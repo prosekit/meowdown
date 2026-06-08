@@ -22,7 +22,9 @@
   },
   "devDependencies": {
     "@ocavue/tsconfig": "^0.7.0",
-    "tsdown": "^0.22.0"
+    "@vitest/browser-playwright": "^4.0.0",
+    "tsdown": "^0.22.0",
+    "vitest": "^4.0.0"
   },
   "publishConfig": {
     "access": "public"
