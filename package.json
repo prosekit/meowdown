@@ -9,11 +9,11 @@
     "build": "pnpm -r run build",
     "lint": "pnpm run lint:eslint && pnpm run lint:oxfmt && pnpm run lint:knip",
     "lint:oxfmt": "oxfmt --check",
-    "lint:eslint": "eslint",
+    "lint:eslint": "eslint --cache",
     "lint:knip": "knip",
     "fix": "pnpm run fix:oxfmt && pnpm run fix:eslint",
     "fix:oxfmt": "oxfmt",
-    "fix:eslint": "eslint --fix",
+    "fix:eslint": "eslint --cache --fix",
     "test": "vitest",
     "typecheck": "tsc -b"
   },
