@@ -16,10 +16,11 @@
     "fix:eslint": "eslint --cache --fix",
     "test": "vitest",
     "test:install": "playwright install chromium",
+    "bench": "vitest bench",
     "typecheck": "tsc -b"
   },
   "devDependencies": {
-    "@ocavue/eslint-config": "^4.0.0",
+    "@ocavue/eslint-config": "^4.5.10",
     "@ocavue/tsconfig": "^0.7.0",
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^4.1.8",

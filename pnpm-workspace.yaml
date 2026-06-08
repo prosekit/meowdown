@@ -13,3 +13,6 @@ trustPolicy: no-downgrade
 trustPolicyIgnoreAfter: 10080 # 7 days
 
 trustLockfile: true
+
+minimumReleaseAgeExclude:
+  - '@ocavue/eslint-config@4.5.10'
