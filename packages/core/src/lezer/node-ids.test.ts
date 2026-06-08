@@ -1,0 +1,66 @@
+import { describe, expect, it } from 'vitest'
+
+import { LEZER_NODE_IDS } from './node-ids.ts'
+
+describe('LEZER_NODE_IDS', () => {
+  it('matches the gfmParser nodeSet name -> id assignment', () => {
+    expect(LEZER_NODE_IDS).toMatchInlineSnapshot(`
+      {
+        "": 0,
+        "ATXHeading1": 9,
+        "ATXHeading2": 10,
+        "ATXHeading3": 11,
+        "ATXHeading4": 12,
+        "ATXHeading5": 13,
+        "ATXHeading6": 14,
+        "Autolink": 33,
+        "Blockquote": 4,
+        "BulletList": 6,
+        "CodeBlock": 2,
+        "CodeInfo": 41,
+        "CodeMark": 39,
+        "CodeText": 40,
+        "Comment": 31,
+        "CommentBlock": 20,
+        "Document": 1,
+        "Emphasis": 25,
+        "EmphasisMark": 38,
+        "Entity": 23,
+        "Escape": 22,
+        "FencedCode": 3,
+        "HTMLBlock": 17,
+        "HTMLTag": 30,
+        "HardBreak": 24,
+        "HeaderMark": 34,
+        "HorizontalRule": 5,
+        "Image": 28,
+        "InlineCode": 29,
+        "Link": 27,
+        "LinkLabel": 43,
+        "LinkMark": 37,
+        "LinkReference": 18,
+        "LinkTitle": 42,
+        "ListItem": 8,
+        "ListMark": 36,
+        "OrderedList": 7,
+        "Paragraph": 19,
+        "ProcessingInstruction": 32,
+        "ProcessingInstructionBlock": 21,
+        "QuoteMark": 35,
+        "SetextHeading1": 15,
+        "SetextHeading2": 16,
+        "Strikethrough": 52,
+        "StrikethroughMark": 53,
+        "StrongEmphasis": 26,
+        "Table": 45,
+        "TableCell": 48,
+        "TableDelimiter": 49,
+        "TableHeader": 46,
+        "TableRow": 47,
+        "Task": 50,
+        "TaskMarker": 51,
+        "URL": 44,
+      }
+    `)
+  })
+})
