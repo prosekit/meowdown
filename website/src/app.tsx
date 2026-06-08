@@ -1,5 +1,5 @@
 import { Editor, type MarkMode } from '@meowdown/react'
-import { useState } from 'react'
+import { type CSSProperties, useState } from 'react'
 
 interface ModeOption {
   value: MarkMode
@@ -42,6 +42,8 @@ interface SegmentedControlProps<T extends string> {
   value: T
   onChange: (value: T) => void
   ariaLabel?: string
+  /** Shared radio group name; required when several controls coexist. */
+  name?: string
 }
 
 function SegmentedControl<T extends string>({
@@ -49,32 +51,27 @@ function SegmentedControl<T extends string>({
   value,
   onChange,
   ariaLabel,
+  name = 'segmented-control',
 }: SegmentedControlProps<T>) {
   return (
     <div
       role="radiogroup"
       aria-label={ariaLabel}
-      className="inline-flex items-center gap-1 rounded-full bg-zinc-100 p-1 dark:bg-zinc-800/80"
+      className="segmented"
+      style={{ '--seg-count': options.length } as CSSProperties}
     >
-      {options.map((option) => {
-        const active = option.value === value
-        return (
-          <button
-            key={option.value}
-            type="button"
-            role="radio"
-            aria-checked={active}
-            onClick={() => onChange(option.value)}
-            className={
-              active
-                ? 'rounded-full bg-white px-3.5 py-1.5 text-sm font-medium text-zinc-900 shadow-sm transition-colors dark:bg-zinc-950 dark:text-white'
-                : 'rounded-full px-3.5 py-1.5 text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'
-            }
-          >
-            {option.label}
-          </button>
-        )
-      })}
+      {options.map((option) => (
+        <label key={option.value}>
+          <input
+            type="radio"
+            name={name}
+            value={option.value}
+            checked={option.value === value}
+            onChange={() => onChange(option.value)}
+          />
+          {option.label}
+        </label>
+      ))}
     </div>
   )
 }
@@ -102,7 +99,7 @@ export function App() {
         </header>
 
         <section className="mt-9 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm sm:mt-14 dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 px-4 py-3.5 sm:px-6 sm:py-4 dark:border-zinc-800">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 px-4 py-2 sm:px-6 sm:py-2.5 dark:border-zinc-800">
             <div className="flex items-center gap-2.5 text-sm font-medium text-zinc-500 dark:text-zinc-400">
               <span className="flex gap-1.5">
                 <span className="h-3 w-3 rounded-full bg-zinc-300 dark:bg-zinc-700" />
