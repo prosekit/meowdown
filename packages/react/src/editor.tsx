@@ -13,15 +13,25 @@ export interface EditorProps {
   markMode?: MarkMode
 
   /**
+   * The initial content of the editor, as an HTML string. Only the value provided on
+   * the first render is used; later changes are ignored.
+   */
+  defaultContent?: string
+
+  /**
    * A callback function that is called whenever the content of the editor changes. This function should be memoized.
    */
   onChange?: (editor: TypedEditor) => void
 }
 
-export function Editor({ markMode = 'focus', onChange }: EditorProps) {
+export function Editor({
+  markMode = 'focus',
+  defaultContent = '<p>Hello World!</p>',
+  onChange,
+}: EditorProps) {
   const [editor] = useState((): TypedEditor => {
     const extension: EditorExtension = defineEditorExtension()
-    return createEditor({ extension, defaultContent: '<p>Hello World!</p>' })
+    return createEditor({ extension, defaultContent })
   })
 
   const markModeExtension = useMemo(() => {

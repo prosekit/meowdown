@@ -1,109 +1,165 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import 'tailwindcss';
+@import '@meowdown/react/style.css';
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+/* ---------------------------------------------------------------------------
+ * Editor surface
+ * ------------------------------------------------------------------------- */
+.ProseMirror {
   box-sizing: border-box;
+  flex: 1 0 auto;
+  padding: 1rem 1.25rem 1.5rem;
+  outline: none;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--color-zinc-700);
+  caret-color: var(--color-violet-600);
+  -webkit-font-smoothing: antialiased;
 }
 
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+@media (min-width: 640px) {
+  .ProseMirror {
+    padding: 1.5rem 1.75rem 2rem;
   }
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
+
+.ProseMirror > * + * {
+  margin-top: 0.85em;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--color-zinc-900);
+}
+
+.ProseMirror h1 {
+  font-size: 1.75rem;
+}
+.ProseMirror h2 {
+  font-size: 1.4rem;
+}
+.ProseMirror h3 {
+  font-size: 1.2rem;
+}
+
+.ProseMirror a {
+  color: var(--color-violet-600);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.ProseMirror code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+  padding: 0.1em 0.35em;
+  border-radius: 0.35rem;
+  background: color-mix(in oklab, var(--color-violet-600) 10%, transparent);
+  color: var(--color-violet-700);
+}
+
+.ProseMirror blockquote {
+  margin-left: 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--color-violet-200);
+  color: var(--color-zinc-600);
+  font-style: italic;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5rem;
+}
+.ProseMirror ul {
+  list-style: disc;
+}
+.ProseMirror ol {
+  list-style: decimal;
+}
+.ProseMirror li {
+  margin-top: 0.25em;
+}
+
+.ProseMirror pre {
+  padding: 0.9rem 1rem;
+  border-radius: 0.6rem;
+  overflow-x: auto;
+  background: var(--color-zinc-100);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+.ProseMirror pre code {
+  padding: 0;
+  background: none;
+  color: inherit;
+}
+
+.ProseMirror hr {
+  margin: 1.5em 0;
+  border: none;
+  border-top: 1px solid var(--color-zinc-200);
+}
+
+/* ---------------------------------------------------------------------------
+ * Markdown syntax characters (`md-mark`) and link URIs
+ * ------------------------------------------------------------------------- */
+.ProseMirror .md-mark,
+.ProseMirror .md-link-uri {
+  color: var(--color-violet-400);
+  opacity: 0.7;
+}
+
+/* hide: syntax is never visible */
+.ProseMirror[data-mark-mode='hide'] .md-mark,
+.ProseMirror[data-mark-mode='hide'] .md-link-uri {
+  display: none;
+}
+
+/* focus: syntax is hidden until revealed near the caret */
+.ProseMirror[data-mark-mode='focus'] .md-mark,
+.ProseMirror[data-mark-mode='focus'] .md-link-uri {
+  display: none;
+}
+.ProseMirror[data-mark-mode='focus'] .md-mark:has(.show),
+.ProseMirror[data-mark-mode='focus'] .md-link-uri:has(.show) {
+  display: inline;
+}
+
+/* ---------------------------------------------------------------------------
+ * Dark mode
+ * ------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  .ProseMirror {
+    color: var(--color-zinc-300);
   }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  .ProseMirror h1,
+  .ProseMirror h2,
+  .ProseMirror h3 {
+    color: var(--color-zinc-50);
+  }
+  .ProseMirror a {
+    color: var(--color-purple-400);
+  }
+  .ProseMirror code {
+    background: color-mix(in oklab, var(--color-purple-400) 15%, transparent);
+    color: var(--color-purple-300);
+  }
+  .ProseMirror blockquote {
+    border-left-color: var(--color-violet-800);
+    color: var(--color-zinc-400);
+  }
+  .ProseMirror pre {
+    background: var(--color-zinc-900);
+  }
+  .ProseMirror hr {
+    border-top-color: var(--color-zinc-700);
+  }
+  .ProseMirror .md-mark,
+  .ProseMirror .md-link-uri {
+    color: var(--color-violet-500);
+  }
 }

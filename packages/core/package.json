@@ -8,14 +8,13 @@
     "url": "https://github.com/prosekit/meowdown"
   },
   "exports": {
-    ".": {
-      "@meowdown/source": "./src/index.ts",
-      "default": "./dist/index.js"
-    }
+    ".": "./src/index.ts",
+    "./style.css": "./src/style.css"
   },
   "files": [
     "./dist/**/*.js",
-    "./dist/**/*.d.ts"
+    "./dist/**/*.d.ts",
+    "./dist/**/*.css"
   ],
   "scripts": {
     "build": "tsdown"
@@ -29,11 +28,16 @@
   },
   "devDependencies": {
     "@ocavue/tsconfig": "^0.7.0",
+    "@tsdown/css": "^0.22.0",
     "@vitest/browser-playwright": "^4.1.8",
     "tsdown": "^0.22.0",
     "vitest": "^4.1.8"
   },
   "publishConfig": {
+    "exports": {
+      ".": "./dist/index.js",
+      "./style.css": "./dist/style.css"
+    },
     "access": "public"
   }
 }

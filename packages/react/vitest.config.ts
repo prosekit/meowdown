@@ -2,9 +2,6 @@ import { playwright } from '@vitest/browser-playwright'
 import { defineProject } from 'vitest/config'
 
 export default defineProject({
-  resolve: {
-    conditions: ['@meowdown/source'],
-  },
   test: {
     browser: {
       enabled: true,

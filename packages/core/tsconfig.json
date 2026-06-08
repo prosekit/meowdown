@@ -1,7 +1,6 @@
 {
   "extends": "@ocavue/tsconfig/dom/app.json",
   "compilerOptions": {
-    "customConditions": ["@meowdown/source"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "erasableSyntaxOnly": true
