@@ -21,7 +21,8 @@
     "build": "tsdown"
   },
   "dependencies": {
-    "@meowdown/core": "workspace:*"
+    "@meowdown/core": "workspace:*",
+    "@prosekit/react": "^0.7.6"
   },
   "peerDependencies": {
     "react": "*",
