@@ -4,7 +4,5 @@ export {
   type TypedEditor,
 } from './extensions/extension.ts'
 export { type MarkMode, defineMarkMode } from './extensions/mark-mode.ts'
-
-// TODO: remove these variables
-export const a = 1
-export const b = 2
+export { docToMarkdown } from './converters/pm-to-md.ts'
+export { markdownToDoc } from './converters/md-to-pm.ts'
