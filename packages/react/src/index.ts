@@ -1,3 +1,3 @@
-export { Editor, type EditorProps } from './editor.tsx'
+export { Editor, type EditorProps, type ChangeHandlerOptions } from './editor.tsx'
 
 export type { TypedEditor, MarkMode } from '@meowdown/core'

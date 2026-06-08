@@ -25,25 +25,17 @@ const MODES: ModeOption[] = [
   },
 ]
 
-// Build starter content with the same dimmable `md-mark` syntax spans that meowdown
-// produces when you type Markdown by hand, so every mode has something to show off.
-const TICK = '`'
-const mark = (syntax: string) => `<span class="md-mark">${syntax}</span>`
-const strong = (text: string) => `<strong>${mark('**')}${text}${mark('**')}</strong>`
-const em = (text: string) => `<em>${mark('*')}${text}${mark('*')}</em>`
-const code = (text: string) => `<code>${mark(TICK)}${text}${mark(TICK)}</code>`
-const del = (text: string) => `<del>${mark('~~')}${text}${mark('~~')}</del>`
-function link(text: string, href: string) {
-  return `<a href="${href}">${mark('[')}${text}</a>${mark('](')}<span class="md-link-uri">${href}</span>${mark(')')}`
-}
+const INITIAL_CONTENT = `
+# Welcome to Meowdown
 
-const STARTER_CONTENT = [
-  `<h1>Welcome to Meowdown</h1>`,
-  `<p>A hybrid Markdown editor that renders as you type, so you never break your flow.</p>`,
-  `<p>Weave in ${strong('bold')}, ${em('italic')}, ${code('inline code')}, or ${del('strikethrough')} without reaching for a toolbar.</p>`,
-  `<p>Drop a ${link('link', 'https://github.com/prosekit/meowdown')} and keep on writing.</p>`,
-  `<blockquote><p>Switch modes above to choose how much Markdown syntax stays in view.</p></blockquote>`,
-].join('')
+A hybrid Markdown editor that renders as you type, so you never break your flow.
+
+Weave in **bold**, *italic*, \`inline code\`, or ~~strikethrough~~ without reaching for a toolbar.
+
+Drop a [link](https://github.com/prosekit/meowdown) and keep on writing.
+
+> Switch modes above to choose how much Markdown syntax stays in view.
+`
 
 interface SegmentedControlProps<T extends string> {
   options: ReadonlyArray<{ value: T; label: string }>
@@ -128,7 +120,7 @@ export function App() {
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-            <Editor markMode={mode} defaultContent={STARTER_CONTENT} />
+            <Editor markMode={mode} initialContent={INITIAL_CONTENT} />
           </div>
 
           <div className="flex items-center gap-2 border-t border-zinc-200 bg-zinc-50/80 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-900/60">
