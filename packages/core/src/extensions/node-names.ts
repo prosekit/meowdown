@@ -16,4 +16,5 @@ export const NODE_NAMES = [
   'tableHeaderCell',
 ] as const
 
-export type NodeName = (typeof NODE_NAMES)[number]
+// This is not used yet
+// export type NodeName = (typeof NODE_NAMES)[number]
