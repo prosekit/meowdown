@@ -1,0 +1,49 @@
+{
+  "name": "@meowdown/react",
+  "type": "module",
+  "version": "0.0.2",
+  "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prosekit/meowdown"
+  },
+  "exports": {
+    ".": {
+      "@meowdown/source": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "./dist/**/*.js",
+    "./dist/**/*.d.ts"
+  ],
+  "scripts": {
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@meowdown/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-dom": "*"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@ocavue/tsconfig": "^0.7.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "tsdown": "^0.22.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

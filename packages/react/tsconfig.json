@@ -1,0 +1,11 @@
+{
+  "extends": "@ocavue/tsconfig/dom/app.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "customConditions": ["@meowdown/source"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "erasableSyntaxOnly": true
+  },
+  "references": [{ "path": "../core/tsconfig.json" }]
+}
