@@ -1,5 +1,20 @@
 @import 'tailwindcss';
 @import '@meowdown/react/style.css';
+@plugin '@egoist/tailwindcss-icons';
+
+:root {
+  color-scheme: light dark;
+}
+
+html {
+  background-color: var(--color-zinc-50);
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    background-color: var(--color-zinc-950);
+  }
+}
 
 /* ---------------------------------------------------------------------------
  * Editor surface
@@ -7,7 +22,7 @@
 .ProseMirror {
   box-sizing: border-box;
   flex: 1 0 auto;
-  padding: 1rem 1.25rem 1.5rem;
+  padding: 1.25rem 1.5rem 1.75rem;
   outline: none;
   font-size: 1.0625rem;
   line-height: 1.7;
@@ -18,7 +33,7 @@
 
 @media (min-width: 640px) {
   .ProseMirror {
-    padding: 1.5rem 1.75rem 2rem;
+    padding: 2rem 2.5rem 2.25rem;
   }
 }
 
