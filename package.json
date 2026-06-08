@@ -15,17 +15,17 @@
     "fix:oxfmt": "oxfmt",
     "fix:eslint": "eslint --cache --fix",
     "test": "vitest",
-        "test:install": "playwright install chromium",
+    "test:install": "playwright install chromium",
     "typecheck": "tsc -b"
   },
   "devDependencies": {
-        "playwright": "^1.60.0",
     "@ocavue/eslint-config": "^4.0.0",
     "@ocavue/tsconfig": "^0.7.0",
     "@types/node": "^24.0.0",
     "eslint": "^10.0.0",
     "knip": "^6.0.0",
     "oxfmt": "^0.53.0",
+    "playwright": "^1.60.0",
     "typescript": "^6.0.3",
     "vite": "^8.0.0",
     "vitest": "^4.0.0"

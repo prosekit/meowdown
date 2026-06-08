@@ -27,6 +27,9 @@ importers:
       oxfmt:
         specifier: ^0.53.0
         version: 0.53.0
+      playwright:
+        specifier: ^1.60.0
+        version: 1.60.0
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
