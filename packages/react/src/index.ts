@@ -1,3 +1,1 @@
-import { a } from '@meowdown/core'
-export const b = 2 + a
-export { MyReactComponent } from './comp.tsx'
+export { Editor, type EditorProps } from './editor.tsx'

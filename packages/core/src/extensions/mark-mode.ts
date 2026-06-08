@@ -1,14 +1,20 @@
-import { definePlugin } from '@prosekit/core'
-import type { Mark, EditorNode, Slice } from '@prosekit/pm/model'
+import { definePlugin, type PlainExtension } from '@prosekit/core'
+import type { EditorNode, Mark, Slice } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
 import type { MarkName } from './inline-marks.ts'
 
+/**
+ * Controls how markdown syntax characters are rendered and how the
+ * editor serializes content to the clipboard.
+ *
+ * - 'hide':  syntax chars never visible; copy strips them.
+ * - 'focus': syntax chars hidden by default; revealed near cursor; copy strips them.
+ * - 'show':  syntax chars always visible (dim grey); copy keeps them.
+ */
 export type MarkMode = 'hide' | 'focus' | 'show'
-
-const markModePluginKey = new PluginKey<DecorationSet>('mark-mode')
 
 const REVEAL_TRIGGERING_MARKS: ReadonlySet<MarkName> = new Set<MarkName>([
   'mdStrong',
@@ -32,20 +38,19 @@ const SYNTAX_BEARING_MARKS: ReadonlySet<MarkName> = new Set<MarkName>([
   'mdDel',
 ])
 
-export function defineMarkModePlugin(mode: MarkMode) {
-  return definePlugin(
-    new Plugin<DecorationSet>({
-      key: markModePluginKey,
-      props: {
-        attributes: () => ({ 'data-mark-mode': mode }),
-        decorations(state) {
-          if (mode !== 'focus') return null
-          return computeFocusDecorations(state)
-        },
-        clipboardTextSerializer: mode === 'show' ? undefined : cleanCopySerializer,
-      },
-    }),
-  )
+function createMarkModePlugin(mode: MarkMode): Plugin<DecorationSet> {
+  return new Plugin<DecorationSet>({
+    key: new PluginKey('mark-mode'),
+    props: {
+      attributes: { 'data-mark-mode': mode },
+      decorations: mode === 'focus' ? (state) => computeFocusDecorations(state) : undefined,
+      clipboardTextSerializer: mode === 'show' ? undefined : cleanCopySerializer,
+    },
+  })
+}
+
+export function defineMarkMode(mode: MarkMode): PlainExtension {
+  return definePlugin(createMarkModePlugin(mode))
 }
 
 function cleanCopySerializer(slice: Slice): string {
