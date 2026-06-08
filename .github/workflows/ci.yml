@@ -48,6 +48,9 @@ jobs:
 
       - uses: ./.github/actions/setup
 
+      - name: Install
+        run: pnpm run test:install
+
       - name: Test
         run: pnpm run test
 
