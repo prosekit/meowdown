@@ -6,8 +6,10 @@ export default defineConfig({
     retry: process.env.CI ? 3 : 0,
     bail: process.env.CI ? 0 : 1,
     coverage: {
-      enabled: false,
-      reporter: ['text-summary', 'text', 'html', 'json', 'json-summary'],
+      enabled: process.env.CI ? true : false,
+      reporter: ['text-summary', 'text', 'html', 'json', 'json-summary'].concat(
+        process.env.GITHUB_ACTIONS ? ['github-actions'] : [],
+      ),
       include: ['packages/*/src/**'],
     },
     fileParallelism: false,
