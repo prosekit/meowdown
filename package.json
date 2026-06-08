@@ -19,10 +19,10 @@
     "typecheck": "tsc -b"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^4.0.0",
     "@ocavue/eslint-config": "^4.0.0",
     "@ocavue/tsconfig": "^0.7.0",
     "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^4.0.0",
     "eslint": "^10.0.0",
     "knip": "^6.0.0",
     "oxfmt": "^0.53.0",
