@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@meowdown/core": "workspace:*",
+    "@prosekit/core": "^0.12.3",
     "@prosekit/react": "^0.7.6"
   },
   "peerDependencies": {

@@ -20,24 +20,8 @@ import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
-import { defineMarkModePlugin, type MarkMode } from './mark-mode-plugin.ts'
 
-export interface EditorExtensionOptions {
-  /**
-   * Controls how markdown syntax characters are rendered and how the
-   * editor serializes content to the clipboard.
-   *
-   * - 'hide':  syntax chars never visible; copy strips them.
-   * - 'focus': syntax chars hidden by default; revealed near cursor; copy strips them.
-   * - 'show':  syntax chars always visible (dim grey); copy keeps them.
-   *
-   * @default 'focus'
-   */
-  markMode?: MarkMode
-}
-
-function defineEditorExtensionImpl(options: EditorExtensionOptions = {}) {
-  const mode = options.markMode ?? 'focus'
+function defineEditorExtensionImpl() {
   return union(
     // nodes
     defineParagraph(),
@@ -55,7 +39,6 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions = {}) {
 
     // plugins
     defineInlineMarkPlugin(),
-    defineMarkModePlugin(mode),
 
     // others
     defineBaseKeymap(),
@@ -69,8 +52,8 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions = {}) {
 
 export type EditorExtension = ReturnType<typeof defineEditorExtensionImpl>
 
-export function defineEditorExtension(options: EditorExtensionOptions = {}): EditorExtension {
-  return defineEditorExtensionImpl(options)
+export function defineEditorExtension(): EditorExtension {
+  return defineEditorExtensionImpl()
 }
 
 export type TypedEditor = Editor<EditorExtension>

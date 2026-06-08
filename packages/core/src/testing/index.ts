@@ -4,17 +4,14 @@ import { createTestEditor } from '@prosekit/core/test'
 import type { EditorNode } from '@prosekit/pm/model'
 
 import { defineEditorExtension } from '../extensions/extension.ts'
-import type { MarkMode } from '../extensions/mark-mode-plugin.ts'
 
 export interface SetupTestEnvOptions {
   /** Whether to mount the editor onto a real DOM container. Defaults to `true`. */
   mount?: boolean
-  /** The mark mode to configure the editor with. Defaults to `'focus'`. */
-  markMode?: MarkMode
 }
 
-export function setupTestEnv({ mount = true, markMode }: SetupTestEnvOptions = {}) {
-  const extension = defineEditorExtension({ markMode })
+export function setupTestEnv({ mount = true }: SetupTestEnvOptions = {}) {
+  const extension = defineEditorExtension()
   const editor = createTestEditor({ extension })
   const n = editor.nodes
   const m = editor.marks
