@@ -7,9 +7,7 @@ export default defineConfig({
     bail: process.env.CI ? 0 : 1,
     coverage: {
       enabled: process.env.CI ? true : false,
-      reporter: ['text-summary', 'text', 'html', 'json', 'json-summary'].concat(
-        process.env.GITHUB_ACTIONS ? ['github-actions'] : [],
-      ),
+      reporter: ['text-summary', 'text', 'html', 'json', 'json-summary'],
       include: ['packages/*/src/**'],
     },
     fileParallelism: false,
