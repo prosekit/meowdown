@@ -6,7 +6,7 @@ export default defineConfig({
     retry: process.env.CI ? 3 : 0,
     bail: process.env.CI ? 0 : 1,
     coverage: {
-      enabled: false,
+      enabled: process.env.CI ? true : false,
       reporter: ['text-summary', 'text', 'html', 'json', 'json-summary'],
       include: ['packages/*/src/**'],
     },
