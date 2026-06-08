@@ -5,6 +5,7 @@
   "private": true,
   "packageManager": "pnpm@11.5.2",
   "scripts": {
+    "dev": "pnpm --filter ./website run dev",
     "build": "pnpm -r run build",
     "lint": "pnpm run lint:eslint && pnpm run lint:oxfmt && pnpm run lint:knip",
     "lint:oxfmt": "oxfmt --check",
