@@ -87,6 +87,16 @@ class MdOut {
   }
 
   /**
+   * Cancel the blank line deferred by the last `closeBlock`, so the next
+   * write starts directly on the following line. Used between the blocks of
+   * a tight list, where markdown separates items (and an item's paragraph
+   * from its nested list) with a single newline.
+   */
+  suppressBlank(): void {
+    this.deferredBlankPrefix = null
+  }
+
+  /**
    * Run `fn` with `linePrefix` extended by `continuation`.
    * If `firstLine` is given, it replaces the prefix on the NEXT line only -
    * used for list items where the marker (`- `) only appears on line 1.
@@ -114,7 +124,11 @@ class MdOut {
   private emitDeferredBlankLine(): void {
     const prefix = this.deferredBlankPrefix
     if (prefix === null) return
-    this.parts.push(prefix, '\n')
+    // Trim the prefix so blank lines carry no trailing whitespace: a list's
+    // "  " continuation becomes an empty line (the following indent is what
+    // keeps the item together), while a blockquote's "> " stays ">" - the
+    // bare marker is required to hold the quote across the blank line.
+    this.parts.push(prefix.trimEnd(), '\n')
     this.deferredBlankPrefix = null
   }
 }
@@ -144,7 +158,7 @@ function emit(node: ProseMirrorNode, out: MdOut): void {
       out.closeBlock()
       return
     case 'list':
-      emitList(node, out)
+      emitList(node, out, isTightItem(node))
       return
     case 'codeBlock':
       emitCodeBlock(node, out)
@@ -162,9 +176,61 @@ function emit(node: ProseMirrorNode, out: MdOut): void {
   }
 }
 
-function emitBlockChildren(node: ProseMirrorNode, out: MdOut): void {
+/**
+ * Emit block-level children. Consecutive `list` children form one markdown
+ * list ("run") whose tightness is decided once for the whole run, matching
+ * CommonMark's list-wide loose/tight semantics.
+ *
+ * `tightItem` is true when `node` is a list item inside a tight run: its
+ * blocks (a paragraph followed by nested lists) are then separated by single
+ * newlines instead of blank lines.
+ */
+function emitBlockChildren(node: ProseMirrorNode, out: MdOut, tightItem = false): void {
   const count = node.childCount
-  for (let i = 0; i < count; i++) emit(node.child(i), out)
+  let index = 0
+  while (index < count) {
+    const child = node.child(index)
+    if (child.type.name !== 'list') {
+      if (tightItem && index > 0) out.suppressBlank()
+      emit(child, out)
+      index++
+      continue
+    }
+    let runEnd = index + 1
+    while (runEnd < count && node.child(runEnd).type.name === 'list') runEnd++
+    const tightRun = isTightRun(node, index, runEnd)
+    for (let item = index; item < runEnd; item++) {
+      const isRunStart = item === index
+      if (isRunStart ? tightItem && index > 0 : tightRun) out.suppressBlank()
+      emitList(node.child(item), out, tightRun)
+    }
+    index = runEnd
+  }
+}
+
+/**
+ * A run of sibling `list` nodes serializes tight iff every item is "simple":
+ * at most one leading paragraph, then only nested lists. Any other shape
+ * (multiple paragraphs, a blockquote, a code block, …) needs blank-line
+ * separation inside the item, which per CommonMark makes the whole list
+ * loose.
+ */
+function isTightRun(parent: ProseMirrorNode, from: number, to: number): boolean {
+  for (let i = from; i < to; i++) {
+    if (!isTightItem(parent.child(i))) return false
+  }
+  return true
+}
+
+function isTightItem(item: ProseMirrorNode): boolean {
+  const count = item.childCount
+  for (let i = 0; i < count; i++) {
+    const child = item.child(i)
+    if (child.type.name === 'list') continue
+    if (child.type.name === 'paragraph' && i === 0) continue
+    return false
+  }
+  return true
 }
 
 /**
@@ -186,7 +252,7 @@ function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
 // List
 // ─────────────────────────────────────────────────────────────────────
 
-function emitList(node: ProseMirrorNode, out: MdOut): void {
+function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
   // prosekit's `list` node is a SINGLE item; sibling `list` nodes form the
   // larger markdown list.
   const attrs = node.attrs as {
@@ -203,8 +269,10 @@ function emitList(node: ProseMirrorNode, out: MdOut): void {
           : '- [ ] '
         : '- ' // bullet | toggle
 
-  const continuation = ' '.repeat(marker.length)
-  out.withPrefix(continuation, marker, () => emitBlockChildren(node, out))
+  // For a task item the `[ ] ` checkbox is list-item CONTENT in GFM terms,
+  // not part of the marker, so continuation lines align to the `- ` width.
+  const continuation = ' '.repeat(attrs.kind === 'task' ? 2 : marker.length)
+  out.withPrefix(continuation, marker, () => emitBlockChildren(node, out, tight))
   out.closeBlock()
 }
 
