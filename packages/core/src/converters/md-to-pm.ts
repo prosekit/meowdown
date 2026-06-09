@@ -70,6 +70,12 @@ function convertBlock(editor: TypedEditor, cursor: TreeCursor, text: string): Pr
       return [editor.nodes.horizontalRule()]
     case LEZER_NODE_IDS.Table:
       return [convertTable(editor, cursor, text)]
+    case LEZER_NODE_IDS.Task:
+      // Reached only for tasks inside ordered lists (bullet lists convert
+      // the Task in `convertListItem`). The flat-list schema has a single
+      // `kind`, so an ordered item cannot also be a task - keep the
+      // `[x]` marker as literal paragraph text so it round-trips verbatim.
+      return [convertParagraph(editor, cursor, text)]
     default:
       return []
   }
@@ -172,22 +178,60 @@ function convertListItem(
   order: number,
 ): ProseMirrorNode {
   const content: ProseMirrorNode[] = []
+  let taskChecked: boolean | null = null
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.ListMark) continue
+      if (kind === 'bullet' && cursor.type.id === LEZER_NODE_IDS.Task) {
+        const task = convertTask(editor, cursor, text)
+        taskChecked = task.checked
+        content.push(task.paragraph)
+        continue
+      }
       content.push(...convertBlock(editor, cursor, text))
     } while (cursor.nextSibling())
     cursor.parent()
   }
   return editor.nodes.list(
     {
-      kind,
+      kind: taskChecked === null ? kind : 'task',
       order: kind === 'ordered' ? order : null,
-      checked: false,
+      checked: taskChecked ?? false,
       collapsed: false,
     },
     content,
   )
+}
+
+interface ConvertedTask {
+  checked: boolean
+  paragraph: ProseMirrorNode
+}
+
+/**
+ * Convert a GFM `Task` leaf (`[ ] text` / `[x] text`, after the list mark)
+ * into its checked state plus a paragraph holding the text. Only the single
+ * space separating the `TaskMarker` from the text is dropped - it is
+ * re-emitted by `docToMarkdown`'s `- [ ] ` marker, keeping any extra
+ * whitespace byte-identical through a round-trip.
+ */
+function convertTask(editor: TypedEditor, cursor: TreeCursor, text: string): ConvertedTask {
+  let checked = false
+  let contentStart = cursor.from
+  const contentEnd = cursor.to
+  if (cursor.firstChild()) {
+    if (cursor.type.id === LEZER_NODE_IDS.TaskMarker) {
+      checked = text.slice(cursor.from, cursor.to).toLowerCase().includes('x')
+      contentStart = cursor.to
+    }
+    cursor.parent()
+  }
+  let content = text.slice(contentStart, contentEnd)
+  if (content.startsWith(' ')) content = content.slice(1)
+  return {
+    checked,
+    paragraph: content === '' ? editor.nodes.paragraph() : editor.nodes.paragraph(content),
+  }
 }
 
 function convertCodeBlock(editor: TypedEditor, cursor: TreeCursor, text: string): ProseMirrorNode {

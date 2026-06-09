@@ -107,6 +107,70 @@ describe('markdownToDoc', () => {
     })
   })
 
+  it('converts a task list item, keeping its text', () => {
+    expect(markdownToDoc(editor, '- [ ] todo').toJSON()).toEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'list',
+          attrs: {
+            kind: 'task',
+            order: null,
+            checked: false,
+            collapsed: false,
+          },
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'todo' }] }],
+        },
+      ],
+    })
+  })
+
+  it('marks a checked task list item', () => {
+    expect(markdownToDoc(editor, '- [x] done').toJSON()).toEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'list',
+          attrs: {
+            kind: 'task',
+            order: null,
+            checked: true,
+            collapsed: false,
+          },
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'done' }] }],
+        },
+      ],
+    })
+  })
+
+  it('mixes task and plain items in one bullet list', () => {
+    const doc = markdownToDoc(editor, '- [x] done\n- plain').toJSON() as {
+      content: Array<{ attrs: { kind: string; checked: boolean } }>
+    }
+    expect(doc.content.map((item) => item.attrs.kind)).toEqual(['task', 'bullet'])
+    expect(doc.content.map((item) => item.attrs.checked)).toEqual([true, false])
+  })
+
+  it('keeps a task marker in an ordered list as literal text', () => {
+    // The flat-list schema has a single `kind`, so an ordered item cannot
+    // also be a task; the marker stays in the text and round-trips verbatim.
+    expect(markdownToDoc(editor, '1. [x] done').toJSON()).toEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'list',
+          attrs: {
+            kind: 'ordered',
+            order: 1,
+            checked: false,
+            collapsed: false,
+          },
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: '[x] done' }] }],
+        },
+      ],
+    })
+  })
+
   it('converts a fenced code block with language', () => {
     expect(markdownToDoc(editor, '```js\nconsole.log(1)\n```').toJSON()).toEqual({
       type: 'doc',
