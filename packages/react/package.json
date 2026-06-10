@@ -2,7 +2,7 @@
   "name": "@meowdown/react",
   "type": "module",
   "version": "0.2.0",
-  "license": "GPL-3.0-only",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/prosekit/meowdown"
