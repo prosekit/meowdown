@@ -53,24 +53,62 @@ describe('docToMarkdown', () => {
     expect(docToMarkdown(node)).toBe('> quoted text\n')
   })
 
-  it('serializes a bullet list', () => {
+  it('serializes a bullet list tight', () => {
     const item = (text: string): NodeJSON => ({
       type: 'list',
       attrs: { kind: 'bullet', order: null, checked: false, collapsed: false },
       content: [paragraph(text)],
     })
     const node = docFromJSON(wrapInDoc(item('one'), item('two')))
-    expect(docToMarkdown(node)).toBe('- one\n\n- two\n')
+    expect(docToMarkdown(node)).toBe('- one\n- two\n')
   })
 
-  it('serializes an ordered list with start number', () => {
+  it('serializes an ordered list tight, with start number', () => {
     const item = (text: string, order: number): NodeJSON => ({
       type: 'list',
       attrs: { kind: 'ordered', order, checked: false, collapsed: false },
       content: [paragraph(text)],
     })
     const node = docFromJSON(wrapInDoc(item('five', 5), item('six', 5)))
-    expect(docToMarkdown(node)).toBe('5. five\n\n5. six\n')
+    expect(docToMarkdown(node)).toBe('5. five\n5. six\n')
+  })
+
+  it('serializes task list items with GFM markers', () => {
+    const item = (text: string, checked: boolean): NodeJSON => ({
+      type: 'list',
+      attrs: { kind: 'task', order: null, checked, collapsed: false },
+      content: [paragraph(text)],
+    })
+    const node = docFromJSON(wrapInDoc(item('todo', false), item('done', true)))
+    expect(docToMarkdown(node)).toBe('- [ ] todo\n- [x] done\n')
+  })
+
+  it('serializes a list loose when an item holds two blocks', () => {
+    const node = docFromJSON(
+      wrapInDoc(
+        {
+          type: 'list',
+          attrs: { kind: 'bullet', order: null, checked: false, collapsed: false },
+          content: [paragraph('first'), paragraph('second')],
+        },
+        {
+          type: 'list',
+          attrs: { kind: 'bullet', order: null, checked: false, collapsed: false },
+          content: [paragraph('third')],
+        },
+      ),
+    )
+    expect(docToMarkdown(node)).toBe('- first\n\n  second\n\n- third\n')
+  })
+
+  it('keeps a blank line between a tight list and the next block', () => {
+    const item: NodeJSON = {
+      type: 'list',
+      attrs: { kind: 'bullet', order: null, checked: false, collapsed: false },
+      content: [paragraph('item')],
+    }
+    const node = docFromJSON(wrapInDoc(item, paragraph('after')))
+    expect(docToMarkdown(node)).toBe('- item\n\nafter\n')
   })
 
   it('serializes a fenced code block with language', () => {
