@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/prosekit/meowdown/compare/core-v0.2.0...core-v0.3.0) (2026-06-11)
+
+
+### Features
+
+* add default editor theme stylesheet ([532b7e5](https://github.com/prosekit/meowdown/commit/532b7e55ea53a2035d6e5d5aa8a5715075451b66))
+* add inline mark toggle keyboard shortcuts ([8653dfd](https://github.com/prosekit/meowdown/commit/8653dfddd896ba675c61a0f44f489de18e065daf))
+* **core:** convert GFM task list ([#15](https://github.com/prosekit/meowdown/issues/15)) ([5b7b318](https://github.com/prosekit/meowdown/commit/5b7b318a36c80fdc2e45873f50160b4c1a36e797))
+* **core:** parse hashtags ([bfb874a](https://github.com/prosekit/meowdown/commit/bfb874a6ab4c567b1a95f89f6b1b4f1230473000))
+* **core:** parse wikilinks ([fee001f](https://github.com/prosekit/meowdown/commit/fee001f622fe60b6c4b303d7f1bd91f71c4fe1f1))
+* **react:** add block handle ([95b0821](https://github.com/prosekit/meowdown/commit/95b082106fbfd8ae5146f7a68f6ce48f87ccbce7))
+
 ## [0.2.0](https://github.com/prosekit/meowdown/compare/core-v0.1.0...core-v0.2.0) (2026-06-08)
 
 
