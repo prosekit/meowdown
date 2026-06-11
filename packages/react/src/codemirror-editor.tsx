@@ -3,35 +3,43 @@ import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { EditorState } from '@codemirror/state'
 import { EditorView, keymap } from '@codemirror/view'
-import { useLayoutEffect, useRef } from 'react'
+import { useImperativeHandle, useLayoutEffect, useRef, type Ref } from 'react'
 
-import type { ChangeHandlerOptions } from './types.ts'
+import type { EditorHandle } from './types.ts'
 
 export interface CodeMirrorEditorProps {
   /**
-   * The initial content of the editor, as a Markdown string. Only the value provided on
-   * the first render is used; later changes are ignored.
+   * The initial Markdown text of the editor. Only the value provided on the
+   * first render is used; later changes are ignored.
    */
-  initialContent?: string
+  initialMarkdown?: string
 
-  /**
-   * A callback function that is called whenever the content of the editor changes. This function should be memoized.
-   */
-  onChange?: (options: ChangeHandlerOptions) => void
+  /** Called on every document change. */
+  onDocChange?: VoidFunction
+
+  /** Imperative handle for the editor. */
+  ref?: Ref<EditorHandle>
 }
 
-export function CodeMirrorEditor({ initialContent, onChange }: CodeMirrorEditorProps) {
+export function CodeMirrorEditor({ initialMarkdown, onDocChange, ref }: CodeMirrorEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const viewRef = useRef<EditorView | null>(null)
 
   // Keep the latest callback in a ref so the view is never recreated when
   // the parent passes a new function identity.
-  const onChangeRef = useRef(onChange)
+  const onDocChangeRef = useRef(onDocChange)
   useLayoutEffect(() => {
-    onChangeRef.current = onChange
-  }, [onChange])
+    onDocChangeRef.current = onDocChange
+  }, [onDocChange])
 
   // Capture the first-render content so the effect does not list it as a dep.
-  const initialContentRef = useRef(initialContent ?? '')
+  const initialMarkdownRef = useRef(initialMarkdown ?? '')
+
+  useImperativeHandle(ref, () => {
+    return {
+      getMarkdown: () => viewRef.current?.state.doc.toString() ?? initialMarkdownRef.current,
+    }
+  }, [])
 
   useLayoutEffect(() => {
     const container = containerRef.current
@@ -39,7 +47,7 @@ export function CodeMirrorEditor({ initialContent, onChange }: CodeMirrorEditorP
     const view = new EditorView({
       parent: container,
       state: EditorState.create({
-        doc: initialContentRef.current,
+        doc: initialMarkdownRef.current,
         extensions: [
           history(),
           keymap.of([...defaultKeymap, ...historyKeymap]),
@@ -48,14 +56,16 @@ export function CodeMirrorEditor({ initialContent, onChange }: CodeMirrorEditorP
           EditorView.lineWrapping,
           EditorView.updateListener.of((update) => {
             if (!update.docChanged) return
-            onChangeRef.current?.({
-              getMarkdown: () => view.state.doc.toString(),
-            })
+            onDocChangeRef.current?.()
           }),
         ],
       }),
     })
-    return () => view.destroy()
+    viewRef.current = view
+    return () => {
+      view.destroy()
+      viewRef.current = null
+    }
   }, [])
 
   return <div ref={containerRef} data-editor="codemirror" />

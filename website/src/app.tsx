@@ -122,7 +122,7 @@ export function App() {
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-            <Editor mode={mode} initialContent={INITIAL_CONTENT} />
+            <Editor mode={mode} initialMarkdown={INITIAL_CONTENT} />
           </div>
 
           <div className="flex items-center gap-2 border-t border-zinc-200 bg-zinc-50/80 px-4 py-3.5 text-sm sm:px-6 sm:py-4 dark:border-zinc-800 dark:bg-zinc-900/60">

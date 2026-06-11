@@ -1,9 +1,9 @@
 import type { MarkMode } from '@meowdown/core'
-import { useCallback, useRef } from 'react'
+import { useImperativeHandle, useRef, type Ref } from 'react'
 
 import { CodeMirrorEditor } from './codemirror-editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
-import type { ChangeHandlerOptions } from './types.ts'
+import type { EditorHandle } from './types.ts'
 
 export type EditorMode = MarkMode | 'source'
 
@@ -17,34 +17,42 @@ export interface EditorProps {
   mode?: EditorMode
 
   /**
-   * The initial content of the editor, as a Markdown string. Only the value provided on
-   * the first render is used; later changes are ignored.
+   * The initial Markdown text of the editor. Only the value provided on the
+   * first render is used; later changes are ignored.
    */
-  initialContent?: string
+  initialMarkdown?: string
 
-  /**
-   * A callback function that is called whenever the content of the editor changes. This function should be memoized.
-   */
-  onChange?: (options: ChangeHandlerOptions) => void
+  /** Called on every document change. */
+  onDocChange?: VoidFunction
+
+  /** Imperative handle for the editor. */
+  ref?: Ref<EditorHandle>
 }
 
-export function Editor({ mode = 'focus', initialContent, onChange }: EditorProps) {
-  // Latest markdown, kept up to date on every change from whichever editor
-  // is mounted. Used to seed the other editor when the mode family flips.
-  const contentRef = useRef(initialContent ?? '')
+export function Editor({ mode = 'focus', initialMarkdown, onDocChange, ref }: EditorProps) {
+  // Handle of whichever editor is currently mounted.
+  const childRef = useRef<EditorHandle>(null)
 
-  const handleChange = useCallback(
-    (options: ChangeHandlerOptions) => {
-      contentRef.current = options.getMarkdown()
-      onChange?.(options)
-    },
-    [onChange],
-  )
+  useImperativeHandle(ref, () => {
+    return { getMarkdown: () => childRef.current?.getMarkdown() ?? '' }
+  }, [])
+
+  // Seed for the mounted editor: the initial markdown on the first render,
+  // the previous editor's content when the mode family flips.
+  const seedMarkdown = childRef.current?.getMarkdown() ?? initialMarkdown ?? ''
 
   if (mode === 'source') {
-    return <CodeMirrorEditor initialContent={contentRef.current} onChange={handleChange} />
+    return (
+      <CodeMirrorEditor ref={childRef} initialMarkdown={seedMarkdown} onDocChange={onDocChange} />
+    )
+  } else {
+    return (
+      <ProseKitEditor
+        ref={childRef}
+        markMode={mode}
+        initialMarkdown={seedMarkdown}
+        onDocChange={onDocChange}
+      />
+    )
   }
-  return (
-    <ProseKitEditor markMode={mode} initialContent={contentRef.current} onChange={handleChange} />
-  )
 }

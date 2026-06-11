@@ -1,9 +1,10 @@
+import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
 
 import { Editor } from './editor.tsx'
-import type { ChangeHandlerOptions } from './types.ts'
+import type { EditorHandle } from './types.ts'
 
 function pmRoot(): HTMLElement | null {
   return document.querySelector<HTMLElement>('.ProseMirror')
@@ -21,7 +22,7 @@ function cmContent(): HTMLElement {
 
 describe('Editor', () => {
   it('renders a ProseKit editor in focus mode by default', async () => {
-    const screen = await render(<Editor initialContent="Hello" />)
+    const screen = await render(<Editor initialMarkdown="Hello" />)
     await expect.element(screen.getByText('Hello')).toBeInTheDocument()
     await vi.waitFor(() => {
       expect(pmRoot()?.dataset['markMode']).toBe('focus')
@@ -30,26 +31,26 @@ describe('Editor', () => {
   })
 
   it('renders a CodeMirror editor in source mode', async () => {
-    await render(<Editor mode="source" initialContent="# Hi" />)
+    await render(<Editor mode="source" initialMarkdown="# Hi" />)
     expect(cmRoot()).not.toBeNull()
     expect(pmRoot()).toBeNull()
   })
 
   it('carries content over from a rich mode to source mode', async () => {
-    const screen = await render(<Editor mode="focus" initialContent="# Hello" />)
+    const screen = await render(<Editor mode="focus" initialMarkdown="# Hello" />)
     await expect.element(screen.getByText('Hello')).toBeInTheDocument()
 
-    await screen.rerender(<Editor mode="source" initialContent="# Hello" />)
+    await screen.rerender(<Editor mode="source" initialMarkdown="# Hello" />)
     expect(cmContent().textContent).toContain('# Hello')
   })
 
   it('carries edits over from source mode to a rich mode', async () => {
-    const screen = await render(<Editor mode="source" initialContent="# Hello" />)
+    const screen = await render(<Editor mode="source" initialMarkdown="# Hello" />)
 
     await userEvent.click(cmContent())
     await userEvent.keyboard('{End} World')
 
-    await screen.rerender(<Editor mode="focus" initialContent="# Hello" />)
+    await screen.rerender(<Editor mode="focus" initialMarkdown="# Hello" />)
     await expect.element(screen.getByText('Hello World')).toBeInTheDocument()
   })
 
@@ -66,25 +67,32 @@ describe('Editor', () => {
     })
   })
 
-  it('forwards onChange from both editors', async () => {
-    const onChange = vi.fn<(options: ChangeHandlerOptions) => void>()
-    const screen = await render(<Editor mode="focus" initialContent="Hello" onChange={onChange} />)
+  it('notifies onDocChange and exposes markdown via ref in both editors', async () => {
+    const onDocChange = vi.fn()
+    const ref = createRef<EditorHandle>()
+    const screen = await render(
+      <Editor ref={ref} mode="focus" initialMarkdown="Hello" onDocChange={onDocChange} />,
+    )
     await expect.element(screen.getByText('Hello')).toBeInTheDocument()
+    expect(ref.current?.getMarkdown()).toBe('Hello\n')
 
     await userEvent.click(pmRoot()!)
     await userEvent.keyboard('1')
     await vi.waitFor(() => {
-      expect(onChange).toHaveBeenCalled()
+      expect(onDocChange).toHaveBeenCalled()
     })
+    expect(ref.current?.getMarkdown()).toContain('1')
 
-    onChange.mockClear()
-    await screen.rerender(<Editor mode="source" initialContent="Hello" onChange={onChange} />)
+    onDocChange.mockClear()
+    await screen.rerender(
+      <Editor ref={ref} mode="source" initialMarkdown="Hello" onDocChange={onDocChange} />,
+    )
 
     await userEvent.click(cmContent())
     await userEvent.keyboard('2')
     await vi.waitFor(() => {
-      expect(onChange).toHaveBeenCalled()
+      expect(onDocChange).toHaveBeenCalled()
     })
-    expect(onChange.mock.calls.at(-1)?.[0].getMarkdown()).toContain('2')
+    expect(ref.current?.getMarkdown()).toContain('2')
   })
 })

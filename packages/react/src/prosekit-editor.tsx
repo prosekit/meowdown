@@ -9,59 +9,57 @@ import {
 } from '@meowdown/core'
 import { createEditor, defineDocChangeHandler } from '@prosekit/core'
 import { ProseKit, useExtension } from '@prosekit/react'
-import { useMemo, useState } from 'react'
+import { useImperativeHandle, useMemo, useState, type Ref } from 'react'
 
-import type { ChangeHandlerOptions } from './types.ts'
+import type { EditorHandle } from './types.ts'
 
 export interface ProseKitEditorProps {
   markMode?: MarkMode
 
   /**
-   * The initial content of the editor, as a Markdown string. Only the value provided on
-   * the first render is used; later changes are ignored.
+   * The initial Markdown text of the editor. Only the value provided on the
+   * first render is used; later changes are ignored.
    */
-  initialContent?: string
+  initialMarkdown?: string
 
-  /**
-   * A callback function that is called whenever the content of the editor changes. This function should be memoized.
-   */
-  onChange?: (options: ChangeHandlerOptions) => void
+  /** Called on every document change. */
+  onDocChange?: VoidFunction
+
+  /** Imperative handle for the editor. */
+  ref?: Ref<EditorHandle>
 }
 
 export function ProseKitEditor({
   markMode = 'focus',
-  initialContent,
-  onChange,
+  initialMarkdown,
+  onDocChange,
+  ref,
 }: ProseKitEditorProps) {
   const [editor] = useState((): TypedEditor => {
     const extension: EditorExtension = defineEditorExtension()
     const editor: TypedEditor = createEditor({ extension })
-    if (initialContent) {
-      editor.setContent(markdownToDoc(editor, initialContent))
+    if (initialMarkdown) {
+      editor.setContent(markdownToDoc(editor, initialMarkdown))
     }
     return editor
   })
+
+  useImperativeHandle(ref, () => {
+    return { getMarkdown: () => docToMarkdown(editor.state.doc) }
+  }, [editor])
 
   const markModeExtension = useMemo(() => {
     return defineMarkMode(markMode)
   }, [markMode])
   useExtension(markModeExtension, { editor })
 
-  const changeOptions: ChangeHandlerOptions = useMemo(() => {
-    const getMarkdown = (): string => {
-      return docToMarkdown(editor.state.doc)
-    }
-
-    return { getMarkdown }
-  }, [editor])
-
   const docChangeExtension = useMemo(() => {
-    if (!onChange) return null
+    if (!onDocChange) return null
 
     return defineDocChangeHandler(() => {
-      onChange(changeOptions)
+      onDocChange()
     })
-  }, [onChange, changeOptions])
+  }, [onDocChange])
   useExtension(docChangeExtension, { editor })
 
   return (

@@ -1,10 +1,10 @@
-import { StrictMode } from 'react'
+import { createRef, StrictMode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
 
 import { CodeMirrorEditor } from './codemirror-editor.tsx'
-import type { ChangeHandlerOptions } from './types.ts'
+import type { EditorHandle } from './types.ts'
 
 function cmContent(): HTMLElement {
   const content = document.querySelector<HTMLElement>('[data-editor="codemirror"] .cm-content')
@@ -14,23 +14,23 @@ function cmContent(): HTMLElement {
 
 describe('CodeMirrorEditor', () => {
   it('renders the initial content in a CodeMirror editor', async () => {
-    await render(<CodeMirrorEditor initialContent="# Hello CM" />)
+    await render(<CodeMirrorEditor initialMarkdown="# Hello CM" />)
     expect(document.querySelector('[data-editor="codemirror"] .cm-editor')).not.toBeNull()
     expect(cmContent().textContent).toContain('# Hello CM')
   })
 
-  it('calls onChange with the edited markdown', async () => {
-    const onChange = vi.fn<(options: ChangeHandlerOptions) => void>()
-    await render(<CodeMirrorEditor initialContent="# Hello" onChange={onChange} />)
+  it('notifies onDocChange and serializes markdown via the handle', async () => {
+    const onDocChange = vi.fn()
+    const ref = createRef<EditorHandle>()
+    await render(<CodeMirrorEditor ref={ref} initialMarkdown="# Hello" onDocChange={onDocChange} />)
 
     await userEvent.click(cmContent())
     await userEvent.keyboard('meow')
 
     await vi.waitFor(() => {
-      expect(onChange).toHaveBeenCalled()
+      expect(onDocChange).toHaveBeenCalled()
     })
-    const markdown = onChange.mock.calls.at(-1)?.[0].getMarkdown() ?? ''
-    expect(markdown).toContain('meow')
+    expect(ref.current?.getMarkdown()).toContain('meow')
   })
 
   it('mounts exactly one editor under StrictMode', async () => {
