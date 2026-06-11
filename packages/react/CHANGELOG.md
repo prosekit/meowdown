@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.4.0](https://github.com/prosekit/meowdown/compare/react-v0.3.0...react-v0.4.0) (2026-06-11)
+
+
+### Features
+
+* **react:** add more EditorHandle methods ([#20](https://github.com/prosekit/meowdown/issues/20)) ([6534eef](https://github.com/prosekit/meowdown/commit/6534eef51ee41737209934465e1db086dece8381))
+* **react:** require react v19 as peer dependency ([#17](https://github.com/prosekit/meowdown/issues/17)) ([010536c](https://github.com/prosekit/meowdown/commit/010536ce47407ddb78b34a6ffff65ebb74fc2a3a))
+
+
+### Bug Fixes
+
+* **core:** remove table resize handle ([#19](https://github.com/prosekit/meowdown/issues/19)) ([7719a23](https://github.com/prosekit/meowdown/commit/7719a239aa670b490d59342b0f78a9096185e25a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @meowdown/core bumped to 0.3.1
+
 ## [0.3.0](https://github.com/prosekit/meowdown/compare/react-v0.2.0...react-v0.3.0) (2026-06-11)
 
 

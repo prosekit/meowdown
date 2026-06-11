@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/prosekit/meowdown/compare/core-v0.3.0...core-v0.3.1) (2026-06-11)
+
+
+### Bug Fixes
+
+* **core:** remove table resize handle ([#19](https://github.com/prosekit/meowdown/issues/19)) ([7719a23](https://github.com/prosekit/meowdown/commit/7719a239aa670b490d59342b0f78a9096185e25a))
+
 ## [0.3.0](https://github.com/prosekit/meowdown/compare/core-v0.2.0...core-v0.3.0) (2026-06-11)
 
 
