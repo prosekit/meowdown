@@ -30,8 +30,8 @@
     "@prosekit/react": "^0.7.6"
   },
   "peerDependencies": {
-    "react": "*",
-    "react-dom": "*"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "peerDependenciesMeta": {
     "react": {
