@@ -27,6 +27,11 @@ The editor extension binds inline-format toggles (`Mod` = Cmd on macOS, Ctrl els
 - `--meowdown-table-header-bg`: table header row background.
 - `--meowdown-font-mono`: monospace font stack.
 - `--meowdown-gutter`: horizontal editor padding. Floating UI such as the block handle (in `@meowdown/react`) lives inside it; keep it at least `3.5rem`.
+- `--meowdown-selection`: text `::selection` background.
+- `--meowdown-node-outline`: outline of a selected node; border color of selected tables and cells.
+- `--meowdown-node-selection`: background wash of a selected node or selected cells.
+
+Selection colors are standalone variables, not derived from `--meowdown-accent`, so selection can be restyled independently.
 
 Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-accent`.
 

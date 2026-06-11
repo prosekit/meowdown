@@ -55,13 +55,7 @@ In the rich modes (`focus` / `show` / `hide`), these toggle inline formatting on
 
 ## Styling
 
-`@meowdown/react/style.css` includes the default theme from [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core). Colors follow the page's `color-scheme`; customize via the `--meowdown-*` CSS variables documented there. The editor reserves a horizontal gutter (`--meowdown-gutter`) so the block handle has room to the left of the hovered block.
-
-Selection colors are standalone variables (independent from `--meowdown-accent`):
-
-- `--meowdown-node-outline`: outline of a selected node (e.g. a block grabbed by its handle).
-- `--meowdown-node-selection`: background wash of a selected node.
-- `--meowdown-selection`: text `::selection` background.
+`@meowdown/react/style.css` includes the default theme from [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core).
 
 ## License
 

@@ -20,6 +20,12 @@
   --meowdown-table-header-bg: light-dark(#fafafa, #27272a);
   --meowdown-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
+  /* Selection colors. Deliberately standalone variables, not derived from
+   * `--meowdown-accent`, so selection can be restyled independently. */
+  --meowdown-node-outline: light-dark(hsl(250 100% 60%), hsl(250 100% 72%));
+  --meowdown-node-selection: light-dark(hsl(250 100% 60% / 0.1), hsl(250 100% 72% / 0.12));
+  --meowdown-selection: light-dark(hsl(250 100% 60% / 0.22), hsl(250 100% 72% / 0.3));
+
   /* Horizontal editor padding. Floating UI tracking the hovered block (the
    * block handle in @meowdown/react) must fit inside it: hover tracking only
    * sees pointer events on the editor element, so a handle outside the
@@ -158,6 +164,46 @@
   font-weight: 600;
   color: var(--meowdown-heading);
   background: var(--meowdown-table-header-bg);
+}
+
+.ProseMirror table.ProseMirror-selectednode td,
+.ProseMirror table.ProseMirror-selectednode th {
+  border-color: var(--meowdown-node-outline);
+}
+
+.ProseMirror .selectedCell {
+/* `double` wins the collapsed-border conflict against the solid borders of
+ * unselected neighbors, so the whole selection perimeter recolors. */
+  border: 1px double var(--meowdown-node-outline);
+  background: var(--meowdown-node-selection);
+  --meowdown-selection: transparent;
+  caret-color: transparent;
+}
+
+/* ---------------------------------------------------------------------------
+ * Selection
+ * ------------------------------------------------------------------------- */
+.ProseMirror ::selection {
+  background: var(--meowdown-selection);
+}
+
+/* Node selection (e.g. from the block handle): thin outline + faint wash,
+ * replacing prosemirror-view's stock blue outline. */
+.ProseMirror .ProseMirror-selectednode {
+  --meowdown-selection: transparent;
+  border-radius: 2px;
+  outline: 1px solid var(--meowdown-node-outline);
+  background: var(--meowdown-node-selection);
+}
+
+.ProseMirror pre.ProseMirror-selectednode {
+  border-radius: 0.6rem;
+}
+
+/* While dragging via the block handle, keep only the outline on the
+ * source block so it does not sit tinted under the drag preview. */
+.ProseMirror.prosekit-dragging {
+  --meowdown-node-selection: transparent;
 }
 
 /* ---------------------------------------------------------------------------
