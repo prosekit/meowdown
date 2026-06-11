@@ -100,6 +100,9 @@ importers:
       '@meowdown/core':
         specifier: workspace:*
         version: link:../core
+      '@ocavue/utils':
+        specifier: ^1.7.0
+        version: 1.7.0
       '@prosekit/core':
         specifier: ^0.12.3
         version: 0.12.3(prosemirror-model@1.25.7)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
@@ -537,6 +540,9 @@ packages:
 
   '@ocavue/utils@1.6.0':
     resolution: {integrity: sha512-8W3q1hxx9qFdrYgPtbElllG/tqYkO/dMhlRUiqasO0SuDFTj78azSQjhIrBTFWxlBPPsSZN6zXYHmb3RwN2Jtg==}
+
+  '@ocavue/utils@1.7.0':
+    resolution: {integrity: sha512-yEk9ATNBjTZTtuVFMB/MAIF6zJBvJ2+lVNQvK2+O+ggEBGTgx2tp27d4FPgmD5bRsNHHP3D0SleQia/bvIeV8w==}
 
   '@oxc-parser/binding-android-arm-eabi@0.133.0':
     resolution: {integrity: sha512-l/44caGse+VpnY9gx0yvvc5QnnG3yG1FO3KZgYvNL1GZrfK86zIwAOgGEVlxDyRymzrU/KHiblPFpevKOmJmUA==}
@@ -3689,6 +3695,8 @@ snapshots:
   '@ocavue/tsconfig@0.7.1': {}
 
   '@ocavue/utils@1.6.0': {}
+
+  '@ocavue/utils@1.7.0': {}
 
   '@oxc-parser/binding-android-arm-eabi@0.133.0':
     optional: true
