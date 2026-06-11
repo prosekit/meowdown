@@ -60,6 +60,9 @@ importers:
       '@prosekit/pm':
         specifier: ^0.1.18
         version: 0.1.18
+      prosemirror-tables:
+        specifier: ^1.8.5
+        version: 1.8.5
     devDependencies:
       '@ocavue/tsconfig':
         specifier: ^0.7.1

@@ -1,6 +1,5 @@
 @import '@prosekit/pm/view/style/prosemirror.css';
 @import '@prosekit/extensions/list/style.css';
-@import '@prosekit/extensions/table/style.css';
 
 /* ---------------------------------------------------------------------------
  * Default theme
@@ -18,6 +17,7 @@
   --meowdown-mark: light-dark(#a78bfa, #8b5cf6);
   --meowdown-border: light-dark(#e4e4e7, #3f3f46);
   --meowdown-code-bg: light-dark(#f4f4f5, #18181b);
+  --meowdown-table-header-bg: light-dark(#fafafa, #27272a);
   --meowdown-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Horizontal editor padding. Floating UI tracking the hovered block (the
@@ -133,6 +133,31 @@
   margin: 1.5em 0;
   border: none;
   border-top: 1px solid var(--meowdown-border);
+}
+
+/* ---------------------------------------------------------------------------
+ * Tables
+ * ------------------------------------------------------------------------- */
+.ProseMirror table {
+  width: 100%;
+  overflow: hidden;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.ProseMirror td,
+.ProseMirror th {
+  box-sizing: border-box;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--meowdown-border);
+  vertical-align: top;
+  text-align: left;
+}
+
+.ProseMirror th {
+  font-weight: 600;
+  color: var(--meowdown-heading);
+  background: var(--meowdown-table-header-bg);
 }
 
 /* ---------------------------------------------------------------------------

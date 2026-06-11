@@ -23,6 +23,11 @@
       background: var(--meowdown-selection);
     }
 
+    /* Cell selection from prosemirror-tables. */
+    .selectedCell {
+      background: var(--meowdown-selection);
+    }
+
     /* Node selection (e.g. from the block handle): thin outline + faint wash,
      * replacing prosemirror-view's stock blue outline. */
     .ProseMirror-selectednode {

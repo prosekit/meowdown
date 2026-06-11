@@ -22,8 +22,9 @@ The editor extension binds inline-format toggles (`Mod` = Cmd on macOS, Ctrl els
 - `--meowdown-muted`: secondary text (blockquotes).
 - `--meowdown-accent`: links, wikilinks, caret, inline code, tags.
 - `--meowdown-mark`: Markdown syntax characters.
-- `--meowdown-border`: horizontal rules.
+- `--meowdown-border`: horizontal rules and table borders.
 - `--meowdown-code-bg`: code block background.
+- `--meowdown-table-header-bg`: table header row background.
 - `--meowdown-font-mono`: monospace font stack.
 - `--meowdown-gutter`: horizontal editor padding. Floating UI such as the block handle (in `@meowdown/react`) lives inside it; keep it at least `3.5rem`.
 

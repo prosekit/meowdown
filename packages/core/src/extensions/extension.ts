@@ -14,13 +14,13 @@ import { defineHorizontalRule } from '@prosekit/extensions/horizontal-rule'
 import { defineList } from '@prosekit/extensions/list'
 import { defineModClickPrevention } from '@prosekit/extensions/mod-click-prevention'
 import { defineParagraph } from '@prosekit/extensions/paragraph'
-import { defineTable } from '@prosekit/extensions/table'
 import { defineText } from '@prosekit/extensions/text'
 import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
+import { defineTable } from './table.ts'
 
 function defineEditorExtensionImpl() {
   return union(
