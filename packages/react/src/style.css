@@ -1,1 +1,31 @@
 @import '@meowdown/core/style.css';
+
+.meowdown {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+
+  .ProseMirror {
+    flex: 1 0 auto;
+  }
+
+  [data-editor='codemirror'] {
+    display: flex;
+    flex: 1 0 auto;
+
+    .cm-editor {
+      flex: 1;
+      font-size: 0.95rem;
+
+      &.cm-focused {
+        outline: none;
+      }
+    }
+
+    .cm-content {
+      padding: 1.25rem 1.5rem 1.75rem;
+      font-family: var(--meowdown-font-mono);
+      caret-color: var(--meowdown-accent);
+    }
+  }
+}

@@ -41,18 +41,18 @@ export function Editor({ mode = 'focus', initialMarkdown, onDocChange, ref }: Ed
   // the previous editor's content when the mode family flips.
   const seedMarkdown = childRef.current?.getMarkdown() ?? initialMarkdown ?? ''
 
-  if (mode === 'source') {
-    return (
-      <CodeMirrorEditor ref={childRef} initialMarkdown={seedMarkdown} onDocChange={onDocChange} />
-    )
-  } else {
-    return (
-      <ProseKitEditor
-        ref={childRef}
-        markMode={mode}
-        initialMarkdown={seedMarkdown}
-        onDocChange={onDocChange}
-      />
-    )
-  }
+  return (
+    <div className="meowdown">
+      {mode === 'source' ? (
+        <CodeMirrorEditor ref={childRef} initialMarkdown={seedMarkdown} onDocChange={onDocChange} />
+      ) : (
+        <ProseKitEditor
+          ref={childRef}
+          markMode={mode}
+          initialMarkdown={seedMarkdown}
+          onDocChange={onDocChange}
+        />
+      )}
+    </div>
+  )
 }

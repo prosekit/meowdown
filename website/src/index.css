@@ -2,18 +2,14 @@
 @import '@meowdown/react/style.css';
 @plugin '@egoist/tailwindcss-icons';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   color-scheme: light dark;
 }
 
 html {
-  background-color: var(--color-zinc-50);
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    background-color: var(--color-zinc-950);
-  }
+  background-color: light-dark(var(--color-zinc-50), var(--color-zinc-950));
 }
 
 /* ---------------------------------------------------------------------------
@@ -31,7 +27,10 @@ html {
   grid-auto-columns: 1fr;
   padding: 0.25rem;
   border-radius: 9999px;
-  background: var(--color-zinc-100);
+  background: light-dark(
+    var(--color-zinc-100),
+    color-mix(in oklab, var(--color-zinc-800) 80%, transparent)
+  );
 }
 
 .segmented::before {
@@ -42,7 +41,7 @@ html {
   left: 0.25rem;
   width: calc((100% - 0.5rem) / var(--seg-count, 3));
   border-radius: 9999px;
-  background: #fff;
+  background: light-dark(#fff, var(--color-zinc-950));
   box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   transition: transform 0.2s ease;
   pointer-events: none;
@@ -69,16 +68,16 @@ html {
   font-size: 0.875rem;
   font-weight: 500;
   white-space: nowrap;
-  color: var(--color-zinc-500);
+  color: light-dark(var(--color-zinc-500), var(--color-zinc-400));
   transition: color 0.2s ease;
 }
 
 .segmented label:hover {
-  color: var(--color-zinc-800);
+  color: light-dark(var(--color-zinc-800), var(--color-zinc-200));
 }
 
 .segmented label:has(input:checked) {
-  color: var(--color-zinc-900);
+  color: light-dark(var(--color-zinc-900), #fff);
 }
 
 .segmented label:has(input:focus-visible) {
@@ -94,206 +93,12 @@ html {
   pointer-events: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  .segmented {
-    background: color-mix(in oklab, var(--color-zinc-800) 80%, transparent);
-  }
-  .segmented::before {
-    background: var(--color-zinc-950);
-  }
-  .segmented label {
-    color: var(--color-zinc-400);
-  }
-  .segmented label:hover {
-    color: var(--color-zinc-200);
-  }
-  .segmented label:has(input:checked) {
-    color: #fff;
-  }
-}
-
 /* ---------------------------------------------------------------------------
- * Editor surface
+ * Editor surface tweaks on larger screens
  * ------------------------------------------------------------------------- */
-.ProseMirror {
-  box-sizing: border-box;
-  flex: 1 0 auto;
-  padding: 1.25rem 1.5rem 1.75rem;
-  outline: none;
-  font-size: 1.0625rem;
-  line-height: 1.7;
-  color: var(--color-zinc-700);
-  caret-color: var(--color-violet-600);
-  -webkit-font-smoothing: antialiased;
-}
-
 @media (min-width: 640px) {
-  .ProseMirror {
+  .ProseMirror,
+  [data-editor='codemirror'] .cm-content {
     padding: 2rem 2.5rem 2.25rem;
-  }
-}
-
-.ProseMirror > * + * {
-  margin-top: 0.85em;
-}
-
-.ProseMirror h1,
-.ProseMirror h2,
-.ProseMirror h3 {
-  font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
-  color: var(--color-zinc-900);
-}
-
-.ProseMirror h1 {
-  font-size: 1.75rem;
-}
-.ProseMirror h2 {
-  font-size: 1.4rem;
-}
-.ProseMirror h3 {
-  font-size: 1.2rem;
-}
-
-.ProseMirror a {
-  color: var(--color-violet-600);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-}
-
-.ProseMirror code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.9em;
-  padding: 0.1em 0.35em;
-  border-radius: 0.35rem;
-  background: color-mix(in oklab, var(--color-violet-600) 10%, transparent);
-  color: var(--color-violet-700);
-}
-
-.ProseMirror blockquote {
-  margin-left: 0;
-  padding-left: 1rem;
-  border-left: 3px solid var(--color-violet-200);
-  color: var(--color-zinc-600);
-  font-style: italic;
-}
-
-.ProseMirror ul,
-.ProseMirror ol {
-  padding-left: 1.5rem;
-}
-.ProseMirror ul {
-  list-style: disc;
-}
-.ProseMirror ol {
-  list-style: decimal;
-}
-.ProseMirror li {
-  margin-top: 0.25em;
-}
-
-.ProseMirror pre {
-  padding: 0.9rem 1rem;
-  border-radius: 0.6rem;
-  overflow-x: auto;
-  background: var(--color-zinc-100);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.9em;
-  line-height: 1.5;
-}
-.ProseMirror pre code {
-  padding: 0;
-  background: none;
-  color: inherit;
-}
-
-.ProseMirror hr {
-  margin: 1.5em 0;
-  border: none;
-  border-top: 1px solid var(--color-zinc-200);
-}
-
-/* ---------------------------------------------------------------------------
- * Source mode editor surface (CodeMirror)
- * ------------------------------------------------------------------------- */
-[data-editor='codemirror'] {
-  flex: 1 0 auto;
-  display: flex;
-}
-
-.cm-editor {
-  flex: 1;
-  font-size: 0.95rem;
-}
-
-.cm-editor.cm-focused {
-  outline: none;
-}
-
-.cm-content {
-  padding: 1.25rem 1.5rem 1.75rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  caret-color: var(--color-violet-600);
-}
-
-/* ---------------------------------------------------------------------------
- * Markdown syntax characters (`md-mark`) and link URIs
- * ------------------------------------------------------------------------- */
-.ProseMirror .md-mark,
-.ProseMirror .md-link-uri {
-  color: var(--color-violet-400);
-  opacity: 0.7;
-}
-
-/* hide: syntax is never visible */
-.ProseMirror[data-mark-mode='hide'] .md-mark,
-.ProseMirror[data-mark-mode='hide'] .md-link-uri {
-  display: none;
-}
-
-/* focus: syntax is hidden until revealed near the caret */
-.ProseMirror[data-mark-mode='focus'] .md-mark,
-.ProseMirror[data-mark-mode='focus'] .md-link-uri {
-  display: none;
-}
-.ProseMirror[data-mark-mode='focus'] .md-mark:has(.show),
-.ProseMirror[data-mark-mode='focus'] .md-link-uri:has(.show) {
-  display: inline;
-}
-
-/* ---------------------------------------------------------------------------
- * Dark mode
- * ------------------------------------------------------------------------- */
-@media (prefers-color-scheme: dark) {
-  .ProseMirror {
-    color: var(--color-zinc-300);
-  }
-  .ProseMirror h1,
-  .ProseMirror h2,
-  .ProseMirror h3 {
-    color: var(--color-zinc-50);
-  }
-  .ProseMirror a {
-    color: var(--color-purple-400);
-  }
-  .ProseMirror code {
-    background: color-mix(in oklab, var(--color-purple-400) 15%, transparent);
-    color: var(--color-purple-300);
-  }
-  .ProseMirror blockquote {
-    border-left-color: var(--color-violet-800);
-    color: var(--color-zinc-400);
-  }
-  .ProseMirror pre {
-    background: var(--color-zinc-900);
-  }
-  .ProseMirror hr {
-    border-top-color: var(--color-zinc-700);
-  }
-  .ProseMirror .md-mark,
-  .ProseMirror .md-link-uri {
-    color: var(--color-violet-500);
   }
 }

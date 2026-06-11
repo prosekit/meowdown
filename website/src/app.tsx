@@ -1,5 +1,5 @@
 import { Editor, type EditorMode } from '@meowdown/react'
-import { type CSSProperties, useState } from 'react'
+import { type CSSProperties, useLayoutEffect, useState } from 'react'
 
 interface ModeOption {
   value: EditorMode
@@ -81,12 +81,41 @@ function SegmentedControl<T extends string>({
   )
 }
 
+type Theme = 'light' | 'dark'
+
+function ThemeToggle() {
+  const [theme, setTheme] = useState<Theme>(() =>
+    window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+  )
+
+  // `dark` class drives Tailwind's `dark:` variant; `color-scheme` drives the
+  // `light-dark()` colors in the stylesheets.
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    root.classList.toggle('dark', theme === 'dark')
+    root.style.colorScheme = theme
+  }, [theme])
+
+  return (
+    <button
+      type="button"
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      aria-label="Toggle color theme"
+      title="Toggle color theme"
+      className="absolute top-4 right-4 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-zinc-200 bg-white text-base shadow-sm transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+    >
+      {theme === 'dark' ? '🌙' : '☀️'}
+    </button>
+  )
+}
+
 export function App() {
   const [mode, setMode] = useState<EditorMode>('focus')
   const activeMode = MODES.find((option) => option.value === mode) ?? MODES[0]
 
   return (
-    <main className="min-h-dvh bg-zinc-50 text-zinc-600 dark:bg-zinc-950 dark:text-zinc-400">
+    <main className="relative min-h-dvh bg-zinc-50 text-zinc-600 dark:bg-zinc-950 dark:text-zinc-400">
+      <ThemeToggle />
       <div className="mx-auto flex h-dvh max-w-3xl flex-col overflow-hidden px-4 py-9 sm:px-8 sm:py-16 lg:py-20">
         <header className="flex flex-col items-center gap-4 text-center sm:gap-5">
           <div className="flex items-center gap-2.5">

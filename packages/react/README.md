@@ -23,7 +23,7 @@ export function App() {
 
 ### `<Editor>`
 
-The Markdown editor component
+The Markdown editor component. Renders inside a `div.meowdown` wrapper that fills a flex parent.
 
 - `mode?: 'focus' | 'show' | 'hide' | 'source'`: defaults to `'focus'`.
   - `'focus'`: Markdown syntax is hidden, revealed around the cursor.
@@ -39,6 +39,10 @@ The Markdown editor component
 Imperative handle for the editor, attached via `ref`.
 
 - `getMarkdown(): string`: serializes the current document to Markdown. Can be expensive on large documents; call it on demand (e.g. throttled) instead of on every change.
+
+## Styling
+
+`@meowdown/react/style.css` includes the default theme from [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core). Colors follow the page's `color-scheme`; customize via the `--meowdown-*` CSS variables documented there.
 
 ## License
 

@@ -1,3 +1,155 @@
 @import '@prosekit/pm/view/style/prosemirror.css';
 @import '@prosekit/extensions/list/style.css';
 @import '@prosekit/extensions/table/style.css';
+
+/* ---------------------------------------------------------------------------
+ * Default theme
+ *
+ * Colors resolve through `light-dark()`, so the editor follows the host
+ * page's `color-scheme` (set `color-scheme: light dark` on `:root` to get
+ * automatic dark mode). Override the `--meowdown-*` variables on `:root` or
+ * any ancestor to customize.
+ * ------------------------------------------------------------------------- */
+:root {
+  --meowdown-text: light-dark(#3f3f46, #d4d4d8);
+  --meowdown-heading: light-dark(#18181b, #fafafa);
+  --meowdown-muted: light-dark(#52525b, #a1a1aa);
+  --meowdown-accent: light-dark(#7c3aed, #c084fc);
+  --meowdown-mark: light-dark(#a78bfa, #8b5cf6);
+  --meowdown-border: light-dark(#e4e4e7, #3f3f46);
+  --meowdown-code-bg: light-dark(#f4f4f5, #18181b);
+  --meowdown-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ---------------------------------------------------------------------------
+ * Editor surface
+ * ------------------------------------------------------------------------- */
+.ProseMirror {
+  box-sizing: border-box;
+  padding: 1.25rem 1.5rem 1.75rem;
+  outline: none;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--meowdown-text);
+  caret-color: var(--meowdown-accent);
+  -webkit-font-smoothing: antialiased;
+}
+
+.ProseMirror > * + * {
+  margin-top: 0.85em;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--meowdown-heading);
+}
+
+.ProseMirror h1 {
+  font-size: 1.75rem;
+}
+.ProseMirror h2 {
+  font-size: 1.4rem;
+}
+.ProseMirror h3 {
+  font-size: 1.2rem;
+}
+.ProseMirror h4 {
+  font-size: 1.1rem;
+}
+.ProseMirror h5 {
+  font-size: 1rem;
+}
+.ProseMirror h6 {
+  font-size: 0.95rem;
+}
+
+.ProseMirror a {
+  color: var(--meowdown-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.ProseMirror code {
+  font-family: var(--meowdown-font-mono);
+  font-size: 0.9em;
+  padding: 0.1em 0.35em;
+  border-radius: 0.35rem;
+  background: color-mix(in oklab, var(--meowdown-accent) 10%, transparent);
+  color: color-mix(in oklab, var(--meowdown-accent) 80%, var(--meowdown-heading));
+}
+
+.ProseMirror blockquote {
+  margin-left: 0;
+  padding-left: 1rem;
+  border-left: 3px solid color-mix(in oklab, var(--meowdown-accent) 35%, transparent);
+  color: var(--meowdown-muted);
+  font-style: italic;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5rem;
+}
+.ProseMirror ul {
+  list-style: disc;
+}
+.ProseMirror ol {
+  list-style: decimal;
+}
+.ProseMirror li {
+  margin-top: 0.25em;
+}
+
+.ProseMirror pre {
+  padding: 0.9rem 1rem;
+  border-radius: 0.6rem;
+  overflow-x: auto;
+  background: var(--meowdown-code-bg);
+  font-family: var(--meowdown-font-mono);
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+.ProseMirror pre code {
+  padding: 0;
+  background: none;
+  color: inherit;
+}
+
+.ProseMirror hr {
+  margin: 1.5em 0;
+  border: none;
+  border-top: 1px solid var(--meowdown-border);
+}
+
+/* ---------------------------------------------------------------------------
+ * Markdown syntax characters (`md-mark`) and link URIs
+ * ------------------------------------------------------------------------- */
+.ProseMirror .md-mark,
+.ProseMirror .md-link-uri {
+  color: var(--meowdown-mark);
+  opacity: 0.7;
+}
+
+/* hide: syntax is never visible */
+.ProseMirror[data-mark-mode='hide'] .md-mark,
+.ProseMirror[data-mark-mode='hide'] .md-link-uri {
+  display: none;
+}
+
+/* focus: syntax is hidden until revealed near the caret */
+.ProseMirror[data-mark-mode='focus'] .md-mark,
+.ProseMirror[data-mark-mode='focus'] .md-link-uri {
+  display: none;
+}
+.ProseMirror[data-mark-mode='focus'] .md-mark:has(.show),
+.ProseMirror[data-mark-mode='focus'] .md-link-uri:has(.show) {
+  display: inline;
+}
