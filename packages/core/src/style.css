@@ -140,6 +140,17 @@
 }
 
 /* ---------------------------------------------------------------------------
+ * Wikilinks (`[[target]]`)
+ * ------------------------------------------------------------------------- */
+.ProseMirror .md-wikilink {
+  color: var(--meowdown-accent);
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
  * Markdown syntax characters (`md-mark`) and link URIs
  * ------------------------------------------------------------------------- */
 .ProseMirror .md-mark,

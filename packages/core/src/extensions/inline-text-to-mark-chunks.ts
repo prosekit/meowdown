@@ -30,6 +30,8 @@ const MARK_NAME_BY_TYPE_ID: ReadonlyMap<number, MarkName> = new Map([
   [LEZER_NODE_IDS.StrikethroughMark, 'mdMark'],
   [LEZER_NODE_IDS.URL, 'mdLinkUri'],
   [LEZER_NODE_IDS.Hashtag, 'mdTag'],
+  [LEZER_NODE_IDS.Wikilink, 'mdWikilink'],
+  [LEZER_NODE_IDS.WikilinkMark, 'mdMark'],
 ])
 
 /**

@@ -69,6 +69,8 @@ export const LEZER_NODE_NAMES = [
 
   // Custom inline (meowdown extensions)
   'Hashtag',
+  'Wikilink',
+  'WikilinkMark',
 ] as const
 
 export type LezerNodeName = (typeof LEZER_NODE_NAMES)[number]

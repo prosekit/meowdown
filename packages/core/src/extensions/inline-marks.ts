@@ -9,6 +9,7 @@ export const MARK_NAMES = [
   'mdLinkUri',
   'mdDel',
   'mdTag',
+  'mdWikilink',
 ] as const
 
 export type MarkName = (typeof MARK_NAMES)[number]
@@ -97,6 +98,19 @@ function defineMdTag() {
   })
 }
 
+/**
+ * Covers the whole `[[target]]`; the `[[` `]]` brackets also carry
+ * `mdMark` (they are removable syntax, unlike a tag's `#`).
+ */
+function defineMdWikilink() {
+  return defineMarkSpec({
+    name: 'mdWikilink' satisfies MarkName,
+    inclusive: false,
+    toDOM: () => ['span', { class: 'md-wikilink' }, 0],
+    parseDOM: [{ tag: 'span.md-wikilink' }],
+  })
+}
+
 export function defineInlineMarks() {
   return union(
     defineMdMark(),
@@ -107,5 +121,6 @@ export function defineInlineMarks() {
     defineMdLinkUri(),
     defineMdDel(),
     defineMdTag(),
+    defineMdWikilink(),
   )
 }

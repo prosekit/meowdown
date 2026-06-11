@@ -1,0 +1,100 @@
+import '../testing/index.ts'
+
+import { createRef } from 'react'
+import { describe, expect, it } from 'vitest'
+import { render } from 'vitest-browser-react'
+import { page, userEvent } from 'vitest/browser'
+
+import { Editor } from './editor.tsx'
+import { ProseKitEditor } from './prosekit-editor.tsx'
+import type { EditorHandle } from './types.ts'
+
+const pmRoot = page.locate('.ProseMirror')
+const menu = page.getByTestId('wikilink-menu')
+
+const NOTES = ['Cat naps', 'Meeting notes', 'Reading list']
+
+function searchNotes(query: string): string[] {
+  return NOTES.filter((note) => note.toLowerCase().includes(query))
+}
+
+// In `userEvent.keyboard`, a literal `[` is escaped by doubling it.
+const TWO_BRACKETS = '[[[['
+
+describe('WikilinkMenu', () => {
+  it('opens right after typing "[[" and lists every note', async () => {
+    await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await expect.element(menu).not.toBeVisible()
+    await userEvent.keyboard(TWO_BRACKETS)
+    await expect.element(menu).toBeVisible()
+    await expect.element(menu.getByText('Cat naps')).toBeVisible()
+    await expect.element(menu.getByText('Meeting notes')).toBeVisible()
+    await expect.element(menu.getByText('Reading list')).toBeVisible()
+  })
+
+  it('filters notes while typing after "[["', async () => {
+    await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard(`${TWO_BRACKETS}re`)
+    await expect.element(menu.getByText('Reading list')).toBeVisible()
+    await expect.element(menu.getByText('Cat naps')).not.toBeInTheDocument()
+  })
+
+  it('does not open on a single "["', async () => {
+    await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard('[[x')
+    await expect.element(menu).not.toBeVisible()
+  })
+
+  it('closes when "]" is typed', async () => {
+    await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard(`${TWO_BRACKETS}a`)
+    await expect.element(menu).toBeVisible()
+    await userEvent.keyboard(']')
+    await expect.element(menu).not.toBeVisible()
+  })
+
+  it('supports async onWikilinkSearch and shows a loading state', async () => {
+    // Deferred promise keeps the pending window deterministic.
+    let resolve!: (notes: string[]) => void
+    const asyncSearch = () =>
+      new Promise<string[]>((r) => {
+        resolve = r
+      })
+    await render(<ProseKitEditor onWikilinkSearch={asyncSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard(TWO_BRACKETS)
+    await expect.element(menu.getByText('Loading...')).toBeVisible()
+    resolve(['Cat naps'])
+    await expect.element(menu.getByText('Cat naps')).toBeVisible()
+  })
+
+  it('inserts the selected note as [[Name]] and removes the query', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard(`Hello ${TWO_BRACKETS}re`)
+    await menu.getByText('Reading list').click()
+
+    await expect.element(menu).not.toBeVisible()
+    expect(ref.current?.getMarkdown()).toContain('Hello [[Reading list]]')
+    expect(ref.current?.getMarkdown()).not.toContain('[[re')
+  })
+
+  it('renders no wikilink menu when onWikilinkSearch is not given', async () => {
+    await render(<ProseKitEditor />)
+    await pmRoot.click()
+    await userEvent.keyboard(TWO_BRACKETS)
+    await expect.element(menu).not.toBeInTheDocument()
+  })
+
+  it('passes onWikilinkSearch through <Editor>', async () => {
+    await render(<Editor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard(`${TWO_BRACKETS}cat`)
+    await expect.element(menu.getByText('Cat naps')).toBeVisible()
+  })
+})

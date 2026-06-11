@@ -61,6 +61,8 @@ describe('LEZER_NODE_IDS', () => {
         "Task": 50,
         "TaskMarker": 51,
         "URL": 44,
+        "Wikilink": 55,
+        "WikilinkMark": 56,
       }
     `)
   })

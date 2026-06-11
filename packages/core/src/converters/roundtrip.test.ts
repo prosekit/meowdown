@@ -43,6 +43,12 @@ describe('markdown round-trip is byte-identical', () => {
     '#meow starts the line',
     '- [ ] #todo item',
     '> quoted #tag',
+    // Wikilinks are plain text to the converters
+    'see [[note]]',
+    '[[note]] starts the line',
+    '- [ ] [[note]] item',
+    '> [[note]] quoted',
+    '[[note with spaces]] and #tag',
   ]
 
   for (const markdown of cases) {

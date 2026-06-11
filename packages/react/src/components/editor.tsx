@@ -3,7 +3,7 @@ import { useImperativeHandle, useRef, type Ref } from 'react'
 
 import { CodeMirrorEditor } from './codemirror-editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
-import type { EditorHandle, TagSearchHandler } from './types.ts'
+import type { EditorHandle, TagSearchHandler, WikilinkSearchHandler } from './types.ts'
 
 export type EditorMode = MarkMode | 'source'
 
@@ -34,6 +34,16 @@ export interface EditorProps {
    */
   onTagSearch?: TagSearchHandler
 
+  /**
+   * Searches notes for the wikilink menu, which opens as soon as `[[` is
+   * typed in a rich mode. Receives the query (lowercased, punctuation
+   * stripped, may be empty) and returns the note names to show,
+   * synchronously or as a promise. Pass a stable function (e.g. from
+   * `useCallback`). Omit to disable the wikilink menu. Ignored in source
+   * mode.
+   */
+  onWikilinkSearch?: WikilinkSearchHandler
+
   /** Imperative handle for the editor. */
   ref?: Ref<EditorHandle>
 }
@@ -43,6 +53,7 @@ export function Editor({
   initialMarkdown,
   onDocChange,
   onTagSearch,
+  onWikilinkSearch,
   ref,
 }: EditorProps) {
   // Handle of whichever editor is currently mounted.
@@ -67,6 +78,7 @@ export function Editor({
           initialMarkdown={seedMarkdown}
           onDocChange={onDocChange}
           onTagSearch={onTagSearch}
+          onWikilinkSearch={onWikilinkSearch}
         />
       )}
     </div>

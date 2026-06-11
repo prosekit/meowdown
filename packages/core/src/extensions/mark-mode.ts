@@ -23,6 +23,7 @@ const REVEAL_TRIGGERING_MARKS: ReadonlySet<MarkName> = new Set<MarkName>([
   'mdDel',
   'mdLinkText',
   'mdLinkUri',
+  'mdWikilink',
 ])
 
 const REVEALABLE_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>(['mdMark', 'mdLinkUri'])
@@ -36,6 +37,7 @@ const SYNTAX_BEARING_MARKS: ReadonlySet<MarkName> = new Set<MarkName>([
   'mdEm',
   'mdCode',
   'mdDel',
+  'mdWikilink',
 ])
 
 function createMarkModePlugin(mode: MarkMode): Plugin<DecorationSet> {

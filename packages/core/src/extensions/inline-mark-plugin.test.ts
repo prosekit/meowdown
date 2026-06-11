@@ -182,6 +182,58 @@ describe('inlineMarkPlugin', () => {
     expect(marksAt(fixture.doc, pos + 1)).toEqual([])
   })
 
+  it('applies mdWikilink to [[note]] with mdMark on the brackets', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('see [[note]] end'))
+    fixture.set(doc)
+
+    // The marked wikilink splits into three text nodes: [[ note ]]
+    const open = findText(fixture.doc, '[[')
+    const target = findText(fixture.doc, 'note')
+    const close = findText(fixture.doc, ']]')
+    expect(open).toBeGreaterThan(0)
+    expect(marksAt(fixture.doc, open + 1)).toEqual(['mdMark', 'mdWikilink'])
+    expect(marksAt(fixture.doc, target + 1)).toEqual(['mdWikilink'])
+    expect(marksAt(fixture.doc, close + 1)).toEqual(['mdMark', 'mdWikilink'])
+    expect(marksAt(fixture.doc, open)).toEqual([]) // the space before
+  })
+
+  it('marks wikilinks inside headings', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.heading({ level: 3 }, 'Title [[note]]'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'note')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilink'])
+  })
+
+  it('does not mark [[note]] inside code blocks', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.codeBlock({ language: '' }, 'a [[note]] b'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'note')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual([])
+  })
+
+  it('removes mdWikilink when the closing ] is deleted', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('see [[note]] end'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'note')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilink'])
+    // Delete the last ']': "see [[note] end" is no longer a wikilink.
+    const lastBracket = findText(fixture.doc, ']]') + 1
+    fixture.view.dispatch(fixture.state.tr.delete(lastBracket, lastBracket + 1))
+    const after = findText(fixture.doc, 'note')
+    expect(marksAt(fixture.doc, after + 1)).toEqual([])
+  })
+
   it('removes mdTag when text is glued in front of the #', () => {
     using fixture = setupFixture()
     const { n } = fixture

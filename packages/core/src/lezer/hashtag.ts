@@ -1,6 +1,17 @@
 import type { MarkdownConfig } from '@lezer/markdown'
 
-const HASH = 35
+import {
+  CHAR_0,
+  CHAR_9,
+  CHAR_HASH,
+  CHAR_HYPHEN_MINUS,
+  CHAR_LOWERCASE_A,
+  CHAR_LOWERCASE_Z,
+  CHAR_MAX_ASCII,
+  CHAR_UNDERSCORE,
+  CHAR_UPPERCASE_A,
+  CHAR_UPPERCASE_Z,
+} from '../unicode.ts'
 
 /**
  * Letters, digits, `-`, `_`. Non-ASCII falls back to a Unicode test;
@@ -8,20 +19,20 @@ const HASH = 35
  */
 function isTagChar(code: number): boolean {
   return (
-    (code >= 48 && code <= 57) || // 0-9
-    (code >= 65 && code <= 90) || // A-Z
-    (code >= 97 && code <= 122) || // a-z
-    code === 45 || // -
-    code === 95 || // _
-    (code > 127 && /[\p{L}\p{N}]/u.test(String.fromCharCode(code)))
+    (code >= CHAR_0 && code <= CHAR_9) ||
+    (code >= CHAR_UPPERCASE_A && code <= CHAR_UPPERCASE_Z) ||
+    (code >= CHAR_LOWERCASE_A && code <= CHAR_LOWERCASE_Z) ||
+    code === CHAR_HYPHEN_MINUS ||
+    code === CHAR_UNDERSCORE ||
+    (code > CHAR_MAX_ASCII && /[\p{L}\p{N}]/u.test(String.fromCharCode(code)))
   )
 }
 
 function isLetter(code: number): boolean {
   return (
-    (code >= 65 && code <= 90) ||
-    (code >= 97 && code <= 122) ||
-    (code > 127 && /\p{L}/u.test(String.fromCharCode(code)))
+    (code >= CHAR_UPPERCASE_A && code <= CHAR_UPPERCASE_Z) ||
+    (code >= CHAR_LOWERCASE_A && code <= CHAR_LOWERCASE_Z) ||
+    (code > CHAR_MAX_ASCII && /\p{L}/u.test(String.fromCharCode(code)))
   )
 }
 
@@ -37,7 +48,7 @@ export const hashtag: MarkdownConfig = {
     {
       name: 'Hashtag',
       parse(cx, next, pos) {
-        if (next !== HASH) return -1
+        if (next !== CHAR_HASH) return -1
         // An empty slice means start-of-text (upstream parsers use the
         // same idiom).
         if (!/\s|^$/.test(cx.slice(pos - 1, pos))) return -1

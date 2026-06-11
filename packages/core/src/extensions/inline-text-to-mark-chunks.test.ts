@@ -270,4 +270,86 @@ describe('inlineTextToMarkChunks', () => {
       "
     `)
   })
+
+  it('wikilink yields mdMark brackets around an mdWikilink target', () => {
+    const chunks = inlineTextToMarkChunks(schema, 'a [[note]] b')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-2: -
+      2-4: mdMark + mdWikilink
+      4-8: mdWikilink
+      8-10: mdMark + mdWikilink
+      10-12: -
+      "
+    `)
+  })
+
+  it('adjacent wikilinks coalesce the middle ]][[ into one chunk', () => {
+    const chunks = inlineTextToMarkChunks(schema, '[[a]][[b]]')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-2: mdMark + mdWikilink
+      2-3: mdWikilink
+      3-7: mdMark + mdWikilink
+      7-8: mdWikilink
+      8-10: mdMark + mdWikilink
+      "
+    `)
+  })
+
+  it('wikilink inside emphasis', () => {
+    const chunks = inlineTextToMarkChunks(schema, '*x [[n]] y*')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-1: mdEm + mdMark
+      1-3: mdEm
+      3-5: mdEm + mdMark + mdWikilink
+      5-6: mdEm + mdWikilink
+      6-8: mdEm + mdMark + mdWikilink
+      8-10: mdEm
+      10-11: mdEm + mdMark
+      "
+    `)
+  })
+
+  it('wikilink inside a link label', () => {
+    const chunks = inlineTextToMarkChunks(schema, '[see [[x]]](http://y)')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-1: mdLinkText(href=http://y) + mdMark
+      1-5: mdLinkText(href=http://y)
+      5-7: mdLinkText(href=http://y) + mdMark + mdWikilink
+      7-8: mdLinkText(href=http://y) + mdWikilink
+      8-10: mdLinkText(href=http://y) + mdMark + mdWikilink
+      10-12: mdMark
+      12-20: mdLinkUri
+      20-21: mdMark
+      "
+    `)
+  })
+
+  it('no mdTag inside a wikilink target', () => {
+    const chunks = inlineTextToMarkChunks(schema, '[[note #tag]]')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-2: mdMark + mdWikilink
+      2-11: mdWikilink
+      11-13: mdMark + mdWikilink
+      "
+    `)
+  })
+
+  it('unclosed wikilink falls back to link parsing of the inner [a]', () => {
+    // No mdWikilink anywhere; the inner `[a]` becomes a shortcut
+    // reference link (pre-existing lezer behavior).
+    const chunks = inlineTextToMarkChunks(schema, '[[a]')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-1: -
+      1-2: mdMark
+      2-3: -
+      3-4: mdMark
+      "
+    `)
+  })
 })

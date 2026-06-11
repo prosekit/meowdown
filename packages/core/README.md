@@ -20,13 +20,15 @@ The editor extension binds inline-format toggles (`Mod` = Cmd on macOS, Ctrl els
 - `--meowdown-text`: body text color.
 - `--meowdown-heading`: heading color.
 - `--meowdown-muted`: secondary text (blockquotes).
-- `--meowdown-accent`: links, caret, inline code, tags.
+- `--meowdown-accent`: links, wikilinks, caret, inline code, tags.
 - `--meowdown-mark`: Markdown syntax characters.
 - `--meowdown-border`: horizontal rules.
 - `--meowdown-code-bg`: code block background.
 - `--meowdown-font-mono`: monospace font stack.
 
 Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-accent`.
+
+Wikilinks (`[[target]]`) render with a dashed underline via the `.md-wikilink` class, colored by `--meowdown-accent`. Their `[[` `]]` brackets behave like other syntax characters: dimmed in show mode, hidden in hide and focus modes.
 
 ## License
 

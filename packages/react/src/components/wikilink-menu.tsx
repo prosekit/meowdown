@@ -1,5 +1,4 @@
 import type { EditorExtension } from '@meowdown/core'
-import { canUseRegexLookbehind } from '@prosekit/core'
 import { useEditor } from '@prosekit/react'
 import {
   AutocompleteEmpty,
@@ -12,38 +11,39 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { returnsTrue } from '../utils/returns-true.ts'
 
-import type { TagSearchHandler } from './types.ts'
+import type { WikilinkSearchHandler } from './types.ts'
 
-// Match "#tag" with at least one character, so typing a heading ("# ") never
-// opens the menu. Do not match "abc#def".
-const regex = canUseRegexLookbehind() ? /(?<!\S)#[\da-z]+$/iu : /#[\da-z]+$/iu
+// Match "[[", "[[query", "[[multi word query": opens right after "[[" and
+// closes once "]" or "[" is typed. No lookbehind: after "[[[", the trailing
+// "[[" still starts a valid wikilink.
+const regex = /\[\[[^[\]]*$/u
 
-interface TagMenuProps {
-  onTagSearch: TagSearchHandler
+interface WikilinkMenuProps {
+  onWikilinkSearch: WikilinkSearchHandler
 }
 
-// Deliberately not shared with WikilinkMenu: the two menus are expected to
+// Deliberately not shared with TagMenu: the two menus are expected to
 // diverge, so the duplication is kept until the differences are clear.
 
-export function TagMenu({ onTagSearch }: TagMenuProps) {
+export function WikilinkMenu({ onWikilinkSearch }: WikilinkMenuProps) {
   const editor = useEditor<EditorExtension>()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
-  const [tags, setTags] = useState<string[]>([])
+  const [notes, setNotes] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
 
-  // Searches tags (sync or async) and applies the result, unless aborted in
+  // Searches notes (sync or async) and applies the result, unless aborted in
   // the meantime.
-  const fetchTags = useCallback(
+  const fetchNotes = useCallback(
     async (query: string, signal: AbortSignal): Promise<void> => {
       if (signal.aborted) return
       setLoading(true)
-      const result = await onTagSearch(query)
+      const result = await onWikilinkSearch(query)
       if (signal.aborted) return
-      setTags(result)
+      setNotes(result)
       setLoading(false)
     },
-    [onTagSearch],
+    [onWikilinkSearch],
   )
 
   useEffect(() => {
@@ -51,12 +51,12 @@ export function TagMenu({ onTagSearch }: TagMenuProps) {
     const controller = new AbortController()
     // Defer so the effect body doesn't call setState synchronously.
     queueMicrotask(() => {
-      void fetchTags(query, controller.signal)
+      void fetchNotes(query, controller.signal)
     })
     return () => {
       controller.abort()
     }
-  }, [open, query, fetchTags])
+  }, [open, query, fetchNotes])
 
   return (
     <AutocompleteRoot
@@ -66,18 +66,18 @@ export function TagMenu({ onTagSearch }: TagMenuProps) {
       onQueryChange={(event) => setQuery(event.detail)}
     >
       <AutocompletePositioner className="meowdown-autocomplete-menu-positioner">
-        <AutocompletePopup className="meowdown-autocomplete-menu" data-testid="tag-menu">
-          {tags.map((tag) => (
+        <AutocompletePopup className="meowdown-autocomplete-menu" data-testid="wikilink-menu">
+          {notes.map((note) => (
             <AutocompleteItem
-              key={tag}
+              key={note}
               className="meowdown-autocomplete-menu-item"
-              onSelect={() => editor.commands.insertText({ text: `#${tag} ` })}
+              onSelect={() => editor.commands.insertText({ text: `[[${note}]]` })}
             >
-              #{tag}
+              {note}
             </AutocompleteItem>
           ))}
           <AutocompleteEmpty className="meowdown-autocomplete-menu-item">
-            {loading ? 'Loading...' : 'No tags found'}
+            {loading ? 'Loading...' : 'No notes found'}
           </AutocompleteEmpty>
         </AutocompletePopup>
       </AutocompletePositioner>

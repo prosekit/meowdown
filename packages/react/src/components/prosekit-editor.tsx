@@ -13,7 +13,8 @@ import { useImperativeHandle, useMemo, useState, type Ref } from 'react'
 
 import { SlashMenu } from './slash-menu.tsx'
 import { TagMenu } from './tag-menu.tsx'
-import type { EditorHandle, TagSearchHandler } from './types.ts'
+import type { EditorHandle, TagSearchHandler, WikilinkSearchHandler } from './types.ts'
+import { WikilinkMenu } from './wikilink-menu.tsx'
 
 export interface ProseKitEditorProps {
   markMode?: MarkMode
@@ -30,6 +31,9 @@ export interface ProseKitEditorProps {
   /** Enables the tag menu. See `EditorProps.onTagSearch`. */
   onTagSearch?: TagSearchHandler
 
+  /** Enables the wikilink menu. See `EditorProps.onWikilinkSearch`. */
+  onWikilinkSearch?: WikilinkSearchHandler
+
   /** Imperative handle for the editor. */
   ref?: Ref<EditorHandle>
 }
@@ -39,6 +43,7 @@ export function ProseKitEditor({
   initialMarkdown,
   onDocChange,
   onTagSearch,
+  onWikilinkSearch,
   ref,
 }: ProseKitEditorProps) {
   const [editor] = useState((): TypedEditor => {
@@ -73,6 +78,7 @@ export function ProseKitEditor({
       <div ref={editor.mount}></div>
       <SlashMenu />
       {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
+      {onWikilinkSearch && <WikilinkMenu onWikilinkSearch={onWikilinkSearch} />}
     </ProseKit>
   )
 }

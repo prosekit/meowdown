@@ -113,6 +113,24 @@ describe('defineMarkMode', () => {
       await expectRevealedMarkers(0)
     })
 
+    it('reveals both [[ ]] when the cursor is inside a wikilink', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      const doc = n.doc(n.paragraph('see [[no<a>te]] end'))
+      fixture.set(doc)
+      await expectRevealedMarkers(2)
+    })
+
+    it('reveals only the wikilink brackets next to a markdown link', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      const doc = n.doc(n.paragraph('[a](http://x)[[no<a>te]]'))
+      fixture.set(doc)
+      await expectRevealedMarkers(2)
+    })
+
     it('reveals nothing inside a #tag (tags have no syntax to reveal)', async () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('focus'))
@@ -157,6 +175,15 @@ describe('defineMarkMode', () => {
       await expectRevealedMarkers(0)
     })
 
+    it('never reveals markers with the cursor inside a wikilink', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('hide'))
+      const { n } = fixture
+      const doc = n.doc(n.paragraph('see [[no<a>te]] end'))
+      fixture.set(doc)
+      await expectRevealedMarkers(0)
+    })
+
     it('strips ** from the copied text', () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('hide'))
@@ -173,6 +200,15 @@ describe('defineMarkMode', () => {
       const doc = n.doc(n.paragraph('see [docs](http://x.test)'))
       fixture.set(doc)
       expect(clipboardText(fixture)).toBe('see docs')
+    })
+
+    it('strips [[ ]] from the copied text', () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('hide'))
+      const { n } = fixture
+      const doc = n.doc(n.paragraph('see [[note]] end'))
+      fixture.set(doc)
+      expect(clipboardText(fixture)).toBe('see note end')
     })
 
     it('keeps #tag verbatim in the copied text', () => {
