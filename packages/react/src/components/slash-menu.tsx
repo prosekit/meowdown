@@ -20,7 +20,7 @@ interface SlashMenuItemProps {
 
 function SlashMenuItem({ label, kbd, onSelect }: SlashMenuItemProps) {
   return (
-    <AutocompleteItem className="meowdown-slash-menu-item" onSelect={onSelect}>
+    <AutocompleteItem className="meowdown-autocomplete-menu-item" onSelect={onSelect}>
       <span>{label}</span>
       {kbd && <kbd>{kbd}</kbd>}
     </AutocompleteItem>
@@ -32,8 +32,8 @@ export function SlashMenu() {
 
   return (
     <AutocompleteRoot regex={regex}>
-      <AutocompletePositioner className="meowdown-slash-menu-positioner">
-        <AutocompletePopup className="meowdown-slash-menu">
+      <AutocompletePositioner className="meowdown-autocomplete-menu-positioner">
+        <AutocompletePopup className="meowdown-autocomplete-menu" data-testid="slash-menu">
           <SlashMenuItem
             label="Heading 1"
             kbd="#"
@@ -83,7 +83,9 @@ export function SlashMenu() {
             label="Table"
             onSelect={() => editor.commands.insertTable({ row: 3, col: 3 })}
           />
-          <AutocompleteEmpty className="meowdown-slash-menu-item">No results</AutocompleteEmpty>
+          <AutocompleteEmpty className="meowdown-autocomplete-menu-item">
+            No results
+          </AutocompleteEmpty>
         </AutocompletePopup>
       </AutocompletePositioner>
     </AutocompleteRoot>

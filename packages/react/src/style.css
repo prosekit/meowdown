@@ -1,5 +1,5 @@
 @import '@meowdown/core/style.css';
-@import './components/slash-menu.css';
+@import './components/autocomplete-menu.css';
 
 .meowdown {
   display: flex;

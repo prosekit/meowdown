@@ -12,7 +12,8 @@ import { ProseKit, useExtension } from '@prosekit/react'
 import { useImperativeHandle, useMemo, useState, type Ref } from 'react'
 
 import { SlashMenu } from './slash-menu.tsx'
-import type { EditorHandle } from './types.ts'
+import { TagMenu } from './tag-menu.tsx'
+import type { EditorHandle, TagSearchHandler } from './types.ts'
 
 export interface ProseKitEditorProps {
   markMode?: MarkMode
@@ -26,6 +27,9 @@ export interface ProseKitEditorProps {
   /** Called on every document change. */
   onDocChange?: VoidFunction
 
+  /** Enables the tag menu. See `EditorProps.onTagSearch`. */
+  onTagSearch?: TagSearchHandler
+
   /** Imperative handle for the editor. */
   ref?: Ref<EditorHandle>
 }
@@ -34,6 +38,7 @@ export function ProseKitEditor({
   markMode = 'focus',
   initialMarkdown,
   onDocChange,
+  onTagSearch,
   ref,
 }: ProseKitEditorProps) {
   const [editor] = useState((): TypedEditor => {
@@ -67,6 +72,7 @@ export function ProseKitEditor({
     <ProseKit editor={editor}>
       <div ref={editor.mount}></div>
       <SlashMenu />
+      {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
     </ProseKit>
   )
 }

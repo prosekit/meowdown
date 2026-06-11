@@ -32,6 +32,7 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
   - `'source'`: raw Markdown source with syntax highlighting.
 - `initialMarkdown?: string`: first render only.
 - `onDocChange?: VoidFunction`: called on every document change.
+- `onTagSearch?: (query: string) => string[] | Promise<string[]>`: enables the tag menu, which opens when typing `#` followed by text in a rich mode; returns the tags to show for a query (lowercased, punctuation stripped). Omit to disable.
 - `ref?: Ref<EditorHandle>`
 
 ### `EditorHandle`

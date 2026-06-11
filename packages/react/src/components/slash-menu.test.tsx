@@ -9,7 +9,7 @@ import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle } from './types.ts'
 
 const pmRoot = page.locate('.ProseMirror')
-const menu = page.locate('.meowdown-slash-menu')
+const menu = page.getByTestId('slash-menu')
 
 const LABELS = [
   'Heading 1',

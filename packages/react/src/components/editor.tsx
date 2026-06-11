@@ -3,7 +3,7 @@ import { useImperativeHandle, useRef, type Ref } from 'react'
 
 import { CodeMirrorEditor } from './codemirror-editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
-import type { EditorHandle } from './types.ts'
+import type { EditorHandle, TagSearchHandler } from './types.ts'
 
 export type EditorMode = MarkMode | 'source'
 
@@ -25,11 +25,26 @@ export interface EditorProps {
   /** Called on every document change. */
   onDocChange?: VoidFunction
 
+  /**
+   * Searches tags for the tag menu, which opens when typing `#` followed by
+   * text in a rich mode. Receives the query (lowercased, punctuation
+   * stripped) and returns the tags to show, synchronously or as a promise.
+   * Pass a stable function (e.g. from `useCallback`). Omit to disable the
+   * tag menu. Ignored in source mode.
+   */
+  onTagSearch?: TagSearchHandler
+
   /** Imperative handle for the editor. */
   ref?: Ref<EditorHandle>
 }
 
-export function Editor({ mode = 'focus', initialMarkdown, onDocChange, ref }: EditorProps) {
+export function Editor({
+  mode = 'focus',
+  initialMarkdown,
+  onDocChange,
+  onTagSearch,
+  ref,
+}: EditorProps) {
   // Handle of whichever editor is currently mounted.
   const childRef = useRef<EditorHandle>(null)
 
@@ -51,6 +66,7 @@ export function Editor({ mode = 'focus', initialMarkdown, onDocChange, ref }: Ed
           markMode={mode}
           initialMarkdown={seedMarkdown}
           onDocChange={onDocChange}
+          onTagSearch={onTagSearch}
         />
       )}
     </div>

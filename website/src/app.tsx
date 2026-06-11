@@ -39,8 +39,18 @@ Weave in **bold**, *italic*, \`inline code\`, or ~~strikethrough~~ without reach
 
 Drop a [link](https://github.com/prosekit/meowdown) and keep on writing.
 
+Label your notes with tags like #meow and #markdown. Type \`#\` followed by a letter to see suggestions.
+
 > Switch modes above to choose how much Markdown syntax stays in view.
 `
+
+const TAGS = ['cats', 'editor', 'ideas', 'markdown', 'meow', 'notes', 'react', 'todo', 'work']
+
+async function searchTags(query: string): Promise<string[]> {
+  // Simulate network latency so the tag menu's loading state shows up.
+  await new Promise((resolve) => setTimeout(resolve, 200))
+  return TAGS.filter((tag) => tag.includes(query))
+}
 
 interface SegmentedControlProps<T extends string> {
   options: ReadonlyArray<{ value: T; label: string }>
@@ -151,7 +161,7 @@ export function App() {
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-            <Editor mode={mode} initialMarkdown={INITIAL_CONTENT} />
+            <Editor mode={mode} initialMarkdown={INITIAL_CONTENT} onTagSearch={searchTags} />
           </div>
 
           <div className="flex items-center gap-2 border-t border-zinc-200 bg-zinc-50/80 px-4 py-3.5 text-sm sm:px-6 sm:py-4 dark:border-zinc-800 dark:bg-zinc-900/60">
