@@ -1,5 +1,7 @@
 @import '@meowdown/core/style.css';
 @import './components/autocomplete-menu.css';
+@import './components/block-handle.css';
+@import './components/drop-indicator.css';
 
 .meowdown {
   display: flex;
@@ -24,7 +26,8 @@
     }
 
     .cm-content {
-      padding: 1.25rem 1.5rem 1.75rem;
+      /* Same gutter as .ProseMirror so switching modes does not shift text. */
+      padding: 1.25rem var(--meowdown-gutter) 1.75rem;
       font-family: var(--meowdown-font-mono);
       caret-color: var(--meowdown-accent);
     }

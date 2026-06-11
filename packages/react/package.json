@@ -51,6 +51,7 @@
     "react-dom": "^19.2.7",
     "tsdown": "^0.22.2",
     "vitest": "^4.1.8",
+    "vitest-browser-commands": "^0.2.1",
     "vitest-browser-react": "^2.2.0"
   },
   "publishConfig": {

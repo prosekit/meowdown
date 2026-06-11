@@ -23,7 +23,7 @@ export function App() {
 
 ### `<Editor>`
 
-The Markdown editor component. Renders inside a `div.meowdown` wrapper that fills a flex parent. In rich modes, typing `/` opens a slash menu for inserting blocks (headings, blockquote, lists, code block, table).
+The Markdown editor component. Renders inside a `div.meowdown` wrapper that fills a flex parent. In rich modes, typing `/` opens a slash menu for inserting blocks (headings, blockquote, lists, code block, table). Hovering a block shows a handle to its left: the plus button inserts an empty paragraph below the block, and the grip selects the block and can be dragged to move it, with a drop indicator line marking the target.
 
 - `mode?: 'focus' | 'show' | 'hide' | 'source'`: defaults to `'focus'`.
   - `'focus'`: Markdown syntax is hidden, revealed around the cursor.
@@ -55,7 +55,7 @@ In the rich modes (`focus` / `show` / `hide`), these toggle inline formatting on
 
 ## Styling
 
-`@meowdown/react/style.css` includes the default theme from [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core). Colors follow the page's `color-scheme`; customize via the `--meowdown-*` CSS variables documented there.
+`@meowdown/react/style.css` includes the default theme from [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core). Colors follow the page's `color-scheme`; customize via the `--meowdown-*` CSS variables documented there. The editor reserves a horizontal gutter (`--meowdown-gutter`) so the block handle has room to the left of the hovered block.
 
 ## License
 

@@ -1,0 +1,66 @@
+.meowdown-block-handle-positioner {
+  display: block;
+  z-index: 50;
+  width: min-content;
+  height: min-content;
+  overflow: visible;
+  transition: transform 100ms ease-out;
+}
+
+.meowdown-block-handle {
+  display: flex;
+  box-sizing: border-box;
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity 100ms,
+    scale 100ms;
+
+  &[data-state='closed'] {
+    opacity: 0;
+    scale: 0.95;
+    transition-duration: 150ms;
+  }
+
+  @starting-style {
+    opacity: 0;
+    scale: 0.95;
+  }
+}
+
+.meowdown-block-handle-add,
+.meowdown-block-handle-drag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 1.5rem;
+  border-radius: 0.25rem;
+  color: color-mix(in oklab, var(--meowdown-muted) 50%, transparent);
+
+  &:hover {
+    background: light-dark(#f4f4f5, #27272a);
+  }
+
+  svg {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+.meowdown-block-handle-add {
+  width: 1.5rem;
+  cursor: pointer;
+}
+
+.meowdown-block-handle-drag {
+  width: 1.25rem;
+  cursor: grab;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meowdown-block-handle-positioner,
+  .meowdown-block-handle {
+    transition: none;
+  }
+}

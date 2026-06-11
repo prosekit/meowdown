@@ -19,6 +19,12 @@
   --meowdown-border: light-dark(#e4e4e7, #3f3f46);
   --meowdown-code-bg: light-dark(#f4f4f5, #18181b);
   --meowdown-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Horizontal editor padding. Floating UI tracking the hovered block (the
+   * block handle in @meowdown/react) must fit inside it: hover tracking only
+   * sees pointer events on the editor element, so a handle outside the
+   * padding closes before it can be clicked. Keep it >= 3.5rem. */
+  --meowdown-gutter: 3.5rem;
 }
 
 /* ---------------------------------------------------------------------------
@@ -26,7 +32,7 @@
  * ------------------------------------------------------------------------- */
 .ProseMirror {
   box-sizing: border-box;
-  padding: 1.25rem 1.5rem 1.75rem;
+  padding: 1.25rem var(--meowdown-gutter) 1.75rem;
   outline: none;
   font-size: 1.0625rem;
   line-height: 1.7;

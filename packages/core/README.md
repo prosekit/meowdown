@@ -25,6 +25,7 @@ The editor extension binds inline-format toggles (`Mod` = Cmd on macOS, Ctrl els
 - `--meowdown-border`: horizontal rules.
 - `--meowdown-code-bg`: code block background.
 - `--meowdown-font-mono`: monospace font stack.
+- `--meowdown-gutter`: horizontal editor padding. Floating UI such as the block handle (in `@meowdown/react`) lives inside it; keep it at least `3.5rem`.
 
 Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-accent`.
 
