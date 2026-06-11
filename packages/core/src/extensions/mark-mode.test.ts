@@ -1,5 +1,6 @@
 import { TextSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
+import { page } from 'vitest/browser'
 
 import { findText } from '../testing/find-text.ts'
 import { setupTestEnv, type TestEnv } from '../testing/index.ts'
@@ -7,9 +8,12 @@ import { setupTestEnv, type TestEnv } from '../testing/index.ts'
 import type { MarkMode } from './mark-mode.ts'
 import { defineMarkMode } from './mark-mode.ts'
 
-/** Number of syntax markers currently revealed (rendered as `.show` spans). */
-function countRevealedMarkers(env: TestEnv): number {
-  return env.dom.querySelectorAll('span.show').length
+const revealedMarkers = page.locate('#test-container span.show')
+const pmRoot = page.locate('.ProseMirror')
+
+/** Asserts how many syntax markers are revealed (rendered as `.show` spans). */
+async function expectRevealedMarkers(count: number): Promise<void> {
+  await expect.element(revealedMarkers).toHaveLength(count)
 }
 
 /** What a full-document copy would put on the clipboard, or `null` if the mode installs no serializer. */
@@ -21,125 +25,125 @@ function clipboardText(env: TestEnv): string | null {
 }
 
 describe('defineMarkMode', () => {
-  it('set data-mark-mode attribute', () => {
-    function getDataMarkMode(markMode: MarkMode) {
+  it('set data-mark-mode attribute', async () => {
+    async function expectDataMarkMode(markMode: MarkMode) {
       using env = setupTestEnv()
       const { n, editor } = env
       editor.use(defineMarkMode(markMode))
       const doc = n.doc(n.paragraph('a'))
       env.set(doc)
-      return env.dom.getAttribute('data-mark-mode')
+      await expect.element(pmRoot).toHaveAttribute('data-mark-mode', markMode)
     }
 
-    expect(getDataMarkMode('focus')).toBe('focus')
-    expect(getDataMarkMode('hide')).toBe('hide')
-    expect(getDataMarkMode('show')).toBe('show')
+    await expectDataMarkMode('focus')
+    await expectDataMarkMode('hide')
+    await expectDataMarkMode('show')
   })
 
   describe('focus mode', () => {
-    it('reveals both ** when the cursor is inside **bold**', () => {
+    it('reveals both ** when the cursor is inside **bold**', async () => {
       using env = setupTestEnv()
       env.editor.use(defineMarkMode('focus'))
       const { n } = env
       const doc = n.doc(n.paragraph('Hello **<a>bold** end'))
       env.set(doc)
-      expect(countRevealedMarkers(env)).toBe(2)
+      await expectRevealedMarkers(2)
     })
 
-    it('reveals nothing when the cursor is in plain text', () => {
+    it('reveals nothing when the cursor is in plain text', async () => {
       using env = setupTestEnv()
       env.editor.use(defineMarkMode('focus'))
       const { n } = env
       const doc = n.doc(n.paragraph('Hello<a> **bold** end'))
       env.set(doc)
-      expect(countRevealedMarkers(env)).toBe(0)
+      await expectRevealedMarkers(0)
     })
 
-    it('reveals only the adjacent marker pair, not unrelated bolds', () => {
+    it('reveals only the adjacent marker pair, not unrelated bolds', async () => {
       using env = setupTestEnv()
       env.editor.use(defineMarkMode('focus'))
       const { n } = env
       const doc = n.doc(n.paragraph('**<a>one** plain **two**'))
       env.set(doc)
-      expect(countRevealedMarkers(env)).toBe(2)
+      await expectRevealedMarkers(2)
     })
 
-    it('reveals nested wrappers (***foo***) as 4 markers', () => {
+    it('reveals nested wrappers (***foo***) as 4 markers', async () => {
       using env = setupTestEnv()
       env.editor.use(defineMarkMode('focus'))
       const { n } = env
       const doc = n.doc(n.paragraph('***<a>foo***'))
       env.set(doc)
-      expect(countRevealedMarkers(env)).toBe(4)
+      await expectRevealedMarkers(4)
     })
 
-    it('reveals every link marker when the cursor is in the text', () => {
+    it('reveals every link marker when the cursor is in the text', async () => {
       using env = setupTestEnv()
       env.editor.use(defineMarkMode('focus'))
       const { n } = env
       const doc = n.doc(n.paragraph('see [<a>docs](http://x.test)'))
       env.set(doc)
-      expect(countRevealedMarkers(env)).toBe(4)
+      await expectRevealedMarkers(4)
     })
 
-    it('reveals every link marker when the cursor is in the url', () => {
+    it('reveals every link marker when the cursor is in the url', async () => {
       using env = setupTestEnv()
       env.editor.use(defineMarkMode('focus'))
       const { n } = env
       const doc = n.doc(n.paragraph('see [docs](http<a>://x.test)'))
       env.set(doc)
-      expect(countRevealedMarkers(env)).toBe(4)
+      await expectRevealedMarkers(4)
     })
 
-    it('reveals when the cursor sits right after the closing **', () => {
+    it('reveals when the cursor sits right after the closing **', async () => {
       using env = setupTestEnv()
       env.editor.use(defineMarkMode('focus'))
       const { n } = env
       const doc = n.doc(n.paragraph('**bold**<a> rest'))
       env.set(doc)
-      expect(countRevealedMarkers(env)).toBe(2)
+      await expectRevealedMarkers(2)
     })
 
-    it('reveals nothing on a multi-char selection', () => {
+    it('reveals nothing on a multi-char selection', async () => {
       using env = setupTestEnv()
       env.editor.use(defineMarkMode('focus'))
       const { n } = env
       const doc = n.doc(n.paragraph('**<a>bold<b>**'))
       env.set(doc)
-      expect(countRevealedMarkers(env)).toBe(0)
+      await expectRevealedMarkers(0)
     })
 
-    it('reveals nothing when the cursor is inside a code block', () => {
+    it('reveals nothing when the cursor is inside a code block', async () => {
       using env = setupTestEnv()
       env.editor.use(defineMarkMode('focus'))
       const { n } = env
       const doc = n.doc(n.codeBlock({ language: '' }, '*not<a> italic*'))
       env.set(doc)
-      expect(countRevealedMarkers(env)).toBe(0)
+      await expectRevealedMarkers(0)
     })
 
-    it('updates the reveal as the cursor moves between paragraphs', () => {
+    it('updates the reveal as the cursor moves between paragraphs', async () => {
       using env = setupTestEnv()
       env.editor.use(defineMarkMode('focus'))
       const { n } = env
       const doc = n.doc(n.paragraph('**<a>alpha** one'), n.paragraph('beta two'))
       env.set(doc)
-      expect(countRevealedMarkers(env)).toBe(2)
+      await expectRevealedMarkers(2)
 
       const twoPos = findText(env.doc, 'two')
       env.view.dispatch(env.state.tr.setSelection(TextSelection.create(env.doc, twoPos)))
-      expect(countRevealedMarkers(env)).toBe(0)
+      await expectRevealedMarkers(0)
     })
   })
 
   describe('hide mode', () => {
-    it('never reveals markers, even with the cursor inside bold', () => {
+    it('never reveals markers, even with the cursor inside bold', async () => {
       using env = setupTestEnv()
       env.editor.use(defineMarkMode('hide'))
       const { n } = env
       const doc = n.doc(n.paragraph('Hello **<a>bold** end'))
       env.set(doc)
-      expect(countRevealedMarkers(env)).toBe(0)
+      await expectRevealedMarkers(0)
     })
 
     it('strips ** from the copied text', () => {
@@ -162,13 +166,13 @@ describe('defineMarkMode', () => {
   })
 
   describe('show mode', () => {
-    it('never reveals markers (syntax is always visible via CSS, not decorations)', () => {
+    it('never reveals markers (syntax is always visible via CSS, not decorations)', async () => {
       using env = setupTestEnv()
       env.editor.use(defineMarkMode('show'))
       const { n } = env
       const doc = n.doc(n.paragraph('Hello **<a>bold** end'))
       env.set(doc)
-      expect(countRevealedMarkers(env)).toBe(0)
+      await expectRevealedMarkers(0)
     })
 
     it('installs no clipboard serializer, so copied text keeps the ** syntax', () => {

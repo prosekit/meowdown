@@ -15,14 +15,7 @@ export function App() {
     console.log(ref.current?.getMarkdown())
   }, [])
 
-  return (
-    <Editor
-      ref={ref}
-      mode="focus"
-      initialMarkdown="# Hello"
-      onDocChange={handleDocChange}
-    />
-  )
+  return <Editor ref={ref} mode="focus" initialMarkdown="# Hello" onDocChange={handleDocChange} />
 }
 ```
 

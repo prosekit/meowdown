@@ -1,5 +1,7 @@
 import '../style.css'
 
+import './locator.ts'
+
 import { createTestEditor } from '@prosekit/core/test'
 import type { EditorNode } from '@prosekit/pm/model'
 
