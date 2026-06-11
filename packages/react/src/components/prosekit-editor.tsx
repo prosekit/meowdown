@@ -11,6 +11,7 @@ import { createEditor, defineDocChangeHandler } from '@prosekit/core'
 import { ProseKit, useExtension } from '@prosekit/react'
 import { useImperativeHandle, useMemo, useState, type Ref } from 'react'
 
+import { SlashMenu } from './slash-menu.tsx'
 import type { EditorHandle } from './types.ts'
 
 export interface ProseKitEditorProps {
@@ -65,6 +66,7 @@ export function ProseKitEditor({
   return (
     <ProseKit editor={editor}>
       <div ref={editor.mount}></div>
+      <SlashMenu />
     </ProseKit>
   )
 }

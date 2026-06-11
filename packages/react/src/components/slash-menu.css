@@ -1,0 +1,59 @@
+.meowdown-slash-menu-positioner {
+  display: block;
+  z-index: 50;
+  width: min-content;
+  height: min-content;
+  overflow: visible;
+}
+
+.meowdown-slash-menu {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-width: 15rem;
+  max-height: 25rem;
+  padding: 0.25rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  white-space: nowrap;
+  user-select: none;
+  border: 1px solid var(--meowdown-border);
+  border-radius: 0.75rem;
+  background: light-dark(#fff, #18181b);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.meowdown-slash-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  box-sizing: border-box;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--meowdown-text);
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+  scroll-margin: 0.25rem;
+
+  /* `display: flex` above would override the UA's `[hidden]` rule, which
+   * the menu relies on to hide filtered-out items. */
+  &[hidden] {
+    display: none;
+  }
+
+  &[data-highlighted] {
+    background: light-dark(#f4f4f5, #27272a);
+  }
+
+  kbd {
+    font-family: var(--meowdown-font-mono);
+    font-size: 0.75rem;
+    color: var(--meowdown-muted);
+    opacity: 0.8;
+  }
+}

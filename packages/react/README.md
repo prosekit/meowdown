@@ -23,7 +23,7 @@ export function App() {
 
 ### `<Editor>`
 
-The Markdown editor component. Renders inside a `div.meowdown` wrapper that fills a flex parent.
+The Markdown editor component. Renders inside a `div.meowdown` wrapper that fills a flex parent. In rich modes, typing `/` opens a slash menu for inserting blocks (headings, blockquote, lists, code block, table).
 
 - `mode?: 'focus' | 'show' | 'hide' | 'source'`: defaults to `'focus'`.
   - `'focus'`: Markdown syntax is hidden, revealed around the cursor.

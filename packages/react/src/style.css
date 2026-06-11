@@ -1,4 +1,5 @@
 @import '@meowdown/core/style.css';
+@import './components/slash-menu.css';
 
 .meowdown {
   display: flex;
