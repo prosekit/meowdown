@@ -3,6 +3,14 @@
 @import './components/block-handle.css';
 @import './components/drop-indicator.css';
 
+/* Selection colors. Deliberately standalone variables, not derived from
+ * `--meowdown-accent`, so selection can be restyled independently. */
+:root {
+  --meowdown-node-outline: light-dark(hsl(250 100% 60%), hsl(250 100% 72%));
+  --meowdown-node-selection: light-dark(hsl(250 100% 60% / 0.1), hsl(250 100% 72% / 0.12));
+  --meowdown-selection: light-dark(hsl(250 100% 60% / 0.22), hsl(250 100% 72% / 0.3));
+}
+
 .meowdown {
   display: flex;
   flex-direction: column;
@@ -10,6 +18,32 @@
 
   .ProseMirror {
     flex: 1 0 auto;
+
+    ::selection {
+      background: var(--meowdown-selection);
+    }
+
+    /* Node selection (e.g. from the block handle): thin outline + faint wash,
+     * replacing prosemirror-view's stock blue outline. */
+    .ProseMirror-selectednode {
+      border-radius: 2px;
+      outline: 1px solid var(--meowdown-node-outline);
+      background: var(--meowdown-node-selection);
+    }
+
+    pre.ProseMirror-selectednode {
+      border-radius: 0.6rem;
+    }
+
+    .ProseMirror-selectednode {
+      --meowdown-selection: transparent;
+    }
+
+    /* While dragging via the block handle, keep only the outline on the
+     * source block so it does not sit tinted under the drag preview. */
+    &.prosekit-dragging {
+      --meowdown-node-selection: transparent;
+    }
   }
 
   [data-editor='codemirror'] {
