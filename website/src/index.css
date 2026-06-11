@@ -92,13 +92,3 @@ html {
   opacity: 0;
   pointer-events: none;
 }
-
-/* ---------------------------------------------------------------------------
- * Editor surface tweaks on larger screens
- * ------------------------------------------------------------------------- */
-@media (min-width: 640px) {
-  .ProseMirror,
-  [data-editor='codemirror'] .cm-content {
-    padding: 2rem 2.5rem 2.25rem;
-  }
-}
