@@ -1,23 +1,20 @@
-import {
-  defineEditorExtension,
-  defineMarkMode,
-  type TypedEditor,
-  type EditorExtension,
-  type MarkMode,
-  docToMarkdown,
-  markdownToDoc,
-} from '@meowdown/core'
-import { createEditor, defineDocChangeHandler } from '@prosekit/core'
-import { ProseKit, useExtension } from '@prosekit/react'
-import { useMemo, useState } from 'react'
+import type { MarkMode } from '@meowdown/core'
+import { useCallback, useRef } from 'react'
 
-export interface ChangeHandlerOptions {
-  editor: TypedEditor
-  getMarkdown: () => string
-}
+import { CodeMirrorEditor } from './codemirror-editor.tsx'
+import { ProseKitEditor } from './prosekit-editor.tsx'
+import type { ChangeHandlerOptions } from './types.ts'
+
+export type EditorMode = MarkMode | 'source'
 
 export interface EditorProps {
-  markMode?: MarkMode
+  /**
+   * The editor mode. The three rich modes ('focus', 'show', 'hide') render a ProseKit
+   * editor; 'source' renders a CodeMirror editor showing the raw Markdown text.
+   * Content carries over when switching between the two editor families, but undo
+   * history and selection do not. Defaults to 'focus'.
+   */
+  mode?: EditorMode
 
   /**
    * The initial content of the editor, as a Markdown string. Only the value provided on
@@ -31,41 +28,23 @@ export interface EditorProps {
   onChange?: (options: ChangeHandlerOptions) => void
 }
 
-export function Editor({ markMode = 'focus', initialContent, onChange }: EditorProps) {
-  const [editor] = useState((): TypedEditor => {
-    const extension: EditorExtension = defineEditorExtension()
-    const editor: TypedEditor = createEditor({ extension })
-    if (initialContent) {
-      editor.setContent(markdownToDoc(editor, initialContent))
-    }
-    return editor
-  })
+export function Editor({ mode = 'focus', initialContent, onChange }: EditorProps) {
+  // Latest markdown, kept up to date on every change from whichever editor
+  // is mounted. Used to seed the other editor when the mode family flips.
+  const contentRef = useRef(initialContent ?? '')
 
-  const markModeExtension = useMemo(() => {
-    return defineMarkMode(markMode)
-  }, [markMode])
-  useExtension(markModeExtension, { editor })
+  const handleChange = useCallback(
+    (options: ChangeHandlerOptions) => {
+      contentRef.current = options.getMarkdown()
+      onChange?.(options)
+    },
+    [onChange],
+  )
 
-  const changeOptions: ChangeHandlerOptions = useMemo(() => {
-    const getMarkdown = (): string => {
-      return docToMarkdown(editor.state.doc)
-    }
-
-    return { editor, getMarkdown }
-  }, [editor])
-
-  const docChangeExtension = useMemo(() => {
-    if (!onChange) return null
-
-    return defineDocChangeHandler(() => {
-      onChange(changeOptions)
-    })
-  }, [onChange, changeOptions])
-  useExtension(docChangeExtension, { editor })
-
+  if (mode === 'source') {
+    return <CodeMirrorEditor initialContent={contentRef.current} onChange={handleChange} />
+  }
   return (
-    <ProseKit editor={editor}>
-      <div ref={editor.mount}></div>
-    </ProseKit>
+    <ProseKitEditor markMode={mode} initialContent={contentRef.current} onChange={handleChange} />
   )
 }

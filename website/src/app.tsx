@@ -1,8 +1,8 @@
-import { Editor, type MarkMode } from '@meowdown/react'
+import { Editor, type EditorMode } from '@meowdown/react'
 import { type CSSProperties, useState } from 'react'
 
 interface ModeOption {
-  value: MarkMode
+  value: EditorMode
   label: string
   description: string
 }
@@ -22,6 +22,11 @@ const MODES: ModeOption[] = [
     value: 'hide',
     label: 'Hide',
     description: 'Markdown characters disappear for a clean, fully rendered view.',
+  },
+  {
+    value: 'source',
+    label: 'Source',
+    description: 'Raw Markdown with syntax highlighting, like an IDE.',
   },
 ]
 
@@ -77,7 +82,7 @@ function SegmentedControl<T extends string>({
 }
 
 export function App() {
-  const [mode, setMode] = useState<MarkMode>('focus')
+  const [mode, setMode] = useState<EditorMode>('focus')
   const activeMode = MODES.find((option) => option.value === mode) ?? MODES[0]
 
   return (
@@ -117,7 +122,7 @@ export function App() {
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-            <Editor markMode={mode} initialContent={INITIAL_CONTENT} />
+            <Editor mode={mode} initialContent={INITIAL_CONTENT} />
           </div>
 
           <div className="flex items-center gap-2 border-t border-zinc-200 bg-zinc-50/80 px-4 py-3.5 text-sm sm:px-6 sm:py-4 dark:border-zinc-800 dark:bg-zinc-900/60">

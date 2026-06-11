@@ -216,6 +216,29 @@ html {
 }
 
 /* ---------------------------------------------------------------------------
+ * Source mode editor surface (CodeMirror)
+ * ------------------------------------------------------------------------- */
+[data-editor='codemirror'] {
+  flex: 1 0 auto;
+  display: flex;
+}
+
+.cm-editor {
+  flex: 1;
+  font-size: 0.95rem;
+}
+
+.cm-editor.cm-focused {
+  outline: none;
+}
+
+.cm-content {
+  padding: 1.25rem 1.5rem 1.75rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  caret-color: var(--color-violet-600);
+}
+
+/* ---------------------------------------------------------------------------
  * Markdown syntax characters (`md-mark`) and link URIs
  * ------------------------------------------------------------------------- */
 .ProseMirror .md-mark,
