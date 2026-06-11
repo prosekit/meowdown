@@ -31,6 +31,7 @@ describe('LEZER_NODE_IDS', () => {
         "HTMLBlock": 17,
         "HTMLTag": 30,
         "HardBreak": 24,
+        "Hashtag": 54,
         "HeaderMark": 34,
         "HorizontalRule": 5,
         "Image": 28,

@@ -113,6 +113,15 @@ describe('defineMarkMode', () => {
       await expectRevealedMarkers(0)
     })
 
+    it('reveals nothing inside a #tag (tags have no syntax to reveal)', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      const doc = n.doc(n.paragraph('Hello #me<a>ow end'))
+      fixture.set(doc)
+      await expectRevealedMarkers(0)
+    })
+
     it('reveals nothing when the cursor is inside a code block', async () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('focus'))
@@ -164,6 +173,15 @@ describe('defineMarkMode', () => {
       const doc = n.doc(n.paragraph('see [docs](http://x.test)'))
       fixture.set(doc)
       expect(clipboardText(fixture)).toBe('see docs')
+    })
+
+    it('keeps #tag verbatim in the copied text', () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('hide'))
+      const { n } = fixture
+      const doc = n.doc(n.paragraph('Hello #meow end'))
+      fixture.set(doc)
+      expect(clipboardText(fixture)).toBe('Hello #meow end')
     })
   })
 

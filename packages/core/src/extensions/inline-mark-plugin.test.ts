@@ -148,4 +148,51 @@ describe('inlineMarkPlugin', () => {
     const pos = findText(fixture.doc, 'italic')
     expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdEm'])
   })
+
+  it('applies mdTag across the whole #tag, # included', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('Hello #meow end'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, '#meow')
+    expect(pos).toBeGreaterThan(0)
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdTag']) // the '#'
+    expect(marksAt(fixture.doc, pos + 5)).toEqual(['mdTag']) // the 'w'
+    expect(marksAt(fixture.doc, pos)).toEqual([]) // the space before
+  })
+
+  it('marks tags inside headings', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.heading({ level: 2 }, 'Title #tag'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, '#tag')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdTag'])
+  })
+
+  it('does NOT mark #tag inside code blocks', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.codeBlock({ language: '' }, 'a #tag b'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, '#tag')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual([])
+  })
+
+  it('removes mdTag when text is glued in front of the #', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('a #tag b'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, '#tag')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdTag'])
+    // Delete the space before the '#': "a#tag b" is no longer a tag.
+    fixture.view.dispatch(fixture.state.tr.delete(pos - 1, pos))
+    const glued = findText(fixture.doc, '#tag')
+    expect(marksAt(fixture.doc, glued + 1)).toEqual([])
+  })
 })

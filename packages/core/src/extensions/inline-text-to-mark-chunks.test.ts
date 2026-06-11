@@ -203,4 +203,71 @@ describe('inlineTextToMarkChunks', () => {
       "
     `)
   })
+
+  it('tag yields a single mdTag chunk covering the # too', () => {
+    const chunks = inlineTextToMarkChunks(schema, 'a #meow b')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-2: -
+      2-7: mdTag
+      7-9: -
+      "
+    `)
+  })
+
+  it('two tags', () => {
+    const chunks = inlineTextToMarkChunks(schema, '#a #b')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-2: mdTag
+      2-3: -
+      3-5: mdTag
+      "
+    `)
+  })
+
+  it('tag inside emphasis', () => {
+    const chunks = inlineTextToMarkChunks(schema, '*x #tag y*')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-1: mdEm + mdMark
+      1-3: mdEm
+      3-7: mdEm + mdTag
+      7-9: mdEm
+      9-10: mdEm + mdMark
+      "
+    `)
+  })
+
+  it('tag inside a link label', () => {
+    const chunks = inlineTextToMarkChunks(schema, '[see #tag](http://x)')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-1: mdLinkText(href=http://x) + mdMark
+      1-5: mdLinkText(href=http://x)
+      5-9: mdLinkText(href=http://x) + mdTag
+      9-11: mdMark
+      11-19: mdLinkUri
+      19-20: mdMark
+      "
+    `)
+  })
+
+  it('heading-like text produces no tag', () => {
+    const chunks = inlineTextToMarkChunks(schema, '# heading text')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-14: -
+      "
+    `)
+  })
+
+  it('all-digit tag produces no mark', () => {
+    const chunks = inlineTextToMarkChunks(schema, "we're #1")
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-8: -
+      "
+    `)
+  })
 })

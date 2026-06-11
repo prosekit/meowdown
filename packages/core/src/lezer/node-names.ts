@@ -66,6 +66,9 @@ export const LEZER_NODE_NAMES = [
   'EmphasisMark',
   'LinkMark',
   'StrikethroughMark',
+
+  // Custom inline (meowdown extensions)
+  'Hashtag',
 ] as const
 
 export type LezerNodeName = (typeof LEZER_NODE_NAMES)[number]

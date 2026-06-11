@@ -130,6 +130,16 @@
 }
 
 /* ---------------------------------------------------------------------------
+ * Tags (`#tag`)
+ * ------------------------------------------------------------------------- */
+.ProseMirror .md-tag {
+  padding: 0.1em 0.35em;
+  border-radius: 0.35rem;
+  background: color-mix(in oklab, var(--meowdown-accent) 10%, transparent);
+  color: color-mix(in oklab, var(--meowdown-accent) 80%, var(--meowdown-heading));
+}
+
+/* ---------------------------------------------------------------------------
  * Markdown syntax characters (`md-mark`) and link URIs
  * ------------------------------------------------------------------------- */
 .ProseMirror .md-mark,

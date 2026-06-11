@@ -9,11 +9,13 @@ The engine powering the editor in [`@meowdown/react`](https://www.npmjs.com/pack
 - `--meowdown-text`: body text color.
 - `--meowdown-heading`: heading color.
 - `--meowdown-muted`: secondary text (blockquotes).
-- `--meowdown-accent`: links, caret, inline code.
+- `--meowdown-accent`: links, caret, inline code, tags.
 - `--meowdown-mark`: Markdown syntax characters.
 - `--meowdown-border`: horizontal rules.
 - `--meowdown-code-bg`: code block background.
 - `--meowdown-font-mono`: monospace font stack.
+
+Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-accent`.
 
 ## License
 

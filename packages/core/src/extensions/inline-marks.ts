@@ -8,6 +8,7 @@ export const MARK_NAMES = [
   'mdLinkText',
   'mdLinkUri',
   'mdDel',
+  'mdTag',
 ] as const
 
 export type MarkName = (typeof MARK_NAMES)[number]
@@ -84,6 +85,18 @@ function defineMdDel() {
   })
 }
 
+/**
+ * Covers the whole `#tag`, `#` included: the `#` is tag content, not
+ * removable syntax, so it never carries `mdMark`.
+ */
+function defineMdTag() {
+  return defineMarkSpec({
+    name: 'mdTag' satisfies MarkName,
+    toDOM: () => ['span', { class: 'md-tag' }, 0],
+    parseDOM: [{ tag: 'span.md-tag' }],
+  })
+}
+
 export function defineInlineMarks() {
   return union(
     defineMdMark(),
@@ -93,5 +106,6 @@ export function defineInlineMarks() {
     defineMdLinkText(),
     defineMdLinkUri(),
     defineMdDel(),
+    defineMdTag(),
   )
 }

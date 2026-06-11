@@ -37,6 +37,12 @@ describe('markdown round-trip is byte-identical', () => {
     '1. one\n1. two',
     // A genuinely loose item (two blocks) keeps its blank line
     '- a\n\n  second paragraph',
+    // Tags are plain text to the converters
+    'hello #meow',
+    // `#tag` at line start is NOT a heading (no space after `#`)
+    '#meow starts the line',
+    '- [ ] #todo item',
+    '> quoted #tag',
   ]
 
   for (const markdown of cases) {
