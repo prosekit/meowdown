@@ -1,11 +1,22 @@
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
-import { EditorState } from '@codemirror/state'
+import { EditorSelection, EditorState } from '@codemirror/state'
 import { EditorView, keymap } from '@codemirror/view'
+import { clamp } from '@ocavue/utils'
+import type { SelectionJSON } from '@prosekit/core'
 import { useImperativeHandle, useLayoutEffect, useRef, type Ref } from 'react'
 
-import type { EditorHandle } from './types.ts'
+import type { EditorHandle, EditorStateSnapshot, SelectionHint } from './types.ts'
+
+function resolveSelection(selection: SelectionHint, docLength: number): EditorSelection {
+  if (selection === 'start') return EditorSelection.single(0)
+  if (selection === 'end') return EditorSelection.single(docLength)
+  return EditorSelection.single(
+    clamp(selection.anchor, 0, docLength),
+    clamp(selection.head, 0, docLength),
+  )
+}
 
 export interface CodeMirrorEditorProps {
   /**
@@ -36,8 +47,52 @@ export function CodeMirrorEditor({ initialMarkdown, onDocChange, ref }: CodeMirr
   const initialMarkdownRef = useRef(initialMarkdown ?? '')
 
   useImperativeHandle(ref, () => {
+    function getMarkdown(): string {
+      return viewRef.current?.state.doc.toString() ?? initialMarkdownRef.current
+    }
+    function getSelection(): SelectionJSON {
+      const main = viewRef.current?.state.selection.main
+      return { type: 'text', anchor: main?.anchor ?? 0, head: main?.head ?? 0 }
+    }
+    function getState(): EditorStateSnapshot {
+      return [getMarkdown(), getSelection()]
+    }
+    function setState(markdown?: string, selection?: SelectionHint): void {
+      const view = viewRef.current
+      if (!view) {
+        if (markdown != null) initialMarkdownRef.current = markdown
+        return
+      }
+      if (markdown == null && !selection) return
+      const docLength = markdown == null ? view.state.doc.length : markdown.length
+      view.dispatch({
+        changes:
+          markdown == null ? undefined : { from: 0, to: view.state.doc.length, insert: markdown },
+        selection: selection ? resolveSelection(selection, docLength) : undefined,
+        scrollIntoView: true,
+      })
+    }
+    function setMarkdown(markdown: string): void {
+      setState(markdown)
+    }
+    function setSelection(selection: SelectionHint): void {
+      setState(undefined, selection)
+    }
+    function focus(): void {
+      viewRef.current?.focus()
+    }
+    function scrollIntoView(): void {
+      viewRef.current?.dispatch({ scrollIntoView: true })
+    }
     return {
-      getMarkdown: () => viewRef.current?.state.doc.toString() ?? initialMarkdownRef.current,
+      getMarkdown,
+      setMarkdown,
+      getState,
+      setState,
+      getSelection,
+      setSelection,
+      focus,
+      scrollIntoView,
     }
   }, [])
 

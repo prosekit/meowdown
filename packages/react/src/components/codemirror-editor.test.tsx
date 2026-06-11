@@ -45,4 +45,28 @@ describe('CodeMirrorEditor', () => {
     await render(<CodeMirrorEditor />)
     await expect.element(cmContent).toHaveTextContent(/^$/)
   })
+
+  it('replaces the document via setMarkdown and notifies onDocChange', async () => {
+    const onDocChange = vi.fn()
+    const ref = createRef<EditorHandle>()
+    await render(<CodeMirrorEditor ref={ref} initialMarkdown="old" onDocChange={onDocChange} />)
+    await expect.element(cmContent).toHaveTextContent('old')
+
+    ref.current?.setMarkdown('# new')
+    await expect.element(cmContent).toHaveTextContent('# new')
+    expect(ref.current?.getMarkdown()).toBe('# new')
+    expect(onDocChange).toHaveBeenCalled()
+  })
+
+  it('clamps the selection hint when markdown shrinks the document', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<CodeMirrorEditor ref={ref} initialMarkdown="Hello World" />)
+    await expect.element(cmContent).toHaveTextContent('Hello World')
+
+    await cmContent.click()
+    ref.current?.setState('Hi', { type: 'text', anchor: 11, head: 11 })
+    await userEvent.keyboard('!')
+    await expect.element(cmContent).toHaveTextContent('Hi!')
+    expect(ref.current?.getState()[1]).toMatchObject({ anchor: 3, head: 3 })
+  })
 })

@@ -40,4 +40,40 @@ describe('ProseKitEditor', () => {
     expect(markdown).toContain('abc')
     expect(markdown.startsWith('# ')).toBe(true)
   })
+
+  it('round-trips a node selection through getState and setState', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<ProseKitEditor ref={ref} initialMarkdown="Hello" />)
+    await expect.element(screen.getByText('Hello')).toBeInTheDocument()
+
+    ref.current?.setState(undefined, { type: 'node', anchor: 0, head: 0 })
+    await expect.element(page.locate('.ProseMirror-selectednode')).toBeInTheDocument()
+    const state = ref.current?.getState()
+    expect(state?.[1].type).toBe('node')
+
+    ref.current?.setState(state?.[0], state?.[1])
+    expect(ref.current?.getState()[1].type).toBe('node')
+  })
+
+  it('falls back to a text selection for an invalid selection hint', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<ProseKitEditor ref={ref} initialMarkdown="Hello" />)
+    await expect.element(screen.getByText('Hello')).toBeInTheDocument()
+
+    ref.current?.setState(undefined, { type: 'bogus', anchor: 1, head: 3 })
+    expect(ref.current?.getState()[1]).toMatchObject({ type: 'text', anchor: 1, head: 3 })
+  })
+
+  it('keeps undo history across setMarkdown', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<ProseKitEditor ref={ref} initialMarkdown="Hello" />)
+    await expect.element(screen.getByText('Hello')).toBeInTheDocument()
+
+    ref.current?.setMarkdown('World')
+    await expect.element(screen.getByText('World')).toBeInTheDocument()
+
+    await pmRoot.click()
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}')
+    await expect.element(screen.getByText('Hello')).toBeInTheDocument()
+  })
 })

@@ -1,9 +1,16 @@
 import type { MarkMode } from '@meowdown/core'
+import type { SelectionJSON } from '@prosekit/core'
 import { useImperativeHandle, useRef, type Ref } from 'react'
 
 import { CodeMirrorEditor } from './codemirror-editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
-import type { EditorHandle, TagSearchHandler, WikilinkSearchHandler } from './types.ts'
+import type {
+  EditorHandle,
+  EditorStateSnapshot,
+  SelectionHint,
+  TagSearchHandler,
+  WikilinkSearchHandler,
+} from './types.ts'
 
 export type EditorMode = MarkMode | 'source'
 
@@ -60,7 +67,40 @@ export function Editor({
   const childRef = useRef<EditorHandle>(null)
 
   useImperativeHandle(ref, () => {
-    return { getMarkdown: () => childRef.current?.getMarkdown() ?? '' }
+    function getMarkdown(): string {
+      return childRef.current?.getMarkdown() ?? ''
+    }
+    function setMarkdown(markdown: string): void {
+      childRef.current?.setMarkdown(markdown)
+    }
+    function getState(): EditorStateSnapshot {
+      return childRef.current?.getState() ?? ['', { type: 'text', anchor: 0, head: 0 }]
+    }
+    function setState(markdown?: string, selection?: SelectionHint): void {
+      childRef.current?.setState(markdown, selection)
+    }
+    function getSelection(): SelectionJSON {
+      return childRef.current?.getSelection() ?? { type: 'text', anchor: 0, head: 0 }
+    }
+    function setSelection(selection: SelectionHint): void {
+      childRef.current?.setSelection(selection)
+    }
+    function focus(): void {
+      childRef.current?.focus()
+    }
+    function scrollIntoView(): void {
+      childRef.current?.scrollIntoView()
+    }
+    return {
+      getMarkdown,
+      setMarkdown,
+      getState,
+      setState,
+      getSelection,
+      setSelection,
+      focus,
+      scrollIntoView,
+    }
   }, [])
 
   // Seed for the mounted editor: the initial markdown on the first render,

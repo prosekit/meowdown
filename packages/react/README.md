@@ -41,6 +41,15 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
 Imperative handle for the editor, attached via `ref`.
 
 - `getMarkdown(): string`: serializes the current document to Markdown. Can be expensive on large documents; call it on demand (e.g. throttled) instead of on every change.
+- `setMarkdown(markdown: string): void`: replaces the whole document as a single undoable edit.
+- `getState(): EditorStateSnapshot`: returns `[markdown, selection]`, where `selection` is a `SelectionJSON` (`{ anchor: number, head: number, type: string }`).
+- `setState(markdown?: string, selection?: SelectionJSON | 'start' | 'end'): void`: replaces the document (if `markdown` is given) and restores `selection`: exactly when valid, otherwise clamped to the nearest text selection; out-of-range positions never throw. `'start'` and `'end'` jump to the document edges. Without a selection, the current one is mapped through the change. Restore a snapshot with `handle.setState(...handle.getState())`.
+- `getSelection(): SelectionJSON`: returns the current selection.
+- `setSelection(selection: SelectionJSON | 'start' | 'end'): void`: restores a selection with the same hint semantics as `setState`.
+- `focus(): void`: focuses the editor.
+- `scrollIntoView(): void`: scrolls the selection into view.
+
+Selection positions are in the mounted editor's coordinate space: ProseMirror document positions in the rich modes, character offsets in source mode. They round-trip within one mode but are not portable across a mode switch.
 
 ## Keyboard shortcuts
 
