@@ -1,4 +1,4 @@
-import './testing/index.ts'
+import '../testing/index.ts'
 
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
