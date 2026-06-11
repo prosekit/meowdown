@@ -20,6 +20,7 @@ import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
+import { defineInlineToggle } from './inline-toggle-commands.ts'
 
 function defineEditorExtensionImpl() {
   return union(
@@ -39,6 +40,7 @@ function defineEditorExtensionImpl() {
 
     // plugins
     defineInlineMarkPlugin(),
+    defineInlineToggle(),
 
     // others
     defineBaseKeymap(),

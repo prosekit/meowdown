@@ -1,5 +1,7 @@
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
+import { longestBacktickRun } from '../utils/backticks.ts'
+
 /**
  * Convert a ProseMirror document into a Markdown string.
  *
@@ -283,7 +285,8 @@ function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
 function emitCodeBlock(node: ProseMirrorNode, out: MdOut): void {
   const language = (node.attrs.language as string) ?? ''
   const code = node.textContent
-  const fence = '`'.repeat(longestBacktickRun(code) + 1)
+  // min 2 keeps the fence width >= 3, CommonMark's minimum.
+  const fence = '`'.repeat(longestBacktickRun(code, 2) + 1)
 
   out.write(fence)
   if (language) out.write(language)
@@ -292,24 +295,6 @@ function emitCodeBlock(node: ProseMirrorNode, out: MdOut): void {
   out.write('\n')
   out.write(fence)
   out.closeBlock()
-}
-
-/**
- * Length of the longest run of backticks in `s`, clamped to a minimum of 2
- * so the returned fence width is always >= 3 - CommonMark's minimum.
- */
-function longestBacktickRun(s: string): number {
-  let longest = 2
-  let run = 0
-  for (let i = 0; i < s.length; i++) {
-    if (s.charCodeAt(i) === 96 /* ` */) {
-      run++
-      if (run > longest) longest = run
-    } else {
-      run = 0
-    }
-  }
-  return longest
 }
 
 // ─────────────────────────────────────────────────────────────────────

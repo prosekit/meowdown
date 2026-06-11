@@ -24,3 +24,16 @@ export interface InlineElement {
 export function parseInline(text: string): readonly InlineElement[] {
   return gfmParser.parseInline(text, 0) as InlineElement[]
 }
+
+/** Depth-first list of every element matching `test`. */
+export function collectInlineElements(
+  nodes: readonly InlineElement[],
+  test: (node: InlineElement) => boolean,
+  out: InlineElement[] = [],
+): InlineElement[] {
+  for (const node of nodes) {
+    if (test(node)) out.push(node)
+    collectInlineElements(node.children, test, out)
+  }
+  return out
+}

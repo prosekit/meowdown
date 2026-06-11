@@ -41,6 +41,17 @@ Imperative handle for the editor, attached via `ref`.
 
 - `getMarkdown(): string`: serializes the current document to Markdown. Can be expensive on large documents; call it on demand (e.g. throttled) instead of on every change.
 
+## Keyboard shortcuts
+
+In the rich modes (`focus` / `show` / `hide`), these toggle inline formatting on the selection (`Mod` = Cmd on macOS, Ctrl elsewhere):
+
+| Key           | Action               |
+| ------------- | -------------------- |
+| `Mod-B`       | toggle bold          |
+| `Mod-I`       | toggle italic        |
+| `Mod-E`       | toggle inline code   |
+| `Mod-Shift-X` | toggle strikethrough |
+
 ## Styling
 
 `@meowdown/react/style.css` includes the default theme from [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core). Colors follow the page's `color-scheme`; customize via the `--meowdown-*` CSS variables documented there.
