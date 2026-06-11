@@ -1,9 +1,47 @@
+import type { SelectionJSON } from '@prosekit/core'
+
+/** A selection to restore: an exact JSON selection, or a document edge. */
+export type SelectionHint = SelectionJSON | 'start' | 'end'
+
+/**
+ * The current Markdown and selection. Selection positions are in the mounted
+ * editor's coordinate space: ProseMirror positions in the rich modes,
+ * character offsets in source mode. Not portable across a mode switch.
+ */
+export type EditorStateSnapshot = [markdown: string, selection: SelectionJSON]
+
 export interface EditorHandle {
   /**
    * Serializes the current document to Markdown. Can be expensive on large
    * documents; call it on demand (e.g. throttled) instead of on every change.
    */
   getMarkdown: () => string
+
+  /** Replaces the whole document as a single undoable edit. */
+  setMarkdown: (markdown: string) => void
+
+  /** Returns the current Markdown and selection. */
+  getState: () => EditorStateSnapshot
+
+  /**
+   * Replaces the document (if `markdown` is given) and restores `selection`:
+   * exactly when valid, otherwise clamped to the nearest text selection;
+   * out-of-range positions never throw. Without a selection, the current one
+   * is mapped through the change.
+   */
+  setState: (markdown?: string, selection?: SelectionHint) => void
+
+  /** Returns the current selection. */
+  getSelection: () => SelectionJSON
+
+  /** Restores a selection with the same hint semantics as `setState`. */
+  setSelection: (selection: SelectionHint) => void
+
+  /** Focuses the editor. */
+  focus: () => void
+
+  /** Scrolls the selection into view. */
+  scrollIntoView: () => void
 }
 
 /**
