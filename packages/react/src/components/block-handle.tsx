@@ -6,45 +6,8 @@ import {
   BlockHandleRoot,
 } from '@prosekit/react/block-handle'
 
-// lucide "plus" and "grip-vertical", inlined since the package has no icon
-// dependency. Sized by the button CSS.
-function PlusIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M5 12h14" />
-      <path d="M12 5v14" />
-    </svg>
-  )
-}
-
-function GripVerticalIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="9" cy="5" r="1" />
-      <circle cx="9" cy="12" r="1" />
-      <circle cx="9" cy="19" r="1" />
-      <circle cx="15" cy="5" r="1" />
-      <circle cx="15" cy="12" r="1" />
-      <circle cx="15" cy="19" r="1" />
-    </svg>
-  )
-}
+import { GripVerticalIcon } from './icons/grip-vertical-icon.tsx'
+import { PlusIcon } from './icons/plus-icon.tsx'
 
 export function BlockHandle() {
   return (
