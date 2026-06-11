@@ -61,6 +61,9 @@ export interface ProseKitEditorProps {
   /** Enables the wikilink menu. See `EditorProps.onWikilinkSearch`. */
   onWikilinkSearch?: WikilinkSearchHandler
 
+  /** Enables or disables spell checking in the editor. */
+  spellCheck?: boolean
+
   /** Imperative handle for the editor. */
   ref?: Ref<EditorHandle>
 }
@@ -71,6 +74,7 @@ export function ProseKitEditor({
   onDocChange,
   onTagSearch,
   onWikilinkSearch,
+  spellCheck,
   ref,
 }: ProseKitEditorProps) {
   const [editor] = useState((): TypedEditor => {
@@ -144,7 +148,7 @@ export function ProseKitEditor({
 
   return (
     <ProseKit editor={editor}>
-      <div ref={editor.mount}></div>
+      <div ref={editor.mount} spellCheck={spellCheck}></div>
       <BlockHandle />
       <DropIndicator />
       <SlashMenu />
