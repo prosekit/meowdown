@@ -43,6 +43,10 @@ Label your notes with tags like #meow and #markdown. Type \`#\` followed by a le
 
 Connect notes with wikilinks like [[Daily journal]] and [[Reading list]]. Type \`[[\` to link another note.
 
+Paste or drop an image straight into the editor to embed it inline.
+
+![A sunny placeholder photo](https://static.photos/yellow/640x360/42)
+
 Drop in a fenced code block and pick its language from the selector:
 
 \`\`\`typescript
@@ -79,6 +83,12 @@ async function searchNotes(query: string): Promise<string[]> {
   // Simulate network latency so the wikilink menu's loading state shows up.
   await new Promise((resolve) => setTimeout(resolve, 200))
   return NOTES.filter((note) => note.toLowerCase().includes(query))
+}
+
+// Demo upload: keep the pasted/dropped image for the session via a blob URL,
+// which the default resolver passes straight through.
+function uploadImage(file: File): string {
+  return URL.createObjectURL(file)
 }
 
 interface SegmentedControlProps<T extends string> {
@@ -196,6 +206,7 @@ export function App() {
               initialMarkdown={INITIAL_CONTENT}
               onTagSearch={searchTags}
               onWikilinkSearch={searchNotes}
+              onImageUpload={uploadImage}
             />
           </div>
 

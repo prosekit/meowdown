@@ -7,6 +7,10 @@ import { ProseKitEditor } from './prosekit-editor.tsx'
 import type {
   EditorHandle,
   EditorStateSnapshot,
+  ImageUploadErrorHandler,
+  ImageUploadHandler,
+  ImageUploadPredicate,
+  ImageUrlResolver,
   SelectionHint,
   TagSearchHandler,
   WikilinkSearchHandler,
@@ -52,6 +56,38 @@ export interface EditorProps {
   onWikilinkSearch?: WikilinkSearchHandler
 
   /**
+   * Maps a Markdown image `src` to a displayable URL for the inline preview,
+   * or returns null to not render that image. Defaults to a safe pass-through
+   * that renders `data:image/*`, `http(s):`, and `blob:` URLs and skips
+   * everything else (relative paths, `javascript:`...). Rich modes only.
+   */
+  resolveImageUrl?: ImageUrlResolver
+
+  /**
+   * Persists a pasted or dropped image file and resolves to the `src` to embed
+   * as `![](src)`. Sync or async; reject to signal failure. On paste/drop a
+   * `![](blob:...)` placeholder appears immediately and its src is swapped for
+   * the resolved one once the upload completes. A clipboard carrying image
+   * files is consumed entirely (any text/html alongside the bitmap is
+   * ignored). Whether this is enabled is read once, on the first render. Omit
+   * to leave paste/drop to the default behavior. Rich modes only.
+   */
+  onImageUpload?: ImageUploadHandler
+
+  /**
+   * Decides which pasted or dropped files `onImageUpload` should handle, before
+   * any placeholder is inserted (e.g. to enforce a size limit). Defaults to
+   * accepting `image/*` files. Rich modes only.
+   */
+  canUploadImage?: ImageUploadPredicate
+
+  /**
+   * Called when `onImageUpload` throws or rejects, with `{ error, file }`.
+   * Defaults to `console.error`. Rich modes only.
+   */
+  onImageUploadError?: ImageUploadErrorHandler
+
+  /**
    * Enables the browser's native spell checking in the rich modes. Defaults
    * to the browser's behavior. Ignored in source mode.
    */
@@ -67,6 +103,10 @@ export function Editor({
   onDocChange,
   onTagSearch,
   onWikilinkSearch,
+  resolveImageUrl,
+  onImageUpload,
+  canUploadImage,
+  onImageUploadError,
   spellCheck,
   ref,
 }: EditorProps) {
@@ -126,6 +166,10 @@ export function Editor({
           onDocChange={onDocChange}
           onTagSearch={onTagSearch}
           onWikilinkSearch={onWikilinkSearch}
+          resolveImageUrl={resolveImageUrl}
+          onImageUpload={onImageUpload}
+          canUploadImage={canUploadImage}
+          onImageUploadError={onImageUploadError}
           spellCheck={spellCheck}
         />
       )}
