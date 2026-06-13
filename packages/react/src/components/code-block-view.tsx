@@ -1,7 +1,7 @@
 import { Select } from '@base-ui/react/select'
 import { type CodeBlockAttrs, codeBlockLanguages } from '@meowdown/core'
 import type { ReactNodeViewProps } from '@prosekit/react'
-import { useEffect, useRef, useState } from 'react'
+import {  useRef, useState } from 'react'
 
 import styles from './code-block-view.module.css'
 import { CheckIcon } from './icons/check-icon.tsx'
@@ -11,6 +11,11 @@ import { CopyIcon } from './icons/copy-icon.tsx'
 const PLAIN_TEXT = ''
 const PLAIN_TEXT_LABEL = 'Plain Text'
 const COPIED_RESET_MS = 1500
+
+const languageItems = codeBlockLanguages.map((name) => ({
+  value: name.toLowerCase(),
+  label: name
+}))
 
 export function CodeBlockView(props: ReactNodeViewProps) {
   const attrs = props.node.attrs as CodeBlockAttrs
@@ -38,7 +43,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
     <div className={styles.Root}>
       <div className={styles.Toolbar} contentEditable={false}>
         <Select.Root
-          items={codeBlockLanguages}
+          items={languageItems}
           value={language}
           onValueChange={setLanguage}
           modal={false}

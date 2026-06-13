@@ -4,8 +4,7 @@ import { codeBlockLanguages } from './code-block-languages.ts'
 
 describe('codeBlockLanguages', () => {
   it('lists the supported languages as `value → label` pairs', () => {
-    const pairs = codeBlockLanguages.map(({ value, label }) => `${value} -> ${label}`)
-    expect(pairs).toMatchInlineSnapshot(`
+    expect(codeBlockLanguages).toMatchInlineSnapshot(`
       [
         "c -> C",
         "c++ -> C++",
