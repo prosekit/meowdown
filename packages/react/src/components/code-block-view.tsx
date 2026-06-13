@@ -35,8 +35,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
   // Keep the toolbar shown until the popup finishes closing animation
   const [comboboxOpen, setComboboxOpen] = useState(false)
 
-  // Markdown fences accept any language, so offer the typed value as an option
-  // when it doesn't match a known one.
+  // Offer the typed value as an option when it doesn't match a known one.
   const itemsForView = useMemo<readonly LanguageItem[]>(() => {
     const value = query.trim()
     if (!value) return codeBlockLanguages
