@@ -85,6 +85,8 @@ async function searchNotes(query: string): Promise<string[]> {
   return NOTES.filter((note) => note.toLowerCase().includes(query))
 }
 
+// REVIEW: read /Users/ocavue/code/github/prosekit/registry/src/lit/sample/sample-uploader.ts for a sample of how to implement a real image uploader that sends the file to a server and returns its URL.
+// REVIEW: notice that the uploader function should have it's own file.
 // Demo upload: keep the pasted/dropped image for the session via a blob URL,
 // which the default resolver passes straight through.
 function uploadImage(file: File): string {
