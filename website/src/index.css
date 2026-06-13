@@ -9,7 +9,24 @@
 }
 
 html {
-  background-color: light-dark(var(--color-zinc-50), var(--color-zinc-950));
+  background-color: light-dark(var(--color-orange-50), var(--color-stone-950));
+}
+
+/* The active mode description re-animates whenever the mode changes (keyed
+ * remount in app.tsx). */
+@keyframes meowdown-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mode-desc {
+  animation: meowdown-fade-in 0.25s ease;
 }
 
 /* ---------------------------------------------------------------------------
@@ -28,8 +45,8 @@ html {
   padding: 0.25rem;
   border-radius: 9999px;
   background: light-dark(
-    var(--color-zinc-100),
-    color-mix(in oklab, var(--color-zinc-800) 80%, transparent)
+    var(--color-stone-100),
+    color-mix(in oklab, var(--color-stone-800) 80%, transparent)
   );
 }
 
@@ -41,8 +58,8 @@ html {
   left: 0.25rem;
   width: calc((100% - 0.5rem) / var(--seg-count, 3));
   border-radius: 9999px;
-  background: light-dark(#fff, var(--color-zinc-950));
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  background: light-dark(var(--color-white), var(--color-stone-950));
+  box-shadow: 0 1px 2px 0 color-mix(in oklab, var(--color-black) 5%, transparent);
   transition: transform 0.2s ease;
   pointer-events: none;
 }
@@ -68,20 +85,20 @@ html {
   font-size: 0.875rem;
   font-weight: 500;
   white-space: nowrap;
-  color: light-dark(var(--color-zinc-500), var(--color-zinc-400));
+  color: light-dark(var(--color-stone-500), var(--color-stone-400));
   transition: color 0.2s ease;
 }
 
 .segmented label:hover {
-  color: light-dark(var(--color-zinc-800), var(--color-zinc-200));
+  color: light-dark(var(--color-stone-800), var(--color-stone-200));
 }
 
 .segmented label:has(input:checked) {
-  color: light-dark(var(--color-zinc-900), #fff);
+  color: light-dark(var(--color-stone-900), var(--color-white));
 }
 
 .segmented label:has(input:focus-visible) {
-  outline: 2px solid var(--color-violet-500);
+  outline: 2px solid var(--color-orange-500);
   outline-offset: 2px;
 }
 
