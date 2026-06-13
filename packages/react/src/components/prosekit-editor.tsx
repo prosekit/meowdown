@@ -14,8 +14,9 @@ import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit, useExtension } from '@prosekit/react'
 import { useImperativeHandle, useMemo, useState, type Ref } from 'react'
 
+import { defineCodeBlockView } from '../extensions/code-block-view.ts'
+
 import { BlockHandle } from './block-handle.tsx'
-import { defineCodeBlockView } from './code-block-view.tsx'
 import { DropIndicator } from './drop-indicator.tsx'
 import { SlashMenu } from './slash-menu.tsx'
 import { TagMenu } from './tag-menu.tsx'
@@ -79,7 +80,9 @@ export function ProseKitEditor({
   ref,
 }: ProseKitEditorProps) {
   const [editor] = useState((): TypedEditor => {
-    const extension: EditorExtension = defineEditorExtension()
+    const baseExtension: EditorExtension = defineEditorExtension()
+
+    const extension = union(baseExtension, defineCodeBlockView())
     const editor: TypedEditor = createEditor({ extension })
     if (initialMarkdown) {
       editor.setContent(markdownToDoc(editor, initialMarkdown))

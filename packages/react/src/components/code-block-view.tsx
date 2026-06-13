@@ -1,12 +1,11 @@
 import { Select } from '@base-ui/react/select'
 import { type CodeBlockAttrs, codeBlockLanguages } from '@meowdown/core'
-import type { Extension } from '@prosekit/core'
-import {
-  defineReactNodeView,
-  type ReactNodeViewComponent,
-  type ReactNodeViewProps,
+import type {
+
+
+  ReactNodeViewProps,
 } from '@prosekit/react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import styles from './code-block-view.module.css'
 import { CheckIcon } from './icons/check-icon.tsx'
@@ -17,14 +16,12 @@ const PLAIN_TEXT = ''
 const PLAIN_TEXT_LABEL = 'Plain Text'
 const COPIED_RESET_MS = 1500
 
-function CodeBlockView(props: ReactNodeViewProps) {
+export function CodeBlockView(props: ReactNodeViewProps) {
   const attrs = props.node.attrs as CodeBlockAttrs
   const language = attrs.language || PLAIN_TEXT
 
-
-
   const setLanguage = (value: string | null) => {
-    props.setAttrs({ language: value || "" } satisfies CodeBlockAttrs)
+    props.setAttrs({ language: value || '' } satisfies CodeBlockAttrs)
   }
 
   const [copied, setCopied] = useState(false)
@@ -45,7 +42,12 @@ function CodeBlockView(props: ReactNodeViewProps) {
   return (
     <div className={styles.Root}>
       <div className={styles.Toolbar} contentEditable={false}>
-        <Select.Root items={codeBlockLanguages} value={language} onValueChange={setLanguage} modal={false}>
+        <Select.Root
+          items={codeBlockLanguages}
+          value={language}
+          onValueChange={setLanguage}
+          modal={false}
+        >
           <Select.Trigger className={styles.Trigger} data-testid="code-block-language">
             <Select.Value />
             <Select.Icon className={styles.TriggerIcon}>
@@ -60,7 +62,7 @@ function CodeBlockView(props: ReactNodeViewProps) {
             >
               <Select.Popup className={styles.Popup}>
                 <Select.List className={styles.List}>
-                  {Object.entries(items).map(([value, label]) => (
+                  {codeBlockLanguages.map(({ value, label }) => (
                     <Select.Item
                       key={value || PLAIN_TEXT_LABEL}
                       value={value}
@@ -93,12 +95,4 @@ function CodeBlockView(props: ReactNodeViewProps) {
       <pre ref={props.contentRef} data-language={language || undefined}></pre>
     </div>
   )
-}
-
-export function defineCodeBlockView(): Extension {
-  return defineReactNodeView({
-    name: 'codeBlock',
-    contentAs: 'code',
-    component: CodeBlockView satisfies ReactNodeViewComponent,
-  })
 }
