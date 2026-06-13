@@ -1,6 +1,8 @@
 import {
   defineEditorExtension,
+  defineLinkClickHandler,
   defineMarkMode,
+  defineWikilinkClickHandler,
   type TypedEditor,
   type EditorExtension,
   type MarkMode,
@@ -16,13 +18,18 @@ import { useImperativeHandle, useMemo, useState, type Ref } from 'react'
 
 import { BlockHandle } from './block-handle.tsx'
 import { DropIndicator } from './drop-indicator.tsx'
+import { LinkHoverCard } from './link-hover-card.tsx'
 import { SlashMenu } from './slash-menu.tsx'
 import { TagMenu } from './tag-menu.tsx'
 import type {
   EditorHandle,
   EditorStateSnapshot,
+  LinkClickHandler,
+  LinkHoverHandler,
   SelectionHint,
   TagSearchHandler,
+  WikilinkClickHandler,
+  WikilinkHoverHandler,
   WikilinkSearchHandler,
 } from './types.ts'
 import { WikilinkMenu } from './wikilink-menu.tsx'
@@ -61,6 +68,18 @@ export interface ProseKitEditorProps {
   /** Enables the wikilink menu. See `EditorProps.onWikilinkSearch`. */
   onWikilinkSearch?: WikilinkSearchHandler
 
+  /** Builds the hover card for Markdown links. See `EditorProps.onLinkHover`. */
+  onLinkHover?: LinkHoverHandler
+
+  /** Fires on Mod+click of a Markdown link. See `EditorProps.onLinkClick`. */
+  onLinkClick?: LinkClickHandler
+
+  /** Builds the hover card for wikilinks. See `EditorProps.onWikilinkHover`. */
+  onWikilinkHover?: WikilinkHoverHandler
+
+  /** Fires on Mod+click of a wikilink. See `EditorProps.onWikilinkClick`. */
+  onWikilinkClick?: WikilinkClickHandler
+
   /** Enables or disables spell checking in the editor. */
   spellCheck?: boolean
 
@@ -74,6 +93,10 @@ export function ProseKitEditor({
   onDocChange,
   onTagSearch,
   onWikilinkSearch,
+  onLinkHover,
+  onLinkClick,
+  onWikilinkHover,
+  onWikilinkClick,
   spellCheck,
   ref,
 }: ProseKitEditorProps) {
@@ -146,6 +169,18 @@ export function ProseKitEditor({
   }, [onDocChange])
   useExtension(docChangeExtension, { editor })
 
+  const linkClickExtension = useMemo(() => {
+    return onLinkClick ? defineLinkClickHandler(onLinkClick) : null
+  }, [onLinkClick])
+  useExtension(linkClickExtension, { editor })
+
+  const wikilinkClickExtension = useMemo(() => {
+    return onWikilinkClick ? defineWikilinkClickHandler(onWikilinkClick) : null
+  }, [onWikilinkClick])
+  useExtension(wikilinkClickExtension, { editor })
+
+  const hoverCardEnabled = !!(onLinkHover || onLinkClick || onWikilinkHover || onWikilinkClick)
+
   return (
     <ProseKit editor={editor}>
       <div ref={editor.mount} spellCheck={spellCheck}></div>
@@ -154,6 +189,14 @@ export function ProseKitEditor({
       <SlashMenu />
       {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
       {onWikilinkSearch && <WikilinkMenu onWikilinkSearch={onWikilinkSearch} />}
+      {hoverCardEnabled && (
+        <LinkHoverCard
+          onLinkHover={onLinkHover}
+          onWikilinkHover={onWikilinkHover}
+          onLinkClick={onLinkClick}
+          onWikilinkClick={onWikilinkClick}
+        />
+      )}
     </ProseKit>
   )
 }

@@ -227,6 +227,14 @@
   text-underline-offset: 2px;
 }
 
+/* A pointer cursor only while a click handler is active (Mod+click to follow). */
+.ProseMirror[data-link-click] a {
+  cursor: pointer;
+}
+.ProseMirror[data-wikilink-click] .md-wikilink {
+  cursor: pointer;
+}
+
 /* ---------------------------------------------------------------------------
  * Markdown syntax characters (`md-mark`) and link URIs
  * ------------------------------------------------------------------------- */

@@ -1,4 +1,13 @@
+import type { LinkHit, WikilinkHit } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
+import type { ReactNode } from 'react'
+
+export type {
+  LinkClickContext,
+  LinkClickHandler,
+  WikilinkClickContext,
+  WikilinkClickHandler,
+} from '@meowdown/core'
 
 /** A selection to restore: an exact JSON selection, or a document edge. */
 export type SelectionHint = SelectionJSON | 'start' | 'end'
@@ -57,3 +66,32 @@ export type TagSearchHandler = (query: string) => string[] | Promise<string[]>
  * and returns the note names to show, either synchronously or as a promise.
  */
 export type WikilinkSearchHandler = (query: string) => string[] | Promise<string[]>
+
+/** Context passed to a {@link LinkHoverHandler}. */
+export interface LinkHoverContext extends LinkHit {
+  /** Aborts when the pointer leaves before an async card resolves. */
+  signal: AbortSignal
+}
+
+/** Context passed to a {@link WikilinkHoverHandler}. */
+export interface WikilinkHoverContext extends WikilinkHit {
+  /** Aborts when the pointer leaves before an async card resolves. */
+  signal: AbortSignal
+}
+
+/**
+ * What a hover handler returns: a React node (or a promise of one) to fill the
+ * card, `null` / `undefined` for the built-in default card, or `false` to show
+ * no card.
+ */
+export type HoverCardResult = ReactNode | Promise<ReactNode | null> | null | false
+
+/**
+ * Builds the hover card for a Markdown link. Runs while the editor is focused
+ * and the pointer dwells on a link. Return a node (or a promise of one) to fill
+ * the card; return nothing for the built-in card; `false` for none.
+ */
+export type LinkHoverHandler = (context: LinkHoverContext) => HoverCardResult
+
+/** Builds the hover card for a wikilink. Same contract as {@link LinkHoverHandler}. */
+export type WikilinkHoverHandler = (context: WikilinkHoverContext) => HoverCardResult
