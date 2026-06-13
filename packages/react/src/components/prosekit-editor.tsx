@@ -115,6 +115,10 @@ export function ProseKitEditor({
     // The image extension installs file paste/drop handlers, which must be
     // present at creation (they don't compose cleanly through a later
     // `editor.use`), so it is unioned with the base here.
+    //
+    // REVIEW: I DO NOT UNDERSTAND "they don't compose cleanly through a later `editor.use`". Try to explain this better with very detailed information and
+    // add comment here. Notice that we do not have to follow "Whether upload is enabled, though, is decided once, on the first render.". We can just assue
+    // that whoever use the editor will always provide the upload functions (so that the editor can actually work).
     const imageExtension = defineImageExtension({
       resolveUrl: (src) =>
         (imageHandlersRef.current.resolveImageUrl ?? defaultResolveImageUrl)(src),
