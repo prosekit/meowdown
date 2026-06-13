@@ -2,9 +2,6 @@
   position: relative;
 }
 
-/* Floats over the top-right of the code, so the block keeps its normal
- * padding. Hidden until the block is hovered (or the control is focused / its
- * popup is open). */
 .Toolbar {
   display: flex;
   align-items: center;
