@@ -140,12 +140,8 @@ export function ProseKitEditor({
   }, [markMode])
   useExtension(markModeExtension, { editor })
 
-  const [codeBlockViewExtension] = useState(defineCodeBlockView)
-  useExtension(codeBlockViewExtension, { editor })
-
   const docChangeExtension = useMemo(() => {
     if (!onDocChange) return null
-
     return defineDocChangeHandler(() => {
       onDocChange()
     })
