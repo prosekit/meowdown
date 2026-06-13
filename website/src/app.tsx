@@ -1,5 +1,12 @@
-import { Editor, type EditorMode } from '@meowdown/react'
-import { type CSSProperties, useLayoutEffect, useState } from 'react'
+import {
+  Editor,
+  type EditorMode,
+  type LinkClickHandler,
+  type LinkHoverHandler,
+  type WikilinkClickHandler,
+  type WikilinkHoverHandler,
+} from '@meowdown/react'
+import { type CSSProperties, useCallback, useEffect, useLayoutEffect, useState } from 'react'
 
 interface ModeOption {
   value: EditorMode
@@ -43,6 +50,8 @@ Label your notes with tags like #meow and #markdown. Type \`#\` followed by a le
 
 Connect notes with wikilinks like [[Daily journal]] and [[Reading list]]. Type \`[[\` to link another note.
 
+Click into the editor, then hover a [link](https://prosekit.dev) or a [[wikilink]] to preview it. Hold Cmd (or Ctrl) and click to open.
+
 | table | syntax | is | supported |
 | ----- | ------ | -- | --------- |
 | even  | **in** | *tables* too! | :D |
@@ -71,6 +80,71 @@ async function searchNotes(query: string): Promise<string[]> {
   // Simulate network latency so the wikilink menu's loading state shows up.
   await new Promise((resolve) => setTimeout(resolve, 200))
   return NOTES.filter((note) => note.toLowerCase().includes(query))
+}
+
+const NOTE_EXCERPTS: Record<string, string> = {
+  'Cat care basics': 'Feeding schedules, grooming, and vet visit reminders.',
+  'Daily journal': "Today's wins, blockers, and one line of gratitude.",
+  'Meeting notes': 'Decisions and action items from this week.',
+  'Project ideas': 'A running list of things to build someday.',
+  'Reading list': 'Books and articles queued up for later.',
+  'Travel plans': 'Flights, lodging, and a loose itinerary.',
+}
+
+function noteExists(target: string): boolean {
+  return NOTES.some((note) => note.toLowerCase() === target.toLowerCase())
+}
+
+function urlHost(href: string): string {
+  try {
+    return new URL(href).host
+  } catch {
+    return href
+  }
+}
+
+const cardStyle: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.25rem',
+  maxWidth: '15rem',
+  padding: '0.5rem 0.625rem',
+}
+const cardTitleStyle: CSSProperties = { fontWeight: 600, color: 'var(--meowdown-heading)' }
+const cardMetaStyle: CSSProperties = { fontSize: '0.75rem', color: 'var(--meowdown-muted)' }
+const cardBodyStyle: CSSProperties = { fontSize: '0.8125rem', lineHeight: 1.4 }
+const ellipsisStyle: CSSProperties = {
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+}
+
+// A custom hover card for wikilinks: a note preview the app builds from its own
+// data. Returned from `onWikilinkHover`.
+function NotePreview({ target }: { target: string }) {
+  return (
+    <div style={cardStyle}>
+      <span style={cardTitleStyle}>{target}</span>
+      <span style={cardMetaStyle}>
+        {noteExists(target) ? 'Note in your vault' : 'New note, not created yet'}
+      </span>
+      <span style={cardBodyStyle}>
+        {NOTE_EXCERPTS[target] ?? 'No preview yet. Cmd/Ctrl-click to create it.'}
+      </span>
+    </div>
+  )
+}
+
+// A custom hover card for Markdown links. Returned from `onLinkHover`. Omit the
+// prop to get meowdown's built-in card (the URL plus Edit / Copy / Open).
+function LinkPreview({ href }: { href: string }) {
+  return (
+    <div style={cardStyle}>
+      <span style={cardTitleStyle}>{urlHost(href)}</span>
+      <span style={{ ...cardMetaStyle, ...ellipsisStyle }}>{href}</span>
+      <span style={cardMetaStyle}>Cmd/Ctrl-click to open</span>
+    </div>
+  )
 }
 
 interface SegmentedControlProps<T extends string> {
@@ -144,6 +218,35 @@ export function App() {
   const [mode, setMode] = useState<EditorMode>('focus')
   const activeMode = MODES.find((option) => option.value === mode) ?? MODES[0]
 
+  // Transient feedback so click handlers have a visible effect in the demo.
+  const [toast, setToast] = useState<string | null>(null)
+  useEffect(() => {
+    if (!toast) return
+    const id = window.setTimeout(() => setToast(null), 2500)
+    return () => window.clearTimeout(id)
+  }, [toast])
+
+  const handleWikilinkHover = useCallback<WikilinkHoverHandler>(async ({ target, signal }) => {
+    // Simulate fetching the note so the card's loading state shows.
+    await new Promise((resolve) => setTimeout(resolve, 250))
+    if (signal.aborted) return null
+    return <NotePreview target={target} />
+  }, [])
+
+  const handleLinkHover = useCallback<LinkHoverHandler>(
+    ({ href }) => <LinkPreview href={href} />,
+    [],
+  )
+
+  const handleWikilinkClick = useCallback<WikilinkClickHandler>(({ target }) => {
+    setToast(`Opening note: ${target}`)
+  }, [])
+
+  const handleLinkClick = useCallback<LinkClickHandler>(({ href }) => {
+    setToast(`Opening link: ${href}`)
+    window.open(href, '_blank', 'noopener')
+  }, [])
+
   return (
     <main className="relative min-h-dvh bg-zinc-50 text-zinc-600 dark:bg-zinc-950 dark:text-zinc-400">
       <ThemeToggle />
@@ -188,6 +291,10 @@ export function App() {
               initialMarkdown={INITIAL_CONTENT}
               onTagSearch={searchTags}
               onWikilinkSearch={searchNotes}
+              onLinkHover={handleLinkHover}
+              onLinkClick={handleLinkClick}
+              onWikilinkHover={handleWikilinkHover}
+              onWikilinkClick={handleWikilinkClick}
             />
           </div>
 
@@ -212,6 +319,15 @@ export function App() {
           </a>
         </footer>
       </div>
+
+      {toast && (
+        <div
+          role="status"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-lg bg-zinc-900 px-4 py-2 text-sm text-white shadow-lg dark:bg-zinc-100 dark:text-zinc-900"
+        >
+          {toast}
+        </div>
+      )}
     </main>
   )
 }

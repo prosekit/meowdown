@@ -7,8 +7,12 @@ import { ProseKitEditor } from './prosekit-editor.tsx'
 import type {
   EditorHandle,
   EditorStateSnapshot,
+  LinkClickHandler,
+  LinkHoverHandler,
   SelectionHint,
   TagSearchHandler,
+  WikilinkClickHandler,
+  WikilinkHoverHandler,
   WikilinkSearchHandler,
 } from './types.ts'
 
@@ -52,6 +56,38 @@ export interface EditorProps {
   onWikilinkSearch?: WikilinkSearchHandler
 
   /**
+   * Builds the floating hover card shown when the editor is focused and the
+   * pointer dwells on a rendered Markdown link. Receives the link (href, text,
+   * positions) and an `AbortSignal`, and returns the React node to render,
+   * synchronously or as a promise. Return nothing to show the built-in card
+   * (the URL plus Edit / Copy / Open); return `false` to show no card. Pass a
+   * stable function. Ignored in source mode.
+   */
+  onLinkHover?: LinkHoverHandler
+
+  /**
+   * Called on Mod+click (Cmd/Ctrl) of a rendered Markdown link, or the built-in
+   * card's Open action. A plain click edits the link text instead. The host
+   * decides what to do (open in a browser, an in-app webview, etc.). Pass a
+   * stable function. Ignored in source mode.
+   */
+  onLinkClick?: LinkClickHandler
+
+  /**
+   * Builds the floating hover card for wikilinks. Same contract as
+   * `onLinkHover`, with the wikilink target and display text. Ignored in source
+   * mode.
+   */
+  onWikilinkHover?: WikilinkHoverHandler
+
+  /**
+   * Called on Mod+click (Cmd/Ctrl) of a rendered wikilink, or the built-in
+   * card's Open action. A plain click edits the link text instead. Pass a
+   * stable function. Ignored in source mode.
+   */
+  onWikilinkClick?: WikilinkClickHandler
+
+  /**
    * Enables the browser's native spell checking in the rich modes. Defaults
    * to the browser's behavior. Ignored in source mode.
    */
@@ -67,6 +103,10 @@ export function Editor({
   onDocChange,
   onTagSearch,
   onWikilinkSearch,
+  onLinkHover,
+  onLinkClick,
+  onWikilinkHover,
+  onWikilinkClick,
   spellCheck,
   ref,
 }: EditorProps) {
@@ -126,6 +166,10 @@ export function Editor({
           onDocChange={onDocChange}
           onTagSearch={onTagSearch}
           onWikilinkSearch={onWikilinkSearch}
+          onLinkHover={onLinkHover}
+          onLinkClick={onLinkClick}
+          onWikilinkHover={onWikilinkHover}
+          onWikilinkClick={onWikilinkClick}
           spellCheck={spellCheck}
         />
       )}

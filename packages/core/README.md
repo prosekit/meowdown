@@ -13,6 +13,14 @@ The editor extension binds inline-format toggles (`Mod` = Cmd on macOS, Ctrl els
 | `Mod-E`       | `editor.commands.toggleCode()`   | `` `code` ``        |
 | `Mod-Shift-X` | `editor.commands.toggleDel()`    | `~~strikethrough~~` |
 
+## Link and wikilink clicks
+
+`defineLinkClickHandler(handler)` and `defineWikilinkClickHandler(handler)` are optional extensions that route a Mod+click (Cmd/Ctrl) on a rendered Markdown link or wikilink to `handler`. A plain click is left alone so the caret lands in the link for editing. The handler receives a context with the resolved link (`href` / `text` for links, `target` / `display` / `raw` for wikilinks), its document range, and the originating `MouseEvent`.
+
+`wikilinkAt(state, pos)` and `linkAt(state, pos)` are the underlying pure hit-test helpers (using the same Lezer parser that applies the marks), exported for hosts that build their own affordances.
+
+While a click handler is active the editor carries a `data-link-click` or `data-wikilink-click` attribute, used to scope the pointer cursor (see Styling).
+
 ## Styling
 
 `@meowdown/core/style.css` ships a default editor theme. Colors use `light-dark()`, so they follow the page's `color-scheme` (set `color-scheme: light dark` on `:root` for automatic dark mode). Customize by overriding these variables on `:root` or any ancestor:
@@ -36,6 +44,8 @@ Selection colors are standalone variables, not derived from `--meowdown-accent`,
 Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-accent`.
 
 Wikilinks (`[[target]]`) render with a dashed underline via the `.md-wikilink` class, colored by `--meowdown-accent`. Their `[[` `]]` brackets behave like other syntax characters: dimmed in show mode, hidden in hide and focus modes.
+
+Links and wikilinks show a pointer cursor only while a click handler is active, scoped by the `[data-link-click] a` and `[data-wikilink-click] .md-wikilink` selectors.
 
 ## License
 
