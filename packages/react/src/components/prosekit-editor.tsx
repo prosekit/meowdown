@@ -14,6 +14,7 @@ import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit, useExtension } from '@prosekit/react'
 import { useImperativeHandle, useMemo, useState, type Ref } from 'react'
 
+import { AIPanel } from './ai-panel.tsx'
 import { BlockHandle } from './block-handle.tsx'
 import { DropIndicator } from './drop-indicator.tsx'
 import { SlashMenu } from './slash-menu.tsx'
@@ -154,6 +155,7 @@ export function ProseKitEditor({
       <SlashMenu />
       {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
       {onWikilinkSearch && <WikilinkMenu onWikilinkSearch={onWikilinkSearch} />}
+      <AIPanel />
     </ProseKit>
   )
 }

@@ -1,0 +1,15 @@
+.Root {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.Positioner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.Popup {
+}
