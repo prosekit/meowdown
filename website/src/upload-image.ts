@@ -16,3 +16,5 @@ export async function uploadImage(file: File): Promise<string> {
   // tmpfiles returns a viewer URL; rewrite it to the direct file URL.
   return json.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/')
 }
+
+// REVIEW: refactor this function (and its file name ) to uploadFile
