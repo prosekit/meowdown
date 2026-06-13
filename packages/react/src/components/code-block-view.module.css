@@ -2,6 +2,9 @@
   position: relative;
 }
 
+/* Floats over the top-right of the code, so the block keeps its normal
+ * padding. Hidden until the block is hovered (or the control is focused / its
+ * popup is open). */
 .Toolbar {
   display: flex;
   align-items: center;
@@ -11,12 +14,20 @@
   right: 0.5rem;
   z-index: 1;
   user-select: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 100ms ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 }
 
-/* Two classes (0,2,0) so this beats core's `.ProseMirror pre` (0,1,1) padding
- * shorthand and the selector never overlaps the first line. */
-.Root .Pre {
-  padding-top: 2.2rem;
+.Root:hover .Toolbar,
+.Root:focus-within .Toolbar,
+.Toolbar:has([data-popup-open]) {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .Trigger {

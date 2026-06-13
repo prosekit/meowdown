@@ -97,11 +97,7 @@ function CodeBlockView(props: ReactNodeViewProps) {
           {copied ? <CheckIcon /> : <CopyIcon />}
         </button>
       </div>
-      <pre
-        ref={props.contentRef}
-        className={styles.Pre}
-        data-language={language || undefined}
-      ></pre>
+      <pre ref={props.contentRef} data-language={language || undefined}></pre>
     </div>
   )
 }
