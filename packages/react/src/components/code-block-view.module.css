@@ -16,11 +16,7 @@
   user-select: none;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 100ms ease-out;
-
-  @media (prefers-reduced-motion: reduce) {
-    transition: none;
-  }
+  /*transition: opacity 100ms ease-out;*/
 }
 
 .Root:hover .Toolbar,
