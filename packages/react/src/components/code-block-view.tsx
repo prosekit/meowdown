@@ -8,9 +8,11 @@ import { CheckIcon } from './icons/check-icon.tsx'
 import { ChevronsUpDownIcon } from './icons/chevrons-up-down-icon.tsx'
 import { CopyIcon } from './icons/copy-icon.tsx'
 
-type LanguageItem = (typeof codeBlockLanguages)[number]
+type LanguageItem = {
+  label: string
+  value: string
+}
 
-const PLAIN_TEXT: LanguageItem = { value: '', label: 'Plain Text' }
 const COPIED_RESET_MS = 1500
 
 export function CodeBlockView(props: ReactNodeViewProps) {
@@ -33,28 +35,30 @@ export function CodeBlockView(props: ReactNodeViewProps) {
   const attrs = props.node.attrs as CodeBlockAttrs
   const language = attrs.language || ''
 
-  const items = useMemo<LanguageItem[]>(() => [PLAIN_TEXT, ...codeBlockLanguages], [])
-
   // Fall back to the raw value so an alias or unknown language still shows in
   // the trigger instead of looking empty.
   const selected = useMemo<LanguageItem>(
-    () => items.find((item) => item.value === language) ?? { value: language, label: language },
-    [items, language],
+    () =>
+      codeBlockLanguages.find((item) => item.value === language) ?? {
+        value: language,
+        label: language,
+      },
+    [language],
   )
 
   const [query, setQuery] = useState('')
 
   // Markdown fences accept any language, so offer the typed value as an option
   // when it doesn't match a known one.
-  const itemsForView = useMemo<LanguageItem[]>(() => {
+  const itemsForView = useMemo<readonly LanguageItem[]>(() => {
     const value = query.trim()
-    if (!value) return items
+    if (!value) return codeBlockLanguages
     const lowercased = value.toLowerCase()
-    const known = items.some(
+    const known = codeBlockLanguages.some(
       (item) => item.value.toLowerCase() === lowercased || item.label.toLowerCase() === lowercased,
     )
-    return known ? items : [...items, { value, label: `Use "${value}"` }]
-  }, [items, query])
+    return known ? codeBlockLanguages : [...codeBlockLanguages, { value, label: `Use "${value}"` }]
+  }, [query])
 
   const setLanguage = (item: LanguageItem | null) => {
     props.setAttrs({ language: item?.value ?? '' } satisfies CodeBlockAttrs)
@@ -106,7 +110,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
                 <Combobox.Empty className={styles.Empty}>No languages found.</Combobox.Empty>
                 <Combobox.List className={styles.List}>
                   {(item: LanguageItem) => (
-                    <Combobox.Item key={item.value} value={item} className={styles.Item}>
+                    <Combobox.Item key={item.label} value={item} className={styles.Item}>
                       <Combobox.ItemIndicator className={styles.ItemIndicator}>
                         <CheckIcon />
                       </Combobox.ItemIndicator>
