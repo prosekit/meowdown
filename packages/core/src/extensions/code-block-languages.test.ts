@@ -6,149 +6,566 @@ describe('codeBlockLanguages', () => {
   it('lists the supported languages as `value → label` pairs', () => {
     expect(codeBlockLanguages).toMatchInlineSnapshot(`
       [
-        "c -> C",
-        "c++ -> C++",
-        "cql -> CQL",
-        "css -> CSS",
-        "go -> Go",
-        "html -> HTML",
-        "java -> Java",
-        "javascript -> JavaScript",
-        "jinja -> Jinja",
-        "json -> JSON",
-        "jsx -> JSX",
-        "less -> LESS",
-        "liquid -> Liquid",
-        "mariadb sql -> MariaDB SQL",
-        "markdown -> Markdown",
-        "ms sql -> MS SQL",
-        "mysql -> MySQL",
-        "php -> PHP",
-        "plsql -> PLSQL",
-        "postgresql -> PostgreSQL",
-        "python -> Python",
-        "rust -> Rust",
-        "sass -> Sass",
-        "scss -> SCSS",
-        "sql -> SQL",
-        "sqlite -> SQLite",
-        "tsx -> TSX",
-        "typescript -> TypeScript",
-        "webassembly -> WebAssembly",
-        "xml -> XML",
-        "yaml -> YAML",
-        "apl -> APL",
-        "pgp -> PGP",
-        "asn.1 -> ASN.1",
-        "asterisk -> Asterisk",
-        "brainfuck -> Brainfuck",
-        "cobol -> Cobol",
-        "c# -> C#",
-        "clojure -> Clojure",
-        "clojurescript -> ClojureScript",
-        "closure stylesheets (gss) -> Closure Stylesheets (GSS)",
-        "cmake -> CMake",
-        "coffeescript -> CoffeeScript",
-        "common lisp -> Common Lisp",
-        "cypher -> Cypher",
-        "cython -> Cython",
-        "crystal -> Crystal",
-        "d -> D",
-        "dart -> Dart",
-        "diff -> diff",
-        "dockerfile -> Dockerfile",
-        "dtd -> DTD",
-        "dylan -> Dylan",
-        "ebnf -> EBNF",
-        "ecl -> ECL",
-        "edn -> edn",
-        "eiffel -> Eiffel",
-        "elm -> Elm",
-        "erlang -> Erlang",
-        "esper -> Esper",
-        "factor -> Factor",
-        "fcl -> FCL",
-        "forth -> Forth",
-        "fortran -> Fortran",
-        "f# -> F#",
-        "gas -> Gas",
-        "gherkin -> Gherkin",
-        "groovy -> Groovy",
-        "haskell -> Haskell",
-        "haxe -> Haxe",
-        "hxml -> HXML",
-        "http -> HTTP",
-        "idl -> IDL",
-        "json-ld -> JSON-LD",
-        "julia -> Julia",
-        "kotlin -> Kotlin",
-        "livescript -> LiveScript",
-        "lua -> Lua",
-        "mirc -> mIRC",
-        "mathematica -> Mathematica",
-        "modelica -> Modelica",
-        "mumps -> MUMPS",
-        "mbox -> Mbox",
-        "nginx -> Nginx",
-        "nsis -> NSIS",
-        "ntriples -> NTriples",
-        "objective-c -> Objective-C",
-        "objective-c++ -> Objective-C++",
-        "ocaml -> OCaml",
-        "octave -> Octave",
-        "oz -> Oz",
-        "pascal -> Pascal",
-        "perl -> Perl",
-        "pig -> Pig",
-        "powershell -> PowerShell",
-        "properties files -> Properties files",
-        "protobuf -> ProtoBuf",
-        "pug -> Pug",
-        "puppet -> Puppet",
-        "q -> Q",
-        "r -> R",
-        "rpm changes -> RPM Changes",
-        "rpm spec -> RPM Spec",
-        "ruby -> Ruby",
-        "sas -> SAS",
-        "scala -> Scala",
-        "scheme -> Scheme",
-        "shell -> Shell",
-        "sieve -> Sieve",
-        "smalltalk -> Smalltalk",
-        "solr -> Solr",
-        "sml -> SML",
-        "sparql -> SPARQL",
-        "spreadsheet -> Spreadsheet",
-        "squirrel -> Squirrel",
-        "stylus -> Stylus",
-        "swift -> Swift",
-        "stex -> sTeX",
-        "latex -> LaTeX",
-        "systemverilog -> SystemVerilog",
-        "tcl -> Tcl",
-        "textile -> Textile",
-        "tiddlywiki -> TiddlyWiki",
-        "tiki wiki -> Tiki wiki",
-        "toml -> TOML",
-        "troff -> Troff",
-        "ttcn -> TTCN",
-        "ttcn_cfg -> TTCN_CFG",
-        "turtle -> Turtle",
-        "web idl -> Web IDL",
-        "vb.net -> VB.NET",
-        "vbscript -> VBScript",
-        "velocity -> Velocity",
-        "verilog -> Verilog",
-        "vhdl -> VHDL",
-        "xquery -> XQuery",
-        "yacas -> Yacas",
-        "z80 -> Z80",
-        "mscgen -> MscGen",
-        "xù -> Xù",
-        "msgenny -> MsGenny",
-        "vue -> Vue",
-        "angular template -> Angular Template",
+        {
+          "label": "APL",
+          "value": "apl",
+        },
+        {
+          "label": "ASN.1",
+          "value": "asn.1",
+        },
+        {
+          "label": "Asterisk",
+          "value": "asterisk",
+        },
+        {
+          "label": "Brainfuck",
+          "value": "brainfuck",
+        },
+        {
+          "label": "C",
+          "value": "c",
+        },
+        {
+          "label": "C#",
+          "value": "c#",
+        },
+        {
+          "label": "C++",
+          "value": "c++",
+        },
+        {
+          "label": "Clojure",
+          "value": "clojure",
+        },
+        {
+          "label": "ClojureScript",
+          "value": "clojurescript",
+        },
+        {
+          "label": "Closure Stylesheets (GSS)",
+          "value": "closure stylesheets (gss)",
+        },
+        {
+          "label": "CMake",
+          "value": "cmake",
+        },
+        {
+          "label": "Cobol",
+          "value": "cobol",
+        },
+        {
+          "label": "CoffeeScript",
+          "value": "coffeescript",
+        },
+        {
+          "label": "Common Lisp",
+          "value": "common lisp",
+        },
+        {
+          "label": "CQL",
+          "value": "cql",
+        },
+        {
+          "label": "Crystal",
+          "value": "crystal",
+        },
+        {
+          "label": "CSS",
+          "value": "css",
+        },
+        {
+          "label": "Cypher",
+          "value": "cypher",
+        },
+        {
+          "label": "Cython",
+          "value": "cython",
+        },
+        {
+          "label": "D",
+          "value": "d",
+        },
+        {
+          "label": "Dart",
+          "value": "dart",
+        },
+        {
+          "label": "diff",
+          "value": "diff",
+        },
+        {
+          "label": "Dockerfile",
+          "value": "dockerfile",
+        },
+        {
+          "label": "DTD",
+          "value": "dtd",
+        },
+        {
+          "label": "Dylan",
+          "value": "dylan",
+        },
+        {
+          "label": "EBNF",
+          "value": "ebnf",
+        },
+        {
+          "label": "ECL",
+          "value": "ecl",
+        },
+        {
+          "label": "edn",
+          "value": "edn",
+        },
+        {
+          "label": "Eiffel",
+          "value": "eiffel",
+        },
+        {
+          "label": "Elm",
+          "value": "elm",
+        },
+        {
+          "label": "Erlang",
+          "value": "erlang",
+        },
+        {
+          "label": "Esper",
+          "value": "esper",
+        },
+        {
+          "label": "F#",
+          "value": "f#",
+        },
+        {
+          "label": "Factor",
+          "value": "factor",
+        },
+        {
+          "label": "FCL",
+          "value": "fcl",
+        },
+        {
+          "label": "Forth",
+          "value": "forth",
+        },
+        {
+          "label": "Fortran",
+          "value": "fortran",
+        },
+        {
+          "label": "Gas",
+          "value": "gas",
+        },
+        {
+          "label": "Gherkin",
+          "value": "gherkin",
+        },
+        {
+          "label": "Go",
+          "value": "go",
+        },
+        {
+          "label": "Groovy",
+          "value": "groovy",
+        },
+        {
+          "label": "Haskell",
+          "value": "haskell",
+        },
+        {
+          "label": "Haxe",
+          "value": "haxe",
+        },
+        {
+          "label": "HTML",
+          "value": "html",
+        },
+        {
+          "label": "HTTP",
+          "value": "http",
+        },
+        {
+          "label": "HXML",
+          "value": "hxml",
+        },
+        {
+          "label": "IDL",
+          "value": "idl",
+        },
+        {
+          "label": "Java",
+          "value": "java",
+        },
+        {
+          "label": "JavaScript",
+          "value": "javascript",
+        },
+        {
+          "label": "Jinja",
+          "value": "jinja",
+        },
+        {
+          "label": "JSON",
+          "value": "json",
+        },
+        {
+          "label": "JSON-LD",
+          "value": "json-ld",
+        },
+        {
+          "label": "JSX",
+          "value": "jsx",
+        },
+        {
+          "label": "Julia",
+          "value": "julia",
+        },
+        {
+          "label": "Kotlin",
+          "value": "kotlin",
+        },
+        {
+          "label": "LaTeX",
+          "value": "latex",
+        },
+        {
+          "label": "LESS",
+          "value": "less",
+        },
+        {
+          "label": "Liquid",
+          "value": "liquid",
+        },
+        {
+          "label": "LiveScript",
+          "value": "livescript",
+        },
+        {
+          "label": "Lua",
+          "value": "lua",
+        },
+        {
+          "label": "MariaDB SQL",
+          "value": "mariadb sql",
+        },
+        {
+          "label": "Markdown",
+          "value": "markdown",
+        },
+        {
+          "label": "Mathematica",
+          "value": "mathematica",
+        },
+        {
+          "label": "Mbox",
+          "value": "mbox",
+        },
+        {
+          "label": "mIRC",
+          "value": "mirc",
+        },
+        {
+          "label": "Modelica",
+          "value": "modelica",
+        },
+        {
+          "label": "MS SQL",
+          "value": "ms sql",
+        },
+        {
+          "label": "MUMPS",
+          "value": "mumps",
+        },
+        {
+          "label": "MySQL",
+          "value": "mysql",
+        },
+        {
+          "label": "Nginx",
+          "value": "nginx",
+        },
+        {
+          "label": "NSIS",
+          "value": "nsis",
+        },
+        {
+          "label": "NTriples",
+          "value": "ntriples",
+        },
+        {
+          "label": "Objective-C",
+          "value": "objective-c",
+        },
+        {
+          "label": "Objective-C++",
+          "value": "objective-c++",
+        },
+        {
+          "label": "OCaml",
+          "value": "ocaml",
+        },
+        {
+          "label": "Octave",
+          "value": "octave",
+        },
+        {
+          "label": "Oz",
+          "value": "oz",
+        },
+        {
+          "label": "Pascal",
+          "value": "pascal",
+        },
+        {
+          "label": "Perl",
+          "value": "perl",
+        },
+        {
+          "label": "PGP",
+          "value": "pgp",
+        },
+        {
+          "label": "PHP",
+          "value": "php",
+        },
+        {
+          "label": "Pig",
+          "value": "pig",
+        },
+        {
+          "label": "Plain text",
+          "value": "",
+        },
+        {
+          "label": "PLSQL",
+          "value": "plsql",
+        },
+        {
+          "label": "PostgreSQL",
+          "value": "postgresql",
+        },
+        {
+          "label": "PowerShell",
+          "value": "powershell",
+        },
+        {
+          "label": "Properties files",
+          "value": "properties files",
+        },
+        {
+          "label": "ProtoBuf",
+          "value": "protobuf",
+        },
+        {
+          "label": "Pug",
+          "value": "pug",
+        },
+        {
+          "label": "Puppet",
+          "value": "puppet",
+        },
+        {
+          "label": "Python",
+          "value": "python",
+        },
+        {
+          "label": "Q",
+          "value": "q",
+        },
+        {
+          "label": "R",
+          "value": "r",
+        },
+        {
+          "label": "RPM Changes",
+          "value": "rpm changes",
+        },
+        {
+          "label": "RPM Spec",
+          "value": "rpm spec",
+        },
+        {
+          "label": "Ruby",
+          "value": "ruby",
+        },
+        {
+          "label": "Rust",
+          "value": "rust",
+        },
+        {
+          "label": "SAS",
+          "value": "sas",
+        },
+        {
+          "label": "Sass",
+          "value": "sass",
+        },
+        {
+          "label": "Scala",
+          "value": "scala",
+        },
+        {
+          "label": "Scheme",
+          "value": "scheme",
+        },
+        {
+          "label": "SCSS",
+          "value": "scss",
+        },
+        {
+          "label": "Shell",
+          "value": "shell",
+        },
+        {
+          "label": "Sieve",
+          "value": "sieve",
+        },
+        {
+          "label": "Smalltalk",
+          "value": "smalltalk",
+        },
+        {
+          "label": "SML",
+          "value": "sml",
+        },
+        {
+          "label": "Solr",
+          "value": "solr",
+        },
+        {
+          "label": "SPARQL",
+          "value": "sparql",
+        },
+        {
+          "label": "Spreadsheet",
+          "value": "spreadsheet",
+        },
+        {
+          "label": "SQL",
+          "value": "sql",
+        },
+        {
+          "label": "SQLite",
+          "value": "sqlite",
+        },
+        {
+          "label": "Squirrel",
+          "value": "squirrel",
+        },
+        {
+          "label": "sTeX",
+          "value": "stex",
+        },
+        {
+          "label": "Stylus",
+          "value": "stylus",
+        },
+        {
+          "label": "Swift",
+          "value": "swift",
+        },
+        {
+          "label": "SystemVerilog",
+          "value": "systemverilog",
+        },
+        {
+          "label": "Tcl",
+          "value": "tcl",
+        },
+        {
+          "label": "Textile",
+          "value": "textile",
+        },
+        {
+          "label": "TiddlyWiki",
+          "value": "tiddlywiki",
+        },
+        {
+          "label": "Tiki wiki",
+          "value": "tiki wiki",
+        },
+        {
+          "label": "TOML",
+          "value": "toml",
+        },
+        {
+          "label": "Troff",
+          "value": "troff",
+        },
+        {
+          "label": "TSX",
+          "value": "tsx",
+        },
+        {
+          "label": "TTCN",
+          "value": "ttcn",
+        },
+        {
+          "label": "TTCN_CFG",
+          "value": "ttcn_cfg",
+        },
+        {
+          "label": "Turtle",
+          "value": "turtle",
+        },
+        {
+          "label": "TypeScript",
+          "value": "typescript",
+        },
+        {
+          "label": "VB.NET",
+          "value": "vb.net",
+        },
+        {
+          "label": "VBScript",
+          "value": "vbscript",
+        },
+        {
+          "label": "Velocity",
+          "value": "velocity",
+        },
+        {
+          "label": "Verilog",
+          "value": "verilog",
+        },
+        {
+          "label": "VHDL",
+          "value": "vhdl",
+        },
+        {
+          "label": "Vue",
+          "value": "vue",
+        },
+        {
+          "label": "Web IDL",
+          "value": "web idl",
+        },
+        {
+          "label": "WebAssembly",
+          "value": "webassembly",
+        },
+        {
+          "label": "XML",
+          "value": "xml",
+        },
+        {
+          "label": "XQuery",
+          "value": "xquery",
+        },
+        {
+          "label": "Yacas",
+          "value": "yacas",
+        },
+        {
+          "label": "YAML",
+          "value": "yaml",
+        },
+        {
+          "label": "Z80",
+          "value": "z80",
+        },
       ]
     `)
   })
