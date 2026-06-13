@@ -51,6 +51,12 @@ export interface EditorProps {
    */
   onWikilinkSearch?: WikilinkSearchHandler
 
+  /**
+   * Enables the browser's native spell checking in the rich modes. Defaults
+   * to the browser's behavior. Ignored in source mode.
+   */
+  spellCheck?: boolean
+
   /** Imperative handle for the editor. */
   ref?: Ref<EditorHandle>
 }
@@ -61,6 +67,7 @@ export function Editor({
   onDocChange,
   onTagSearch,
   onWikilinkSearch,
+  spellCheck,
   ref,
 }: EditorProps) {
   // Handle of whichever editor is currently mounted.
@@ -119,6 +126,7 @@ export function Editor({
           onDocChange={onDocChange}
           onTagSearch={onTagSearch}
           onWikilinkSearch={onWikilinkSearch}
+          spellCheck={spellCheck}
         />
       )}
     </div>

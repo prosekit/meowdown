@@ -184,6 +184,7 @@ export function App() {
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
             <Editor
               mode={mode}
+              spellCheck={false}
               initialMarkdown={INITIAL_CONTENT}
               onTagSearch={searchTags}
               onWikilinkSearch={searchNotes}
