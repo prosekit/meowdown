@@ -2,6 +2,7 @@
 declare const styles = {
   'Root': '' as string,
   'Toolbar': '' as string,
+  'Root': '' as string,
   'Pre': '' as string,
   'Trigger': '' as string,
   'TriggerIcon': '' as string,
