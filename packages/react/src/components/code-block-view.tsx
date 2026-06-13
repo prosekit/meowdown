@@ -19,7 +19,7 @@ const PLAIN_TEXT_LABEL = 'Plain Text'
 const COPIED_RESET_MS = 1500
 
 function CodeBlockView(props: ReactNodeViewProps) {
-  const attrs = (props.node.attrs as CodeBlockAttrs)
+  const attrs = props.node.attrs as CodeBlockAttrs
   const language = attrs.language || PLAIN_TEXT
 
   // `items` lets `<Select.Value>` show the label of the selected language. The
