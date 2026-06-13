@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
 
-import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
 import { defineImagePreview } from './image-preview.ts'
@@ -100,7 +99,7 @@ describe('image preview', () => {
     const markdown = '![cat](https://example.com/cat.png)'
     fixture.set(n.doc(n.paragraph(markdown)))
     await expect.element(preview).toBeInTheDocument()
-    expect(docToMarkdown(fixture.doc)).toBe(`${markdown}\n`)
+    expect(fixture.getMarkdown()).toBe(`${markdown}\n`)
   })
 
   it('still renders the preview in hide mark mode', async () => {

@@ -100,9 +100,9 @@ export function ProseKitEditor({
   spellCheck,
   ref,
 }: ProseKitEditorProps) {
-  // The latest handler closures are read at call time so a re-render with a
-  // new closure never strands the extension calling a stale one. Whether
-  // upload is enabled, though, is decided once, on the first render.
+  // Every image callback is read through this ref at call time, so a re-render
+  // with a new closure (or newly added/removed handler) is picked up live: the
+  // image extension is built once but never captures a stale closure.
   const imageHandlersRef = useRef({
     resolveImageUrl,
     onImageUpload,
@@ -112,22 +112,35 @@ export function ProseKitEditor({
   imageHandlersRef.current = { resolveImageUrl, onImageUpload, canUploadImage, onImageUploadError }
 
   const [editor] = useState((): TypedEditor => {
-    // The image extension installs file paste/drop handlers, which must be
-    // present at creation (they don't compose cleanly through a later
-    // `editor.use`), so it is unioned with the base here.
+    // The image extension is unioned with the base here, at creation, instead of
+    // being added later with `editor.use(...)`. The upload half registers its
+    // paste/drop handlers through ProseKit's facet system (a child facet of
+    // `editorEventFacet`). Each facet is assigned a fixed numeric path, and when
+    // `editor.use` folds a new extension into an already-built editor it merges
+    // the two facet trees position-by-position (`unionFacetNode`), asserting
+    // that both sides at a given path point to the same facet. A facet defined
+    // in a separately-loaded module (`@prosekit/extensions/file`) can land on a
+    // path that collides with another facet in the live tree, tripping that
+    // assertion and throwing at runtime. Composing the whole tree once, before
+    // the editor exists, sidesteps the incremental merge so the handlers always
+    // install cleanly.
     //
-    // REVIEW: I DO NOT UNDERSTAND "they don't compose cleanly through a later `editor.use`". Try to explain this better with very detailed information and
-    // add comment here. Notice that we do not have to follow "Whether upload is enabled, though, is decided once, on the first render.". We can just assue
-    // that whoever use the editor will always provide the upload functions (so that the editor can actually work).
+    // The handlers are always installed; `canUpload` is what actually gates
+    // uploading, returning false (so paste/drop falls back to the default) while
+    // no `onImageUpload` is set. Reading it from the ref keeps enablement live
+    // rather than frozen at first render.
     const imageExtension = defineImageExtension({
       resolveUrl: (src) =>
         (imageHandlersRef.current.resolveImageUrl ?? defaultResolveImageUrl)(src),
-      upload: onImageUpload
-        ? (file) => (imageHandlersRef.current.onImageUpload ?? onImageUpload)(file)
-        : undefined,
-      canUpload: canUploadImage
-        ? (file) => (imageHandlersRef.current.canUploadImage ?? canUploadImage)(file)
-        : undefined,
+      upload: (file) => {
+        const handler = imageHandlersRef.current.onImageUpload
+        return handler ? handler(file) : Promise.reject(new Error('onImageUpload is not set'))
+      },
+      canUpload: (file) => {
+        if (!imageHandlersRef.current.onImageUpload) return false
+        const predicate = imageHandlersRef.current.canUploadImage
+        return predicate ? predicate(file) : file.type.startsWith('image/')
+      },
       onUploadError: ({ error, file }) => {
         const handler = imageHandlersRef.current.onImageUploadError
         if (handler) handler({ error, file })

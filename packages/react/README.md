@@ -41,17 +41,6 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
 - `spellCheck?: boolean`: toggles the browser's native spell checking in the rich modes. Defaults to the browser's behavior. Ignored in source mode.
 - `ref?: Ref<EditorHandle>`
 
-REVIEW: remove paragraph below
-
-Inline images render as a non-editable preview inline at the position of the `![alt](src)` text, flowing with the surrounding text; the Markdown text itself stays in the document, so saving is unaffected. A minimal demo upload that keeps images for the session:
-
-```tsx
-<Editor onImageUpload={(file) => URL.createObjectURL(file)} />
-```
-
-REVIEW: remove paragraph above
-
-
 ### `EditorHandle`
 
 Imperative handle for the editor, attached via `ref`.

@@ -1,11 +1,11 @@
 /**
  * Uploads a file to https://tmpfiles.org and returns the URL of the uploaded
- * image.
+ * file.
  *
  * This is for demonstration only: tmpfiles.org deletes uploads after one hour.
  * A production host would POST to its own storage and return a stable URL.
  */
-export async function uploadImage(file: File): Promise<string> {
+export async function uploadFile(file: File): Promise<string> {
   const body = new FormData()
   body.append('file', file)
   const response = await fetch('https://tmpfiles.org/api/v1/upload', { method: 'POST', body })
@@ -16,5 +16,3 @@ export async function uploadImage(file: File): Promise<string> {
   // tmpfiles returns a viewer URL; rewrite it to the direct file URL.
   return json.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/')
 }
-
-// REVIEW: refactor this function (and its file name ) to uploadFile

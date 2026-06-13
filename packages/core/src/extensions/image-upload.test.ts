@@ -1,9 +1,7 @@
-import { pasteFiles, pasteText } from '@prosekit/core/test'
 import type { Uploader } from '@prosekit/extensions/file'
 import { describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
-import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { findText } from '../testing/find-text.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
@@ -14,34 +12,6 @@ import { defaultResolveImageUrl } from './images.ts'
 function createImageFile(name = 'cat.png'): File {
   return new File([new Uint8Array([1, 2, 3])], name, { type: 'image/png' })
 }
-
-// `pasteFiles` from `@prosekit/core/test` covers file-only pastes; these two
-// helpers cover what it can't express: an image alongside text (to check the
-// text is dropped) and a drop at coordinates.
-function pasteImageAndText(fixture: Fixture, file: File, text: string): void {
-  const data = new DataTransfer()
-  data.setData('text/plain', text)
-  data.items.add(file)
-  fixture.dom.dispatchEvent(
-    new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
-  )
-}
-
-function dropFiles(fixture: Fixture, files: File[], left: number, top: number): void {
-  const dataTransfer = new DataTransfer()
-  for (const file of files) dataTransfer.items.add(file)
-  fixture.dom.dispatchEvent(
-    new DragEvent('drop', {
-      dataTransfer,
-      clientX: left,
-      clientY: top,
-      bubbles: true,
-      cancelable: true,
-    }),
-  )
-}
-
-// REVIEW: just add a paste and drop method to the fixture so that we can reuse it in other tests.
 
 /** An uploader whose promise is resolved by hand, for deterministic timing. */
 function deferredUploader(): { uploader: Uploader<string>; resolve: (url: string) => void } {
@@ -63,13 +33,6 @@ function setupUpload(options: Partial<ResolvedUploadOptions> = {}): Fixture {
   })
 }
 
-function markdown(fixture: Fixture): string {
-  return docToMarkdown(fixture.doc)
-}
-
-// REVIEW: just add a getMarkdown() method to the fixture so that we can reuse it in other tests.
-
-
 describe('image upload', () => {
   it('uploads a pasted image and swaps the placeholder for the returned src', async () => {
     const uploader = vi.fn<Uploader<string>>(({ file }) => Promise.resolve(`uploaded/${file.name}`))
@@ -78,10 +41,10 @@ describe('image upload', () => {
     fixture.set(n.doc(n.paragraph('hi<a>')))
 
     const file = createImageFile()
-    pasteFiles(fixture.view, [file])
+    fixture.paste([file])
     expect(uploader).toHaveBeenCalledWith(expect.objectContaining({ file }))
     await vi.waitFor(() => {
-      expect(markdown(fixture)).toBe('hi![](uploaded/cat.png)\n')
+      expect(fixture.getMarkdown()).toBe('hi![](uploaded/cat.png)\n')
     })
   })
 
@@ -91,13 +54,13 @@ describe('image upload', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('hi<a>')))
 
-    pasteFiles(fixture.view, [createImageFile()])
+    fixture.paste([createImageFile()])
     // The placeholder is inserted synchronously, carrying a blob: URL.
-    expect(markdown(fixture)).toMatch(/^hi!\[]\(blob:[^)]+\)\n$/)
+    expect(fixture.getMarkdown()).toMatch(/^hi!\[]\(blob:[^)]+\)\n$/)
 
     resolve('final.png')
     await vi.waitFor(() => {
-      expect(markdown(fixture)).toBe('hi![](final.png)\n')
+      expect(fixture.getMarkdown()).toBe('hi![](final.png)\n')
     })
   })
 
@@ -109,8 +72,8 @@ describe('image upload', () => {
     fixture.set(n.doc(n.paragraph('hi<a>')))
 
     const file = createImageFile()
-    pasteFiles(fixture.view, [file])
-    expect(markdown(fixture)).toContain('![](blob:')
+    fixture.paste([file])
+    expect(fixture.getMarkdown()).toContain('![](blob:')
 
     await vi.waitFor(() => {
       expect(onError).toHaveBeenCalledTimes(1)
@@ -118,10 +81,10 @@ describe('image upload', () => {
     const arg = onError.mock.calls[0][0] as { error: unknown; file: File }
     expect(arg.file).toBe(file)
     expect((arg.error as Error).cause).toBe(cause)
-    expect(markdown(fixture)).toBe('hi\n')
+    expect(fixture.getMarkdown()).toBe('hi\n')
 
     fixture.view.dispatch(fixture.state.tr.insertText('!', 3))
-    expect(markdown(fixture)).toBe('hi!\n')
+    expect(fixture.getMarkdown()).toBe('hi!\n')
   })
 
   it('falls through when canUpload rejects the file', () => {
@@ -130,9 +93,9 @@ describe('image upload', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('hi<a>')))
 
-    pasteFiles(fixture.view, [createImageFile()])
+    fixture.paste([createImageFile()])
     expect(uploader).not.toHaveBeenCalled()
-    expect(markdown(fixture)).not.toContain('![]')
+    expect(fixture.getMarkdown()).not.toContain('![]')
   })
 
   it('ignores a non-image file with the default canUpload', () => {
@@ -142,9 +105,9 @@ describe('image upload', () => {
     fixture.set(n.doc(n.paragraph('hi<a>')))
 
     const textFile = new File(['x'], 'notes.txt', { type: 'text/plain' })
-    pasteFiles(fixture.view, [textFile])
+    fixture.paste([textFile])
     expect(uploader).not.toHaveBeenCalled()
-    expect(markdown(fixture)).not.toContain('![]')
+    expect(fixture.getMarkdown()).not.toContain('![]')
   })
 
   it('falls through for a text-only clipboard, leaving paste to the default', async () => {
@@ -153,10 +116,10 @@ describe('image upload', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('<a>')))
 
-    pasteText(fixture.view, 'plain text')
+    fixture.paste([], 'plain text')
     await expect.element(page.getByText('plain text')).toBeInTheDocument()
     expect(uploader).not.toHaveBeenCalled()
-    expect(markdown(fixture)).not.toContain('![]')
+    expect(fixture.getMarkdown()).not.toContain('![]')
   })
 
   it('does nothing on an image paste when no upload handler is installed', async () => {
@@ -165,9 +128,9 @@ describe('image upload', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('hi<a>')))
 
-    pasteFiles(fixture.view, [createImageFile()])
+    fixture.paste([createImageFile()])
     await vi.waitFor(() => {
-      expect(markdown(fixture)).toBe('hi\n')
+      expect(fixture.getMarkdown()).toBe('hi\n')
     })
   })
 
@@ -176,11 +139,11 @@ describe('image upload', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('<a>')))
 
-    pasteImageAndText(fixture, createImageFile(), 'pasted html text')
+    fixture.paste([createImageFile()], 'pasted html text')
     await vi.waitFor(() => {
-      expect(markdown(fixture)).toBe('![](uploaded/cat.png)\n')
+      expect(fixture.getMarkdown()).toBe('![](uploaded/cat.png)\n')
     })
-    expect(markdown(fixture)).not.toContain('pasted html text')
+    expect(fixture.getMarkdown()).not.toContain('pasted html text')
   })
 
   it('uploads two pasted files and inserts them in order', async () => {
@@ -188,24 +151,26 @@ describe('image upload', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('<a>')))
 
-    pasteFiles(fixture.view, [createImageFile('a.png'), createImageFile('b.png')])
+    fixture.paste([createImageFile('a.png'), createImageFile('b.png')])
     await vi.waitFor(() => {
-      expect(markdown(fixture)).toBe('![](uploaded/a.png)![](uploaded/b.png)\n')
+      expect(fixture.getMarkdown()).toBe('![](uploaded/a.png)![](uploaded/b.png)\n')
     })
   })
 
-  it('drops an image at the drop point, not the caret', async () => {
+  it('drops an image as its own block at the drop point', async () => {
     using fixture = setupUpload({ uploader: () => Promise.resolve('drop.png') })
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('first<a>'), n.paragraph('second')))
 
     const target = findText(fixture.doc, 'second') + 3
     const coords = fixture.view.coordsAtPos(target)
-    dropFiles(fixture, [createImageFile()], coords.left, coords.top)
+    fixture.drop([createImageFile()], coords.left, coords.top)
+    // The image lands as a standalone block (blank lines around it), not inline
+    // in either paragraph.
     await vi.waitFor(() => {
-      expect(markdown(fixture)).toContain('![](drop.png)')
+      expect(fixture.getMarkdown()).toContain('\n\n![](drop.png)\n\n')
     })
-    expect(markdown(fixture)).toMatch(/^first\n\n/)
+    expect(fixture.getMarkdown()).toMatch(/^first\n\n/)
   })
 
   it('swaps the placeholder wherever concurrent edits push it', async () => {
@@ -214,13 +179,13 @@ describe('image upload', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('hello<a>')))
 
-    pasteFiles(fixture.view, [createImageFile()])
+    fixture.paste([createImageFile()])
     // Edit the document start while the upload is in flight.
     fixture.view.dispatch(fixture.state.tr.insertText('XYZ', 1))
     resolve('flight.png')
 
     await vi.waitFor(() => {
-      expect(markdown(fixture)).toBe('XYZhello![](flight.png)\n')
+      expect(fixture.getMarkdown()).toBe('XYZhello![](flight.png)\n')
     })
   })
 
@@ -231,15 +196,15 @@ describe('image upload', () => {
     // The marker must not collide with the blob: URL that findText scans.
     fixture.set(n.doc(n.paragraph('one<a>'), n.paragraph('ZZZ')))
 
-    pasteFiles(fixture.view, [createImageFile()])
-    const blob = markdown(fixture).match(/!\[]\((blob:[^)]+)\)/)?.[1]
+    fixture.paste([createImageFile()])
+    const blob = fixture.getMarkdown().match(/!\[]\((blob:[^)]+)\)/)?.[1]
     expect(blob).toBeTruthy()
     // Duplicate the placeholder into the second paragraph.
     fixture.view.dispatch(fixture.state.tr.insertText(`![](${blob})`, findText(fixture.doc, 'ZZZ')))
     resolve('dup.png')
 
     await vi.waitFor(() => {
-      const md = markdown(fixture)
+      const md = fixture.getMarkdown()
       expect(md).not.toContain('blob:')
       expect(md.match(/!\[]\(dup\.png\)/g) ?? []).toHaveLength(2)
     })
@@ -251,15 +216,15 @@ describe('image upload', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('keep'), n.paragraph('gone<a>')))
 
-    pasteFiles(fixture.view, [createImageFile()])
+    fixture.paste([createImageFile()])
     // Delete the whole second paragraph (where the placeholder lives).
     fixture.view.dispatch(fixture.state.tr.delete(6, fixture.doc.content.size))
     resolve('gone.png')
 
     await vi.waitFor(() => {
-      expect(markdown(fixture)).toBe('keep\n')
+      expect(fixture.getMarkdown()).toBe('keep\n')
     })
-    expect(markdown(fixture)).not.toContain('![]')
+    expect(fixture.getMarkdown()).not.toContain('![]')
   })
 
   it('does not dispatch after the editor is unmounted', async () => {
@@ -268,7 +233,7 @@ describe('image upload', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('hi<a>')))
 
-    pasteFiles(fixture.view, [createImageFile()])
+    fixture.paste([createImageFile()])
     const view = fixture.view
     fixture.editor.unmount()
     expect(view.isDestroyed).toBe(true)

@@ -1,7 +1,7 @@
 import { Editor, type EditorMode } from '@meowdown/react'
 import { type CSSProperties, useLayoutEffect, useState } from 'react'
 
-import { uploadImage } from './upload-image.ts'
+import { uploadFile } from './upload-file.ts'
 
 interface ModeOption {
   value: EditorMode
@@ -202,7 +202,7 @@ export function App() {
               initialMarkdown={INITIAL_CONTENT}
               onTagSearch={searchTags}
               onWikilinkSearch={searchNotes}
-              onImageUpload={uploadImage}
+              onImageUpload={uploadFile}
             />
           </div>
 
