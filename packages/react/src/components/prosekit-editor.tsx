@@ -81,7 +81,6 @@ export function ProseKitEditor({
 }: ProseKitEditorProps) {
   const [editor] = useState((): TypedEditor => {
     const baseExtension: EditorExtension = defineEditorExtension()
-
     const extension = union(baseExtension, defineCodeBlockView())
     const editor: TypedEditor = createEditor({ extension })
     if (initialMarkdown) {
