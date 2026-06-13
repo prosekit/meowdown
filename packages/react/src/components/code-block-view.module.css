@@ -100,7 +100,7 @@
   display: flex;
   flex-direction: column;
   max-height: min(var(--available-height), 18rem);
-  min-width: 12rem;
+  width: 14rem;
   border: 1px solid var(--meowdown-border);
   border-radius: 0.5rem;
   background: light-dark(#ffffff, #27272a);
@@ -202,4 +202,8 @@
 
 .ItemText {
   grid-column: 2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
