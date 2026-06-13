@@ -1,7 +1,6 @@
 import { Select } from '@base-ui/react/select'
-import { languages } from '@codemirror/language-data'
+import { type CodeBlockAttrs, codeBlockLanguages } from '@meowdown/core'
 import type { Extension } from '@prosekit/core'
-import type { CodeBlockAttrs } from '@prosekit/extensions/code-block'
 import {
   defineReactNodeView,
   type ReactNodeViewComponent,
@@ -22,13 +21,11 @@ function CodeBlockView(props: ReactNodeViewProps) {
   const attrs = props.node.attrs as CodeBlockAttrs
   const language = attrs.language || PLAIN_TEXT
 
-  // `items` lets `<Select.Value>` show the label of the selected language. The
-  // value is the lowercased name (an idiomatic fence info string); the
-  // highlighter matches it back case-insensitively.
+  // `items` lets `<Select.Value>` show the label of the selected language.
   const items = useMemo<Record<string, string>>(() => {
     const record: Record<string, string> = { [PLAIN_TEXT]: PLAIN_TEXT_LABEL }
-    for (const description of languages) {
-      record[description.name.toLowerCase()] = description.name
+    for (const { value, label } of codeBlockLanguages) {
+      record[value] = label
     }
     return record
   }, [])
@@ -38,15 +35,15 @@ function CodeBlockView(props: ReactNodeViewProps) {
   }
 
   const [copied, setCopied] = useState(false)
-  const resetTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  useEffect(() => () => clearTimeout(resetTimer.current), [])
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => () => clearTimeout(resetTimerRef.current), [])
 
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(props.node.textContent)
       setCopied(true)
-      clearTimeout(resetTimer.current)
-      resetTimer.current = setTimeout(() => setCopied(false), COPIED_RESET_MS)
+      clearTimeout(resetTimerRef.current)
+      resetTimerRef.current = setTimeout(() => setCopied(false), COPIED_RESET_MS)
     } catch {
       // The clipboard API can reject (no permission, insecure context); ignore.
     }
