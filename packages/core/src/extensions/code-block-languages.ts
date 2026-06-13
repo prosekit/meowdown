@@ -16,9 +16,7 @@ export interface CodeBlockLanguage {
 }
 
 /**
- * The languages meowdown can syntax-highlight, ready to populate a language
- * picker. Each `value` round-trips through a code block's `language` attribute
- * and is matched back to a grammar case-insensitively.
+ * A list of code block languages that meowdown can syntax-highlight.
  */
 export const codeBlockLanguages: readonly CodeBlockLanguage[] = languages.map((description) => ({
   value: description.name.toLowerCase(),
