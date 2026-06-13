@@ -8,13 +8,11 @@ import { CheckIcon } from './icons/check-icon.tsx'
 import { ChevronsUpDownIcon } from './icons/chevrons-up-down-icon.tsx'
 import { CopyIcon } from './icons/copy-icon.tsx'
 
-
 const COPIED_RESET_MS = 1500
-
 
 export function CodeBlockView(props: ReactNodeViewProps) {
   const attrs = props.node.attrs as CodeBlockAttrs
-  const language = attrs.language || ""
+  const language = attrs.language || ''
 
   const setLanguage = (value: string | null) => {
     props.setAttrs({ language: value || '' } satisfies CodeBlockAttrs)
@@ -58,11 +56,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
               <Select.Popup className={styles.Popup}>
                 <Select.List className={styles.List}>
                   {codeBlockLanguages.map(({ value, label }) => (
-                    <Select.Item
-                      key={value  }
-                      value={value}
-                      className={styles.Item}
-                    >
+                    <Select.Item key={value} value={value} className={styles.Item}>
                       <Select.ItemIndicator className={styles.ItemIndicator}>
                         <CheckIcon />
                       </Select.ItemIndicator>
