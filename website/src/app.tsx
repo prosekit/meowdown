@@ -45,7 +45,7 @@ Connect notes with wikilinks like [[Daily journal]] and [[Reading list]]. Type \
 
 Drop in a fenced code block and pick its language from the selector:
 
-\`\`\`ts
+\`\`\`typescript
 function greet(name: string): string {
   return \`Hello, \${name}!\`
 }
