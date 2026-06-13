@@ -8,7 +8,7 @@ import { setupFixture, type Fixture } from '../testing/index.ts'
 import type { MarkMode } from './mark-mode.ts'
 import { defineMarkMode } from './mark-mode.ts'
 
-const revealedMarkers = page.locate('#test-container span.show')
+const revealedMarkers = page.locate('.ProseMirror span.show')
 const pmRoot = page.locate('.ProseMirror')
 
 /** Asserts how many syntax markers are revealed (rendered as `.show` spans). */
