@@ -9,13 +9,42 @@ import { createParser } from 'prosemirror-highlight/lezer'
 // language is unsupported so we stop retrying it.
 const parserCache = new Map<string, HighlightParser | null>()
 
-function buildParser(description: LanguageDescription): HighlightParser {
-  const language = description.support!.language
-  return createParser({
-    parse: (options) => language.parser.parse(options.content),
+
+async function loadParserForLanguage(language: string): Promise<void> {
+  const description = LanguageDescription.matchLanguageName(languages, language, true)
+  if (!description) {
+    parserCache.set(language, null)
+    return
+  }
+
+  let support = description.support
+
+  if (!support) {
+    try {
+      support = await description.load()
+    } catch (error) {
+      console.error(`[meowdown] Failed to load language "${language}":`, error)
+      parserCache.set(language, null)
+    }
+  }
+
+  if (parserCache.has(language)) {
+    return
+  }
+
+  if (!support) {
+    parserCache.set(language, null)
+    return
+  }
+
+
+  const parser = createParser({
+    parse: (options) => support.language.parser.parse(options.content),
     highlighter: classHighlighter,
   })
+  parserCache.set(language, parser)
 }
+
 
 const lazyParser: HighlightParser = (options) => {
   const language = options.language?.trim()
@@ -31,26 +60,11 @@ const lazyParser: HighlightParser = (options) => {
     return cached(options)
   }
 
-  const description = LanguageDescription.matchLanguageName(languages, language, true)
-  if (!description) {
-    parserCache.set(language, null)
-    return []
-  }
-
-  if (description.support) {
-    const parser = buildParser(description)
-    parserCache.set(language, parser)
-    return parser(options)
-  }
-
-  return description
-    .load()
-    .then(() => undefined)
-    .catch((error) => {
-      console.error(`[meowdown] Failed to load language "${language}":`, error)
-      parserCache.set(language, null)
-    })
+  return loadParserForLanguage(language)
 }
+
+
+
 
 /**
  * Adds syntax highlighting to `codeBlock` nodes, parsing each block with the
