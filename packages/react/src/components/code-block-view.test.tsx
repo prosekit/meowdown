@@ -55,6 +55,20 @@ describe('code block language selector', () => {
       .not.toBeInTheDocument()
   })
 
+  it('lets the user set a language outside the list', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} initialMarkdown={CODE_BLOCK_MD} />)
+
+    await selector.click()
+    await search.fill('mylang')
+    await page.getByRole('option', { name: 'Use "mylang"', exact: true }).click()
+
+    await expect.element(selector).toHaveTextContent('mylang')
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toContain('```mylang')
+    })
+  })
+
   it('copies the code block contents to the clipboard', async () => {
     await render(<ProseKitEditor initialMarkdown={CODE_BLOCK_MD} />)
     await expect.element(copyButton).toBeInTheDocument()

@@ -1,7 +1,7 @@
 import { Combobox } from '@base-ui/react/combobox'
 import { type CodeBlockAttrs, codeBlockLanguages } from '@meowdown/core'
 import type { ReactNodeViewProps } from '@prosekit/react'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import styles from './code-block-view.module.css'
 import { CheckIcon } from './icons/check-icon.tsx'
@@ -14,6 +14,22 @@ const PLAIN_TEXT: LanguageItem = { value: '', label: 'Plain Text' }
 const COPIED_RESET_MS = 1500
 
 export function CodeBlockView(props: ReactNodeViewProps) {
+  const DEBUG_REF = useRef<string | null>(null)
+
+  // DO not delete my debug code
+  if (!DEBUG_REF.current) {
+    DEBUG_REF.current = 'DEBUG_ID_' + Math.random().toString(16).slice(2, 8)
+  }
+
+  useEffect(() => {
+    console.log('CodeBlockView rendering', DEBUG_REF.current)
+    return () => {
+      console.log('CodeBlockView unmounting', DEBUG_REF.current)
+    }
+  }, [])
+
+  console.log('CodeBlockView render start', DEBUG_REF.current)
+
   const attrs = props.node.attrs as CodeBlockAttrs
   const language = attrs.language || ''
 
@@ -25,6 +41,20 @@ export function CodeBlockView(props: ReactNodeViewProps) {
     () => items.find((item) => item.value === language) ?? { value: language, label: language },
     [items, language],
   )
+
+  const [query, setQuery] = useState('')
+
+  // Markdown fences accept any language, so offer the typed value as an option
+  // when it doesn't match a known one.
+  const itemsForView = useMemo<LanguageItem[]>(() => {
+    const value = query.trim()
+    if (!value) return items
+    const lowercased = value.toLowerCase()
+    const known = items.some(
+      (item) => item.value.toLowerCase() === lowercased || item.label.toLowerCase() === lowercased,
+    )
+    return known ? items : [...items, { value, label: `Use "${value}"` }]
+  }, [items, query])
 
   const setLanguage = (item: LanguageItem | null) => {
     props.setAttrs({ language: item?.value ?? '' } satisfies CodeBlockAttrs)
@@ -47,7 +77,16 @@ export function CodeBlockView(props: ReactNodeViewProps) {
   return (
     <div className={styles.Root}>
       <div className={styles.Toolbar} contentEditable={false}>
-        <Combobox.Root items={items} value={selected} onValueChange={setLanguage}>
+        <Combobox.Root
+          items={itemsForView}
+          value={selected}
+          onValueChange={setLanguage}
+          inputValue={query}
+          onInputValueChange={setQuery}
+          onOpenChange={(open) => {
+            if (!open) setQuery('')
+          }}
+        >
           <Combobox.Trigger className={styles.Trigger} data-testid="code-block-language">
             <Combobox.Value placeholder="Plain Text" />
             <Combobox.Icon className={styles.TriggerIcon}>
@@ -60,7 +99,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
                 <div className={styles.SearchRow}>
                   <Combobox.Input
                     className={styles.Search}
-                    placeholder="Search language"
+                    placeholder="Search or type a language"
                     data-testid="code-block-language-search"
                   />
                 </div>
