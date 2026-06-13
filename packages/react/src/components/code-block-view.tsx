@@ -1,25 +1,20 @@
 import { Select } from '@base-ui/react/select'
 import { type CodeBlockAttrs, codeBlockLanguages } from '@meowdown/core'
 import type { ReactNodeViewProps } from '@prosekit/react'
-import {  useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
 import styles from './code-block-view.module.css'
 import { CheckIcon } from './icons/check-icon.tsx'
 import { ChevronsUpDownIcon } from './icons/chevrons-up-down-icon.tsx'
 import { CopyIcon } from './icons/copy-icon.tsx'
 
-const PLAIN_TEXT = ''
-const PLAIN_TEXT_LABEL = 'Plain Text'
+
 const COPIED_RESET_MS = 1500
 
-const languageItems = codeBlockLanguages.map((name) => ({
-  value: name.toLowerCase(),
-  label: name
-}))
 
 export function CodeBlockView(props: ReactNodeViewProps) {
   const attrs = props.node.attrs as CodeBlockAttrs
-  const language = attrs.language || PLAIN_TEXT
+  const language = attrs.language || ""
 
   const setLanguage = (value: string | null) => {
     props.setAttrs({ language: value || '' } satisfies CodeBlockAttrs)
@@ -35,7 +30,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
       clearTimeout(resetTimerRef.current)
       resetTimerRef.current = setTimeout(() => setCopied(false), COPIED_RESET_MS)
     } catch (error) {
-      console.warn("[meowdown] Failed to copy code block:", error)
+      console.warn('[meowdown] Failed to copy code block:', error)
     }
   }
 
@@ -43,7 +38,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
     <div className={styles.Root}>
       <div className={styles.Toolbar} contentEditable={false}>
         <Select.Root
-          items={languageItems}
+          items={codeBlockLanguages}
           value={language}
           onValueChange={setLanguage}
           modal={false}
@@ -64,7 +59,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
                 <Select.List className={styles.List}>
                   {codeBlockLanguages.map(({ value, label }) => (
                     <Select.Item
-                      key={value || PLAIN_TEXT_LABEL}
+                      key={value  }
                       value={value}
                       className={styles.Item}
                     >
@@ -92,7 +87,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
           {copied ? <CheckIcon /> : <CopyIcon />}
         </button>
       </div>
-      <pre ref={props.contentRef} data-language={language || ""}></pre>
+      <pre ref={props.contentRef} data-language={language || ''}></pre>
     </div>
   )
 }
