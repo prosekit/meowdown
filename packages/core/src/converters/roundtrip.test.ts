@@ -43,6 +43,11 @@ describe('markdown round-trip is byte-identical', () => {
     '#meow starts the line',
     '- [ ] #todo item',
     '> quoted #tag',
+    // Images are plain text to the converters (preview is a decoration)
+    '![alt](cat.png)',
+    '![](cat.png)',
+    'see ![alt](https://example.com/cat.png) inline',
+    '![a](1.png) and ![b](2.png)',
     // Wikilinks are plain text to the converters
     'see [[note]]',
     '[[note]] starts the line',

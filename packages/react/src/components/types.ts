@@ -1,5 +1,12 @@
 import type { SelectionJSON } from '@prosekit/core'
 
+export type {
+  ImageUrlResolver,
+  ImageUploadHandler,
+  ImageUploadPredicate,
+  ImageUploadErrorHandler,
+} from '@meowdown/core'
+
 /** A selection to restore: an exact JSON selection, or a document edge. */
 export type SelectionHint = SelectionJSON | 'start' | 'end'
 

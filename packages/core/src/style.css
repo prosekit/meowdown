@@ -31,6 +31,10 @@
    * sees pointer events on the editor element, so a handle outside the
    * padding closes before it can be clicked. Keep it >= 3.5rem. */
   --meowdown-gutter: 3.5rem;
+
+  /* Inline image previews. Standalone variables per the styling rule. */
+  --meowdown-image-max-height: 28rem;
+  --meowdown-image-radius: 0.6rem;
 }
 
 /* ---------------------------------------------------------------------------
@@ -276,6 +280,22 @@
   text-decoration-style: dashed;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Inline image previews (`![alt](src)`)
+ * ------------------------------------------------------------------------- */
+.ProseMirror .md-image {
+  display: inline-block;
+  vertical-align: middle;
+  user-select: none;
+  margin: 0 0.15em;
+}
+.ProseMirror .md-image img {
+  display: block;
+  max-width: 100%;
+  max-height: var(--meowdown-image-max-height);
+  border-radius: var(--meowdown-image-radius);
 }
 
 /* ---------------------------------------------------------------------------

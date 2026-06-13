@@ -2,6 +2,10 @@ export { Editor, type EditorMode, type EditorProps } from './components/editor.t
 export type {
   EditorHandle,
   EditorStateSnapshot,
+  ImageUploadErrorHandler,
+  ImageUploadHandler,
+  ImageUploadPredicate,
+  ImageUrlResolver,
   SelectionHint,
   TagSearchHandler,
   WikilinkSearchHandler,

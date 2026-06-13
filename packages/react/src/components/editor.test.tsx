@@ -11,6 +11,23 @@ import type { EditorHandle } from './types.ts'
 const pmRoot = page.locate('.ProseMirror')
 const cmRoot = page.locate('.cm-editor')
 const cmContent = page.locate('[data-editor="codemirror"] .cm-content')
+const mdImage = page.getByTestId('md-image')
+
+function createImageFile(name = 'cat.png'): File {
+  return new File([new Uint8Array([1, 2, 3])], name, { type: 'image/png' })
+}
+
+// `@prosekit/core/test`'s `pasteFiles` takes an `EditorView`, which the public
+// `<Editor>` deliberately does not expose, so this end-to-end test dispatches a
+// real `paste` event on the editor DOM instead. The view-level matrix lives in
+// `@meowdown/core`'s `image-upload.test.ts`, which uses `pasteFiles`.
+function pasteImage(target: Element, file: File): void {
+  const data = new DataTransfer()
+  data.items.add(file)
+  target.dispatchEvent(
+    new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
+  )
+}
 
 describe('Editor', () => {
   it('renders a ProseKit editor in focus mode by default', async () => {
@@ -223,5 +240,61 @@ describe('Editor', () => {
     ref.current?.scrollIntoView()
     await userEvent.keyboard('A')
     await expect.element(cmContent).toHaveTextContent('A!Hi')
+  })
+})
+
+describe('Editor images', () => {
+  it('uploads a pasted image through the public component', async () => {
+    const upload = vi.fn((file: File) => `uploaded/${file.name}`)
+    const ref = createRef<EditorHandle>()
+    await render(<Editor ref={ref} onImageUpload={upload} />)
+    await pmRoot.click()
+
+    pasteImage(pmRoot.element(), createImageFile())
+    await vi.waitFor(() => {
+      expect(upload).toHaveBeenCalled()
+      expect(ref.current?.getMarkdown()).toContain('![](uploaded/cat.png)')
+    })
+  })
+
+  it('previews a remote image with no image props and leaves paste alone', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<Editor ref={ref} initialMarkdown="![cat](https://example.com/cat.png)" />)
+    await expect.element(mdImage).toBeInTheDocument()
+    await expect
+      .element(mdImage.locate('img'))
+      .toHaveAttribute('src', 'https://example.com/cat.png')
+
+    await pmRoot.click()
+    pasteImage(pmRoot.element(), createImageFile())
+    expect(ref.current?.getMarkdown()).not.toContain('![](cat.png)')
+  })
+
+  it('accepts image props in source mode without rendering a preview', async () => {
+    await render(
+      <Editor
+        mode="source"
+        initialMarkdown="![cat](https://example.com/cat.png)"
+        onImageUpload={() => 'x.png'}
+      />,
+    )
+    await expect.element(cmContent).toHaveTextContent('![cat](https://example.com/cat.png)')
+    await expect.element(mdImage).not.toBeInTheDocument()
+  })
+
+  it('calls the latest onImageUpload after a re-render', async () => {
+    const first = vi.fn(() => 'first.png')
+    const second = vi.fn(() => 'second.png')
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<Editor ref={ref} onImageUpload={first} />)
+    await screen.rerender(<Editor ref={ref} onImageUpload={second} />)
+
+    await pmRoot.click()
+    pasteImage(pmRoot.element(), createImageFile())
+    await vi.waitFor(() => {
+      expect(second).toHaveBeenCalled()
+      expect(ref.current?.getMarkdown()).toContain('![](second.png)')
+    })
+    expect(first).not.toHaveBeenCalled()
   })
 })
