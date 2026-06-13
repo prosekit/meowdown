@@ -9,6 +9,8 @@ import {
   AutocompleteRoot,
 } from '@prosekit/react/autocomplete'
 
+import styles from './autocomplete-menu.module.css'
+
 // Match inputs like "/", "/table", "/heading 1" etc. Do not match "/ heading".
 const regex = canUseRegexLookbehind() ? /(?<!\S)\/(\S.*)?$/u : /\/(\S.*)?$/u
 
@@ -20,7 +22,7 @@ interface SlashMenuItemProps {
 
 function SlashMenuItem({ label, kbd, onSelect }: SlashMenuItemProps) {
   return (
-    <AutocompleteItem className="meowdown-autocomplete-menu-item" onSelect={onSelect}>
+    <AutocompleteItem className={styles.Item} onSelect={onSelect}>
       <span>{label}</span>
       {kbd && <kbd>{kbd}</kbd>}
     </AutocompleteItem>
@@ -32,8 +34,8 @@ export function SlashMenu() {
 
   return (
     <AutocompleteRoot regex={regex}>
-      <AutocompletePositioner className="meowdown-autocomplete-menu-positioner">
-        <AutocompletePopup className="meowdown-autocomplete-menu" data-testid="slash-menu">
+      <AutocompletePositioner className={styles.Positioner}>
+        <AutocompletePopup className={styles.Popup} data-testid="slash-menu">
           <SlashMenuItem
             label="Heading 1"
             kbd="#"
@@ -83,9 +85,7 @@ export function SlashMenu() {
             label="Table"
             onSelect={() => editor.commands.insertTable({ row: 3, col: 3 })}
           />
-          <AutocompleteEmpty className="meowdown-autocomplete-menu-item">
-            No results
-          </AutocompleteEmpty>
+          <AutocompleteEmpty className={styles.Item}>No results</AutocompleteEmpty>
         </AutocompletePopup>
       </AutocompletePositioner>
     </AutocompleteRoot>

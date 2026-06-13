@@ -11,6 +11,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { returnsTrue } from '../utils/returns-true.ts'
 
+import styles from './autocomplete-menu.module.css'
 import type { WikilinkSearchHandler } from './types.ts'
 
 // Match "[[", "[[query", "[[multi word query": opens right after "[[" and
@@ -65,18 +66,18 @@ export function WikilinkMenu({ onWikilinkSearch }: WikilinkMenuProps) {
       onOpenChange={(event) => setOpen(event.detail)}
       onQueryChange={(event) => setQuery(event.detail)}
     >
-      <AutocompletePositioner className="meowdown-autocomplete-menu-positioner">
-        <AutocompletePopup className="meowdown-autocomplete-menu" data-testid="wikilink-menu">
+      <AutocompletePositioner className={styles.Positioner}>
+        <AutocompletePopup className={styles.Popup} data-testid="wikilink-menu">
           {notes.map((note) => (
             <AutocompleteItem
               key={note}
-              className="meowdown-autocomplete-menu-item"
+              className={styles.Item}
               onSelect={() => editor.commands.insertText({ text: `[[${note}]]` })}
             >
               {note}
             </AutocompleteItem>
           ))}
-          <AutocompleteEmpty className="meowdown-autocomplete-menu-item">
+          <AutocompleteEmpty className={styles.Item}>
             {loading ? 'Loading...' : 'No notes found'}
           </AutocompleteEmpty>
         </AutocompletePopup>

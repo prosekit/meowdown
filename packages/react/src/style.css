@@ -1,7 +1,4 @@
 @import '@meowdown/core/style.css';
-@import './components/autocomplete-menu.css';
-@import './components/block-handle.css';
-@import './components/drop-indicator.css';
 
 .meowdown {
   display: flex;

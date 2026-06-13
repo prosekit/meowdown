@@ -1,19 +1,27 @@
-.meowdown-block-handle-positioner {
+.Positioner {
   display: block;
   z-index: 50;
   width: min-content;
   height: min-content;
   overflow: visible;
   transition: transform 100ms ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 }
 
-.meowdown-block-handle {
+.Popup {
   display: flex;
   box-sizing: border-box;
   transform-origin: var(--transform-origin);
   transition:
     opacity 100ms,
     scale 100ms;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 
   &[data-state='closed'] {
     opacity: 0;
@@ -27,8 +35,8 @@
   }
 }
 
-.meowdown-block-handle-add,
-.meowdown-block-handle-drag {
+.Add,
+.Draggable {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -48,19 +56,12 @@
   }
 }
 
-.meowdown-block-handle-add {
+.Add {
   width: 1.5rem;
   cursor: pointer;
 }
 
-.meowdown-block-handle-drag {
+.Draggable {
   width: 1.25rem;
   cursor: grab;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .meowdown-block-handle-positioner,
-  .meowdown-block-handle {
-    transition: none;
-  }
 }

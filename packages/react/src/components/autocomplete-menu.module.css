@@ -1,4 +1,4 @@
-.meowdown-autocomplete-menu-positioner {
+.Positioner {
   display: block;
   z-index: 50;
   width: min-content;
@@ -6,7 +6,7 @@
   overflow: visible;
 }
 
-.meowdown-autocomplete-menu {
+.Popup {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -25,7 +25,7 @@
     0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
-.meowdown-autocomplete-menu-item {
+.Item {
   display: flex;
   align-items: center;
   justify-content: space-between;
