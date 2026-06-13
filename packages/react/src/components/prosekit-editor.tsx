@@ -8,7 +8,7 @@ import {
   markdownToDoc,
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
-import { createEditor, defineDocChangeHandler, type SelectionJSON } from '@prosekit/core'
+import { createEditor, defineDocChangeHandler, type SelectionJSON, union } from '@prosekit/core'
 import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit, useExtension } from '@prosekit/react'

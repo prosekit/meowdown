@@ -1,10 +1,6 @@
 import { Select } from '@base-ui/react/select'
 import { type CodeBlockAttrs, codeBlockLanguages } from '@meowdown/core'
-import type {
-
-
-  ReactNodeViewProps,
-} from '@prosekit/react'
+import type { ReactNodeViewProps } from '@prosekit/react'
 import { useEffect, useRef, useState } from 'react'
 
 import styles from './code-block-view.module.css'
