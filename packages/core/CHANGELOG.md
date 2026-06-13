@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/prosekit/meowdown/compare/core-v0.3.1...core-v0.4.0) (2026-06-13)
+
+
+### Features
+
+* add code block syntax highlighting and language selector ([#27](https://github.com/prosekit/meowdown/issues/27)) ([d2ae648](https://github.com/prosekit/meowdown/commit/d2ae648378fb24bccc172139cb1816cf8e125ab8))
+
 ## [0.3.1](https://github.com/prosekit/meowdown/compare/core-v0.3.0...core-v0.3.1) (2026-06-11)
 
 

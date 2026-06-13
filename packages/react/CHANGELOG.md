@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.5.0](https://github.com/prosekit/meowdown/compare/react-v0.4.0...react-v0.5.0) (2026-06-13)
+
+
+### Features
+
+* add code block syntax highlighting and language selector ([#27](https://github.com/prosekit/meowdown/issues/27)) ([d2ae648](https://github.com/prosekit/meowdown/commit/d2ae648378fb24bccc172139cb1816cf8e125ab8))
+* **react:** add spellCheck prop to Editor ([#21](https://github.com/prosekit/meowdown/issues/21)) ([9231d4a](https://github.com/prosekit/meowdown/commit/9231d4ad9a8be4ebc918077a5b5c613e135d8cb6))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @meowdown/core bumped to 0.4.0
+
 ## [0.4.0](https://github.com/prosekit/meowdown/compare/react-v0.3.0...react-v0.4.0) (2026-06-11)
 
 
