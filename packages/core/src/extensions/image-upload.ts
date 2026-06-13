@@ -40,6 +40,9 @@ function findPlacedImages(doc: EditorNode, src: string): PlacedImage[] {
     const text = node.textContent
     if (text.includes(src)) {
       const base = pos + 1
+      // REVIEW: you use LEZER to parse EVERY inline textblock
+      // to find the image. That's very slow. Since we already have the mark,
+      // we can just find the correct mark.
       for (const image of findInlineImages(text)) {
         if (image.src !== src) continue
         const srcOffset = text.indexOf(src, image.from)
