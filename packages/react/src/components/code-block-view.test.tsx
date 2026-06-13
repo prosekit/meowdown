@@ -9,6 +9,7 @@ import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle } from './types.ts'
 
 const selector = page.getByTestId('code-block-language')
+const search = page.getByTestId('code-block-language-search')
 const copyButton = page.getByTestId('code-block-copy')
 const tokens = page.locate('.ProseMirror pre code [class*="tok-"]')
 
@@ -38,6 +39,20 @@ describe('code block language selector', () => {
     await vi.waitFor(() => {
       expect(ref.current?.getMarkdown()).toContain('```python')
     })
+  })
+
+  it('filters the languages as the user types', async () => {
+    await render(<ProseKitEditor initialMarkdown={CODE_BLOCK_MD} />)
+
+    await selector.click()
+    await search.fill('python')
+
+    await expect
+      .element(page.getByRole('option', { name: 'Python', exact: true }))
+      .toBeInTheDocument()
+    await expect
+      .element(page.getByRole('option', { name: 'Rust', exact: true }))
+      .not.toBeInTheDocument()
   })
 
   it('copies the code block contents to the clipboard', async () => {

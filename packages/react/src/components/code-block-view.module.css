@@ -97,10 +97,10 @@
 
 .Popup {
   box-sizing: border-box;
-  max-height: var(--available-height);
-  min-width: 9rem;
-  overflow-y: auto;
-  padding: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  max-height: min(var(--available-height), 18rem);
+  min-width: 12rem;
   border: 1px solid var(--meowdown-border);
   border-radius: 0.5rem;
   background: light-dark(#ffffff, #27272a);
@@ -126,9 +126,48 @@
   }
 }
 
+.SearchRow {
+  padding: 0.35rem;
+  border-bottom: 1px solid var(--meowdown-border);
+}
+
+.Search {
+  box-sizing: border-box;
+  width: 100%;
+  height: 1.7rem;
+  padding: 0 0.45rem;
+  border: 1px solid var(--meowdown-border);
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--meowdown-heading);
+  font: inherit;
+  outline: none;
+
+  &::placeholder {
+    color: var(--meowdown-muted);
+  }
+
+  &:focus-visible {
+    border-color: var(--meowdown-accent);
+  }
+}
+
+.Empty {
+  padding: 0.5rem;
+  color: var(--meowdown-muted);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.Empty:empty {
+  display: none;
+}
+
 .List {
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  padding: 0.25rem;
 }
 
 .Item {
