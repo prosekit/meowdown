@@ -17,3 +17,6 @@ trustLockfile: true
 minimumReleaseAgeExclude:
   - prosemirror-highlight@0.15.2
   - '@ocavue/utils@1.7.0'
+  - '@prosekit/extensions@0.17.5-beta.0'
+  - '@prosekit/react@0.8.0-beta.0'
+  - '@prosekit/web@0.9.0-beta.0'
