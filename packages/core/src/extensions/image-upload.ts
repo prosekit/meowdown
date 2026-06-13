@@ -133,6 +133,11 @@ export function defineImageUpload(options: ResolvedUploadOptions): PlainExtensio
     defineFileDropHandler(({ view, event, file }) => {
       // The handler's own `pos` is computed for block insertion; for literal
       // text we want the nearest text position, so recompute from the event.
+
+      // REVIEW: when the user drops a file, they expect it to be inserted
+      // as a "block"-level image. In anther word, we usually want to insert a
+      // paragraph that contains the image, instead of inserting the image into an existing paragraph.
+      // So you can just use the file drop handler position here.
       const coords = view.posAtCoords({ left: event.clientX, top: event.clientY })
       return handleFile(view, file, coords?.pos, options)
     }),
