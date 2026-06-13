@@ -43,6 +43,14 @@ Label your notes with tags like #meow and #markdown. Type \`#\` followed by a le
 
 Connect notes with wikilinks like [[Daily journal]] and [[Reading list]]. Type \`[[\` to link another note.
 
+Drop in a fenced code block and pick its language from the selector:
+
+\`\`\`ts
+function greet(name: string): string {
+  return \`Hello, \${name}!\`
+}
+\`\`\`
+
 | table | syntax | is | supported |
 | ----- | ------ | -- | --------- |
 | even  | **in** | *tables* too! | :D |

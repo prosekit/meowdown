@@ -17,6 +17,7 @@ import { defineParagraph } from '@prosekit/extensions/paragraph'
 import { defineText } from '@prosekit/extensions/text'
 import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
+import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
@@ -39,6 +40,7 @@ function defineEditorExtensionImpl() {
     defineInlineMarks(),
 
     // plugins
+    defineCodeBlockSyntaxHighlight(),
     defineInlineMarkPlugin(),
     defineInlineToggle(),
 

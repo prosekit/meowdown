@@ -15,6 +15,7 @@ import { ProseKit, useExtension } from '@prosekit/react'
 import { useImperativeHandle, useMemo, useState, type Ref } from 'react'
 
 import { BlockHandle } from './block-handle.tsx'
+import { defineCodeBlockView } from './code-block-view.tsx'
 import { DropIndicator } from './drop-indicator.tsx'
 import { SlashMenu } from './slash-menu.tsx'
 import { TagMenu } from './tag-menu.tsx'
@@ -136,6 +137,9 @@ export function ProseKitEditor({
     return defineMarkMode(markMode)
   }, [markMode])
   useExtension(markModeExtension, { editor })
+
+  const [codeBlockViewExtension] = useState(defineCodeBlockView)
+  useExtension(codeBlockViewExtension, { editor })
 
   const docChangeExtension = useMemo(() => {
     if (!onDocChange) return null

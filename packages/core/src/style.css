@@ -135,6 +135,13 @@
   color: inherit;
 }
 
+/* Shiki syntax highlighting. Tokens carry both theme colors as CSS variables
+ * (set by `prosemirror-highlight`); `light-dark()` picks one per color scheme,
+ * matching the rest of the theme. */
+.ProseMirror pre code .shiki {
+  color: light-dark(var(--shiki-light), var(--shiki-dark));
+}
+
 .ProseMirror hr {
   margin: 1.5em 0;
   border: none;

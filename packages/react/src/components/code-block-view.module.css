@@ -1,0 +1,127 @@
+.Root {
+  position: relative;
+}
+
+.Toolbar {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+  user-select: none;
+}
+
+/* Two classes (0,2,0) so this beats core's `.ProseMirror pre` (0,1,1) padding
+ * shorthand and the selector never overlaps the first line. */
+.Root .Pre {
+  padding-top: 2.2rem;
+}
+
+.Trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  box-sizing: border-box;
+  height: 1.6rem;
+  padding: 0 0.4rem;
+  border: 1px solid var(--meowdown-border);
+  border-radius: 0.35rem;
+  background: light-dark(#ffffff, #27272a);
+  color: var(--meowdown-muted);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.75rem;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--meowdown-heading);
+  }
+
+  &[data-popup-open] {
+    color: var(--meowdown-heading);
+  }
+}
+
+.TriggerIcon {
+  display: flex;
+
+  svg {
+    display: block;
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+}
+
+.Positioner {
+  z-index: 50;
+  outline: none;
+}
+
+.Popup {
+  box-sizing: border-box;
+  max-height: var(--available-height);
+  min-width: 9rem;
+  overflow-y: auto;
+  padding: 0.25rem;
+  border: 1px solid var(--meowdown-border);
+  border-radius: 0.5rem;
+  background: light-dark(#ffffff, #27272a);
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
+  color: var(--meowdown-text);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.8rem;
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity 100ms,
+    scale 100ms;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    scale: 0.95;
+  }
+}
+
+.List {
+  display: flex;
+  flex-direction: column;
+}
+
+.Item {
+  display: grid;
+  grid-template-columns: 1rem 1fr;
+  align-items: center;
+  gap: 0.4rem;
+  box-sizing: border-box;
+  padding: 0.3rem 0.5rem 0.3rem 0.3rem;
+  border-radius: 0.35rem;
+  cursor: pointer;
+  outline: none;
+  scroll-margin: 0.25rem;
+
+  &[data-highlighted] {
+    background: color-mix(in oklab, var(--meowdown-accent) 14%, transparent);
+    color: var(--meowdown-heading);
+  }
+}
+
+.ItemIndicator {
+  display: flex;
+  grid-column: 1;
+  color: var(--meowdown-accent);
+
+  svg {
+    display: block;
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+}
+
+.ItemText {
+  grid-column: 2;
+}
