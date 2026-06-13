@@ -15,5 +15,5 @@ trustPolicyIgnoreAfter: 10080 # 7 days
 trustLockfile: true
 
 minimumReleaseAgeExclude:
-  - '@ocavue/utils@1.7.0'
   - prosemirror-highlight@0.15.2
+  - '@ocavue/utils@1.7.0'
