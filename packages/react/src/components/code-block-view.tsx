@@ -1,7 +1,7 @@
 import { Combobox } from '@base-ui/react/combobox'
 import { type CodeBlockAttrs, codeBlockLanguages } from '@meowdown/core'
 import type { ReactNodeViewProps } from '@prosekit/react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
 import styles from './code-block-view.module.css'
 import { CheckIcon } from './icons/check-icon.tsx'
@@ -16,22 +16,6 @@ type LanguageItem = {
 const COPIED_RESET_MS = 1500
 
 export function CodeBlockView(props: ReactNodeViewProps) {
-  const DEBUG_REF = useRef<string | null>(null)
-
-  // DO not delete my debug code
-  if (!DEBUG_REF.current) {
-    DEBUG_REF.current = 'DEBUG_ID_' + Math.random().toString(16).slice(2, 8)
-  }
-
-  useEffect(() => {
-    console.log('CodeBlockView rendering', DEBUG_REF.current)
-    return () => {
-      console.log('CodeBlockView unmounting', DEBUG_REF.current)
-    }
-  }, [])
-
-  console.log('CodeBlockView render start', DEBUG_REF.current)
-
   const attrs = props.node.attrs as CodeBlockAttrs
   const language = attrs.language || ''
 
@@ -142,7 +126,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
           {copied ? <CheckIcon /> : <CopyIcon />}
         </button>
       </div>
-      <pre ref={props.contentRef} data-language={language || ''}></pre>
+      <pre ref={props.contentRef} data-language={language}></pre>
     </div>
   )
 }
