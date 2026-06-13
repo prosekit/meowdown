@@ -4,15 +4,16 @@
     "./src/**/*.ts",
     "./src/**/*.tsx",
     "./src/**/*.module.css",
-    "./src/**/*.module.css.d.ts",
+    "./src/**/*.module.d.css.ts",
     "./*.ts"
   ],
   "compilerOptions": {
     "jsx": "react-jsx",
-    "module": "preserve",
-    "moduleResolution": "bundler",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowArbitraryExtensions": true,
     "erasableSyntaxOnly": true
   },
-  "cmkOptions": { "enabled": true, "dtsOutDir": "." },
+  "cmkOptions": { "enabled": true, "dtsOutDir": ".", "arbitraryExtensions": true },
   "references": [{ "path": "../core/tsconfig.json" }]
 }

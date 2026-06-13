@@ -10,6 +10,6 @@ export default defineESLintConfig(
     markdown: false,
   },
   {
-    ignores: ['**/*.module.css.d.ts'],
+    ignores: ['**/*.module.d.css.ts'],
   },
 )
