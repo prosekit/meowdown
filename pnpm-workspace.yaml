@@ -16,3 +16,4 @@ trustLockfile: true
 
 minimumReleaseAgeExclude:
   - '@ocavue/utils@1.7.0'
+  - prosemirror-highlight@0.15.2
