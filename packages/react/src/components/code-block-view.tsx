@@ -48,6 +48,9 @@ export function CodeBlockView(props: ReactNodeViewProps) {
 
   const [query, setQuery] = useState('')
 
+  // Keep the toolbar shown until the popup finishes closing animation
+  const [comboboxOpen, setComboboxOpen] = useState(false)
+
   // Markdown fences accept any language, so offer the typed value as an option
   // when it doesn't match a known one.
   const itemsForView = useMemo<readonly LanguageItem[]>(() => {
@@ -80,7 +83,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
 
   return (
     <div className={styles.Root}>
-      <div className={styles.Toolbar} contentEditable={false}>
+      <div className={styles.Toolbar} contentEditable={false} data-open={comboboxOpen || undefined}>
         <Combobox.Root
           items={itemsForView}
           value={selected}
@@ -88,7 +91,11 @@ export function CodeBlockView(props: ReactNodeViewProps) {
           inputValue={query}
           onInputValueChange={setQuery}
           onOpenChange={(open) => {
-            if (!open) setQuery('')
+            if (open) setComboboxOpen(true)
+            else setQuery('')
+          }}
+          onOpenChangeComplete={(open) => {
+            if (!open) setComboboxOpen(false)
           }}
         >
           <Combobox.Trigger className={styles.Trigger} data-testid="code-block-language">

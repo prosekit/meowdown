@@ -21,7 +21,7 @@
 
 .Root:hover .Toolbar,
 .Root:focus-within .Toolbar,
-.Toolbar:has([data-popup-open]) {
+.Toolbar[data-open] {
   opacity: 1;
   pointer-events: auto;
 }
