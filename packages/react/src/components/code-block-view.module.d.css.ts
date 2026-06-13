@@ -6,6 +6,7 @@ declare const styles = {
   'Pre': '' as string,
   'Trigger': '' as string,
   'TriggerIcon': '' as string,
+  'CopyButton': '' as string,
   'Positioner': '' as string,
   'Popup': '' as string,
   'List': '' as string,

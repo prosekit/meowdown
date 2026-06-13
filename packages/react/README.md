@@ -23,7 +23,7 @@ export function App() {
 
 ### `<Editor>`
 
-The Markdown editor component. Renders inside a `div.meowdown` wrapper that fills a flex parent. In rich modes, typing `/` opens a slash menu for inserting blocks (headings, blockquote, lists, code block, table). Hovering a block shows a handle to its left: the plus button inserts an empty paragraph below the block, and the grip selects the block and can be dragged to move it, with a drop indicator line marking the target. Code blocks are syntax-highlighted with [Shiki](https://shiki.style) and carry a language selector in their top-right corner.
+The Markdown editor component. Renders inside a `div.meowdown` wrapper that fills a flex parent. In rich modes, typing `/` opens a slash menu for inserting blocks (headings, blockquote, lists, code block, table). Hovering a block shows a handle to its left: the plus button inserts an empty paragraph below the block, and the grip selects the block and can be dragged to move it, with a drop indicator line marking the target. Code blocks are syntax-highlighted with [Shiki](https://shiki.style) and carry a language selector and a copy button in their top-right corner.
 
 - `mode?: 'focus' | 'show' | 'hide' | 'source'`: defaults to `'focus'`.
   - `'focus'`: Markdown syntax is hidden, revealed around the cursor.

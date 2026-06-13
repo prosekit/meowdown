@@ -3,6 +3,9 @@
 }
 
 .Toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
@@ -43,6 +46,35 @@
 
 .TriggerIcon {
   display: flex;
+
+  svg {
+    display: block;
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+}
+
+.CopyButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 1px solid var(--meowdown-border);
+  border-radius: 0.35rem;
+  background: light-dark(#ffffff, #27272a);
+  color: var(--meowdown-muted);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--meowdown-heading);
+  }
+
+  &[data-copied] {
+    color: var(--meowdown-accent);
+  }
 
   svg {
     display: block;

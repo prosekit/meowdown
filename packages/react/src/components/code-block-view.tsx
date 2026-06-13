@@ -6,14 +6,16 @@ import {
   type ReactNodeViewComponent,
   type ReactNodeViewProps,
 } from '@prosekit/react'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import styles from './code-block-view.module.css'
 import { CheckIcon } from './icons/check-icon.tsx'
 import { ChevronsUpDownIcon } from './icons/chevrons-up-down-icon.tsx'
+import { CopyIcon } from './icons/copy-icon.tsx'
 
 const PLAIN_TEXT = ''
 const PLAIN_TEXT_LABEL = 'Plain Text'
+const COPIED_RESET_MS = 1500
 
 function CodeBlockView(props: ReactNodeViewProps) {
   const language = (props.node.attrs as CodeBlockAttrs).language || PLAIN_TEXT
@@ -29,6 +31,21 @@ function CodeBlockView(props: ReactNodeViewProps) {
 
   const setLanguage = (value: string) => {
     props.setAttrs({ language: value } satisfies CodeBlockAttrs)
+  }
+
+  const [copied, setCopied] = useState(false)
+  const resetTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  useEffect(() => () => clearTimeout(resetTimer.current), [])
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(props.node.textContent)
+      setCopied(true)
+      clearTimeout(resetTimer.current)
+      resetTimer.current = setTimeout(() => setCopied(false), COPIED_RESET_MS)
+    } catch {
+      // The clipboard API can reject (no permission, insecure context); ignore.
+    }
   }
 
   return (
@@ -66,6 +83,18 @@ function CodeBlockView(props: ReactNodeViewProps) {
             </Select.Positioner>
           </Select.Portal>
         </Select.Root>
+        <button
+          type="button"
+          className={styles.CopyButton}
+          data-testid="code-block-copy"
+          data-copied={copied ? '' : undefined}
+          aria-label={copied ? 'Copied' : 'Copy code'}
+          title={copied ? 'Copied' : 'Copy code'}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={copy}
+        >
+          {copied ? <CheckIcon /> : <CopyIcon />}
+        </button>
       </div>
       <pre
         ref={props.contentRef}

@@ -9,6 +9,7 @@ import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle } from './types.ts'
 
 const selector = page.getByTestId('code-block-language')
+const copyButton = page.getByTestId('code-block-copy')
 const tokens = page.locate('.ProseMirror pre code .shiki')
 
 const CODE_BLOCK_MD = '```rust\nfn main() {}\n```'
@@ -37,5 +38,15 @@ describe('code block language selector', () => {
     await vi.waitFor(() => {
       expect(ref.current?.getMarkdown()).toContain('```python')
     })
+  })
+
+  it('copies the code block contents to the clipboard', async () => {
+    await render(<ProseKitEditor initialMarkdown={CODE_BLOCK_MD} />)
+    await expect.element(copyButton).toBeInTheDocument()
+
+    await copyButton.click()
+
+    await expect.element(copyButton).toHaveAttribute('data-copied')
+    expect(await navigator.clipboard.readText()).toBe('fn main() {}')
   })
 })
