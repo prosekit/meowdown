@@ -52,12 +52,11 @@ const lazyParser: HighlightParser = (options) => {
 
   const cached: HighlightParser | null | undefined = parserCache.get(language)
 
-  if (cached === null) {
-    return []
-  }
-
   if (cached) {
     return cached(options)
+  }
+  if (cached === null) {
+    return []
   }
 
   return loadParserForLanguage(language)
