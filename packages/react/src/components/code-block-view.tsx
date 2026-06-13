@@ -21,14 +21,14 @@ export function CodeBlockView(props: ReactNodeViewProps) {
 
   // Fall back to the raw value so an alias or unknown language still shows in
   // the trigger instead of looking empty.
-  const selected = useMemo<LanguageItem>(
-    () =>
+  const selected = useMemo<LanguageItem>(() => {
+    return (
       codeBlockLanguages.find((item) => item.value === language) ?? {
         value: language,
         label: language,
-      },
-    [language],
-  )
+      }
+    )
+  }, [language])
 
   const [query, setQuery] = useState('')
 
