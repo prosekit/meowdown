@@ -9,7 +9,6 @@ import { createParser } from 'prosemirror-highlight/lezer'
 // language is unsupported so we stop retrying it.
 const parserCache = new Map<string, HighlightParser | null>()
 
-
 async function loadParserForLanguage(language: string): Promise<void> {
   const description = LanguageDescription.matchLanguageName(languages, language, true)
   if (!description) {
@@ -37,14 +36,12 @@ async function loadParserForLanguage(language: string): Promise<void> {
     return
   }
 
-
   const parser = createParser({
     parse: (options) => support.language.parser.parse(options.content),
     highlighter: classHighlighter,
   })
   parserCache.set(language, parser)
 }
-
 
 const lazyParser: HighlightParser = (options) => {
   const language = options.language?.trim()
@@ -61,9 +58,6 @@ const lazyParser: HighlightParser = (options) => {
 
   return loadParserForLanguage(language)
 }
-
-
-
 
 /**
  * Adds syntax highlighting to `codeBlock` nodes, parsing each block with the
