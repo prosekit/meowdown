@@ -38,6 +38,6 @@ describe('defineCodeBlockSyntaxHighlight', () => {
     using fixture = setupFixture()
     const { n } = fixture
     fixture.set(n.doc(n.codeBlock({ language: 'definitely-not-a-language' }, 'plain text here')))
-    await expect.element(page.locate('#test-container pre')).toHaveTextContent('plain text here')
+    await expect.element(page.locate('.ProseMirror pre')).toHaveTextContent('plain text here')
   })
 })
