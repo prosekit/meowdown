@@ -8,6 +8,7 @@
     "pnpm-lock.yaml",
     "package-lock.json",
     "CHANGELOG.md",
+    "*.module.css.d.ts",
     ".next",
     ".cache",
     ".DS_Store",

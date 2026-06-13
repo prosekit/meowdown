@@ -12,6 +12,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { returnsTrue } from '../utils/returns-true.ts'
 
+import styles from './autocomplete-menu.module.css'
 import type { TagSearchHandler } from './types.ts'
 
 // Match "#tag" with at least one character, so typing a heading ("# ") never
@@ -65,18 +66,18 @@ export function TagMenu({ onTagSearch }: TagMenuProps) {
       onOpenChange={(event) => setOpen(event.detail)}
       onQueryChange={(event) => setQuery(event.detail)}
     >
-      <AutocompletePositioner className="meowdown-autocomplete-menu-positioner">
-        <AutocompletePopup className="meowdown-autocomplete-menu" data-testid="tag-menu">
+      <AutocompletePositioner className={styles.Positioner}>
+        <AutocompletePopup className={styles.Popup} data-testid="tag-menu">
           {tags.map((tag) => (
             <AutocompleteItem
               key={tag}
-              className="meowdown-autocomplete-menu-item"
+              className={styles.Item}
               onSelect={() => editor.commands.insertText({ text: `#${tag} ` })}
             >
               #{tag}
             </AutocompleteItem>
           ))}
-          <AutocompleteEmpty className="meowdown-autocomplete-menu-item">
+          <AutocompleteEmpty className={styles.Item}>
             {loading ? 'Loading...' : 'No tags found'}
           </AutocompleteEmpty>
         </AutocompletePopup>

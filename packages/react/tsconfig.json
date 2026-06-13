@@ -1,10 +1,18 @@
 {
   "extends": "@ocavue/tsconfig/dom/app.json",
+  "include": [
+    "./src/**/*.ts",
+    "./src/**/*.tsx",
+    "./src/**/*.module.css",
+    "./src/**/*.module.css.d.ts",
+    "./*.ts"
+  ],
   "compilerOptions": {
     "jsx": "react-jsx",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "preserve",
+    "moduleResolution": "bundler",
     "erasableSyntaxOnly": true
   },
+  "cmkOptions": { "enabled": true, "dtsOutDir": "." },
   "references": [{ "path": "../core/tsconfig.json" }]
 }

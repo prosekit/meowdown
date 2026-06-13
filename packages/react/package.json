@@ -17,7 +17,7 @@
     "./dist/**/*.css"
   ],
   "scripts": {
-    "build": "tsdown"
+    "build": "cmk && tsdown"
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.3",
@@ -44,6 +44,7 @@
     }
   },
   "devDependencies": {
+    "@css-modules-kit/codegen": "^1.2.0",
     "@ocavue/tsconfig": "^0.7.1",
     "@tsdown/css": "^0.22.2",
     "@types/react": "^19.2.17",

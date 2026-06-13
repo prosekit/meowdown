@@ -1,13 +1,7 @@
 /* Position and size come from the element's inline styles; `transition: all`
  * makes the line glide between drop points. */
-.meowdown-drop-indicator {
+.DropIndicator {
   z-index: 50;
   background: var(--meowdown-accent);
   transition: all 150ms;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .meowdown-drop-indicator {
-    transition: none;
-  }
 }

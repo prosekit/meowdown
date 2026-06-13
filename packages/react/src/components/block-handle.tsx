@@ -6,21 +6,19 @@ import {
   BlockHandleRoot,
 } from '@prosekit/react/block-handle'
 
+import styles from './block-handle.module.css'
 import { GripVerticalIcon } from './icons/grip-vertical-icon.tsx'
 import { PlusIcon } from './icons/plus-icon.tsx'
 
 export function BlockHandle() {
   return (
     <BlockHandleRoot>
-      <BlockHandlePositioner className="meowdown-block-handle-positioner">
-        <BlockHandlePopup className="meowdown-block-handle" data-testid="block-handle">
-          <BlockHandleAdd className="meowdown-block-handle-add" data-testid="block-handle-add">
+      <BlockHandlePositioner className={styles.Positioner}>
+        <BlockHandlePopup className={styles.Popup} data-testid="block-handle">
+          <BlockHandleAdd className={styles.Add} data-testid="block-handle-add">
             <PlusIcon />
           </BlockHandleAdd>
-          <BlockHandleDraggable
-            className="meowdown-block-handle-drag"
-            data-testid="block-handle-drag"
-          >
+          <BlockHandleDraggable className={styles.Draggable} data-testid="block-handle-drag">
             <GripVerticalIcon />
           </BlockHandleDraggable>
         </BlockHandlePopup>
