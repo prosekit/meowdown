@@ -21,17 +21,10 @@ function CodeBlockView(props: ReactNodeViewProps) {
   const attrs = props.node.attrs as CodeBlockAttrs
   const language = attrs.language || PLAIN_TEXT
 
-  // `items` lets `<Select.Value>` show the label of the selected language.
-  const items = useMemo<Record<string, string>>(() => {
-    const record: Record<string, string> = { [PLAIN_TEXT]: PLAIN_TEXT_LABEL }
-    for (const { value, label } of codeBlockLanguages) {
-      record[value] = label
-    }
-    return record
-  }, [])
 
-  const setLanguage = (value: string) => {
-    props.setAttrs({ language: value } satisfies CodeBlockAttrs)
+
+  const setLanguage = (value: string | null) => {
+    props.setAttrs({ language: value || "" } satisfies CodeBlockAttrs)
   }
 
   const [copied, setCopied] = useState(false)
@@ -52,7 +45,7 @@ function CodeBlockView(props: ReactNodeViewProps) {
   return (
     <div className={styles.Root}>
       <div className={styles.Toolbar} contentEditable={false}>
-        <Select.Root items={items} value={language} onValueChange={setLanguage} modal={false}>
+        <Select.Root items={codeBlockLanguages} value={language} onValueChange={setLanguage} modal={false}>
           <Select.Trigger className={styles.Trigger} data-testid="code-block-language">
             <Select.Value />
             <Select.Icon className={styles.TriggerIcon}>
