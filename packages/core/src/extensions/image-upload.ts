@@ -8,7 +8,6 @@ import {
 import type { EditorNode } from '@prosekit/pm/model'
 import type { EditorView } from '@prosekit/pm/view'
 
-import { findInlineImages } from './find-inline-images.ts'
 import type { ImageUploadErrorHandler } from './images.ts'
 
 export interface ResolvedUploadOptions {
@@ -26,33 +25,26 @@ interface PlacedImage {
 }
 
 /**
- * Re-scan the document for every image whose `src` equals `src`. The temporary
- * `blob:` object URL is unique, so this recovers the placeholder's position
- * without any stored anchor: robust against concurrent edits, undo, and doc
- * rebuilds, and naturally handles zero matches (deleted under us) or many
- * (the placeholder was duplicated).
+ * Re-scan the document for every placeholder carrying `src`. We insert an exact
+ * `![](src)` token whose `blob:` object URL is unique, so a plain substring
+ * search recovers its position (and any copies) without re-parsing: robust
+ * against concurrent edits, undo, and doc rebuilds, and naturally handling zero
+ * matches (deleted under us) or many (the placeholder was duplicated).
  */
 function findPlacedImages(doc: EditorNode, src: string): PlacedImage[] {
   const out: PlacedImage[] = []
+  const token = `![](${src})`
   doc.descendants((node, pos) => {
     if (node.type.spec.code) return false
     if (!node.isTextblock) return true
     const text = node.textContent
-    if (text.includes(src)) {
-      const base = pos + 1
-      // REVIEW: you use LEZER to parse EVERY inline textblock
-      // to find the image. That's very slow. Since we already have the mark,
-      // we can just find the correct mark.
-      for (const image of findInlineImages(text)) {
-        if (image.src !== src) continue
-        const srcOffset = text.indexOf(src, image.from)
-        out.push({
-          from: base + image.from,
-          to: base + image.to,
-          srcFrom: base + srcOffset,
-          srcTo: base + srcOffset + src.length,
-        })
-      }
+    const base = pos + 1
+    let index = text.indexOf(token)
+    while (index !== -1) {
+      const from = base + index
+      const srcFrom = from + 4 // skip the leading `![](`
+      out.push({ from, to: from + token.length, srcFrom, srcTo: srcFrom + src.length })
+      index = text.indexOf(token, index + token.length)
     }
     return false
   })
@@ -62,12 +54,12 @@ function findPlacedImages(doc: EditorNode, src: string): PlacedImage[] {
 function startUpload(
   view: EditorView,
   file: File,
-  pos: number | undefined,
   options: ResolvedUploadOptions,
+  insertPlaceholder: (markdown: string) => void,
 ): void {
   const task = new UploadTask({ file, uploader: options.uploader })
   const objectURL = task.objectURL
-  insertPlaceholder(view, `![](${objectURL})`, pos)
+  insertPlaceholder(`![](${objectURL})`)
   task.finished.then(
     (resultURL) => {
       if (!view.isDestroyed) replaceMatches(view, objectURL, resultURL)
@@ -84,10 +76,22 @@ function startUpload(
   )
 }
 
-function insertPlaceholder(view: EditorView, markdown: string, pos: number | undefined): void {
-  const tr =
-    pos == null ? view.state.tr.insertText(markdown) : view.state.tr.insertText(markdown, pos)
-  view.dispatch(tr)
+/** Paste: insert the placeholder inline, at the caret. */
+function insertInline(view: EditorView, markdown: string): void {
+  view.dispatch(view.state.tr.insertText(markdown))
+}
+
+/** Drop: insert the placeholder as its own block at the drop position. */
+function insertBlock(view: EditorView, markdown: string, pos: number): void {
+  const { state } = view
+  const paragraph = state.schema.nodes.paragraph.createAndFill(null, state.schema.text(markdown))
+  if (!paragraph) return
+  const clamped = Math.min(Math.max(pos, 0), state.doc.content.size)
+  const $pos = state.doc.resolve(clamped)
+  // A block can only land at a block boundary: before the textblock the drop
+  // fell inside, or at the given position when it is already between blocks.
+  const at = $pos.parent.isTextblock ? $pos.before() : $pos.pos
+  view.dispatch(state.tr.insert(at, paragraph))
 }
 
 function replaceMatches(view: EditorView, oldSrc: string, newSrc: string): void {
@@ -117,11 +121,11 @@ function removeMatches(view: EditorView, src: string): void {
 function handleFile(
   view: EditorView,
   file: File,
-  pos: number | undefined,
   options: ResolvedUploadOptions,
+  insertPlaceholder: (markdown: string) => void,
 ): boolean {
   if (!options.canUpload(file)) return false
-  startUpload(view, file, pos, options)
+  startUpload(view, file, options, insertPlaceholder)
   // Returning true consumes the event (ProseMirror calls preventDefault), so a
   // clipboard carrying image files is handled entirely.
   return true
@@ -129,17 +133,13 @@ function handleFile(
 
 export function defineImageUpload(options: ResolvedUploadOptions): PlainExtension {
   return union(
-    defineFilePasteHandler(({ view, file }) => handleFile(view, file, undefined, options)),
-    defineFileDropHandler(({ view, event, file }) => {
-      // The handler's own `pos` is computed for block insertion; for literal
-      // text we want the nearest text position, so recompute from the event.
-
-      // REVIEW: when the user drops a file, they expect it to be inserted
-      // as a "block"-level image. In anther word, we usually want to insert a
-      // paragraph that contains the image, instead of inserting the image into an existing paragraph.
-      // So you can just use the file drop handler position here.
-      const coords = view.posAtCoords({ left: event.clientX, top: event.clientY })
-      return handleFile(view, file, coords?.pos, options)
-    }),
+    // Paste lands inline at the caret; drop lands as its own block at the drop
+    // position (the conventional behavior for a dropped image file).
+    defineFilePasteHandler(({ view, file }) =>
+      handleFile(view, file, options, (markdown) => insertInline(view, markdown)),
+    ),
+    defineFileDropHandler(({ view, file, pos }) =>
+      handleFile(view, file, options, (markdown) => insertBlock(view, markdown, pos)),
+    ),
   )
 }

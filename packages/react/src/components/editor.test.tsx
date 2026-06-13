@@ -13,12 +13,14 @@ const cmRoot = page.locate('.cm-editor')
 const cmContent = page.locate('[data-editor="codemirror"] .cm-content')
 const mdImage = page.getByTestId('md-image')
 
-// REVIEW: rename to `createImageFile`
-function imageFile(name = 'cat.png'): File {
+function createImageFile(name = 'cat.png'): File {
   return new File([new Uint8Array([1, 2, 3])], name, { type: 'image/png' })
 }
 
-// REVIEW: `@prosekit/core/test` has a `pasteFiles` API. Use that instead.
+// `@prosekit/core/test`'s `pasteFiles` takes an `EditorView`, which the public
+// `<Editor>` deliberately does not expose, so this end-to-end test dispatches a
+// real `paste` event on the editor DOM instead. The view-level matrix lives in
+// `@meowdown/core`'s `image-upload.test.ts`, which uses `pasteFiles`.
 function pasteImage(target: Element, file: File): void {
   const data = new DataTransfer()
   data.items.add(file)
@@ -248,7 +250,7 @@ describe('Editor images', () => {
     await render(<Editor ref={ref} onImageUpload={upload} />)
     await pmRoot.click()
 
-    pasteImage(pmRoot.element(), imageFile())
+    pasteImage(pmRoot.element(), createImageFile())
     await vi.waitFor(() => {
       expect(upload).toHaveBeenCalled()
       expect(ref.current?.getMarkdown()).toContain('![](uploaded/cat.png)')
@@ -264,7 +266,7 @@ describe('Editor images', () => {
       .toHaveAttribute('src', 'https://example.com/cat.png')
 
     await pmRoot.click()
-    pasteImage(pmRoot.element(), imageFile())
+    pasteImage(pmRoot.element(), createImageFile())
     expect(ref.current?.getMarkdown()).not.toContain('![](cat.png)')
   })
 
@@ -288,7 +290,7 @@ describe('Editor images', () => {
     await screen.rerender(<Editor ref={ref} onImageUpload={second} />)
 
     await pmRoot.click()
-    pasteImage(pmRoot.element(), imageFile())
+    pasteImage(pmRoot.element(), createImageFile())
     await vi.waitFor(() => {
       expect(second).toHaveBeenCalled()
       expect(ref.current?.getMarkdown()).toContain('![](second.png)')
