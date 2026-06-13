@@ -17,17 +17,18 @@ function buildParser(description: LanguageDescription): HighlightParser {
   })
 }
 
-// `prosemirror-highlight` retries the node whenever the parser returns a
-// promise, so the CodeMirror grammar loads on a first pass and the decorations
-// land on the next one. Tokens get `@lezer/highlight` `tok-*` classes that the
-// stylesheet colors.
 const lazyParser: HighlightParser = (options) => {
   const language = options.language?.trim()
   if (!language) return []
 
-  const cached = parserCache.get(language)
-  if (cached !== undefined) {
-    return cached ? cached(options) : []
+  const cached: HighlightParser | null | undefined = parserCache.get(language)
+
+  if (cached === null) {
+    return []
+  }
+
+  if (cached) {
+    return cached(options)
   }
 
   const description = LanguageDescription.matchLanguageName(languages, language, true)
@@ -45,7 +46,8 @@ const lazyParser: HighlightParser = (options) => {
   return description
     .load()
     .then(() => undefined)
-    .catch(() => {
+    .catch((error) => {
+      console.error(`[meowdown] Failed to load language "${language}":`, error)
       parserCache.set(language, null)
     })
 }
