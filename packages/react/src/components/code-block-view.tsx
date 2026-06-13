@@ -1,6 +1,7 @@
 import { Select } from '@base-ui/react/select'
+import { languages } from '@codemirror/language-data'
 import type { Extension } from '@prosekit/core'
-import { type CodeBlockAttrs, shikiBundledLanguagesInfo } from '@prosekit/extensions/code-block'
+import type { CodeBlockAttrs } from '@prosekit/extensions/code-block'
 import {
   defineReactNodeView,
   type ReactNodeViewComponent,
@@ -20,11 +21,13 @@ const COPIED_RESET_MS = 1500
 function CodeBlockView(props: ReactNodeViewProps) {
   const language = (props.node.attrs as CodeBlockAttrs).language || PLAIN_TEXT
 
-  // `items` lets `<Select.Value>` show the label of the selected language.
+  // `items` lets `<Select.Value>` show the label of the selected language. The
+  // value is the lowercased name (an idiomatic fence info string); the
+  // highlighter matches it back case-insensitively.
   const items = useMemo<Record<string, string>>(() => {
     const record: Record<string, string> = { [PLAIN_TEXT]: PLAIN_TEXT_LABEL }
-    for (const info of shikiBundledLanguagesInfo) {
-      record[info.id] = info.name
+    for (const description of languages) {
+      record[description.name.toLowerCase()] = description.name
     }
     return record
   }, [])

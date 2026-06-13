@@ -10,7 +10,7 @@ import type { EditorHandle } from './types.ts'
 
 const selector = page.getByTestId('code-block-language')
 const copyButton = page.getByTestId('code-block-copy')
-const tokens = page.locate('.ProseMirror pre code .shiki')
+const tokens = page.locate('.ProseMirror pre code [class*="tok-"]')
 
 const CODE_BLOCK_MD = '```rust\nfn main() {}\n```'
 
@@ -21,7 +21,7 @@ describe('code block language selector', () => {
     await expect.element(selector).toHaveTextContent('Rust')
   })
 
-  it('highlights the code block with shiki tokens', async () => {
+  it('highlights the code block with syntax tokens', async () => {
     await render(<ProseKitEditor initialMarkdown={CODE_BLOCK_MD} />)
     await expect.element(tokens.first(), { timeout: 15000 }).toBeInTheDocument()
   })

@@ -37,7 +37,7 @@ Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-a
 
 Wikilinks (`[[target]]`) render with a dashed underline via the `.md-wikilink` class, colored by `--meowdown-accent`. Their `[[` `]]` brackets behave like other syntax characters: dimmed in show mode, hidden in hide and focus modes.
 
-Code blocks are syntax-highlighted with [Shiki](https://shiki.style). Each token carries both the light and dark theme colors as CSS variables, so highlighting follows the page's `color-scheme` like the rest of the theme; set a `codeBlock` node's `language` attribute to pick a grammar.
+Code blocks are syntax-highlighted with [Lezer](https://lezer.codemirror.net) grammars, loaded on demand from [`@codemirror/language-data`](https://www.npmjs.com/package/@codemirror/language-data) to match a `codeBlock` node's `language` attribute. Tokens get `@lezer/highlight` `tok-*` classes, colored via `light-dark()` so highlighting follows the page's `color-scheme` like the rest of the theme.
 
 ## License
 
