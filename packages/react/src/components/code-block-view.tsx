@@ -22,7 +22,6 @@ export function CodeBlockView(props: ReactNodeViewProps) {
 
   const [copied, setCopied] = useState(false)
   const resetTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
-  useEffect(() => () => clearTimeout(resetTimerRef.current), [])
 
   const copy = async () => {
     try {
@@ -30,8 +29,8 @@ export function CodeBlockView(props: ReactNodeViewProps) {
       setCopied(true)
       clearTimeout(resetTimerRef.current)
       resetTimerRef.current = setTimeout(() => setCopied(false), COPIED_RESET_MS)
-    } catch {
-      // The clipboard API can reject (no permission, insecure context); ignore.
+    } catch (error) {
+      console.warn("[meowdown] Failed to copy code block:", error)
     }
   }
 
@@ -88,7 +87,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
           {copied ? <CheckIcon /> : <CopyIcon />}
         </button>
       </div>
-      <pre ref={props.contentRef} data-language={language || undefined}></pre>
+      <pre ref={props.contentRef} data-language={language || ""}></pre>
     </div>
   )
 }
