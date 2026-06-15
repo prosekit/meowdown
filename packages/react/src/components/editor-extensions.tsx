@@ -71,8 +71,7 @@ export function EditorExtensions({
 
   useExtension(
     useMemo(() => {
-      if (!placeholder) return null
-      return definePlaceholder({ placeholder })
+      return placeholder ? definePlaceholder({ placeholder }) : null
     }, [placeholder]),
   )
 
