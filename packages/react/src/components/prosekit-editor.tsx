@@ -22,6 +22,7 @@ import { BlockHandle } from './block-handle.tsx'
 import { DropIndicator } from './drop-indicator.tsx'
 import { EditorExtensions } from './editor-extensions.tsx'
 import { SlashMenu } from './slash-menu.tsx'
+import { TableHandle } from './table-handle.tsx'
 import { TagMenu } from './tag-menu.tsx'
 import type {
   EditorHandle,
@@ -204,6 +205,7 @@ export function ProseKitEditor({
         readOnly={readOnly}
       />
       <BlockHandle />
+      {!readOnly && <TableHandle />}
       <DropIndicator />
       <SlashMenu />
       {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
