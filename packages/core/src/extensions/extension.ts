@@ -18,6 +18,7 @@ import { defineText } from '@prosekit/extensions/text'
 import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
+import { defineHeadingShortcuts } from './heading-shortcuts.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
@@ -43,6 +44,7 @@ function defineEditorExtensionImpl() {
     defineCodeBlockSyntaxHighlight(),
     defineInlineMarkPlugin(),
     defineInlineToggle(),
+    defineHeadingShortcuts(),
 
     // others
     defineBaseKeymap(),
