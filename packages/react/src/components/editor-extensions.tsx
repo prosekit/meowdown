@@ -1,9 +1,11 @@
 import {
   defineImages,
   defineMarkMode,
+  definePlaceholder,
   defineWikilinkClickHandler,
   type ImageOptions,
   type MarkMode,
+  type PlaceholderOptions,
   type WikilinkClickHandler,
 } from '@meowdown/core'
 import { defineDocChangeHandler } from '@prosekit/core'
@@ -17,6 +19,7 @@ export interface EditorExtensionsProps {
   resolveImageUrl?: ImageOptions['resolveImageUrl']
   onImagePaste?: ImageOptions['onImagePaste']
   onImageSaveError?: ImageOptions['onImageSaveError']
+  placeholder?: PlaceholderOptions['placeholder']
 }
 
 // A leaf that renders nothing and holds every reactive `useExtension` call (each
@@ -29,6 +32,7 @@ export function EditorExtensions({
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
+  placeholder,
 }: EditorExtensionsProps): null {
   useExtension(useMemo(() => defineMarkMode(markMode), [markMode]))
 
@@ -49,6 +53,13 @@ export function EditorExtensions({
         resolveImageUrl ? defineImages({ resolveImageUrl, onImagePaste, onImageSaveError }) : null,
       [resolveImageUrl, onImagePaste, onImageSaveError],
     ),
+  )
+
+  useExtension(
+    useMemo(() => {
+      if (!placeholder) return null
+      return definePlaceholder({ placeholder })
+    }, [placeholder]),
   )
 
   return null

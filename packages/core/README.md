@@ -27,6 +27,7 @@ The editor extension binds inline-format toggles (`Mod` = Cmd on macOS, Ctrl els
 - `--meowdown-table-header-bg`: table header row background.
 - `--meowdown-image-max-height`: max height of rendered inline images.
 - `--meowdown-image-radius`: corner radius of rendered inline images.
+- `--meowdown-placeholder`: placeholder text color (defaults to `--meowdown-muted`).
 - `--meowdown-font-mono`: monospace font stack.
 - `--meowdown-gutter`: horizontal editor padding. Floating UI such as the block handle (in `@meowdown/react`) lives inside it; keep it at least `3.5rem`.
 - `--meowdown-selection`: text `::selection` background.

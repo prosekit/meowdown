@@ -1,4 +1,9 @@
-import type { ImageOptions, MarkMode, WikilinkClickHandler } from '@meowdown/core'
+import type {
+  ImageOptions,
+  MarkMode,
+  PlaceholderOptions,
+  WikilinkClickHandler,
+} from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
 import { clsx } from 'clsx/lite'
 import { useImperativeHandle, useRef, type ReactNode, type Ref } from 'react'
@@ -74,6 +79,12 @@ export interface EditorProps {
   onImageSaveError?: ImageOptions['onImageSaveError']
 
   /**
+   * Placeholder text shown in an empty block. A function receives the editor
+   * state. Pass a stable function. Ignored in source mode.
+   */
+  placeholder?: PlaceholderOptions['placeholder']
+
+  /**
    * Enables the browser's native spell checking in the rich modes. Defaults
    * to the browser's behavior. Ignored in source mode.
    */
@@ -102,6 +113,7 @@ export function Editor({
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
+  placeholder,
   spellCheck,
   editorClassName,
   wrapperClassName,
@@ -171,6 +183,7 @@ export function Editor({
           resolveImageUrl={resolveImageUrl}
           onImagePaste={onImagePaste}
           onImageSaveError={onImageSaveError}
+          placeholder={placeholder}
           spellCheck={spellCheck}
           editorClassName={editorClassName}
         >

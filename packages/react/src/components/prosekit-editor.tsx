@@ -4,6 +4,7 @@ import {
   type EditorExtension,
   type ImageOptions,
   type MarkMode,
+  type PlaceholderOptions,
   type WikilinkClickHandler,
   docToMarkdown,
   markdownToDoc,
@@ -77,6 +78,9 @@ export interface ProseKitEditorProps {
   /** Called when an image fails to persist. See `EditorProps.onImageSaveError`. */
   onImageSaveError?: ImageOptions['onImageSaveError']
 
+  /** Placeholder text for empty blocks. See `EditorProps.placeholder`. */
+  placeholder?: PlaceholderOptions['placeholder']
+
   /** Enables or disables spell checking in the editor. */
   spellCheck?: boolean
 
@@ -100,6 +104,7 @@ export function ProseKitEditor({
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
+  placeholder,
   spellCheck,
   editorClassName,
   ref,
@@ -172,6 +177,7 @@ export function ProseKitEditor({
         resolveImageUrl={resolveImageUrl}
         onImagePaste={onImagePaste}
         onImageSaveError={onImageSaveError}
+        placeholder={placeholder}
       />
       <BlockHandle />
       <DropIndicator />

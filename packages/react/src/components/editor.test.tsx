@@ -228,6 +228,16 @@ describe('Editor', () => {
     await expect.element(page.getByAltText('pic')).not.toBeInTheDocument()
   })
 
+  it('shows placeholder text in an empty editor and hides it once typed', async () => {
+    const placeholder = page.locate('.prosekit-placeholder')
+    await render(<Editor placeholder="Write something" />)
+    await expect.element(placeholder).toHaveAttribute('data-placeholder', 'Write something')
+
+    await pmRoot.click()
+    await userEvent.keyboard('hi')
+    await expect.element(placeholder).not.toBeInTheDocument()
+  })
+
   it('exposes the underlying editor on the handle in rich modes only', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(<Editor ref={ref} initialMarkdown="Hi" />)

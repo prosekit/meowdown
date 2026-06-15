@@ -293,6 +293,17 @@
 }
 
 /* ---------------------------------------------------------------------------
+ * Placeholder text for empty blocks (ProseKit's definePlaceholder)
+ * ------------------------------------------------------------------------- */
+.ProseMirror .prosekit-placeholder::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--meowdown-placeholder, var(--meowdown-muted));
+}
+
+/* ---------------------------------------------------------------------------
  * Markdown syntax characters (`md-mark`) and link URIs
  * ------------------------------------------------------------------------- */
 .ProseMirror .md-mark,
