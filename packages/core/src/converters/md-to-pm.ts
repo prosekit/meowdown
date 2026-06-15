@@ -254,20 +254,37 @@ function convertCodeBlock(editor: TypedEditor, cursor: TreeCursor, text: string)
 }
 
 function convertTable(editor: TypedEditor, cursor: TreeCursor, text: string): ProseMirrorNode {
+  // The delimiter row (a `TableDelimiter` that is a direct child of `Table`)
+  // is the only source that always encodes every column, so it drives the
+  // column count. `@lezer/markdown` emits no `TableCell` for an empty cell, so
+  // counting per-row cells would drop empty columns and misalign the rest.
+  let columnCount = 0
+  if (cursor.firstChild()) {
+    do {
+      if (cursor.type.id === LEZER_NODE_IDS.TableDelimiter) {
+        columnCount = countDelimiterColumns(text.slice(cursor.from, cursor.to))
+      }
+    } while (cursor.nextSibling())
+    cursor.parent()
+  }
+
   const rows: ProseMirrorNode[] = []
   if (cursor.firstChild()) {
     do {
       const id = cursor.type.id
       if (id === LEZER_NODE_IDS.TableHeader) {
-        rows.push(convertTableRow(editor, cursor, text, true))
+        rows.push(convertTableRow(editor, cursor, text, true, columnCount))
       } else if (id === LEZER_NODE_IDS.TableRow) {
-        rows.push(convertTableRow(editor, cursor, text, false))
+        rows.push(convertTableRow(editor, cursor, text, false, columnCount))
       }
-      // TableDelimiter between header and body is intentionally skipped.
     } while (cursor.nextSibling())
     cursor.parent()
   }
   return editor.nodes.table(rows)
+}
+
+function countDelimiterColumns(separator: string): number {
+  return separator.split('|').filter((segment) => segment.trim() !== '').length
 }
 
 function convertTableRow(
@@ -275,19 +292,28 @@ function convertTableRow(
   cursor: TreeCursor,
   text: string,
   isHeader: boolean,
+  columnCount: number,
 ): ProseMirrorNode {
-  const cells: ProseMirrorNode[] = []
+  const cellTexts: string[] = Array<string>(columnCount).fill('')
   if (cursor.firstChild()) {
+    const hasLeadingPipe = cursor.type.id === LEZER_NODE_IDS.TableDelimiter
+    let delimiterCount = 0
     do {
-      if (cursor.type.id === LEZER_NODE_IDS.TableCell) {
-        const cellText = text.slice(cursor.from, cursor.to).trim()
-        const paragraph = editor.nodes.paragraph(cellText)
-        cells.push(
-          isHeader ? editor.nodes.tableHeaderCell(paragraph) : editor.nodes.tableCell(paragraph),
-        )
+      if (cursor.type.id === LEZER_NODE_IDS.TableDelimiter) {
+        delimiterCount++
+      } else if (cursor.type.id === LEZER_NODE_IDS.TableCell) {
+        const column = delimiterCount - (hasLeadingPipe ? 1 : 0)
+        if (column >= 0 && column < columnCount) {
+          cellTexts[column] = text.slice(cursor.from, cursor.to).trim()
+        }
       }
     } while (cursor.nextSibling())
     cursor.parent()
   }
+
+  const cells = cellTexts.map((cellText) => {
+    const paragraph = editor.nodes.paragraph(cellText)
+    return isHeader ? editor.nodes.tableHeaderCell(paragraph) : editor.nodes.tableCell(paragraph)
+  })
   return editor.nodes.tableRow(cells)
 }
