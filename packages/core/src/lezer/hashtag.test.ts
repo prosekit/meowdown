@@ -1,3 +1,4 @@
+import dedent from 'dedent'
 import { describe, expect, it } from 'vitest'
 
 import { type InlineElement, parseInline } from './inline.ts'
@@ -113,7 +114,12 @@ describe('hashtag inline parser', () => {
   })
 
   it('is never produced by gfmBlockOnlyParser', () => {
-    const tree = gfmBlockOnlyParser.parse('hello #meow\n\n# heading #tag')
+    const markdown = dedent`
+      hello #meow
+
+      # heading #tag
+    `
+    const tree = gfmBlockOnlyParser.parse(markdown)
     let sawHashtag = false
     tree.iterate({
       enter(node) {

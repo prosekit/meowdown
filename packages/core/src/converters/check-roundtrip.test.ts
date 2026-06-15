@@ -1,9 +1,31 @@
+import dedent from 'dedent'
 import { describe, expect, it } from 'vitest'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
 
 describe('checkRoundTrip', () => {
-  it.each(['hello world', '# Hello\n\nWorld', '- a\n- b'])('reports exact for %j', (markdown) => {
+  it.each([
+    'hello world',
+    dedent`
+      # Hello
+
+      World
+    `,
+    dedent`
+      - a
+      - b
+    `,
+    dedent`
+      |  |  |  |
+      | --- | --- | --- |
+      |  |  |  |
+    `,
+    dedent`
+      | a |  | c |
+      | --- | --- | --- |
+      |  | b |  |
+    `,
+  ])('reports exact for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('exact')
   })
 
@@ -15,9 +37,15 @@ describe('checkRoundTrip', () => {
   })
 
   it.each([
-    'Hello\n=====', // setext heading
+    dedent`
+      Hello
+      =====
+    `, // setext heading
     '<div class="x">hi</div>', // raw HTML block
-    '* a\n* b', // bullet markers normalize to `-`
+    dedent`
+      * a
+      * b
+    `, // bullet markers normalize to `-`
   ])('reports lossy for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('lossy')
   })

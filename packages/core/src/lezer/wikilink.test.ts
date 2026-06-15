@@ -1,3 +1,4 @@
+import dedent from 'dedent'
 import { describe, expect, it } from 'vitest'
 
 import { type InlineElement, parseInline } from './inline.ts'
@@ -134,7 +135,12 @@ describe('wikilink inline parser', () => {
   })
 
   it('is never produced by gfmBlockOnlyParser', () => {
-    const tree = gfmBlockOnlyParser.parse('hello [[note]]\n\n# heading [[x]]')
+    const markdown = dedent`
+      hello [[note]]
+
+      # heading [[x]]
+    `
+    const tree = gfmBlockOnlyParser.parse(markdown)
     let sawWikilink = false
     tree.iterate({
       enter(node) {
