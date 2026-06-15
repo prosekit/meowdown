@@ -4,13 +4,17 @@ import { Decoration, DecorationSet, type EditorView } from '@prosekit/pm/view'
 
 import { scanInlineImages } from '../converters/scan-inline-images.ts'
 
+type ImageUrlResolver = (src: string) => string | undefined
+type ImagePasteHandler = (file: File) => string | undefined | Promise<string | undefined>
+type ImageSaveErrorHandler = (error: unknown, file: File) => void
+
 export interface ImageOptions {
   /** Map a markdown `src` to a displayable URL, or `undefined` to skip rendering. */
-  resolveImageUrl: (src: string) => string | undefined
+  resolveImageUrl: ImageUrlResolver
   /** Persist a pasted/dropped image file and return its markdown `src`, or `undefined` to decline. */
-  onImagePaste?: (file: File) => string | undefined | Promise<string | undefined>
+  onImagePaste?: ImagePasteHandler
   /** Called when persisting a pasted/dropped image throws. Defaults to `console.error`. */
-  onImageSaveError?: (error: unknown, file: File) => void
+  onImageSaveError?: ImageSaveErrorHandler
 }
 
 const imageKey = new PluginKey<DecorationSet>('meowdown-images')
@@ -96,11 +100,15 @@ function reportImageError(
   else console.error('[meowdown] failed to save pasted image:', error)
 }
 
+const defaultOnImageSaveError: ImageSaveErrorHandler = (error) => {
+  console.error('[meowdown] failed to save pasted image:', error)
+}
+
 async function insertSavedImages(
   view: EditorView,
   files: File[],
-  onImagePaste: NonNullable<ImageOptions['onImagePaste']>,
-  onImageSaveError: ImageOptions['onImageSaveError'],
+  onImagePaste: ImagePasteHandler,
+  onImageSaveError: ImageSaveErrorHandler = defaultOnImageSaveError,
   at?: number,
 ): Promise<void> {
   let position = at
@@ -129,17 +137,17 @@ function createImageInputPlugin(options: ImageOptions): Plugin {
     props: {
       handlePaste: (view, event) => {
         const files = imageFiles(event.clipboardData)
-        const onImagePaste = options.onImagePaste
+        const { onImagePaste, onImageSaveError } = options
         if (files.length === 0 || !onImagePaste) return false
-        void insertSavedImages(view, files, onImagePaste, options.onImageSaveError)
+        void insertSavedImages(view, files, onImagePaste, onImageSaveError)
         return true
       },
       handleDrop: (view, event) => {
         const files = imageFiles(event.dataTransfer)
-        const onImagePaste = options.onImagePaste
+        const { onImagePaste, onImageSaveError } = options
         if (files.length === 0 || !onImagePaste) return false
         const drop = view.posAtCoords({ left: event.clientX, top: event.clientY })
-        void insertSavedImages(view, files, onImagePaste, options.onImageSaveError, drop?.pos)
+        void insertSavedImages(view, files, onImagePaste, onImageSaveError, drop?.pos)
         return true
       },
     },
