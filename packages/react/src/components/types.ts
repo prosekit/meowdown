@@ -1,3 +1,4 @@
+import type { TypedEditor } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
 
 /** A selection to restore: an exact JSON selection, or a document edge. */
@@ -42,6 +43,9 @@ export interface EditorHandle {
 
   /** Scrolls the selection into view. */
   scrollIntoView: () => void
+
+  /** Escape hatch: the underlying ProseKit editor, or `undefined` in source mode. */
+  readonly editor: TypedEditor | undefined
 }
 
 /**

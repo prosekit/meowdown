@@ -93,6 +93,7 @@ export function CodeMirrorEditor({ initialMarkdown, onDocChange, ref }: CodeMirr
       setSelection,
       focus,
       scrollIntoView,
+      editor: undefined,
     }
   }, [])
 

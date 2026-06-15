@@ -216,6 +216,17 @@ describe('Editor', () => {
     await expect.element(cmContent).toHaveTextContent('Hi!')
   })
 
+  it('exposes the underlying editor on the handle in rich modes only', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<Editor ref={ref} initialMarkdown="Hi" />)
+    await expect.element(screen.getByText('Hi')).toBeInTheDocument()
+    expect(ref.current?.editor).toBeTruthy()
+    expect(ref.current?.editor?.state.doc.textContent).toBe('Hi')
+
+    await screen.rerender(<Editor ref={ref} mode="source" initialMarkdown="Hi" />)
+    expect(ref.current?.editor).toBeUndefined()
+  })
+
   it('applies editorClassName and wrapperClassName', async () => {
     await render(
       <Editor initialMarkdown="Hi" editorClassName="test-editable" wrapperClassName="test-wrap" />,

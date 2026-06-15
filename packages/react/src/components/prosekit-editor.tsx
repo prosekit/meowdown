@@ -140,6 +140,7 @@ export function ProseKitEditor({
       setSelection,
       focus,
       scrollIntoView,
+      editor,
     }
   }, [editor])
 

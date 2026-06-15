@@ -120,6 +120,9 @@ export function Editor({
       setSelection,
       focus,
       scrollIntoView,
+      get editor() {
+        return childRef.current?.editor
+      },
     }
   }, [])
 

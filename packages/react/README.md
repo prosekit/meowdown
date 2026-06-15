@@ -56,6 +56,7 @@ Imperative handle for the editor, attached via `ref`.
 - `setSelection(selection: SelectionJSON | 'start' | 'end'): void`: restores a selection with the same hint semantics as `setState`.
 - `focus(): void`: focuses the editor.
 - `scrollIntoView(): void`: scrolls the selection into view.
+- `editor: TypedEditor | undefined`: escape hatch for the underlying ProseKit editor, `undefined` in source mode. No stability guarantees beyond what `@meowdown/core` exports.
 
 Selection positions are in the mounted editor's coordinate space: ProseMirror document positions in the rich modes, character offsets in source mode. They round-trip within one mode but are not portable across a mode switch.
 
