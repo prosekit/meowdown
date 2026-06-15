@@ -1,6 +1,5 @@
 import {
   defineEditorExtension,
-  defineMarkMode,
   type TypedEditor,
   type EditorExtension,
   type MarkMode,
@@ -8,16 +7,17 @@ import {
   markdownToDoc,
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
-import { createEditor, defineDocChangeHandler, type SelectionJSON, union } from '@prosekit/core'
+import { createEditor, type SelectionJSON, union } from '@prosekit/core'
 import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
-import { ProseKit, useExtension } from '@prosekit/react'
-import { useImperativeHandle, useMemo, useState, type Ref } from 'react'
+import { ProseKit } from '@prosekit/react'
+import { useImperativeHandle, useState, type Ref } from 'react'
 
 import { defineCodeBlockView } from '../extensions/code-block-view.ts'
 
 import { BlockHandle } from './block-handle.tsx'
 import { DropIndicator } from './drop-indicator.tsx'
+import { EditorExtensions } from './editor-extensions.tsx'
 import { SlashMenu } from './slash-menu.tsx'
 import { TagMenu } from './tag-menu.tsx'
 import type {
@@ -135,22 +135,10 @@ export function ProseKitEditor({
     }
   }, [editor])
 
-  const markModeExtension = useMemo(() => {
-    return defineMarkMode(markMode)
-  }, [markMode])
-  useExtension(markModeExtension, { editor })
-
-  const docChangeExtension = useMemo(() => {
-    if (!onDocChange) return null
-    return defineDocChangeHandler(() => {
-      onDocChange()
-    })
-  }, [onDocChange])
-  useExtension(docChangeExtension, { editor })
-
   return (
     <ProseKit editor={editor}>
       <div ref={editor.mount} spellCheck={spellCheck}></div>
+      <EditorExtensions markMode={markMode} onDocChange={onDocChange} />
       <BlockHandle />
       <DropIndicator />
       <SlashMenu />
