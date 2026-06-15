@@ -24,7 +24,7 @@ Heading shortcuts toggle the current block to a heading of that level (or back t
 | `Mod-5` / `Mod-Alt-5` | Heading 5 |
 | `Mod-6` / `Mod-Alt-6` | Heading 6 |
 
-`EDITOR_KEY_BINDINGS` exports a `Record<string, string>` mapping every key above to its description, for host settings UIs and keybinding-collision checks.
+`EDITOR_KEY_BINDINGS` is a literal (`as const`) object mapping every key above to its description, for host settings UIs and keybinding-collision checks.
 
 ## Round-trip fidelity
 
