@@ -15,4 +15,5 @@ export { definePlaceholder, type PlaceholderOptions } from '@prosekit/extensions
 export { codeBlockLanguages } from './extensions/code-block-languages.ts'
 export { docToMarkdown } from './converters/pm-to-md.ts'
 export { markdownToDoc } from './converters/md-to-pm.ts'
+export { checkRoundTrip, type RoundTripFidelity } from './converters/check-roundtrip.ts'
 export type { CodeBlockAttrs } from '@prosekit/extensions/code-block'

@@ -49,6 +49,10 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
 
 Re-exported from `@prosekit/react`. Call it from a component passed as `children` to read the live editor instance.
 
+### `checkRoundTrip`
+
+Re-exported from `@meowdown/core`. `checkRoundTrip(markdown)` returns `'exact' | 'normalizing' | 'lossy'`, for hosts that gate saving markdown files on whether the editor reproduces them faithfully.
+
 ### `EditorHandle`
 
 Imperative handle for the editor, attached via `ref`.
