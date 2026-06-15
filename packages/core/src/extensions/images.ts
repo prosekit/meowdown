@@ -8,7 +8,7 @@ export interface ImageOptions {
   /** Map a markdown `src` to a displayable URL, or `undefined` to skip rendering. */
   resolveImageUrl: (src: string) => string | undefined
   /** Persist a pasted/dropped image file and return its markdown `src`, or `undefined` to decline. */
-  onImagePaste?: (file: File) => Promise<string | undefined>
+  onImagePaste?: (file: File) => string | undefined | Promise<string | undefined>
   /** Called when persisting a pasted/dropped image throws. Defaults to `console.error`. */
   onImageSaveError?: (error: unknown, file: File) => void
 }

@@ -251,7 +251,7 @@ describe('MeowdownEditor', () => {
   })
 
   it('uploads and inserts an image dropped from outside the editor', async () => {
-    const onImagePaste = vi.fn(() => Promise.resolve('https://cdn/cat.png'))
+    const onImagePaste = vi.fn(() => 'https://cdn/cat.png')
     const ref = createRef<EditorHandle>()
     const screen = await render(
       <MeowdownEditor
