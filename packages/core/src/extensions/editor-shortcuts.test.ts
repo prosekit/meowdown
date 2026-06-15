@@ -4,9 +4,6 @@ import { userEvent } from 'vitest/browser'
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture } from '../testing/index.ts'
 
-// Mirror ProseMirror's own `Mod` resolution so the test holds on every platform.
-const mod = /Mac|iP(hone|[oa]d)/u.test(navigator.platform) ? 'Meta' : 'Control'
-
 const LEVELS = [1, 2, 3, 4, 5, 6] as const
 
 describe('heading shortcuts', () => {
@@ -15,7 +12,7 @@ describe('heading shortcuts', () => {
       using fixture = setupFixture()
       fixture.set(fixture.n.doc(fixture.n.paragraph('title<a>')))
       fixture.view.focus()
-      await userEvent.keyboard(`{${mod}>}${level}{/${mod}}`)
+      await userEvent.keyboard(`{ControlOrMeta>}${level}{/ControlOrMeta}`)
       expect(docToMarkdown(fixture.doc)).toBe(`${'#'.repeat(level)} title\n`)
     })
   }
@@ -24,7 +21,7 @@ describe('heading shortcuts', () => {
     using fixture = setupFixture()
     fixture.set(fixture.n.doc(fixture.n.heading({ level: 1 }, 'title<a>')))
     fixture.view.focus()
-    await userEvent.keyboard(`{${mod}>}1{/${mod}}`)
+    await userEvent.keyboard(`{ControlOrMeta>}1{/ControlOrMeta}`)
     expect(docToMarkdown(fixture.doc)).toBe('title\n')
   })
 
@@ -32,7 +29,7 @@ describe('heading shortcuts', () => {
     using fixture = setupFixture()
     fixture.set(fixture.n.doc(fixture.n.paragraph('title<a>')))
     fixture.view.focus()
-    await userEvent.keyboard(`{${mod}>}{Alt>}1{/Alt}{/${mod}}`)
+    await userEvent.keyboard(`{ControlOrMeta>}{Alt>}1{/Alt}{/ControlOrMeta}`)
     expect(docToMarkdown(fixture.doc)).toBe('title\n')
   })
 
@@ -54,7 +51,7 @@ describe('inline toggle shortcuts', () => {
     using fixture = setupFixture()
     fixture.set(fixture.n.doc(fixture.n.paragraph('<a>bold<b>')))
     fixture.view.focus()
-    await userEvent.keyboard(`{${mod}>}${key}{/${mod}}`)
+    await userEvent.keyboard(`{ControlOrMeta>}${key}{/ControlOrMeta}`)
     expect(docToMarkdown(fixture.doc)).toBe(`${expected}\n`)
   })
 
@@ -62,7 +59,7 @@ describe('inline toggle shortcuts', () => {
     using fixture = setupFixture()
     fixture.set(fixture.n.doc(fixture.n.paragraph('<a>bold<b>')))
     fixture.view.focus()
-    await userEvent.keyboard(`{${mod}>}{Shift>}x{/Shift}{/${mod}}`)
+    await userEvent.keyboard(`{ControlOrMeta>}{Shift>}x{/Shift}{/ControlOrMeta}`)
     expect(docToMarkdown(fixture.doc)).toBe('~~bold~~\n')
   })
 })
