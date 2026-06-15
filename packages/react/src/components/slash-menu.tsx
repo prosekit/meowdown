@@ -83,7 +83,7 @@ export function SlashMenu() {
           />
           <SlashMenuItem
             label="Table"
-            onSelect={() => editor.commands.insertTable({ row: 3, col: 3 })}
+            onSelect={() => editor.commands.insertTable({ row: 3, col: 3, header: true })}
           />
           <AutocompleteEmpty className={styles.Item}>No results</AutocompleteEmpty>
         </AutocompletePopup>
