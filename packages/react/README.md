@@ -61,6 +61,10 @@ Re-exported from `@prosekit/react`. Call it from a component passed as `children
 
 Re-exported from `@meowdown/core`. `checkRoundTrip(markdown)` returns `'exact' | 'normalizing' | 'lossy'`, for hosts that gate saving markdown files on whether the editor reproduces them faithfully.
 
+### `EDITOR_KEY_BINDINGS`
+
+Re-exported from `@meowdown/core`. A literal (`as const`) object mapping each editor shortcut (e.g. `Mod-b`, `Mod-1`) to its description, for host settings UIs and keybinding-collision checks.
+
 ### `EditorHandle`
 
 Imperative handle for the editor, attached via `handleRef`.
