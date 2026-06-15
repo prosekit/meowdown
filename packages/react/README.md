@@ -5,8 +5,10 @@ React components for Meowdown, a hybrid (live-preview) Markdown editor.
 ## Usage
 
 ```tsx
-import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
+import '@meowdown/core/style.css'
 import '@meowdown/react/style.css'
+
+import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import { useRef, useCallback } from 'react'
 
 export function App() {
@@ -57,14 +59,6 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
 
 Re-exported from `@prosekit/react`. Call it from a component passed as `children` to read the live editor instance.
 
-### `checkRoundTrip`
-
-Re-exported from `@meowdown/core`. `checkRoundTrip(markdown)` returns `'exact' | 'normalizing' | 'lossy'`, for hosts that gate saving markdown files on whether the editor reproduces them faithfully.
-
-### `EDITOR_KEY_BINDINGS`
-
-Re-exported from `@meowdown/core`. A literal (`as const`) object mapping each editor shortcut (e.g. `Mod-b`, `Mod-1`) to its description, for host settings UIs and keybinding-collision checks.
-
 ### `EditorHandle`
 
 Imperative handle for the editor, attached via `handleRef`.
@@ -81,20 +75,9 @@ Imperative handle for the editor, attached via `handleRef`.
 
 Selection positions are in the mounted editor's coordinate space: ProseMirror document positions in the rich modes, character offsets in source mode. They round-trip within one mode but are not portable across a mode switch.
 
-## Keyboard shortcuts
-
-In the rich modes (`focus` / `show` / `hide`), these toggle inline formatting on the selection (`Mod` = Cmd on macOS, Ctrl elsewhere):
-
-| Key           | Action               |
-| ------------- | -------------------- |
-| `Mod-B`       | toggle bold          |
-| `Mod-I`       | toggle italic        |
-| `Mod-E`       | toggle inline code   |
-| `Mod-Shift-X` | toggle strikethrough |
-
 ## Styling
 
-`@meowdown/react/style.css` includes the default theme from [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core).
+Import both stylesheets: `@meowdown/core/style.css` (the editor theme and variables) and `@meowdown/react/style.css` (the component layout). The core theme is documented in [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core).
 
 ## License
 

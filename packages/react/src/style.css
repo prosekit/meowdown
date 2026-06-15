@@ -1,5 +1,3 @@
-@import '@meowdown/core/style.css';
-
 .meowdown {
   display: flex;
   flex-direction: column;

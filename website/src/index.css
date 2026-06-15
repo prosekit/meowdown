@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import '@meowdown/core/style.css';
 @import '@meowdown/react/style.css';
 @plugin '@egoist/tailwindcss-icons';
 
