@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0](https://github.com/prosekit/meowdown/compare/react-v0.5.0...react-v0.6.0) (2026-06-15)
+
+
+### Features
+
+* refine editor API ([#35](https://github.com/prosekit/meowdown/issues/35)) ([203cdc7](https://github.com/prosekit/meowdown/commit/203cdc78b06099309c57821a9d0f2c16bc12f9cf))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @meowdown/core bumped to 0.5.0
+
 ## [0.5.0](https://github.com/prosekit/meowdown/compare/react-v0.4.0...react-v0.5.0) (2026-06-15)
 
 

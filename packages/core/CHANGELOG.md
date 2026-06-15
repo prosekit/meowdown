@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/prosekit/meowdown/compare/core-v0.4.0...core-v0.5.0) (2026-06-15)
+
+
+### Features
+
+* refine editor API ([#35](https://github.com/prosekit/meowdown/issues/35)) ([203cdc7](https://github.com/prosekit/meowdown/commit/203cdc78b06099309c57821a9d0f2c16bc12f9cf))
+
 ## [0.4.0](https://github.com/prosekit/meowdown/compare/core-v0.3.1...core-v0.4.0) (2026-06-15)
 
 
