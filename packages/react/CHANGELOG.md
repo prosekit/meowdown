@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.5.0](https://github.com/prosekit/meowdown/compare/react-v0.4.0...react-v0.5.0) (2026-06-15)
+
+
+### Features
+
+* add code block syntax highlighting and language selector ([#27](https://github.com/prosekit/meowdown/issues/27)) ([d2ae648](https://github.com/prosekit/meowdown/commit/d2ae648378fb24bccc172139cb1816cf8e125ab8))
+* add inline image rendering ([d0a37d0](https://github.com/prosekit/meowdown/commit/d0a37d089a8f6aa2db4a19ec2a1a3a61baa7aee8))
+* add onWikilinkClick prop ([d9d10db](https://github.com/prosekit/meowdown/commit/d9d10db2b78cfc1d7240abcce828471f0194b110))
+* **core:** add checkRoundTrip to detect lossy markdown ([1a19c55](https://github.com/prosekit/meowdown/commit/1a19c559e699393358d5bccfdb9e812b5d34b2f4))
+* **react:** add editorClassName and wrapperClassName props ([1280bb8](https://github.com/prosekit/meowdown/commit/1280bb87a0fc905ff5e889f8aeacd8db1087646d))
+* **react:** add EditorHandle.editor ([57863fa](https://github.com/prosekit/meowdown/commit/57863fa822e7e883003e62d454eadf94f3643cc1))
+* **react:** add readOnly prop ([528d934](https://github.com/prosekit/meowdown/commit/528d9347c3619cdaa56d306433fc740559c85469))
+* **react:** add spellCheck prop to Editor ([#21](https://github.com/prosekit/meowdown/issues/21)) ([9231d4a](https://github.com/prosekit/meowdown/commit/9231d4ad9a8be4ebc918077a5b5c613e135d8cb6))
+* **react:** render children inside the editor ProseKit context ([9ccb2ce](https://github.com/prosekit/meowdown/commit/9ccb2cefc1c3f63ad56e50af2a2d2b55ae709e99))
+* **react:** show placeholder text in empty blocks ([2a2b8fc](https://github.com/prosekit/meowdown/commit/2a2b8fce77aafe7d09aa608a4a62b8439d71f9f5))
+* **react:** support rich tag and wikilink menu items ([1cd4b9c](https://github.com/prosekit/meowdown/commit/1cd4b9cbfa2df3d873090869b4a5e9f245600049))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @meowdown/core bumped to 0.4.0
+
 ## [0.4.0](https://github.com/prosekit/meowdown/compare/react-v0.3.0...react-v0.4.0) (2026-06-11)
 
 
