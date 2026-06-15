@@ -34,6 +34,7 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
 - `onDocChange?: VoidFunction`: called on every document change.
 - `onTagSearch?: (query: string) => string[] | Promise<string[]>`: enables the tag menu, which opens when typing `#` followed by text in a rich mode; returns the tags to show for a query (lowercased, punctuation stripped). Omit to disable.
 - `onWikilinkSearch?: (query: string) => string[] | Promise<string[]>`: enables the wikilink menu, which opens as soon as `[[` is typed in a rich mode; returns the note names to show for a query (lowercased, punctuation stripped, may be empty). Selecting a note inserts `[[Note Name]]`. Omit to disable.
+- `onWikilinkClick?: (payload: { target: string; event: MouseEvent }) => void`: called when a rendered wiki link is clicked. A plain click inside a link the caret already sits in just places the caret; `Mod`-click always fires. Pass a stable function (e.g. from `useCallback`). Ignored in source mode.
 - `spellCheck?: boolean`: toggles the browser's native spell checking in the rich modes. Defaults to the browser's behavior. Ignored in source mode.
 - `editorClassName?: string`: class on the editable root (the contenteditable). Rich modes only.
 - `wrapperClassName?: string`: class on the outer `div.meowdown` wrapper.

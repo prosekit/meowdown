@@ -35,7 +35,7 @@ Selection colors are standalone variables, not derived from `--meowdown-accent`,
 
 Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-accent`.
 
-Wikilinks (`[[target]]`) render with a dashed underline via the `.md-wikilink` class, colored by `--meowdown-accent`. Their `[[` `]]` brackets behave like other syntax characters: dimmed in show mode, hidden in hide and focus modes.
+Wikilinks (`[[target]]`) render with a dashed underline via the `.md-wikilink` class, colored by `--meowdown-accent`, with a pointer cursor. Their `[[` `]]` brackets behave like other syntax characters: dimmed in show mode, hidden in hide and focus modes. Wire click navigation with `defineWikilinkClickHandler(({ target, event }) => ...)` (or `@meowdown/react`'s `onWikilinkClick` prop).
 
 ## License
 

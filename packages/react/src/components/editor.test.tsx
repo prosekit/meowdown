@@ -244,6 +244,17 @@ describe('Editor', () => {
     await expect.element(page.getByTestId('probe')).toHaveTextContent('has-editor')
   })
 
+  it('calls onWikilinkClick when a rendered wiki link is clicked', async () => {
+    const onWikilinkClick = vi.fn()
+    const screen = await render(
+      <Editor initialMarkdown="see [[Note]] here" onWikilinkClick={onWikilinkClick} />,
+    )
+    await screen.getByText('Note').click()
+    await vi.waitFor(() => {
+      expect(onWikilinkClick).toHaveBeenCalledWith(expect.objectContaining({ target: 'Note' }))
+    })
+  })
+
   it('does not render children in source mode', async () => {
     await render(
       <Editor mode="source" initialMarkdown="Hi">

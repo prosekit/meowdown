@@ -1,4 +1,4 @@
-import type { MarkMode } from '@meowdown/core'
+import type { MarkMode, WikilinkClickHandler } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
 import { clsx } from 'clsx/lite'
 import { useImperativeHandle, useRef, type ReactNode, type Ref } from 'react'
@@ -53,6 +53,12 @@ export interface EditorProps {
   onWikilinkSearch?: WikilinkSearchHandler
 
   /**
+   * Called with the link target on click of a rendered wiki link. Pass a stable
+   * function (e.g. from `useCallback`). Ignored in source mode.
+   */
+  onWikilinkClick?: WikilinkClickHandler
+
+  /**
    * Enables the browser's native spell checking in the rich modes. Defaults
    * to the browser's behavior. Ignored in source mode.
    */
@@ -77,6 +83,7 @@ export function Editor({
   onDocChange,
   onTagSearch,
   onWikilinkSearch,
+  onWikilinkClick,
   spellCheck,
   editorClassName,
   wrapperClassName,
@@ -142,6 +149,7 @@ export function Editor({
           onDocChange={onDocChange}
           onTagSearch={onTagSearch}
           onWikilinkSearch={onWikilinkSearch}
+          onWikilinkClick={onWikilinkClick}
           spellCheck={spellCheck}
           editorClassName={editorClassName}
         >

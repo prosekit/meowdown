@@ -3,6 +3,7 @@ import {
   type TypedEditor,
   type EditorExtension,
   type MarkMode,
+  type WikilinkClickHandler,
   docToMarkdown,
   markdownToDoc,
 } from '@meowdown/core'
@@ -63,6 +64,9 @@ export interface ProseKitEditorProps {
   /** Enables the wikilink menu. See `EditorProps.onWikilinkSearch`. */
   onWikilinkSearch?: WikilinkSearchHandler
 
+  /** Called on click of a rendered wiki link. See `EditorProps.onWikilinkClick`. */
+  onWikilinkClick?: WikilinkClickHandler
+
   /** Enables or disables spell checking in the editor. */
   spellCheck?: boolean
 
@@ -82,6 +86,7 @@ export function ProseKitEditor({
   onDocChange,
   onTagSearch,
   onWikilinkSearch,
+  onWikilinkClick,
   spellCheck,
   editorClassName,
   ref,
@@ -147,7 +152,11 @@ export function ProseKitEditor({
   return (
     <ProseKit editor={editor}>
       <div ref={editor.mount} spellCheck={spellCheck} className={editorClassName}></div>
-      <EditorExtensions markMode={markMode} onDocChange={onDocChange} />
+      <EditorExtensions
+        markMode={markMode}
+        onDocChange={onDocChange}
+        onWikilinkClick={onWikilinkClick}
+      />
       <BlockHandle />
       <DropIndicator />
       <SlashMenu />
