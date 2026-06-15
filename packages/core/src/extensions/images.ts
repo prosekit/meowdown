@@ -1,16 +1,20 @@
-import { definePlugin, union, type PlainExtension } from '@prosekit/core'
+import { definePlugin, Priority, union, withPriority, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 import { Decoration, DecorationSet, type EditorView } from '@prosekit/pm/view'
 
 import { scanInlineImages } from '../converters/scan-inline-images.ts'
 
+type ImageUrlResolver = (src: string) => string | undefined
+type ImagePasteHandler = (file: File) => string | undefined | Promise<string | undefined>
+type ImageSaveErrorHandler = (error: unknown, file: File) => void
+
 export interface ImageOptions {
   /** Map a markdown `src` to a displayable URL, or `undefined` to skip rendering. */
-  resolveImageUrl: (src: string) => string | undefined
+  resolveImageUrl: ImageUrlResolver
   /** Persist a pasted/dropped image file and return its markdown `src`, or `undefined` to decline. */
-  onImagePaste?: (file: File) => Promise<string | undefined>
+  onImagePaste?: ImagePasteHandler
   /** Called when persisting a pasted/dropped image throws. Defaults to `console.error`. */
-  onImageSaveError?: (error: unknown, file: File) => void
+  onImageSaveError?: ImageSaveErrorHandler
 }
 
 const imageKey = new PluginKey<DecorationSet>('meowdown-images')
@@ -87,24 +91,24 @@ function imageFiles(data: DataTransfer | null): File[] {
   return Array.from(data.files).filter((file) => file.type.startsWith('image/'))
 }
 
-function reportImageError(options: ImageOptions, error: unknown, file: File): void {
-  if (options.onImageSaveError) options.onImageSaveError(error, file)
-  else console.error('[meowdown] failed to save pasted image:', error)
+const defaultOnImageSaveError: ImageSaveErrorHandler = (error) => {
+  console.error('[meowdown] failed to save pasted image:', error)
 }
 
 async function insertSavedImages(
   view: EditorView,
   files: File[],
-  options: ImageOptions & { onImagePaste: NonNullable<ImageOptions['onImagePaste']> },
+  onImagePaste: ImagePasteHandler,
+  onImageSaveError: ImageSaveErrorHandler = defaultOnImageSaveError,
   at?: number,
 ): Promise<void> {
   let position = at
   for (const file of files) {
     let saved: string | undefined
     try {
-      saved = await options.onImagePaste(file)
+      saved = await onImagePaste(file)
     } catch (error) {
-      reportImageError(options, error, file)
+      onImageSaveError(error, file)
       continue
     }
     if (!saved || view.isDestroyed) continue
@@ -124,17 +128,17 @@ function createImageInputPlugin(options: ImageOptions): Plugin {
     props: {
       handlePaste: (view, event) => {
         const files = imageFiles(event.clipboardData)
-        const onImagePaste = options.onImagePaste
+        const { onImagePaste, onImageSaveError } = options
         if (files.length === 0 || !onImagePaste) return false
-        void insertSavedImages(view, files, { ...options, onImagePaste })
+        void insertSavedImages(view, files, onImagePaste, onImageSaveError)
         return true
       },
       handleDrop: (view, event) => {
         const files = imageFiles(event.dataTransfer)
-        const onImagePaste = options.onImagePaste
+        const { onImagePaste, onImageSaveError } = options
         if (files.length === 0 || !onImagePaste) return false
         const drop = view.posAtCoords({ left: event.clientX, top: event.clientY })
-        void insertSavedImages(view, files, { ...options, onImagePaste }, drop?.pos)
+        void insertSavedImages(view, files, onImagePaste, onImageSaveError, drop?.pos)
         return true
       },
     },
@@ -145,6 +149,9 @@ function createImageInputPlugin(options: ImageOptions): Plugin {
 export function defineImages(options: ImageOptions): PlainExtension {
   return union(
     definePlugin(createImageRenderPlugin(options)),
-    definePlugin(createImageInputPlugin(options)),
+    // High priority so the drop/paste handler runs before ProseKit's
+    // drop-indicator plugin, whose default-priority handleDrop otherwise
+    // consumes external file drops before this one sees them.
+    withPriority(definePlugin(createImageInputPlugin(options)), Priority.high),
   )
 }

@@ -250,6 +250,40 @@ describe('MeowdownEditor', () => {
     await expect.element(page.getByAltText('pic')).not.toBeInTheDocument()
   })
 
+  it('uploads and inserts an image dropped from outside the editor', async () => {
+    const onImagePaste = vi.fn(() => 'https://cdn/cat.png')
+    const ref = createRef<EditorHandle>()
+    const screen = await render(
+      <MeowdownEditor
+        handleRef={ref}
+        initialMarkdown="Drop zone"
+        resolveImageUrl={(src) => src}
+        onImagePaste={onImagePaste}
+      />,
+    )
+    await expect.element(screen.getByText('Drop zone')).toBeInTheDocument()
+
+    // Simulate a Finder drop: a synthetic `drop` carrying an image File, aimed
+    // at the paragraph so ProseKit's drop-indicator also claims the position.
+    const target = pmRoot.getByText('Drop zone').element()
+    const rect = target.getBoundingClientRect()
+    const file = new File(['cat'], 'cat.png', { type: 'image/png' })
+    const dataTransfer = new DataTransfer()
+    dataTransfer.items.add(file)
+    pmRoot.element().dispatchEvent(
+      new DragEvent('drop', {
+        dataTransfer,
+        clientX: rect.left + rect.width / 2,
+        clientY: rect.top + rect.height / 2,
+        bubbles: true,
+        cancelable: true,
+      }),
+    )
+
+    await vi.waitFor(() => expect(onImagePaste).toHaveBeenCalledWith(file))
+    await vi.waitFor(() => expect(ref.current?.getMarkdown()).toContain('![](https://cdn/cat.png)'))
+  })
+
   it('shows placeholder text in an empty editor and hides it once typed', async () => {
     const placeholder = page.locate('.prosekit-placeholder')
     await render(<MeowdownEditor placeholder="Write something" />)
