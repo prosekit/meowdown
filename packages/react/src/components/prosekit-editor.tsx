@@ -14,7 +14,7 @@ import { createEditor, type SelectionJSON, union } from '@prosekit/core'
 import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit } from '@prosekit/react'
-import { useImperativeHandle, useState, type ReactNode, type Ref } from 'react'
+import { useImperativeHandle, useMemo, useRef, useState, type ReactNode, type Ref } from 'react'
 
 import { defineCodeBlockView } from '../extensions/code-block-view.ts'
 
@@ -57,7 +57,7 @@ export interface ProseKitEditorProps {
    */
   initialMarkdown?: string
 
-  /** Called on every document change. */
+  /** Called on every user-driven document change, not on programmatic setState. */
   onDocChange?: VoidFunction
 
   /** Enables the tag menu. See `EditorProps.onTagSearch`. */
@@ -124,6 +124,10 @@ export function ProseKitEditor({
     return editor
   })
 
+  // Set while a programmatic setState/setMarkdown dispatch runs, so the
+  // doc-change handler can ignore it: a host replacing content already knows.
+  const suppressDocChangeRef = useRef(false)
+
   useImperativeHandle(ref, () => {
     function getMarkdown(): string {
       return docToMarkdown(editor.state.doc)
@@ -144,7 +148,12 @@ export function ProseKitEditor({
       if (selection) {
         transaction.setSelection(resolveSelection(transaction.doc, selection)).scrollIntoView()
       }
-      editor.view.dispatch(transaction)
+      suppressDocChangeRef.current = true
+      try {
+        editor.view.dispatch(transaction)
+      } finally {
+        suppressDocChangeRef.current = false
+      }
     }
     function setMarkdown(markdown: string): void {
       setState(markdown)
@@ -171,12 +180,22 @@ export function ProseKitEditor({
     }
   }, [editor])
 
+  // Guard the host callback so programmatic setState/setMarkdown stays silent.
+  // Stable per `onDocChange` identity, so the extension is not rebuilt every render.
+  const handleDocChange = useMemo(() => {
+    if (!onDocChange) return undefined
+    return () => {
+      if (suppressDocChangeRef.current) return
+      onDocChange()
+    }
+  }, [onDocChange])
+
   return (
     <ProseKit editor={editor}>
       <div ref={editor.mount} spellCheck={spellCheck} className={editorClassName}></div>
       <EditorExtensions
         markMode={markMode}
-        onDocChange={onDocChange}
+        onDocChange={handleDocChange}
         onWikilinkClick={onWikilinkClick}
         resolveImageUrl={resolveImageUrl}
         onImagePaste={onImagePaste}

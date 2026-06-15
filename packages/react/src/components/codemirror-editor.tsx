@@ -25,7 +25,7 @@ export interface CodeMirrorEditorProps {
    */
   initialMarkdown?: string
 
-  /** Called on every document change. */
+  /** Called on every user-driven document change, not on programmatic setState. */
   onDocChange?: VoidFunction
 
   /** Makes the editor read-only. See `EditorProps.readOnly`. */
@@ -44,6 +44,10 @@ export function CodeMirrorEditor({
   const containerRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef<EditorView | null>(null)
   const readOnlyCompartmentRef = useRef(new Compartment())
+
+  // Set while a programmatic setState/setMarkdown dispatch runs, so the update
+  // listener can ignore it: a host replacing content already knows.
+  const suppressDocChangeRef = useRef(false)
 
   // Keep the latest callback in a ref so the view is never recreated when
   // the parent passes a new function identity.
@@ -75,12 +79,17 @@ export function CodeMirrorEditor({
       }
       if (markdown == null && !selection) return
       const docLength = markdown == null ? view.state.doc.length : markdown.length
-      view.dispatch({
-        changes:
-          markdown == null ? undefined : { from: 0, to: view.state.doc.length, insert: markdown },
-        selection: selection ? resolveSelection(selection, docLength) : undefined,
-        scrollIntoView: true,
-      })
+      suppressDocChangeRef.current = true
+      try {
+        view.dispatch({
+          changes:
+            markdown == null ? undefined : { from: 0, to: view.state.doc.length, insert: markdown },
+          selection: selection ? resolveSelection(selection, docLength) : undefined,
+          scrollIntoView: true,
+        })
+      } finally {
+        suppressDocChangeRef.current = false
+      }
     }
     function setMarkdown(markdown: string): void {
       setState(markdown)
@@ -122,7 +131,7 @@ export function CodeMirrorEditor({
           EditorView.lineWrapping,
           readOnlyCompartmentRef.current.of(EditorState.readOnly.of(initialReadOnlyRef.current)),
           EditorView.updateListener.of((update) => {
-            if (!update.docChanged) return
+            if (!update.docChanged || suppressDocChangeRef.current) return
             onDocChangeRef.current?.()
           }),
         ],

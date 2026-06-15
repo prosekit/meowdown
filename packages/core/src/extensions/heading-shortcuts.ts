@@ -1,6 +1,6 @@
 import { defineKeymap, toggleNode, withSkipCodeBlock, type PlainExtension } from '@prosekit/core'
 
-export const HEADING_LEVELS = [1, 2, 3, 4, 5, 6] as const
+const HEADING_LEVELS = [1, 2, 3, 4, 5, 6] as const
 
 export function defineHeadingShortcuts(): PlainExtension {
   const keymap = Object.fromEntries(
