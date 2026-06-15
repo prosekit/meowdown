@@ -1,4 +1,4 @@
-import { definePlugin, union, type PlainExtension } from '@prosekit/core'
+import { definePlugin, Priority, union, withPriority, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 import { Decoration, DecorationSet, type EditorView } from '@prosekit/pm/view'
 
@@ -145,6 +145,9 @@ function createImageInputPlugin(options: ImageOptions): Plugin {
 export function defineImages(options: ImageOptions): PlainExtension {
   return union(
     definePlugin(createImageRenderPlugin(options)),
-    definePlugin(createImageInputPlugin(options)),
+    // High priority so the drop/paste handler runs before ProseKit's
+    // drop-indicator plugin, whose default-priority handleDrop otherwise
+    // consumes external file drops before this one sees them.
+    withPriority(definePlugin(createImageInputPlugin(options)), Priority.high),
   )
 }
