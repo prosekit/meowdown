@@ -1,6 +1,6 @@
 import type { MarkMode } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
-import { useImperativeHandle, useRef, type Ref } from 'react'
+import { useImperativeHandle, useRef, type ReactNode, type Ref } from 'react'
 
 import { CodeMirrorEditor } from './codemirror-editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
@@ -59,6 +59,9 @@ export interface EditorProps {
 
   /** Imperative handle for the editor. */
   ref?: Ref<EditorHandle>
+
+  /** Nodes rendered inside the editor's ProseKit context (rich modes only). */
+  children?: ReactNode
 }
 
 export function Editor({
@@ -69,6 +72,7 @@ export function Editor({
   onWikilinkSearch,
   spellCheck,
   ref,
+  children,
 }: EditorProps) {
   // Handle of whichever editor is currently mounted.
   const childRef = useRef<EditorHandle>(null)
@@ -127,7 +131,9 @@ export function Editor({
           onTagSearch={onTagSearch}
           onWikilinkSearch={onWikilinkSearch}
           spellCheck={spellCheck}
-        />
+        >
+          {children}
+        </ProseKitEditor>
       )}
     </div>
   )

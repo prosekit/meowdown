@@ -11,7 +11,7 @@ import { createEditor, type SelectionJSON, union } from '@prosekit/core'
 import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit } from '@prosekit/react'
-import { useImperativeHandle, useState, type Ref } from 'react'
+import { useImperativeHandle, useState, type ReactNode, type Ref } from 'react'
 
 import { defineCodeBlockView } from '../extensions/code-block-view.ts'
 
@@ -68,6 +68,9 @@ export interface ProseKitEditorProps {
 
   /** Imperative handle for the editor. */
   ref?: Ref<EditorHandle>
+
+  /** Nodes rendered inside the ProseKit context. See `EditorProps.children`. */
+  children?: ReactNode
 }
 
 export function ProseKitEditor({
@@ -78,6 +81,7 @@ export function ProseKitEditor({
   onWikilinkSearch,
   spellCheck,
   ref,
+  children,
 }: ProseKitEditorProps) {
   const [editor] = useState((): TypedEditor => {
     const baseExtension: EditorExtension = defineEditorExtension()
@@ -144,6 +148,7 @@ export function ProseKitEditor({
       <SlashMenu />
       {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
       {onWikilinkSearch && <WikilinkMenu onWikilinkSearch={onWikilinkSearch} />}
+      {children}
     </ProseKit>
   )
 }

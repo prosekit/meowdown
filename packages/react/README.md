@@ -36,6 +36,11 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
 - `onWikilinkSearch?: (query: string) => string[] | Promise<string[]>`: enables the wikilink menu, which opens as soon as `[[` is typed in a rich mode; returns the note names to show for a query (lowercased, punctuation stripped, may be empty). Selecting a note inserts `[[Note Name]]`. Omit to disable.
 - `spellCheck?: boolean`: toggles the browser's native spell checking in the rich modes. Defaults to the browser's behavior. Ignored in source mode.
 - `ref?: Ref<EditorHandle>`
+- `children?: ReactNode`: rendered inside the editor's ProseKit context, so children can call `useEditor()`. Only rendered in the rich modes; source mode ignores them.
+
+### `useEditor`
+
+Re-exported from `@prosekit/react`. Call it from a component passed as `children` to read the live editor instance.
 
 ### `EditorHandle`
 

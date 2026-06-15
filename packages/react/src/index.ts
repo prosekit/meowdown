@@ -9,3 +9,4 @@ export type {
 
 export type { TypedEditor, MarkMode } from '@meowdown/core'
 export type { SelectionJSON } from '@prosekit/core'
+export { useEditor } from '@prosekit/react'

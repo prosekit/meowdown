@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import { useEditor } from '@prosekit/react'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -11,6 +12,13 @@ import type { EditorHandle } from './types.ts'
 const pmRoot = page.locate('.ProseMirror')
 const cmRoot = page.locate('.cm-editor')
 const cmContent = page.locate('[data-editor="codemirror"] .cm-content')
+
+// Renders only when it sits inside the editor's ProseKit context; `useEditor`
+// throws otherwise.
+function EditorProbe() {
+  const editor = useEditor()
+  return <span data-testid="probe">{editor ? 'has-editor' : 'no-editor'}</span>
+}
 
 describe('Editor', () => {
   it('renders a ProseKit editor in focus mode by default', async () => {
@@ -206,6 +214,25 @@ describe('Editor', () => {
     await expect.element(cmContent).toHaveTextContent('Hi')
     await userEvent.keyboard('!')
     await expect.element(cmContent).toHaveTextContent('Hi!')
+  })
+
+  it('renders children inside the ProseKit context in rich modes', async () => {
+    await render(
+      <Editor initialMarkdown="Hi">
+        <EditorProbe />
+      </Editor>,
+    )
+    await expect.element(page.getByTestId('probe')).toHaveTextContent('has-editor')
+  })
+
+  it('does not render children in source mode', async () => {
+    await render(
+      <Editor mode="source" initialMarkdown="Hi">
+        <EditorProbe />
+      </Editor>,
+    )
+    await expect.element(cmRoot).toBeInTheDocument()
+    await expect.element(page.getByTestId('probe')).not.toBeInTheDocument()
   })
 
   it('focuses and scrolls via the handle in both editors', async () => {
