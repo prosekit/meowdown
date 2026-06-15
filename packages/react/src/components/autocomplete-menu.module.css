@@ -1,3 +1,13 @@
+/* Autocomplete menu (tag + wikilink). Hosts restyle it by overriding these
+ * CSS variables (each falls back to the default below):
+ *   --meowdown-menu-background      popup background
+ *   --meowdown-menu-border          popup border color
+ *   --meowdown-menu-radius          popup corner radius
+ *   --meowdown-menu-shadow          popup box-shadow
+ *   --meowdown-menu-item-radius     row corner radius
+ *   --meowdown-menu-item-highlight  highlighted-row background
+ */
+
 .Positioner {
   display: block;
   z-index: 50;
@@ -17,12 +27,14 @@
   overscroll-behavior: contain;
   white-space: nowrap;
   user-select: none;
-  border: 1px solid var(--meowdown-border);
-  border-radius: 0.75rem;
-  background: light-dark(#fff, #18181b);
-  box-shadow:
+  border: 1px solid var(--meowdown-menu-border, var(--meowdown-border));
+  border-radius: var(--meowdown-menu-radius, 0.75rem);
+  background: var(--meowdown-menu-background, light-dark(#fff, #18181b));
+  box-shadow: var(
+    --meowdown-menu-shadow,
     0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
+    0 4px 6px -4px rgb(0 0 0 / 0.1)
+  );
 }
 
 .Item {
@@ -32,7 +44,7 @@
   gap: 1.5rem;
   box-sizing: border-box;
   padding: 0.375rem 0.75rem;
-  border-radius: 0.5rem;
+  border-radius: var(--meowdown-menu-item-radius, 0.5rem);
   font-size: 0.875rem;
   color: var(--meowdown-text);
   white-space: nowrap;
@@ -47,7 +59,7 @@
   }
 
   &[data-highlighted] {
-    background: light-dark(#f4f4f5, #27272a);
+    background: var(--meowdown-menu-item-highlight, light-dark(#f4f4f5, #27272a));
   }
 
   kbd {
