@@ -1,6 +1,8 @@
 import { MeowdownEditor, type EditorMode } from '@meowdown/react'
 import { type CSSProperties, useLayoutEffect, useState } from 'react'
 
+import { uploadFile } from './upload-file.ts'
+
 interface ModeOption {
   value: EditorMode
   label: string
@@ -43,6 +45,10 @@ Label your notes with tags like #meow and #markdown. Type \`#\` followed by a le
 
 Connect notes with wikilinks like [[Daily journal]] and [[Reading list]]. Type \`[[\` to link another note.
 
+Drop in an image and it renders right under the line. Paste or drag one in to upload your own:
+
+![A sunny placeholder photo](https://static.photos/yellow/640x360/42)
+
 Drop in a fenced code block and pick its language from the selector:
 
 \`\`\`typescript
@@ -79,6 +85,10 @@ async function searchNotes(query: string): Promise<string[]> {
   // Simulate network latency so the wikilink menu's loading state shows up.
   await new Promise((resolve) => setTimeout(resolve, 200))
   return NOTES.filter((note) => note.toLowerCase().includes(query))
+}
+
+function resolveImageUrl(src: string): string | undefined {
+  return /^https?:\/\//.test(src) ? src : undefined
 }
 
 const ICON_BUTTON_CLASS =
@@ -224,6 +234,8 @@ export function App() {
               initialMarkdown={INITIAL_CONTENT}
               onTagSearch={searchTags}
               onWikilinkSearch={searchNotes}
+              resolveImageUrl={resolveImageUrl}
+              onImagePaste={uploadFile}
             />
           </div>
 
