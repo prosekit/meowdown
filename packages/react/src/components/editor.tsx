@@ -1,4 +1,4 @@
-import type { MarkMode, WikilinkClickHandler } from '@meowdown/core'
+import type { ImageOptions, MarkMode, WikilinkClickHandler } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
 import { clsx } from 'clsx/lite'
 import { useImperativeHandle, useRef, type ReactNode, type Ref } from 'react'
@@ -59,6 +59,21 @@ export interface EditorProps {
   onWikilinkClick?: WikilinkClickHandler
 
   /**
+   * Maps an image `src` to a displayable URL (or `undefined` to skip). Enables
+   * inline image rendering. Pass a stable function. Ignored in source mode.
+   */
+  resolveImageUrl?: ImageOptions['resolveImageUrl']
+
+  /**
+   * Persists a pasted/dropped image file and returns its markdown `src`. Pass a
+   * stable function. Ignored in source mode.
+   */
+  onImagePaste?: ImageOptions['onImagePaste']
+
+  /** Called when persisting a pasted/dropped image throws. Ignored in source mode. */
+  onImageSaveError?: ImageOptions['onImageSaveError']
+
+  /**
    * Enables the browser's native spell checking in the rich modes. Defaults
    * to the browser's behavior. Ignored in source mode.
    */
@@ -84,6 +99,9 @@ export function Editor({
   onTagSearch,
   onWikilinkSearch,
   onWikilinkClick,
+  resolveImageUrl,
+  onImagePaste,
+  onImageSaveError,
   spellCheck,
   editorClassName,
   wrapperClassName,
@@ -150,6 +168,9 @@ export function Editor({
           onTagSearch={onTagSearch}
           onWikilinkSearch={onWikilinkSearch}
           onWikilinkClick={onWikilinkClick}
+          resolveImageUrl={resolveImageUrl}
+          onImagePaste={onImagePaste}
+          onImageSaveError={onImageSaveError}
           spellCheck={spellCheck}
           editorClassName={editorClassName}
         >

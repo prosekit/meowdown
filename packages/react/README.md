@@ -35,6 +35,9 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
 - `onTagSearch?: (query: string) => string[] | Promise<string[]>`: enables the tag menu, which opens when typing `#` followed by text in a rich mode; returns the tags to show for a query (lowercased, punctuation stripped). Omit to disable.
 - `onWikilinkSearch?: (query: string) => string[] | Promise<string[]>`: enables the wikilink menu, which opens as soon as `[[` is typed in a rich mode; returns the note names to show for a query (lowercased, punctuation stripped, may be empty). Selecting a note inserts `[[Note Name]]`. Omit to disable.
 - `onWikilinkClick?: (payload: { target: string; event: MouseEvent }) => void`: called when a rendered wiki link is clicked. A plain click inside a link the caret already sits in just places the caret; `Mod`-click always fires. Pass a stable function (e.g. from `useCallback`). Ignored in source mode.
+- `resolveImageUrl?: (src: string) => string | undefined`: maps an image `src` to a displayable URL (or `undefined` to skip). Enables inline image rendering: `![alt](src)` stays literal text and the image renders beneath its line. Pass a stable function. Ignored in source mode.
+- `onImagePaste?: (file: File) => Promise<string | undefined>`: persists a pasted or dropped image file and returns its markdown `src` (or `undefined` to decline). Pass a stable function. Ignored in source mode.
+- `onImageSaveError?: (error: Error, file: File) => void`: called when `onImagePaste` throws. Defaults to `console.error`. Ignored in source mode.
 - `spellCheck?: boolean`: toggles the browser's native spell checking in the rich modes. Defaults to the browser's behavior. Ignored in source mode.
 - `editorClassName?: string`: class on the editable root (the contenteditable). Rich modes only.
 - `wrapperClassName?: string`: class on the outer `div.meowdown` wrapper.

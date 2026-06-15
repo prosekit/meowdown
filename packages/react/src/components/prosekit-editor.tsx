@@ -2,6 +2,7 @@ import {
   defineEditorExtension,
   type TypedEditor,
   type EditorExtension,
+  type ImageOptions,
   type MarkMode,
   type WikilinkClickHandler,
   docToMarkdown,
@@ -67,6 +68,15 @@ export interface ProseKitEditorProps {
   /** Called on click of a rendered wiki link. See `EditorProps.onWikilinkClick`. */
   onWikilinkClick?: WikilinkClickHandler
 
+  /** Resolves an image `src` to a URL. See `EditorProps.resolveImageUrl`. */
+  resolveImageUrl?: ImageOptions['resolveImageUrl']
+
+  /** Persists a pasted/dropped image. See `EditorProps.onImagePaste`. */
+  onImagePaste?: ImageOptions['onImagePaste']
+
+  /** Called when an image fails to persist. See `EditorProps.onImageSaveError`. */
+  onImageSaveError?: ImageOptions['onImageSaveError']
+
   /** Enables or disables spell checking in the editor. */
   spellCheck?: boolean
 
@@ -87,6 +97,9 @@ export function ProseKitEditor({
   onTagSearch,
   onWikilinkSearch,
   onWikilinkClick,
+  resolveImageUrl,
+  onImagePaste,
+  onImageSaveError,
   spellCheck,
   editorClassName,
   ref,
@@ -156,6 +169,9 @@ export function ProseKitEditor({
         markMode={markMode}
         onDocChange={onDocChange}
         onWikilinkClick={onWikilinkClick}
+        resolveImageUrl={resolveImageUrl}
+        onImagePaste={onImagePaste}
+        onImageSaveError={onImageSaveError}
       />
       <BlockHandle />
       <DropIndicator />

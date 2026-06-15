@@ -1,6 +1,8 @@
 import {
+  defineImages,
   defineMarkMode,
   defineWikilinkClickHandler,
+  type ImageOptions,
   type MarkMode,
   type WikilinkClickHandler,
 } from '@meowdown/core'
@@ -12,6 +14,9 @@ export interface EditorExtensionsProps {
   markMode: MarkMode
   onDocChange?: VoidFunction
   onWikilinkClick?: WikilinkClickHandler
+  resolveImageUrl?: ImageOptions['resolveImageUrl']
+  onImagePaste?: ImageOptions['onImagePaste']
+  onImageSaveError?: ImageOptions['onImageSaveError']
 }
 
 // A leaf that renders nothing and holds every reactive `useExtension` call (each
@@ -21,6 +26,9 @@ export function EditorExtensions({
   markMode,
   onDocChange,
   onWikilinkClick,
+  resolveImageUrl,
+  onImagePaste,
+  onImageSaveError,
 }: EditorExtensionsProps): null {
   useExtension(useMemo(() => defineMarkMode(markMode), [markMode]))
 
@@ -32,6 +40,14 @@ export function EditorExtensions({
     useMemo(
       () => (onWikilinkClick ? defineWikilinkClickHandler(onWikilinkClick) : null),
       [onWikilinkClick],
+    ),
+  )
+
+  useExtension(
+    useMemo(
+      () =>
+        resolveImageUrl ? defineImages({ resolveImageUrl, onImagePaste, onImageSaveError }) : null,
+      [resolveImageUrl, onImagePaste, onImageSaveError],
     ),
   )
 

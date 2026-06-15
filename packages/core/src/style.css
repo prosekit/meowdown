@@ -280,6 +280,19 @@
 }
 
 /* ---------------------------------------------------------------------------
+ * Inline images (`![alt](src)`), rendered beneath the literal markdown line
+ * ------------------------------------------------------------------------- */
+.ProseMirror .md-image {
+  display: block;
+}
+
+.ProseMirror .md-image img {
+  max-height: var(--meowdown-image-max-height, 24rem);
+  max-width: 100%;
+  border-radius: var(--meowdown-image-radius, 0.5rem);
+}
+
+/* ---------------------------------------------------------------------------
  * Markdown syntax characters (`md-mark`) and link URIs
  * ------------------------------------------------------------------------- */
 .ProseMirror .md-mark,

@@ -216,6 +216,18 @@ describe('Editor', () => {
     await expect.element(cmContent).toHaveTextContent('Hi!')
   })
 
+  it('renders an image when resolveImageUrl returns a url', async () => {
+    await render(
+      <Editor initialMarkdown="![pic](a.png)" resolveImageUrl={(src) => `https://cdn/${src}`} />,
+    )
+    await expect.element(page.getByAltText('pic')).toHaveAttribute('src', 'https://cdn/a.png')
+  })
+
+  it('does not render an image when resolveImageUrl returns undefined', async () => {
+    await render(<Editor initialMarkdown="![pic](a.png)" resolveImageUrl={() => undefined} />)
+    await expect.element(page.getByAltText('pic')).not.toBeInTheDocument()
+  })
+
   it('exposes the underlying editor on the handle in rich modes only', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(<Editor ref={ref} initialMarkdown="Hi" />)

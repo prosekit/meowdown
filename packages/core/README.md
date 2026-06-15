@@ -25,6 +25,8 @@ The editor extension binds inline-format toggles (`Mod` = Cmd on macOS, Ctrl els
 - `--meowdown-border`: horizontal rules and table borders.
 - `--meowdown-code-bg`: code block background.
 - `--meowdown-table-header-bg`: table header row background.
+- `--meowdown-image-max-height`: max height of rendered inline images.
+- `--meowdown-image-radius`: corner radius of rendered inline images.
 - `--meowdown-font-mono`: monospace font stack.
 - `--meowdown-gutter`: horizontal editor padding. Floating UI such as the block handle (in `@meowdown/react`) lives inside it; keep it at least `3.5rem`.
 - `--meowdown-selection`: text `::selection` background.
@@ -36,6 +38,8 @@ Selection colors are standalone variables, not derived from `--meowdown-accent`,
 Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-accent`.
 
 Wikilinks (`[[target]]`) render with a dashed underline via the `.md-wikilink` class, colored by `--meowdown-accent`, with a pointer cursor. Their `[[` `]]` brackets behave like other syntax characters: dimmed in show mode, hidden in hide and focus modes. Wire click navigation with `defineWikilinkClickHandler(({ target, event }) => ...)` (or `@meowdown/react`'s `onWikilinkClick` prop).
+
+Inline images (`![alt](src)`) stay literal text and render beneath their line as a widget decoration when a host resolves the `src` to a URL. Add it with `defineImages({ resolveImageUrl, onImagePaste })` (or `@meowdown/react`'s image props).
 
 ## License
 
