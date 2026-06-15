@@ -13,7 +13,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { returnsTrue } from '../utils/returns-true.ts'
 
 import styles from './autocomplete-menu.module.css'
-import type { TagSearchHandler } from './types.ts'
+import type { TagItem, TagSearchHandler } from './types.ts'
 
 // Match "#tag" with at least one character, so typing a heading ("# ") never
 // opens the menu. Do not match "abc#def".
@@ -30,18 +30,18 @@ export function TagMenu({ onTagSearch }: TagMenuProps) {
   const editor = useEditor<EditorExtension>()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
-  const [tags, setTags] = useState<string[]>([])
+  const [items, setItems] = useState<TagItem[]>([])
   const [loading, setLoading] = useState(false)
 
   // Searches tags (sync or async) and applies the result, unless aborted in
   // the meantime.
-  const fetchTags = useCallback(
+  const fetchItems = useCallback(
     async (query: string, signal: AbortSignal): Promise<void> => {
       if (signal.aborted) return
       setLoading(true)
       const result = await onTagSearch(query)
       if (signal.aborted) return
-      setTags(result)
+      setItems(result)
       setLoading(false)
     },
     [onTagSearch],
@@ -52,12 +52,12 @@ export function TagMenu({ onTagSearch }: TagMenuProps) {
     const controller = new AbortController()
     // Defer so the effect body doesn't call setState synchronously.
     queueMicrotask(() => {
-      void fetchTags(query, controller.signal)
+      void fetchItems(query, controller.signal)
     })
     return () => {
       controller.abort()
     }
-  }, [open, query, fetchTags])
+  }, [open, query, fetchItems])
 
   return (
     <AutocompleteRoot
@@ -68,13 +68,17 @@ export function TagMenu({ onTagSearch }: TagMenuProps) {
     >
       <AutocompletePositioner className={styles.Positioner}>
         <AutocompletePopup className={styles.Popup} data-testid="tag-menu">
-          {tags.map((tag) => (
+          {items.map((item) => (
             <AutocompleteItem
-              key={tag}
+              key={item.tag}
               className={styles.Item}
-              onSelect={() => editor.commands.insertText({ text: `#${tag} ` })}
+              onSelect={() => {
+                editor.commands.insertText({ text: `#${item.tag} ` })
+                item.onSelect?.()
+              }}
             >
-              #{tag}
+              <span>{item.label ?? `#${item.tag}`}</span>
+              {item.detail ? <span className={styles.Detail}>{item.detail}</span> : null}
             </AutocompleteItem>
           ))}
           <AutocompleteEmpty className={styles.Item}>

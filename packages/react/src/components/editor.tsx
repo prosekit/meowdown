@@ -1,6 +1,12 @@
-import type { MarkMode } from '@meowdown/core'
+import type {
+  ImageOptions,
+  MarkMode,
+  PlaceholderOptions,
+  WikilinkClickHandler,
+} from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
-import { useImperativeHandle, useRef, type Ref } from 'react'
+import { clsx } from 'clsx/lite'
+import { useImperativeHandle, useRef, type ReactNode, type Ref } from 'react'
 
 import { CodeMirrorEditor } from './codemirror-editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
@@ -29,7 +35,10 @@ export interface EditorProps {
    */
   initialMarkdown?: string
 
-  /** Called on every document change. */
+  /**
+   * Called on every user-driven document change. Programmatic `setMarkdown` and
+   * `setState` on the handle do not fire it.
+   */
   onDocChange?: VoidFunction
 
   /**
@@ -52,28 +61,76 @@ export interface EditorProps {
   onWikilinkSearch?: WikilinkSearchHandler
 
   /**
+   * Called with the link target on click of a rendered wiki link. Pass a stable
+   * function (e.g. from `useCallback`). Ignored in source mode.
+   */
+  onWikilinkClick?: WikilinkClickHandler
+
+  /**
+   * Maps an image `src` to a displayable URL (or `undefined` to skip). Enables
+   * inline image rendering. Pass a stable function. Ignored in source mode.
+   */
+  resolveImageUrl?: ImageOptions['resolveImageUrl']
+
+  /**
+   * Persists a pasted/dropped image file and returns its markdown `src`. Pass a
+   * stable function. Ignored in source mode.
+   */
+  onImagePaste?: ImageOptions['onImagePaste']
+
+  /** Called when persisting a pasted/dropped image throws. Ignored in source mode. */
+  onImageSaveError?: ImageOptions['onImageSaveError']
+
+  /**
+   * Placeholder text shown in an empty block. A function receives the editor
+   * state. Pass a stable function. Ignored in source mode.
+   */
+  placeholder?: PlaceholderOptions['placeholder']
+
+  /** Makes the editor read-only, in both the rich and source modes. */
+  readOnly?: boolean
+
+  /**
    * Enables the browser's native spell checking in the rich modes. Defaults
    * to the browser's behavior. Ignored in source mode.
    */
   spellCheck?: boolean
 
+  /** Class on the editable root (the contenteditable). Rich modes only. */
+  editorClassName?: string
+
+  /** Class on the outer `.meowdown` wrapper div. */
+  wrapperClassName?: string
+
   /** Imperative handle for the editor. */
-  ref?: Ref<EditorHandle>
+  handleRef?: Ref<EditorHandle>
+
+  /** Nodes rendered inside the editor's ProseKit context (rich modes only). */
+  children?: ReactNode
 }
 
-export function Editor({
+export function MeowdownEditor({
   mode = 'focus',
   initialMarkdown,
   onDocChange,
   onTagSearch,
   onWikilinkSearch,
+  onWikilinkClick,
+  resolveImageUrl,
+  onImagePaste,
+  onImageSaveError,
+  placeholder,
+  readOnly,
   spellCheck,
-  ref,
+  editorClassName,
+  wrapperClassName,
+  handleRef,
+  children,
 }: EditorProps) {
   // Handle of whichever editor is currently mounted.
   const childRef = useRef<EditorHandle>(null)
 
-  useImperativeHandle(ref, () => {
+  useImperativeHandle(handleRef, () => {
     function getMarkdown(): string {
       return childRef.current?.getMarkdown() ?? ''
     }
@@ -107,6 +164,9 @@ export function Editor({
       setSelection,
       focus,
       scrollIntoView,
+      get editor() {
+        return childRef.current?.editor
+      },
     }
   }, [])
 
@@ -115,9 +175,14 @@ export function Editor({
   const seedMarkdown = childRef.current?.getMarkdown() ?? initialMarkdown ?? ''
 
   return (
-    <div className="meowdown">
+    <div className={clsx('meowdown', wrapperClassName)}>
       {mode === 'source' ? (
-        <CodeMirrorEditor ref={childRef} initialMarkdown={seedMarkdown} onDocChange={onDocChange} />
+        <CodeMirrorEditor
+          ref={childRef}
+          initialMarkdown={seedMarkdown}
+          onDocChange={onDocChange}
+          readOnly={readOnly}
+        />
       ) : (
         <ProseKitEditor
           ref={childRef}
@@ -126,8 +191,17 @@ export function Editor({
           onDocChange={onDocChange}
           onTagSearch={onTagSearch}
           onWikilinkSearch={onWikilinkSearch}
+          onWikilinkClick={onWikilinkClick}
+          resolveImageUrl={resolveImageUrl}
+          onImagePaste={onImagePaste}
+          onImageSaveError={onImageSaveError}
+          placeholder={placeholder}
+          readOnly={readOnly}
           spellCheck={spellCheck}
-        />
+          editorClassName={editorClassName}
+        >
+          {children}
+        </ProseKitEditor>
       )}
     </div>
   )

@@ -46,7 +46,7 @@ describe('CodeMirrorEditor', () => {
     await expect.element(cmContent).toHaveTextContent(/^$/)
   })
 
-  it('replaces the document via setMarkdown and notifies onDocChange', async () => {
+  it('replaces the document via setMarkdown without notifying onDocChange', async () => {
     const onDocChange = vi.fn()
     const ref = createRef<EditorHandle>()
     await render(<CodeMirrorEditor ref={ref} initialMarkdown="old" onDocChange={onDocChange} />)
@@ -55,7 +55,8 @@ describe('CodeMirrorEditor', () => {
     ref.current?.setMarkdown('# new')
     await expect.element(cmContent).toHaveTextContent('# new')
     expect(ref.current?.getMarkdown()).toBe('# new')
-    expect(onDocChange).toHaveBeenCalled()
+    // Programmatic setMarkdown is silent: the host that called it already knows.
+    expect(onDocChange).not.toHaveBeenCalled()
   })
 
   it('clamps the selection hint when markdown shrinks the document', async () => {

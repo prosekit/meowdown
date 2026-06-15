@@ -1,11 +1,15 @@
-export { Editor, type EditorMode, type EditorProps } from './components/editor.tsx'
+export { MeowdownEditor, type EditorMode, type EditorProps } from './components/editor.tsx'
 export type {
   EditorHandle,
   EditorStateSnapshot,
   SelectionHint,
+  TagItem,
   TagSearchHandler,
+  WikilinkItem,
   WikilinkSearchHandler,
 } from './components/types.ts'
 
 export type { TypedEditor, MarkMode } from '@meowdown/core'
+export { checkRoundTrip, type RoundTripFidelity, EDITOR_KEY_BINDINGS } from '@meowdown/core'
 export type { SelectionJSON } from '@prosekit/core'
+export { useEditor } from '@prosekit/react'

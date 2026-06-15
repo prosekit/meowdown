@@ -5,7 +5,7 @@ React components for Meowdown, a hybrid (live-preview) Markdown editor.
 ## Usage
 
 ```tsx
-import { Editor, type EditorHandle } from '@meowdown/react'
+import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import '@meowdown/react/style.css'
 import { useRef, useCallback } from 'react'
 
@@ -15,13 +15,20 @@ export function App() {
     console.log(ref.current?.getMarkdown())
   }, [])
 
-  return <Editor ref={ref} mode="focus" initialMarkdown="# Hello" onDocChange={handleDocChange} />
+  return (
+    <MeowdownEditor
+      handleRef={ref}
+      mode="focus"
+      initialMarkdown="# Hello"
+      onDocChange={handleDocChange}
+    />
+  )
 }
 ```
 
 ## API
 
-### `<Editor>`
+### `<MeowdownEditor>`
 
 The Markdown editor component. Renders inside a `div.meowdown` wrapper that fills a flex parent. In rich modes, typing `/` opens a slash menu for inserting blocks (headings, blockquote, lists, code block, table). Hovering a block shows a handle to its left: the plus button inserts an empty paragraph below the block, and the grip selects the block and can be dragged to move it, with a drop indicator line marking the target.
 
@@ -31,24 +38,46 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
   - `'hide'`: Markdown syntax is always hidden.
   - `'source'`: raw Markdown source with syntax highlighting.
 - `initialMarkdown?: string`: first render only.
-- `onDocChange?: VoidFunction`: called on every document change.
-- `onTagSearch?: (query: string) => string[] | Promise<string[]>`: enables the tag menu, which opens when typing `#` followed by text in a rich mode; returns the tags to show for a query (lowercased, punctuation stripped). Omit to disable.
-- `onWikilinkSearch?: (query: string) => string[] | Promise<string[]>`: enables the wikilink menu, which opens as soon as `[[` is typed in a rich mode; returns the note names to show for a query (lowercased, punctuation stripped, may be empty). Selecting a note inserts `[[Note Name]]`. Omit to disable.
+- `onDocChange?: VoidFunction`: called on every user-driven document change. Programmatic `setMarkdown` / `setState` on the handle do not fire it.
+- `onTagSearch?: (query: string) => TagItem[] | Promise<TagItem[]>`: enables the tag menu, which opens when typing `#` followed by text in a rich mode. Returns ranked rows `{ tag, label?, detail?, onSelect? }` (the menu does not re-sort). Selecting a row inserts `#tag ` then runs its `onSelect`. Omit to disable.
+- `onWikilinkSearch?: (query: string) => WikilinkItem[] | Promise<WikilinkItem[]>`: enables the wikilink menu, which opens as soon as `[[` is typed in a rich mode. Returns ranked rows `{ target, label?, detail?, onSelect? }` (the menu does not re-sort). Selecting a row inserts `[[target]]` then runs its `onSelect`. Omit to disable.
+- `onWikilinkClick?: (payload: { target: string; event: MouseEvent }) => void`: called when a rendered wiki link is clicked. A plain click inside a link the caret already sits in just places the caret; `Mod`-click always fires. Pass a stable function (e.g. from `useCallback`). Ignored in source mode.
+- `resolveImageUrl?: (src: string) => string | undefined`: maps an image `src` to a displayable URL (or `undefined` to skip). Enables inline image rendering: `![alt](src)` stays literal text and the image renders beneath its line. Pass a stable function. Ignored in source mode.
+- `onImagePaste?: (file: File) => Promise<string | undefined>`: persists a pasted or dropped image file and returns its markdown `src` (or `undefined` to decline). Pass a stable function. Ignored in source mode.
+- `onImageSaveError?: (error: Error, file: File) => void`: called when `onImagePaste` throws. Defaults to `console.error`. Ignored in source mode.
+- `placeholder?: string | ((state) => string)`: placeholder text shown in an empty block. Pass a stable function. Ignored in source mode.
+- `readOnly?: boolean`: makes the editor read-only, in both the rich and source modes.
 - `spellCheck?: boolean`: toggles the browser's native spell checking in the rich modes. Defaults to the browser's behavior. Ignored in source mode.
-- `ref?: Ref<EditorHandle>`
+- `editorClassName?: string`: class on the editable root (the contenteditable). Rich modes only.
+- `wrapperClassName?: string`: class on the outer `div.meowdown` wrapper.
+- `handleRef?: Ref<EditorHandle>`
+- `children?: ReactNode`: rendered inside the editor's ProseKit context, so children can call `useEditor()`. Only rendered in the rich modes; source mode ignores them.
+
+### `useEditor`
+
+Re-exported from `@prosekit/react`. Call it from a component passed as `children` to read the live editor instance.
+
+### `checkRoundTrip`
+
+Re-exported from `@meowdown/core`. `checkRoundTrip(markdown)` returns `'exact' | 'normalizing' | 'lossy'`, for hosts that gate saving markdown files on whether the editor reproduces them faithfully.
+
+### `EDITOR_KEY_BINDINGS`
+
+Re-exported from `@meowdown/core`. A literal (`as const`) object mapping each editor shortcut (e.g. `Mod-b`, `Mod-1`) to its description, for host settings UIs and keybinding-collision checks.
 
 ### `EditorHandle`
 
-Imperative handle for the editor, attached via `ref`.
+Imperative handle for the editor, attached via `handleRef`.
 
 - `getMarkdown(): string`: serializes the current document to Markdown. Can be expensive on large documents; call it on demand (e.g. throttled) instead of on every change.
-- `setMarkdown(markdown: string): void`: replaces the whole document as a single undoable edit.
+- `setMarkdown(markdown: string): void`: replaces the whole document as a single undoable edit. Does not fire `onDocChange`.
 - `getState(): EditorStateSnapshot`: returns `[markdown, selection]`, where `selection` is a `SelectionJSON` (`{ anchor: number, head: number, type: string }`).
 - `setState(markdown?: string, selection?: SelectionJSON | 'start' | 'end'): void`: replaces the document (if `markdown` is given) and restores `selection`: exactly when valid, otherwise clamped to the nearest text selection; out-of-range positions never throw. `'start'` and `'end'` jump to the document edges. Without a selection, the current one is mapped through the change. Restore a snapshot with `handle.setState(...handle.getState())`.
 - `getSelection(): SelectionJSON`: returns the current selection.
 - `setSelection(selection: SelectionJSON | 'start' | 'end'): void`: restores a selection with the same hint semantics as `setState`.
 - `focus(): void`: focuses the editor.
 - `scrollIntoView(): void`: scrolls the selection into view.
+- `editor: TypedEditor | undefined`: escape hatch for the underlying ProseKit editor, `undefined` in source mode. No stability guarantees beyond what `@meowdown/core` exports.
 
 Selection positions are in the mounted editor's coordinate space: ProseMirror document positions in the rich modes, character offsets in source mode. They round-trip within one mode but are not portable across a mode switch.
 

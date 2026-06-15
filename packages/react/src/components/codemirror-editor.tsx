@@ -1,7 +1,7 @@
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
-import { EditorSelection, EditorState } from '@codemirror/state'
+import { Compartment, EditorSelection, EditorState } from '@codemirror/state'
 import { EditorView, keymap } from '@codemirror/view'
 import { clamp } from '@ocavue/utils'
 import type { SelectionJSON } from '@prosekit/core'
@@ -25,16 +25,29 @@ export interface CodeMirrorEditorProps {
    */
   initialMarkdown?: string
 
-  /** Called on every document change. */
+  /** Called on every user-driven document change, not on programmatic setState. */
   onDocChange?: VoidFunction
+
+  /** Makes the editor read-only. See `EditorProps.readOnly`. */
+  readOnly?: boolean
 
   /** Imperative handle for the editor. */
   ref?: Ref<EditorHandle>
 }
 
-export function CodeMirrorEditor({ initialMarkdown, onDocChange, ref }: CodeMirrorEditorProps) {
+export function CodeMirrorEditor({
+  initialMarkdown,
+  onDocChange,
+  readOnly,
+  ref,
+}: CodeMirrorEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef<EditorView | null>(null)
+  const readOnlyCompartmentRef = useRef(new Compartment())
+
+  // Set while a programmatic setState/setMarkdown dispatch runs, so the update
+  // listener can ignore it: a host replacing content already knows.
+  const suppressDocChangeRef = useRef(false)
 
   // Keep the latest callback in a ref so the view is never recreated when
   // the parent passes a new function identity.
@@ -43,8 +56,9 @@ export function CodeMirrorEditor({ initialMarkdown, onDocChange, ref }: CodeMirr
     onDocChangeRef.current = onDocChange
   }, [onDocChange])
 
-  // Capture the first-render content so the effect does not list it as a dep.
+  // Capture the first-render values so the create effect lists no deps.
   const initialMarkdownRef = useRef(initialMarkdown ?? '')
+  const initialReadOnlyRef = useRef(readOnly ?? false)
 
   useImperativeHandle(ref, () => {
     function getMarkdown(): string {
@@ -65,12 +79,17 @@ export function CodeMirrorEditor({ initialMarkdown, onDocChange, ref }: CodeMirr
       }
       if (markdown == null && !selection) return
       const docLength = markdown == null ? view.state.doc.length : markdown.length
-      view.dispatch({
-        changes:
-          markdown == null ? undefined : { from: 0, to: view.state.doc.length, insert: markdown },
-        selection: selection ? resolveSelection(selection, docLength) : undefined,
-        scrollIntoView: true,
-      })
+      suppressDocChangeRef.current = true
+      try {
+        view.dispatch({
+          changes:
+            markdown == null ? undefined : { from: 0, to: view.state.doc.length, insert: markdown },
+          selection: selection ? resolveSelection(selection, docLength) : undefined,
+          scrollIntoView: true,
+        })
+      } finally {
+        suppressDocChangeRef.current = false
+      }
     }
     function setMarkdown(markdown: string): void {
       setState(markdown)
@@ -93,6 +112,7 @@ export function CodeMirrorEditor({ initialMarkdown, onDocChange, ref }: CodeMirr
       setSelection,
       focus,
       scrollIntoView,
+      editor: undefined,
     }
   }, [])
 
@@ -109,8 +129,9 @@ export function CodeMirrorEditor({ initialMarkdown, onDocChange, ref }: CodeMirr
           markdown({ base: markdownLanguage }),
           syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
           EditorView.lineWrapping,
+          readOnlyCompartmentRef.current.of(EditorState.readOnly.of(initialReadOnlyRef.current)),
           EditorView.updateListener.of((update) => {
-            if (!update.docChanged) return
+            if (!update.docChanged || suppressDocChangeRef.current) return
             onDocChangeRef.current?.()
           }),
         ],
@@ -122,6 +143,14 @@ export function CodeMirrorEditor({ initialMarkdown, onDocChange, ref }: CodeMirr
       viewRef.current = null
     }
   }, [])
+
+  useLayoutEffect(() => {
+    viewRef.current?.dispatch({
+      effects: readOnlyCompartmentRef.current.reconfigure(
+        EditorState.readOnly.of(readOnly ?? false),
+      ),
+    })
+  }, [readOnly])
 
   return <div ref={containerRef} data-editor="codemirror" />
 }

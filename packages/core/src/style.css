@@ -276,6 +276,31 @@
   text-decoration-style: dashed;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------------------------------
+ * Inline images (`![alt](src)`), rendered beneath the literal markdown line
+ * ------------------------------------------------------------------------- */
+.ProseMirror .md-image {
+  display: block;
+}
+
+.ProseMirror .md-image img {
+  max-height: var(--meowdown-image-max-height, 24rem);
+  max-width: 100%;
+  border-radius: var(--meowdown-image-radius, 0.5rem);
+}
+
+/* ---------------------------------------------------------------------------
+ * Placeholder text for empty blocks (ProseKit's definePlaceholder)
+ * ------------------------------------------------------------------------- */
+.ProseMirror .prosekit-placeholder::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--meowdown-placeholder, var(--meowdown-muted));
 }
 
 /* ---------------------------------------------------------------------------

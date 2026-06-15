@@ -1,23 +1,26 @@
 import {
   defineEditorExtension,
-  defineMarkMode,
   type TypedEditor,
   type EditorExtension,
+  type ImageOptions,
   type MarkMode,
+  type PlaceholderOptions,
+  type WikilinkClickHandler,
   docToMarkdown,
   markdownToDoc,
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
-import { createEditor, defineDocChangeHandler, type SelectionJSON, union } from '@prosekit/core'
+import { createEditor, type SelectionJSON, union } from '@prosekit/core'
 import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
-import { ProseKit, useExtension } from '@prosekit/react'
-import { useImperativeHandle, useMemo, useState, type Ref } from 'react'
+import { ProseKit } from '@prosekit/react'
+import { useImperativeHandle, useMemo, useRef, useState, type ReactNode, type Ref } from 'react'
 
 import { defineCodeBlockView } from '../extensions/code-block-view.ts'
 
 import { BlockHandle } from './block-handle.tsx'
 import { DropIndicator } from './drop-indicator.tsx'
+import { EditorExtensions } from './editor-extensions.tsx'
 import { SlashMenu } from './slash-menu.tsx'
 import { TagMenu } from './tag-menu.tsx'
 import type {
@@ -54,7 +57,7 @@ export interface ProseKitEditorProps {
    */
   initialMarkdown?: string
 
-  /** Called on every document change. */
+  /** Called on every user-driven document change, not on programmatic setState. */
   onDocChange?: VoidFunction
 
   /** Enables the tag menu. See `EditorProps.onTagSearch`. */
@@ -63,11 +66,35 @@ export interface ProseKitEditorProps {
   /** Enables the wikilink menu. See `EditorProps.onWikilinkSearch`. */
   onWikilinkSearch?: WikilinkSearchHandler
 
+  /** Called on click of a rendered wiki link. See `EditorProps.onWikilinkClick`. */
+  onWikilinkClick?: WikilinkClickHandler
+
+  /** Resolves an image `src` to a URL. See `EditorProps.resolveImageUrl`. */
+  resolveImageUrl?: ImageOptions['resolveImageUrl']
+
+  /** Persists a pasted/dropped image. See `EditorProps.onImagePaste`. */
+  onImagePaste?: ImageOptions['onImagePaste']
+
+  /** Called when an image fails to persist. See `EditorProps.onImageSaveError`. */
+  onImageSaveError?: ImageOptions['onImageSaveError']
+
+  /** Placeholder text for empty blocks. See `EditorProps.placeholder`. */
+  placeholder?: PlaceholderOptions['placeholder']
+
+  /** Makes the editor read-only. See `EditorProps.readOnly`. */
+  readOnly?: boolean
+
   /** Enables or disables spell checking in the editor. */
   spellCheck?: boolean
 
+  /** Class on the editable root. See `EditorProps.editorClassName`. */
+  editorClassName?: string
+
   /** Imperative handle for the editor. */
   ref?: Ref<EditorHandle>
+
+  /** Nodes rendered inside the ProseKit context. See `EditorProps.children`. */
+  children?: ReactNode
 }
 
 export function ProseKitEditor({
@@ -76,8 +103,16 @@ export function ProseKitEditor({
   onDocChange,
   onTagSearch,
   onWikilinkSearch,
+  onWikilinkClick,
+  resolveImageUrl,
+  onImagePaste,
+  onImageSaveError,
+  placeholder,
+  readOnly,
   spellCheck,
+  editorClassName,
   ref,
+  children,
 }: ProseKitEditorProps) {
   const [editor] = useState((): TypedEditor => {
     const baseExtension: EditorExtension = defineEditorExtension()
@@ -88,6 +123,10 @@ export function ProseKitEditor({
     }
     return editor
   })
+
+  // Set while a programmatic setState/setMarkdown dispatch runs, so the
+  // doc-change handler can ignore it: a host replacing content already knows.
+  const suppressDocChangeRef = useRef(false)
 
   useImperativeHandle(ref, () => {
     function getMarkdown(): string {
@@ -109,7 +148,12 @@ export function ProseKitEditor({
       if (selection) {
         transaction.setSelection(resolveSelection(transaction.doc, selection)).scrollIntoView()
       }
-      editor.view.dispatch(transaction)
+      suppressDocChangeRef.current = true
+      try {
+        editor.view.dispatch(transaction)
+      } finally {
+        suppressDocChangeRef.current = false
+      }
     }
     function setMarkdown(markdown: string): void {
       setState(markdown)
@@ -132,30 +176,39 @@ export function ProseKitEditor({
       setSelection,
       focus,
       scrollIntoView,
+      editor,
     }
   }, [editor])
 
-  const markModeExtension = useMemo(() => {
-    return defineMarkMode(markMode)
-  }, [markMode])
-  useExtension(markModeExtension, { editor })
-
-  const docChangeExtension = useMemo(() => {
-    if (!onDocChange) return null
-    return defineDocChangeHandler(() => {
+  // Guard the host callback so programmatic setState/setMarkdown stays silent.
+  // Stable per `onDocChange` identity, so the extension is not rebuilt every render.
+  const handleDocChange = useMemo(() => {
+    if (!onDocChange) return undefined
+    return () => {
+      if (suppressDocChangeRef.current) return
       onDocChange()
-    })
+    }
   }, [onDocChange])
-  useExtension(docChangeExtension, { editor })
 
   return (
     <ProseKit editor={editor}>
-      <div ref={editor.mount} spellCheck={spellCheck}></div>
+      <div ref={editor.mount} spellCheck={spellCheck} className={editorClassName}></div>
+      <EditorExtensions
+        markMode={markMode}
+        onDocChange={handleDocChange}
+        onWikilinkClick={onWikilinkClick}
+        resolveImageUrl={resolveImageUrl}
+        onImagePaste={onImagePaste}
+        onImageSaveError={onImageSaveError}
+        placeholder={placeholder}
+        readOnly={readOnly}
+      />
       <BlockHandle />
       <DropIndicator />
       <SlashMenu />
       {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
       {onWikilinkSearch && <WikilinkMenu onWikilinkSearch={onWikilinkSearch} />}
+      {children}
     </ProseKit>
   )
 }

@@ -124,7 +124,7 @@ export function isInlineActive(text: string, from: number, to: number, spec: Tog
   )
   for (let pos = from; pos < to; pos++) {
     if (isSpace(text[pos])) continue
-    if (!covered.some((span) => span.from <= pos && pos < span.to)) return false
+    if (covered.every((span) => !(span.from <= pos && pos < span.to))) return false
   }
   return true
 }
