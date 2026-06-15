@@ -10,6 +10,7 @@ export {
   type WikilinkClickPayload,
 } from './extensions/wikilink-click.ts'
 export { defineImages, type ImageOptions } from './extensions/images.ts'
+export { EDITOR_KEY_BINDINGS } from './extensions/key-bindings.ts'
 export { definePlaceholder, type PlaceholderOptions } from '@prosekit/extensions/placeholder'
 export { codeBlockLanguages } from './extensions/code-block-languages.ts'
 export { docToMarkdown } from './converters/pm-to-md.ts'

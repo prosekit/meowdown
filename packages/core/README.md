@@ -13,6 +13,19 @@ The editor extension binds inline-format toggles (`Mod` = Cmd on macOS, Ctrl els
 | `Mod-E`       | `editor.commands.toggleCode()`   | `` `code` ``        |
 | `Mod-Shift-X` | `editor.commands.toggleDel()`    | `~~strikethrough~~` |
 
+Heading shortcuts toggle the current block to a heading of that level (or back to a paragraph):
+
+| Key                   | Action    |
+| --------------------- | --------- |
+| `Mod-1` / `Mod-Alt-1` | Heading 1 |
+| `Mod-2` / `Mod-Alt-2` | Heading 2 |
+| `Mod-3` / `Mod-Alt-3` | Heading 3 |
+| `Mod-4` / `Mod-Alt-4` | Heading 4 |
+| `Mod-5` / `Mod-Alt-5` | Heading 5 |
+| `Mod-6` / `Mod-Alt-6` | Heading 6 |
+
+`EDITOR_KEY_BINDINGS` exports a `Record<string, string>` mapping every key above to its description, for host settings UIs and keybinding-collision checks.
+
 ## Styling
 
 `@meowdown/core/style.css` ships a default editor theme. Colors use `light-dark()`, so they follow the page's `color-scheme` (set `color-scheme: light dark` on `:root` for automatic dark mode). Customize by overriding these variables on `:root` or any ancestor:
