@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
-import { Editor } from './editor.tsx'
+import { MeowdownEditor } from './editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle, TagItem } from './types.ts'
 
@@ -95,8 +95,8 @@ describe('TagMenu', () => {
     await expect.element(menu).not.toBeInTheDocument()
   })
 
-  it('passes onTagSearch through <Editor>', async () => {
-    await render(<Editor onTagSearch={searchTags} />)
+  it('passes onTagSearch through <MeowdownEditor>', async () => {
+    await render(<MeowdownEditor onTagSearch={searchTags} />)
     await pmRoot.click()
     await userEvent.keyboard('#a')
     await expect.element(menu.getByText('art')).toBeVisible()
