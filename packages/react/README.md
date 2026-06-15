@@ -6,6 +6,7 @@ React components for Meowdown, a hybrid (live-preview) Markdown editor.
 
 ```tsx
 import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
+import '@meowdown/core/style.css'
 import '@meowdown/react/style.css'
 import { useRef, useCallback } from 'react'
 
@@ -57,13 +58,7 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
 
 Re-exported from `@prosekit/react`. Call it from a component passed as `children` to read the live editor instance.
 
-### `checkRoundTrip`
-
-Re-exported from `@meowdown/core`. `checkRoundTrip(markdown)` returns `'exact' | 'normalizing' | 'lossy'`, for hosts that gate saving markdown files on whether the editor reproduces them faithfully.
-
-### `EDITOR_KEY_BINDINGS`
-
-Re-exported from `@meowdown/core`. A literal (`as const`) object mapping each editor shortcut (e.g. `Mod-b`, `Mod-1`) to its description, for host settings UIs and keybinding-collision checks.
+Engine-level exports such as `checkRoundTrip`, `EDITOR_KEY_BINDINGS`, `MarkMode`, and `TypedEditor` come from [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core); import them from there directly.
 
 ### `EditorHandle`
 
@@ -94,7 +89,7 @@ In the rich modes (`focus` / `show` / `hide`), these toggle inline formatting on
 
 ## Styling
 
-`@meowdown/react/style.css` includes the default theme from [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core).
+Import both stylesheets: `@meowdown/core/style.css` (the editor theme and variables) and `@meowdown/react/style.css` (the component layout). The core theme is documented in [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core).
 
 ## License
 
