@@ -260,6 +260,15 @@ describe('MeowdownEditor', () => {
     await expect.element(placeholder).not.toBeInTheDocument()
   })
 
+  it('does not show the placeholder when the document is not empty', async () => {
+    const placeholder = page.locate('.prosekit-placeholder')
+    const screen = await render(
+      <MeowdownEditor placeholder="Write something" initialMarkdown="hello" />,
+    )
+    await expect.element(screen.getByText('hello')).toBeInTheDocument()
+    await expect.element(placeholder).not.toBeInTheDocument()
+  })
+
   it('makes the rich editor read-only and restores it when toggled off', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Hi" readOnly />)

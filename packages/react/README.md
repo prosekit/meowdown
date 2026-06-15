@@ -44,8 +44,8 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
 - `onWikilinkClick?: (payload: { target: string; event: MouseEvent }) => void`: called when a rendered wiki link is clicked. A plain click inside a link the caret already sits in just places the caret; `Mod`-click always fires. Pass a stable function (e.g. from `useCallback`). Ignored in source mode.
 - `resolveImageUrl?: (src: string) => string | undefined`: maps an image `src` to a displayable URL (or `undefined` to skip). Enables inline image rendering: `![alt](src)` stays literal text and the image renders beneath its line. Pass a stable function. Ignored in source mode.
 - `onImagePaste?: (file: File) => Promise<string | undefined>`: persists a pasted or dropped image file and returns its markdown `src` (or `undefined` to decline). Pass a stable function. Ignored in source mode.
-- `onImageSaveError?: (error: Error, file: File) => void`: called when `onImagePaste` throws. Defaults to `console.error`. Ignored in source mode.
-- `placeholder?: string | ((state) => string)`: placeholder text shown in an empty block. Pass a stable function. Ignored in source mode.
+- `onImageSaveError?: (error: unknown, file: File) => void`: called when `onImagePaste` throws. Defaults to `console.error`. Ignored in source mode.
+- `placeholder?: string | ((state) => string)`: placeholder text shown when the whole document is empty. Pass a stable function. Ignored in source mode.
 - `readOnly?: boolean`: makes the editor read-only, in both the rich and source modes.
 - `spellCheck?: boolean`: toggles the browser's native spell checking in the rich modes. Defaults to the browser's behavior. Ignored in source mode.
 - `editorClassName?: string`: class on the editable root (the contenteditable). Rich modes only.

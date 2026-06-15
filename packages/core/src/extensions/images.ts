@@ -10,7 +10,7 @@ export interface ImageOptions {
   /** Persist a pasted/dropped image file and return its markdown `src`, or `undefined` to decline. */
   onImagePaste?: (file: File) => Promise<string | undefined>
   /** Called when persisting a pasted/dropped image throws. Defaults to `console.error`. */
-  onImageSaveError?: (error: Error, file: File) => void
+  onImageSaveError?: (error: unknown, file: File) => void
 }
 
 const imageKey = new PluginKey<DecorationSet>('meowdown-images')
@@ -87,7 +87,7 @@ function imageFiles(data: DataTransfer | null): File[] {
   return Array.from(data.files).filter((file) => file.type.startsWith('image/'))
 }
 
-function reportImageError(options: ImageOptions, error: Error, file: File): void {
+function reportImageError(options: ImageOptions, error: unknown, file: File): void {
   if (options.onImageSaveError) options.onImageSaveError(error, file)
   else console.error('[meowdown] failed to save pasted image:', error)
 }
@@ -104,7 +104,7 @@ async function insertSavedImages(
     try {
       saved = await options.onImagePaste(file)
     } catch (error) {
-      reportImageError(options, error as Error, file)
+      reportImageError(options, error, file)
       continue
     }
     if (!saved || view.isDestroyed) continue

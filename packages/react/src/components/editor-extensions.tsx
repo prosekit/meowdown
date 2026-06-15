@@ -71,7 +71,9 @@ export function EditorExtensions({
 
   useExtension(
     useMemo(() => {
-      return placeholder ? definePlaceholder({ placeholder }) : null
+      // 'doc' so the placeholder shows only when the whole document is empty,
+      // not in every empty block the caret enters.
+      return placeholder ? definePlaceholder({ placeholder, strategy: 'doc' }) : null
     }, [placeholder]),
   )
 
