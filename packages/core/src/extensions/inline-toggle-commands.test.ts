@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { userEvent } from 'vitest/browser'
 
+import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { findText } from '../testing/find-text.ts'
 import { setupFixture } from '../testing/index.ts'
 import { marksAt } from '../testing/marks-at.ts'
@@ -169,6 +170,26 @@ describe('keymap', () => {
     fixture.view.focus()
     await userEvent.keyboard('{ControlOrMeta>}b{/ControlOrMeta}')
     expect(fixture.doc.child(0).textContent).toBe('**hello**')
+  })
+
+  it.each([
+    ['b', '**bold**'],
+    ['i', '*bold*'],
+    ['e', '`bold`'],
+  ])('Mod-%s wraps the selection', async (key, expected) => {
+    using fixture = setupFixture()
+    fixture.set(fixture.n.doc(fixture.n.paragraph('<a>bold<b>')))
+    fixture.view.focus()
+    await userEvent.keyboard(`{ControlOrMeta>}${key}{/ControlOrMeta}`)
+    expect(docToMarkdown(fixture.doc)).toBe(`${expected}\n`)
+  })
+
+  it('Mod-Shift-x wraps the selection in ~~', async () => {
+    using fixture = setupFixture()
+    fixture.set(fixture.n.doc(fixture.n.paragraph('<a>bold<b>')))
+    fixture.view.focus()
+    await userEvent.keyboard(`{ControlOrMeta>}{Shift>}x{/Shift}{/ControlOrMeta}`)
+    expect(docToMarkdown(fixture.doc)).toBe('~~bold~~\n')
   })
 })
 

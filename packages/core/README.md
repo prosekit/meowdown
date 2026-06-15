@@ -15,14 +15,14 @@ The editor extension binds inline-format toggles (`Mod` = Cmd on macOS, Ctrl els
 
 Heading shortcuts toggle the current block to a heading of that level (or back to a paragraph):
 
-| Key                   | Action    |
-| --------------------- | --------- |
-| `Mod-1` / `Mod-Alt-1` | Heading 1 |
-| `Mod-2` / `Mod-Alt-2` | Heading 2 |
-| `Mod-3` / `Mod-Alt-3` | Heading 3 |
-| `Mod-4` / `Mod-Alt-4` | Heading 4 |
-| `Mod-5` / `Mod-Alt-5` | Heading 5 |
-| `Mod-6` / `Mod-Alt-6` | Heading 6 |
+| Key     | Action    |
+| ------- | --------- |
+| `Mod-1` | Heading 1 |
+| `Mod-2` | Heading 2 |
+| `Mod-3` | Heading 3 |
+| `Mod-4` | Heading 4 |
+| `Mod-5` | Heading 5 |
+| `Mod-6` | Heading 6 |
 
 `EDITOR_KEY_BINDINGS` is a literal (`as const`) object mapping every key above to its description, for host settings UIs and keybinding-collision checks.
 
