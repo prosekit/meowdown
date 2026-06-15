@@ -106,19 +106,27 @@ function caretToggle(
   return true
 }
 
+function defineInlineToggleCommands() {
+  return defineCommands({
+    toggleEm: () => toggleInline(TOGGLE_SPECS.em),
+    toggleStrong: () => toggleInline(TOGGLE_SPECS.strong),
+    toggleCode: () => toggleInline(TOGGLE_SPECS.code),
+    toggleDel: () => toggleInline(TOGGLE_SPECS.del),
+  })
+}
+
+function defineInlineToggleKeymap() {
+  return defineKeymap({
+    'Mod-b': toggleInline(TOGGLE_SPECS.strong),
+    'Mod-i': toggleInline(TOGGLE_SPECS.em),
+    'Mod-e': toggleInline(TOGGLE_SPECS.code),
+    'Mod-Shift-x': toggleInline(TOGGLE_SPECS.del),
+  })
+}
+
 export function defineInlineToggle() {
   return union(
-    defineCommands({
-      toggleEm: () => toggleInline(TOGGLE_SPECS.em),
-      toggleStrong: () => toggleInline(TOGGLE_SPECS.strong),
-      toggleCode: () => toggleInline(TOGGLE_SPECS.code),
-      toggleDel: () => toggleInline(TOGGLE_SPECS.del),
-    }),
-    defineKeymap({
-      'Mod-b': toggleInline(TOGGLE_SPECS.strong),
-      'Mod-i': toggleInline(TOGGLE_SPECS.em),
-      'Mod-e': toggleInline(TOGGLE_SPECS.code),
-      'Mod-Shift-x': toggleInline(TOGGLE_SPECS.del),
-    }),
+    defineInlineToggleCommands(),
+    defineInlineToggleKeymap(),
   )
 }

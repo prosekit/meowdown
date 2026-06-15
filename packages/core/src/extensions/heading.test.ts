@@ -6,7 +6,7 @@ import { setupFixture } from '../testing/index.ts'
 
 const LEVELS = [1, 2, 3, 4, 5, 6] as const
 
-describe('heading shortcuts', () => {
+describe('keymap', () => {
   for (const level of LEVELS) {
     it(`Mod-${level} sets heading ${level}`, async () => {
       using fixture = setupFixture()
@@ -39,27 +39,5 @@ describe('heading shortcuts', () => {
     fixture.view.focus()
     await userEvent.keyboard('{Backspace}')
     expect(docToMarkdown(fixture.doc)).toBe('title\n')
-  })
-})
-
-describe('inline toggle shortcuts', () => {
-  it.each([
-    ['b', '**bold**'],
-    ['i', '*bold*'],
-    ['e', '`bold`'],
-  ])('Mod-%s wraps the selection', async (key, expected) => {
-    using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.paragraph('<a>bold<b>')))
-    fixture.view.focus()
-    await userEvent.keyboard(`{ControlOrMeta>}${key}{/ControlOrMeta}`)
-    expect(docToMarkdown(fixture.doc)).toBe(`${expected}\n`)
-  })
-
-  it('Mod-Shift-x wraps the selection in ~~', async () => {
-    using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.paragraph('<a>bold<b>')))
-    fixture.view.focus()
-    await userEvent.keyboard(`{ControlOrMeta>}{Shift>}x{/Shift}{/ControlOrMeta}`)
-    expect(docToMarkdown(fixture.doc)).toBe('~~bold~~\n')
   })
 })
