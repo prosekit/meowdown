@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.0](https://github.com/prosekit/meowdown/compare/core-v0.3.1...core-v0.4.0) (2026-06-15)
+
+
+### Features
+
+* add code block syntax highlighting and language selector ([#27](https://github.com/prosekit/meowdown/issues/27)) ([d2ae648](https://github.com/prosekit/meowdown/commit/d2ae648378fb24bccc172139cb1816cf8e125ab8))
+* add inline image rendering ([d0a37d0](https://github.com/prosekit/meowdown/commit/d0a37d089a8f6aa2db4a19ec2a1a3a61baa7aee8))
+* add onWikilinkClick prop ([d9d10db](https://github.com/prosekit/meowdown/commit/d9d10db2b78cfc1d7240abcce828471f0194b110))
+* **core:** add checkRoundTrip to detect lossy markdown ([1a19c55](https://github.com/prosekit/meowdown/commit/1a19c559e699393358d5bccfdb9e812b5d34b2f4))
+* **core:** add heading shortcuts ([4f48d58](https://github.com/prosekit/meowdown/commit/4f48d5859620599a062da4215345a4c1bfe359ed))
+* **core:** expose the editor keybinding table ([876894e](https://github.com/prosekit/meowdown/commit/876894e1035453932d4ae077a15eea1db17783ae))
+* **react:** add readOnly prop ([528d934](https://github.com/prosekit/meowdown/commit/528d9347c3619cdaa56d306433fc740559c85469))
+* **react:** show placeholder text in empty blocks ([2a2b8fc](https://github.com/prosekit/meowdown/commit/2a2b8fce77aafe7d09aa608a4a62b8439d71f9f5))
+
 ## [0.3.1](https://github.com/prosekit/meowdown/compare/core-v0.3.0...core-v0.3.1) (2026-06-11)
 
 
