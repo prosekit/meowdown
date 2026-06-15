@@ -91,15 +91,6 @@ function imageFiles(data: DataTransfer | null): File[] {
   return Array.from(data.files).filter((file) => file.type.startsWith('image/'))
 }
 
-function reportImageError(
-  onImageSaveError: ImageOptions['onImageSaveError'],
-  error: unknown,
-  file: File,
-): void {
-  if (onImageSaveError) onImageSaveError(error, file)
-  else console.error('[meowdown] failed to save pasted image:', error)
-}
-
 const defaultOnImageSaveError: ImageSaveErrorHandler = (error) => {
   console.error('[meowdown] failed to save pasted image:', error)
 }
@@ -117,7 +108,7 @@ async function insertSavedImages(
     try {
       saved = await onImagePaste(file)
     } catch (error) {
-      reportImageError(onImageSaveError, error, file)
+      onImageSaveError(error, file)
       continue
     }
     if (!saved || view.isDestroyed) continue
