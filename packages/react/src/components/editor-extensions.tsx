@@ -37,27 +37,36 @@ export function EditorExtensions({
   placeholder,
   readOnly,
 }: EditorExtensionsProps): null {
-  useExtension(useMemo(() => defineMarkMode(markMode), [markMode]))
-
-  useExtension(useMemo(() => (readOnly ? defineReadonly() : null), [readOnly]))
-
   useExtension(
-    useMemo(() => (onDocChange ? defineDocChangeHandler(onDocChange) : null), [onDocChange]),
+    useMemo(() => {
+      return defineMarkMode(markMode)
+    }, [markMode]),
   )
 
   useExtension(
-    useMemo(
-      () => (onWikilinkClick ? defineWikilinkClickHandler(onWikilinkClick) : null),
-      [onWikilinkClick],
-    ),
+    useMemo(() => {
+      return readOnly ? defineReadonly() : null
+    }, [readOnly]),
   )
 
   useExtension(
-    useMemo(
-      () =>
-        resolveImageUrl ? defineImages({ resolveImageUrl, onImagePaste, onImageSaveError }) : null,
-      [resolveImageUrl, onImagePaste, onImageSaveError],
-    ),
+    useMemo(() => {
+      return onDocChange ? defineDocChangeHandler(onDocChange) : null
+    }, [onDocChange]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return onWikilinkClick ? defineWikilinkClickHandler(onWikilinkClick) : null
+    }, [onWikilinkClick]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return resolveImageUrl
+        ? defineImages({ resolveImageUrl, onImagePaste, onImageSaveError })
+        : null
+    }, [resolveImageUrl, onImagePaste, onImageSaveError]),
   )
 
   useExtension(
