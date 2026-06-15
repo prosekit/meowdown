@@ -126,7 +126,7 @@ export function ProseKitEditor({
 
   // Set while a programmatic setState/setMarkdown dispatch runs, so the
   // doc-change handler can ignore it: a host replacing content already knows.
-  const suppressDocChange = useRef(false)
+  const suppressDocChangeRef = useRef(false)
 
   useImperativeHandle(ref, () => {
     function getMarkdown(): string {
@@ -148,11 +148,11 @@ export function ProseKitEditor({
       if (selection) {
         transaction.setSelection(resolveSelection(transaction.doc, selection)).scrollIntoView()
       }
-      suppressDocChange.current = true
+      suppressDocChangeRef.current = true
       try {
         editor.view.dispatch(transaction)
       } finally {
-        suppressDocChange.current = false
+        suppressDocChangeRef.current = false
       }
     }
     function setMarkdown(markdown: string): void {
@@ -185,7 +185,7 @@ export function ProseKitEditor({
   const handleDocChange = useMemo(() => {
     if (!onDocChange) return undefined
     return () => {
-      if (suppressDocChange.current) return
+      if (suppressDocChangeRef.current) return
       onDocChange()
     }
   }, [onDocChange])
