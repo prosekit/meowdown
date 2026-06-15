@@ -1,5 +1,6 @@
 import type { MarkMode } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
+import { clsx } from 'clsx/lite'
 import { useImperativeHandle, useRef, type ReactNode, type Ref } from 'react'
 
 import { CodeMirrorEditor } from './codemirror-editor.tsx'
@@ -57,6 +58,12 @@ export interface EditorProps {
    */
   spellCheck?: boolean
 
+  /** Class on the editable root (the contenteditable). Rich modes only. */
+  editorClassName?: string
+
+  /** Class on the outer `.meowdown` wrapper div. */
+  wrapperClassName?: string
+
   /** Imperative handle for the editor. */
   ref?: Ref<EditorHandle>
 
@@ -71,6 +78,8 @@ export function Editor({
   onTagSearch,
   onWikilinkSearch,
   spellCheck,
+  editorClassName,
+  wrapperClassName,
   ref,
   children,
 }: EditorProps) {
@@ -119,7 +128,7 @@ export function Editor({
   const seedMarkdown = childRef.current?.getMarkdown() ?? initialMarkdown ?? ''
 
   return (
-    <div className="meowdown">
+    <div className={clsx('meowdown', wrapperClassName)}>
       {mode === 'source' ? (
         <CodeMirrorEditor ref={childRef} initialMarkdown={seedMarkdown} onDocChange={onDocChange} />
       ) : (
@@ -131,6 +140,7 @@ export function Editor({
           onTagSearch={onTagSearch}
           onWikilinkSearch={onWikilinkSearch}
           spellCheck={spellCheck}
+          editorClassName={editorClassName}
         >
           {children}
         </ProseKitEditor>

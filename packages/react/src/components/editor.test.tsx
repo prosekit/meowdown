@@ -216,6 +216,14 @@ describe('Editor', () => {
     await expect.element(cmContent).toHaveTextContent('Hi!')
   })
 
+  it('applies editorClassName and wrapperClassName', async () => {
+    await render(
+      <Editor initialMarkdown="Hi" editorClassName="test-editable" wrapperClassName="test-wrap" />,
+    )
+    await expect.element(pmRoot).toHaveClass('test-editable')
+    await expect.element(page.locate('.test-wrap')).toBeInTheDocument()
+  })
+
   it('renders children inside the ProseKit context in rich modes', async () => {
     await render(
       <Editor initialMarkdown="Hi">

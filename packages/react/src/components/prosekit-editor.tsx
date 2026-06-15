@@ -66,6 +66,9 @@ export interface ProseKitEditorProps {
   /** Enables or disables spell checking in the editor. */
   spellCheck?: boolean
 
+  /** Class on the editable root. See `EditorProps.editorClassName`. */
+  editorClassName?: string
+
   /** Imperative handle for the editor. */
   ref?: Ref<EditorHandle>
 
@@ -80,6 +83,7 @@ export function ProseKitEditor({
   onTagSearch,
   onWikilinkSearch,
   spellCheck,
+  editorClassName,
   ref,
   children,
 }: ProseKitEditorProps) {
@@ -141,7 +145,7 @@ export function ProseKitEditor({
 
   return (
     <ProseKit editor={editor}>
-      <div ref={editor.mount} spellCheck={spellCheck}></div>
+      <div ref={editor.mount} spellCheck={spellCheck} className={editorClassName}></div>
       <EditorExtensions markMode={markMode} onDocChange={onDocChange} />
       <BlockHandle />
       <DropIndicator />
