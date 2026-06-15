@@ -113,7 +113,8 @@ describe('MeowdownEditor', () => {
     ref.current?.setMarkdown('# New title')
     await expect.element(screen.getByText('New title')).toBeInTheDocument()
     expect(ref.current?.getMarkdown()).toBe('# New title\n')
-    expect(onDocChange).toHaveBeenCalled()
+    // Programmatic setMarkdown is silent: the host that called it already knows.
+    expect(onDocChange).not.toHaveBeenCalled()
 
     await screen.rerender(
       <MeowdownEditor
@@ -126,6 +127,7 @@ describe('MeowdownEditor', () => {
     ref.current?.setMarkdown('plain')
     await expect.element(cmContent).toHaveTextContent('plain')
     expect(ref.current?.getMarkdown()).toBe('plain')
+    expect(onDocChange).not.toHaveBeenCalled()
   })
 
   it('reports the document and selection via getState', async () => {

@@ -35,7 +35,10 @@ export interface EditorProps {
    */
   initialMarkdown?: string
 
-  /** Called on every document change. */
+  /**
+   * Called on every user-driven document change. Programmatic `setMarkdown` and
+   * `setState` on the handle do not fire it.
+   */
   onDocChange?: VoidFunction
 
   /**
