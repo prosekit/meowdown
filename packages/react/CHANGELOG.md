@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/prosekit/meowdown/compare/react-v0.8.0...react-v0.8.1) (2026-06-15)
+
+
+### Bug Fixes
+
+* **core:** keep empty table cells on markdown round-trip ([#46](https://github.com/prosekit/meowdown/issues/46)) ([3ab4cca](https://github.com/prosekit/meowdown/commit/3ab4ccad881c6e517f4f55645becb3435619cd8b))
+
 ## [0.8.0](https://github.com/prosekit/meowdown/compare/react-v0.7.0...react-v0.8.0) (2026-06-15)
 
 
