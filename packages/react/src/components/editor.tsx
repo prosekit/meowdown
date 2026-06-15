@@ -106,7 +106,7 @@ export interface EditorProps {
   children?: ReactNode
 }
 
-export function Editor({
+export function MeowdownEditor({
   mode = 'focus',
   initialMarkdown,
   onDocChange,

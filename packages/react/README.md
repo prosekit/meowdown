@@ -5,7 +5,7 @@ React components for Meowdown, a hybrid (live-preview) Markdown editor.
 ## Usage
 
 ```tsx
-import { Editor, type EditorHandle } from '@meowdown/react'
+import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import '@meowdown/react/style.css'
 import { useRef, useCallback } from 'react'
 
@@ -15,13 +15,20 @@ export function App() {
     console.log(ref.current?.getMarkdown())
   }, [])
 
-  return <Editor ref={ref} mode="focus" initialMarkdown="# Hello" onDocChange={handleDocChange} />
+  return (
+    <MeowdownEditor
+      ref={ref}
+      mode="focus"
+      initialMarkdown="# Hello"
+      onDocChange={handleDocChange}
+    />
+  )
 }
 ```
 
 ## API
 
-### `<Editor>`
+### `<MeowdownEditor>`
 
 The Markdown editor component. Renders inside a `div.meowdown` wrapper that fills a flex parent. In rich modes, typing `/` opens a slash menu for inserting blocks (headings, blockquote, lists, code block, table). Hovering a block shows a handle to its left: the plus button inserts an empty paragraph below the block, and the grip selects the block and can be dragged to move it, with a drop indicator line marking the target.
 
