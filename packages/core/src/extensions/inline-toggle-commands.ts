@@ -125,8 +125,5 @@ function defineInlineToggleKeymap() {
 }
 
 export function defineInlineToggle() {
-  return union(
-    defineInlineToggleCommands(),
-    defineInlineToggleKeymap(),
-  )
+  return union(defineInlineToggleCommands(), defineInlineToggleKeymap())
 }

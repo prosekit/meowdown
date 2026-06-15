@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { userEvent } from 'vitest/browser'
 
+import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { findText } from '../testing/find-text.ts'
 import { setupFixture } from '../testing/index.ts'
 import { marksAt } from '../testing/marks-at.ts'
-import { docToMarkdown } from '../converters/pm-to-md.ts'
 
 describe('toggleStrong command', () => {
   it('wraps the selection and re-derives marks', () => {
