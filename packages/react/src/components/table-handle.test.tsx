@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import dedent from 'dedent'
 import { createRef, type Ref } from 'react'
 import { describe, expect, it } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -16,7 +17,11 @@ const rowHandle = page.getByTestId('table-handle-row')
 const columnMenu = page.getByTestId('table-handle-column-menu')
 const rowMenu = page.getByTestId('table-handle-row-menu')
 
-const TABLE_MARKDOWN = '| a | b |\n| --- | --- |\n| 1 | 2 |\n'
+const TABLE_MARKDOWN = dedent`
+  | a | b |
+  | --- | --- |
+  | 1 | 2 |
+`
 
 // The mouse position persists across tests; park it first so a leftover
 // position over the new editor cannot open a handle.
