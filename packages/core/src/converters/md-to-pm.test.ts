@@ -1,4 +1,5 @@
 import { createEditor } from '@prosekit/core'
+import dedent from 'dedent'
 import { describe, expect, it } from 'vitest'
 
 import { defineEditorExtension } from '../extensions/extension.ts'
@@ -7,6 +8,21 @@ import { markdownToDoc } from './md-to-pm.ts'
 import { sampleContent, sampleContentMarkdown } from './sample-content.ts'
 
 const editor = createEditor({ extension: defineEditorExtension() })
+
+function tableShape(markdown: string): Array<Array<{ type: string; text: string }>> {
+  const table = markdownToDoc(editor, markdown).child(0)
+  const rows: Array<Array<{ type: string; text: string }>> = []
+  for (let r = 0; r < table.childCount; r++) {
+    const row = table.child(r)
+    const cells: Array<{ type: string; text: string }> = []
+    for (let c = 0; c < row.childCount; c++) {
+      const cell = row.child(c)
+      cells.push({ type: cell.type.name, text: cell.textContent })
+    }
+    rows.push(cells)
+  }
+  return rows
+}
 
 describe('markdownToDoc', () => {
   it('converts a heading', () => {
@@ -52,7 +68,11 @@ describe('markdownToDoc', () => {
   })
 
   it('flattens a bullet list', () => {
-    expect(markdownToDoc(editor, '- one\n- two').toJSON()).toEqual({
+    const md = dedent`
+      - one
+      - two
+    `
+    expect(markdownToDoc(editor, md).toJSON()).toEqual({
       type: 'doc',
       content: [
         {
@@ -80,7 +100,11 @@ describe('markdownToDoc', () => {
   })
 
   it('keeps the start number of an ordered list', () => {
-    expect(markdownToDoc(editor, '5. five\n6. six').toJSON()).toEqual({
+    const md = dedent`
+      5. five
+      6. six
+    `
+    expect(markdownToDoc(editor, md).toJSON()).toEqual({
       type: 'doc',
       content: [
         {
@@ -144,7 +168,11 @@ describe('markdownToDoc', () => {
   })
 
   it('mixes task and plain items in one bullet list', () => {
-    const doc = markdownToDoc(editor, '- [x] done\n- plain').toJSON() as {
+    const md = dedent`
+      - [x] done
+      - plain
+    `
+    const doc = markdownToDoc(editor, md).toJSON() as {
       content: Array<{ attrs: { kind: string; checked: boolean } }>
     }
     expect(doc.content.map((item) => item.attrs.kind)).toEqual(['task', 'bullet'])
@@ -192,7 +220,11 @@ describe('markdownToDoc', () => {
   })
 
   it('converts a GFM table with a header row', () => {
-    const md = '| a | b |\n|---|---|\n| 1 | 2 |\n'
+    const md = dedent`
+      | a | b |
+      |---|---|
+      | 1 | 2 |
+    `
     expect(markdownToDoc(editor, md).toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -253,6 +285,66 @@ describe('markdownToDoc', () => {
         },
       ],
     })
+  })
+
+  it('keeps empty cells when the whole table is empty', () => {
+    const md = dedent`
+      |     |     |     |
+      | --- | --- | --- |
+      |     |     |     |
+    `
+    expect(tableShape(md)).toEqual([
+      [
+        { type: 'tableHeaderCell', text: '' },
+        { type: 'tableHeaderCell', text: '' },
+        { type: 'tableHeaderCell', text: '' },
+      ],
+      [
+        { type: 'tableCell', text: '' },
+        { type: 'tableCell', text: '' },
+        { type: 'tableCell', text: '' },
+      ],
+    ])
+  })
+
+  it('places cells in the correct columns when some are empty', () => {
+    const md = dedent`
+      | a   |     | c   |
+      | --- | --- | --- |
+      |     | b   |     |
+    `
+    expect(tableShape(md)).toEqual([
+      [
+        { type: 'tableHeaderCell', text: 'a' },
+        { type: 'tableHeaderCell', text: '' },
+        { type: 'tableHeaderCell', text: 'c' },
+      ],
+      [
+        { type: 'tableCell', text: '' },
+        { type: 'tableCell', text: 'b' },
+        { type: 'tableCell', text: '' },
+      ],
+    ])
+  })
+
+  it('pads a short row to the header column count', () => {
+    const md = dedent`
+      | a   | b   | c   |
+      | --- | --- | --- |
+      | 1   |
+    `
+    expect(tableShape(md)).toEqual([
+      [
+        { type: 'tableHeaderCell', text: 'a' },
+        { type: 'tableHeaderCell', text: 'b' },
+        { type: 'tableHeaderCell', text: 'c' },
+      ],
+      [
+        { type: 'tableCell', text: '1' },
+        { type: 'tableCell', text: '' },
+        { type: 'tableCell', text: '' },
+      ],
+    ])
   })
 
   it('round-trips the full sample document', () => {
