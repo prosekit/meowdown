@@ -82,8 +82,8 @@ export interface EditorProps {
   onImageSaveError?: ImageOptions['onImageSaveError']
 
   /**
-   * Placeholder text shown in an empty block. A function receives the editor
-   * state. Pass a stable function. Ignored in source mode.
+   * Placeholder text shown when the whole document is empty. A function
+   * receives the editor state. Pass a stable function. Ignored in source mode.
    */
   placeholder?: PlaceholderOptions['placeholder']
 
