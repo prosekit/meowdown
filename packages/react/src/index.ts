@@ -3,7 +3,9 @@ export type {
   EditorHandle,
   EditorStateSnapshot,
   SelectionHint,
+  TagItem,
   TagSearchHandler,
+  WikilinkItem,
   WikilinkSearchHandler,
 } from './components/types.ts'
 

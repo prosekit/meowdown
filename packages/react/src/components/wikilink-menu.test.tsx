@@ -1,21 +1,25 @@
 import '../testing/index.ts'
 
 import { createRef } from 'react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
 import { Editor } from './editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
-import type { EditorHandle } from './types.ts'
+import type { EditorHandle, WikilinkItem } from './types.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const menu = page.getByTestId('wikilink-menu')
 
-const NOTES = ['Cat naps', 'Meeting notes', 'Reading list']
+const WIKILINKS: WikilinkItem[] = [
+  { target: 'Cat naps' },
+  { target: 'Meeting notes' },
+  { target: 'Reading list' },
+]
 
-function searchNotes(query: string): string[] {
-  return NOTES.filter((note) => note.toLowerCase().includes(query))
+function searchNotes(query: string): WikilinkItem[] {
+  return WIKILINKS.filter((item) => item.target.toLowerCase().includes(query))
 }
 
 // In `userEvent.keyboard`, a literal `[` is escaped by doubling it.
@@ -59,17 +63,34 @@ describe('WikilinkMenu', () => {
 
   it('supports async onWikilinkSearch and shows a loading state', async () => {
     // Deferred promise keeps the pending window deterministic.
-    let resolve!: (notes: string[]) => void
+    let resolve!: (items: WikilinkItem[]) => void
     const asyncSearch = () =>
-      new Promise<string[]>((r) => {
+      new Promise<WikilinkItem[]>((r) => {
         resolve = r
       })
     await render(<ProseKitEditor onWikilinkSearch={asyncSearch} />)
     await pmRoot.click()
     await userEvent.keyboard(TWO_BRACKETS)
     await expect.element(menu.getByText('Loading...')).toBeVisible()
-    resolve(['Cat naps'])
+    resolve([{ target: 'Cat naps' }])
     await expect.element(menu.getByText('Cat naps')).toBeVisible()
+  })
+
+  it('shows label and detail, inserts the target, and runs onSelect', async () => {
+    const ref = createRef<EditorHandle>()
+    const onSelect = vi.fn()
+    const richSearch = (): WikilinkItem[] => [
+      { target: '2026-06-15', label: 'June 15', detail: 'daily', onSelect },
+    ]
+    await render(<ProseKitEditor ref={ref} onWikilinkSearch={richSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard(TWO_BRACKETS)
+    await expect.element(menu.getByText('June 15')).toBeVisible()
+    await expect.element(menu.getByText('daily')).toBeVisible()
+
+    await menu.getByText('June 15').click()
+    expect(ref.current?.getMarkdown()).toContain('[[2026-06-15]]')
+    expect(onSelect).toHaveBeenCalled()
   })
 
   it('inserts the selected note as [[Name]] and removes the query', async () => {

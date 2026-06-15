@@ -49,15 +49,40 @@ export interface EditorHandle {
 }
 
 /**
+/** One row in the tag menu. The host ranks the rows; the menu does not re-sort. */
+export interface TagItem {
+  /** Inserted as `#tag `. */
+  tag: string
+  /** Display text; defaults to `#tag`. */
+  label?: string
+  /** Secondary text shown beside the label. */
+  detail?: string
+  /** Side effect run after the tag is inserted (e.g. create the tag). */
+  onSelect?: () => void
+}
+
+/**
  * Searches tags for the tag menu. Receives the query typed after `#`
- * (lowercased, punctuation stripped) and returns the tags to show, either
+ * (lowercased, punctuation stripped) and returns the rows to show, either
  * synchronously or as a promise.
  */
-export type TagSearchHandler = (query: string) => string[] | Promise<string[]>
+export type TagSearchHandler = (query: string) => TagItem[] | Promise<TagItem[]>
+
+/** One row in the wikilink menu. The host ranks the rows; the menu does not re-sort. */
+export interface WikilinkItem {
+  /** Inserted as `[[target]]`. */
+  target: string
+  /** Display text; defaults to `target`. */
+  label?: string
+  /** Secondary text shown beside the label. */
+  detail?: string
+  /** Side effect run after the link is inserted (e.g. create the note). */
+  onSelect?: () => void
+}
 
 /**
  * Searches notes for the wikilink menu. Receives the query typed after
  * `[[` (lowercased, punctuation stripped, may be empty or contain spaces)
- * and returns the note names to show, either synchronously or as a promise.
+ * and returns the rows to show, either synchronously or as a promise.
  */
-export type WikilinkSearchHandler = (query: string) => string[] | Promise<string[]>
+export type WikilinkSearchHandler = (query: string) => WikilinkItem[] | Promise<WikilinkItem[]>
