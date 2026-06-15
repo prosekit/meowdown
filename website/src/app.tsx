@@ -81,6 +81,9 @@ async function searchNotes(query: string): Promise<string[]> {
   return NOTES.filter((note) => note.toLowerCase().includes(query))
 }
 
+const ICON_BUTTON_CLASS =
+  'flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/70 text-stone-500 shadow-sm backdrop-blur transition-colors hover:bg-white hover:text-stone-900 dark:border-stone-700/70 dark:bg-stone-900/70 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100'
+
 interface SegmentedControlProps<T extends string> {
   options: ReadonlyArray<{ value: T; label: string }>
   value: T
@@ -141,10 +144,27 @@ function ThemeToggle() {
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       aria-label="Toggle color theme"
       title="Toggle color theme"
-      className="absolute top-4 right-4 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-zinc-200 bg-white text-base shadow-sm transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+      className={ICON_BUTTON_CLASS}
     >
       {theme === 'dark' ? '🌙' : '☀️'}
     </button>
+  )
+}
+
+function Brand() {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-yellow-100 text-lg shadow-sm shadow-amber-500/30">
+        🐱
+      </span>
+      <span className="text-lg font-semibold tracking-tight text-stone-900 dark:text-white">
+        Meowdown
+      </span>
+      <span className="hidden items-center gap-1.5 rounded-full border border-amber-300/70 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 sm:inline-flex dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+        Work in progress
+      </span>
+    </div>
   )
 }
 
@@ -153,31 +173,39 @@ export function App() {
   const activeMode = MODES.find((option) => option.value === mode) ?? MODES[0]
 
   return (
-    <main className="relative min-h-dvh bg-zinc-50 text-zinc-600 dark:bg-zinc-950 dark:text-zinc-400">
-      <ThemeToggle />
-      <div className="mx-auto flex h-dvh max-w-3xl flex-col overflow-hidden px-4 py-9 sm:px-8 sm:py-16 lg:py-20">
-        <header className="flex flex-col items-center gap-4 text-center sm:gap-5">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 text-xl dark:bg-zinc-800">
-              🐱
-            </span>
-            <span className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">
-              Meowdown
-            </span>
+    <main className="relative min-h-dvh overflow-hidden text-stone-600 dark:bg-stone-950">
+      <div className="relative mx-auto flex h-dvh max-w-5xl flex-col px-4 py-5 sm:px-6 sm:py-7">
+        <nav className="flex shrink-0 items-center justify-between">
+          <Brand />
+          <div className="flex items-center gap-2">
+            <a
+              href="https://github.com/prosekit/meowdown"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="View source on GitHub"
+              title="View source on GitHub"
+              className={ICON_BUTTON_CLASS}
+            >
+              <span className="i-simple-icons-github size-4" aria-hidden="true" />
+            </a>
+            <ThemeToggle />
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/70 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-            Work in progress
-          </span>
+        </nav>
+
+        <header className="shrink-0 py-5 text-center sm:py-6">
+          <h1 className="text-3xl font-semibold tracking-tight text-balance text-stone-900 sm:text-4xl dark:text-white">
+            Markdown that{' '}
+            <span className="text-amber-500 dark:text-amber-400">renders as you type</span>
+          </h1>
         </header>
 
-        <section className="mt-9 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm sm:mt-14 dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 px-4 py-2 sm:px-6 sm:py-2.5 dark:border-zinc-800">
-            <div className="flex items-center gap-2.5 text-sm font-medium text-zinc-500 dark:text-zinc-400">
+        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-2xl shadow-orange-500/20 ring-1 ring-black/5 dark:border-stone-800 dark:bg-stone-900 dark:shadow-black/40 dark:ring-white/5">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200/80 bg-stone-50/60 px-4 py-2.5 sm:px-5 dark:border-stone-800 dark:bg-stone-950/30">
+            <div className="flex items-center gap-2.5 text-sm font-medium text-stone-500 dark:text-stone-400">
               <span className="flex gap-1.5">
-                <span className="h-3 w-3 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-                <span className="h-3 w-3 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-                <span className="h-3 w-3 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+                <span className="h-3 w-3 rounded-full bg-red-400 ring-1 ring-black/10 ring-inset" />
+                <span className="h-3 w-3 rounded-full bg-amber-400 ring-1 ring-black/10 ring-inset" />
+                <span className="h-3 w-3 rounded-full bg-green-400 ring-1 ring-black/10 ring-inset" />
               </span>
               <span>untitled.md</span>
             </div>
@@ -199,24 +227,26 @@ export function App() {
             />
           </div>
 
-          <div className="flex items-center gap-2 border-t border-zinc-200 bg-zinc-50/80 px-4 py-3.5 text-sm sm:px-6 sm:py-4 dark:border-zinc-800 dark:bg-zinc-900/60">
-            <span className="font-semibold text-zinc-700 dark:text-zinc-200">
-              {activeMode.label}
+          <div className="flex items-center gap-2 border-t border-stone-200/80 bg-stone-50/60 px-4 py-3 text-sm sm:px-5 dark:border-stone-800 dark:bg-stone-950/30">
+            <span key={mode} className="mode-desc flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <span className="font-semibold text-stone-700 dark:text-stone-200">
+                {activeMode.label}
+              </span>
+              <span className="text-stone-300 dark:text-stone-600">·</span>
+              <span className="text-stone-500 dark:text-stone-400">{activeMode.description}</span>
             </span>
-            <span className="text-zinc-300 dark:text-zinc-600">·</span>
-            <span>{activeMode.description}</span>
           </div>
         </section>
 
-        <footer className="mt-6 flex justify-center sm:mt-8">
+        <footer className="shrink-0 pt-4 text-center text-xs text-stone-400 dark:text-stone-600">
+          Built with{' '}
           <a
-            href="https://github.com/prosekit/meowdown"
+            href="https://prosekit.dev"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs text-zinc-400 transition-colors hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+            className="font-medium text-stone-500 underline-offset-2 transition-colors hover:text-stone-700 hover:underline dark:text-stone-500 dark:hover:text-stone-300"
           >
-            <span className="i-simple-icons-github size-3.5" aria-hidden="true" />
-            <span>View source on GitHub</span>
+            ProseKit
           </a>
         </footer>
       </div>
