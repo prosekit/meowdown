@@ -87,24 +87,29 @@ function imageFiles(data: DataTransfer | null): File[] {
   return Array.from(data.files).filter((file) => file.type.startsWith('image/'))
 }
 
-function reportImageError(options: ImageOptions, error: unknown, file: File): void {
-  if (options.onImageSaveError) options.onImageSaveError(error, file)
+function reportImageError(
+  onImageSaveError: ImageOptions['onImageSaveError'],
+  error: unknown,
+  file: File,
+): void {
+  if (onImageSaveError) onImageSaveError(error, file)
   else console.error('[meowdown] failed to save pasted image:', error)
 }
 
 async function insertSavedImages(
   view: EditorView,
   files: File[],
-  options: ImageOptions & { onImagePaste: NonNullable<ImageOptions['onImagePaste']> },
+  onImagePaste: NonNullable<ImageOptions['onImagePaste']>,
+  onImageSaveError: ImageOptions['onImageSaveError'],
   at?: number,
 ): Promise<void> {
   let position = at
   for (const file of files) {
     let saved: string | undefined
     try {
-      saved = await options.onImagePaste(file)
+      saved = await onImagePaste(file)
     } catch (error) {
-      reportImageError(options, error, file)
+      reportImageError(onImageSaveError, error, file)
       continue
     }
     if (!saved || view.isDestroyed) continue
@@ -126,7 +131,7 @@ function createImageInputPlugin(options: ImageOptions): Plugin {
         const files = imageFiles(event.clipboardData)
         const onImagePaste = options.onImagePaste
         if (files.length === 0 || !onImagePaste) return false
-        void insertSavedImages(view, files, { ...options, onImagePaste })
+        void insertSavedImages(view, files, onImagePaste, options.onImageSaveError)
         return true
       },
       handleDrop: (view, event) => {
@@ -134,7 +139,7 @@ function createImageInputPlugin(options: ImageOptions): Plugin {
         const onImagePaste = options.onImagePaste
         if (files.length === 0 || !onImagePaste) return false
         const drop = view.posAtCoords({ left: event.clientX, top: event.clientY })
-        void insertSavedImages(view, files, { ...options, onImagePaste }, drop?.pos)
+        void insertSavedImages(view, files, onImagePaste, options.onImageSaveError, drop?.pos)
         return true
       },
     },
