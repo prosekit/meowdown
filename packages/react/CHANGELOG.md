@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://github.com/prosekit/meowdown/compare/react-v0.6.0...react-v0.7.0) (2026-06-15)
+
+
+### Features
+
+* **react:** stop re-exporting core ([#41](https://github.com/prosekit/meowdown/issues/41)) ([ecac81a](https://github.com/prosekit/meowdown/commit/ecac81a7a3df53769c71a13c88dac21736d2d3a0))
+
+
+### Bug Fixes
+
+* scope placeholder to empty doc ([#38](https://github.com/prosekit/meowdown/issues/38)) ([4bbdf19](https://github.com/prosekit/meowdown/commit/4bbdf19f2dc338c44c82a7381c5485c81e60d8b6))
+
 ## [0.6.0](https://github.com/prosekit/meowdown/compare/react-v0.5.0...react-v0.6.0) (2026-06-15)
 
 

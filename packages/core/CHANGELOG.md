@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://github.com/prosekit/meowdown/compare/core-v0.5.0...core-v0.7.0) (2026-06-15)
+
+
+### Features
+
+* **core:** drop the Mod-Alt-N heading shortcuts ([#40](https://github.com/prosekit/meowdown/issues/40)) ([d188bf1](https://github.com/prosekit/meowdown/commit/d188bf1b8b227f997abeb8a702f4cb25e2d6deee))
+
+
+### Bug Fixes
+
+* scope placeholder to empty doc ([#38](https://github.com/prosekit/meowdown/issues/38)) ([4bbdf19](https://github.com/prosekit/meowdown/commit/4bbdf19f2dc338c44c82a7381c5485c81e60d8b6))
+
 ## [0.5.0](https://github.com/prosekit/meowdown/compare/core-v0.4.0...core-v0.5.0) (2026-06-15)
 
 
