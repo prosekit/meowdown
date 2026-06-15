@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/prosekit/meowdown/compare/react-v0.7.0...react-v0.8.0) (2026-06-15)
+
+
+### Features
+
+* **react:** add table handle ([#45](https://github.com/prosekit/meowdown/issues/45)) ([30b78af](https://github.com/prosekit/meowdown/commit/30b78afadf828434dd66fe9987ede8b0742d92ed))
+
+
+### Bug Fixes
+
+* **core:** run image drop handler ([#43](https://github.com/prosekit/meowdown/issues/43)) ([fb3fd9b](https://github.com/prosekit/meowdown/commit/fb3fd9b38d2200e7167298c7a7ac186e76849d25))
+
 ## [0.7.0](https://github.com/prosekit/meowdown/compare/react-v0.6.0...react-v0.7.0) (2026-06-15)
 
 

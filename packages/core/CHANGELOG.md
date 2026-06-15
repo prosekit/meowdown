@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/prosekit/meowdown/compare/core-v0.7.0...core-v0.8.0) (2026-06-15)
+
+
+### Bug Fixes
+
+* **core:** run image drop handler ([#43](https://github.com/prosekit/meowdown/issues/43)) ([fb3fd9b](https://github.com/prosekit/meowdown/commit/fb3fd9b38d2200e7167298c7a7ac186e76849d25))
+
 ## [0.7.0](https://github.com/prosekit/meowdown/compare/core-v0.5.0...core-v0.7.0) (2026-06-15)
 
 
