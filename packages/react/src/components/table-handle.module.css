@@ -56,6 +56,7 @@
   background: light-dark(#fff, #18181b);
   color: color-mix(in oklab, var(--meowdown-muted) 50%, transparent);
   cursor: grab;
+  outline: none;
   overflow: clip;
   transition: background-color 100ms;
 
@@ -81,6 +82,7 @@
   overscroll-behavior: contain;
   white-space: nowrap;
   user-select: none;
+  outline: none;
   border: 1px solid var(--meowdown-border);
   border-radius: 0.75rem;
   background: light-dark(#fff, #18181b);
