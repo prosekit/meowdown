@@ -100,7 +100,7 @@ export interface EditorProps {
   wrapperClassName?: string
 
   /** Imperative handle for the editor. */
-  ref?: Ref<EditorHandle>
+  handleRef?: Ref<EditorHandle>
 
   /** Nodes rendered inside the editor's ProseKit context (rich modes only). */
   children?: ReactNode
@@ -121,13 +121,13 @@ export function MeowdownEditor({
   spellCheck,
   editorClassName,
   wrapperClassName,
-  ref,
+  handleRef,
   children,
 }: EditorProps) {
   // Handle of whichever editor is currently mounted.
   const childRef = useRef<EditorHandle>(null)
 
-  useImperativeHandle(ref, () => {
+  useImperativeHandle(handleRef, () => {
     function getMarkdown(): string {
       return childRef.current?.getMarkdown() ?? ''
     }

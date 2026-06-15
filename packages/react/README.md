@@ -17,7 +17,7 @@ export function App() {
 
   return (
     <MeowdownEditor
-      ref={ref}
+      handleRef={ref}
       mode="focus"
       initialMarkdown="# Hello"
       onDocChange={handleDocChange}
@@ -50,7 +50,7 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
 - `spellCheck?: boolean`: toggles the browser's native spell checking in the rich modes. Defaults to the browser's behavior. Ignored in source mode.
 - `editorClassName?: string`: class on the editable root (the contenteditable). Rich modes only.
 - `wrapperClassName?: string`: class on the outer `div.meowdown` wrapper.
-- `ref?: Ref<EditorHandle>`
+- `handleRef?: Ref<EditorHandle>`
 - `children?: ReactNode`: rendered inside the editor's ProseKit context, so children can call `useEditor()`. Only rendered in the rich modes; source mode ignores them.
 
 ### `useEditor`
@@ -63,7 +63,7 @@ Re-exported from `@meowdown/core`. `checkRoundTrip(markdown)` returns `'exact' |
 
 ### `EditorHandle`
 
-Imperative handle for the editor, attached via `ref`.
+Imperative handle for the editor, attached via `handleRef`.
 
 - `getMarkdown(): string`: serializes the current document to Markdown. Can be expensive on large documents; call it on demand (e.g. throttled) instead of on every change.
 - `setMarkdown(markdown: string): void`: replaces the whole document as a single undoable edit.
