@@ -9,7 +9,6 @@ import { defineBlockquote } from '@prosekit/extensions/blockquote'
 import { defineCodeBlock } from '@prosekit/extensions/code-block'
 import { defineDoc } from '@prosekit/extensions/doc'
 import { defineGapCursor } from '@prosekit/extensions/gap-cursor'
-import { defineHeading } from '@prosekit/extensions/heading'
 import { defineHorizontalRule } from '@prosekit/extensions/horizontal-rule'
 import { defineList } from '@prosekit/extensions/list'
 import { defineModClickPrevention } from '@prosekit/extensions/mod-click-prevention'
@@ -18,7 +17,7 @@ import { defineText } from '@prosekit/extensions/text'
 import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
-import { defineHeadingShortcuts } from './heading-shortcuts.ts'
+import { defineHeading } from './heading.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
@@ -44,7 +43,6 @@ function defineEditorExtensionImpl() {
     defineCodeBlockSyntaxHighlight(),
     defineInlineMarkPlugin(),
     defineInlineToggle(),
-    defineHeadingShortcuts(),
 
     // others
     defineBaseKeymap(),

@@ -18,15 +18,31 @@ describe('heading shortcuts', () => {
       await userEvent.keyboard(`{${mod}>}${level}{/${mod}}`)
       expect(docToMarkdown(fixture.doc)).toBe(`${'#'.repeat(level)} title\n`)
     })
-
-    it(`Mod-Alt-${level} sets heading ${level}`, async () => {
-      using fixture = setupFixture()
-      fixture.set(fixture.n.doc(fixture.n.paragraph('title<a>')))
-      fixture.view.focus()
-      await userEvent.keyboard(`{${mod}>}{Alt>}${level}{/Alt}{/${mod}}`)
-      expect(docToMarkdown(fixture.doc)).toBe(`${'#'.repeat(level)} title\n`)
-    })
   }
+
+  it('toggles a heading back off with a second Mod-1', async () => {
+    using fixture = setupFixture()
+    fixture.set(fixture.n.doc(fixture.n.heading({ level: 1 }, 'title<a>')))
+    fixture.view.focus()
+    await userEvent.keyboard(`{${mod}>}1{/${mod}}`)
+    expect(docToMarkdown(fixture.doc)).toBe('title\n')
+  })
+
+  it('does not bind Mod-Alt-1 (dropped in favor of Mod-1)', async () => {
+    using fixture = setupFixture()
+    fixture.set(fixture.n.doc(fixture.n.paragraph('title<a>')))
+    fixture.view.focus()
+    await userEvent.keyboard(`{${mod}>}{Alt>}1{/Alt}{/${mod}}`)
+    expect(docToMarkdown(fixture.doc)).toBe('title\n')
+  })
+
+  it('turns a heading back into a paragraph on Backspace at its start', async () => {
+    using fixture = setupFixture()
+    fixture.set(fixture.n.doc(fixture.n.heading({ level: 1 }, '<a>title')))
+    fixture.view.focus()
+    await userEvent.keyboard('{Backspace}')
+    expect(docToMarkdown(fixture.doc)).toBe('title\n')
+  })
 })
 
 describe('inline toggle shortcuts', () => {
