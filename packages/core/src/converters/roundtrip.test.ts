@@ -1,4 +1,5 @@
 import { createEditor } from '@prosekit/core'
+import dedent from 'dedent'
 import { describe, expect, it } from 'vitest'
 
 import { defineEditorExtension } from '../extensions/extension.ts'
@@ -24,19 +25,43 @@ describe('markdown round-trip is byte-identical', () => {
     // Task lists (GFM `Task` / `TaskMarker`)
     '- [ ] todo',
     '- [x] done',
-    '- [ ] todo\n- [x] done\n- [ ] another',
-    '- [x] done\n- plain item\n- [ ] todo',
-    '- [ ] parent\n  - [x] child',
+    dedent`
+      - [ ] todo
+      - [x] done
+      - [ ] another
+    `,
+    dedent`
+      - [x] done
+      - plain item
+      - [ ] todo
+    `,
+    dedent`
+      - [ ] parent
+        - [x] child
+    `,
     '- [ ]  double-spaced text',
     // Task marker inside an ordered list has no `task` list kind to map to;
     // the marker survives as literal paragraph text instead.
     '1. [x] done',
     // Tight lists stay tight
-    '- a\n- b',
-    '- parent\n  - child',
-    '1. one\n1. two',
+    dedent`
+      - a
+      - b
+    `,
+    dedent`
+      - parent
+        - child
+    `,
+    dedent`
+      1. one
+      1. two
+    `,
     // A genuinely loose item (two blocks) keeps its blank line
-    '- a\n\n  second paragraph',
+    dedent`
+      - a
+
+        second paragraph
+    `,
     // Tags are plain text to the converters
     'hello #meow',
     // `#tag` at line start is NOT a heading (no space after `#`)
@@ -49,6 +74,23 @@ describe('markdown round-trip is byte-identical', () => {
     '- [ ] [[note]] item',
     '> [[note]] quoted',
     '[[note with spaces]] and #tag',
+    // Tables, including empty and partially-empty cells. The serializer writes
+    // empty cells unpadded (`|  |`), so these stay unaligned to match its bytes.
+    dedent`
+      | a | b |
+      | --- | --- |
+      | 1 | 2 |
+    `,
+    dedent`
+      |  |  |  |
+      | --- | --- | --- |
+      |  |  |  |
+    `,
+    dedent`
+      | a |  | c |
+      | --- | --- | --- |
+      |  | b |  |
+    `,
   ]
 
   for (const markdown of cases) {
