@@ -84,6 +84,9 @@ export interface EditorProps {
    */
   placeholder?: PlaceholderOptions['placeholder']
 
+  /** Makes the editor read-only, in both the rich and source modes. */
+  readOnly?: boolean
+
   /**
    * Enables the browser's native spell checking in the rich modes. Defaults
    * to the browser's behavior. Ignored in source mode.
@@ -114,6 +117,7 @@ export function Editor({
   onImagePaste,
   onImageSaveError,
   placeholder,
+  readOnly,
   spellCheck,
   editorClassName,
   wrapperClassName,
@@ -170,7 +174,12 @@ export function Editor({
   return (
     <div className={clsx('meowdown', wrapperClassName)}>
       {mode === 'source' ? (
-        <CodeMirrorEditor ref={childRef} initialMarkdown={seedMarkdown} onDocChange={onDocChange} />
+        <CodeMirrorEditor
+          ref={childRef}
+          initialMarkdown={seedMarkdown}
+          onDocChange={onDocChange}
+          readOnly={readOnly}
+        />
       ) : (
         <ProseKitEditor
           ref={childRef}
@@ -184,6 +193,7 @@ export function Editor({
           onImagePaste={onImagePaste}
           onImageSaveError={onImageSaveError}
           placeholder={placeholder}
+          readOnly={readOnly}
           spellCheck={spellCheck}
           editorClassName={editorClassName}
         >

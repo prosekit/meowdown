@@ -81,6 +81,9 @@ export interface ProseKitEditorProps {
   /** Placeholder text for empty blocks. See `EditorProps.placeholder`. */
   placeholder?: PlaceholderOptions['placeholder']
 
+  /** Makes the editor read-only. See `EditorProps.readOnly`. */
+  readOnly?: boolean
+
   /** Enables or disables spell checking in the editor. */
   spellCheck?: boolean
 
@@ -105,6 +108,7 @@ export function ProseKitEditor({
   onImagePaste,
   onImageSaveError,
   placeholder,
+  readOnly,
   spellCheck,
   editorClassName,
   ref,
@@ -178,6 +182,7 @@ export function ProseKitEditor({
         onImagePaste={onImagePaste}
         onImageSaveError={onImageSaveError}
         placeholder={placeholder}
+        readOnly={readOnly}
       />
       <BlockHandle />
       <DropIndicator />

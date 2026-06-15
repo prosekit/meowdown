@@ -2,6 +2,7 @@ import {
   defineImages,
   defineMarkMode,
   definePlaceholder,
+  defineReadonly,
   defineWikilinkClickHandler,
   type ImageOptions,
   type MarkMode,
@@ -20,6 +21,7 @@ export interface EditorExtensionsProps {
   onImagePaste?: ImageOptions['onImagePaste']
   onImageSaveError?: ImageOptions['onImageSaveError']
   placeholder?: PlaceholderOptions['placeholder']
+  readOnly?: boolean
 }
 
 // A leaf that renders nothing and holds every reactive `useExtension` call (each
@@ -33,8 +35,11 @@ export function EditorExtensions({
   onImagePaste,
   onImageSaveError,
   placeholder,
+  readOnly,
 }: EditorExtensionsProps): null {
   useExtension(useMemo(() => defineMarkMode(markMode), [markMode]))
+
+  useExtension(useMemo(() => (readOnly ? defineReadonly() : null), [readOnly]))
 
   useExtension(
     useMemo(() => (onDocChange ? defineDocChangeHandler(onDocChange) : null), [onDocChange]),

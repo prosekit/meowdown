@@ -238,6 +238,29 @@ describe('Editor', () => {
     await expect.element(placeholder).not.toBeInTheDocument()
   })
 
+  it('makes the rich editor read-only and restores it when toggled off', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<Editor ref={ref} initialMarkdown="Hi" readOnly />)
+    await expect.element(screen.getByText('Hi')).toBeInTheDocument()
+    await pmRoot.click()
+    await userEvent.keyboard('X')
+    expect(ref.current?.getMarkdown()).toBe('Hi\n')
+
+    await screen.rerender(<Editor ref={ref} initialMarkdown="Hi" readOnly={false} />)
+    await pmRoot.click()
+    await userEvent.keyboard('Y')
+    expect(ref.current?.getMarkdown()).toContain('Y')
+  })
+
+  it('makes the source editor read-only', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<Editor ref={ref} mode="source" initialMarkdown="Hi" readOnly />)
+    await expect.element(cmContent).toHaveTextContent('Hi')
+    await cmContent.click()
+    await userEvent.keyboard('X')
+    expect(ref.current?.getMarkdown()).toBe('Hi')
+  })
+
   it('exposes the underlying editor on the handle in rich modes only', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(<Editor ref={ref} initialMarkdown="Hi" />)

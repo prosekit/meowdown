@@ -39,6 +39,7 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
 - `onImagePaste?: (file: File) => Promise<string | undefined>`: persists a pasted or dropped image file and returns its markdown `src` (or `undefined` to decline). Pass a stable function. Ignored in source mode.
 - `onImageSaveError?: (error: Error, file: File) => void`: called when `onImagePaste` throws. Defaults to `console.error`. Ignored in source mode.
 - `placeholder?: string | ((state) => string)`: placeholder text shown in an empty block. Pass a stable function. Ignored in source mode.
+- `readOnly?: boolean`: makes the editor read-only, in both the rich and source modes.
 - `spellCheck?: boolean`: toggles the browser's native spell checking in the rich modes. Defaults to the browser's behavior. Ignored in source mode.
 - `editorClassName?: string`: class on the editable root (the contenteditable). Rich modes only.
 - `wrapperClassName?: string`: class on the outer `div.meowdown` wrapper.

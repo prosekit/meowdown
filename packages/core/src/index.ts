@@ -12,6 +12,7 @@ export {
 export { defineImages, type ImageOptions } from './extensions/images.ts'
 export { EDITOR_KEY_BINDINGS } from './extensions/key-bindings.ts'
 export { definePlaceholder, type PlaceholderOptions } from '@prosekit/extensions/placeholder'
+export { defineReadonly } from '@prosekit/extensions/readonly'
 export { codeBlockLanguages } from './extensions/code-block-languages.ts'
 export { docToMarkdown } from './converters/pm-to-md.ts'
 export { markdownToDoc } from './converters/md-to-pm.ts'
