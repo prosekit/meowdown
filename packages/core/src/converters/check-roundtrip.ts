@@ -1,7 +1,3 @@
-import { createEditor } from '@prosekit/core'
-
-import { defineEditorExtension, type TypedEditor } from '../extensions/extension.ts'
-
 import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
 
@@ -13,13 +9,6 @@ import { docToMarkdown } from './pm-to-md.ts'
  */
 export type RoundTripFidelity = 'exact' | 'normalizing' | 'lossy'
 
-let sharedEditor: TypedEditor | undefined
-
-function getSharedEditor(): TypedEditor {
-  sharedEditor ??= createEditor({ extension: defineEditorExtension() })
-  return sharedEditor
-}
-
 function trimTrailingNewlines(text: string): string {
   return text.replace(/\n+$/u, '')
 }
@@ -30,7 +19,7 @@ function nonBlankLines(text: string): string[] {
 
 /** Classify how `markdown` survives the editor's parse-then-serialize round trip. */
 export function checkRoundTrip(markdown: string): RoundTripFidelity {
-  const serialized = docToMarkdown(markdownToDoc(getSharedEditor(), markdown))
+  const serialized = docToMarkdown(markdownToDoc(markdown))
   if (trimTrailingNewlines(serialized) === trimTrailingNewlines(markdown)) return 'exact'
   const before = nonBlankLines(markdown)
   const after = nonBlankLines(serialized)

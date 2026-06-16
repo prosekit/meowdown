@@ -165,17 +165,17 @@ describe('docToMarkdown', () => {
   it('round-trips sampleContent (doc → md → doc)', () => {
     const node = docFromJSON(sampleContent)
     const md = docToMarkdown(node)
-    const back: NodeJSON = markdownToDoc(editor, md).toJSON() as NodeJSON
+    const back: NodeJSON = markdownToDoc(md).toJSON() as NodeJSON
     expect(back).toEqual(sampleContent)
   })
 
   it('round-trips sampleContentMarkdown (md → doc → md → doc)', () => {
     // md → doc (one).
-    const pm1 = markdownToDoc(editor, sampleContentMarkdown)
+    const pm1 = markdownToDoc(sampleContentMarkdown)
     // doc → md → doc; the markdown text may differ in whitespace, but the
     // parsed structure should be stable.
     const md = docToMarkdown(pm1)
-    const pm2 = markdownToDoc(editor, md)
+    const pm2 = markdownToDoc(md)
     expect(pm2.toJSON()).toEqual(pm1.toJSON())
   })
 })

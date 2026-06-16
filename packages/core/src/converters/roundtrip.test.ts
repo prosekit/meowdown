@@ -1,16 +1,11 @@
-import { createEditor } from '@prosekit/core'
 import dedent from 'dedent'
 import { describe, expect, it } from 'vitest'
-
-import { defineEditorExtension } from '../extensions/extension.ts'
 
 import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
 
-const editor = createEditor({ extension: defineEditorExtension() })
-
 function roundtrip(markdown: string): string {
-  return docToMarkdown(markdownToDoc(editor, markdown))
+  return docToMarkdown(markdownToDoc(markdown))
 }
 
 /**

@@ -1,25 +1,32 @@
 import type { TreeCursor } from '@lezer/common'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
-import type { TypedEditor } from '../extensions/extension.ts'
+import { getNodeBuilders, type TypedNodeBuilders } from '../extensions/schema.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 import { gfmBlockOnlyParser } from '../lezer/parser.ts'
 
 /**
- * Convert a markdown string into a ProseMirror document node, built against
- * the schema of the given editor.
+ * Convert a markdown string into a ProseMirror document node.
  *
- * The output follows the extension set defined in `./prosekit.ts` (doc,
- * paragraph, text, heading, blockquote, list, codeBlock, table, tableRow,
+ * By default the document is built with the shared schema's node builders, so
+ * no editor is required. When the result will be loaded into a specific editor,
+ * pass that editor's `nodes` so the document uses the editor's own schema
+ * instance and can be inserted without a JSON round trip.
+ *
+ * The output follows the extension set defined in `../extensions/extension.ts`
+ * (doc, paragraph, text, heading, blockquote, list, codeBlock, table, tableRow,
  * tableCell, tableHeaderCell, horizontalRule). The function does not produce
- * inline marks because `prosekit.ts` doesn't register any - emphasis / link /
- * inline-code characters survive as literal text.
+ * inline marks because the markdown stays literal text - emphasis / link /
+ * inline-code characters survive verbatim.
  */
-export function markdownToDoc(editor: TypedEditor, markdown: string): ProseMirrorNode {
+export function markdownToDoc(
+  markdown: string,
+  nodes: TypedNodeBuilders = getNodeBuilders(),
+): ProseMirrorNode {
   const tree = gfmBlockOnlyParser.parse(markdown)
   const cursor = tree.cursor()
-  const blocks = collectBlocks(editor, cursor, markdown)
-  return editor.nodes.doc(blocks)
+  const blocks = collectBlocks(nodes, cursor, markdown)
+  return nodes.doc(blocks)
 }
 
 /**
@@ -27,62 +34,70 @@ export function markdownToDoc(editor: TypedEditor, markdown: string): ProseMirro
  * and flattening any node converter that returns multiple siblings
  * (lists are the main case).
  */
-function collectBlocks(editor: TypedEditor, cursor: TreeCursor, text: string): ProseMirrorNode[] {
+function collectBlocks(
+  nodes: TypedNodeBuilders,
+  cursor: TreeCursor,
+  text: string,
+): ProseMirrorNode[] {
   const out: ProseMirrorNode[] = []
   if (!cursor.firstChild()) return out
   do {
-    out.push(...convertBlock(editor, cursor, text))
+    out.push(...convertBlock(nodes, cursor, text))
   } while (cursor.nextSibling())
   cursor.parent()
   return out
 }
 
-function convertBlock(editor: TypedEditor, cursor: TreeCursor, text: string): ProseMirrorNode[] {
+function convertBlock(
+  nodes: TypedNodeBuilders,
+  cursor: TreeCursor,
+  text: string,
+): ProseMirrorNode[] {
   switch (cursor.type.id) {
     case LEZER_NODE_IDS.ATXHeading1:
-      return [convertHeading(editor, cursor, text, 1)]
+      return [convertHeading(nodes, cursor, text, 1)]
     case LEZER_NODE_IDS.ATXHeading2:
-      return [convertHeading(editor, cursor, text, 2)]
+      return [convertHeading(nodes, cursor, text, 2)]
     case LEZER_NODE_IDS.ATXHeading3:
-      return [convertHeading(editor, cursor, text, 3)]
+      return [convertHeading(nodes, cursor, text, 3)]
     case LEZER_NODE_IDS.ATXHeading4:
-      return [convertHeading(editor, cursor, text, 4)]
+      return [convertHeading(nodes, cursor, text, 4)]
     case LEZER_NODE_IDS.ATXHeading5:
-      return [convertHeading(editor, cursor, text, 5)]
+      return [convertHeading(nodes, cursor, text, 5)]
     case LEZER_NODE_IDS.ATXHeading6:
-      return [convertHeading(editor, cursor, text, 6)]
+      return [convertHeading(nodes, cursor, text, 6)]
     case LEZER_NODE_IDS.SetextHeading1:
-      return [convertHeading(editor, cursor, text, 1)]
+      return [convertHeading(nodes, cursor, text, 1)]
     case LEZER_NODE_IDS.SetextHeading2:
-      return [convertHeading(editor, cursor, text, 2)]
+      return [convertHeading(nodes, cursor, text, 2)]
     case LEZER_NODE_IDS.Paragraph:
-      return [convertParagraph(editor, cursor, text)]
+      return [convertParagraph(nodes, cursor, text)]
     case LEZER_NODE_IDS.Blockquote:
-      return [convertBlockquote(editor, cursor, text)]
+      return [convertBlockquote(nodes, cursor, text)]
     case LEZER_NODE_IDS.BulletList:
-      return convertList(editor, cursor, text, 'bullet', 1)
+      return convertList(nodes, cursor, text, 'bullet', 1)
     case LEZER_NODE_IDS.OrderedList:
-      return convertOrderedList(editor, cursor, text)
+      return convertOrderedList(nodes, cursor, text)
     case LEZER_NODE_IDS.FencedCode:
     case LEZER_NODE_IDS.CodeBlock:
-      return [convertCodeBlock(editor, cursor, text)]
+      return [convertCodeBlock(nodes, cursor, text)]
     case LEZER_NODE_IDS.HorizontalRule:
-      return [editor.nodes.horizontalRule()]
+      return [nodes.horizontalRule()]
     case LEZER_NODE_IDS.Table:
-      return [convertTable(editor, cursor, text)]
+      return [convertTable(nodes, cursor, text)]
     case LEZER_NODE_IDS.Task:
       // Reached only for tasks inside ordered lists (bullet lists convert
       // the Task in `convertListItem`). The flat-list schema has a single
       // `kind`, so an ordered item cannot also be a task - keep the
       // `[x]` marker as literal paragraph text so it round-trips verbatim.
-      return [convertParagraph(editor, cursor, text)]
+      return [convertParagraph(nodes, cursor, text)]
     default:
       return []
   }
 }
 
 function convertHeading(
-  editor: TypedEditor,
+  nodes: TypedNodeBuilders,
   cursor: TreeCursor,
   text: string,
   level: number,
@@ -108,28 +123,36 @@ function convertHeading(
   }
 
   const content = text.slice(contentStart, contentEnd).trim()
-  return editor.nodes.heading({ level }, content)
+  return nodes.heading({ level }, content)
 }
 
-function convertParagraph(editor: TypedEditor, cursor: TreeCursor, text: string): ProseMirrorNode {
+function convertParagraph(
+  nodes: TypedNodeBuilders,
+  cursor: TreeCursor,
+  text: string,
+): ProseMirrorNode {
   const content = text.slice(cursor.from, cursor.to)
-  return editor.nodes.paragraph(content)
+  return nodes.paragraph(content)
 }
 
-function convertBlockquote(editor: TypedEditor, cursor: TreeCursor, text: string): ProseMirrorNode {
+function convertBlockquote(
+  nodes: TypedNodeBuilders,
+  cursor: TreeCursor,
+  text: string,
+): ProseMirrorNode {
   const content: ProseMirrorNode[] = []
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) continue
-      content.push(...convertBlock(editor, cursor, text))
+      content.push(...convertBlock(nodes, cursor, text))
     } while (cursor.nextSibling())
     cursor.parent()
   }
-  return editor.nodes.blockquote(content)
+  return nodes.blockquote(content)
 }
 
 function convertList(
-  editor: TypedEditor,
+  nodes: TypedNodeBuilders,
   cursor: TreeCursor,
   text: string,
   kind: 'bullet' | 'ordered',
@@ -139,7 +162,7 @@ function convertList(
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.ListItem) {
-        items.push(convertListItem(editor, cursor, text, kind, order))
+        items.push(convertListItem(nodes, cursor, text, kind, order))
       }
     } while (cursor.nextSibling())
     cursor.parent()
@@ -148,7 +171,7 @@ function convertList(
 }
 
 function convertOrderedList(
-  editor: TypedEditor,
+  nodes: TypedNodeBuilders,
   cursor: TreeCursor,
   text: string,
 ): ProseMirrorNode[] {
@@ -167,11 +190,11 @@ function convertOrderedList(
     }
     cursor.parent()
   }
-  return convertList(editor, cursor, text, 'ordered', order)
+  return convertList(nodes, cursor, text, 'ordered', order)
 }
 
 function convertListItem(
-  editor: TypedEditor,
+  nodes: TypedNodeBuilders,
   cursor: TreeCursor,
   text: string,
   kind: 'bullet' | 'ordered',
@@ -183,16 +206,16 @@ function convertListItem(
     do {
       if (cursor.type.id === LEZER_NODE_IDS.ListMark) continue
       if (kind === 'bullet' && cursor.type.id === LEZER_NODE_IDS.Task) {
-        const task = convertTask(editor, cursor, text)
+        const task = convertTask(nodes, cursor, text)
         taskChecked = task.checked
         content.push(task.paragraph)
         continue
       }
-      content.push(...convertBlock(editor, cursor, text))
+      content.push(...convertBlock(nodes, cursor, text))
     } while (cursor.nextSibling())
     cursor.parent()
   }
-  return editor.nodes.list(
+  return nodes.list(
     {
       kind: taskChecked === null ? kind : 'task',
       order: kind === 'ordered' ? order : null,
@@ -215,7 +238,7 @@ interface ConvertedTask {
  * re-emitted by `docToMarkdown`'s `- [ ] ` marker, keeping any extra
  * whitespace byte-identical through a round-trip.
  */
-function convertTask(editor: TypedEditor, cursor: TreeCursor, text: string): ConvertedTask {
+function convertTask(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string): ConvertedTask {
   let checked = false
   let contentStart = cursor.from
   const contentEnd = cursor.to
@@ -230,11 +253,15 @@ function convertTask(editor: TypedEditor, cursor: TreeCursor, text: string): Con
   if (content.startsWith(' ')) content = content.slice(1)
   return {
     checked,
-    paragraph: content === '' ? editor.nodes.paragraph() : editor.nodes.paragraph(content),
+    paragraph: content === '' ? nodes.paragraph() : nodes.paragraph(content),
   }
 }
 
-function convertCodeBlock(editor: TypedEditor, cursor: TreeCursor, text: string): ProseMirrorNode {
+function convertCodeBlock(
+  nodes: TypedNodeBuilders,
+  cursor: TreeCursor,
+  text: string,
+): ProseMirrorNode {
   let language = ''
   let code = ''
   if (cursor.firstChild()) {
@@ -250,10 +277,10 @@ function convertCodeBlock(editor: TypedEditor, cursor: TreeCursor, text: string)
     } while (cursor.nextSibling())
     cursor.parent()
   }
-  return editor.nodes.codeBlock({ language }, code)
+  return nodes.codeBlock({ language }, code)
 }
 
-function convertTable(editor: TypedEditor, cursor: TreeCursor, text: string): ProseMirrorNode {
+function convertTable(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string): ProseMirrorNode {
   // The delimiter row (a `TableDelimiter` that is a direct child of `Table`)
   // is the only source that always encodes every column, so it drives the
   // column count. `@lezer/markdown` emits no `TableCell` for an empty cell, so
@@ -273,14 +300,14 @@ function convertTable(editor: TypedEditor, cursor: TreeCursor, text: string): Pr
     do {
       const id = cursor.type.id
       if (id === LEZER_NODE_IDS.TableHeader) {
-        rows.push(convertTableRow(editor, cursor, text, true, columnCount))
+        rows.push(convertTableRow(nodes, cursor, text, true, columnCount))
       } else if (id === LEZER_NODE_IDS.TableRow) {
-        rows.push(convertTableRow(editor, cursor, text, false, columnCount))
+        rows.push(convertTableRow(nodes, cursor, text, false, columnCount))
       }
     } while (cursor.nextSibling())
     cursor.parent()
   }
-  return editor.nodes.table(rows)
+  return nodes.table(rows)
 }
 
 function countDelimiterColumns(separator: string): number {
@@ -288,7 +315,7 @@ function countDelimiterColumns(separator: string): number {
 }
 
 function convertTableRow(
-  editor: TypedEditor,
+  nodes: TypedNodeBuilders,
   cursor: TreeCursor,
   text: string,
   isHeader: boolean,
@@ -312,8 +339,8 @@ function convertTableRow(
   }
 
   const cells = cellTexts.map((cellText) => {
-    const paragraph = editor.nodes.paragraph(cellText)
-    return isHeader ? editor.nodes.tableHeaderCell(paragraph) : editor.nodes.tableCell(paragraph)
+    const paragraph = nodes.paragraph(cellText)
+    return isHeader ? nodes.tableHeaderCell(paragraph) : nodes.tableCell(paragraph)
   })
-  return editor.nodes.tableRow(cells)
+  return nodes.tableRow(cells)
 }

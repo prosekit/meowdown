@@ -1,16 +1,11 @@
-import { createEditor } from '@prosekit/core'
 import dedent from 'dedent'
 import { describe, expect, it } from 'vitest'
-
-import { defineEditorExtension } from '../extensions/extension.ts'
 
 import { markdownToDoc } from './md-to-pm.ts'
 import { sampleContent, sampleContentMarkdown } from './sample-content.ts'
 
-const editor = createEditor({ extension: defineEditorExtension() })
-
 function tableShape(markdown: string): Array<Array<{ type: string; text: string }>> {
-  const table = markdownToDoc(editor, markdown).child(0)
+  const table = markdownToDoc(markdown).child(0)
   const rows: Array<Array<{ type: string; text: string }>> = []
   for (let r = 0; r < table.childCount; r++) {
     const row = table.child(r)
@@ -26,7 +21,7 @@ function tableShape(markdown: string): Array<Array<{ type: string; text: string 
 
 describe('markdownToDoc', () => {
   it('converts a heading', () => {
-    expect(markdownToDoc(editor, '# Hello').toJSON()).toEqual({
+    expect(markdownToDoc('# Hello').toJSON()).toEqual({
       type: 'doc',
       content: [
         {
@@ -39,7 +34,7 @@ describe('markdownToDoc', () => {
   })
 
   it('converts a plain paragraph', () => {
-    expect(markdownToDoc(editor, 'hello world').toJSON()).toEqual({
+    expect(markdownToDoc('hello world').toJSON()).toEqual({
       type: 'doc',
       content: [
         {
@@ -51,7 +46,7 @@ describe('markdownToDoc', () => {
   })
 
   it('converts a blockquote', () => {
-    expect(markdownToDoc(editor, '> quoted text').toJSON()).toEqual({
+    expect(markdownToDoc('> quoted text').toJSON()).toEqual({
       type: 'doc',
       content: [
         {
@@ -72,7 +67,7 @@ describe('markdownToDoc', () => {
       - one
       - two
     `
-    expect(markdownToDoc(editor, md).toJSON()).toEqual({
+    expect(markdownToDoc(md).toJSON()).toEqual({
       type: 'doc',
       content: [
         {
@@ -104,7 +99,7 @@ describe('markdownToDoc', () => {
       5. five
       6. six
     `
-    expect(markdownToDoc(editor, md).toJSON()).toEqual({
+    expect(markdownToDoc(md).toJSON()).toEqual({
       type: 'doc',
       content: [
         {
@@ -132,7 +127,7 @@ describe('markdownToDoc', () => {
   })
 
   it('converts a task list item, keeping its text', () => {
-    expect(markdownToDoc(editor, '- [ ] todo').toJSON()).toEqual({
+    expect(markdownToDoc('- [ ] todo').toJSON()).toEqual({
       type: 'doc',
       content: [
         {
@@ -150,7 +145,7 @@ describe('markdownToDoc', () => {
   })
 
   it('marks a checked task list item', () => {
-    expect(markdownToDoc(editor, '- [x] done').toJSON()).toEqual({
+    expect(markdownToDoc('- [x] done').toJSON()).toEqual({
       type: 'doc',
       content: [
         {
@@ -172,7 +167,7 @@ describe('markdownToDoc', () => {
       - [x] done
       - plain
     `
-    const doc = markdownToDoc(editor, md).toJSON() as {
+    const doc = markdownToDoc(md).toJSON() as {
       content: Array<{ attrs: { kind: string; checked: boolean } }>
     }
     expect(doc.content.map((item) => item.attrs.kind)).toEqual(['task', 'bullet'])
@@ -182,7 +177,7 @@ describe('markdownToDoc', () => {
   it('keeps a task marker in an ordered list as literal text', () => {
     // The flat-list schema has a single `kind`, so an ordered item cannot
     // also be a task; the marker stays in the text and round-trips verbatim.
-    expect(markdownToDoc(editor, '1. [x] done').toJSON()).toEqual({
+    expect(markdownToDoc('1. [x] done').toJSON()).toEqual({
       type: 'doc',
       content: [
         {
@@ -200,7 +195,7 @@ describe('markdownToDoc', () => {
   })
 
   it('converts a fenced code block with language', () => {
-    expect(markdownToDoc(editor, '```js\nconsole.log(1)\n```').toJSON()).toEqual({
+    expect(markdownToDoc('```js\nconsole.log(1)\n```').toJSON()).toEqual({
       type: 'doc',
       content: [
         {
@@ -213,7 +208,7 @@ describe('markdownToDoc', () => {
   })
 
   it('converts a horizontal rule', () => {
-    expect(markdownToDoc(editor, '---').toJSON()).toEqual({
+    expect(markdownToDoc('---').toJSON()).toEqual({
       type: 'doc',
       content: [{ type: 'horizontalRule' }],
     })
@@ -225,7 +220,7 @@ describe('markdownToDoc', () => {
       |---|---|
       | 1 | 2 |
     `
-    expect(markdownToDoc(editor, md).toJSON()).toEqual({
+    expect(markdownToDoc(md).toJSON()).toEqual({
       type: 'doc',
       content: [
         {
@@ -348,6 +343,6 @@ describe('markdownToDoc', () => {
   })
 
   it('round-trips the full sample document', () => {
-    expect(markdownToDoc(editor, sampleContentMarkdown).toJSON()).toEqual(sampleContent)
+    expect(markdownToDoc(sampleContentMarkdown).toJSON()).toEqual(sampleContent)
   })
 })
