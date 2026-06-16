@@ -21,7 +21,8 @@ const mixedParagraph =
 const longParagraph = (mixedParagraph + ' ').repeat(50)
 
 describe('inlineTextToMarkChunks', () => {
-  const markBuilders = createMarkBuilders<EditorExtension>(defineEditorExtension().schema!)
+  const schema = defineEditorExtension().schema!
+  const markBuilders = createMarkBuilders<EditorExtension>(schema)
 
   bench('plain', () => {
     inlineTextToMarkChunks(markBuilders, plainParagraph)

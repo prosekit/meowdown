@@ -35,7 +35,8 @@ describe('inlineTextToMarkChunks', () => {
   let markBuilders: TypedMarkBuilders
 
   beforeAll(() => {
-    markBuilders = createMarkBuilders<EditorExtension>(defineEditorExtension().schema!)
+    const schema = defineEditorExtension().schema!
+    markBuilders = createMarkBuilders<EditorExtension>(schema)
   })
 
   it('plain text returns no chunks (no marks anywhere)', () => {
