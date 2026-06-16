@@ -51,6 +51,21 @@ export function inlineTextToMarkChunks(
   return out
 }
 
+/**
+ * Derive the `href` for a bare autolink from its visible text:
+ *
+ * - a URL with a scheme is used as-is
+ * - an email becomes `mailto:`
+ * - a `www.` URL gets an implied `https://`
+ * - anything else returns `undefined`
+ */
+function getAutolinkHref(urlText: string): string | undefined {
+  if (/^[a-z][a-z0-9+.-]*:/i.test(urlText)) return urlText
+  if (/^[^\s@]+@[^\s@]+$/.test(urlText)) return `mailto:${urlText}`
+  if (/^www\./i.test(urlText)) return `https://${urlText}`
+  return undefined
+}
+
 function walk(
   nodes: readonly InlineElement[],
   parentMarks: readonly Mark[],
@@ -67,6 +82,15 @@ function walk(
     }
     if (node.type === LEZER_NODE_IDS.Link || node.type === LEZER_NODE_IDS.Image) {
       walkLink(node, parentMarks, text, schema, out)
+    } else if (node.type === LEZER_NODE_IDS.URL) {
+      // A standalone `URL` node is a GFM autolink (the address part of a real
+      // `[text](url)` is handled inside `walkLink`, not here). Linkify the
+      // shapes we recognize; anything else keeps the muted `mdLinkUri`.
+      const href = getAutolinkHref(text.slice(node.from, node.to))
+      // TODO: replace the stringly-typed `schema.marks[name].create()` pattern
+      // in this file with typed mark creation threaded through `walk`.
+      const mark = href ? schema.marks.mdLinkText.create({ href }) : schema.marks.mdLinkUri.create()
+      emit(out, node.from, node.to, [...parentMarks, mark])
     } else {
       const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(node.type)
       const childMarks = maybeMarkName

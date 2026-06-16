@@ -53,6 +53,19 @@ describe('inlineMarkPlugin', () => {
     expect(linkText!.attrs.href).toBe('http://x.test')
   })
 
+  it('applies mdLinkText with a derived href on a bare autolink', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('visit https://example.com now'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'https://example.com')
+    const $pos = fixture.doc.resolve(pos + 1)
+    const linkText = $pos.marks().find((m) => m.type.name === 'mdLinkText')
+    expect(linkText).toBeTruthy()
+    expect(linkText!.attrs.href).toBe('https://example.com')
+  })
+
   it('marks `*foo*` inside headings as well', () => {
     using fixture = setupFixture()
     const { n } = fixture
