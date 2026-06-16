@@ -4,6 +4,10 @@ import { defineProject } from 'vitest/config'
 
 export default defineProject({
   plugins: [playwrightCommands()],
+  // Pre-bundle so the first lazy import in a test does not trigger a mid-run reload.
+  optimizeDeps: {
+    include: ['@prosekit/core/test'],
+  },
   test: {
     browser: {
       enabled: true,

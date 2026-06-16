@@ -1,10 +1,10 @@
 import { isApple } from '@prosekit/core'
+import { pasteText } from '@prosekit/core/test'
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
-import { pasteText } from '../testing/paste.ts'
 
 import { defineEmbedPaste, detectEmbedUrl } from './embed-paste.ts'
 import { defineImages } from './images.ts'
@@ -113,6 +113,16 @@ describe('paste a lone embed link', () => {
     pasteText(view, YT)
     expect(editor.state.doc.textContent).toBe(`const x = 1${YT}`)
     await expect.element(youtubeEmbed).not.toBeInTheDocument()
+  })
+
+  it('embeds over a selection that spans two blocks', async () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    useEmbedPaste(fixture)
+    fixture.set(n.doc(n.paragraph('one <a>two'), n.paragraph('three<b> four')))
+    pasteText(view, YT)
+    expect(editor.state.doc.textContent).toBe(`one ${EMBED} four`)
+    await expect.element(youtubeEmbed).toBeInTheDocument()
   })
 })
 

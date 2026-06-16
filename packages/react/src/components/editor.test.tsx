@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import { pasteText } from '@prosekit/core/test'
 import { useEditor } from '@prosekit/react'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
@@ -12,14 +13,6 @@ import type { EditorHandle } from './types.ts'
 const pmRoot = page.locate('.ProseMirror')
 const cmRoot = page.locate('.cm-editor')
 const cmContent = page.locate('[data-editor="codemirror"] .cm-content')
-
-function dispatchPaste(element: Element, text: string): void {
-  const clipboardData = new DataTransfer()
-  clipboardData.setData('text/plain', text)
-  element.dispatchEvent(
-    new ClipboardEvent('paste', { clipboardData, bubbles: true, cancelable: true }),
-  )
-}
 
 // Renders only when it sits inside the editor's ProseKit context; `useEditor`
 // throws otherwise.
@@ -259,9 +252,12 @@ describe('MeowdownEditor', () => {
   })
 
   it('embeds a pasted YouTube link by default', async () => {
-    await render(<MeowdownEditor resolveImageUrl={(src) => src} />)
+    const ref = createRef<EditorHandle>()
+    await render(<MeowdownEditor handleRef={ref} resolveImageUrl={(src) => src} />)
     await pmRoot.click()
-    dispatchPaste(pmRoot.element(), 'https://www.youtube.com/watch?v=aqz-KE-bpKQ')
+    const view = ref.current?.editor?.view
+    if (!view) throw new Error('editor not mounted')
+    pasteText(view, 'https://www.youtube.com/watch?v=aqz-KE-bpKQ')
     await expect
       .element(pmRoot.getByTestId('youtube-embed'))
       .toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ')
@@ -269,11 +265,14 @@ describe('MeowdownEditor', () => {
 
   it('does not embed a pasted link when embedPaste is off', async () => {
     const url = 'https://www.youtube.com/watch?v=aqz-KE-bpKQ'
+    const ref = createRef<EditorHandle>()
     const screen = await render(
-      <MeowdownEditor resolveImageUrl={(src) => src} embedPaste={false} />,
+      <MeowdownEditor handleRef={ref} resolveImageUrl={(src) => src} embedPaste={false} />,
     )
     await pmRoot.click()
-    dispatchPaste(pmRoot.element(), url)
+    const view = ref.current?.editor?.view
+    if (!view) throw new Error('editor not mounted')
+    pasteText(view, url)
     await expect.element(screen.getByText(url)).toBeInTheDocument()
     await expect.element(pmRoot.getByTestId('youtube-embed')).not.toBeInTheDocument()
   })
