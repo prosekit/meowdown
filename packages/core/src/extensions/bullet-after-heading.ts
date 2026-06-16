@@ -44,12 +44,7 @@ const bulletAfterHeadingOnEnter: Command = (state, dispatch) => {
 /**
  * "Type a title, press Return, start bullets." When this extension is applied,
  * pressing Enter at the end of the document's first heading (the title line)
- * drops the caret into a fresh empty bullet instead of a plain paragraph. A
- * heading anywhere else in the document is left to the default Enter.
- *
- * Not part of `defineEditorExtension`; the React package applies it via the
- * `bulletAfterHeading` prop (off by default). The high priority lets the command
- * run before the editor's default Enter so it can claim the end-of-heading case.
+ * drops the caret into a fresh empty bullet instead of a plain paragraph.
  */
 export function defineBulletAfterHeading(): PlainExtension {
   return withPriority(defineKeymap({ Enter: bulletAfterHeadingOnEnter }), Priority.high)

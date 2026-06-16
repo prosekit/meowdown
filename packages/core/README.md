@@ -61,7 +61,7 @@ Inline images (`![alt](src)`) stay literal text and render beneath their line as
 
 Pasting a lone tweet or YouTube link can auto-embed it. `defineEmbedPaste()` (or `@meowdown/react`'s `embedPaste` prop) rewrites the pasted link to `![](url)` so it renders as an embed; one undo turns the embed back into the raw link. It is not part of `defineEditorExtension`; add it explicitly.
 
-Pressing Enter at the end of the document's first heading (the title line) can start a fresh empty bullet on the next line instead of a plain paragraph. A heading anywhere else is left to the default Enter. `defineBulletAfterHeading()` binds this. It is not part of `defineEditorExtension`; add it explicitly.
+Pressing Enter at the end of the document's first heading (the title line) can start a fresh empty bullet on the next line instead of a plain paragraph. `defineBulletAfterHeading()` binds this. It is not part of `defineEditorExtension`; add it explicitly.
 
 ## License
 

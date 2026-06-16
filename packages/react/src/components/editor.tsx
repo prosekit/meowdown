@@ -91,9 +91,8 @@ export interface EditorProps {
 
   /**
    * Pressing Enter at the end of the document's first heading (the title line)
-   * starts a fresh empty bullet on the next line instead of a plain paragraph; a
-   * heading anywhere else is left to the default Enter. Off by default. Ignored
-   * in source mode.
+   * starts a fresh empty bullet on the next line instead of a plain paragraph.
+   * Off by default. Ignored in source mode.
    */
   bulletAfterHeading?: boolean
 
