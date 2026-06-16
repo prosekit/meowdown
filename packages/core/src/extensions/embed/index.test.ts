@@ -46,6 +46,11 @@ describe('embeds in the editor', () => {
     await expect
       .element(page.locate('.ProseMirror img[alt="cat"]'))
       .toHaveAttribute('src', 'https://example.com/cat.png')
+    // REVIEW: same as above
+    const pmRoot = page.locate('.ProseMirror')
+    const image = pmRoot.getByAltText('cat')
+    await expect.element(image).toHaveAttribute('src', 'https://example.com/cat.png')
+
     // No embed iframe is rendered for a plain image.
     await expect.element(page.locate('.ProseMirror iframe')).not.toBeInTheDocument()
   })
