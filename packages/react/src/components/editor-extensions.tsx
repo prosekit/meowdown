@@ -1,4 +1,5 @@
 import {
+  defineBulletAfterHeading,
   defineEmbedPaste,
   defineImages,
   defineMarkMode,
@@ -22,6 +23,7 @@ export interface EditorExtensionsProps {
   onImagePaste?: ImageOptions['onImagePaste']
   onImageSaveError?: ImageOptions['onImageSaveError']
   embedPaste?: boolean
+  bulletAfterHeading?: boolean
   placeholder?: PlaceholderOptions['placeholder']
   readOnly?: boolean
 }
@@ -37,6 +39,7 @@ export function EditorExtensions({
   onImagePaste,
   onImageSaveError,
   embedPaste,
+  bulletAfterHeading,
   placeholder,
   readOnly,
 }: EditorExtensionsProps): null {
@@ -80,6 +83,12 @@ export function EditorExtensions({
       // handler tracks `resolveImageUrl`.
       return embedPaste && resolveImageUrl ? defineEmbedPaste() : null
     }, [embedPaste, resolveImageUrl]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return bulletAfterHeading ? defineBulletAfterHeading() : null
+    }, [bulletAfterHeading]),
   )
 
   useExtension(
