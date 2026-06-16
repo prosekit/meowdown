@@ -2,7 +2,7 @@ import type { EmbedMatcher } from './types.ts'
 
 const YOUTUBE_HOSTS = /^(?:www\.|m\.)?(?:youtube\.com|youtube-nocookie\.com)$/i
 const YOUTU_BE_HOST = /^(?:www\.)?youtu\.be$/i
-const VIDEO_ID = /^[\w-]{11}$/
+const VIDEO_ID = /^[\w-]{11}$/ // YouTube video IDs are always 11 characters of letters, digits, underscores, or hyphens. WHY? GIVE ME A SOURCE // REVIEW
 
 /** Extract `{ videoId, startSeconds? }` from any watch/shorts/embed/live/`youtu.be` URL. */
 function parseYouTube(src: string): { videoId: string; startSeconds?: number } | undefined {
