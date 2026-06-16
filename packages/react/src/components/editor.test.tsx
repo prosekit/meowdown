@@ -13,6 +13,14 @@ const pmRoot = page.locate('.ProseMirror')
 const cmRoot = page.locate('.cm-editor')
 const cmContent = page.locate('[data-editor="codemirror"] .cm-content')
 
+function dispatchPaste(element: Element, text: string): void {
+  const clipboardData = new DataTransfer()
+  clipboardData.setData('text/plain', text)
+  element.dispatchEvent(
+    new ClipboardEvent('paste', { clipboardData, bubbles: true, cancelable: true }),
+  )
+}
+
 // Renders only when it sits inside the editor's ProseKit context; `useEditor`
 // throws otherwise.
 function EditorProbe() {
@@ -248,6 +256,26 @@ describe('MeowdownEditor', () => {
       <MeowdownEditor initialMarkdown="![pic](a.png)" resolveImageUrl={() => undefined} />,
     )
     await expect.element(page.getByAltText('pic')).not.toBeInTheDocument()
+  })
+
+  it('embeds a pasted YouTube link by default', async () => {
+    await render(<MeowdownEditor resolveImageUrl={(src) => src} />)
+    await pmRoot.click()
+    dispatchPaste(pmRoot.element(), 'https://www.youtube.com/watch?v=aqz-KE-bpKQ')
+    await expect
+      .element(pmRoot.getByTestId('youtube-embed'))
+      .toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ')
+  })
+
+  it('does not embed a pasted link when embedPaste is off', async () => {
+    const url = 'https://www.youtube.com/watch?v=aqz-KE-bpKQ'
+    const screen = await render(
+      <MeowdownEditor resolveImageUrl={(src) => src} embedPaste={false} />,
+    )
+    await pmRoot.click()
+    dispatchPaste(pmRoot.element(), url)
+    await expect.element(screen.getByText(url)).toBeInTheDocument()
+    await expect.element(pmRoot.getByTestId('youtube-embed')).not.toBeInTheDocument()
   })
 
   it('uploads and inserts an image dropped from outside the editor', async () => {

@@ -47,6 +47,7 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
 - `resolveImageUrl?: (src: string) => string | undefined`: maps an image `src` to a displayable URL (or `undefined` to skip). Enables inline image rendering: `![alt](src)` stays literal text and the image renders beneath its line. Pass a stable function. Ignored in source mode.
 - `onImagePaste?: (file: File) => string | undefined | Promise<string | undefined>`: persists a pasted or dropped image file and returns its markdown `src` (or `undefined` to decline), synchronously or as a promise. Pass a stable function. Ignored in source mode.
 - `onImageSaveError?: (error: unknown, file: File) => void`: called when `onImagePaste` throws. Defaults to `console.error`. Ignored in source mode.
+- `embedPaste?: boolean`: auto-embeds a pasted tweet or YouTube link as a rich embed; one undo turns the embed back into the raw link. On by default; set `false` to disable. Only takes effect when `resolveImageUrl` is set, since embeds render through the image pipeline. Ignored in source mode.
 - `placeholder?: string | ((state) => string)`: placeholder text shown when the whole document is empty. Pass a stable function. Ignored in source mode.
 - `readOnly?: boolean`: makes the editor read-only, in both the rich and source modes.
 - `spellCheck?: boolean`: toggles the browser's native spell checking in the rich modes. Defaults to the browser's behavior. Ignored in source mode.

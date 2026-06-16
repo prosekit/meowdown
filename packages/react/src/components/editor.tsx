@@ -82,6 +82,14 @@ export interface EditorProps {
   onImageSaveError?: ImageOptions['onImageSaveError']
 
   /**
+   * Auto-embeds a pasted tweet or YouTube link as a rich embed; one undo turns
+   * the embed back into the raw link. On by default. Ignored in source mode, and
+   * only takes effect when `resolveImageUrl` is set, since embeds render through
+   * the same image pipeline.
+   */
+  embedPaste?: boolean
+
+  /**
    * Placeholder text shown when the whole document is empty. A function
    * receives the editor state. Pass a stable function. Ignored in source mode.
    */
@@ -119,6 +127,7 @@ export function MeowdownEditor({
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
+  embedPaste = true,
   placeholder,
   readOnly,
   spellCheck,
@@ -195,6 +204,7 @@ export function MeowdownEditor({
           resolveImageUrl={resolveImageUrl}
           onImagePaste={onImagePaste}
           onImageSaveError={onImageSaveError}
+          embedPaste={embedPaste}
           placeholder={placeholder}
           readOnly={readOnly}
           spellCheck={spellCheck}
