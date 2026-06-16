@@ -108,7 +108,7 @@ describe('defineMarkMode', () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('focus'))
       const { n } = fixture
-      const doc = n.doc(n.paragraph('a <https://<a>x.io> b'))
+      const doc = n.doc(n.paragraph('a <https://<a>example.com> b'))
       fixture.set(doc)
       await expectRevealedMarkers(2)
     })

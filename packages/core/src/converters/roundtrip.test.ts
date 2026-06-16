@@ -73,7 +73,7 @@ describe('markdown round-trip is byte-identical', () => {
     'visit https://example.com now',
     'see www.example.com here',
     'mail me@example.com ok',
-    'a <https://x.io> b',
+    'a <https://example.com> b',
     'end https://example.com.',
     // Tables, including empty and partially-empty cells. The serializer writes
     // empty cells unpadded (`|  |`), so these stay unaligned to match its bytes.

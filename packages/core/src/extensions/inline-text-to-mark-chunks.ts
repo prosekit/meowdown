@@ -52,9 +52,12 @@ export function inlineTextToMarkChunks(
 }
 
 /**
- * Derive the `href` for a bare autolink from its visible text: a URL with a
- * scheme is used as-is; an email becomes `mailto:`; a `www.` URL gets an
- * implied `https://`. Returns `undefined` for anything else.
+ * Derive the `href` for a bare autolink from its visible text:
+ *
+ * - a URL with a scheme is used as-is
+ * - an email becomes `mailto:`
+ * - a `www.` URL gets an implied `https://`
+ * - anything else returns `undefined`
  */
 function getAutolinkHref(urlText: string): string | undefined {
   if (/^[a-z][a-z0-9+.-]*:/i.test(urlText)) return urlText
