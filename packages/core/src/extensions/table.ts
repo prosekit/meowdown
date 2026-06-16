@@ -1,13 +1,13 @@
-import { definePlugin, union } from '@prosekit/core'
+import { union } from '@prosekit/core'
 import {
   defineTableCellSpec,
   defineTableCommands,
   defineTableDropIndicator,
+  defineTableEditingPlugin,
   defineTableHeaderCellSpec,
   defineTableRowSpec,
   defineTableSpec,
 } from '@prosekit/extensions/table'
-import { tableEditing } from 'prosemirror-tables'
 
 export function defineTable() {
   return union(
@@ -15,7 +15,7 @@ export function defineTable() {
     defineTableRowSpec(),
     defineTableCellSpec(),
     defineTableHeaderCellSpec(),
-    definePlugin(tableEditing()), // TODO: export related API from prosekit so that we don't have to install prosemirror-tables as a separate dependency
+    defineTableEditingPlugin({ allowTableNodeSelection: true }),
     defineTableCommands(),
     defineTableDropIndicator(),
   )
