@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.0](https://github.com/prosekit/meowdown/compare/react-v0.9.0...react-v0.10.0) (2026-06-16)
+
+
+### Features
+
+* **react:** add blockHandle prop ([#56](https://github.com/prosekit/meowdown/issues/56)) ([21a8fe7](https://github.com/prosekit/meowdown/commit/21a8fe75be8e63aea1c0f07bb880a38f9bb72879))
+* start a bullet on Enter after a heading ([#55](https://github.com/prosekit/meowdown/issues/55)) ([ac7c6b4](https://github.com/prosekit/meowdown/commit/ac7c6b42f810784efb30cbd1e3fd521cc68379aa))
+
 ## [0.9.0](https://github.com/prosekit/meowdown/compare/react-v0.8.1...react-v0.9.0) (2026-06-16)
 
 
