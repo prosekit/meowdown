@@ -76,6 +76,6 @@ describe('COMMON_TLDS', () => {
   })
 
   it('pins the set size', () => {
-    expect(COMMON_TLDS.size).toMatchInlineSnapshot(`285`)
+    expect(COMMON_TLDS.size).toMatchInlineSnapshot(`288`)
   })
 })
