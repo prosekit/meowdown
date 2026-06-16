@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "pnpm --filter ./website run dev",
     "build": "pnpm -r run build",
-    "ci:publish:snapshot": "pnpx pkg-pr-new publish --pnpm './packages/*'",
+    "ci:publish:snapshot": "pkg-pr-new publish --pnpm './packages/*'",
     "lint": "pnpm run lint:eslint && pnpm run lint:oxfmt && pnpm run lint:knip",
     "lint:oxfmt": "oxfmt --check",
     "lint:eslint": "eslint --cache --max-warnings 0",
@@ -28,6 +28,7 @@
     "eslint": "^10.5.0",
     "knip": "^6.16.1",
     "oxfmt": "^0.55.0",
+    "pkg-pr-new": "^0.0.75",
     "playwright": "^1.61.0",
     "typescript": "^6.0.3",
     "vite": "^8.0.16",
