@@ -63,6 +63,10 @@ Pasting a lone tweet or YouTube link can auto-embed it. `defineEmbedPaste()` (or
 
 Pressing Enter at the end of the document's first heading (the title line) can start a fresh empty bullet on the next line instead of a plain paragraph. `defineBulletAfterHeading()` binds this. It is not part of `defineEditorExtension`; add it explicitly.
 
+## Re-exports
+
+`Priority` and `withPriority` are re-exported from `@prosekit/core`, so you can set extension priorities (e.g. `withPriority(extension, Priority.high)`) without depending on `@prosekit/core` directly.
+
 ## License
 
 MIT
