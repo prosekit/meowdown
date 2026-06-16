@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import { pasteText } from '@prosekit/core/test'
 import { useEditor } from '@prosekit/react'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
@@ -248,6 +249,32 @@ describe('MeowdownEditor', () => {
       <MeowdownEditor initialMarkdown="![pic](a.png)" resolveImageUrl={() => undefined} />,
     )
     await expect.element(page.getByAltText('pic')).not.toBeInTheDocument()
+  })
+
+  it('embeds a pasted YouTube link by default', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<MeowdownEditor handleRef={ref} resolveImageUrl={(src) => src} />)
+    await pmRoot.click()
+    const view = ref.current?.editor?.view
+    if (!view) throw new Error('editor not mounted')
+    pasteText(view, 'https://www.youtube.com/watch?v=aqz-KE-bpKQ')
+    await expect
+      .element(pmRoot.getByTestId('youtube-embed'))
+      .toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ')
+  })
+
+  it('does not embed a pasted link when embedPaste is off', async () => {
+    const url = 'https://www.youtube.com/watch?v=aqz-KE-bpKQ'
+    const ref = createRef<EditorHandle>()
+    const screen = await render(
+      <MeowdownEditor handleRef={ref} resolveImageUrl={(src) => src} embedPaste={false} />,
+    )
+    await pmRoot.click()
+    const view = ref.current?.editor?.view
+    if (!view) throw new Error('editor not mounted')
+    pasteText(view, url)
+    await expect.element(screen.getByText(url)).toBeInTheDocument()
+    await expect.element(pmRoot.getByTestId('youtube-embed')).not.toBeInTheDocument()
   })
 
   it('uploads and inserts an image dropped from outside the editor', async () => {

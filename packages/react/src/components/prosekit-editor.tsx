@@ -79,6 +79,9 @@ export interface ProseKitEditorProps {
   /** Called when an image fails to persist. See `EditorProps.onImageSaveError`. */
   onImageSaveError?: ImageOptions['onImageSaveError']
 
+  /** Auto-embeds a pasted tweet/YouTube link. See `EditorProps.embedPaste`. */
+  embedPaste?: boolean
+
   /** Placeholder text for empty blocks. See `EditorProps.placeholder`. */
   placeholder?: PlaceholderOptions['placeholder']
 
@@ -108,6 +111,7 @@ export function ProseKitEditor({
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
+  embedPaste,
   placeholder,
   readOnly,
   spellCheck,
@@ -201,6 +205,7 @@ export function ProseKitEditor({
         resolveImageUrl={resolveImageUrl}
         onImagePaste={onImagePaste}
         onImageSaveError={onImageSaveError}
+        embedPaste={embedPaste}
         placeholder={placeholder}
         readOnly={readOnly}
       />

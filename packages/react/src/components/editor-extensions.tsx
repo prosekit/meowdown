@@ -1,4 +1,5 @@
 import {
+  defineEmbedPaste,
   defineImages,
   defineMarkMode,
   definePlaceholder,
@@ -20,6 +21,7 @@ export interface EditorExtensionsProps {
   resolveImageUrl?: ImageOptions['resolveImageUrl']
   onImagePaste?: ImageOptions['onImagePaste']
   onImageSaveError?: ImageOptions['onImageSaveError']
+  embedPaste?: boolean
   placeholder?: PlaceholderOptions['placeholder']
   readOnly?: boolean
 }
@@ -34,6 +36,7 @@ export function EditorExtensions({
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
+  embedPaste,
   placeholder,
   readOnly,
 }: EditorExtensionsProps): null {
@@ -67,6 +70,16 @@ export function EditorExtensions({
         ? defineImages({ resolveImageUrl, onImagePaste, onImageSaveError })
         : null
     }, [resolveImageUrl, onImagePaste, onImageSaveError]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      // Embeds render through the image pipeline (`defineImages`), which is only
+      // mounted when `resolveImageUrl` is set. Without it, rewriting a pasted
+      // link to `![](url)` would leave non-rendering source text, so the paste
+      // handler tracks `resolveImageUrl`.
+      return embedPaste && resolveImageUrl ? defineEmbedPaste() : null
+    }, [embedPaste, resolveImageUrl]),
   )
 
   useExtension(
