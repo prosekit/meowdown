@@ -31,27 +31,13 @@ export const getMarkBuilders: () => TypedMarkBuilders = /* @__PURE__ */ once(() 
   return createMarkBuilders<EditorExtension>(getSharedSchema())
 })
 
-const markBuildersBySchema = new WeakMap<Schema, TypedMarkBuilders>()
+const MARK_BUILDERS_CACHE_KEY = 'meowdown_mark_builders'
 
-/**
- * Typed mark builders bound to a specific schema, cached per schema.
- */
+/** Typed mark builders bound to a specific schema, cached per schema. */
 export function getMarkBuildersForSchema(schema: Schema): TypedMarkBuilders {
-  let builders = markBuildersBySchema.get(schema)
-  if (!builders) {
-    builders = createMarkBuilders<EditorExtension>(schema)
-    markBuildersBySchema.set(schema, builders)
-  }
+  const cached = schema.cached[MARK_BUILDERS_CACHE_KEY] as TypedMarkBuilders | undefined
+  if (cached) return cached
+  const builders = createMarkBuilders<EditorExtension>(schema)
+  schema.cached[MARK_BUILDERS_CACHE_KEY] = builders
   return builders
 }
-
-// REVIEW: `schema` has a `cached` property for extensions to store whatever values they want to cache per schema. You do not need to
-// use WeekMap here.
-// /**
-// An object for storing whatever values modules may want to
-// compute and cache per schema. (If you want to store something
-// in it, try to use property names unlikely to clash.)
-// */
-// cached: {
-//     [key: string]: any;
-// };
