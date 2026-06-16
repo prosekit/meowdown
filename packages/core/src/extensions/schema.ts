@@ -44,3 +44,14 @@ export function getMarkBuildersForSchema(schema: Schema): TypedMarkBuilders {
   }
   return builders
 }
+
+// REVIEW: `schema` has a `cached` property for extensions to store whatever values they want to cache per schema. You do not need to
+// use WeekMap here.
+// /**
+// An object for storing whatever values modules may want to
+// compute and cache per schema. (If you want to store something
+// in it, try to use property names unlikely to clash.)
+// */
+// cached: {
+//     [key: string]: any;
+// };
