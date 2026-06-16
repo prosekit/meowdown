@@ -10,6 +10,7 @@ export {
   type WikilinkClickPayload,
 } from './extensions/wikilink-click.ts'
 export { defineImages, type ImageOptions } from './extensions/images.ts'
+export { defineEmbedPaste } from './extensions/embed-paste.ts'
 export { EDITOR_KEY_BINDINGS } from './extensions/key-bindings.ts'
 export { definePlaceholder, type PlaceholderOptions } from '@prosekit/extensions/placeholder'
 export { defineReadonly } from '@prosekit/extensions/readonly'
