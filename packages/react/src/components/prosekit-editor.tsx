@@ -85,6 +85,9 @@ export interface ProseKitEditorProps {
   /** Starts a bullet on Enter after a heading. See `EditorProps.bulletAfterHeading`. */
   bulletAfterHeading?: boolean
 
+  /** Shows the per-block gutter handle. See `EditorProps.blockHandle`. */
+  blockHandle?: boolean
+
   /** Placeholder text for empty blocks. See `EditorProps.placeholder`. */
   placeholder?: PlaceholderOptions['placeholder']
 
@@ -116,6 +119,7 @@ export function ProseKitEditor({
   onImageSaveError,
   embedPaste,
   bulletAfterHeading,
+  blockHandle = true,
   placeholder,
   readOnly,
   spellCheck,
@@ -214,9 +218,9 @@ export function ProseKitEditor({
         placeholder={placeholder}
         readOnly={readOnly}
       />
-      <BlockHandle />
+      {blockHandle && !readOnly && <BlockHandle />}
       {!readOnly && <TableHandle />}
-      <DropIndicator />
+      {blockHandle && !readOnly && <DropIndicator />}
       <SlashMenu />
       {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
       {onWikilinkSearch && <WikilinkMenu onWikilinkSearch={onWikilinkSearch} />}

@@ -98,6 +98,15 @@ export interface EditorProps {
   bulletAfterHeading?: boolean
 
   /**
+   * Shows the per-block gutter handle in the rich modes: a drag grip for
+   * reordering blocks and a "+" add button, plus the drop indicator that
+   * visualizes where a dragged block will land. On by default. Set to `false`
+   * to hide the gutter affordance entirely, e.g. when the host does not want
+   * block reordering. Ignored in source mode and when `readOnly` is set.
+   */
+  blockHandle?: boolean
+
+  /**
    * Placeholder text shown when the whole document is empty. A function
    * receives the editor state. Pass a stable function. Ignored in source mode.
    */
@@ -137,6 +146,7 @@ export function MeowdownEditor({
   onImageSaveError,
   embedPaste = true,
   bulletAfterHeading = false,
+  blockHandle = true,
   placeholder,
   readOnly,
   spellCheck,
@@ -215,6 +225,7 @@ export function MeowdownEditor({
           onImageSaveError={onImageSaveError}
           embedPaste={embedPaste}
           bulletAfterHeading={bulletAfterHeading}
+          blockHandle={blockHandle}
           placeholder={placeholder}
           readOnly={readOnly}
           spellCheck={spellCheck}
