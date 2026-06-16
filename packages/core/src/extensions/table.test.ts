@@ -23,11 +23,15 @@ describe('table', () => {
     view.dispatch(view.state.tr.setSelection(selection))
 
     view.focus()
-    expect(getTablePos(fixture.doc)).toBeGreaterThan(-1)
+    expect(hasTable(fixture.doc)).toBe(true)
     await userEvent.keyboard('{Backspace}')
-    expect(getTablePos(fixture.doc)).toBe(-1)
+    expect(hasTable(fixture.doc)).toBe(false)
   })
 })
+
+function hasTable(doc: EditorNode): boolean {
+  return getTablePos(doc) > -1
+}
 
 function getTablePos(doc: EditorNode): number {
   let tablePos = -1
