@@ -3,8 +3,7 @@ import type { EmbedMatcher } from './types.ts'
 const YOUTUBE_HOSTS = /^(?:www\.|m\.)?(?:youtube\.com|youtube-nocookie\.com)$/i
 const YOUTU_BE_HOST = /^(?:www\.)?youtu\.be$/i
 // A YouTube video id is a 64-bit value encoded as base64url, so it is always
-// 11 characters from the `[A-Za-z0-9_-]` alphabet (ceil(64 / 6) = 11). Google
-// does not formally document this, but it has held in practice for years.
+// 11 characters from the `[A-Za-z0-9_-]` alphabet.
 // Source: https://wiki.archiveteam.org/index.php/YouTube/Technical_details
 const VIDEO_ID = /^[\w-]{11}$/
 
