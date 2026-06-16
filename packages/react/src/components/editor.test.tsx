@@ -1,6 +1,7 @@
 import '../testing/index.ts'
 
 import { pasteText } from '@prosekit/core/test'
+import { TextSelection } from '@prosekit/pm/state'
 import { useEditor } from '@prosekit/react'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
@@ -275,6 +276,19 @@ describe('MeowdownEditor', () => {
     pasteText(view, url)
     await expect.element(screen.getByText(url)).toBeInTheDocument()
     await expect.element(pmRoot.getByTestId('youtube-embed')).not.toBeInTheDocument()
+  })
+
+  it('starts a bullet on Enter after a heading when bulletAfterHeading is on', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<MeowdownEditor handleRef={ref} bulletAfterHeading initialMarkdown="# Title" />)
+    await pmRoot.click()
+    const view = ref.current?.editor?.view
+    if (!view) throw new Error('editor not mounted')
+    const headingEnd = view.state.doc.child(0).nodeSize - 1
+    view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, headingEnd)))
+    view.focus()
+    await userEvent.keyboard('{Enter}')
+    await expect.element(pmRoot.locate('[data-list-kind="bullet"]')).toBeInTheDocument()
   })
 
   it('uploads and inserts an image dropped from outside the editor', async () => {

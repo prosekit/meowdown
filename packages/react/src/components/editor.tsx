@@ -90,6 +90,13 @@ export interface EditorProps {
   embedPaste?: boolean
 
   /**
+   * Pressing Enter at the end of the document's first heading (the title line)
+   * starts a fresh empty bullet on the next line instead of a plain paragraph.
+   * Off by default. Ignored in source mode.
+   */
+  bulletAfterHeading?: boolean
+
+  /**
    * Shows the per-block gutter handle in the rich modes: a drag grip for
    * reordering blocks and a "+" add button, plus the drop indicator that
    * visualizes where a dragged block will land. On by default. Set to `false`
@@ -137,6 +144,7 @@ export function MeowdownEditor({
   onImagePaste,
   onImageSaveError,
   embedPaste = true,
+  bulletAfterHeading = false,
   blockHandle = true,
   placeholder,
   readOnly,
@@ -215,6 +223,7 @@ export function MeowdownEditor({
           onImagePaste={onImagePaste}
           onImageSaveError={onImageSaveError}
           embedPaste={embedPaste}
+          bulletAfterHeading={bulletAfterHeading}
           blockHandle={blockHandle}
           placeholder={placeholder}
           readOnly={readOnly}
