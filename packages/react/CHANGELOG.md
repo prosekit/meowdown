@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.0](https://github.com/prosekit/meowdown/compare/react-v0.8.1...react-v0.9.0) (2026-06-16)
+
+
+### Features
+
+* auto-embed pasted tweet and YouTube links ([#54](https://github.com/prosekit/meowdown/issues/54)) ([0535da4](https://github.com/prosekit/meowdown/commit/0535da4266fb7c0d8153d4b8e18067d6443c7e32))
+* **core:** build markdown documents without an editor ([#48](https://github.com/prosekit/meowdown/issues/48)) ([bfe3125](https://github.com/prosekit/meowdown/commit/bfe31254c5483ff62fe962dfe61e9cb9b5160b45))
+
 ## [0.8.1](https://github.com/prosekit/meowdown/compare/react-v0.8.0...react-v0.8.1) (2026-06-15)
 
 

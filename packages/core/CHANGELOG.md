@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.9.0](https://github.com/prosekit/meowdown/compare/core-v0.8.1...core-v0.9.0) (2026-06-16)
+
+
+### Features
+
+* auto-embed pasted tweet and YouTube links ([#54](https://github.com/prosekit/meowdown/issues/54)) ([0535da4](https://github.com/prosekit/meowdown/commit/0535da4266fb7c0d8153d4b8e18067d6443c7e32))
+* **core:** autolink bare URLs ([#50](https://github.com/prosekit/meowdown/issues/50)) ([501a457](https://github.com/prosekit/meowdown/commit/501a4579e37ccff85acd8f6622ca69629c891d79))
+* **core:** build markdown documents without an editor ([#48](https://github.com/prosekit/meowdown/issues/48)) ([bfe3125](https://github.com/prosekit/meowdown/commit/bfe31254c5483ff62fe962dfe61e9cb9b5160b45))
+* **core:** embed youtube and tweets ([#52](https://github.com/prosekit/meowdown/issues/52)) ([8d6528b](https://github.com/prosekit/meowdown/commit/8d6528b53d16dc89d0f6e235918d8f1255d21157))
+
+
+### Bug Fixes
+
+* **core:** allow table node selection ([#53](https://github.com/prosekit/meowdown/issues/53)) ([2fa5d14](https://github.com/prosekit/meowdown/commit/2fa5d142b09c24a518620ff9dbc55c3c90a4fb3d))
+
 ## [0.8.1](https://github.com/prosekit/meowdown/compare/core-v0.8.0...core-v0.8.1) (2026-06-15)
 
 
