@@ -8,7 +8,7 @@
  *     -> compute affected range from step maps (fall back to full doc)
  *     -> walk participating textblocks (paragraph / heading etc.) inside that range
  *     -> for each: text = node.textContent
- *                  chunks = inlineTextToMarkChunks(schema, text)
+ *                  chunks = inlineTextToMarkChunks(getMarkBuildersForSchema(schema), text)
  *     -> if chunks is non-empty: tr.step(new BatchSetMarkStep(chunks))
  *                                  .setMeta(META_KEY, true)
  */
@@ -21,6 +21,7 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { BatchSetMarkStep } from './batch-set-mark-step.ts'
 import { inlineTextToMarkChunks } from './inline-text-to-mark-chunks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
+import { getMarkBuildersForSchema } from './schema.ts'
 
 const META_KEY = 'inline-marks-applied'
 
@@ -61,7 +62,7 @@ function chunksForTextblock(
     chunkCacheHits++
   } else {
     chunkCacheParses++
-    relative = inlineTextToMarkChunks(schema, node.textContent)
+    relative = inlineTextToMarkChunks(getMarkBuildersForSchema(schema), node.textContent)
     CHUNK_CACHE.set(node, relative)
   }
   if (baseOffset === 0) return relative

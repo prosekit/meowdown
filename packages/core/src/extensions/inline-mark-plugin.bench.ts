@@ -1,6 +1,7 @@
+import { createMarkBuilders } from '@prosekit/core'
 import { bench, describe } from 'vitest'
 
-import { defineEditorExtension } from './extension.ts'
+import { defineEditorExtension, type EditorExtension } from './extension.ts'
 import { inlineTextToMarkChunks } from './inline-text-to-mark-chunks.ts'
 
 // Run with:  pnpm bench
@@ -20,17 +21,17 @@ const mixedParagraph =
 const longParagraph = (mixedParagraph + ' ').repeat(50)
 
 describe('inlineTextToMarkChunks', () => {
-  const schema = defineEditorExtension().schema!
+  const markBuilders = createMarkBuilders<EditorExtension>(defineEditorExtension().schema!)
 
   bench('plain', () => {
-    inlineTextToMarkChunks(schema, plainParagraph)
+    inlineTextToMarkChunks(markBuilders, plainParagraph)
   })
 
   bench('mixed', () => {
-    inlineTextToMarkChunks(schema, mixedParagraph)
+    inlineTextToMarkChunks(markBuilders, mixedParagraph)
   })
 
   bench('long', () => {
-    inlineTextToMarkChunks(schema, longParagraph)
+    inlineTextToMarkChunks(markBuilders, longParagraph)
   })
 })

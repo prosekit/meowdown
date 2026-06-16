@@ -30,3 +30,23 @@ export const getNodeBuilders: () => TypedNodeBuilders = /* @__PURE__ */ once(() 
 export const getMarkBuilders: () => TypedMarkBuilders = /* @__PURE__ */ once(() => {
   return createMarkBuilders<EditorExtension>(getSharedSchema())
 })
+
+const markBuildersBySchema = new WeakMap<Schema, TypedMarkBuilders>()
+
+/**
+ * Typed mark builders bound to a specific schema, cached per schema.
+ *
+ * The inline-mark plugin creates marks from the live editor's own
+ * `state.schema`, which is a different `Schema` instance than
+ * {@link getSharedSchema}. A mark carries its `MarkType`, and a mark built from
+ * a different schema instance is not type-identical, so the plugin must not use
+ * {@link getMarkBuilders} (which is bound to the shared schema).
+ */
+export function getMarkBuildersForSchema(schema: Schema): TypedMarkBuilders {
+  let builders = markBuildersBySchema.get(schema)
+  if (!builders) {
+    builders = createMarkBuilders<EditorExtension>(schema)
+    markBuildersBySchema.set(schema, builders)
+  }
+  return builders
+}

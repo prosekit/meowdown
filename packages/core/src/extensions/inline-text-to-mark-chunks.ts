@@ -1,4 +1,4 @@
-import type { Mark, Schema } from '@prosekit/pm/model'
+import type { Mark } from '@prosekit/pm/model'
 
 import type { InlineElement } from '../lezer/inline.ts'
 import { parseInline } from '../lezer/inline.ts'
@@ -7,6 +7,7 @@ import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 import type { MarkName } from './inline-marks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
 import { marksEqual } from './marks-equal.ts'
+import type { TypedMarkBuilders } from './schema.ts'
 
 /**
  * Lookup from Lezer node type id to the ProseMirror mark.
@@ -40,14 +41,14 @@ const MARK_NAME_BY_TYPE_ID: ReadonlyMap<number, MarkName> = new Map([
  * Callers shift the chunks into the document's coordinate space.
  */
 export function inlineTextToMarkChunks(
-  /** ProseMirror schema with our inline marks defined. */
-  schema: Schema,
+  /** Typed mark builders bound to the target schema (see {@link getMarkBuildersForSchema}). */
+  marks: TypedMarkBuilders,
   /** The raw inline text of one textblock (no block prefix). */
   text: string,
 ): MarkChunk[] {
   const elements = parseInline(text)
   const out: MarkChunk[] = []
-  walk(elements, [], 0, text.length, text, schema, out)
+  walk(elements, [], 0, text.length, text, marks, out)
   return out
 }
 
@@ -72,7 +73,7 @@ function walk(
   rangeStart: number,
   rangeEnd: number,
   text: string,
-  schema: Schema,
+  marks: TypedMarkBuilders,
   out: MarkChunk[],
 ): void {
   let pos = rangeStart
@@ -81,25 +82,23 @@ function walk(
       emit(out, pos, node.from, parentMarks)
     }
     if (node.type === LEZER_NODE_IDS.Link || node.type === LEZER_NODE_IDS.Image) {
-      walkLink(node, parentMarks, text, schema, out)
+      walkLink(node, parentMarks, text, marks, out)
     } else if (node.type === LEZER_NODE_IDS.URL) {
       // A standalone `URL` node is a GFM autolink (the address part of a real
       // `[text](url)` is handled inside `walkLink`, not here). Linkify the
       // shapes we recognize; anything else keeps the muted `mdLinkUri`.
       const href = getAutolinkHref(text.slice(node.from, node.to))
-      // TODO: replace the stringly-typed `schema.marks[name].create()` pattern
-      // in this file with typed mark creation threaded through `walk`.
-      const mark = href ? schema.marks.mdLinkText.create({ href }) : schema.marks.mdLinkUri.create()
+      const mark = href ? marks.mdLinkText.create({ href }) : marks.mdLinkUri.create()
       emit(out, node.from, node.to, [...parentMarks, mark])
     } else {
       const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(node.type)
       const childMarks = maybeMarkName
-        ? [...parentMarks, schema.marks[maybeMarkName].create()]
+        ? [...parentMarks, marks[maybeMarkName].create()]
         : parentMarks
       if (node.children.length === 0) {
         emit(out, node.from, node.to, childMarks)
       } else {
-        walk(node.children, childMarks, node.from, node.to, text, schema, out)
+        walk(node.children, childMarks, node.from, node.to, text, marks, out)
       }
     }
     pos = node.to
@@ -130,7 +129,7 @@ function walkLink(
   node: InlineElement,
   parentMarks: readonly Mark[],
   text: string,
-  schema: Schema,
+  marks: TypedMarkBuilders,
   out: MarkChunk[],
 ): void {
   let labelEnd = -1
@@ -145,25 +144,24 @@ function walkLink(
     }
   }
   const href = urlNode ? text.slice(urlNode.from, urlNode.to) : ''
-  const linkTextMark =
-    href && schema.marks.mdLinkText ? schema.marks.mdLinkText.create({ href }) : null
+  const linkTextMark = href ? marks.mdLinkText.create({ href }) : null
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd && linkTextMark !== null
 
   let pos = node.from
   for (const child of node.children) {
     if (child.from > pos) {
-      const marks = inLabel(pos) ? [...parentMarks, linkTextMark!] : parentMarks
-      emit(out, pos, child.from, marks)
+      const childMarks = inLabel(pos) ? [...parentMarks, linkTextMark!] : parentMarks
+      emit(out, pos, child.from, childMarks)
     }
     const baseForChild = inLabel(child.from) ? [...parentMarks, linkTextMark!] : parentMarks
     const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(child.type)
     const childMarks = maybeMarkName
-      ? [...baseForChild, schema.marks[maybeMarkName].create()]
+      ? [...baseForChild, marks[maybeMarkName].create()]
       : baseForChild
     if (child.children.length === 0) {
       emit(out, child.from, child.to, childMarks)
     } else {
-      walk(child.children, childMarks, child.from, child.to, text, schema, out)
+      walk(child.children, childMarks, child.from, child.to, text, marks, out)
     }
     pos = child.to
   }
