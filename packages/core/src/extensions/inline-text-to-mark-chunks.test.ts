@@ -254,6 +254,163 @@ describe('inlineTextToMarkChunks', () => {
     `)
   })
 
+  // --- autolink TLD allowlist ----------------------------------------------
+
+  it('autolinks a two-letter ccTLD', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'https://example.io')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-18: mdLinkText(href=https://example.io)
+      "
+    `)
+  })
+
+  it('autolinks a multi-label host ending in a ccTLD', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'https://a.b.example.co.uk')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-25: mdLinkText(href=https://a.b.example.co.uk)
+      "
+    `)
+  })
+
+  it('autolinks an uppercase host with a lowercase scheme', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'https://EXAMPLE.COM')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-19: mdLinkText(href=https://EXAMPLE.COM)
+      "
+    `)
+  })
+
+  it('autolinks a URL with port, path, query and hash', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'https://example.com:8080/p?q=1#h')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-32: mdLinkText(href=https://example.com:8080/p?q=1#h)
+      "
+    `)
+  })
+
+  it('does not link a bare URL with an uncommon TLD', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'https://example.zzz')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-19: -
+      "
+    `)
+  })
+
+  it('does not link a bare URL with an uncommon TLD in a sentence', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'visit https://example.zzz now')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-29: -
+      "
+    `)
+  })
+
+  it('does not link a www URL with an uncommon TLD', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'see www.example.zzz here')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-24: -
+      "
+    `)
+  })
+
+  it('does not link an email with an uncommon TLD', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'mail me@example.zzz ok')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-22: -
+      "
+    `)
+  })
+
+  it('does not link a real but uncommon TLD', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'https://example.museum')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-22: -
+      "
+    `)
+  })
+
+  it('does not link a numeric TLD', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'https://example.123')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-19: -
+      "
+    `)
+  })
+
+  it('does not link a bare IP-literal host', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'http://192.168.1.1/path')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-23: -
+      "
+    `)
+  })
+
+  it('keeps an angle-bracket autolink with an uncommon TLD', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, '<https://example.zzz>')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-1: mdMark
+      1-20: mdLinkText(href=https://example.zzz)
+      20-21: mdMark
+      "
+    `)
+  })
+
+  it('keeps an angle-bracket non-http scheme with an uncommon TLD', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, '<ssh://example.zzz>')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-1: mdMark
+      1-18: mdLinkText(href=ssh://example.zzz)
+      18-19: mdMark
+      "
+    `)
+  })
+
+  it('keeps an explicit link with an uncommon TLD', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, '[text](https://example.zzz)')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-1: mdLinkText(href=https://example.zzz) + mdMark
+      1-5: mdLinkText(href=https://example.zzz)
+      5-7: mdMark
+      7-26: mdLinkUri
+      26-27: mdMark
+      "
+    `)
+  })
+
+  it('does not link a bare uncommon-TLD URL nested in emphasis', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, '*https://example.zzz*')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-1: mdEm + mdMark
+      1-20: mdEm
+      20-21: mdEm + mdMark
+      "
+    `)
+  })
+
+  it('links only the common-TLD URL when two autolinks share a block', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'https://a.com and https://b.zzz')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-13: mdLinkText(href=https://a.com)
+      13-31: -
+      "
+    `)
+  })
+
   it('nested emphasis inside strong (***foo***)', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '***foo***')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`

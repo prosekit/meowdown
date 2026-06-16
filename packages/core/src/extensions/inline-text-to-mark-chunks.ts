@@ -4,6 +4,7 @@ import type { InlineElement } from '../lezer/inline.ts'
 import { parseInline } from '../lezer/inline.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 
+import { hasAllowedTld } from './common-tlds.ts'
 import type { MarkName } from './inline-marks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
 import { marksEqual } from './marks-equal.ts'
@@ -48,7 +49,7 @@ export function inlineTextToMarkChunks(
 ): MarkChunk[] {
   const elements = parseInline(text)
   const out: MarkChunk[] = []
-  walk(elements, [], 0, text.length, text, marks, out)
+  walk(elements, [], 0, text.length, text, marks, out, false)
   return out
 }
 
@@ -75,6 +76,7 @@ function walk(
   text: string,
   marks: TypedMarkBuilders,
   out: MarkChunk[],
+  insideAutolink: boolean,
 ): void {
   let pos = rangeStart
   for (const node of nodes) {
@@ -82,14 +84,22 @@ function walk(
       emit(out, pos, node.from, parentMarks)
     }
     if (node.type === LEZER_NODE_IDS.Link || node.type === LEZER_NODE_IDS.Image) {
-      walkLink(node, parentMarks, text, marks, out)
+      walkLink(node, parentMarks, text, marks, out, insideAutolink)
     } else if (node.type === LEZER_NODE_IDS.URL) {
       // A standalone `URL` node is a GFM autolink (the address part of a real
-      // `[text](url)` is handled inside `walkLink`, not here). Linkify the
-      // shapes we recognize; anything else keeps the muted `mdLinkUri`.
-      const href = getAutolinkHref(text.slice(node.from, node.to))
-      const mark = href ? marks.mdLinkText.create({ href }) : marks.mdLinkUri.create()
-      emit(out, node.from, node.to, [...parentMarks, mark])
+      // `[text](url)` is handled inside `walkLink`, not here). Explicit `<...>`
+      // autolinks bypass the TLD allowlist; a bare literal autolink must end in
+      // a common TLD or it stays plain body text. An unrecognized URL shape
+      // keeps the muted `mdLinkUri`.
+      const urlText = text.slice(node.from, node.to)
+      const href = getAutolinkHref(urlText)
+      if (href && (insideAutolink || hasAllowedTld(urlText))) {
+        emit(out, node.from, node.to, [...parentMarks, marks.mdLinkText.create({ href })])
+      } else if (href) {
+        emit(out, node.from, node.to, parentMarks)
+      } else {
+        emit(out, node.from, node.to, [...parentMarks, marks.mdLinkUri.create()])
+      }
     } else {
       const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(node.type)
       const childMarks = maybeMarkName
@@ -98,7 +108,8 @@ function walk(
       if (node.children.length === 0) {
         emit(out, node.from, node.to, childMarks)
       } else {
-        walk(node.children, childMarks, node.from, node.to, text, marks, out)
+        const childInsideAutolink = insideAutolink || node.type === LEZER_NODE_IDS.Autolink
+        walk(node.children, childMarks, node.from, node.to, text, marks, out, childInsideAutolink)
       }
     }
     pos = node.to
@@ -131,6 +142,7 @@ function walkLink(
   text: string,
   marks: TypedMarkBuilders,
   out: MarkChunk[],
+  insideAutolink: boolean,
 ): void {
   let labelEnd = -1
   let urlNode: InlineElement | null = null
@@ -161,7 +173,7 @@ function walkLink(
     if (child.children.length === 0) {
       emit(out, child.from, child.to, childMarks)
     } else {
-      walk(child.children, childMarks, child.from, child.to, text, marks, out)
+      walk(child.children, childMarks, child.from, child.to, text, marks, out, insideAutolink)
     }
     pos = child.to
   }
