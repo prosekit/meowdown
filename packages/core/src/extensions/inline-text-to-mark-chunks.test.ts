@@ -129,6 +129,129 @@ describe('inlineTextToMarkChunks', () => {
     `)
   })
 
+  it('autolinks a bare https URL', () => {
+    const chunks = inlineTextToMarkChunks(schema, 'visit https://example.com now')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-6: -
+      6-25: mdLinkText(href=https://example.com)
+      25-29: -
+      "
+    `)
+  })
+
+  it('autolinks a www URL with an implied https scheme', () => {
+    const chunks = inlineTextToMarkChunks(schema, 'see www.example.com here')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-4: -
+      4-19: mdLinkText(href=https://www.example.com)
+      19-24: -
+      "
+    `)
+  })
+
+  it('autolinks a bare email as mailto', () => {
+    const chunks = inlineTextToMarkChunks(schema, 'mail me@example.com ok')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-5: -
+      5-19: mdLinkText(href=mailto:me@example.com)
+      19-22: -
+      "
+    `)
+  })
+
+  it('autolinks a bare mailto URL, keeping the scheme', () => {
+    const chunks = inlineTextToMarkChunks(schema, 'a mailto:me@x.io b')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-2: -
+      2-16: mdLinkText(href=mailto:me@x.io)
+      16-18: -
+      "
+    `)
+  })
+
+  it('autolinks an angle-bracket URL, with the brackets as mdMark', () => {
+    const chunks = inlineTextToMarkChunks(schema, 'a <https://x.io> b')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-2: -
+      2-3: mdMark
+      3-15: mdLinkText(href=https://x.io)
+      15-16: mdMark
+      16-18: -
+      "
+    `)
+  })
+
+  it('keeps a non-http scheme in an angle autolink', () => {
+    const chunks = inlineTextToMarkChunks(schema, 'a <ftp://host> b')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-2: -
+      2-3: mdMark
+      3-13: mdLinkText(href=ftp://host)
+      13-14: mdMark
+      14-16: -
+      "
+    `)
+  })
+
+  it('keeps an ssh scheme in an angle autolink', () => {
+    const chunks = inlineTextToMarkChunks(schema, 'a <ssh://host> b')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-2: -
+      2-3: mdMark
+      3-13: mdLinkText(href=ssh://host)
+      13-14: mdMark
+      14-16: -
+      "
+    `)
+  })
+
+  it('excludes trailing punctuation from an autolink', () => {
+    const chunks = inlineTextToMarkChunks(schema, 'end https://example.com.')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-4: -
+      4-23: mdLinkText(href=https://example.com)
+      23-24: -
+      "
+    `)
+  })
+
+  it('autolinks a URL nested in emphasis', () => {
+    const chunks = inlineTextToMarkChunks(schema, '*https://x.io*')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-1: mdEm + mdMark
+      1-13: mdEm + mdLinkText(href=https://x.io)
+      13-14: mdEm + mdMark
+      "
+    `)
+  })
+
+  it('does not bare-autolink a non-http scheme', () => {
+    const chunks = inlineTextToMarkChunks(schema, 'a ftp://host b')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-14: -
+      "
+    `)
+  })
+
+  it('does not autolink a schemeless host', () => {
+    const chunks = inlineTextToMarkChunks(schema, 'a example.com b')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-15: -
+      "
+    `)
+  })
+
   it('nested emphasis inside strong (***foo***)', () => {
     const chunks = inlineTextToMarkChunks(schema, '***foo***')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`

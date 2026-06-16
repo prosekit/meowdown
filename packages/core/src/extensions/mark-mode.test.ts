@@ -95,6 +95,24 @@ describe('defineMarkMode', () => {
       await expectRevealedMarkers(4)
     })
 
+    it('reveals nothing when the cursor is inside a bare autolink', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      const doc = n.doc(n.paragraph('visit https://exa<a>mple.com now'))
+      fixture.set(doc)
+      await expectRevealedMarkers(0)
+    })
+
+    it('reveals the angle brackets when the cursor is inside <url>', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      const doc = n.doc(n.paragraph('a <https://<a>x.io> b'))
+      fixture.set(doc)
+      await expectRevealedMarkers(2)
+    })
+
     it('reveals when the cursor sits right after the closing **', async () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('focus'))
@@ -200,6 +218,15 @@ describe('defineMarkMode', () => {
       const doc = n.doc(n.paragraph('see [docs](http://x.test)'))
       fixture.set(doc)
       expect(clipboardText(fixture)).toBe('see docs')
+    })
+
+    it('keeps a bare autolink in the copied text', () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('hide'))
+      const { n } = fixture
+      const doc = n.doc(n.paragraph('visit https://example.com now'))
+      fixture.set(doc)
+      expect(clipboardText(fixture)).toBe('visit https://example.com now')
     })
 
     it('strips [[ ]] from the copied text', () => {
