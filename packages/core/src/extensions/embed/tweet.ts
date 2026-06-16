@@ -56,6 +56,8 @@ interface TweetResizeMessage {
 function listenForTweetHeight(iframe: HTMLIFrameElement): void {
   const onMessage = (event: MessageEvent) => {
     if (event.source !== iframe.contentWindow) return
+    // REVIEW: 1. what if the message format change? Please add a try cache block here to avoid breaking the whole editor.
+    // 2. if we do catch error, print a warning
     const message = event.data as TweetResizeMessage | null
     const height = message?.['twttr.embed']?.params?.[0]?.height
     if (typeof height === 'number') iframe.style.height = `${height}px`
