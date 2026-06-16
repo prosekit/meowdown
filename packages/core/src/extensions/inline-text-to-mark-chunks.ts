@@ -41,7 +41,7 @@ const MARK_NAME_BY_TYPE_ID: ReadonlyMap<number, MarkName> = new Map([
  * Callers shift the chunks into the document's coordinate space.
  */
 export function inlineTextToMarkChunks(
-  /** Typed mark builders bound to the target schema (see {@link getMarkBuildersForSchema}). */
+  /** Typed mark builders bound to the target schema. */
   marks: TypedMarkBuilders,
   /** The raw inline text of one textblock (no block prefix). */
   text: string,
