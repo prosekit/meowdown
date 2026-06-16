@@ -53,5 +53,6 @@ describe('embeds in the editor', () => {
 
     // No embed iframe is rendered for a plain image.
     await expect.element(page.locate('.ProseMirror iframe')).not.toBeInTheDocument()
+    // REVIEW: you write too many time `.ProseMirror`. Just set a global const pmRoot = page.locate('.ProseMirror')
   })
 })
