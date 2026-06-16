@@ -43,6 +43,7 @@ export const matchTweet: EmbedMatcher = (src) => {
 
 /** The `postMessage` payload the Twitter embed iframe sends once it has laid out. */
 interface TweetResizeMessage {
+  // REVIEW: where did you know this message format? Please add a comment to explain how you know this and where to find the documentation for this message format. Maybe a doc link or a github soure code link to a git sha and line mnumber.
   'twttr.embed'?: {
     method?: string
     params?: Array<{ height?: number }>
