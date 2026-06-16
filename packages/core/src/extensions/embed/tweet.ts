@@ -14,6 +14,9 @@ function parseTweetId(src: string): string | undefined {
   return STATUS_ID.exec(url.pathname)?.[1]
 }
 
+// REVIEW:
+// 1. Move this function to packages/core/src/utils/
+// 2. return false if `typeof window === 'undefined'` to avoid error in SSR environment.
 function prefersDarkColorScheme(): boolean {
   return window.matchMedia('(prefers-color-scheme: dark)').matches
 }
