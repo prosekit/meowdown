@@ -62,6 +62,14 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
 
 Re-exported from `@prosekit/react`. Call it from a component passed as `children` to read the live editor instance.
 
+### `useKeymap`
+
+Re-exported from `@prosekit/react`. Registers a keymap on the editor from a `children` component; set its priority with `Priority` from `@meowdown/core`.
+
+### `useExtension`
+
+Re-exported from `@prosekit/react`. Applies an extension to the editor from a `children` component.
+
 ### `EditorHandle`
 
 Imperative handle for the editor, attached via `handleRef`.
