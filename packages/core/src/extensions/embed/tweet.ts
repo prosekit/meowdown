@@ -39,28 +39,16 @@ export const matchTweet: EmbedMatcher = (src) => {
   }
 }
 
-/**
- * Shape of the resize message Twitter's first-party embed iframe
- * (`platform.twitter.com/embed/Tweet.html`) posts to its parent once the tweet
- * has laid out: `{ 'twttr.embed': { method: 'twttr.private.resize', params: [{ height }] } }`.
- *
- * Twitter does not document this; it is reverse-engineered from the widget's
- * `window.postMessage` payload (see the community write-up at
- * https://gist.github.com/surianee/6dd10ce6ab8778f2bcad). Because it is
- * undocumented and may change, `listenForTweetHeight` parses it defensively and
- * a failure just leaves the iframe at its CSS height.
- */
-interface TweetResizeMessage {
-  'twttr.embed'?: {
-    method?: string
-    params?: Array<{ height?: number }>
-  }
-}
-
 function listenForTweetHeight(iframe: HTMLIFrameElement): void {
   const onMessage = (event: MessageEvent) => {
     if (event.source !== iframe.contentWindow) return
     try {
+      interface TweetResizeMessage {
+        'twttr.embed'?: {
+          method?: string
+          params?: Array<{ height?: number }>
+        }
+      }
       const message = event.data as TweetResizeMessage | null
       const height = message?.['twttr.embed']?.params?.[0]?.height
       if (typeof height === 'number') iframe.style.height = `${height}px`
