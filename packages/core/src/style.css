@@ -293,6 +293,29 @@
 }
 
 /* ---------------------------------------------------------------------------
+ * Embedded media (`![](youtube|tweet url)`), rendered beneath the markdown line
+ * ------------------------------------------------------------------------- */
+.ProseMirror .md-embed-wrapper {
+  display: block;
+  margin-block: 0.5rem;
+}
+
+.ProseMirror .md-embed-youtube {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: var(--meowdown-image-radius, 0.5rem);
+}
+
+.ProseMirror .md-embed-tweet {
+  display: block;
+  width: 100%;
+  max-width: 550px;
+  border: 0;
+}
+
+/* ---------------------------------------------------------------------------
  * Placeholder text for empty blocks (ProseKit's definePlaceholder)
  * ------------------------------------------------------------------------- */
 .ProseMirror .prosekit-placeholder::before {

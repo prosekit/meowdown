@@ -75,6 +75,10 @@ describe('markdown round-trip is byte-identical', () => {
     'mail me@example.com ok',
     'a <https://example.com> b',
     'end https://example.com.',
+    // Embeds stay literal `![](url)` text; the embed renders as a decoration only
+    '![](https://www.youtube.com/watch?v=dQw4w9WgXcQ)',
+    '![](https://twitter.com/jack/status/20)',
+    'text before ![](https://youtu.be/dQw4w9WgXcQ) and after',
     // Tables, including empty and partially-empty cells. The serializer writes
     // empty cells unpadded (`|  |`), so these stay unaligned to match its bytes.
     dedent`
