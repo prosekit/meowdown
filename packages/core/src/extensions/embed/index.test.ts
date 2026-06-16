@@ -8,6 +8,15 @@ describe('embeds in the editor', () => {
   it('renders a YouTube embed for ![](watch url)', async () => {
     using fixture = setupFixture()
     fixture.editor.use(defineImages({ resolveImageUrl: (src) => src }))
+    // REVIEW: update the brain/projects/meowdown/ to remembder a rule:
+    // For better readability, do not write test like `fixture.n.doc(fixture.n.paragraph('xxx'))`
+    // Always first extract the n to a variable, then write shorter code
+    // The following is a good example
+    // using fixture = setupFixture()
+    // const { editor, n } = fixture
+    // editor.use(defineImages({ resolveImageUrl: (src) => src }))
+    // const doc = n.doc(n.paragraph('![](https://youtu.be/dQw4w9WgXcQ)'))
+    // fixture.set(doc)
     fixture.set(fixture.n.doc(fixture.n.paragraph('![](https://youtu.be/dQw4w9WgXcQ)')))
     await expect
       .element(page.locate('.ProseMirror [data-testid="youtube-embed"]'))
