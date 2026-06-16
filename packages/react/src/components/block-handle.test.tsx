@@ -64,6 +64,21 @@ describe('BlockHandle', () => {
     await expect.element(pmRoot.locate('p.ProseMirror-selectednode')).toHaveTextContent('Bravo')
   })
 
+  it('does not render when blockHandle is false', async () => {
+    await unhover()
+    await render(<ProseKitEditor initialMarkdown={'Alpha\n\nBravo'} blockHandle={false} />)
+    await hover(pmRoot.getByText('Alpha'))
+    await expect.element(handle).not.toBeInTheDocument()
+    await expect.element(dropIndicator).not.toBeInTheDocument()
+  })
+
+  it('does not render when readOnly', async () => {
+    await unhover()
+    await render(<ProseKitEditor initialMarkdown={'Alpha\n\nBravo'} readOnly />)
+    await hover(pmRoot.getByText('Alpha'))
+    await expect.element(handle).not.toBeInTheDocument()
+  })
+
   it('drags a block to a new position, showing the drop indicator', async () => {
     const ref = createRef<EditorHandle>()
     await renderEditor(ref)
