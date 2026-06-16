@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "pnpm --filter ./website run dev",
     "build": "pnpm -r run build",
+    "ci:publish:snapshot": "pnpx pkg-pr-new publish --pnpm './packages/*'",
     "lint": "pnpm run lint:eslint && pnpm run lint:oxfmt && pnpm run lint:knip",
     "lint:oxfmt": "oxfmt --check",
     "lint:eslint": "eslint --cache --max-warnings 0",

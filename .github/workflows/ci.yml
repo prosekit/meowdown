@@ -59,3 +59,37 @@ jobs:
 
       - name: Report Coverage
         uses: davelosert/vitest-coverage-report-action@02f3c2e641286b7fa308cd3e430783103ce6103b # v2.12.0
+
+  publish-snapshot:
+    runs-on: ubuntu-latest
+
+    needs: [build]
+
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Publish snapshot packages
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          max_attempts=8
+          base_sleep=10
+          for attempt in $(seq 1 "${max_attempts}"); do
+            echo "Attempt ${attempt} to publish snapshot packages..."
+            if pnpm run ci:publish:snapshot; then
+              echo "Publish snapshot packages succeeded"
+              break
+            elif [ "${attempt}" -eq "${max_attempts}" ]; then
+              echo "Publish snapshot packages failed"
+              exit 1
+            fi
+            sleep_duration=$((base_sleep * attempt))
+            echo "Sleeping ${sleep_duration}s before retry..."
+            sleep "${sleep_duration}"
+          done
