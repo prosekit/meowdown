@@ -75,6 +75,12 @@ describe('markdown round-trip is byte-identical', () => {
     'mail me@example.com ok',
     'a <https://example.com> b',
     'end https://example.com.',
+    // Uncommon-TLD autolinks render as plain text but must serialize unchanged
+    'visit https://example.zzz now',
+    'see www.foo.invalidtld here',
+    'mail me@foo.zzz ok',
+    'a <https://example.zzz> b',
+    '[text](https://example.zzz)',
     // Embeds stay literal `![](url)` text; the embed renders as a decoration only
     '![](https://www.youtube.com/watch?v=dQw4w9WgXcQ)',
     '![](https://twitter.com/jack/status/20)',

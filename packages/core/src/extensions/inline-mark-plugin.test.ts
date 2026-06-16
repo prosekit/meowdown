@@ -66,6 +66,108 @@ describe('inlineMarkPlugin', () => {
     expect(linkText!.attrs.href).toBe('https://example.com')
   })
 
+  it('does not link a bare autolink with an uncommon TLD', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('visit https://example.zzz now'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'https://example.zzz')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual([])
+  })
+
+  it('does not link a www autolink with an uncommon TLD', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('see www.foo.zzz here'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'www.foo.zzz')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual([])
+  })
+
+  it('does not link an email autolink with an uncommon TLD', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('mail me@foo.zzz ok'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'me@foo.zzz')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual([])
+  })
+
+  it('keeps an angle-bracket autolink despite an uncommon TLD', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('a <https://example.zzz> b'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'https://example.zzz')
+    const $pos = fixture.doc.resolve(pos + 1)
+    const linkText = $pos.marks().find((m) => m.type.name === 'mdLinkText')
+    expect(linkText?.attrs.href).toBe('https://example.zzz')
+  })
+
+  it('keeps an explicit link despite an uncommon TLD', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('see [docs](https://example.zzz)'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'docs')
+    const $pos = fixture.doc.resolve(pos + 1)
+    const linkText = $pos.marks().find((m) => m.type.name === 'mdLinkText')
+    expect(linkText?.attrs.href).toBe('https://example.zzz')
+  })
+
+  it('does not link an uncommon-TLD autolink inside a heading', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.heading({ level: 2 }, 'see https://x.zzz'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'https://x.zzz')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual([])
+  })
+
+  it('links a common-TLD autolink inside a table cell', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.table(n.tableRow(n.tableCell(n.paragraph('go https://x.com')))))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'https://x.com')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdLinkText'])
+  })
+
+  it('drops mdLinkText when the TLD is edited to an uncommon one', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('visit https://example.com now'))
+    fixture.set(doc)
+
+    const url = findText(fixture.doc, 'https://example.com')
+    expect(marksAt(fixture.doc, url + 1)).toEqual(['mdLinkText'])
+    const com = findText(fixture.doc, 'com')
+    fixture.view.dispatch(fixture.state.tr.insertText('zzz', com, com + 3))
+    const after = findText(fixture.doc, 'https://example.zzz')
+    expect(marksAt(fixture.doc, after + 1)).toEqual([])
+  })
+
+  it('adds mdLinkText when the TLD is edited to a common one', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('visit https://example.zzz now'))
+    fixture.set(doc)
+
+    const url = findText(fixture.doc, 'https://example.zzz')
+    expect(marksAt(fixture.doc, url + 1)).toEqual([])
+    const zzz = findText(fixture.doc, 'zzz')
+    fixture.view.dispatch(fixture.state.tr.insertText('com', zzz, zzz + 3))
+    const after = findText(fixture.doc, 'https://example.com')
+    expect(marksAt(fixture.doc, after + 1)).toEqual(['mdLinkText'])
+  })
+
   it('marks `*foo*` inside headings as well', () => {
     using fixture = setupFixture()
     const { n } = fixture
