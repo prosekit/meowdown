@@ -1,4 +1,3 @@
-import { once } from '@ocavue/utils'
 import {
   defineBaseCommands,
   defineBaseKeymap,
@@ -16,7 +15,7 @@ import { defineModClickPrevention } from '@prosekit/extensions/mod-click-prevent
 import { defineParagraph } from '@prosekit/extensions/paragraph'
 import { defineText } from '@prosekit/extensions/text'
 import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
-import type { Schema } from '@prosekit/pm/model'
+
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineHeading } from './heading.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
@@ -62,25 +61,3 @@ export function defineEditorExtension(): EditorExtension {
 }
 
 export type TypedEditor = Editor<EditorExtension>
-export type TypedNodeBuilders = 'TODO'
-export type TypedMarkBuilders = 'TODO'
-
-// TODO: move getSharedSchema to a separate module `schema.ts`;
-const getSharedSchema: () => Schema = /* @__PURE__ */ once(() => {
-  const schema = defineEditorExtension().schema
-  if (!schema) {
-    throw new Error('Unexpected empty schema')
-  }
-  return schema
-})
-
-// TODO: move TypedNodeBuilders, TypedMarkBuilders, getNodeBuilders and getMarkBuilders to a separate module `schema.ts` and add some test;
-export const getNodeBuilders: () => TypedNodeBuilders = /* @__PURE__ */ once(() => {
-  const schema = getSharedSchema()
-  return 'TODO'
-})
-
-export const getMarkBuilders: () => TypedMarkBuilders = /* @__PURE__ */ once(() => {
-  const schema = getSharedSchema()
-  return 'TODO'
-})

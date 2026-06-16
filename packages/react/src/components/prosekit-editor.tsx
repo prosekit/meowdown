@@ -120,7 +120,7 @@ export function ProseKitEditor({
     const extension = union(baseExtension, defineCodeBlockView())
     const editor: TypedEditor = createEditor({ extension })
     if (initialMarkdown) {
-      editor.setContent(markdownToDoc(editor, initialMarkdown))
+      editor.setContent(markdownToDoc(initialMarkdown, editor.nodes))
     }
     return editor
   })
@@ -143,7 +143,7 @@ export function ProseKitEditor({
       if (markdown == null && !selection) return
       const transaction = editor.state.tr
       if (markdown != null) {
-        const doc = markdownToDoc(editor, markdown)
+        const doc = markdownToDoc(markdown, editor.nodes)
         transaction.replaceWith(0, transaction.doc.content.size, doc.content)
       }
       if (selection) {
