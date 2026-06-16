@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/prosekit/meowdown/compare/react-v0.10.0...react-v0.11.0) (2026-06-16)
+
+
+### Features
+
+* re-export prosekit keymap and extension APIs ([#61](https://github.com/prosekit/meowdown/issues/61)) ([8d847d7](https://github.com/prosekit/meowdown/commit/8d847d7fddb7d52052fb1b0517596c3de46b038a))
+
 ## [0.10.0](https://github.com/prosekit/meowdown/compare/react-v0.9.0...react-v0.10.0) (2026-06-16)
 
 
