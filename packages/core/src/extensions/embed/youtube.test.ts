@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { matchYouTube } from './youtube.ts'
 
 describe('matchYouTube', () => {
+  // REVIEW: rename `keyFor` to `getKey`
   const keyFor = (src: string) => matchYouTube(src)?.key
 
   it('matches the standard watch URL', () => {
