@@ -12,10 +12,7 @@ import { defineEditorExtension, type EditorExtension } from './extension.ts'
 export type TypedNodeBuilders = ExtractNodeBuilders<EditorExtension>
 export type TypedMarkBuilders = ExtractMarkBuilders<EditorExtension>
 
-/**
- * The schema shared by every parser and serializer. Building it once avoids
- * recreating an editor (and its schema) for each markdown conversion.
- */
+/** The schema shared by every parser and serializer, built once and cached. */
 const getSharedSchema: () => Schema = /* @__PURE__ */ once(() => {
   const schema = defineEditorExtension().schema
   if (schema == null) {
