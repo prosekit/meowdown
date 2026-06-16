@@ -21,6 +21,13 @@ describe('embeds in the editor', () => {
     await expect
       .element(page.locate('.ProseMirror [data-testid="youtube-embed"]'))
       .toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
+    // REVIEW: do not write `[data-testid=` selector directly. Let's chain locators instead. The following is a good example.
+    // Also remembder this in  brain/projects/meowdown/
+    let pmRoot = page.locate('.ProseMirror')
+    let embed = pmRoot.getByTestId('youtube-embed')
+    await expect
+      .element(embed)
+      .toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
   })
 
   it('renders a tweet embed for ![](status url)', async () => {
