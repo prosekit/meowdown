@@ -8,14 +8,18 @@ import {
 import { TextSelection, type Command } from '@prosekit/pm/state'
 
 /**
- * Claim Enter only when the selection is an empty caret at the very end of a
- * heading, starting a fresh empty bullet on the next line. Every other Enter
- * (mid-heading, in a paragraph, inside a list) returns false and falls through
- * to the editor's default handling.
+ * Claim Enter only when the selection is an empty caret at the very end of the
+ * document's first heading (the note's title line). Every other Enter (a later
+ * heading, mid-heading, in a paragraph, inside a list) returns false and falls
+ * through to the editor's default handling.
  */
 const bulletAfterHeadingOnEnter: Command = (state, dispatch) => {
   const { $from, empty } = state.selection
-  if (!empty || $from.parent.type.name !== 'heading') {
+  // Only the document's first block, and only when that block is a heading.
+  if (!empty || $from.depth !== 1 || $from.index(0) !== 0) {
+    return false
+  }
+  if ($from.parent.type.name !== 'heading') {
     return false
   }
   // Only at the end of the heading's text; Enter elsewhere splits as usual.
@@ -38,8 +42,9 @@ const bulletAfterHeadingOnEnter: Command = (state, dispatch) => {
 
 /**
  * "Type a title, press Return, start bullets." When this extension is applied,
- * pressing Enter at the end of a heading drops the caret into a fresh empty
- * bullet instead of a plain paragraph.
+ * pressing Enter at the end of the document's first heading (the title line)
+ * drops the caret into a fresh empty bullet instead of a plain paragraph. A
+ * heading anywhere else in the document is left to the default Enter.
  *
  * Not part of `defineEditorExtension`; the React package applies it via the
  * `bulletAfterHeading` prop (off by default). The high priority lets the command

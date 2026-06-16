@@ -20,7 +20,7 @@ function hasBulletList(fixture: Fixture): boolean {
 }
 
 describe('defineBulletAfterHeading', () => {
-  it('starts an empty bullet on Enter at the end of a heading', async () => {
+  it('starts an empty bullet on Enter at the end of the first heading', async () => {
     using fixture = setupFixture()
     const { n } = fixture
     useBulletAfterHeading(fixture)
@@ -49,7 +49,22 @@ describe('defineBulletAfterHeading', () => {
     expect(fixture.doc.eq(expected)).toBe(true)
   })
 
-  it('works for any heading, not just the first, inserting between it and the next block', async () => {
+  it('inserts the bullet between the first heading and the following block', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    useBulletAfterHeading(fixture)
+    fixture.set(n.doc(n.heading({ level: 1 }, 'Title<a>'), n.paragraph('body')))
+    fixture.view.focus()
+    await userEvent.keyboard('{Enter}')
+    const expected = n.doc(
+      n.heading({ level: 1 }, 'Title'),
+      n.list({ kind: 'bullet' }, n.paragraph()),
+      n.paragraph('body'),
+    )
+    expect(fixture.doc.eq(expected)).toBe(true)
+  })
+
+  it('leaves a heading that is not the document first block to the default Enter', async () => {
     using fixture = setupFixture()
     const { n } = fixture
     useBulletAfterHeading(fixture)
@@ -58,16 +73,10 @@ describe('defineBulletAfterHeading', () => {
     )
     fixture.view.focus()
     await userEvent.keyboard('{Enter}')
-    const expected = n.doc(
-      n.paragraph('intro'),
-      n.heading({ level: 2 }, 'Section'),
-      n.list({ kind: 'bullet' }, n.paragraph()),
-      n.paragraph('body'),
-    )
-    expect(fixture.doc.eq(expected)).toBe(true)
+    expect(hasBulletList(fixture)).toBe(false)
   })
 
-  it('leaves Enter in the middle of a heading to the default split', async () => {
+  it('leaves Enter in the middle of the first heading to the default split', async () => {
     using fixture = setupFixture()
     const { n } = fixture
     useBulletAfterHeading(fixture)
