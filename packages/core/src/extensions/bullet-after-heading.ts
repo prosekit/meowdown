@@ -5,6 +5,7 @@ import {
   withPriority,
   type PlainExtension,
 } from '@prosekit/core'
+import type { ListAttrs } from '@prosekit/extensions/list'
 import { TextSelection, type Command } from '@prosekit/pm/state'
 
 /**
@@ -29,7 +30,7 @@ const bulletAfterHeadingOnEnter: Command = (state, dispatch) => {
   if (dispatch) {
     const listType = getNodeType(state.schema, 'list')
     const paragraphType = getNodeType(state.schema, 'paragraph')
-    const bullet = listType.create({ kind: 'bullet' }, paragraphType.create())
+    const bullet = listType.create({ kind: 'bullet' } satisfies ListAttrs, paragraphType.create())
     const afterHeading = $from.after()
     const tr = state.tr.insert(afterHeading, bullet)
     // The caret lands inside the new empty bullet: one past the list's open
