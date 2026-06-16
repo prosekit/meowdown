@@ -14,6 +14,19 @@ trustPolicyIgnoreAfter: 10080 # 7 days
 
 trustLockfile: true
 
+# Temporary: testing the unreleased `MarkBuilder.create` change from
+# prosekit/prosekit#1683 via pkg.pr.new. Once a prosekit beta that includes
+# `create` is released, remove this block and bump the `@prosekit/*` specifiers
+# in the package.json files to that version.
+blockExoticSubdeps: false
+
+overrides:
+  '@prosekit/core': 'https://pkg.pr.new/@prosekit/core@b1a035b'
+  '@prosekit/extensions': 'https://pkg.pr.new/@prosekit/extensions@b1a035b'
+  '@prosekit/pm': 'https://pkg.pr.new/@prosekit/pm@b1a035b'
+  '@prosekit/react': 'https://pkg.pr.new/@prosekit/react@b1a035b'
+  '@prosekit/web': 'https://pkg.pr.new/@prosekit/web@b1a035b'
+
 minimumReleaseAgeExclude:
   - prosemirror-highlight@0.15.2
   - '@ocavue/utils@1.7.0'
