@@ -3,11 +3,10 @@ import { describe, expect, it } from 'vitest'
 import { matchYouTube } from './youtube.ts'
 
 describe('matchYouTube', () => {
-  // REVIEW: rename `keyFor` to `getKey`
-  const keyFor = (src: string) => matchYouTube(src)?.key
+  const getKey = (src: string) => matchYouTube(src)?.key
 
   it('matches the standard watch URL', () => {
-    expect(keyFor('https://www.youtube.com/watch?v=dQw4w9WgXcQ')).toBe('youtube:dQw4w9WgXcQ:0')
+    expect(getKey('https://www.youtube.com/watch?v=dQw4w9WgXcQ')).toBe('youtube:dQw4w9WgXcQ:0')
   })
 
   it.each([
@@ -16,12 +15,12 @@ describe('matchYouTube', () => {
     'https://www.youtube.com/embed/dQw4w9WgXcQ',
     'https://m.youtube.com/watch?v=dQw4w9WgXcQ',
   ])('matches %s', (src) => {
-    expect(keyFor(src)).toBe('youtube:dQw4w9WgXcQ:0')
+    expect(getKey(src)).toBe('youtube:dQw4w9WgXcQ:0')
   })
 
   it('carries a start time (t=90, t=1m30s)', () => {
-    expect(keyFor('https://youtu.be/dQw4w9WgXcQ?t=90')).toBe('youtube:dQw4w9WgXcQ:90')
-    expect(keyFor('https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=1m30s')).toBe(
+    expect(getKey('https://youtu.be/dQw4w9WgXcQ?t=90')).toBe('youtube:dQw4w9WgXcQ:90')
+    expect(getKey('https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=1m30s')).toBe(
       'youtube:dQw4w9WgXcQ:90',
     )
   })

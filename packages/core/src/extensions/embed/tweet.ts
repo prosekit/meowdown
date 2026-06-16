@@ -1,3 +1,5 @@
+import { prefersDarkColorScheme } from '../../utils/prefers-dark-color-scheme.ts'
+
 import type { EmbedMatcher } from './types.ts'
 
 const TWEET_HOSTS = /^(?:www\.|mobile\.)?(?:twitter\.com|x\.com)$/i
@@ -12,13 +14,6 @@ function parseTweetId(src: string): string | undefined {
   }
   if (!TWEET_HOSTS.test(url.hostname)) return undefined
   return STATUS_ID.exec(url.pathname)?.[1]
-}
-
-// REVIEW:
-// 1. Move this function to packages/core/src/utils/
-// 2. return false if `typeof window === 'undefined'` to avoid error in SSR environment.
-function prefersDarkColorScheme(): boolean {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
 }
 
 export const matchTweet: EmbedMatcher = (src) => {
@@ -44,27 +39,34 @@ export const matchTweet: EmbedMatcher = (src) => {
   }
 }
 
-/** The `postMessage` payload the Twitter embed iframe sends once it has laid out. */
+/**
+ * Shape of the resize message Twitter's first-party embed iframe
+ * (`platform.twitter.com/embed/Tweet.html`) posts to its parent once the tweet
+ * has laid out: `{ 'twttr.embed': { method: 'twttr.private.resize', params: [{ height }] } }`.
+ *
+ * Twitter does not document this; it is reverse-engineered from the widget's
+ * `window.postMessage` payload (see the community write-up at
+ * https://gist.github.com/surianee/6dd10ce6ab8778f2bcad). Because it is
+ * undocumented and may change, `listenForTweetHeight` parses it defensively and
+ * a failure just leaves the iframe at its CSS height.
+ */
 interface TweetResizeMessage {
-  // REVIEW: where did you know this message format? Please add a comment to explain how you know this and where to find the documentation for this message format. Maybe a doc link or a github soure code link to a git sha and line mnumber.
   'twttr.embed'?: {
     method?: string
     params?: Array<{ height?: number }>
   }
 }
 
-/**
- * The Twitter embed iframe posts `{ 'twttr.embed': { method: 'twttr.private.resize',
- * params: [{ height }] } }` once it has laid out. Resize only for our own iframe.
- */
 function listenForTweetHeight(iframe: HTMLIFrameElement): void {
   const onMessage = (event: MessageEvent) => {
     if (event.source !== iframe.contentWindow) return
-    // REVIEW: 1. what if the message format change? Please add a try cache block here to avoid breaking the whole editor.
-    // 2. if we do catch error, print a warning
-    const message = event.data as TweetResizeMessage | null
-    const height = message?.['twttr.embed']?.params?.[0]?.height
-    if (typeof height === 'number') iframe.style.height = `${height}px`
+    try {
+      const message = event.data as TweetResizeMessage | null
+      const height = message?.['twttr.embed']?.params?.[0]?.height
+      if (typeof height === 'number') iframe.style.height = `${height}px`
+    } catch (error) {
+      console.warn('[meowdown] failed to parse tweet resize message:', error)
+    }
   }
   window.addEventListener('message', onMessage)
   // Drop the listener once the iframe leaves the DOM (decoration rebuilt/removed).
