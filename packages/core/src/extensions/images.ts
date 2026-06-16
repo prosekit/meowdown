@@ -4,6 +4,8 @@ import { Decoration, DecorationSet, type EditorView } from '@prosekit/pm/view'
 
 import { scanInlineImages } from '../converters/scan-inline-images.ts'
 
+import { matchEmbed, type EmbedRender } from './embed/index.ts'
+
 type ImageUrlResolver = (src: string) => string | undefined
 type ImagePasteHandler = (file: File) => string | undefined | Promise<string | undefined>
 type ImageSaveErrorHandler = (error: unknown, file: File) => void
@@ -48,28 +50,51 @@ function computeImageRanges(state: EditorState): ImageRange[] {
 function buildImageDecorations(state: EditorState, options: ImageOptions): DecorationSet {
   const decorations: Decoration[] = []
   for (const range of computeImageRanges(state)) {
+    // Embeddable URLs (YouTube, tweets) render as a rich embed; everything else
+    // falls through to the plain `<img>` path.
+    const embed = matchEmbed(range.src)
+    if (embed) {
+      decorations.push(buildEmbedDecoration(range, embed))
+      continue
+    }
     const url = options.resolveImageUrl(range.src)
-    if (!url) continue
-    decorations.push(
-      Decoration.widget(
-        range.widgetAt,
-        () => {
-          const figure = document.createElement('div')
-          figure.className = 'md-image'
-          figure.contentEditable = 'false'
-          const img = document.createElement('img')
-          img.src = url
-          img.alt = range.alt
-          img.draggable = false
-          figure.appendChild(img)
-          return figure
-        },
-        // Keyed by url so ProseMirror reuses the DOM node and the image never reloads.
-        { key: `md-image:${url}`, side: 1 },
-      ),
-    )
+    if (url) decorations.push(buildImageDecoration(range, url))
   }
   return DecorationSet.create(state.doc, decorations)
+}
+
+function buildEmbedDecoration(range: ImageRange, embed: EmbedRender): Decoration {
+  return Decoration.widget(
+    range.widgetAt,
+    () => {
+      const wrapper = document.createElement('div')
+      wrapper.className = 'md-embed-wrapper'
+      wrapper.contentEditable = 'false'
+      wrapper.appendChild(embed.render())
+      return wrapper
+    },
+    // Keyed by embed identity so ProseMirror reuses the iframe and it never reloads.
+    { key: `md-embed:${embed.key}`, side: 1 },
+  )
+}
+
+function buildImageDecoration(range: ImageRange, url: string): Decoration {
+  return Decoration.widget(
+    range.widgetAt,
+    () => {
+      const figure = document.createElement('div')
+      figure.className = 'md-image'
+      figure.contentEditable = 'false'
+      const img = document.createElement('img')
+      img.src = url
+      img.alt = range.alt
+      img.draggable = false
+      figure.appendChild(img)
+      return figure
+    },
+    // Keyed by url so ProseMirror reuses the DOM node and the image never reloads.
+    { key: `md-image:${url}`, side: 1 },
+  )
 }
 
 function createImageRenderPlugin(options: ImageOptions): Plugin<DecorationSet> {

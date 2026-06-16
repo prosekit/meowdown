@@ -49,6 +49,12 @@ Drop in an image and it renders right under the line. Paste or drag one in to up
 
 ![A sunny placeholder photo](https://static.photos/yellow/640x360/42)
 
+Embed a YouTube video or a tweet with the same image syntax, just point the link at the URL:
+
+![](https://www.youtube.com/watch?v=aqz-KE-bpKQ)
+
+![](https://twitter.com/jack/status/20)
+
 Drop in a fenced code block and pick its language from the selector:
 
 \`\`\`typescript
