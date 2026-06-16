@@ -60,6 +60,9 @@ importers:
       '@lezer/markdown':
         specifier: ^1.6.4
         version: 1.6.4
+      '@ocavue/utils':
+        specifier: ^1.7.0
+        version: 1.7.0
       '@prosekit/core':
         specifier: ^0.12.3
         version: 0.12.3(prosemirror-model@1.25.7)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
