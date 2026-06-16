@@ -15,14 +15,6 @@ describe('codeBlockLanguages', () => {
           "value": "asn.1",
         },
         {
-          "label": "Asterisk",
-          "value": "asterisk",
-        },
-        {
-          "label": "Brainfuck",
-          "value": "brainfuck",
-        },
-        {
           "label": "C",
           "value": "c",
         },
@@ -111,10 +103,6 @@ describe('codeBlockLanguages', () => {
           "value": "ebnf",
         },
         {
-          "label": "ECL",
-          "value": "ecl",
-        },
-        {
           "label": "edn",
           "value": "edn",
         },
@@ -131,20 +119,8 @@ describe('codeBlockLanguages', () => {
           "value": "erlang",
         },
         {
-          "label": "Esper",
-          "value": "esper",
-        },
-        {
           "label": "F#",
           "value": "f#",
-        },
-        {
-          "label": "Factor",
-          "value": "factor",
-        },
-        {
-          "label": "FCL",
-          "value": "fcl",
         },
         {
           "label": "Forth",
@@ -263,20 +239,12 @@ describe('codeBlockLanguages', () => {
           "value": "mbox",
         },
         {
-          "label": "mIRC",
-          "value": "mirc",
-        },
-        {
           "label": "Modelica",
           "value": "modelica",
         },
         {
           "label": "MS SQL",
           "value": "ms sql",
-        },
-        {
-          "label": "MUMPS",
-          "value": "mumps",
         },
         {
           "label": "MySQL",
@@ -311,10 +279,6 @@ describe('codeBlockLanguages', () => {
           "value": "octave",
         },
         {
-          "label": "Oz",
-          "value": "oz",
-        },
-        {
           "label": "Pascal",
           "value": "pascal",
         },
@@ -329,10 +293,6 @@ describe('codeBlockLanguages', () => {
         {
           "label": "PHP",
           "value": "php",
-        },
-        {
-          "label": "Pig",
-          "value": "pig",
         },
         {
           "label": "Plain text",
@@ -451,10 +411,6 @@ describe('codeBlockLanguages', () => {
           "value": "sqlite",
         },
         {
-          "label": "Squirrel",
-          "value": "squirrel",
-        },
-        {
           "label": "sTeX",
           "value": "stex",
         },
@@ -555,16 +511,8 @@ describe('codeBlockLanguages', () => {
           "value": "xquery",
         },
         {
-          "label": "Yacas",
-          "value": "yacas",
-        },
-        {
           "label": "YAML",
           "value": "yaml",
-        },
-        {
-          "label": "Z80",
-          "value": "z80",
         },
       ]
     `)
