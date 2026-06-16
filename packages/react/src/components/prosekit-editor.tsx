@@ -82,6 +82,9 @@ export interface ProseKitEditorProps {
   /** Auto-embeds a pasted tweet/YouTube link. See `EditorProps.embedPaste`. */
   embedPaste?: boolean
 
+  /** Starts a bullet on Enter after a heading. See `EditorProps.bulletAfterHeading`. */
+  bulletAfterHeading?: boolean
+
   /** Placeholder text for empty blocks. See `EditorProps.placeholder`. */
   placeholder?: PlaceholderOptions['placeholder']
 
@@ -112,6 +115,7 @@ export function ProseKitEditor({
   onImagePaste,
   onImageSaveError,
   embedPaste,
+  bulletAfterHeading,
   placeholder,
   readOnly,
   spellCheck,
@@ -206,6 +210,7 @@ export function ProseKitEditor({
         onImagePaste={onImagePaste}
         onImageSaveError={onImageSaveError}
         embedPaste={embedPaste}
+        bulletAfterHeading={bulletAfterHeading}
         placeholder={placeholder}
         readOnly={readOnly}
       />

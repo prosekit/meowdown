@@ -90,6 +90,13 @@ export interface EditorProps {
   embedPaste?: boolean
 
   /**
+   * Pressing Enter at the end of a heading starts a fresh empty bullet on the
+   * next line instead of a plain paragraph. Off by default. Ignored in source
+   * mode.
+   */
+  bulletAfterHeading?: boolean
+
+  /**
    * Placeholder text shown when the whole document is empty. A function
    * receives the editor state. Pass a stable function. Ignored in source mode.
    */
@@ -128,6 +135,7 @@ export function MeowdownEditor({
   onImagePaste,
   onImageSaveError,
   embedPaste = true,
+  bulletAfterHeading = false,
   placeholder,
   readOnly,
   spellCheck,
@@ -205,6 +213,7 @@ export function MeowdownEditor({
           onImagePaste={onImagePaste}
           onImageSaveError={onImageSaveError}
           embedPaste={embedPaste}
+          bulletAfterHeading={bulletAfterHeading}
           placeholder={placeholder}
           readOnly={readOnly}
           spellCheck={spellCheck}
