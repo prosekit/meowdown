@@ -15,11 +15,24 @@ const pmRoot = page.locate('.ProseMirror')
 const handle = page.getByTestId('block-handle')
 const dropIndicator = page.getByTestId('drop-indicator')
 
+interface RenderOptions {
+  ref?: Ref<EditorHandle>
+  blockHandle?: boolean
+  readOnly?: boolean
+}
+
 // The mouse position persists across tests; park it first so a leftover
 // position over the new editor cannot open the handle.
-async function renderEditor(ref?: Ref<EditorHandle>) {
+async function renderEditor({ ref, blockHandle, readOnly }: RenderOptions = {}) {
   await unhover()
-  return await render(<ProseKitEditor ref={ref} initialMarkdown={'Alpha\n\nBravo'} />)
+  return await render(
+    <ProseKitEditor
+      ref={ref}
+      initialMarkdown={'Alpha\n\nBravo'}
+      blockHandle={blockHandle}
+      readOnly={readOnly}
+    />,
+  )
 }
 
 describe('BlockHandle', () => {
@@ -48,7 +61,7 @@ describe('BlockHandle', () => {
 
   it('inserts an empty paragraph below the hovered block with the add button', async () => {
     const ref = createRef<EditorHandle>()
-    await renderEditor(ref)
+    await renderEditor({ ref })
     await hover(pmRoot.getByText('Alpha'))
     await page.getByTestId('block-handle-add').click()
     // Adding hides the handle and puts the caret into the new paragraph.
@@ -65,23 +78,21 @@ describe('BlockHandle', () => {
   })
 
   it('does not render when blockHandle is false', async () => {
-    await unhover()
-    await render(<ProseKitEditor initialMarkdown={'Alpha\n\nBravo'} blockHandle={false} />)
+    await renderEditor({ blockHandle: false })
     await hover(pmRoot.getByText('Alpha'))
     await expect.element(handle).not.toBeInTheDocument()
     await expect.element(dropIndicator).not.toBeInTheDocument()
   })
 
   it('does not render when readOnly', async () => {
-    await unhover()
-    await render(<ProseKitEditor initialMarkdown={'Alpha\n\nBravo'} readOnly />)
+    await renderEditor({ readOnly: true })
     await hover(pmRoot.getByText('Alpha'))
     await expect.element(handle).not.toBeInTheDocument()
   })
 
   it('drags a block to a new position, showing the drop indicator', async () => {
     const ref = createRef<EditorHandle>()
-    await renderEditor(ref)
+    await renderEditor({ ref })
     await hover(pmRoot.getByText('Bravo'))
 
     const start = await hover(page.getByTestId('block-handle-drag'))
