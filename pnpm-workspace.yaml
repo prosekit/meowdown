@@ -17,9 +17,9 @@ trustLockfile: true
 minimumReleaseAgeExclude:
   - prosemirror-highlight@0.15.2
   - '@ocavue/utils@1.7.0'
-  - '@prosekit/core@0.13.0-beta.0'
-  - '@prosekit/extensions@0.17.5-beta.1'
-  - '@prosekit/react@0.8.0-beta.1'
-  - '@prosekit/web@0.9.0-beta.1'
+  - '@prosekit/core@0.13.0-beta.1'
+  - '@prosekit/extensions@0.17.5-beta.2'
+  - '@prosekit/react@0.8.0-beta.2'
+  - '@prosekit/web@0.9.0-beta.2'
   - eslint-plugin-unicorn@66.0.0
   - '@ocavue/eslint-config@4.7.1'

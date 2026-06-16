@@ -30,3 +30,14 @@ export const getNodeBuilders: () => TypedNodeBuilders = /* @__PURE__ */ once(() 
 export const getMarkBuilders: () => TypedMarkBuilders = /* @__PURE__ */ once(() => {
   return createMarkBuilders<EditorExtension>(getSharedSchema())
 })
+
+const MARK_BUILDERS_CACHE_KEY = 'meowdown_mark_builders'
+
+/** Typed mark builders bound to a specific schema, cached per schema. */
+export function getMarkBuildersForSchema(schema: Schema): TypedMarkBuilders {
+  const cached = schema.cached[MARK_BUILDERS_CACHE_KEY] as TypedMarkBuilders | undefined
+  if (cached) return cached
+  const builders = createMarkBuilders<EditorExtension>(schema)
+  schema.cached[MARK_BUILDERS_CACHE_KEY] = builders
+  return builders
+}

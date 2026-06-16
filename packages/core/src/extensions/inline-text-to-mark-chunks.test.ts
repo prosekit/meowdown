@@ -1,9 +1,10 @@
-import type { Schema } from '@prosekit/pm/model'
+import { createMarkBuilders } from '@prosekit/core'
 import { beforeAll, describe, expect, it } from 'vitest'
 
-import { defineEditorExtension } from './extension.ts'
+import { defineEditorExtension, type EditorExtension } from './extension.ts'
 import { inlineTextToMarkChunks } from './inline-text-to-mark-chunks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
+import type { TypedMarkBuilders } from './schema.ts'
 
 /**
  * Helper: serialize chunk to a compact string form so inline
@@ -31,14 +32,15 @@ function foramtMarkChunks(chunks: MarkChunk[]): string {
 }
 
 describe('inlineTextToMarkChunks', () => {
-  let schema: Schema
+  let markBuilders: TypedMarkBuilders
 
   beforeAll(() => {
-    schema = defineEditorExtension().schema!
+    const schema = defineEditorExtension().schema!
+    markBuilders = createMarkBuilders<EditorExtension>(schema)
   })
 
   it('plain text returns no chunks (no marks anywhere)', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'hello world')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'hello world')
     // Pure text has no inline nodes; the implementation does not emit
     // a "no-mark" gap when the entire range is plain.
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
@@ -49,7 +51,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('emphasis yields gap + mark + content + mark', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'Hello *world*')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'Hello *world*')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-6: -
@@ -61,7 +63,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('strong emphasis', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'a **bold** b')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'a **bold** b')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-2: -
@@ -74,7 +76,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('inline code', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'a `c` b')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'a `c` b')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-2: -
@@ -87,7 +89,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('strikethrough', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'a ~~b~~ c')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'a ~~b~~ c')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-2: -
@@ -100,7 +102,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('link with href on its text portion', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'see [docs](http://x) now')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'see [docs](http://x) now')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-4: -
@@ -115,7 +117,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('link with emphasis nested inside the text', () => {
-    const chunks = inlineTextToMarkChunks(schema, '[*ital*](http://x)')
+    const chunks = inlineTextToMarkChunks(markBuilders, '[*ital*](http://x)')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-1: mdLinkText(href=http://x) + mdMark
@@ -130,7 +132,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('autolinks a bare https URL', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'visit https://example.com now')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'visit https://example.com now')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-6: -
@@ -141,7 +143,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('autolinks a www URL with an implied https scheme', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'see www.example.com here')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'see www.example.com here')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-4: -
@@ -152,7 +154,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('autolinks a bare email as mailto', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'mail me@example.com ok')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'mail me@example.com ok')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-5: -
@@ -163,7 +165,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('autolinks a bare mailto URL, keeping the scheme', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'a mailto:me@example.com b')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'a mailto:me@example.com b')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-2: -
@@ -174,7 +176,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('autolinks an angle-bracket URL, with the brackets as mdMark', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'a <https://example.com> b')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'a <https://example.com> b')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-2: -
@@ -187,7 +189,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('keeps a non-http scheme in an angle autolink', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'a <ftp://example.com> b')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'a <ftp://example.com> b')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-2: -
@@ -200,7 +202,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('keeps an ssh scheme in an angle autolink', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'a <ssh://example.com> b')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'a <ssh://example.com> b')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-2: -
@@ -213,7 +215,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('excludes trailing punctuation from an autolink', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'end https://example.com.')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'end https://example.com.')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-4: -
@@ -224,7 +226,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('autolinks a URL nested in emphasis', () => {
-    const chunks = inlineTextToMarkChunks(schema, '*https://example.com*')
+    const chunks = inlineTextToMarkChunks(markBuilders, '*https://example.com*')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-1: mdEm + mdMark
@@ -235,7 +237,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('does not bare-autolink a non-http scheme', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'a ftp://example.com b')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'a ftp://example.com b')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-21: -
@@ -244,7 +246,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('does not autolink a schemeless host', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'a example.com b')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'a example.com b')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-15: -
@@ -253,7 +255,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('nested emphasis inside strong (***foo***)', () => {
-    const chunks = inlineTextToMarkChunks(schema, '***foo***')
+    const chunks = inlineTextToMarkChunks(markBuilders, '***foo***')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-1: mdEm + mdMark
@@ -266,7 +268,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('adjacent emphasis and strong', () => {
-    const chunks = inlineTextToMarkChunks(schema, '*a***b**')
+    const chunks = inlineTextToMarkChunks(markBuilders, '*a***b**')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-1: mdEm + mdMark
@@ -280,7 +282,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('emphasis at start and end of text', () => {
-    const chunks = inlineTextToMarkChunks(schema, '*a* mid *b*')
+    const chunks = inlineTextToMarkChunks(markBuilders, '*a* mid *b*')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-1: mdEm + mdMark
@@ -295,7 +297,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('entire content is emphasized', () => {
-    const chunks = inlineTextToMarkChunks(schema, '*all*')
+    const chunks = inlineTextToMarkChunks(markBuilders, '*all*')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-1: mdEm + mdMark
@@ -306,11 +308,11 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('empty input returns no chunks', () => {
-    expect(inlineTextToMarkChunks(schema, '')).toEqual([])
+    expect(inlineTextToMarkChunks(markBuilders, '')).toEqual([])
   })
 
   it('escape characters produce no marks (visible literal text)', () => {
-    const chunks = inlineTextToMarkChunks(schema, String.raw`\*not\*`)
+    const chunks = inlineTextToMarkChunks(markBuilders, String.raw`\*not\*`)
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-7: -
@@ -319,7 +321,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('hard break produces no mark', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'a  \nb')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'a  \nb')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-5: -
@@ -328,7 +330,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('tag yields a single mdTag chunk covering the # too', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'a #meow b')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'a #meow b')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-2: -
@@ -339,7 +341,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('two tags', () => {
-    const chunks = inlineTextToMarkChunks(schema, '#a #b')
+    const chunks = inlineTextToMarkChunks(markBuilders, '#a #b')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-2: mdTag
@@ -350,7 +352,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('tag inside emphasis', () => {
-    const chunks = inlineTextToMarkChunks(schema, '*x #tag y*')
+    const chunks = inlineTextToMarkChunks(markBuilders, '*x #tag y*')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-1: mdEm + mdMark
@@ -363,7 +365,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('tag inside a link label', () => {
-    const chunks = inlineTextToMarkChunks(schema, '[see #tag](http://x)')
+    const chunks = inlineTextToMarkChunks(markBuilders, '[see #tag](http://x)')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-1: mdLinkText(href=http://x) + mdMark
@@ -377,7 +379,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('heading-like text produces no tag', () => {
-    const chunks = inlineTextToMarkChunks(schema, '# heading text')
+    const chunks = inlineTextToMarkChunks(markBuilders, '# heading text')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-14: -
@@ -386,7 +388,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('all-digit tag produces no mark', () => {
-    const chunks = inlineTextToMarkChunks(schema, "we're #1")
+    const chunks = inlineTextToMarkChunks(markBuilders, "we're #1")
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-8: -
@@ -395,7 +397,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('wikilink yields mdMark brackets around an mdWikilink target', () => {
-    const chunks = inlineTextToMarkChunks(schema, 'a [[note]] b')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'a [[note]] b')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-2: -
@@ -408,7 +410,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('adjacent wikilinks coalesce the middle ]][[ into one chunk', () => {
-    const chunks = inlineTextToMarkChunks(schema, '[[a]][[b]]')
+    const chunks = inlineTextToMarkChunks(markBuilders, '[[a]][[b]]')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-2: mdMark + mdWikilink
@@ -421,7 +423,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('wikilink inside emphasis', () => {
-    const chunks = inlineTextToMarkChunks(schema, '*x [[n]] y*')
+    const chunks = inlineTextToMarkChunks(markBuilders, '*x [[n]] y*')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-1: mdEm + mdMark
@@ -436,7 +438,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('wikilink inside a link label', () => {
-    const chunks = inlineTextToMarkChunks(schema, '[see [[x]]](http://y)')
+    const chunks = inlineTextToMarkChunks(markBuilders, '[see [[x]]](http://y)')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-1: mdLinkText(href=http://y) + mdMark
@@ -452,7 +454,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('no mdTag inside a wikilink target', () => {
-    const chunks = inlineTextToMarkChunks(schema, '[[note #tag]]')
+    const chunks = inlineTextToMarkChunks(markBuilders, '[[note #tag]]')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-2: mdMark + mdWikilink
@@ -465,7 +467,7 @@ describe('inlineTextToMarkChunks', () => {
   it('unclosed wikilink falls back to link parsing of the inner [a]', () => {
     // No mdWikilink anywhere; the inner `[a]` becomes a shortcut
     // reference link (pre-existing lezer behavior).
-    const chunks = inlineTextToMarkChunks(schema, '[[a]')
+    const chunks = inlineTextToMarkChunks(markBuilders, '[[a]')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-1: -
