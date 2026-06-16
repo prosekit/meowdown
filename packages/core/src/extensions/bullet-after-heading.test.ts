@@ -49,6 +49,24 @@ describe('defineBulletAfterHeading', () => {
     expect(fixture.doc.eq(expected)).toBe(true)
   })
 
+  it('works for any heading, not just the first, inserting between it and the next block', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    useBulletAfterHeading(fixture)
+    fixture.set(
+      n.doc(n.paragraph('intro'), n.heading({ level: 2 }, 'Section<a>'), n.paragraph('body')),
+    )
+    fixture.view.focus()
+    await userEvent.keyboard('{Enter}')
+    const expected = n.doc(
+      n.paragraph('intro'),
+      n.heading({ level: 2 }, 'Section'),
+      n.list({ kind: 'bullet' }, n.paragraph()),
+      n.paragraph('body'),
+    )
+    expect(fixture.doc.eq(expected)).toBe(true)
+  })
+
   it('leaves Enter in the middle of a heading to the default split', async () => {
     using fixture = setupFixture()
     const { n } = fixture
