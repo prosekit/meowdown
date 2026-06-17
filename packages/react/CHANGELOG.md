@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/prosekit/meowdown/compare/react-v0.11.0...react-v0.11.1) (2026-06-17)
+
+
+### Bug Fixes
+
+* **react:** constrain autocomplete menu width ([#66](https://github.com/prosekit/meowdown/issues/66)) ([b83b019](https://github.com/prosekit/meowdown/commit/b83b019671664a3336a33e5452d6764a604ba571))
+
 ## [0.11.0](https://github.com/prosekit/meowdown/compare/react-v0.10.0...react-v0.11.0) (2026-06-16)
 
 
