@@ -77,7 +77,7 @@ export function WikilinkMenu({ onWikilinkSearch }: WikilinkMenuProps) {
                 item.onSelect?.()
               }}
             >
-              <span>{item.label ?? item.target}</span>
+              <span className={styles.Label}>{item.label ?? item.target}</span>
               {item.detail ? <span className={styles.Detail}>{item.detail}</span> : null}
             </AutocompleteItem>
           ))}

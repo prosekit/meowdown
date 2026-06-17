@@ -93,6 +93,28 @@ describe('WikilinkMenu', () => {
     expect(onSelect).toHaveBeenCalled()
   })
 
+  it('keeps long rows within the menu width', async () => {
+    const longTitle = 'A very long note title '.repeat(12)
+    const richSearch = (): WikilinkItem[] => [
+      {
+        target: longTitle,
+        label: longTitle,
+        detail: 'A very long detail '.repeat(8),
+      },
+    ]
+
+    await render(<ProseKitEditor onWikilinkSearch={richSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard(TWO_BRACKETS)
+    await expect.element(menu.getByText(longTitle)).toBeVisible()
+
+    const menuBox = menu.element().getBoundingClientRect()
+    const label = menu.getByText(longTitle).element()
+
+    expect(menuBox.width).toBeLessThanOrEqual(384)
+    expect(label.scrollWidth).toBeGreaterThan(label.clientWidth)
+  })
+
   it('inserts the selected note as [[Name]] and removes the query', async () => {
     const ref = createRef<EditorHandle>()
     await render(<ProseKitEditor ref={ref} onWikilinkSearch={searchNotes} />)
