@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/prosekit/meowdown/compare/core-v0.11.0...core-v0.11.1) (2026-06-17)
+
+
+### Bug Fixes
+
+* **core:** remove niche code block languages ([#64](https://github.com/prosekit/meowdown/issues/64)) ([73126db](https://github.com/prosekit/meowdown/commit/73126dbeb5bc09a55f95212e79e603481a7cf665))
+
 ## [0.11.0](https://github.com/prosekit/meowdown/compare/core-v0.10.0...core-v0.11.0) (2026-06-16)
 
 
