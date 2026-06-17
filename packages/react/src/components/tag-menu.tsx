@@ -77,7 +77,7 @@ export function TagMenu({ onTagSearch }: TagMenuProps) {
                 item.onSelect?.()
               }}
             >
-              <span>{item.label ?? `#${item.tag}`}</span>
+              <span className={styles.Label}>{item.label ?? `#${item.tag}`}</span>
               {item.detail ? <span className={styles.Detail}>{item.detail}</span> : null}
             </AutocompleteItem>
           ))}
