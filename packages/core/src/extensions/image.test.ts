@@ -195,12 +195,12 @@ describe('image selection ring in hide mode', () => {
 
     // Selects the whole image
     await userEvent.keyboard('{ArrowRight}')
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot( `"ABC▛![img](url)▟DEF"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC▛![img](url)▟DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'solid' })
 
     // Steps past, collapses the caret
     await userEvent.keyboard('{ArrowRight}')
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot( `"ABC![img](url)▌DEF"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC![img](url)▌DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
   })
 
@@ -209,12 +209,12 @@ describe('image selection ring in hide mode', () => {
 
     // Put the caret just after the image
     setCaret(fixture, 14)
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot( `"ABC![img](url)▌DEF"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC![img](url)▌DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
 
     // Selects the whole image
     await userEvent.keyboard('{ArrowLeft}')
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot( `"ABC▛![img](url)▟DEF"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC▛![img](url)▟DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'solid' })
   })
 })
