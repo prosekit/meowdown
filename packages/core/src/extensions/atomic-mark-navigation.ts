@@ -16,18 +16,17 @@ import { getMarkRangeAt } from './get-mark-range-at.ts'
 import { getMarkMode, type MarkMode } from './mark-mode.ts'
 import type { MarkName } from './mark-names.ts'
 
+type AtomicMarks = Array<{ name: MarkName; modes: ReadonlyArray<MarkMode> }>
+
 export interface AtomicMarkNavigationOptions {
   /**
    * Each source mark (e.g. `mdImageSource`) paired with the mark modes in which
    * its run is one atomic unit.
    */
-  marks: Array<{ name: MarkName; modes: ReadonlyArray<MarkMode> }>
+  marks: AtomicMarks,
   /** Decoration class added over the source range while the unit is selected. */
   selectedClass: string
 }
-
-// The `marks` option, reused by the per-command helpers below.
-type AtomicMarks = AtomicMarkNavigationOptions['marks']
 
 // The source marks that are atomic in `state`'s current mark mode (empty when no
 // mode is applied, which keeps the whole feature inert).
