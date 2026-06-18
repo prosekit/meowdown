@@ -12,6 +12,8 @@ export interface WikilinkHit {
   target: string
 }
 
+
+// REVIEW: RENAME THIS FROM `wikilinkAt` TO `findWikilinkAt`
 /** The wikilink covering `pos`, found via the `mdWikilink` mark. Exported for tests. */
 export function wikilinkAt(state: EditorState, pos: number): WikilinkHit | undefined {
   const $pos = state.doc.resolve(pos)

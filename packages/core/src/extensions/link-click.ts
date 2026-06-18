@@ -13,6 +13,8 @@ export interface LinkHit {
   href: string
 }
 
+
+// REVIEW: RENAME THIS FROM `linkAt` TO `findLinkAt`
 /** The link covering `pos`, found via the `mdLinkText` mark. Exported for tests. */
 export function linkAt(state: EditorState, pos: number): LinkHit | undefined {
   const $pos = state.doc.resolve(pos)
