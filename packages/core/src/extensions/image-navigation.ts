@@ -59,22 +59,18 @@ function selectRange(state: EditorState, range: ImageRange): TextSelection {
 // far edge, or step past an image to the left (which the browser cannot do).
 const arrowRight: Command = (state, dispatch, view) => {
   if (!isHideMode(view) || !isTextSelection(state.selection)) return false
-  // REVIEW:
-  // BAD: sel = state.selection
-  // GOOD: selection = state.selection
-  // APPLY THIS EVERYWHERE
-  const sel = state.selection
-  if (sel.empty) {
-    const after = imageAfter(state, sel.from)
+  const selection = state.selection
+  if (selection.empty) {
+    const after = imageAfter(state, selection.from)
     if (after) {
       dispatch?.(state.tr.setSelection(selectRange(state, after)))
       return true
     }
-    const before = imageBefore(state, sel.from)
+    const before = imageBefore(state, selection.from)
     if (before) {
-      const $from = state.doc.resolve(sel.from)
-      if (sel.from >= $from.end()) return false
-      dispatch?.(state.tr.setSelection(TextSelection.create(state.doc, sel.from + 1)))
+      const $from = state.doc.resolve(selection.from)
+      if (selection.from >= $from.end()) return false
+      dispatch?.(state.tr.setSelection(TextSelection.create(state.doc, selection.from + 1)))
       return true
     }
     return false
@@ -89,9 +85,9 @@ const arrowRight: Command = (state, dispatch, view) => {
 // near edge.
 const arrowLeft: Command = (state, dispatch, view) => {
   if (!isHideMode(view) || !isTextSelection(state.selection)) return false
-  const sel = state.selection
-  if (sel.empty) {
-    const before = imageBefore(state, sel.from)
+  const selection = state.selection
+  if (selection.empty) {
+    const before = imageBefore(state, selection.from)
     if (!before) return false
     dispatch?.(state.tr.setSelection(selectRange(state, before)))
     return true
