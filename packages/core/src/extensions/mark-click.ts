@@ -12,13 +12,11 @@ export interface MarkClickConfig<Payload> {
   /** The click target must sit inside this selector, tested via `closest`. */
   selector: string
   /** The mark hit covering `pos`, or `undefined` when the click misses it. */
-  // REVIEW: rename to findHitAt.
-  hitAt: (state: EditorState, pos: number) => MarkClickHit<Payload> | undefined
+  findHitAt: (state: EditorState, pos: number) => MarkClickHit<Payload> | undefined
   /** Fired once the click passes the caret-edit guard below. */
   onClick: (payload: Payload, event: MouseEvent) => void
   /** Stops native handling (e.g. `<a>` navigation) before firing. */
-  // REVIEW: make `preventDefault` must passed. Remove `?`
-  preventDefault?: boolean
+  preventDefault: boolean
 }
 
 /**
@@ -27,9 +25,7 @@ export interface MarkClickConfig<Payload> {
  * so the run stays editable; `Mod`-click always fires.
  */
 export function defineMarkClickHandler<Payload>(config: MarkClickConfig<Payload>): PlainExtension {
-
   let selectionBefore: { from: number; to: number; empty: boolean } | undefined
-
   return definePlugin(
     new Plugin({
       key: config.key,
@@ -45,15 +41,12 @@ export function defineMarkClickHandler<Payload>(config: MarkClickConfig<Payload>
         handleClick: (view, pos, event) => {
           const target = event.target as HTMLElement | null
           if (!target?.closest?.(config.selector)) return false
-          const hit = config.hitAt(view.state, pos)
+          const hit = config.findHitAt(view.state, pos)
           if (!hit) return false
           const modClick = isApple ? event.metaKey : event.ctrlKey
-
-          // It's unclear what does this mean? "selectionBefore?.empty &&
-          // selectionBefore.from >= hit.from &&
-          // selectionBefore.to <= hit.to"
-          // Add some pithy comments. REVIEW
-          //
+          // Caret already resting inside this mark means the user is editing the
+          // run, not following it: let a plain click just move the caret. A
+          // `Mod`-click overrides and always fires.
           if (
             !modClick &&
             selectionBefore?.empty &&

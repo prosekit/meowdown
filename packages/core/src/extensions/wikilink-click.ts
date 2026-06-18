@@ -12,10 +12,8 @@ export interface WikilinkHit {
   target: string
 }
 
-
-// REVIEW: RENAME THIS FROM `wikilinkAt` TO `findWikilinkAt`
 /** The wikilink covering `pos`, found via the `mdWikilink` mark. Exported for tests. */
-export function wikilinkAt(state: EditorState, pos: number): WikilinkHit | undefined {
+export function findWikilinkAt(state: EditorState, pos: number): WikilinkHit | undefined {
   const $pos = state.doc.resolve(pos)
   if (!$pos.parent.isTextblock || $pos.parent.type.spec.code) return
   const range = getMarkRange($pos, 'mdWikilink' satisfies MarkName)
@@ -42,11 +40,12 @@ export interface WikilinkClickPayload {
 export type WikilinkClickHandler = (payload: WikilinkClickPayload) => void
 
 export function defineWikilinkClickHandler(onClick: WikilinkClickHandler): PlainExtension {
-  return defineMarkClickHandler({
+  return defineMarkClickHandler<string>({
     key: wikilinkClickKey,
     selector: '.md-wikilink',
-    hitAt: (state, pos) => {
-      const hit = wikilinkAt(state, pos)
+    preventDefault: false,
+    findHitAt: (state, pos) => {
+      const hit = findWikilinkAt(state, pos)
       return hit ? { from: hit.from, to: hit.to, payload: hit.target } : undefined
     },
     onClick: (target, event) => onClick({ target, event }),

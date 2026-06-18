@@ -13,10 +13,8 @@ export interface LinkHit {
   href: string
 }
 
-
-// REVIEW: RENAME THIS FROM `linkAt` TO `findLinkAt`
 /** The link covering `pos`, found via the `mdLinkText` mark. Exported for tests. */
-export function linkAt(state: EditorState, pos: number): LinkHit | undefined {
+export function findLinkAt(state: EditorState, pos: number): LinkHit | undefined {
   const $pos = state.doc.resolve(pos)
   if (!$pos.parent.isTextblock || $pos.parent.type.spec.code) return
   const range = getMarkRange($pos, 'mdLinkText' satisfies MarkName)
@@ -32,12 +30,12 @@ export interface LinkClickPayload {
 export type LinkClickHandler = (payload: LinkClickPayload) => void
 
 export function defineLinkClickHandler(onClick: LinkClickHandler): PlainExtension {
-  return defineMarkClickHandler({
+  return defineMarkClickHandler<string>({
     key: linkClickKey,
-    selector: 'a', // REVIEW: this feels unsafe because we might have a lot of <a> elements in the editor. Maybe we should use a more specific selector? Perhaps update the markd spec?
+    selector: '.md-link',
     preventDefault: true,
-    hitAt: (state, pos) => {
-      const hit = linkAt(state, pos)
+    findHitAt: (state, pos) => {
+      const hit = findLinkAt(state, pos)
       return hit ? { from: hit.from, to: hit.to, payload: hit.href } : undefined
     },
     onClick: (href, event) => onClick({ href, event }),
