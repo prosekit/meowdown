@@ -21,7 +21,7 @@ describe('bareAutolink', () => {
     })
 
     it('with a subdomain and a path', () => {
-      expect(urls('sub.domain.io/path?q=1')).toEqual([[0, 22, 'sub.domain.io/path?q=1']])
+      expect(urls('sub.domain.com/path?q=1')).toEqual([[0, 23, 'sub.domain.com/path?q=1']])
     })
 
     it('right after an opening paren', () => {

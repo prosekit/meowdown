@@ -8,7 +8,7 @@ describe('hostFromUrl', () => {
   })
 
   it('strips the path', () => {
-    expect(hostFromUrl('sub.domain.io/path?q=1')).toBe('sub.domain.io')
+    expect(hostFromUrl('sub.domain.com/path?q=1')).toBe('sub.domain.com')
   })
 })
 
@@ -16,7 +16,7 @@ describe('isLinkableBareHost', () => {
   const linkable = [
     'google.com',
     'example.org',
-    'sub.domain.io',
+    'cdn.example.net',
     'a-b.example.com',
     'GOOGLE.COM',
     'm.google.com',
@@ -38,9 +38,10 @@ describe('isLinkableBareHost', () => {
     'Cargo.toml', // toml not a tld
     'package.json', // json not a tld
     'etc', // single label
-    't.co', // 1-char host
-    'x.io', // 1-char host
-    'do.so', // so not a tld and host < 3 anyway
+    'page.io', // io is a real TLD but not in the curated list
+    'corp.co', // co is a real TLD but excluded on purpose
+    'ab.com', // 2-char registrable host (com is in the list)
+    'x.org', // 1-char registrable host (org is in the list)
     '1.2.3.4', // last label not a tld
     'v1.2', // last label not a tld
     '192.168.0.1', // last label not a tld

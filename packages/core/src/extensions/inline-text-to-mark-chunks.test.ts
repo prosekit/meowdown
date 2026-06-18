@@ -345,10 +345,10 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('bare-autolinks a domain with a path, keeping the path in the href', () => {
-    const chunks = inlineTextToMarkChunks(markBuilders, 'sub.domain.io/path?q=1')
+    const chunks = inlineTextToMarkChunks(markBuilders, 'sub.domain.com/path?q=1')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-22: mdLinkText(href=https://sub.domain.io/path?q=1)
+      0-23: mdLinkText(href=https://sub.domain.com/path?q=1)
       "
     `)
   })
