@@ -25,13 +25,15 @@ export interface MdImageViewAttrs {
 /**
  * Covers the whole `![alt](url)` source. This is the mark `defineMarkMode`
  * hides in hide/focus mode so the rendered image replaces the raw syntax. The
- * `src` attribute keeps adjacent images distinct so their ranges stay separate.
+ * `src`/`alt` attributes keep adjacent images distinct so their ranges stay
+ * separate, and carry the parsed values so a click can resolve the image
+ * without re-parsing the source.
  */
 function defineMdImageSource() {
   return defineMarkSpec<'mdImageSource', MdImageSourceAttrs>({
     name: 'mdImageSource' satisfies MarkName,
     inclusive: false,
-    attrs: { src: { default: '' } },
+    attrs: { src: { default: '' }, alt: { default: '' } },
     toDOM: () => ['span', { class: 'md-image-source' }, 0],
     parseDOM: [{ tag: 'span.md-image-source' }],
   })
@@ -39,6 +41,7 @@ function defineMdImageSource() {
 
 export interface MdImageSourceAttrs {
   src: string
+  alt: string
 }
 
 /**

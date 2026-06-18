@@ -1,9 +1,10 @@
 import { TextSelection } from '@prosekit/pm/state'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
 import { getSelectionSnapshot, setupFixture, type Fixture } from '../testing/index.ts'
 
+import { defineImageClickHandler, type ImageClickHandler } from './image-click.ts'
 import { defineImage } from './image.ts'
 import { defineMarkMode } from './mark-mode.ts'
 
@@ -186,24 +187,99 @@ describe('image selection ring in hide mode', () => {
   // to it does not. This is what the `md-image-selected` decoration drives.
   it('rings the preview only while the image is selected', async () => {
     using fixture = setupHidden()
-    setCaret(fixture, 3) // ABC| just before the image
 
+    // Put the caret just before the image
+    setCaret(fixture, 3)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC▌![img](url)DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
 
-    await userEvent.keyboard('{ArrowRight}') // selects the whole image
+    // Selects the whole image
+    await userEvent.keyboard('{ArrowRight}')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC▛![img](url)▟DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'solid' })
 
-    await userEvent.keyboard('{ArrowRight}') // steps past, collapses the caret
+    // Steps past, collapses the caret
+    await userEvent.keyboard('{ArrowRight}')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC![img](url)▌DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
   })
 
   it('rings the preview when selected from its right edge', async () => {
     using fixture = setupHidden()
-    setCaret(fixture, 14) // image|DEF just after the image
 
+    // Put the caret just after the image
+    setCaret(fixture, 14)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC![img](url)▌DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
 
-    await userEvent.keyboard('{ArrowLeft}') // selects the whole image
+    // Selects the whole image
+    await userEvent.keyboard('{ArrowLeft}')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC▛![img](url)▟DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'solid' })
+  })
+})
+
+describe('image click callback', () => {
+  // Render `markdown` with a click handler attached, showing http(s) images as-is.
+  function applyClickable(
+    fixture: Fixture,
+    markdown: string,
+    onImageClick: ImageClickHandler,
+  ): void {
+    const { editor, n } = fixture
+    editor.use(defineImage({ resolveImageUrl: (src) => src }))
+    editor.use(defineImageClickHandler(onImageClick))
+    fixture.set(n.doc(n.paragraph(markdown)))
+  }
+
+  it('fires with the markdown src and alt when the preview is clicked', async () => {
+    const onImageClick = vi.fn<ImageClickHandler>()
+    using fixture = setupFixture()
+    applyClickable(fixture, '![cat](https://example.com/cat.png)', onImageClick)
+    await expect.element(preview).toBeInTheDocument()
+    await userEvent.click(preview)
+    await vi.waitFor(() => {
+      expect(onImageClick).toHaveBeenCalledWith(
+        expect.objectContaining({ src: 'https://example.com/cat.png', alt: 'cat' }),
+      )
+    })
+  })
+
+  it('passes the originating MouseEvent', async () => {
+    const onImageClick = vi.fn<ImageClickHandler>()
+    using fixture = setupFixture()
+    applyClickable(fixture, '![cat](https://example.com/cat.png)', onImageClick)
+    await expect.element(preview).toBeInTheDocument()
+    await userEvent.click(preview)
+    await vi.waitFor(() => expect(onImageClick).toHaveBeenCalled())
+    expect(onImageClick.mock.calls[0][0].event).toBeInstanceOf(MouseEvent)
+  })
+
+  it('does not fire when plain text is clicked', async () => {
+    const onImageClick = vi.fn<ImageClickHandler>()
+    using fixture = setupFixture()
+    applyClickable(fixture, 'hello ![cat](https://example.com/cat.png)', onImageClick)
+    await expect.element(preview).toBeInTheDocument()
+    await userEvent.click(pmRoot.getByText('hello', { exact: false }))
+    expect(onImageClick).not.toHaveBeenCalled()
+  })
+
+  it('reports each adjacent image by its own src and alt', async () => {
+    const onImageClick = vi.fn<ImageClickHandler>()
+    using fixture = setupFixture()
+    applyClickable(
+      fixture,
+      '![one](https://example.com/1.png)![two](https://example.com/2.png)',
+      onImageClick,
+    )
+    await expect.element(pmRoot.getByAltText('one')).toBeInTheDocument()
+    await userEvent.click(pmRoot.getByAltText('one'))
+    await userEvent.click(pmRoot.getByAltText('two'))
+    await vi.waitFor(() => expect(onImageClick).toHaveBeenCalledTimes(2))
+    expect(onImageClick.mock.calls.map((call) => call[0].src)).toEqual([
+      'https://example.com/1.png',
+      'https://example.com/2.png',
+    ])
+    expect(onImageClick.mock.calls.map((call) => call[0].alt)).toEqual(['one', 'two'])
   })
 })

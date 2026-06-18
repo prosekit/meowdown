@@ -2,11 +2,13 @@ import {
   defineBulletAfterHeading,
   defineEmbedPaste,
   defineImage,
+  defineImageClickHandler,
   defineLinkClickHandler,
   defineMarkMode,
   definePlaceholder,
   defineReadonly,
   defineWikilinkClickHandler,
+  type ImageClickHandler,
   type ImageOptions,
   type LinkClickHandler,
   type MarkMode,
@@ -25,6 +27,7 @@ export interface EditorExtensionsProps {
   resolveImageUrl?: ImageOptions['resolveImageUrl']
   onImagePaste?: ImageOptions['onImagePaste']
   onImageSaveError?: ImageOptions['onImageSaveError']
+  onImageClick?: ImageClickHandler
   embedPaste?: boolean
   bulletAfterHeading?: boolean
   placeholder?: PlaceholderOptions['placeholder']
@@ -42,6 +45,7 @@ export function EditorExtensions({
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
+  onImageClick,
   embedPaste,
   bulletAfterHeading,
   placeholder,
@@ -81,6 +85,12 @@ export function EditorExtensions({
     useMemo(() => {
       return defineImage({ resolveImageUrl, onImagePaste, onImageSaveError })
     }, [resolveImageUrl, onImagePaste, onImageSaveError]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return onImageClick ? defineImageClickHandler(onImageClick) : null
+    }, [onImageClick]),
   )
 
   useExtension(

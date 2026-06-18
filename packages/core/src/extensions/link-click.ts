@@ -1,9 +1,9 @@
-import { getMarkRange, type PlainExtension } from '@prosekit/core'
+import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 
+import { getMarkRangeAt } from './get-mark-range-at.ts'
 import type { MdLinkTextAttrs } from './inline-marks.ts'
 import { defineMarkClickHandler } from './mark-click.ts'
-import type { MarkName } from './mark-names.ts'
 
 const linkClickKey = new PluginKey('meowdown-link-click')
 
@@ -15,9 +15,7 @@ export interface LinkHit {
 
 /** The link covering `pos`, found via the `mdLinkText` mark. Exported for tests. */
 export function findLinkAt(state: EditorState, pos: number): LinkHit | undefined {
-  const $pos = state.doc.resolve(pos)
-  if (!$pos.parent.isTextblock || $pos.parent.type.spec.code) return
-  const range = getMarkRange($pos, 'mdLinkText' satisfies MarkName)
+  const range = getMarkRangeAt(state, pos, 'mdLinkText')
   if (!range) return
   return { from: range.from, to: range.to, href: (range.mark.attrs as MdLinkTextAttrs).href }
 }

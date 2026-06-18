@@ -15,6 +15,11 @@ export {
   type LinkClickPayload,
 } from './extensions/link-click.ts'
 export { defineImage, type ImageOptions } from './extensions/image.ts'
+export {
+  defineImageClickHandler,
+  type ImageClickHandler,
+  type ImageClickPayload,
+} from './extensions/image-click.ts'
 export { defineEmbedPaste } from './extensions/embed-paste.ts'
 export { defineBulletAfterHeading } from './extensions/bullet-after-heading.ts'
 export { EDITOR_KEY_BINDINGS } from './extensions/key-bindings.ts'

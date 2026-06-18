@@ -1,7 +1,6 @@
 import {
   defineKeymap,
   definePlugin,
-  getMarkRange,
   isTextSelection,
   Priority,
   union,
@@ -14,12 +13,12 @@ import { Plugin, PluginKey, TextSelection } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
+import { getMarkRangeAt } from './get-mark-range-at.ts'
 import { getMarkMode } from './mark-mode.ts'
-import type { MarkName } from './mark-names.ts'
 
 // The contiguous run of `mdImageSource` text that touches `pos`, or undefined.
 function getImageSourceRangeAt(state: EditorState, pos: number): MarkRange | undefined {
-  return getMarkRange(state.doc.resolve(pos), 'mdImageSource' satisfies MarkName)
+  return getMarkRangeAt(state, pos, 'mdImageSource')
 }
 
 // The image whose range ends exactly at `pos` (immediately left of the caret).
