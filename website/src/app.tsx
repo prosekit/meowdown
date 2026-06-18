@@ -3,8 +3,20 @@ import { type CSSProperties, useLayoutEffect, useState } from 'react'
 
 import { uploadFile } from './upload-file.ts'
 
-function logImageClick({ src, alt }: { src: string; alt: string }): void {
-  console.info('[meowdown] image clicked', { src, alt })
+// Confirm, then open the target in a new tab. Shared by the link and image
+// click handlers below.
+function confirmAndOpen(label: string, url: string): void {
+  if (window.confirm(`Open ${label} in a new tab?\n${url}`)) {
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+}
+
+function handleLinkClick({ href }: { href: string }): void {
+  confirmAndOpen('this link', href)
+}
+
+function handleImageClick({ src }: { src: string }): void {
+  confirmAndOpen('this image', src)
 }
 
 interface ModeOption {
@@ -243,7 +255,8 @@ export function App() {
               onTagSearch={searchTags}
               onWikilinkSearch={searchNotes}
               onImagePaste={uploadFile}
-              onImageClick={logImageClick}
+              onImageClick={handleImageClick}
+              onLinkClick={handleLinkClick}
             />
           </div>
 
