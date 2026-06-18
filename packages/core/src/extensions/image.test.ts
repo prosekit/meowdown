@@ -206,7 +206,10 @@ describe('image selection ring in hide mode', () => {
 
   it('rings the preview when selected from its right edge', async () => {
     using fixture = setupHidden()
-    setCaret(fixture, 14) // image|DEF just after the image
+
+    // Put the caret just after the image
+    setCaret(fixture, 14)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC▌![img](url)DEF"`)
 
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
 
