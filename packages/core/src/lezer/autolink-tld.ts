@@ -30,7 +30,7 @@ const BARE_AUTOLINK_TLDS: ReadonlySet<string> = new Set([
   'pl',
   'cc',
   'es',
-  ])
+])
 
 // A single DNS label: alphanumeric, hyphens allowed inside but not at the edges.
 const DNS_LABEL_RE = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i
