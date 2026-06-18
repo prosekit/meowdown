@@ -210,10 +210,11 @@ describe('image selection ring in hide mode', () => {
     // Put the caret just after the image
     setCaret(fixture, 14)
     expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC▌![img](url)DEF"`)
-
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
 
-    await userEvent.keyboard('{ArrowLeft}') // selects the whole image
+    // Selects the whole image
+    await userEvent.keyboard('{ArrowLeft}')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC▌![img](url)DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'solid' })
   })
 })
