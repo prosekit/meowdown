@@ -315,11 +315,113 @@ describe('inlineTextToMarkChunks', () => {
     `)
   })
 
-  it('does not autolink a schemeless host', () => {
+  it('autolinks a bare domain on the curated TLD list', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, 'a example.com b')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-15: -
+      0-2: -
+      2-13: mdLinkText(href=https://example.com)
+      13-15: -
+      "
+    `)
+  })
+
+  it('does not autolink a bare host whose TLD is off the list', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'a README.md b')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-13: -
+      "
+    `)
+  })
+
+  it('bare-autolinks a domain that starts the text', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'google.com')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-10: mdLinkText(href=https://google.com)
+      "
+    `)
+  })
+
+  it('bare-autolinks a domain with a path, keeping the path in the href', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'sub.domain.com/path?q=1')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-23: mdLinkText(href=https://sub.domain.com/path?q=1)
+      "
+    `)
+  })
+
+  it('preserves case in the bare-autolink href', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'GOOGLE.COM')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-10: mdLinkText(href=https://GOOGLE.COM)
+      "
+    `)
+  })
+
+  it('excludes a trailing period from a bare autolink', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'Visit google.com.')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-6: -
+      6-16: mdLinkText(href=https://google.com)
+      16-17: -
+      "
+    `)
+  })
+
+  it('does not bare-autolink a code-file name', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'edit node.js then')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-17: -
+      "
+    `)
+  })
+
+  it('claims a www. autolink as one chunk, not a nested bare domain', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'www.example.com')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-15: mdLinkText(href=https://www.example.com)
+      "
+    `)
+  })
+
+  it('does not bare-autolink the label of an explicit link', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, '[google.com](http://x)')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-1: mdLinkText(href=http://x) + mdMark
+      1-11: mdLinkText(href=http://x)
+      11-13: mdMark
+      13-21: mdLinkUri
+      21-22: mdMark
+      "
+    `)
+  })
+
+  it('does not bare-autolink inside inline code', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, '`see google.com`')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-1: mdCode + mdMark
+      1-15: mdCode
+      15-16: mdCode + mdMark
+      "
+    `)
+  })
+
+  it('does not bare-autolink a domain after an @ (it is an email)', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'mail a@google.com here')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-5: -
+      5-17: mdLinkText(href=mailto:a@google.com)
+      17-22: -
       "
     `)
   })
