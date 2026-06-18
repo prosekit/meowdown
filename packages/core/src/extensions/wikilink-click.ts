@@ -1,6 +1,7 @@
-import { definePlugin, getMarkRange, isApple, type PlainExtension } from '@prosekit/core'
-import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
+import { getMarkRange, type PlainExtension } from '@prosekit/core'
+import { PluginKey, type EditorState } from '@prosekit/pm/state'
 
+import { defineMarkClickHandler } from './mark-click.ts'
 import type { MarkName } from './mark-names.ts'
 
 const wikilinkClickKey = new PluginKey('meowdown-wikilink-click')
@@ -39,38 +40,13 @@ export interface WikilinkClickPayload {
 export type WikilinkClickHandler = (payload: WikilinkClickPayload) => void
 
 export function defineWikilinkClickHandler(onClick: WikilinkClickHandler): PlainExtension {
-  let selectionBefore: { from: number; to: number; empty: boolean } | undefined
-  return definePlugin(
-    new Plugin({
-      key: wikilinkClickKey,
-      props: {
-        handleDOMEvents: {
-          // The browser moves the caret on click, so snapshot the selection first.
-          mousedown: (view) => {
-            const { from, to, empty } = view.state.selection
-            selectionBefore = { from, to, empty }
-            return false
-          },
-        },
-        handleClick: (view, pos, event) => {
-          const onLink = (event.target as HTMLElement | null)?.closest?.('.md-wikilink')
-          if (!onLink) return false
-          const link = wikilinkAt(view.state, pos)
-          if (!link) return false
-          const modClick = isApple ? event.metaKey : event.ctrlKey
-          // A plain click inside a link the caret already sits in just places the caret.
-          if (
-            !modClick &&
-            selectionBefore?.empty &&
-            selectionBefore.from >= link.from &&
-            selectionBefore.to <= link.to
-          ) {
-            return false
-          }
-          onClick({ target: link.target, event })
-          return true
-        },
-      },
-    }),
-  )
+  return defineMarkClickHandler({
+    key: wikilinkClickKey,
+    selector: '.md-wikilink',
+    hitAt: (state, pos) => {
+      const hit = wikilinkAt(state, pos)
+      return hit ? { from: hit.from, to: hit.to, payload: hit.target } : undefined
+    },
+    onClick: (target, event) => onClick({ target, event }),
+  })
 }
