@@ -1,5 +1,6 @@
 import { GFM, type InlineContext, parser as defaultParser } from '@lezer/markdown'
 
+import { bareAutolink } from './bare-autolink.ts'
 import { hashtag } from './hashtag.ts'
 import { wikilink } from './wikilink.ts'
 
@@ -16,10 +17,11 @@ function consumeAllInline(cx: InlineContext): number {
 
 /**
  * `@lezer/markdown` parser configured with GFM (table, strikethrough,
- * task list, autolink) plus meowdown's `Hashtag` and `Wikilink` inline
- * syntax. Use when both block and inline structure must be recognized.
+ * task list, autolink) plus meowdown's `Hashtag`, `Wikilink`, and bare
+ * domain autolink inline syntax. Use when both block and inline structure
+ * must be recognized.
  */
-export const gfmParser = defaultParser.configure([GFM, hashtag, wikilink])
+export const gfmParser = defaultParser.configure([GFM, hashtag, wikilink, bareAutolink])
 
 /**
  * `@lezer/markdown` parser configured with GFM plus a `SkipInline`
