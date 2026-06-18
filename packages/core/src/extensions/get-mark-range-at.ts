@@ -13,6 +13,8 @@ export function getMarkRangeAt(
   pos: number,
   markName: MarkName,
 ): MarkRange | undefined {
+  const size = state.doc.content.size
+  if (pos < 0 || pos > size) return
   const $pos = state.doc.resolve(pos)
   if (!$pos.parent.isTextblock || $pos.parent.type.spec.code) return
   return getMarkRange($pos, markName)
