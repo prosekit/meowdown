@@ -16,6 +16,7 @@ import { Decoration, DecorationSet } from '@prosekit/pm/view'
 import { getMarkMode } from './mark-mode.ts'
 import type { MarkName } from './mark-names.ts'
 
+// REVIEW: REMOVE ImageRange, just use MarkRange from prosekit.
 interface ImageRange {
   from: number
   to: number
@@ -24,6 +25,7 @@ interface ImageRange {
 // The contiguous run of `mdImageSource` text that touches `pos`, or undefined.
 function imageSourceRangeAt(state: EditorState, pos: number): ImageRange | undefined {
   const range = getMarkRange(state.doc.resolve(pos), 'mdImageSource' satisfies MarkName)
+  // REVIEW: REMOVE MarkRange->ImageRange logic, just use MarkRange from prosekit.
   return range ? { from: range.from, to: range.to } : undefined
 }
 
