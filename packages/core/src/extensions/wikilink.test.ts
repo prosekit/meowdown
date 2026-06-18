@@ -134,6 +134,7 @@ describe.each(LABEL_MODES)('wikilink selection ring in %s mode', (mode) => {
     using fixture = setup()
 
     setCaret(fixture, 10)
+    // REVIEW: DO NOT USE `toBe` if the string contains weird characters like ▌. Use toMatchInlineSnapshot instead so that this can be generated automatically in future.
     expect(getSelectionSnapshot(fixture.state)).toBe('AB[[Note]]▌CD')
     await expect.element(label).toHaveStyle({ outlineStyle: 'none' })
 
