@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.12.0](https://github.com/prosekit/meowdown/compare/core-v0.11.1...core-v0.12.0) (2026-06-18)
+
+
+### Features
+
+* add onImageClick prop ([#70](https://github.com/prosekit/meowdown/issues/70)) ([eb5f972](https://github.com/prosekit/meowdown/commit/eb5f972ac772887d0e5ba6a5c301fcbed3a235ac))
+* add onLinkClick prop ([#71](https://github.com/prosekit/meowdown/issues/71)) ([af38591](https://github.com/prosekit/meowdown/commit/af38591a187625e976571bfd86c0817333a4fc78))
+* **core:** render images and embeds inline via a mark view ([#58](https://github.com/prosekit/meowdown/issues/58)) ([776da6c](https://github.com/prosekit/meowdown/commit/776da6c7cd58cf1c8c75fe0308e2967841a62851))
+
+
+### Bug Fixes
+
+* **core:** improve image selection ([#69](https://github.com/prosekit/meowdown/issues/69)) ([b4a735d](https://github.com/prosekit/meowdown/commit/b4a735dd2bf7c4e1e1119e1efca7f7245d7577b7))
+
 ## [0.11.1](https://github.com/prosekit/meowdown/compare/core-v0.11.0...core-v0.11.1) (2026-06-17)
 
 
