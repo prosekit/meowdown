@@ -17,6 +17,7 @@ export interface MarkClickConfig<Payload> {
   /** Fired once the click passes the caret-edit guard below. */
   onClick: (payload: Payload, event: MouseEvent) => void
   /** Stops native handling (e.g. `<a>` navigation) before firing. */
+  // REVIEW: make `preventDefault` must passed. Remove `?`
   preventDefault?: boolean
 }
 
