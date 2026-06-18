@@ -47,7 +47,10 @@ function defineEditorExtensionImpl() {
     defineInlineToggle(),
     defineWikilink(),
     defineAtomicMarkNavigation({
-      markNames: ['mdImageSource', 'mdWikilinkSource'],
+      marks: [
+        { name: 'mdImageSource', modes: ['hide'] },
+        { name: 'mdWikilinkSource', modes: ['hide', 'focus', 'show'] },
+      ],
       selectedClass: 'md-atomic-selected',
     }),
 

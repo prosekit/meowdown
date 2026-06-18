@@ -131,22 +131,22 @@ describe('defineMarkMode', () => {
       await expectRevealedMarkers(0)
     })
 
-    it('reveals both [[ ]] when the cursor is inside a wikilink', async () => {
+    it('reveals nothing inside a wikilink (the source is atomic, never revealed)', async () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('focus'))
       const { n } = fixture
       const doc = n.doc(n.paragraph('see [[no<a>te]] end'))
       fixture.set(doc)
-      await expectRevealedMarkers(3)
+      await expectRevealedMarkers(0)
     })
 
-    it('reveals only the wikilink brackets next to a markdown link', async () => {
+    it('reveals nothing inside a wikilink next to a markdown link', async () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('focus'))
       const { n } = fixture
       const doc = n.doc(n.paragraph('[a](http://x)[[no<a>te]]'))
       fixture.set(doc)
-      await expectRevealedMarkers(3)
+      await expectRevealedMarkers(0)
     })
 
     it('reveals nothing inside a #tag (tags have no syntax to reveal)', async () => {
