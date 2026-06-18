@@ -187,15 +187,20 @@ describe('image selection ring in hide mode', () => {
   // to it does not. This is what the `md-image-selected` decoration drives.
   it('rings the preview only while the image is selected', async () => {
     using fixture = setupHidden()
-    setCaret(fixture, 3) // ABC| just before the image
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC▌![img](url)DEF"`)
 
+    // Put the caret just before the image
+    setCaret(fixture, 3)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC▌![img](url)DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
 
-    await userEvent.keyboard('{ArrowRight}') // selects the whole image
+    // selects the whole image
+    await userEvent.keyboard('{ArrowRight}')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot( `"ABC▛![img](url)▟DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'solid' })
 
-    await userEvent.keyboard('{ArrowRight}') // steps past, collapses the caret
+    // steps past, collapses the caret
+    await userEvent.keyboard('{ArrowRight}')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot( `"ABC![img](url)▌DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
   })
 
