@@ -1,4 +1,4 @@
-import { definePlugin, getMarkType, isApple, type PlainExtension } from '@prosekit/core'
+import { definePlugin, getMarkRange, isApple, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
 import type { MarkName } from './mark-names.ts'
@@ -13,36 +13,14 @@ export interface WikilinkHit {
 
 /** The wikilink covering `pos`, found via the `mdWikilink` mark. Exported for tests. */
 export function wikilinkAt(state: EditorState, pos: number): WikilinkHit | undefined {
-  const mark = getMarkType(state.schema, 'mdWikilink' satisfies MarkName)
   const $pos = state.doc.resolve(pos)
-  const parent = $pos.parent
-  if (!parent.isTextblock || parent.type.spec.code) return
-
-  // The mark spans several text nodes (the brackets also carry `mdMark`), so
-  // walk the contiguous run of `mdWikilink` children that contains `pos`.
-  const start = $pos.start()
-  let runFrom = -1
-  let runTo = -1
-  let hit: { from: number; to: number } | undefined
-  let offset = 0
-  parent.forEach((child) => {
-    const childFrom = start + offset
-    offset += child.nodeSize
-    const childTo = start + offset
-    if (mark.isInSet(child.marks)) {
-      if (runFrom < 0) runFrom = childFrom
-      runTo = childTo
-    } else {
-      if (runFrom >= 0 && runFrom <= pos && pos <= runTo) hit = { from: runFrom, to: runTo }
-      runFrom = -1
-    }
-  })
-  if (runFrom >= 0 && runFrom <= pos && pos <= runTo) hit = { from: runFrom, to: runTo }
-  if (!hit) return
+  if (!$pos.parent.isTextblock || $pos.parent.type.spec.code) return
+  const range = getMarkRange($pos, 'mdWikilink' satisfies MarkName)
+  if (!range) return
   return {
-    from: hit.from,
-    to: hit.to,
-    target: parseWikilinkTarget(state.doc.textBetween(hit.from, hit.to)),
+    from: range.from,
+    to: range.to,
+    target: parseWikilinkTarget(state.doc.textBetween(range.from, range.to)),
   }
 }
 

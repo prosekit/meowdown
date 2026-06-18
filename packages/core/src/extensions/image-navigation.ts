@@ -1,7 +1,7 @@
 import {
   defineKeymap,
   definePlugin,
-  getMarkType,
+  getMarkRange,
   Priority,
   union,
   withPriority,
@@ -21,31 +21,9 @@ interface ImageRange {
 }
 
 // The contiguous run of `mdImageSource` text that touches `pos`, or undefined.
-// Mirrors `wikilinkAt` in `wikilink-click.ts`.
 function imageSourceRangeAt(state: EditorState, pos: number): ImageRange | undefined {
-  const mark = getMarkType(state.schema, 'mdImageSource' satisfies MarkName)
-  const $pos = state.doc.resolve(pos)
-  const parent = $pos.parent
-  if (!parent.isTextblock) return
-  const start = $pos.start()
-  let runFrom = -1
-  let runTo = -1
-  let hit: ImageRange | undefined
-  let offset = 0
-  parent.forEach((child) => {
-    const childFrom = start + offset
-    offset += child.nodeSize
-    const childTo = start + offset
-    if (mark.isInSet(child.marks)) {
-      if (runFrom < 0) runFrom = childFrom
-      runTo = childTo
-    } else {
-      if (runFrom >= 0 && runFrom <= pos && pos <= runTo) hit = { from: runFrom, to: runTo }
-      runFrom = -1
-    }
-  })
-  if (runFrom >= 0 && runFrom <= pos && pos <= runTo) hit = { from: runFrom, to: runTo }
-  return hit
+  const range = getMarkRange(state.doc.resolve(pos), 'mdImageSource' satisfies MarkName)
+  return range ? { from: range.from, to: range.to } : undefined
 }
 
 // The image whose range ends exactly at `pos` (immediately left of the caret).
