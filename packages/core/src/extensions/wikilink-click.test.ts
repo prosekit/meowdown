@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 
 import { setupFixture } from '../testing/index.ts'
 
-import { parseWikilink, findWikilinkAt } from './wikilink-click.ts'
+import { findWikilinkAt } from './wikilink-click.ts'
+import { parseWikilink } from './wikilink.ts'
 
 describe('parseWikilink', () => {
   it.each([

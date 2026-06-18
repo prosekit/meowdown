@@ -21,19 +21,6 @@ export function findWikilinkAt(state: EditorState, pos: number): WikilinkHit | u
   return { from: range.from, to: range.to, target }
 }
 
-export interface ParsedWikilink {
-  target: string
-  display: string
-}
-
-/** Splits `[[target]]`/`[[target|alias]]` into its target and display label (the alias, or empty). */
-export function parseWikilink(text: string): ParsedWikilink {
-  const inner = text.replace(/^\[\[/u, '').replace(/\]\]$/u, '')
-  const pipe = inner.indexOf('|')
-  if (pipe < 0) return { target: inner.trim(), display: '' }
-  return { target: inner.slice(0, pipe).trim(), display: inner.slice(pipe + 1).trim() }
-}
-
 export interface WikilinkClickPayload {
   target: string
   event: MouseEvent

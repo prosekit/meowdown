@@ -15,7 +15,7 @@ import type { MarkChunk } from './mark-chunk.ts'
 import type { MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
 import type { TypedMarkBuilders } from './schema.ts'
-import { parseWikilink } from './wikilink-click.ts'
+import { parseWikilink } from './wikilink.ts'
 
 /**
  * Lookup from Lezer node type id to the ProseMirror mark.

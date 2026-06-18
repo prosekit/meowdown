@@ -4,6 +4,19 @@ import type { MarkViewConstructor } from '@prosekit/pm/view'
 import type { MdWikilinkViewAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
 
+export interface ParsedWikilink {
+  target: string
+  display: string
+}
+
+/** Splits `[[target]]`/`[[target|alias]]` into its target and display label (the alias, or empty). */
+export function parseWikilink(text: string): ParsedWikilink {
+  const inner = text.replace(/^\[\[/u, '').replace(/\]\]$/u, '')
+  const pipe = inner.indexOf('|')
+  if (pipe < 0) return { target: inner.trim(), display: '' }
+  return { target: inner.slice(0, pipe).trim(), display: inner.slice(pipe + 1).trim() }
+}
+
 /**
  * Render `mdWikilinkView` (anchored on the wikilink's final character) as the
  * non-editable label: the anchor char stays inside `contentDOM`, and the label
