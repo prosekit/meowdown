@@ -9,8 +9,8 @@ import {
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView, MarkViewConstructor } from '@prosekit/pm/view'
 
+import { defineAtomicMarkNavigation } from './atomic-mark-navigation.ts'
 import { matchEmbed } from './embed/index.ts'
-import { defineImageNavigation } from './image-navigation.ts'
 import type { MdImageViewAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
 
@@ -158,7 +158,10 @@ export function defineImage(options: ImageOptions = {}): PlainExtension {
       name: 'mdImageView' satisfies MarkName,
       constructor: createImageMarkView(options),
     }),
-    defineImageNavigation(),
+    defineAtomicMarkNavigation({
+      markNames: ['mdImageSource' satisfies MarkName],
+      selectedClass: 'md-image-selected',
+    }),
     // High priority so the drop/paste handler runs before ProseKit's
     // drop-indicator plugin.
     withPriority(definePlugin(createImageInputPlugin(options)), Priority.high),
