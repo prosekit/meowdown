@@ -21,8 +21,8 @@ minimumReleaseAgeExclude:
 # Enable "blockExoticSubdeps" and "overrides" to install packages from pkg.pr.new
 blockExoticSubdeps: false
 overrides:
-  '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@3a887f4
-  '@prosekit/react': https://pkg.pr.new/@prosekit/react@3a887f4
-  '@prosekit/core': https://pkg.pr.new/@prosekit/core@3a887f4
-  '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@3a887f4
-  '@prosekit/web': https://pkg.pr.new/@prosekit/web@3a887f4
+  '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@3a887f44acdb0814111680d013245557ead5ba57
+  '@prosekit/react': https://pkg.pr.new/@prosekit/react@3a887f44acdb0814111680d013245557ead5ba57
+  '@prosekit/core': https://pkg.pr.new/@prosekit/core@3a887f44acdb0814111680d013245557ead5ba57
+  '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@3a887f44acdb0814111680d013245557ead5ba57
+  '@prosekit/web': https://pkg.pr.new/@prosekit/web@3a887f44acdb0814111680d013245557ead5ba57

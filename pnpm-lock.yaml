@@ -6,11 +6,11 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@3a887f4
-  '@prosekit/react': https://pkg.pr.new/@prosekit/react@3a887f4
-  '@prosekit/core': https://pkg.pr.new/@prosekit/core@3a887f4
-  '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@3a887f4
-  '@prosekit/web': https://pkg.pr.new/@prosekit/web@3a887f4
+  '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@3a887f44acdb0814111680d013245557ead5ba57
+  '@prosekit/react': https://pkg.pr.new/@prosekit/react@3a887f44acdb0814111680d013245557ead5ba57
+  '@prosekit/core': https://pkg.pr.new/@prosekit/core@3a887f44acdb0814111680d013245557ead5ba57
+  '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@3a887f44acdb0814111680d013245557ead5ba57
+  '@prosekit/web': https://pkg.pr.new/@prosekit/web@3a887f44acdb0814111680d013245557ead5ba57
 
 importers:
 
@@ -74,14 +74,14 @@ importers:
         specifier: ^1.7.0
         version: 1.7.0
       '@prosekit/core':
-        specifier: https://pkg.pr.new/@prosekit/core@3a887f4
-        version: https://pkg.pr.new/@prosekit/core@3a887f4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
+        specifier: https://pkg.pr.new/@prosekit/core@3a887f44acdb0814111680d013245557ead5ba57
+        version: https://pkg.pr.new/@prosekit/core@3a887f44acdb0814111680d013245557ead5ba57(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
       '@prosekit/extensions':
-        specifier: https://pkg.pr.new/@prosekit/extensions@3a887f4
-        version: https://pkg.pr.new/@prosekit/extensions@3a887f4(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.41.9)
+        specifier: https://pkg.pr.new/@prosekit/extensions@3a887f44acdb0814111680d013245557ead5ba57
+        version: https://pkg.pr.new/@prosekit/extensions@3a887f44acdb0814111680d013245557ead5ba57(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.41.9)
       '@prosekit/pm':
-        specifier: https://pkg.pr.new/@prosekit/pm@3a887f4
-        version: https://pkg.pr.new/@prosekit/pm@3a887f4
+        specifier: https://pkg.pr.new/@prosekit/pm@3a887f44acdb0814111680d013245557ead5ba57
+        version: https://pkg.pr.new/@prosekit/pm@3a887f44acdb0814111680d013245557ead5ba57
       prosemirror-highlight:
         specifier: ^0.15.2
         version: 0.15.2(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.41.9)
@@ -135,14 +135,14 @@ importers:
         specifier: ^1.7.0
         version: 1.7.0
       '@prosekit/core':
-        specifier: https://pkg.pr.new/@prosekit/core@3a887f4
-        version: https://pkg.pr.new/@prosekit/core@3a887f4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
+        specifier: https://pkg.pr.new/@prosekit/core@3a887f44acdb0814111680d013245557ead5ba57
+        version: https://pkg.pr.new/@prosekit/core@3a887f44acdb0814111680d013245557ead5ba57(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
       '@prosekit/pm':
-        specifier: https://pkg.pr.new/@prosekit/pm@3a887f4
-        version: https://pkg.pr.new/@prosekit/pm@3a887f4
+        specifier: https://pkg.pr.new/@prosekit/pm@3a887f44acdb0814111680d013245557ead5ba57
+        version: https://pkg.pr.new/@prosekit/pm@3a887f44acdb0814111680d013245557ead5ba57
       '@prosekit/react':
-        specifier: https://pkg.pr.new/@prosekit/react@3a887f4
-        version: https://pkg.pr.new/@prosekit/react@3a887f4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)
+        specifier: https://pkg.pr.new/@prosekit/react@3a887f44acdb0814111680d013245557ead5ba57
+        version: https://pkg.pr.new/@prosekit/react@3a887f44acdb0814111680d013245557ead5ba57(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1092,12 +1092,12 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@prosekit/core@https://pkg.pr.new/@prosekit/core@3a887f4':
-    resolution: {integrity: sha512-75rAWyM3PCgTjcTYpPHfxu9/6ZlmOHrp/g3RExjjAMDsIfFITTX225DFRnGDLg3tJG/TGPMl+Ws40/d+cZetBQ==, tarball: https://pkg.pr.new/@prosekit/core@3a887f4}
+  '@prosekit/core@https://pkg.pr.new/@prosekit/core@3a887f44acdb0814111680d013245557ead5ba57':
+    resolution: {integrity: sha512-75rAWyM3PCgTjcTYpPHfxu9/6ZlmOHrp/g3RExjjAMDsIfFITTX225DFRnGDLg3tJG/TGPMl+Ws40/d+cZetBQ==, tarball: https://pkg.pr.new/@prosekit/core@3a887f44acdb0814111680d013245557ead5ba57}
     version: 0.13.0-beta.1
 
-  '@prosekit/extensions@https://pkg.pr.new/@prosekit/extensions@3a887f4':
-    resolution: {integrity: sha512-+f2Os76T1Xb0fw0HzVdLaHZcuJjfTfYYZzE/WL76xlXslaDqVQKGrpc6ZXxwQWYvTXMLLoLB+oDTHanMa4Gj3A==, tarball: https://pkg.pr.new/@prosekit/extensions@3a887f4}
+  '@prosekit/extensions@https://pkg.pr.new/@prosekit/extensions@3a887f44acdb0814111680d013245557ead5ba57':
+    resolution: {integrity: sha512-+f2Os76T1Xb0fw0HzVdLaHZcuJjfTfYYZzE/WL76xlXslaDqVQKGrpc6ZXxwQWYvTXMLLoLB+oDTHanMa4Gj3A==, tarball: https://pkg.pr.new/@prosekit/extensions@3a887f44acdb0814111680d013245557ead5ba57}
     version: 0.17.5-beta.2
     peerDependencies:
       loro-crdt: '>= 1.10.0'
@@ -1114,12 +1114,12 @@ packages:
       yjs:
         optional: true
 
-  '@prosekit/pm@https://pkg.pr.new/@prosekit/pm@3a887f4':
-    resolution: {integrity: sha512-Gv6qekz6SpezXFHC3EnLLzDwRx8dOsTd0GeJwEka2FxBRvit1/MfbiL6Eju0s7nUmVLOAzYiCqy7jbT1v1m+mA==, tarball: https://pkg.pr.new/@prosekit/pm@3a887f4}
+  '@prosekit/pm@https://pkg.pr.new/@prosekit/pm@3a887f44acdb0814111680d013245557ead5ba57':
+    resolution: {integrity: sha512-Gv6qekz6SpezXFHC3EnLLzDwRx8dOsTd0GeJwEka2FxBRvit1/MfbiL6Eju0s7nUmVLOAzYiCqy7jbT1v1m+mA==, tarball: https://pkg.pr.new/@prosekit/pm@3a887f44acdb0814111680d013245557ead5ba57}
     version: 0.1.18
 
-  '@prosekit/react@https://pkg.pr.new/@prosekit/react@3a887f4':
-    resolution: {integrity: sha512-ofORgTvPW0+58H2edFtMoXWgEpbWBElzrwifNT77MzpoKU8w8s/qYGdBjwbln9wpFVLxq4NMt6JBowOiKwS3kw==, tarball: https://pkg.pr.new/@prosekit/react@3a887f4}
+  '@prosekit/react@https://pkg.pr.new/@prosekit/react@3a887f44acdb0814111680d013245557ead5ba57':
+    resolution: {integrity: sha512-ofORgTvPW0+58H2edFtMoXWgEpbWBElzrwifNT77MzpoKU8w8s/qYGdBjwbln9wpFVLxq4NMt6JBowOiKwS3kw==, tarball: https://pkg.pr.new/@prosekit/react@3a887f44acdb0814111680d013245557ead5ba57}
     version: 0.8.0-beta.2
     peerDependencies:
       react: '>= 18.2.0'
@@ -1130,8 +1130,8 @@ packages:
       react-dom:
         optional: true
 
-  '@prosekit/web@https://pkg.pr.new/@prosekit/web@3a887f4':
-    resolution: {integrity: sha512-lCCOuTTIQVIWQxQI8doh6gpe/zyu5wGlo0TFfQj9iQNmcC4Wbz7IEGzB5iIieDWaJwv8KhYyzC9WUOdbh2ZmKg==, tarball: https://pkg.pr.new/@prosekit/web@3a887f4}
+  '@prosekit/web@https://pkg.pr.new/@prosekit/web@3a887f44acdb0814111680d013245557ead5ba57':
+    resolution: {integrity: sha512-lCCOuTTIQVIWQxQI8doh6gpe/zyu5wGlo0TFfQj9iQNmcC4Wbz7IEGzB5iIieDWaJwv8KhYyzC9WUOdbh2ZmKg==, tarball: https://pkg.pr.new/@prosekit/web@3a887f44acdb0814111680d013245557ead5ba57}
     version: 0.9.0-beta.2
 
   '@prosemirror-adapter/core@0.5.3':
@@ -4423,10 +4423,10 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@prosekit/core@https://pkg.pr.new/@prosekit/core@3a887f4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)':
+  '@prosekit/core@https://pkg.pr.new/@prosekit/core@3a887f44acdb0814111680d013245557ead5ba57(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)':
     dependencies:
       '@ocavue/utils': 1.7.0
-      '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@3a887f4
+      '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@3a887f44acdb0814111680d013245557ead5ba57
       orderedmap: 2.1.1
       prosemirror-splittable: 0.1.1(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
       type-fest: 5.7.0
@@ -4435,11 +4435,11 @@ snapshots:
       - prosemirror-state
       - prosemirror-transform
 
-  '@prosekit/extensions@https://pkg.pr.new/@prosekit/extensions@3a887f4(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.41.9)':
+  '@prosekit/extensions@https://pkg.pr.new/@prosekit/extensions@3a887f44acdb0814111680d013245557ead5ba57(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.41.9)':
     dependencies:
       '@ocavue/utils': 1.7.0
-      '@prosekit/core': https://pkg.pr.new/@prosekit/core@3a887f4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
-      '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@3a887f4
+      '@prosekit/core': https://pkg.pr.new/@prosekit/core@3a887f44acdb0814111680d013245557ead5ba57(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
+      '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@3a887f44acdb0814111680d013245557ead5ba57
       prosemirror-changeset: 2.4.1
       prosemirror-drop-indicator: 0.1.4
       prosemirror-dropcursor: 1.8.2
@@ -4466,7 +4466,7 @@ snapshots:
       - refractor
       - sugar-high
 
-  '@prosekit/pm@https://pkg.pr.new/@prosekit/pm@3a887f4':
+  '@prosekit/pm@https://pkg.pr.new/@prosekit/pm@3a887f44acdb0814111680d013245557ead5ba57':
     dependencies:
       prosemirror-commands: 1.7.1
       prosemirror-history: 1.5.0
@@ -4477,11 +4477,11 @@ snapshots:
       prosemirror-transform: 1.12.0
       prosemirror-view: 1.41.9
 
-  '@prosekit/react@https://pkg.pr.new/@prosekit/react@3a887f4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)':
+  '@prosekit/react@https://pkg.pr.new/@prosekit/react@3a887f44acdb0814111680d013245557ead5ba57(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)':
     dependencies:
-      '@prosekit/core': https://pkg.pr.new/@prosekit/core@3a887f4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
-      '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@3a887f4
-      '@prosekit/web': https://pkg.pr.new/@prosekit/web@3a887f4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
+      '@prosekit/core': https://pkg.pr.new/@prosekit/core@3a887f44acdb0814111680d013245557ead5ba57(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
+      '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@3a887f44acdb0814111680d013245557ead5ba57
+      '@prosekit/web': https://pkg.pr.new/@prosekit/web@3a887f44acdb0814111680d013245557ead5ba57(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
       '@prosemirror-adapter/core': 0.5.3
       '@prosemirror-adapter/react': 0.5.3(react-dom@19.2.7)(react@19.2.7)
     optionalDependencies:
@@ -4505,16 +4505,16 @@ snapshots:
       - y-prosemirror
       - yjs
 
-  '@prosekit/web@https://pkg.pr.new/@prosekit/web@3a887f4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)':
+  '@prosekit/web@https://pkg.pr.new/@prosekit/web@3a887f44acdb0814111680d013245557ead5ba57(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)':
     dependencies:
       '@aria-ui/core': 0.2.1
       '@aria-ui/elements': 0.1.10
       '@aria-ui/utils': 0.1.6
       '@floating-ui/dom': 1.7.6
       '@ocavue/utils': 1.7.0
-      '@prosekit/core': https://pkg.pr.new/@prosekit/core@3a887f4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
-      '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@3a887f4(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.41.9)
-      '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@3a887f4
+      '@prosekit/core': https://pkg.pr.new/@prosekit/core@3a887f44acdb0814111680d013245557ead5ba57(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
+      '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@3a887f44acdb0814111680d013245557ead5ba57(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.41.9)
+      '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@3a887f44acdb0814111680d013245557ead5ba57
       prosemirror-tables: 1.8.5
     transitivePeerDependencies:
       - '@lezer/common'
