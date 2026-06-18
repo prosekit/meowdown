@@ -237,8 +237,7 @@ describe('inlineMarkPlugin', () => {
 
     const pos = findText(fixture.doc, 'note')
     expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilinkSource'])
-    // Delete the last ']': "see [[note] end" is no longer a wikilink. The
-    // closing brackets are separate text nodes, so target the first `]`.
+    // Delete one ']': "see [[note] end" is no longer a wikilink.
     const firstBracket = findText(fixture.doc, ']')
     fixture.view.dispatch(fixture.state.tr.delete(firstBracket + 1, firstBracket + 2))
     const after = findText(fixture.doc, 'note')
