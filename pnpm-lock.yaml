@@ -128,13 +128,13 @@ importers:
         specifier: ^1.7.0
         version: 1.7.0
       '@prosekit/core':
-        specifier: ^0.13.0-beta.2
+        specifier: ^0.13.0-beta.0
         version: 0.13.0-beta.3(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
       '@prosekit/pm':
         specifier: ^0.1.19-beta.0
         version: 0.1.19-beta.0
       '@prosekit/react':
-        specifier: ^0.8.0-beta.4
+        specifier: ^0.8.0-beta.0
         version: 0.8.0-beta.4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)
       clsx:
         specifier: ^2.1.1
