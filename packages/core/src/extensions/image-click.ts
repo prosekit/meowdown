@@ -1,8 +1,8 @@
-import { definePlugin, getMarkRange, type PlainExtension } from '@prosekit/core'
+import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
+import { getMarkRangeAt } from './get-mark-range-at.ts'
 import type { MdImageSourceAttrs } from './inline-marks.ts'
-import type { MarkName } from './mark-names.ts'
 
 const imageClickKey = new PluginKey('meowdown-image-click')
 
@@ -15,9 +15,7 @@ interface ImageHit {
 
 /** The image covering `pos`, found via the `mdImageSource` run. */
 function findImageAt(state: EditorState, pos: number): ImageHit | undefined {
-  const $pos = state.doc.resolve(pos)
-  if (!$pos.parent.isTextblock || $pos.parent.type.spec.code) return
-  const range = getMarkRange($pos, 'mdImageSource' satisfies MarkName)
+  const range = getMarkRangeAt(state, pos, 'mdImageSource')
   if (!range) return
   const { src, alt } = range.mark.attrs as MdImageSourceAttrs
   return { from: range.from, to: range.to, src, alt }

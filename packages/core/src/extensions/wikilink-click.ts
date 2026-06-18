@@ -1,8 +1,8 @@
-import { getMarkRange, type PlainExtension } from '@prosekit/core'
+import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 
+import { getMarkRangeAt } from './get-mark-range-at.ts'
 import { defineMarkClickHandler } from './mark-click.ts'
-import type { MarkName } from './mark-names.ts'
 
 const wikilinkClickKey = new PluginKey('meowdown-wikilink-click')
 
@@ -14,9 +14,7 @@ export interface WikilinkHit {
 
 /** The wikilink covering `pos`, found via the `mdWikilink` mark. Exported for tests. */
 export function findWikilinkAt(state: EditorState, pos: number): WikilinkHit | undefined {
-  const $pos = state.doc.resolve(pos)
-  if (!$pos.parent.isTextblock || $pos.parent.type.spec.code) return
-  const range = getMarkRange($pos, 'mdWikilink' satisfies MarkName)
+  const range = getMarkRangeAt(state, pos, 'mdWikilink')
   if (!range) return
   return {
     from: range.from,
