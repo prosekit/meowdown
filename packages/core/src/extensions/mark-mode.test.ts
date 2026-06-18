@@ -229,6 +229,15 @@ describe('defineMarkMode', () => {
       expect(clipboardText(fixture)).toBe('visit https://example.com now')
     })
 
+    it('keeps the whole image source so a copied image stays markdown', () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('hide'))
+      const { n } = fixture
+      const doc = n.doc(n.paragraph('see ![cat](https://example.com/cat.png) end'))
+      fixture.set(doc)
+      expect(clipboardText(fixture)).toBe('see ![cat](https://example.com/cat.png) end')
+    })
+
     it('strips [[ ]] from the copied text', () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('hide'))

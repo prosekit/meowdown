@@ -8,6 +8,8 @@ import {
 import type { ListAttrs } from '@prosekit/extensions/list'
 import { TextSelection, type Command } from '@prosekit/pm/state'
 
+import type { NodeName } from './node-names.ts'
+
 /**
  * Claim Enter only when the selection is an empty caret at the very end of the
  * document's first heading (the note's title line). Every other Enter (a later
@@ -20,7 +22,7 @@ const bulletAfterHeadingOnEnter: Command = (state, dispatch) => {
   if (!empty || $from.depth !== 1 || $from.index(0) !== 0) {
     return false
   }
-  if ($from.parent.type.name !== 'heading') {
+  if ($from.parent.type.name !== ('heading' satisfies NodeName)) {
     return false
   }
   // Only at the end of the heading's text; Enter elsewhere splits as usual.
@@ -28,8 +30,8 @@ const bulletAfterHeadingOnEnter: Command = (state, dispatch) => {
     return false
   }
   if (dispatch) {
-    const listType = getNodeType(state.schema, 'list')
-    const paragraphType = getNodeType(state.schema, 'paragraph')
+    const listType = getNodeType(state.schema, 'list' satisfies NodeName)
+    const paragraphType = getNodeType(state.schema, 'paragraph' satisfies NodeName)
     const bullet = listType.create({ kind: 'bullet' } satisfies ListAttrs, paragraphType.create())
     const afterHeading = $from.after()
     const tr = state.tr.insert(afterHeading, bullet)

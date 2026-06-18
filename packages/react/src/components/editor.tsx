@@ -67,8 +67,9 @@ export interface EditorProps {
   onWikilinkClick?: WikilinkClickHandler
 
   /**
-   * Maps an image `src` to a displayable URL (or `undefined` to skip). Enables
-   * inline image rendering. Pass a stable function. Ignored in source mode.
+   * Maps an image `src` to a displayable URL, or `undefined` to skip that image.
+   * Defaults to showing http(s) URLs as-is. Pass a stable function (e.g. from
+   * `useCallback`). Ignored in source mode.
    */
   resolveImageUrl?: ImageOptions['resolveImageUrl']
 
@@ -83,9 +84,7 @@ export interface EditorProps {
 
   /**
    * Auto-embeds a pasted tweet or YouTube link as a rich embed; one undo turns
-   * the embed back into the raw link. On by default. Ignored in source mode, and
-   * only takes effect when `resolveImageUrl` is set, since embeds render through
-   * the same image pipeline.
+   * the embed back into the raw link. On by default. Ignored in source mode.
    */
   embedPaste?: boolean
 

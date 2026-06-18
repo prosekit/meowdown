@@ -1,5 +1,8 @@
+import type { CodeBlockAttrs } from '@prosekit/extensions/code-block'
+import type { HeadingAttrs } from '@prosekit/extensions/heading'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
+import type { NodeName } from '../extensions/node-names.ts'
 import { longestBacktickRun } from '../utils/backticks.ts'
 
 /**
@@ -140,7 +143,7 @@ class MdOut {
 // ─────────────────────────────────────────────────────────────────────
 
 function emit(node: ProseMirrorNode, out: MdOut): void {
-  switch (node.type.name) {
+  switch (node.type.name as NodeName) {
     case 'doc':
       emitBlockChildren(node, out)
       return
@@ -149,8 +152,8 @@ function emit(node: ProseMirrorNode, out: MdOut): void {
       out.closeBlock()
       return
     case 'heading': {
-      const level = node.attrs.level as number
-      out.write(HEADING_PREFIX[level] ?? '# ')
+      const attrs = node.attrs as HeadingAttrs
+      out.write(HEADING_PREFIX[attrs.level] ?? '# ')
       emitInlineChildren(node, out)
       out.closeBlock()
       return
@@ -192,14 +195,14 @@ function emitBlockChildren(node: ProseMirrorNode, out: MdOut, tightItem = false)
   let index = 0
   while (index < count) {
     const child = node.child(index)
-    if (child.type.name !== 'list') {
+    if (child.type.name !== ('list' satisfies NodeName)) {
       if (tightItem && index > 0) out.suppressBlank()
       emit(child, out)
       index++
       continue
     }
     let runEnd = index + 1
-    while (runEnd < count && node.child(runEnd).type.name === 'list') runEnd++
+    while (runEnd < count && node.child(runEnd).type.name === ('list' satisfies NodeName)) runEnd++
     const tightRun = isTightRun(node, index, runEnd)
     for (let item = index; item < runEnd; item++) {
       const isRunStart = item === index
@@ -228,8 +231,8 @@ function isTightItem(item: ProseMirrorNode): boolean {
   const count = item.childCount
   for (let i = 0; i < count; i++) {
     const child = item.child(i)
-    if (child.type.name === 'list') continue
-    if (child.type.name === 'paragraph' && i === 0) continue
+    if (child.type.name === ('list' satisfies NodeName)) continue
+    if (child.type.name === ('paragraph' satisfies NodeName) && i === 0) continue
     return false
   }
   return true
@@ -283,7 +286,8 @@ function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
 // ─────────────────────────────────────────────────────────────────────
 
 function emitCodeBlock(node: ProseMirrorNode, out: MdOut): void {
-  const language = (node.attrs.language as string) ?? ''
+  const attrs = node.attrs as CodeBlockAttrs
+  const language: string = attrs.language || ''
   const code = node.textContent
   // min 2 keeps the fence width >= 3, CommonMark's minimum.
   const fence = '`'.repeat(longestBacktickRun(code, 2) + 1)
@@ -314,7 +318,7 @@ function emitTable(node: ProseMirrorNode, out: MdOut): void {
     let isHeaderRow = false
     for (let c = 0; c < row.childCount; c++) {
       const cell = row.child(c)
-      if (cell.type.name === 'tableHeaderCell') isHeaderRow = true
+      if (cell.type.name === ('tableHeaderCell' satisfies NodeName)) isHeaderRow = true
       cells.push(extractCellText(cell))
     }
     if (isHeaderRow && headerIdx < 0) headerIdx = r

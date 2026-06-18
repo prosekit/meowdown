@@ -1,18 +1,39 @@
 import { defineMarkSpec, union } from '@prosekit/core'
 
-export const MARK_NAMES = [
-  'mdMark',
-  'mdEm',
-  'mdStrong',
-  'mdCode',
-  'mdLinkText',
-  'mdLinkUri',
-  'mdDel',
-  'mdTag',
-  'mdWikilink',
-] as const
+import type { MarkName } from './mark-names.ts'
 
-export type MarkName = (typeof MARK_NAMES)[number]
+/**
+ * Anchors an inline image preview on the final character of `![alt](url)`. A
+ * mark view (see `defineImage`) renders the image; without it the anchor char
+ * just renders as text. Carries the parsed `src`/`alt`.
+ */
+function defineMdImageView() {
+  return defineMarkSpec<'mdImageView', MdImageViewAttrs>({
+    name: 'mdImageView' satisfies MarkName,
+    inclusive: false,
+    attrs: { src: { default: '' }, alt: { default: '' } },
+    toDOM: () => ['span', { class: 'md-image-anchor' }, 0],
+    parseDOM: [{ tag: 'span.md-image-anchor' }],
+  })
+}
+
+export interface MdImageViewAttrs {
+  src: string
+  alt: string
+}
+
+/**
+ * Covers the whole `![alt](url)` source. This is the mark `defineMarkMode`
+ * hides in hide/focus mode so the rendered image replaces the raw syntax.
+ */
+function defineMdImageSource() {
+  return defineMarkSpec({
+    name: 'mdImageSource' satisfies MarkName,
+    inclusive: false,
+    toDOM: () => ['span', { class: 'md-image-source' }, 0],
+    parseDOM: [{ tag: 'span.md-image-source' }],
+  })
+}
 
 /**
  * Syntax characters: `*`, `_`, `` ` ``, `[`, `]`, `(`, `)`, `~`
@@ -51,12 +72,16 @@ function defineMdCode() {
   })
 }
 
+export interface MdLinkTextAttrs {
+  href: string
+}
+
 function defineMdLinkText() {
-  return defineMarkSpec({
+  return defineMarkSpec<'mdLinkText', MdLinkTextAttrs>({
     name: 'mdLinkText' satisfies MarkName,
     inclusive: false,
     attrs: { href: { default: '' } },
-    toDOM: (mark) => ['a', { href: mark.attrs.href as string }, 0],
+    toDOM: (mark) => ['a', { href: (mark.attrs as MdLinkTextAttrs).href }, 0],
     parseDOM: [
       {
         tag: 'a',
@@ -112,6 +137,8 @@ function defineMdWikilink() {
 }
 
 export function defineInlineMarks() {
+  // The last mark registered here gets the lowest rank and becomes the outermost DOM wrapper.
+
   return union(
     defineMdMark(),
     defineMdEm(),
@@ -122,5 +149,10 @@ export function defineInlineMarks() {
     defineMdDel(),
     defineMdTag(),
     defineMdWikilink(),
+
+    // The image marks are registered last so the preview (mdImageView) wraps the
+    // source (mdImageSource), which wraps the syntax marks.
+    defineMdImageSource(),
+    defineMdImageView(),
   )
 }

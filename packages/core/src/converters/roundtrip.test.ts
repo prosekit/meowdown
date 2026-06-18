@@ -75,7 +75,8 @@ describe('markdown round-trip is byte-identical', () => {
     'mail me@example.com ok',
     'a <https://example.com> b',
     'end https://example.com.',
-    // Embeds stay literal `![](url)` text; the embed renders as a decoration only
+    '![cat](https://example.com/cat.png)',
+    'a ![one](https://example.com/1.png) b ![two](https://example.com/2.png) c',
     '![](https://www.youtube.com/watch?v=dQw4w9WgXcQ)',
     '![](https://twitter.com/jack/status/20)',
     'text before ![](https://youtu.be/dQw4w9WgXcQ) and after',

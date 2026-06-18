@@ -5,6 +5,8 @@ import type { Extension } from '@prosekit/core'
 import { defineCodeBlockHighlight, type HighlightParser } from '@prosekit/extensions/code-block'
 import { createParser } from 'prosemirror-highlight/lezer'
 
+import type { NodeName } from './node-names.ts'
+
 // Per language attribute: a ready highlight parser, or `null` once we know the
 // language is unsupported so we stop retrying it.
 const parserCache = new Map<string, HighlightParser | null>()
@@ -66,5 +68,8 @@ const lazyParser: HighlightParser = (options) => {
  * `tok-*` classes; the default theme colors them per color scheme.
  */
 export function defineCodeBlockSyntaxHighlight(): Extension {
-  return defineCodeBlockHighlight({ parser: lazyParser, nodeTypes: ['codeBlock'] })
+  return defineCodeBlockHighlight({
+    parser: lazyParser,
+    nodeTypes: ['codeBlock' satisfies NodeName],
+  })
 }

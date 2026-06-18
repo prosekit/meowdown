@@ -14,13 +14,15 @@ import {
 } from '@prosekit/extensions/heading'
 import type { Command } from '@prosekit/pm/state'
 
+import type { NodeName } from './node-names.ts'
+
 function toggleHeading(level: number): Command {
-  return withSkipCodeBlock(toggleNode({ type: 'heading', attrs: { level } }))
+  return withSkipCodeBlock(toggleNode({ type: 'heading' satisfies NodeName, attrs: { level } }))
 }
 
 const backspaceUnsetHeading: Command = (state, dispatch, view) => {
   const $pos = isAtBlockStart(state, view)
-  if ($pos?.parent.type.name === 'heading') {
+  if ($pos?.parent.type.name === ('heading' satisfies NodeName)) {
     return unsetBlockType()(state, dispatch, view)
   }
   return false

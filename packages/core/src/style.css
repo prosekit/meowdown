@@ -280,22 +280,25 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Inline images (`![alt](src)`), rendered beneath the literal markdown line
+ * Inline image / embed previews (`![alt](url)`), rendered in place via a mark
+ * view at the image's source position.
  * ------------------------------------------------------------------------- */
-.ProseMirror .md-image {
-  display: block;
+
+/* Small images flow inline with the surrounding text. */
+.ProseMirror .md-image-preview-img {
+  display: inline-block;
+  vertical-align: bottom;
 }
 
-.ProseMirror .md-image img {
+.ProseMirror .md-image-preview-img img {
   max-height: var(--meowdown-image-max-height, 24rem);
   max-width: 100%;
   border-radius: var(--meowdown-image-radius, 0.5rem);
 }
 
-/* ---------------------------------------------------------------------------
- * Embedded media (`![](youtube|tweet url)`), rendered beneath the markdown line
- * ------------------------------------------------------------------------- */
-.ProseMirror .md-embed-wrapper {
+/* Embeds (YouTube, tweets) are too tall for text flow: render as a block at
+ * the source position. */
+.ProseMirror .md-image-preview-embed {
   display: block;
   margin-block: 0.5rem;
 }
@@ -329,9 +332,17 @@
 /* ---------------------------------------------------------------------------
  * Markdown syntax characters (`md-mark`) and link URIs
  * ------------------------------------------------------------------------- */
-.ProseMirror .md-mark,
-.ProseMirror .md-link-uri {
+.ProseMirror .md-mark {
   color: var(--meowdown-mark);
+  opacity: 0.7;
+}
+
+/* The URL of a link/image */
+.ProseMirror .md-link-uri {
+  color: var(--meowdown-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
   opacity: 0.7;
 }
 
@@ -348,5 +359,15 @@
 }
 .ProseMirror[data-mark-mode='focus'] .md-mark:has(.show),
 .ProseMirror[data-mark-mode='focus'] .md-link-uri:has(.show) {
+  display: inline;
+}
+
+/* Image source (`![alt](url)`, incl. alt text): hidden as a unit so the inline
+ * preview stands in for it. */
+.ProseMirror[data-mark-mode='hide'] .md-image-source,
+.ProseMirror[data-mark-mode='focus'] .md-image-source {
+  display: none;
+}
+.ProseMirror[data-mark-mode='focus'] .md-image-source:has(.show) {
   display: inline;
 }

@@ -1,7 +1,7 @@
 import {
   defineBulletAfterHeading,
   defineEmbedPaste,
-  defineImages,
+  defineImage,
   defineMarkMode,
   definePlaceholder,
   defineReadonly,
@@ -69,20 +69,14 @@ export function EditorExtensions({
 
   useExtension(
     useMemo(() => {
-      return resolveImageUrl
-        ? defineImages({ resolveImageUrl, onImagePaste, onImageSaveError })
-        : null
+      return defineImage({ resolveImageUrl, onImagePaste, onImageSaveError })
     }, [resolveImageUrl, onImagePaste, onImageSaveError]),
   )
 
   useExtension(
     useMemo(() => {
-      // Embeds render through the image pipeline (`defineImages`), which is only
-      // mounted when `resolveImageUrl` is set. Without it, rewriting a pasted
-      // link to `![](url)` would leave non-rendering source text, so the paste
-      // handler tracks `resolveImageUrl`.
-      return embedPaste && resolveImageUrl ? defineEmbedPaste() : null
-    }, [embedPaste, resolveImageUrl]),
+      return embedPaste ? defineEmbedPaste() : null
+    }, [embedPaste]),
   )
 
   useExtension(

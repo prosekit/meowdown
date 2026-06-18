@@ -1,6 +1,8 @@
 import { definePlugin, getMarkType, isApple, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
+import type { MarkName } from './mark-names.ts'
+
 const wikilinkClickKey = new PluginKey('meowdown-wikilink-click')
 
 export interface WikilinkHit {
@@ -11,7 +13,7 @@ export interface WikilinkHit {
 
 /** The wikilink covering `pos`, found via the `mdWikilink` mark. Exported for tests. */
 export function wikilinkAt(state: EditorState, pos: number): WikilinkHit | undefined {
-  const mark = getMarkType(state.schema, 'mdWikilink')
+  const mark = getMarkType(state.schema, 'mdWikilink' satisfies MarkName)
   const $pos = state.doc.resolve(pos)
   const parent = $pos.parent
   if (!parent.isTextblock || parent.type.spec.code) return
