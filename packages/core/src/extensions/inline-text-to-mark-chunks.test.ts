@@ -473,8 +473,7 @@ describe('inlineTextToMarkChunks', () => {
       0-2: -
       2-4: mdMark + mdWikilinkSource(target=note)
       4-8: mdWikilinkSource(target=note)
-      8-9: mdMark + mdWikilinkSource(target=note)
-      9-10: mdMark + mdWikilinkSource(target=note) + mdWikilinkView(target=note)
+      8-10: mdMark + mdWikilinkSource(target=note) + mdWikilinkView(target=note)
       10-12: -
       "
     `)
@@ -486,12 +485,10 @@ describe('inlineTextToMarkChunks', () => {
       "
       0-2: mdMark + mdWikilinkSource(target=a)
       2-3: mdWikilinkSource(target=a)
-      3-4: mdMark + mdWikilinkSource(target=a)
-      4-5: mdMark + mdWikilinkSource(target=a) + mdWikilinkView(target=a)
+      3-5: mdMark + mdWikilinkSource(target=a) + mdWikilinkView(target=a)
       5-7: mdMark + mdWikilinkSource(target=b)
       7-8: mdWikilinkSource(target=b)
-      8-9: mdMark + mdWikilinkSource(target=b)
-      9-10: mdMark + mdWikilinkSource(target=b) + mdWikilinkView(target=b)
+      8-10: mdMark + mdWikilinkSource(target=b) + mdWikilinkView(target=b)
       "
     `)
   })
@@ -504,8 +501,7 @@ describe('inlineTextToMarkChunks', () => {
       1-3: mdEm
       3-5: mdEm + mdMark + mdWikilinkSource(target=n)
       5-6: mdEm + mdWikilinkSource(target=n)
-      6-7: mdEm + mdMark + mdWikilinkSource(target=n)
-      7-8: mdEm + mdMark + mdWikilinkSource(target=n) + mdWikilinkView(target=n)
+      6-8: mdEm + mdMark + mdWikilinkSource(target=n) + mdWikilinkView(target=n)
       8-10: mdEm
       10-11: mdEm + mdMark
       "
@@ -520,8 +516,7 @@ describe('inlineTextToMarkChunks', () => {
       1-5: mdLinkText(href=http://y)
       5-7: mdLinkText(href=http://y) + mdMark + mdWikilinkSource(target=x)
       7-8: mdLinkText(href=http://y) + mdWikilinkSource(target=x)
-      8-9: mdLinkText(href=http://y) + mdMark + mdWikilinkSource(target=x)
-      9-10: mdLinkText(href=http://y) + mdMark + mdWikilinkSource(target=x) + mdWikilinkView(target=x)
+      8-10: mdLinkText(href=http://y) + mdMark + mdWikilinkSource(target=x) + mdWikilinkView(target=x)
       10-12: mdMark
       12-20: mdLinkUri
       20-21: mdMark
@@ -535,8 +530,7 @@ describe('inlineTextToMarkChunks', () => {
       "
       0-2: mdMark + mdWikilinkSource(target=note #tag)
       2-11: mdWikilinkSource(target=note #tag)
-      11-12: mdMark + mdWikilinkSource(target=note #tag)
-      12-13: mdMark + mdWikilinkSource(target=note #tag) + mdWikilinkView(target=note #tag)
+      11-13: mdMark + mdWikilinkSource(target=note #tag) + mdWikilinkView(target=note #tag)
       "
     `)
   })

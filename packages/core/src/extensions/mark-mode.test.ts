@@ -131,15 +131,13 @@ describe('defineMarkMode', () => {
       await expectRevealedMarkers(0)
     })
 
-    // `[[` is one span; the closing `]]` is two (the final `]` anchors the
-    // label mark view), so three marker spans reveal in all.
     it('reveals both [[ ]] when the cursor is inside a wikilink', async () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('focus'))
       const { n } = fixture
       const doc = n.doc(n.paragraph('see [[no<a>te]] end'))
       fixture.set(doc)
-      await expectRevealedMarkers(3)
+      await expectRevealedMarkers(2)
     })
 
     it('reveals only the wikilink brackets next to a markdown link', async () => {
@@ -148,7 +146,7 @@ describe('defineMarkMode', () => {
       const { n } = fixture
       const doc = n.doc(n.paragraph('[a](http://x)[[no<a>te]]'))
       fixture.set(doc)
-      await expectRevealedMarkers(3)
+      await expectRevealedMarkers(2)
     })
 
     it('reveals nothing inside a #tag (tags have no syntax to reveal)', async () => {

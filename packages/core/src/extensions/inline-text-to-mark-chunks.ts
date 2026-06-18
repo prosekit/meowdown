@@ -257,12 +257,11 @@ function walkImage(
  * Special walker for a wikilink `[[target]]`/`[[target|alias]]`.
  *
  * Emits `mdWikilinkSource({ target })` across the whole node (the mark
- * `defineMarkMode` hides) and `mdWikilinkView({ target, display })` on the node's
- * final character, the anchor a mark view renders the non-editable label on. The
+ * `defineMarkMode` hides) and `mdWikilinkView({ target, display })` on the
+ * closing `]]`, the anchor a mark view renders the non-editable label on. The
  * node's only children are the two `WikilinkMark` brackets (`[[` and `]]`); they
  * carry `mdMark` for show mode, and the target text between them carries only
- * `mdWikilinkSource`. The closing `]]` straddles the anchor, so it splits: the
- * final `]` also gets `mdWikilinkView`.
+ * `mdWikilinkSource`.
  */
 function walkWikilink(
   node: InlineElement,
@@ -274,28 +273,21 @@ function walkWikilink(
   const { target, display } = parseWikilink(text.slice(node.from, node.to))
   const source = marks.mdWikilinkSource.create({ target } satisfies MdWikilinkSourceAttrs)
   const view = marks.mdWikilinkView.create({ target, display } satisfies MdWikilinkViewAttrs)
-  const anchorFrom = node.to - 1
 
   let pos = node.from
   for (const child of node.children) {
     if (child.from > pos) {
       emit(out, pos, child.from, [...parentMarks, source])
     }
-    if (child.from < anchorFrom) {
-      emit(out, child.from, Math.min(child.to, anchorFrom), [
-        ...parentMarks,
-        source,
-        marks.mdMark.create(),
-      ])
-    }
-    if (child.to > anchorFrom) {
-      emit(out, Math.max(child.from, anchorFrom), child.to, [
-        ...parentMarks,
-        source,
-        view,
-        marks.mdMark.create(),
-      ])
-    }
+    // The closing `]]` (the node's last child) anchors the label mark view; the
+    // opening `[[` is plain source syntax.
+    const isClosing = child.to === node.to
+    emit(out, child.from, child.to, [
+      ...parentMarks,
+      source,
+      ...(isClosing ? [view] : []),
+      marks.mdMark.create(),
+    ])
     pos = child.to
   }
   if (pos < node.to) {
