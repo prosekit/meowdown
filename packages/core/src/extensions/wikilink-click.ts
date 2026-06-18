@@ -34,11 +34,6 @@ export function parseWikilink(text: string): ParsedWikilink {
   return { target: inner.slice(0, pipe).trim(), display: inner.slice(pipe + 1).trim() }
 }
 
-/** Extracts the target from `[[target]]` or `[[target|alias]]`. Exported for tests. */
-export function parseWikilinkTarget(text: string): string {
-  return parseWikilink(text).target
-}
-
 export interface WikilinkClickPayload {
   target: string
   event: MouseEvent

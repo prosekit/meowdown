@@ -2,15 +2,16 @@ import { describe, expect, it } from 'vitest'
 
 import { setupFixture } from '../testing/index.ts'
 
-import { parseWikilinkTarget, findWikilinkAt } from './wikilink-click.ts'
+import { parseWikilink, findWikilinkAt } from './wikilink-click.ts'
 
-describe('parseWikilinkTarget', () => {
+describe('parseWikilink', () => {
   it.each([
-    ['[[Note]]', 'Note'],
-    ['[[Note|Alias]]', 'Note'],
-    ['[[  Spaced Name  ]]', 'Spaced Name'],
-  ])('extracts the target from %s', (input, expected) => {
-    expect(parseWikilinkTarget(input)).toBe(expected)
+    ['[[Note]]', 'Note', ''],
+    ['[[Note|Alias]]', 'Note', 'Alias'],
+    ['[[  Spaced Name  ]]', 'Spaced Name', ''],
+    ['[[Note | My Note]]', 'Note', 'My Note'],
+  ])('parses %s', (input, target, display) => {
+    expect(parseWikilink(input)).toEqual({ target, display })
   })
 })
 
