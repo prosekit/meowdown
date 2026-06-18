@@ -70,6 +70,7 @@ export function defineMarkMode(mode: MarkMode): PlainExtension {
 }
 
 /** The active mark mode, read from the `data-mark-mode` attribute on the editor. */
+// REVIEW: do not read the mode from the DOM. Use plugin key and plugin state to get the mode
 export function getMarkMode(view: EditorView): MarkMode | undefined {
   return view.dom.dataset.markMode as MarkMode | undefined
 }
