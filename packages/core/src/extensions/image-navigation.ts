@@ -6,6 +6,7 @@ import {
   Priority,
   union,
   withPriority,
+  type MarkRange,
   type PlainExtension,
 } from '@prosekit/core'
 import type { Command, EditorState } from '@prosekit/pm/state'
@@ -16,37 +17,28 @@ import { Decoration, DecorationSet } from '@prosekit/pm/view'
 import { getMarkMode } from './mark-mode.ts'
 import type { MarkName } from './mark-names.ts'
 
-// REVIEW: REMOVE ImageRange, just use MarkRange from prosekit.
-interface ImageRange {
-  from: number
-  to: number
-}
-
 // The contiguous run of `mdImageSource` text that touches `pos`, or undefined.
-// REVIEW: rename imageSourceRangeAt to getImageSourceRangeAt. Simlar renames for all functions in this file.
-function imageSourceRangeAt(state: EditorState, pos: number): ImageRange | undefined {
-  const range = getMarkRange(state.doc.resolve(pos), 'mdImageSource' satisfies MarkName)
-  // REVIEW: REMOVE MarkRange->ImageRange logic, just use MarkRange from prosekit.
-  return range ? { from: range.from, to: range.to } : undefined
+function getImageSourceRangeAt(state: EditorState, pos: number): MarkRange | undefined {
+  return getMarkRange(state.doc.resolve(pos), 'mdImageSource' satisfies MarkName)
 }
 
 // The image whose range ends exactly at `pos` (immediately left of the caret).
-function imageBefore(state: EditorState, pos: number): ImageRange | undefined {
-  const range = imageSourceRangeAt(state, pos)
+function getImageBefore(state: EditorState, pos: number): MarkRange | undefined {
+  const range = getImageSourceRangeAt(state, pos)
   return range && range.to === pos ? range : undefined
 }
 
 // The image whose range starts exactly at `pos` (immediately right of the caret).
-function imageAfter(state: EditorState, pos: number): ImageRange | undefined {
-  const range = imageSourceRangeAt(state, pos)
+function getImageAfter(state: EditorState, pos: number): MarkRange | undefined {
+  const range = getImageSourceRangeAt(state, pos)
   return range && range.from === pos ? range : undefined
 }
 
 // The image range a non-empty selection exactly spans, or undefined.
-function selectedImageRange(state: EditorState): ImageRange | undefined {
+function getSelectedImageRange(state: EditorState): MarkRange | undefined {
   const { from, to, empty } = state.selection
   if (empty) return
-  const range = imageSourceRangeAt(state, from)
+  const range = getImageSourceRangeAt(state, from)
   return range && range.from === from && range.to === to ? range : undefined
 }
 
@@ -54,7 +46,7 @@ function isHideMode(view: EditorView | undefined): boolean {
   return !!view && getMarkMode(view) === 'hide'
 }
 
-function selectRange(state: EditorState, range: ImageRange): TextSelection {
+function selectRange(state: EditorState, range: MarkRange): TextSelection {
   return TextSelection.create(state.doc, range.from, range.to)
 }
 
@@ -64,12 +56,12 @@ const arrowRight: Command = (state, dispatch, view) => {
   if (!isHideMode(view) || !isTextSelection(state.selection)) return false
   const selection = state.selection
   if (selection.empty) {
-    const after = imageAfter(state, selection.from)
+    const after = getImageAfter(state, selection.from)
     if (after) {
       dispatch?.(state.tr.setSelection(selectRange(state, after)))
       return true
     }
-    const before = imageBefore(state, selection.from)
+    const before = getImageBefore(state, selection.from)
     if (before) {
       const $from = state.doc.resolve(selection.from)
       if (selection.from >= $from.end()) return false
@@ -78,8 +70,7 @@ const arrowRight: Command = (state, dispatch, view) => {
     }
     return false
   }
-  // REVIEW: Question: What if I do not add the logic below, is there any difference in user experience?
-  const range = selectedImageRange(state)
+  const range = getSelectedImageRange(state)
   if (!range) return false
   dispatch?.(state.tr.setSelection(TextSelection.create(state.doc, range.to)))
   return true
@@ -91,13 +82,12 @@ const arrowLeft: Command = (state, dispatch, view) => {
   if (!isHideMode(view) || !isTextSelection(state.selection)) return false
   const selection = state.selection
   if (selection.empty) {
-    const before = imageBefore(state, selection.from)
+    const before = getImageBefore(state, selection.from)
     if (!before) return false
     dispatch?.(state.tr.setSelection(selectRange(state, before)))
     return true
   }
-  // REVIEW: Question: What if I do not add the logic below, is there any difference in user experience?
-  const range = selectedImageRange(state)
+  const range = getSelectedImageRange(state)
   if (!range) return false
   dispatch?.(state.tr.setSelection(TextSelection.create(state.doc, range.from)))
   return true
@@ -109,12 +99,12 @@ const arrowLeft: Command = (state, dispatch, view) => {
 const backspace: Command = (state, dispatch, view) => {
   if (!isHideMode(view) || !state.selection.empty) return false
   const pos = state.selection.from
-  const before = imageBefore(state, pos)
+  const before = getImageBefore(state, pos)
   if (before) {
     dispatch?.(state.tr.delete(before.from, before.to))
     return true
   }
-  if (!imageAfter(state, pos)) return false
+  if (!getImageAfter(state, pos)) return false
   if (pos <= state.doc.resolve(pos).start()) return false
   dispatch?.(state.tr.delete(pos - 1, pos))
   return true
@@ -124,12 +114,12 @@ const backspace: Command = (state, dispatch, view) => {
 const forwardDelete: Command = (state, dispatch, view) => {
   if (!isHideMode(view) || !state.selection.empty) return false
   const pos = state.selection.from
-  const after = imageAfter(state, pos)
+  const after = getImageAfter(state, pos)
   if (after) {
     dispatch?.(state.tr.delete(after.from, after.to))
     return true
   }
-  if (!imageBefore(state, pos)) return false
+  if (!getImageBefore(state, pos)) return false
   if (pos >= state.doc.resolve(pos).end()) return false
   dispatch?.(state.tr.delete(pos, pos + 1))
   return true
@@ -141,7 +131,7 @@ function createImageSelectionPlugin(): Plugin {
     key: new PluginKey('image-selection'),
     props: {
       decorations: (state) => {
-        const range = selectedImageRange(state)
+        const range = getSelectedImageRange(state)
         if (!range) return null
         return DecorationSet.create(state.doc, [
           Decoration.inline(range.from, range.to, { class: 'md-image-selected' }),
