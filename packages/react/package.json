@@ -28,9 +28,9 @@
     "@codemirror/view": "^6.43.1",
     "@meowdown/core": "workspace:*",
     "@ocavue/utils": "^1.7.0",
-    "@prosekit/core": "^0.13.0-beta.2",
-    "@prosekit/pm": "^0.1.18",
-    "@prosekit/react": "^0.8.0-beta.3",
+    "@prosekit/core": "^0.13.0-beta.0",
+    "@prosekit/pm": "^0.1.19-beta.0",
+    "@prosekit/react": "^0.8.0-beta.4",
     "clsx": "^2.1.1"
   },
   "peerDependencies": {
