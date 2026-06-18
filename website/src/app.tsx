@@ -3,6 +3,10 @@ import { type CSSProperties, useLayoutEffect, useState } from 'react'
 
 import { uploadFile } from './upload-file.ts'
 
+function logImageClick({ src, alt }: { src: string; alt: string }): void {
+  console.info('[meowdown] image clicked', { src, alt })
+}
+
 interface ModeOption {
   value: EditorMode
   label: string
@@ -239,6 +243,7 @@ export function App() {
               onTagSearch={searchTags}
               onWikilinkSearch={searchNotes}
               onImagePaste={uploadFile}
+              onImageClick={logImageClick}
             />
           </div>
 

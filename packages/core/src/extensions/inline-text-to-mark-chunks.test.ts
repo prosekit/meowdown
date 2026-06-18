@@ -136,11 +136,11 @@ describe('inlineTextToMarkChunks', () => {
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-4: -
-      4-6: mdImageSource(src=http://x/p.png) + mdMark
-      6-9: mdImageSource(src=http://x/p.png)
-      9-11: mdImageSource(src=http://x/p.png) + mdMark
-      11-25: mdImageSource(src=http://x/p.png) + mdLinkUri
-      25-26: mdImageSource(src=http://x/p.png) + mdImageView(src=http://x/p.png,alt=alt) + mdMark
+      4-6: mdImageSource(src=http://x/p.png,alt=alt) + mdMark
+      6-9: mdImageSource(src=http://x/p.png,alt=alt)
+      9-11: mdImageSource(src=http://x/p.png,alt=alt) + mdMark
+      11-25: mdImageSource(src=http://x/p.png,alt=alt) + mdLinkUri
+      25-26: mdImageSource(src=http://x/p.png,alt=alt) + mdImageView(src=http://x/p.png,alt=alt) + mdMark
       26-30: -
       "
     `)
@@ -174,12 +174,12 @@ describe('inlineTextToMarkChunks', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '![a](http://x "t")')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-2: mdImageSource(src=http://x) + mdMark
-      2-3: mdImageSource(src=http://x)
-      3-5: mdImageSource(src=http://x) + mdMark
-      5-13: mdImageSource(src=http://x) + mdLinkUri
-      13-17: mdImageSource(src=http://x)
-      17-18: mdImageSource(src=http://x) + mdImageView(src=http://x,alt=a) + mdMark
+      0-2: mdImageSource(src=http://x,alt=a) + mdMark
+      2-3: mdImageSource(src=http://x,alt=a)
+      3-5: mdImageSource(src=http://x,alt=a) + mdMark
+      5-13: mdImageSource(src=http://x,alt=a) + mdLinkUri
+      13-17: mdImageSource(src=http://x,alt=a)
+      17-18: mdImageSource(src=http://x,alt=a) + mdImageView(src=http://x,alt=a) + mdMark
       "
     `)
   })
@@ -188,15 +188,15 @@ describe('inlineTextToMarkChunks', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '![a **b** c](http://x)')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-2: mdImageSource(src=http://x) + mdMark
-      2-4: mdImageSource(src=http://x)
-      4-6: mdImageSource(src=http://x) + mdMark + mdStrong
-      6-7: mdImageSource(src=http://x) + mdStrong
-      7-9: mdImageSource(src=http://x) + mdMark + mdStrong
-      9-11: mdImageSource(src=http://x)
-      11-13: mdImageSource(src=http://x) + mdMark
-      13-21: mdImageSource(src=http://x) + mdLinkUri
-      21-22: mdImageSource(src=http://x) + mdImageView(src=http://x,alt=a **b** c) + mdMark
+      0-2: mdImageSource(src=http://x,alt=a **b** c) + mdMark
+      2-4: mdImageSource(src=http://x,alt=a **b** c)
+      4-6: mdImageSource(src=http://x,alt=a **b** c) + mdMark + mdStrong
+      6-7: mdImageSource(src=http://x,alt=a **b** c) + mdStrong
+      7-9: mdImageSource(src=http://x,alt=a **b** c) + mdMark + mdStrong
+      9-11: mdImageSource(src=http://x,alt=a **b** c)
+      11-13: mdImageSource(src=http://x,alt=a **b** c) + mdMark
+      13-21: mdImageSource(src=http://x,alt=a **b** c) + mdLinkUri
+      21-22: mdImageSource(src=http://x,alt=a **b** c) + mdImageView(src=http://x,alt=a **b** c) + mdMark
       "
     `)
   })

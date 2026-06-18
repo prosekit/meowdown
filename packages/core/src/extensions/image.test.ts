@@ -188,6 +188,7 @@ describe('image selection ring in hide mode', () => {
   it('rings the preview only while the image is selected', async () => {
     using fixture = setupHidden()
     setCaret(fixture, 3) // ABC| just before the image
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot()
 
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
 
@@ -210,9 +211,12 @@ describe('image selection ring in hide mode', () => {
 })
 
 describe('image click callback', () => {
-
   // Render `markdown` with a click handler attached, showing http(s) images as-is.
-  function applyClickable(fixture: Fixture, markdown: string, onImageClick: ImageClickHandler): void {
+  function applyClickable(
+    fixture: Fixture,
+    markdown: string,
+    onImageClick: ImageClickHandler,
+  ): void {
     const { editor, n } = fixture
     editor.use(defineImage({ resolveImageUrl: (src) => src }))
     editor.use(defineImageClickHandler(onImageClick))
