@@ -4,7 +4,7 @@ import { page, userEvent } from 'vitest/browser'
 
 import { getSelectionSnapshot, setupFixture, type Fixture } from '../testing/index.ts'
 
-import { defineImageClickHandler, type ImageClickPayload } from './image-click.ts'
+import { defineImageClickHandler, type ImageClickHandler } from './image-click.ts'
 import { defineImage } from './image.ts'
 import { defineMarkMode } from './mark-mode.ts'
 
@@ -210,10 +210,9 @@ describe('image selection ring in hide mode', () => {
 })
 
 describe('image click callback', () => {
-  type ClickSpy = ReturnType<typeof vi.fn<(payload: ImageClickPayload) => void>>
 
   // Render `markdown` with a click handler attached, showing http(s) images as-is.
-  function applyClickable(fixture: Fixture, markdown: string, onImageClick: ClickSpy): void {
+  function applyClickable(fixture: Fixture, markdown: string, onImageClick: ImageClickHandler): void {
     const { editor, n } = fixture
     editor.use(defineImage({ resolveImageUrl: (src) => src }))
     editor.use(defineImageClickHandler(onImageClick))
@@ -221,7 +220,7 @@ describe('image click callback', () => {
   }
 
   it('fires with the markdown src and alt when the preview is clicked', async () => {
-    const onImageClick: ClickSpy = vi.fn()
+    const onImageClick = vi.fn<ImageClickHandler>()
     using fixture = setupFixture()
     applyClickable(fixture, '![cat](https://example.com/cat.png)', onImageClick)
     await expect.element(preview).toBeInTheDocument()
@@ -234,7 +233,7 @@ describe('image click callback', () => {
   })
 
   it('passes the originating MouseEvent', async () => {
-    const onImageClick: ClickSpy = vi.fn()
+    const onImageClick = vi.fn<ImageClickHandler>()
     using fixture = setupFixture()
     applyClickable(fixture, '![cat](https://example.com/cat.png)', onImageClick)
     await expect.element(preview).toBeInTheDocument()
@@ -244,7 +243,7 @@ describe('image click callback', () => {
   })
 
   it('does not fire when plain text is clicked', async () => {
-    const onImageClick: ClickSpy = vi.fn()
+    const onImageClick = vi.fn<ImageClickHandler>()
     using fixture = setupFixture()
     applyClickable(fixture, 'hello ![cat](https://example.com/cat.png)', onImageClick)
     await expect.element(preview).toBeInTheDocument()
@@ -253,7 +252,7 @@ describe('image click callback', () => {
   })
 
   it('reports each adjacent image by its own src and alt', async () => {
-    const onImageClick: ClickSpy = vi.fn()
+    const onImageClick = vi.fn<ImageClickHandler>()
     using fixture = setupFixture()
     applyClickable(
       fixture,
