@@ -50,14 +50,23 @@ const MODES: ModeOption[] = [
 
 const MODE_STORAGE_KEY = 'meowdown:mode'
 
-function isEditorMode(value: string | null): value is EditorMode {
-  return value != null && MODES.some((option) => option.value === value)
-}
 
 function readStoredMode(): EditorMode {
   const stored = sessionStorage.getItem(MODE_STORAGE_KEY)
-  return isEditorMode(stored) ? stored : 'focus'
+  if (stored) {
+    for (const option of MODES) {
+      if (option.value === stored) {
+        return option.value
+      }
+    }
+  }
+  return "focus"
 }
+
+function writeStoredMode(mode: EditorMode): void {
+  sessionStorage.setItem(MODE_STORAGE_KEY, mode)
+}
+
 
 const INITIAL_CONTENT = `
 # Welcome to Meowdown
@@ -214,7 +223,7 @@ export function App() {
   const activeMode = MODES.find((option) => option.value === mode) ?? MODES[0]
 
   useEffect(() => {
-    sessionStorage.setItem(MODE_STORAGE_KEY, mode)
+    writeStoredMode(mode)
   }, [mode])
 
   return (
