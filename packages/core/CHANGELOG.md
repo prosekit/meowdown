@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0](https://github.com/prosekit/meowdown/compare/core-v0.13.0...core-v0.14.0) (2026-06-18)
+
+
+### Features
+
+* **core:** make wikilinks immutable in every mark mode ([#78](https://github.com/prosekit/meowdown/issues/78)) ([611e671](https://github.com/prosekit/meowdown/commit/611e6713c6260149ac7db5c33568b97bf49222ab))
+
 ## [0.13.0](https://github.com/prosekit/meowdown/compare/core-v0.12.0...core-v0.13.0) (2026-06-18)
 
 
