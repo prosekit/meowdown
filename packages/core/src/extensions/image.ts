@@ -10,6 +10,7 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView, MarkViewConstructor } from '@prosekit/pm/view'
 
 import { matchEmbed } from './embed/index.ts'
+import { defineImageNavigation } from './image-navigation.ts'
 import type { MdImageViewAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
 
@@ -51,11 +52,11 @@ function renderImagePreview(
   if (!url) return undefined
   const wrapper = document.createElement('span')
   wrapper.className = 'md-image-preview md-image-preview-img'
+  wrapper.dataset.testid = 'image-preview'
   const img = document.createElement('img')
   img.src = url
   img.alt = alt
   img.draggable = false
-  img.dataset.testid = 'image-preview'
   wrapper.appendChild(img)
   return wrapper
 }
@@ -157,6 +158,7 @@ export function defineImage(options: ImageOptions = {}): PlainExtension {
       name: 'mdImageView' satisfies MarkName,
       constructor: createImageMarkView(options),
     }),
+    defineImageNavigation(),
     // High priority so the drop/paste handler runs before ProseKit's
     // drop-indicator plugin.
     withPriority(definePlugin(createImageInputPlugin(options)), Priority.high),

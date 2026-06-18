@@ -3,6 +3,7 @@ import type { EditorNode, Mark, Slice } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
+import type { EditorView } from '@prosekit/pm/view'
 
 import type { MarkName } from './mark-names.ts'
 
@@ -53,9 +54,15 @@ const SYNTAX_BEARING_MARKS: ReadonlySet<MarkName> = new Set<MarkName>([
   'mdWikilink',
 ])
 
-function createMarkModePlugin(mode: MarkMode): Plugin<DecorationSet> {
-  return new Plugin<DecorationSet>({
-    key: new PluginKey('mark-mode'),
+const markModeKey = new PluginKey<MarkMode>('mark-mode')
+
+function createMarkModePlugin(mode: MarkMode): Plugin<MarkMode> {
+  return new Plugin<MarkMode>({
+    key: markModeKey,
+    state: {
+      init: () => mode,
+      apply: (_tr, value) => value,
+    },
     props: {
       attributes: { 'data-mark-mode': mode },
       decorations: mode === 'focus' ? (state) => computeFocusDecorations(state) : undefined,
@@ -66,6 +73,11 @@ function createMarkModePlugin(mode: MarkMode): Plugin<DecorationSet> {
 
 export function defineMarkMode(mode: MarkMode): PlainExtension {
   return definePlugin(createMarkModePlugin(mode))
+}
+
+/** The active mark mode, or `undefined` when `defineMarkMode` is not applied. */
+export function getMarkMode(view: EditorView): MarkMode | undefined {
+  return markModeKey.getState(view.state)
 }
 
 function cleanCopySerializer(slice: Slice): string {

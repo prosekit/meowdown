@@ -4,7 +4,7 @@ import type { InlineElement } from '../lezer/inline.ts'
 import { parseInline } from '../lezer/inline.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 
-import type { MdImageViewAttrs, MdLinkTextAttrs } from './inline-marks.ts'
+import type { MdImageSourceAttrs, MdImageViewAttrs, MdLinkTextAttrs } from './inline-marks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
 import type { MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
@@ -204,7 +204,7 @@ function walkImage(
   const src = text.slice(urlNode.from, urlNode.to)
   const alt = brackets.length >= 2 ? text.slice(brackets[0].to, brackets[1].from) : ''
 
-  const source = marks.mdImageSource.create()
+  const source = marks.mdImageSource.create({ src } satisfies MdImageSourceAttrs)
   const view = marks.mdImageView.create({ src, alt } satisfies MdImageViewAttrs)
 
   // The image's final character, where `mdImageView` is anchored: `)` today, a
