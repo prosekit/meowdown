@@ -12,6 +12,7 @@ export interface MarkClickConfig<Payload> {
   /** The click target must sit inside this selector, tested via `closest`. */
   selector: string
   /** The mark hit covering `pos`, or `undefined` when the click misses it. */
+  // REVIEW: rename to findHitAt.
   hitAt: (state: EditorState, pos: number) => MarkClickHit<Payload> | undefined
   /** Fired once the click passes the caret-edit guard below. */
   onClick: (payload: Payload, event: MouseEvent) => void
