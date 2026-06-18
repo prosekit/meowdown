@@ -82,11 +82,12 @@
   font-size: 0.95rem;
 }
 
-.ProseMirror a {
+.ProseMirror .md-link {
   color: var(--meowdown-accent);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
+  cursor: pointer;
 }
 
 .ProseMirror code {

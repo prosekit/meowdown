@@ -9,6 +9,11 @@ export {
   type WikilinkClickHandler,
   type WikilinkClickPayload,
 } from './extensions/wikilink-click.ts'
+export {
+  defineLinkClickHandler,
+  type LinkClickHandler,
+  type LinkClickPayload,
+} from './extensions/link-click.ts'
 export { defineImage, type ImageOptions } from './extensions/image.ts'
 export { defineEmbedPaste } from './extensions/embed-paste.ts'
 export { defineBulletAfterHeading } from './extensions/bullet-after-heading.ts'

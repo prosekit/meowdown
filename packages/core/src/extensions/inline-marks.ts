@@ -87,7 +87,7 @@ function defineMdLinkText() {
     name: 'mdLinkText' satisfies MarkName,
     inclusive: false,
     attrs: { href: { default: '' } },
-    toDOM: (mark) => ['a', { href: (mark.attrs as MdLinkTextAttrs).href }, 0],
+    toDOM: (mark) => ['a', { class: 'md-link', href: (mark.attrs as MdLinkTextAttrs).href }, 0],
     parseDOM: [
       {
         tag: 'a',
