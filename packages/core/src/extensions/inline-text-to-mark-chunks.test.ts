@@ -136,11 +136,11 @@ describe('inlineTextToMarkChunks', () => {
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-4: -
-      4-6: mdImageSource + mdMark
-      6-9: mdImageSource
-      9-11: mdImageSource + mdMark
-      11-25: mdImageSource + mdLinkUri
-      25-26: mdImageSource + mdImageView(src=http://x/p.png,alt=alt) + mdMark
+      4-6: mdImageSource(src=http://x/p.png) + mdMark
+      6-9: mdImageSource(src=http://x/p.png)
+      9-11: mdImageSource(src=http://x/p.png) + mdMark
+      11-25: mdImageSource(src=http://x/p.png) + mdLinkUri
+      25-26: mdImageSource(src=http://x/p.png) + mdImageView(src=http://x/p.png,alt=alt) + mdMark
       26-30: -
       "
     `)
@@ -150,9 +150,9 @@ describe('inlineTextToMarkChunks', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '![](z.png)')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-4: mdImageSource + mdMark
-      4-9: mdImageSource + mdLinkUri
-      9-10: mdImageSource + mdImageView(src=z.png) + mdMark
+      0-4: mdImageSource(src=z.png) + mdMark
+      4-9: mdImageSource(src=z.png) + mdLinkUri
+      9-10: mdImageSource(src=z.png) + mdImageView(src=z.png) + mdMark
       "
     `)
   })
@@ -174,12 +174,12 @@ describe('inlineTextToMarkChunks', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '![a](http://x "t")')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-2: mdImageSource + mdMark
-      2-3: mdImageSource
-      3-5: mdImageSource + mdMark
-      5-13: mdImageSource + mdLinkUri
-      13-17: mdImageSource
-      17-18: mdImageSource + mdImageView(src=http://x,alt=a) + mdMark
+      0-2: mdImageSource(src=http://x) + mdMark
+      2-3: mdImageSource(src=http://x)
+      3-5: mdImageSource(src=http://x) + mdMark
+      5-13: mdImageSource(src=http://x) + mdLinkUri
+      13-17: mdImageSource(src=http://x)
+      17-18: mdImageSource(src=http://x) + mdImageView(src=http://x,alt=a) + mdMark
       "
     `)
   })
@@ -188,15 +188,15 @@ describe('inlineTextToMarkChunks', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '![a **b** c](http://x)')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-2: mdImageSource + mdMark
-      2-4: mdImageSource
-      4-6: mdImageSource + mdMark + mdStrong
-      6-7: mdImageSource + mdStrong
-      7-9: mdImageSource + mdMark + mdStrong
-      9-11: mdImageSource
-      11-13: mdImageSource + mdMark
-      13-21: mdImageSource + mdLinkUri
-      21-22: mdImageSource + mdImageView(src=http://x,alt=a **b** c) + mdMark
+      0-2: mdImageSource(src=http://x) + mdMark
+      2-4: mdImageSource(src=http://x)
+      4-6: mdImageSource(src=http://x) + mdMark + mdStrong
+      6-7: mdImageSource(src=http://x) + mdStrong
+      7-9: mdImageSource(src=http://x) + mdMark + mdStrong
+      9-11: mdImageSource(src=http://x)
+      11-13: mdImageSource(src=http://x) + mdMark
+      13-21: mdImageSource(src=http://x) + mdLinkUri
+      21-22: mdImageSource(src=http://x) + mdImageView(src=http://x,alt=a **b** c) + mdMark
       "
     `)
   })
