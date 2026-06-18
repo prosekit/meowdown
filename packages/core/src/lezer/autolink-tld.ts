@@ -56,7 +56,7 @@ const BARE_AUTOLINK_TLDS: ReadonlySet<string> = new Set([
 ])
 
 // A single DNS label: alphanumeric, hyphens allowed inside but not at the edges.
-const LABEL_RE = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i
+const DNS_LABEL_RE = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i
 
 /** The host portion of a bare candidate: everything before the first `/`. */
 export function hostFromUrl(text: string): string {
@@ -87,7 +87,7 @@ export function isLinkableBareHost(host: string): boolean {
   if (registrable.length < 3) return false
 
   for (const label of labels) {
-    if (label.length > 63 || !LABEL_RE.test(label)) return false
+    if (label.length > 63 || !DNS_LABEL_RE.test(label)) return false
   }
   return true
 }
