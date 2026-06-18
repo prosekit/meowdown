@@ -1,7 +1,6 @@
-import { defineMarkView, union, type PlainExtension } from '@prosekit/core'
+import { defineMarkView, type PlainExtension } from '@prosekit/core'
 import type { MarkViewConstructor } from '@prosekit/pm/view'
 
-import { defineAtomicMarkNavigation } from './atomic-mark-navigation.ts'
 import type { MdWikilinkViewAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
 
@@ -38,18 +37,13 @@ function createWikilinkMarkView(): MarkViewConstructor {
 
 /**
  * Render `[[target]]`/`[[target|alias]]` as an immutable inline label (a mark
- * view) and make it a single caret stop in hide mode: arrowing onto it selects
- * the whole source, and Backspace/Delete remove it as a unit.
+ * view) standing in for the raw source. The single-caret-stop behavior in hide
+ * mode comes from the shared `defineAtomicMarkNavigation` in the editor
+ * extension, which treats `mdWikilinkSource` (and `mdImageSource`) as one unit.
  */
 export function defineWikilink(): PlainExtension {
-  return union(
-    defineMarkView({
-      name: 'mdWikilinkView' satisfies MarkName,
-      constructor: createWikilinkMarkView(),
-    }),
-    defineAtomicMarkNavigation({
-      markNames: ['mdWikilinkSource' satisfies MarkName],
-      selectedClass: 'md-wikilink-selected',
-    }),
-  )
+  return defineMarkView({
+    name: 'mdWikilinkView' satisfies MarkName,
+    constructor: createWikilinkMarkView(),
+  }) as PlainExtension
 }

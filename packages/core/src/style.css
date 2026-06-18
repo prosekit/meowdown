@@ -301,11 +301,11 @@
 }
 
 /* The whole wikilink source is selected: a single caret stop in hide mode. The
- * `md-wikilink-selected` decoration wraps the source text spans, so match the
+ * `md-atomic-selected` decoration wraps the source text spans, so match the
  * mark view that contains a selected span and ring its label like a node
  * selection (`.ProseMirror-selectednode`). */
 .ProseMirror[data-mark-mode='hide']
-  .md-wikilink-view:has(.md-wikilink-selected)
+  .md-wikilink-view:has(.md-atomic-selected)
   .md-wikilink-label {
   outline: 2px solid var(--meowdown-node-outline);
   outline-offset: 2px;
@@ -353,11 +353,11 @@
 }
 
 /* The whole image source is selected: a single caret stop in hide mode. The
- * `md-image-selected` decoration wraps the source text spans, so the preview
+ * `md-atomic-selected` decoration wraps the source text spans, so the preview
  * (a sibling of the mark view's content) is not a descendant of it; match the
  * mark view that contains a selected span instead. Ring the preview like a node
  * selection (`.ProseMirror-selectednode`). */
-.ProseMirror[data-mark-mode='hide'] .md-image-view:has(.md-image-selected) .md-image-preview {
+.ProseMirror[data-mark-mode='hide'] .md-image-view:has(.md-atomic-selected) .md-image-preview {
   outline: 2px solid var(--meowdown-node-outline);
   outline-offset: 2px;
   border-radius: var(--meowdown-image-radius, 0.5rem);
