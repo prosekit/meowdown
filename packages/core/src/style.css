@@ -289,28 +289,6 @@
   display: none;
 }
 
-/* The wikilink mark view anchors on the link's trailing character, held in this
- * contentDOM. Hiding that char with `display:none` (as the rest of the source is
- * hidden) drops it from the box tree, so a caret placed just after the wikilink
- * has no box to land in: the browser then traps it before the label and the next
- * typed character lands before the wikilink. Instead collapse the char to zero
- * width while keeping it in the layout, so the caret rests just after the label
- * and typing continues after the wikilink. Scoped to the contentDOM so the rest
- * of the markup keeps using `display:none`. */
-.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content,
-.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content {
-  display: inline-block;
-  width: 0;
-  overflow: hidden;
-  vertical-align: text-bottom;
-}
-.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content .md-mark,
-.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content .md-mark,
-.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content .md-wikilink-source,
-.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content .md-wikilink-source {
-  display: inline;
-}
-
 /* ---------------------------------------------------------------------------
  * Inline image / embed previews (`![alt](url)`), rendered in place via a mark
  * view at the image's source position.
@@ -423,5 +401,29 @@
 .ProseMirror[data-mark-mode='focus'] .md-mark:has(.show),
 .ProseMirror[data-mark-mode='focus'] .md-link-uri:has(.show),
 .ProseMirror[data-mark-mode='focus'] .md-image-source:has(.show) {
+  display: inline;
+}
+
+/* Each mark view (wikilink, image) anchors on its unit's trailing character, held
+ * in a contentDOM. Hiding that char with the `display:none` above drops it from
+ * the box tree, so a caret placed just after the unit has no box to land in: the
+ * browser traps it before the rendered label/preview and the next typed character
+ * lands before the unit (not after it). Instead collapse the char to zero width
+ * but keep it in the layout, so the caret has a real stop right after the unit and
+ * typing continues there. Scoped to the contentDOM, so all other markup keeps the
+ * `display:none` above. */
+.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content,
+.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content,
+.ProseMirror[data-mark-mode='hide'] .md-image-view-content,
+.ProseMirror[data-mark-mode='focus'] .md-image-view-content {
+  display: inline-block;
+  width: 0;
+  overflow: hidden;
+  vertical-align: text-bottom;
+}
+.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content :is(.md-mark, .md-wikilink-source),
+.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content :is(.md-mark, .md-wikilink-source),
+.ProseMirror[data-mark-mode='hide'] .md-image-view-content :is(.md-mark, .md-image-source),
+.ProseMirror[data-mark-mode='focus'] .md-image-view-content :is(.md-mark, .md-image-source) {
   display: inline;
 }
