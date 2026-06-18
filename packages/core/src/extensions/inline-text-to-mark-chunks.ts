@@ -1,5 +1,6 @@
 import type { Mark } from '@prosekit/pm/model'
 
+import { hostFromUrl, isLinkableBareHost } from '../lezer/autolink-tld.ts'
 import type { InlineElement } from '../lezer/inline.ts'
 import { parseInline } from '../lezer/inline.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
@@ -65,12 +66,14 @@ export function inlineTextToMarkChunks(
  * - a URL with a scheme is used as-is
  * - an email becomes `mailto:`
  * - a `www.` URL gets an implied `https://`
+ * - a bare domain on the curated TLD list gets an implied `https://`
  * - anything else returns `undefined`
  */
 function getAutolinkHref(urlText: string): string | undefined {
   if (/^[a-z][a-z0-9+.-]*:/i.test(urlText)) return urlText
   if (/^[^\s@]+@[^\s@]+$/.test(urlText)) return `mailto:${urlText}`
   if (/^www\./i.test(urlText)) return `https://${urlText}`
+  if (isLinkableBareHost(hostFromUrl(urlText))) return `https://${urlText}`
   return undefined
 }
 

@@ -66,6 +66,29 @@ describe('inlineMarkPlugin', () => {
     expect(linkText!.attrs.href).toBe('https://example.com')
   })
 
+  it('applies mdLinkText with an https href on a bare domain', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('visit google.com now'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'google.com')
+    const $pos = fixture.doc.resolve(pos + 1)
+    const linkText = $pos.marks().find((m) => m.type.name === 'mdLinkText')
+    expect(linkText).toBeTruthy()
+    expect(linkText!.attrs.href).toBe('https://google.com')
+  })
+
+  it('leaves a bare host off the TLD list as plain text', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('open README.md now'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'README.md')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual([])
+  })
+
   it('marks `*foo*` inside headings as well', () => {
     using fixture = setupFixture()
     const { n } = fixture

@@ -75,6 +75,10 @@ describe('markdown round-trip is byte-identical', () => {
     'mail me@example.com ok',
     'a <https://example.com> b',
     'end https://example.com.',
+    // Bare domains autolink too, but stay plain text to the converters
+    'see google.com here',
+    'paths sub.domain.net/a/b?x=1 end',
+    'not a link README.md here',
     '![cat](https://example.com/cat.png)',
     'a ![one](https://example.com/1.png) b ![two](https://example.com/2.png) c',
     '![](https://www.youtube.com/watch?v=dQw4w9WgXcQ)',
