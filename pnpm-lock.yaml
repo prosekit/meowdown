@@ -131,8 +131,8 @@ importers:
         specifier: ^0.13.0-beta.2
         version: 0.13.0-beta.3(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
       '@prosekit/pm':
-        specifier: ^0.1.18
-        version: 0.1.18
+        specifier: ^0.1.19-beta.0
+        version: 0.1.19-beta.0
       '@prosekit/react':
         specifier: ^0.8.0-beta.4
         version: 0.8.0-beta.4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)
@@ -1104,9 +1104,6 @@ packages:
         optional: true
       yjs:
         optional: true
-
-  '@prosekit/pm@0.1.18':
-    resolution: {integrity: sha512-K00S6TY4gIlkWo1Y53h9STePNSPZ6UroHaIiKTkJvfMnwBBUZEc7+CUpmtNMzLtUqjmVAoaCTnW6VDBJaEXqWg==}
 
   '@prosekit/pm@0.1.19-beta.0':
     resolution: {integrity: sha512-7vkxSf8byvR1XNIxCShdtK6UXTGgGix2lrzuA2RwvDBwz2eeqRuxjwuVN2r2EopXCJS/v4V05UXv/DuOXDULhw==}
@@ -4456,17 +4453,6 @@ snapshots:
       - prosemirror-view
       - refractor
       - sugar-high
-
-  '@prosekit/pm@0.1.18':
-    dependencies:
-      prosemirror-commands: 1.7.1
-      prosemirror-history: 1.5.0
-      prosemirror-inputrules: 1.5.1
-      prosemirror-keymap: 1.2.3
-      prosemirror-model: 1.25.9
-      prosemirror-state: 1.4.4
-      prosemirror-transform: 1.12.0
-      prosemirror-view: 1.41.9
 
   '@prosekit/pm@0.1.19-beta.0':
     dependencies:
