@@ -19,7 +19,6 @@ function createWikilinkMarkView(): MarkViewConstructor {
     const dom = document.createElement('span')
     dom.className = 'md-wikilink-view'
     const contentDOM = document.createElement('span')
-    contentDOM.className = 'md-wikilink-view-content'
     dom.appendChild(contentDOM)
 
     const label = document.createElement('span')
