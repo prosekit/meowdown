@@ -159,7 +159,7 @@ function createSelectionPlugin(markNames: MarkName[], selectedClass: string): Pl
     props: {
       decorations: (state) => {
         const range = getSelectedRange(state, markNames)
-        if (!range) return null
+        if (!range) return undefined
         return DecorationSet.create(state.doc, [
           Decoration.inline(range.from, range.to, { class: selectedClass }),
         ])
