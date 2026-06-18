@@ -2,6 +2,7 @@ import { createEditor, type NodeJSON } from '@prosekit/core'
 import { describe, expect, it } from 'vitest'
 
 import { defineEditorExtension } from '../extensions/extension.ts'
+import type { NodeName } from '../extensions/node-names.ts'
 
 import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
@@ -134,7 +135,7 @@ describe('docToMarkdown', () => {
   })
 
   it('serializes a horizontal rule', () => {
-    const node = docFromJSON(wrapInDoc({ type: 'horizontalRule' }))
+    const node = docFromJSON(wrapInDoc({ type: 'horizontalRule' satisfies NodeName }))
     expect(docToMarkdown(node)).toBe('---\n')
   })
 

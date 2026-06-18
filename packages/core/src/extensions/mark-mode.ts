@@ -4,7 +4,7 @@ import type { EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
-import type { MarkName } from './inline-marks.ts'
+import type { MarkName } from './mark-names.ts'
 
 /**
  * Controls how markdown syntax characters are rendered and how the
@@ -16,6 +16,8 @@ import type { MarkName } from './inline-marks.ts'
  */
 export type MarkMode = 'hide' | 'focus' | 'show'
 
+// Marks whose presence at the caret reveals the surrounding markdown syntax in
+// focus mode.
 const REVEAL_TRIGGERING_MARKS: ReadonlySet<MarkName> = new Set<MarkName>([
   'mdStrong',
   'mdEm',
@@ -24,14 +26,25 @@ const REVEAL_TRIGGERING_MARKS: ReadonlySet<MarkName> = new Set<MarkName>([
   'mdLinkText',
   'mdLinkUri',
   'mdWikilink',
+  // Reveals the raw `![alt](url)` when the caret is anywhere in the image
+  // source, including its plain alt text (which carries only mdImageSource).
+  'mdImageSource',
 ])
 
+// The hidden marks individually decorated `.show` within a revealed range: the
+// syntax punctuation and the bare URL.
 const REVEALABLE_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>(['mdMark', 'mdLinkUri'])
 
+// Marks whose text is dropped from a clean clipboard copy, so copied markdown
+// omits the rendered syntax. Image source is exempt (see `cleanCopySerializer`).
 const CLIPBOARD_STRIP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>(['mdMark', 'mdLinkUri'])
 
+// Marks that make a text node part of a link; revealing one reveals the whole
+// link (text + URL) envelope.
 const LINK_BEARING_MARKS: ReadonlySet<MarkName> = new Set<MarkName>(['mdLinkText', 'mdLinkUri'])
 
+// Marks that carry their own inline formatting (not bare punctuation), used to
+// test link-envelope membership.
 const SYNTAX_BEARING_MARKS: ReadonlySet<MarkName> = new Set<MarkName>([
   'mdStrong',
   'mdEm',
@@ -61,9 +74,14 @@ function cleanCopySerializer(slice: Slice): string {
     const parts: string[] = []
     blockNode.descendants((textNode) => {
       if (!textNode.isText || !textNode.text) return true
-      const stripped = textNode.marks.some((m: Mark) =>
-        CLIPBOARD_STRIP_MARK_NAMES.has(m.type.name as MarkName),
+      // Keep the whole image source so a copied image stays `![alt](url)`,
+      // even though its punctuation/url carry otherwise-stripped marks.
+      const isImageSource = textNode.marks.some(
+        (m: Mark) => m.type.name === ('mdImageSource' satisfies MarkName),
       )
+      const stripped =
+        !isImageSource &&
+        textNode.marks.some((m: Mark) => CLIPBOARD_STRIP_MARK_NAMES.has(m.type.name as MarkName))
       if (!stripped) parts.push(textNode.text)
       return false
     })
@@ -74,12 +92,12 @@ function cleanCopySerializer(slice: Slice): string {
   return blocks.join('\n')
 }
 
-function computeFocusDecorations(state: EditorState): DecorationSet | null {
+function computeFocusDecorations(state: EditorState): DecorationSet | undefined {
   const { $anchor, empty } = state.selection
   if (!empty) return DecorationSet.empty
 
   const textblock = $anchor.parent
-  if (!textblock.isTextblock) return null
+  if (!textblock.isTextblock) return undefined
 
   const textblockStart = $anchor.start()
   const parentOffset = $anchor.parentOffset
@@ -203,10 +221,10 @@ function isLinkEnvelopeMember(child: EditorNode): boolean {
   let hasLinkMark = false
   let hasOtherSemantic = false
   for (const mark of child.marks) {
-    const n = mark.type.name as MarkName
-    if (n === 'mdMark') hasMdMark = true
-    else if (LINK_BEARING_MARKS.has(n)) hasLinkMark = true
-    else if (SYNTAX_BEARING_MARKS.has(n)) hasOtherSemantic = true
+    const name = mark.type.name as MarkName
+    if (name === 'mdMark') hasMdMark = true
+    else if (LINK_BEARING_MARKS.has(name)) hasLinkMark = true
+    else if (SYNTAX_BEARING_MARKS.has(name)) hasOtherSemantic = true
   }
   if (hasLinkMark) return true
   if (hasMdMark && !hasOtherSemantic) return true

@@ -131,6 +131,76 @@ describe('inlineTextToMarkChunks', () => {
     `)
   })
 
+  it('image: mdImageSource over the source, mdImageView on the final char', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'see ![alt](http://x/p.png) end')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-4: -
+      4-6: mdImageSource + mdMark
+      6-9: mdImageSource
+      9-11: mdImageSource + mdMark
+      11-25: mdImageSource + mdLinkUri
+      25-26: mdImageSource + mdImageView(src=http://x/p.png,alt=alt) + mdMark
+      26-30: -
+      "
+    `)
+  })
+
+  it('image with empty alt', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, '![](z.png)')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-4: mdImageSource + mdMark
+      4-9: mdImageSource + mdLinkUri
+      9-10: mdImageSource + mdImageView(src=z.png) + mdMark
+      "
+    `)
+  })
+
+  it('reference image does not get image marks (falls through to the link walk)', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, 'a ![b][id] c')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-2: -
+      2-4: mdMark
+      4-5: -
+      5-6: mdMark
+      6-12: -
+      "
+    `)
+  })
+
+  it('image with a title leaves the title node unmarked', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, '![a](http://x "t")')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-2: mdImageSource + mdMark
+      2-3: mdImageSource
+      3-5: mdImageSource + mdMark
+      5-13: mdImageSource + mdLinkUri
+      13-17: mdImageSource
+      17-18: mdImageSource + mdImageView(src=http://x,alt=a) + mdMark
+      "
+    `)
+  })
+
+  it('image with formatted alt marks the nested emphasis', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, '![a **b** c](http://x)')
+    expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-2: mdImageSource + mdMark
+      2-4: mdImageSource
+      4-6: mdImageSource + mdMark + mdStrong
+      6-7: mdImageSource + mdStrong
+      7-9: mdImageSource + mdMark + mdStrong
+      9-11: mdImageSource
+      11-13: mdImageSource + mdMark
+      13-21: mdImageSource + mdLinkUri
+      21-22: mdImageSource + mdImageView(src=http://x,alt=a **b** c) + mdMark
+      "
+    `)
+  })
+
   it('autolinks a bare https URL', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, 'visit https://example.com now')
     expect(foramtMarkChunks(chunks)).toMatchInlineSnapshot(`

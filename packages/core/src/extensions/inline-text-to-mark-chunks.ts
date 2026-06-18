@@ -4,8 +4,9 @@ import type { InlineElement } from '../lezer/inline.ts'
 import { parseInline } from '../lezer/inline.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 
-import type { MarkName } from './inline-marks.ts'
+import type { MdImageViewAttrs, MdLinkTextAttrs } from './inline-marks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
+import type { MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
 import type { TypedMarkBuilders } from './schema.ts'
 
@@ -81,14 +82,18 @@ function walk(
     if (node.from > pos) {
       emit(out, pos, node.from, parentMarks)
     }
-    if (node.type === LEZER_NODE_IDS.Link || node.type === LEZER_NODE_IDS.Image) {
+    if (node.type === LEZER_NODE_IDS.Link) {
       walkLink(node, parentMarks, text, marks, out)
+    } else if (node.type === LEZER_NODE_IDS.Image) {
+      walkImage(node, parentMarks, text, marks, out)
     } else if (node.type === LEZER_NODE_IDS.URL) {
       // A standalone `URL` node is a GFM autolink (the address part of a real
       // `[text](url)` is handled inside `walkLink`, not here). Linkify the
       // shapes we recognize; anything else keeps the muted `mdLinkUri`.
       const href = getAutolinkHref(text.slice(node.from, node.to))
-      const mark = href ? marks.mdLinkText.create({ href }) : marks.mdLinkUri.create()
+      const mark = href
+        ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs)
+        : marks.mdLinkUri.create()
       emit(out, node.from, node.to, [...parentMarks, mark])
     } else {
       const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(node.type)
@@ -144,7 +149,7 @@ function walkLink(
     }
   }
   const href = urlNode ? text.slice(urlNode.from, urlNode.to) : ''
-  const linkTextMark = href ? marks.mdLinkText.create({ href }) : null
+  const linkTextMark = href ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs) : null
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd && linkTextMark !== null
 
   let pos = node.from
@@ -171,12 +176,79 @@ function walkLink(
 }
 
 /**
+ * Special walker for a direct image `![alt](url)`.
+ *
+ * Emits `mdImageSource` across the whole node (the mark `defineMarkMode` hides)
+ * and `mdImageView({ src, alt })` on the node's final character, which is the
+ * anchor a mark view renders the inline image on. The final character is `)`
+ * today and would be `]` for a future reference image `![alt][id]`, so the
+ * anchor is `node.to - 1`, never a hardcoded `)`. `mdMark`/`mdLinkUri` style the
+ * source for show mode; the alt carries no `mdLinkText` (it is not a link), but
+ * inline emphasis inside it is still highlighted like any other syntax.
+ */
+function walkImage(
+  node: InlineElement,
+  parentMarks: readonly Mark[],
+  text: string,
+  marks: TypedMarkBuilders,
+  out: MarkChunk[],
+): void {
+  const urlNode = node.children.find((child) => child.type === LEZER_NODE_IDS.URL)
+  if (!urlNode) {
+    // A reference image `![alt][id]` has no `URL` child; fall back to the link
+    // walk, which renders nothing yet.
+    walkLink(node, parentMarks, text, marks, out)
+    return
+  }
+  const brackets = node.children.filter((child) => child.type === LEZER_NODE_IDS.LinkMark)
+  const src = text.slice(urlNode.from, urlNode.to)
+  const alt = brackets.length >= 2 ? text.slice(brackets[0].to, brackets[1].from) : ''
+
+  const source = marks.mdImageSource.create()
+  const view = marks.mdImageView.create({ src, alt } satisfies MdImageViewAttrs)
+
+  // The image's final character, where `mdImageView` is anchored: `)` today, a
+  // future `]` for `![alt][id]`.
+  const anchorFrom = node.to - 1
+
+  // Marks shared by every chunk at `from`: `mdImageSource` over the whole
+  // source, plus `mdImageView` once we reach the final character (the render
+  // anchor). Each child layers its own syntax mark on top.
+  const baseAt = (from: number): Mark[] =>
+    from >= anchorFrom ? [...parentMarks, source, view] : [...parentMarks, source]
+
+  let pos = node.from
+  for (const child of node.children) {
+    if (child.from > pos) {
+      emit(out, pos, child.from, baseAt(pos))
+    }
+    const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(child.type)
+    const childMarks = maybeMarkName
+      ? [...baseAt(child.from), marks[maybeMarkName].create()]
+      : baseAt(child.from)
+    if (child.children.length === 0) {
+      emit(out, child.from, child.to, childMarks)
+    } else {
+      walk(child.children, childMarks, child.from, child.to, text, marks, out)
+    }
+    pos = child.to
+  }
+  if (pos < node.to) {
+    emit(out, pos, node.to, baseAt(pos))
+  }
+}
+
+/**
  * Push `[from, to, marks]` to `out`, coalescing with the previous chunk
  * when both share the same mark set. Coalescing keeps the chunk list
  * short, which matters for `BatchSetMarkStep.apply`'s per-chunk diff.
  */
 function emit(out: MarkChunk[], from: number, to: number, marks: readonly Mark[]): void {
-  if (from >= to) return
+  if (from >= to) {
+    // Should not happen.
+    return
+  }
+
   const last = out.at(-1)
   if (last && last[1] === from && marksEqual(last[2], marks)) {
     out[out.length - 1] = [last[0], to, last[2]]

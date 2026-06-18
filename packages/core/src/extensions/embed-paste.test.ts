@@ -7,7 +7,7 @@ import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
 import { defineEmbedPaste, detectEmbedUrl } from './embed-paste.ts'
-import { defineImages } from './images.ts'
+import { defineImage } from './image.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const youtubeEmbed = pmRoot.getByTestId('youtube-embed')
@@ -18,7 +18,7 @@ const EMBED = `![](${YT})`
 
 function useEmbedPaste(fixture: Fixture): void {
   const { editor } = fixture
-  editor.use(defineImages({ resolveImageUrl: (src) => src }))
+  editor.use(defineImage({ resolveImageUrl: (src) => src }))
   editor.use(defineEmbedPaste())
 }
 
