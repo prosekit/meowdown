@@ -1,7 +1,8 @@
-import { MeowdownEditor, type EditorMode } from '@meowdown/react'
-import { type CSSProperties, useEffect, useLayoutEffect, useState } from 'react'
+import { MeowdownEditor } from '@meowdown/react'
+import { type CSSProperties, useLayoutEffect, useState } from 'react'
 
 import { uploadFile } from './upload-file.ts'
+import { MODES, useEditorMode } from './use-editor-mode.ts'
 
 // Confirm, then open the target in a new tab. Shared by the link and image
 // click handlers below.
@@ -18,55 +19,6 @@ function handleLinkClick({ href }: { href: string }): void {
 function handleImageClick({ src }: { src: string }): void {
   confirmAndOpen('this image', src)
 }
-
-interface ModeOption {
-  value: EditorMode
-  label: string
-  description: string
-}
-
-const MODES: ModeOption[] = [
-  {
-    value: 'focus',
-    label: 'Focus',
-    description: 'Syntax stays hidden and peeks out only where your cursor rests.',
-  },
-  {
-    value: 'show',
-    label: 'Show',
-    description: 'Every Markdown character stays visible, dimmed in soft grey.',
-  },
-  {
-    value: 'hide',
-    label: 'Hide',
-    description: 'Markdown characters disappear for a clean, fully rendered view.',
-  },
-  {
-    value: 'source',
-    label: 'Source',
-    description: 'Raw Markdown with syntax highlighting, like an IDE.',
-  },
-]
-
-const MODE_STORAGE_KEY = 'meowdown:mode'
-
-
-function readStoredMode(): EditorMode {
-  const stored = sessionStorage.getItem(MODE_STORAGE_KEY)
-  if (stored) {
-    for (const option of MODES) {
-      if (option.value === stored) {
-        return option.value
-      }
-    }
-  }
-  return "focus"
-}
-
-function writeStoredMode(mode: EditorMode): void {
-  sessionStorage.setItem(MODE_STORAGE_KEY, mode)
-}
-
 
 const INITIAL_CONTENT = `
 # Welcome to Meowdown
@@ -219,12 +171,7 @@ function Brand() {
 }
 
 export function App() {
-  const [mode, setMode] = useState<EditorMode>(readStoredMode)
-  const activeMode = MODES.find((option) => option.value === mode) ?? MODES[0]
-
-  useEffect(() => {
-    writeStoredMode(mode)
-  }, [mode])
+  const { mode, setMode, activeMode } = useEditorMode()
 
   return (
     <main className="relative min-h-dvh overflow-hidden text-stone-600 dark:bg-stone-950">
