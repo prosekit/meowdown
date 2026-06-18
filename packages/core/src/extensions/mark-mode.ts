@@ -3,6 +3,7 @@ import type { EditorNode, Mark, Slice } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
+import type { EditorView } from '@prosekit/pm/view'
 
 import type { MarkName } from './mark-names.ts'
 
@@ -66,6 +67,11 @@ function createMarkModePlugin(mode: MarkMode): Plugin<DecorationSet> {
 
 export function defineMarkMode(mode: MarkMode): PlainExtension {
   return definePlugin(createMarkModePlugin(mode))
+}
+
+/** The active mark mode, read from the `data-mark-mode` attribute on the editor. */
+export function getMarkMode(view: EditorView): MarkMode | undefined {
+  return view.dom.dataset.markMode as MarkMode | undefined
 }
 
 function cleanCopySerializer(slice: Slice): string {

@@ -45,3 +45,10 @@ export const CHAR_9 = 57 /* 9 */
 
 // Boundaries.
 export const CHAR_MAX_ASCII = 127
+
+export const UNICODE_LEFT_BLACK_LENTICULAR_BRACKET = '\u{3010}' /* 【 */
+export const UNICODE_RIGHT_BLACK_LENTICULAR_BRACKET = '\u{3011}' /* 】 */
+
+export const UNICODE_LEFT_HALF_BLOCK = '\u{258C}' /* ▌ */
+export const UNICODE_QUADRANT_UPPER_LEFT_AND_UPPER_RIGHT_AND_LOWER_LEFT = '\u{259B}' /* ▛ */
+export const UNICODE_QUADRANT_UPPER_RIGHT_AND_LOWER_LEFT_AND_LOWER_RIGHT = '\u{259F}' /* ▟ */

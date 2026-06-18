@@ -318,6 +318,15 @@
   border: 0;
 }
 
+/* The whole image source is selected: a single caret stop in hide mode. Ring the
+ * preview like a node selection (`.ProseMirror-selectednode`). */
+.ProseMirror[data-mark-mode='hide'] .md-image-selected .md-image-preview {
+  outline: 2px solid var(--meowdown-node-outline);
+  outline-offset: 2px;
+  border-radius: var(--meowdown-image-radius, 0.5rem);
+  background: var(--meowdown-node-selection);
+}
+
 /* ---------------------------------------------------------------------------
  * Placeholder text for empty blocks (ProseKit's definePlaceholder)
  * ------------------------------------------------------------------------- */
