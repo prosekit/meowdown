@@ -175,8 +175,9 @@ export interface MdWikilinkViewAttrs {
 }
 
 export function defineInlineMarks() {
-  // The last mark registered here gets the lowest rank and becomes the outermost DOM wrapper.
-
+  // The last mark registered gets the lowest rank and becomes the outermost DOM
+  // wrapper, so the wikilink/image marks go last: the view mark (mdWikilinkView /
+  // mdImageView) wraps the source, which wraps the syntax marks.
   return union(
     defineMdMark(),
     defineMdEm(),
@@ -187,9 +188,6 @@ export function defineInlineMarks() {
     defineMdDel(),
     defineMdTag(),
 
-    // The wikilink/image marks are registered last so the view mark
-    // (mdWikilinkView / mdImageView) wraps the source, which wraps the syntax
-    // marks.
     defineMdWikilinkSource(),
     defineMdWikilinkView(),
     defineMdImageSource(),
