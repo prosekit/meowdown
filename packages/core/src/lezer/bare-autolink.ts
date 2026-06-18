@@ -30,6 +30,7 @@ function isDomainStartChar(code: number): boolean {
   )
 }
 
+// Ported from https://code.haverbeke.berlin/lezer/markdown/src/commit/1.6.4/src/extension.ts#L173-L177
 function countChar(text: string, end: number, ch: string): number {
   let count = 0
   for (let i = 0; i < end; i++) {
@@ -38,9 +39,11 @@ function countChar(text: string, end: number, ch: string): number {
   return count
 }
 
-// Trailing-punctuation trimming, ported from `@lezer/markdown`'s GFM autolink so
-// a bare domain ending a sentence drops the `.`/`,`/`)` etc. but keeps interior
-// punctuation. Returns the kept length of `matched`.
+// Trailing-punctuation trimming, so a bare domain ending a sentence
+// drops the `.` / `,` / `)` etc. but keeps interior punctuation.
+// Returns the kept length of `matched`.
+//
+// Ported from https://code.haverbeke.berlin/lezer/markdown/src/commit/1.6.4/src/extension.ts#L179-L195
 function trimAutolinkEnd(matched: string): number {
   let end = matched.length
   for (;;) {
