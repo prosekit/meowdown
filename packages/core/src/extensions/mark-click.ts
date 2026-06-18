@@ -27,7 +27,9 @@ export interface MarkClickConfig<Payload> {
  * so the run stays editable; `Mod`-click always fires.
  */
 export function defineMarkClickHandler<Payload>(config: MarkClickConfig<Payload>): PlainExtension {
+
   let selectionBefore: { from: number; to: number; empty: boolean } | undefined
+
   return definePlugin(
     new Plugin({
       key: config.key,
@@ -46,6 +48,11 @@ export function defineMarkClickHandler<Payload>(config: MarkClickConfig<Payload>
           const hit = config.hitAt(view.state, pos)
           if (!hit) return false
           const modClick = isApple ? event.metaKey : event.ctrlKey
+
+          // It's unclear what does this mean? "selectionBefore?.empty &&
+          // selectionBefore.from >= hit.from &&
+          // selectionBefore.to <= hit.to"
+          // Add some pithy comments
           if (
             !modClick &&
             selectionBefore?.empty &&
