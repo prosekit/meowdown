@@ -52,7 +52,8 @@ export function defineMarkClickHandler<Payload>(config: MarkClickConfig<Payload>
           // It's unclear what does this mean? "selectionBefore?.empty &&
           // selectionBefore.from >= hit.from &&
           // selectionBefore.to <= hit.to"
-          // Add some pithy comments
+          // Add some pithy comments. REVIEW
+          //
           if (
             !modClick &&
             selectionBefore?.empty &&
