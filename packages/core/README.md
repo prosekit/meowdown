@@ -57,6 +57,8 @@ Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-a
 
 Wikilinks (`[[target]]`) render with a dashed underline via the `.md-wikilink` class, colored by `--meowdown-accent`, with a pointer cursor. Their `[[` `]]` brackets behave like other syntax characters: dimmed in show mode, hidden in hide and focus modes. Wire click navigation with `defineWikilinkClickHandler(({ target, event }) => ...)` (or `@meowdown/react`'s `onWikilinkClick` prop).
 
+Markdown links (`[text](url)`) render the label as an `<a href>`; the `[`, `]`, and `(url)` syntax dims in show mode and hides in hide and focus modes. Wire click handling with `defineLinkClickHandler(({ href, event }) => ...)` (or `@meowdown/react`'s `onLinkClick` prop). A plain click inside a link the caret already sits in just places the caret; `Mod`-click always fires.
+
 Inline images (`![alt](src)`) stay literal text and render in place via a mark view, with the raw `![alt](src)` hidden in hide and focus modes. Add it with `defineImage({ resolveImageUrl, onImagePaste })` (or `@meowdown/react`'s image props). `resolveImageUrl` is optional and defaults to showing http(s) URLs as-is.
 
 Pasting a lone tweet or YouTube link can auto-embed it. `defineEmbedPaste()` (or `@meowdown/react`'s `embedPaste` prop) rewrites the pasted link to `![](url)` so it renders as an embed; one undo turns the embed back into the raw link. It is not part of `defineEditorExtension`; add it explicitly.
