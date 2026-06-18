@@ -23,7 +23,7 @@ export interface AtomicMarkNavigationOptions {
    * Each source mark (e.g. `mdImageSource`) paired with the mark modes in which
    * its run is one atomic unit.
    */
-  marks: AtomicMarks,
+  marks: AtomicMarks
   /** Decoration class added over the source range while the unit is selected. */
   selectedClass: string
 }
