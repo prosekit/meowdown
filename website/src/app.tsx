@@ -1,5 +1,5 @@
 import { MeowdownEditor, type EditorMode } from '@meowdown/react'
-import { type CSSProperties, useLayoutEffect, useState } from 'react'
+import { type CSSProperties, useEffect, useLayoutEffect, useState } from 'react'
 
 import { uploadFile } from './upload-file.ts'
 
@@ -47,6 +47,17 @@ const MODES: ModeOption[] = [
     description: 'Raw Markdown with syntax highlighting, like an IDE.',
   },
 ]
+
+const MODE_STORAGE_KEY = 'meowdown:mode'
+
+function isEditorMode(value: string | null): value is EditorMode {
+  return value != null && MODES.some((option) => option.value === value)
+}
+
+function readStoredMode(): EditorMode {
+  const stored = sessionStorage.getItem(MODE_STORAGE_KEY)
+  return isEditorMode(stored) ? stored : 'focus'
+}
 
 const INITIAL_CONTENT = `
 # Welcome to Meowdown
@@ -199,8 +210,12 @@ function Brand() {
 }
 
 export function App() {
-  const [mode, setMode] = useState<EditorMode>('focus')
+  const [mode, setMode] = useState<EditorMode>(readStoredMode)
   const activeMode = MODES.find((option) => option.value === mode) ?? MODES[0]
+
+  useEffect(() => {
+    sessionStorage.setItem(MODE_STORAGE_KEY, mode)
+  }, [mode])
 
   return (
     <main className="relative min-h-dvh overflow-hidden text-stone-600 dark:bg-stone-950">
