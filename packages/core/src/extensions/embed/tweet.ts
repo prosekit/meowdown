@@ -18,7 +18,7 @@ function parseTweetId(src: string): string | undefined {
 
 export const matchTweet: EmbedMatcher = (src) => {
   const tweetId = parseTweetId(src)
-  if (!tweetId) return undefined
+  if (!tweetId) return
   return {
     key: `tweet:${tweetId}`,
     render: () => {
