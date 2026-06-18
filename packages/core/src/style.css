@@ -289,6 +289,28 @@
   display: none;
 }
 
+/* The wikilink mark view anchors on the link's trailing character, held in this
+ * contentDOM. Hiding that char with `display:none` (as the rest of the source is
+ * hidden) drops it from the box tree, so a caret placed just after the wikilink
+ * has no box to land in: the browser then traps it before the label and the next
+ * typed character lands before the wikilink. Instead collapse the char to zero
+ * width while keeping it in the layout, so the caret rests just after the label
+ * and typing continues after the wikilink. Scoped to the contentDOM so the rest
+ * of the markup keeps using `display:none`. */
+.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content,
+.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content {
+  display: inline-block;
+  width: 0;
+  overflow: hidden;
+  vertical-align: text-bottom;
+}
+.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content .md-mark,
+.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content .md-mark,
+.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content .md-wikilink-source,
+.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content .md-wikilink-source {
+  display: inline;
+}
+
 /* ---------------------------------------------------------------------------
  * Inline image / embed previews (`![alt](url)`), rendered in place via a mark
  * view at the image's source position.

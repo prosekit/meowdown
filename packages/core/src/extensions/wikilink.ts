@@ -23,6 +23,12 @@ export function parseWikilink(text: string): ParsedWikilink {
  * is a `contentEditable="false"` sibling. Mark-mode hides the surrounding
  * `mdWikilinkSource`, so what remains visible is the label, in place of the raw
  * `[[target]]`/`[[target|alias]]`.
+ *
+ * The label is appended before `contentDOM` so the anchor char (the wikilink's
+ * trailing edge) sits after it. A collapsed caret placed just after the wikilink
+ * then lands in `contentDOM`, which `style.css` keeps in the layout (zero width)
+ * rather than `display:none`, so the caret rests after the label and typing
+ * continues after the wikilink instead of being trapped before it.
  */
 function createWikilinkMarkView(): MarkViewConstructor {
   return (mark) => {
@@ -30,8 +36,6 @@ function createWikilinkMarkView(): MarkViewConstructor {
 
     const dom = document.createElement('span')
     dom.className = 'md-wikilink-view'
-    const contentDOM = document.createElement('span')
-    dom.appendChild(contentDOM)
 
     const label = document.createElement('span')
     label.className = 'md-wikilink-label'
@@ -39,6 +43,10 @@ function createWikilinkMarkView(): MarkViewConstructor {
     label.dataset.testid = 'wikilink'
     label.textContent = attrs.display || attrs.target
     dom.appendChild(label)
+
+    const contentDOM = document.createElement('span')
+    contentDOM.className = 'md-wikilink-view-content'
+    dom.appendChild(contentDOM)
 
     return {
       dom,
