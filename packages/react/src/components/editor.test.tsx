@@ -410,6 +410,22 @@ describe('MeowdownEditor', () => {
     })
   })
 
+  it('calls onLinkClick when a rendered Markdown link is clicked', async () => {
+    const onLinkClick = vi.fn()
+    const screen = await render(
+      <MeowdownEditor
+        initialMarkdown="see [Docs](https://example.com) here"
+        onLinkClick={onLinkClick}
+      />,
+    )
+    await screen.getByText('Docs').click()
+    await vi.waitFor(() => {
+      expect(onLinkClick).toHaveBeenCalledWith(
+        expect.objectContaining({ href: 'https://example.com' }),
+      )
+    })
+  })
+
   it('does not render children in source mode', async () => {
     await render(
       <MeowdownEditor mode="source" initialMarkdown="Hi">
