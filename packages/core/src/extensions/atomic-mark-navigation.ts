@@ -16,22 +16,22 @@ import { getMarkRangeAt } from './get-mark-range-at.ts'
 import { getMarkMode, type MarkMode } from './mark-mode.ts'
 import type { MarkName } from './mark-names.ts'
 
-export interface AtomicMarkConfig {
-  /** The source mark (e.g. `mdImageSource`) whose run is one atomic unit. */
-  name: MarkName
-  /** The mark modes in which this mark is an atomic unit. */
-  modes: ReadonlyArray<MarkMode>
-}
-
 export interface AtomicMarkNavigationOptions {
-  marks: AtomicMarkConfig[]
+  /**
+   * Each source mark (e.g. `mdImageSource`) paired with the mark modes in which
+   * its run is one atomic unit.
+   */
+  marks: Array<{ name: MarkName; modes: ReadonlyArray<MarkMode> }>
   /** Decoration class added over the source range while the unit is selected. */
   selectedClass: string
 }
 
+// The `marks` option, reused by the per-command helpers below.
+type AtomicMarks = AtomicMarkNavigationOptions['marks']
+
 // The source marks that are atomic in `state`'s current mark mode (empty when no
 // mode is applied, which keeps the whole feature inert).
-function activeMarkNames(marks: AtomicMarkConfig[], state: EditorState): MarkName[] {
+function activeMarkNames(marks: AtomicMarks, state: EditorState): MarkName[] {
   const mode = getMarkMode(state)
   if (!mode) return []
   return marks.flatMap((mark) => (mark.modes.includes(mode) ? [mark.name] : []))
@@ -80,7 +80,7 @@ function selectRange(state: EditorState, range: MarkRange): TextSelection {
 
 // ArrowRight: select the unit to the right, collapse a selected unit to its far
 // edge, or step past a unit to the left (which the browser cannot do).
-function createArrowRight(marks: AtomicMarkConfig[]): Command {
+function createArrowRight(marks: AtomicMarks): Command {
   return (state, dispatch) => {
     const markNames = activeMarkNames(marks, state)
     if (markNames.length === 0 || !isTextSelection(state.selection)) return false
@@ -109,7 +109,7 @@ function createArrowRight(marks: AtomicMarkConfig[]): Command {
 
 // ArrowLeft: select the unit to the left, or collapse a selected unit to its
 // near edge.
-function createArrowLeft(marks: AtomicMarkConfig[]): Command {
+function createArrowLeft(marks: AtomicMarks): Command {
   return (state, dispatch) => {
     const markNames = activeMarkNames(marks, state)
     if (markNames.length === 0 || !isTextSelection(state.selection)) return false
@@ -130,7 +130,7 @@ function createArrowLeft(marks: AtomicMarkConfig[]): Command {
 // Backspace: delete a whole unit to the left, or delete one character to the
 // left while next to a unit (the browser's native delete mangles the hidden
 // source). A selected unit falls through to the base `deleteSelection`.
-function createBackspace(marks: AtomicMarkConfig[]): Command {
+function createBackspace(marks: AtomicMarks): Command {
   return (state, dispatch) => {
     const markNames = activeMarkNames(marks, state)
     if (markNames.length === 0 || !state.selection.empty) return false
@@ -148,7 +148,7 @@ function createBackspace(marks: AtomicMarkConfig[]): Command {
 }
 
 // Delete: the forward mirror of `backspace`.
-function createForwardDelete(marks: AtomicMarkConfig[]): Command {
+function createForwardDelete(marks: AtomicMarks): Command {
   return (state, dispatch) => {
     const markNames = activeMarkNames(marks, state)
     if (markNames.length === 0 || !state.selection.empty) return false
@@ -166,7 +166,7 @@ function createForwardDelete(marks: AtomicMarkConfig[]): Command {
 }
 
 // Mark the source range while its whole unit is selected (see `style.css`).
-function createSelectionPlugin(marks: AtomicMarkConfig[], selectedClass: string): Plugin {
+function createSelectionPlugin(marks: AtomicMarks, selectedClass: string): Plugin {
   return new Plugin({
     key: new PluginKey(`atomic-mark-selection-${selectedClass}`),
     props: {
