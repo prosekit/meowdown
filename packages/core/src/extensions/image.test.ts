@@ -1,8 +1,14 @@
-import { TextSelection } from '@prosekit/pm/state'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
-import { getSelectionSnapshot, setupFixture, type Fixture } from '../testing/index.ts'
+import {
+  getSelectionSnapshot,
+  setCaret,
+  setupFixture,
+  traceKeyAt,
+  traceKeySelection,
+  type Fixture,
+} from '../testing/index.ts'
 
 import { defineImageClickHandler, type ImageClickHandler } from './image-click.ts'
 import { defineImage } from './image.ts'
@@ -31,32 +37,6 @@ function setupHidden(): Fixture {
   editor.use(defineMarkMode('hide'))
   fixture.set(n.doc(n.paragraph(TEXT)))
   return fixture
-}
-
-// Place a collapsed caret at text offset `offset`.
-function setCaret(fixture: Fixture, offset: number): void {
-  const { view } = fixture
-  view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, offset + 1)))
-  view.focus()
-}
-
-// Press `key` `times` times, capturing the selection snapshot before and after
-// each press.
-async function trace(fixture: Fixture, key: string, times: number): Promise<string[]> {
-  const steps = [getSelectionSnapshot(fixture.state)]
-  for (let index = 0; index < times; index++) {
-    await userEvent.keyboard(`{${key}}`)
-    steps.push(getSelectionSnapshot(fixture.state))
-  }
-  return steps
-}
-
-async function backspaceAt(offset: number): Promise<string> {
-  using fixture = setupHidden()
-  setCaret(fixture, offset)
-  const before = getSelectionSnapshot(fixture.state)
-  await userEvent.keyboard('{Backspace}')
-  return `${before}  ->  ${getSelectionSnapshot(fixture.state)}`
 }
 
 describe('image', () => {
@@ -137,7 +117,7 @@ describe('image caret navigation in hide mode', () => {
   it('ArrowRight selects the image, then steps past into DEF', async () => {
     using fixture = setupHidden()
     setCaret(fixture, 1)
-    expect(await trace(fixture, 'ArrowRight', 6)).toMatchInlineSnapshot(`
+    expect(await traceKeySelection(fixture, 'ArrowRight', 6)).toMatchInlineSnapshot(`
       [
         "A▌BC![img](url)DEF",
         "AB▌C![img](url)DEF",
@@ -153,7 +133,7 @@ describe('image caret navigation in hide mode', () => {
   it('ArrowLeft selects the image, then collapses to its left edge', async () => {
     using fixture = setupHidden()
     setCaret(fixture, 15)
-    expect(await trace(fixture, 'ArrowLeft', 3)).toMatchInlineSnapshot(`
+    expect(await traceKeySelection(fixture, 'ArrowLeft', 3)).toMatchInlineSnapshot(`
       [
         "ABC![img](url)D▌EF",
         "ABC![img](url)▌DEF",
@@ -165,10 +145,10 @@ describe('image caret navigation in hide mode', () => {
 
   it('Backspace deletes the image as a unit, plain text one char', async () => {
     const result = [
-      await backspaceAt(2), // between B and C
-      await backspaceAt(3), // just before the image
-      await backspaceAt(14), // just after the image
-      await backspaceAt(15), // between D and E
+      await traceKeyAt(setupHidden, 2, 'Backspace'), // between B and C
+      await traceKeyAt(setupHidden, 3, 'Backspace'), // just before the image
+      await traceKeyAt(setupHidden, 14, 'Backspace'), // just after the image
+      await traceKeyAt(setupHidden, 15, 'Backspace'), // between D and E
     ]
 
     expect(result).toMatchInlineSnapshot(`

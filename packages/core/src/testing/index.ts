@@ -8,6 +8,7 @@ import type { EditorNode } from '@prosekit/pm/model'
 import { defineEditorExtension } from '../extensions/extension.ts'
 
 export { getSelectionSnapshot } from './selection-snapshot.ts'
+export { setCaret, traceKeySelection, traceKeyAt } from './caret.ts'
 
 export interface SetupFixtureOptions {
   /** Whether to mount the editor onto a real DOM container. Defaults to `true`. */

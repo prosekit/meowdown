@@ -16,12 +16,14 @@ import { defineParagraph } from '@prosekit/extensions/paragraph'
 import { defineText } from '@prosekit/extensions/text'
 import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
+import { defineAtomicMarkNavigation } from './atomic-mark-navigation.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineHeading } from './heading.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
 import { defineTable } from './table.ts'
+import { defineWikilink } from './wikilink.ts'
 
 function defineEditorExtensionImpl() {
   return union(
@@ -43,6 +45,11 @@ function defineEditorExtensionImpl() {
     defineCodeBlockSyntaxHighlight(),
     defineInlineMarkPlugin(),
     defineInlineToggle(),
+    defineWikilink(),
+    defineAtomicMarkNavigation({
+      markNames: ['mdImageSource', 'mdWikilinkSource'],
+      selectedClass: 'md-atomic-selected',
+    }),
 
     // others
     defineBaseKeymap(),

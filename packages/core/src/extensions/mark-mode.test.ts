@@ -137,7 +137,7 @@ describe('defineMarkMode', () => {
       const { n } = fixture
       const doc = n.doc(n.paragraph('see [[no<a>te]] end'))
       fixture.set(doc)
-      await expectRevealedMarkers(2)
+      await expectRevealedMarkers(3)
     })
 
     it('reveals only the wikilink brackets next to a markdown link', async () => {
@@ -146,7 +146,7 @@ describe('defineMarkMode', () => {
       const { n } = fixture
       const doc = n.doc(n.paragraph('[a](http://x)[[no<a>te]]'))
       fixture.set(doc)
-      await expectRevealedMarkers(2)
+      await expectRevealedMarkers(3)
     })
 
     it('reveals nothing inside a #tag (tags have no syntax to reveal)', async () => {
@@ -238,13 +238,13 @@ describe('defineMarkMode', () => {
       expect(clipboardText(fixture)).toBe('see ![cat](https://example.com/cat.png) end')
     })
 
-    it('strips [[ ]] from the copied text', () => {
+    it('keeps the whole [[ ]] source in the copied text', () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('hide'))
       const { n } = fixture
       const doc = n.doc(n.paragraph('see [[note]] end'))
       fixture.set(doc)
-      expect(clipboardText(fixture)).toBe('see note end')
+      expect(clipboardText(fixture)).toBe('see [[note]] end')
     })
 
     it('keeps #tag verbatim in the copied text', () => {

@@ -269,15 +269,25 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Wikilinks (`[[target]]`)
+ * Wikilinks (`[[target]]`/`[[target|alias]]`), rendered in place via a mark
+ * view: an immutable label standing in for the raw source.
  * ------------------------------------------------------------------------- */
-.ProseMirror .md-wikilink {
+.ProseMirror .md-wikilink-label,
+.ProseMirror .md-wikilink-source {
   color: var(--meowdown-accent);
   text-decoration: underline;
   text-decoration-style: dashed;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
   cursor: pointer;
+}
+
+/* The label stands in for the source in hide/focus. In show mode the raw source
+ * is visible, so the label would only duplicate it; likewise once the source is
+ * revealed near the caret in focus mode. */
+.ProseMirror[data-mark-mode='show'] .md-wikilink-label,
+.ProseMirror[data-mark-mode='focus'] .md-wikilink-view:has(.show) .md-wikilink-label {
+  display: none;
 }
 
 /* ---------------------------------------------------------------------------
@@ -319,16 +329,21 @@
   border: 0;
 }
 
-/* The whole image source is selected: a single caret stop in hide mode. The
- * `md-image-selected` decoration wraps the source text spans, so the preview
- * (a sibling of the mark view's content) is not a descendant of it; match the
- * mark view that contains a selected span instead. Ring the preview like a node
- * selection (`.ProseMirror-selectednode`). */
-.ProseMirror[data-mark-mode='hide'] .md-image-view:has(.md-image-selected) .md-image-preview {
+/* The whole image/wikilink source is selected: a single caret stop in hide
+ * mode. The `md-atomic-selected` decoration wraps the source text spans; the
+ * rendered preview/label is a sibling of the mark view's content, not a
+ * descendant of the decoration, so match the mark view that contains a selected
+ * span and ring it like a node selection (`.ProseMirror-selectednode`). */
+.ProseMirror[data-mark-mode='hide'] .md-image-view:has(.md-atomic-selected) .md-image-preview,
+.ProseMirror[data-mark-mode='hide'] .md-wikilink-view:has(.md-atomic-selected) .md-wikilink-label {
   outline: 2px solid var(--meowdown-node-outline);
   outline-offset: 2px;
-  border-radius: var(--meowdown-image-radius, 0.5rem);
+  border-radius: 0.25rem;
   background: var(--meowdown-node-selection);
+}
+/* The image preview keeps its own corner radius. */
+.ProseMirror[data-mark-mode='hide'] .md-image-view:has(.md-atomic-selected) .md-image-preview {
+  border-radius: var(--meowdown-image-radius, 0.5rem);
 }
 
 /* ---------------------------------------------------------------------------
@@ -359,28 +374,23 @@
   opacity: 0.7;
 }
 
-/* hide: syntax is never visible */
+/* Syntax hidden as a unit in hide and focus modes, revealed near the caret via
+ * the `.show` decoration in focus mode. Covers the punctuation (`md-mark`), the
+ * link/image URL (`md-link-uri`), and the whole image/wikilink source whose
+ * rendered preview/label stands in for it (incl. the image alt text). */
 .ProseMirror[data-mark-mode='hide'] .md-mark,
-.ProseMirror[data-mark-mode='hide'] .md-link-uri {
-  display: none;
-}
-
-/* focus: syntax is hidden until revealed near the caret */
+.ProseMirror[data-mark-mode='hide'] .md-link-uri,
+.ProseMirror[data-mark-mode='hide'] .md-image-source,
+.ProseMirror[data-mark-mode='hide'] .md-wikilink-source,
 .ProseMirror[data-mark-mode='focus'] .md-mark,
-.ProseMirror[data-mark-mode='focus'] .md-link-uri {
+.ProseMirror[data-mark-mode='focus'] .md-link-uri,
+.ProseMirror[data-mark-mode='focus'] .md-image-source,
+.ProseMirror[data-mark-mode='focus'] .md-wikilink-source {
   display: none;
 }
 .ProseMirror[data-mark-mode='focus'] .md-mark:has(.show),
-.ProseMirror[data-mark-mode='focus'] .md-link-uri:has(.show) {
-  display: inline;
-}
-
-/* Image source (`![alt](url)`, incl. alt text): hidden as a unit so the inline
- * preview stands in for it. */
-.ProseMirror[data-mark-mode='hide'] .md-image-source,
-.ProseMirror[data-mark-mode='focus'] .md-image-source {
-  display: none;
-}
-.ProseMirror[data-mark-mode='focus'] .md-image-source:has(.show) {
+.ProseMirror[data-mark-mode='focus'] .md-link-uri:has(.show),
+.ProseMirror[data-mark-mode='focus'] .md-image-source:has(.show),
+.ProseMirror[data-mark-mode='focus'] .md-wikilink-source:has(.show) {
   display: inline;
 }

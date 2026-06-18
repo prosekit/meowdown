@@ -218,20 +218,17 @@ describe('inlineMarkPlugin', () => {
     expect(marksAt(fixture.doc, pos + 1)).toEqual([])
   })
 
-  it('applies mdWikilink to [[note]] with mdMark on the brackets', () => {
+  it('applies mdWikilinkSource to [[note]] with mdMark on the brackets', () => {
     using fixture = setupFixture()
     const { n } = fixture
     const doc = n.doc(n.paragraph('see [[note]] end'))
     fixture.set(doc)
 
-    // The marked wikilink splits into three text nodes: [[ note ]]
     const open = findText(fixture.doc, '[[')
     const target = findText(fixture.doc, 'note')
-    const close = findText(fixture.doc, ']]')
     expect(open).toBeGreaterThan(0)
-    expect(marksAt(fixture.doc, open + 1)).toEqual(['mdMark', 'mdWikilink'])
-    expect(marksAt(fixture.doc, target + 1)).toEqual(['mdWikilink'])
-    expect(marksAt(fixture.doc, close + 1)).toEqual(['mdMark', 'mdWikilink'])
+    expect(marksAt(fixture.doc, open + 1)).toEqual(['mdMark', 'mdWikilinkSource'])
+    expect(marksAt(fixture.doc, target + 1)).toEqual(['mdWikilinkSource'])
     expect(marksAt(fixture.doc, open)).toEqual([]) // the space before
   })
 
@@ -242,7 +239,7 @@ describe('inlineMarkPlugin', () => {
     fixture.set(doc)
 
     const pos = findText(fixture.doc, 'note')
-    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilink'])
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilinkSource'])
   })
 
   it('does not mark [[note]] inside code blocks', () => {
@@ -255,17 +252,17 @@ describe('inlineMarkPlugin', () => {
     expect(marksAt(fixture.doc, pos + 1)).toEqual([])
   })
 
-  it('removes mdWikilink when the closing ] is deleted', () => {
+  it('removes mdWikilinkSource when the closing ] is deleted', () => {
     using fixture = setupFixture()
     const { n } = fixture
     const doc = n.doc(n.paragraph('see [[note]] end'))
     fixture.set(doc)
 
     const pos = findText(fixture.doc, 'note')
-    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilink'])
-    // Delete the last ']': "see [[note] end" is no longer a wikilink.
-    const lastBracket = findText(fixture.doc, ']]') + 1
-    fixture.view.dispatch(fixture.state.tr.delete(lastBracket, lastBracket + 1))
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilinkSource'])
+    // Delete one ']': "see [[note] end" is no longer a wikilink.
+    const firstBracket = findText(fixture.doc, ']')
+    fixture.view.dispatch(fixture.state.tr.delete(firstBracket + 1, firstBracket + 2))
     const after = findText(fixture.doc, 'note')
     expect(marksAt(fixture.doc, after + 1)).toEqual([])
   })
