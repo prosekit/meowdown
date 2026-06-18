@@ -328,13 +328,16 @@
   border: 0;
 }
 
-/* The whole image/wikilink source is selected: a single caret stop in hide
- * mode. The `md-atomic-selected` decoration wraps the source text spans; the
- * rendered preview/label is a sibling of the mark view's content, not a
- * descendant of the decoration, so match the mark view that contains a selected
- * span and ring it like a node selection (`.ProseMirror-selectednode`). */
+/* The whole image/wikilink source is selected: a single caret stop. The image
+ * is atomic in hide mode only; the wikilink is atomic in hide and focus. The
+ * `md-atomic-selected` decoration wraps the source text spans; the rendered
+ * preview/label is a sibling of the mark view's content, not a descendant of the
+ * decoration, so match the mark view that contains a selected span and ring it
+ * like a node selection (`.ProseMirror-selectednode`). In show mode the raw
+ * source is visible and uses the native selection highlight instead. */
 .ProseMirror[data-mark-mode='hide'] .md-image-view:has(.md-atomic-selected) .md-image-preview,
-.ProseMirror[data-mark-mode='hide'] .md-wikilink-view:has(.md-atomic-selected) .md-wikilink-label {
+.ProseMirror[data-mark-mode='hide'] .md-wikilink-view:has(.md-atomic-selected) .md-wikilink-label,
+.ProseMirror[data-mark-mode='focus'] .md-wikilink-view:has(.md-atomic-selected) .md-wikilink-label {
   outline: 2px solid var(--meowdown-node-outline);
   outline-offset: 2px;
   border-radius: 0.25rem;
