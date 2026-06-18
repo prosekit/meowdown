@@ -1,35 +1,20 @@
 /**
  * Allowed TLDs when they appear in a bare domain (no scheme, no `www.`).
  *
- * Source: Top 25 TLDs by domain count https://research.domaintools.com/statistics/tld-counts/
- *
+ * The 10 most-visited TLDs by real Chrome traffic.
+ * Source: Chrome UX Report https://github.com/zakird/crux-top-lists
  */
 const BARE_AUTOLINK_TLDS: ReadonlySet<string> = new Set([
   'com',
-  'de',
-  'net',
-  'cn',
-  'org',
-  'uk',
-  'xyz',
-  'top',
-  'nl',
-  'ru',
-  'info',
   'br',
-  'fr',
-  'au',
-  'shop',
-  'eu',
-  'ca',
+  'net',
+  'jp',
+  'org',
   'in',
-  'online',
+  'de',
+  'ru',
   'it',
-  'co',
-  'ch',
-  'pl',
-  'cc',
-  'es',
+  'fr',
 ])
 
 // A single DNS label: alphanumeric, hyphens allowed inside but not at the edges.
