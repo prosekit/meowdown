@@ -2,6 +2,7 @@ import {
   defineEditorExtension,
   type TypedEditor,
   type EditorExtension,
+  type ImageClickHandler,
   type ImageOptions,
   type LinkClickHandler,
   type MarkMode,
@@ -83,6 +84,9 @@ export interface ProseKitEditorProps {
   /** Called when an image fails to persist. See `EditorProps.onImageSaveError`. */
   onImageSaveError?: ImageOptions['onImageSaveError']
 
+  /** Called on click of a rendered image. See `EditorProps.onImageClick`. */
+  onImageClick?: ImageClickHandler
+
   /** Auto-embeds a pasted tweet/YouTube link. See `EditorProps.embedPaste`. */
   embedPaste?: boolean
 
@@ -122,6 +126,7 @@ export function ProseKitEditor({
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
+  onImageClick,
   embedPaste,
   bulletAfterHeading,
   blockHandle = true,
@@ -219,6 +224,7 @@ export function ProseKitEditor({
         resolveImageUrl={resolveImageUrl}
         onImagePaste={onImagePaste}
         onImageSaveError={onImageSaveError}
+        onImageClick={onImageClick}
         embedPaste={embedPaste}
         bulletAfterHeading={bulletAfterHeading}
         placeholder={placeholder}

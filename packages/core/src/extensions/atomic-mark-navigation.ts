@@ -1,7 +1,6 @@
 import {
   defineKeymap,
   definePlugin,
-  getMarkRange,
   isTextSelection,
   Priority,
   union,
@@ -14,6 +13,7 @@ import { Plugin, PluginKey, TextSelection } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
+import { getMarkRangeAt } from './get-mark-range-at.ts'
 import { getMarkMode } from './mark-mode.ts'
 import type { MarkName } from './mark-names.ts'
 
@@ -26,9 +26,8 @@ export interface AtomicMarkNavigationOptions {
 
 // The contiguous run of one atomic source mark that touches `pos`, or undefined.
 function getRangeAt(state: EditorState, pos: number, markNames: MarkName[]): MarkRange | undefined {
-  const $pos = state.doc.resolve(pos)
   for (const name of markNames) {
-    const range = getMarkRange($pos, name)
+    const range = getMarkRangeAt(state, pos, name)
     if (range) return range
   }
   return undefined

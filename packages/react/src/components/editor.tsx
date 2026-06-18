@@ -1,4 +1,5 @@
 import type {
+  ImageClickHandler,
   ImageOptions,
   LinkClickHandler,
   MarkMode,
@@ -92,6 +93,13 @@ export interface EditorProps {
   onImageSaveError?: ImageOptions['onImageSaveError']
 
   /**
+   * Called when the user clicks a rendered image, with its markdown `src`,
+   * `alt`, and the originating `MouseEvent`. Pass a stable function (e.g. from
+   * `useCallback`). Ignored in source mode.
+   */
+  onImageClick?: ImageClickHandler
+
+  /**
    * Auto-embeds a pasted tweet or YouTube link as a rich embed; one undo turns
    * the embed back into the raw link. On by default. Ignored in source mode.
    */
@@ -152,6 +160,7 @@ export function MeowdownEditor({
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
+  onImageClick,
   embedPaste = true,
   bulletAfterHeading = false,
   blockHandle = true,
@@ -232,6 +241,7 @@ export function MeowdownEditor({
           resolveImageUrl={resolveImageUrl}
           onImagePaste={onImagePaste}
           onImageSaveError={onImageSaveError}
+          onImageClick={onImageClick}
           embedPaste={embedPaste}
           bulletAfterHeading={bulletAfterHeading}
           blockHandle={blockHandle}

@@ -219,7 +219,7 @@ function walkImage(
   const src = text.slice(urlNode.from, urlNode.to)
   const alt = brackets.length >= 2 ? text.slice(brackets[0].to, brackets[1].from) : ''
 
-  const source = marks.mdImageSource.create({ src } satisfies MdImageSourceAttrs)
+  const source = marks.mdImageSource.create({ src, alt } satisfies MdImageSourceAttrs)
   const view = marks.mdImageView.create({ src, alt } satisfies MdImageViewAttrs)
 
   // The image's final character, where `mdImageView` is anchored: `)` today, a

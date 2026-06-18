@@ -410,6 +410,23 @@ describe('MeowdownEditor', () => {
     })
   })
 
+  it('calls onImageClick when a rendered image is clicked', async () => {
+    const onImageClick = vi.fn()
+    const screen = await render(
+      <MeowdownEditor
+        initialMarkdown="![pic](https://example.com/a.png)"
+        resolveImageUrl={(src) => src}
+        onImageClick={onImageClick}
+      />,
+    )
+    await screen.getByAltText('pic').click()
+    await vi.waitFor(() => {
+      expect(onImageClick).toHaveBeenCalledWith(
+        expect.objectContaining({ src: 'https://example.com/a.png', alt: 'pic' }),
+      )
+    })
+  })
+
   it('calls onLinkClick when a rendered Markdown link is clicked', async () => {
     const onLinkClick = vi.fn()
     const screen = await render(
