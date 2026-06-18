@@ -64,8 +64,6 @@ function createMarkModePlugin(mode: MarkMode): Plugin<MarkMode> {
       apply: (_tr, value) => value,
     },
     props: {
-      // The attribute drives the mode-specific CSS; `getMarkMode` reads the
-      // plugin state, not this attribute.
       attributes: { 'data-mark-mode': mode },
       decorations: mode === 'focus' ? (state) => computeFocusDecorations(state) : undefined,
       clipboardTextSerializer: mode === 'show' ? undefined : cleanCopySerializer,
