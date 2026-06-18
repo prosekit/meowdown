@@ -258,10 +258,11 @@ function walkImage(
  *
  * Emits `mdWikilinkSource({ target })` across the whole node (the mark
  * `defineMarkMode` hides) and `mdWikilinkView({ target, display })` on the
- * closing `]]`, the anchor a mark view renders the non-editable label on. The
- * node's only children are the two `WikilinkMark` brackets (`[[` and `]]`); they
- * carry `mdMark` for show mode, and the target text between them carries only
- * `mdWikilinkSource`.
+ * wikilink's final character, the anchor a mark view renders the non-editable
+ * label on (the same rule as `walkImage`). The node's only children are the two
+ * `WikilinkMark` brackets (`[[` and `]]`); they carry `mdMark` for show mode,
+ * and the target text between them carries only `mdWikilinkSource`. The closing
+ * `]]` is one child, so it is split here so only its last `]` carries the view.
  */
 function walkWikilink(
   node: InlineElement,
@@ -274,24 +275,27 @@ function walkWikilink(
   const source = marks.mdWikilinkSource.create({ target } satisfies MdWikilinkSourceAttrs)
   const view = marks.mdWikilinkView.create({ target, display } satisfies MdWikilinkViewAttrs)
 
+  // The wikilink's final character, where `mdWikilinkView` is anchored.
+  const anchorFrom = node.to - 1
+  const baseAt = (from: number): Mark[] =>
+    from >= anchorFrom ? [...parentMarks, source, view] : [...parentMarks, source]
+
   let pos = node.from
   for (const child of node.children) {
     if (child.from > pos) {
-      emit(out, pos, child.from, [...parentMarks, source])
+      emit(out, pos, child.from, baseAt(pos))
     }
-    // The closing `]]` (the node's last child) anchors the label mark view; the
-    // opening `[[` is plain source syntax.
-    const isClosing = child.to === node.to
-    emit(out, child.from, child.to, [
-      ...parentMarks,
-      source,
-      ...(isClosing ? [view] : []),
-      marks.mdMark.create(),
-    ])
+    const mark = marks.mdMark.create()
+    if (child.from < anchorFrom && child.to > anchorFrom) {
+      emit(out, child.from, anchorFrom, [...baseAt(child.from), mark])
+      emit(out, anchorFrom, child.to, [...baseAt(anchorFrom), mark])
+    } else {
+      emit(out, child.from, child.to, [...baseAt(child.from), mark])
+    }
     pos = child.to
   }
   if (pos < node.to) {
-    emit(out, pos, node.to, [...parentMarks, source])
+    emit(out, pos, node.to, baseAt(pos))
   }
 }
 
