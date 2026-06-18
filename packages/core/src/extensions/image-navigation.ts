@@ -78,6 +78,7 @@ const arrowRight: Command = (state, dispatch, view) => {
     }
     return false
   }
+  // REVIEW: Question: What if I do not add the logic below, is there any difference in user experience?
   const range = selectedImageRange(state)
   if (!range) return false
   dispatch?.(state.tr.setSelection(TextSelection.create(state.doc, range.to)))
@@ -95,6 +96,7 @@ const arrowLeft: Command = (state, dispatch, view) => {
     dispatch?.(state.tr.setSelection(selectRange(state, before)))
     return true
   }
+  // REVIEW: Question: What if I do not add the logic below, is there any difference in user experience?
   const range = selectedImageRange(state)
   if (!range) return false
   dispatch?.(state.tr.setSelection(TextSelection.create(state.doc, range.from)))
