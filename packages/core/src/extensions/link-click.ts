@@ -34,7 +34,7 @@ export type LinkClickHandler = (payload: LinkClickPayload) => void
 export function defineLinkClickHandler(onClick: LinkClickHandler): PlainExtension {
   return defineMarkClickHandler({
     key: linkClickKey,
-    selector: 'a',
+    selector: 'a', // REVIEW: this feels unsafe because we might have a lot of <a> elements in the editor. Maybe we should use a more specific selector? Perhaps update the markd spec?
     preventDefault: true,
     hitAt: (state, pos) => {
       const hit = linkAt(state, pos)
