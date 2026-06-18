@@ -162,6 +162,26 @@ describe('image caret navigation in hide mode', () => {
   })
 })
 
+// The image is atomic only in hide mode (per-mark policy); the wikilink is atomic
+// in every mode. In show mode the image's raw `![img](url)` is ordinary editable
+// text, so Backspace removes one character instead of the whole image.
+describe('image is not atomic outside hide mode', () => {
+  function setupShow(): Fixture {
+    const fixture = setupFixture()
+    const { editor, n } = fixture
+    editor.use(defineImage({ resolveImageUrl: () => IMAGE_URL }))
+    editor.use(defineMarkMode('show'))
+    fixture.set(n.doc(n.paragraph(TEXT)))
+    return fixture
+  }
+
+  it('Backspace deletes one source character, not the whole image', async () => {
+    expect(await traceKeyAt(setupShow, 7, 'Backspace')).toMatchInlineSnapshot(
+      `"ABC![im▌g](url)DEF  ->  ABC![i▌g](url)DEF"`,
+    )
+  })
+})
+
 describe('image selection ring in hide mode', () => {
   // Selecting the whole `![img](url)` rings the preview; a collapsed caret next
   // to it does not. This is what the `md-image-selected` decoration drives.
