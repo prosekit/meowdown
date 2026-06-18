@@ -348,6 +348,13 @@
   border-radius: var(--meowdown-image-radius, 0.5rem);
 }
 
+/* While a whole atomic unit is selected, the selection covers its (often hidden)
+ * source, so hide the text caret: the ring/native selection is the affordance,
+ * not an insertion point. */
+.ProseMirror:has(.md-atomic-selected) {
+  caret-color: transparent;
+}
+
 /* ---------------------------------------------------------------------------
  * Placeholder text for empty blocks (ProseKit's definePlaceholder)
  * ------------------------------------------------------------------------- */
