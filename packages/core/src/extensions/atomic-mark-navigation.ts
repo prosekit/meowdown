@@ -10,18 +10,31 @@ import {
 } from '@prosekit/core'
 import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey, TextSelection } from '@prosekit/pm/state'
-import type { EditorView } from '@prosekit/pm/view'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
 import { getMarkRangeAt } from './get-mark-range-at.ts'
-import { getMarkMode } from './mark-mode.ts'
+import { getMarkMode, type MarkMode } from './mark-mode.ts'
 import type { MarkName } from './mark-names.ts'
 
+export interface AtomicMarkConfig {
+  /** The source mark (e.g. `mdImageSource`) whose run is one atomic unit. */
+  name: MarkName
+  /** The mark modes in which this mark is an atomic unit. */
+  modes: ReadonlyArray<MarkMode>
+}
+
 export interface AtomicMarkNavigationOptions {
-  /** The source marks (e.g. `mdImageSource`) whose run is one atomic unit. */
-  markNames: MarkName[]
+  marks: AtomicMarkConfig[]
   /** Decoration class added over the source range while the unit is selected. */
   selectedClass: string
+}
+
+// The source marks that are atomic in `state`'s current mark mode (empty when no
+// mode is applied, which keeps the whole feature inert).
+function activeMarkNames(marks: AtomicMarkConfig[], state: EditorState): MarkName[] {
+  const mode = getMarkMode(state)
+  if (!mode) return []
+  return marks.flatMap((mark) => (mark.modes.includes(mode) ? [mark.name] : []))
 }
 
 // The contiguous run of one atomic source mark that touches `pos`, or undefined.
@@ -61,19 +74,16 @@ function getSelectedRange(state: EditorState, markNames: MarkName[]): MarkRange 
   return range && range.from === from && range.to === to ? range : undefined
 }
 
-function isHideMode(view: EditorView | undefined): boolean {
-  return !!view && getMarkMode(view) === 'hide'
-}
-
 function selectRange(state: EditorState, range: MarkRange): TextSelection {
   return TextSelection.create(state.doc, range.from, range.to)
 }
 
 // ArrowRight: select the unit to the right, collapse a selected unit to its far
 // edge, or step past a unit to the left (which the browser cannot do).
-function createArrowRight(markNames: MarkName[]): Command {
-  return (state, dispatch, view) => {
-    if (!isHideMode(view) || !isTextSelection(state.selection)) return false
+function createArrowRight(marks: AtomicMarkConfig[]): Command {
+  return (state, dispatch) => {
+    const markNames = activeMarkNames(marks, state)
+    if (markNames.length === 0 || !isTextSelection(state.selection)) return false
     const selection = state.selection
     if (selection.empty) {
       const after = getRangeAfter(state, selection.from, markNames)
@@ -99,9 +109,10 @@ function createArrowRight(markNames: MarkName[]): Command {
 
 // ArrowLeft: select the unit to the left, or collapse a selected unit to its
 // near edge.
-function createArrowLeft(markNames: MarkName[]): Command {
-  return (state, dispatch, view) => {
-    if (!isHideMode(view) || !isTextSelection(state.selection)) return false
+function createArrowLeft(marks: AtomicMarkConfig[]): Command {
+  return (state, dispatch) => {
+    const markNames = activeMarkNames(marks, state)
+    if (markNames.length === 0 || !isTextSelection(state.selection)) return false
     const selection = state.selection
     if (selection.empty) {
       const before = getRangeBefore(state, selection.from, markNames)
@@ -119,9 +130,10 @@ function createArrowLeft(markNames: MarkName[]): Command {
 // Backspace: delete a whole unit to the left, or delete one character to the
 // left while next to a unit (the browser's native delete mangles the hidden
 // source). A selected unit falls through to the base `deleteSelection`.
-function createBackspace(markNames: MarkName[]): Command {
-  return (state, dispatch, view) => {
-    if (!isHideMode(view) || !state.selection.empty) return false
+function createBackspace(marks: AtomicMarkConfig[]): Command {
+  return (state, dispatch) => {
+    const markNames = activeMarkNames(marks, state)
+    if (markNames.length === 0 || !state.selection.empty) return false
     const pos = state.selection.from
     const before = getRangeBefore(state, pos, markNames)
     if (before) {
@@ -136,9 +148,10 @@ function createBackspace(markNames: MarkName[]): Command {
 }
 
 // Delete: the forward mirror of `backspace`.
-function createForwardDelete(markNames: MarkName[]): Command {
-  return (state, dispatch, view) => {
-    if (!isHideMode(view) || !state.selection.empty) return false
+function createForwardDelete(marks: AtomicMarkConfig[]): Command {
+  return (state, dispatch) => {
+    const markNames = activeMarkNames(marks, state)
+    if (markNames.length === 0 || !state.selection.empty) return false
     const pos = state.selection.from
     const after = getRangeAfter(state, pos, markNames)
     if (after) {
@@ -153,11 +166,13 @@ function createForwardDelete(markNames: MarkName[]): Command {
 }
 
 // Mark the source range while its whole unit is selected (see `style.css`).
-function createSelectionPlugin(markNames: MarkName[], selectedClass: string): Plugin {
+function createSelectionPlugin(marks: AtomicMarkConfig[], selectedClass: string): Plugin {
   return new Plugin({
     key: new PluginKey(`atomic-mark-selection-${selectedClass}`),
     props: {
       decorations: (state) => {
+        const markNames = activeMarkNames(marks, state)
+        if (markNames.length === 0) return
         const range = getSelectedRange(state, markNames)
         if (!range) return
         return DecorationSet.create(state.doc, [
@@ -169,25 +184,26 @@ function createSelectionPlugin(markNames: MarkName[], selectedClass: string): Pl
 }
 
 /**
- * In hide mode, make a hidden text-backed unit (an image source, a wikilink
- * source) a single caret stop: arrowing onto it selects the whole source (ringed
- * by a `selectedClass` decoration), and Backspace/Delete remove it as a unit.
- * Inert in show mode and without `defineMarkMode('hide')`.
+ * Make a text-backed source unit (an image source, a wikilink source) a single
+ * caret stop in the mark modes listed per mark: arrowing onto it selects the
+ * whole source (ringed by a `selectedClass` decoration), and Backspace/Delete
+ * remove it as a unit. Inert in any mode a mark does not list, and without
+ * `defineMarkMode`.
  */
 export function defineAtomicMarkNavigation({
-  markNames,
+  marks,
   selectedClass,
 }: AtomicMarkNavigationOptions): PlainExtension {
   return union(
     withPriority(
       defineKeymap({
-        ArrowRight: createArrowRight(markNames),
-        ArrowLeft: createArrowLeft(markNames),
-        Backspace: createBackspace(markNames),
-        Delete: createForwardDelete(markNames),
+        ArrowRight: createArrowRight(marks),
+        ArrowLeft: createArrowLeft(marks),
+        Backspace: createBackspace(marks),
+        Delete: createForwardDelete(marks),
       }),
       Priority.high,
     ),
-    definePlugin(createSelectionPlugin(markNames, selectedClass)),
+    definePlugin(createSelectionPlugin(marks, selectedClass)),
   )
 }

@@ -3,7 +3,6 @@ import type { EditorNode, Mark, Slice } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
-import type { EditorView } from '@prosekit/pm/view'
 
 import type { MarkName } from './mark-names.ts'
 
@@ -85,8 +84,8 @@ export function defineMarkMode(mode: MarkMode): PlainExtension {
 }
 
 /** The active mark mode, or `undefined` when `defineMarkMode` is not applied. */
-export function getMarkMode(view: EditorView): MarkMode | undefined {
-  return markModeKey.getState(view.state)
+export function getMarkMode(state: EditorState): MarkMode | undefined {
+  return markModeKey.getState(state)
 }
 
 function cleanCopySerializer(slice: Slice): string {
