@@ -54,6 +54,8 @@ function selectRange(state: EditorState, range: ImageRange): TextSelection {
   return TextSelection.create(state.doc, range.from, range.to)
 }
 
+// REVIEW: DO NOT USE `selection instanceof TextSelection`. Import the isTextSelection from prosekit/core. Scan the whole codebase for this pattern and replace it.
+
 // ArrowRight: select the image to the right, collapse a selected image to its
 // far edge, or step past an image to the left (which the browser cannot do).
 const arrowRight: Command = (state, dispatch, view) => {

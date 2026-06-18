@@ -318,9 +318,12 @@
   border: 0;
 }
 
-/* The whole image source is selected: a single caret stop in hide mode. Ring the
- * preview like a node selection (`.ProseMirror-selectednode`). */
-.ProseMirror[data-mark-mode='hide'] .md-image-selected .md-image-preview {
+/* The whole image source is selected: a single caret stop in hide mode. The
+ * `md-image-selected` decoration wraps the source text spans, so the preview
+ * (a sibling of the mark view's content) is not a descendant of it; match the
+ * mark view that contains a selected span instead. Ring the preview like a node
+ * selection (`.ProseMirror-selectednode`). */
+.ProseMirror[data-mark-mode='hide'] .md-image-view:has(.md-image-selected) .md-image-preview {
   outline: 2px solid var(--meowdown-node-outline);
   outline-offset: 2px;
   border-radius: var(--meowdown-image-radius, 0.5rem);

@@ -52,11 +52,11 @@ function renderImagePreview(
   if (!url) return undefined
   const wrapper = document.createElement('span')
   wrapper.className = 'md-image-preview md-image-preview-img'
+  wrapper.dataset.testid = 'image-preview'
   const img = document.createElement('img')
   img.src = url
   img.alt = alt
   img.draggable = false
-  img.dataset.testid = 'image-preview'
   wrapper.appendChild(img)
   return wrapper
 }

@@ -54,10 +54,18 @@ const SYNTAX_BEARING_MARKS: ReadonlySet<MarkName> = new Set<MarkName>([
   'mdWikilink',
 ])
 
-function createMarkModePlugin(mode: MarkMode): Plugin<DecorationSet> {
-  return new Plugin<DecorationSet>({
-    key: new PluginKey('mark-mode'),
+const markModeKey = new PluginKey<MarkMode>('mark-mode')
+
+function createMarkModePlugin(mode: MarkMode): Plugin<MarkMode> {
+  return new Plugin<MarkMode>({
+    key: markModeKey,
+    state: {
+      init: () => mode,
+      apply: (_tr, value) => value,
+    },
     props: {
+      // The attribute drives the mode-specific CSS; `getMarkMode` reads the
+      // plugin state, not this attribute.
       attributes: { 'data-mark-mode': mode },
       decorations: mode === 'focus' ? (state) => computeFocusDecorations(state) : undefined,
       clipboardTextSerializer: mode === 'show' ? undefined : cleanCopySerializer,
@@ -69,10 +77,9 @@ export function defineMarkMode(mode: MarkMode): PlainExtension {
   return definePlugin(createMarkModePlugin(mode))
 }
 
-/** The active mark mode, read from the `data-mark-mode` attribute on the editor. */
-// REVIEW: do not read the mode from the DOM. Use plugin key and plugin state to get the mode
+/** The active mark mode, or `undefined` when `defineMarkMode` is not applied. */
 export function getMarkMode(view: EditorView): MarkMode | undefined {
-  return view.dom.dataset.markMode as MarkMode | undefined
+  return markModeKey.getState(view.state)
 }
 
 function cleanCopySerializer(slice: Slice): string {
