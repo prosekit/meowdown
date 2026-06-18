@@ -25,8 +25,6 @@ const REVEAL_TRIGGERING_MARKS: ReadonlySet<MarkName> = new Set<MarkName>([
   'mdDel',
   'mdLinkText',
   'mdLinkUri',
-  // Reveals the raw `[[target]]` when the caret is at the wikilink source.
-  'mdWikilinkSource',
   // Reveals the raw `![alt](url)` when the caret is anywhere in the image
   // source, including its plain alt text (which carries only mdImageSource).
   'mdImageSource',
