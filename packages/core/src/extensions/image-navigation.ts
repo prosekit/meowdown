@@ -23,6 +23,7 @@ interface ImageRange {
 }
 
 // The contiguous run of `mdImageSource` text that touches `pos`, or undefined.
+// REVIEW: rename imageSourceRangeAt to getImageSourceRangeAt. Simlar renames for all functions in this file.
 function imageSourceRangeAt(state: EditorState, pos: number): ImageRange | undefined {
   const range = getMarkRange(state.doc.resolve(pos), 'mdImageSource' satisfies MarkName)
   // REVIEW: REMOVE MarkRange->ImageRange logic, just use MarkRange from prosekit.
