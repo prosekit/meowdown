@@ -2,7 +2,6 @@ import { playwright } from '@vitest/browser-playwright'
 import { defineProject } from 'vitest/config'
 
 export default defineProject({
-  plugins: [playwrightCommands()],
   test: {
     browser: {
       enabled: true,
