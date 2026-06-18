@@ -1,4 +1,4 @@
-import { MeowdownEditor, type EditorMode } from '@meowdown/react'
+import { MeowdownEditor, type EditorMode, type TagItem, type WikilinkItem } from '@meowdown/react'
 import { type CSSProperties, useLayoutEffect, useState } from 'react'
 
 import { uploadFile } from './upload-file.ts'
@@ -90,10 +90,10 @@ function greet(name: string): string {
 
 const TAGS = ['cats', 'editor', 'ideas', 'markdown', 'meow', 'notes', 'react', 'todo', 'work']
 
-async function searchTags(query: string): Promise<string[]> {
+async function searchTags(query: string): Promise<TagItem[]> {
   // Simulate network latency so the tag menu's loading state shows up.
   await new Promise((resolve) => setTimeout(resolve, 200))
-  return TAGS.filter((tag) => tag.includes(query))
+  return TAGS.filter((tag) => tag.includes(query)).map((tag) => ({ tag }))
 }
 
 const NOTES = [
@@ -105,10 +105,12 @@ const NOTES = [
   'Travel plans',
 ]
 
-async function searchNotes(query: string): Promise<string[]> {
+async function searchNotes(query: string): Promise<WikilinkItem[]> {
   // Simulate network latency so the wikilink menu's loading state shows up.
   await new Promise((resolve) => setTimeout(resolve, 200))
-  return NOTES.filter((note) => note.toLowerCase().includes(query))
+  return NOTES.filter((note) => note.toLowerCase().includes(query)).map((note) => ({
+    target: note,
+  }))
 }
 
 const ICON_BUTTON_CLASS =
