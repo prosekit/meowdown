@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.0](https://github.com/prosekit/meowdown/compare/core-v0.12.0...core-v0.13.0) (2026-06-18)
+
+
+### Features
+
+* **core:** autolink bare domains via a curated TLD list ([#76](https://github.com/prosekit/meowdown/issues/76)) ([ec75857](https://github.com/prosekit/meowdown/commit/ec7585769ee65a72edaf3609fbc3603f6034c05e))
+* **core:** render wikilinks as an immutable mark view ([#73](https://github.com/prosekit/meowdown/issues/73)) ([10da525](https://github.com/prosekit/meowdown/commit/10da52518b27bfaec2224614d1040270e6c676f2))
+
 ## [0.12.0](https://github.com/prosekit/meowdown/compare/core-v0.11.1...core-v0.12.0) (2026-06-18)
 
 
