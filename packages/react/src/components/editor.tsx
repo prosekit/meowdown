@@ -1,6 +1,7 @@
 import type {
   ImageClickHandler,
   ImageOptions,
+  LinkClickHandler,
   MarkMode,
   PlaceholderOptions,
   WikilinkClickHandler,
@@ -66,6 +67,14 @@ export interface EditorProps {
    * function (e.g. from `useCallback`). Ignored in source mode.
    */
   onWikilinkClick?: WikilinkClickHandler
+
+  /**
+   * Called with the link `href` on click of a rendered Markdown link
+   * (`[text](url)`). A plain click inside a link the caret already sits in just
+   * places the caret; `Mod`-click always fires. Pass a stable function (e.g.
+   * from `useCallback`). Ignored in source mode.
+   */
+  onLinkClick?: LinkClickHandler
 
   /**
    * Maps an image `src` to a displayable URL, or `undefined` to skip that image.
@@ -147,6 +156,7 @@ export function MeowdownEditor({
   onTagSearch,
   onWikilinkSearch,
   onWikilinkClick,
+  onLinkClick,
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
@@ -227,6 +237,7 @@ export function MeowdownEditor({
           onTagSearch={onTagSearch}
           onWikilinkSearch={onWikilinkSearch}
           onWikilinkClick={onWikilinkClick}
+          onLinkClick={onLinkClick}
           resolveImageUrl={resolveImageUrl}
           onImagePaste={onImagePaste}
           onImageSaveError={onImageSaveError}

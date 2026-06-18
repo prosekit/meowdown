@@ -4,6 +4,7 @@ import {
   type EditorExtension,
   type ImageClickHandler,
   type ImageOptions,
+  type LinkClickHandler,
   type MarkMode,
   type PlaceholderOptions,
   type WikilinkClickHandler,
@@ -71,6 +72,9 @@ export interface ProseKitEditorProps {
   /** Called on click of a rendered wiki link. See `EditorProps.onWikilinkClick`. */
   onWikilinkClick?: WikilinkClickHandler
 
+  /** Called on click of a rendered Markdown link. See `EditorProps.onLinkClick`. */
+  onLinkClick?: LinkClickHandler
+
   /** Resolves an image `src` to a URL. See `EditorProps.resolveImageUrl`. */
   resolveImageUrl?: ImageOptions['resolveImageUrl']
 
@@ -118,6 +122,7 @@ export function ProseKitEditor({
   onTagSearch,
   onWikilinkSearch,
   onWikilinkClick,
+  onLinkClick,
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
@@ -215,6 +220,7 @@ export function ProseKitEditor({
         markMode={markMode}
         onDocChange={handleDocChange}
         onWikilinkClick={onWikilinkClick}
+        onLinkClick={onLinkClick}
         resolveImageUrl={resolveImageUrl}
         onImagePaste={onImagePaste}
         onImageSaveError={onImageSaveError}

@@ -3,12 +3,14 @@ import {
   defineEmbedPaste,
   defineImage,
   defineImageClickHandler,
+  defineLinkClickHandler,
   defineMarkMode,
   definePlaceholder,
   defineReadonly,
   defineWikilinkClickHandler,
   type ImageClickHandler,
   type ImageOptions,
+  type LinkClickHandler,
   type MarkMode,
   type PlaceholderOptions,
   type WikilinkClickHandler,
@@ -21,6 +23,7 @@ export interface EditorExtensionsProps {
   markMode: MarkMode
   onDocChange?: VoidFunction
   onWikilinkClick?: WikilinkClickHandler
+  onLinkClick?: LinkClickHandler
   resolveImageUrl?: ImageOptions['resolveImageUrl']
   onImagePaste?: ImageOptions['onImagePaste']
   onImageSaveError?: ImageOptions['onImageSaveError']
@@ -38,6 +41,7 @@ export function EditorExtensions({
   markMode,
   onDocChange,
   onWikilinkClick,
+  onLinkClick,
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
@@ -69,6 +73,12 @@ export function EditorExtensions({
     useMemo(() => {
       return onWikilinkClick ? defineWikilinkClickHandler(onWikilinkClick) : null
     }, [onWikilinkClick]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return onLinkClick ? defineLinkClickHandler(onLinkClick) : null
+    }, [onLinkClick]),
   )
 
   useExtension(
