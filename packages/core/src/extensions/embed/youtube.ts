@@ -42,7 +42,7 @@ function parseStartSeconds(value: string): number | undefined {
 
 export const matchYouTube: EmbedMatcher = (src) => {
   const parsed = parseYouTube(src)
-  if (!parsed) return undefined
+  if (!parsed) return
   const query = parsed.startSeconds ? `?start=${parsed.startSeconds}` : ''
   return {
     key: `youtube:${parsed.videoId}:${parsed.startSeconds ?? 0}`,

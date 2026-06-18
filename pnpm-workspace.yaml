@@ -15,8 +15,4 @@ trustPolicyIgnoreAfter: 10080 # 7 days
 trustLockfile: true
 
 minimumReleaseAgeExclude:
-  - '@prosekit/core@0.13.0-beta.1'
-  - '@prosekit/extensions@0.17.5-beta.2'
-  - '@prosekit/react@0.8.0-beta.2'
-  - '@prosekit/web@0.9.0-beta.2'
-  - '@ocavue/eslint-config@4.7.2'
+  - '@ocavue/eslint-config'

@@ -196,7 +196,7 @@ export function ProseKitEditor({
   // Guard the host callback so programmatic setState/setMarkdown stays silent.
   // Stable per `onDocChange` identity, so the extension is not rebuilt every render.
   const handleDocChange = useMemo(() => {
-    if (!onDocChange) return undefined
+    if (!onDocChange) return
     return () => {
       if (suppressDocChangeRef.current) return
       onDocChange()
