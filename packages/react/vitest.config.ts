@@ -5,8 +5,8 @@ import { defineProject } from 'vitest/config'
 export default defineProject({
   plugins: [playwrightCommands()],
   test: {
-  retry: process.env.CI ? 3 : 0,
-  bail: process.env.CI ? 0 : 1,
+    retry: process.env.CI ? 3 : 0,
+    bail: process.env.CI ? 0 : 1,
     browser: {
       enabled: true,
       viewport: {
