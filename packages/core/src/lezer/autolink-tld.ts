@@ -1,59 +1,36 @@
 /**
- * Curated, tunable list of TLDs that meowdown autolinks when they appear in a
- * bare domain (no scheme, no `www.`). It deliberately omits TLDs that double as
- * common code-file extensions even though they are real ccTLDs: `md` (markdown),
- * `sh` (shell), `pl` (perl), `rs` (rust). Those still autolink behind a
- * `www.`/scheme prefix, just not bare, so `README.md` and `deploy.sh` stay
- * plain text.
+ * Allowed TLDs when they appear in a bare domain (no scheme, no `www.`).
+ *
+ * Source: Top 25 TLDs by domain count https://research.domaintools.com/statistics/tld-counts/
+ *
  */
 const BARE_AUTOLINK_TLDS: ReadonlySet<string> = new Set([
-  // generic
   'com',
-  'org',
-  'net',
-  'edu',
-  'gov',
-  'mil',
-  'int',
-  'info',
-  'biz',
-  // popular new gTLDs
-  'io',
-  'co',
-  'ai',
-  'app',
-  'dev',
-  'me',
-  'xyz',
-  'online',
-  'site',
-  'tech',
-  'blog',
-  'shop',
-  'store',
-  'cloud',
-  'page',
-  'wiki',
-  // common ccTLDs used as vanity / real sites
-  'us',
-  'uk',
-  'ca',
   'de',
-  'fr',
-  'jp',
+  'net',
   'cn',
-  'au',
-  'in',
-  'ru',
-  'br',
-  'eu',
+  'org',
+  'uk',
+  'xyz',
+  'top',
   'nl',
-  'es',
+  'ru',
+  'info',
+  'br',
+  'fr',
+  'au',
+  'shop',
+  'eu',
+  'ca',
+  'in',
+  'online',
   'it',
+  'co',
   'ch',
-  'se',
-  'kr',
-])
+  'pl',
+  'cc',
+  'es',
+  ])
 
 // A single DNS label: alphanumeric, hyphens allowed inside but not at the edges.
 const DNS_LABEL_RE = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i
