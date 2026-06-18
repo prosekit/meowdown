@@ -16,3 +16,4 @@ trustLockfile: true
 
 minimumReleaseAgeExclude:
   - '@ocavue/eslint-config'
+  - '@prosekit/*'
