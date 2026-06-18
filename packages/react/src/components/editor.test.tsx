@@ -404,7 +404,7 @@ describe('MeowdownEditor', () => {
     const screen = await render(
       <MeowdownEditor initialMarkdown="see [[Note]] here" onWikilinkClick={onWikilinkClick} />,
     )
-    await screen.getByText('Note').click()
+    await screen.getByTestId('wikilink').click()
     await vi.waitFor(() => {
       expect(onWikilinkClick).toHaveBeenCalledWith(expect.objectContaining({ target: 'Note' }))
     })

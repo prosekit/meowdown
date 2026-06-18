@@ -55,7 +55,7 @@ Selection colors are standalone variables, not derived from `--meowdown-accent`,
 
 Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-accent`.
 
-Wikilinks (`[[target]]`) render with a dashed underline via the `.md-wikilink` class, colored by `--meowdown-accent`, with a pointer cursor. Their `[[` `]]` brackets behave like other syntax characters: dimmed in show mode, hidden in hide and focus modes. Wire click navigation with `defineWikilinkClickHandler(({ target, event }) => ...)` (or `@meowdown/react`'s `onWikilinkClick` prop).
+Wikilinks (`[[target]]`/`[[target|alias]]`) render in place via a mark view as an immutable label (the alias, or the target when there is no alias), with the raw source hidden in hide and focus modes and shown dimmed in show mode. The label uses the `.md-wikilink-label` class and the raw source the `.md-wikilink-source` class, both dashed-underlined and colored by `--meowdown-accent`. In hide mode the link is a single caret stop: arrowing onto it selects the whole source (ringed with `--meowdown-node-outline`), and Backspace/Delete remove it as a unit. Wire click navigation with `defineWikilinkClickHandler(({ target, event }) => ...)` (or `@meowdown/react`'s `onWikilinkClick` prop).
 
 Inline images (`![alt](src)`) stay literal text and render in place via a mark view, with the raw `![alt](src)` hidden in hide and focus modes. Add it with `defineImage({ resolveImageUrl, onImagePaste })` (or `@meowdown/react`'s image props). `resolveImageUrl` is optional and defaults to showing http(s) URLs as-is.
 

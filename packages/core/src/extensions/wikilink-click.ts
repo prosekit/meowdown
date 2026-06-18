@@ -1,6 +1,7 @@
 import { definePlugin, getMarkRange, isApple, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
+import type { MdWikilinkSourceAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
 
 const wikilinkClickKey = new PluginKey('meowdown-wikilink-click')
@@ -11,24 +12,32 @@ export interface WikilinkHit {
   target: string
 }
 
-/** The wikilink covering `pos`, found via the `mdWikilink` mark. Exported for tests. */
+/** The wikilink covering `pos`, found via the `mdWikilinkSource` mark. Exported for tests. */
 export function wikilinkAt(state: EditorState, pos: number): WikilinkHit | undefined {
   const $pos = state.doc.resolve(pos)
   if (!$pos.parent.isTextblock || $pos.parent.type.spec.code) return
-  const range = getMarkRange($pos, 'mdWikilink' satisfies MarkName)
+  const range = getMarkRange($pos, 'mdWikilinkSource' satisfies MarkName)
   if (!range) return
-  return {
-    from: range.from,
-    to: range.to,
-    target: parseWikilinkTarget(state.doc.textBetween(range.from, range.to)),
-  }
+  const { target } = range.mark.attrs as MdWikilinkSourceAttrs
+  return { from: range.from, to: range.to, target }
+}
+
+export interface ParsedWikilink {
+  target: string
+  display: string
+}
+
+/** Splits `[[target]]`/`[[target|alias]]` into its target and display label (the alias, or empty). */
+export function parseWikilink(text: string): ParsedWikilink {
+  const inner = text.replace(/^\[\[/u, '').replace(/\]\]$/u, '')
+  const pipe = inner.indexOf('|')
+  if (pipe < 0) return { target: inner.trim(), display: '' }
+  return { target: inner.slice(0, pipe).trim(), display: inner.slice(pipe + 1).trim() }
 }
 
 /** Extracts the target from `[[target]]` or `[[target|alias]]`. Exported for tests. */
 export function parseWikilinkTarget(text: string): string {
-  const inner = text.replace(/^\[\[/u, '').replace(/\]\]$/u, '')
-  const pipe = inner.indexOf('|')
-  return (pipe >= 0 ? inner.slice(0, pipe) : inner).trim()
+  return parseWikilink(text).target
 }
 
 export interface WikilinkClickPayload {
@@ -53,7 +62,9 @@ export function defineWikilinkClickHandler(onClick: WikilinkClickHandler): Plain
           },
         },
         handleClick: (view, pos, event) => {
-          const onLink = (event.target as HTMLElement | null)?.closest?.('.md-wikilink')
+          const onLink = (event.target as HTMLElement | null)?.closest?.(
+            '.md-wikilink-label, .md-wikilink-source',
+          )
           if (!onLink) return false
           const link = wikilinkAt(view.state, pos)
           if (!link) return false

@@ -9,7 +9,8 @@ export const MARK_NAMES = [
   'mdLinkUri',
   'mdDel',
   'mdTag',
-  'mdWikilink',
+  'mdWikilinkSource',
+  'mdWikilinkView',
 ] as const
 
 export type MarkName = (typeof MARK_NAMES)[number]

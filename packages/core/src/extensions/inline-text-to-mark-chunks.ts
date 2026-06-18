@@ -4,11 +4,18 @@ import type { InlineElement } from '../lezer/inline.ts'
 import { parseInline } from '../lezer/inline.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 
-import type { MdImageSourceAttrs, MdImageViewAttrs, MdLinkTextAttrs } from './inline-marks.ts'
+import type {
+  MdImageSourceAttrs,
+  MdImageViewAttrs,
+  MdLinkTextAttrs,
+  MdWikilinkSourceAttrs,
+  MdWikilinkViewAttrs,
+} from './inline-marks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
 import type { MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
 import type { TypedMarkBuilders } from './schema.ts'
+import { parseWikilink } from './wikilink-click.ts'
 
 /**
  * Lookup from Lezer node type id to the ProseMirror mark.
@@ -32,7 +39,6 @@ const MARK_NAME_BY_TYPE_ID: ReadonlyMap<number, MarkName> = new Map([
   [LEZER_NODE_IDS.StrikethroughMark, 'mdMark'],
   [LEZER_NODE_IDS.URL, 'mdLinkUri'],
   [LEZER_NODE_IDS.Hashtag, 'mdTag'],
-  [LEZER_NODE_IDS.Wikilink, 'mdWikilink'],
   [LEZER_NODE_IDS.WikilinkMark, 'mdMark'],
 ])
 
@@ -86,6 +92,8 @@ function walk(
       walkLink(node, parentMarks, text, marks, out)
     } else if (node.type === LEZER_NODE_IDS.Image) {
       walkImage(node, parentMarks, text, marks, out)
+    } else if (node.type === LEZER_NODE_IDS.Wikilink) {
+      walkWikilink(node, parentMarks, text, marks, out)
     } else if (node.type === LEZER_NODE_IDS.URL) {
       // A standalone `URL` node is a GFM autolink (the address part of a real
       // `[text](url)` is handled inside `walkLink`, not here). Linkify the
@@ -159,6 +167,13 @@ function walkLink(
       emit(out, pos, child.from, childMarks)
     }
     const baseForChild = inLabel(child.from) ? [...parentMarks, linkTextMark!] : parentMarks
+    // A wikilink in the label needs its own source/view walk, not the generic
+    // per-child mark mapping.
+    if (child.type === LEZER_NODE_IDS.Wikilink) {
+      walkWikilink(child, baseForChild, text, marks, out)
+      pos = child.to
+      continue
+    }
     const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(child.type)
     const childMarks = maybeMarkName
       ? [...baseForChild, marks[maybeMarkName].create()]
@@ -235,6 +250,56 @@ function walkImage(
   }
   if (pos < node.to) {
     emit(out, pos, node.to, baseAt(pos))
+  }
+}
+
+/**
+ * Special walker for a wikilink `[[target]]`/`[[target|alias]]`.
+ *
+ * Emits `mdWikilinkSource({ target })` across the whole node (the mark
+ * `defineMarkMode` hides) and `mdWikilinkView({ target, display })` on the node's
+ * final character, the anchor a mark view renders the non-editable label on. The
+ * node's only children are the two `WikilinkMark` brackets (`[[` and `]]`); they
+ * carry `mdMark` for show mode, and the target text between them carries only
+ * `mdWikilinkSource`. The closing `]]` straddles the anchor, so it splits: the
+ * final `]` also gets `mdWikilinkView`.
+ */
+function walkWikilink(
+  node: InlineElement,
+  parentMarks: readonly Mark[],
+  text: string,
+  marks: TypedMarkBuilders,
+  out: MarkChunk[],
+): void {
+  const { target, display } = parseWikilink(text.slice(node.from, node.to))
+  const source = marks.mdWikilinkSource.create({ target } satisfies MdWikilinkSourceAttrs)
+  const view = marks.mdWikilinkView.create({ target, display } satisfies MdWikilinkViewAttrs)
+  const anchorFrom = node.to - 1
+
+  let pos = node.from
+  for (const child of node.children) {
+    if (child.from > pos) {
+      emit(out, pos, child.from, [...parentMarks, source])
+    }
+    if (child.from < anchorFrom) {
+      emit(out, child.from, Math.min(child.to, anchorFrom), [
+        ...parentMarks,
+        source,
+        marks.mdMark.create(),
+      ])
+    }
+    if (child.to > anchorFrom) {
+      emit(out, Math.max(child.from, anchorFrom), child.to, [
+        ...parentMarks,
+        source,
+        view,
+        marks.mdMark.create(),
+      ])
+    }
+    pos = child.to
+  }
+  if (pos < node.to) {
+    emit(out, pos, node.to, [...parentMarks, source])
   }
 }
 

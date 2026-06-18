@@ -26,7 +26,8 @@ const REVEAL_TRIGGERING_MARKS: ReadonlySet<MarkName> = new Set<MarkName>([
   'mdDel',
   'mdLinkText',
   'mdLinkUri',
-  'mdWikilink',
+  // Reveals the raw `[[target]]` when the caret is at the wikilink source.
+  'mdWikilinkSource',
   // Reveals the raw `![alt](url)` when the caret is anywhere in the image
   // source, including its plain alt text (which carries only mdImageSource).
   'mdImageSource',
@@ -37,8 +38,16 @@ const REVEAL_TRIGGERING_MARKS: ReadonlySet<MarkName> = new Set<MarkName>([
 const REVEALABLE_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>(['mdMark', 'mdLinkUri'])
 
 // Marks whose text is dropped from a clean clipboard copy, so copied markdown
-// omits the rendered syntax. Image source is exempt (see `cleanCopySerializer`).
+// omits the rendered syntax. Source marks are exempt (see `cleanCopySerializer`).
 const CLIPBOARD_STRIP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>(['mdMark', 'mdLinkUri'])
+
+// Source marks whose whole run is kept verbatim in a clean copy, so a rendered
+// image stays `![alt](url)` and a rendered wikilink stays `[[target]]`, even
+// though their punctuation/url carry otherwise-stripped marks.
+const CLIPBOARD_KEEP_SOURCE_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([
+  'mdImageSource',
+  'mdWikilinkSource',
+])
 
 // Marks that make a text node part of a link; revealing one reveals the whole
 // link (text + URL) envelope.
@@ -51,7 +60,7 @@ const SYNTAX_BEARING_MARKS: ReadonlySet<MarkName> = new Set<MarkName>([
   'mdEm',
   'mdCode',
   'mdDel',
-  'mdWikilink',
+  'mdWikilinkSource',
 ])
 
 const markModeKey = new PluginKey<MarkMode>('mark-mode')
@@ -86,13 +95,11 @@ function cleanCopySerializer(slice: Slice): string {
     const parts: string[] = []
     blockNode.descendants((textNode) => {
       if (!textNode.isText || !textNode.text) return true
-      // Keep the whole image source so a copied image stays `![alt](url)`,
-      // even though its punctuation/url carry otherwise-stripped marks.
-      const isImageSource = textNode.marks.some(
-        (m: Mark) => m.type.name === ('mdImageSource' satisfies MarkName),
+      const isKeptSource = textNode.marks.some((m: Mark) =>
+        CLIPBOARD_KEEP_SOURCE_MARK_NAMES.has(m.type.name as MarkName),
       )
       const stripped =
-        !isImageSource &&
+        !isKeptSource &&
         textNode.marks.some((m: Mark) => CLIPBOARD_STRIP_MARK_NAMES.has(m.type.name as MarkName))
       if (!stripped) parts.push(textNode.text)
       return false

@@ -130,16 +130,45 @@ function defineMdTag() {
 }
 
 /**
- * Covers the whole `[[target]]`; the `[[` `]]` brackets also carry
- * `mdMark` (they are removable syntax, unlike a tag's `#`).
+ * Covers the whole `[[target]]`/`[[target|alias]]` source. This is the mark
+ * `defineMarkMode` hides in hide/focus mode so the rendered label replaces the
+ * raw syntax. The `target` attribute keeps adjacent wikilinks distinct so their
+ * ranges stay separate. The `[[` `]]` brackets also carry `mdMark` (removable
+ * syntax, unlike a tag's `#`).
  */
-function defineMdWikilink() {
-  return defineMarkSpec({
-    name: 'mdWikilink' satisfies MarkName,
+function defineMdWikilinkSource() {
+  return defineMarkSpec<'mdWikilinkSource', MdWikilinkSourceAttrs>({
+    name: 'mdWikilinkSource' satisfies MarkName,
     inclusive: false,
-    toDOM: () => ['span', { class: 'md-wikilink' }, 0],
-    parseDOM: [{ tag: 'span.md-wikilink' }],
+    attrs: { target: { default: '' } },
+    toDOM: () => ['span', { class: 'md-wikilink-source' }, 0],
+    parseDOM: [{ tag: 'span.md-wikilink-source' }],
   })
+}
+
+export interface MdWikilinkSourceAttrs {
+  target: string
+}
+
+/**
+ * Anchors the rendered wikilink label on the final character of
+ * `[[target]]`/`[[target|alias]]`. A mark view (see `defineWikilink`) renders the
+ * non-editable label; without it the anchor char just renders as text. Carries
+ * the parsed `target` and `display` (the alias, or empty when none).
+ */
+function defineMdWikilinkView() {
+  return defineMarkSpec<'mdWikilinkView', MdWikilinkViewAttrs>({
+    name: 'mdWikilinkView' satisfies MarkName,
+    inclusive: false,
+    attrs: { target: { default: '' }, display: { default: '' } },
+    toDOM: () => ['span', { class: 'md-wikilink-anchor' }, 0],
+    parseDOM: [{ tag: 'span.md-wikilink-anchor' }],
+  })
+}
+
+export interface MdWikilinkViewAttrs {
+  target: string
+  display: string
 }
 
 export function defineInlineMarks() {
@@ -154,10 +183,12 @@ export function defineInlineMarks() {
     defineMdLinkUri(),
     defineMdDel(),
     defineMdTag(),
-    defineMdWikilink(),
 
-    // The image marks are registered last so the preview (mdImageView) wraps the
-    // source (mdImageSource), which wraps the syntax marks.
+    // The wikilink/image marks are registered last so the view mark
+    // (mdWikilinkView / mdImageView) wraps the source, which wraps the syntax
+    // marks.
+    defineMdWikilinkSource(),
+    defineMdWikilinkView(),
     defineMdImageSource(),
     defineMdImageView(),
   )
