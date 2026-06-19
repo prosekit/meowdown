@@ -19,8 +19,10 @@ function tableShape(markdown: string): Array<Array<{ type: string; text: string 
   return rows
 }
 
+const bulletAttrs = { kind: 'bullet', order: null, checked: false, collapsed: false }
+
 describe('markdownToDoc', () => {
-  it('converts a heading', () => {
+  it('keeps a heading', () => {
     expect(markdownToDoc('# Hello').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -33,7 +35,7 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it('converts a plain paragraph', () => {
+  it('keeps a paragraph', () => {
     expect(markdownToDoc('hello world').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -45,7 +47,7 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it('converts a blockquote', () => {
+  it('keeps a blockquote', () => {
     expect(markdownToDoc('> quoted text').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -62,7 +64,7 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it('flattens a bullet list', () => {
+  it('keeps a bullet list', () => {
     const md = dedent`
       - one
       - two
@@ -94,7 +96,7 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it('keeps the start number of an ordered list', () => {
+  it('keeps an ordered start number', () => {
     const md = dedent`
       5. five
       6. six
@@ -126,7 +128,7 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it('converts a task list item, keeping its text', () => {
+  it('keeps a task item', () => {
     expect(markdownToDoc('- [ ] todo').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -144,7 +146,7 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it('marks a checked task list item', () => {
+  it('keeps a checked task', () => {
     expect(markdownToDoc('- [x] done').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -162,7 +164,7 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it('mixes task and plain items in one bullet list', () => {
+  it('keeps mixed task and plain items', () => {
     const md = dedent`
       - [x] done
       - plain
@@ -174,7 +176,7 @@ describe('markdownToDoc', () => {
     expect(doc.content.map((item) => item.attrs.checked)).toEqual([true, false])
   })
 
-  it('keeps a task marker in an ordered list as literal text', () => {
+  it('keeps a literal task marker in an ordered item', () => {
     // The flat-list schema has a single `kind`, so an ordered item cannot
     // also be a task; the marker stays in the text and round-trips verbatim.
     expect(markdownToDoc('1. [x] done').toJSON()).toEqual({
@@ -194,7 +196,7 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it('converts a fenced code block with language', () => {
+  it('keeps a fenced block with language', () => {
     expect(markdownToDoc('```js\nconsole.log(1)\n```').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -207,14 +209,14 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it('converts a horizontal rule', () => {
+  it('keeps a horizontal rule', () => {
     expect(markdownToDoc('---').toJSON()).toEqual({
       type: 'doc',
       content: [{ type: 'horizontalRule' }],
     })
   })
 
-  it('converts a GFM table with a header row', () => {
+  it('keeps a table with a header', () => {
     const md = dedent`
       | a | b |
       |---|---|
@@ -282,7 +284,7 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it('keeps empty cells when the whole table is empty', () => {
+  it('keeps empty table cells', () => {
     const md = dedent`
       |     |     |     |
       | --- | --- | --- |
@@ -302,7 +304,7 @@ describe('markdownToDoc', () => {
     ])
   })
 
-  it('places cells in the correct columns when some are empty', () => {
+  it('keeps cells in their columns', () => {
     const md = dedent`
       | a   |     | c   |
       | --- | --- | --- |
@@ -322,7 +324,7 @@ describe('markdownToDoc', () => {
     ])
   })
 
-  it('pads a short row to the header column count', () => {
+  it('keeps a short row padded', () => {
     const md = dedent`
       | a   | b   | c   |
       | --- | --- | --- |
@@ -342,16 +344,10 @@ describe('markdownToDoc', () => {
     ])
   })
 
-  it('round-trips the full sample document', () => {
+  it('keeps the sample document', () => {
     expect(markdownToDoc(sampleContentMarkdown).toJSON()).toEqual(sampleContent)
   })
-})
 
-const bulletAttrs = { kind: 'bullet', order: null, checked: false, collapsed: false }
-
-// `it` parses correctly; `it.fails` asserts the ideal parse for an input the
-// parser currently mishandles (a known defect).
-describe('markdownToDoc', () => {
   it('keeps an asterisk bullet', () => {
     expect(markdownToDoc('* star').toJSON()).toEqual({
       type: 'doc',

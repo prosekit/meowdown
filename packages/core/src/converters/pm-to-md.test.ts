@@ -10,37 +10,37 @@ const fixture = setupFixture({ mount: false })
 const { n, schema } = fixture
 
 describe('docToMarkdown', () => {
-  it('serializes a paragraph', () => {
+  it('keeps a paragraph', () => {
     const doc = n.doc(n.paragraph('hello world'))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('hello world\n')
   })
 
-  it('serializes a level-1 heading', () => {
+  it('keeps a level-1 heading', () => {
     const doc = n.doc(n.heading({ level: 1 }, 'Level 1'))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('# Level 1\n')
   })
 
-  it('serializes a level-3 heading', () => {
+  it('keeps a level-3 heading', () => {
     const doc = n.doc(n.heading({ level: 3 }, 'Level 3'))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('### Level 3\n')
   })
 
-  it('serializes a level-6 heading', () => {
+  it('keeps a level-6 heading', () => {
     const doc = n.doc(n.heading({ level: 6 }, 'Level 6'))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('###### Level 6\n')
   })
 
-  it('serializes a blockquote', () => {
+  it('keeps a blockquote', () => {
     const doc = n.doc(n.blockquote(n.paragraph('quoted text')))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('> quoted text\n')
   })
 
-  it('serializes a bullet list tight', () => {
+  it('keeps a tight bullet list', () => {
     const doc = n.doc(
       n.list({ kind: 'bullet' }, n.paragraph('one')),
       n.list({ kind: 'bullet' }, n.paragraph('two')),
@@ -49,7 +49,7 @@ describe('docToMarkdown', () => {
     expect(markdown).toBe('- one\n- two\n')
   })
 
-  it('serializes an ordered list tight, with start number', () => {
+  it('keeps an ordered start number', () => {
     const doc = n.doc(
       n.list({ kind: 'ordered', order: 5 }, n.paragraph('five')),
       n.list({ kind: 'ordered', order: 5 }, n.paragraph('six')),
@@ -58,7 +58,7 @@ describe('docToMarkdown', () => {
     expect(markdown).toBe('5. five\n5. six\n')
   })
 
-  it('serializes task list items with GFM markers', () => {
+  it('keeps task markers', () => {
     const doc = n.doc(
       n.list({ kind: 'task', checked: false }, n.paragraph('todo')),
       n.list({ kind: 'task', checked: true }, n.paragraph('done')),
@@ -67,7 +67,7 @@ describe('docToMarkdown', () => {
     expect(markdown).toBe('- [ ] todo\n- [x] done\n')
   })
 
-  it('serializes a list loose when an item holds two blocks', () => {
+  it('keeps a loose two-block item', () => {
     const doc = n.doc(
       n.list({ kind: 'bullet' }, n.paragraph('first'), n.paragraph('second')),
       n.list({ kind: 'bullet' }, n.paragraph('third')),
@@ -76,13 +76,13 @@ describe('docToMarkdown', () => {
     expect(markdown).toBe('- first\n\n  second\n\n- third\n')
   })
 
-  it('keeps a blank line between a tight list and the next block', () => {
+  it('keeps a blank line after a list', () => {
     const doc = n.doc(n.list({ kind: 'bullet' }, n.paragraph('item')), n.paragraph('after'))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('- item\n\nafter\n')
   })
 
-  it('keeps an empty bullet between two paragraphs', () => {
+  it('keeps an empty bullet between paragraphs', () => {
     const doc = n.doc(
       n.paragraph('LINE 1'),
       n.list({ kind: 'bullet' }, n.paragraph()),
@@ -110,25 +110,25 @@ describe('docToMarkdown', () => {
     expect(markdown).toBe('1.\n')
   })
 
-  it('serializes a fenced code block with language', () => {
+  it('keeps a fenced block with language', () => {
     const doc = n.doc(n.codeBlock({ language: 'js' }, 'console.log(1)'))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('```js\nconsole.log(1)\n```\n')
   })
 
-  it('widens the fence when code contains triple-backticks', () => {
+  it('keeps code containing triple-backticks', () => {
     const doc = n.doc(n.codeBlock({ language: '' }, '```\nnested fence\n```'))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('````\n```\nnested fence\n```\n````\n')
   })
 
-  it('serializes a horizontal rule', () => {
+  it('keeps a horizontal rule', () => {
     const doc = n.doc(n.horizontalRule())
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('---\n')
   })
 
-  it('serializes a GFM table', () => {
+  it('keeps a table', () => {
     const doc = n.doc(
       n.table(
         n.tableRow(n.tableHeaderCell(n.paragraph('A')), n.tableHeaderCell(n.paragraph('B'))),
@@ -139,22 +139,6 @@ describe('docToMarkdown', () => {
     expect(markdown).toBe('| A | B |\n| --- | --- |\n| 1 | 2 |\n')
   })
 
-  it('round-trips sampleContent (doc → md → doc)', () => {
-    const doc = schema.nodeFromJSON(sampleContent)
-    const markdown = docToMarkdown(doc)
-    expect(markdownToDoc(markdown).toJSON()).toEqual(sampleContent)
-  })
-
-  it('round-trips sampleContentMarkdown (md → doc → md → doc)', () => {
-    const doc = markdownToDoc(sampleContentMarkdown)
-    const markdown = docToMarkdown(doc)
-    expect(markdownToDoc(markdown).toJSON()).toEqual(doc.toJSON())
-  })
-})
-
-// `it` serializes correctly; `it.fails` asserts the ideal output for a doc the
-// serializer currently mangles (a known defect).
-describe('docToMarkdown', () => {
   it('keeps a nested bullet', () => {
     const doc = n.doc(
       n.list({ kind: 'bullet' }, n.paragraph('a'), n.list({ kind: 'bullet' }, n.paragraph('b'))),
@@ -199,6 +183,18 @@ describe('docToMarkdown', () => {
     const doc = n.doc(n.paragraph('a'), n.horizontalRule(), n.paragraph('b'))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('a\n\n---\n\nb\n')
+  })
+
+  it('keeps the sample document (doc → md → doc)', () => {
+    const doc = schema.nodeFromJSON(sampleContent)
+    const markdown = docToMarkdown(doc)
+    expect(markdownToDoc(markdown).toJSON()).toEqual(sampleContent)
+  })
+
+  it('keeps the sample markdown stable (md → doc → md → doc)', () => {
+    const doc = markdownToDoc(sampleContentMarkdown)
+    const markdown = docToMarkdown(doc)
+    expect(markdownToDoc(markdown).toJSON()).toEqual(doc.toJSON())
   })
 
   it.fails('keeps a list in a quote clean', () => {
