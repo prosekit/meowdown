@@ -44,8 +44,6 @@ const MARK_NAME_BY_TYPE_ID: ReadonlyMap<number, MarkName> = new Map([
   [LEZER_NODE_IDS.WikilinkMark, 'mdMark'],
 ])
 
-
-
 /**
  * Walk a textblock's inline content and produce a list of mark chunks
  * with positions relative to the start of `text` (i.e. zero-based).
@@ -111,20 +109,18 @@ function walk(
         : marks.mdLinkUri.create()
       emit(out, node.from, node.to, [...parentMarks, mark])
     } else {
-
-
-        let packKey: string | undefined
+      let packKey: string | undefined
 
       if (type === LEZER_NODE_IDS.Emphasis) {
-        packKey = "italic"
+        packKey = 'italic'
       } else if (type === LEZER_NODE_IDS.StrongEmphasis) {
-        packKey = "bold"
+        packKey = 'bold'
       } else if (type === LEZER_NODE_IDS.InlineCode) {
-        packKey = "code"
+        packKey = 'code'
       } else if (type === LEZER_NODE_IDS.Strikethrough) {
-        packKey = "strike"
+        packKey = 'strike'
       } else if (type === LEZER_NODE_IDS.Autolink) {
-        packKey = "autolink"
+        packKey = 'autolink'
       }
 
       const base = packKey
