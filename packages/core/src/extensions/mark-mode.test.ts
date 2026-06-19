@@ -829,7 +829,7 @@ describe('focus mode', () => {
     expectClipboard('focus', 'Hello **bold** end', 'Hello bold end')
   })
 
-  it('preserves marks after pressing backspaces', async () => {
+  it('handles backspace correctly around bold', async () => {
     using fixture = setupFixture()
     fixture.editor.use(defineMarkMode('focus'))
     const { n } = fixture
@@ -837,11 +837,11 @@ describe('focus mode', () => {
     fixture.set(n.doc(n.paragraph('text **bold** <a>*italic* text')))
     fixture.view.focus()
 
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold** ▌*italic* text"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold** ┃*italic* text"`)
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold**▌*italic* text"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold**┃*italic* text"`)
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold*▌*italic* text"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold*┃*italic* text"`)
   })
 })
 
@@ -939,6 +939,21 @@ describe('hide mode', () => {
 
   it('keeps #tag verbatim in the copied text', () => {
     expectClipboard('hide', 'Hello #meow end', 'Hello #meow end')
+  })
+
+  it('handles backspace correctly around bold', async () => {
+    using fixture = setupFixture()
+    fixture.editor.use(defineMarkMode('hide'))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('text **bold** <a>text')))
+    fixture.view.focus()
+
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold** ┃text"`)
+    // TODO: this is a bug. Pressing backspace should not delete the closing **
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold┃text"`)
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bol┃text"`)
   })
 })
 
