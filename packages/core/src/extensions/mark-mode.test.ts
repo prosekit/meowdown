@@ -37,20 +37,7 @@ function clipboardText(fixture: Fixture): string | null {
 }
 
 describe('defineMarkMode', () => {
-  it('set data-mark-mode attribute', async () => {
-    async function expectDataMarkMode(markMode: MarkMode) {
-      using fixture = setupFixture()
-      const { n, editor } = fixture
-      editor.use(defineMarkMode(markMode))
-      const doc = n.doc(n.paragraph('a'))
-      fixture.set(doc)
-      await expect.element(pmRoot).toHaveAttribute('data-mark-mode', markMode)
-    }
 
-    await expectDataMarkMode('focus')
-    await expectDataMarkMode('hide')
-    await expectDataMarkMode('show')
-  })
 
   describe('focus mode', () => {
     it("sets data-mark-mode attribute to 'focus'", async () => {
