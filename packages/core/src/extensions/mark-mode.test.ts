@@ -234,6 +234,15 @@ describe('defineMarkMode', () => {
       // Only the first link's 4 markers; the abutting second link stays hidden.
       await expectRevealedMarkers(4)
     })
+
+    it('strips syntax from the copied text just like hide mode', () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      const doc = n.doc(n.paragraph('Hello **bold** end'))
+      fixture.set(doc)
+      expect(clipboardText(fixture)).toBe('Hello bold end')
+    })
   })
 
   describe('hide mode', () => {
@@ -330,16 +339,6 @@ describe('defineMarkMode', () => {
     })
   })
 
-  describe('focus mode clipboard', () => {
-    it('strips syntax from the copied text just like hide mode', () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('Hello **bold** end'))
-      fixture.set(doc)
-      expect(clipboardText(fixture)).toBe('Hello bold end')
-    })
-  })
 
   describe('md-pack structure', () => {
     it('wraps a whole link in one pack containing the anchor', async () => {
