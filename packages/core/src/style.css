@@ -385,11 +385,11 @@
   opacity: 0.7;
 }
 
-/* The mdGroup mark wraps a whole inline unit so focus mode can reveal it with one
+/* The mdPack mark wraps a whole inline unit so focus mode can reveal it with one
  * range lookup. It is layout-only: `display: contents` keeps it out of the box
  * tree, so it never affects flow or an inner image mark view, while still being a
  * real element a `.show` decoration can land inside. */
-.ProseMirror .md-m-group {
+.ProseMirror .md-pack {
   display: contents;
 }
 

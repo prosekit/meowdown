@@ -22,11 +22,11 @@ describe('inline-marks', () => {
     expect(order.indexOf('mdImageSource')).toBeLessThan(order.indexOf('mdLinkUri'))
   })
 
-  it('ranks the group mark outermost of all, so it wraps the whole unit', () => {
-    // mdGroup must be the outer DOM wrapper, including outside an image mark view,
+  it('ranks the pack mark outermost of all, so it wraps the whole unit', () => {
+    // mdPack must be the outer DOM wrapper, including outside an image mark view,
     // so a reveal range can cover the entire unit.
     const schema = defineEditorExtension().schema!
     const order = Object.keys(schema.marks)
-    expect(order.indexOf('mdGroup')).toBeLessThan(order.indexOf('mdImageView'))
+    expect(order.indexOf('mdPack')).toBeLessThan(order.indexOf('mdImageView'))
   })
 })

@@ -174,7 +174,7 @@ export interface MdWikilinkViewAttrs {
   display: string
 }
 
-export interface MdGroupAttrs {
+export interface MdPackAttrs {
   /**
    * Content-derived identity of one inline syntax unit. Adjacent units of the
    * same kind are kept apart by it (so they do not merge into one mark run), and
@@ -191,25 +191,21 @@ export interface MdGroupAttrs {
  * `getMarkRange` lookup instead of stitching its punctuation back together.
  * `excludes: ''` lets nested units carry two of these marks at once.
  */
-function defineMdGroup() {
-  return defineMarkSpec<'mdGroup', MdGroupAttrs>({
-    name: 'mdGroup' satisfies MarkName,
+function defineMdPack() {
+  return defineMarkSpec<'mdPack', MdPackAttrs>({
+    name: 'mdPack' satisfies MarkName,
     excludes: '',
     inclusive: false,
     attrs: { key: { default: '' } },
-    toDOM: (mark) => [
-      'span',
-      { class: 'md-m-group', 'data-key': (mark.attrs as MdGroupAttrs).key },
-      0,
-    ],
-    parseDOM: [{ tag: 'span.md-m-group' }],
+    toDOM: (mark) => ['span', { class: 'md-pack', 'data-key': (mark.attrs as MdPackAttrs).key }, 0],
+    parseDOM: [{ tag: 'span.md-pack' }],
   })
 }
 
 export function defineInlineMarks() {
   // The last mark registered gets the lowest rank and becomes the outermost DOM
   // wrapper, so the wikilink/image marks go last: the view mark (mdWikilinkView /
-  // mdImageView) wraps the source, which wraps the syntax marks. The group mark
+  // mdImageView) wraps the source, which wraps the syntax marks. The pack mark
   // goes last of all, so it wraps the whole unit (including a mark view).
   return union(
     defineMdMark(),
@@ -225,6 +221,6 @@ export function defineInlineMarks() {
     defineMdWikilinkView(),
     defineMdImageSource(),
     defineMdImageView(),
-    defineMdGroup(),
+    defineMdPack(),
   )
 }

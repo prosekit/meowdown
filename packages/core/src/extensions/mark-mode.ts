@@ -80,12 +80,12 @@ function cleanCopySerializer(slice: Slice): string {
  * In focus mode, reveal the markdown syntax of the inline unit under the caret.
  *
  * Every revealable unit (emphasis, strong, code, strikethrough, link, autolink,
- * image) carries one `mdGroup` mark spanning it, so a single boundary-inclusive
+ * image) carries one `mdPack` mark spanning it, so a single boundary-inclusive
  * `getMarkRange` finds the unit, returning the outermost when units nest. One
  * decoration over its range flips the hidden punctuation/url/source visible via
  * the `.show` CSS rule. Because the range covers the whole unit, a caret at
  * either edge (e.g. right after a link's `)`) still reveals it. Wikilink and
- * `#tag` carry no `mdGroup`, so they never reveal.
+ * `#tag` carry no `mdPack`, so they never reveal.
  */
 function computeFocusDecorations(state: EditorState): DecorationSet {
   const { selection } = state
@@ -94,7 +94,7 @@ function computeFocusDecorations(state: EditorState): DecorationSet {
   const $pos = selection.$head
   if (!$pos.parent.isTextblock || $pos.parent.type.spec.code) return DecorationSet.empty
 
-  const range = getMarkRange($pos, getMarkType(state.schema, 'mdGroup'))
+  const range = getMarkRange($pos, getMarkType(state.schema, 'mdPack'))
   if (!range) return DecorationSet.empty
 
   return DecorationSet.create(state.doc, [

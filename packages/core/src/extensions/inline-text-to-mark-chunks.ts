@@ -6,7 +6,7 @@ import { parseInline } from '../lezer/inline.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 
 import type {
-  MdGroupAttrs,
+  MdPackAttrs,
   MdImageSourceAttrs,
   MdImageViewAttrs,
   MdLinkTextAttrs,
@@ -45,12 +45,12 @@ const MARK_NAME_BY_TYPE_ID: ReadonlyMap<number, MarkName> = new Map([
 ])
 
 /**
- * Content-derived `mdGroup` key for inline units whose key is just the kind.
+ * Content-derived `mdPack` key for inline units whose key is just the kind.
  * Link and image are keyed by their url instead (see `walkLink` / `walkImage`),
  * so adjacent ones with different urls stay separate. Wikilink, tag and bare
- * autolinks are absent: they get no group (atomic, or nothing to reveal).
+ * autolinks are absent: they get no pack (atomic, or nothing to reveal).
  */
-const GROUP_KEY_BY_TYPE_ID: ReadonlyMap<number, string> = new Map([
+const PACK_KEY_BY_TYPE_ID: ReadonlyMap<number, string> = new Map([
   [LEZER_NODE_IDS.Emphasis, 'italic'],
   [LEZER_NODE_IDS.StrongEmphasis, 'bold'],
   [LEZER_NODE_IDS.InlineCode, 'code'],
@@ -122,9 +122,9 @@ function walk(
         : marks.mdLinkUri.create()
       emit(out, node.from, node.to, [...parentMarks, mark])
     } else {
-      const groupKey = GROUP_KEY_BY_TYPE_ID.get(node.type)
-      const base = groupKey
-        ? [...parentMarks, marks.mdGroup.create({ key: groupKey } satisfies MdGroupAttrs)]
+      const packKey = PACK_KEY_BY_TYPE_ID.get(node.type)
+      const base = packKey
+        ? [...parentMarks, marks.mdPack.create({ key: packKey } satisfies MdPackAttrs)]
         : parentMarks
       const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(node.type)
       const childMarks = maybeMarkName ? [...base, marks[maybeMarkName].create()] : base
@@ -180,8 +180,8 @@ function walkLink(
   const linkTextMark = href ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs) : null
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd && linkTextMark !== null
 
-  const group = marks.mdGroup.create({ key: `link_${href}` } satisfies MdGroupAttrs)
-  const base = [...parentMarks, group]
+  const pack = marks.mdPack.create({ key: `link_${href}` } satisfies MdPackAttrs)
+  const base = [...parentMarks, pack]
 
   let pos = node.from
   for (const child of node.children) {
@@ -244,17 +244,17 @@ function walkImage(
 
   const source = marks.mdImageSource.create({ src, alt } satisfies MdImageSourceAttrs)
   const view = marks.mdImageView.create({ src, alt } satisfies MdImageViewAttrs)
-  const group = marks.mdGroup.create({ key: `image_${src}` } satisfies MdGroupAttrs)
+  const pack = marks.mdPack.create({ key: `image_${src}` } satisfies MdPackAttrs)
 
   // The image's final character, where `mdImageView` is anchored: `)` today, a
   // future `]` for `![alt][id]`.
   const anchorFrom = node.to - 1
 
-  // Marks shared by every chunk at `from`: the `mdGroup` envelope plus
+  // Marks shared by every chunk at `from`: the `mdPack` envelope plus
   // `mdImageSource` over the whole source, plus `mdImageView` once we reach the
   // final character (the render anchor). Each child layers its own syntax mark on top.
   const baseAt = (from: number): Mark[] =>
-    from >= anchorFrom ? [...parentMarks, group, source, view] : [...parentMarks, group, source]
+    from >= anchorFrom ? [...parentMarks, pack, source, view] : [...parentMarks, pack, source]
 
   let pos = node.from
   for (const child of node.children) {
