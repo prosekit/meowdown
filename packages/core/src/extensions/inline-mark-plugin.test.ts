@@ -15,9 +15,9 @@ describe('inlineMarkPlugin', () => {
 
     const pos = findText(fixture.doc, 'bold')
     expect(pos).toBeGreaterThan(0)
-    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdStrong'])
-    // The `**` syntax markers carry mdStrong + mdMark.
-    expect(marksAt(fixture.doc, pos - 1)).toEqual(['mdMark', 'mdStrong'])
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdGroup', 'mdStrong'])
+    // The `**` syntax markers carry the group, mdStrong + mdMark.
+    expect(marksAt(fixture.doc, pos - 1)).toEqual(['mdGroup', 'mdMark', 'mdStrong'])
   })
 
   it('applies mdEm inside *italic*', () => {
@@ -27,7 +27,7 @@ describe('inlineMarkPlugin', () => {
     fixture.set(doc)
 
     const pos = findText(fixture.doc, 'ital')
-    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdEm'])
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdEm', 'mdGroup'])
   })
 
   it('applies mdCode inside `code`', () => {
@@ -37,7 +37,7 @@ describe('inlineMarkPlugin', () => {
     fixture.set(doc)
 
     const pos = findText(fixture.doc, 'bar')
-    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdCode'])
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdCode', 'mdGroup'])
   })
 
   it('applies mdLinkText with href attr inside [text](url)', () => {
@@ -96,7 +96,7 @@ describe('inlineMarkPlugin', () => {
     fixture.set(doc)
 
     const pos = findText(fixture.doc, 'italic')
-    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdEm'])
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdEm', 'mdGroup'])
   })
 
   it('does NOT mark inline syntax inside code blocks', () => {
@@ -182,7 +182,7 @@ describe('inlineMarkPlugin', () => {
     fixture.set(doc)
 
     const pos = findText(fixture.doc, 'italic')
-    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdEm'])
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdEm', 'mdGroup'])
   })
 
   it('applies mdTag across the whole #tag, # included', () => {
@@ -260,11 +260,13 @@ describe('inlineMarkPlugin', () => {
 
     const pos = findText(fixture.doc, 'note')
     expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilinkSource'])
-    // Delete one ']': "see [[note] end" is no longer a wikilink.
+    // Delete one ']': "see [[note] end" is no longer a wikilink. The inner
+    // `[note]` becomes a shortcut reference link, so it loses mdWikilinkSource
+    // but gains the link group wrapper.
     const firstBracket = findText(fixture.doc, ']')
     fixture.view.dispatch(fixture.state.tr.delete(firstBracket + 1, firstBracket + 2))
     const after = findText(fixture.doc, 'note')
-    expect(marksAt(fixture.doc, after + 1)).toEqual([])
+    expect(marksAt(fixture.doc, after + 1)).toEqual(['mdGroup'])
   })
 
   it('removes mdTag when text is glued in front of the #', () => {
