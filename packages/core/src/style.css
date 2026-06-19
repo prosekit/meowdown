@@ -385,23 +385,39 @@
   opacity: 0.7;
 }
 
-/* Syntax hidden as a unit in hide and focus modes. Covers the punctuation
- * (`md-mark`), the link/image URL (`md-link-uri`), and the whole image/wikilink
- * source whose rendered preview/label stands in for it (incl. the image alt
- * text). In focus mode all but the atomic wikilink source reveal near the caret
- * via the `.show` decoration. */
-.ProseMirror[data-mark-mode='hide'] .md-mark,
-.ProseMirror[data-mark-mode='hide'] .md-link-uri,
-.ProseMirror[data-mark-mode='hide'] .md-image-source,
-.ProseMirror[data-mark-mode='hide'] .md-wikilink-source,
-.ProseMirror[data-mark-mode='focus'] .md-mark,
-.ProseMirror[data-mark-mode='focus'] .md-link-uri,
-.ProseMirror[data-mark-mode='focus'] .md-image-source,
-.ProseMirror[data-mark-mode='focus'] .md-wikilink-source {
-  display: none;
+/* The mdPack mark wraps a whole inline unit so focus mode can reveal it with one
+ * range lookup. It is layout-only: `display: contents` keeps it out of the box
+ * tree, so it never affects flow or an inner image mark view, while still being a
+ * real element a `.show` decoration can land inside. */
+.ProseMirror .md-pack {
+  display: contents;
 }
-.ProseMirror[data-mark-mode='focus'] .md-mark:has(.show),
-.ProseMirror[data-mark-mode='focus'] .md-link-uri:has(.show),
-.ProseMirror[data-mark-mode='focus'] .md-image-source:has(.show) {
-  display: inline;
+
+.ProseMirror[data-mark-mode='hide'] {
+  .md-mark,
+  .md-link-uri,
+  .md-image-source,
+  .md-wikilink-source {
+    display: none;
+  }
+}
+
+.ProseMirror[data-mark-mode='focus'] {
+  .md-wikilink-source {
+    display: none;
+  }
+
+  .md-mark,
+  .md-link-uri,
+  .md-image-source {
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: bottom;
+
+    letter-spacing: -2em;
+
+    &:has(.show) {
+      letter-spacing: 0;
+    }
+  }
 }

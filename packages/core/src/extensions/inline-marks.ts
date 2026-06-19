@@ -174,10 +174,39 @@ export interface MdWikilinkViewAttrs {
   display: string
 }
 
+export interface MdPackAttrs {
+  /**
+   * Content-derived identity of one inline syntax unit. Adjacent units of the
+   * same kind are kept apart by it (so they do not merge into one mark run), and
+   * it stays stable when unrelated text in the block is edited, so editing one
+   * unit never re-marks the others. Values: `bold` | `italic` | `code` |
+   * `strike` | `autolink` | `link_${href}` | `image_${src}`.
+   */
+  key: string
+}
+
+/**
+ * Wraps a whole revealable inline unit (emphasis, strong, code, strikethrough,
+ * link, autolink, image) so focus mode can reveal the unit with one
+ * `getMarkRange` lookup instead of stitching its punctuation back together.
+ * `excludes: ''` lets nested units carry two of these marks at once.
+ */
+function defineMdPack() {
+  return defineMarkSpec<'mdPack', MdPackAttrs>({
+    name: 'mdPack' satisfies MarkName,
+    excludes: '',
+    inclusive: false,
+    attrs: { key: { default: '' } },
+    toDOM: (mark) => ['span', { class: 'md-pack', 'data-key': (mark.attrs as MdPackAttrs).key }, 0],
+    parseDOM: [{ tag: 'span.md-pack' }],
+  })
+}
+
 export function defineInlineMarks() {
   // The last mark registered gets the lowest rank and becomes the outermost DOM
   // wrapper, so the wikilink/image marks go last: the view mark (mdWikilinkView /
-  // mdImageView) wraps the source, which wraps the syntax marks.
+  // mdImageView) wraps the source, which wraps the syntax marks. The pack mark
+  // goes last of all, so it wraps the whole unit (including a mark view).
   return union(
     defineMdMark(),
     defineMdEm(),
@@ -192,5 +221,6 @@ export function defineInlineMarks() {
     defineMdWikilinkView(),
     defineMdImageSource(),
     defineMdImageView(),
+    defineMdPack(),
   )
 }

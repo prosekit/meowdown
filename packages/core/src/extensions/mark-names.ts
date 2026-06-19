@@ -11,6 +11,7 @@ export const MARK_NAMES = [
   'mdTag',
   'mdWikilinkSource',
   'mdWikilinkView',
+  'mdPack',
 ] as const
 
 export type MarkName = (typeof MARK_NAMES)[number]
