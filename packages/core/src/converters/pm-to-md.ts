@@ -86,6 +86,16 @@ class MdOut {
 
   /** End the current block; the next write gets a blank line before it. */
   closeBlock(): void {
+    // A block with no inline content still owns a line. The clearest case is
+    // an empty list item (`- `): its marker lives in `pendingFirst` and would
+    // be dropped entirely if nothing flushed it. Emit the marker (trimmed, so
+    // the empty line carries no trailing whitespace) before closing.
+    if (this.atLineStart && this.pendingFirst !== null) {
+      this.emitDeferredBlankLine()
+      this.parts.push(this.pendingFirst.trimEnd())
+      this.pendingFirst = null
+      this.atLineStart = false
+    }
     if (!this.atLineStart) this.parts.push('\n')
     this.atLineStart = true
     this.deferredBlankPrefix = this.linePrefix
@@ -248,8 +258,15 @@ function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
   const count = node.childCount
   for (let i = 0; i < count; i++) {
     const child = node.child(i)
-    if (child.isText && child.text) out.write(child.text)
-    // Future inline node types (hardBreak, image, mention) go here.
+    if (child.isText && child.text) {
+      out.write(child.text)
+    } else if (child.type.name === ('hardBreak' satisfies NodeName)) {
+      // A `hardBreak` carries a markdown soft line break: emit a single
+      // newline. `write` re-applies the current line prefix after it, so the
+      // break stays inside the same block (list item, blockquote, …).
+      out.write('\n')
+    }
+    // Future inline node types (image, mention) go here.
   }
 }
 
