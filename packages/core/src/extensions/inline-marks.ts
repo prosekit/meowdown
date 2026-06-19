@@ -52,7 +52,7 @@ function defineMdMark() {
     name: 'mdMark' satisfies MarkName,
     // `inclusive: false` so typing right after a mark boundary does not extend the mark
     inclusive: false,
-    toDOM: () => ['span', { class: 'md-mark', "contenteditable": "false" }, 0],
+    toDOM: () => ['span', { class: 'md-mark',  }, 0],
     parseDOM: [{ tag: 'span.md-mark' }],
   })
 }
