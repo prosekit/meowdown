@@ -393,17 +393,12 @@
   display: contents;
 }
 
-/* Syntax hidden as a unit in hide and focus modes. Covers the punctuation
- * (`md-mark`), the link/image URL (`md-link-uri`), and the whole image/wikilink
- * source whose rendered preview/label stands in for it (incl. the image alt
- * text). In focus mode all but the atomic wikilink source reveal near the caret
- * via the `.show` decoration. */
 .ProseMirror[data-mark-mode='hide'] {
   .md-mark,
   .md-link-uri,
   .md-image-source,
   .md-wikilink-source {
-    display: none;
+      display: none;
   }
 }
 
