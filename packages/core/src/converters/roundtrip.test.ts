@@ -117,467 +117,466 @@ describe('markdown round-trip is byte-identical', () => {
   }
 })
 
-// Edge cases. Every `it` asserts a lossless, byte-identical load/save. Every
-// `it.fails` asserts that SAME ideal for an input the converters currently
-// mangle: the failing assertion marks a known DEFECT, never intended behavior.
+// Edge cases. `it` keeps the input through a round-trip; `it.fails` marks a
+// known defect (it asserts the same ideal, which currently fails).
 
-describe('round-trip edge cases: text', () => {
-  it('preserves soft line breaks within a paragraph', () => {
+describe('text', () => {
+  it('keeps soft breaks', () => {
     expect(roundtrip('a\nb\nc')).toBe('a\nb\nc\n')
   })
 
-  it('keeps a blank line between two paragraphs', () => {
+  it('keeps a blank line between paragraphs', () => {
     expect(roundtrip('line1\n\nline2')).toBe('line1\n\nline2\n')
   })
 
-  it('preserves a tab inside text', () => {
+  it('keeps a tab', () => {
     expect(roundtrip('tab\tinside')).toBe('tab\tinside\n')
   })
 
-  it('preserves accented characters', () => {
+  it('keeps accented characters', () => {
     expect(roundtrip('café résumé')).toBe('café résumé\n')
   })
 
-  it('preserves emoji', () => {
+  it('keeps emoji', () => {
     expect(roundtrip('emoji 🎉 test')).toBe('emoji 🎉 test\n')
   })
 
-  it('preserves CJK text', () => {
+  it('keeps CJK text', () => {
     expect(roundtrip('CJK 中文 テスト')).toBe('CJK 中文 テスト\n')
   })
 
-  it('preserves runs of multiple spaces', () => {
+  it('keeps multiple spaces', () => {
     expect(roundtrip('a  b  spaces')).toBe('a  b  spaces\n')
   })
 
-  it('preserves a literal backslash', () => {
+  it('keeps a literal backslash', () => {
     expect(roundtrip(String.raw`backslash \ here`)).toBe('backslash \\ here\n')
   })
 
-  it('preserves angle brackets and ampersands', () => {
+  it('keeps angle brackets and ampersands', () => {
     expect(roundtrip('amp & lt < gt >')).toBe('amp & lt < gt >\n')
   })
 
-  it.fails('preserves trailing spaces on a line', () => {
+  it.fails('keeps trailing spaces', () => {
     expect(roundtrip('trailing spaces   ')).toBe('trailing spaces   \n')
   })
 })
 
-describe('round-trip edge cases: inline stays literal text', () => {
-  it('keeps bold markers as text', () => {
+describe('inline', () => {
+  it('keeps bold markers', () => {
     expect(roundtrip('**bold**')).toBe('**bold**\n')
   })
 
-  it('keeps italic markers as text', () => {
+  it('keeps italic markers', () => {
     expect(roundtrip('*italic*')).toBe('*italic*\n')
   })
 
-  it('keeps strikethrough markers as text', () => {
+  it('keeps strikethrough markers', () => {
     expect(roundtrip('~~strike~~')).toBe('~~strike~~\n')
   })
 
-  it('keeps inline code as text', () => {
+  it('keeps inline code', () => {
     expect(roundtrip('`inline`')).toBe('`inline`\n')
   })
 
-  it('keeps a link as text', () => {
+  it('keeps a link', () => {
     expect(roundtrip('[link](url)')).toBe('[link](url)\n')
   })
 
-  it('keeps an image as text', () => {
+  it('keeps an image', () => {
     expect(roundtrip('![img](src)')).toBe('![img](src)\n')
   })
 
-  it('keeps an angle autolink as text', () => {
+  it('keeps an angle autolink', () => {
     expect(roundtrip('<https://auto.com>')).toBe('<https://auto.com>\n')
   })
 
-  it('keeps an aliased wikilink as text', () => {
+  it('keeps an aliased wikilink', () => {
     expect(roundtrip('[[note|alias]]')).toBe('[[note|alias]]\n')
   })
 
-  it('keeps a hashtag as text', () => {
+  it('keeps a hashtag', () => {
     expect(roundtrip('#hashtag')).toBe('#hashtag\n')
   })
 
-  it('keeps escaped emphasis as text', () => {
+  it('keeps escaped emphasis', () => {
     expect(roundtrip(String.raw`foo \*esc\*`)).toBe('foo \\*esc\\*\n')
   })
 
-  it.fails('preserves a raw HTML block', () => {
+  it.fails('keeps a raw HTML block', () => {
     expect(roundtrip('<div>html</div>')).toBe('<div>html</div>\n')
   })
 
-  it.fails('preserves an HTML comment', () => {
+  it.fails('keeps an HTML comment', () => {
     expect(roundtrip('<!-- comment -->')).toBe('<!-- comment -->\n')
   })
 })
 
-describe('round-trip edge cases: headings', () => {
-  it('preserves a level-6 heading', () => {
+describe('headings', () => {
+  it('keeps a level-6 heading', () => {
     expect(roundtrip('###### H6')).toBe('###### H6\n')
   })
 
-  it('treats seven hashes as text', () => {
+  it('keeps seven hashes as text', () => {
     expect(roundtrip('####### seven')).toBe('####### seven\n')
   })
 
-  it('treats a hash without a space as text', () => {
+  it('keeps a spaceless hash as text', () => {
     expect(roundtrip('#nospace')).toBe('#nospace\n')
   })
 
-  it('preserves a lone hash', () => {
+  it('keeps a lone hash', () => {
     expect(roundtrip('#')).toBe('#\n')
   })
 
-  it('keeps emphasis markers in a heading', () => {
+  it('keeps emphasis in a heading', () => {
     expect(roundtrip('# with *stars*')).toBe('# with *stars*\n')
   })
 
-  it.fails('preserves a trailing closing hash', () => {
+  it.fails('keeps a trailing closing hash', () => {
     expect(roundtrip('# trailing #')).toBe('# trailing #\n')
   })
 
-  it.fails('preserves extra space after the heading hash', () => {
+  it.fails('keeps extra space after the hash', () => {
     expect(roundtrip('#  extra')).toBe('#  extra\n')
   })
 
-  it.fails('preserves the trailing space of an empty heading', () => {
+  it.fails('keeps an empty heading trailing space', () => {
     expect(roundtrip('# ')).toBe('# \n')
   })
 
-  it.fails('preserves setext heading text (level 1)', () => {
+  it.fails('keeps setext text (level 1)', () => {
     expect(roundtrip('Setext1\n===')).toBe('Setext1\n===\n')
   })
 
-  it.fails('preserves setext heading text (level 2)', () => {
+  it.fails('keeps setext text (level 2)', () => {
     expect(roundtrip('Setext2\n---')).toBe('Setext2\n---\n')
   })
 })
 
-describe('round-trip edge cases: blockquotes', () => {
-  it('preserves a simple blockquote', () => {
+describe('blockquotes', () => {
+  it('keeps a simple quote', () => {
     expect(roundtrip('> quote')).toBe('> quote\n')
   })
 
-  it('preserves a blockquote with an inner blank line', () => {
+  it('keeps an inner blank line', () => {
     expect(roundtrip('> p1\n>\n> p2')).toBe('> p1\n>\n> p2\n')
   })
 
-  it('preserves an empty blockquote marker', () => {
+  it('keeps an empty quote marker', () => {
     expect(roundtrip('>')).toBe('>\n')
   })
 
-  it('preserves a heading inside a blockquote', () => {
+  it('keeps a heading in a quote', () => {
     expect(roundtrip('> # heading')).toBe('> # heading\n')
   })
 
-  it('preserves a blockquote between paragraphs', () => {
+  it('keeps a quote between paragraphs', () => {
     expect(roundtrip('x\n\n> q\n\ny')).toBe('x\n\n> q\n\ny\n')
   })
 
-  it.fails('preserves a trailing space after the quote marker', () => {
+  it.fails('keeps a trailing space after the marker', () => {
     expect(roundtrip('> ')).toBe('> \n')
   })
 
-  it.fails('preserves a two-line blockquote without adding a quote mark', () => {
+  it.fails('keeps a two-line quote', () => {
     expect(roundtrip('> l1\n> l2')).toBe('> l1\n> l2\n')
   })
 
-  it.fails('preserves a lazily-nested blockquote', () => {
+  it.fails('keeps a lazily-nested quote', () => {
     expect(roundtrip('> a\n>> b')).toBe('> a\n>> b\n')
   })
 
-  it.fails('preserves a nested list in a blockquote', () => {
+  it.fails('keeps a nested list in a quote', () => {
     expect(roundtrip('> - item')).toBe('> - item\n')
   })
 })
 
-describe('round-trip edge cases: bullet lists', () => {
-  it('preserves a single bullet', () => {
+describe('bullet lists', () => {
+  it('keeps a single bullet', () => {
     expect(roundtrip('- item')).toBe('- item\n')
   })
 
-  it('preserves a nested bullet at a 2-space indent', () => {
+  it('keeps a nested bullet', () => {
     expect(roundtrip('- a\n  - nested')).toBe('- a\n  - nested\n')
   })
 
-  it('preserves a loose item holding two blocks', () => {
+  it('keeps a loose two-block item', () => {
     expect(roundtrip('- a\n\n  para2')).toBe('- a\n\n  para2\n')
   })
 
-  it('preserves a bare empty bullet', () => {
+  it('keeps a bare empty bullet', () => {
     expect(roundtrip('-')).toBe('-\n')
   })
 
-  it.fails('preserves an asterisk bullet', () => {
+  it.fails('keeps an asterisk bullet', () => {
     expect(roundtrip('* star')).toBe('* star\n')
   })
 
-  it.fails('preserves a plus bullet', () => {
+  it.fails('keeps a plus bullet', () => {
     expect(roundtrip('+ plus')).toBe('+ plus\n')
   })
 
-  it.fails('preserves a 4-space nested indent', () => {
+  it.fails('keeps a 4-space nested indent', () => {
     expect(roundtrip('- a\n    - deep')).toBe('- a\n    - deep\n')
   })
 
-  it.fails('preserves a loose single-paragraph list', () => {
+  it.fails('keeps a loose list', () => {
     expect(roundtrip('- a\n\n- b')).toBe('- a\n\n- b\n')
   })
 
-  it.fails('preserves a trailing space after a bullet marker', () => {
+  it.fails('keeps a trailing space after the marker', () => {
     expect(roundtrip('- ')).toBe('- \n')
   })
 
-  it.fails('preserves a trailing space on an empty middle item', () => {
+  it.fails('keeps a trailing space on an empty item', () => {
     expect(roundtrip('- a\n- \n- b')).toBe('- a\n- \n- b\n')
   })
 })
 
-describe('round-trip edge cases: ordered lists', () => {
-  it('preserves an ordered item', () => {
+describe('ordered lists', () => {
+  it('keeps an ordered item', () => {
     expect(roundtrip('1. one')).toBe('1. one\n')
   })
 
-  it('preserves a two-digit start number', () => {
+  it('keeps a two-digit start', () => {
     expect(roundtrip('10. ten')).toBe('10. ten\n')
   })
 
-  it('preserves a zero start number', () => {
+  it('keeps a zero start', () => {
     expect(roundtrip('0. zero')).toBe('0. zero\n')
   })
 
-  it('preserves a nested ordered list', () => {
+  it('keeps a nested ordered list', () => {
     expect(roundtrip('1. a\n   1. nested')).toBe('1. a\n   1. nested\n')
   })
 
-  it.fails('preserves sequential ordered numbers', () => {
+  it.fails('keeps sequential numbers', () => {
     expect(roundtrip('1. one\n2. two')).toBe('1. one\n2. two\n')
   })
 
-  it.fails('preserves a paren ordered delimiter', () => {
+  it.fails('keeps a paren delimiter', () => {
     expect(roundtrip('1) paren')).toBe('1) paren\n')
   })
 
-  it.fails('preserves the numbers of empty ordered items', () => {
+  it.fails('keeps empty item numbers', () => {
     expect(roundtrip('1.\n2.')).toBe('1.\n2.\n')
   })
 })
 
-describe('round-trip edge cases: task lists', () => {
-  it('preserves an empty task marker', () => {
+describe('task lists', () => {
+  it('keeps an empty task marker', () => {
     expect(roundtrip('- [ ]')).toBe('- [ ]\n')
   })
 
-  it('keeps a task marker literal in an ordered item', () => {
+  it('keeps a task marker in an ordered item', () => {
     expect(roundtrip('1. [x] otask')).toBe('1. [x] otask\n')
   })
 
-  it('preserves a nested task under a task', () => {
+  it('keeps a nested task', () => {
     expect(roundtrip('- [ ] parent\n  - [x] child')).toBe('- [ ] parent\n  - [x] child\n')
   })
 
-  it.fails('preserves an uppercase task marker', () => {
+  it.fails('keeps an uppercase marker', () => {
     expect(roundtrip('- [X] upper')).toBe('- [X] upper\n')
   })
 
-  it.fails('preserves a trailing space after a task marker', () => {
+  it.fails('keeps a trailing space after the marker', () => {
     expect(roundtrip('- [ ] ')).toBe('- [ ] \n')
   })
 })
 
-describe('round-trip edge cases: code blocks', () => {
-  it('preserves a fenced code block with language', () => {
+describe('code blocks', () => {
+  it('keeps a fenced block with language', () => {
     expect(roundtrip('```js\nconst x=1\n```')).toBe('```js\nconst x=1\n```\n')
   })
 
-  it('preserves multi-line fenced code', () => {
+  it('keeps multi-line fenced code', () => {
     expect(roundtrip('```\nl1\nl2\n```')).toBe('```\nl1\nl2\n```\n')
   })
 
-  it('preserves indentation inside a fence', () => {
+  it('keeps indentation in a fence', () => {
     expect(roundtrip('```\n  indented in fence\n```')).toBe('```\n  indented in fence\n```\n')
   })
 
-  it.fails('preserves an empty fenced code block', () => {
+  it.fails('keeps an empty fence', () => {
     expect(roundtrip('```\n```')).toBe('```\n```\n')
   })
 
-  it.fails('preserves a tilde-fenced code block', () => {
+  it.fails('keeps a tilde fence', () => {
     expect(roundtrip('~~~\ntilde\n~~~')).toBe('~~~\ntilde\n~~~\n')
   })
 
-  it.fails('preserves an indented code block', () => {
+  it.fails('keeps an indented code block', () => {
     expect(roundtrip('    indented')).toBe('    indented\n')
   })
 })
 
-describe('round-trip edge cases: thematic breaks', () => {
-  it('preserves a dash rule', () => {
+describe('thematic breaks', () => {
+  it('keeps a dash rule', () => {
     expect(roundtrip('---')).toBe('---\n')
   })
 
-  it('preserves a rule between paragraphs', () => {
+  it('keeps a rule between paragraphs', () => {
     expect(roundtrip('---\n\nafter')).toBe('---\n\nafter\n')
   })
 
-  it.fails('preserves an asterisk thematic break', () => {
+  it.fails('keeps an asterisk rule', () => {
     expect(roundtrip('***')).toBe('***\n')
   })
 
-  it.fails('preserves an underscore thematic break', () => {
+  it.fails('keeps an underscore rule', () => {
     expect(roundtrip('___')).toBe('___\n')
   })
 
-  it.fails('preserves a spaced thematic break', () => {
+  it.fails('keeps a spaced rule', () => {
     expect(roundtrip('- - -')).toBe('- - -\n')
   })
 })
 
-describe('round-trip edge cases: tables', () => {
-  it('preserves a single-column table', () => {
+describe('tables', () => {
+  it('keeps a single-column table', () => {
     expect(roundtrip('| a |\n| --- |\n| 1 |')).toBe('| a |\n| --- |\n| 1 |\n')
   })
 
-  it('preserves a table with a missing cell', () => {
+  it('keeps a missing cell', () => {
     expect(roundtrip('| h1 | h2 | h3 |\n| --- | --- | --- |\n| a |  | c |')).toBe(
       '| h1 | h2 | h3 |\n| --- | --- | --- |\n| a |  | c |\n',
     )
   })
 
-  it.fails('preserves table column alignment', () => {
+  it.fails('keeps column alignment', () => {
     expect(roundtrip('| a | b |\n| :-- | --: |\n| 1 | 2 |')).toBe(
       '| a | b |\n| :-- | --: |\n| 1 | 2 |\n',
     )
   })
 
-  it.fails('preserves an escaped pipe in a table cell', () => {
+  it.fails('keeps an escaped pipe', () => {
     expect(roundtrip('| a \\| b | c |\n| --- | --- |\n| 1 | 2 |')).toBe(
       '| a \\| b | c |\n| --- | --- |\n| 1 | 2 |\n',
     )
   })
 })
 
-describe('round-trip edge cases: escapes and whitespace', () => {
-  it('preserves an escaped hash', () => {
+describe('escapes and whitespace', () => {
+  it('keeps an escaped hash', () => {
     expect(roundtrip(String.raw`\# not heading`)).toBe('\\# not heading\n')
   })
 
-  it('preserves an escaped dash', () => {
+  it('keeps an escaped dash', () => {
     expect(roundtrip(String.raw`\- not list`)).toBe('\\- not list\n')
   })
 
-  it('preserves an escaped ordered marker', () => {
+  it('keeps an escaped ordered marker', () => {
     expect(roundtrip(String.raw`1\. not ordered`)).toBe('1\\. not ordered\n')
   })
 
-  it('serializes empty input as a single newline', () => {
+  it('keeps empty input as one newline', () => {
     expect(roundtrip('')).toBe('\n')
   })
 
-  it.fails('preserves a whitespace-only line', () => {
+  it.fails('keeps a whitespace-only line', () => {
     expect(roundtrip('   ')).toBe('   \n')
   })
 
-  it.fails('preserves internal blank-line runs', () => {
+  it.fails('keeps internal blank-line runs', () => {
     expect(roundtrip('a\n\n\n\nb')).toBe('a\n\n\n\nb\n')
   })
 
-  it.fails('preserves YAML frontmatter', () => {
+  it.fails('keeps YAML frontmatter', () => {
     expect(roundtrip('---\ntitle: x\n---')).toBe('---\ntitle: x\n---\n')
   })
 })
 
-describe('round-trip edge cases: mixed structures', () => {
-  it('preserves a paragraph, list, paragraph sequence', () => {
+describe('mixed structures', () => {
+  it('keeps a paragraph-list-paragraph sequence', () => {
     expect(roundtrip('para\n\n- list\n\npara2')).toBe('para\n\n- list\n\npara2\n')
   })
 
-  it('preserves a heading, paragraph, list sequence', () => {
+  it('keeps a heading-paragraph-list sequence', () => {
     expect(roundtrip('# h\n\npara\n\n- list')).toBe('# h\n\npara\n\n- list\n')
   })
 
-  it('preserves a blockquote followed by a code block', () => {
+  it('keeps a quote then a code block', () => {
     expect(roundtrip('> q\n\n```\ncode\n```')).toBe('> q\n\n```\ncode\n```\n')
   })
 
-  it('preserves a code block inside a list item', () => {
+  it('keeps a code block in a list item', () => {
     expect(roundtrip('- a\n\n  ```\n  code\n  ```')).toBe('- a\n\n  ```\n  code\n  ```\n')
   })
 
-  it('preserves a table followed by a list', () => {
+  it('keeps a table then a list', () => {
     expect(roundtrip('| a | b |\n| --- | --- |\n| 1 | 2 |\n\n- list')).toBe(
       '| a | b |\n| --- | --- |\n| 1 | 2 |\n\n- list\n',
     )
   })
 
-  it.fails('preserves stacked headings without inserting blank lines', () => {
+  it.fails('keeps stacked headings tight', () => {
     expect(roundtrip('# h1\n## h2\n### h3')).toBe('# h1\n## h2\n### h3\n')
   })
 
-  it.fails('preserves ordered numbers before a paragraph', () => {
+  it.fails('keeps ordered numbers before a paragraph', () => {
     expect(roundtrip('1. a\n2. b\n\npara')).toBe('1. a\n2. b\n\npara\n')
   })
 })
 
-describe('round-trip edge cases: idempotency', () => {
-  it('is idempotent for a paragraph', () => {
+describe('idempotency', () => {
+  it('keeps a paragraph stable', () => {
     const once = roundtrip('hello')
     expect(roundtrip(once)).toBe(once)
   })
 
-  it('is idempotent for a tight bullet list', () => {
+  it('keeps a tight list stable', () => {
     const once = roundtrip('- a\n- b')
     expect(roundtrip(once)).toBe(once)
   })
 
-  it('is idempotent for a fenced code block', () => {
+  it('keeps a fenced block stable', () => {
     const once = roundtrip('```\ncode\n```')
     expect(roundtrip(once)).toBe(once)
   })
 
-  it('is idempotent for a table', () => {
+  it('keeps a table stable', () => {
     const once = roundtrip('| a | b |\n| --- | --- |\n| 1 | 2 |')
     expect(roundtrip(once)).toBe(once)
   })
 
-  it('is idempotent after the loose-to-tight defect settles', () => {
+  it('keeps a collapsed loose list stable', () => {
     const once = roundtrip('- a\n\n- b')
     expect(roundtrip(once)).toBe(once)
   })
 
-  it('is idempotent after the asterisk-bullet defect settles', () => {
+  it('keeps a normalized asterisk bullet stable', () => {
     const once = roundtrip('* star')
     expect(roundtrip(once)).toBe(once)
   })
 
-  it('is idempotent after the uppercase-task defect settles', () => {
+  it('keeps a lowercased task marker stable', () => {
     const once = roundtrip('- [X] upper')
     expect(roundtrip(once)).toBe(once)
   })
 
-  it('is idempotent after the ordered-renumber defect settles', () => {
+  it('keeps a renumbered list stable', () => {
     const once = roundtrip('1. one\n2. two')
     expect(roundtrip(once)).toBe(once)
   })
 
-  it('is idempotent for a lazily-nested blockquote', () => {
+  it('keeps a lazily-nested quote stable', () => {
     const once = roundtrip('> a\n>> b')
     expect(roundtrip(once)).toBe(once)
   })
 
-  it('is idempotent for mangled frontmatter', () => {
+  it('keeps mangled frontmatter stable', () => {
     const once = roundtrip('---\ntitle: x\n---')
     expect(roundtrip(once)).toBe(once)
   })
 
-  it.fails('is idempotent for a two-line blockquote', () => {
+  it.fails('keeps a two-line quote stable', () => {
     const once = roundtrip('> l1\n> l2')
     expect(roundtrip(once)).toBe(once)
   })
 
-  it.fails('is idempotent for an empty fenced code block', () => {
+  it.fails('keeps an empty fence stable', () => {
     const once = roundtrip('```\n```')
     expect(roundtrip(once)).toBe(once)
   })

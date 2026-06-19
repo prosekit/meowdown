@@ -152,8 +152,10 @@ describe('docToMarkdown', () => {
   })
 })
 
-describe('docToMarkdown edge cases', () => {
-  it('indents a two-level nested bullet list', () => {
+// `it` serializes correctly; `it.fails` asserts the ideal output for a doc the
+// serializer currently mangles (a known defect).
+describe('docToMarkdown', () => {
+  it('keeps a nested bullet', () => {
     const doc = n.doc(
       n.list({ kind: 'bullet' }, n.paragraph('a'), n.list({ kind: 'bullet' }, n.paragraph('b'))),
     )
@@ -161,7 +163,7 @@ describe('docToMarkdown edge cases', () => {
     expect(markdown).toBe('- a\n  - b\n')
   })
 
-  it('indents a three-level nested bullet list', () => {
+  it('keeps a deeply nested bullet', () => {
     const doc = n.doc(
       n.list(
         { kind: 'bullet' },
@@ -173,7 +175,7 @@ describe('docToMarkdown edge cases', () => {
     expect(markdown).toBe('- a\n  - b\n    - c\n')
   })
 
-  it('nests an ordered list inside a bullet item', () => {
+  it('keeps an ordered list in a bullet', () => {
     const doc = n.doc(
       n.list(
         { kind: 'bullet' },
@@ -185,7 +187,7 @@ describe('docToMarkdown edge cases', () => {
     expect(markdown).toBe('- a\n  1. b\n')
   })
 
-  it('serializes a loose item holding a code block', () => {
+  it('keeps a code block in a loose item', () => {
     const doc = n.doc(
       n.list({ kind: 'bullet' }, n.paragraph('a'), n.codeBlock({ language: '' }, 'code')),
     )
@@ -193,19 +195,19 @@ describe('docToMarkdown edge cases', () => {
     expect(markdown).toBe('- a\n\n  ```\n  code\n  ```\n')
   })
 
-  it('serializes a horizontal rule between paragraphs', () => {
+  it('keeps a rule between paragraphs', () => {
     const doc = n.doc(n.paragraph('a'), n.horizontalRule(), n.paragraph('b'))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('a\n\n---\n\nb\n')
   })
 
-  it.fails('serializes a blockquote-wrapped list without extra quote lines', () => {
+  it.fails('keeps a list in a quote clean', () => {
     const doc = n.doc(n.blockquote(n.list({ kind: 'bullet' }, n.paragraph('item'))))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('> - item\n')
   })
 
-  it.fails('serializes an empty code block without a blank line', () => {
+  it.fails('keeps an empty code block clean', () => {
     const doc = n.doc(n.codeBlock({ language: '' }))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('```\n```\n')

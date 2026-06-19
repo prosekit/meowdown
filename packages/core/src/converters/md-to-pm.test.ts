@@ -349,11 +349,10 @@ describe('markdownToDoc', () => {
 
 const bulletAttrs = { kind: 'bullet', order: null, checked: false, collapsed: false }
 
-// Each `it` asserts the correct parse. Each `it.fails` asserts the IDEAL parse
-// for an input the parser currently mishandles: a known DEFECT, not behavior we
-// want.
-describe('markdownToDoc edge cases', () => {
-  it('parses an asterisk bullet as a bullet list', () => {
+// `it` parses correctly; `it.fails` asserts the ideal parse for an input the
+// parser currently mishandles (a known defect).
+describe('markdownToDoc', () => {
+  it('keeps an asterisk bullet', () => {
     expect(markdownToDoc('* star').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -366,7 +365,7 @@ describe('markdownToDoc edge cases', () => {
     })
   })
 
-  it('parses a paren-delimited ordered list', () => {
+  it('keeps a paren ordered delimiter', () => {
     expect(markdownToDoc('1) paren').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -379,7 +378,7 @@ describe('markdownToDoc edge cases', () => {
     })
   })
 
-  it('parses a zero start number on an ordered list', () => {
+  it('keeps a zero start', () => {
     expect(markdownToDoc('0. zero').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -392,7 +391,7 @@ describe('markdownToDoc edge cases', () => {
     })
   })
 
-  it('parses an uppercase task marker as checked', () => {
+  it('keeps an uppercase task marker', () => {
     expect(markdownToDoc('- [X] upper').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -405,7 +404,7 @@ describe('markdownToDoc edge cases', () => {
     })
   })
 
-  it('parses an indented code block', () => {
+  it('keeps an indented code block', () => {
     expect(markdownToDoc('    indented').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -418,7 +417,7 @@ describe('markdownToDoc edge cases', () => {
     })
   })
 
-  it('parses a tilde-fenced code block', () => {
+  it('keeps a tilde fence', () => {
     expect(markdownToDoc('~~~\ntilde\n~~~').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -427,28 +426,28 @@ describe('markdownToDoc edge cases', () => {
     })
   })
 
-  it('treats a hash without a space as a paragraph', () => {
+  it('keeps a spaceless hash as text', () => {
     expect(markdownToDoc('#nospace').toJSON()).toEqual({
       type: 'doc',
       content: [{ type: 'paragraph', content: [{ type: 'text', text: '#nospace' }] }],
     })
   })
 
-  it('treats seven hashes as a paragraph', () => {
+  it('keeps seven hashes as text', () => {
     expect(markdownToDoc('####### seven').toJSON()).toEqual({
       type: 'doc',
       content: [{ type: 'paragraph', content: [{ type: 'text', text: '####### seven' }] }],
     })
   })
 
-  it('parses an empty heading', () => {
+  it('keeps an empty heading', () => {
     expect(markdownToDoc('# ').toJSON()).toEqual({
       type: 'doc',
       content: [{ type: 'heading', attrs: { level: 1 } }],
     })
   })
 
-  it('nests a blockquote inside a blockquote', () => {
+  it('keeps a nested quote', () => {
     expect(markdownToDoc('> a\n>> b').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -466,7 +465,7 @@ describe('markdownToDoc edge cases', () => {
     })
   })
 
-  it.fails('keeps the text of a setext heading', () => {
+  it.fails('keeps setext text', () => {
     expect(markdownToDoc('Setext1\n===').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -475,14 +474,14 @@ describe('markdownToDoc edge cases', () => {
     })
   })
 
-  it.fails('keeps a raw HTML block as text', () => {
+  it.fails('keeps a raw HTML block', () => {
     expect(markdownToDoc('<div>html</div>').toJSON()).toEqual({
       type: 'doc',
       content: [{ type: 'paragraph', content: [{ type: 'text', text: '<div>html</div>' }] }],
     })
   })
 
-  it.fails('keeps quote marks out of a two-line blockquote text', () => {
+  it.fails('keeps a two-line quote clean', () => {
     expect(markdownToDoc('> l1\n> l2').toJSON()).toEqual({
       type: 'doc',
       content: [
