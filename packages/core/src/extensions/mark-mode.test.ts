@@ -1,9 +1,9 @@
 import { TextSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
-import { page } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 
 import { findText } from '../testing/find-text.ts'
-import { setupFixture, type Fixture } from '../testing/index.ts'
+import { getSelectionSnapshot, setupFixture, type Fixture } from '../testing/index.ts'
 
 import { defineImage } from './image.ts'
 import type { MarkMode } from './mark-mode.ts'
@@ -368,6 +368,28 @@ describe('defineMarkMode', () => {
       fixture.set(n.doc(n.paragraph('![alt](pic.png)')))
       const group = pmRoot.locate('.md-m-group[data-key="image_pic.png"]')
       await expect.element(group.getByTestId('image-preview')).toBeVisible()
+    })
+  })
+
+  describe('focus mode backspace at a **bold** *italic* boundary', () => {
+    it('captures the state after one and two backspaces', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      // Caret sits between the space after `**bold**` and the `*italic*`.
+      const doc = n.doc(n.paragraph('text **bold** <a>*italic* text'))
+      fixture.set(doc)
+      fixture.view.focus()
+
+      await userEvent.keyboard('{Backspace}')
+      expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(
+        `"text **bold▌*italic* text"`,
+      )
+
+      await userEvent.keyboard('{Backspace}')
+      expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(
+        `"text **bol▌*italic* text"`,
+      )
     })
   })
 })
