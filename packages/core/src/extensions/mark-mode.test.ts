@@ -1,4 +1,5 @@
 import { TextSelection } from '@prosekit/pm/state'
+import { formatHTML } from 'diffable-html-snapshot'
 import { describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
 
@@ -7,7 +8,6 @@ import { setupFixture, type Fixture } from '../testing/index.ts'
 
 import type { MarkMode } from './mark-mode.ts'
 import { defineMarkMode } from './mark-mode.ts'
-import { formatHTML } from 'diffable-html-snapshot'
 
 const revealedMarkers = page.locate('.ProseMirror span.show')
 const pmRoot = page.locate('.ProseMirror')
