@@ -22,7 +22,8 @@
   user-select: none;
   border: 1px solid var(--meowdown-border);
   border-radius: 0.75rem;
-  background: light-dark(#fff, #18181b);
+  background: #fff;
+  background: var(--meowdown-autocomplete-bg, light-dark(#fff, #18181b));
   box-shadow:
     0 10px 15px -3px rgb(0 0 0 / 0.1),
     0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -51,7 +52,8 @@
   }
 
   &[data-highlighted] {
-    background: light-dark(#f4f4f5, #27272a);
+    background: #f4f4f5;
+    background: var(--meowdown-autocomplete-highlight-bg, light-dark(#f4f4f5, #27272a));
   }
 
   kbd {
