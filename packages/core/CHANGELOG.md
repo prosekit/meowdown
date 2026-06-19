@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.0](https://github.com/prosekit/meowdown/compare/core-v0.14.0...core-v0.15.0) (2026-06-19)
+
+
+### Features
+
+* make autocomplete menu colors themeable ([#81](https://github.com/prosekit/meowdown/issues/81)) ([0f71204](https://github.com/prosekit/meowdown/commit/0f71204e7847f3ca8b8d3f1ab74e16f72c56deba))
+
 ## [0.14.0](https://github.com/prosekit/meowdown/compare/core-v0.13.0...core-v0.14.0) (2026-06-18)
 
 
