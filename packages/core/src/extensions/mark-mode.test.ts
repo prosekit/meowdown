@@ -184,16 +184,16 @@ describe('defineMarkMode', () => {
       fixture.set(n.doc(n.paragraph('text **bold** <a>*italic* text')))
       fixture.view.focus()
 
-      expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(
         `"text **bold** ▌*italic* text"`,
       )
       await userEvent.keyboard('{Backspace}')
       // TODO: this is a bug. Pressing backspace should not delete **
-      expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(
         `"text **bold▌*italic* text"`,
       )
       await userEvent.keyboard('{Backspace}')
-      expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(
         `"text **bol▌*italic* text"`,
       )
     })
