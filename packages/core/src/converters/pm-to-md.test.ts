@@ -112,6 +112,30 @@ describe('docToMarkdown', () => {
     expect(docToMarkdown(node)).toBe('- item\n\nafter\n')
   })
 
+  it('keeps an empty bullet between two paragraphs', () => {
+    const bullet: NodeJSON = {
+      type: 'list',
+      attrs: { kind: 'bullet', order: null, checked: false, collapsed: false },
+      content: [paragraph('')],
+    }
+    const node = docFromJSON(wrapInDoc(paragraph('LINE 1'), bullet, paragraph('LINE 2')))
+    expect(docToMarkdown(node)).toBe('LINE 1\n\n-\n\nLINE 2\n')
+  })
+
+  it('keeps an empty item marker for every list kind', () => {
+    const empty = (attrs: Record<string, unknown>): NodeJSON => ({
+      type: 'list',
+      attrs,
+      content: [paragraph('')],
+    })
+    const bullet = empty({ kind: 'bullet', order: null, checked: false, collapsed: false })
+    const task = empty({ kind: 'task', order: null, checked: false, collapsed: false })
+    const ordered = empty({ kind: 'ordered', order: 1, checked: false, collapsed: false })
+    expect(docToMarkdown(docFromJSON(wrapInDoc(bullet)))).toBe('-\n')
+    expect(docToMarkdown(docFromJSON(wrapInDoc(task)))).toBe('- [ ]\n')
+    expect(docToMarkdown(docFromJSON(wrapInDoc(ordered)))).toBe('1.\n')
+  })
+
   it('serializes a fenced code block with language', () => {
     const node = docFromJSON(
       wrapInDoc({

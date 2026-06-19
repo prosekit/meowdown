@@ -86,6 +86,14 @@ class MdOut {
 
   /** End the current block; the next write gets a blank line before it. */
   closeBlock(): void {
+    // An empty block (e.g. an empty list item `- `) still owns a line: flush
+    // its pending marker, trimmed, so it is neither dropped nor left dangling.
+    if (this.atLineStart && this.pendingFirst !== null) {
+      this.emitDeferredBlankLine()
+      this.parts.push(this.pendingFirst.trimEnd())
+      this.pendingFirst = null
+      this.atLineStart = false
+    }
     if (!this.atLineStart) this.parts.push('\n')
     this.atLineStart = true
     this.deferredBlankPrefix = this.linePrefix
