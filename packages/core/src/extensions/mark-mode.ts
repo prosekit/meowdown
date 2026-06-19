@@ -92,9 +92,10 @@ function computeFocusDecorations(state: EditorState): DecorationSet {
   if (!selection.empty) return DecorationSet.empty
 
   const $pos = selection.$head
-  if (!$pos.parent.isTextblock || $pos.parent.type.spec.code) return DecorationSet.empty
+  const { parent } = $pos
+  if (! parent.isTextblock ||  parent.type.spec.code) return DecorationSet.empty
 
-  const range = getMarkRange($pos, getMarkType(state.schema, 'mdPack'))
+  const range = getMarkRange($pos, getMarkType(state.schema, 'mdPack' satisfies MarkName))
   if (!range) return DecorationSet.empty
 
   return DecorationSet.create(state.doc, [
