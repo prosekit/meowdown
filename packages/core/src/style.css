@@ -398,18 +398,20 @@
  * source whose rendered preview/label stands in for it (incl. the image alt
  * text). In focus mode all but the atomic wikilink source reveal near the caret
  * via the `.show` decoration. */
-.ProseMirror[data-mark-mode='hide'] .md-mark,
-.ProseMirror[data-mark-mode='hide'] .md-link-uri,
-.ProseMirror[data-mark-mode='hide'] .md-image-source,
-.ProseMirror[data-mark-mode='hide'] .md-wikilink-source,
-.ProseMirror[data-mark-mode='focus'] .md-mark,
-.ProseMirror[data-mark-mode='focus'] .md-link-uri,
-.ProseMirror[data-mark-mode='focus'] .md-image-source,
-.ProseMirror[data-mark-mode='focus'] .md-wikilink-source {
-  display: none;
+.ProseMirror[data-mark-mode='hide'] {
+    .md-mark, .md-link-uri, .md-image-source, .md-wikilink-source {
+          display: none;
+    }
 }
-.ProseMirror[data-mark-mode='focus'] .md-mark:has(.show),
-.ProseMirror[data-mark-mode='focus'] .md-link-uri:has(.show),
-.ProseMirror[data-mark-mode='focus'] .md-image-source:has(.show) {
-  display: inline;
+
+.ProseMirror[data-mark-mode='focus'] {
+    .md-mark, .md-link-uri, .md-image-source, .md-wikilink-source {
+        display: none;
+    }
+
+    .md-mark, .md-link-uri, .md-image-source {
+        &:has(.show) {
+            display: inline;
+        }
+    }
 }
