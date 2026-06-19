@@ -7,6 +7,7 @@ import { setupFixture, type Fixture } from '../testing/index.ts'
 
 import type { MarkMode } from './mark-mode.ts'
 import { defineMarkMode } from './mark-mode.ts'
+import { formatHTML } from 'diffable-html-snapshot'
 
 const revealedMarkers = page.locate('.ProseMirror span.show')
 const pmRoot = page.locate('.ProseMirror')
@@ -93,6 +94,41 @@ describe('defineMarkMode', () => {
       const doc = n.doc(n.paragraph('see [docs](http<a>://x.test)'))
       fixture.set(doc)
       await expectRevealedMarkers(4)
+    })
+
+    it('reveals every link marker when the cursor sits right after the closing )', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      const doc = n.doc(n.paragraph('ABC[link](https://example.com)<a>DEF'))
+      fixture.set(doc)
+      await expectRevealedMarkers(4)
+      expect(formatHTML(fixture.view.dom.innerHTML)).toMatchInlineSnapshot(`
+        "
+        <p>
+          ABC
+          <a
+            class="md-link"
+            href="https://example.com"
+          >
+            <span class="md-mark">
+              [
+            </span>
+            link
+          </a>
+          <span class="md-mark">
+            ](
+          </span>
+          <span class="md-link-uri">
+            https://example.com
+          </span>
+          <span class="md-mark">
+            )
+          </span>
+          DEF
+        </p>
+        "
+      `)
     })
 
     it('reveals nothing when the cursor is inside a bare autolink', async () => {
