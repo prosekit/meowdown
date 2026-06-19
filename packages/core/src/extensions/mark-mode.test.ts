@@ -233,6 +233,57 @@ describe('defineMarkMode', () => {
       fixture.set(doc)
       expect(clipboardText(fixture)).toBe('Hello bold end')
     })
+    describe('md-pack structure', () => {
+      it('wraps a whole link in one pack containing the anchor', async () => {
+        using fixture = setupFixture()
+        fixture.editor.use(defineMarkMode('focus'))
+        const { n } = fixture
+        fixture.set(n.doc(n.paragraph('see [docs](http://x.test)')))
+        const pack = pmRoot.locate('.md-pack[data-key="link_http://x.test"]')
+        await expect.element(pack.getByRole('link')).toBeInTheDocument()
+      })
+
+      it('nests an italic pack inside a bold pack', async () => {
+        using fixture = setupFixture()
+        fixture.editor.use(defineMarkMode('focus'))
+        const { n } = fixture
+        fixture.set(n.doc(n.paragraph('**bold *italic* bold**')))
+        const bold = pmRoot.locate('.md-pack[data-key="bold"]')
+        await expect.element(bold.locate('.md-pack[data-key="italic"]')).toBeInTheDocument()
+      })
+
+      it('wraps an image in a pack while its preview still renders', async () => {
+        using fixture = setupFixture()
+        fixture.editor.use(defineImage({ resolveImageUrl: () => IMAGE_URL }))
+        fixture.editor.use(defineMarkMode('focus'))
+        const { n } = fixture
+        fixture.set(n.doc(n.paragraph('![alt](pic.png)')))
+        const pack = pmRoot.locate('.md-pack[data-key="image_pic.png"]')
+        await expect.element(pack.getByTestId('image-preview')).toBeVisible()
+      })
+    })
+
+    describe('backspace at a **bold** *italic* boundary', () => {
+      it('captures the state after one and two backspaces', async () => {
+        using fixture = setupFixture()
+        fixture.editor.use(defineMarkMode('focus'))
+        const { n } = fixture
+        // Caret sits between the space after `**bold**` and the `*italic*`.
+        const doc = n.doc(n.paragraph('text **bold** <a>*italic* text'))
+        fixture.set(doc)
+        fixture.view.focus()
+
+        await userEvent.keyboard('{Backspace}')
+        expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(
+          `"text **bold▌*italic* text"`,
+        )
+
+        await userEvent.keyboard('{Backspace}')
+        expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(
+          `"text **bol▌*italic* text"`,
+        )
+      })
+    })
   })
 
   describe('hide mode', () => {
@@ -338,58 +389,6 @@ describe('defineMarkMode', () => {
       const doc = n.doc(n.paragraph('Hello **bold** end'))
       fixture.set(doc)
       expect(clipboardText(fixture)).toBeNull()
-    })
-  })
-
-  describe('md-pack structure', () => {
-    it('wraps a whole link in one pack containing the anchor', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      fixture.set(n.doc(n.paragraph('see [docs](http://x.test)')))
-      const pack = pmRoot.locate('.md-pack[data-key="link_http://x.test"]')
-      await expect.element(pack.getByRole('link')).toBeInTheDocument()
-    })
-
-    it('nests an italic pack inside a bold pack', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      fixture.set(n.doc(n.paragraph('**bold *italic* bold**')))
-      const bold = pmRoot.locate('.md-pack[data-key="bold"]')
-      await expect.element(bold.locate('.md-pack[data-key="italic"]')).toBeInTheDocument()
-    })
-
-    it('wraps an image in a pack while its preview still renders', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineImage({ resolveImageUrl: () => IMAGE_URL }))
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      fixture.set(n.doc(n.paragraph('![alt](pic.png)')))
-      const pack = pmRoot.locate('.md-pack[data-key="image_pic.png"]')
-      await expect.element(pack.getByTestId('image-preview')).toBeVisible()
-    })
-  })
-
-  describe('focus mode backspace at a **bold** *italic* boundary', () => {
-    it('captures the state after one and two backspaces', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      // Caret sits between the space after `**bold**` and the `*italic*`.
-      const doc = n.doc(n.paragraph('text **bold** <a>*italic* text'))
-      fixture.set(doc)
-      fixture.view.focus()
-
-      await userEvent.keyboard('{Backspace}')
-      expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(
-        `"text **bold▌*italic* text"`,
-      )
-
-      await userEvent.keyboard('{Backspace}')
-      expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(
-        `"text **bol▌*italic* text"`,
-      )
     })
   })
 })
