@@ -53,6 +53,12 @@ describe('defineMarkMode', () => {
   })
 
   describe('focus mode', () => {
+    it("sets data-mark-mode attribute to 'focus'", async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'focus')
+    })
+
     it('reveals both ** when the cursor is inside **bold**', async () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('focus'))
@@ -246,6 +252,12 @@ describe('defineMarkMode', () => {
   })
 
   describe('hide mode', () => {
+    it("sets data-mark-mode attribute to 'hide'", async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('hide'))
+      await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'hide')
+    })
+
     it('never reveals markers, even with the cursor inside bold', async () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('hide'))
@@ -320,6 +332,13 @@ describe('defineMarkMode', () => {
   })
 
   describe('show mode', () => {
+    it("sets data-mark-mode attribute to 'show'", async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('show'))
+      await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'show')
+    })
+
+
     it('never reveals markers (syntax is always visible via CSS, not decorations)', async () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('show'))
