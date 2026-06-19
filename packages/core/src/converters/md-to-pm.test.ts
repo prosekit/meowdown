@@ -349,8 +349,11 @@ describe('markdownToDoc', () => {
 
 const bulletAttrs = { kind: 'bullet', order: null, checked: false, collapsed: false }
 
+// Each `it` asserts the correct parse. Each `it.fails` asserts the IDEAL parse
+// for an input the parser currently mishandles: a known DEFECT, not behavior we
+// want.
 describe('markdownToDoc edge cases', () => {
-  it('normalizes an asterisk bullet to a bullet list', () => {
+  it('parses an asterisk bullet as a bullet list', () => {
     expect(markdownToDoc('* star').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -363,7 +366,7 @@ describe('markdownToDoc edge cases', () => {
     })
   })
 
-  it('normalizes a paren ordered delimiter to an ordered list', () => {
+  it('parses a paren-delimited ordered list', () => {
     expect(markdownToDoc('1) paren').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -376,7 +379,7 @@ describe('markdownToDoc edge cases', () => {
     })
   })
 
-  it('keeps a zero start number on an ordered list', () => {
+  it('parses a zero start number on an ordered list', () => {
     expect(markdownToDoc('0. zero').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -389,7 +392,7 @@ describe('markdownToDoc edge cases', () => {
     })
   })
 
-  it('checks a task with an uppercase marker', () => {
+  it('parses an uppercase task marker as checked', () => {
     expect(markdownToDoc('- [X] upper').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -463,7 +466,7 @@ describe('markdownToDoc edge cases', () => {
     })
   })
 
-  it.fails('drops the text of a setext heading', () => {
+  it.fails('keeps the text of a setext heading', () => {
     expect(markdownToDoc('Setext1\n===').toJSON()).toEqual({
       type: 'doc',
       content: [
@@ -472,14 +475,14 @@ describe('markdownToDoc edge cases', () => {
     })
   })
 
-  it.fails('drops a raw HTML block', () => {
+  it.fails('keeps a raw HTML block as text', () => {
     expect(markdownToDoc('<div>html</div>').toJSON()).toEqual({
       type: 'doc',
       content: [{ type: 'paragraph', content: [{ type: 'text', text: '<div>html</div>' }] }],
     })
   })
 
-  it.fails('leaks the second quote mark into blockquote text', () => {
+  it.fails('keeps quote marks out of a two-line blockquote text', () => {
     expect(markdownToDoc('> l1\n> l2').toJSON()).toEqual({
       type: 'doc',
       content: [

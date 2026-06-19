@@ -199,13 +199,13 @@ describe('docToMarkdown edge cases', () => {
     expect(markdown).toBe('a\n\n---\n\nb\n')
   })
 
-  it.fails('does not append spurious quote lines after a list in a blockquote', () => {
+  it.fails('serializes a blockquote-wrapped list without extra quote lines', () => {
     const doc = n.doc(n.blockquote(n.list({ kind: 'bullet' }, n.paragraph('item'))))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('> - item\n')
   })
 
-  it.fails('does not add a blank line to an empty code block', () => {
+  it.fails('serializes an empty code block without a blank line', () => {
     const doc = n.doc(n.codeBlock({ language: '' }))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('```\n```\n')
