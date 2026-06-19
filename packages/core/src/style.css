@@ -399,19 +399,37 @@
  * text). In focus mode all but the atomic wikilink source reveal near the caret
  * via the `.show` decoration. */
 .ProseMirror[data-mark-mode='hide'] {
-    .md-mark, .md-link-uri, .md-image-source, .md-wikilink-source {
-          display: none;
-    }
+  .md-mark,
+  .md-link-uri,
+  .md-image-source,
+  .md-wikilink-source {
+    display: none;
+  }
 }
 
 .ProseMirror[data-mark-mode='focus'] {
-    .md-mark, .md-link-uri, .md-image-source, .md-wikilink-source {
-        display: none;
-    }
+  .md-wikilink-source {
+    display: none;
+  }
 
-    .md-mark, .md-link-uri, .md-image-source {
-        &:has(.show) {
-            display: inline;
-        }
+  .md-mark,
+  .md-link-uri,
+  .md-image-source {
+    /*display: none;*/
+
+    overflow: hidden;
+    visibility: hidden;
+    letter-spacing: -2em;
+    display: inline-block;
+    vertical-align: bottom;
+
+    &:has(.show) {
+      /*display: inline;*/
+
+      letter-spacing: 0;
+      width: auto;
+      height: auto;
+      visibility: visible;
     }
+  }
 }
