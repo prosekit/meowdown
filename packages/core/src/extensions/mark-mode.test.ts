@@ -6,7 +6,6 @@ import { findText } from '../testing/find-text.ts'
 import { getSelectionSnapshot, setupFixture, type Fixture } from '../testing/index.ts'
 
 import { defineImage } from './image.ts'
-import type { MarkMode } from './mark-mode.ts'
 import { defineMarkMode } from './mark-mode.ts'
 
 const IMAGE_SVG =
@@ -37,8 +36,6 @@ function clipboardText(fixture: Fixture): string | null {
 }
 
 describe('defineMarkMode', () => {
-
-
   describe('focus mode', () => {
     it("sets data-mark-mode attribute to 'focus'", async () => {
       using fixture = setupFixture()
@@ -324,7 +321,6 @@ describe('defineMarkMode', () => {
       fixture.editor.use(defineMarkMode('show'))
       await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'show')
     })
-
 
     it('never reveals markers (syntax is always visible via CSS, not decorations)', async () => {
       using fixture = setupFixture()
