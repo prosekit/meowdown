@@ -44,19 +44,7 @@ const MARK_NAME_BY_TYPE_ID: ReadonlyMap<number, MarkName> = new Map([
   [LEZER_NODE_IDS.WikilinkMark, 'mdMark'],
 ])
 
-/**
- * Content-derived `mdPack` key for inline units whose key is just the kind.
- * Link and image are keyed by their url instead (see `walkLink` / `walkImage`),
- * so adjacent ones with different urls stay separate. Wikilink, tag and bare
- * autolinks are absent: they get no pack (atomic, or nothing to reveal).
- */
-const PACK_KEY_BY_TYPE_ID: ReadonlyMap<number, string> = new Map([
-  [LEZER_NODE_IDS.Emphasis, 'italic'],
-  [LEZER_NODE_IDS.StrongEmphasis, 'bold'],
-  [LEZER_NODE_IDS.InlineCode, 'code'],
-  [LEZER_NODE_IDS.Strikethrough, 'strike'],
-  [LEZER_NODE_IDS.Autolink, 'autolink'],
-])
+
 
 /**
  * Walk a textblock's inline content and produce a list of mark chunks
