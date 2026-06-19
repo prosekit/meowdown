@@ -6,6 +6,7 @@ import { parseInline } from '../lezer/inline.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 
 import type {
+  MdPackAttrs,
   MdImageSourceAttrs,
   MdImageViewAttrs,
   MdLinkTextAttrs,
@@ -91,13 +92,14 @@ function walk(
     if (node.from > pos) {
       emit(out, pos, node.from, parentMarks)
     }
-    if (node.type === LEZER_NODE_IDS.Link) {
+    const type: number = node.type
+    if (type === LEZER_NODE_IDS.Link) {
       walkLink(node, parentMarks, text, marks, out)
-    } else if (node.type === LEZER_NODE_IDS.Image) {
+    } else if (type === LEZER_NODE_IDS.Image) {
       walkImage(node, parentMarks, text, marks, out)
-    } else if (node.type === LEZER_NODE_IDS.Wikilink) {
+    } else if (type === LEZER_NODE_IDS.Wikilink) {
       walkWikilink(node, parentMarks, text, marks, out)
-    } else if (node.type === LEZER_NODE_IDS.URL) {
+    } else if (type === LEZER_NODE_IDS.URL) {
       // A standalone `URL` node is a GFM autolink (the address part of a real
       // `[text](url)` is handled inside `walkLink`, not here). Linkify the
       // shapes we recognize; anything else keeps the muted `mdLinkUri`.
@@ -107,10 +109,25 @@ function walk(
         : marks.mdLinkUri.create()
       emit(out, node.from, node.to, [...parentMarks, mark])
     } else {
-      const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(node.type)
-      const childMarks = maybeMarkName
-        ? [...parentMarks, marks[maybeMarkName].create()]
+      let packKey: string | undefined
+
+      if (type === LEZER_NODE_IDS.Emphasis) {
+        packKey = 'italic'
+      } else if (type === LEZER_NODE_IDS.StrongEmphasis) {
+        packKey = 'bold'
+      } else if (type === LEZER_NODE_IDS.InlineCode) {
+        packKey = 'code'
+      } else if (type === LEZER_NODE_IDS.Strikethrough) {
+        packKey = 'strike'
+      } else if (type === LEZER_NODE_IDS.Autolink) {
+        packKey = 'autolink'
+      }
+
+      const base = packKey
+        ? [...parentMarks, marks.mdPack.create({ key: packKey } satisfies MdPackAttrs)]
         : parentMarks
+      const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(type)
+      const childMarks = maybeMarkName ? [...base, marks[maybeMarkName].create()] : base
       if (node.children.length === 0) {
         emit(out, node.from, node.to, childMarks)
       } else {
@@ -163,13 +180,16 @@ function walkLink(
   const linkTextMark = href ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs) : null
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd && linkTextMark !== null
 
+  const pack = marks.mdPack.create({ key: `link_${href}` } satisfies MdPackAttrs)
+  const base = [...parentMarks, pack]
+
   let pos = node.from
   for (const child of node.children) {
     if (child.from > pos) {
-      const childMarks = inLabel(pos) ? [...parentMarks, linkTextMark!] : parentMarks
+      const childMarks = inLabel(pos) ? [...base, linkTextMark!] : base
       emit(out, pos, child.from, childMarks)
     }
-    const baseForChild = inLabel(child.from) ? [...parentMarks, linkTextMark!] : parentMarks
+    const baseForChild = inLabel(child.from) ? [...base, linkTextMark!] : base
     // A wikilink in the label needs its own source/view walk, not the generic
     // per-child mark mapping.
     if (child.type === LEZER_NODE_IDS.Wikilink) {
@@ -189,7 +209,7 @@ function walkLink(
     pos = child.to
   }
   if (pos < node.to) {
-    emit(out, pos, node.to, parentMarks)
+    emit(out, pos, node.to, base)
   }
 }
 
@@ -224,16 +244,17 @@ function walkImage(
 
   const source = marks.mdImageSource.create({ src, alt } satisfies MdImageSourceAttrs)
   const view = marks.mdImageView.create({ src, alt } satisfies MdImageViewAttrs)
+  const pack = marks.mdPack.create({ key: `image_${src}` } satisfies MdPackAttrs)
 
   // The image's final character, where `mdImageView` is anchored: `)` today, a
   // future `]` for `![alt][id]`.
   const anchorFrom = node.to - 1
 
-  // Marks shared by every chunk at `from`: `mdImageSource` over the whole
-  // source, plus `mdImageView` once we reach the final character (the render
-  // anchor). Each child layers its own syntax mark on top.
+  // Marks shared by every chunk at `from`: the `mdPack` envelope plus
+  // `mdImageSource` over the whole source, plus `mdImageView` once we reach the
+  // final character (the render anchor). Each child layers its own syntax mark on top.
   const baseAt = (from: number): Mark[] =>
-    from >= anchorFrom ? [...parentMarks, source, view] : [...parentMarks, source]
+    from >= anchorFrom ? [...parentMarks, pack, source, view] : [...parentMarks, pack, source]
 
   let pos = node.from
   for (const child of node.children) {

@@ -1,290 +1,984 @@
 import { TextSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
-import { page } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 
 import { findText } from '../testing/find-text.ts'
-import { setupFixture, type Fixture } from '../testing/index.ts'
+import { setupFixture } from '../testing/index.ts'
 
-import type { MarkMode } from './mark-mode.ts'
-import { defineMarkMode } from './mark-mode.ts'
+import { defineImage } from './image.ts'
+import { defineMarkMode, type MarkMode } from './mark-mode.ts'
 
-const revealedMarkers = page.locate('.ProseMirror span.show')
 const pmRoot = page.locate('.ProseMirror')
 
-/** Asserts how many syntax markers are revealed (rendered as `.show` spans). */
-async function expectRevealedMarkers(count: number): Promise<void> {
-  await expect.element(revealedMarkers).toHaveLength(count)
+/** Mount one paragraph in `mode` (caret at `<a>`) and freeze the rendered HTML. */
+function renderHTML(mode: MarkMode, text: string): string {
+  using fixture = setupFixture()
+  fixture.editor.use(defineMarkMode(mode))
+  const { n } = fixture
+  fixture.set(n.doc(n.paragraph(text)))
+  return fixture.htmlSnapshot
 }
 
-/** What a full-document copy would put on the clipboard, or `null` if the mode installs no serializer. */
-function clipboardText(fixture: Fixture): string | null {
+/** Mount one paragraph in `mode` and assert what a full-document copy yields (`null` = no serializer). */
+function expectClipboard(mode: MarkMode, text: string, expected: string | null): void {
+  using fixture = setupFixture()
+  fixture.editor.use(defineMarkMode(mode))
+  const { n } = fixture
+  fixture.set(n.doc(n.paragraph(text)))
   const serialize = fixture.view.someProp('clipboardTextSerializer')
-  if (!serialize) return null
   const { doc } = fixture
-  return serialize(doc.slice(0, doc.content.size), fixture.view)
+  const actual = serialize ? serialize(doc.slice(0, doc.content.size), fixture.view) : null
+  expect(actual).toBe(expected)
 }
 
 describe('defineMarkMode', () => {
-  it('set data-mark-mode attribute', async () => {
-    async function expectDataMarkMode(markMode: MarkMode) {
-      using fixture = setupFixture()
-      const { n, editor } = fixture
-      editor.use(defineMarkMode(markMode))
-      const doc = n.doc(n.paragraph('a'))
-      fixture.set(doc)
-      await expect.element(pmRoot).toHaveAttribute('data-mark-mode', markMode)
-    }
-
-    await expectDataMarkMode('focus')
-    await expectDataMarkMode('hide')
-    await expectDataMarkMode('show')
-  })
-
   describe('focus mode', () => {
-    it('reveals both ** when the cursor is inside **bold**', async () => {
+    it("sets data-mark-mode attribute to 'focus'", async () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('Hello **<a>bold** end'))
-      fixture.set(doc)
-      await expectRevealedMarkers(2)
+      await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'focus')
     })
 
-    it('reveals nothing when the cursor is in plain text', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('Hello<a> **bold** end'))
-      fixture.set(doc)
-      await expectRevealedMarkers(0)
+    it('reveals both ** when the cursor is inside **bold**', () => {
+      expect(renderHTML('focus', 'Hello **<a>bold** end')).toMatchInlineSnapshot(`
+        "
+        <p>
+          Hello
+          <span
+            class="md-pack"
+            data-key="bold"
+          >
+            <strong>
+              <span class="md-mark">
+                <span class="show">
+                  **
+                </span>
+              </span>
+              <span class="show">
+                bold
+              </span>
+              <span class="md-mark">
+                <span class="show">
+                  **
+                </span>
+              </span>
+            </strong>
+          </span>
+          end
+        </p>
+        "
+      `)
     })
 
-    it('reveals only the adjacent marker pair, not unrelated bolds', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('**<a>one** plain **two**'))
-      fixture.set(doc)
-      await expectRevealedMarkers(2)
+    it('reveals nothing when the cursor is in plain text', () => {
+      expect(renderHTML('focus', 'Hello<a> **bold** end')).toMatchInlineSnapshot(`
+        "
+        <p>
+          Hello
+          <span
+            class="md-pack"
+            data-key="bold"
+          >
+            <strong>
+              <span class="md-mark">
+                **
+              </span>
+              bold
+              <span class="md-mark">
+                **
+              </span>
+            </strong>
+          </span>
+          end
+        </p>
+        "
+      `)
     })
 
-    it('reveals nested wrappers (***foo***) as 4 markers', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('***<a>foo***'))
-      fixture.set(doc)
-      await expectRevealedMarkers(4)
+    it('reveals only the adjacent marker pair, not unrelated bolds', () => {
+      expect(renderHTML('focus', '**<a>one** plain **two**')).toMatchInlineSnapshot(`
+        "
+        <p>
+          <span
+            class="md-pack"
+            data-key="bold"
+          >
+            <strong>
+              <span class="md-mark">
+                <span class="show">
+                  **
+                </span>
+              </span>
+              <span class="show">
+                one
+              </span>
+              <span class="md-mark">
+                <span class="show">
+                  **
+                </span>
+              </span>
+            </strong>
+          </span>
+          plain
+          <span
+            class="md-pack"
+            data-key="bold"
+          >
+            <strong>
+              <span class="md-mark">
+                **
+              </span>
+              two
+              <span class="md-mark">
+                **
+              </span>
+            </strong>
+          </span>
+        </p>
+        "
+      `)
     })
 
-    it('reveals every link marker when the cursor is in the text', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('see [<a>docs](http://x.test)'))
-      fixture.set(doc)
-      await expectRevealedMarkers(4)
+    it('reveals nested wrappers (***foo***)', () => {
+      expect(renderHTML('focus', '***<a>foo***')).toMatchInlineSnapshot(`
+        "
+        <p>
+          <span
+            class="md-pack"
+            data-key="italic"
+          >
+            <em>
+              <span class="md-mark">
+                <span class="show">
+                  *
+                </span>
+              </span>
+            </em>
+            <span
+              class="md-pack"
+              data-key="bold"
+            >
+              <strong>
+                <em>
+                  <span class="md-mark">
+                    <span class="show">
+                      **
+                    </span>
+                  </span>
+                  <span class="show">
+                    foo
+                  </span>
+                  <span class="md-mark">
+                    <span class="show">
+                      **
+                    </span>
+                  </span>
+                </em>
+              </strong>
+            </span>
+            <em>
+              <span class="md-mark">
+                <span class="show">
+                  *
+                </span>
+              </span>
+            </em>
+          </span>
+        </p>
+        "
+      `)
     })
 
-    it('reveals every link marker when the cursor is in the url', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('see [docs](http<a>://x.test)'))
-      fixture.set(doc)
-      await expectRevealedMarkers(4)
+    it('reveals every link marker when the cursor is in the text', () => {
+      expect(renderHTML('focus', 'see [<a>docs](http://x.test)')).toMatchInlineSnapshot(`
+        "
+        <p>
+          see
+          <span
+            class="md-pack"
+            data-key="link_http://x.test"
+          >
+            <a
+              class="md-link"
+              href="http://x.test"
+            >
+              <span class="md-mark">
+                <span class="show">
+                  [
+                </span>
+              </span>
+              <span class="show">
+                docs
+              </span>
+            </a>
+            <span class="md-mark">
+              <span class="show">
+                ](
+              </span>
+            </span>
+            <span class="md-link-uri">
+              <span class="show">
+                http://x.test
+              </span>
+            </span>
+            <span class="md-mark">
+              <span class="show">
+                )
+              </span>
+            </span>
+          </span>
+        </p>
+        "
+      `)
     })
 
-    it('reveals nothing when the cursor is inside a bare autolink', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('visit https://exa<a>mple.com now'))
-      fixture.set(doc)
-      await expectRevealedMarkers(0)
+    it('reveals every link marker when the cursor is in the url', () => {
+      expect(renderHTML('focus', 'see [docs](http<a>://x.test)')).toMatchInlineSnapshot(`
+        "
+        <p>
+          see
+          <span
+            class="md-pack"
+            data-key="link_http://x.test"
+          >
+            <a
+              class="md-link"
+              href="http://x.test"
+            >
+              <span class="md-mark">
+                <span class="show">
+                  [
+                </span>
+              </span>
+              <span class="show">
+                docs
+              </span>
+            </a>
+            <span class="md-mark">
+              <span class="show">
+                ](
+              </span>
+            </span>
+            <span class="md-link-uri">
+              <span class="show">
+                http://x.test
+              </span>
+            </span>
+            <span class="md-mark">
+              <span class="show">
+                )
+              </span>
+            </span>
+          </span>
+        </p>
+        "
+      `)
     })
 
-    it('reveals the angle brackets when the cursor is inside <url>', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('a <https://<a>example.com> b'))
-      fixture.set(doc)
-      await expectRevealedMarkers(2)
+    it('reveals nothing when the cursor is inside a bare autolink', () => {
+      expect(renderHTML('focus', 'visit https://exa<a>mple.com now')).toMatchInlineSnapshot(`
+        "
+        <p>
+          visit
+          <a
+            class="md-link"
+            href="https://example.com"
+          >
+            https://example.com
+          </a>
+          now
+        </p>
+        "
+      `)
     })
 
-    it('reveals when the cursor sits right after the closing **', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('**bold**<a> rest'))
-      fixture.set(doc)
-      await expectRevealedMarkers(2)
+    it('reveals the angle brackets when the cursor is inside <url>', () => {
+      expect(renderHTML('focus', 'a <https://<a>example.com> b')).toMatchInlineSnapshot(`
+        "
+        <p>
+          a
+          <span
+            class="md-pack"
+            data-key="autolink"
+          >
+            <span class="md-mark">
+              <span class="show">
+                &lt;
+              </span>
+            </span>
+            <a
+              class="md-link"
+              href="https://example.com"
+            >
+              <span class="show">
+                https://example.com
+              </span>
+            </a>
+            <span class="md-mark">
+              <span class="show">
+                &gt;
+              </span>
+            </span>
+          </span>
+          b
+        </p>
+        "
+      `)
     })
 
-    it('reveals nothing on a multi-char selection', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('**<a>bold<b>**'))
-      fixture.set(doc)
-      await expectRevealedMarkers(0)
+    it('reveals when the cursor sits right after the closing **', () => {
+      expect(renderHTML('focus', '**bold**<a> rest')).toMatchInlineSnapshot(`
+        "
+        <p>
+          <span
+            class="md-pack"
+            data-key="bold"
+          >
+            <strong>
+              <span class="md-mark">
+                <span class="show">
+                  **
+                </span>
+              </span>
+              <span class="show">
+                bold
+              </span>
+              <span class="md-mark">
+                <span class="show">
+                  **
+                </span>
+              </span>
+            </strong>
+          </span>
+          rest
+        </p>
+        "
+      `)
     })
 
-    it('reveals nothing inside a wikilink (the source is atomic, never revealed)', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('see [[no<a>te]] end'))
-      fixture.set(doc)
-      await expectRevealedMarkers(0)
+    it('reveals nothing on a multi-char selection', () => {
+      expect(renderHTML('focus', '**<a>bold<b>**')).toMatchInlineSnapshot(`
+        "
+        <p>
+          <span
+            class="md-pack"
+            data-key="bold"
+          >
+            <strong>
+              <span class="md-mark">
+                **
+              </span>
+              bold
+              <span class="md-mark">
+                **
+              </span>
+            </strong>
+          </span>
+        </p>
+        "
+      `)
     })
 
-    it('reveals nothing inside a wikilink next to a markdown link', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('[a](http://x)[[no<a>te]]'))
-      fixture.set(doc)
-      await expectRevealedMarkers(0)
+    it('reveals nothing inside a wikilink (the source is atomic, never revealed)', () => {
+      expect(renderHTML('focus', 'see [[no<a>te]] end')).toMatchInlineSnapshot(`
+        "
+        <p>
+          see
+          <span class="md-wikilink-source">
+            <span class="md-mark">
+              [[
+            </span>
+            note
+            <span class="md-mark">
+              ]
+            </span>
+          </span>
+          <span class="md-wikilink-view">
+            <span>
+              <span class="md-wikilink-source">
+                <span class="md-mark">
+                  ]
+                </span>
+              </span>
+            </span>
+            <span
+              class="md-wikilink-label"
+              contenteditable="false"
+              data-testid="wikilink"
+            >
+              note
+            </span>
+          </span>
+          end
+        </p>
+        "
+      `)
     })
 
-    it('reveals nothing inside a #tag (tags have no syntax to reveal)', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('Hello #me<a>ow end'))
-      fixture.set(doc)
-      await expectRevealedMarkers(0)
+    it('reveals nothing inside a wikilink next to a markdown link', () => {
+      expect(renderHTML('focus', '[a](http://x)[[no<a>te]]')).toMatchInlineSnapshot(`
+        "
+        <p>
+          <span
+            class="md-pack"
+            data-key="link_http://x"
+          >
+            <a
+              class="md-link"
+              href="http://x"
+            >
+              <span class="md-mark">
+                [
+              </span>
+              a
+            </a>
+            <span class="md-mark">
+              ](
+            </span>
+            <span class="md-link-uri">
+              http://x
+            </span>
+            <span class="md-mark">
+              )
+            </span>
+          </span>
+          <span class="md-wikilink-source">
+            <span class="md-mark">
+              [[
+            </span>
+            note
+            <span class="md-mark">
+              ]
+            </span>
+          </span>
+          <span class="md-wikilink-view">
+            <span>
+              <span class="md-wikilink-source">
+                <span class="md-mark">
+                  ]
+                </span>
+              </span>
+            </span>
+            <span
+              class="md-wikilink-label"
+              contenteditable="false"
+              data-testid="wikilink"
+            >
+              note
+            </span>
+          </span>
+        </p>
+        "
+      `)
     })
 
-    it('reveals nothing when the cursor is inside a code block', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.codeBlock({ language: '' }, '*not<a> italic*'))
-      fixture.set(doc)
-      await expectRevealedMarkers(0)
+    it('reveals nothing inside a #tag (tags have no syntax to reveal)', () => {
+      expect(renderHTML('focus', 'Hello #me<a>ow end')).toMatchInlineSnapshot(`
+        "
+        <p>
+          Hello
+          <span class="md-tag">
+            #meow
+          </span>
+          end
+        </p>
+        "
+      `)
     })
 
-    it('updates the reveal as the cursor moves between paragraphs', async () => {
+    it('reveals the whole link when the cursor sits right after the closing )', () => {
+      expect(renderHTML('focus', 'ABC[link](https://example.com)<a>DEF')).toMatchInlineSnapshot(`
+        "
+        <p>
+          ABC
+          <span
+            class="md-pack"
+            data-key="link_https://example.com"
+          >
+            <a
+              class="md-link"
+              href="https://example.com"
+            >
+              <span class="md-mark">
+                <span class="show">
+                  [
+                </span>
+              </span>
+              <span class="show">
+                link
+              </span>
+            </a>
+            <span class="md-mark">
+              <span class="show">
+                ](
+              </span>
+            </span>
+            <span class="md-link-uri">
+              <span class="show">
+                https://example.com
+              </span>
+            </span>
+            <span class="md-mark">
+              <span class="show">
+                )
+              </span>
+            </span>
+          </span>
+          DEF
+        </p>
+        "
+      `)
+    })
+
+    it('reveals the angle autolink when the cursor sits right after the closing >', () => {
+      expect(renderHTML('focus', 'a <https://example.com><a> b')).toMatchInlineSnapshot(`
+        "
+        <p>
+          a
+          <span
+            class="md-pack"
+            data-key="autolink"
+          >
+            <span class="md-mark">
+              <span class="show">
+                &lt;
+              </span>
+            </span>
+            <a
+              class="md-link"
+              href="https://example.com"
+            >
+              <span class="show">
+                https://example.com
+              </span>
+            </a>
+            <span class="md-mark">
+              <span class="show">
+                &gt;
+              </span>
+            </span>
+          </span>
+          b
+        </p>
+        "
+      `)
+    })
+
+    it('reveals the whole outer unit even when the cursor is in its bold-only region', () => {
+      expect(renderHTML('focus', '**bo<a>ld *italic* bold**')).toMatchInlineSnapshot(`
+        "
+        <p>
+          <span
+            class="md-pack"
+            data-key="bold"
+          >
+            <strong>
+              <span class="md-mark">
+                <span class="show">
+                  **
+                </span>
+              </span>
+              <span class="show">
+                bold
+              </span>
+            </strong>
+            <span
+              class="md-pack"
+              data-key="italic"
+            >
+              <strong>
+                <em>
+                  <span class="md-mark">
+                    <span class="show">
+                      *
+                    </span>
+                  </span>
+                  <span class="show">
+                    italic
+                  </span>
+                  <span class="md-mark">
+                    <span class="show">
+                      *
+                    </span>
+                  </span>
+                </em>
+              </strong>
+            </span>
+            <strong>
+              <span class="show">
+                bold
+              </span>
+              <span class="md-mark">
+                <span class="show">
+                  **
+                </span>
+              </span>
+            </strong>
+          </span>
+        </p>
+        "
+      `)
+    })
+
+    it('reveals only the link the cursor is in, not its adjacent neighbor', () => {
+      expect(renderHTML('focus', '[a<a>](x)[b](y)')).toMatchInlineSnapshot(`
+        "
+        <p>
+          <span
+            class="md-pack"
+            data-key="link_x"
+          >
+            <a
+              class="md-link"
+              href="x"
+            >
+              <span class="md-mark">
+                <span class="show">
+                  [
+                </span>
+              </span>
+              <span class="show">
+                a
+              </span>
+            </a>
+            <span class="md-mark">
+              <span class="show">
+                ](
+              </span>
+            </span>
+            <span class="md-link-uri">
+              <span class="show">
+                x
+              </span>
+            </span>
+            <span class="md-mark">
+              <span class="show">
+                )
+              </span>
+            </span>
+          </span>
+          <span
+            class="md-pack"
+            data-key="link_y"
+          >
+            <a
+              class="md-link"
+              href="y"
+            >
+              <span class="md-mark">
+                [
+              </span>
+              b
+            </a>
+            <span class="md-mark">
+              ](
+            </span>
+            <span class="md-link-uri">
+              y
+            </span>
+            <span class="md-mark">
+              )
+            </span>
+          </span>
+        </p>
+        "
+      `)
+    })
+
+    it('reveals nothing when the cursor is inside a code block', () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('focus'))
       const { n } = fixture
-      const doc = n.doc(n.paragraph('**<a>alpha** one'), n.paragraph('beta two'))
-      fixture.set(doc)
-      await expectRevealedMarkers(2)
+      fixture.set(n.doc(n.codeBlock({ language: '' }, '*not<a> italic*')))
+      expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
+        "
+        <pre>
+          <code>
+            *not italic*
+          </code>
+        </pre>
+        "
+      `)
+    })
+
+    it('renders an inline image as a pack wrapping the preview', () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineImage({ resolveImageUrl: () => 'http://x/p.png' }))
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      fixture.set(n.doc(n.paragraph('![alt](pic.png)')))
+      expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
+        "
+        <p>
+          <span
+            class="md-pack"
+            data-key="image_pic.png"
+          >
+            <span class="md-image-source">
+              <span class="md-mark">
+                <span class="show">
+                  ![
+                </span>
+              </span>
+              <span class="show">
+                alt
+              </span>
+              <span class="md-mark">
+                <span class="show">
+                  ](
+                </span>
+              </span>
+              <span class="md-link-uri">
+                <span class="show">
+                  pic.png
+                </span>
+              </span>
+            </span>
+            <span class="md-image-view">
+              <span class="md-image-view-content">
+                <span class="md-image-source">
+                  <span class="md-mark">
+                    <span class="show">
+                      )
+                    </span>
+                  </span>
+                </span>
+              </span>
+              <span
+                class="md-image-preview md-image-preview-img"
+                contenteditable="false"
+                data-testid="image-preview"
+              >
+                <img
+                  alt="alt"
+                  draggable="false"
+                  src="http://x/p.png"
+                >
+              </span>
+            </span>
+          </span>
+        </p>
+        "
+      `)
+    })
+
+    it('updates the reveal as the cursor moves between paragraphs', () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      fixture.set(n.doc(n.paragraph('**<a>alpha** one'), n.paragraph('beta two')))
+      expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
+        "
+        <p>
+          <span
+            class="md-pack"
+            data-key="bold"
+          >
+            <strong>
+              <span class="md-mark">
+                <span class="show">
+                  **
+                </span>
+              </span>
+              <span class="show">
+                alpha
+              </span>
+              <span class="md-mark">
+                <span class="show">
+                  **
+                </span>
+              </span>
+            </strong>
+          </span>
+          one
+        </p>
+        <p>
+          beta two
+        </p>
+        "
+      `)
 
       const twoPos = findText(fixture.doc, 'two')
       fixture.view.dispatch(
         fixture.state.tr.setSelection(TextSelection.create(fixture.doc, twoPos)),
       )
-      await expectRevealedMarkers(0)
+      expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
+        "
+        <p>
+          <span
+            class="md-pack"
+            data-key="bold"
+          >
+            <strong>
+              <span class="md-mark">
+                **
+              </span>
+              alpha
+              <span class="md-mark">
+                **
+              </span>
+            </strong>
+          </span>
+          one
+        </p>
+        <p>
+          beta two
+        </p>
+        "
+      `)
+    })
+
+    it('strips syntax from the copied text just like hide mode', () => {
+      expectClipboard('focus', 'Hello **bold** end', 'Hello bold end')
+    })
+
+    it('preserves marks after pressing backspaces', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      // Caret sits between the space after `**bold**` and the `*italic*`.
+      fixture.set(n.doc(n.paragraph('text **bold** <a>*italic* text')))
+      fixture.view.focus()
+
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold** ▌*italic* text"`)
+      await userEvent.keyboard('{Backspace}')
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold**▌*italic* text"`)
+      await userEvent.keyboard('{Backspace}')
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold*▌*italic* text"`)
     })
   })
 
   describe('hide mode', () => {
-    it('never reveals markers, even with the cursor inside bold', async () => {
+    it("sets data-mark-mode attribute to 'hide'", async () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('hide'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('Hello **<a>bold** end'))
-      fixture.set(doc)
-      await expectRevealedMarkers(0)
+      await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'hide')
     })
 
-    it('never reveals markers with the cursor inside a wikilink', async () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('hide'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('see [[no<a>te]] end'))
-      fixture.set(doc)
-      await expectRevealedMarkers(0)
+    it('never reveals markers, even with the cursor inside bold', () => {
+      expect(renderHTML('hide', 'Hello **<a>bold** end')).toMatchInlineSnapshot(`
+        "
+        <p>
+          Hello
+          <span
+            class="md-pack"
+            data-key="bold"
+          >
+            <strong>
+              <span class="md-mark">
+                **
+              </span>
+              bold
+              <span class="md-mark">
+                **
+              </span>
+            </strong>
+          </span>
+          end
+        </p>
+        "
+      `)
+    })
+
+    it('never reveals markers with the cursor inside a wikilink', () => {
+      expect(renderHTML('hide', 'see [[no<a>te]] end')).toMatchInlineSnapshot(`
+        "
+        <p>
+          see
+          <span class="md-wikilink-source">
+            <span class="md-mark">
+              [[
+            </span>
+            note
+            <span class="md-mark">
+              ]
+            </span>
+          </span>
+          <span class="md-wikilink-view">
+            <span>
+              <span class="md-wikilink-source">
+                <span class="md-mark">
+                  ]
+                </span>
+              </span>
+            </span>
+            <span
+              class="md-wikilink-label"
+              contenteditable="false"
+              data-testid="wikilink"
+            >
+              note
+            </span>
+          </span>
+          end
+        </p>
+        "
+      `)
     })
 
     it('strips ** from the copied text', () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('hide'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('Hello **bold** end'))
-      fixture.set(doc)
-      expect(clipboardText(fixture)).toBe('Hello bold end')
+      expectClipboard('hide', 'Hello **bold** end', 'Hello bold end')
     })
 
     it('strips link [..](..) syntax from the copied text', () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('hide'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('see [docs](http://x.test)'))
-      fixture.set(doc)
-      expect(clipboardText(fixture)).toBe('see docs')
+      expectClipboard('hide', 'see [docs](http://x.test)', 'see docs')
     })
 
     it('keeps a bare autolink in the copied text', () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('hide'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('visit https://example.com now'))
-      fixture.set(doc)
-      expect(clipboardText(fixture)).toBe('visit https://example.com now')
+      expectClipboard('hide', 'visit https://example.com now', 'visit https://example.com now')
     })
 
     it('keeps the whole image source so a copied image stays markdown', () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('hide'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('see ![cat](https://example.com/cat.png) end'))
-      fixture.set(doc)
-      expect(clipboardText(fixture)).toBe('see ![cat](https://example.com/cat.png) end')
+      expectClipboard(
+        'hide',
+        'see ![cat](https://example.com/cat.png) end',
+        'see ![cat](https://example.com/cat.png) end',
+      )
     })
 
     it('keeps the whole [[ ]] source in the copied text', () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('hide'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('see [[note]] end'))
-      fixture.set(doc)
-      expect(clipboardText(fixture)).toBe('see [[note]] end')
+      expectClipboard('hide', 'see [[note]] end', 'see [[note]] end')
     })
 
     it('keeps #tag verbatim in the copied text', () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('hide'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('Hello #meow end'))
-      fixture.set(doc)
-      expect(clipboardText(fixture)).toBe('Hello #meow end')
+      expectClipboard('hide', 'Hello #meow end', 'Hello #meow end')
     })
   })
 
   describe('show mode', () => {
-    it('never reveals markers (syntax is always visible via CSS, not decorations)', async () => {
+    it("sets data-mark-mode attribute to 'show'", async () => {
       using fixture = setupFixture()
       fixture.editor.use(defineMarkMode('show'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('Hello **<a>bold** end'))
-      fixture.set(doc)
-      await expectRevealedMarkers(0)
+      await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'show')
+    })
+
+    it('never reveals markers (syntax is always visible via CSS, not decorations)', () => {
+      expect(renderHTML('show', 'Hello **<a>bold** end')).toMatchInlineSnapshot(`
+        "
+        <p>
+          Hello
+          <span
+            class="md-pack"
+            data-key="bold"
+          >
+            <strong>
+              <span class="md-mark">
+                **
+              </span>
+              bold
+              <span class="md-mark">
+                **
+              </span>
+            </strong>
+          </span>
+          end
+        </p>
+        "
+      `)
     })
 
     it('installs no clipboard serializer, so copied text keeps the ** syntax', () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('show'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('Hello **bold** end'))
-      fixture.set(doc)
-      expect(clipboardText(fixture)).toBeNull()
-    })
-  })
-
-  describe('focus mode clipboard', () => {
-    it('strips syntax from the copied text just like hide mode', () => {
-      using fixture = setupFixture()
-      fixture.editor.use(defineMarkMode('focus'))
-      const { n } = fixture
-      const doc = n.doc(n.paragraph('Hello **bold** end'))
-      fixture.set(doc)
-      expect(clipboardText(fixture)).toBe('Hello bold end')
+      expectClipboard('show', 'Hello **bold** end', null)
     })
   })
 })
