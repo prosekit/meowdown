@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.1](https://github.com/prosekit/meowdown/compare/core-v0.15.0...core-v0.15.1) (2026-06-19)
+
+
+### Bug Fixes
+
+* **core:** keep empty list item markers on serialize ([#85](https://github.com/prosekit/meowdown/issues/85)) ([142359c](https://github.com/prosekit/meowdown/commit/142359c5a71ed327c27540e665f1b81ef4167da9))
+
 ## [0.15.0](https://github.com/prosekit/meowdown/compare/core-v0.14.0...core-v0.15.0) (2026-06-19)
 
 
