@@ -390,21 +390,51 @@
  * source whose rendered preview/label stands in for it (incl. the image alt
  * text). In focus mode all but the atomic wikilink source reveal near the caret
  * via the `.show` decoration. */
-.ProseMirror[data-mark-mode='hide'] .md-mark,
-.ProseMirror[data-mark-mode='hide'] .md-link-uri,
-.ProseMirror[data-mark-mode='hide'] .md-image-source,
-.ProseMirror[data-mark-mode='hide'] .md-wikilink-source,
-.ProseMirror[data-mark-mode='focus'] .md-mark,
-.ProseMirror[data-mark-mode='focus'] .md-link-uri,
-.ProseMirror[data-mark-mode='focus'] .md-image-source,
-.ProseMirror[data-mark-mode='focus'] .md-wikilink-source {
-  display: none;
-}
-.ProseMirror[data-mark-mode='focus'] .md-mark:has(.show),
-.ProseMirror[data-mark-mode='focus'] .md-link-uri:has(.show),
-.ProseMirror[data-mark-mode='focus'] .md-image-source:has(.show) {
-  display: inline;
-}
+
+
+ .ProseMirror[data-mark-mode='hide'] {
+     :is(.md-mark,  .md-link-uri, .md-image-source, .md-wikilink-source) {
+         display: none;
+     }
+ }
+
+ .ProseMirror[data-mark-mode='focus'] {
+     :is(.md-mark,  .md-link-uri, .md-image-source, .md-wikilink-source) {
+         /*width: 0px;*/
+         /*height: 1lh;*/
+         overflow: hidden;
+         visibility: hidden;
+         letter-spacing: -2em;
+         display: inline-block;
+         vertical-align: bottom;
+
+         &:has(.show) {
+             letter-spacing: 0;
+             width: auto;
+             height: auto;
+             visibility: visible;
+         }
+     }
+ }
+
+/*
+  .ProseMirror[data-mark-mode='focus'] {
+      .md-view-content {
+          overflow: hidden;
+          visibility: hidden;
+          letter-spacing: -2em;
+          display: inline-block;
+          vertical-align: bottom;
+
+          &:has(.show) {
+              letter-spacing: 0;
+              width: auto;
+              height: auto;
+              visibility: visible;
+          }
+      }
+  }*/
+
 
 /* Each mark view (wikilink, image) anchors on its unit's trailing character, held
  * in a contentDOM. Hiding that char with the `display:none` above drops it from
@@ -418,14 +448,16 @@
 .ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content,
 .ProseMirror[data-mark-mode='hide'] .md-image-view-content,
 .ProseMirror[data-mark-mode='focus'] .md-image-view-content {
-  display: inline-block;
-  width: 0;
-  overflow: hidden;
-  vertical-align: text-bottom;
+  /*display: inline-block;*/
+  /*width: 0px;*/
+  /*overflow: hidden;*/
+  /*vertical-align: bottom;*/
+  /*visibility: hidden;*/
 }
 .ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content :is(.md-mark, .md-wikilink-source),
 .ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content :is(.md-mark, .md-wikilink-source),
 .ProseMirror[data-mark-mode='hide'] .md-image-view-content :is(.md-mark, .md-image-source),
 .ProseMirror[data-mark-mode='focus'] .md-image-view-content :is(.md-mark, .md-image-source) {
-  display: inline;
+  /*display: inline;*/
+  /*transform: perspective(1px) rotateY(90deg);*/
 }
