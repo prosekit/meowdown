@@ -5,8 +5,13 @@ import { page } from 'vitest/browser'
 import { findText } from '../testing/find-text.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
+import { defineImage } from './image.ts'
 import type { MarkMode } from './mark-mode.ts'
 import { defineMarkMode } from './mark-mode.ts'
+
+const IMAGE_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10" fill="pink"/></svg>'
+const IMAGE_URL = `data:image/svg+xml;base64,${btoa(IMAGE_SVG)}`
 
 // A syntax span counts as revealed when the focus decoration (`.show`) lands
 // inside it, which is exactly what the production CSS keys off. One decoration
@@ -333,6 +338,36 @@ describe('defineMarkMode', () => {
       const doc = n.doc(n.paragraph('Hello **bold** end'))
       fixture.set(doc)
       expect(clipboardText(fixture)).toBe('Hello bold end')
+    })
+  })
+
+  describe('md-m-group structure', () => {
+    it('wraps a whole link in one group containing the anchor', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      fixture.set(n.doc(n.paragraph('see [docs](http://x.test)')))
+      const group = pmRoot.locate('.md-m-group[data-key="link_http://x.test"]')
+      await expect.element(group.getByRole('link')).toBeInTheDocument()
+    })
+
+    it('nests an italic group inside a bold group', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      fixture.set(n.doc(n.paragraph('**bold *italic* bold**')))
+      const bold = pmRoot.locate('.md-m-group[data-key="bold"]')
+      await expect.element(bold.locate('.md-m-group[data-key="italic"]')).toBeInTheDocument()
+    })
+
+    it('wraps an image in a group while its preview still renders', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineImage({ resolveImageUrl: () => IMAGE_URL }))
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      fixture.set(n.doc(n.paragraph('![alt](pic.png)')))
+      const group = pmRoot.locate('.md-m-group[data-key="image_pic.png"]')
+      await expect.element(group.getByTestId('image-preview')).toBeVisible()
     })
   })
 })
