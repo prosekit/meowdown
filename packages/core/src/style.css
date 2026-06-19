@@ -385,6 +385,14 @@
   opacity: 0.7;
 }
 
+/* The mdGroup mark wraps a whole inline unit so focus mode can reveal it with one
+ * range lookup. It is layout-only: `display: contents` keeps it out of the box
+ * tree, so it never affects flow or an inner image mark view, while still being a
+ * real element a `.show` decoration can land inside. */
+.ProseMirror .md-m-group {
+  display: contents;
+}
+
 /* Syntax hidden as a unit in hide and focus modes. Covers the punctuation
  * (`md-mark`), the link/image URL (`md-link-uri`), and the whole image/wikilink
  * source whose rendered preview/label stands in for it (incl. the image alt
