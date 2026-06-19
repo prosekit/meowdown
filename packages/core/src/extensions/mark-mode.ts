@@ -28,6 +28,7 @@ const REVEAL_TRIGGERING_MARKS: ReadonlySet<MarkName> = new Set<MarkName>([
   // Reveals the raw `![alt](url)` when the caret is anywhere in the image
   // source, including its plain alt text (which carries only mdImageSource).
   'mdImageSource',
+  'mdMark'
 ])
 
 // The hidden marks individually decorated `.show` within a revealed range: the
