@@ -19,8 +19,6 @@ function tableShape(markdown: string): Array<Array<{ type: string; text: string 
   return rows
 }
 
-const bulletAttrs = { kind: 'bullet', order: null, checked: false, collapsed: false }
-
 describe('markdownToDoc', () => {
   it('keeps a heading', () => {
     expect(markdownToDoc('# Hello').toJSON()).toEqual({
@@ -354,7 +352,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'list',
-          attrs: bulletAttrs,
+          attrs: { kind: 'bullet', order: null, checked: false, collapsed: false },
           content: [{ type: 'paragraph', content: [{ type: 'text', text: 'star' }] }],
         },
       ],
