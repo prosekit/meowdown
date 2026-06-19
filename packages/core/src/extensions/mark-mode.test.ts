@@ -1,10 +1,9 @@
 import { TextSelection } from '@prosekit/pm/state'
-import { formatHTML } from 'diffable-html-snapshot'
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
 import { findText } from '../testing/find-text.ts'
-import { getSelectionSnapshot, setupFixture } from '../testing/index.ts'
+import { setupFixture } from '../testing/index.ts'
 
 import { defineImage } from './image.ts'
 import { defineMarkMode, type MarkMode } from './mark-mode.ts'
@@ -841,18 +840,12 @@ describe('defineMarkMode', () => {
       fixture.set(n.doc(n.paragraph('text **bold** <a>*italic* text')))
       fixture.view.focus()
 
-      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(
-        `"text **bold** ▌*italic* text"`,
-      )
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold** ▌*italic* text"`)
       await userEvent.keyboard('{Backspace}')
       // TODO: this is a bug. Pressing backspace should not delete **
-      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(
-        `"text **bold▌*italic* text"`,
-      )
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold▌*italic* text"`)
       await userEvent.keyboard('{Backspace}')
-      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(
-        `"text **bol▌*italic* text"`,
-      )
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bol▌*italic* text"`)
     })
   })
 
