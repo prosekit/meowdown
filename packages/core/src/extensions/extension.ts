@@ -9,6 +9,7 @@ import { defineBlockquote } from '@prosekit/extensions/blockquote'
 import { defineCodeBlock } from '@prosekit/extensions/code-block'
 import { defineDoc } from '@prosekit/extensions/doc'
 import { defineGapCursor } from '@prosekit/extensions/gap-cursor'
+import { defineHardBreak } from '@prosekit/extensions/hard-break'
 import { defineHorizontalRule } from '@prosekit/extensions/horizontal-rule'
 import { defineList } from '@prosekit/extensions/list'
 import { defineModClickPrevention } from '@prosekit/extensions/mod-click-prevention'
@@ -31,6 +32,7 @@ function defineEditorExtensionImpl() {
     defineParagraph(),
     defineDoc(),
     defineText(),
+    defineHardBreak(),
     defineBlockquote(),
     defineList(),
     defineHeading(),

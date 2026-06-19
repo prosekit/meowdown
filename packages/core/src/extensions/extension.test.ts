@@ -12,6 +12,7 @@ describe('defineEditorExtension', () => {
     const doc = n.doc(
       n.heading({ level: 1 }, 'Title'),
       n.paragraph('A paragraph.'),
+      n.paragraph('Line one', n.hardBreak(), 'Line two'),
       n.blockquote(n.paragraph('A quote.')),
       n.list({ kind: 'bullet' }, n.paragraph('A bullet item.')),
       n.list({ kind: 'ordered', order: 1 }, n.paragraph('An ordered item.')),
@@ -43,6 +44,22 @@ describe('defineEditorExtension', () => {
             "content": [
               {
                 "text": "A paragraph.",
+                "type": "text",
+              },
+            ],
+            "type": "paragraph",
+          },
+          {
+            "content": [
+              {
+                "text": "Line one",
+                "type": "text",
+              },
+              {
+                "type": "hardBreak",
+              },
+              {
+                "text": "Line two",
                 "type": "text",
               },
             ],

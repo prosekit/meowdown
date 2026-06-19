@@ -14,9 +14,10 @@ import { gfmBlockOnlyParser } from '../lezer/parser.ts'
  * instance and can be inserted without a JSON round trip.
  *
  * The output follows the extension set defined in `../extensions/extension.ts`
- * (doc, paragraph, text, heading, blockquote, list, codeBlock, table, tableRow,
- * tableCell, tableHeaderCell, horizontalRule). The function does not produce
- * inline marks because the markdown stays literal text - emphasis / link /
+ * (doc, paragraph, text, hardBreak, heading, blockquote, list, codeBlock,
+ * table, tableRow, tableCell, tableHeaderCell, horizontalRule). The only inline
+ * node produced is `hardBreak` (one per soft line break); the function produces
+ * no inline marks because the markdown stays literal text - emphasis / link /
  * inline-code characters survive verbatim.
  */
 export function markdownToDoc(
@@ -132,7 +133,26 @@ function convertParagraph(
   text: string,
 ): ProseMirrorNode {
   const content = text.slice(cursor.from, cursor.to)
-  return nodes.paragraph(content)
+  return nodes.paragraph(inlineWithBreaks(nodes, content))
+}
+
+/**
+ * Split inline text on its soft line breaks, turning each `\n` into a
+ * `hardBreak` node (`<br>`). A markdown soft break must not survive as a raw
+ * `\n` inside a single text node: ProseMirror's DOM parser collapses such a
+ * newline to a space the moment it re-reads the textblock, silently merging
+ * the lines in both the view and the saved document. The `hardBreak` node's
+ * one-character `\n` `leafText` keeps inline offsets aligned for the
+ * inline-mark plugin. Empty segments are dropped by the node builders.
+ */
+function inlineWithBreaks(nodes: TypedNodeBuilders, text: string): Array<ProseMirrorNode | string> {
+  const segments = text.split('\n')
+  const children: Array<ProseMirrorNode | string> = []
+  for (let i = 0; i < segments.length; i++) {
+    if (i > 0) children.push(nodes.hardBreak())
+    children.push(segments[i])
+  }
+  return children
 }
 
 function convertBlockquote(
@@ -253,7 +273,7 @@ function convertTask(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string)
   if (content.startsWith(' ')) content = content.slice(1)
   return {
     checked,
-    paragraph: content === '' ? nodes.paragraph() : nodes.paragraph(content),
+    paragraph: nodes.paragraph(inlineWithBreaks(nodes, content)),
   }
 }
 

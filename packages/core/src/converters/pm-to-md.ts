@@ -248,8 +248,15 @@ function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
   const count = node.childCount
   for (let i = 0; i < count; i++) {
     const child = node.child(i)
-    if (child.isText && child.text) out.write(child.text)
-    // Future inline node types (hardBreak, image, mention) go here.
+    if (child.isText && child.text) {
+      out.write(child.text)
+    } else if (child.type.name === ('hardBreak' satisfies NodeName)) {
+      // A `hardBreak` carries a markdown soft line break: emit a single
+      // newline. `write` re-applies the current line prefix after it, so the
+      // break stays inside the same block (list item, blockquote, …).
+      out.write('\n')
+    }
+    // Future inline node types (image, mention) go here.
   }
 }
 
