@@ -842,10 +842,9 @@ describe('defineMarkMode', () => {
 
       expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold** ▌*italic* text"`)
       await userEvent.keyboard('{Backspace}')
-      // TODO: this is a bug. Pressing backspace should not delete **
-      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold▌*italic* text"`)
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold**▌*italic* text"`)
       await userEvent.keyboard('{Backspace}')
-      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bol▌*italic* text"`)
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold*▌*italic* text"`)
     })
   })
 
