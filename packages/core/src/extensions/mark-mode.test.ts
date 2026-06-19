@@ -339,7 +339,6 @@ describe('defineMarkMode', () => {
     })
   })
 
-
   describe('md-pack structure', () => {
     it('wraps a whole link in one pack containing the anchor', async () => {
       using fixture = setupFixture()
