@@ -233,7 +233,8 @@ describe('defineMarkMode', () => {
       fixture.set(doc)
       expect(clipboardText(fixture)).toBe('Hello bold end')
     })
-    describe('md-pack structure', () => {
+
+
       it('wraps a whole link in one pack containing the anchor', async () => {
         using fixture = setupFixture()
         fixture.editor.use(defineMarkMode('focus'))
@@ -261,10 +262,8 @@ describe('defineMarkMode', () => {
         const pack = pmRoot.locate('.md-pack[data-key="image_pic.png"]')
         await expect.element(pack.getByTestId('image-preview')).toBeVisible()
       })
-    })
 
-    describe('backspace at a **bold** *italic* boundary', () => {
-      it('captures the state after one and two backspaces', async () => {
+      it('reserves marks after pressing backspaces', async () => {
         using fixture = setupFixture()
         fixture.editor.use(defineMarkMode('focus'))
         const { n } = fixture
@@ -273,7 +272,10 @@ describe('defineMarkMode', () => {
         fixture.set(doc)
         fixture.view.focus()
 
+        expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(
+        )
         await userEvent.keyboard('{Backspace}')
+        // TODO: this is a bug. Pressing backspace should not delete **
         expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(
           `"text **bold▌*italic* text"`,
         )
@@ -283,7 +285,6 @@ describe('defineMarkMode', () => {
           `"text **bol▌*italic* text"`,
         )
       })
-    })
   })
 
   describe('hide mode', () => {
