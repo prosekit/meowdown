@@ -415,21 +415,14 @@
   .md-mark,
   .md-link-uri,
   .md-image-source {
-    /*display: none;*/
-
     overflow: hidden;
-    visibility: hidden;
-    letter-spacing: -2em;
     display: inline-block;
     vertical-align: bottom;
 
-    &:has(.show) {
-      /*display: inline;*/
+    letter-spacing: -2em;
 
+    &:has(.show) {
       letter-spacing: 0;
-      width: auto;
-      height: auto;
-      visibility: visible;
     }
   }
 }
