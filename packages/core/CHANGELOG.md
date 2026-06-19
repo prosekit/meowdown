@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.2](https://github.com/prosekit/meowdown/compare/core-v0.15.1...core-v0.15.2) (2026-06-19)
+
+
+### Bug Fixes
+
+* **core:** improve focus-mode marker reveal ([#88](https://github.com/prosekit/meowdown/issues/88)) ([adb668e](https://github.com/prosekit/meowdown/commit/adb668e30e36b9ddbf10ccab7551d557b17369f3))
+
 ## [0.15.1](https://github.com/prosekit/meowdown/compare/core-v0.15.0...core-v0.15.1) (2026-06-19)
 
 
