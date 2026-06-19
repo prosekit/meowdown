@@ -17,7 +17,7 @@ function renderHTML(mode: MarkMode, text: string): string {
   fixture.editor.use(defineMarkMode(mode))
   const { n } = fixture
   fixture.set(n.doc(n.paragraph(text)))
-  return formatHTML(fixture.view.dom.innerHTML)
+  return fixture.htmlSnapshot
 }
 
 /** Mount one paragraph in `mode` and assert what a full-document copy yields (`null` = no serializer). */
@@ -691,7 +691,7 @@ describe('defineMarkMode', () => {
       fixture.editor.use(defineMarkMode('focus'))
       const { n } = fixture
       fixture.set(n.doc(n.codeBlock({ language: '' }, '*not<a> italic*')))
-      expect(formatHTML(fixture.view.dom.innerHTML)).toMatchInlineSnapshot(`
+      expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
         "
         <pre>
           <code>
@@ -708,7 +708,7 @@ describe('defineMarkMode', () => {
       fixture.editor.use(defineMarkMode('focus'))
       const { n } = fixture
       fixture.set(n.doc(n.paragraph('![alt](pic.png)')))
-      expect(formatHTML(fixture.view.dom.innerHTML)).toMatchInlineSnapshot(`
+      expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
         "
         <p>
           <span
@@ -768,7 +768,7 @@ describe('defineMarkMode', () => {
       fixture.editor.use(defineMarkMode('focus'))
       const { n } = fixture
       fixture.set(n.doc(n.paragraph('**<a>alpha** one'), n.paragraph('beta two')))
-      expect(formatHTML(fixture.view.dom.innerHTML)).toMatchInlineSnapshot(`
+      expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
         "
         <p>
           <span
@@ -803,7 +803,7 @@ describe('defineMarkMode', () => {
       fixture.view.dispatch(
         fixture.state.tr.setSelection(TextSelection.create(fixture.doc, twoPos)),
       )
-      expect(formatHTML(fixture.view.dom.innerHTML)).toMatchInlineSnapshot(`
+      expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
         "
         <p>
           <span
@@ -841,16 +841,16 @@ describe('defineMarkMode', () => {
       fixture.set(n.doc(n.paragraph('text **bold** <a>*italic* text')))
       fixture.view.focus()
 
-      expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(
         `"text **bold** ▌*italic* text"`,
       )
       await userEvent.keyboard('{Backspace}')
       // TODO: this is a bug. Pressing backspace should not delete **
-      expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(
         `"text **bold▌*italic* text"`,
       )
       await userEvent.keyboard('{Backspace}')
-      expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(
         `"text **bol▌*italic* text"`,
       )
     })
