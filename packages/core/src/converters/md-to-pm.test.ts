@@ -346,3 +346,148 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc(sampleContentMarkdown).toJSON()).toEqual(sampleContent)
   })
 })
+
+const bulletAttrs = { kind: 'bullet', order: null, checked: false, collapsed: false }
+
+describe('markdownToDoc edge cases', () => {
+  it('normalizes an asterisk bullet to a bullet list', () => {
+    expect(markdownToDoc('* star').toJSON()).toEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'list',
+          attrs: bulletAttrs,
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'star' }] }],
+        },
+      ],
+    })
+  })
+
+  it('normalizes a paren ordered delimiter to an ordered list', () => {
+    expect(markdownToDoc('1) paren').toJSON()).toEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'list',
+          attrs: { kind: 'ordered', order: 1, checked: false, collapsed: false },
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'paren' }] }],
+        },
+      ],
+    })
+  })
+
+  it('keeps a zero start number on an ordered list', () => {
+    expect(markdownToDoc('0. zero').toJSON()).toEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'list',
+          attrs: { kind: 'ordered', order: 0, checked: false, collapsed: false },
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'zero' }] }],
+        },
+      ],
+    })
+  })
+
+  it('checks a task with an uppercase marker', () => {
+    expect(markdownToDoc('- [X] upper').toJSON()).toEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'list',
+          attrs: { kind: 'task', order: null, checked: true, collapsed: false },
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'upper' }] }],
+        },
+      ],
+    })
+  })
+
+  it('parses an indented code block', () => {
+    expect(markdownToDoc('    indented').toJSON()).toEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'codeBlock',
+          attrs: { language: '' },
+          content: [{ type: 'text', text: 'indented' }],
+        },
+      ],
+    })
+  })
+
+  it('parses a tilde-fenced code block', () => {
+    expect(markdownToDoc('~~~\ntilde\n~~~').toJSON()).toEqual({
+      type: 'doc',
+      content: [
+        { type: 'codeBlock', attrs: { language: '' }, content: [{ type: 'text', text: 'tilde' }] },
+      ],
+    })
+  })
+
+  it('treats a hash without a space as a paragraph', () => {
+    expect(markdownToDoc('#nospace').toJSON()).toEqual({
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: '#nospace' }] }],
+    })
+  })
+
+  it('treats seven hashes as a paragraph', () => {
+    expect(markdownToDoc('####### seven').toJSON()).toEqual({
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: '####### seven' }] }],
+    })
+  })
+
+  it('parses an empty heading', () => {
+    expect(markdownToDoc('# ').toJSON()).toEqual({
+      type: 'doc',
+      content: [{ type: 'heading', attrs: { level: 1 } }],
+    })
+  })
+
+  it('nests a blockquote inside a blockquote', () => {
+    expect(markdownToDoc('> a\n>> b').toJSON()).toEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'blockquote',
+          content: [
+            { type: 'paragraph', content: [{ type: 'text', text: 'a' }] },
+            {
+              type: 'blockquote',
+              content: [{ type: 'paragraph', content: [{ type: 'text', text: 'b' }] }],
+            },
+          ],
+        },
+      ],
+    })
+  })
+
+  it.fails('drops the text of a setext heading', () => {
+    expect(markdownToDoc('Setext1\n===').toJSON()).toEqual({
+      type: 'doc',
+      content: [
+        { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'Setext1' }] },
+      ],
+    })
+  })
+
+  it.fails('drops a raw HTML block', () => {
+    expect(markdownToDoc('<div>html</div>').toJSON()).toEqual({
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: '<div>html</div>' }] }],
+    })
+  })
+
+  it.fails('leaks the second quote mark into blockquote text', () => {
+    expect(markdownToDoc('> l1\n> l2').toJSON()).toEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'blockquote',
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'l1\nl2' }] }],
+        },
+      ],
+    })
+  })
+})
