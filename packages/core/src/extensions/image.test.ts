@@ -119,13 +119,13 @@ describe('image caret navigation in hide mode', () => {
     setCaret(fixture, 1)
     expect(await traceKeySelection(fixture, 'ArrowRight', 6)).toMatchInlineSnapshot(`
       [
-        "A▌BC![img](url)DEF",
-        "AB▌C![img](url)DEF",
-        "ABC▌![img](url)DEF",
-        "ABC▛![img](url)▟DEF",
-        "ABC![img](url)▌DEF",
-        "ABC![img](url)D▌EF",
-        "ABC![img](url)DE▌F",
+        "A┃BC![img](url)DEF",
+        "AB┃C![img](url)DEF",
+        "ABC┃![img](url)DEF",
+        "ABC❰![img](url)❱DEF",
+        "ABC![img](url)┃DEF",
+        "ABC![img](url)D┃EF",
+        "ABC![img](url)DE┃F",
       ]
     `)
   })
@@ -135,10 +135,10 @@ describe('image caret navigation in hide mode', () => {
     setCaret(fixture, 15)
     expect(await traceKeySelection(fixture, 'ArrowLeft', 3)).toMatchInlineSnapshot(`
       [
-        "ABC![img](url)D▌EF",
-        "ABC![img](url)▌DEF",
-        "ABC▛![img](url)▟DEF",
-        "ABC▌![img](url)DEF",
+        "ABC![img](url)D┃EF",
+        "ABC![img](url)┃DEF",
+        "ABC❰![img](url)❱DEF",
+        "ABC┃![img](url)DEF",
       ]
     `)
   })
@@ -153,10 +153,10 @@ describe('image caret navigation in hide mode', () => {
 
     expect(result).toMatchInlineSnapshot(`
       [
-        "AB▌C![img](url)DEF  ->  A▌C![img](url)DEF",
-        "ABC▌![img](url)DEF  ->  AB▌![img](url)DEF",
-        "ABC![img](url)▌DEF  ->  ABC▌DEF",
-        "ABC![img](url)D▌EF  ->  ABC![img](url)▌EF",
+        "AB┃C![img](url)DEF  ->  A┃C![img](url)DEF",
+        "ABC┃![img](url)DEF  ->  AB┃![img](url)DEF",
+        "ABC![img](url)┃DEF  ->  ABC┃DEF",
+        "ABC![img](url)D┃EF  ->  ABC![img](url)┃EF",
       ]
     `)
   })
@@ -177,7 +177,7 @@ describe('image is not atomic outside hide mode', () => {
 
   it('Backspace deletes one source character, not the whole image', async () => {
     expect(await traceKeyAt(setupShow, 7, 'Backspace')).toMatchInlineSnapshot(
-      `"ABC![im▌g](url)DEF  ->  ABC![i▌g](url)DEF"`,
+      `"ABC![im┃g](url)DEF  ->  ABC![i┃g](url)DEF"`,
     )
   })
 })
@@ -190,17 +190,17 @@ describe('image selection ring in hide mode', () => {
 
     // Put the caret just before the image
     setCaret(fixture, 3)
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC▌![img](url)DEF"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC┃![img](url)DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
 
     // Selects the whole image
     await userEvent.keyboard('{ArrowRight}')
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC▛![img](url)▟DEF"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC❰![img](url)❱DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'solid' })
 
     // Steps past, collapses the caret
     await userEvent.keyboard('{ArrowRight}')
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC![img](url)▌DEF"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC![img](url)┃DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
   })
 
@@ -209,12 +209,12 @@ describe('image selection ring in hide mode', () => {
 
     // Put the caret just after the image
     setCaret(fixture, 14)
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC![img](url)▌DEF"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC![img](url)┃DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
 
     // Selects the whole image
     await userEvent.keyboard('{ArrowLeft}')
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC▛![img](url)▟DEF"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC❰![img](url)❱DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'solid' })
   })
 })

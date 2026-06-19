@@ -837,11 +837,11 @@ describe('focus mode', () => {
     fixture.set(n.doc(n.paragraph('text **bold** <a>*italic* text')))
     fixture.view.focus()
 
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold** ▌*italic* text"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold** ┃*italic* text"`)
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold**▌*italic* text"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold**┃*italic* text"`)
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold*▌*italic* text"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold*┃*italic* text"`)
   })
 
 
@@ -950,12 +950,12 @@ describe('hide mode', () => {
     fixture.set(n.doc(n.paragraph('text **bold** <a>text')))
     fixture.view.focus()
 
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot( )
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot( `"text **bold** ┃text"`)
     // TODO: this is a bug. Pressing backspace should not delete the closing **
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot( )
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot( `"text **bold┃text"`)
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot( )
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot( `"text **bol┃text"`)
   })
 })
 
