@@ -8,10 +8,17 @@ import { setupFixture, type Fixture } from '../testing/index.ts'
 import type { MarkMode } from './mark-mode.ts'
 import { defineMarkMode } from './mark-mode.ts'
 
-const revealedMarkers = page.locate('.ProseMirror span.show')
+// A syntax span counts as revealed when the focus decoration (`.show`) lands
+// inside it, which is exactly what the production CSS keys off. One decoration
+// now covers the whole `mdGroup`, so counting `.show` spans directly would also
+// count the unit's text; scoping to the hidden-syntax spans recovers the marker
+// count.
+const revealedMarkers = page.locate(
+  '.ProseMirror .md-mark:has(.show), .ProseMirror .md-link-uri:has(.show), .ProseMirror .md-image-source:has(.show)',
+)
 const pmRoot = page.locate('.ProseMirror')
 
-/** Asserts how many syntax markers are revealed (rendered as `.show` spans). */
+/** Asserts how many syntax markers are revealed (made visible by the `.show` decoration). */
 async function expectRevealedMarkers(count: number): Promise<void> {
   await expect.element(revealedMarkers).toHaveLength(count)
 }
@@ -180,6 +187,47 @@ describe('defineMarkMode', () => {
         fixture.state.tr.setSelection(TextSelection.create(fixture.doc, twoPos)),
       )
       await expectRevealedMarkers(0)
+    })
+
+    it('reveals the whole link when the cursor sits right after the closing )', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      const doc = n.doc(n.paragraph('ABC[link](https://example.com)<a>DEF'))
+      fixture.set(doc)
+      // `[`, `](`, the url and `)` all reveal; the trailing-edge caret used to
+      // reveal nothing because `)` carried no triggering mark.
+      await expectRevealedMarkers(4)
+    })
+
+    it('reveals the angle autolink when the cursor sits right after the closing >', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      const doc = n.doc(n.paragraph('a <https://example.com><a> b'))
+      fixture.set(doc)
+      await expectRevealedMarkers(2)
+    })
+
+    it('reveals the whole outer unit even when the cursor is in its bold-only region', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      // Cursor in the leading `bold`, outside the nested italic. The whole unit
+      // reveals: both `**` and both inner `*` (4 markers).
+      const doc = n.doc(n.paragraph('**bo<a>ld *italic* bold**'))
+      fixture.set(doc)
+      await expectRevealedMarkers(4)
+    })
+
+    it('reveals only the link the cursor is in, not its adjacent neighbor', async () => {
+      using fixture = setupFixture()
+      fixture.editor.use(defineMarkMode('focus'))
+      const { n } = fixture
+      const doc = n.doc(n.paragraph('[a<a>](x)[b](y)'))
+      fixture.set(doc)
+      // Only the first link's 4 markers; the abutting second link stays hidden.
+      await expectRevealedMarkers(4)
     })
   })
 
