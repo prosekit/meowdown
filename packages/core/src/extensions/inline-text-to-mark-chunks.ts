@@ -107,13 +107,13 @@ function walk(
       emit(out, pos, node.from, parentMarks)
     }
     const type: number = node.type
-    if ( type === LEZER_NODE_IDS.Link) {
+    if (type === LEZER_NODE_IDS.Link) {
       walkLink(node, parentMarks, text, marks, out)
-    } else if ( type === LEZER_NODE_IDS.Image) {
+    } else if (type === LEZER_NODE_IDS.Image) {
       walkImage(node, parentMarks, text, marks, out)
-    } else if ( type === LEZER_NODE_IDS.Wikilink) {
+    } else if (type === LEZER_NODE_IDS.Wikilink) {
       walkWikilink(node, parentMarks, text, marks, out)
-    } else if ( type === LEZER_NODE_IDS.URL) {
+    } else if (type === LEZER_NODE_IDS.URL) {
       // A standalone `URL` node is a GFM autolink (the address part of a real
       // `[text](url)` is handled inside `walkLink`, not here). Linkify the
       // shapes we recognize; anything else keeps the muted `mdLinkUri`.
@@ -124,7 +124,21 @@ function walk(
       emit(out, node.from, node.to, [...parentMarks, mark])
     } else {
 
-      const packKey = PACK_KEY_BY_TYPE_ID.get(type)
+
+        let packKey: string | undefined
+
+      if (type === LEZER_NODE_IDS.Emphasis) {
+        packKey = "italic"
+      } else if (type === LEZER_NODE_IDS.StrongEmphasis) {
+        packKey = "bold"
+      } else if (type === LEZER_NODE_IDS.InlineCode) {
+        packKey = "code"
+      } else if (type === LEZER_NODE_IDS.Strikethrough) {
+        packKey = "strike"
+      } else if (type === LEZER_NODE_IDS.Autolink) {
+        packKey = "autolink"
+      }
+
       const base = packKey
         ? [...parentMarks, marks.mdPack.create({ key: packKey } satisfies MdPackAttrs)]
         : parentMarks
