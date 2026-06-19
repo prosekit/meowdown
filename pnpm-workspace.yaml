@@ -17,6 +17,7 @@ trustLockfile: true
 minimumReleaseAgeExclude:
   - '@ocavue/eslint-config'
   - '@prosekit/*'
+  - diffable-html-snapshot@0.3.0
 
 # Enable "blockExoticSubdeps" and "overrides" to install packages from pkg.pr.new
 # blockExoticSubdeps: false
