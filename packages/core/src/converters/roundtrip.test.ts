@@ -51,6 +51,13 @@ describe('markdown round-trip is byte-identical', () => {
       1. one
       1. two
     `,
+    // Empty list items keep their marker; the line is not dropped
+    '-',
+    dedent`
+      - a
+      -
+      - b
+    `,
     // A genuinely loose item (two blocks) keeps its blank line
     dedent`
       - a
@@ -120,5 +127,10 @@ describe('markdown round-trip normalizations', () => {
 
   it('normalizes an uppercase task marker to lowercase', () => {
     expect(roundtrip('- [X] done')).toBe('- [x] done\n')
+  })
+
+  it('trims an empty list item to a bare marker', () => {
+    expect(roundtrip('- ')).toBe('-\n')
+    expect(roundtrip('- a\n- \n- b')).toBe('- a\n-\n- b\n')
   })
 })
