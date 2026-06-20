@@ -383,7 +383,11 @@ function convertTableRow(
       } else if (cursor.type.id === LEZER_NODE_IDS.TableCell) {
         const column = delimiterCount - (hasLeadingPipe ? 1 : 0)
         if (column >= 0 && column < columnCount) {
-          cellTexts[column] = text.slice(cursor.from, cursor.to).trim()
+          // Unescape `\|` to a logical `|`; the serializer re-escapes it.
+          cellTexts[column] = text
+            .slice(cursor.from, cursor.to)
+            .trim()
+            .replaceAll(String.raw`\|`, '|')
         }
       }
     } while (cursor.nextSibling())

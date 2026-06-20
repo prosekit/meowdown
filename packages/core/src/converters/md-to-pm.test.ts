@@ -347,6 +347,24 @@ describe('markdownToDoc', () => {
     ])
   })
 
+  it('unescapes an escaped pipe in a cell', () => {
+    const md = dedent`
+      | a \| b | c   |
+      | ------- | --- |
+      | 1       | 2   |
+    `
+    expect(tableShape(md)).toEqual([
+      [
+        { type: 'tableHeaderCell', text: 'a | b' },
+        { type: 'tableHeaderCell', text: 'c' },
+      ],
+      [
+        { type: 'tableCell', text: '1' },
+        { type: 'tableCell', text: '2' },
+      ],
+    ])
+  })
+
   it('keeps a short row padded', () => {
     const md = dedent`
       | a   | b   | c   |
