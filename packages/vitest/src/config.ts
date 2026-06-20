@@ -25,7 +25,7 @@ export function defineSharedConfig() {
         : undefined,
     test: {
       setupFiles: browserName === 'webkit' ? ['@meowdown/vitest/setup-webkit'] : [],
-      retry: process.env.CI ? 4 : 0,
+      retry: process.env.CI ? 3 : 0,
       bail: process.env.CI ? 0 : 1,
       fileParallelism: false,
       browser: {
