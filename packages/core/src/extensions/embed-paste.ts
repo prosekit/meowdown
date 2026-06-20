@@ -17,11 +17,11 @@ export function detectEmbedUrl(text: string): string | undefined {
 function getPastedText(event: ClipboardEvent, slice: Slice): string {
   const fromClipboard = event.clipboardData?.getData('text/plain')
   if (fromClipboard) return fromClipboard
-  // Firefox's ClipboardEvent constructor discards the DataTransfer passed to it
-  // and substitutes an empty one, so a synthetic paste event carries no text.
-  // Fall back to the slice ProseMirror parsed from the paste, which holds the
-  // same text on every engine.
-  // See https://github.com/w3c/clipboard-apis/issues/64
+  // Firefox ignores the standard `clipboardData` init member of the ClipboardEvent
+  // constructor (Gecko reads non-standard `data`/`dataType` strings instead), so a
+  // synthetic paste carries no text there; Chrome and WebKit honor it. Fall back to
+  // the slice ProseMirror parsed from the paste, which holds the text on every engine.
+  // See https://github.com/w3c/clipboard-apis/issues/33
   return slice.content.textBetween(0, slice.content.size, '\n')
 }
 
