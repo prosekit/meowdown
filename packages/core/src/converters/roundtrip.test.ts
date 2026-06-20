@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
@@ -172,6 +172,12 @@ describe('inline', () => {
 
   it('keeps a processing instruction', () => {
     expect(roundtrip('<?php echo 1; ?>')).toBe('<?php echo 1; ?>\n')
+  })
+
+  it('keeps a link reference definition', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    expect(roundtrip('[foo]: /url')).toBe('[foo]: /url\n')
+    warn.mockRestore()
   })
 })
 

@@ -97,8 +97,17 @@ function convertBlock(
       // `kind`, so an ordered item cannot also be a task - keep the
       // `[x]` marker as literal paragraph text so it round-trips verbatim.
       return [convertParagraph(nodes, cursor, text)]
-    default:
-      return []
+    default: {
+      // Never silently drop a block: an unhandled type (e.g. a link reference
+      // definition) keeps its raw source as literal paragraph text. Warn so a
+      // missing converter case surfaces instead of losing content quietly.
+      const raw = text.slice(cursor.from, cursor.to)
+      if (raw.trim() === '') return []
+      console.warn(
+        `[meowdown] markdownToDoc: unsupported block "${cursor.type.name}" kept as literal text`,
+      )
+      return [convertParagraph(nodes, cursor, text)]
+    }
   }
 }
 

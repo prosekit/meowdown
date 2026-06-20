@@ -1,5 +1,5 @@
 import dedent from 'dedent'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { markdownToDoc } from './md-to-pm.ts'
 import { sampleContent, sampleContentMarkdown } from './sample-content.ts'
@@ -480,6 +480,16 @@ describe('markdownToDoc', () => {
       type: 'doc',
       content: [{ type: 'paragraph', content: [{ type: 'text', text: '<?php echo 1; ?>' }] }],
     })
+  })
+
+  it('warns and keeps an unsupported block as literal text', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    expect(markdownToDoc('[foo]: /url').toJSON()).toEqual({
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: '[foo]: /url' }] }],
+    })
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('[meowdown]'))
+    warn.mockRestore()
   })
 
   it.fails('keeps a two-line quote clean', () => {
