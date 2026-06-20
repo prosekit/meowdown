@@ -4,7 +4,7 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
-    "./setup": "./src/setup.ts"
+    "./setup-webkit": "./src/setup-webkit.ts"
   },
   "devDependencies": {
     "@ocavue/tsconfig": "^0.7.1",

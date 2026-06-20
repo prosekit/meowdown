@@ -32,7 +32,7 @@ export function defineSharedConfig() {
           { target: 'es2025' }
         : undefined,
     test: {
-      setupFiles: ['@meowdown/config-vitest/setup'],
+      setupFiles: browserName === 'webkit' ? ['@meowdown/config-vitest/setup-webkit'] : [],
       retry: process.env.CI ? 3 : 0,
       bail: process.env.CI ? 0 : 1,
       browser: {
