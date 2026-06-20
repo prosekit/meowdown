@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.2](https://github.com/prosekit/meowdown/compare/core-v0.16.1...core-v0.16.2) (2026-06-20)
+
+
+### Bug Fixes
+
+* **core:** preserve thematic break marker on round-trip ([#104](https://github.com/prosekit/meowdown/issues/104)) ([7cfc064](https://github.com/prosekit/meowdown/commit/7cfc0646ad57d29491f6dcfb5820e6f0095e168f))
+
 ## [0.16.1](https://github.com/prosekit/meowdown/compare/core-v0.16.0...core-v0.16.1) (2026-06-20)
 
 

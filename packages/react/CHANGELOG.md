@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.2](https://github.com/prosekit/meowdown/compare/react-v0.16.1...react-v0.16.2) (2026-06-20)
+
+
+### Miscellaneous Chores
+
+* **react:** Synchronize meowdown versions
+
 ## [0.16.1](https://github.com/prosekit/meowdown/compare/react-v0.16.0...react-v0.16.1) (2026-06-20)
 
 
