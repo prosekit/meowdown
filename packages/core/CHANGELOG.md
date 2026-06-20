@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.16.0](https://github.com/prosekit/meowdown/compare/core-v0.15.2...core-v0.16.0) (2026-06-20)
+
+
+### Features
+
+* **core:** support YAML frontmatter ([#100](https://github.com/prosekit/meowdown/issues/100)) ([b915768](https://github.com/prosekit/meowdown/commit/b915768914296eb88b88204822f865aa6b3d3a50))
+
+
+### Bug Fixes
+
+* **core:** avoid double-escaping pipes in table cells ([#102](https://github.com/prosekit/meowdown/issues/102)) ([79e2987](https://github.com/prosekit/meowdown/commit/79e2987358ca541782a5aa58c1c7e201e50ad086))
+* **core:** emit empty code block without a blank line ([#99](https://github.com/prosekit/meowdown/issues/99)) ([83bef2c](https://github.com/prosekit/meowdown/commit/83bef2c81d22b1cf0911768586d7fedea2f0040f))
+* **core:** improve markdown round-trip fidelity ([#98](https://github.com/prosekit/meowdown/issues/98)) ([8d704a1](https://github.com/prosekit/meowdown/commit/8d704a17f6d2655fa09eca668ccd32509ab25e67))
+* **core:** stop emitting junk marker lines after nested blocks ([#103](https://github.com/prosekit/meowdown/issues/103)) ([e41ed98](https://github.com/prosekit/meowdown/commit/e41ed98afb06a853b3a50b8706ca84583d58718c))
+* fall back to slice text when clipboardData is empty ([#93](https://github.com/prosekit/meowdown/issues/93)) ([ff3fc07](https://github.com/prosekit/meowdown/commit/ff3fc07ad8f11c8cc0cd71d36d653001a1d21556))
+
 ## [0.15.2](https://github.com/prosekit/meowdown/compare/core-v0.15.1...core-v0.15.2) (2026-06-19)
 
 
