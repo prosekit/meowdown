@@ -16,6 +16,17 @@ export function defineSharedConfig() {
     return 'chromium'
   })()
 
+  // WebKit and Chromium reject navigator.clipboard.readText() unless 'clipboard-read'
+  // is granted. Chromium also needs 'clipboard-write'. Firefox reads without a grant.
+  const clipboardPermissions =
+    browserName === 'chromium'
+      ? ['clipboard-read', 'clipboard-write']
+      : browserName === 'webkit'
+        ? ['clipboard-read']
+        : undefined
+
+  console.error('[meowdown][debug] clipboardPermissions', browserName, clipboardPermissions)
+
   return defineProject({
     plugins: [playwrightCommands()],
     oxc:
@@ -39,8 +50,7 @@ export function defineSharedConfig() {
             reducedMotion: 'reduce',
             hasTouch: true,
             // A list of permissions to grant to all pages in this context. See https://playwright.dev/docs/api/class-browsercontext#browser-context-grant-permissions
-            permissions:
-              browserName === 'chromium' ? ['clipboard-read', 'clipboard-write'] : undefined,
+            permissions: clipboardPermissions,
           },
         }),
         headless: true,
