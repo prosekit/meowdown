@@ -292,11 +292,11 @@ describe('bullet lists', () => {
     expect(roundtrip('- a\n-\n- b')).toBe('- a\n-\n- b\n')
   })
 
-  it.fails('keeps an asterisk bullet', () => {
+  it('keeps an asterisk bullet', () => {
     expect(roundtrip('* star')).toBe('* star\n')
   })
 
-  it.fails('keeps a plus bullet', () => {
+  it('keeps a plus bullet', () => {
     expect(roundtrip('+ plus')).toBe('+ plus\n')
   })
 

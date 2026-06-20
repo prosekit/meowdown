@@ -10,11 +10,12 @@ import type { NodeName } from './node-names.ts'
 /**
  * The marker for a list item.
  *
- * For ordered list items, the marker is either `.` or `)`.
+ * For ordered list items, the marker is `.` or `)`.
+ * For bullet and task list items, the marker is `-`, `*`, or `+`.
  *
  * Defaults to null if unknown.
  */
-export type ListMarker = '.' | ')' | null
+export type ListMarker = '.' | ')' | '-' | '*' | '+' | null
 
 export interface MeowdownListAttrs extends ListAttrs {
   marker?: ListMarker
@@ -30,8 +31,14 @@ function defineListMarkerAttr(): ListMarkerExtension {
     default: null,
     // A new item created by pressing Enter keeps the previous item's delimiter.
     splittable: true,
-    toDOM: (value) => (value === ')' ? ['data-list-marker', ')'] : null),
-    parseDOM: (node) => (node.getAttribute('data-list-marker') === ')' ? ')' : null),
+    // Persist only the non-canonical markers (`.` and `-` are the defaults the
+    // serializer emits anyway); the rest must survive an editor DOM re-parse.
+    toDOM: (value) =>
+      value === ')' || value === '*' || value === '+' ? ['data-list-marker', value] : null,
+    parseDOM: (node) => {
+      const value = node.getAttribute('data-list-marker')
+      return value === ')' || value === '*' || value === '+' ? value : null
+    },
   })
 }
 

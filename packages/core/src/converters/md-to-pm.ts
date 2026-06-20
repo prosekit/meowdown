@@ -195,10 +195,10 @@ function convertListItem(
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
+        const markText = text.slice(cursor.from, cursor.to)
         if (kind === 'ordered') {
           // An ordered list marker is a sequence of 1–9 arabic digits `(0-9)`, followed by either a `.` character or a `)` character.
           // https://spec.commonmark.org/0.31.2/#ordered-list-marker
-          const markText = text.slice(cursor.from, cursor.to)
           const number = Number.parseInt(markText, 10)
           order = Number.isFinite(number) ? number : 1
           if (markText.endsWith(')')) {
@@ -206,6 +206,10 @@ function convertListItem(
           } else if (markText.endsWith('.')) {
             marker = '.'
           }
+        } else {
+          // A bullet list marker is one of `-`, `+`, or `*`.
+          // https://spec.commonmark.org/0.31.2/#bullet-list-marker
+          marker = markText === '*' || markText === '+' ? markText : '-'
         }
         continue
       }

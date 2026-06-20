@@ -17,6 +17,10 @@ describe('checkRoundTrip', () => {
       - b
     `,
     dedent`
+      * a
+      * b
+    `,
+    dedent`
       |  |  |  |
       | --- | --- | --- |
       |  |  |  |
@@ -42,10 +46,6 @@ describe('checkRoundTrip', () => {
       Hello
       =====
     `, // setext heading
-    dedent`
-      * a
-      * b
-    `, // bullet markers normalize to `-`
   ])('reports lossy for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('lossy')
   })
