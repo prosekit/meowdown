@@ -23,6 +23,7 @@ describe('markdownToDoc', () => {
   it('keeps a heading', () => {
     expect(markdownToDoc('# Hello').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'heading',
@@ -36,6 +37,7 @@ describe('markdownToDoc', () => {
   it('keeps a paragraph', () => {
     expect(markdownToDoc('hello world').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'paragraph',
@@ -48,6 +50,7 @@ describe('markdownToDoc', () => {
   it('keeps a blockquote', () => {
     expect(markdownToDoc('> quoted text').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'blockquote',
@@ -69,6 +72,7 @@ describe('markdownToDoc', () => {
     `
     expect(markdownToDoc(md).toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'list',
@@ -105,6 +109,7 @@ describe('markdownToDoc', () => {
     `
     expect(markdownToDoc(md).toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'list',
@@ -137,6 +142,7 @@ describe('markdownToDoc', () => {
   it('keeps a task item', () => {
     expect(markdownToDoc('- [ ] todo').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'list',
@@ -157,6 +163,7 @@ describe('markdownToDoc', () => {
   it('keeps a checked task', () => {
     expect(markdownToDoc('- [x] done').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'list',
@@ -191,6 +198,7 @@ describe('markdownToDoc', () => {
     // also be a task; the marker stays in the text and round-trips verbatim.
     expect(markdownToDoc('1. [x] done').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'list',
@@ -211,6 +219,7 @@ describe('markdownToDoc', () => {
   it('keeps a fenced block with language', () => {
     expect(markdownToDoc('```js\nconsole.log(1)\n```').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'codeBlock',
@@ -224,6 +233,7 @@ describe('markdownToDoc', () => {
   it('keeps a horizontal rule', () => {
     expect(markdownToDoc('---').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [{ type: 'horizontalRule' }],
     })
   })
@@ -236,6 +246,7 @@ describe('markdownToDoc', () => {
     `
     expect(markdownToDoc(md).toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'table',
@@ -381,6 +392,7 @@ describe('markdownToDoc', () => {
   it('keeps an asterisk bullet', () => {
     expect(markdownToDoc('* star').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'list',
@@ -401,6 +413,7 @@ describe('markdownToDoc', () => {
   it('keeps a paren ordered delimiter', () => {
     expect(markdownToDoc('1) paren').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'list',
@@ -421,6 +434,7 @@ describe('markdownToDoc', () => {
   it('keeps a zero start', () => {
     expect(markdownToDoc('0. zero').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'list',
@@ -441,6 +455,7 @@ describe('markdownToDoc', () => {
   it('keeps an uppercase task marker', () => {
     expect(markdownToDoc('- [X] upper').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'list',
@@ -461,6 +476,7 @@ describe('markdownToDoc', () => {
   it('keeps an indented code block', () => {
     expect(markdownToDoc('    indented').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'codeBlock',
@@ -474,6 +490,7 @@ describe('markdownToDoc', () => {
   it('keeps a tilde fence', () => {
     expect(markdownToDoc('~~~\ntilde\n~~~').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         { type: 'codeBlock', attrs: { language: '' }, content: [{ type: 'text', text: 'tilde' }] },
       ],
@@ -483,6 +500,7 @@ describe('markdownToDoc', () => {
   it('keeps a spaceless hash as text', () => {
     expect(markdownToDoc('#nospace').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [{ type: 'paragraph', content: [{ type: 'text', text: '#nospace' }] }],
     })
   })
@@ -490,6 +508,7 @@ describe('markdownToDoc', () => {
   it('keeps seven hashes as text', () => {
     expect(markdownToDoc('####### seven').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [{ type: 'paragraph', content: [{ type: 'text', text: '####### seven' }] }],
     })
   })
@@ -497,6 +516,7 @@ describe('markdownToDoc', () => {
   it('keeps an empty heading', () => {
     expect(markdownToDoc('# ').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [{ type: 'heading', attrs: { level: 1 } }],
     })
   })
@@ -504,6 +524,7 @@ describe('markdownToDoc', () => {
   it('keeps a nested quote', () => {
     expect(markdownToDoc('> a\n>> b').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'blockquote',
@@ -522,6 +543,7 @@ describe('markdownToDoc', () => {
   it.fails('keeps setext text', () => {
     expect(markdownToDoc('Setext1\n===').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'Setext1' }] },
       ],
@@ -531,6 +553,7 @@ describe('markdownToDoc', () => {
   it('keeps a raw HTML block', () => {
     expect(markdownToDoc('<div>html</div>').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [{ type: 'paragraph', content: [{ type: 'text', text: '<div>html</div>' }] }],
     })
   })
@@ -538,6 +561,7 @@ describe('markdownToDoc', () => {
   it('keeps a processing instruction', () => {
     expect(markdownToDoc('<?php echo 1; ?>').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [{ type: 'paragraph', content: [{ type: 'text', text: '<?php echo 1; ?>' }] }],
     })
   })
@@ -545,12 +569,50 @@ describe('markdownToDoc', () => {
   it('keeps a two-line quote clean', () => {
     expect(markdownToDoc('> l1\n> l2').toJSON()).toEqual({
       type: 'doc',
+      attrs: { frontmatter: null },
       content: [
         {
           type: 'blockquote',
           content: [{ type: 'paragraph', content: [{ type: 'text', text: 'l1\nl2' }] }],
         },
       ],
+    })
+  })
+
+  it('keeps YAML frontmatter as a doc attribute', () => {
+    // The whole input is the frontmatter block, so the only content is the
+    // empty paragraph the schema fills in (it serializes back to nothing).
+    expect(markdownToDoc('---\ntitle: x\n---').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: 'title: x' },
+      content: [{ type: 'paragraph' }],
+    })
+  })
+
+  it('keeps a multi-line frontmatter body literal before content', () => {
+    const md = '---\ntitle: x\ntags: [a, b]\n---\n\n# heading'
+    expect(markdownToDoc(md).toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: 'title: x\ntags: [a, b]' },
+      content: [
+        { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'heading' }] },
+      ],
+    })
+  })
+
+  it('keeps an empty frontmatter block as an empty string', () => {
+    expect(markdownToDoc('---\n---').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: '' },
+      content: [{ type: 'paragraph' }],
+    })
+  })
+
+  it('keeps a lone dashes line as a thematic break, not frontmatter', () => {
+    expect(markdownToDoc('---').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [{ type: 'horizontalRule' }],
     })
   })
 })

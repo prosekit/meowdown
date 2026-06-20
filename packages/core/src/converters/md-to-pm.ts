@@ -33,10 +33,34 @@ export function markdownToDoc(
   markdown: string,
   nodes: TypedNodeBuilders = getNodeBuilders(),
 ): ProseMirrorNode {
-  const tree = gfmBlockOnlyParser.parse(markdown)
+  // Peel off a leading YAML frontmatter block (`---\n...\n---`) before lezer
+  const [frontmatterBody, frontmatterMatchLength] = matchFrontmatter(markdown)
+  const rest = frontmatterMatchLength ? markdown.slice(frontmatterMatchLength) : markdown
+
+  const tree = gfmBlockOnlyParser.parse(rest)
   const cursor = tree.cursor()
-  const blocks = collectBlocks(nodes, cursor, markdown)
-  return nodes.doc(blocks)
+  const blocks = collectBlocks(nodes, cursor, rest)
+
+  return nodes.doc({ frontmatter: frontmatterBody }, blocks)
+}
+
+/**
+ * Matches a leading YAML frontmatter block: a `---` fence at offset 0, a body,
+ * and a closing `---` fence, each fence being exactly three dashes followed by
+ * optional spaces or tabs. Returns the body (the lines between the fences,
+ * joined by `\n`, without a trailing newline) and the length of the matched
+ * region, or undefined when there is no terminated frontmatter block (a lone `---`
+ * with no closing fence stays a thematic break).
+ */
+const FRONTMATTER_RE = /^---[ \t]*\r?\n([\s\S]*?\n)?---[ \t]*(?:\r?\n|$)/
+
+function matchFrontmatter(
+  markdown: string,
+): [body?: string | undefined, matchLength?: number | undefined] {
+  const match = FRONTMATTER_RE.exec(markdown)
+  if (!match) return []
+  const body = (match[1] ?? '').replace(/\r?\n$/, '')
+  return [body, match[0].length]
 }
 
 /**

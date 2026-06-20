@@ -2,6 +2,7 @@ import type { CodeBlockAttrs } from '@prosekit/extensions/code-block'
 import type { HeadingAttrs } from '@prosekit/extensions/heading'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
+import type { Frontmatter } from '../extensions/frontmatter.ts'
 import type { MeowdownListAttrs } from '../extensions/list.ts'
 import type { NodeName } from '../extensions/node-names.ts'
 import { longestBacktickRun } from '../utils/backticks.ts'
@@ -23,8 +24,26 @@ import { longestBacktickRun } from '../utils/backticks.ts'
  */
 export function docToMarkdown(node: ProseMirrorNode): string {
   const out = new MdOut()
+  emitFrontmatter(node.attrs.frontmatter as Frontmatter, out)
   emit(node, out)
   return out.finish()
+}
+
+/**
+ * Emit the document's YAML frontmatter (stored as a `doc` attribute) as a
+ * leading `---\n{body}\n---` block. `null` (the default) emits nothing; an
+ * empty body emits `---\n---` with no middle blank line.
+ */
+function emitFrontmatter(body: Frontmatter, out: MdOut): void {
+  if (body === null) return
+  out.write('---')
+  out.write('\n')
+  if (body !== '') {
+    out.write(body)
+    out.write('\n')
+  }
+  out.write('---')
+  out.closeBlock()
 }
 
 /** Heading prefixes indexed by level (1..6). Index 0 is a sentinel. */

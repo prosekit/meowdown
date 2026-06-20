@@ -30,7 +30,6 @@ export interface MeowdownListAttrs extends ListAttrs {
   taskMarker?: TaskMarker
 }
 
-// `marker` has a default, so it must stay optional in the node builders.
 type ListMarkerExtension = Extension<{ Nodes: { list: { marker?: ListMarker } } }>
 
 function defineListMarkerAttr(): ListMarkerExtension {
@@ -51,7 +50,6 @@ function defineListMarkerAttr(): ListMarkerExtension {
   })
 }
 
-// `taskMarker` has a default, so it must stay optional in the node builders.
 type ListTaskMarkerExtension = Extension<{ Nodes: { list: { taskMarker?: TaskMarker } } }>
 
 function defineListTaskMarkerAttr(): ListTaskMarkerExtension {
