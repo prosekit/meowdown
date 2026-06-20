@@ -34,17 +34,14 @@ export function markdownToDoc(
   nodes: TypedNodeBuilders = getNodeBuilders(),
 ): ProseMirrorNode {
   // Peel off a leading YAML frontmatter block (`---\n...\n---`) before lezer
-  const  [frontmatterBody, frontmatterMatchLength ] = matchFrontmatter(markdown)
+  const [frontmatterBody, frontmatterMatchLength] = matchFrontmatter(markdown)
   const rest = frontmatterMatchLength ? markdown.slice(frontmatterMatchLength) : markdown
-
-
-
 
   const tree = gfmBlockOnlyParser.parse(rest)
   const cursor = tree.cursor()
   const blocks = collectBlocks(nodes, cursor, rest)
 
-  return  nodes.doc({ frontmatter: frontmatterBody }, blocks)
+  return nodes.doc({ frontmatter: frontmatterBody }, blocks)
 }
 
 /**
@@ -57,9 +54,11 @@ export function markdownToDoc(
  */
 const FRONTMATTER_RE = /^---[ \t]*\r?\n([\s\S]*?\n)?---[ \t]*(?:\r?\n|$)/
 
-function matchFrontmatter(markdown: string): [ body?: string | undefined, matchLength?: number | undefined ] {
+function matchFrontmatter(
+  markdown: string,
+): [body?: string | undefined, matchLength?: number | undefined] {
   const match = FRONTMATTER_RE.exec(markdown)
-  if (!match) return [ ]
+  if (!match) return []
   const body = (match[1] ?? '').replace(/\r?\n$/, '')
   return [body, match[0].length]
 }
