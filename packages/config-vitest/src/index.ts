@@ -38,7 +38,6 @@ export function defineSharedConfig() {
           contextOptions: {
             reducedMotion: 'reduce',
             hasTouch: true,
-
             // A list of permissions to grant to all pages in this context. See https://playwright.dev/docs/api/class-browsercontext#browser-context-grant-permissions
             permissions:
               browserName === 'chromium' ? ['clipboard-read', 'clipboard-write'] : undefined,
