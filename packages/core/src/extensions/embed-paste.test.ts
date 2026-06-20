@@ -1,4 +1,3 @@
-import { isFirefox } from '@meowdown/vitest/helpers'
 import { isApple } from '@prosekit/core'
 import { pasteText } from '@prosekit/core/test'
 import { describe, expect, it } from 'vitest'
@@ -52,10 +51,7 @@ describe('detectEmbedUrl', () => {
 })
 
 describe('paste a lone embed link', () => {
-  it.skipIf(
-    // TODO: fix the test in Firefox.
-    isFirefox(),
-  )('embeds a pasted YouTube link', async () => {
+  it('embeds a pasted YouTube link', async () => {
     using fixture = setupFixture()
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
@@ -69,10 +65,7 @@ describe('paste a lone embed link', () => {
       .toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ')
   })
 
-  it.skipIf(
-    // TODO: fix the test in Firefox.
-    isFirefox(),
-  )('embeds a pasted tweet link', async () => {
+  it('embeds a pasted tweet link', async () => {
     using fixture = setupFixture()
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
@@ -82,10 +75,7 @@ describe('paste a lone embed link', () => {
     await expect.element(tweetEmbed).toBeInTheDocument()
   })
 
-  it.skipIf(
-    // TODO: fix the test in Firefox.
-    isFirefox(),
-  )('replaces the selected text when pasting onto a selection', async () => {
+  it('replaces the selected text when pasting onto a selection', async () => {
     using fixture = setupFixture()
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
@@ -125,10 +115,7 @@ describe('paste a lone embed link', () => {
     await expect.element(youtubeEmbed).not.toBeInTheDocument()
   })
 
-  it.skipIf(
-    // TODO: fix the test in Firefox.
-    isFirefox(),
-  )('embeds over a selection that spans two blocks', async () => {
+  it('embeds over a selection that spans two blocks', async () => {
     using fixture = setupFixture()
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
@@ -140,10 +127,7 @@ describe('paste a lone embed link', () => {
 })
 
 describe('undo restores the raw link', () => {
-  it.skipIf(
-    // TODO: fix the test in Firefox.
-    isFirefox(),
-  )('one undo turns the embed back into the link, a second removes it', async () => {
+  it('one undo turns the embed back into the link, a second removes it', async () => {
     using fixture = setupFixture()
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
@@ -170,10 +154,7 @@ describe('undo restores the raw link', () => {
     await expect.element(youtubeEmbed).toBeInTheDocument()
   })
 
-  it.skipIf(
-    // TODO: fix the test in Firefox.
-    isFirefox(),
-  )('takes exactly two undo steps (proves the two-transaction split)', () => {
+  it('takes exactly two undo steps (proves the two-transaction split)', () => {
     using fixture = setupFixture()
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
@@ -184,10 +165,7 @@ describe('undo restores the raw link', () => {
     expect(editor.state.doc.textContent).toBe(YT)
   })
 
-  it.skipIf(
-    // TODO: fix the test in Firefox.
-    isFirefox(),
-  )('keeps the surrounding text, removing only the pasted link', () => {
+  it('keeps the surrounding text, removing only the pasted link', () => {
     using fixture = setupFixture()
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
@@ -200,10 +178,7 @@ describe('undo restores the raw link', () => {
     expect(editor.state.doc.textContent).toBe('before ')
   })
 
-  it.skipIf(
-    // TODO: fix the test in Firefox.
-    isFirefox(),
-  )('reverts via the real Ctrl-z / Cmd-z shortcut', async () => {
+  it('reverts via the real Ctrl-z / Cmd-z shortcut', async () => {
     using fixture = setupFixture()
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
