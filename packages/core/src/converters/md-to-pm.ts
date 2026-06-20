@@ -103,9 +103,7 @@ function convertBlock(
       // missing converter case surfaces instead of losing content quietly.
       const raw = text.slice(cursor.from, cursor.to)
       if (raw.trim() === '') return []
-      console.warn(
-        `[meowdown] markdownToDoc: unsupported block "${cursor.type.name}" kept as literal text`,
-      )
+      console.warn(`[meowdown] unsupported lezer block "${cursor.type.name}"`)
       return [convertParagraph(nodes, cursor, text)]
     }
   }
