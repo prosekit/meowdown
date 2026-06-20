@@ -267,8 +267,6 @@ function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
 // ─────────────────────────────────────────────────────────────────────
 
 function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
-  // prosekit's `list` node is a SINGLE item; sibling `list` nodes form the
-  // larger markdown list.
   const attrs = node.attrs as MeowdownListAttrs
   const bulletMarker = attrs.marker === '*' || attrs.marker === '+' ? attrs.marker : '-'
   const orderMarker = attrs.marker === ')' ? ')' : '.'
