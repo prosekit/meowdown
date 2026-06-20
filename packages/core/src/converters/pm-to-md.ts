@@ -270,13 +270,14 @@ function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
   // prosekit's `list` node is a SINGLE item; sibling `list` nodes form the
   // larger markdown list.
   const attrs = node.attrs as MeowdownListAttrs
-  const bullet = attrs.marker === '*' || attrs.marker === '+' ? attrs.marker : '-'
+  const bulletMarker = attrs.marker === '*' || attrs.marker === '+' ? attrs.marker : '-'
+  const orderMarker = attrs.marker === ')' ? ')' : '.'
   const marker =
     attrs.kind === 'ordered'
-      ? `${attrs.order ?? 1}${attrs.marker === ')' ? ')' : '.'} `
+      ? `${attrs.order ?? 1}${orderMarker} `
       : attrs.kind === 'task'
-        ? `${bullet} [${attrs.checked ? 'x' : ' '}] `
-        : `${bullet} ` // bullet | toggle
+        ? `${bulletMarker} [${attrs.checked ? 'x' : ' '}] `
+        : `${bulletMarker} ` // bullet | toggle
 
   // For a task item the `[ ] ` checkbox is list-item CONTENT in GFM terms,
   // not part of the marker, so continuation lines align to the `- ` width.
