@@ -488,7 +488,7 @@ describe('tables', () => {
     )
   })
 
-  it.fails('keeps an escaped pipe', () => {
+  it('keeps an escaped pipe', () => {
     expect(roundtrip('| a \\| b | c |\n| --- | --- |\n| 1 | 2 |')).toBe(
       '| a \\| b | c |\n| --- | --- |\n| 1 | 2 |\n',
     )
