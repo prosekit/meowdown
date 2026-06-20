@@ -27,7 +27,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'heading',
-          attrs: { level: 1 },
+          attrs: { level: 1, setextUnderline: null },
           content: [{ type: 'text', text: 'Hello' }],
         },
       ],
@@ -517,7 +517,7 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('# ').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null },
-      content: [{ type: 'heading', attrs: { level: 1 } }],
+      content: [{ type: 'heading', attrs: { level: 1, setextUnderline: null } }],
     })
   })
 
@@ -540,12 +540,30 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it.fails('keeps setext text', () => {
+  it('keeps setext text', () => {
     expect(markdownToDoc('Setext1\n===').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null },
       content: [
-        { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'Setext1' }] },
+        {
+          type: 'heading',
+          attrs: { level: 1, setextUnderline: 3 },
+          content: [{ type: 'text', text: 'Setext1' }],
+        },
+      ],
+    })
+  })
+
+  it('keeps setext text (level 2)', () => {
+    expect(markdownToDoc('Setext2\n---').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 2, setextUnderline: 3 },
+          content: [{ type: 'text', text: 'Setext2' }],
+        },
       ],
     })
   })
@@ -595,7 +613,11 @@ describe('markdownToDoc', () => {
       type: 'doc',
       attrs: { frontmatter: 'title: x\ntags: [a, b]' },
       content: [
-        { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'heading' }] },
+        {
+          type: 'heading',
+          attrs: { level: 1, setextUnderline: null },
+          content: [{ type: 'text', text: 'heading' }],
+        },
       ],
     })
   })

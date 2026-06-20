@@ -30,6 +30,10 @@ describe('checkRoundTrip', () => {
       | --- | --- | --- |
       |  | b |  |
     `,
+    dedent`
+      Hello
+      =====
+    `, // setext heading keeps its text and underline length
   ])('reports exact for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('exact')
   })
@@ -42,10 +46,7 @@ describe('checkRoundTrip', () => {
   })
 
   it.each([
-    dedent`
-      Hello
-      =====
-    `, // setext heading
+    '# Hello #', // a closing ATX hash sequence is dropped
   ])('reports lossy for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('lossy')
   })

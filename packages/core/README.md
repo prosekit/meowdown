@@ -28,7 +28,7 @@ Heading shortcuts toggle the current block to a heading of that level (or back t
 
 ## Round-trip fidelity
 
-`checkRoundTrip(markdown)` reports how faithfully markdown survives a parse-then-serialize round trip: `'exact'` (byte-identical modulo the trailing newline), `'normalizing'` (same non-blank lines, only blank-line layout differs), or `'lossy'` (a non-blank line changed, e.g. setext headings or raw HTML blocks). Hosts that keep markdown on disk can gate saves on it, opening lossy files read-only so a save never rewrites content.
+`checkRoundTrip(markdown)` reports how faithfully markdown survives a parse-then-serialize round trip: `'exact'` (byte-identical modulo the trailing newline), `'normalizing'` (same non-blank lines, only blank-line layout differs), or `'lossy'` (a non-blank line changed, e.g. a closing ATX hash sequence or unaligned table columns). Hosts that keep markdown on disk can gate saves on it, opening lossy files read-only so a save never rewrites content.
 
 ## Styling
 
