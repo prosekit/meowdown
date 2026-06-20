@@ -34,6 +34,33 @@ describe('docToMarkdown', () => {
     expect(markdown).toBe('###### Level 6\n')
   })
 
+  it('emits a setext level-1 heading', () => {
+    const doc = n.doc(n.heading({ level: 1, setextUnderline: 3 }, 'Title'))
+    expect(docToMarkdown(doc)).toBe('Title\n===\n')
+  })
+
+  it('emits a setext level-2 heading', () => {
+    const doc = n.doc(n.heading({ level: 2, setextUnderline: 3 }, 'Title'))
+    expect(docToMarkdown(doc)).toBe('Title\n---\n')
+  })
+
+  it('keeps the setext underline length', () => {
+    const long = n.doc(n.heading({ level: 1, setextUnderline: 9 }, 'Title'))
+    expect(docToMarkdown(long)).toBe('Title\n=========\n')
+    const short = n.doc(n.heading({ level: 2, setextUnderline: 1 }, 'Title'))
+    expect(docToMarkdown(short)).toBe('Title\n-\n')
+  })
+
+  it('emits a setext heading deeper than level 2 as ATX', () => {
+    const doc = n.doc(n.heading({ level: 3, setextUnderline: 3 }, 'Title'))
+    expect(docToMarkdown(doc)).toBe('### Title\n')
+  })
+
+  it('emits an empty setext heading as ATX', () => {
+    const doc = n.doc(n.heading({ level: 1, setextUnderline: 3 }))
+    expect(docToMarkdown(doc)).toBe('#\n')
+  })
+
   it('keeps a blockquote', () => {
     const doc = n.doc(n.blockquote(n.paragraph('quoted text')))
     const markdown = docToMarkdown(doc)

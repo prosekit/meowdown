@@ -8,6 +8,8 @@ import { gfmBlockOnlyParser } from '../lezer/parser.ts'
 import {
   CHAR_ASTERISK,
   CHAR_DOT,
+  CHAR_EQUAL,
+  CHAR_HYPHEN_MINUS,
   CHAR_LOWERCASE_X,
   CHAR_PLUS,
   CHAR_RIGHT_PARENTHESIS,
@@ -89,21 +91,21 @@ function convertBlock(
 ): ProseMirrorNode[] {
   switch (cursor.type.id) {
     case LEZER_NODE_IDS.ATXHeading1:
-      return [convertHeading(nodes, cursor, text, 1)]
+      return [convertHeading(nodes, cursor, text, 1, false)]
     case LEZER_NODE_IDS.ATXHeading2:
-      return [convertHeading(nodes, cursor, text, 2)]
+      return [convertHeading(nodes, cursor, text, 2, false)]
     case LEZER_NODE_IDS.ATXHeading3:
-      return [convertHeading(nodes, cursor, text, 3)]
+      return [convertHeading(nodes, cursor, text, 3, false)]
     case LEZER_NODE_IDS.ATXHeading4:
-      return [convertHeading(nodes, cursor, text, 4)]
+      return [convertHeading(nodes, cursor, text, 4, false)]
     case LEZER_NODE_IDS.ATXHeading5:
-      return [convertHeading(nodes, cursor, text, 5)]
+      return [convertHeading(nodes, cursor, text, 5, false)]
     case LEZER_NODE_IDS.ATXHeading6:
-      return [convertHeading(nodes, cursor, text, 6)]
+      return [convertHeading(nodes, cursor, text, 6, false)]
     case LEZER_NODE_IDS.SetextHeading1:
-      return [convertHeading(nodes, cursor, text, 1)]
+      return [convertHeading(nodes, cursor, text, 1, true)]
     case LEZER_NODE_IDS.SetextHeading2:
-      return [convertHeading(nodes, cursor, text, 2)]
+      return [convertHeading(nodes, cursor, text, 2, true)]
     case LEZER_NODE_IDS.Paragraph:
       return [convertParagraph(nodes, cursor, text)]
     case LEZER_NODE_IDS.HTMLBlock:
@@ -147,29 +149,55 @@ function convertHeading(
   cursor: TreeCursor,
   text: string,
   level: number,
+  isSetext: boolean,
 ): ProseMirrorNode {
   // Strip the opening HeaderMark (the "#" run + following space) and any
-  // optional closing HeaderMark used in "# foo #" style.
+  // optional closing HeaderMark used in "# foo #" style. A setext heading's
+  // only HeaderMark is the trailing underline, so guard on the mark starting
+  // at the heading's left edge before treating it as the opening mark.
+  const headingFrom = cursor.from
   let contentStart = cursor.from
   let contentEnd = cursor.to
+  let underlineFrom = -1
+  let underlineTo = -1
   if (cursor.firstChild()) {
-    if (cursor.type.id === LEZER_NODE_IDS.HeaderMark) {
+    if (cursor.type.id === LEZER_NODE_IDS.HeaderMark && cursor.from === headingFrom) {
       contentStart = cursor.to
     }
     let lastId = -1
     let lastFrom = -1
+    let lastTo = -1
     do {
       lastId = cursor.type.id
       lastFrom = cursor.from
+      lastTo = cursor.to
     } while (cursor.nextSibling())
     if (lastId === LEZER_NODE_IDS.HeaderMark && lastFrom > contentStart) {
       contentEnd = lastFrom
+      underlineFrom = lastFrom
+      underlineTo = lastTo
     }
     cursor.parent()
   }
 
   const content = text.slice(contentStart, contentEnd).trim()
-  return nodes.heading({ level }, content)
+  // CommonMark setext underlines may be any length; keep the source count so
+  // the round-trip is lossless. Fall back to 1 if lezer reported no run.
+  const setextUnderline = isSetext
+    ? countUnderlineChars(text, underlineFrom, underlineTo) || 1
+    : null
+  return nodes.heading({ level, setextUnderline }, content)
+}
+
+/** Count the `=` / `-` characters in a setext underline run. */
+function countUnderlineChars(text: string, from: number, to: number): number {
+  if (from < 0) return 0
+  let count = 0
+  for (let i = from; i < to; i++) {
+    const code = text.charCodeAt(i)
+    if (code === CHAR_EQUAL || code === CHAR_HYPHEN_MINUS) count++
+  }
+  return count
 }
 
 function convertParagraph(

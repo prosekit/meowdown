@@ -1,8 +1,8 @@
 import type { CodeBlockAttrs } from '@prosekit/extensions/code-block'
-import type { HeadingAttrs } from '@prosekit/extensions/heading'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
 import type { Frontmatter } from '../extensions/frontmatter.ts'
+import type { MeowdownHeadingAttrs } from '../extensions/heading.ts'
 import type { MeowdownListAttrs } from '../extensions/list.ts'
 import type { NodeName } from '../extensions/node-names.ts'
 import { longestBacktickRun } from '../utils/backticks.ts'
@@ -56,6 +56,23 @@ const HEADING_PREFIX: ReadonlyArray<string> = [
   '##### ',
   '###### ',
 ]
+
+function emitHeading(node: ProseMirrorNode, out: MdOut): void {
+  const attrs = node.attrs as MeowdownHeadingAttrs
+  const underline = attrs.setextUnderline
+  // Setext exists only for levels 1-2 and needs a content line to underline;
+  // an empty or deeper heading falls back to ATX.
+  if (underline != null && node.content.size > 0 && attrs.level <= 2) {
+    emitInlineChildren(node, out)
+    const underlineChar = attrs.level === 1 ? '=' : '-'
+    out.write('\n' + underlineChar.repeat(Math.max(1, underline)))
+    out.closeBlock()
+    return
+  }
+  out.write(HEADING_PREFIX[attrs.level] ?? '# ')
+  emitInlineChildren(node, out)
+  out.closeBlock()
+}
 
 // ─────────────────────────────────────────────────────────────────────
 // Output buffer
@@ -179,13 +196,9 @@ function emit(node: ProseMirrorNode, out: MdOut): void {
       emitInlineChildren(node, out)
       out.closeBlock()
       return
-    case 'heading': {
-      const attrs = node.attrs as HeadingAttrs
-      out.write(HEADING_PREFIX[attrs.level] ?? '# ')
-      emitInlineChildren(node, out)
-      out.closeBlock()
+    case 'heading':
+      emitHeading(node, out)
       return
-    }
     case 'blockquote':
       out.withPrefix('> ', '> ', () => emitBlockChildren(node, out))
       out.closeBlock()

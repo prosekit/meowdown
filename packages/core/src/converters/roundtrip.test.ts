@@ -212,12 +212,28 @@ describe('headings', () => {
     expect(roundtrip('# ')).toBe('# \n')
   })
 
-  it.fails('keeps setext text (level 1)', () => {
+  it('keeps setext text (level 1)', () => {
     expect(roundtrip('Setext1\n===')).toBe('Setext1\n===\n')
   })
 
-  it.fails('keeps setext text (level 2)', () => {
+  it('keeps setext text (level 2)', () => {
     expect(roundtrip('Setext2\n---')).toBe('Setext2\n---\n')
+  })
+
+  it('keeps setext roundtrip stable', () => {
+    expect(roundtrip('Setext1\n===\n')).toBe('Setext1\n===\n')
+    expect(roundtrip('Setext2\n---\n')).toBe('Setext2\n---\n')
+  })
+
+  it('keeps the setext underline length', () => {
+    // CommonMark allows any underline length, so it must survive a round-trip.
+    expect(roundtrip('Foo\n=========')).toBe('Foo\n=========\n')
+    expect(roundtrip('Foo\n-------------------------')).toBe('Foo\n-------------------------\n')
+    expect(roundtrip('Foo\n=')).toBe('Foo\n=\n')
+  })
+
+  it('keeps multi-line setext content', () => {
+    expect(roundtrip('Foo bar\nbaz qux\n===')).toBe('Foo bar\nbaz qux\n===\n')
   })
 })
 
