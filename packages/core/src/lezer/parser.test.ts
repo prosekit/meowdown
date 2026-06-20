@@ -14,8 +14,11 @@ A *emph* paragraph.
 
 - [x] task list item
 
-> line1
-> line2
+paragraph line1
+paragraph line2
+
+> blockquote line1
+> blockquote line2
 `
 
 interface AstNode {
