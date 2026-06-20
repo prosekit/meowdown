@@ -418,7 +418,7 @@ describe('code blocks', () => {
     expect(roundtrip('```\n  indented in fence\n```')).toBe('```\n  indented in fence\n```\n')
   })
 
-  it.fails('keeps an empty fence', () => {
+  it('keeps an empty fence', () => {
     expect(roundtrip('```\n```')).toBe('```\n```\n')
   })
 
@@ -613,7 +613,7 @@ describe('idempotency', () => {
     expect(roundtrip(once)).toBe(once)
   })
 
-  it.fails('keeps an empty fence stable', () => {
+  it('keeps an empty fence stable', () => {
     const once = roundtrip('```\n```')
     expect(roundtrip(once)).toBe(once)
   })

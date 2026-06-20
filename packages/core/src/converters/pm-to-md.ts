@@ -299,8 +299,10 @@ function emitCodeBlock(node: ProseMirrorNode, out: MdOut): void {
   out.write(fence)
   if (language) out.write(language)
   out.write('\n')
-  out.write(code)
-  out.write('\n')
+  if (code) {
+    out.write(code)
+    out.write('\n')
+  }
   out.write(fence)
   out.closeBlock()
 }
