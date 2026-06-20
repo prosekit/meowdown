@@ -44,7 +44,7 @@ export function defineEmbedPaste(): PlainExtension {
       props: {
         handlePaste: (view, event) => {
           const parent = view.state.selection.$from.parent
-          // Never in a code block, where `![](url)` is literal source, not an embed.
+          // Never in a code block
           if (!parent.inlineContent || parent.type.spec.code) return false
           const text = event.clipboardData?.getData('text/plain')
           if (!text) return false
