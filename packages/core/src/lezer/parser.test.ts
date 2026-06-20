@@ -13,6 +13,9 @@ A *emph* paragraph.
 - bullet list item
 
 - [x] task list item
+
+> line1
+> line2
 `
 
 interface AstNode {
@@ -48,8 +51,8 @@ describe('gfmParser', () => {
       "{
         "name": "Document",
         "from": 0,
-        "to": 115,
-        "text": "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n",
+        "to": 132,
+        "text": "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\n> line1\\n> line2\\n",
         "children": [
           {
             "name": "Paragraph",
@@ -200,6 +203,34 @@ describe('gfmParser', () => {
                 ]
               }
             ]
+          },
+          {
+            "name": "Blockquote",
+            "from": 116,
+            "to": 131,
+            "text": "> line1\\n> line2",
+            "children": [
+              {
+                "name": "QuoteMark",
+                "from": 116,
+                "to": 117,
+                "text": ">"
+              },
+              {
+                "name": "Paragraph",
+                "from": 118,
+                "to": 131,
+                "text": "line1\\n> line2",
+                "children": [
+                  {
+                    "name": "QuoteMark",
+                    "from": 124,
+                    "to": 125,
+                    "text": ">"
+                  }
+                ]
+              }
+            ]
           }
         ]
       }"
@@ -213,8 +244,8 @@ describe('gfmBlockOnlyParser', () => {
       "{
         "name": "Document",
         "from": 0,
-        "to": 115,
-        "text": "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n",
+        "to": 132,
+        "text": "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\n> line1\\n> line2\\n",
         "children": [
           {
             "name": "Paragraph",
@@ -339,6 +370,34 @@ describe('gfmBlockOnlyParser', () => {
                         "text": "[x]"
                       }
                     ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Blockquote",
+            "from": 116,
+            "to": 131,
+            "text": "> line1\\n> line2",
+            "children": [
+              {
+                "name": "QuoteMark",
+                "from": 116,
+                "to": 117,
+                "text": ">"
+              },
+              {
+                "name": "Paragraph",
+                "from": 118,
+                "to": 131,
+                "text": "line1\\n> line2",
+                "children": [
+                  {
+                    "name": "QuoteMark",
+                    "from": 124,
+                    "to": 125,
+                    "text": ">"
                   }
                 ]
               }
