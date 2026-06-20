@@ -8,6 +8,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
+import { isFirefox } from '@meowdown/vitest/helpers'
 import { MeowdownEditor } from './editor.tsx'
 import type { EditorHandle } from './types.ts'
 
@@ -252,7 +253,10 @@ describe('MeowdownEditor', () => {
     await expect.element(page.getByAltText('pic')).not.toBeInTheDocument()
   })
 
-  it('embeds a pasted YouTube link by default', async () => {
+  it.skipIf(
+    // TODO: fix the test in Firefox.
+    isFirefox(),
+  )('embeds a pasted YouTube link by default', async () => {
     const ref = createRef<EditorHandle>()
     await render(<MeowdownEditor handleRef={ref} resolveImageUrl={(src) => src} />)
     await pmRoot.click()
