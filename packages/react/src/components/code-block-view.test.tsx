@@ -5,7 +5,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 
-import { isSafari } from '../testing/index.ts'
+import { isSafari } from '../testing/browser.ts'
+
 import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle } from './types.ts'
 
