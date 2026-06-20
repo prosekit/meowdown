@@ -154,8 +154,28 @@ function convertParagraph(
   cursor: TreeCursor,
   text: string,
 ): ProseMirrorNode {
-  const content = text.slice(cursor.from, cursor.to)
-  return nodes.paragraph(content)
+  const from = cursor.from
+  const to = cursor.to
+  // In block-only parsing a paragraph has no inline children, with one
+  // exception: lezer leaves the lazy-continuation `QuoteMark`s of a multi-line
+  // blockquote (`> l1\n> l2`) embedded in the paragraph's span. Excising those
+  // (plus the single space each one allows) keeps the soft break as a bare
+  // `\n`, so the marker is not re-quoted into `> > l2` on the way out.
+  if (cursor.firstChild()) {
+    let content = ''
+    let pos = from
+    do {
+      if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) {
+        content += text.slice(pos, cursor.from)
+        pos = cursor.to
+        if (text.charCodeAt(pos) === CHAR_SPACE) pos += 1
+      }
+    } while (cursor.nextSibling())
+    cursor.parent()
+    content += text.slice(pos, to)
+    return content === '' ? nodes.paragraph() : nodes.paragraph(content)
+  }
+  return nodes.paragraph(text.slice(from, to))
 }
 
 function convertBlockquote(
