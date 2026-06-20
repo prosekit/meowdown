@@ -65,11 +65,11 @@ describe('defineEditorExtension', () => {
           {
             "attrs": {
               "checked": false,
-              "taskMarker": null,
               "collapsed": false,
               "kind": "bullet",
               "marker": null,
               "order": null,
+              "taskMarker": null,
             },
             "content": [
               {
@@ -87,11 +87,11 @@ describe('defineEditorExtension', () => {
           {
             "attrs": {
               "checked": false,
-              "taskMarker": null,
               "collapsed": false,
               "kind": "ordered",
               "marker": null,
               "order": 1,
+              "taskMarker": null,
             },
             "content": [
               {
@@ -109,11 +109,11 @@ describe('defineEditorExtension', () => {
           {
             "attrs": {
               "checked": false,
-              "taskMarker": null,
               "collapsed": false,
               "kind": "task",
               "marker": null,
               "order": null,
+              "taskMarker": null,
             },
             "content": [
               {
