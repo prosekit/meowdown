@@ -254,7 +254,7 @@ describe('blockquotes', () => {
     expect(roundtrip('> ')).toBe('> \n')
   })
 
-  it.fails('keeps a two-line quote', () => {
+  it('keeps a two-line quote', () => {
     expect(roundtrip('> l1\n> l2')).toBe('> l1\n> l2\n')
   })
 
@@ -608,7 +608,7 @@ describe('idempotency', () => {
     expect(roundtrip(once)).toBe(once)
   })
 
-  it.fails('keeps a two-line quote stable', () => {
+  it('keeps a two-line quote stable', () => {
     const once = roundtrip('> l1\n> l2')
     expect(roundtrip(once)).toBe(once)
   })

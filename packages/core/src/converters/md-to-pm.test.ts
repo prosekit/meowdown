@@ -524,7 +524,7 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it.fails('keeps a two-line quote clean', () => {
+  it('keeps a two-line quote clean', () => {
     expect(markdownToDoc('> l1\n> l2').toJSON()).toEqual({
       type: 'doc',
       content: [
