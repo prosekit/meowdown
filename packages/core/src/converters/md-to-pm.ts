@@ -5,7 +5,15 @@ import type { ListMarker, MeowdownListAttrs, TaskMarker } from '../extensions/li
 import { getNodeBuilders, type TypedNodeBuilders } from '../extensions/schema.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 import { gfmBlockOnlyParser } from '../lezer/parser.ts'
-import { CHAR_LOWERCASE_X, CHAR_SPACE, CHAR_TAB, CHAR_UPPERCASE_A, CHAR_UPPERCASE_X } from '../unicode.ts'
+import {
+  CHAR_ASTERISK,
+  CHAR_DOT,
+  CHAR_LOWERCASE_X,
+  CHAR_PLUS,
+  CHAR_RIGHT_PARENTHESIS,
+  CHAR_SPACE,
+  CHAR_UPPERCASE_X,
+} from '../unicode.ts'
 
 /**
  * Convert a markdown string into a ProseMirror document node.
@@ -197,21 +205,22 @@ function convertListItem(
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
-        const markText = text.slice(cursor.from, cursor.to)
         if (kind === 'ordered') {
           // An ordered list marker is a sequence of 1–9 arabic digits `(0-9)`, followed by either a `.` character or a `)` character.
           // https://spec.commonmark.org/0.31.2/#ordered-list-marker
-          const number = Number.parseInt(markText, 10)
-          order = Number.isFinite(number) ? number : 1
-          if (markText.endsWith(')')) {
+          const delimiterCode = text.charCodeAt(cursor.to - 1)
+          if (delimiterCode === CHAR_RIGHT_PARENTHESIS) {
             marker = ')'
-          } else if (markText.endsWith('.')) {
+          } else if (delimiterCode === CHAR_DOT) {
             marker = '.'
           }
+          const number = Number.parseInt(text.slice(cursor.from, cursor.to), 10)
+          order = Number.isFinite(number) ? number : 1
         } else {
           // A bullet list marker is one of `-`, `+`, or `*`.
           // https://spec.commonmark.org/0.31.2/#bullet-list-marker
-          marker = markText === '*' || markText === '+' ? markText : '-'
+          const code = text.charCodeAt(cursor.from)
+          marker = code === CHAR_ASTERISK ? '*' : code === CHAR_PLUS ? '+' : '-'
         }
         continue
       }
@@ -271,8 +280,9 @@ function convertTask(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string)
     }
     cursor.parent()
   }
-  let content = text.slice(contentStart, contentEnd)
-  if (content.startsWith(' ')) content = content.slice(1)
+  // Skip the single separating space before slicing
+  if (text.charCodeAt(contentStart) === CHAR_SPACE) contentStart += 1
+  const content = text.slice(contentStart, contentEnd)
   return {
     checked,
     taskMarker,
