@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/prosekit/meowdown/compare/react-v0.15.2...react-v0.16.0) (2026-06-20)
+
+
+### Bug Fixes
+
+* fall back to slice text when clipboardData is empty ([#93](https://github.com/prosekit/meowdown/issues/93)) ([ff3fc07](https://github.com/prosekit/meowdown/commit/ff3fc07ad8f11c8cc0cd71d36d653001a1d21556))
+
 ## [0.15.2](https://github.com/prosekit/meowdown/compare/react-v0.15.1...react-v0.15.2) (2026-06-19)
 
 
