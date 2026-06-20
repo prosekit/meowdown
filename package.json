@@ -29,7 +29,7 @@
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^4.1.9",
     "eslint": "^10.4.0",
-    "knip": "^6.14.1",
+    "knip": "^6.17.0",
     "monorepo-typescript-references": "^1.1.2",
     "oxfmt": "^0.55.0",
     "pkg-pr-new": "^0.0.75",
