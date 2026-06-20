@@ -189,7 +189,7 @@ function convertListItem(
 ): ProseMirrorNode {
   const content: ProseMirrorNode[] = []
   let taskChecked: boolean | undefined
-  let order: number  | undefined
+  let order: number | undefined
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
