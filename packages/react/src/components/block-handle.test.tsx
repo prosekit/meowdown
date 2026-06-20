@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import { isSafari } from '@meowdown/config-vitest/helpers'
 import { createRef, type Ref } from 'react'
 import { describe, expect, it } from 'vitest'
 import { mouse } from 'vitest-browser-commands/playwright'
@@ -8,7 +9,6 @@ import { page, userEvent } from 'vitest/browser'
 
 import { hover, unhover } from '../testing/mouse.ts'
 
-import { isSafari } from '@meowdown/config-vitest/helpers'
 import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle } from './types.ts'
 
