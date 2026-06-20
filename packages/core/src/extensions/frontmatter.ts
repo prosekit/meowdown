@@ -12,18 +12,10 @@ import type { NodeName } from './node-names.ts'
  */
 export type Frontmatter = string | null
 
-// `frontmatter` has a default, so it must stay optional in the node builders.
 type DocFrontmatterExtension = Extension<{ Nodes: { doc: { frontmatter?: Frontmatter } } }>
 
 /**
  * Stores YAML frontmatter as a non-rendered attribute on the root `doc` node.
- *
- * Frontmatter is document metadata, not content: it is never shown or edited
- * inline. The converters set it on parse (`markdownToDoc`) and read it on
- * serialize (`docToMarkdown`). There is no `toDOM` / `parseDOM`, because the
- * doc node is the editor root and ProseMirror's clipboard serialization never
- * includes the doc node itself, so there is nothing useful to persist to the
- * DOM.
  */
 export function defineDocFrontmatterAttr(): DocFrontmatterExtension {
   return defineNodeAttr<'doc', 'frontmatter', Frontmatter>({
