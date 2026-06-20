@@ -1,4 +1,3 @@
-import { sleep } from '@ocavue/utils'
 import { TextSelection } from '@prosekit/pm/state'
 import { userEvent } from 'vitest/browser'
 
