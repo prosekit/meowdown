@@ -4,7 +4,6 @@ import { userEvent } from 'vitest/browser'
 import { getSelectionSnapshot } from './selection-snapshot.ts'
 
 import type { Fixture } from './index.ts'
-import { sleep } from '@ocavue/utils'
 
 /** Place a collapsed caret at text offset `offset`. */
 export function setCaret(fixture: Fixture, offset: number): void {
@@ -24,9 +23,7 @@ export async function traceKeySelection(
 ): Promise<string[]> {
   const steps = [getSelectionSnapshot(fixture.state)]
   for (let index = 0; index < times; index++) {
-    await sleep(1)
     await userEvent.keyboard(`{${key}}`)
-    await sleep(1)
     steps.push(getSelectionSnapshot(fixture.state))
   }
   return steps
