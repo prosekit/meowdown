@@ -158,9 +158,7 @@ function convertParagraph(
   const to = cursor.to
   // In block-only parsing a paragraph has no inline children, with one
   // exception: lezer leaves the lazy-continuation `QuoteMark`s of a multi-line
-  // blockquote (`> l1\n> l2`) embedded in the paragraph's span. Excising those
-  // (plus the single space each one allows) keeps the soft break as a bare
-  // `\n`, so the marker is not re-quoted into `> > l2` on the way out.
+  // blockquote (`> l1\n> l2`) embedded in the paragraph's span.
   if (cursor.firstChild()) {
     let content = ''
     let pos = from
