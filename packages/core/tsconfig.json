@@ -4,5 +4,10 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "erasableSyntaxOnly": true
-  }
+  },
+  "references": [
+    {
+      "path": "../vitest/tsconfig.json"
+    }
+  ]
 }

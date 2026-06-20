@@ -13,6 +13,15 @@ export function detectEmbedUrl(text: string): string | undefined {
   return matchEmbed(trimmed) ? trimmed : undefined
 }
 
+// function getPastedText(event: ClipboardEvent, slice: Slice): string {
+//   const fromClipboard = event.clipboardData?.getData('text/plain')
+//   if (fromClipboard != null) return fromClipboard
+//   // Firefox's ClipboardEvent constructor swaps in an empty DataTransfer, so a
+//   // synthetic paste event carries no text. Fall back to the slice ProseMirror
+//   // parsed from the paste, which holds the same text on every engine.
+//   return slice.content.textBetween(0, slice.content.size, '\n')
+// }
+
 function insertEmbedFromPaste(view: EditorView, url: string): void {
   const { from, to } = view.state.selection
   // Insert the raw URL as its own history event.
