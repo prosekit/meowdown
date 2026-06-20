@@ -38,7 +38,29 @@ jobs:
         run: pnpm run build
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
+    name: test-${{ matrix.os }}-${{ matrix.browser }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            runner: ubuntu-latest
+            browser: chromium
+            coverage: true
+          - os: linux
+            runner: ubuntu-latest
+            browser: firefox
+          - os: mac
+            runner: macos-latest
+            browser: chromium
+          - os: mac
+            runner: macos-latest
+            browser: webkit
+          - os: windows
+            runner: windows-latest
+            browser: chromium
 
     permissions:
       contents: read
@@ -52,12 +74,16 @@ jobs:
       - uses: ./.github/actions/setup
 
       - name: Install
-        run: pnpm run test:install
+        run: pnpm run test:install:${{ matrix.browser }}
 
       - name: Test
         run: pnpm run test
+        env:
+          MEOWDOWN_TEST_BROWSER: ${{ matrix.browser }}
+          MEOWDOWN_TEST_COVERAGE: ${{ matrix.coverage && 'true' || '' }}
 
       - name: Report Coverage
+        if: ${{ matrix.coverage }}
         uses: davelosert/vitest-coverage-report-action@3c054a2d2e2ca45446417ad5d6d5eb33092af8f1 # v2.12.1
 
   publish-snapshot:

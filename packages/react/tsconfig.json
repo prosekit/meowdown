@@ -15,5 +15,12 @@
     "erasableSyntaxOnly": true
   },
   "cmkOptions": { "enabled": true, "dtsOutDir": ".", "arbitraryExtensions": true },
-  "references": [{ "path": "../core/tsconfig.json" }]
+  "references": [
+    {
+      "path": "../config-vitest/tsconfig.json"
+    },
+    {
+      "path": "../core/tsconfig.json"
+    }
+  ]
 }

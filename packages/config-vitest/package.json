@@ -1,0 +1,15 @@
+{
+  "name": "@meowdown/config-vitest",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./setup": "./src/setup.ts"
+  },
+  "devDependencies": {
+    "@ocavue/tsconfig": "^0.7.1",
+    "@vitest/browser-playwright": "^4.1.9",
+    "vitest": "^4.1.9",
+    "vitest-browser-commands": "^0.2.1"
+  }
+}
