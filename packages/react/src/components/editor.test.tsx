@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import { isFirefox } from '@meowdown/vitest/helpers'
 import { pasteText } from '@prosekit/core/test'
 import { TextSelection } from '@prosekit/pm/state'
 import { useEditor } from '@prosekit/react'
@@ -8,7 +9,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
-import { isFirefox } from '@meowdown/vitest/helpers'
 import { MeowdownEditor } from './editor.tsx'
 import type { EditorHandle } from './types.ts'
 

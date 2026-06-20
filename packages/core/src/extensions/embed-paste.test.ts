@@ -1,3 +1,4 @@
+import { isFirefox } from '@meowdown/vitest/helpers'
 import { isApple } from '@prosekit/core'
 import { pasteText } from '@prosekit/core/test'
 import { describe, expect, it } from 'vitest'
@@ -6,7 +7,6 @@ import { page, userEvent } from 'vitest/browser'
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
-import { isFirefox } from '@meowdown/vitest/helpers'
 import { defineEmbedPaste, detectEmbedUrl } from './embed-paste.ts'
 import { defineImage } from './image.ts'
 
