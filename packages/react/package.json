@@ -20,7 +20,7 @@
     "build": "cmk && tsdown"
   },
   "dependencies": {
-    "@base-ui/react": "^1.5.0",
+    "@base-ui/react": "^1.6.0",
     "@codemirror/commands": "^6.10.3",
     "@codemirror/lang-markdown": "^6.5.0",
     "@codemirror/language": "^6.12.3",
@@ -30,7 +30,7 @@
     "@ocavue/utils": "^1.7.0",
     "@prosekit/core": "^0.13.0-beta.3",
     "@prosekit/pm": "^0.1.19-beta.0",
-    "@prosekit/react": "^0.8.0-beta.4",
+    "@prosekit/react": "^0.8.0-beta.5",
     "clsx": "^2.1.1"
   },
   "peerDependencies": {
