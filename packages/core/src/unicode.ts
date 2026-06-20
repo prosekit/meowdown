@@ -69,5 +69,10 @@ export const UNICODE_HEAVY_RIGHT_POINTING_ANGLE_BRACKET_ORNAMENT = '\u{2771}' /*
  * Ported from https://github.com/lezer-parser/markdown/blob/1.6.3/src/markdown.ts#L233
  */
 export function isSpaceChar(char: number): boolean {
-  return char === CHAR_SPACE || char === CHAR_TAB || char === 10 || char === 13
+  return (
+    char === CHAR_SPACE ||
+    char === CHAR_TAB ||
+    char === CHAR_LINE_FEED ||
+    char === CHAR_CARRIAGE_RETURN
+  )
 }
