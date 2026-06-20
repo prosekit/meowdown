@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.1](https://github.com/prosekit/meowdown/compare/core-v0.16.0...core-v0.16.1) (2026-06-20)
+
+
+### Bug Fixes
+
+* **core:** preserve setext heading underline ([#101](https://github.com/prosekit/meowdown/issues/101)) ([2742971](https://github.com/prosekit/meowdown/commit/27429714b2bc07adab2a4733c5165868a60477a4))
+
 ## [0.16.0](https://github.com/prosekit/meowdown/compare/core-v0.15.2...core-v0.16.0) (2026-06-20)
 
 
