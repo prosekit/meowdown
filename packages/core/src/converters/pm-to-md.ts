@@ -127,7 +127,13 @@ class MdOut {
     }
     fn()
     this.linePrefix = savedLine
-    this.pendingFirst = savedFirst
+    // When `firstLine` is set we folded the outer one-shot marker (`savedFirst`,
+    // e.g. a blockquote's "> ") into this block's first-line marker, which `fn`
+    // has by now written or flushed. Restoring `savedFirst` would re-introduce
+    // that already-consumed marker, which `closeBlock` then dumps as a bare junk
+    // line ("> - item\n>\n>\n"). A following sibling rebuilds its marker from
+    // `savedLine` anyway, so dropping it here is safe.
+    this.pendingFirst = firstLine !== null ? null : savedFirst
   }
 
   finish(): string {

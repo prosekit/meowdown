@@ -197,7 +197,7 @@ describe('docToMarkdown', () => {
     expect(markdownToDoc(markdown).toJSON()).toEqual(doc.toJSON())
   })
 
-  it.fails('keeps a list in a quote clean', () => {
+  it('keeps a list in a quote clean', () => {
     const doc = n.doc(n.blockquote(n.list({ kind: 'bullet' }, n.paragraph('item'))))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('> - item\n')

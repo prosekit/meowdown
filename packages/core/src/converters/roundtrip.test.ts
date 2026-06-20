@@ -262,8 +262,12 @@ describe('blockquotes', () => {
     expect(roundtrip('> a\n>> b')).toBe('> a\n>> b\n')
   })
 
-  it.fails('keeps a nested list in a quote', () => {
+  it('keeps a nested list in a quote', () => {
     expect(roundtrip('> - item')).toBe('> - item\n')
+  })
+
+  it('keeps a two-item list in a quote', () => {
+    expect(roundtrip('> - a\n> - b')).toBe('> - a\n> - b\n')
   })
 })
 
@@ -278,6 +282,10 @@ describe('bullet lists', () => {
 
   it('keeps a nested bullet', () => {
     expect(roundtrip('- a\n  - nested')).toBe('- a\n  - nested\n')
+  })
+
+  it('keeps an immediately nested bullet', () => {
+    expect(roundtrip('- - a')).toBe('- - a\n')
   })
 
   it('keeps a loose two-block item', () => {
