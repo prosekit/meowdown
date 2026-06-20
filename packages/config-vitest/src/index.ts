@@ -16,14 +16,6 @@ export function defineSharedConfig() {
     return 'chromium'
   })()
 
-  // A list of permissions to grant to all pages in this context. See https://playwright.dev/docs/api/class-browsercontext#browser-context-grant-permissions
-  const permissions = (() => {
-    if (browserName === 'chromium') {
-      return ['clipboard-read', 'clipboard-write']
-    }
-    return
-  })()
-
   return defineProject({
     plugins: [playwrightCommands()],
     oxc:
@@ -46,7 +38,10 @@ export function defineSharedConfig() {
           contextOptions: {
             reducedMotion: 'reduce',
             hasTouch: true,
-            permissions,
+
+            // A list of permissions to grant to all pages in this context. See https://playwright.dev/docs/api/class-browsercontext#browser-context-grant-permissions
+            permissions:
+              browserName === 'chromium' ? ['clipboard-read', 'clipboard-write'] : undefined,
           },
         }),
         headless: true,
