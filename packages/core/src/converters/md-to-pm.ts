@@ -98,8 +98,7 @@ function convertBlock(
       // `[x]` marker as literal paragraph text so it round-trips verbatim.
       return [convertParagraph(nodes, cursor, text)]
     default: {
-      // Never silently drop a block: an unhandled type (e.g. a link reference
-      // definition) keeps its raw source as literal paragraph text. Warn so a
+      // Never silently drop a block: an unhandled type keeps its raw source as literal paragraph text. Warn so a
       // missing converter case surfaces instead of losing content quietly.
       const raw = text.slice(cursor.from, cursor.to)
       if (raw.trim() === '') return []
