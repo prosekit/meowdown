@@ -464,15 +464,15 @@ describe('thematic breaks', () => {
     expect(roundtrip('---\n\nafter')).toBe('---\n\nafter\n')
   })
 
-  it.fails('keeps an asterisk rule', () => {
+  it('keeps an asterisk rule', () => {
     expect(roundtrip('***')).toBe('***\n')
   })
 
-  it.fails('keeps an underscore rule', () => {
+  it('keeps an underscore rule', () => {
     expect(roundtrip('___')).toBe('___\n')
   })
 
-  it.fails('keeps a spaced rule', () => {
+  it('keeps a spaced rule', () => {
     expect(roundtrip('- - -')).toBe('- - -\n')
   })
 })

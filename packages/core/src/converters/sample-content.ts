@@ -253,6 +253,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'horizontalRule',
+      attrs: { marker: null },
     },
     {
       type: 'paragraph',

@@ -123,8 +123,12 @@ function convertBlock(
     case LEZER_NODE_IDS.FencedCode:
     case LEZER_NODE_IDS.CodeBlock:
       return [convertCodeBlock(nodes, cursor, text)]
-    case LEZER_NODE_IDS.HorizontalRule:
-      return [nodes.horizontalRule()]
+    case LEZER_NODE_IDS.HorizontalRule: {
+      // Keep the source marker (`***`, `___`, `- - -`, ...); `---` is canonical
+      // and stays null. Trailing spaces are insignificant, so drop them.
+      const marker = text.slice(cursor.from, cursor.to).trimEnd()
+      return [nodes.horizontalRule({ marker: marker === '---' ? null : marker })]
+    }
     case LEZER_NODE_IDS.Table:
       return [convertTable(nodes, cursor, text)]
     case LEZER_NODE_IDS.Task:

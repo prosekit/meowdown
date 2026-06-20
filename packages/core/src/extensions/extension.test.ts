@@ -236,6 +236,9 @@ describe('defineEditorExtension', () => {
             "type": "table",
           },
           {
+            "attrs": {
+              "marker": null,
+            },
             "type": "horizontalRule",
           },
         ],

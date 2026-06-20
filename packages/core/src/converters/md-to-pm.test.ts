@@ -234,7 +234,7 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('---').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null },
-      content: [{ type: 'horizontalRule' }],
+      content: [{ type: 'horizontalRule', attrs: { marker: null } }],
     })
   })
 
@@ -634,7 +634,7 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('---').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null },
-      content: [{ type: 'horizontalRule' }],
+      content: [{ type: 'horizontalRule', attrs: { marker: null } }],
     })
   })
 })

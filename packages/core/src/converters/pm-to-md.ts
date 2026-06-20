@@ -3,6 +3,7 @@ import type { ProseMirrorNode } from '@prosekit/pm/model'
 
 import type { Frontmatter } from '../extensions/frontmatter.ts'
 import type { MeowdownHeadingAttrs } from '../extensions/heading.ts'
+import type { MeowdownHorizontalRuleAttrs } from '../extensions/horizontal-rule.ts'
 import type { MeowdownListAttrs } from '../extensions/list.ts'
 import type { NodeName } from '../extensions/node-names.ts'
 import { longestBacktickRun } from '../utils/backticks.ts'
@@ -215,10 +216,12 @@ function emit(node: ProseMirrorNode, out: MdOut): void {
     case 'codeBlock':
       emitCodeBlock(node, out)
       return
-    case 'horizontalRule':
-      out.write('---')
+    case 'horizontalRule': {
+      const { marker } = node.attrs as MeowdownHorizontalRuleAttrs
+      out.write(marker || '---')
       out.closeBlock()
       return
+    }
     case 'table':
       emitTable(node, out)
       return
