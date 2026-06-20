@@ -37,6 +37,7 @@ function defineListMarkerAttr(): ListMarkerExtension {
 
 export type MeowdownListExtension = Union<[ListExtensionBase, ListMarkerExtension]>
 
+// REVIEW: TODO: remove this comment below
 /**
  * The flat-list extension plus a `marker` attribute so an ordered list keeps
  * its source delimiter (`1.` vs `1)`) through a markdown round-trip.
