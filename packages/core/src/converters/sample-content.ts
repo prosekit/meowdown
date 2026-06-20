@@ -112,7 +112,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'list',
-      attrs: { kind: 'ordered', order: 1, checked: false, collapsed: false },
+      attrs: { kind: 'ordered', order: 2, checked: false, collapsed: false },
       content: [
         {
           type: 'paragraph',

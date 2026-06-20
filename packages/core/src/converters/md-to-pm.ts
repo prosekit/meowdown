@@ -81,9 +81,9 @@ function convertBlock(
     case LEZER_NODE_IDS.Blockquote:
       return [convertBlockquote(nodes, cursor, text)]
     case LEZER_NODE_IDS.BulletList:
-      return convertList(nodes, cursor, text, 'bullet', 1)
+      return convertList(nodes, cursor, text, 'bullet')
     case LEZER_NODE_IDS.OrderedList:
-      return convertOrderedList(nodes, cursor, text)
+      return convertList(nodes, cursor, text, 'ordered')
     case LEZER_NODE_IDS.FencedCode:
     case LEZER_NODE_IDS.CodeBlock:
       return [convertCodeBlock(nodes, cursor, text)]
@@ -168,13 +168,12 @@ function convertList(
   cursor: TreeCursor,
   text: string,
   kind: 'bullet' | 'ordered',
-  order: number,
 ): ProseMirrorNode[] {
   const items: ProseMirrorNode[] = []
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.ListItem) {
-        items.push(convertListItem(nodes, cursor, text, kind, order))
+        items.push(convertListItem(nodes, cursor, text, kind))
       }
     } while (cursor.nextSibling())
     cursor.parent()
@@ -182,41 +181,26 @@ function convertList(
   return items
 }
 
-function convertOrderedList(
-  nodes: TypedNodeBuilders,
-  cursor: TreeCursor,
-  text: string,
-): ProseMirrorNode[] {
-  // Read the start number from the first ListItem's first ListMark text,
-  // e.g. "1." → 1, "5." → 5. All items in a single OrderedList share
-  // the same `order` attribute on the prosekit side.
-  let order = 1
-  if (cursor.firstChild()) {
-    if (cursor.type.id === LEZER_NODE_IDS.ListItem && cursor.firstChild()) {
-      if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
-        const markText = text.slice(cursor.from, cursor.to)
-        const parsed = Number.parseInt(markText, 10)
-        if (Number.isFinite(parsed)) order = parsed
-      }
-      cursor.parent()
-    }
-    cursor.parent()
-  }
-  return convertList(nodes, cursor, text, 'ordered', order)
-}
-
 function convertListItem(
   nodes: TypedNodeBuilders,
   cursor: TreeCursor,
   text: string,
   kind: 'bullet' | 'ordered',
-  order: number,
 ): ProseMirrorNode {
   const content: ProseMirrorNode[] = []
   let taskChecked: boolean | null = null
+  let order: number | null = null
   if (cursor.firstChild()) {
     do {
-      if (cursor.type.id === LEZER_NODE_IDS.ListMark) continue
+      if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
+        // Each ordered item owns its number ("1.", "2."); read it per item so
+        // a list keeps "1. 2. 3." instead of repeating the first marker.
+        if (kind === 'ordered') {
+          const parsed = Number.parseInt(text.slice(cursor.from, cursor.to), 10)
+          order = Number.isFinite(parsed) ? parsed : 1
+        }
+        continue
+      }
       if (kind === 'bullet' && cursor.type.id === LEZER_NODE_IDS.Task) {
         const task = convertTask(nodes, cursor, text)
         taskChecked = task.checked
@@ -230,7 +214,7 @@ function convertListItem(
   return nodes.list(
     {
       kind: taskChecked === null ? kind : 'task',
-      order: kind === 'ordered' ? order : null,
+      order: kind === 'ordered' ? (order ?? 1) : null,
       checked: taskChecked ?? false,
       collapsed: false,
     },

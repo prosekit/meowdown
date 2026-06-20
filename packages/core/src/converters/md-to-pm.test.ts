@@ -94,7 +94,7 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it('keeps an ordered start number', () => {
+  it('keeps each ordered item number', () => {
     const md = dedent`
       5. five
       6. six
@@ -116,7 +116,7 @@ describe('markdownToDoc', () => {
           type: 'list',
           attrs: {
             kind: 'ordered',
-            order: 5,
+            order: 6,
             checked: false,
             collapsed: false,
           },

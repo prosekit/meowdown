@@ -338,7 +338,7 @@ describe('ordered lists', () => {
     expect(roundtrip('1. one\n1. two')).toBe('1. one\n1. two\n')
   })
 
-  it.fails('keeps sequential numbers', () => {
+  it('keeps sequential numbers', () => {
     expect(roundtrip('1. one\n2. two')).toBe('1. one\n2. two\n')
   })
 
@@ -346,7 +346,7 @@ describe('ordered lists', () => {
     expect(roundtrip('1) paren')).toBe('1) paren\n')
   })
 
-  it.fails('keeps empty item numbers', () => {
+  it('keeps empty item numbers', () => {
     expect(roundtrip('1.\n2.')).toBe('1.\n2.\n')
   })
 })
@@ -552,7 +552,7 @@ describe('mixed structures', () => {
     expect(roundtrip('# h1\n## h2\n### h3')).toBe('# h1\n## h2\n### h3\n')
   })
 
-  it.fails('keeps ordered numbers before a paragraph', () => {
+  it('keeps ordered numbers before a paragraph', () => {
     expect(roundtrip('1. a\n2. b\n\npara')).toBe('1. a\n2. b\n\npara\n')
   })
 })
