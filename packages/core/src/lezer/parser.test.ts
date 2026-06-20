@@ -34,7 +34,7 @@ function buildAst(cursor: TreeCursor, text: string): AstNode {
     name: cursor.name,
     from: cursor.from,
     to: cursor.to,
-    text: text.slice(cursor.from, cursor.to)
+    text: text.slice(cursor.from, cursor.to),
   }
   if (cursor.firstChild()) {
     do {
@@ -249,7 +249,8 @@ describe('gfmParser', () => {
 
 describe('gfmBlockOnlyParser', () => {
   it('parses block structure but never emits inline nodes', () => {
-    expect(show(buildAst(gfmBlockOnlyParser.parse(sample).cursor(), sample))).toMatchInlineSnapshot(`
+    expect(show(buildAst(gfmBlockOnlyParser.parse(sample).cursor(), sample)))
+      .toMatchInlineSnapshot(`
       "{
         "name": "Document",
         "from": 0,
