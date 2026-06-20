@@ -203,7 +203,7 @@ describe('docToMarkdown', () => {
     expect(markdown).toBe('> - item\n')
   })
 
-  it.fails('keeps an empty code block clean', () => {
+  it('keeps an empty code block clean', () => {
     const doc = n.doc(n.codeBlock({ language: '' }))
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('```\n```\n')
