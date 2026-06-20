@@ -62,3 +62,12 @@ export const UNICODE_VERTICAL_LINE = '\u{007C}' /* | */
 export const UNICODE_BOX_DRAWINGS_HEAVY_VERTICAL = '\u{2503}' /* ┃ */
 export const UNICODE_HEAVY_LEFT_POINTING_ANGLE_BRACKET_ORNAMENT = '\u{2770}' /* ❰ */
 export const UNICODE_HEAVY_RIGHT_POINTING_ANGLE_BRACKET_ORNAMENT = '\u{2771}' /* ❱ */
+
+/**
+ * Check if a char code is a space character.
+ *
+ * Ported from https://github.com/lezer-parser/markdown/blob/1.6.3/src/markdown.ts#L233
+ */
+export function isSpaceChar(char: number): boolean {
+  return char === CHAR_SPACE || char === CHAR_TAB || char === 10 || char === 13
+}
