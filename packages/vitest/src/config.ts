@@ -25,8 +25,6 @@ export function defineSharedConfig() {
         ? ['clipboard-read']
         : undefined
 
-  console.error('[meowdown][debug] clipboardPermissions', browserName, clipboardPermissions)
-
   return defineProject({
     plugins: [playwrightCommands()],
     oxc:
