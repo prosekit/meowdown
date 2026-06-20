@@ -342,7 +342,7 @@ describe('ordered lists', () => {
     expect(roundtrip('1. one\n2. two')).toBe('1. one\n2. two\n')
   })
 
-  it.fails('keeps a paren ordered list marker', () => {
+  it('keeps a paren ordered list marker', () => {
     expect(roundtrip('1) paren')).toBe('1) paren\n')
   })
 

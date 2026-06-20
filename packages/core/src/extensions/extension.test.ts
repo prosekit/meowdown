@@ -67,6 +67,7 @@ describe('defineEditorExtension', () => {
               "checked": false,
               "collapsed": false,
               "kind": "bullet",
+              "marker": ".",
               "order": null,
             },
             "content": [
@@ -87,6 +88,7 @@ describe('defineEditorExtension', () => {
               "checked": false,
               "collapsed": false,
               "kind": "ordered",
+              "marker": ".",
               "order": 1,
             },
             "content": [
@@ -107,6 +109,7 @@ describe('defineEditorExtension', () => {
               "checked": false,
               "collapsed": false,
               "kind": "task",
+              "marker": ".",
               "order": null,
             },
             "content": [

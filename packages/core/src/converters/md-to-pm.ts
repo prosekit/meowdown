@@ -1,6 +1,7 @@
 import type { TreeCursor } from '@lezer/common'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
+import type { ListMarker } from '../extensions/list.ts'
 import { getNodeBuilders, type TypedNodeBuilders } from '../extensions/schema.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 import { gfmBlockOnlyParser } from '../lezer/parser.ts'
@@ -190,15 +191,17 @@ function convertListItem(
   const content: ProseMirrorNode[] = []
   let taskChecked: boolean | undefined
   let order: number | undefined
+  let marker: ListMarker = '.'
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
         if (kind === 'ordered') {
           // An ordered list marker is a sequence of 1–9 arabic digits `(0-9)`, followed by either a `.` character or a `)` character.
           // https://spec.commonmark.org/0.31.2/#ordered-list-marker
-          const marker = text.slice(cursor.from, cursor.to)
-          const number = Number.parseInt(marker, 10)
+          const markText = text.slice(cursor.from, cursor.to)
+          const number = Number.parseInt(markText, 10)
           order = Number.isFinite(number) ? number : 1
+          if (markText.endsWith(')')) marker = ')'
         }
         continue
       }
@@ -218,6 +221,7 @@ function convertListItem(
       order: kind === 'ordered' ? (order ?? 1) : null,
       checked: taskChecked ?? false,
       collapsed: false,
+      marker,
     },
     content,
   )

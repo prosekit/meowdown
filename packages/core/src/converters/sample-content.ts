@@ -62,7 +62,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'list',
-      attrs: { kind: 'bullet', order: null, checked: false, collapsed: false },
+      attrs: { kind: 'bullet', order: null, checked: false, collapsed: false, marker: '.' },
       content: [
         {
           type: 'paragraph',
@@ -72,7 +72,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'list',
-      attrs: { kind: 'bullet', order: null, checked: false, collapsed: false },
+      attrs: { kind: 'bullet', order: null, checked: false, collapsed: false, marker: '.' },
       content: [
         {
           type: 'paragraph',
@@ -85,6 +85,7 @@ export const sampleContent: NodeJSON = {
             order: null,
             checked: false,
             collapsed: false,
+            marker: '.',
           },
           content: [
             {
@@ -102,7 +103,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'list',
-      attrs: { kind: 'ordered', order: 1, checked: false, collapsed: false },
+      attrs: { kind: 'ordered', order: 1, checked: false, collapsed: false, marker: '.' },
       content: [
         {
           type: 'paragraph',
@@ -112,7 +113,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'list',
-      attrs: { kind: 'ordered', order: 2, checked: false, collapsed: false },
+      attrs: { kind: 'ordered', order: 2, checked: false, collapsed: false, marker: '.' },
       content: [
         {
           type: 'paragraph',

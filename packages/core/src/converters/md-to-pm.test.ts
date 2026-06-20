@@ -77,6 +77,7 @@ describe('markdownToDoc', () => {
             order: null,
             checked: false,
             collapsed: false,
+            marker: '.',
           },
           content: [{ type: 'paragraph', content: [{ type: 'text', text: 'one' }] }],
         },
@@ -87,6 +88,7 @@ describe('markdownToDoc', () => {
             order: null,
             checked: false,
             collapsed: false,
+            marker: '.',
           },
           content: [{ type: 'paragraph', content: [{ type: 'text', text: 'two' }] }],
         },
@@ -109,6 +111,7 @@ describe('markdownToDoc', () => {
             order: 5,
             checked: false,
             collapsed: false,
+            marker: '.',
           },
           content: [{ type: 'paragraph', content: [{ type: 'text', text: 'five' }] }],
         },
@@ -119,6 +122,7 @@ describe('markdownToDoc', () => {
             order: 6,
             checked: false,
             collapsed: false,
+            marker: '.',
           },
           content: [{ type: 'paragraph', content: [{ type: 'text', text: 'six' }] }],
         },
@@ -137,6 +141,7 @@ describe('markdownToDoc', () => {
             order: null,
             checked: false,
             collapsed: false,
+            marker: '.',
           },
           content: [{ type: 'paragraph', content: [{ type: 'text', text: 'todo' }] }],
         },
@@ -155,6 +160,7 @@ describe('markdownToDoc', () => {
             order: null,
             checked: true,
             collapsed: false,
+            marker: '.',
           },
           content: [{ type: 'paragraph', content: [{ type: 'text', text: 'done' }] }],
         },
@@ -187,6 +193,7 @@ describe('markdownToDoc', () => {
             order: 1,
             checked: false,
             collapsed: false,
+            marker: '.',
           },
           content: [{ type: 'paragraph', content: [{ type: 'text', text: '[x] done' }] }],
         },
@@ -352,7 +359,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'list',
-          attrs: { kind: 'bullet', order: null, checked: false, collapsed: false },
+          attrs: { kind: 'bullet', order: null, checked: false, collapsed: false, marker: '.' },
           content: [{ type: 'paragraph', content: [{ type: 'text', text: 'star' }] }],
         },
       ],
@@ -365,7 +372,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'list',
-          attrs: { kind: 'ordered', order: 1, checked: false, collapsed: false },
+          attrs: { kind: 'ordered', order: 1, checked: false, collapsed: false, marker: ')' },
           content: [{ type: 'paragraph', content: [{ type: 'text', text: 'paren' }] }],
         },
       ],
@@ -378,7 +385,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'list',
-          attrs: { kind: 'ordered', order: 0, checked: false, collapsed: false },
+          attrs: { kind: 'ordered', order: 0, checked: false, collapsed: false, marker: '.' },
           content: [{ type: 'paragraph', content: [{ type: 'text', text: 'zero' }] }],
         },
       ],
@@ -391,7 +398,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'list',
-          attrs: { kind: 'task', order: null, checked: true, collapsed: false },
+          attrs: { kind: 'task', order: null, checked: true, collapsed: false, marker: '.' },
           content: [{ type: 'paragraph', content: [{ type: 'text', text: 'upper' }] }],
         },
       ],

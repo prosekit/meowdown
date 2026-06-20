@@ -272,10 +272,11 @@ function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
     kind: 'bullet' | 'ordered' | 'task' | 'toggle'
     order: number | null
     checked: boolean
+    marker: '.' | ')'
   }
   const marker =
     attrs.kind === 'ordered'
-      ? `${attrs.order ?? 1}. `
+      ? `${attrs.order ?? 1}${attrs.marker} `
       : attrs.kind === 'task'
         ? attrs.checked
           ? '- [x] '
