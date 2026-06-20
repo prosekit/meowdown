@@ -244,8 +244,8 @@ function convertListItem(
           }
           cursor.parent()
         }
-         // Skip the single separating space after `[ ]` / `[x]`
-         let nextCode = text.charCodeAt(taskStart)
+        // Skip the single separating space after `[ ]` / `[x]`
+        const nextCode = text.charCodeAt(taskStart)
         if (nextCode === CHAR_SPACE || nextCode === CHAR_TAB) taskStart += 1
         const taskText = text.slice(taskStart, taskEnd)
         content.push(taskText === '' ? nodes.paragraph() : nodes.paragraph(taskText))
