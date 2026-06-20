@@ -52,14 +52,14 @@ export function markdownToDoc(
  * and a closing `---` fence, each fence being exactly three dashes followed by
  * optional spaces or tabs. Returns the body (the lines between the fences,
  * joined by `\n`, without a trailing newline) and the length of the matched
- * region, or null when there is no terminated frontmatter block (a lone `---`
+ * region, or undefined when there is no terminated frontmatter block (a lone `---`
  * with no closing fence stays a thematic break).
  */
 const FRONTMATTER_RE = /^---[ \t]*\r?\n([\s\S]*?\n)?---[ \t]*(?:\r?\n|$)/
 
-function matchFrontmatter(markdown: string): { body: string; matchLength: number } | null {
+function matchFrontmatter(markdown: string): { body: string; matchLength: number } | undefined {
   const match = FRONTMATTER_RE.exec(markdown)
-  if (!match) return null
+  if (!match) return
   const body = (match[1] ?? '').replace(/\r?\n$/, '')
   return { body, matchLength: match[0].length }
 }
