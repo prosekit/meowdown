@@ -12,6 +12,7 @@ import {
   CHAR_PLUS,
   CHAR_RIGHT_PARENTHESIS,
   CHAR_SPACE,
+  CHAR_TAB,
   CHAR_UPPERCASE_X,
 } from '../unicode.ts'
 
@@ -225,10 +226,29 @@ function convertListItem(
         continue
       }
       if (kind === 'bullet' && cursor.type.id === LEZER_NODE_IDS.Task) {
-        const task = convertTask(nodes, cursor, text)
-        taskChecked = task.checked
-        taskMarker = task.taskMarker
-        content.push(task.paragraph)
+        // A GFM `Task` leaf (`[ ] text` / `[x] text`, after the list mark).
+        let taskStart = cursor.from
+        const taskEnd = cursor.to
+        taskChecked = false
+        if (cursor.firstChild()) {
+          if (cursor.type.id === LEZER_NODE_IDS.TaskMarker) {
+            const taskMarkerCode = text.charCodeAt(cursor.from + 1)
+            if (taskMarkerCode === CHAR_LOWERCASE_X) {
+              taskChecked = true
+              taskMarker = 'x'
+            } else if (taskMarkerCode === CHAR_UPPERCASE_X) {
+              taskChecked = true
+              taskMarker = 'X'
+            }
+            taskStart = cursor.to
+          }
+          cursor.parent()
+        }
+         // Skip the single separating space after `[ ]` / `[x]`
+         let nextCode = text.charCodeAt(taskStart)
+        if (nextCode === CHAR_SPACE || nextCode === CHAR_TAB) taskStart += 1
+        const taskText = text.slice(taskStart, taskEnd)
+        content.push(taskText === '' ? nodes.paragraph() : nodes.paragraph(taskText))
         continue
       }
       content.push(...convertBlock(nodes, cursor, text))
@@ -246,48 +266,6 @@ function convertListItem(
     } satisfies MeowdownListAttrs,
     content,
   )
-}
-
-interface ConvertedTask {
-  checked: boolean
-  taskMarker: TaskMarker
-  paragraph: ProseMirrorNode
-}
-
-/**
- * Convert a GFM `Task` leaf (`[ ] text` / `[x] text`, after the list mark)
- * into its checked state plus a paragraph holding the text. Only the single
- * space separating the `TaskMarker` from the text is dropped - it is
- * re-emitted by `docToMarkdown`'s `- [ ] ` marker, keeping any extra
- * whitespace byte-identical through a round-trip.
- */
-function convertTask(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string): ConvertedTask {
-  let checked = false
-  let taskMarker: TaskMarker = null
-  let contentStart = cursor.from
-  const contentEnd = cursor.to
-  if (cursor.firstChild()) {
-    if (cursor.type.id === LEZER_NODE_IDS.TaskMarker) {
-      const taskMarkerCode = text.charCodeAt(cursor.from + 1)
-      if (taskMarkerCode === CHAR_LOWERCASE_X) {
-        checked = true
-        taskMarker = 'x'
-      } else if (taskMarkerCode === CHAR_UPPERCASE_X) {
-        checked = true
-        taskMarker = 'X'
-      }
-      contentStart = cursor.to
-    }
-    cursor.parent()
-  }
-  // Skip the single separating space before slicing
-  if (text.charCodeAt(contentStart) === CHAR_SPACE) contentStart += 1
-  const content = text.slice(contentStart, contentEnd)
-  return {
-    checked,
-    taskMarker,
-    paragraph: content === '' ? nodes.paragraph() : nodes.paragraph(content),
-  }
 }
 
 function convertCodeBlock(
