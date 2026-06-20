@@ -468,10 +468,17 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it.fails('keeps a raw HTML block', () => {
+  it('keeps a raw HTML block', () => {
     expect(markdownToDoc('<div>html</div>').toJSON()).toEqual({
       type: 'doc',
       content: [{ type: 'paragraph', content: [{ type: 'text', text: '<div>html</div>' }] }],
+    })
+  })
+
+  it('keeps a processing instruction', () => {
+    expect(markdownToDoc('<?php echo 1; ?>').toJSON()).toEqual({
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: '<?php echo 1; ?>' }] }],
     })
   })
 

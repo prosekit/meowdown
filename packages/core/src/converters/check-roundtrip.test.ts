@@ -6,6 +6,7 @@ import { checkRoundTrip } from './check-roundtrip.ts'
 describe('checkRoundTrip', () => {
   it.each([
     'hello world',
+    '<div class="x">hi</div>', // raw HTML block survives as literal text
     dedent`
       # Hello
 
@@ -41,7 +42,6 @@ describe('checkRoundTrip', () => {
       Hello
       =====
     `, // setext heading
-    '<div class="x">hi</div>', // raw HTML block
     dedent`
       * a
       * b

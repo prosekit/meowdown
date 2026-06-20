@@ -162,12 +162,16 @@ describe('inline', () => {
     )
   })
 
-  it.fails('keeps a raw HTML block', () => {
+  it('keeps a raw HTML block', () => {
     expect(roundtrip('<div>html</div>')).toBe('<div>html</div>\n')
   })
 
-  it.fails('keeps an HTML comment', () => {
+  it('keeps an HTML comment', () => {
     expect(roundtrip('<!-- comment -->')).toBe('<!-- comment -->\n')
+  })
+
+  it('keeps a processing instruction', () => {
+    expect(roundtrip('<?php echo 1; ?>')).toBe('<?php echo 1; ?>\n')
   })
 })
 

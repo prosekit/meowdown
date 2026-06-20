@@ -72,6 +72,12 @@ function convertBlock(
       return [convertHeading(nodes, cursor, text, 2)]
     case LEZER_NODE_IDS.Paragraph:
       return [convertParagraph(nodes, cursor, text)]
+    case LEZER_NODE_IDS.HTMLBlock:
+    case LEZER_NODE_IDS.CommentBlock:
+    case LEZER_NODE_IDS.ProcessingInstructionBlock:
+      // The schema has no HTML / comment node, so keep the raw block as
+      // literal paragraph text; it survives verbatim through a round-trip.
+      return [convertParagraph(nodes, cursor, text)]
     case LEZER_NODE_IDS.Blockquote:
       return [convertBlockquote(nodes, cursor, text)]
     case LEZER_NODE_IDS.BulletList:
