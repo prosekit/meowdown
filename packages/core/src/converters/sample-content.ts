@@ -62,7 +62,14 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'list',
-      attrs: { kind: 'bullet', order: null, checked: false, collapsed: false, marker: '-' },
+      attrs: {
+        kind: 'bullet',
+        order: null,
+        checked: false,
+        collapsed: false,
+        marker: '-',
+        taskMarker: null,
+      },
       content: [
         {
           type: 'paragraph',
@@ -72,7 +79,14 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'list',
-      attrs: { kind: 'bullet', order: null, checked: false, collapsed: false, marker: '-' },
+      attrs: {
+        kind: 'bullet',
+        order: null,
+        checked: false,
+        collapsed: false,
+        marker: '-',
+        taskMarker: null,
+      },
       content: [
         {
           type: 'paragraph',
@@ -86,6 +100,7 @@ export const sampleContent: NodeJSON = {
             checked: false,
             collapsed: false,
             marker: '-',
+            taskMarker: null,
           },
           content: [
             {
@@ -103,7 +118,14 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'list',
-      attrs: { kind: 'ordered', order: 1, checked: false, collapsed: false, marker: '.' },
+      attrs: {
+        kind: 'ordered',
+        order: 1,
+        checked: false,
+        collapsed: false,
+        marker: '.',
+        taskMarker: null,
+      },
       content: [
         {
           type: 'paragraph',
@@ -113,7 +135,14 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'list',
-      attrs: { kind: 'ordered', order: 2, checked: false, collapsed: false, marker: '.' },
+      attrs: {
+        kind: 'ordered',
+        order: 2,
+        checked: false,
+        collapsed: false,
+        marker: '.',
+        taskMarker: null,
+      },
       content: [
         {
           type: 'paragraph',

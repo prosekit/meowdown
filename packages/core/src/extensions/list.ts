@@ -17,8 +17,17 @@ import type { NodeName } from './node-names.ts'
  */
 export type ListMarker = '.' | ')' | '-' | '*' | '+' | null
 
+/**
+ * The character inside a checked task's checkbox.
+ *
+ * GFM marks a box checked with either `x` or `X`. Defaults to null, which the
+ * serializer emits as the canonical lowercase `x`.
+ */
+export type TaskMarker = 'x' | 'X' | null
+
 export interface MeowdownListAttrs extends ListAttrs {
   marker?: ListMarker
+  taskMarker?: TaskMarker
 }
 
 // `marker` has a default, so it must stay optional in the node builders.
@@ -42,8 +51,27 @@ function defineListMarkerAttr(): ListMarkerExtension {
   })
 }
 
-export type MeowdownListExtension = Union<[ListExtensionBase, ListMarkerExtension]>
+// `taskMarker` has a default, so it must stay optional in the node builders.
+type ListTaskMarkerExtension = Extension<{ Nodes: { list: { taskMarker?: TaskMarker } } }>
+
+function defineListTaskMarkerAttr(): ListTaskMarkerExtension {
+  return defineNodeAttr<'list', 'taskMarker', TaskMarker>({
+    type: 'list' satisfies NodeName,
+    attr: 'taskMarker',
+    default: null,
+    // A new item created by pressing Enter keeps the previous item's casing.
+    splittable: true,
+    // Persist only the non-canonical uppercase `X`; lowercase `x` is the
+    // default the serializer emits anyway, and it must survive a DOM re-parse.
+    toDOM: (value) => (value === 'X' ? ['data-list-task-marker', value] : null),
+    parseDOM: (node) => (node.getAttribute('data-list-task-marker') === 'X' ? 'X' : null),
+  })
+}
+
+export type MeowdownListExtension = Union<
+  [ListExtensionBase, ListMarkerExtension, ListTaskMarkerExtension]
+>
 
 export function defineMeowdownList(): MeowdownListExtension {
-  return union(defineListBase(), defineListMarkerAttr())
+  return union(defineListBase(), defineListMarkerAttr(), defineListTaskMarkerAttr())
 }

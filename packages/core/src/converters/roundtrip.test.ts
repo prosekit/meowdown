@@ -396,7 +396,7 @@ describe('task lists', () => {
     expect(roundtrip('- [ ] [[note]] item')).toBe('- [ ] [[note]] item\n')
   })
 
-  it.fails('keeps an uppercase marker', () => {
+  it('keeps an uppercase marker', () => {
     expect(roundtrip('- [X] upper')).toBe('- [X] upper\n')
   })
 
@@ -588,7 +588,7 @@ describe('idempotency', () => {
     expect(roundtrip(once)).toBe(once)
   })
 
-  it('keeps a lowercased task marker stable', () => {
+  it('keeps an uppercase task marker stable', () => {
     const once = roundtrip('- [X] upper')
     expect(roundtrip(once)).toBe(once)
   })

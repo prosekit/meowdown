@@ -270,11 +270,12 @@ function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
   const attrs = node.attrs as MeowdownListAttrs
   const bulletMarker = attrs.marker === '*' || attrs.marker === '+' ? attrs.marker : '-'
   const orderMarker = attrs.marker === ')' ? ')' : '.'
+  const checkMark = attrs.taskMarker === 'X' ? 'X' : 'x'
   const marker =
     attrs.kind === 'ordered'
       ? `${attrs.order ?? 1}${orderMarker} `
       : attrs.kind === 'task'
-        ? `${bulletMarker} [${attrs.checked ? 'x' : ' '}] `
+        ? `${bulletMarker} [${attrs.checked ? checkMark : ' '}] `
         : `${bulletMarker} ` // bullet | toggle
 
   // For a task item the `[ ] ` checkbox is list-item CONTENT in GFM terms,
