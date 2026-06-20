@@ -1,10 +1,10 @@
+import { sleep } from '@ocavue/utils'
 import { TextSelection } from '@prosekit/pm/state'
 import { userEvent } from 'vitest/browser'
 
 import { getSelectionSnapshot } from './selection-snapshot.ts'
 
 import type { Fixture } from './index.ts'
-import { sleep } from '@ocavue/utils'
 
 /** Place a collapsed caret at text offset `offset`. */
 export function setCaret(fixture: Fixture, offset: number): void {
