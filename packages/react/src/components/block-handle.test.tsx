@@ -1,6 +1,6 @@
 import '../testing/index.ts'
 
-import { isFirefox, isSafari } from '@meowdown/vitest/helpers'
+import { isFirefox } from '@meowdown/vitest/helpers'
 import { createRef, type Ref } from 'react'
 import { describe, expect, it } from 'vitest'
 import { mouse } from 'vitest-browser-commands/playwright'
@@ -36,10 +36,7 @@ async function renderEditor({ ref, blockHandle, readOnly }: RenderOptions = {}) 
   )
 }
 
-describe.skipIf(
-  // TODO: Fix the tests on Safari
-  isSafari(),
-)('BlockHandle', () => {
+describe('BlockHandle', () => {
   it('shows when hovering a block', async () => {
     await renderEditor()
     await expect.element(handle).not.toBeVisible()

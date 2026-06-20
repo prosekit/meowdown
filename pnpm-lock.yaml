@@ -140,8 +140,8 @@ importers:
         specifier: ^0.1.19-beta.0
         version: 0.1.19-beta.0
       '@prosekit/react':
-        specifier: ^0.8.0-beta.4
-        version: 0.8.0-beta.4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)
+        specifier: ^0.8.0-beta.5
+        version: 0.8.0-beta.5(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1144,8 +1144,8 @@ packages:
   '@prosekit/pm@0.1.19-beta.0':
     resolution: {integrity: sha512-7vkxSf8byvR1XNIxCShdtK6UXTGgGix2lrzuA2RwvDBwz2eeqRuxjwuVN2r2EopXCJS/v4V05UXv/DuOXDULhw==}
 
-  '@prosekit/react@0.8.0-beta.4':
-    resolution: {integrity: sha512-+Iu8Q+rIUIMeF5gNzpDrn0dKi/3wIY2kHa+1xaZTgnHe+zgC7PyYzcsHXQryWQnhACmWJMdNQSo+IjPjBg8Efw==}
+  '@prosekit/react@0.8.0-beta.5':
+    resolution: {integrity: sha512-LZ1UuMnUefl4j5aVAzxnRURoK/fxIOzwXbXAHJhUYcBEOlrm2fpGiSkoFce50hgTn6nPH+NOaY10XaOPsZnO6A==}
     peerDependencies:
       react: '>= 18.2.0'
       react-dom: '>= 18.2.0'
@@ -1155,8 +1155,8 @@ packages:
       react-dom:
         optional: true
 
-  '@prosekit/web@0.9.0-beta.4':
-    resolution: {integrity: sha512-vC6RXU06s7tYcBfVqrczQcKUfvDmR5CY/oOs19I0u9f64Yq707RSyqMaWtUuyzVKOSgJY5fRFpE01EMZu6FjTA==}
+  '@prosekit/web@0.9.0-beta.5':
+    resolution: {integrity: sha512-a2KMk2/DoVOHUSHHfHuZ4BpF7kw4uPliMXBiWANksEYtUxCaIR0q8I+cOWKHfvu3RtTA3XYxHqHZ40UE1GmQww==}
 
   '@prosemirror-adapter/core@0.5.3':
     resolution: {integrity: sha512-jGcI/eq3USFqf1fCaejgCmifmXYDyFco6/5KjyyNBnuEhLqyLjD+020CtcduEOsnN4xPZr5ikclgHIR6kEFkQg==}
@@ -4529,11 +4529,11 @@ snapshots:
       prosemirror-transform: 1.12.0
       prosemirror-view: 1.41.9
 
-  '@prosekit/react@0.8.0-beta.4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)':
+  '@prosekit/react@0.8.0-beta.5(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)':
     dependencies:
       '@prosekit/core': 0.13.0-beta.3(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
       '@prosekit/pm': 0.1.19-beta.0
-      '@prosekit/web': 0.9.0-beta.4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
+      '@prosekit/web': 0.9.0-beta.5(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
       '@prosemirror-adapter/core': 0.5.3
       '@prosemirror-adapter/react': 0.5.3(react-dom@19.2.7)(react@19.2.7)
     optionalDependencies:
@@ -4557,7 +4557,7 @@ snapshots:
       - y-prosemirror
       - yjs
 
-  '@prosekit/web@0.9.0-beta.4(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)':
+  '@prosekit/web@0.9.0-beta.5(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)':
     dependencies:
       '@aria-ui/core': 0.2.1
       '@aria-ui/elements': 0.1.10
