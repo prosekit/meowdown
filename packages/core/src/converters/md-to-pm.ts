@@ -11,9 +11,8 @@ import {
   CHAR_LOWERCASE_X,
   CHAR_PLUS,
   CHAR_RIGHT_PARENTHESIS,
-  CHAR_SPACE,
-  CHAR_TAB,
   CHAR_UPPERCASE_X,
+  isSpaceChar,
 } from '../unicode.ts'
 
 /**
@@ -166,7 +165,7 @@ function convertParagraph(
       if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) {
         content += text.slice(pos, cursor.from)
         pos = cursor.to
-        if (text.charCodeAt(pos) === CHAR_SPACE) pos += 1
+        if (isSpaceChar(text.charCodeAt(pos))) pos += 1
       }
     } while (cursor.nextSibling())
     cursor.parent()
@@ -262,9 +261,8 @@ function convertListItem(
           }
           cursor.parent()
         }
-        // Skip the single separating space after `[ ]` / `[x]`
-        const nextCode = text.charCodeAt(taskStart)
-        if (nextCode === CHAR_SPACE || nextCode === CHAR_TAB) taskStart += 1
+        // Skip the single separating whitespace after `[ ]` / `[x]`
+        if (isSpaceChar(text.charCodeAt(taskStart))) taskStart += 1
         const taskText = text.slice(taskStart, taskEnd)
         content.push(taskText === '' ? nodes.paragraph() : nodes.paragraph(taskText))
         continue
