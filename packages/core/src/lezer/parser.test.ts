@@ -54,8 +54,8 @@ describe('gfmParser', () => {
       "{
         "name": "Document",
         "from": 0,
-        "to": 132,
-        "text": "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\n> line1\\n> line2\\n",
+        "to": 187,
+        "text": "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\nparagraph line1\\nparagraph line2\\n\\n> blockquote line1\\n> blockquote line2\\n",
         "children": [
           {
             "name": "Paragraph",
@@ -208,27 +208,33 @@ describe('gfmParser', () => {
             ]
           },
           {
-            "name": "Blockquote",
+            "name": "Paragraph",
             "from": 116,
-            "to": 131,
-            "text": "> line1\\n> line2",
+            "to": 147,
+            "text": "paragraph line1\\nparagraph line2"
+          },
+          {
+            "name": "Blockquote",
+            "from": 149,
+            "to": 186,
+            "text": "> blockquote line1\\n> blockquote line2",
             "children": [
               {
                 "name": "QuoteMark",
-                "from": 116,
-                "to": 117,
+                "from": 149,
+                "to": 150,
                 "text": ">"
               },
               {
                 "name": "Paragraph",
-                "from": 118,
-                "to": 131,
-                "text": "line1\\n> line2",
+                "from": 151,
+                "to": 186,
+                "text": "blockquote line1\\n> blockquote line2",
                 "children": [
                   {
                     "name": "QuoteMark",
-                    "from": 124,
-                    "to": 125,
+                    "from": 168,
+                    "to": 169,
                     "text": ">"
                   }
                 ]
@@ -247,8 +253,8 @@ describe('gfmBlockOnlyParser', () => {
       "{
         "name": "Document",
         "from": 0,
-        "to": 132,
-        "text": "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\n> line1\\n> line2\\n",
+        "to": 187,
+        "text": "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\nparagraph line1\\nparagraph line2\\n\\n> blockquote line1\\n> blockquote line2\\n",
         "children": [
           {
             "name": "Paragraph",
@@ -379,27 +385,33 @@ describe('gfmBlockOnlyParser', () => {
             ]
           },
           {
-            "name": "Blockquote",
+            "name": "Paragraph",
             "from": 116,
-            "to": 131,
-            "text": "> line1\\n> line2",
+            "to": 147,
+            "text": "paragraph line1\\nparagraph line2"
+          },
+          {
+            "name": "Blockquote",
+            "from": 149,
+            "to": 186,
+            "text": "> blockquote line1\\n> blockquote line2",
             "children": [
               {
                 "name": "QuoteMark",
-                "from": 116,
-                "to": 117,
+                "from": 149,
+                "to": 150,
                 "text": ">"
               },
               {
                 "name": "Paragraph",
-                "from": 118,
-                "to": 131,
-                "text": "line1\\n> line2",
+                "from": 151,
+                "to": 186,
+                "text": "blockquote line1\\n> blockquote line2",
                 "children": [
                   {
                     "name": "QuoteMark",
-                    "from": 124,
-                    "to": 125,
+                    "from": 168,
+                    "to": 169,
                     "text": ">"
                   }
                 ]
