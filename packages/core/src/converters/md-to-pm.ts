@@ -188,8 +188,8 @@ function convertListItem(
   kind: 'bullet' | 'ordered',
 ): ProseMirrorNode {
   const content: ProseMirrorNode[] = []
-  let taskChecked: boolean | null = null
-  let order: number | null = null
+  let taskChecked: boolean | undefined
+  let order: number  | undefined
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
@@ -214,7 +214,7 @@ function convertListItem(
   }
   return nodes.list(
     {
-      kind: taskChecked === null ? kind : 'task',
+      kind: taskChecked == null ? kind : 'task',
       order: kind === 'ordered' ? (order ?? 1) : null,
       checked: taskChecked ?? false,
       collapsed: false,
