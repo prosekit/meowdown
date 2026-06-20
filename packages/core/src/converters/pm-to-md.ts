@@ -2,6 +2,7 @@ import type { CodeBlockAttrs } from '@prosekit/extensions/code-block'
 import type { HeadingAttrs } from '@prosekit/extensions/heading'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
+import type { MeowdownListAttrs } from '../extensions/list.ts'
 import type { NodeName } from '../extensions/node-names.ts'
 import { longestBacktickRun } from '../utils/backticks.ts'
 
@@ -268,15 +269,10 @@ function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
 function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
   // prosekit's `list` node is a SINGLE item; sibling `list` nodes form the
   // larger markdown list.
-  const attrs = node.attrs as {
-    kind: 'bullet' | 'ordered' | 'task' | 'toggle'
-    order: number | null
-    checked: boolean
-    marker: '.' | ')'
-  }
+  const attrs = node.attrs as MeowdownListAttrs
   const marker =
     attrs.kind === 'ordered'
-      ? `${attrs.order ?? 1}${attrs.marker} `
+      ? `${attrs.order ?? 1}${attrs.marker === ')' ? ')' : '.'} `
       : attrs.kind === 'task'
         ? attrs.checked
           ? '- [x] '

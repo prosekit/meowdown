@@ -21,7 +21,7 @@ import { defineHeading } from './heading.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
-import { defineList } from './list.ts'
+import { defineMeowdownList } from './list.ts'
 import { defineTable } from './table.ts'
 import { defineWikilink } from './wikilink.ts'
 
@@ -32,7 +32,7 @@ function defineEditorExtensionImpl() {
     defineDoc(),
     defineText(),
     defineBlockquote(),
-    defineList(),
+    defineMeowdownList(),
     defineHeading(),
     defineTable(),
     defineCodeBlock(),

@@ -1,7 +1,7 @@
 import type { TreeCursor } from '@lezer/common'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
-import type { ListMarker } from '../extensions/list.ts'
+import type { ListMarker, MeowdownListAttrs } from '../extensions/list.ts'
 import { getNodeBuilders, type TypedNodeBuilders } from '../extensions/schema.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 import { gfmBlockOnlyParser } from '../lezer/parser.ts'
@@ -191,7 +191,7 @@ function convertListItem(
   const content: ProseMirrorNode[] = []
   let taskChecked: boolean | undefined
   let order: number | undefined
-  let marker: ListMarker = '.'
+  let marker: ListMarker | undefined
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
@@ -201,7 +201,11 @@ function convertListItem(
           const markText = text.slice(cursor.from, cursor.to)
           const number = Number.parseInt(markText, 10)
           order = Number.isFinite(number) ? number : 1
-          if (markText.endsWith(')')) marker = ')'
+          if (markText.endsWith(')')) {
+            marker = ')'
+          } else if (markText.endsWith('.')) {
+            marker = '.'
+          }
         }
         continue
       }
@@ -222,7 +226,7 @@ function convertListItem(
       checked: taskChecked ?? false,
       collapsed: false,
       marker,
-    },
+    } satisfies MeowdownListAttrs,
     content,
   )
 }
