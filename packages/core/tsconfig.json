@@ -7,7 +7,7 @@
   },
   "references": [
     {
-      "path": "../config-vitest/tsconfig.json"
+      "path": "../vitest/tsconfig.json"
     }
   ]
 }

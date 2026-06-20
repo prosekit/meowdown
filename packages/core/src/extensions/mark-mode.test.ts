@@ -1,4 +1,4 @@
-import { isFirefox } from '@meowdown/config-vitest/helpers'
+import { isFirefox } from '@meowdown/vitest/helpers'
 import { TextSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'

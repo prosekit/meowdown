@@ -17,10 +17,10 @@
   "cmkOptions": { "enabled": true, "dtsOutDir": ".", "arbitraryExtensions": true },
   "references": [
     {
-      "path": "../config-vitest/tsconfig.json"
+      "path": "../core/tsconfig.json"
     },
     {
-      "path": "../core/tsconfig.json"
+      "path": "../vitest/tsconfig.json"
     }
   ]
 }

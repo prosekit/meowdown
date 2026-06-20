@@ -2,13 +2,13 @@
   "extends": "@ocavue/tsconfig/dom/root.json",
   "references": [
     {
-      "path": "./packages/config-vitest/tsconfig.json"
-    },
-    {
       "path": "./packages/core/tsconfig.json"
     },
     {
       "path": "./packages/react/tsconfig.json"
+    },
+    {
+      "path": "./packages/vitest/tsconfig.json"
     },
     {
       "path": "./website/tsconfig.json"

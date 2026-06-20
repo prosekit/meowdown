@@ -1,6 +1,6 @@
 import '../testing/index.ts'
 
-import { isSafari } from '@meowdown/config-vitest/helpers'
+import { isSafari } from '@meowdown/vitest/helpers'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'

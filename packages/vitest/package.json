@@ -1,9 +1,9 @@
 {
-  "name": "@meowdown/config-vitest",
+  "name": "@meowdown/vitest",
   "type": "module",
   "private": true,
   "exports": {
-    ".": "./src/index.ts",
+    "./config": "./src/config.ts",
     "./helpers": "./src/helpers.ts",
     "./setup-webkit": "./src/setup-webkit.ts"
   },

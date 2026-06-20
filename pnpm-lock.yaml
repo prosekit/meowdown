@@ -49,21 +49,6 @@ importers:
         specifier: ^4.1.9
         version: 4.1.9(@types/node@24.13.2)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(vite@8.0.16)
 
-  packages/config-vitest:
-    devDependencies:
-      '@ocavue/tsconfig':
-        specifier: ^0.7.1
-        version: 0.7.1
-      '@vitest/browser-playwright':
-        specifier: ^4.1.9
-        version: 4.1.9(playwright@1.61.0)(vite@8.0.16)(vitest@4.1.9)
-      vitest:
-        specifier: ^4.1.9
-        version: 4.1.9(@types/node@24.13.2)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(vite@8.0.16)
-      vitest-browser-commands:
-        specifier: ^0.2.1
-        version: 0.2.1(@vitest/browser-playwright@4.1.9)(vitest@4.1.9)
-
   packages/core:
     dependencies:
       '@codemirror/language':
@@ -97,9 +82,9 @@ importers:
         specifier: ^0.15.2
         version: 0.15.2(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.41.9)
     devDependencies:
-      '@meowdown/config-vitest':
+      '@meowdown/vitest':
         specifier: workspace:*
-        version: link:../config-vitest
+        version: link:../vitest
       '@ocavue/tsconfig':
         specifier: ^0.7.1
         version: 0.7.1
@@ -164,9 +149,9 @@ importers:
       '@css-modules-kit/codegen':
         specifier: ^1.3.0
         version: 1.3.0(typescript@6.0.3)
-      '@meowdown/config-vitest':
+      '@meowdown/vitest':
         specifier: workspace:*
-        version: link:../config-vitest
+        version: link:../vitest
       '@ocavue/tsconfig':
         specifier: ^0.7.1
         version: 0.7.1
@@ -203,6 +188,21 @@ importers:
       vitest-browser-react:
         specifier: ^2.2.0
         version: 2.2.0(@types/react-dom@19.2.3)(@types/react@19.2.17)(react-dom@19.2.7)(react@19.2.7)(vitest@4.1.9)
+
+  packages/vitest:
+    devDependencies:
+      '@ocavue/tsconfig':
+        specifier: ^0.7.1
+        version: 0.7.1
+      '@vitest/browser-playwright':
+        specifier: ^4.1.9
+        version: 4.1.9(playwright@1.61.0)(vite@8.0.16)(vitest@4.1.9)
+      vitest:
+        specifier: ^4.1.9
+        version: 4.1.9(@types/node@24.13.2)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(vite@8.0.16)
+      vitest-browser-commands:
+        specifier: ^0.2.1
+        version: 0.2.1(@vitest/browser-playwright@4.1.9)(vitest@4.1.9)
 
   website:
     dependencies:

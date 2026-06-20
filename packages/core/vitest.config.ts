@@ -1,3 +1,3 @@
-import { defineSharedConfig } from '@meowdown/config-vitest'
+import { defineSharedConfig } from '@meowdown/vitest/config'
 
 export default defineSharedConfig()
