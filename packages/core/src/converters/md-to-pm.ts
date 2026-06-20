@@ -193,11 +193,12 @@ function convertListItem(
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
-        // Each ordered item owns its number ("1.", "2."); read it per item so
-        // a list keeps "1. 2. 3." instead of repeating the first marker.
         if (kind === 'ordered') {
-          const parsed = Number.parseInt(text.slice(cursor.from, cursor.to), 10)
-          order = Number.isFinite(parsed) ? parsed : 1
+          // An ordered list marker is a sequence of 1–9 arabic digits `(0-9)`, followed by either a `.` character or a `)` character.
+          // https://spec.commonmark.org/0.31.2/#ordered-list-marker
+          const marker = text.slice(cursor.from, cursor.to)
+          const number = Number.parseInt(marker, 10)
+          order = Number.isFinite(number) ? number : 1
         }
         continue
       }
