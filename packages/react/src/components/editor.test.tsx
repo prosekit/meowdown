@@ -1,6 +1,5 @@
 import '../testing/index.ts'
 
-import { isFirefox } from '@meowdown/vitest/helpers'
 import { pasteText } from '@prosekit/core/test'
 import { TextSelection } from '@prosekit/pm/state'
 import { useEditor } from '@prosekit/react'
@@ -253,10 +252,7 @@ describe('MeowdownEditor', () => {
     await expect.element(page.getByAltText('pic')).not.toBeInTheDocument()
   })
 
-  it.skipIf(
-    // TODO: fix the test in Firefox.
-    isFirefox(),
-  )('embeds a pasted YouTube link by default', async () => {
+  it('embeds a pasted YouTube link by default', async () => {
     const ref = createRef<EditorHandle>()
     await render(<MeowdownEditor handleRef={ref} resolveImageUrl={(src) => src} />)
     await pmRoot.click()
