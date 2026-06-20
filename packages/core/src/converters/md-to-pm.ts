@@ -1,9 +1,19 @@
 import type { TreeCursor } from '@lezer/common'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
+import type { ListMarker, MeowdownListAttrs, TaskMarker } from '../extensions/list.ts'
 import { getNodeBuilders, type TypedNodeBuilders } from '../extensions/schema.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 import { gfmBlockOnlyParser } from '../lezer/parser.ts'
+import {
+  CHAR_ASTERISK,
+  CHAR_DOT,
+  CHAR_LOWERCASE_X,
+  CHAR_PLUS,
+  CHAR_RIGHT_PARENTHESIS,
+  CHAR_UPPERCASE_X,
+  isSpaceChar,
+} from '../unicode.ts'
 
 /**
  * Convert a markdown string into a ProseMirror document node.
@@ -72,12 +82,18 @@ function convertBlock(
       return [convertHeading(nodes, cursor, text, 2)]
     case LEZER_NODE_IDS.Paragraph:
       return [convertParagraph(nodes, cursor, text)]
+    case LEZER_NODE_IDS.HTMLBlock:
+    case LEZER_NODE_IDS.CommentBlock:
+    case LEZER_NODE_IDS.ProcessingInstructionBlock:
+      // The schema has no HTML / comment node, so keep the raw block as
+      // literal paragraph text; it survives verbatim through a round-trip.
+      return [convertParagraph(nodes, cursor, text)]
     case LEZER_NODE_IDS.Blockquote:
       return [convertBlockquote(nodes, cursor, text)]
     case LEZER_NODE_IDS.BulletList:
-      return convertList(nodes, cursor, text, 'bullet', 1)
+      return convertList(nodes, cursor, text, 'bullet')
     case LEZER_NODE_IDS.OrderedList:
-      return convertOrderedList(nodes, cursor, text)
+      return convertList(nodes, cursor, text, 'ordered')
     case LEZER_NODE_IDS.FencedCode:
     case LEZER_NODE_IDS.CodeBlock:
       return [convertCodeBlock(nodes, cursor, text)]
@@ -91,8 +107,14 @@ function convertBlock(
       // `kind`, so an ordered item cannot also be a task - keep the
       // `[x]` marker as literal paragraph text so it round-trips verbatim.
       return [convertParagraph(nodes, cursor, text)]
-    default:
-      return []
+    default: {
+      // Never silently drop a block: an unhandled type keeps its raw source as literal paragraph text. Warn so a
+      // missing converter case surfaces instead of losing content quietly.
+      const raw = text.slice(cursor.from, cursor.to)
+      if (raw.trim() === '') return []
+      console.warn(`[meowdown] unsupported lezer block "${cursor.type.name}"`)
+      return [convertParagraph(nodes, cursor, text)]
+    }
   }
 }
 
@@ -131,8 +153,26 @@ function convertParagraph(
   cursor: TreeCursor,
   text: string,
 ): ProseMirrorNode {
-  const content = text.slice(cursor.from, cursor.to)
-  return nodes.paragraph(content)
+  const from = cursor.from
+  const to = cursor.to
+  // In block-only parsing a paragraph has no inline children, with one
+  // exception: lezer leaves the lazy-continuation `QuoteMark`s of a multi-line
+  // blockquote (`> l1\n> l2`) embedded in the paragraph's span.
+  if (cursor.firstChild()) {
+    let content = ''
+    let pos = from
+    do {
+      if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) {
+        content += text.slice(pos, cursor.from)
+        pos = cursor.to
+        if (isSpaceChar(text.charCodeAt(pos))) pos += 1
+      }
+    } while (cursor.nextSibling())
+    cursor.parent()
+    content += text.slice(pos, to)
+    return content === '' ? nodes.paragraph() : nodes.paragraph(content)
+  }
+  return nodes.paragraph(text.slice(from, to))
 }
 
 function convertBlockquote(
@@ -156,13 +196,12 @@ function convertList(
   cursor: TreeCursor,
   text: string,
   kind: 'bullet' | 'ordered',
-  order: number,
 ): ProseMirrorNode[] {
   const items: ProseMirrorNode[] = []
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.ListItem) {
-        items.push(convertListItem(nodes, cursor, text, kind, order))
+        items.push(convertListItem(nodes, cursor, text, kind))
       }
     } while (cursor.nextSibling())
     cursor.parent()
@@ -170,45 +209,62 @@ function convertList(
   return items
 }
 
-function convertOrderedList(
-  nodes: TypedNodeBuilders,
-  cursor: TreeCursor,
-  text: string,
-): ProseMirrorNode[] {
-  // Read the start number from the first ListItem's first ListMark text,
-  // e.g. "1." → 1, "5." → 5. All items in a single OrderedList share
-  // the same `order` attribute on the prosekit side.
-  let order = 1
-  if (cursor.firstChild()) {
-    if (cursor.type.id === LEZER_NODE_IDS.ListItem && cursor.firstChild()) {
-      if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
-        const markText = text.slice(cursor.from, cursor.to)
-        const parsed = Number.parseInt(markText, 10)
-        if (Number.isFinite(parsed)) order = parsed
-      }
-      cursor.parent()
-    }
-    cursor.parent()
-  }
-  return convertList(nodes, cursor, text, 'ordered', order)
-}
-
 function convertListItem(
   nodes: TypedNodeBuilders,
   cursor: TreeCursor,
   text: string,
   kind: 'bullet' | 'ordered',
-  order: number,
 ): ProseMirrorNode {
   const content: ProseMirrorNode[] = []
-  let taskChecked: boolean | null = null
+  let taskChecked: boolean | undefined
+  let taskMarker: TaskMarker | undefined
+  let order: number | undefined
+  let marker: ListMarker | undefined
   if (cursor.firstChild()) {
     do {
-      if (cursor.type.id === LEZER_NODE_IDS.ListMark) continue
+      if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
+        if (kind === 'ordered') {
+          // An ordered list marker is a sequence of 1–9 arabic digits `(0-9)`, followed by either a `.` character or a `)` character.
+          // https://spec.commonmark.org/0.31.2/#ordered-list-marker
+          const delimiterCode = text.charCodeAt(cursor.to - 1)
+          if (delimiterCode === CHAR_RIGHT_PARENTHESIS) {
+            marker = ')'
+          } else if (delimiterCode === CHAR_DOT) {
+            marker = '.'
+          }
+          const number = Number.parseInt(text.slice(cursor.from, cursor.to), 10)
+          order = Number.isFinite(number) ? number : 1
+        } else {
+          // A bullet list marker is one of `-`, `+`, or `*`.
+          // https://spec.commonmark.org/0.31.2/#bullet-list-marker
+          const code = text.charCodeAt(cursor.from)
+          marker = code === CHAR_ASTERISK ? '*' : code === CHAR_PLUS ? '+' : '-'
+        }
+        continue
+      }
       if (kind === 'bullet' && cursor.type.id === LEZER_NODE_IDS.Task) {
-        const task = convertTask(nodes, cursor, text)
-        taskChecked = task.checked
-        content.push(task.paragraph)
+        // A GFM `Task` leaf (`[ ] text` / `[x] text`, after the list mark).
+        let taskStart = cursor.from
+        const taskEnd = cursor.to
+        taskChecked = false
+        if (cursor.firstChild()) {
+          if (cursor.type.id === LEZER_NODE_IDS.TaskMarker) {
+            const taskMarkerCode = text.charCodeAt(cursor.from + 1)
+            if (taskMarkerCode === CHAR_LOWERCASE_X) {
+              taskChecked = true
+              taskMarker = 'x'
+            } else if (taskMarkerCode === CHAR_UPPERCASE_X) {
+              taskChecked = true
+              taskMarker = 'X'
+            }
+            taskStart = cursor.to
+          }
+          cursor.parent()
+        }
+        // Skip the single separating whitespace after `[ ]` / `[x]`
+        if (isSpaceChar(text.charCodeAt(taskStart))) taskStart += 1
+        const taskText = text.slice(taskStart, taskEnd)
+        content.push(taskText === '' ? nodes.paragraph() : nodes.paragraph(taskText))
         continue
       }
       content.push(...convertBlock(nodes, cursor, text))
@@ -217,44 +273,15 @@ function convertListItem(
   }
   return nodes.list(
     {
-      kind: taskChecked === null ? kind : 'task',
-      order: kind === 'ordered' ? order : null,
+      kind: taskChecked == null ? kind : 'task',
+      order: kind === 'ordered' ? (order ?? 1) : null,
       checked: taskChecked ?? false,
       collapsed: false,
-    },
+      marker,
+      taskMarker,
+    } satisfies MeowdownListAttrs,
     content,
   )
-}
-
-interface ConvertedTask {
-  checked: boolean
-  paragraph: ProseMirrorNode
-}
-
-/**
- * Convert a GFM `Task` leaf (`[ ] text` / `[x] text`, after the list mark)
- * into its checked state plus a paragraph holding the text. Only the single
- * space separating the `TaskMarker` from the text is dropped - it is
- * re-emitted by `docToMarkdown`'s `- [ ] ` marker, keeping any extra
- * whitespace byte-identical through a round-trip.
- */
-function convertTask(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string): ConvertedTask {
-  let checked = false
-  let contentStart = cursor.from
-  const contentEnd = cursor.to
-  if (cursor.firstChild()) {
-    if (cursor.type.id === LEZER_NODE_IDS.TaskMarker) {
-      checked = text.slice(cursor.from, cursor.to).toLowerCase().includes('x')
-      contentStart = cursor.to
-    }
-    cursor.parent()
-  }
-  let content = text.slice(contentStart, contentEnd)
-  if (content.startsWith(' ')) content = content.slice(1)
-  return {
-    checked,
-    paragraph: content === '' ? nodes.paragraph() : nodes.paragraph(content),
-  }
 }
 
 function convertCodeBlock(

@@ -162,12 +162,20 @@ describe('inline', () => {
     )
   })
 
-  it.fails('keeps a raw HTML block', () => {
+  it('keeps a raw HTML block', () => {
     expect(roundtrip('<div>html</div>')).toBe('<div>html</div>\n')
   })
 
-  it.fails('keeps an HTML comment', () => {
+  it('keeps an HTML comment', () => {
     expect(roundtrip('<!-- comment -->')).toBe('<!-- comment -->\n')
+  })
+
+  it('keeps a processing instruction', () => {
+    expect(roundtrip('<?php echo 1; ?>')).toBe('<?php echo 1; ?>\n')
+  })
+
+  it.fails('keeps a link reference definition', () => {
+    expect(roundtrip('[foo]: /url')).toBe('[foo]: /url\n')
   })
 })
 
@@ -246,7 +254,7 @@ describe('blockquotes', () => {
     expect(roundtrip('> ')).toBe('> \n')
   })
 
-  it.fails('keeps a two-line quote', () => {
+  it('keeps a two-line quote', () => {
     expect(roundtrip('> l1\n> l2')).toBe('> l1\n> l2\n')
   })
 
@@ -284,11 +292,11 @@ describe('bullet lists', () => {
     expect(roundtrip('- a\n-\n- b')).toBe('- a\n-\n- b\n')
   })
 
-  it.fails('keeps an asterisk bullet', () => {
+  it('keeps an asterisk bullet', () => {
     expect(roundtrip('* star')).toBe('* star\n')
   })
 
-  it.fails('keeps a plus bullet', () => {
+  it('keeps a plus bullet', () => {
     expect(roundtrip('+ plus')).toBe('+ plus\n')
   })
 
@@ -330,15 +338,15 @@ describe('ordered lists', () => {
     expect(roundtrip('1. one\n1. two')).toBe('1. one\n1. two\n')
   })
 
-  it.fails('keeps sequential numbers', () => {
+  it('keeps sequential numbers', () => {
     expect(roundtrip('1. one\n2. two')).toBe('1. one\n2. two\n')
   })
 
-  it.fails('keeps a paren delimiter', () => {
+  it('keeps a paren ordered list marker', () => {
     expect(roundtrip('1) paren')).toBe('1) paren\n')
   })
 
-  it.fails('keeps empty item numbers', () => {
+  it('keeps empty item numbers', () => {
     expect(roundtrip('1.\n2.')).toBe('1.\n2.\n')
   })
 })
@@ -388,7 +396,7 @@ describe('task lists', () => {
     expect(roundtrip('- [ ] [[note]] item')).toBe('- [ ] [[note]] item\n')
   })
 
-  it.fails('keeps an uppercase marker', () => {
+  it('keeps an uppercase marker', () => {
     expect(roundtrip('- [X] upper')).toBe('- [X] upper\n')
   })
 
@@ -544,7 +552,7 @@ describe('mixed structures', () => {
     expect(roundtrip('# h1\n## h2\n### h3')).toBe('# h1\n## h2\n### h3\n')
   })
 
-  it.fails('keeps ordered numbers before a paragraph', () => {
+  it('keeps ordered numbers before a paragraph', () => {
     expect(roundtrip('1. a\n2. b\n\npara')).toBe('1. a\n2. b\n\npara\n')
   })
 })
@@ -580,7 +588,7 @@ describe('idempotency', () => {
     expect(roundtrip(once)).toBe(once)
   })
 
-  it('keeps a lowercased task marker stable', () => {
+  it('keeps an uppercase task marker stable', () => {
     const once = roundtrip('- [X] upper')
     expect(roundtrip(once)).toBe(once)
   })
@@ -600,7 +608,7 @@ describe('idempotency', () => {
     expect(roundtrip(once)).toBe(once)
   })
 
-  it.fails('keeps a two-line quote stable', () => {
+  it('keeps a two-line quote stable', () => {
     const once = roundtrip('> l1\n> l2')
     expect(roundtrip(once)).toBe(once)
   })

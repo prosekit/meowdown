@@ -3,6 +3,8 @@ export const CHAR_UPPERCASE_A = 65 /* A */
 export const CHAR_LOWERCASE_A = 97 /* a */
 export const CHAR_UPPERCASE_Z = 90 /* Z */
 export const CHAR_LOWERCASE_Z = 122 /* z */
+export const CHAR_LOWERCASE_X = 120 /* x */
+export const CHAR_UPPERCASE_X = 88 /* X */
 
 // Non-alphabetic chars.
 export const CHAR_DOT = 46 /* . */
@@ -29,6 +31,8 @@ export const CHAR_LEFT_CURLY_BRACKET = 123 /* { */
 export const CHAR_RIGHT_CURLY_BRACKET = 125 /* } */
 export const CHAR_HYPHEN_MINUS = 45 /* - */
 export const CHAR_PLUS = 43 /* + */
+export const CHAR_ASTERISK = 42 /* * */
+export const CHAR_RIGHT_PARENTHESIS = 41 /* ) */
 export const CHAR_DOUBLE_QUOTE = 34 /* " */
 export const CHAR_SINGLE_QUOTE = 39 /* ' */
 export const CHAR_PERCENT = 37 /* % */
@@ -58,3 +62,17 @@ export const UNICODE_VERTICAL_LINE = '\u{007C}' /* | */
 export const UNICODE_BOX_DRAWINGS_HEAVY_VERTICAL = '\u{2503}' /* ┃ */
 export const UNICODE_HEAVY_LEFT_POINTING_ANGLE_BRACKET_ORNAMENT = '\u{2770}' /* ❰ */
 export const UNICODE_HEAVY_RIGHT_POINTING_ANGLE_BRACKET_ORNAMENT = '\u{2771}' /* ❱ */
+
+/**
+ * Check if a char code is a space character.
+ *
+ * Ported from https://github.com/lezer-parser/markdown/blob/1.6.3/src/markdown.ts#L233
+ */
+export function isSpaceChar(char: number): boolean {
+  return (
+    char === CHAR_SPACE ||
+    char === CHAR_TAB ||
+    char === CHAR_LINE_FEED ||
+    char === CHAR_CARRIAGE_RETURN
+  )
+}

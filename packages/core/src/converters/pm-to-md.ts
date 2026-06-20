@@ -2,6 +2,7 @@ import type { CodeBlockAttrs } from '@prosekit/extensions/code-block'
 import type { HeadingAttrs } from '@prosekit/extensions/heading'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
+import type { MeowdownListAttrs } from '../extensions/list.ts'
 import type { NodeName } from '../extensions/node-names.ts'
 import { longestBacktickRun } from '../utils/backticks.ts'
 
@@ -266,21 +267,16 @@ function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
 // ─────────────────────────────────────────────────────────────────────
 
 function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
-  // prosekit's `list` node is a SINGLE item; sibling `list` nodes form the
-  // larger markdown list.
-  const attrs = node.attrs as {
-    kind: 'bullet' | 'ordered' | 'task' | 'toggle'
-    order: number | null
-    checked: boolean
-  }
+  const attrs = node.attrs as MeowdownListAttrs
+  const bulletMarker = attrs.marker === '*' || attrs.marker === '+' ? attrs.marker : '-'
+  const orderMarker = attrs.marker === ')' ? ')' : '.'
+  const checkMark = attrs.taskMarker === 'X' ? 'X' : 'x'
   const marker =
     attrs.kind === 'ordered'
-      ? `${attrs.order ?? 1}. `
+      ? `${attrs.order ?? 1}${orderMarker} `
       : attrs.kind === 'task'
-        ? attrs.checked
-          ? '- [x] '
-          : '- [ ] '
-        : '- ' // bullet | toggle
+        ? `${bulletMarker} [${attrs.checked ? checkMark : ' '}] `
+        : `${bulletMarker} ` // bullet | toggle
 
   // For a task item the `[ ] ` checkbox is list-item CONTENT in GFM terms,
   // not part of the marker, so continuation lines align to the `- ` width.

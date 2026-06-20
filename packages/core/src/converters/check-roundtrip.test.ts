@@ -6,6 +6,7 @@ import { checkRoundTrip } from './check-roundtrip.ts'
 describe('checkRoundTrip', () => {
   it.each([
     'hello world',
+    '<div class="x">hi</div>',
     dedent`
       # Hello
 
@@ -14,6 +15,10 @@ describe('checkRoundTrip', () => {
     dedent`
       - a
       - b
+    `,
+    dedent`
+      * a
+      * b
     `,
     dedent`
       |  |  |  |
@@ -41,11 +46,6 @@ describe('checkRoundTrip', () => {
       Hello
       =====
     `, // setext heading
-    '<div class="x">hi</div>', // raw HTML block
-    dedent`
-      * a
-      * b
-    `, // bullet markers normalize to `-`
   ])('reports lossy for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('lossy')
   })

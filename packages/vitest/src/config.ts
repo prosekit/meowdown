@@ -16,6 +16,11 @@ export function defineSharedConfig() {
     return 'chromium'
   })()
 
+  const setupFiles = ['@meowdown/vitest/setup-console']
+  if (browserName === 'webkit') {
+    setupFiles.push('@meowdown/vitest/setup-webkit')
+  }
+
   return defineProject({
     plugins: [playwrightCommands()],
     oxc:
@@ -24,7 +29,7 @@ export function defineSharedConfig() {
           { target: 'es2025' }
         : undefined,
     test: {
-      setupFiles: browserName === 'webkit' ? ['@meowdown/vitest/setup-webkit'] : [],
+      setupFiles,
       retry: process.env.CI ? 3 : 0,
       bail: process.env.CI ? 0 : 1,
       fileParallelism: false,

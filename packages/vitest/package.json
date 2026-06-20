@@ -6,12 +6,14 @@
   "exports": {
     "./config": "./src/config.ts",
     "./helpers": "./src/helpers.ts",
+    "./setup-console": "./src/setup-console.ts",
     "./setup-webkit": "./src/setup-webkit.ts"
   },
   "devDependencies": {
     "@ocavue/tsconfig": "^0.7.1",
     "@vitest/browser-playwright": "^4.1.9",
     "vitest": "^4.1.9",
-    "vitest-browser-commands": "^0.2.1"
+    "vitest-browser-commands": "^0.2.1",
+    "vitest-fail-on-console": "^0.10.1"
   }
 }
