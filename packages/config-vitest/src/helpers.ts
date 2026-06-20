@@ -16,3 +16,7 @@ function getBrowserName() {
 export function isSafari() {
   return getBrowserName() === 'webkit'
 }
+
+export function isFirefox() {
+  return getBrowserName() === 'firefox'
+}

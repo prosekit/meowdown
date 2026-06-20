@@ -4,6 +4,7 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
+    "./helpers": "./src/helpers.ts",
     "./setup-webkit": "./src/setup-webkit.ts"
   },
   "devDependencies": {
