@@ -208,4 +208,22 @@ describe('docToMarkdown', () => {
     const markdown = docToMarkdown(doc)
     expect(markdown).toBe('```\n```\n')
   })
+
+  it('keeps a frontmatter-only document', () => {
+    const doc = n.doc({ frontmatter: 'title: x' })
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('---\ntitle: x\n---\n')
+  })
+
+  it('keeps frontmatter before content', () => {
+    const doc = n.doc({ frontmatter: 'title: x' }, n.heading({ level: 1 }, 'heading'))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('---\ntitle: x\n---\n\n# heading\n')
+  })
+
+  it('keeps an empty frontmatter block', () => {
+    const doc = n.doc({ frontmatter: '' }, n.paragraph('body'))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('---\n---\n\nbody\n')
+  })
 })

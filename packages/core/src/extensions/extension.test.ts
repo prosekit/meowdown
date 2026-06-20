@@ -26,6 +26,9 @@ describe('defineEditorExtension', () => {
 
     expect(doc.toJSON()).toMatchInlineSnapshot(`
       {
+        "attrs": {
+          "frontmatter": null,
+        },
         "content": [
           {
             "attrs": {

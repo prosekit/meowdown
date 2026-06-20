@@ -520,8 +520,16 @@ describe('escapes and whitespace', () => {
     expect(roundtrip('a\n\n\n\nb')).toBe('a\n\n\n\nb\n')
   })
 
-  it.fails('keeps YAML frontmatter', () => {
+  it('keeps YAML frontmatter', () => {
     expect(roundtrip('---\ntitle: x\n---')).toBe('---\ntitle: x\n---\n')
+  })
+
+  it('keeps YAML frontmatter before content', () => {
+    expect(roundtrip('---\ntitle: x\n---\n\n# heading')).toBe('---\ntitle: x\n---\n\n# heading\n')
+  })
+
+  it('normalizes a missing blank line after frontmatter', () => {
+    expect(roundtrip('---\ntitle: x\n---\n# heading')).toBe('---\ntitle: x\n---\n\n# heading\n')
   })
 })
 
@@ -603,7 +611,7 @@ describe('idempotency', () => {
     expect(roundtrip(once)).toBe(once)
   })
 
-  it('keeps mangled frontmatter stable', () => {
+  it('keeps frontmatter stable', () => {
     const once = roundtrip('---\ntitle: x\n---')
     expect(roundtrip(once)).toBe(once)
   })

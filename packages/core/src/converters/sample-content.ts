@@ -2,6 +2,7 @@ import type { NodeJSON } from '@prosekit/core'
 
 export const sampleContent: NodeJSON = {
   type: 'doc',
+  attrs: { frontmatter: null },
   content: [
     {
       type: 'heading',

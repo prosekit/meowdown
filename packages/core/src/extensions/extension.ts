@@ -17,6 +17,7 @@ import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineAtomicMarkNavigation } from './atomic-mark-navigation.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
+import { defineDocFrontmatterAttr } from './frontmatter.ts'
 import { defineHeading } from './heading.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
@@ -30,6 +31,7 @@ function defineEditorExtensionImpl() {
     // nodes
     defineParagraph(),
     defineDoc(),
+    defineDocFrontmatterAttr(),
     defineText(),
     defineBlockquote(),
     defineMeowdownList(),
