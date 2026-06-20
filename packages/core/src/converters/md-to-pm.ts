@@ -1,10 +1,11 @@
 import type { TreeCursor } from '@lezer/common'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
-import type { ListMarker, MeowdownListAttrs } from '../extensions/list.ts'
+import type { ListMarker, MeowdownListAttrs, TaskMarker } from '../extensions/list.ts'
 import { getNodeBuilders, type TypedNodeBuilders } from '../extensions/schema.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 import { gfmBlockOnlyParser } from '../lezer/parser.ts'
+import { CHAR_LOWERCASE_X, CHAR_SPACE, CHAR_TAB, CHAR_UPPERCASE_A, CHAR_UPPERCASE_X } from '../unicode.ts'
 
 /**
  * Convert a markdown string into a ProseMirror document node.
@@ -190,6 +191,7 @@ function convertListItem(
 ): ProseMirrorNode {
   const content: ProseMirrorNode[] = []
   let taskChecked: boolean | undefined
+  let taskMarker: TaskMarker | undefined
   let order: number | undefined
   let marker: ListMarker | undefined
   if (cursor.firstChild()) {
@@ -216,6 +218,7 @@ function convertListItem(
       if (kind === 'bullet' && cursor.type.id === LEZER_NODE_IDS.Task) {
         const task = convertTask(nodes, cursor, text)
         taskChecked = task.checked
+        taskMarker = task.taskMarker
         content.push(task.paragraph)
         continue
       }
@@ -230,6 +233,7 @@ function convertListItem(
       checked: taskChecked ?? false,
       collapsed: false,
       marker,
+      taskMarker,
     } satisfies MeowdownListAttrs,
     content,
   )
@@ -237,6 +241,7 @@ function convertListItem(
 
 interface ConvertedTask {
   checked: boolean
+  taskMarker: TaskMarker
   paragraph: ProseMirrorNode
 }
 
@@ -249,11 +254,19 @@ interface ConvertedTask {
  */
 function convertTask(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string): ConvertedTask {
   let checked = false
+  let taskMarker: TaskMarker = null
   let contentStart = cursor.from
   const contentEnd = cursor.to
   if (cursor.firstChild()) {
     if (cursor.type.id === LEZER_NODE_IDS.TaskMarker) {
-      checked = text.slice(cursor.from, cursor.to).toLowerCase().includes('x')
+      const taskMarkerCode = text.charCodeAt(cursor.from + 1)
+      if (taskMarkerCode === CHAR_LOWERCASE_X) {
+        checked = true
+        taskMarker = 'x'
+      } else if (taskMarkerCode === CHAR_UPPERCASE_X) {
+        checked = true
+        taskMarker = 'X'
+      }
       contentStart = cursor.to
     }
     cursor.parent()
@@ -262,6 +275,7 @@ function convertTask(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string)
   if (content.startsWith(' ')) content = content.slice(1)
   return {
     checked,
+    taskMarker,
     paragraph: content === '' ? nodes.paragraph() : nodes.paragraph(content),
   }
 }

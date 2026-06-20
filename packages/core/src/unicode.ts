@@ -3,6 +3,8 @@ export const CHAR_UPPERCASE_A = 65 /* A */
 export const CHAR_LOWERCASE_A = 97 /* a */
 export const CHAR_UPPERCASE_Z = 90 /* Z */
 export const CHAR_LOWERCASE_Z = 122 /* z */
+export const CHAR_LOWERCASE_X = 120 /* x */
+export const CHAR_UPPERCASE_X = 88 /* X */
 
 // Non-alphabetic chars.
 export const CHAR_DOT = 46 /* . */
