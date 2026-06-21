@@ -4,9 +4,9 @@ import {
   BlockHandlePositioner,
   BlockHandleRoot,
 } from '@prosekit/react/block-handle'
+import { GripVerticalIcon } from 'lucide-react'
 
 import styles from './block-handle.module.css'
-import { GripVerticalIcon } from './icons/grip-vertical-icon.tsx'
 
 export function BlockHandle() {
   return (

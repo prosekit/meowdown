@@ -1,12 +1,10 @@
 import { Combobox } from '@base-ui/react/combobox'
 import { type CodeBlockAttrs, codeBlockLanguages } from '@meowdown/core'
 import type { ReactNodeViewProps } from '@prosekit/react'
+import { CheckIcon, ChevronsUpDownIcon, CopyIcon } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 
 import styles from './code-block-view.module.css'
-import { CheckIcon } from './icons/check-icon.tsx'
-import { ChevronsUpDownIcon } from './icons/chevrons-up-down-icon.tsx'
-import { CopyIcon } from './icons/copy-icon.tsx'
 
 type LanguageItem = {
   label: string
