@@ -4,7 +4,8 @@ import { docToMarkdown } from './pm-to-md.ts'
 /**
  * How faithfully markdown survives a parse-then-serialize round trip:
  * - `exact`: byte-identical (modulo the trailing newline).
- * - `normalizing`: same non-blank lines, only blank-line layout differs.
+ * - `normalizing`: same non-blank lines ignoring trailing whitespace; only
+ *   blank-line layout or insignificant trailing whitespace differs.
  * - `lossy`: a non-blank line changed, so content would be lost or altered.
  */
 export type RoundTripFidelity = 'exact' | 'normalizing' | 'lossy'
@@ -23,7 +24,13 @@ export function checkRoundTrip(markdown: string): RoundTripFidelity {
   if (trimTrailingNewlines(serialized) === trimTrailingNewlines(markdown)) return 'exact'
   const before = nonBlankLines(markdown)
   const after = nonBlankLines(serialized)
-  if (before.length === after.length && before.every((line, index) => line === after[index])) {
+  // Compare by trimEnd: trailing whitespace is insignificant in Markdown and the
+  // serializer normalizes it away, so a trailing-space-only difference is
+  // `normalizing`, not `lossy`. Leading indentation is structural and must match.
+  if (
+    before.length === after.length &&
+    before.every((line, index) => line.trimEnd() === after[index].trimEnd())
+  ) {
     return 'normalizing'
   }
   return 'lossy'
