@@ -672,17 +672,30 @@ describe('measureContentColumn', () => {
     expect(measureContentColumn('hello', 0)).toBe(0)
   })
 
-  it('counts characters before the position on its line', () => {
+  it('is 0 at the start of a line', () => {
+    expect(measureContentColumn('abc\nx', 4)).toBe(0)
+  })
+
+  it('counts the characters before the position', () => {
     expect(measureContentColumn('- item', 2)).toBe(2)
   })
 
-  it('measures from the start of the current line', () => {
-    expect(measureContentColumn('a\n  b', 4)).toBe(2)
+  it('measures only the current line', () => {
+    expect(measureContentColumn('abc\n  x', 6)).toBe(2)
   })
 
-  it('counts a tab as a tab stop of 4', () => {
+  it('counts a tab from column 0 as 4', () => {
     expect(measureContentColumn('\tx', 1)).toBe(4)
+  })
+
+  it('counts a tab to the next multiple of 4', () => {
+    expect(measureContentColumn('a\tx', 2)).toBe(4)
     expect(measureContentColumn('ab\tx', 3)).toBe(4)
+    expect(measureContentColumn('abc\tx', 4)).toBe(4)
+  })
+
+  it('accumulates multiple tabs', () => {
+    expect(measureContentColumn('\t\tx', 2)).toBe(8)
   })
 })
 
@@ -699,8 +712,19 @@ describe('sliceColumn', () => {
     expect(sliceColumn('    deep', 2)).toBe('  deep')
   })
 
-  it('counts a tab as a tab stop of 4', () => {
-    expect(sliceColumn('\tline', 2)).toBe('line')
+  it('advances a tab to the next multiple of 4', () => {
+    expect(sliceColumn('\tx', 4)).toBe('x')
+    expect(sliceColumn(' \tx', 4)).toBe('x')
+    expect(sliceColumn('  \tx', 4)).toBe('x')
+    expect(sliceColumn('   \tx', 4)).toBe('x')
+  })
+
+  it('stops once a tab reaches the column', () => {
+    expect(sliceColumn('\t\tx', 4)).toBe('\tx')
+  })
+
+  it('consumes a whole tab when the column falls mid-tab', () => {
+    expect(sliceColumn('\tx', 2)).toBe('x')
   })
 
   it('returns the line unchanged at column 0', () => {
