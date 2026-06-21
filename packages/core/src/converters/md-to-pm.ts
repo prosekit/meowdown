@@ -202,7 +202,10 @@ function convertHeading(
     cursor.parent()
   }
 
-  const content = text.slice(contentStart, contentEnd).trim()
+  // Dedent before trimming so a multi-line setext heading inside a container
+  // (rare) keeps its continuation lines aligned; trim then drops the outer ends.
+  const raw = text.slice(contentStart, contentEnd)
+  const content = dedentContinuation(raw, measureContentColumn(text, contentStart)).trim()
   // CommonMark setext underlines may be any length; keep the source count so
   // the round-trip is lossless. Fall back to 1 if lezer reported no run.
   const setextUnderline = isSetext
@@ -222,39 +225,66 @@ function countUnderlineChars(text: string, from: number, to: number): number {
   return count
 }
 
-/** The number of leading characters before `from` on its own line (the container's content column). */
-function lineIndentWidth(text: string, from: number): number {
-  return from - (text.lastIndexOf('\n', from - 1) + 1)
+/**
+ * The column at which content begins on the line containing `from` (i.e. the
+ * enclosing container's content column). Columns count a tab as a CommonMark
+ * tab stop of 4 (`4 - col % 4`), matching how lezer measures indentation.
+ */
+function measureContentColumn(text: string, from: number): number {
+  const lineStart = text.lastIndexOf('\n', from - 1) + 1
+  let col = 0
+  for (let index = lineStart; index < from; index++) {
+    col += text.charCodeAt(index) === CHAR_TAB ? 4 - (col % 4) : 1
+  }
+  return col
 }
 
-/** Drop up to `width` leading space/tab characters from a continuation line. */
-function stripIndent(line: string, width: number): string {
+/** Drop a line's leading whitespace up to `column`, counting a tab as `4 - col % 4` columns. */
+function sliceColumn(line: string, column: number): string {
+  let col = 0
   let index = 0
-  while (index < width && index < line.length) {
+  while (index < line.length && col < column) {
     const code = line.charCodeAt(index)
-    if (code !== CHAR_SPACE && code !== CHAR_TAB) break
+    if (code === CHAR_SPACE) col += 1
+    else if (code === CHAR_TAB) col += 4 - (col % 4)
+    else break
     index++
   }
-  return index === 0 ? line : line.slice(index)
+  return line.slice(index)
 }
 
 /**
- * Build a paragraph from raw markdown content. A soft line break stays a literal
- * `\n` inside a single text node (the paragraph spec sets `whitespace: 'pre'`, so
- * a DOM re-read keeps the newline instead of folding it to a space). Continuation
- * lines are dedented by `indentWidth` (the container's content column) so the
- * serializer's own line prefix does not double the indent.
+ * Strip a leaf block's structural continuation indent.
+ *
+ * lezer keeps the indent of a multi-line block's continuation lines inside the
+ * source span (its `scrub` pads each line's container prefix to equal-width
+ * whitespace to preserve positions). CommonMark and lezer require every
+ * continuation line to be indented to the same content `column`, which equals
+ * the block's first-line column. The first line is already past its indent, so
+ * only lines 2..n are dedented. Returns `content` untouched at column 0 (a
+ * top-level block) or when there is no continuation line.
+ */
+function dedentContinuation(content: string, column: number): string {
+  if (column === 0 || !content.includes('\n')) return content
+  return content
+    .split('\n')
+    .map((line, index) => (index === 0 ? line : sliceColumn(line, column)))
+    .join('\n')
+}
+
+/**
+ * Build a paragraph from raw markdown content, dedenting continuation lines so
+ * the serializer's own line prefix does not double the indent. A soft line break
+ * stays a literal `\n` in a single text node; the paragraph spec's
+ * `whitespace: 'pre'` keeps a DOM re-read from folding it to a space.
  */
 function buildParagraph(
   nodes: TypedNodeBuilders,
   content: string,
-  indentWidth: number,
+  column: number,
 ): ProseMirrorNode {
-  if (content === '') return nodes.paragraph()
-  if (!content.includes('\n')) return nodes.paragraph(content)
-  const lines = content.split('\n')
-  const dedented = lines.map((line, index) => (index === 0 ? line : stripIndent(line, indentWidth)))
-  return nodes.paragraph(dedented.join('\n'))
+  const dedented = dedentContinuation(content, column)
+  return dedented === '' ? nodes.paragraph() : nodes.paragraph(dedented)
 }
 
 function convertParagraph(
@@ -264,7 +294,7 @@ function convertParagraph(
 ): ProseMirrorNode {
   const from = cursor.from
   const to = cursor.to
-  const indentWidth = lineIndentWidth(text, from)
+  const column = measureContentColumn(text, from)
   // In block-only parsing a paragraph has no inline children, with one
   // exception: lezer leaves the lazy-continuation `QuoteMark`s of a multi-line
   // blockquote (`> l1\n> l2`) embedded in the paragraph's span.
@@ -280,9 +310,9 @@ function convertParagraph(
     } while (cursor.nextSibling())
     cursor.parent()
     content += text.slice(pos, to)
-    return buildParagraph(nodes, content, indentWidth)
+    return buildParagraph(nodes, content, column)
   }
-  return buildParagraph(nodes, text.slice(from, to), indentWidth)
+  return buildParagraph(nodes, text.slice(from, to), column)
 }
 
 function convertBlockquote(
@@ -374,7 +404,7 @@ function convertListItem(
         // Skip the single separating whitespace after `[ ]` / `[x]`
         if (isSpaceChar(text.charCodeAt(taskStart))) taskStart += 1
         const taskText = text.slice(taskStart, taskEnd)
-        content.push(buildParagraph(nodes, taskText, lineIndentWidth(text, taskStart)))
+        content.push(buildParagraph(nodes, taskText, measureContentColumn(text, taskStart)))
         continue
       }
       content.push(...convertBlock(nodes, cursor, text))
