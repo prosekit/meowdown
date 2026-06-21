@@ -40,13 +40,19 @@
  * ------------------------------------------------------------------------- */
 .ProseMirror {
   box-sizing: border-box;
-  padding: 1.25rem var(--meowdown-gutter) 1.75rem;
   outline: none;
   font-size: 1.0625rem;
   line-height: 1.7;
   color: var(--meowdown-text);
   caret-color: var(--meowdown-accent);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Surface padding stays on a meowdown-owned class, not `.ProseMirror`: the block
+ * handle's drag preview clones a block into a bare `.ProseMirror` container, which
+ * must not pick up the gutter padding. */
+.meowdown-content {
+  padding: 1.25rem var(--meowdown-gutter) 1.75rem;
 }
 
 .ProseMirror > * + * {
