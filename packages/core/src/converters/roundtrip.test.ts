@@ -308,6 +308,20 @@ describe('bullet lists', () => {
     expect(roundtrip('- a\n\n  para2')).toBe('- a\n\n  para2\n')
   })
 
+  it('keeps a soft break inside an item', () => {
+    expect(roundtrip('- line one\n  line two')).toBe('- line one\n  line two\n')
+  })
+
+  it('keeps a soft break in a second paragraph', () => {
+    expect(roundtrip('- x\n\n  line one\n  line two')).toBe('- x\n\n  line one\n  line two\n')
+  })
+
+  it('keeps a soft break in a nested item', () => {
+    expect(roundtrip('- a\n  - x\n\n    line one\n    line two')).toBe(
+      '- a\n  - x\n\n    line one\n    line two\n',
+    )
+  })
+
   it('keeps a bare empty bullet', () => {
     expect(roundtrip('-')).toBe('-\n')
   })
@@ -410,6 +424,10 @@ describe('task lists', () => {
 
   it('keeps a nested task', () => {
     expect(roundtrip('- [ ] parent\n  - [x] child')).toBe('- [ ] parent\n  - [x] child\n')
+  })
+
+  it('keeps a soft break in a task', () => {
+    expect(roundtrip('- [ ] line one\n  line two')).toBe('- [ ] line one\n  line two\n')
   })
 
   it('keeps a tag in a task', () => {
@@ -597,6 +615,11 @@ describe('idempotency', () => {
 
   it('keeps a tight list stable', () => {
     const once = roundtrip('- a\n- b')
+    expect(roundtrip(once)).toBe(once)
+  })
+
+  it('keeps a soft-wrapped item stable', () => {
+    const once = roundtrip('- x\n\n  line one\n  line two')
     expect(roundtrip(once)).toBe(once)
   })
 

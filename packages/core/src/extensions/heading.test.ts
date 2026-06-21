@@ -1,3 +1,4 @@
+import { DOMParser, DOMSerializer } from '@prosekit/pm/model'
 import { describe, expect, it } from 'vitest'
 import { userEvent } from 'vitest/browser'
 
@@ -39,5 +40,27 @@ describe('keymap', () => {
     fixture.view.focus()
     await userEvent.keyboard('{Backspace}')
     expect(docToMarkdown(fixture.doc)).toBe('title\n')
+  })
+})
+
+describe('soft line break', () => {
+  it('declares whitespace: pre', () => {
+    using fixture = setupFixture()
+    expect(fixture.schema.nodes.heading.spec.whitespace).toBe('pre')
+  })
+
+  it('keeps a multi-line setext heading through a DOM round-trip', () => {
+    // Without whitespace: 'pre' the DOM re-read folds the `\n` to a space,
+    // silently merging the two lines. This pins that the break survives.
+    using fixture = setupFixture()
+    const { schema, n } = fixture
+    const doc = n.doc(n.heading({ level: 1 }, 'Foo bar\nbaz qux'))
+
+    const dom = DOMSerializer.fromSchema(schema).serializeFragment(doc.content)
+    const container = document.createElement('div')
+    container.appendChild(dom)
+
+    const parsed = DOMParser.fromSchema(schema).parse(container)
+    expect(parsed.child(0).textContent).toBe('Foo bar\nbaz qux')
   })
 })

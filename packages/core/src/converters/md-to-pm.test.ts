@@ -597,6 +597,30 @@ describe('markdownToDoc', () => {
     })
   })
 
+  it('keeps a list item soft break as a dedented single text node', () => {
+    expect(markdownToDoc('- x\n\n  line one\n  line two').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        {
+          type: 'list',
+          attrs: {
+            kind: 'bullet',
+            order: null,
+            checked: false,
+            collapsed: false,
+            marker: '-',
+            taskMarker: null,
+          },
+          content: [
+            { type: 'paragraph', content: [{ type: 'text', text: 'x' }] },
+            { type: 'paragraph', content: [{ type: 'text', text: 'line one\nline two' }] },
+          ],
+        },
+      ],
+    })
+  })
+
   it('keeps YAML frontmatter as a doc attribute', () => {
     // The whole input is the frontmatter block, so the only content is the
     // empty paragraph the schema fills in (it serializes back to nothing).
