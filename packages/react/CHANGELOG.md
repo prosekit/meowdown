@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.17.0](https://github.com/prosekit/meowdown/compare/react-v0.16.2...react-v0.17.0) (2026-06-21)
+
+
+### Features
+
+* make YAML frontmatter handling opt-in ([#111](https://github.com/prosekit/meowdown/issues/111)) ([e3a46dd](https://github.com/prosekit/meowdown/commit/e3a46ddefbc90dc5f79ccdd186c36fb4938c4d1f))
+* remove the add button from the block handle ([#116](https://github.com/prosekit/meowdown/issues/116)) ([1e497b7](https://github.com/prosekit/meowdown/commit/1e497b7ef986cedff2dfa162c9dc21cc924c8a68))
+
+
+### Bug Fixes
+
+* stop block handle drag preview inheriting gutter padding ([#115](https://github.com/prosekit/meowdown/issues/115)) ([82927e5](https://github.com/prosekit/meowdown/commit/82927e5f5b51a78e08857d89c80a24f09107fb05))
+
 ## [0.16.2](https://github.com/prosekit/meowdown/compare/react-v0.16.1...react-v0.16.2) (2026-06-20)
 
 
