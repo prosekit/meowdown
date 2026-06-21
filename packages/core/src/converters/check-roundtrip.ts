@@ -5,7 +5,8 @@ import { docToMarkdown } from './pm-to-md.ts'
  * How faithfully markdown survives a parse-then-serialize round trip:
  * - `exact`: byte-identical (modulo the trailing newline).
  * - `normalizing`: same non-blank lines ignoring trailing whitespace; only
- *   blank-line layout or insignificant trailing whitespace differs.
+ *   blank-line layout (including empty `>` lines inside a blockquote) or
+ *   insignificant trailing whitespace differs.
  * - `lossy`: a non-blank line changed, so content would be lost or altered.
  */
 export type RoundTripFidelity = 'exact' | 'normalizing' | 'lossy'
@@ -14,8 +15,15 @@ function trimTrailingNewlines(text: string): string {
   return text.replace(/\n+$/u, '')
 }
 
+// A line carries no content when it is empty, whitespace, or holds only
+// blockquote markers (`>`). An empty `>` is the blockquote form of a blank
+// line, so the serializer inserting one between blocks is layout, not content.
+function isBlankLine(line: string): boolean {
+  return /^[\s>]*$/u.test(line)
+}
+
 function nonBlankLines(text: string): string[] {
-  return text.split('\n').filter((line) => line.trim() !== '')
+  return text.split('\n').filter((line) => !isBlankLine(line))
 }
 
 /** Options for {@link checkRoundTrip}. */
