@@ -230,6 +230,37 @@ describe('markdownToDoc', () => {
     })
   })
 
+  it('keeps every line of a fenced block nested in a list item', () => {
+    // lezer emits one CodeText per line for a code block inside a container, so
+    // the converter must accumulate them; overwriting drops all but the last.
+    const md = ['- a', '', '  ```', '  l1', '  l2', '  l3', '  ```'].join('\n')
+    expect(markdownToDoc(md).toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        {
+          type: 'list',
+          attrs: {
+            kind: 'bullet',
+            order: null,
+            checked: false,
+            collapsed: false,
+            marker: '-',
+            taskMarker: null,
+          },
+          content: [
+            { type: 'paragraph', content: [{ type: 'text', text: 'a' }] },
+            {
+              type: 'codeBlock',
+              attrs: { language: '' },
+              content: [{ type: 'text', text: 'l1\nl2\nl3' }],
+            },
+          ],
+        },
+      ],
+    })
+  })
+
   it('keeps a horizontal rule', () => {
     expect(markdownToDoc('---').toJSON()).toEqual({
       type: 'doc',
