@@ -30,12 +30,30 @@ describe('checkRoundTrip', () => {
       | --- | --- | --- |
       |  | b |  |
     `,
+
+    // setext heading keeps its text and underline length
     dedent`
       Hello
       =====
-    `, // setext heading keeps its text and underline length
-    '- x\n\n  line one\n  line two', // a list item's soft-wrapped paragraph keeps its indent
-    '- a\n  - x\n\n    line one\n    line two', // nested list, same
+    `,
+
+    // a list item's soft-wrapped paragraph keeps its indent
+    dedent`
+      - x
+
+        line one
+        line two
+    `,
+    // nested list, same
+    dedent`
+      - a
+        - x
+
+          line one
+          line two
+    `,
+
+
   ])('reports exact for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('exact')
   })
