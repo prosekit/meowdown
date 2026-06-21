@@ -481,7 +481,7 @@ describe('gfmBlockOnlyParser', () => {
     // container indent and emits one CodeText per line, the stripped indent
     // living in the gaps between the nodes. Each CodeText slice already carries
     // its own trailing newline, so concatenating them rebuilds the code text.
-    const input = '- x\n\n  ```\n  line1\n  line2\n  ```\n'
+    const input = ['- x', '', '  ```', '  line1', '  line2', '  ```\n'].join('\n')
     expect(show(buildAst(gfmBlockOnlyParser.parse(input).cursor(), input))).toMatchInlineSnapshot(`
       "{
         "name": "Document",
