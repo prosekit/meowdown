@@ -50,8 +50,6 @@ describe('soft line break', () => {
   })
 
   it('keeps a multi-line setext heading through a DOM round-trip', () => {
-    // Without whitespace: 'pre' the DOM re-read folds the `\n` to a space,
-    // silently merging the two lines. This pins that the break survives.
     using fixture = setupFixture()
     const { schema, n } = fixture
     const doc = n.doc(n.heading({ level: 1 }, 'Foo bar\nbaz qux'))

@@ -9,7 +9,7 @@ function setupEditor() {
   return { editor, schema: editor.schema, n: editor.nodes }
 }
 
-describe('paragraph', () => {
+describe('soft line break', () => {
   it('declares whitespace: pre', () => {
     const { schema } = setupEditor()
     expect(schema.nodes.paragraph.spec.whitespace).toBe('pre')
