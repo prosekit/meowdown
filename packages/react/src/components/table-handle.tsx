@@ -15,9 +15,8 @@ import {
   TableHandleRowPopup,
   TableHandleRowPositioner,
 } from '@prosekit/react/table-handle'
+import { GripHorizontalIcon, GripVerticalIcon } from 'lucide-react'
 
-import { GripHorizontalIcon } from './icons/grip-horizontal-icon.tsx'
-import { GripVerticalIcon } from './icons/grip-vertical-icon.tsx'
 import styles from './table-handle.module.css'
 
 function getTableHandleState(editor: Editor<EditorExtension>) {

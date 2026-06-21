@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.17.1](https://github.com/prosekit/meowdown/compare/core-v0.17.0...core-v0.17.1) (2026-06-21)
+
+
+### Bug Fixes
+
+* treat blockquote-marker-only lines as blank ([#118](https://github.com/prosekit/meowdown/issues/118)) ([f1ecd66](https://github.com/prosekit/meowdown/commit/f1ecd6609f2dbef2ac07159f6a41c2cc2afde3dc))
+
+## [0.17.0](https://github.com/prosekit/meowdown/compare/core-v0.16.2...core-v0.17.0) (2026-06-21)
+
+
+### Features
+
+* delete table on Backspace over full cell selection ([#110](https://github.com/prosekit/meowdown/issues/110)) ([5b392cb](https://github.com/prosekit/meowdown/commit/5b392cb700c38e43e57609d87794d04377e8582a))
+* make YAML frontmatter handling opt-in ([#111](https://github.com/prosekit/meowdown/issues/111)) ([e3a46dd](https://github.com/prosekit/meowdown/commit/e3a46ddefbc90dc5f79ccdd186c36fb4938c4d1f))
+
+
+### Bug Fixes
+
+* **core:** preserve soft line breaks ([#112](https://github.com/prosekit/meowdown/issues/112)) ([7e0e7bb](https://github.com/prosekit/meowdown/commit/7e0e7bb1757d1f3359397fa8447aa32b6924ca63))
+* stop block handle drag preview inheriting gutter padding ([#115](https://github.com/prosekit/meowdown/issues/115)) ([82927e5](https://github.com/prosekit/meowdown/commit/82927e5f5b51a78e08857d89c80a24f09107fb05))
+
 ## [0.16.2](https://github.com/prosekit/meowdown/compare/core-v0.16.1...core-v0.16.2) (2026-06-20)
 
 

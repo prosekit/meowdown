@@ -61,6 +61,8 @@ describe('checkRoundTrip', () => {
     '- a\n\n- b', // a loose list serializes tight
     '- [ ] Asdf\n- [ ]\n- [ ] ', // a trailing space on an empty task is normalized away
     'trailing spaces   ', // trailing whitespace is insignificant
+    '> text\n> - item', // a blockquote gains an empty `>` line before a following list
+    '> a\n> - x\n> - y', // same, with a multi-item list inside the blockquote
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })
