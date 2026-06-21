@@ -13,6 +13,8 @@ import {
   CHAR_LOWERCASE_X,
   CHAR_PLUS,
   CHAR_RIGHT_PARENTHESIS,
+  CHAR_SPACE,
+  CHAR_TAB,
   CHAR_UPPERCASE_X,
   isSpaceChar,
 } from '../unicode.ts'
@@ -204,6 +206,51 @@ function countUnderlineChars(text: string, from: number, to: number): number {
   return count
 }
 
+/** The number of leading characters before `from` on its own line (the container's content column). */
+function lineIndentWidth(text: string, from: number): number {
+  return from - (text.lastIndexOf('\n', from - 1) + 1)
+}
+
+/** Drop up to `width` leading space/tab characters from a continuation line. */
+function stripIndent(line: string, width: number): string {
+  let index = 0
+  while (index < width && index < line.length) {
+    const code = line.charCodeAt(index)
+    if (code !== CHAR_SPACE && code !== CHAR_TAB) break
+    index++
+  }
+  return index === 0 ? line : line.slice(index)
+}
+
+/**
+ * Build a paragraph from raw markdown content. A soft line break becomes a
+ * `hardBreak` node (rendered as `<br>`), never a bare `\n`: ProseMirror cannot
+ * hold a literal newline in a textblock, because a DOM re-read folds it to a
+ * space and silently drops the break. Continuation lines are dedented by
+ * `indentWidth` (the container's content column) so the serializer's own line
+ * prefix does not double the indent.
+ */
+function buildParagraph(
+  nodes: TypedNodeBuilders,
+  content: string,
+  indentWidth: number,
+): ProseMirrorNode {
+  if (content === '') return nodes.paragraph()
+  if (!content.includes('\n')) return nodes.paragraph(content)
+  const lines = content.split('\n')
+  const children: Array<string | ProseMirrorNode> = []
+  for (let index = 0; index < lines.length; index++) {
+    if (index === 0) {
+      if (lines[index] !== '') children.push(lines[index])
+      continue
+    }
+    children.push(nodes.hardBreak())
+    const line = stripIndent(lines[index], indentWidth)
+    if (line !== '') children.push(line)
+  }
+  return nodes.paragraph(...children)
+}
+
 function convertParagraph(
   nodes: TypedNodeBuilders,
   cursor: TreeCursor,
@@ -211,6 +258,7 @@ function convertParagraph(
 ): ProseMirrorNode {
   const from = cursor.from
   const to = cursor.to
+  const indentWidth = lineIndentWidth(text, from)
   // In block-only parsing a paragraph has no inline children, with one
   // exception: lezer leaves the lazy-continuation `QuoteMark`s of a multi-line
   // blockquote (`> l1\n> l2`) embedded in the paragraph's span.
@@ -226,9 +274,9 @@ function convertParagraph(
     } while (cursor.nextSibling())
     cursor.parent()
     content += text.slice(pos, to)
-    return content === '' ? nodes.paragraph() : nodes.paragraph(content)
+    return buildParagraph(nodes, content, indentWidth)
   }
-  return nodes.paragraph(text.slice(from, to))
+  return buildParagraph(nodes, text.slice(from, to), indentWidth)
 }
 
 function convertBlockquote(
@@ -320,7 +368,7 @@ function convertListItem(
         // Skip the single separating whitespace after `[ ]` / `[x]`
         if (isSpaceChar(text.charCodeAt(taskStart))) taskStart += 1
         const taskText = text.slice(taskStart, taskEnd)
-        content.push(taskText === '' ? nodes.paragraph() : nodes.paragraph(taskText))
+        content.push(buildParagraph(nodes, taskText, lineIndentWidth(text, taskStart)))
         continue
       }
       content.push(...convertBlock(nodes, cursor, text))

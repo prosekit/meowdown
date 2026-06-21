@@ -650,3 +650,48 @@ describe('idempotency', () => {
     expect(roundtrip(once)).toBe(once)
   })
 })
+
+describe('soft line breaks in lists', () => {
+  it('keeps a tight list item soft break', () => {
+    expect(roundtrip('- line one\n  line two')).toBe('- line one\n  line two\n')
+  })
+
+  it('keeps a loose list item second paragraph', () => {
+    expect(roundtrip('- x\n\n  line one\n  line two')).toBe('- x\n\n  line one\n  line two\n')
+  })
+
+  it('keeps a nested list item soft break', () => {
+    expect(roundtrip('- a\n  - x\n\n    line one\n    line two')).toBe(
+      '- a\n  - x\n\n    line one\n    line two\n',
+    )
+  })
+
+  it('keeps a multi-line task', () => {
+    expect(roundtrip('- [ ] line one\n  line two')).toBe('- [ ] line one\n  line two\n')
+  })
+
+  it('stays stable on a second pass', () => {
+    const once = roundtrip('- x\n\n  line one\n  line two')
+    expect(roundtrip(once)).toBe(once)
+  })
+})
+
+describe('reflect daily-note regressions', () => {
+  // Both snippets come from real reflect-open daily notes that opened read-only
+  // because the round-trip guard (checkRoundTrip) classified them `lossy`.
+
+  it('round-trips a nested multi-line paragraph (2026-04-06)', () => {
+    // A soft-wrapped paragraph inside a nested list item, now kept via hardBreak
+    // with the continuation line dedented so the indent does not double.
+    expect(
+      roundtrip('- [[Audio memos]]\n  - first paragraph\n\n    He is nice.\n    LTV $1200.'),
+    ).toBe('- [[Audio memos]]\n  - first paragraph\n\n    He is nice.\n    LTV $1200.\n')
+  })
+
+  it.fails('keeps a trailing space on an empty task (2026-06-15)', () => {
+    // The serializer still normalizes the trailing space away; checkRoundTrip now
+    // classifies this `normalizing`, not `lossy` (see check-roundtrip.test.ts), so
+    // the note opens editable instead of read-only.
+    expect(roundtrip('- [ ] Asdf\n- [ ]\n- [ ] ')).toBe('- [ ] Asdf\n- [ ]\n- [ ] \n')
+  })
+})

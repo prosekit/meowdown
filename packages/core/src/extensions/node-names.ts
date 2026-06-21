@@ -4,6 +4,7 @@
 export const NODE_NAMES = [
   'doc',
   'text',
+  'hardBreak',
   'paragraph',
   'heading',
   'blockquote',
