@@ -66,7 +66,9 @@ describe('checkRoundTrip', () => {
   })
 
   it.each([
-    '# Hello #', // a closing ATX hash sequence is dropped
+    '# Hello #', // a closing ATX hash sequence is dropped (same line count, content differs)
+    '    indented', // an indented code block becomes a fence: the non-blank line count grows
+    '~~~\ntilde\n~~~', // a tilde fence becomes a backtick fence: same line count, content differs
   ])('reports lossy for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('lossy')
   })

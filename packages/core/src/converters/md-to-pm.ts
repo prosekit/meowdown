@@ -230,7 +230,7 @@ function countUnderlineChars(text: string, from: number, to: number): number {
  * enclosing container's content column). Columns count a tab as a CommonMark
  * tab stop of 4 (`4 - col % 4`), matching how lezer measures indentation.
  */
-function measureContentColumn(text: string, from: number): number {
+export function measureContentColumn(text: string, from: number): number {
   const lineStart = text.lastIndexOf('\n', from - 1) + 1
   let col = 0
   for (let index = lineStart; index < from; index++) {
@@ -240,7 +240,7 @@ function measureContentColumn(text: string, from: number): number {
 }
 
 /** Drop a line's leading whitespace up to `column`, counting a tab as `4 - col % 4` columns. */
-function sliceColumn(line: string, column: number): string {
+export function sliceColumn(line: string, column: number): string {
   let col = 0
   let index = 0
   while (index < line.length && col < column) {
@@ -264,7 +264,7 @@ function sliceColumn(line: string, column: number): string {
  * only lines 2..n are dedented. Returns `content` untouched at column 0 (a
  * top-level block) or when there is no continuation line.
  */
-function dedentContinuation(content: string, column: number): string {
+export function dedentContinuation(content: string, column: number): string {
   if (column === 0 || !content.includes('\n')) return content
   return content
     .split('\n')

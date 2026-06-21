@@ -1,7 +1,7 @@
 import dedent from 'dedent'
 import { describe, expect, it } from 'vitest'
 
-import { markdownToDoc } from './md-to-pm.ts'
+import { dedentContinuation, markdownToDoc, measureContentColumn, sliceColumn } from './md-to-pm.ts'
 import { sampleContent, sampleContentMarkdown } from './sample-content.ts'
 
 function tableShape(markdown: string): Array<Array<{ type: string; text: string }>> {
@@ -664,5 +664,66 @@ describe('markdownToDoc', () => {
 
   it('leaves a frontmatter block as content when frontmatter is off (default)', () => {
     expect(markdownToDoc('---\ntitle: x\n---').attrs.frontmatter).toBe(null)
+  })
+})
+
+describe('measureContentColumn', () => {
+  it('is 0 at the document start', () => {
+    expect(measureContentColumn('hello', 0)).toBe(0)
+  })
+
+  it('counts characters before the position on its line', () => {
+    expect(measureContentColumn('- item', 2)).toBe(2)
+  })
+
+  it('measures from the start of the current line', () => {
+    expect(measureContentColumn('a\n  b', 4)).toBe(2)
+  })
+
+  it('counts a tab as a tab stop of 4', () => {
+    expect(measureContentColumn('\tx', 1)).toBe(4)
+    expect(measureContentColumn('ab\tx', 3)).toBe(4)
+  })
+})
+
+describe('sliceColumn', () => {
+  it('drops leading spaces up to the column', () => {
+    expect(sliceColumn('  line', 2)).toBe('line')
+  })
+
+  it('stops at the first non-whitespace', () => {
+    expect(sliceColumn('  line', 8)).toBe('line')
+  })
+
+  it('keeps whitespace beyond the column', () => {
+    expect(sliceColumn('    deep', 2)).toBe('  deep')
+  })
+
+  it('counts a tab as a tab stop of 4', () => {
+    expect(sliceColumn('\tline', 2)).toBe('line')
+  })
+
+  it('returns the line unchanged at column 0', () => {
+    expect(sliceColumn('  line', 0)).toBe('  line')
+  })
+})
+
+describe('dedentContinuation', () => {
+  it('returns single-line content unchanged', () => {
+    expect(dedentContinuation('hello', 2)).toBe('hello')
+  })
+
+  it('returns content unchanged at column 0', () => {
+    expect(dedentContinuation('a\n  b', 0)).toBe('a\n  b')
+  })
+
+  it('keeps the first line and dedents the rest', () => {
+    expect(dedentContinuation('one\n    two', 2)).toBe('one\n  two')
+  })
+
+  it('strips the full column from each continuation line', () => {
+    expect(dedentContinuation('line one\n  line two\n  line three', 2)).toBe(
+      'line one\nline two\nline three',
+    )
   })
 })
