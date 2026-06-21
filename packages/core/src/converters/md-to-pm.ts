@@ -439,11 +439,6 @@ function convertCodeBlock(
           language = text.slice(cursor.from, cursor.to)
           break
         case LEZER_NODE_IDS.CodeText:
-          // Inside a container (list item, blockquote) lezer scrubs each line's
-          // structural indent and emits one `CodeText` per line, the stripped
-          // indent living in the gaps between them; each slice already carries
-          // its own trailing newline. Accumulate so every line survives - a
-          // top-level block is the single-`CodeText` case of the same loop.
           code += text.slice(cursor.from, cursor.to)
           break
       }
