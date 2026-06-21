@@ -60,17 +60,6 @@ describe('BlockHandle', () => {
     await expect.element(handle).not.toBeVisible()
   })
 
-  it('inserts an empty paragraph below the hovered block with the add button', async () => {
-    const ref = createRef<EditorHandle>()
-    await renderEditor({ ref })
-    await hover(pmRoot.getByText('Alpha'))
-    await page.getByTestId('block-handle-add').click()
-    // Adding hides the handle and puts the caret into the new paragraph.
-    await expect.element(handle).not.toBeVisible()
-    await userEvent.keyboard('Inserted')
-    expect(ref.current?.getMarkdown()).toBe('Alpha\n\nInserted\n\nBravo\n')
-  })
-
   it('keeps the gutter padding on the editor but off a bare ProseMirror drag preview', async () => {
     await renderEditor()
     // The editor's gutter padding lives on `.meowdown-content`, not `.ProseMirror`.

@@ -35,15 +35,16 @@
   }
 }
 
-.Add,
 .Draggable {
   display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  width: 1.25rem;
   height: 1.5rem;
   border-radius: 0.25rem;
   color: color-mix(in oklab, var(--meowdown-muted) 50%, transparent);
+  cursor: grab;
 
   &:hover {
     background: light-dark(#f4f4f5, #27272a);
@@ -54,14 +55,4 @@
     width: 1.25rem;
     height: 1.25rem;
   }
-}
-
-.Add {
-  width: 1.5rem;
-  cursor: pointer;
-}
-
-.Draggable {
-  width: 1.25rem;
-  cursor: grab;
 }
