@@ -242,7 +242,7 @@
 
 .ProseMirror .selectedCell {
   /* `double` wins the collapsed-border conflict against the solid borders of
- * unselected neighbors, so the whole selection perimeter recolors. */
+   * unselected neighbors, so the whole selection perimeter recolors. */
   border: 1px double var(--meowdown-node-outline);
   background: var(--meowdown-node-selection);
   caret-color: transparent;
@@ -256,8 +256,7 @@
 }
 
 /* prosemirror-view adds `ProseMirror-hideselection` whenever the selection is
- * not "visible" (a node selection).
- */
+ * not "visible" (a node selection). */
 .ProseMirror.ProseMirror-hideselection ::selection {
     --meowdown-selection: transparent;
     caret-color: transparent;
