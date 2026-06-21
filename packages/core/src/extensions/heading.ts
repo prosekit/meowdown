@@ -1,6 +1,7 @@
 import {
   defineKeymap,
   defineNodeAttr,
+  defineNodeSpec,
   isAtBlockStart,
   toggleNode,
   union,
@@ -28,6 +29,21 @@ export interface MeowdownHeadingAttrs extends HeadingAttrs {
    * can be setext, and the level alone decides the underline character.
    */
   setextUnderline?: number | null
+}
+
+type HeadingSpecExtension = Extension<{
+  Nodes: { heading: HeadingAttrs }
+}>
+
+/**
+ * Merge `whitespace: 'pre'` onto the base heading spec. A multi-line setext
+ * heading keeps a soft line break as a literal `\n`; without `whitespace: 'pre'`
+ * (and `white-space: pre-wrap` in the stylesheet) a DOM re-read folds it to a
+ * space, dropping the break. `defineNodeSpec` merges specs of the same name, so
+ * this adds the single field without re-declaring the heading spec.
+ */
+function defineHeadingWhitespace(): HeadingSpecExtension {
+  return defineNodeSpec({ name: 'heading' satisfies NodeName, whitespace: 'pre' })
 }
 
 type SetextUnderlineExtension = Extension<{
@@ -78,6 +94,7 @@ function defineHeadingKeymap(): PlainExtension {
 export function defineHeading() {
   return union(
     defineHeadingSpec(),
+    defineHeadingWhitespace(),
     defineSetextUnderlineAttr(),
     defineHeadingInputRule(),
     defineHeadingCommands(),

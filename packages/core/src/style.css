@@ -53,6 +53,12 @@
   margin-top: 0.85em;
 }
 
+/* Render soft line breaks (a literal `\n` kept by the paragraph's
+ * `whitespace: 'pre'` spec) as line breaks, while still wrapping long lines. */
+.ProseMirror p {
+  white-space: pre-wrap;
+}
+
 .ProseMirror h1,
 .ProseMirror h2,
 .ProseMirror h3,
@@ -63,6 +69,9 @@
   line-height: 1.25;
   letter-spacing: -0.01em;
   color: var(--meowdown-heading);
+  /* Render a multi-line setext heading's soft break (kept by the heading's
+   * `whitespace: 'pre'` spec) as a line break, while still wrapping long lines. */
+  white-space: pre-wrap;
 }
 
 .ProseMirror h1 {
