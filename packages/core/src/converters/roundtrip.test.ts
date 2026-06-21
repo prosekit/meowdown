@@ -13,7 +13,8 @@ describe('text', () => {
   })
 
   it('keeps a blank line between paragraphs', () => {
-    expect(roundtrip('line1\n\nline2')).toBe('line1\n\nline2\n')
+    const md = ['line1', '', 'line2'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 
   it('keeps a tab', () => {
@@ -255,7 +256,8 @@ describe('blockquotes', () => {
   })
 
   it('keeps a quote between paragraphs', () => {
-    expect(roundtrip('x\n\n> q\n\ny')).toBe('x\n\n> q\n\ny\n')
+    const md = ['x', '', '> q', '', 'y'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 
   it('keeps a tag in a quote', () => {
@@ -305,7 +307,8 @@ describe('bullet lists', () => {
   })
 
   it('keeps a loose two-block item', () => {
-    expect(roundtrip('- a\n\n  para2')).toBe('- a\n\n  para2\n')
+    const md = ['- a', '', '  para2'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 
   it('keeps a soft break inside an item', () => {
@@ -313,16 +316,13 @@ describe('bullet lists', () => {
   })
 
   it('keeps a soft break in a second paragraph', () => {
-    //  	•	TODO: review, for readability considerations, if there are two or more consecutive blank lines in the input of this file, then use the following method ([].join('\n')) to construct the markdown string. Please refactor the entire file.
-    expect(roundtrip(['- x', '', '  line one', '  line two'].join('\n'))).toBe(
-      ['- x', '', '  line one', '  line two', ''].join('\n'),
-    )
+    const md = ['- x', '', '  line one', '  line two'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 
   it('keeps a soft break in a nested item', () => {
-    expect(roundtrip('- a\n  - x\n\n    line one\n    line two')).toBe(
-      '- a\n  - x\n\n    line one\n    line two\n',
-    )
+    const md = ['- a', '  - x', '', '    line one', '    line two'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 
   it('keeps a bare empty bullet', () => {
@@ -346,7 +346,8 @@ describe('bullet lists', () => {
   })
 
   it.fails('keeps a loose list', () => {
-    expect(roundtrip('- a\n\n- b')).toBe('- a\n\n- b\n')
+    const md = ['- a', '', '- b'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 
   it.fails('keeps a trailing space after the marker', () => {
@@ -482,7 +483,8 @@ describe('thematic breaks', () => {
   })
 
   it('keeps a rule between paragraphs', () => {
-    expect(roundtrip('---\n\nafter')).toBe('---\n\nafter\n')
+    const md = ['---', '', 'after'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 
   it('keeps an asterisk rule', () => {
@@ -562,7 +564,8 @@ describe('escapes and whitespace', () => {
   })
 
   it.fails('keeps internal blank-line runs', () => {
-    expect(roundtrip('a\n\n\n\nb')).toBe('a\n\n\n\nb\n')
+    const md = ['a', '', '', '', 'b'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 
   it('keeps YAML frontmatter', () => {
@@ -570,14 +573,13 @@ describe('escapes and whitespace', () => {
   })
 
   it('keeps YAML frontmatter before content', () => {
-    expect(roundtrip('---\ntitle: x\n---\n\n# heading', { frontmatter: true })).toBe(
-      '---\ntitle: x\n---\n\n# heading\n',
-    )
+    const md = ['---', 'title: x', '---', '', '# heading'].join('\n')
+    expect(roundtrip(md, { frontmatter: true })).toBe(md + '\n')
   })
 
   it('normalizes a missing blank line after frontmatter', () => {
     expect(roundtrip('---\ntitle: x\n---\n# heading', { frontmatter: true })).toBe(
-      '---\ntitle: x\n---\n\n# heading\n',
+      ['---', 'title: x', '---', '', '# heading', ''].join('\n'),
     )
   })
 
@@ -588,25 +590,28 @@ describe('escapes and whitespace', () => {
 
 describe('mixed structures', () => {
   it('keeps a paragraph-list-paragraph sequence', () => {
-    expect(roundtrip('para\n\n- list\n\npara2')).toBe('para\n\n- list\n\npara2\n')
+    const md = ['para', '', '- list', '', 'para2'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 
   it('keeps a heading-paragraph-list sequence', () => {
-    expect(roundtrip('# h\n\npara\n\n- list')).toBe('# h\n\npara\n\n- list\n')
+    const md = ['# h', '', 'para', '', '- list'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 
   it('keeps a quote then a code block', () => {
-    expect(roundtrip('> q\n\n```\ncode\n```')).toBe('> q\n\n```\ncode\n```\n')
+    const md = ['> q', '', '```', 'code', '```'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 
   it('keeps a code block in a list item', () => {
-    expect(roundtrip('- a\n\n  ```\n  code\n  ```')).toBe('- a\n\n  ```\n  code\n  ```\n')
+    const md = ['- a', '', '  ```', '  code', '  ```'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 
   it('keeps a table then a list', () => {
-    expect(roundtrip('| a | b |\n| --- | --- |\n| 1 | 2 |\n\n- list')).toBe(
-      '| a | b |\n| --- | --- |\n| 1 | 2 |\n\n- list\n',
-    )
+    const md = ['| a | b |', '| --- | --- |', '| 1 | 2 |', '', '- list'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 
   it.fails('keeps stacked headings tight', () => {
@@ -614,7 +619,8 @@ describe('mixed structures', () => {
   })
 
   it('keeps ordered numbers before a paragraph', () => {
-    expect(roundtrip('1. a\n2. b\n\npara')).toBe('1. a\n2. b\n\npara\n')
+    const md = ['1. a', '2. b', '', 'para'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 })
 
@@ -630,7 +636,7 @@ describe('idempotency', () => {
   })
 
   it('keeps a soft-wrapped item stable', () => {
-    const once = roundtrip('- x\n\n  line one\n  line two')
+    const once = roundtrip(['- x', '', '  line one', '  line two'].join('\n'))
     expect(roundtrip(once)).toBe(once)
   })
 
@@ -645,7 +651,7 @@ describe('idempotency', () => {
   })
 
   it('keeps a collapsed loose list stable', () => {
-    const once = roundtrip('- a\n\n- b')
+    const once = roundtrip(['- a', '', '- b'].join('\n'))
     expect(roundtrip(once)).toBe(once)
   })
 
