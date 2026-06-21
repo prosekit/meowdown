@@ -46,7 +46,7 @@ Heading shortcuts toggle the current block to a heading of that level (or back t
 - `--meowdown-image-radius`: corner radius of rendered inline images.
 - `--meowdown-placeholder`: placeholder text color (defaults to `--meowdown-muted`).
 - `--meowdown-font-mono`: monospace font stack.
-- `--meowdown-gutter`: horizontal editor padding. Floating UI such as the block handle (in `@meowdown/react`) lives inside it; keep it at least `3.5rem`.
+- `--meowdown-gutter`: horizontal editor padding. Applied to the editable root's `.meowdown-content` class (set by `@meowdown/react`), not `.ProseMirror`, so the block handle's drag preview stays unpadded. Floating UI such as the block handle lives inside it; keep it at least `3.5rem`.
 - `--meowdown-selection`: text `::selection` background.
 - `--meowdown-node-outline`: outline of a selected node; border color of selected tables and cells.
 - `--meowdown-node-selection`: background wash of a selected node or selected cells.

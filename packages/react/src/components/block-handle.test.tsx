@@ -71,6 +71,26 @@ describe('BlockHandle', () => {
     expect(ref.current?.getMarkdown()).toBe('Alpha\n\nInserted\n\nBravo\n')
   })
 
+  it('keeps the gutter padding on the editor but off a bare ProseMirror drag preview', async () => {
+    await renderEditor()
+    // The editor's gutter padding lives on `.meowdown-content`, not `.ProseMirror`.
+    await expect.element(pmRoot).not.toHaveStyle({ paddingLeft: '0px' })
+
+    // The block handle builds its drag preview as a bare `.ProseMirror.prosekit-dragging`
+    // container appended to <body>; it must not inherit that gutter padding.
+    const preview = document.createElement('div')
+    preview.className = 'ProseMirror prosekit-dragging'
+    preview.dataset.testid = 'drag-preview-probe'
+    document.body.append(preview)
+    try {
+      await expect
+        .element(page.getByTestId('drag-preview-probe'))
+        .toHaveStyle({ paddingLeft: '0px' })
+    } finally {
+      preview.remove()
+    }
+  })
+
   it('selects the hovered block when pressing the drag handle', async () => {
     await renderEditor()
     await hover(pmRoot.getByText('Bravo'))

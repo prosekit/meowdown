@@ -16,6 +16,7 @@ import { createEditor, type SelectionJSON, union } from '@prosekit/core'
 import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit } from '@prosekit/react'
+import { clsx } from 'clsx/lite'
 import { useImperativeHandle, useMemo, useRef, useState, type ReactNode, type Ref } from 'react'
 
 import { defineCodeBlockView } from '../extensions/code-block-view.ts'
@@ -219,7 +220,11 @@ export function ProseKitEditor({
 
   return (
     <ProseKit editor={editor}>
-      <div ref={editor.mount} spellCheck={spellCheck} className={editorClassName}></div>
+      <div
+        ref={editor.mount}
+        spellCheck={spellCheck}
+        className={clsx('meowdown-content', editorClassName)}
+      ></div>
       <EditorExtensions
         markMode={markMode}
         onDocChange={handleDocChange}
