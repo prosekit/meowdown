@@ -428,8 +428,6 @@ describe('gfmBlockOnlyParser', () => {
     // A soft-wrapped paragraph inside a list item. lezer's Paragraph starts
     // after the first line's indent, but the continuation line's 2-space indent
     // stays inside the node's [from, to) span (see the `\n  line two` in `text`).
-    // `buildParagraph` (md-to-pm.ts) dedents those continuation lines so the
-    // round-trip indent does not double.
     const input = '- x\n\n  line one\n  line two\n'
     expect(show(buildAst(gfmBlockOnlyParser.parse(input).cursor(), input))).toMatchInlineSnapshot(`
       "{
