@@ -283,8 +283,9 @@ function buildParagraph(
   content: string,
   column: number,
 ): ProseMirrorNode {
-  const dedented = dedentContinuation(content, column)
-  return dedented === '' ? nodes.paragraph() : nodes.paragraph(dedented)
+  // An empty string adds no child (the builder skips falsy text), so this also
+  // covers the empty-paragraph case.
+  return nodes.paragraph(dedentContinuation(content, column))
 }
 
 function convertParagraph(
