@@ -280,6 +280,14 @@
   border-radius: 0.6rem;
 }
 
+/* Flat list items render as real `<li>`, so prosemirror-view's stock
+ * `li.ProseMirror-selectednode:after` still draws a second blue (#8cf) box that
+ * bleeds 32px into the gutter on top of our own outline. Drop it; the outline
+ * above is the only selection visual we want. */
+.ProseMirror li.ProseMirror-selectednode::after {
+  content: none;
+}
+
 /* While dragging via the block handle, keep only the outline on the
  * source block so it does not sit tinted under the drag preview. */
 .ProseMirror.prosekit-dragging {
