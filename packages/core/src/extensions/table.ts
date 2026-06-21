@@ -7,10 +7,10 @@ import {
   defineTableHeaderCellSpec,
   defineTableRowSpec,
   defineTableSpec,
+  deleteTable,
   isCellSelection,
 } from '@prosekit/extensions/table'
 import type { Command } from '@prosekit/pm/state'
-import { deleteTable } from 'prosemirror-tables'
 
 // When a cell selection covers the whole table, Backspace and Delete remove the
 // entire table instead of only clearing the cell contents.
