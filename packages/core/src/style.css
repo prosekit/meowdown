@@ -256,6 +256,18 @@
   background: var(--meowdown-selection);
 }
 
+/* prosemirror-view adds `ProseMirror-hideselection` whenever the selection is
+ * not "visible" (a node selection), and ships a stock rule that zeroes out the
+ * native highlight so only the `.ProseMirror-selectednode` box shows. The
+ * `.ProseMirror ::selection` rule above has equal specificity and wins on
+ * source order, re-showing the highlight. On Safari a node selection's DOM
+ * range spills past the selected node (WebKit cannot place a selection edge
+ * between non-editable blocks), so that re-shown highlight bleeds across
+ * neighboring lines. Re-assert the suppression with higher specificity. */
+.ProseMirror.ProseMirror-hideselection ::selection {
+  background: transparent;
+}
+
 /* Node selection (e.g. from the block handle): thin outline + faint wash,
  * replacing prosemirror-view's stock blue outline. */
 .ProseMirror .ProseMirror-selectednode {
