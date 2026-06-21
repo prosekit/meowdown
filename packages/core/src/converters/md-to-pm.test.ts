@@ -217,7 +217,14 @@ describe('markdownToDoc', () => {
   })
 
   it('keeps a fenced block with language', () => {
-    expect(markdownToDoc('```js\nconsole.log(1)\n```').toJSON()).toEqual({
+    const md = [
+      // A code block
+      '```js',
+      'console.log(1)',
+      '```',
+    ].join('\n')
+
+    expect(markdownToDoc(md).toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null },
       content: [
@@ -230,10 +237,17 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it('keeps every line of a fenced block nested in a list item', () => {
-    // lezer emits one CodeText per line for a code block inside a container, so
-    // the converter must accumulate them; overwriting drops all but the last.
-    const md = ['- a', '', '  ```', '  l1', '  l2', '  l3', '  ```'].join('\n')
+  it('keeps a multiple-line fenced block nested in a list item', () => {
+    const md = [
+      // A code block inside a list item
+      '- x',
+      '',
+      '  ```',
+      '  line1',
+      '  line2',
+      '  line3',
+      '  ```',
+    ].join('\n')
     expect(markdownToDoc(md).toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null },
