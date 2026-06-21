@@ -423,4 +423,57 @@ describe('gfmBlockOnlyParser', () => {
       }"
     `)
   })
+
+  it('keeps a list item continuation indent inside the paragraph span', () => {
+    // A soft-wrapped paragraph inside a list item. lezer's Paragraph starts
+    // after the first line's indent, but the continuation line's 2-space indent
+    // stays inside the node's [from, to) span (see the `\n  line two` in `text`).
+    // `buildParagraph` (md-to-pm.ts) dedents those continuation lines so the
+    // round-trip indent does not double.
+    const input = '- x\n\n  line one\n  line two\n'
+    expect(show(buildAst(gfmBlockOnlyParser.parse(input).cursor(), input))).toMatchInlineSnapshot(`
+      "{
+        "name": "Document",
+        "from": 0,
+        "to": 27,
+        "text": "- x\\n\\n  line one\\n  line two\\n",
+        "children": [
+          {
+            "name": "BulletList",
+            "from": 0,
+            "to": 26,
+            "text": "- x\\n\\n  line one\\n  line two",
+            "children": [
+              {
+                "name": "ListItem",
+                "from": 0,
+                "to": 26,
+                "text": "- x\\n\\n  line one\\n  line two",
+                "children": [
+                  {
+                    "name": "ListMark",
+                    "from": 0,
+                    "to": 1,
+                    "text": "-"
+                  },
+                  {
+                    "name": "Paragraph",
+                    "from": 2,
+                    "to": 3,
+                    "text": "x"
+                  },
+                  {
+                    "name": "Paragraph",
+                    "from": 7,
+                    "to": 26,
+                    "text": "line one\\n  line two"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }"
+    `)
+  })
 })
