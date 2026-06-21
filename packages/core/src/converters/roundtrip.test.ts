@@ -313,7 +313,13 @@ describe('bullet lists', () => {
   })
 
   it('keeps a soft break in a second paragraph', () => {
-    expect(roundtrip('- x\n\n  line one\n  line two')).toBe('- x\n\n  line one\n  line two\n')
+    //  	•	TODO: review, for readability considerations, if there are two or more consecutive blank lines in the input of this file, then use the following method ([].join('\n')) to construct the markdown string. Please refactor the entire file.
+    expect(roundtrip(
+      ['- x', '', '  line one', '  line two'].join('\n')
+
+    )).toBe(
+      ['- x', '', '  line one', '  line two',''].join('\n')
+    )
   })
 
   it('keeps a soft break in a nested item', () => {
