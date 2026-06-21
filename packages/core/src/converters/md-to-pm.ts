@@ -17,6 +17,15 @@ import {
   isSpaceChar,
 } from '../unicode.ts'
 
+/** Options for {@link markdownToDoc}. */
+export interface MarkdownToDocOptions {
+  /** Node builders to build the document with. Defaults to the shared schema's builders. */
+  nodes?: TypedNodeBuilders
+
+  /** Whether to peel a leading `---` frontmatter block onto the doc's `frontmatter` attribute. Off by default. */
+  frontmatter?: boolean
+}
+
 /**
  * Convert a markdown string into a ProseMirror document node.
  *
@@ -33,17 +42,24 @@ import {
  */
 export function markdownToDoc(
   markdown: string,
-  nodes: TypedNodeBuilders = getNodeBuilders(),
+  options: MarkdownToDocOptions = {},
 ): ProseMirrorNode {
-  // Peel off a leading YAML frontmatter block (`---\n...\n---`) before lezer
-  const [frontmatterBody, frontmatterMatchLength] = matchFrontmatter(markdown)
-  const rest = frontmatterMatchLength ? markdown.slice(frontmatterMatchLength) : markdown
+  const { nodes = getNodeBuilders(), frontmatter = false } = options
+
+  // Optionally peel a leading `---` frontmatter block off before lezer.
+  let frontmatterBody: string | undefined
+  let rest = markdown
+  if (frontmatter) {
+    const [body, matchLength] = matchFrontmatter(markdown)
+    frontmatterBody = body
+    if (matchLength) rest = markdown.slice(matchLength)
+  }
 
   const tree = gfmBlockOnlyParser.parse(rest)
   const cursor = tree.cursor()
   const blocks = collectBlocks(nodes, cursor, rest)
 
-  return nodes.doc({ frontmatter: frontmatterBody }, blocks)
+  return nodes.doc(frontmatterBody === undefined ? {} : { frontmatter: frontmatterBody }, blocks)
 }
 
 /**

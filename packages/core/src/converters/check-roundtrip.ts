@@ -17,9 +17,19 @@ function nonBlankLines(text: string): string[] {
   return text.split('\n').filter((line) => line.trim() !== '')
 }
 
+/** Options for {@link checkRoundTrip}. */
+export interface CheckRoundTripOptions {
+  /** Whether to handle a leading `---` frontmatter block. Off by default. */
+  frontmatter?: boolean
+}
+
 /** Classify how `markdown` survives the editor's parse-then-serialize round trip. */
-export function checkRoundTrip(markdown: string): RoundTripFidelity {
-  const serialized = docToMarkdown(markdownToDoc(markdown))
+export function checkRoundTrip(
+  markdown: string,
+  options: CheckRoundTripOptions = {},
+): RoundTripFidelity {
+  const doc = markdownToDoc(markdown, { frontmatter: options.frontmatter })
+  const serialized = docToMarkdown(doc, { frontmatter: options.frontmatter })
   if (trimTrailingNewlines(serialized) === trimTrailingNewlines(markdown)) return 'exact'
   const before = nonBlankLines(markdown)
   const after = nonBlankLines(serialized)

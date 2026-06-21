@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
 
-function roundtrip(markdown: string): string {
-  return docToMarkdown(markdownToDoc(markdown))
+function roundtrip(markdown: string, options?: { frontmatter?: boolean }): string {
+  return docToMarkdown(markdownToDoc(markdown, options), options)
 }
 
 describe('text', () => {
@@ -545,15 +545,23 @@ describe('escapes and whitespace', () => {
   })
 
   it('keeps YAML frontmatter', () => {
-    expect(roundtrip('---\ntitle: x\n---')).toBe('---\ntitle: x\n---\n')
+    expect(roundtrip('---\ntitle: x\n---', { frontmatter: true })).toBe('---\ntitle: x\n---\n')
   })
 
   it('keeps YAML frontmatter before content', () => {
-    expect(roundtrip('---\ntitle: x\n---\n\n# heading')).toBe('---\ntitle: x\n---\n\n# heading\n')
+    expect(roundtrip('---\ntitle: x\n---\n\n# heading', { frontmatter: true })).toBe(
+      '---\ntitle: x\n---\n\n# heading\n',
+    )
   })
 
   it('normalizes a missing blank line after frontmatter', () => {
-    expect(roundtrip('---\ntitle: x\n---\n# heading')).toBe('---\ntitle: x\n---\n\n# heading\n')
+    expect(roundtrip('---\ntitle: x\n---\n# heading', { frontmatter: true })).toBe(
+      '---\ntitle: x\n---\n\n# heading\n',
+    )
+  })
+
+  it('renders a frontmatter block as content when frontmatter is off (default)', () => {
+    expect(roundtrip('---\ntitle: x\n---')).toContain('title: x')
   })
 })
 
@@ -636,8 +644,8 @@ describe('idempotency', () => {
   })
 
   it('keeps frontmatter stable', () => {
-    const once = roundtrip('---\ntitle: x\n---')
-    expect(roundtrip(once)).toBe(once)
+    const once = roundtrip('---\ntitle: x\n---', { frontmatter: true })
+    expect(roundtrip(once, { frontmatter: true })).toBe(once)
   })
 
   it('keeps a two-line quote stable', () => {
