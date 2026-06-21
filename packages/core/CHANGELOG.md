@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.1](https://github.com/prosekit/meowdown/compare/core-v0.17.0...core-v0.17.1) (2026-06-21)
+
+
+### Bug Fixes
+
+* treat blockquote-marker-only lines as blank ([#118](https://github.com/prosekit/meowdown/issues/118)) ([f1ecd66](https://github.com/prosekit/meowdown/commit/f1ecd6609f2dbef2ac07159f6a41c2cc2afde3dc))
+
 ## [0.17.0](https://github.com/prosekit/meowdown/compare/core-v0.16.2...core-v0.17.0) (2026-06-21)
 
 
