@@ -277,15 +277,6 @@
   background: var(--meowdown-node-selection);
 }
 
-/* Explicit, var-free guard that zeroes the native highlight on the selected
- * node's own subtree. The `.ProseMirror.ProseMirror-hideselection ::selection`
- * rule above already covers this (and the spill outside the node) during a node
- * selection, so this is a redundant subset kept as a scoped fallback. */
-.ProseMirror .ProseMirror-selectednode::selection,
-.ProseMirror .ProseMirror-selectednode *::selection {
-  background: transparent;
-}
-
 .ProseMirror pre.ProseMirror-selectednode {
   border-radius: 0.6rem;
 }
