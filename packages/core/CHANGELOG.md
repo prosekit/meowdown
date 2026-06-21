@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.3](https://github.com/prosekit/meowdown/compare/core-v0.17.2...core-v0.17.3) (2026-06-21)
+
+
+### Bug Fixes
+
+* **core:** preserve multi-line code blocks in list items ([#123](https://github.com/prosekit/meowdown/issues/123)) ([7954017](https://github.com/prosekit/meowdown/commit/79540174b3e52490ffc813e7078151e2c17b830a))
+
 ## [0.17.2](https://github.com/prosekit/meowdown/compare/core-v0.17.1...core-v0.17.2) (2026-06-21)
 
 
