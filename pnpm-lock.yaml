@@ -81,6 +81,9 @@ importers:
       prosemirror-highlight:
         specifier: ^0.15.2
         version: 0.15.2(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.41.9)
+      prosemirror-tables:
+        specifier: ^1.8.5
+        version: 1.8.5
     devDependencies:
       '@meowdown/vitest':
         specifier: workspace:*

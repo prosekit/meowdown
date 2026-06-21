@@ -10,6 +10,7 @@ import {
   isCellSelection,
 } from '@prosekit/extensions/table'
 import type { Command } from '@prosekit/pm/state'
+import { deleteTable } from 'prosemirror-tables'
 
 // When a cell selection covers the whole table, Backspace and Delete remove the
 // entire table instead of only clearing the cell contents.
@@ -17,11 +18,7 @@ const deleteTableOnFullCellSelection: Command = (state, dispatch) => {
   const { selection } = state
   if (!isCellSelection(selection)) return false
   if (!selection.isColSelection() || !selection.isRowSelection()) return false
-  if (dispatch) {
-    const $cell = selection.$anchorCell
-    dispatch(state.tr.delete($cell.before(-1), $cell.after(-1)).scrollIntoView())
-  }
-  return true
+  return deleteTable(state, dispatch)
 }
 
 function defineTableKeymap(): PlainExtension {

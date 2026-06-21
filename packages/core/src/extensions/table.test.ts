@@ -40,14 +40,14 @@ describe('table', () => {
     )
     fixture.set(doc)
 
-    const [headerA, headerB] = cellHitPositions(fixture.doc)
+    const [headerA, headerB] = getCellHitPositions(fixture.doc)
     editor.commands.selectTableRow({ anchor: headerA, head: headerB })
 
     view.focus()
     await userEvent.keyboard('{Backspace}')
 
     expect(hasTable(fixture.doc)).toBe(true)
-    expect(cellTexts(fixture.doc)).toEqual(['', '', '1', '2'])
+    expect(getCellTexts(fixture.doc)).toEqual(['', '', '1', '2'])
   })
 
   it('deletes the whole table when Backspace over a full cell selection', async () => {
@@ -62,7 +62,7 @@ describe('table', () => {
     )
     fixture.set(doc)
 
-    const [headerA] = cellHitPositions(fixture.doc)
+    const [headerA] = getCellHitPositions(fixture.doc)
     editor.commands.selectTable({ pos: headerA })
 
     view.focus()
@@ -72,7 +72,7 @@ describe('table', () => {
   })
 })
 
-function cellTexts(doc: EditorNode): string[] {
+function getCellTexts(doc: EditorNode): string[] {
   const texts: string[] = []
   doc.descendants((node) => {
     if (node.type.name === 'tableCell' || node.type.name === 'tableHeaderCell') {
@@ -84,7 +84,7 @@ function cellTexts(doc: EditorNode): string[] {
   return texts
 }
 
-function cellHitPositions(doc: EditorNode): number[] {
+function getCellHitPositions(doc: EditorNode): number[] {
   const positions: number[] = []
   doc.descendants((node, pos) => {
     if (node.type.name === 'tableCell' || node.type.name === 'tableHeaderCell') {

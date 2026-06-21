@@ -29,7 +29,8 @@
     "@prosekit/core": "^0.13.0-beta.3",
     "@prosekit/extensions": "^0.17.5-beta.5",
     "@prosekit/pm": "^0.1.19-beta.0",
-    "prosemirror-highlight": "^0.15.2"
+    "prosemirror-highlight": "^0.15.2",
+    "prosemirror-tables": "^1.8.5"
   },
   "devDependencies": {
     "@meowdown/vitest": "workspace:*",
