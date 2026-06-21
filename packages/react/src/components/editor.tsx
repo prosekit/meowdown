@@ -112,6 +112,9 @@ export interface EditorProps {
    */
   bulletAfterHeading?: boolean
 
+  /** Handles a leading `---` frontmatter block in the rich modes (off by default, ignored in source mode). */
+  frontmatter?: boolean
+
   /**
    * Shows the per-block gutter handle in the rich modes: a drag grip for
    * reordering blocks and a "+" add button, plus the drop indicator that
@@ -163,6 +166,7 @@ export function MeowdownEditor({
   onImageClick,
   embedPaste = true,
   bulletAfterHeading = false,
+  frontmatter = false,
   blockHandle = true,
   placeholder,
   readOnly,
@@ -244,6 +248,7 @@ export function MeowdownEditor({
           onImageClick={onImageClick}
           embedPaste={embedPaste}
           bulletAfterHeading={bulletAfterHeading}
+          frontmatter={frontmatter}
           blockHandle={blockHandle}
           placeholder={placeholder}
           readOnly={readOnly}

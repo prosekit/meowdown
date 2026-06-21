@@ -8,6 +8,12 @@ import type { MeowdownListAttrs } from '../extensions/list.ts'
 import type { NodeName } from '../extensions/node-names.ts'
 import { longestBacktickRun } from '../utils/backticks.ts'
 
+/** Options for {@link docToMarkdown}. */
+export interface DocToMarkdownOptions {
+  /** Whether to serialize the doc's `frontmatter` attribute as a leading `---` block. Off by default. */
+  frontmatter?: boolean
+}
+
 /**
  * Convert a ProseMirror document into a Markdown string.
  *
@@ -23,9 +29,11 @@ import { longestBacktickRun } from '../utils/backticks.ts'
  * - Backtick fence width and cell escaping use single linear loops, no
  *   regex on the hot path.
  */
-export function docToMarkdown(node: ProseMirrorNode): string {
+export function docToMarkdown(node: ProseMirrorNode, options: DocToMarkdownOptions = {}): string {
   const out = new MdOut()
-  emitFrontmatter(node.attrs.frontmatter as Frontmatter, out)
+  if (options.frontmatter) {
+    emitFrontmatter(node.attrs.frontmatter as Frontmatter, out)
+  }
   emit(node, out)
   return out.finish()
 }

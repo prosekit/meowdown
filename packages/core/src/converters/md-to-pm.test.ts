@@ -624,7 +624,7 @@ describe('markdownToDoc', () => {
   it('keeps YAML frontmatter as a doc attribute', () => {
     // The whole input is the frontmatter block, so the only content is the
     // empty paragraph the schema fills in (it serializes back to nothing).
-    expect(markdownToDoc('---\ntitle: x\n---').toJSON()).toEqual({
+    expect(markdownToDoc('---\ntitle: x\n---', { frontmatter: true }).toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: 'title: x' },
       content: [{ type: 'paragraph' }],
@@ -633,7 +633,7 @@ describe('markdownToDoc', () => {
 
   it('keeps a multi-line frontmatter body literal before content', () => {
     const md = '---\ntitle: x\ntags: [a, b]\n---\n\n# heading'
-    expect(markdownToDoc(md).toJSON()).toEqual({
+    expect(markdownToDoc(md, { frontmatter: true }).toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: 'title: x\ntags: [a, b]' },
       content: [
@@ -647,7 +647,7 @@ describe('markdownToDoc', () => {
   })
 
   it('keeps an empty frontmatter block as an empty string', () => {
-    expect(markdownToDoc('---\n---').toJSON()).toEqual({
+    expect(markdownToDoc('---\n---', { frontmatter: true }).toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: '' },
       content: [{ type: 'paragraph' }],
@@ -655,10 +655,14 @@ describe('markdownToDoc', () => {
   })
 
   it('keeps a lone dashes line as a thematic break, not frontmatter', () => {
-    expect(markdownToDoc('---').toJSON()).toEqual({
+    expect(markdownToDoc('---', { frontmatter: true }).toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null },
       content: [{ type: 'horizontalRule', attrs: { marker: null } }],
     })
+  })
+
+  it('leaves a frontmatter block as content when frontmatter is off (default)', () => {
+    expect(markdownToDoc('---\ntitle: x\n---').attrs.frontmatter).toBe(null)
   })
 })
