@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.4](https://github.com/prosekit/meowdown/compare/react-v0.17.3...react-v0.17.4) (2026-06-21)
+
+
+### Bug Fixes
+
+* update prosekit ([#125](https://github.com/prosekit/meowdown/issues/125)) ([7f698e9](https://github.com/prosekit/meowdown/commit/7f698e9a1492ed6a7f80dac078c7e64f75c3082d))
+
 ## [0.17.3](https://github.com/prosekit/meowdown/compare/react-v0.17.2...react-v0.17.3) (2026-06-21)
 
 
