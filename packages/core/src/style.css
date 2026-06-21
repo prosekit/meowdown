@@ -258,8 +258,8 @@
 /* prosemirror-view adds `ProseMirror-hideselection` whenever the selection is
  * not "visible" (a node selection). */
 .ProseMirror.ProseMirror-hideselection ::selection {
-    --meowdown-selection: transparent;
-    caret-color: transparent;
+  --meowdown-selection: transparent;
+  caret-color: transparent;
 }
 
 /* Node selection (e.g. from the block handle): thin outline + faint wash,
