@@ -34,6 +34,8 @@ describe('checkRoundTrip', () => {
       Hello
       =====
     `, // setext heading keeps its text and underline length
+    '- x\n\n  line one\n  line two', // a list item's soft-wrapped paragraph keeps its indent
+    '- a\n  - x\n\n    line one\n    line two', // nested list, same
   ])('reports exact for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('exact')
   })
@@ -41,6 +43,8 @@ describe('checkRoundTrip', () => {
   it.each([
     'a\n\n\nb', // extra blank lines collapse to one
     '- a\n\n- b', // a loose list serializes tight
+    '- [ ] Asdf\n- [ ]\n- [ ] ', // a trailing space on an empty task is normalized away
+    'trailing spaces   ', // trailing whitespace is insignificant
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })

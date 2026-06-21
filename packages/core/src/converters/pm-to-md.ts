@@ -289,17 +289,23 @@ function isTightItem(item: ProseMirrorNode): boolean {
 }
 
 /**
- * Walk inline children writing text directly. The schema has no marks, so
- * every inline child is currently a text node - but going through this
- * loop instead of `node.textContent` avoids one intermediate string
- * allocation per leaf block (paragraph / heading content).
+ * Walk inline children writing text directly. Inline content is a text node or a
+ * `hardBreak` (a soft line break); going through this loop instead of
+ * `node.textContent` avoids one intermediate string allocation per leaf block
+ * (paragraph / heading content). A `hardBreak` emits a `\n`; `MdOut.write` then
+ * re-applies the current line prefix, so a break inside a list item stays
+ * aligned to the item's continuation indent.
  */
 function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
   const count = node.childCount
   for (let i = 0; i < count; i++) {
     const child = node.child(i)
-    if (child.isText && child.text) out.write(child.text)
-    // Future inline node types (hardBreak, image, mention) go here.
+    if (child.isText && child.text) {
+      out.write(child.text)
+    } else if (child.type.name === ('hardBreak' satisfies NodeName)) {
+      out.write('\n')
+    }
+    // Future inline node types (image, mention) go here.
   }
 }
 

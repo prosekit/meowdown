@@ -591,7 +591,47 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'blockquote',
-          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'l1\nl2' }] }],
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: 'l1' },
+                { type: 'hardBreak' },
+                { type: 'text', text: 'l2' },
+              ],
+            },
+          ],
+        },
+      ],
+    })
+  })
+
+  it('keeps a list item soft break as a dedented hardBreak', () => {
+    expect(markdownToDoc('- x\n\n  line one\n  line two').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        {
+          type: 'list',
+          attrs: {
+            kind: 'bullet',
+            order: null,
+            checked: false,
+            collapsed: false,
+            marker: '-',
+            taskMarker: null,
+          },
+          content: [
+            { type: 'paragraph', content: [{ type: 'text', text: 'x' }] },
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: 'line one' },
+                { type: 'hardBreak' },
+                { type: 'text', text: 'line two' },
+              ],
+            },
+          ],
         },
       ],
     })
