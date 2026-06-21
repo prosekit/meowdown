@@ -217,7 +217,14 @@ describe('markdownToDoc', () => {
   })
 
   it('keeps a fenced block with language', () => {
-    expect(markdownToDoc('```js\nconsole.log(1)\n```').toJSON()).toEqual({
+    const md = [
+      // A code block
+      '```js',
+      'console.log(1)',
+      '```',
+    ].join('\n')
+
+    expect(markdownToDoc(md).toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null },
       content: [
@@ -225,6 +232,44 @@ describe('markdownToDoc', () => {
           type: 'codeBlock',
           attrs: { language: 'js' },
           content: [{ type: 'text', text: 'console.log(1)' }],
+        },
+      ],
+    })
+  })
+
+  it('keeps a multiple-line fenced block nested in a list item', () => {
+    const md = [
+      // A code block inside a list item
+      '- x',
+      '',
+      '  ```',
+      '  line1',
+      '  line2',
+      '  line3',
+      '  ```',
+    ].join('\n')
+    expect(markdownToDoc(md).toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        {
+          type: 'list',
+          attrs: {
+            kind: 'bullet',
+            order: null,
+            checked: false,
+            collapsed: false,
+            marker: '-',
+            taskMarker: null,
+          },
+          content: [
+            { type: 'paragraph', content: [{ type: 'text', text: 'x' }] },
+            {
+              type: 'codeBlock',
+              attrs: { language: '' },
+              content: [{ type: 'text', text: 'line1\nline2\nline3' }],
+            },
+          ],
         },
       ],
     })

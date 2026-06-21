@@ -439,7 +439,7 @@ function convertCodeBlock(
           language = text.slice(cursor.from, cursor.to)
           break
         case LEZER_NODE_IDS.CodeText:
-          code = text.slice(cursor.from, cursor.to)
+          code += text.slice(cursor.from, cursor.to)
           break
       }
     } while (cursor.nextSibling())

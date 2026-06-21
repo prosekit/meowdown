@@ -474,4 +474,98 @@ describe('gfmBlockOnlyParser', () => {
       }"
     `)
   })
+
+  it('emits one CodeText per line for a fenced code block inside a list item', () => {
+    // A multi-line fenced code block inside a list item. Unlike a top-level
+    // block (one CodeText spanning every line), lezer scrubs each line's 2-space
+    // container indent and emits one CodeText per line, the stripped indent
+    // living in the gaps between the nodes. Each CodeText slice already carries
+    // its own trailing newline, so concatenating them rebuilds the code text.
+    const input = [
+      // A code block inside a list item
+      '- x',
+      '',
+      '  ```',
+      '  line1',
+      '  line2',
+      '  line3',
+      '  ```',
+    ].join('\n')
+    expect(show(buildAst(gfmBlockOnlyParser.parse(input).cursor(), input))).toMatchInlineSnapshot(`
+      "{
+        "name": "Document",
+        "from": 0,
+        "to": 40,
+        "text": "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
+        "children": [
+          {
+            "name": "BulletList",
+            "from": 0,
+            "to": 40,
+            "text": "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
+            "children": [
+              {
+                "name": "ListItem",
+                "from": 0,
+                "to": 40,
+                "text": "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
+                "children": [
+                  {
+                    "name": "ListMark",
+                    "from": 0,
+                    "to": 1,
+                    "text": "-"
+                  },
+                  {
+                    "name": "Paragraph",
+                    "from": 2,
+                    "to": 3,
+                    "text": "x"
+                  },
+                  {
+                    "name": "FencedCode",
+                    "from": 7,
+                    "to": 40,
+                    "text": "\`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
+                    "children": [
+                      {
+                        "name": "CodeMark",
+                        "from": 7,
+                        "to": 10,
+                        "text": "\`\`\`"
+                      },
+                      {
+                        "name": "CodeText",
+                        "from": 13,
+                        "to": 19,
+                        "text": "line1\\n"
+                      },
+                      {
+                        "name": "CodeText",
+                        "from": 21,
+                        "to": 27,
+                        "text": "line2\\n"
+                      },
+                      {
+                        "name": "CodeText",
+                        "from": 29,
+                        "to": 34,
+                        "text": "line3"
+                      },
+                      {
+                        "name": "CodeMark",
+                        "from": 37,
+                        "to": 40,
+                        "text": "\`\`\`"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }"
+    `)
+  })
 })

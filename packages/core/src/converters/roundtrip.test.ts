@@ -609,6 +609,13 @@ describe('mixed structures', () => {
     expect(roundtrip(md)).toBe(md + '\n')
   })
 
+  it('keeps every line of a multi-line code block in a list item', () => {
+    // Regression: lezer emits one CodeText per line inside a container, so a
+    // converter that overwrites instead of accumulating drops all but the last.
+    const md = ['- a', '', '  ```', '  l1', '  l2', '  l3', '  ```'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
+
   it('keeps a table then a list', () => {
     const md = ['| a | b |', '| --- | --- |', '| 1 | 2 |', '', '- list'].join('\n')
     expect(roundtrip(md)).toBe(md + '\n')
