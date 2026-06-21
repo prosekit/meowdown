@@ -52,8 +52,6 @@ describe('checkRoundTrip', () => {
           line one
           line two
     `,
-
-
   ])('reports exact for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('exact')
   })
