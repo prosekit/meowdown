@@ -263,11 +263,11 @@ describe('markdownToDoc', () => {
             taskMarker: null,
           },
           content: [
-            { type: 'paragraph', content: [{ type: 'text', text: 'a' }] },
+            { type: 'paragraph', content: [{ type: 'text', text: 'x' }] },
             {
               type: 'codeBlock',
               attrs: { language: '' },
-              content: [{ type: 'text', text: 'l1\nl2\nl3' }],
+              content: [{ type: 'text', text: 'line1\nline2\nline3' }],
             },
           ],
         },

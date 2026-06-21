@@ -495,20 +495,20 @@ describe('gfmBlockOnlyParser', () => {
       "{
         "name": "Document",
         "from": 0,
-        "to": 33,
-        "text": "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  \`\`\`\\n",
+        "to": 40,
+        "text": "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
         "children": [
           {
             "name": "BulletList",
             "from": 0,
-            "to": 32,
-            "text": "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  \`\`\`",
+            "to": 40,
+            "text": "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
             "children": [
               {
                 "name": "ListItem",
                 "from": 0,
-                "to": 32,
-                "text": "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  \`\`\`",
+                "to": 40,
+                "text": "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
                 "children": [
                   {
                     "name": "ListMark",
@@ -525,8 +525,8 @@ describe('gfmBlockOnlyParser', () => {
                   {
                     "name": "FencedCode",
                     "from": 7,
-                    "to": 32,
-                    "text": "\`\`\`\\n  line1\\n  line2\\n  \`\`\`",
+                    "to": 40,
+                    "text": "\`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
                     "children": [
                       {
                         "name": "CodeMark",
@@ -543,13 +543,19 @@ describe('gfmBlockOnlyParser', () => {
                       {
                         "name": "CodeText",
                         "from": 21,
-                        "to": 26,
-                        "text": "line2"
+                        "to": 27,
+                        "text": "line2\\n"
+                      },
+                      {
+                        "name": "CodeText",
+                        "from": 29,
+                        "to": 34,
+                        "text": "line3"
                       },
                       {
                         "name": "CodeMark",
-                        "from": 29,
-                        "to": 32,
+                        "from": 37,
+                        "to": 40,
                         "text": "\`\`\`"
                       }
                     ]
