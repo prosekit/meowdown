@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.2](https://github.com/prosekit/meowdown/compare/core-v0.17.1...core-v0.17.2) (2026-06-21)
+
+
+### Bug Fixes
+
+* **core:** prevent selection highlight overflow on Safari ([#120](https://github.com/prosekit/meowdown/issues/120)) ([ce43f9e](https://github.com/prosekit/meowdown/commit/ce43f9e2a37f9ab9d436caf8a2a36587f481089d))
+
 ## [0.17.1](https://github.com/prosekit/meowdown/compare/core-v0.17.0...core-v0.17.1) (2026-06-21)
 
 
