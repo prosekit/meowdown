@@ -27,7 +27,11 @@ export { definePlaceholder, type PlaceholderOptions } from '@prosekit/extensions
 export { defineReadonly } from '@prosekit/extensions/readonly'
 export { Priority, withPriority } from '@prosekit/core'
 export { codeBlockLanguages } from './extensions/code-block-languages.ts'
-export { docToMarkdown } from './converters/pm-to-md.ts'
-export { markdownToDoc } from './converters/md-to-pm.ts'
-export { checkRoundTrip, type RoundTripFidelity } from './converters/check-roundtrip.ts'
+export { docToMarkdown, type DocToMarkdownOptions } from './converters/pm-to-md.ts'
+export { markdownToDoc, type MarkdownToDocOptions } from './converters/md-to-pm.ts'
+export {
+  checkRoundTrip,
+  type CheckRoundTripOptions,
+  type RoundTripFidelity,
+} from './converters/check-roundtrip.ts'
 export type { CodeBlockAttrs } from '@prosekit/extensions/code-block'
