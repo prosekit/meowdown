@@ -320,16 +320,14 @@ function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
   const bulletMarker = attrs.marker === '*' || attrs.marker === '+' ? attrs.marker : '-'
   const orderMarker = attrs.marker === ')' ? ')' : '.'
   const checkMark = attrs.taskMarker === 'X' ? 'X' : 'x'
-  const marker =
-    attrs.kind === 'ordered'
-      ? `${attrs.order ?? 1}${orderMarker} `
-      : attrs.kind === 'task'
-        ? `${bulletMarker} [${attrs.checked ? checkMark : ' '}] `
-        : `${bulletMarker} ` // bullet | toggle
-
-  // For a task item the `[ ] ` checkbox is list-item CONTENT in GFM terms,
-  // not part of the marker, so continuation lines align to the `- ` width.
-  const continuation = ' '.repeat(attrs.kind === 'task' ? 2 : marker.length)
+  // The delimiter plus its original gap (1-4 spaces). The gap rides on the delimiter,
+  // before a task's `[ ] ` checkbox (which is list-item CONTENT in GFM terms). The
+  // prefix width is the content column, so continuation lines align to it.
+  const gap = Math.min(Math.max(attrs.markerGap ?? 1, 1), 4)
+  const delimiter = attrs.kind === 'ordered' ? `${attrs.order ?? 1}${orderMarker}` : bulletMarker
+  const prefix = `${delimiter}${' '.repeat(gap)}`
+  const marker = attrs.kind === 'task' ? `${prefix}[${attrs.checked ? checkMark : ' '}] ` : prefix
+  const continuation = ' '.repeat(prefix.length)
   out.withPrefix(continuation, marker, () => emitBlockChildren(node, out, tight))
   out.closeBlock()
 }
