@@ -28,6 +28,7 @@ const TWO_BRACKETS = '[[[['
 
 // Cmd-Shift-K on Apple, Ctrl-Shift-K elsewhere, matching the `Mod-Shift-k`
 // keymap. The held modifier is released in reverse order.
+// TODO:REVIEW: is there a more simple way like `{CtrlOrCommand}`?
 const MOD = isApple ? 'Meta' : 'Control'
 async function pressInsertShortcut(): Promise<void> {
   await userEvent.keyboard(`{${MOD}>}{Shift>}k{/Shift}{/${MOD}}`)
@@ -150,6 +151,7 @@ describe('WikilinkMenu', () => {
   })
 })
 
+// TODO:REVIEW: rename 'WikilinkMenu Cmd-Shift-K shortcut' to 'Mod-Shift-K shortcut'
 describe('WikilinkMenu Cmd-Shift-K shortcut', () => {
   it('opens the menu with every note', async () => {
     await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
