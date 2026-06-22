@@ -69,7 +69,12 @@ function defineListTaskMarkerAttr(): ListTaskMarkerExtension {
 
 type ListMarkerGapExtension = Extension<{ Nodes: { list: { markerGap?: number } } }>
 
+function isValidMarkerGap(value: number | null | undefined): value is 2 | 3 | 4 {
+  return value === 2 || value === 3 || value === 4
+}
+
 function defineListMarkerGapAttr(): ListMarkerGapExtension {
+
   return defineNodeAttr<'list', 'markerGap', number>({
     type: 'list' satisfies NodeName,
     attr: 'markerGap',
@@ -81,10 +86,12 @@ function defineListMarkerGapAttr(): ListMarkerGapExtension {
     // emits anyway, and the rest must survive an editor DOM re-parse. A gap of 5+ is
     // indented code, a different structure, so it never reaches here.
     toDOM: (value) =>
-      value != null && value >= 2 && value <= 4 ? ['data-list-marker-gap', String(value)] : null,
+    {
+     return (isValidMarkerGap(value)) ? ['data-list-marker-gap', String(value)] : null
+    },
     parseDOM: (node) => {
       const value = Number.parseInt(node.getAttribute('data-list-marker-gap') ?? '', 10)
-      return value >= 2 && value <= 4 ? value : 1
+      return isValidMarkerGap(value) ? value : 1
     },
   })
 }
