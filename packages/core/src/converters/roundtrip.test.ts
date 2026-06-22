@@ -345,6 +345,15 @@ describe('bullet lists', () => {
     expect(roundtrip('-  double space')).toBe('-  double space\n')
   })
 
+  it('keeps a 4-space marker gap', () => {
+    expect(roundtrip('-    four spaces')).toBe('-    four spaces\n')
+  })
+
+  it('keeps a marker gap before a second paragraph', () => {
+    const md = ['-  a', '', '   para2'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
+
   it.fails('keeps a 4-space nested indent', () => {
     expect(roundtrip('- a\n    - deep')).toBe('- a\n    - deep\n')
   })
@@ -395,6 +404,10 @@ describe('ordered lists', () => {
   it('keeps empty item numbers', () => {
     expect(roundtrip('1.\n2.')).toBe('1.\n2.\n')
   })
+
+  it('keeps a marker gap', () => {
+    expect(roundtrip('1.   three spaces')).toBe('1.   three spaces\n')
+  })
 })
 
 describe('task lists', () => {
@@ -420,6 +433,14 @@ describe('task lists', () => {
 
   it('keeps double-spaced task text', () => {
     expect(roundtrip('- [ ]  double-spaced text')).toBe('- [ ]  double-spaced text\n')
+  })
+
+  it('keeps triple-spaced task text', () => {
+    expect(roundtrip('- [ ]   triple-spaced text')).toBe('- [ ]   triple-spaced text\n')
+  })
+
+  it('keeps a gap before the checkbox', () => {
+    expect(roundtrip('-  [ ] gap before box')).toBe('-  [ ] gap before box\n')
   })
 
   it('keeps an empty task marker', () => {
