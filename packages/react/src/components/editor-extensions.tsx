@@ -31,7 +31,6 @@ export interface EditorExtensionsProps {
   onImageSaveError?: ImageOptions['onImageSaveError']
   onImageClick?: ImageClickHandler
   embedPaste?: boolean
-  htmlPaste?: boolean
   bulletAfterHeading?: boolean
   placeholder?: PlaceholderOptions['placeholder']
   readOnly?: boolean
@@ -50,7 +49,6 @@ export function EditorExtensions({
   onImageSaveError,
   onImageClick,
   embedPaste,
-  htmlPaste,
   bulletAfterHeading,
   placeholder,
   readOnly,
@@ -103,11 +101,7 @@ export function EditorExtensions({
     }, [embedPaste]),
   )
 
-  useExtension(
-    useMemo(() => {
-      return htmlPaste === false ? null : defineHTMLPaste()
-    }, [htmlPaste]),
-  )
+  useExtension(useMemo(() => defineHTMLPaste(), []))
 
   useExtension(useMemo(() => defineMarkdownCopy(), []))
 

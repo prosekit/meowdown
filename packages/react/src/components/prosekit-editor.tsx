@@ -91,9 +91,6 @@ export interface ProseKitEditorProps {
   /** Auto-embeds a pasted tweet/YouTube link. See `EditorProps.embedPaste`. */
   embedPaste?: boolean
 
-  /** Converts pasted rich-text HTML to Markdown. See `EditorProps.htmlPaste`. */
-  htmlPaste?: boolean
-
   /** Starts a bullet on Enter after a heading. See `EditorProps.bulletAfterHeading`. */
   bulletAfterHeading?: boolean
 
@@ -135,7 +132,6 @@ export function ProseKitEditor({
   onImageSaveError,
   onImageClick,
   embedPaste,
-  htmlPaste,
   bulletAfterHeading,
   frontmatter = false,
   blockHandle = true,
@@ -239,7 +235,6 @@ export function ProseKitEditor({
         onImageSaveError={onImageSaveError}
         onImageClick={onImageClick}
         embedPaste={embedPaste}
-        htmlPaste={htmlPaste}
         bulletAfterHeading={bulletAfterHeading}
         placeholder={placeholder}
         readOnly={readOnly}

@@ -106,12 +106,6 @@ export interface EditorProps {
   embedPaste?: boolean
 
   /**
-   * Converts pasted rich-text HTML (a bullet list, bold, a link, ...) into
-   * Markdown so the formatting survives. On by default. Ignored in source mode.
-   */
-  htmlPaste?: boolean
-
-  /**
    * Pressing Enter at the end of the document's first heading (the title line)
    * starts a fresh empty bullet on the next line instead of a plain paragraph.
    * Off by default. Ignored in source mode.
@@ -171,7 +165,6 @@ export function MeowdownEditor({
   onImageSaveError,
   onImageClick,
   embedPaste = true,
-  htmlPaste = true,
   bulletAfterHeading = false,
   frontmatter = false,
   blockHandle = true,
@@ -254,7 +247,6 @@ export function MeowdownEditor({
           onImageSaveError={onImageSaveError}
           onImageClick={onImageClick}
           embedPaste={embedPaste}
-          htmlPaste={htmlPaste}
           bulletAfterHeading={bulletAfterHeading}
           frontmatter={frontmatter}
           blockHandle={blockHandle}
