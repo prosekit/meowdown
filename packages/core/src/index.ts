@@ -24,6 +24,10 @@ export { defineEmbedPaste } from './extensions/embed-paste.ts'
 export { defineHTMLPaste } from './extensions/html-paste.ts'
 export { defineMarkdownCopy } from './extensions/markdown-copy.ts'
 export { defineBulletAfterHeading } from './extensions/bullet-after-heading.ts'
+export {
+  defineWikilinkTrigger,
+  type WikilinkTriggerExtension,
+} from './extensions/wikilink-trigger.ts'
 export { EDITOR_KEY_BINDINGS } from './extensions/key-bindings.ts'
 export { definePlaceholder, type PlaceholderOptions } from '@prosekit/extensions/placeholder'
 export { defineReadonly } from '@prosekit/extensions/readonly'
