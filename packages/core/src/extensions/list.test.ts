@@ -62,3 +62,64 @@ describe('commands', () => {
     expect(docToMarkdown(fixture.doc)).toBe('- [x] done\n')
   })
 })
+
+describe('keymap', () => {
+  const pressModEnter = () => userEvent.keyboard('{ControlOrMeta>}{Enter}{/ControlOrMeta}')
+  const pressModShiftEnter = () =>
+    userEvent.keyboard('{ControlOrMeta>}{Shift>}{Enter}{/Shift}{/ControlOrMeta}')
+
+  it('Mod-Enter cycles a square checkbox task: unchecked -> checked -> bullet', async () => {
+    using fixture = setupFixture()
+    fixture.set(fixture.n.doc(fixture.n.paragraph('todo<a>')))
+    fixture.view.focus()
+
+    await pressModEnter()
+    expect(docToMarkdown(fixture.doc)).toBe('- [ ] todo\n')
+    await pressModEnter()
+    expect(docToMarkdown(fixture.doc)).toBe('- [x] todo\n')
+    await pressModEnter()
+    expect(docToMarkdown(fixture.doc)).toBe('- todo\n')
+  })
+
+  it('Mod-Shift-Enter cycles a circle checkbox task: unchecked -> checked -> bullet', async () => {
+    using fixture = setupFixture()
+    fixture.set(fixture.n.doc(fixture.n.paragraph('todo<a>')))
+    fixture.view.focus()
+
+    await pressModShiftEnter()
+    expect(docToMarkdown(fixture.doc)).toBe('+ [ ] todo\n')
+    await pressModShiftEnter()
+    expect(docToMarkdown(fixture.doc)).toBe('+ [x] todo\n')
+    await pressModShiftEnter()
+    expect(docToMarkdown(fixture.doc)).toBe('- todo\n')
+  })
+
+  it('Mod-Enter converts a circle checkbox task into a square checkbox task', async () => {
+    using fixture = setupFixture()
+    fixture.set(
+      fixture.n.doc(
+        fixture.n.list(
+          { kind: 'task', marker: '+', checked: false },
+          fixture.n.paragraph('todo<a>'),
+        ),
+      ),
+    )
+    fixture.view.focus()
+
+    await pressModEnter()
+    expect(docToMarkdown(fixture.doc)).toBe('- [ ] todo\n')
+  })
+
+  it('Mod-Shift-Enter converts a square checkbox task into a circle checkbox task', async () => {
+    using fixture = setupFixture()
+    fixture.set(
+      fixture.n.doc(
+        fixture.n.list({ kind: 'task', checked: false }, fixture.n.paragraph('todo<a>')),
+      ),
+    )
+    fixture.view.focus()
+
+    await pressModShiftEnter()
+    expect(docToMarkdown(fixture.doc)).toBe('+ [ ] todo\n')
+  })
+})

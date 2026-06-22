@@ -1,5 +1,6 @@
 import {
   defineCommands,
+  defineKeymap,
   defineNodeAttr,
   union,
   type Extension,
@@ -16,7 +17,7 @@ import {
   wrapInList,
   type ListAttrs,
 } from '@prosekit/extensions/list'
-import type { Command } from '@prosekit/pm/state'
+import type { Command, EditorState } from '@prosekit/pm/state'
 import { wrappingListInputRule } from 'prosemirror-flat-list'
 
 import type { NodeName } from './node-names.ts'
@@ -148,6 +149,65 @@ function defineTaskCommands() {
   })
 }
 
+/** The attributes of the closest list node enclosing the selection, if any. */
+function getListAttrsAtSelection(state: EditorState): MeowdownListAttrs | null {
+  const { $from } = state.selection
+  for (let depth = $from.depth; depth > 0; depth--) {
+    const node = $from.node(depth)
+    if (node.type.name === ('list' satisfies NodeName)) {
+      return node.attrs
+    }
+  }
+  return null
+}
+
+/**
+ * Cycle the block under the cursor through the square checkbox task states:
+ * anything else -> unchecked square -> checked square -> bullet. (Mod-Enter)
+ */
+function rotateSquareTask(): Command {
+  return (state, dispatch, view) => {
+    const attrs = getListAttrsAtSelection(state)
+    const isSquare = attrs?.kind === 'task' && attrs.marker !== '+'
+    let next: MeowdownListAttrs
+    if (isSquare && !attrs?.checked) {
+      next = { kind: 'task', marker: attrs?.marker ?? null, checked: true }
+    } else if (isSquare && attrs?.checked) {
+      next = { kind: 'bullet', marker: null, checked: false }
+    } else {
+      next = { kind: 'task', marker: null, checked: false }
+    }
+    return wrapInList<MeowdownListAttrs>(next)(state, dispatch, view)
+  }
+}
+
+/**
+ * Cycle the block under the cursor through the circle checkbox task states:
+ * anything else -> unchecked circle -> checked circle -> bullet. (Mod-Shift-Enter)
+ */
+function rotateCircleTask(): Command {
+  return (state, dispatch, view) => {
+    const attrs = getListAttrsAtSelection(state)
+    const isCircle = attrs?.kind === 'task' && attrs.marker === '+'
+    let next: MeowdownListAttrs
+    if (isCircle && !attrs?.checked) {
+      next = { kind: 'task', marker: '+', checked: true }
+    } else if (isCircle && attrs?.checked) {
+      next = { kind: 'bullet', marker: null, checked: false }
+    } else {
+      next = { kind: 'task', marker: '+', checked: false }
+    }
+    return wrapInList<MeowdownListAttrs>(next)(state, dispatch, view)
+  }
+}
+
+function defineMeowdownListKeymap(): PlainExtension {
+  return defineKeymap({
+    'Mod-Enter': rotateSquareTask(),
+    'Mod-Shift-Enter': rotateCircleTask(),
+  })
+}
+
 export function defineMeowdownList() {
   return union(
     defineListSpec(),
@@ -158,6 +218,7 @@ export function defineMeowdownList() {
     defineListDropIndicator(),
 
     defineMeowdownListInputRules(),
+    defineMeowdownListKeymap(),
     defineListMarkerAttr(),
     defineListTaskMarkerAttr(),
     defineTaskCommands(),
