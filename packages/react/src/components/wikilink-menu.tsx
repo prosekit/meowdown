@@ -1,4 +1,5 @@
 import type { EditorExtension } from '@meowdown/core'
+import { canUseRegexLookbehind } from '@prosekit/core'
 import { useEditor } from '@prosekit/react'
 import {
   AutocompleteEmpty,
@@ -17,16 +18,31 @@ import type { WikilinkItem, WikilinkSearchHandler } from './types.ts'
 // Match "[[", "[[query", "[[multi word query": opens right after "[[" and
 // closes once "]" or "[" is typed. No lookbehind: after "[[[", the trailing
 // "[[" still starts a valid wikilink.
-const regex = /\[\[[^[\]]*$/u
+const bracketRegex = /\[\[[^[\]]*$/u
+
+// Match "@", "@query", "@multi word query" at a word boundary: opens right
+// after "@" and closes once "[" or "]" is typed, the same body as the bracket
+// trigger. The lookbehind keeps "@" inside a word (emails, handles) from
+// opening the menu; the fallback accepts the mid-word trigger like TagMenu.
+const atRegex = canUseRegexLookbehind() ? /(?<!\S)@[^[\]]*$/u : /@[^[\]]*$/u
 
 interface WikilinkMenuProps {
+  onWikilinkSearch: WikilinkSearchHandler
+}
+
+interface WikilinkAutocompleteProps {
+  regex: RegExp
+  testId: string
   onWikilinkSearch: WikilinkSearchHandler
 }
 
 // Deliberately not shared with TagMenu: the two menus are expected to
 // diverge, so the duplication is kept until the differences are clear.
 
-export function WikilinkMenu({ onWikilinkSearch }: WikilinkMenuProps) {
+// One autocomplete trigger for the wikilink menu. WikilinkMenu renders it
+// twice, once per trigger ("[[" and "@"), so both feed the same search and
+// insert the same `[[target]]`.
+function WikilinkAutocomplete({ regex, testId, onWikilinkSearch }: WikilinkAutocompleteProps) {
   const editor = useEditor<EditorExtension>()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -67,7 +83,7 @@ export function WikilinkMenu({ onWikilinkSearch }: WikilinkMenuProps) {
       onQueryChange={(event) => setQuery(event.detail)}
     >
       <AutocompletePositioner className={styles.Positioner}>
-        <AutocompletePopup className={styles.Popup} data-testid="wikilink-menu">
+        <AutocompletePopup className={styles.Popup} data-testid={testId}>
           {items.map((item) => (
             <AutocompleteItem
               key={item.target}
@@ -87,5 +103,22 @@ export function WikilinkMenu({ onWikilinkSearch }: WikilinkMenuProps) {
         </AutocompletePopup>
       </AutocompletePositioner>
     </AutocompleteRoot>
+  )
+}
+
+export function WikilinkMenu({ onWikilinkSearch }: WikilinkMenuProps) {
+  return (
+    <>
+      <WikilinkAutocomplete
+        regex={bracketRegex}
+        testId="wikilink-menu"
+        onWikilinkSearch={onWikilinkSearch}
+      />
+      <WikilinkAutocomplete
+        regex={atRegex}
+        testId="wikilink-at-menu"
+        onWikilinkSearch={onWikilinkSearch}
+      />
+    </>
   )
 }
