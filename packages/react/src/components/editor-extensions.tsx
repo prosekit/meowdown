@@ -1,9 +1,11 @@
 import {
   defineBulletAfterHeading,
   defineEmbedPaste,
+  defineHTMLPaste,
   defineImage,
   defineImageClickHandler,
   defineLinkClickHandler,
+  defineMarkdownCopy,
   defineMarkMode,
   definePlaceholder,
   defineReadonly,
@@ -29,6 +31,7 @@ export interface EditorExtensionsProps {
   onImageSaveError?: ImageOptions['onImageSaveError']
   onImageClick?: ImageClickHandler
   embedPaste?: boolean
+  htmlPaste?: boolean
   bulletAfterHeading?: boolean
   placeholder?: PlaceholderOptions['placeholder']
   readOnly?: boolean
@@ -47,6 +50,7 @@ export function EditorExtensions({
   onImageSaveError,
   onImageClick,
   embedPaste,
+  htmlPaste,
   bulletAfterHeading,
   placeholder,
   readOnly,
@@ -98,6 +102,14 @@ export function EditorExtensions({
       return embedPaste ? defineEmbedPaste() : null
     }, [embedPaste]),
   )
+
+  useExtension(
+    useMemo(() => {
+      return htmlPaste === false ? null : defineHTMLPaste()
+    }, [htmlPaste]),
+  )
+
+  useExtension(useMemo(() => defineMarkdownCopy(), []))
 
   useExtension(
     useMemo(() => {
