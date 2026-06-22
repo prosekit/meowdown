@@ -67,7 +67,6 @@ A read-only renderer that turns Markdown into a React tree styled exactly like `
 ```tsx
 import '@meowdown/core/style.css'
 import { MarkdownView } from '@meowdown/react'
-
 ;<MarkdownView
   markdown="See [[Some Note]] and **bold**."
   onWikilinkClick={({ target }) => open(target)}
