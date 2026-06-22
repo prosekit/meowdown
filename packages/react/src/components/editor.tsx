@@ -53,8 +53,8 @@ export interface EditorProps {
   onTagSearch?: TagSearchHandler
 
   /**
-   * Searches notes for the wikilink menu, which opens as soon as `[[` is
-   * typed in a rich mode. Receives the query (lowercased, punctuation
+   * Searches notes for the wikilink menu, which opens as soon as `[[` or `@`
+   * is typed in a rich mode. Receives the query (lowercased, punctuation
    * stripped, may be empty) and returns the note names to show,
    * synchronously or as a promise. Pass a stable function (e.g. from
    * `useCallback`). Omit to disable the wikilink menu. Ignored in source

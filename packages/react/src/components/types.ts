@@ -82,7 +82,7 @@ export interface WikilinkItem {
 
 /**
  * Searches notes for the wikilink menu. Receives the query typed after
- * `[[` (lowercased, punctuation stripped, may be empty or contain spaces)
- * and returns the rows to show, either synchronously or as a promise.
+ * `[[` or `@` (lowercased, punctuation stripped, may be empty or contain
+ * spaces) and returns the rows to show, either synchronously or as a promise.
  */
 export type WikilinkSearchHandler = (query: string) => WikilinkItem[] | Promise<WikilinkItem[]>
