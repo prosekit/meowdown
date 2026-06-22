@@ -71,10 +71,18 @@ export function SlashMenu() {
             kbd="1."
             onSelect={() => editor.commands.wrapInList({ kind: 'ordered' })}
           />
+          {/* The user-facing copy ("Task list" / "Checkbox list") intentionally
+              differs from the internal command names (`wrapInCircleTask` /
+              `wrapInSquareTask`, "circle / square checkbox task"). */}
           <SlashMenuItem
             label="Task list"
-            kbd="[]"
-            onSelect={() => editor.commands.wrapInList({ kind: 'task' })}
+            kbd="+ [ ] "
+            onSelect={() => editor.commands.wrapInCircleTask()}
+          />
+          <SlashMenuItem
+            label="Checkbox list"
+            kbd="- [ ] "
+            onSelect={() => editor.commands.wrapInSquareTask()}
           />
           <SlashMenuItem
             label="Code block"

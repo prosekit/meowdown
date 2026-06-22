@@ -187,6 +187,42 @@ describe('markdownToDoc', () => {
     })
   })
 
+  it('keeps different markers for tasks', () => {
+    // `-` parses as a square checkbox task, `+` as a circle checkbox task.
+    expect(markdownToDoc('- [x] Square Task\n\n\n+ [ ] Circle Task').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        {
+          type: 'list',
+          attrs: {
+            kind: 'task',
+            order: null,
+            checked: true,
+            collapsed: false,
+            marker: '-',
+            taskMarker: 'x',
+            markerGap: 1,
+          },
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Square Task' }] }],
+        },
+        {
+          type: 'list',
+          attrs: {
+            kind: 'task',
+            order: null,
+            checked: false,
+            collapsed: false,
+            marker: '+',
+            taskMarker: null,
+            markerGap: 1,
+          },
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Circle Task' }] }],
+        },
+      ],
+    })
+  })
+
   it('keeps mixed task and plain items', () => {
     const md = dedent`
       - [x] done
