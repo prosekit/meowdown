@@ -361,8 +361,13 @@ function convertListItem(
   let taskMarker: TaskMarker | undefined
   let order: number | undefined
   let marker: ListMarker | undefined
+  let markEndColumn: number | undefined
+  let firstContentColumn: number | undefined
   if (cursor.firstChild()) {
     do {
+      if (cursor.type.id !== LEZER_NODE_IDS.ListMark && firstContentColumn == null) {
+        firstContentColumn = measureContentColumn(text, cursor.from)
+      }
       if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
         if (kind === 'ordered') {
           // An ordered list marker is a sequence of 1–9 arabic digits `(0-9)`, followed by either a `.` character or a `)` character.
@@ -381,6 +386,7 @@ function convertListItem(
           const code = text.charCodeAt(cursor.from)
           marker = code === CHAR_ASTERISK ? '*' : code === CHAR_PLUS ? '+' : '-'
         }
+        markEndColumn = measureContentColumn(text, cursor.to)
         continue
       }
       if (kind === 'bullet' && cursor.type.id === LEZER_NODE_IDS.Task) {
@@ -412,6 +418,11 @@ function convertListItem(
     } while (cursor.nextSibling())
     cursor.parent()
   }
+  // The gap between the marker and the content. A gap of 5+ is indented code (a
+  // different node, so `firstContentColumn` would be the code block's), and 1 is the
+  // canonical default; only a 2-4 space gap is a faithful, content-preserving variation.
+  const gap =
+    firstContentColumn != null && markEndColumn != null ? firstContentColumn - markEndColumn : 1
   return nodes.list(
     {
       kind: taskChecked == null ? kind : 'task',
@@ -420,6 +431,7 @@ function convertListItem(
       collapsed: false,
       marker,
       taskMarker,
+      markerGap: gap >= 2 && gap <= 4 ? gap : 1,
     } satisfies MeowdownListAttrs,
     content,
   )
