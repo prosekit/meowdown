@@ -41,3 +41,14 @@ export function getMarkBuildersForSchema(schema: Schema): TypedMarkBuilders {
   schema.cached[MARK_BUILDERS_CACHE_KEY] = builders
   return builders
 }
+
+const NODE_BUILDERS_CACHE_KEY = 'meowdown_node_builders'
+
+/** Typed node builders bound to a specific schema, cached per schema. */
+export function getNodeBuildersForSchema(schema: Schema): TypedNodeBuilders {
+  const cached = schema.cached[NODE_BUILDERS_CACHE_KEY] as TypedNodeBuilders | undefined
+  if (cached) return cached
+  const builders = createNodeBuilders<EditorExtension>(schema)
+  schema.cached[NODE_BUILDERS_CACHE_KEY] = builders
+  return builders
+}
