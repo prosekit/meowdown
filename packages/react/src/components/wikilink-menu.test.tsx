@@ -12,7 +12,6 @@ import type { EditorHandle, WikilinkItem } from './types.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const menu = page.getByTestId('wikilink-menu')
-const atMenu = page.getByTestId('wikilink-at-menu')
 
 const WIKILINKS: WikilinkItem[] = [
   { target: 'Cat naps' },
@@ -63,31 +62,38 @@ describe('WikilinkMenu', () => {
     await expect.element(menu).not.toBeVisible()
   })
 
+  it('stays open when a space follows "[["', async () => {
+    await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard(`${TWO_BRACKETS} `)
+    await expect.element(menu).toBeVisible()
+  })
+
   it('opens right after typing "@" and lists every note', async () => {
     await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
     await pmRoot.click()
-    await expect.element(atMenu).not.toBeVisible()
+    await expect.element(menu).not.toBeVisible()
     await userEvent.keyboard('@')
-    await expect.element(atMenu).toBeVisible()
-    await expect.element(atMenu.getByText('Cat naps')).toBeVisible()
-    await expect.element(atMenu.getByText('Meeting notes')).toBeVisible()
-    await expect.element(atMenu.getByText('Reading list')).toBeVisible()
+    await expect.element(menu).toBeVisible()
+    await expect.element(menu.getByText('Cat naps')).toBeVisible()
+    await expect.element(menu.getByText('Meeting notes')).toBeVisible()
+    await expect.element(menu.getByText('Reading list')).toBeVisible()
   })
 
   it('filters notes while typing after "@"', async () => {
     await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
     await pmRoot.click()
     await userEvent.keyboard('@re')
-    await expect.element(atMenu.getByText('Reading list')).toBeVisible()
-    await expect.element(atMenu.getByText('Cat naps')).not.toBeInTheDocument()
+    await expect.element(menu.getByText('Reading list')).toBeVisible()
+    await expect.element(menu.getByText('Cat naps')).not.toBeInTheDocument()
   })
 
   it('keeps the menu open across spaces for a multi-word query', async () => {
     await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
     await pmRoot.click()
     await userEvent.keyboard('@cat na')
-    await expect.element(atMenu).toBeVisible()
-    await expect.element(atMenu.getByText('Cat naps')).toBeVisible()
+    await expect.element(menu).toBeVisible()
+    await expect.element(menu.getByText('Cat naps')).toBeVisible()
   })
 
   it('inserts the selected note as [[Name]] and removes the @query', async () => {
@@ -95,9 +101,9 @@ describe('WikilinkMenu', () => {
     await render(<ProseKitEditor ref={ref} onWikilinkSearch={searchNotes} />)
     await pmRoot.click()
     await userEvent.keyboard('Hello @re')
-    await atMenu.getByText('Reading list').click()
+    await menu.getByText('Reading list').click()
 
-    await expect.element(atMenu).not.toBeVisible()
+    await expect.element(menu).not.toBeVisible()
     expect(ref.current?.getMarkdown()).toContain('Hello [[Reading list]]')
     expect(ref.current?.getMarkdown()).not.toContain('@re')
   })
@@ -108,7 +114,7 @@ describe('WikilinkMenu', () => {
     await render(<ProseKitEditor onWikilinkSearch={richSearch} />)
     await pmRoot.click()
     await userEvent.keyboard('@cat')
-    await atMenu.getByText('Cat naps').click()
+    await menu.getByText('Cat naps').click()
     expect(onSelect).toHaveBeenCalled()
   })
 
@@ -118,14 +124,21 @@ describe('WikilinkMenu', () => {
     await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
     await pmRoot.click()
     await userEvent.keyboard('foo@')
-    await expect.element(atMenu).not.toBeVisible()
+    await expect.element(menu).not.toBeVisible()
+  })
+
+  it('does not open when a space follows "@"', async () => {
+    await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard('text @ text')
+    await expect.element(menu).not.toBeVisible()
   })
 
   it('renders no @ menu when onWikilinkSearch is not given', async () => {
     await render(<ProseKitEditor />)
     await pmRoot.click()
     await userEvent.keyboard('@cat')
-    await expect.element(atMenu).not.toBeInTheDocument()
+    await expect.element(menu).not.toBeInTheDocument()
   })
 
   it('supports async onWikilinkSearch and shows a loading state', async () => {
