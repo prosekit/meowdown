@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.0](https://github.com/prosekit/meowdown/compare/core-v0.18.0...core-v0.19.0) (2026-06-22)
+
+
+### Features
+
+* paste rich text as markdown ([#130](https://github.com/prosekit/meowdown/issues/130)) ([a1e6f23](https://github.com/prosekit/meowdown/commit/a1e6f2318f498405fc5675b1e693bebd97d14a1e))
+
 ## [0.18.0](https://github.com/prosekit/meowdown/compare/core-v0.17.4...core-v0.18.0) (2026-06-22)
 
 
