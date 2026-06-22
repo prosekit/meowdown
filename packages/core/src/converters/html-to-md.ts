@@ -5,8 +5,6 @@ import remarkGfm from 'remark-gfm'
 import remarkStringify from 'remark-stringify'
 import { unified } from 'unified'
 
-
-
 function createProcessor() {
   return unified()
     .use(rehypeParse)
