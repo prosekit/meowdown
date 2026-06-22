@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.18.0](https://github.com/prosekit/meowdown/compare/core-v0.17.4...core-v0.18.0) (2026-06-22)
+
+
+### Features
+
+* add circle task list items ([#128](https://github.com/prosekit/meowdown/issues/128)) ([48c0fea](https://github.com/prosekit/meowdown/commit/48c0fea4ceb106ad07f617a141198cfaa4626938))
+
+
+### Bug Fixes
+
+* capture the list marker gap width ([#127](https://github.com/prosekit/meowdown/issues/127)) ([05989bf](https://github.com/prosekit/meowdown/commit/05989bfb858824b04e0b4f49ac12568c24f7132d))
+
 ## [0.17.4](https://github.com/prosekit/meowdown/compare/core-v0.17.3...core-v0.17.4) (2026-06-21)
 
 
