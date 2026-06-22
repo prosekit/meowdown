@@ -341,6 +341,10 @@ describe('bullet lists', () => {
     expect(roundtrip('+ plus')).toBe('+ plus\n')
   })
 
+  it('keeps a double space after the marker', () => {
+    expect(roundtrip('-  double space')).toBe('-  double space\n')
+  })
+
   it.fails('keeps a 4-space nested indent', () => {
     expect(roundtrip('- a\n    - deep')).toBe('- a\n    - deep\n')
   })
