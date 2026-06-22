@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import { canUseRegexLookbehind } from '@prosekit/core'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -59,6 +60,85 @@ describe('WikilinkMenu', () => {
     await expect.element(menu).toBeVisible()
     await userEvent.keyboard(']')
     await expect.element(menu).not.toBeVisible()
+  })
+
+  it('stays open when a space follows "[["', async () => {
+    await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard(`${TWO_BRACKETS} `)
+    await expect.element(menu).toBeVisible()
+  })
+
+  it('opens right after typing "@" and lists every note', async () => {
+    await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await expect.element(menu).not.toBeVisible()
+    await userEvent.keyboard('@')
+    await expect.element(menu).toBeVisible()
+    await expect.element(menu.getByText('Cat naps')).toBeVisible()
+    await expect.element(menu.getByText('Meeting notes')).toBeVisible()
+    await expect.element(menu.getByText('Reading list')).toBeVisible()
+  })
+
+  it('filters notes while typing after "@"', async () => {
+    await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard('@re')
+    await expect.element(menu.getByText('Reading list')).toBeVisible()
+    await expect.element(menu.getByText('Cat naps')).not.toBeInTheDocument()
+  })
+
+  it('keeps the menu open across spaces for a multi-word query', async () => {
+    await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard('@cat na')
+    await expect.element(menu).toBeVisible()
+    await expect.element(menu.getByText('Cat naps')).toBeVisible()
+  })
+
+  it('inserts the selected note as [[Name]] and removes the @query', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard('Hello @re')
+    await menu.getByText('Reading list').click()
+
+    await expect.element(menu).not.toBeVisible()
+    expect(ref.current?.getMarkdown()).toContain('Hello [[Reading list]]')
+    expect(ref.current?.getMarkdown()).not.toContain('@re')
+  })
+
+  it('runs onSelect when a note is chosen', async () => {
+    const onSelect = vi.fn()
+    const richSearch = (): WikilinkItem[] => [{ target: 'Cat naps', onSelect }]
+    await render(<ProseKitEditor onWikilinkSearch={richSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard('@cat')
+    await menu.getByText('Cat naps').click()
+    expect(onSelect).toHaveBeenCalled()
+  })
+
+  it('does not open when "@" follows a non-space character', async () => {
+    // The fallback regex (no lookbehind support) intentionally triggers mid-word.
+    if (!canUseRegexLookbehind()) return
+    await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard('foo@')
+    await expect.element(menu).not.toBeVisible()
+  })
+
+  it('does not open when a space follows "@"', async () => {
+    await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard('text @ text')
+    await expect.element(menu).not.toBeVisible()
+  })
+
+  it('renders no @ menu when onWikilinkSearch is not given', async () => {
+    await render(<ProseKitEditor />)
+    await pmRoot.click()
+    await userEvent.keyboard('@cat')
+    await expect.element(menu).not.toBeInTheDocument()
   })
 
   it('supports async onWikilinkSearch and shows a loading state', async () => {

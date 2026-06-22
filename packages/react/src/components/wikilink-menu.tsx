@@ -1,4 +1,5 @@
 import type { EditorExtension } from '@meowdown/core'
+import { canUseRegexLookbehind } from '@prosekit/core'
 import { useEditor } from '@prosekit/react'
 import {
   AutocompleteEmpty,
@@ -14,10 +15,17 @@ import { returnsTrue } from '../utils/returns-true.ts'
 import styles from './autocomplete-menu.module.css'
 import type { WikilinkItem, WikilinkSearchHandler } from './types.ts'
 
-// Match "[[", "[[query", "[[multi word query": opens right after "[[" and
-// closes once "]" or "[" is typed. No lookbehind: after "[[[", the trailing
-// "[[" still starts a valid wikilink.
-const regex = /\[\[[^[\]]*$/u
+// Open the wikilink menu on either "[[" or "@", and close on "[" or "]".
+//
+// - "[[" matches "[[", "[[query", "[[multi word query". A space right after
+//   "[[" is fine, so "[[ note" keeps the menu open.
+// - "@" matches "@", "@query", "@multi word query", but NOT "@ ": a space
+//   right after "@" cancels it, so prose like "meet @ 5pm" never opens the
+//   menu. The lookbehind also keeps "@" inside a word (e.g. emails) from
+//   triggering; the fallback drops only that boundary guard.
+const regex = canUseRegexLookbehind()
+  ? /(?:\[\[[^[\]]*|(?<!\S)@(?:[^[\]\s][^[\]]*)?)$/u
+  : /(?:\[\[[^[\]]*|@(?:[^[\]\s][^[\]]*)?)$/u
 
 interface WikilinkMenuProps {
   onWikilinkSearch: WikilinkSearchHandler
