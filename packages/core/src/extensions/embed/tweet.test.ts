@@ -16,9 +16,11 @@ describe('matchTweet', () => {
     expect(matchTweet('https://example.com/jack/status/20')).toBeUndefined()
   })
 
-  it('renders the first-party embed iframe with the tweet id', () => {
-    const element = matchTweet('https://x.com/jack/status/20')!.render() as HTMLIFrameElement
-    expect(element.tagName).toBe('IFRAME')
-    expect(element.src).toContain('platform.twitter.com/embed/Tweet.html?id=20')
+  it('describes the first-party embed iframe with the tweet id', () => {
+    const embed = matchTweet('https://x.com/jack/status/20')!
+    expect(embed.kind).toBe('tweet')
+    expect(embed.src).toContain('platform.twitter.com/embed/Tweet.html?id=20')
+    expect(embed.className).toBe('md-embed md-embed-tweet')
+    expect(embed.testid).toBe('tweet-embed')
   })
 })

@@ -15,6 +15,16 @@ export {
   type LinkClickPayload,
 } from './extensions/link-click.ts'
 export { defineImage, type ImageOptions } from './extensions/image.ts'
+export { matchEmbed, listenForTweetHeight, type EmbedDescriptor } from './extensions/embed/index.ts'
+export {
+  defineCodeBlockSyntaxHighlight,
+  getCodeTokens,
+  type CodeToken,
+} from './extensions/code-block-highlight.ts'
+export { inlineTextToMarkChunks } from './extensions/inline-text-to-mark-chunks.ts'
+export type { MarkChunk } from './extensions/mark-chunk.ts'
+export { getMarkBuilders, type TypedMarkBuilders } from './extensions/schema.ts'
+export type { MdWikilinkViewAttrs, MdImageViewAttrs } from './extensions/inline-marks.ts'
 export {
   defineImageClickHandler,
   type ImageClickHandler,
