@@ -20,6 +20,7 @@ const LABELS = [
   'Bullet list',
   'Ordered list',
   'Task list',
+  'Checkbox list',
   'Code block',
   'Table',
 ]
@@ -56,12 +57,22 @@ describe('SlashMenu', () => {
     expect(ref.current?.getMarkdown()).toBe('# Hello\n')
   })
 
-  it('wraps the current block in a task list', async () => {
+  it('wraps the current block in a circle checkbox task', async () => {
     const ref = createRef<EditorHandle>()
     await render(<ProseKitEditor ref={ref} />)
     await pmRoot.click()
     await userEvent.keyboard('Buy milk /task')
-    await menu.getByText('Task list').click()
+    await menu.getByText('Task list', { exact: true }).click()
+
+    expect(ref.current?.getMarkdown()).toContain('+ [ ] Buy milk')
+  })
+
+  it('wraps the current block in a square checkbox task', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} />)
+    await pmRoot.click()
+    await userEvent.keyboard('Buy milk /checkbox')
+    await menu.getByText('Checkbox list', { exact: true }).click()
 
     expect(ref.current?.getMarkdown()).toContain('- [ ] Buy milk')
   })

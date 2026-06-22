@@ -1,3 +1,4 @@
+import dedent from 'dedent'
 import { describe, expect, it } from 'vitest'
 
 import { setupFixture } from '../testing/index.ts'
@@ -87,11 +88,27 @@ describe('docToMarkdown', () => {
 
   it('keeps task markers', () => {
     const doc = n.doc(
-      n.list({ kind: 'task', checked: false }, n.paragraph('todo')),
-      n.list({ kind: 'task', checked: true }, n.paragraph('done')),
+      n.list({ kind: 'task', checked: false }, n.paragraph('A')),
+      n.list({ kind: 'task', checked: true }, n.paragraph('B')),
+      n.list({ kind: 'task', checked: false, marker: '+' }, n.paragraph('C')),
+      n.list({ kind: 'task', checked: true, marker: '+' }, n.paragraph('D')),
+      n.list({ kind: 'task', checked: false, marker: '*' }, n.paragraph('E')),
+      n.list({ kind: 'task', checked: true, marker: '*' }, n.paragraph('F')),
+      n.list({ kind: 'task', checked: false, marker: '-' }, n.paragraph('G')),
+      n.list({ kind: 'task', checked: true, marker: '-' }, n.paragraph('H')),
     )
     const markdown = docToMarkdown(doc)
-    expect(markdown).toBe('- [ ] todo\n- [x] done\n')
+    expect(markdown.trim()).toBe(
+      dedent`
+        - [ ] A
+        - [x] B
+        + [ ] C
+        + [x] D
+        * [ ] E
+        * [x] F
+        - [ ] G
+        - [x] H`,
+    )
   })
 
   it('keeps a loose two-block item', () => {

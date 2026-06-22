@@ -449,6 +449,32 @@ describe('task lists', () => {
   it.fails('keeps a trailing space after the marker', () => {
     expect(roundtrip('- [ ] ')).toBe('- [ ] \n')
   })
+
+  it('keeps an unchecked circle task', () => {
+    expect(roundtrip('+ [ ] todo')).toBe('+ [ ] todo\n')
+  })
+
+  it('keeps a checked circle task', () => {
+    expect(roundtrip('+ [x] done')).toBe('+ [x] done\n')
+  })
+
+  it('keeps an uppercase checked circle task', () => {
+    expect(roundtrip('+ [X] done')).toBe('+ [X] done\n')
+  })
+
+  it('keeps mixed circle tasks and square checkboxes', () => {
+    expect(roundtrip('+ [ ] task\n- [ ] checkbox\n+ [x] done')).toBe(
+      '+ [ ] task\n- [ ] checkbox\n+ [x] done\n',
+    )
+  })
+
+  it('keeps a star-marked checkbox square', () => {
+    expect(roundtrip('* [ ] checkbox')).toBe('* [ ] checkbox\n')
+  })
+
+  it('keeps a nested circle task under a square checkbox', () => {
+    expect(roundtrip('- [ ] parent\n  + [x] child')).toBe('- [ ] parent\n  + [x] child\n')
+  })
 })
 
 describe('code blocks', () => {
