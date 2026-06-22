@@ -28,6 +28,7 @@ export type TaskMarker = 'x' | 'X' | null
 export interface MeowdownListAttrs extends ListAttrs {
   marker?: ListMarker
   taskMarker?: TaskMarker
+  markerGap?: number
 }
 
 type ListMarkerExtension = Extension<{ Nodes: { list: { marker?: ListMarker } } }>
@@ -66,10 +67,42 @@ function defineListTaskMarkerAttr(): ListTaskMarkerExtension {
   })
 }
 
+type ListMarkerGapExtension = Extension<{ Nodes: { list: { markerGap?: number } } }>
+
+function isValidMarkerGap(value: number | null | undefined): value is 2 | 3 | 4 {
+  return value === 2 || value === 3 || value === 4
+}
+
+function defineListMarkerGapAttr(): ListMarkerGapExtension {
+  return defineNodeAttr<'list', 'markerGap', number>({
+    type: 'list' satisfies NodeName,
+    attr: 'markerGap',
+    // The canonical single space between the marker and the content.
+    default: 1,
+    // A new item created by pressing Enter keeps the previous item's gap.
+    splittable: true,
+    // Persist only a non-canonical gap (2-4 spaces); 1 is the default the serializer
+    // emits anyway, and the rest must survive an editor DOM re-parse. A gap of 5+ is
+    // indented code, a different structure, so it never reaches here.
+    toDOM: (value) => {
+      return isValidMarkerGap(value) ? ['data-list-marker-gap', String(value)] : null
+    },
+    parseDOM: (node) => {
+      const value = Number.parseInt(node.getAttribute('data-list-marker-gap') ?? '', 10)
+      return isValidMarkerGap(value) ? value : 1
+    },
+  })
+}
+
 export type MeowdownListExtension = Union<
-  [ListExtensionBase, ListMarkerExtension, ListTaskMarkerExtension]
+  [ListExtensionBase, ListMarkerExtension, ListTaskMarkerExtension, ListMarkerGapExtension]
 >
 
 export function defineMeowdownList(): MeowdownListExtension {
-  return union(defineListBase(), defineListMarkerAttr(), defineListTaskMarkerAttr())
+  return union(
+    defineListBase(),
+    defineListMarkerAttr(),
+    defineListTaskMarkerAttr(),
+    defineListMarkerGapAttr(),
+  )
 }
