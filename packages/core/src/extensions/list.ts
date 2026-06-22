@@ -75,8 +75,8 @@ function defineListMarkerGapAttr(): ListMarkerGapExtension {
     attr: 'markerGap',
     // The canonical single space between the marker and the content.
     default: 1,
-    // A new item created by pressing Enter starts with the canonical single space.
-    splittable: false,
+    // A new item created by pressing Enter keeps the previous item's gap.
+    splittable: true,
     // Persist only a non-canonical gap (2-4 spaces); 1 is the default the serializer
     // emits anyway, and the rest must survive an editor DOM re-parse. A gap of 5+ is
     // indented code, a different structure, so it never reaches here.
