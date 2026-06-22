@@ -1,6 +1,6 @@
 import '../testing/index.ts'
 
-import { canUseRegexLookbehind, isApple } from '@prosekit/core'
+import { canUseRegexLookbehind } from '@prosekit/core'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -26,12 +26,10 @@ function searchNotes(query: string): WikilinkItem[] {
 // In `userEvent.keyboard`, a literal `[` is escaped by doubling it.
 const TWO_BRACKETS = '[[[['
 
-// Cmd-Shift-K on Apple, Ctrl-Shift-K elsewhere, matching the `Mod-Shift-k`
-// keymap. The held modifier is released in reverse order.
-// TODO:REVIEW: is there a more simple way like `{CtrlOrCommand}`?
-const MOD = isApple ? 'Meta' : 'Control'
+// `{ControlOrMeta>}` resolves to Cmd on Apple and Ctrl elsewhere, matching the
+// `Mod-Shift-k` keymap.
 async function pressInsertShortcut(): Promise<void> {
-  await userEvent.keyboard(`{${MOD}>}{Shift>}k{/Shift}{/${MOD}}`)
+  await userEvent.keyboard('{ControlOrMeta>}{Shift>}k{/Shift}{/ControlOrMeta}')
 }
 
 describe('WikilinkMenu', () => {
@@ -230,8 +228,7 @@ describe('WikilinkMenu', () => {
   })
 })
 
-// TODO:REVIEW: rename 'WikilinkMenu Cmd-Shift-K shortcut' to 'Mod-Shift-K shortcut'
-describe('WikilinkMenu Cmd-Shift-K shortcut', () => {
+describe('Mod-Shift-K shortcut', () => {
   it('opens the menu with every note', async () => {
     await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
     await pmRoot.click()
