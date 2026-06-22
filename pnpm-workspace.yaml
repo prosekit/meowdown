@@ -18,12 +18,14 @@ minimumReleaseAgeExclude:
   - '@ocavue/eslint-config'
   - '@prosekit/*'
   - diffable-html-snapshot@0.3.0
+  - prosemirror-splittable@1.0.0
 
 # Enable "blockExoticSubdeps" and "overrides" to install packages from pkg.pr.new
-# blockExoticSubdeps: false
-# overrides:
-#   '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@3a887f44acdb0814111680d013245557ead5ba57
-#   '@prosekit/react': https://pkg.pr.new/@prosekit/react@3a887f44acdb0814111680d013245557ead5ba57
-#   '@prosekit/core': https://pkg.pr.new/@prosekit/core@3a887f44acdb0814111680d013245557ead5ba57
-#   '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@3a887f44acdb0814111680d013245557ead5ba57
-#   '@prosekit/web': https://pkg.pr.new/@prosekit/web@3a887f44acdb0814111680d013245557ead5ba57
+# pkg.pr.new build of prosekit/prosekit#1702 (transaction-based triggerAutocomplete)
+blockExoticSubdeps: false
+overrides:
+  '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@ca8c4245fa967f35bd4fc6c217d3d5a6e2c07d98
+  '@prosekit/react': https://pkg.pr.new/@prosekit/react@ca8c4245fa967f35bd4fc6c217d3d5a6e2c07d98
+  '@prosekit/core': https://pkg.pr.new/@prosekit/core@ca8c4245fa967f35bd4fc6c217d3d5a6e2c07d98
+  '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@ca8c4245fa967f35bd4fc6c217d3d5a6e2c07d98
+  '@prosekit/web': https://pkg.pr.new/@prosekit/web@ca8c4245fa967f35bd4fc6c217d3d5a6e2c07d98
