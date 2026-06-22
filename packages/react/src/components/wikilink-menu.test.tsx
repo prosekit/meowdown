@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import { isApple } from '@prosekit/core'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -24,6 +25,13 @@ function searchNotes(query: string): WikilinkItem[] {
 
 // In `userEvent.keyboard`, a literal `[` is escaped by doubling it.
 const TWO_BRACKETS = '[[[['
+
+// Cmd-Shift-K on Apple, Ctrl-Shift-K elsewhere, matching the `Mod-Shift-k`
+// keymap. The held modifier is released in reverse order.
+const MOD = isApple ? 'Meta' : 'Control'
+async function pressInsertShortcut(): Promise<void> {
+  await userEvent.keyboard(`{${MOD}>}{Shift>}k{/Shift}{/${MOD}}`)
+}
 
 describe('WikilinkMenu', () => {
   it('opens right after typing "[[" and lists every note', async () => {
@@ -139,5 +147,48 @@ describe('WikilinkMenu', () => {
     await pmRoot.click()
     await userEvent.keyboard(`${TWO_BRACKETS}cat`)
     await expect.element(menu.getByText('Cat naps')).toBeVisible()
+  })
+})
+
+describe('WikilinkMenu Cmd-Shift-K shortcut', () => {
+  it('opens the menu with every note', async () => {
+    await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await expect.element(menu).not.toBeVisible()
+    await pressInsertShortcut()
+    await expect.element(menu).toBeVisible()
+    await expect.element(menu.getByText('Cat naps')).toBeVisible()
+    await expect.element(menu.getByText('Reading list')).toBeVisible()
+  })
+
+  it('seeds the query from the selected text', async () => {
+    await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard('Cat')
+    await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}')
+    await pressInsertShortcut()
+    await expect.element(menu.getByText('Cat naps')).toBeVisible()
+    await expect.element(menu.getByText('Reading list')).not.toBeInTheDocument()
+  })
+
+  it('inserts the selected note as [[Name]] and removes the query', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await pressInsertShortcut()
+    await menu.getByText('Reading list').click()
+
+    await expect.element(menu).not.toBeVisible()
+    expect(ref.current?.getMarkdown()).toContain('[[Reading list]]')
+    expect(ref.current?.getMarkdown()).not.toContain('[[\n')
+  })
+
+  it('does nothing when onWikilinkSearch is not given', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} />)
+    await pmRoot.click()
+    await pressInsertShortcut()
+    await expect.element(menu).not.toBeInTheDocument()
+    expect(ref.current?.getMarkdown()).not.toContain('[[')
   })
 })

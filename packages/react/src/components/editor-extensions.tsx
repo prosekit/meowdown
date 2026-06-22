@@ -10,6 +10,7 @@ import {
   definePlaceholder,
   defineReadonly,
   defineWikilinkClickHandler,
+  defineWikilinkTrigger,
   type ImageClickHandler,
   type ImageOptions,
   type LinkClickHandler,
@@ -34,6 +35,8 @@ export interface EditorExtensionsProps {
   bulletAfterHeading?: boolean
   placeholder?: PlaceholderOptions['placeholder']
   readOnly?: boolean
+  /** Binds Mod-Shift-k to open the wikilink menu. Set when a search handler exists. */
+  wikilinkEnabled?: boolean
 }
 
 // A leaf that renders nothing and holds every reactive `useExtension` call (each
@@ -52,6 +55,7 @@ export function EditorExtensions({
   bulletAfterHeading,
   placeholder,
   readOnly,
+  wikilinkEnabled,
 }: EditorExtensionsProps): null {
   useExtension(
     useMemo(() => {
@@ -117,6 +121,12 @@ export function EditorExtensions({
       // not in every empty block the caret enters.
       return placeholder ? definePlaceholder({ placeholder, strategy: 'doc' }) : null
     }, [placeholder]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return wikilinkEnabled ? defineWikilinkTrigger() : null
+    }, [wikilinkEnabled]),
   )
 
   return null

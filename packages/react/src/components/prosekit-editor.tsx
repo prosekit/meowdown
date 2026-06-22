@@ -238,6 +238,7 @@ export function ProseKitEditor({
         bulletAfterHeading={bulletAfterHeading}
         placeholder={placeholder}
         readOnly={readOnly}
+        wikilinkEnabled={!!onWikilinkSearch}
       />
       {blockHandle && !readOnly && <BlockHandle />}
       {!readOnly && <TableHandle />}
