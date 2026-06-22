@@ -26,8 +26,6 @@ function searchNotes(query: string): WikilinkItem[] {
 // In `userEvent.keyboard`, a literal `[` is escaped by doubling it.
 const TWO_BRACKETS = '[[[['
 
-// `{ControlOrMeta>}` resolves to Cmd on Apple and Ctrl elsewhere, matching the
-// `Mod-Shift-k` keymap.
 async function pressInsertShortcut(): Promise<void> {
   await userEvent.keyboard('{ControlOrMeta>}{Shift>}k{/Shift}{/ControlOrMeta}')
 }
