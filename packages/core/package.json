@@ -31,7 +31,12 @@
     "@prosekit/extensions": "^0.17.5-beta.7",
     "@prosekit/pm": "^0.1.19-beta.0",
     "prosemirror-flat-list": "^0.6.0",
-    "prosemirror-highlight": "^0.15.2"
+    "prosemirror-highlight": "^0.15.2",
+    "rehype-parse": "^9.0.1",
+    "rehype-remark": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-stringify": "^11.0.0",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@meowdown/vitest": "workspace:*",

@@ -21,6 +21,8 @@ export {
   type ImageClickPayload,
 } from './extensions/image-click.ts'
 export { defineEmbedPaste } from './extensions/embed-paste.ts'
+export { defineHTMLPaste } from './extensions/html-paste.ts'
+export { defineMarkdownCopy } from './extensions/markdown-copy.ts'
 export { defineBulletAfterHeading } from './extensions/bullet-after-heading.ts'
 export { EDITOR_KEY_BINDINGS } from './extensions/key-bindings.ts'
 export { definePlaceholder, type PlaceholderOptions } from '@prosekit/extensions/placeholder'

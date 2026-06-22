@@ -1,9 +1,11 @@
 import {
   defineBulletAfterHeading,
   defineEmbedPaste,
+  defineHTMLPaste,
   defineImage,
   defineImageClickHandler,
   defineLinkClickHandler,
+  defineMarkdownCopy,
   defineMarkMode,
   definePlaceholder,
   defineReadonly,
@@ -98,6 +100,10 @@ export function EditorExtensions({
       return embedPaste ? defineEmbedPaste() : null
     }, [embedPaste]),
   )
+
+  useExtension(useMemo(() => defineHTMLPaste(), []))
+
+  useExtension(useMemo(() => defineMarkdownCopy(), []))
 
   useExtension(
     useMemo(() => {
