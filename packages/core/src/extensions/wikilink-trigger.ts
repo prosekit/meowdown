@@ -11,7 +11,7 @@ const WIKILINK_OPEN = '[['
  * the selection is dropped; a selection that already starts with `[[`, or that
  * spans more than one block, is left untouched.
  */
-const openWikilinkMenuCommand: Command = (state, dispatch, view) => {
+const openWikilinkMenuCommand: Command = (state, dispatch) => {
   const { selection } = state
   if (!selection.empty && !selection.$head.sameParent(selection.$anchor)) {
     return false
@@ -26,13 +26,13 @@ const openWikilinkMenuCommand: Command = (state, dispatch, view) => {
   }
   const text = WIKILINK_OPEN + query
 
-  if (dispatch && view) {
+  if (dispatch) {
     const tr = state.tr.insertText(text, selection.from, selection.to)
     tr.setSelection(TextSelection.create(tr.doc, selection.from + text.length))
+    // The programmatic insert does not open the regex-triggered menu on its own,
+    // so tag the same transaction to re-scan at the new cursor and open it.
+    triggerAutocomplete(tr)
     dispatch(tr.scrollIntoView())
-    // The programmatic insert above does not open the regex-triggered menu, so
-    // re-scan at the new cursor to open it.
-    triggerAutocomplete()(view.state, view.dispatch, view)
   }
   return true
 }
