@@ -24,7 +24,11 @@ export {
 export { inlineTextToMarkChunks } from './extensions/inline-text-to-mark-chunks.ts'
 export type { MarkChunk } from './extensions/mark-chunk.ts'
 export { getMarkBuilders, type TypedMarkBuilders } from './extensions/schema.ts'
-export type { MdWikilinkViewAttrs, MdImageViewAttrs } from './extensions/inline-marks.ts'
+export type {
+  MdWikilinkViewAttrs,
+  MdImageViewAttrs,
+  MdLinkTextAttrs,
+} from './extensions/inline-marks.ts'
 export {
   defineImageClickHandler,
   type ImageClickHandler,

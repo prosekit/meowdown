@@ -100,10 +100,7 @@ function tokenize(code: string, support: LanguageSupport): CodeToken[] {
  * loaded (the common path, no render flash), and a `Promise` only when a grammar
  * must load on demand. Returns `[]` for an empty or unsupported language.
  */
-export function getCodeTokens(
-  code: string,
-  language: string,
-): CodeToken[] | Promise<CodeToken[]> {
+export function getCodeTokens(code: string, language: string): CodeToken[] | Promise<CodeToken[]> {
   const trimmed = language.trim()
   if (!trimmed) return []
 
