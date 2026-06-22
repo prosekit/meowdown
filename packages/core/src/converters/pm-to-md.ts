@@ -320,9 +320,7 @@ function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
   const bulletMarker = attrs.marker === '*' || attrs.marker === '+' ? attrs.marker : '-'
   const orderMarker = attrs.marker === ')' ? ')' : '.'
   const checkMark = attrs.taskMarker === 'X' ? 'X' : 'x'
-  // The delimiter plus its original gap (1-4 spaces). The gap rides on the delimiter,
-  // before a task's `[ ] ` checkbox (which is list-item CONTENT in GFM terms). The
-  // prefix width is the content column, so continuation lines align to it.
+  // The delimiter plus its original gap (1-4 spaces).
   const gap = Math.min(Math.max(attrs.markerGap ?? 1, 1), 4)
   const delimiter = attrs.kind === 'ordered' ? `${attrs.order ?? 1}${orderMarker}` : bulletMarker
   const prefix = `${delimiter}${' '.repeat(gap)}`

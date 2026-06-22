@@ -74,7 +74,6 @@ function isValidMarkerGap(value: number | null | undefined): value is 2 | 3 | 4 
 }
 
 function defineListMarkerGapAttr(): ListMarkerGapExtension {
-
   return defineNodeAttr<'list', 'markerGap', number>({
     type: 'list' satisfies NodeName,
     attr: 'markerGap',
@@ -85,9 +84,8 @@ function defineListMarkerGapAttr(): ListMarkerGapExtension {
     // Persist only a non-canonical gap (2-4 spaces); 1 is the default the serializer
     // emits anyway, and the rest must survive an editor DOM re-parse. A gap of 5+ is
     // indented code, a different structure, so it never reaches here.
-    toDOM: (value) =>
-    {
-     return (isValidMarkerGap(value)) ? ['data-list-marker-gap', String(value)] : null
+    toDOM: (value) => {
+      return isValidMarkerGap(value) ? ['data-list-marker-gap', String(value)] : null
     },
     parseDOM: (node) => {
       const value = Number.parseInt(node.getAttribute('data-list-marker-gap') ?? '', 10)
