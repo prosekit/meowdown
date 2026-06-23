@@ -9,9 +9,6 @@ const pmRoot = page.locate('.ProseMirror')
 const label = pmRoot.getByTestId('wikilink')
 
 const ALL_MODES: MarkMode[] = ['hide', 'focus', 'show']
-// The label stands in for the source only in hide and focus; show mode renders
-// the raw `[[target]]` instead, so the label is hidden there.
-const LABEL_MODES: MarkMode[] = ['hide', 'focus']
 
 // An editor in `mode` whose only content is the letter `A`, caret right after it
 // (text offset 1), exactly the state of a user who typed `A` then opened the
@@ -29,17 +26,6 @@ function setupAfterA(mode: MarkMode): Fixture {
 // runs once an item is chosen.
 function insertWikilink(fixture: Fixture, source: string): void {
   fixture.editor.commands.insertText({ text: source })
-}
-
-// The browser caret rect (where a collapsed selection is actually painted) and
-// the rendered label rect, for asserting the caret sits after the label.
-function caretAndLabelRects(label: HTMLElement): { caret: DOMRect; label: DOMRect } {
-  const selection = window.getSelection()
-  if (!selection || selection.rangeCount === 0) throw new Error('no selection')
-  return {
-    caret: selection.getRangeAt(0).getBoundingClientRect(),
-    label: label.getBoundingClientRect(),
-  }
 }
 
 // The whole point of the fix: after inserting a wikilink, the caret is a real
