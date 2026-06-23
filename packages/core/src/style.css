@@ -15,6 +15,7 @@
   --meowdown-muted: light-dark(#52525b, #a1a1aa);
   --meowdown-accent: light-dark(#7c3aed, #c084fc);
   --meowdown-mark: light-dark(#a78bfa, #8b5cf6);
+  --meowdown-highlight: light-dark(#fef08a, #854d0e);
   --meowdown-border: light-dark(#e4e4e7, #3f3f46);
   --meowdown-code-bg: light-dark(#f4f4f5, #18181b);
   --meowdown-table-header-bg: light-dark(#fafafa, #27272a);
@@ -105,6 +106,15 @@
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
   cursor: pointer;
+}
+
+.ProseMirror mark {
+  background: var(--meowdown-highlight);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 .ProseMirror code {
