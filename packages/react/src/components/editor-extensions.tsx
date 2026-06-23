@@ -35,7 +35,6 @@ export interface EditorExtensionsProps {
   bulletAfterHeading?: boolean
   placeholder?: PlaceholderOptions['placeholder']
   readOnly?: boolean
-  /** Binds Mod-Shift-k to open the wikilink menu. Set when a search handler exists. */
   wikilinkEnabled?: boolean
 }
 
