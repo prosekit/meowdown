@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.22.0](https://github.com/prosekit/meowdown/compare/core-v0.21.1...core-v0.22.0) (2026-06-23)
+
+
+### Features
+
+* add highlight mark syntax ([#141](https://github.com/prosekit/meowdown/issues/141)) ([abcd913](https://github.com/prosekit/meowdown/commit/abcd91353270a1cd17dbfd8960e7cdd0ea7512f3))
+* add onTagClick prop ([#143](https://github.com/prosekit/meowdown/issues/143)) ([420d916](https://github.com/prosekit/meowdown/commit/420d91638592ca6ad68047acfef4090b0d3da137))
+* convert pasted `<mark>` HTML to `==highlight==` ([#144](https://github.com/prosekit/meowdown/issues/144)) ([08c2617](https://github.com/prosekit/meowdown/commit/08c261768843d571213623550e9eb8644d29ea85))
+
 ## [0.21.1](https://github.com/prosekit/meowdown/compare/core-v0.21.0...core-v0.21.1) (2026-06-23)
 
 
