@@ -1,4 +1,5 @@
 import {
+  defaultResolveImageUrl,
   getCodeTokens,
   getMarkBuilders,
   inlineTextToMarkChunks,
@@ -60,10 +61,6 @@ interface RenderContext {
   onImageClick?: ImageClickHandler
 }
 
-/** Show an `src` as-is when it is an http(s) URL, otherwise skip it (matches core). */
-function defaultResolveImageUrl(src: string): string | undefined {
-  return /^https?:\/\//i.test(src) ? src : undefined
-}
 
 function WikilinkChip(props: {
   target: string

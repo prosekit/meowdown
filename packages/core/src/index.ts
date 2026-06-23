@@ -14,7 +14,7 @@ export {
   type LinkClickHandler,
   type LinkClickPayload,
 } from './extensions/link-click.ts'
-export { defineImage, type ImageOptions } from './extensions/image.ts'
+export { defineImage, type ImageOptions, defaultResolveImageUrl } from './extensions/image.ts'
 export { matchEmbed, listenForTweetHeight, type EmbedDescriptor } from './extensions/embed/index.ts'
 export {
   defineCodeBlockSyntaxHighlight,

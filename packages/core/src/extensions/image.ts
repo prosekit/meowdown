@@ -30,7 +30,7 @@ export interface ImageOptions {
 }
 
 /** Show an `src` as-is when it is an http(s) URL, otherwise skip rendering it. */
-function defaultResolveImageUrl(src: string): string | undefined {
+export function defaultResolveImageUrl(src: string): string | undefined {
   return /^https?:\/\//i.test(src) ? src : undefined
 }
 
