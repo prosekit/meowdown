@@ -120,6 +120,14 @@ function defineMdDel() {
   })
 }
 
+function defineMdHighlight() {
+  return defineMarkSpec({
+    name: 'mdHighlight' satisfies MarkName,
+    toDOM: () => ['mark', 0],
+    parseDOM: [{ tag: 'mark' }],
+  })
+}
+
 /**
  * Covers the whole `#tag`, `#` included: the `#` is tag content, not
  * removable syntax, so it never carries `mdMark`.
@@ -180,7 +188,7 @@ export interface MdPackAttrs {
    * same kind are kept apart by it (so they do not merge into one mark run), and
    * it stays stable when unrelated text in the block is edited, so editing one
    * unit never re-marks the others. Values: `bold` | `italic` | `code` |
-   * `strike` | `autolink` | `link_${href}` | `image_${src}`.
+   * `strike` | `highlight` | `autolink` | `link_${href}` | `image_${src}`.
    */
   key: string
 }
@@ -215,6 +223,7 @@ export function defineInlineMarks() {
     defineMdLinkText(),
     defineMdLinkUri(),
     defineMdDel(),
+    defineMdHighlight(),
     defineMdTag(),
 
     defineMdWikilinkSource(),
