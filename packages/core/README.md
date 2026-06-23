@@ -53,7 +53,7 @@ Heading shortcuts toggle the current block to a heading of that level (or back t
 
 Selection colors are standalone variables, not derived from `--meowdown-accent`, so selection can be restyled independently.
 
-Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-accent`.
+Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-accent`. Wire click handling with `defineTagClickHandler(({ tag, event }) => ...)` (or `@meowdown/react`'s `onTagClick` prop); `tag` is read from the rendered text without the leading `#`. A plain click inside a tag the caret already sits in just places the caret; `Mod`-click always fires.
 
 Wikilinks (`[[target]]`/`[[target|alias]]`) render in place via a mark view as an immutable label (the alias, or the target when there is no alias), with the raw source hidden in hide and focus modes and shown dimmed in show mode. The label uses the `.md-wikilink-label` class and the raw source the `.md-wikilink-source` class, both dashed-underlined and colored by `--meowdown-accent`. In every mark mode the link is a single immutable caret stop: arrowing onto it selects the whole source (ringed with `--meowdown-node-outline` in hide and focus, the native selection over the visible source in show), and Backspace/Delete remove it as a unit. Wire click navigation with `defineWikilinkClickHandler(({ target, event }) => ...)` (or `@meowdown/react`'s `onWikilinkClick` prop).
 
