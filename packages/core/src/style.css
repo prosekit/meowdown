@@ -316,6 +316,7 @@
 
 /* prosemirror-view adds `ProseMirror-hideselection` whenever the selection is
  * not "visible" (a node selection). */
+.ProseMirror:has(.md-atomic-selected),
 .ProseMirror.ProseMirror-hideselection ::selection {
   --meowdown-selection: transparent;
   caret-color: transparent;
@@ -417,8 +418,7 @@
  * like a node selection (`.ProseMirror-selectednode`). In show mode the raw
  * source is visible and uses the native selection highlight instead. */
 .ProseMirror[data-mark-mode='hide'] .md-image-view:has(.md-atomic-selected) .md-image-preview,
-.ProseMirror[data-mark-mode='hide'] .md-wikilink-view:has(.md-atomic-selected) .md-wikilink-label,
-.ProseMirror[data-mark-mode='focus'] .md-wikilink-view:has(.md-atomic-selected) .md-wikilink-label {
+.ProseMirror .md-wikilink-view:has(.md-atomic-selected) .md-wikilink-label {
   outline: 2px solid var(--meowdown-node-outline);
   outline-offset: 2px;
   border-radius: 0.25rem;
@@ -499,4 +499,50 @@
       letter-spacing: 0;
     }
   }
+}
+
+.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content,
+.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content,
+.ProseMirror[data-mark-mode='hide'] .md-image-view-content,
+.ProseMirror[data-mark-mode='focus'] .md-image-view-content {
+  display: inline-flex;
+  height: 100%;
+  vertical-align: bottom;
+}
+
+.ProseMirror[data-mark-mode='hide'] .md-image-view-content,
+.ProseMirror[data-mark-mode='focus'] .md-image-view-content {
+  overflow: hidden;
+  &:not(:has(.show)) {
+    width: 0px;
+  }
+}
+
+.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content,
+.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content {
+  overflow: visible;
+  width: 0px;
+  max-width: 0px;
+  min-width: 0px;
+  background-color: transparent;
+
+  * {
+    color: transparent;
+    background-color: transparent;
+  }
+}
+
+/* The trailing source char inside a view contentDOM is hidden by the general
+ * `display:none` above; that leaves it without a box, so the caret falls back
+ * before it. Put it back in the layout (kept invisible by the transparent/clip
+ * rules above) so the caret has a real stop right after the unit. */
+.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content :is(.md-mark, .md-wikilink-source),
+.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content :is(.md-mark, .md-wikilink-source),
+.ProseMirror[data-mark-mode='hide'] .md-image-view-content :is(.md-mark, .md-image-source),
+.ProseMirror[data-mark-mode='focus'] .md-image-view-content :is(.md-mark, .md-image-source) {
+  display: inline-flex;
+  width: 0px;
+  max-width: 0px;
+  min-width: 0px;
+  overflow: visible;
 }

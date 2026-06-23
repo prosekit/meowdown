@@ -394,19 +394,19 @@ describe('focus mode', () => {
           </span>
         </span>
         <span class="md-wikilink-view">
-          <span>
-            <span class="md-wikilink-source">
-              <span class="md-mark">
-                ]
-              </span>
-            </span>
-          </span>
           <span
             class="md-wikilink-label"
             contenteditable="false"
             data-testid="wikilink"
           >
             note
+          </span>
+          <span class="md-wikilink-view-content">
+            <span class="md-wikilink-source">
+              <span class="md-mark">
+                ]
+              </span>
+            </span>
           </span>
         </span>
         end
@@ -452,19 +452,19 @@ describe('focus mode', () => {
           </span>
         </span>
         <span class="md-wikilink-view">
-          <span>
-            <span class="md-wikilink-source">
-              <span class="md-mark">
-                ]
-              </span>
-            </span>
-          </span>
           <span
             class="md-wikilink-label"
             contenteditable="false"
             data-testid="wikilink"
           >
             note
+          </span>
+          <span class="md-wikilink-view-content">
+            <span class="md-wikilink-source">
+              <span class="md-mark">
+                ]
+              </span>
+            </span>
           </span>
         </span>
       </p>
@@ -896,19 +896,19 @@ describe('hide mode', () => {
           </span>
         </span>
         <span class="md-wikilink-view">
-          <span>
-            <span class="md-wikilink-source">
-              <span class="md-mark">
-                ]
-              </span>
-            </span>
-          </span>
           <span
             class="md-wikilink-label"
             contenteditable="false"
             data-testid="wikilink"
           >
             note
+          </span>
+          <span class="md-wikilink-view-content">
+            <span class="md-wikilink-source">
+              <span class="md-mark">
+                ]
+              </span>
+            </span>
           </span>
         </span>
         end

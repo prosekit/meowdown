@@ -73,7 +73,6 @@ function WikilinkChip(props: {
     : undefined
   return (
     <span className="md-wikilink-view">
-      <span>{children}</span>
       <span
         className="md-wikilink-label"
         data-testid="wikilink"
@@ -82,6 +81,7 @@ function WikilinkChip(props: {
       >
         {display || target}
       </span>
+      <span className="md-wikilink-view-content">{children}</span>
     </span>
   )
 }
