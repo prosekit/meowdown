@@ -14,6 +14,11 @@ export {
   type LinkClickHandler,
   type LinkClickPayload,
 } from './extensions/link-click.ts'
+export {
+  defineTagClickHandler,
+  type TagClickHandler,
+  type TagClickPayload,
+} from './extensions/tag-click.ts'
 export { defineImage, type ImageOptions, defaultResolveImageUrl } from './extensions/image.ts'
 export { matchEmbed, listenForTweetHeight, type EmbedDescriptor } from './extensions/embed/index.ts'
 export {
