@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.1](https://github.com/prosekit/meowdown/compare/core-v0.21.0...core-v0.21.1) (2026-06-23)
+
+
+### Bug Fixes
+
+* **core:** keep the caret after an inserted wikilink ([#80](https://github.com/prosekit/meowdown/issues/80)) ([dedac49](https://github.com/prosekit/meowdown/commit/dedac49f17035c84c4700f6eed9345b6b1279d01))
+
 ## [0.21.0](https://github.com/prosekit/meowdown/compare/core-v0.20.0...core-v0.21.0) (2026-06-23)
 
 
