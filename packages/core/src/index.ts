@@ -14,7 +14,21 @@ export {
   type LinkClickHandler,
   type LinkClickPayload,
 } from './extensions/link-click.ts'
-export { defineImage, type ImageOptions } from './extensions/image.ts'
+export { defineImage, type ImageOptions, defaultResolveImageUrl } from './extensions/image.ts'
+export { matchEmbed, listenForTweetHeight, type EmbedDescriptor } from './extensions/embed/index.ts'
+export {
+  defineCodeBlockSyntaxHighlight,
+  getCodeTokens,
+  type CodeToken,
+} from './extensions/code-block-highlight.ts'
+export { inlineTextToMarkChunks } from './extensions/inline-text-to-mark-chunks.ts'
+export type { MarkChunk } from './extensions/mark-chunk.ts'
+export { getMarkBuilders, type TypedMarkBuilders } from './extensions/schema.ts'
+export type {
+  MdWikilinkViewAttrs,
+  MdImageViewAttrs,
+  MdLinkTextAttrs,
+} from './extensions/inline-marks.ts'
 export {
   defineImageClickHandler,
   type ImageClickHandler,
@@ -38,3 +52,5 @@ export {
   type RoundTripFidelity,
 } from './converters/check-roundtrip.ts'
 export type { CodeBlockAttrs } from '@prosekit/extensions/code-block'
+export type { NodeName } from './extensions/node-names.ts'
+export type { MarkName } from './extensions/mark-names.ts'

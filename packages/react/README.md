@@ -60,6 +60,27 @@ The Markdown editor component. Renders inside a `div.meowdown` wrapper that fill
 - `handleRef?: Ref<EditorHandle>`
 - `children?: ReactNode`: rendered inside the editor's ProseKit context, so children can call `useEditor()`. Only rendered in the rich modes; source mode ignores them.
 
+### `<MarkdownView>`
+
+A read-only renderer that turns Markdown into a React tree styled exactly like `<MeowdownEditor>` in `hide` mode: inline marks, wiki-link chips, images, tweet/YouTube embeds, and syntax-highlighted code. It mounts no editor and holds no ProseMirror view, so it is cheap to render many times (backlink lists, search results, previews). Import `@meowdown/core/style.css` for the theme; the root carries the `ProseMirror` and `meowdown-content` classes plus `data-mark-mode`, so the editor stylesheet applies unchanged.
+
+```tsx
+import '@meowdown/core/style.css'
+import { MarkdownView } from '@meowdown/react'
+;<MarkdownView
+  markdown="See [[Some Note]] and **bold**."
+  onWikilinkClick={({ target }) => open(target)}
+/>
+```
+
+- `markdown: string`: the Markdown to render. Live: changing it re-renders.
+- `markMode?: 'hide' | 'focus' | 'show'`: defaults to `'hide'`.
+- `frontmatter?: boolean`: peel a leading YAML frontmatter block first. Off by default.
+- `resolveImageUrl?`, `onWikilinkClick?`, `onLinkClick?`, `onImageClick?`: the same shapes as the matching `<MeowdownEditor>` props. Pass stable functions.
+- `className?: string`: extra class on the content root.
+
+Code blocks render their content and syntax highlighting (the same `tok-*` classes as the editor) but without the editor's language picker / copy toolbar. `<MarkdownView>` requires a DOM environment; it is not a server-side HTML-string renderer.
+
 ### `useEditor`
 
 Re-exported from `@prosekit/react`. Call it from a component passed as `children` to read the live editor instance.

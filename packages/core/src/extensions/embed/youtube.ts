@@ -45,21 +45,15 @@ export const matchYouTube: EmbedMatcher = (src) => {
   if (!parsed) return
   const query = parsed.startSeconds ? `?start=${parsed.startSeconds}` : ''
   return {
+    kind: 'youtube',
     key: `youtube:${parsed.videoId}:${parsed.startSeconds ?? 0}`,
-    render: () => {
-      const iframe = document.createElement('iframe')
-      // Privacy-enhanced player; no tracking cookies until the user plays.
-      iframe.src = `https://www.youtube-nocookie.com/embed/${parsed.videoId}${query}`
-      iframe.title = 'YouTube video'
-      iframe.className = 'md-embed md-embed-youtube'
-      iframe.dataset.testid = 'youtube-embed'
-      iframe.loading = 'lazy'
-      iframe.referrerPolicy = 'strict-origin-when-cross-origin'
-      iframe.setAttribute('frameborder', '0')
-      iframe.allow =
-        'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen'
-      iframe.allowFullscreen = true
-      return iframe
-    },
+    // Privacy-enhanced player; no tracking cookies until the user plays.
+    src: `https://www.youtube-nocookie.com/embed/${parsed.videoId}${query}`,
+    title: 'YouTube video',
+    className: 'md-embed md-embed-youtube',
+    testid: 'youtube-embed',
+    allow:
+      'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen',
+    allowFullscreen: true,
   }
 }
