@@ -61,7 +61,6 @@ interface RenderContext {
   onImageClick?: ImageClickHandler
 }
 
-
 function WikilinkChip(props: {
   target: string
   display: string
