@@ -38,10 +38,7 @@ const openWikilinkMenuCommand: Command = (state, dispatch) => {
 }
 
 /**
- * Binds `Mod-Shift-k` (Cmd-Shift-K on Apple) to open the wikilink menu, and
- * exposes the same behavior as the `openWikilinkMenu` command. Apply it only
- * when a wikilink search handler is wired, so the shortcut exists exactly when
- * the menu does.
+ * Binds `Mod-Shift-k` to open the wikilink menu.
  */
 export function defineWikilinkTrigger(): PlainExtension {
   return defineKeymap({ 'Mod-Shift-k': openWikilinkMenuCommand })
