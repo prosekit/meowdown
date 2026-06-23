@@ -5,6 +5,7 @@ import {
   listenForTweetHeight,
   markdownToDoc,
   matchEmbed,
+  type CodeBlockAttrs,
   type CodeToken,
   type EmbedDescriptor,
   type ImageClickHandler,
@@ -14,6 +15,7 @@ import {
   type MdImageViewAttrs,
   type MdLinkTextAttrs,
   type MdWikilinkViewAttrs,
+  type NodeName,
   type WikilinkClickHandler,
 } from '@meowdown/core'
 import { Mark, type Node as ProseMirrorNode } from '@prosekit/pm/model'
@@ -305,8 +307,9 @@ function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode 
 }
 
 function renderBlock(node: ProseMirrorNode, key: number, context: RenderContext): ReactNode {
-  if (node.type.name === 'codeBlock') {
-    const language = typeof node.attrs.language === 'string' ? node.attrs.language : ''
+  if (node.type.name === ('codeBlock' satisfies NodeName)) {
+    const attrs = node.attrs as CodeBlockAttrs
+    const language: string = typeof attrs.language === 'string' ? attrs.language : ''
     return <CodeBlock key={key} code={node.textContent} language={language} />
   }
 

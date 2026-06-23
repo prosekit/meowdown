@@ -52,3 +52,5 @@ export {
   type RoundTripFidelity,
 } from './converters/check-roundtrip.ts'
 export type { CodeBlockAttrs } from '@prosekit/extensions/code-block'
+export type { NodeName } from './extensions/node-names.ts'
+export type { MarkName } from './extensions/mark-names.ts'
