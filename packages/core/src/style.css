@@ -316,7 +316,7 @@
 
 /* prosemirror-view adds `ProseMirror-hideselection` whenever the selection is
  * not "visible" (a node selection). */
- .ProseMirror:has(.md-atomic-selected),
+.ProseMirror:has(.md-atomic-selected),
 .ProseMirror.ProseMirror-hideselection ::selection {
   --meowdown-selection: transparent;
   caret-color: transparent;
@@ -418,8 +418,7 @@
  * like a node selection (`.ProseMirror-selectednode`). In show mode the raw
  * source is visible and uses the native selection highlight instead. */
 .ProseMirror[data-mark-mode='hide'] .md-image-view:has(.md-atomic-selected) .md-image-preview,
-.ProseMirror[data-mark-mode='hide'] .md-wikilink-view:has(.md-atomic-selected) .md-wikilink-label,
-.ProseMirror[data-mark-mode='focus'] .md-wikilink-view:has(.md-atomic-selected) .md-wikilink-label {
+.ProseMirror .md-wikilink-view:has(.md-atomic-selected) .md-wikilink-label {
   outline: 2px solid var(--meowdown-node-outline);
   outline-offset: 2px;
   border-radius: 0.25rem;
@@ -502,30 +501,33 @@
   }
 }
 
-/* Each mark view (wikilink, image) anchors on its unit's trailing character, held
- * in a contentDOM. Hiding that char with the `display:none` above drops it from
- * the box tree, so a caret placed just after the unit has no box to land in: the
- * browser traps it before the rendered label/preview and the next typed character
- * lands before the unit (not after it). Instead collapse the char to zero width
- * but keep it in the layout, so the caret has a real stop right after the unit and
- * typing continues there. Scoped to the contentDOM, so all other markup keeps the
- * `display:none` above. */
 .ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content,
 .ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content,
 .ProseMirror[data-mark-mode='hide'] .md-image-view-content,
 .ProseMirror[data-mark-mode='focus'] .md-image-view-content {
   display: inline-block;
-  width: 0;
-  overflow: hidden;
-  vertical-align: text-bottom;
+  height: 100%;
+  vertical-align: bottom;
 }
-.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content :is(.md-mark, .md-wikilink-source),
-.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content :is(.md-mark, .md-wikilink-source),
-.ProseMirror[data-mark-mode='hide'] .md-image-view-content :is(.md-mark, .md-image-source),
-.ProseMirror[data-mark-mode='focus'] .md-image-view-content :is(.md-mark, .md-image-source) {
-  display: inline;
-  /* Focus mode collapses `.md-mark` with `letter-spacing: -2em`; inside the
-   * zero-width contentDOM that drags the caret a couple of em left of the label,
-   * back before it. Reset it so the caret rests at the label's trailing edge. */
-  letter-spacing: normal;
+
+.ProseMirror[data-mark-mode='hide'] .md-image-view-content,
+.ProseMirror[data-mark-mode='focus'] .md-image-view-content {
+  overflow: hidden;
+  &:not(:has(.show)) {
+    width: 0px;
+  }
+}
+
+.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content,
+.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content {
+  overflow: visible;
+  width: 5px;
+  max-width: 5px;
+  margin-left: -5px;
+  background-color: transparent;
+
+  * {
+    color: transparent;
+    background-color: transparent;
+  }
 }
