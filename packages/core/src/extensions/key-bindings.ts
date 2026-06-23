@@ -4,6 +4,7 @@ export const EDITOR_KEY_BINDINGS = {
   'Mod-i': 'Italic',
   'Mod-e': 'Inline code',
   'Mod-Shift-x': 'Strikethrough',
+  'Mod-Shift-h': 'Highlight',
   'Mod-1': 'Heading 1',
   'Mod-2': 'Heading 2',
   'Mod-3': 'Heading 3',

@@ -191,14 +191,31 @@ describe('keymap', () => {
     await userEvent.keyboard(`{ControlOrMeta>}{Shift>}x{/Shift}{/ControlOrMeta}`)
     expect(docToMarkdown(fixture.doc)).toBe('~~bold~~\n')
   })
+
+  it('Mod-Shift-h wraps the selection in ==', async () => {
+    using fixture = setupFixture()
+    fixture.set(fixture.n.doc(fixture.n.paragraph('<a>bold<b>')))
+    fixture.view.focus()
+    await userEvent.keyboard(`{ControlOrMeta>}{Shift>}h{/Shift}{/ControlOrMeta}`)
+    expect(docToMarkdown(fixture.doc)).toBe('==bold==\n')
+  })
+
+  it('Mod-Shift-h unwraps an existing highlight', async () => {
+    using fixture = setupFixture()
+    fixture.set(fixture.n.doc(fixture.n.paragraph('==<a>bold<b>==')))
+    fixture.view.focus()
+    await userEvent.keyboard(`{ControlOrMeta>}{Shift>}h{/Shift}{/ControlOrMeta}`)
+    expect(docToMarkdown(fixture.doc)).toBe('bold\n')
+  })
 })
 
 describe('other constructs', () => {
-  it('toggleEm, toggleCode, toggleDel wrap with their delimiters', () => {
+  it('toggleEm, toggleCode, toggleDel, toggleHighlight wrap with their delimiters', () => {
     for (const [command, expected] of [
       ['toggleEm', '*hello*'],
       ['toggleCode', '`hello`'],
       ['toggleDel', '~~hello~~'],
+      ['toggleHighlight', '==hello=='],
     ] as const) {
       using fixture = setupFixture()
       const { editor, n } = fixture

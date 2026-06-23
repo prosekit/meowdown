@@ -33,6 +33,8 @@ describe('LEZER_NODE_IDS', () => {
         "HardBreak": 24,
         "Hashtag": 54,
         "HeaderMark": 34,
+        "Highlight": 57,
+        "HighlightMark": 58,
         "HorizontalRule": 5,
         "Image": 28,
         "InlineCode": 29,

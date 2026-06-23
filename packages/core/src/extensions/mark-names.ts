@@ -8,6 +8,7 @@ export const MARK_NAMES = [
   'mdLinkText',
   'mdLinkUri',
   'mdDel',
+  'mdHighlight',
   'mdTag',
   'mdWikilinkSource',
   'mdWikilinkView',

@@ -71,6 +71,8 @@ export const LEZER_NODE_NAMES = [
   'Hashtag',
   'Wikilink',
   'WikilinkMark',
+  'Highlight',
+  'HighlightMark',
 ] as const
 
 export type LezerNodeName = (typeof LEZER_NODE_NAMES)[number]

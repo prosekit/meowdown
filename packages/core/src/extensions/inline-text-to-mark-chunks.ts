@@ -35,10 +35,12 @@ const MARK_NAME_BY_TYPE_ID: ReadonlyMap<number, MarkName> = new Map([
   [LEZER_NODE_IDS.StrongEmphasis, 'mdStrong'],
   [LEZER_NODE_IDS.InlineCode, 'mdCode'],
   [LEZER_NODE_IDS.Strikethrough, 'mdDel'],
+  [LEZER_NODE_IDS.Highlight, 'mdHighlight'],
   [LEZER_NODE_IDS.EmphasisMark, 'mdMark'],
   [LEZER_NODE_IDS.CodeMark, 'mdMark'],
   [LEZER_NODE_IDS.LinkMark, 'mdMark'],
   [LEZER_NODE_IDS.StrikethroughMark, 'mdMark'],
+  [LEZER_NODE_IDS.HighlightMark, 'mdMark'],
   [LEZER_NODE_IDS.URL, 'mdLinkUri'],
   [LEZER_NODE_IDS.Hashtag, 'mdTag'],
   [LEZER_NODE_IDS.WikilinkMark, 'mdMark'],
@@ -119,6 +121,8 @@ function walk(
         packKey = 'code'
       } else if (type === LEZER_NODE_IDS.Strikethrough) {
         packKey = 'strike'
+      } else if (type === LEZER_NODE_IDS.Highlight) {
+        packKey = 'highlight'
       } else if (type === LEZER_NODE_IDS.Autolink) {
         packKey = 'autolink'
       }

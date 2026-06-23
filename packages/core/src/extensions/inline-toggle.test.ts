@@ -167,6 +167,18 @@ describe('toggle del', () => {
   })
 })
 
+describe('toggle highlight', () => {
+  it.each([
+    ['<a>x<b>', '==x=='],
+    ['<a>==hi==<b>', 'hi'],
+    ['==a <a>b<b> c==', '==a== b ==c=='],
+    // other constructs inside survive; same-type spans dissolve
+    ['<a>**a** ==b==<b>', '==**a** b=='],
+  ])('%j -> %j', (input, expected) => {
+    expect(toggle('highlight', input)).toBe(expected)
+  })
+})
+
 describe('isInlineActive', () => {
   it.each([
     ['**<a>bold<b>**', 'strong', true],

@@ -23,6 +23,7 @@ export const TOGGLE_SPECS = {
   strong: { node: LEZER_NODE_IDS.StrongEmphasis, delim: '**' },
   code: { node: LEZER_NODE_IDS.InlineCode, delim: '`' },
   del: { node: LEZER_NODE_IDS.Strikethrough, delim: '~~' },
+  highlight: { node: LEZER_NODE_IDS.Highlight, delim: '==' },
 } as const satisfies Record<string, ToggleSpec>
 
 export type ToggleName = keyof typeof TOGGLE_SPECS
@@ -32,6 +33,7 @@ const MARKER_IDS: ReadonlySet<number> = new Set([
   LEZER_NODE_IDS.CodeMark,
   LEZER_NODE_IDS.LinkMark,
   LEZER_NODE_IDS.StrikethroughMark,
+  LEZER_NODE_IDS.HighlightMark,
 ])
 
 /** The opening and closing delimiter tokens of a toggleable node. */
@@ -50,7 +52,8 @@ function nestableContent(node: InlineElement): [number, number] | null {
   if (
     type === LEZER_NODE_IDS.Emphasis ||
     type === LEZER_NODE_IDS.StrongEmphasis ||
-    type === LEZER_NODE_IDS.Strikethrough
+    type === LEZER_NODE_IDS.Strikethrough ||
+    type === LEZER_NODE_IDS.Highlight
   ) {
     return [children[0].to, children.at(-1)!.from]
   }

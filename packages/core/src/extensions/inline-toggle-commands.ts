@@ -112,6 +112,7 @@ function defineInlineToggleCommands() {
     toggleStrong: () => toggleInline(TOGGLE_SPECS.strong),
     toggleCode: () => toggleInline(TOGGLE_SPECS.code),
     toggleDel: () => toggleInline(TOGGLE_SPECS.del),
+    toggleHighlight: () => toggleInline(TOGGLE_SPECS.highlight),
   })
 }
 
@@ -121,6 +122,7 @@ function defineInlineToggleKeymap() {
     'Mod-i': toggleInline(TOGGLE_SPECS.em),
     'Mod-e': toggleInline(TOGGLE_SPECS.code),
     'Mod-Shift-x': toggleInline(TOGGLE_SPECS.del),
+    'Mod-Shift-h': toggleInline(TOGGLE_SPECS.highlight),
   })
 }
 

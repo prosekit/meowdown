@@ -40,6 +40,28 @@ describe('inlineMarkPlugin', () => {
     expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdCode', 'mdPack'])
   })
 
+  it('applies mdHighlight inside ==text==', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('pre ==hi== post'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'hi')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdHighlight', 'mdPack'])
+    // The `==` syntax markers carry the pack, mdHighlight + mdMark.
+    expect(marksAt(fixture.doc, pos - 1)).toEqual(['mdHighlight', 'mdMark', 'mdPack'])
+  })
+
+  it('keeps nested mdStrong inside ==**bold**==', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('x ==**bold**== y'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'bold')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdHighlight', 'mdPack', 'mdPack', 'mdStrong'])
+  })
+
   it('applies mdLinkText with href attr inside [text](url)', () => {
     using fixture = setupFixture()
     const { n } = fixture

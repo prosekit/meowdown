@@ -12,6 +12,7 @@ describe('EDITOR_KEY_BINDINGS', () => {
         "Mod-4": "Heading 4",
         "Mod-5": "Heading 5",
         "Mod-6": "Heading 6",
+        "Mod-Shift-h": "Highlight",
         "Mod-Shift-x": "Strikethrough",
         "Mod-b": "Bold",
         "Mod-e": "Inline code",
