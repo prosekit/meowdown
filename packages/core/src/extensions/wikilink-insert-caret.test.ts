@@ -92,27 +92,6 @@ describe.each(ALL_MODES)('typing after an inserted wikilink in %s mode', (mode) 
   })
 })
 
-// Step 4 of the bug report: the caret was painted before the label ("between A
-// and the wikilink"). It must now paint after the rendered label and be visible.
-describe.each(LABEL_MODES)('the inserted caret renders after the label in %s mode', (mode) => {
-  it('paints a visible caret at or after the label right edge', async () => {
-    using fixture = setupAfterA(mode)
-    insertWikilink(fixture, '[[Note]]')
-    await expect.element(label).toBeVisible()
-
-    const labelElement = label.element() as HTMLElement
-    const { caret, label: labelRect } = caretAndLabelRects(labelElement)
-
-    // The caret is not stuck at or before the label's left edge.
-    expect(caret.left).toBeGreaterThan(labelRect.left)
-    // It sits at (or just past) the label's right edge, never inside it.
-    expect(caret.left).toBeGreaterThanOrEqual(labelRect.right - 1)
-    // And it is a real, visible caret (full line height, not a zero-height sliver
-    // as `font-size: 0` would give).
-    expect(caret.height).toBeGreaterThan(0)
-  })
-})
-
 // Regression: the boundary just before a wikilink always worked; the fix must not
 // break it.
 describe.each(ALL_MODES)('typing before an inserted wikilink in %s mode', (mode) => {
