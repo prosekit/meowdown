@@ -569,3 +569,59 @@ describe('gfmBlockOnlyParser', () => {
     `)
   })
 })
+
+/** Flatten an inline parse to `Name[from,to]` tokens for compact assertions. */
+function inlineTokens(src: string): string[] {
+  const tokens: string[] = []
+  gfmParser.parse(src).iterate({
+    enter: (node) => {
+      if (node.name !== 'Document' && node.name !== 'Paragraph') {
+        tokens.push(`${node.name}[${node.from},${node.to}]`)
+      }
+    },
+  })
+  return tokens
+}
+
+describe('highlight (==text==)', () => {
+  it('wraps the run in Highlight with HighlightMark delimiters', () => {
+    expect(inlineTokens('==hi==')).toEqual([
+      'Highlight[0,6]',
+      'HighlightMark[0,2]',
+      'HighlightMark[4,6]',
+    ])
+  })
+
+  it('finds a highlight surrounded by text', () => {
+    expect(inlineTokens('a ==hi== b')).toEqual([
+      'Highlight[2,8]',
+      'HighlightMark[2,4]',
+      'HighlightMark[6,8]',
+    ])
+  })
+
+  it('allows nested inline syntax inside a highlight', () => {
+    expect(inlineTokens('==**bold**==')).toEqual([
+      'Highlight[0,12]',
+      'HighlightMark[0,2]',
+      'StrongEmphasis[2,10]',
+      'EmphasisMark[2,4]',
+      'EmphasisMark[8,10]',
+      'HighlightMark[10,12]',
+    ])
+  })
+
+  it('nests with strikethrough both ways', () => {
+    expect(inlineTokens('~~==hi==~~')).toContain('Highlight[2,8]')
+    expect(inlineTokens('==~~hi~~==')).toContain('Strikethrough[2,8]')
+  })
+
+  it('does not highlight space-flanked equals runs', () => {
+    expect(inlineTokens('a == b == c').some((token) => token.startsWith('Highlight'))).toBe(false)
+    expect(inlineTokens('== x ==').some((token) => token.startsWith('Highlight'))).toBe(false)
+  })
+
+  it('does not consume a third equals as a delimiter', () => {
+    expect(inlineTokens('foo === bar').some((token) => token.startsWith('Highlight'))).toBe(false)
+  })
+})

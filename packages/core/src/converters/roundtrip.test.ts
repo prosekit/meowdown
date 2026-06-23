@@ -63,6 +63,14 @@ describe('inline', () => {
     expect(roundtrip('~~strike~~')).toBe('~~strike~~\n')
   })
 
+  it('keeps highlight markers', () => {
+    expect(roundtrip('==highlight==')).toBe('==highlight==\n')
+  })
+
+  it('keeps a highlight inside a list item', () => {
+    expect(roundtrip('- a ==hi== b')).toBe('- a ==hi== b\n')
+  })
+
   it('keeps inline code', () => {
     expect(roundtrip('`inline`')).toBe('`inline`\n')
   })
