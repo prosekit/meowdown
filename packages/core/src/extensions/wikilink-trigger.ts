@@ -1,8 +1,4 @@
-import {
-  
-  defineKeymap,
-  type PlainExtension,
-} from '@prosekit/core'
+import { defineKeymap, type PlainExtension } from '@prosekit/core'
 import { triggerAutocomplete } from '@prosekit/extensions/autocomplete'
 import { TextSelection, type Command } from '@prosekit/pm/state'
 
