@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.22.0](https://github.com/prosekit/meowdown/compare/react-v0.21.1...react-v0.22.0) (2026-06-23)
+
+
+### Features
+
+* add onTagClick prop ([#143](https://github.com/prosekit/meowdown/issues/143)) ([420d916](https://github.com/prosekit/meowdown/commit/420d91638592ca6ad68047acfef4090b0d3da137))
+
 ## [0.21.1](https://github.com/prosekit/meowdown/compare/react-v0.21.0...react-v0.21.1) (2026-06-23)
 
 
