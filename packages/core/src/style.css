@@ -316,6 +316,7 @@
 
 /* prosemirror-view adds `ProseMirror-hideselection` whenever the selection is
  * not "visible" (a node selection). */
+ .ProseMirror:has(.md-atomic-selected),
 .ProseMirror.ProseMirror-hideselection ::selection {
   --meowdown-selection: transparent;
   caret-color: transparent;
