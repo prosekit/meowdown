@@ -40,7 +40,6 @@
  * ------------------------------------------------------------------------- */
 .ProseMirror {
   box-sizing: border-box;
-  padding: 1.25rem var(--meowdown-gutter) 1.75rem;
   outline: none;
   font-size: 1.0625rem;
   line-height: 1.7;
@@ -49,8 +48,21 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/* Surface padding stays on a meowdown-owned class, not `.ProseMirror`: the block
+ * handle's drag preview clones a block into a bare `.ProseMirror` container, which
+ * must not pick up the gutter padding. */
+.meowdown-content {
+  padding: 1.25rem var(--meowdown-gutter) 1.75rem;
+}
+
 .ProseMirror > * + * {
   margin-top: 0.85em;
+}
+
+/* Render soft line breaks (a literal `\n` kept by the paragraph's
+ * `whitespace: 'pre'` spec) as line breaks, while still wrapping long lines. */
+.ProseMirror p {
+  white-space: pre-wrap;
 }
 
 .ProseMirror h1,
@@ -63,6 +75,9 @@
   line-height: 1.25;
   letter-spacing: -0.01em;
   color: var(--meowdown-heading);
+  /* Render a multi-line setext heading's soft break (kept by the heading's
+   * `whitespace: 'pre'` spec) as a line break, while still wrapping long lines. */
+  white-space: pre-wrap;
 }
 
 .ProseMirror h1 {
@@ -121,6 +136,65 @@
 }
 .ProseMirror li {
   margin-top: 0.25em;
+}
+
+/* ---------------------------------------------------------------------------
+ * Checkbox task list items
+ *
+ * `kind: 'task'` is the single checkable list kind; the bullet marker picks the
+ * shape. `+` (data-list-marker="+") is a circle checkbox task, any other marker
+ * is a square checkbox task. Plain GFM on disk (`+ [ ]` vs `- [ ]`), mirroring
+ * reflect-editor.
+ * ------------------------------------------------------------------------- */
+.ProseMirror .prosemirror-flat-list[data-list-kind='task'] {
+  /* Animation: fade the opacity when an item is (un)checked. */
+  transition: opacity 200ms ease;
+
+  /* Dim a checked item; reset nested checked items so it does not compound. */
+  &[data-list-checked] {
+    opacity: 0.5;
+
+    & .prosemirror-flat-list[data-list-kind='task'][data-list-checked] {
+      opacity: 1;
+    }
+  }
+
+  & > .list-marker {
+    /* Animation: grow the checkbox slightly on hover. */
+    transition: transform 120ms ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    & input[type='checkbox'] {
+      appearance: none;
+      -webkit-appearance: none;
+      box-sizing: border-box;
+      width: 0.95rem;
+      height: 0.95rem;
+      border: 1.5px solid var(--meowdown-border);
+      border-radius: 0.25rem; /* square */
+      background: transparent center / 100% 100% no-repeat;
+      /* Animation: fade the fill and border when (un)checked. */
+      transition:
+        background-color 150ms ease,
+        border-color 150ms ease;
+
+      &:checked {
+        border-color: transparent;
+        background-color: var(--meowdown-accent);
+        background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+      }
+    }
+  }
+
+  /* A `+` marker is the circle checkbox task. */
+  &[data-list-marker='+'] > .list-marker input[type='checkbox'] {
+    border-radius: 100rem;
+    width: 1.05rem;
+    height: 1.05rem;
+  }
 }
 
 .ProseMirror pre {
@@ -227,10 +301,9 @@
 
 .ProseMirror .selectedCell {
   /* `double` wins the collapsed-border conflict against the solid borders of
- * unselected neighbors, so the whole selection perimeter recolors. */
+   * unselected neighbors, so the whole selection perimeter recolors. */
   border: 1px double var(--meowdown-node-outline);
   background: var(--meowdown-node-selection);
-  --meowdown-selection: transparent;
   caret-color: transparent;
 }
 
@@ -241,10 +314,16 @@
   background: var(--meowdown-selection);
 }
 
+/* prosemirror-view adds `ProseMirror-hideselection` whenever the selection is
+ * not "visible" (a node selection). */
+.ProseMirror.ProseMirror-hideselection ::selection {
+  --meowdown-selection: transparent;
+  caret-color: transparent;
+}
+
 /* Node selection (e.g. from the block handle): thin outline + faint wash,
  * replacing prosemirror-view's stock blue outline. */
 .ProseMirror .ProseMirror-selectednode {
-  --meowdown-selection: transparent;
   border-radius: 2px;
   outline: 1px solid var(--meowdown-node-outline);
   background: var(--meowdown-node-selection);
@@ -385,25 +464,41 @@
   opacity: 0.7;
 }
 
-/* Syntax hidden as a unit in hide and focus modes. Covers the punctuation
- * (`md-mark`), the link/image URL (`md-link-uri`), and the whole image/wikilink
- * source whose rendered preview/label stands in for it (incl. the image alt
- * text). In focus mode all but the atomic wikilink source reveal near the caret
- * via the `.show` decoration. */
-.ProseMirror[data-mark-mode='hide'] .md-mark,
-.ProseMirror[data-mark-mode='hide'] .md-link-uri,
-.ProseMirror[data-mark-mode='hide'] .md-image-source,
-.ProseMirror[data-mark-mode='hide'] .md-wikilink-source,
-.ProseMirror[data-mark-mode='focus'] .md-mark,
-.ProseMirror[data-mark-mode='focus'] .md-link-uri,
-.ProseMirror[data-mark-mode='focus'] .md-image-source,
-.ProseMirror[data-mark-mode='focus'] .md-wikilink-source {
-  display: none;
+/* The mdPack mark wraps a whole inline unit so focus mode can reveal it with one
+ * range lookup. It is layout-only: `display: contents` keeps it out of the box
+ * tree, so it never affects flow or an inner image mark view, while still being a
+ * real element a `.show` decoration can land inside. */
+.ProseMirror .md-pack {
+  display: contents;
 }
-.ProseMirror[data-mark-mode='focus'] .md-mark:has(.show),
-.ProseMirror[data-mark-mode='focus'] .md-link-uri:has(.show),
-.ProseMirror[data-mark-mode='focus'] .md-image-source:has(.show) {
-  display: inline;
+
+.ProseMirror[data-mark-mode='hide'] {
+  .md-mark,
+  .md-link-uri,
+  .md-image-source,
+  .md-wikilink-source {
+    display: none;
+  }
+}
+
+.ProseMirror[data-mark-mode='focus'] {
+  .md-wikilink-source {
+    display: none;
+  }
+
+  .md-mark,
+  .md-link-uri,
+  .md-image-source {
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: bottom;
+
+    letter-spacing: -2em;
+
+    &:has(.show) {
+      letter-spacing: 0;
+    }
+  }
 }
 
 /* Each mark view (wikilink, image) anchors on its unit's trailing character, held
@@ -428,4 +523,8 @@
 .ProseMirror[data-mark-mode='hide'] .md-image-view-content :is(.md-mark, .md-image-source),
 .ProseMirror[data-mark-mode='focus'] .md-image-view-content :is(.md-mark, .md-image-source) {
   display: inline;
+  /* Focus mode collapses `.md-mark` with `letter-spacing: -2em`; inside the
+   * zero-width contentDOM that drags the caret a couple of em left of the label,
+   * back before it. Reset it so the caret rests at the label's trailing edge. */
+  letter-spacing: normal;
 }

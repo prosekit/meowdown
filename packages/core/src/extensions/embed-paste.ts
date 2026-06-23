@@ -1,5 +1,6 @@
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { closeHistory } from '@prosekit/pm/history'
+import type { Slice } from '@prosekit/pm/model'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
@@ -11,6 +12,17 @@ export function detectEmbedUrl(text: string): string | undefined {
   const trimmed = text.trim()
   if (!trimmed || /\s/.test(trimmed)) return undefined
   return matchEmbed(trimmed) ? trimmed : undefined
+}
+
+function getPastedText(event: ClipboardEvent, slice: Slice): string {
+  const fromClipboard = event.clipboardData?.getData('text/plain')
+  if (fromClipboard) return fromClipboard
+  // Firefox ignores the standard `clipboardData` init member of the ClipboardEvent
+  // constructor (Gecko reads non-standard `data`/`dataType` strings instead), so a
+  // synthetic paste carries no text there; Chrome and WebKit honor it. Fall back to
+  // the slice ProseMirror parsed from the paste, which holds the text on every engine.
+  // See https://github.com/w3c/clipboard-apis/issues/33
+  return slice.content.textBetween(0, slice.content.size, '\n')
 }
 
 function insertEmbedFromPaste(view: EditorView, url: string): void {
@@ -33,11 +45,11 @@ export function defineEmbedPaste(): PlainExtension {
     new Plugin({
       key: embedPasteKey,
       props: {
-        handlePaste: (view, event) => {
+        handlePaste: (view, event, slice) => {
           const parent = view.state.selection.$from.parent
-          // Never in a code block, where `![](url)` is literal source, not an embed.
+          // Never in a code block
           if (!parent.inlineContent || parent.type.spec.code) return false
-          const text = event.clipboardData?.getData('text/plain')
+          const text = getPastedText(event, slice)
           if (!text) return false
           const url = detectEmbedUrl(text)
           if (!url) return false

@@ -2,10 +2,11 @@ import type { NodeJSON } from '@prosekit/core'
 
 export const sampleContent: NodeJSON = {
   type: 'doc',
+  attrs: { frontmatter: null },
   content: [
     {
       type: 'heading',
-      attrs: { level: 1 },
+      attrs: { level: 1, setextUnderline: null },
       content: [{ type: 'text', text: 'Meowdown' }],
     },
     {
@@ -28,17 +29,17 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'heading',
-      attrs: { level: 2 },
+      attrs: { level: 2, setextUnderline: null },
       content: [{ type: 'text', text: 'Headings' }],
     },
     {
       type: 'heading',
-      attrs: { level: 3 },
+      attrs: { level: 3, setextUnderline: null },
       content: [{ type: 'text', text: 'This is an H3' }],
     },
     {
       type: 'heading',
-      attrs: { level: 2 },
+      attrs: { level: 2, setextUnderline: null },
       content: [{ type: 'text', text: 'Blockquote' }],
     },
     {
@@ -57,12 +58,20 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'heading',
-      attrs: { level: 2 },
+      attrs: { level: 2, setextUnderline: null },
       content: [{ type: 'text', text: 'Bullet list' }],
     },
     {
       type: 'list',
-      attrs: { kind: 'bullet', order: null, checked: false, collapsed: false },
+      attrs: {
+        kind: 'bullet',
+        order: null,
+        checked: false,
+        collapsed: false,
+        marker: '-',
+        taskMarker: null,
+        markerGap: 1,
+      },
       content: [
         {
           type: 'paragraph',
@@ -72,7 +81,15 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'list',
-      attrs: { kind: 'bullet', order: null, checked: false, collapsed: false },
+      attrs: {
+        kind: 'bullet',
+        order: null,
+        checked: false,
+        collapsed: false,
+        marker: '-',
+        taskMarker: null,
+        markerGap: 1,
+      },
       content: [
         {
           type: 'paragraph',
@@ -85,6 +102,9 @@ export const sampleContent: NodeJSON = {
             order: null,
             checked: false,
             collapsed: false,
+            marker: '-',
+            taskMarker: null,
+            markerGap: 1,
           },
           content: [
             {
@@ -97,12 +117,20 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'heading',
-      attrs: { level: 2 },
+      attrs: { level: 2, setextUnderline: null },
       content: [{ type: 'text', text: 'Ordered list' }],
     },
     {
       type: 'list',
-      attrs: { kind: 'ordered', order: 1, checked: false, collapsed: false },
+      attrs: {
+        kind: 'ordered',
+        order: 1,
+        checked: false,
+        collapsed: false,
+        marker: '.',
+        taskMarker: null,
+        markerGap: 1,
+      },
       content: [
         {
           type: 'paragraph',
@@ -112,7 +140,15 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'list',
-      attrs: { kind: 'ordered', order: 1, checked: false, collapsed: false },
+      attrs: {
+        kind: 'ordered',
+        order: 2,
+        checked: false,
+        collapsed: false,
+        marker: '.',
+        taskMarker: null,
+        markerGap: 1,
+      },
       content: [
         {
           type: 'paragraph',
@@ -122,7 +158,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'heading',
-      attrs: { level: 2 },
+      attrs: { level: 2, setextUnderline: null },
       content: [{ type: 'text', text: 'Code block' }],
     },
     {
@@ -137,7 +173,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'heading',
-      attrs: { level: 2 },
+      attrs: { level: 2, setextUnderline: null },
       content: [{ type: 'text', text: 'Table' }],
     },
     {
@@ -222,6 +258,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'horizontalRule',
+      attrs: { marker: null },
     },
     {
       type: 'paragraph',

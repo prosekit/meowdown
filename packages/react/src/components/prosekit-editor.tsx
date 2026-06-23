@@ -16,6 +16,7 @@ import { createEditor, type SelectionJSON, union } from '@prosekit/core'
 import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit } from '@prosekit/react'
+import { clsx } from 'clsx/lite'
 import { useImperativeHandle, useMemo, useRef, useState, type ReactNode, type Ref } from 'react'
 
 import { defineCodeBlockView } from '../extensions/code-block-view.ts'
@@ -93,6 +94,9 @@ export interface ProseKitEditorProps {
   /** Starts a bullet on Enter after a heading. See `EditorProps.bulletAfterHeading`. */
   bulletAfterHeading?: boolean
 
+  /** Handles a leading YAML frontmatter block. See `EditorProps.frontmatter`. */
+  frontmatter?: boolean
+
   /** Shows the per-block gutter handle. See `EditorProps.blockHandle`. */
   blockHandle?: boolean
 
@@ -129,6 +133,7 @@ export function ProseKitEditor({
   onImageClick,
   embedPaste,
   bulletAfterHeading,
+  frontmatter = false,
   blockHandle = true,
   placeholder,
   readOnly,
@@ -142,7 +147,7 @@ export function ProseKitEditor({
     const extension = union(baseExtension, defineCodeBlockView())
     const editor: TypedEditor = createEditor({ extension })
     if (initialMarkdown) {
-      editor.setContent(markdownToDoc(initialMarkdown, editor.nodes))
+      editor.setContent(markdownToDoc(initialMarkdown, { nodes: editor.nodes, frontmatter }))
     }
     return editor
   })
@@ -153,7 +158,7 @@ export function ProseKitEditor({
 
   useImperativeHandle(ref, () => {
     function getMarkdown(): string {
-      return docToMarkdown(editor.state.doc)
+      return docToMarkdown(editor.state.doc, { frontmatter })
     }
     function getSelection(): SelectionJSON {
       return editor.state.selection.toJSON() as SelectionJSON
@@ -165,7 +170,7 @@ export function ProseKitEditor({
       if (markdown == null && !selection) return
       const transaction = editor.state.tr
       if (markdown != null) {
-        const doc = markdownToDoc(markdown, editor.nodes)
+        const doc = markdownToDoc(markdown, { nodes: editor.nodes, frontmatter })
         transaction.replaceWith(0, transaction.doc.content.size, doc.content)
       }
       if (selection) {
@@ -201,7 +206,7 @@ export function ProseKitEditor({
       scrollIntoView,
       editor,
     }
-  }, [editor])
+  }, [editor, frontmatter])
 
   // Guard the host callback so programmatic setState/setMarkdown stays silent.
   // Stable per `onDocChange` identity, so the extension is not rebuilt every render.
@@ -215,7 +220,11 @@ export function ProseKitEditor({
 
   return (
     <ProseKit editor={editor}>
-      <div ref={editor.mount} spellCheck={spellCheck} className={editorClassName}></div>
+      <div
+        ref={editor.mount}
+        spellCheck={spellCheck}
+        className={clsx('meowdown-content', editorClassName)}
+      ></div>
       <EditorExtensions
         markMode={markMode}
         onDocChange={handleDocChange}
@@ -229,6 +238,7 @@ export function ProseKitEditor({
         bulletAfterHeading={bulletAfterHeading}
         placeholder={placeholder}
         readOnly={readOnly}
+        wikilinkEnabled={!!onWikilinkSearch}
       />
       {blockHandle && !readOnly && <BlockHandle />}
       {!readOnly && <TableHandle />}

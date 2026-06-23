@@ -37,7 +37,7 @@ describe.each(['hide', 'focus'] as MarkMode[])(
 
       await userEvent.keyboard('B')
       expect(fixture.doc.textContent).toBe('A![img](url)B')
-      expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A![img](url)B▌"`)
+      expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A![img](url)B┃"`)
     })
 
     it('types after an image that sits between words', async () => {

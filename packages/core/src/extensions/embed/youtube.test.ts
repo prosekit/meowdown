@@ -31,16 +31,15 @@ describe('matchYouTube', () => {
     expect(matchYouTube('not a url')).toBeUndefined()
   })
 
-  it('renders a nocookie embed iframe', () => {
-    const element = matchYouTube('https://youtu.be/dQw4w9WgXcQ')!.render() as HTMLIFrameElement
-    expect(element.tagName).toBe('IFRAME')
-    expect(element.src).toBe('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
-    expect(element.getAttribute('loading')).toBe('lazy')
-    expect(element.allowFullscreen).toBe(true)
+  it('describes a nocookie embed iframe', () => {
+    const embed = matchYouTube('https://youtu.be/dQw4w9WgXcQ')!
+    expect(embed.kind).toBe('youtube')
+    expect(embed.src).toBe('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
+    expect(embed.allowFullscreen).toBe(true)
   })
 
   it('passes the start time through to the embed src', () => {
-    const element = matchYouTube('https://youtu.be/dQw4w9WgXcQ?t=90')!.render() as HTMLIFrameElement
-    expect(element.src).toBe('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?start=90')
+    const embed = matchYouTube('https://youtu.be/dQw4w9WgXcQ?t=90')!
+    expect(embed.src).toBe('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?start=90')
   })
 })

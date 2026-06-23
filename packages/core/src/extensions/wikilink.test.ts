@@ -74,12 +74,12 @@ describe.each(ALL_MODES)('wikilink caret navigation in %s mode', (mode) => {
     setCaret(fixture, 1)
     expect(await traceKeySelection(fixture, 'ArrowRight', 5)).toMatchInlineSnapshot(`
       [
-        "A▌B[[Note]]CD",
-        "AB▌[[Note]]CD",
-        "AB▛[[Note]]▟CD",
-        "AB[[Note]]▌CD",
-        "AB[[Note]]C▌D",
-        "AB[[Note]]CD▌",
+        "A┃B[[Note]]CD",
+        "AB┃[[Note]]CD",
+        "AB❰[[Note]]❱CD",
+        "AB[[Note]]┃CD",
+        "AB[[Note]]C┃D",
+        "AB[[Note]]CD┃",
       ]
     `)
   })
@@ -89,10 +89,10 @@ describe.each(ALL_MODES)('wikilink caret navigation in %s mode', (mode) => {
     setCaret(fixture, 11)
     expect(await traceKeySelection(fixture, 'ArrowLeft', 3)).toMatchInlineSnapshot(`
       [
-        "AB[[Note]]C▌D",
-        "AB[[Note]]▌CD",
-        "AB▛[[Note]]▟CD",
-        "AB▌[[Note]]CD",
+        "AB[[Note]]C┃D",
+        "AB[[Note]]┃CD",
+        "AB❰[[Note]]❱CD",
+        "AB┃[[Note]]CD",
       ]
     `)
   })
@@ -105,10 +105,10 @@ describe.each(ALL_MODES)('wikilink caret navigation in %s mode', (mode) => {
       await traceKeyAt(setup, 11, 'Backspace'), // between C and D
     ]).toMatchInlineSnapshot(`
       [
-        "A▌B[[Note]]CD  ->  ▌B[[Note]]CD",
-        "AB▌[[Note]]CD  ->  A▌[[Note]]CD",
-        "AB[[Note]]▌CD  ->  AB▌CD",
-        "AB[[Note]]C▌D  ->  AB[[Note]]▌D",
+        "A┃B[[Note]]CD  ->  ┃B[[Note]]CD",
+        "AB┃[[Note]]CD  ->  A┃[[Note]]CD",
+        "AB[[Note]]┃CD  ->  AB┃CD",
+        "AB[[Note]]C┃D  ->  AB[[Note]]┃D",
       ]
     `)
   })
@@ -124,15 +124,15 @@ describe.each(LABEL_MODES)('wikilink selection ring in %s mode', (mode) => {
     using fixture = setup()
 
     setCaret(fixture, 2)
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"AB▌[[Note]]CD"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"AB┃[[Note]]CD"`)
     await expect.element(label).toHaveStyle({ outlineStyle: 'none' })
 
     await userEvent.keyboard('{ArrowRight}')
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"AB▛[[Note]]▟CD"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"AB❰[[Note]]❱CD"`)
     await expect.element(label).toHaveStyle({ outlineStyle: 'solid' })
 
     await userEvent.keyboard('{ArrowRight}')
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"AB[[Note]]▌CD"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"AB[[Note]]┃CD"`)
     await expect.element(label).toHaveStyle({ outlineStyle: 'none' })
   })
 
@@ -140,11 +140,11 @@ describe.each(LABEL_MODES)('wikilink selection ring in %s mode', (mode) => {
     using fixture = setup()
 
     setCaret(fixture, 10)
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"AB[[Note]]▌CD"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"AB[[Note]]┃CD"`)
     await expect.element(label).toHaveStyle({ outlineStyle: 'none' })
 
     await userEvent.keyboard('{ArrowLeft}')
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"AB▛[[Note]]▟CD"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"AB❰[[Note]]❱CD"`)
     await expect.element(label).toHaveStyle({ outlineStyle: 'solid' })
   })
 })

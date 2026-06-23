@@ -188,6 +188,7 @@ describe('undo restores the raw link', () => {
 
     view.focus()
     // `Mod-z` is bound to undo by defineHistory; exercise the actual binding.
+    // TODO: rewrite this to {ControlOrMeta}
     await userEvent.keyboard(
       `{${isApple ? 'Meta' : 'Control'}>}z{/${isApple ? 'Meta' : 'Control'}}`,
     )

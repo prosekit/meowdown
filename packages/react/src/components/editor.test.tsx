@@ -146,8 +146,8 @@ describe('MeowdownEditor', () => {
 
   it('applies markdown and a selection hint via setState', async () => {
     const ref = createRef<EditorHandle>()
-    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="x" />)
-    await expect.element(screen.getByText('x')).toBeInTheDocument()
+    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="hello" />)
+    await expect.element(screen.getByText('hello')).toBeInTheDocument()
 
     await pmRoot.click()
     ref.current?.setState('ac', { type: 'text', anchor: 2, head: 2 })

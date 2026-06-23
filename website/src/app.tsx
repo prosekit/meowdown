@@ -33,6 +33,13 @@ Label your notes with tags like #meow and #markdown. Type \`#\` followed by a le
 
 Connect notes with wikilinks like [[Daily journal]] and [[Reading list]]. Type \`[[\` to link another note.
 
+Track things two ways. Type \`+ \` for a circle checkbox task, or \`[] \` for a square checkbox task:
+
++ [ ] Ship the circle task
++ [x] Read the research doc
+- [ ] Buy cat food
+- [x] Water the plants
+
 Drop in an image and it renders right where you wrote it. Paste or drag one in to upload your own:
 
 ![A sunny placeholder photo](https://static.photos/yellow/640x360/42)

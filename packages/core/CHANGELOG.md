@@ -1,5 +1,125 @@
 # Changelog
 
+## [0.21.0](https://github.com/prosekit/meowdown/compare/core-v0.20.0...core-v0.21.0) (2026-06-23)
+
+
+### Features
+
+* open the wikilink menu on Mod-Shift-K ([#134](https://github.com/prosekit/meowdown/issues/134)) ([8021ea0](https://github.com/prosekit/meowdown/commit/8021ea09adf39ffcf1267fe43a821188ebdb6bf0))
+* render Markdown to React statically with MarkdownView ([#135](https://github.com/prosekit/meowdown/issues/135)) ([b541154](https://github.com/prosekit/meowdown/commit/b541154346b3ee56d923593fa1ef5b05ec061d66))
+
+## [0.20.0](https://github.com/prosekit/meowdown/compare/core-v0.19.0...core-v0.20.0) (2026-06-22)
+
+
+### Miscellaneous Chores
+
+* **core:** Synchronize meowdown versions
+
+## [0.19.0](https://github.com/prosekit/meowdown/compare/core-v0.18.0...core-v0.19.0) (2026-06-22)
+
+
+### Features
+
+* paste rich text as markdown ([#130](https://github.com/prosekit/meowdown/issues/130)) ([a1e6f23](https://github.com/prosekit/meowdown/commit/a1e6f2318f498405fc5675b1e693bebd97d14a1e))
+
+## [0.18.0](https://github.com/prosekit/meowdown/compare/core-v0.17.4...core-v0.18.0) (2026-06-22)
+
+
+### Features
+
+* add circle task list items ([#128](https://github.com/prosekit/meowdown/issues/128)) ([48c0fea](https://github.com/prosekit/meowdown/commit/48c0fea4ceb106ad07f617a141198cfaa4626938))
+
+
+### Bug Fixes
+
+* capture the list marker gap width ([#127](https://github.com/prosekit/meowdown/issues/127)) ([05989bf](https://github.com/prosekit/meowdown/commit/05989bfb858824b04e0b4f49ac12568c24f7132d))
+
+## [0.17.4](https://github.com/prosekit/meowdown/compare/core-v0.17.3...core-v0.17.4) (2026-06-21)
+
+
+### Miscellaneous Chores
+
+* **core:** Synchronize meowdown versions
+
+## [0.17.3](https://github.com/prosekit/meowdown/compare/core-v0.17.2...core-v0.17.3) (2026-06-21)
+
+
+### Bug Fixes
+
+* **core:** preserve multi-line code blocks in list items ([#123](https://github.com/prosekit/meowdown/issues/123)) ([7954017](https://github.com/prosekit/meowdown/commit/79540174b3e52490ffc813e7078151e2c17b830a))
+
+## [0.17.2](https://github.com/prosekit/meowdown/compare/core-v0.17.1...core-v0.17.2) (2026-06-21)
+
+
+### Bug Fixes
+
+* **core:** prevent selection highlight overflow on Safari ([#120](https://github.com/prosekit/meowdown/issues/120)) ([ce43f9e](https://github.com/prosekit/meowdown/commit/ce43f9e2a37f9ab9d436caf8a2a36587f481089d))
+
+## [0.17.1](https://github.com/prosekit/meowdown/compare/core-v0.17.0...core-v0.17.1) (2026-06-21)
+
+
+### Bug Fixes
+
+* treat blockquote-marker-only lines as blank ([#118](https://github.com/prosekit/meowdown/issues/118)) ([f1ecd66](https://github.com/prosekit/meowdown/commit/f1ecd6609f2dbef2ac07159f6a41c2cc2afde3dc))
+
+## [0.17.0](https://github.com/prosekit/meowdown/compare/core-v0.16.2...core-v0.17.0) (2026-06-21)
+
+
+### Features
+
+* delete table on Backspace over full cell selection ([#110](https://github.com/prosekit/meowdown/issues/110)) ([5b392cb](https://github.com/prosekit/meowdown/commit/5b392cb700c38e43e57609d87794d04377e8582a))
+* make YAML frontmatter handling opt-in ([#111](https://github.com/prosekit/meowdown/issues/111)) ([e3a46dd](https://github.com/prosekit/meowdown/commit/e3a46ddefbc90dc5f79ccdd186c36fb4938c4d1f))
+
+
+### Bug Fixes
+
+* **core:** preserve soft line breaks ([#112](https://github.com/prosekit/meowdown/issues/112)) ([7e0e7bb](https://github.com/prosekit/meowdown/commit/7e0e7bb1757d1f3359397fa8447aa32b6924ca63))
+* stop block handle drag preview inheriting gutter padding ([#115](https://github.com/prosekit/meowdown/issues/115)) ([82927e5](https://github.com/prosekit/meowdown/commit/82927e5f5b51a78e08857d89c80a24f09107fb05))
+
+## [0.16.2](https://github.com/prosekit/meowdown/compare/core-v0.16.1...core-v0.16.2) (2026-06-20)
+
+
+### Bug Fixes
+
+* **core:** preserve thematic break marker on round-trip ([#104](https://github.com/prosekit/meowdown/issues/104)) ([7cfc064](https://github.com/prosekit/meowdown/commit/7cfc0646ad57d29491f6dcfb5820e6f0095e168f))
+
+## [0.16.1](https://github.com/prosekit/meowdown/compare/core-v0.16.0...core-v0.16.1) (2026-06-20)
+
+
+### Bug Fixes
+
+* **core:** preserve setext heading underline ([#101](https://github.com/prosekit/meowdown/issues/101)) ([2742971](https://github.com/prosekit/meowdown/commit/27429714b2bc07adab2a4733c5165868a60477a4))
+
+## [0.16.0](https://github.com/prosekit/meowdown/compare/core-v0.15.2...core-v0.16.0) (2026-06-20)
+
+
+### Features
+
+* **core:** support YAML frontmatter ([#100](https://github.com/prosekit/meowdown/issues/100)) ([b915768](https://github.com/prosekit/meowdown/commit/b915768914296eb88b88204822f865aa6b3d3a50))
+
+
+### Bug Fixes
+
+* **core:** avoid double-escaping pipes in table cells ([#102](https://github.com/prosekit/meowdown/issues/102)) ([79e2987](https://github.com/prosekit/meowdown/commit/79e2987358ca541782a5aa58c1c7e201e50ad086))
+* **core:** emit empty code block without a blank line ([#99](https://github.com/prosekit/meowdown/issues/99)) ([83bef2c](https://github.com/prosekit/meowdown/commit/83bef2c81d22b1cf0911768586d7fedea2f0040f))
+* **core:** improve markdown round-trip fidelity ([#98](https://github.com/prosekit/meowdown/issues/98)) ([8d704a1](https://github.com/prosekit/meowdown/commit/8d704a17f6d2655fa09eca668ccd32509ab25e67))
+* **core:** stop emitting junk marker lines after nested blocks ([#103](https://github.com/prosekit/meowdown/issues/103)) ([e41ed98](https://github.com/prosekit/meowdown/commit/e41ed98afb06a853b3a50b8706ca84583d58718c))
+* fall back to slice text when clipboardData is empty ([#93](https://github.com/prosekit/meowdown/issues/93)) ([ff3fc07](https://github.com/prosekit/meowdown/commit/ff3fc07ad8f11c8cc0cd71d36d653001a1d21556))
+
+## [0.15.2](https://github.com/prosekit/meowdown/compare/core-v0.15.1...core-v0.15.2) (2026-06-19)
+
+
+### Bug Fixes
+
+* **core:** improve focus-mode marker reveal ([#88](https://github.com/prosekit/meowdown/issues/88)) ([adb668e](https://github.com/prosekit/meowdown/commit/adb668e30e36b9ddbf10ccab7551d557b17369f3))
+
+## [0.15.1](https://github.com/prosekit/meowdown/compare/core-v0.15.0...core-v0.15.1) (2026-06-19)
+
+
+### Bug Fixes
+
+* **core:** keep empty list item markers on serialize ([#85](https://github.com/prosekit/meowdown/issues/85)) ([142359c](https://github.com/prosekit/meowdown/commit/142359c5a71ed327c27540e665f1b81ef4167da9))
+
 ## [0.15.0](https://github.com/prosekit/meowdown/compare/core-v0.14.0...core-v0.15.0) (2026-06-19)
 
 

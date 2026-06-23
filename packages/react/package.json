@@ -1,11 +1,12 @@
 {
   "name": "@meowdown/react",
   "type": "module",
-  "version": "0.15.0",
+  "version": "0.21.0",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/prosekit/meowdown"
+    "url": "https://github.com/prosekit/meowdown",
+    "directory": "packages/react"
   },
   "exports": {
     ".": "./src/index.ts",
@@ -20,7 +21,7 @@
     "build": "cmk && tsdown"
   },
   "dependencies": {
-    "@base-ui/react": "^1.5.0",
+    "@base-ui/react": "^1.6.0",
     "@codemirror/commands": "^6.10.3",
     "@codemirror/lang-markdown": "^6.5.0",
     "@codemirror/language": "^6.12.3",
@@ -30,8 +31,9 @@
     "@ocavue/utils": "^1.7.0",
     "@prosekit/core": "^0.13.0-beta.3",
     "@prosekit/pm": "^0.1.19-beta.0",
-    "@prosekit/react": "^0.8.0-beta.4",
-    "clsx": "^2.1.1"
+    "@prosekit/react": "^0.8.0-beta.10",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.21.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",
@@ -47,6 +49,7 @@
   },
   "devDependencies": {
     "@css-modules-kit/codegen": "^1.3.0",
+    "@meowdown/vitest": "workspace:*",
     "@ocavue/tsconfig": "^0.7.1",
     "@tsdown/css": "^0.22.3",
     "@types/react": "^19.2.17",

@@ -1,13 +1,16 @@
 import {
   defineBulletAfterHeading,
   defineEmbedPaste,
+  defineHTMLPaste,
   defineImage,
   defineImageClickHandler,
   defineLinkClickHandler,
+  defineMarkdownCopy,
   defineMarkMode,
   definePlaceholder,
   defineReadonly,
   defineWikilinkClickHandler,
+  defineWikilinkTrigger,
   type ImageClickHandler,
   type ImageOptions,
   type LinkClickHandler,
@@ -32,6 +35,7 @@ export interface EditorExtensionsProps {
   bulletAfterHeading?: boolean
   placeholder?: PlaceholderOptions['placeholder']
   readOnly?: boolean
+  wikilinkEnabled?: boolean
 }
 
 // A leaf that renders nothing and holds every reactive `useExtension` call (each
@@ -50,6 +54,7 @@ export function EditorExtensions({
   bulletAfterHeading,
   placeholder,
   readOnly,
+  wikilinkEnabled,
 }: EditorExtensionsProps): null {
   useExtension(
     useMemo(() => {
@@ -99,6 +104,10 @@ export function EditorExtensions({
     }, [embedPaste]),
   )
 
+  useExtension(useMemo(() => defineHTMLPaste(), []))
+
+  useExtension(useMemo(() => defineMarkdownCopy(), []))
+
   useExtension(
     useMemo(() => {
       return bulletAfterHeading ? defineBulletAfterHeading() : null
@@ -111,6 +120,12 @@ export function EditorExtensions({
       // not in every empty block the caret enters.
       return placeholder ? definePlaceholder({ placeholder, strategy: 'doc' }) : null
     }, [placeholder]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return wikilinkEnabled ? defineWikilinkTrigger() : null
+    }, [wikilinkEnabled]),
   )
 
   return null

@@ -1,11 +1,12 @@
 {
   "name": "@meowdown/core",
   "type": "module",
-  "version": "0.15.0",
+  "version": "0.21.0",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/prosekit/meowdown"
+    "url": "https://github.com/prosekit/meowdown",
+    "directory": "packages/core"
   },
   "exports": {
     ".": "./src/index.ts",
@@ -27,16 +28,23 @@
     "@lezer/markdown": "^1.6.4",
     "@ocavue/utils": "^1.7.0",
     "@prosekit/core": "^0.13.0-beta.3",
-    "@prosekit/extensions": "^0.17.5-beta.4",
+    "@prosekit/extensions": "^0.18.0-beta.9",
     "@prosekit/pm": "^0.1.19-beta.0",
-    "prosemirror-highlight": "^0.15.2"
+    "prosemirror-flat-list": "^0.6.0",
+    "prosemirror-highlight": "^0.15.2",
+    "rehype-parse": "^9.0.1",
+    "rehype-remark": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-stringify": "^11.0.0",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
+    "@meowdown/vitest": "workspace:*",
     "@ocavue/tsconfig": "^0.7.1",
     "@tsdown/css": "^0.22.3",
     "@vitest/browser-playwright": "^4.1.9",
     "dedent": "^1.7.2",
-    "diffable-html-snapshot": "^0.2.0",
+    "diffable-html-snapshot": "^0.3.0",
     "tsdown": "^0.22.3",
     "vitest": "^4.1.9"
   },

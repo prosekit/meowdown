@@ -4,8 +4,11 @@ import './locator.ts'
 
 import { createTestEditor } from '@prosekit/core/test'
 import type { EditorNode } from '@prosekit/pm/model'
+import { formatHTML } from 'diffable-html-snapshot'
 
 import { defineEditorExtension } from '../extensions/extension.ts'
+
+import { getSelectionSnapshot } from './selection-snapshot.ts'
 
 export { getSelectionSnapshot } from './selection-snapshot.ts'
 export { setCaret, traceKeySelection, traceKeyAt } from './caret.ts'
@@ -56,6 +59,14 @@ export function setupFixture({ mount = true }: SetupFixtureOptions = {}) {
 
     get dom() {
       return editor.view.dom
+    },
+
+    get selectionSnapshot() {
+      return getSelectionSnapshot(editor.view.state)
+    },
+
+    get htmlSnapshot() {
+      return formatHTML(editor.view.dom.innerHTML)
     },
 
     set(doc: EditorNode) {

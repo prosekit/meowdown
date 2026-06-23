@@ -26,10 +26,14 @@ describe('defineEditorExtension', () => {
 
     expect(doc.toJSON()).toMatchInlineSnapshot(`
       {
+        "attrs": {
+          "frontmatter": null,
+        },
         "content": [
           {
             "attrs": {
               "level": 1,
+              "setextUnderline": null,
             },
             "content": [
               {
@@ -67,7 +71,10 @@ describe('defineEditorExtension', () => {
               "checked": false,
               "collapsed": false,
               "kind": "bullet",
+              "marker": null,
+              "markerGap": 1,
               "order": null,
+              "taskMarker": null,
             },
             "content": [
               {
@@ -87,7 +94,10 @@ describe('defineEditorExtension', () => {
               "checked": false,
               "collapsed": false,
               "kind": "ordered",
+              "marker": null,
+              "markerGap": 1,
               "order": 1,
+              "taskMarker": null,
             },
             "content": [
               {
@@ -107,7 +117,10 @@ describe('defineEditorExtension', () => {
               "checked": false,
               "collapsed": false,
               "kind": "task",
+              "marker": null,
+              "markerGap": 1,
               "order": null,
+              "taskMarker": null,
             },
             "content": [
               {
@@ -226,6 +239,9 @@ describe('defineEditorExtension', () => {
             "type": "table",
           },
           {
+            "attrs": {
+              "marker": null,
+            },
             "type": "horizontalRule",
           },
         ],

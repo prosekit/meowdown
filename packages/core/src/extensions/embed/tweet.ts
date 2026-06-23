@@ -19,27 +19,25 @@ function parseTweetId(src: string): string | undefined {
 export const matchTweet: EmbedMatcher = (src) => {
   const tweetId = parseTweetId(src)
   if (!tweetId) return
+  const theme = prefersDarkColorScheme() ? 'dark' : 'light'
   return {
+    kind: 'tweet',
     key: `tweet:${tweetId}`,
-    render: () => {
-      const theme = prefersDarkColorScheme() ? 'dark' : 'light'
-      const iframe = document.createElement('iframe')
-      // First-party embed endpoint; renders the tweet with no global script.
-      iframe.src = `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=${theme}&dnt=true`
-      iframe.title = 'Tweet'
-      iframe.className = 'md-embed md-embed-tweet'
-      iframe.dataset.testid = 'tweet-embed'
-      iframe.loading = 'lazy'
-      iframe.referrerPolicy = 'strict-origin-when-cross-origin'
-      iframe.setAttribute('frameborder', '0')
-      // Tweet.html reports its rendered height via postMessage; size to fit.
-      listenForTweetHeight(iframe)
-      return iframe
-    },
+    // First-party embed endpoint; renders the tweet with no global script.
+    src: `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=${theme}&dnt=true`,
+    title: 'Tweet',
+    className: 'md-embed md-embed-tweet',
+    testid: 'tweet-embed',
   }
 }
 
-function listenForTweetHeight(iframe: HTMLIFrameElement): void {
+/**
+ * `Tweet.html` reports its rendered height via `postMessage`; size the iframe to
+ * fit. Returns a cleanup that removes the listener. The cleanup also runs once
+ * the iframe leaves the DOM, so the editor's DOM mark view (which has no destroy
+ * hook) is covered, while a React caller can call it on unmount.
+ */
+export function listenForTweetHeight(iframe: HTMLIFrameElement): () => void {
   const onMessage = (event: MessageEvent) => {
     if (event.source !== iframe.contentWindow) return
     try {
@@ -57,12 +55,17 @@ function listenForTweetHeight(iframe: HTMLIFrameElement): void {
     }
   }
   window.addEventListener('message', onMessage)
+  let cleaned = false
+  const cleanup = (): void => {
+    if (cleaned) return
+    cleaned = true
+    window.removeEventListener('message', onMessage)
+    observer.disconnect()
+  }
   // Drop the listener once the iframe leaves the DOM (decoration rebuilt/removed).
   const observer = new MutationObserver(() => {
-    if (!iframe.isConnected) {
-      window.removeEventListener('message', onMessage)
-      observer.disconnect()
-    }
+    if (!iframe.isConnected) cleanup()
   })
   observer.observe(document.body, { childList: true, subtree: true })
+  return cleanup
 }

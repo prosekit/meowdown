@@ -1,9 +1,18 @@
 import type { CodeBlockAttrs } from '@prosekit/extensions/code-block'
-import type { HeadingAttrs } from '@prosekit/extensions/heading'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
+import type { Frontmatter } from '../extensions/frontmatter.ts'
+import type { MeowdownHeadingAttrs } from '../extensions/heading.ts'
+import type { MeowdownHorizontalRuleAttrs } from '../extensions/horizontal-rule.ts'
+import type { MeowdownListAttrs } from '../extensions/list.ts'
 import type { NodeName } from '../extensions/node-names.ts'
 import { longestBacktickRun } from '../utils/backticks.ts'
+
+/** Options for {@link docToMarkdown}. */
+export interface DocToMarkdownOptions {
+  /** Whether to serialize the doc's `frontmatter` attribute as a leading `---` block. Off by default. */
+  frontmatter?: boolean
+}
 
 /**
  * Convert a ProseMirror document into a Markdown string.
@@ -20,10 +29,30 @@ import { longestBacktickRun } from '../utils/backticks.ts'
  * - Backtick fence width and cell escaping use single linear loops, no
  *   regex on the hot path.
  */
-export function docToMarkdown(node: ProseMirrorNode): string {
+export function docToMarkdown(node: ProseMirrorNode, options: DocToMarkdownOptions = {}): string {
   const out = new MdOut()
+  if (options.frontmatter) {
+    emitFrontmatter(node.attrs.frontmatter as Frontmatter, out)
+  }
   emit(node, out)
   return out.finish()
+}
+
+/**
+ * Emit the document's YAML frontmatter (stored as a `doc` attribute) as a
+ * leading `---\n{body}\n---` block. `null` (the default) emits nothing; an
+ * empty body emits `---\n---` with no middle blank line.
+ */
+function emitFrontmatter(body: Frontmatter, out: MdOut): void {
+  if (body === null) return
+  out.write('---')
+  out.write('\n')
+  if (body !== '') {
+    out.write(body)
+    out.write('\n')
+  }
+  out.write('---')
+  out.closeBlock()
 }
 
 /** Heading prefixes indexed by level (1..6). Index 0 is a sentinel. */
@@ -36,6 +65,23 @@ const HEADING_PREFIX: ReadonlyArray<string> = [
   '##### ',
   '###### ',
 ]
+
+function emitHeading(node: ProseMirrorNode, out: MdOut): void {
+  const attrs = node.attrs as MeowdownHeadingAttrs
+  const underline = attrs.setextUnderline
+  // Setext exists only for levels 1-2 and needs a content line to underline;
+  // an empty or deeper heading falls back to ATX.
+  if (underline != null && node.content.size > 0 && attrs.level <= 2) {
+    emitInlineChildren(node, out)
+    const underlineChar = attrs.level === 1 ? '=' : '-'
+    out.write('\n' + underlineChar.repeat(Math.max(1, underline)))
+    out.closeBlock()
+    return
+  }
+  out.write(HEADING_PREFIX[attrs.level] ?? '# ')
+  emitInlineChildren(node, out)
+  out.closeBlock()
+}
 
 // ─────────────────────────────────────────────────────────────────────
 // Output buffer
@@ -86,6 +132,14 @@ class MdOut {
 
   /** End the current block; the next write gets a blank line before it. */
   closeBlock(): void {
+    // An empty block (e.g. an empty list item `- `) still owns a line: flush
+    // its pending marker, trimmed, so it is neither dropped nor left dangling.
+    if (this.atLineStart && this.pendingFirst !== null) {
+      this.emitDeferredBlankLine()
+      this.parts.push(this.pendingFirst.trimEnd())
+      this.pendingFirst = null
+      this.atLineStart = false
+    }
     if (!this.atLineStart) this.parts.push('\n')
     this.atLineStart = true
     this.deferredBlankPrefix = this.linePrefix
@@ -118,7 +172,13 @@ class MdOut {
     }
     fn()
     this.linePrefix = savedLine
-    this.pendingFirst = savedFirst
+    // When `firstLine` is set we folded the outer one-shot marker (`savedFirst`,
+    // e.g. a blockquote's "> ") into this block's first-line marker, which `fn`
+    // has by now written or flushed. Restoring `savedFirst` would re-introduce
+    // that already-consumed marker, which `closeBlock` then dumps as a bare junk
+    // line ("> - item\n>\n>\n"). A following sibling rebuilds its marker from
+    // `savedLine` anyway, so dropping it here is safe.
+    this.pendingFirst = firstLine !== null ? null : savedFirst
   }
 
   finish(): string {
@@ -151,13 +211,9 @@ function emit(node: ProseMirrorNode, out: MdOut): void {
       emitInlineChildren(node, out)
       out.closeBlock()
       return
-    case 'heading': {
-      const attrs = node.attrs as HeadingAttrs
-      out.write(HEADING_PREFIX[attrs.level] ?? '# ')
-      emitInlineChildren(node, out)
-      out.closeBlock()
+    case 'heading':
+      emitHeading(node, out)
       return
-    }
     case 'blockquote':
       out.withPrefix('> ', '> ', () => emitBlockChildren(node, out))
       out.closeBlock()
@@ -168,10 +224,12 @@ function emit(node: ProseMirrorNode, out: MdOut): void {
     case 'codeBlock':
       emitCodeBlock(node, out)
       return
-    case 'horizontalRule':
-      out.write('---')
+    case 'horizontalRule': {
+      const { marker } = node.attrs as MeowdownHorizontalRuleAttrs
+      out.write(marker || '---')
       out.closeBlock()
       return
+    }
     case 'table':
       emitTable(node, out)
       return
@@ -258,25 +316,16 @@ function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
 // ─────────────────────────────────────────────────────────────────────
 
 function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
-  // prosekit's `list` node is a SINGLE item; sibling `list` nodes form the
-  // larger markdown list.
-  const attrs = node.attrs as {
-    kind: 'bullet' | 'ordered' | 'task' | 'toggle'
-    order: number | null
-    checked: boolean
-  }
-  const marker =
-    attrs.kind === 'ordered'
-      ? `${attrs.order ?? 1}. `
-      : attrs.kind === 'task'
-        ? attrs.checked
-          ? '- [x] '
-          : '- [ ] '
-        : '- ' // bullet | toggle
-
-  // For a task item the `[ ] ` checkbox is list-item CONTENT in GFM terms,
-  // not part of the marker, so continuation lines align to the `- ` width.
-  const continuation = ' '.repeat(attrs.kind === 'task' ? 2 : marker.length)
+  const attrs = node.attrs as MeowdownListAttrs
+  const bulletMarker = attrs.marker === '*' || attrs.marker === '+' ? attrs.marker : '-'
+  const orderMarker = attrs.marker === ')' ? ')' : '.'
+  const checkMark = attrs.taskMarker === 'X' ? 'X' : 'x'
+  // The delimiter plus its original gap (1-4 spaces).
+  const gap = Math.min(Math.max(attrs.markerGap ?? 1, 1), 4)
+  const delimiter = attrs.kind === 'ordered' ? `${attrs.order ?? 1}${orderMarker}` : bulletMarker
+  const prefix = `${delimiter}${' '.repeat(gap)}`
+  const marker = attrs.kind === 'task' ? `${prefix}[${attrs.checked ? checkMark : ' '}] ` : prefix
+  const continuation = ' '.repeat(prefix.length)
   out.withPrefix(continuation, marker, () => emitBlockChildren(node, out, tight))
   out.closeBlock()
 }
@@ -295,8 +344,10 @@ function emitCodeBlock(node: ProseMirrorNode, out: MdOut): void {
   out.write(fence)
   if (language) out.write(language)
   out.write('\n')
-  out.write(code)
-  out.write('\n')
+  if (code) {
+    out.write(code)
+    out.write('\n')
+  }
   out.write(fence)
   out.closeBlock()
 }

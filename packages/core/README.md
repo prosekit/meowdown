@@ -28,7 +28,7 @@ Heading shortcuts toggle the current block to a heading of that level (or back t
 
 ## Round-trip fidelity
 
-`checkRoundTrip(markdown)` reports how faithfully markdown survives a parse-then-serialize round trip: `'exact'` (byte-identical modulo the trailing newline), `'normalizing'` (same non-blank lines, only blank-line layout differs), or `'lossy'` (a non-blank line changed, e.g. setext headings or raw HTML blocks). Hosts that keep markdown on disk can gate saves on it, opening lossy files read-only so a save never rewrites content.
+`checkRoundTrip(markdown)` reports how faithfully markdown survives a parse-then-serialize round trip: `'exact'` (byte-identical modulo the trailing newline), `'normalizing'` (same non-blank lines, only blank-line layout differs), or `'lossy'` (a non-blank line changed, e.g. a closing ATX hash sequence or unaligned table columns). Hosts that keep markdown on disk can gate saves on it, opening lossy files read-only so a save never rewrites content.
 
 ## Styling
 
@@ -46,7 +46,7 @@ Heading shortcuts toggle the current block to a heading of that level (or back t
 - `--meowdown-image-radius`: corner radius of rendered inline images.
 - `--meowdown-placeholder`: placeholder text color (defaults to `--meowdown-muted`).
 - `--meowdown-font-mono`: monospace font stack.
-- `--meowdown-gutter`: horizontal editor padding. Floating UI such as the block handle (in `@meowdown/react`) lives inside it; keep it at least `3.5rem`.
+- `--meowdown-gutter`: horizontal editor padding. Applied to the editable root's `.meowdown-content` class (set by `@meowdown/react`), not `.ProseMirror`, so the block handle's drag preview stays unpadded. Floating UI such as the block handle lives inside it; keep it at least `3.5rem`.
 - `--meowdown-selection`: text `::selection` background.
 - `--meowdown-node-outline`: outline of a selected node; border color of selected tables and cells.
 - `--meowdown-node-selection`: background wash of a selected node or selected cells.
@@ -65,7 +65,17 @@ Inline images (`![alt](src)`) stay literal text and render in place via a mark v
 
 Pasting a lone tweet or YouTube link can auto-embed it. `defineEmbedPaste()` (or `@meowdown/react`'s `embedPaste` prop) rewrites the pasted link to `![](url)` so it renders as an embed; one undo turns the embed back into the raw link. It is not part of `defineEditorExtension`; add it explicitly.
 
+Pasting rich-text HTML from a browser (a bullet list, **bold**, a link, ...) converts it to Markdown so the formatting survives instead of arriving as plain text. `defineHTMLPaste()` (applied by default in `@meowdown/react`) rewrites the clipboard's `text/html` through the unified (rehype / remark) pipeline and reparses the Markdown with the editor's schema; meowdown's own clipboard (tagged `data-pm-slice`) and any paste landing in a code block are left to the default path. Going the other way, `defineMarkdownCopy()` serializes copied content to Markdown for the clipboard's `text/plain` flavor, so pasting into a plain-text field keeps list markers and block structure. Neither is part of `defineEditorExtension`; add them explicitly.
+
 Pressing Enter at the end of the document's first heading (the title line) can start a fresh empty bullet on the next line instead of a plain paragraph. `defineBulletAfterHeading()` binds this. It is not part of `defineEditorExtension`; add it explicitly.
+
+## Static rendering primitives
+
+`@meowdown/react`'s `<MarkdownView>` renders Markdown to a read-only React tree without an editor by reusing these building blocks, also exported for other renderers:
+
+- `inlineTextToMarkChunks(getMarkBuilders(), text)`: the inline parser the editor uses, returning `[from, to, marks]` chunks (`MarkChunk`) for one line of source text.
+- `getCodeTokens(code, language)`: syntax-highlight tokens (`CodeToken`, the tuple `[from, to, classes]`) tagged with the same `tok-*` classes as the editor. Returns synchronously once the Lezer grammar is cached, otherwise a promise.
+- `matchEmbed(src)`: detects a tweet/YouTube image `src` and returns an `EmbedDescriptor` (no DOM); `listenForTweetHeight(iframe)` syncs a tweet iframe's height and returns a cleanup function.
 
 ## Re-exports
 

@@ -1,5 +1,110 @@
 # Changelog
 
+## [0.21.0](https://github.com/prosekit/meowdown/compare/react-v0.20.0...react-v0.21.0) (2026-06-23)
+
+
+### Features
+
+* open the wikilink menu on Mod-Shift-K ([#134](https://github.com/prosekit/meowdown/issues/134)) ([8021ea0](https://github.com/prosekit/meowdown/commit/8021ea09adf39ffcf1267fe43a821188ebdb6bf0))
+* render Markdown to React statically with MarkdownView ([#135](https://github.com/prosekit/meowdown/issues/135)) ([b541154](https://github.com/prosekit/meowdown/commit/b541154346b3ee56d923593fa1ef5b05ec061d66))
+
+## [0.20.0](https://github.com/prosekit/meowdown/compare/react-v0.19.0...react-v0.20.0) (2026-06-22)
+
+
+### Features
+
+* **react:** open the wikilink menu on `@` ([#132](https://github.com/prosekit/meowdown/issues/132)) ([d635105](https://github.com/prosekit/meowdown/commit/d635105b939e1e3d24efe1ce8b1f39291a5a3b63))
+
+## [0.19.0](https://github.com/prosekit/meowdown/compare/react-v0.18.0...react-v0.19.0) (2026-06-22)
+
+
+### Features
+
+* paste rich text as markdown ([#130](https://github.com/prosekit/meowdown/issues/130)) ([a1e6f23](https://github.com/prosekit/meowdown/commit/a1e6f2318f498405fc5675b1e693bebd97d14a1e))
+
+## [0.18.0](https://github.com/prosekit/meowdown/compare/react-v0.17.4...react-v0.18.0) (2026-06-22)
+
+
+### Features
+
+* add circle task list items ([#128](https://github.com/prosekit/meowdown/issues/128)) ([48c0fea](https://github.com/prosekit/meowdown/commit/48c0fea4ceb106ad07f617a141198cfaa4626938))
+
+## [0.17.4](https://github.com/prosekit/meowdown/compare/react-v0.17.3...react-v0.17.4) (2026-06-21)
+
+
+### Bug Fixes
+
+* update prosekit ([#125](https://github.com/prosekit/meowdown/issues/125)) ([7f698e9](https://github.com/prosekit/meowdown/commit/7f698e9a1492ed6a7f80dac078c7e64f75c3082d))
+
+## [0.17.3](https://github.com/prosekit/meowdown/compare/react-v0.17.2...react-v0.17.3) (2026-06-21)
+
+
+### Miscellaneous Chores
+
+* **react:** Synchronize meowdown versions
+
+## [0.17.2](https://github.com/prosekit/meowdown/compare/react-v0.17.1...react-v0.17.2) (2026-06-21)
+
+
+### Miscellaneous Chores
+
+* **react:** Synchronize meowdown versions
+
+## [0.17.1](https://github.com/prosekit/meowdown/compare/react-v0.17.0...react-v0.17.1) (2026-06-21)
+
+
+### Miscellaneous Chores
+
+* **react:** Synchronize meowdown versions
+
+## [0.17.0](https://github.com/prosekit/meowdown/compare/react-v0.16.2...react-v0.17.0) (2026-06-21)
+
+
+### Features
+
+* make YAML frontmatter handling opt-in ([#111](https://github.com/prosekit/meowdown/issues/111)) ([e3a46dd](https://github.com/prosekit/meowdown/commit/e3a46ddefbc90dc5f79ccdd186c36fb4938c4d1f))
+* remove the add button from the block handle ([#116](https://github.com/prosekit/meowdown/issues/116)) ([1e497b7](https://github.com/prosekit/meowdown/commit/1e497b7ef986cedff2dfa162c9dc21cc924c8a68))
+
+
+### Bug Fixes
+
+* stop block handle drag preview inheriting gutter padding ([#115](https://github.com/prosekit/meowdown/issues/115)) ([82927e5](https://github.com/prosekit/meowdown/commit/82927e5f5b51a78e08857d89c80a24f09107fb05))
+
+## [0.16.2](https://github.com/prosekit/meowdown/compare/react-v0.16.1...react-v0.16.2) (2026-06-20)
+
+
+### Miscellaneous Chores
+
+* **react:** Synchronize meowdown versions
+
+## [0.16.1](https://github.com/prosekit/meowdown/compare/react-v0.16.0...react-v0.16.1) (2026-06-20)
+
+
+### Miscellaneous Chores
+
+* **react:** Synchronize meowdown versions
+
+## [0.16.0](https://github.com/prosekit/meowdown/compare/react-v0.15.2...react-v0.16.0) (2026-06-20)
+
+
+### Bug Fixes
+
+* fall back to slice text when clipboardData is empty ([#93](https://github.com/prosekit/meowdown/issues/93)) ([ff3fc07](https://github.com/prosekit/meowdown/commit/ff3fc07ad8f11c8cc0cd71d36d653001a1d21556))
+
+## [0.15.2](https://github.com/prosekit/meowdown/compare/react-v0.15.1...react-v0.15.2) (2026-06-19)
+
+
+### Miscellaneous Chores
+
+* **react:** Synchronize meowdown versions
+
+## [0.15.1](https://github.com/prosekit/meowdown/compare/react-v0.15.0...react-v0.15.1) (2026-06-19)
+
+
+### Miscellaneous Chores
+
+* **react:** Synchronize meowdown versions
+
 ## [0.15.0](https://github.com/prosekit/meowdown/compare/react-v0.14.0...react-v0.15.0) (2026-06-19)
 
 

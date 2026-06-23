@@ -48,7 +48,7 @@ describe.each(ALL_MODES)('typing after an inserted wikilink in %s mode', (mode) 
   it('places the caret after the wikilink', () => {
     using fixture = setupAfterA(mode)
     insertWikilink(fixture, '[[Note]]')
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A[[Note]]▌"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A[[Note]]┃"`)
   })
 
   it('types the next character after the wikilink, not before it', async () => {
@@ -58,7 +58,7 @@ describe.each(ALL_MODES)('typing after an inserted wikilink in %s mode', (mode) 
 
     await userEvent.keyboard('B')
     expect(fixture.doc.textContent).toBe('A[[Note]]B')
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A[[Note]]B▌"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A[[Note]]B┃"`)
   })
 
   it('keeps typing after the wikilink across several characters', async () => {
@@ -68,7 +68,7 @@ describe.each(ALL_MODES)('typing after an inserted wikilink in %s mode', (mode) 
 
     await userEvent.keyboard('Bar')
     expect(fixture.doc.textContent).toBe('A[[Note]]Bar')
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A[[Note]]Bar▌"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A[[Note]]Bar┃"`)
   })
 
   it('types after an alias wikilink, after its label', async () => {
@@ -78,7 +78,7 @@ describe.each(ALL_MODES)('typing after an inserted wikilink in %s mode', (mode) 
 
     await userEvent.keyboard('B')
     expect(fixture.doc.textContent).toBe('A[[target|Alias]]B')
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A[[target|Alias]]B▌"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A[[target|Alias]]B┃"`)
   })
 
   it('types after the second of two adjacent wikilinks', async () => {
@@ -88,7 +88,7 @@ describe.each(ALL_MODES)('typing after an inserted wikilink in %s mode', (mode) 
 
     await userEvent.keyboard('B')
     expect(fixture.doc.textContent).toBe('A[[One]][[Two]]B')
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A[[One]][[Two]]B▌"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A[[One]][[Two]]B┃"`)
   })
 })
 
@@ -127,7 +127,7 @@ describe.each(ALL_MODES)('typing before an inserted wikilink in %s mode', (mode)
 
     await userEvent.keyboard('X')
     expect(fixture.doc.textContent).toBe('AX[[Note]]C')
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"AX▌[[Note]]C"`)
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"AX┃[[Note]]C"`)
   })
 })
 

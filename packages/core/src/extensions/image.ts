@@ -9,7 +9,7 @@ import {
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView, MarkViewConstructor } from '@prosekit/pm/view'
 
-import { matchEmbed } from './embed/index.ts'
+import { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './embed/index.ts'
 import type { MdImageViewAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
 
@@ -30,8 +30,24 @@ export interface ImageOptions {
 }
 
 /** Show an `src` as-is when it is an http(s) URL, otherwise skip rendering it. */
-function defaultResolveImageUrl(src: string): string | undefined {
+export function defaultResolveImageUrl(src: string): string | undefined {
   return /^https?:\/\//i.test(src) ? src : undefined
+}
+
+/** Build the iframe DOM for an embed descriptor and start its height listener. */
+function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
+  const iframe = document.createElement('iframe')
+  iframe.src = embed.src
+  iframe.title = embed.title
+  iframe.className = embed.className
+  iframe.dataset.testid = embed.testid
+  iframe.loading = 'lazy'
+  iframe.referrerPolicy = 'strict-origin-when-cross-origin'
+  iframe.setAttribute('frameborder', '0')
+  if (embed.allow) iframe.allow = embed.allow
+  if (embed.allowFullscreen) iframe.allowFullscreen = true
+  if (embed.kind === 'tweet') listenForTweetHeight(iframe)
+  return iframe
 }
 
 /** Build the inline preview for an image `src`: an embed iframe or an `<img>`. */
@@ -44,7 +60,7 @@ function renderImagePreview(
   if (embed) {
     const wrapper = document.createElement('span')
     wrapper.className = 'md-image-preview md-image-preview-embed'
-    wrapper.appendChild(embed.render())
+    wrapper.appendChild(buildEmbedIframe(embed))
     return wrapper
   }
   const url = (options.resolveImageUrl ?? defaultResolveImageUrl)(src)

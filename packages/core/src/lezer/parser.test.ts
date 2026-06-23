@@ -13,21 +13,33 @@ A *emph* paragraph.
 - bullet list item
 
 - [x] task list item
+
+paragraph line1
+paragraph line2
+
+> blockquote line1
+> blockquote line2
 `
 
 interface AstNode {
   name: string
   from: number
   to: number
+  text: string
   children?: AstNode[]
 }
 
-function buildAst(cursor: TreeCursor): AstNode {
-  const node: AstNode = { name: cursor.name, from: cursor.from, to: cursor.to }
+function buildAst(cursor: TreeCursor, text: string): AstNode {
+  const node: AstNode = {
+    name: cursor.name,
+    from: cursor.from,
+    to: cursor.to,
+    text: text.slice(cursor.from, cursor.to),
+  }
   if (cursor.firstChild()) {
     do {
       const children = (node.children ??= [])
-      children.push(buildAst(cursor))
+      children.push(buildAst(cursor, text))
     } while (cursor.nextSibling())
     cursor.parent()
   }
@@ -38,31 +50,36 @@ const show = (ast: AstNode) => JSON.stringify(ast, null, 2)
 
 describe('gfmParser', () => {
   it('parses block and inline structure', () => {
-    expect(show(buildAst(gfmParser.parse(sample).cursor()))).toMatchInlineSnapshot(`
+    expect(show(buildAst(gfmParser.parse(sample).cursor(), sample))).toMatchInlineSnapshot(`
       "{
         "name": "Document",
         "from": 0,
-        "to": 115,
+        "to": 187,
+        "text": "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\nparagraph line1\\nparagraph line2\\n\\n> blockquote line1\\n> blockquote line2\\n",
         "children": [
           {
             "name": "Paragraph",
             "from": 1,
             "to": 20,
+            "text": "A *emph* paragraph.",
             "children": [
               {
                 "name": "Emphasis",
                 "from": 3,
                 "to": 9,
+                "text": "*emph*",
                 "children": [
                   {
                     "name": "EmphasisMark",
                     "from": 3,
-                    "to": 4
+                    "to": 4,
+                    "text": "*"
                   },
                   {
                     "name": "EmphasisMark",
                     "from": 8,
-                    "to": 9
+                    "to": 9,
+                    "text": "*"
                   }
                 ]
               }
@@ -72,53 +89,63 @@ describe('gfmParser', () => {
             "name": "Table",
             "from": 22,
             "to": 72,
+            "text": "| table header |\\n| ------------ |\\n| table cell   |",
             "children": [
               {
                 "name": "TableHeader",
                 "from": 22,
                 "to": 38,
+                "text": "| table header |",
                 "children": [
                   {
                     "name": "TableDelimiter",
                     "from": 22,
-                    "to": 23
+                    "to": 23,
+                    "text": "|"
                   },
                   {
                     "name": "TableCell",
                     "from": 24,
-                    "to": 36
+                    "to": 36,
+                    "text": "table header"
                   },
                   {
                     "name": "TableDelimiter",
                     "from": 37,
-                    "to": 38
+                    "to": 38,
+                    "text": "|"
                   }
                 ]
               },
               {
                 "name": "TableDelimiter",
                 "from": 39,
-                "to": 55
+                "to": 55,
+                "text": "| ------------ |"
               },
               {
                 "name": "TableRow",
                 "from": 56,
                 "to": 72,
+                "text": "| table cell   |",
                 "children": [
                   {
                     "name": "TableDelimiter",
                     "from": 56,
-                    "to": 57
+                    "to": 57,
+                    "text": "|"
                   },
                   {
                     "name": "TableCell",
                     "from": 58,
-                    "to": 68
+                    "to": 68,
+                    "text": "table cell"
                   },
                   {
                     "name": "TableDelimiter",
                     "from": 71,
-                    "to": 72
+                    "to": 72,
+                    "text": "|"
                   }
                 ]
               }
@@ -128,21 +155,25 @@ describe('gfmParser', () => {
             "name": "BulletList",
             "from": 74,
             "to": 114,
+            "text": "- bullet list item\\n\\n- [x] task list item",
             "children": [
               {
                 "name": "ListItem",
                 "from": 74,
                 "to": 92,
+                "text": "- bullet list item",
                 "children": [
                   {
                     "name": "ListMark",
                     "from": 74,
-                    "to": 75
+                    "to": 75,
+                    "text": "-"
                   },
                   {
                     "name": "Paragraph",
                     "from": 76,
-                    "to": 92
+                    "to": 92,
+                    "text": "bullet list item"
                   }
                 ]
               },
@@ -150,23 +181,61 @@ describe('gfmParser', () => {
                 "name": "ListItem",
                 "from": 94,
                 "to": 114,
+                "text": "- [x] task list item",
                 "children": [
                   {
                     "name": "ListMark",
                     "from": 94,
-                    "to": 95
+                    "to": 95,
+                    "text": "-"
                   },
                   {
                     "name": "Task",
                     "from": 96,
                     "to": 114,
+                    "text": "[x] task list item",
                     "children": [
                       {
                         "name": "TaskMarker",
                         "from": 96,
-                        "to": 99
+                        "to": 99,
+                        "text": "[x]"
                       }
                     ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Paragraph",
+            "from": 116,
+            "to": 147,
+            "text": "paragraph line1\\nparagraph line2"
+          },
+          {
+            "name": "Blockquote",
+            "from": 149,
+            "to": 186,
+            "text": "> blockquote line1\\n> blockquote line2",
+            "children": [
+              {
+                "name": "QuoteMark",
+                "from": 149,
+                "to": 150,
+                "text": ">"
+              },
+              {
+                "name": "Paragraph",
+                "from": 151,
+                "to": 186,
+                "text": "blockquote line1\\n> blockquote line2",
+                "children": [
+                  {
+                    "name": "QuoteMark",
+                    "from": 168,
+                    "to": 169,
+                    "text": ">"
                   }
                 ]
               }
@@ -180,68 +249,81 @@ describe('gfmParser', () => {
 
 describe('gfmBlockOnlyParser', () => {
   it('parses block structure but never emits inline nodes', () => {
-    expect(show(buildAst(gfmBlockOnlyParser.parse(sample).cursor()))).toMatchInlineSnapshot(`
+    expect(show(buildAst(gfmBlockOnlyParser.parse(sample).cursor(), sample)))
+      .toMatchInlineSnapshot(`
       "{
         "name": "Document",
         "from": 0,
-        "to": 115,
+        "to": 187,
+        "text": "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\nparagraph line1\\nparagraph line2\\n\\n> blockquote line1\\n> blockquote line2\\n",
         "children": [
           {
             "name": "Paragraph",
             "from": 1,
-            "to": 20
+            "to": 20,
+            "text": "A *emph* paragraph."
           },
           {
             "name": "Table",
             "from": 22,
             "to": 72,
+            "text": "| table header |\\n| ------------ |\\n| table cell   |",
             "children": [
               {
                 "name": "TableHeader",
                 "from": 22,
                 "to": 38,
+                "text": "| table header |",
                 "children": [
                   {
                     "name": "TableDelimiter",
                     "from": 22,
-                    "to": 23
+                    "to": 23,
+                    "text": "|"
                   },
                   {
                     "name": "TableCell",
                     "from": 24,
-                    "to": 36
+                    "to": 36,
+                    "text": "table header"
                   },
                   {
                     "name": "TableDelimiter",
                     "from": 37,
-                    "to": 38
+                    "to": 38,
+                    "text": "|"
                   }
                 ]
               },
               {
                 "name": "TableDelimiter",
                 "from": 39,
-                "to": 55
+                "to": 55,
+                "text": "| ------------ |"
               },
               {
                 "name": "TableRow",
                 "from": 56,
                 "to": 72,
+                "text": "| table cell   |",
                 "children": [
                   {
                     "name": "TableDelimiter",
                     "from": 56,
-                    "to": 57
+                    "to": 57,
+                    "text": "|"
                   },
                   {
                     "name": "TableCell",
                     "from": 58,
-                    "to": 68
+                    "to": 68,
+                    "text": "table cell"
                   },
                   {
                     "name": "TableDelimiter",
                     "from": 71,
-                    "to": 72
+                    "to": 72,
+                    "text": "|"
                   }
                 ]
               }
@@ -251,21 +333,25 @@ describe('gfmBlockOnlyParser', () => {
             "name": "BulletList",
             "from": 74,
             "to": 114,
+            "text": "- bullet list item\\n\\n- [x] task list item",
             "children": [
               {
                 "name": "ListItem",
                 "from": 74,
                 "to": 92,
+                "text": "- bullet list item",
                 "children": [
                   {
                     "name": "ListMark",
                     "from": 74,
-                    "to": 75
+                    "to": 75,
+                    "text": "-"
                   },
                   {
                     "name": "Paragraph",
                     "from": 76,
-                    "to": 92
+                    "to": 92,
+                    "text": "bullet list item"
                   }
                 ]
               },
@@ -273,21 +359,204 @@ describe('gfmBlockOnlyParser', () => {
                 "name": "ListItem",
                 "from": 94,
                 "to": 114,
+                "text": "- [x] task list item",
                 "children": [
                   {
                     "name": "ListMark",
                     "from": 94,
-                    "to": 95
+                    "to": 95,
+                    "text": "-"
                   },
                   {
                     "name": "Task",
                     "from": 96,
                     "to": 114,
+                    "text": "[x] task list item",
                     "children": [
                       {
                         "name": "TaskMarker",
                         "from": 96,
-                        "to": 99
+                        "to": 99,
+                        "text": "[x]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Paragraph",
+            "from": 116,
+            "to": 147,
+            "text": "paragraph line1\\nparagraph line2"
+          },
+          {
+            "name": "Blockquote",
+            "from": 149,
+            "to": 186,
+            "text": "> blockquote line1\\n> blockquote line2",
+            "children": [
+              {
+                "name": "QuoteMark",
+                "from": 149,
+                "to": 150,
+                "text": ">"
+              },
+              {
+                "name": "Paragraph",
+                "from": 151,
+                "to": 186,
+                "text": "blockquote line1\\n> blockquote line2",
+                "children": [
+                  {
+                    "name": "QuoteMark",
+                    "from": 168,
+                    "to": 169,
+                    "text": ">"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }"
+    `)
+  })
+
+  it('keeps a list item continuation indent inside the paragraph span', () => {
+    // A soft-wrapped paragraph inside a list item. lezer's Paragraph starts
+    // after the first line's indent, but the continuation line's 2-space indent
+    // stays inside the node's [from, to) span (see the `\n  line two` in `text`).
+    const input = '- x\n\n  line one\n  line two\n'
+    expect(show(buildAst(gfmBlockOnlyParser.parse(input).cursor(), input))).toMatchInlineSnapshot(`
+      "{
+        "name": "Document",
+        "from": 0,
+        "to": 27,
+        "text": "- x\\n\\n  line one\\n  line two\\n",
+        "children": [
+          {
+            "name": "BulletList",
+            "from": 0,
+            "to": 26,
+            "text": "- x\\n\\n  line one\\n  line two",
+            "children": [
+              {
+                "name": "ListItem",
+                "from": 0,
+                "to": 26,
+                "text": "- x\\n\\n  line one\\n  line two",
+                "children": [
+                  {
+                    "name": "ListMark",
+                    "from": 0,
+                    "to": 1,
+                    "text": "-"
+                  },
+                  {
+                    "name": "Paragraph",
+                    "from": 2,
+                    "to": 3,
+                    "text": "x"
+                  },
+                  {
+                    "name": "Paragraph",
+                    "from": 7,
+                    "to": 26,
+                    "text": "line one\\n  line two"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }"
+    `)
+  })
+
+  it('emits one CodeText per line for a fenced code block inside a list item', () => {
+    // A multi-line fenced code block inside a list item. Unlike a top-level
+    // block (one CodeText spanning every line), lezer scrubs each line's 2-space
+    // container indent and emits one CodeText per line, the stripped indent
+    // living in the gaps between the nodes. Each CodeText slice already carries
+    // its own trailing newline, so concatenating them rebuilds the code text.
+    const input = [
+      // A code block inside a list item
+      '- x',
+      '',
+      '  ```',
+      '  line1',
+      '  line2',
+      '  line3',
+      '  ```',
+    ].join('\n')
+    expect(show(buildAst(gfmBlockOnlyParser.parse(input).cursor(), input))).toMatchInlineSnapshot(`
+      "{
+        "name": "Document",
+        "from": 0,
+        "to": 40,
+        "text": "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
+        "children": [
+          {
+            "name": "BulletList",
+            "from": 0,
+            "to": 40,
+            "text": "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
+            "children": [
+              {
+                "name": "ListItem",
+                "from": 0,
+                "to": 40,
+                "text": "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
+                "children": [
+                  {
+                    "name": "ListMark",
+                    "from": 0,
+                    "to": 1,
+                    "text": "-"
+                  },
+                  {
+                    "name": "Paragraph",
+                    "from": 2,
+                    "to": 3,
+                    "text": "x"
+                  },
+                  {
+                    "name": "FencedCode",
+                    "from": 7,
+                    "to": 40,
+                    "text": "\`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
+                    "children": [
+                      {
+                        "name": "CodeMark",
+                        "from": 7,
+                        "to": 10,
+                        "text": "\`\`\`"
+                      },
+                      {
+                        "name": "CodeText",
+                        "from": 13,
+                        "to": 19,
+                        "text": "line1\\n"
+                      },
+                      {
+                        "name": "CodeText",
+                        "from": 21,
+                        "to": 27,
+                        "text": "line2\\n"
+                      },
+                      {
+                        "name": "CodeText",
+                        "from": 29,
+                        "to": 34,
+                        "text": "line3"
+                      },
+                      {
+                        "name": "CodeMark",
+                        "from": 37,
+                        "to": 40,
+                        "text": "\`\`\`"
                       }
                     ]
                   }

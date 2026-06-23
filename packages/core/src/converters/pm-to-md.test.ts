@@ -1,182 +1,278 @@
-import { createEditor, type NodeJSON } from '@prosekit/core'
+import dedent from 'dedent'
 import { describe, expect, it } from 'vitest'
 
-import { defineEditorExtension } from '../extensions/extension.ts'
-import type { NodeName } from '../extensions/node-names.ts'
+import { setupFixture } from '../testing/index.ts'
 
 import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
 import { sampleContent, sampleContentMarkdown } from './sample-content.ts'
 
-const editor = createEditor({ extension: defineEditorExtension() })
-const docFromJSON = (json: NodeJSON) => editor.schema.nodeFromJSON(json)
-
-function wrapInDoc(...children: NodeJSON[]): NodeJSON {
-  return {
-    type: 'doc',
-    content: children,
-  }
-}
-
-function paragraph(text: string): NodeJSON {
-  return {
-    type: 'paragraph',
-    content: text ? [{ type: 'text', text }] : undefined,
-  }
-}
+const fixture = setupFixture({ mount: false })
+const { n, schema } = fixture
 
 describe('docToMarkdown', () => {
-  it('serializes a paragraph', () => {
-    const node = docFromJSON(wrapInDoc(paragraph('hello world')))
-    expect(docToMarkdown(node)).toBe('hello world\n')
+  it('keeps a paragraph', () => {
+    const doc = n.doc(n.paragraph('hello world'))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('hello world\n')
   })
 
-  it('serializes headings at every level', () => {
-    for (let level = 1; level <= 6; level++) {
-      const node = docFromJSON(
-        wrapInDoc({
-          type: 'heading',
-          attrs: { level },
-          content: [{ type: 'text', text: `Level ${level}` }],
-        }),
-      )
-      expect(docToMarkdown(node)).toBe('#'.repeat(level) + ` Level ${level}\n`)
-    }
+  it('keeps a level-1 heading', () => {
+    const doc = n.doc(n.heading({ level: 1 }, 'Level 1'))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('# Level 1\n')
   })
 
-  it('serializes a blockquote', () => {
-    const node = docFromJSON(
-      wrapInDoc({
-        type: 'blockquote',
-        content: [paragraph('quoted text')],
-      }),
+  it('keeps a level-3 heading', () => {
+    const doc = n.doc(n.heading({ level: 3 }, 'Level 3'))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('### Level 3\n')
+  })
+
+  it('keeps a level-6 heading', () => {
+    const doc = n.doc(n.heading({ level: 6 }, 'Level 6'))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('###### Level 6\n')
+  })
+
+  it('emits a setext level-1 heading', () => {
+    const doc = n.doc(n.heading({ level: 1, setextUnderline: 3 }, 'Title'))
+    expect(docToMarkdown(doc)).toBe('Title\n===\n')
+  })
+
+  it('emits a setext level-2 heading', () => {
+    const doc = n.doc(n.heading({ level: 2, setextUnderline: 3 }, 'Title'))
+    expect(docToMarkdown(doc)).toBe('Title\n---\n')
+  })
+
+  it('keeps the setext underline length', () => {
+    const long = n.doc(n.heading({ level: 1, setextUnderline: 9 }, 'Title'))
+    expect(docToMarkdown(long)).toBe('Title\n=========\n')
+    const short = n.doc(n.heading({ level: 2, setextUnderline: 1 }, 'Title'))
+    expect(docToMarkdown(short)).toBe('Title\n-\n')
+  })
+
+  it('emits a setext heading deeper than level 2 as ATX', () => {
+    const doc = n.doc(n.heading({ level: 3, setextUnderline: 3 }, 'Title'))
+    expect(docToMarkdown(doc)).toBe('### Title\n')
+  })
+
+  it('emits an empty setext heading as ATX', () => {
+    const doc = n.doc(n.heading({ level: 1, setextUnderline: 3 }))
+    expect(docToMarkdown(doc)).toBe('#\n')
+  })
+
+  it('keeps a blockquote', () => {
+    const doc = n.doc(n.blockquote(n.paragraph('quoted text')))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('> quoted text\n')
+  })
+
+  it('keeps a tight bullet list', () => {
+    const doc = n.doc(
+      n.list({ kind: 'bullet' }, n.paragraph('one')),
+      n.list({ kind: 'bullet' }, n.paragraph('two')),
     )
-    expect(docToMarkdown(node)).toBe('> quoted text\n')
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('- one\n- two\n')
   })
 
-  it('serializes a bullet list tight', () => {
-    const item = (text: string): NodeJSON => ({
-      type: 'list',
-      attrs: { kind: 'bullet', order: null, checked: false, collapsed: false },
-      content: [paragraph(text)],
-    })
-    const node = docFromJSON(wrapInDoc(item('one'), item('two')))
-    expect(docToMarkdown(node)).toBe('- one\n- two\n')
+  it('keeps an ordered start number', () => {
+    const doc = n.doc(
+      n.list({ kind: 'ordered', order: 5 }, n.paragraph('five')),
+      n.list({ kind: 'ordered', order: 5 }, n.paragraph('six')),
+    )
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('5. five\n5. six\n')
   })
 
-  it('serializes an ordered list tight, with start number', () => {
-    const item = (text: string, order: number): NodeJSON => ({
-      type: 'list',
-      attrs: { kind: 'ordered', order, checked: false, collapsed: false },
-      content: [paragraph(text)],
-    })
-    const node = docFromJSON(wrapInDoc(item('five', 5), item('six', 5)))
-    expect(docToMarkdown(node)).toBe('5. five\n5. six\n')
+  it('keeps task markers', () => {
+    const doc = n.doc(
+      n.list({ kind: 'task', checked: false }, n.paragraph('A')),
+      n.list({ kind: 'task', checked: true }, n.paragraph('B')),
+      n.list({ kind: 'task', checked: false, marker: '+' }, n.paragraph('C')),
+      n.list({ kind: 'task', checked: true, marker: '+' }, n.paragraph('D')),
+      n.list({ kind: 'task', checked: false, marker: '*' }, n.paragraph('E')),
+      n.list({ kind: 'task', checked: true, marker: '*' }, n.paragraph('F')),
+      n.list({ kind: 'task', checked: false, marker: '-' }, n.paragraph('G')),
+      n.list({ kind: 'task', checked: true, marker: '-' }, n.paragraph('H')),
+    )
+    const markdown = docToMarkdown(doc)
+    expect(markdown.trim()).toBe(
+      dedent`
+        - [ ] A
+        - [x] B
+        + [ ] C
+        + [x] D
+        * [ ] E
+        * [x] F
+        - [ ] G
+        - [x] H`,
+    )
   })
 
-  it('serializes task list items with GFM markers', () => {
-    const item = (text: string, checked: boolean): NodeJSON => ({
-      type: 'list',
-      attrs: { kind: 'task', order: null, checked, collapsed: false },
-      content: [paragraph(text)],
-    })
-    const node = docFromJSON(wrapInDoc(item('todo', false), item('done', true)))
-    expect(docToMarkdown(node)).toBe('- [ ] todo\n- [x] done\n')
+  it('keeps a loose two-block item', () => {
+    const doc = n.doc(
+      n.list({ kind: 'bullet' }, n.paragraph('first'), n.paragraph('second')),
+      n.list({ kind: 'bullet' }, n.paragraph('third')),
+    )
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('- first\n\n  second\n\n- third\n')
   })
 
-  it('serializes a list loose when an item holds two blocks', () => {
-    const node = docFromJSON(
-      wrapInDoc(
-        {
-          type: 'list',
-          attrs: { kind: 'bullet', order: null, checked: false, collapsed: false },
-          content: [paragraph('first'), paragraph('second')],
-        },
-        {
-          type: 'list',
-          attrs: { kind: 'bullet', order: null, checked: false, collapsed: false },
-          content: [paragraph('third')],
-        },
+  it('keeps a blank line after a list', () => {
+    const doc = n.doc(n.list({ kind: 'bullet' }, n.paragraph('item')), n.paragraph('after'))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('- item\n\nafter\n')
+  })
+
+  it('keeps an empty bullet between paragraphs', () => {
+    const doc = n.doc(
+      n.paragraph('LINE 1'),
+      n.list({ kind: 'bullet' }, n.paragraph()),
+      n.paragraph('LINE 2'),
+    )
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('LINE 1\n\n-\n\nLINE 2\n')
+  })
+
+  it('keeps an empty bullet marker', () => {
+    const doc = n.doc(n.list({ kind: 'bullet' }, n.paragraph()))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('-\n')
+  })
+
+  it('keeps an empty task marker', () => {
+    const doc = n.doc(n.list({ kind: 'task', checked: false }, n.paragraph()))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('- [ ]\n')
+  })
+
+  it('keeps an empty ordered marker', () => {
+    const doc = n.doc(n.list({ kind: 'ordered', order: 1 }, n.paragraph()))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('1.\n')
+  })
+
+  it('keeps a fenced block with language', () => {
+    const doc = n.doc(n.codeBlock({ language: 'js' }, 'console.log(1)'))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('```js\nconsole.log(1)\n```\n')
+  })
+
+  it('keeps code containing triple-backticks', () => {
+    const doc = n.doc(n.codeBlock({ language: '' }, '```\nnested fence\n```'))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('````\n```\nnested fence\n```\n````\n')
+  })
+
+  it('keeps a horizontal rule', () => {
+    const doc = n.doc(n.horizontalRule())
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('---\n')
+  })
+
+  it('keeps a table', () => {
+    const doc = n.doc(
+      n.table(
+        n.tableRow(n.tableHeaderCell(n.paragraph('A')), n.tableHeaderCell(n.paragraph('B'))),
+        n.tableRow(n.tableCell(n.paragraph('1')), n.tableCell(n.paragraph('2'))),
       ),
     )
-    expect(docToMarkdown(node)).toBe('- first\n\n  second\n\n- third\n')
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('| A | B |\n| --- | --- |\n| 1 | 2 |\n')
   })
 
-  it('keeps a blank line between a tight list and the next block', () => {
-    const item: NodeJSON = {
-      type: 'list',
-      attrs: { kind: 'bullet', order: null, checked: false, collapsed: false },
-      content: [paragraph('item')],
-    }
-    const node = docFromJSON(wrapInDoc(item, paragraph('after')))
-    expect(docToMarkdown(node)).toBe('- item\n\nafter\n')
-  })
-
-  it('serializes a fenced code block with language', () => {
-    const node = docFromJSON(
-      wrapInDoc({
-        type: 'codeBlock',
-        attrs: { language: 'js' },
-        content: [{ type: 'text', text: 'console.log(1)' }],
-      }),
+  it('keeps a nested bullet', () => {
+    const doc = n.doc(
+      n.list({ kind: 'bullet' }, n.paragraph('a'), n.list({ kind: 'bullet' }, n.paragraph('b'))),
     )
-    expect(docToMarkdown(node)).toBe('```js\nconsole.log(1)\n```\n')
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('- a\n  - b\n')
   })
 
-  it('widens the fence when code contains triple-backticks', () => {
-    const node = docFromJSON(
-      wrapInDoc({
-        type: 'codeBlock',
-        attrs: { language: '' },
-        content: [{ type: 'text', text: '```\nnested fence\n```' }],
-      }),
+  it('keeps a deeply nested bullet', () => {
+    const doc = n.doc(
+      n.list(
+        { kind: 'bullet' },
+        n.paragraph('a'),
+        n.list({ kind: 'bullet' }, n.paragraph('b'), n.list({ kind: 'bullet' }, n.paragraph('c'))),
+      ),
     )
-    expect(docToMarkdown(node)).toBe('````\n```\nnested fence\n```\n````\n')
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('- a\n  - b\n    - c\n')
   })
 
-  it('serializes a horizontal rule', () => {
-    const node = docFromJSON(wrapInDoc({ type: 'horizontalRule' satisfies NodeName }))
-    expect(docToMarkdown(node)).toBe('---\n')
-  })
-
-  it('serializes a GFM table', () => {
-    const cell = (text: string, header: boolean): NodeJSON => ({
-      type: header ? 'tableHeaderCell' : 'tableCell',
-      attrs: { colspan: 1, rowspan: 1, colwidth: null },
-      content: [paragraph(text)],
-    })
-    const node = docFromJSON(
-      wrapInDoc({
-        type: 'table',
-        content: [
-          {
-            type: 'tableRow',
-            content: [cell('A', true), cell('B', true)],
-          },
-          {
-            type: 'tableRow',
-            content: [cell('1', false), cell('2', false)],
-          },
-        ],
-      }),
+  it('keeps an ordered list in a bullet', () => {
+    const doc = n.doc(
+      n.list(
+        { kind: 'bullet' },
+        n.paragraph('a'),
+        n.list({ kind: 'ordered', order: 1 }, n.paragraph('b')),
+      ),
     )
-    expect(docToMarkdown(node)).toBe('| A | B |\n| --- | --- |\n| 1 | 2 |\n')
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('- a\n  1. b\n')
   })
 
-  it('round-trips sampleContent (doc → md → doc)', () => {
-    const node = docFromJSON(sampleContent)
-    const md = docToMarkdown(node)
-    const back: NodeJSON = markdownToDoc(md).toJSON() as NodeJSON
-    expect(back).toEqual(sampleContent)
+  it('keeps a code block in a loose item', () => {
+    const doc = n.doc(
+      n.list({ kind: 'bullet' }, n.paragraph('a'), n.codeBlock({ language: '' }, 'code')),
+    )
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('- a\n\n  ```\n  code\n  ```\n')
   })
 
-  it('round-trips sampleContentMarkdown (md → doc → md → doc)', () => {
-    // md → doc (one).
-    const pm1 = markdownToDoc(sampleContentMarkdown)
-    // doc → md → doc; the markdown text may differ in whitespace, but the
-    // parsed structure should be stable.
-    const md = docToMarkdown(pm1)
-    const pm2 = markdownToDoc(md)
-    expect(pm2.toJSON()).toEqual(pm1.toJSON())
+  it('keeps a rule between paragraphs', () => {
+    const doc = n.doc(n.paragraph('a'), n.horizontalRule(), n.paragraph('b'))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('a\n\n---\n\nb\n')
+  })
+
+  it('keeps the sample document (doc → md → doc)', () => {
+    const doc = schema.nodeFromJSON(sampleContent)
+    const markdown = docToMarkdown(doc)
+    expect(markdownToDoc(markdown).toJSON()).toEqual(sampleContent)
+  })
+
+  it('keeps the sample markdown stable (md → doc → md → doc)', () => {
+    const doc = markdownToDoc(sampleContentMarkdown)
+    const markdown = docToMarkdown(doc)
+    expect(markdownToDoc(markdown).toJSON()).toEqual(doc.toJSON())
+  })
+
+  it('keeps a list in a quote clean', () => {
+    const doc = n.doc(n.blockquote(n.list({ kind: 'bullet' }, n.paragraph('item'))))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('> - item\n')
+  })
+
+  it('keeps an empty code block clean', () => {
+    const doc = n.doc(n.codeBlock({ language: '' }))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('```\n```\n')
+  })
+
+  it('keeps a frontmatter-only document', () => {
+    const doc = n.doc({ frontmatter: 'title: x' })
+    const markdown = docToMarkdown(doc, { frontmatter: true })
+    expect(markdown).toBe('---\ntitle: x\n---\n')
+  })
+
+  it('keeps frontmatter before content', () => {
+    const doc = n.doc({ frontmatter: 'title: x' }, n.heading({ level: 1 }, 'heading'))
+    const markdown = docToMarkdown(doc, { frontmatter: true })
+    expect(markdown).toBe('---\ntitle: x\n---\n\n# heading\n')
+  })
+
+  it('keeps an empty frontmatter block', () => {
+    const doc = n.doc({ frontmatter: '' }, n.paragraph('body'))
+    const markdown = docToMarkdown(doc, { frontmatter: true })
+    expect(markdown).toBe('---\n---\n\nbody\n')
+  })
+
+  it('ignores the frontmatter attribute by default', () => {
+    const doc = n.doc({ frontmatter: 'title: x' }, n.paragraph('body'))
+    expect(docToMarkdown(doc)).toBe('body\n')
   })
 })
