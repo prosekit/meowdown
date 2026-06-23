@@ -23,6 +23,24 @@ describe('htmlToMarkdown', () => {
     expect(htmlToMarkdown('<del>gone</del>').trim()).toBe('~~gone~~')
   })
 
+  it('converts a mark element to ==highlight==', () => {
+    expect(htmlToMarkdown('<mark>highlighted</mark>').trim()).toBe('==highlighted==')
+    expect(htmlToMarkdown('<p>hi <mark>there</mark> end</p>').trim()).toBe('hi ==there== end')
+  })
+
+  it('keeps a line-leading mark unescaped', () => {
+    // A literal leading `==` would be escaped to `\==` to guard a setext
+    // heading; writing it through the highlight construct must not be.
+    expect(htmlToMarkdown('<p><mark>start</mark> rest</p>').trim()).toBe('==start== rest')
+  })
+
+  it('keeps nested formatting inside a mark', () => {
+    expect(htmlToMarkdown('<p><mark><strong>bold</strong></mark></p>').trim()).toBe('==**bold**==')
+    expect(htmlToMarkdown('<p>a <mark>x</mark> and <del>y</del></p>').trim()).toBe(
+      'a ==x== and ~~y~~',
+    )
+  })
+
   it('converts a heading and a blockquote', () => {
     expect(htmlToMarkdown('<h2>Title</h2><blockquote><p>q</p></blockquote>').trim()).toBe(
       '## Title\n\n> q',

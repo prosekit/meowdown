@@ -42,9 +42,12 @@
     "@meowdown/vitest": "workspace:*",
     "@ocavue/tsconfig": "^0.7.1",
     "@tsdown/css": "^0.22.3",
+    "@types/mdast": "^4.0.4",
     "@vitest/browser-playwright": "^4.1.9",
     "dedent": "^1.7.2",
     "diffable-html-snapshot": "^0.3.0",
+    "hast-util-to-mdast": "^10.1.2",
+    "mdast-util-to-markdown": "^2.1.2",
     "tsdown": "^0.22.3",
     "vitest": "^4.1.9"
   },
