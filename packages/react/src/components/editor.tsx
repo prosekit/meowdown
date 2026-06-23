@@ -71,17 +71,15 @@ export interface EditorProps {
 
   /**
    * Called with the link `href` on click of a rendered Markdown link
-   * (`[text](url)`). A plain click inside a link the caret already sits in just
-   * places the caret; `Mod`-click always fires. Pass a stable function (e.g.
-   * from `useCallback`). Ignored in source mode.
+   * (`[text](url)`). Pass a stable function (e.g. from `useCallback`). Ignored
+   * in source mode.
    */
   onLinkClick?: LinkClickHandler
 
   /**
    * Called with the tag name (without the leading `#`) on click of a rendered
-   * `#tag`. A plain click inside a tag the caret already sits in just places the
-   * caret; `Mod`-click always fires. Pass a stable function (e.g. from
-   * `useCallback`). Ignored in source mode.
+   * `#tag`. Pass a stable function (e.g. from `useCallback`). Ignored in source
+   * mode.
    */
   onTagClick?: TagClickHandler
 

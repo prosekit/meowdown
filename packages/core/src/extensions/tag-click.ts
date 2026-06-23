@@ -39,10 +39,7 @@ export function defineTagClickHandler(onClick: TagClickHandler): PlainExtension 
     key: tagClickKey,
     selector: '.md-tag',
     preventDefault: false,
-    findHitAt: (state, pos) => {
-      const hit = findTagAt(state, pos)
-      return hit ? { from: hit.from, to: hit.to, payload: hit.tag } : undefined
-    },
+    findPayloadAt: (state, pos) => findTagAt(state, pos)?.tag,
     onClick: (tag, event) => onClick({ tag, event }),
   })
 }
