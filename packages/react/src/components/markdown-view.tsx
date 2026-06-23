@@ -12,6 +12,7 @@ import {
   type LinkClickHandler,
   type MarkChunk,
   type MarkMode,
+  type MarkName,
   type MdImageViewAttrs,
   type MdLinkTextAttrs,
   type MdWikilinkViewAttrs,
@@ -211,7 +212,8 @@ function CodeBlock({ code, language }: { code: string; language: string }): Reac
 
 /** Wrap inline `children` in one mark, special-casing the view/link marks. */
 function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): ReactNode {
-  switch (mark.type.name) {
+  const name = mark.type.name as MarkName
+  switch (name) {
     case 'mdWikilinkView': {
       const attrs = mark.attrs as MdWikilinkViewAttrs
       return (
