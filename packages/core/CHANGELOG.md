@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.21.0](https://github.com/prosekit/meowdown/compare/core-v0.20.0...core-v0.21.0) (2026-06-23)
+
+
+### Features
+
+* open the wikilink menu on Mod-Shift-K ([#134](https://github.com/prosekit/meowdown/issues/134)) ([8021ea0](https://github.com/prosekit/meowdown/commit/8021ea09adf39ffcf1267fe43a821188ebdb6bf0))
+* render Markdown to React statically with MarkdownView ([#135](https://github.com/prosekit/meowdown/issues/135)) ([b541154](https://github.com/prosekit/meowdown/commit/b541154346b3ee56d923593fa1ef5b05ec061d66))
+
 ## [0.20.0](https://github.com/prosekit/meowdown/compare/core-v0.19.0...core-v0.20.0) (2026-06-22)
 
 
