@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.0](https://github.com/prosekit/meowdown/compare/react-v0.19.0...react-v0.20.0) (2026-06-22)
+
+
+### Features
+
+* **react:** open the wikilink menu on `@` ([#132](https://github.com/prosekit/meowdown/issues/132)) ([d635105](https://github.com/prosekit/meowdown/commit/d635105b939e1e3d24efe1ce8b1f39291a5a3b63))
+
 ## [0.19.0](https://github.com/prosekit/meowdown/compare/react-v0.18.0...react-v0.19.0) (2026-06-22)
 
 
