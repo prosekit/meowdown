@@ -74,7 +74,7 @@ Pressing Enter at the end of the document's first heading (the title line) can s
 `@meowdown/react`'s `<MarkdownView>` renders Markdown to a read-only React tree without an editor by reusing these building blocks, also exported for other renderers:
 
 - `inlineTextToMarkChunks(getMarkBuilders(), text)`: the inline parser the editor uses, returning `[from, to, marks]` chunks (`MarkChunk`) for one line of source text.
-- `getCodeTokens(code, language)`: syntax-highlight tokens (`CodeToken`, `{ from, to, classes }`) tagged with the same `tok-*` classes as the editor. Returns synchronously once the Lezer grammar is cached, otherwise a promise.
+- `getCodeTokens(code, language)`: syntax-highlight tokens (`CodeToken`, the tuple `[from, to, classes]`) tagged with the same `tok-*` classes as the editor. Returns synchronously once the Lezer grammar is cached, otherwise a promise.
 - `matchEmbed(src)`: detects a tweet/YouTube image `src` and returns an `EmbedDescriptor` (no DOM); `listenForTweetHeight(iframe)` syncs a tweet iframe's height and returns a cleanup function.
 
 ## Re-exports

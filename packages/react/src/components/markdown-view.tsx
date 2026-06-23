@@ -164,15 +164,14 @@ function renderTokens(code: string, tokens: readonly CodeToken[]): ReactNode {
   const out: ReactNode[] = []
   let pos = 0
   let index = 0
-  for (const token of tokens) {
-    if (token.from > pos)
-      out.push(<Fragment key={`gap-${index}`}>{code.slice(pos, token.from)}</Fragment>)
+  for (const [from, to, classes] of tokens) {
+    if (from > pos) out.push(<Fragment key={`gap-${index}`}>{code.slice(pos, from)}</Fragment>)
     out.push(
-      <span key={index} className={token.classes}>
-        {code.slice(token.from, token.to)}
+      <span key={index} className={classes}>
+        {code.slice(from, to)}
       </span>,
     )
-    pos = token.to
+    pos = to
     index++
   }
   if (pos < code.length) out.push(<Fragment key="tail">{code.slice(pos)}</Fragment>)

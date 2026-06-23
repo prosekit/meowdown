@@ -79,17 +79,13 @@ export function defineCodeBlockSyntaxHighlight(): Extension {
 }
 
 /** A highlighted span of code: `[from, to)` carries the `@lezer/highlight` classes. */
-export interface CodeToken {
-  from: number
-  to: number
-  classes: string
-}
+export type CodeToken = readonly [from: number, to: number, classes: string]
 
 function tokenize(code: string, support: LanguageSupport): CodeToken[] {
   const tree = support.language.parser.parse(code)
   const tokens: CodeToken[] = []
   highlightTree(tree, classHighlighter, (from, to, classes) => {
-    tokens.push({ from, to, classes })
+    tokens.push([from, to, classes])
   })
   return tokens
 }
