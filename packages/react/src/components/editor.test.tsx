@@ -443,6 +443,17 @@ describe('MeowdownEditor', () => {
     })
   })
 
+  it('calls onTagClick when a rendered tag is clicked', async () => {
+    const onTagClick = vi.fn()
+    const screen = await render(
+      <MeowdownEditor initialMarkdown="see #hello here" onTagClick={onTagClick} />,
+    )
+    await screen.getByText('#hello').click()
+    await vi.waitFor(() => {
+      expect(onTagClick).toHaveBeenCalledWith(expect.objectContaining({ tag: 'hello' }))
+    })
+  })
+
   it('does not render children in source mode', async () => {
     await render(
       <MeowdownEditor mode="source" initialMarkdown="Hi">

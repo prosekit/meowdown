@@ -32,10 +32,7 @@ export function defineLinkClickHandler(onClick: LinkClickHandler): PlainExtensio
     key: linkClickKey,
     selector: '.md-link',
     preventDefault: true,
-    findHitAt: (state, pos) => {
-      const hit = findLinkAt(state, pos)
-      return hit ? { from: hit.from, to: hit.to, payload: hit.href } : undefined
-    },
+    findPayloadAt: (state, pos) => findLinkAt(state, pos)?.href,
     onClick: (href, event) => onClick({ href, event }),
   })
 }

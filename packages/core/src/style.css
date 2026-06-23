@@ -358,6 +358,7 @@
   border-radius: 0.35rem;
   background: color-mix(in oklab, var(--meowdown-accent) 10%, transparent);
   color: color-mix(in oklab, var(--meowdown-accent) 80%, var(--meowdown-heading));
+  cursor: pointer;
 }
 
 /* ---------------------------------------------------------------------------

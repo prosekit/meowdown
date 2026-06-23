@@ -20,6 +20,10 @@ function handleImageClick({ src }: { src: string }): void {
   confirmAndOpen('this image', src)
 }
 
+function handleTagClick({ tag }: { tag: string }): void {
+  window.alert(`Clicked tag: #${tag}`)
+}
+
 const INITIAL_CONTENT = `
 # Welcome to Meowdown
 
@@ -237,6 +241,7 @@ export function App() {
               onImagePaste={uploadFile}
               onImageClick={handleImageClick}
               onLinkClick={handleLinkClick}
+              onTagClick={handleTagClick}
             />
           </div>
 

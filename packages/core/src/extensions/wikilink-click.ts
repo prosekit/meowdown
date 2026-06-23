@@ -33,10 +33,7 @@ export function defineWikilinkClickHandler(onClick: WikilinkClickHandler): Plain
     key: wikilinkClickKey,
     selector: '.md-wikilink-label, .md-wikilink-source',
     preventDefault: false,
-    findHitAt: (state, pos) => {
-      const hit = findWikilinkAt(state, pos)
-      return hit ? { from: hit.from, to: hit.to, payload: hit.target } : undefined
-    },
+    findPayloadAt: (state, pos) => findWikilinkAt(state, pos)?.target,
     onClick: (target, event) => onClick({ target, event }),
   })
 }

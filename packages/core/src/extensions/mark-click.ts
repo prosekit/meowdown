@@ -1,62 +1,34 @@
-import { definePlugin, isApple, type PlainExtension } from '@prosekit/core'
+import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, type EditorState, type PluginKey } from '@prosekit/pm/state'
-
-interface MarkClickHit<Payload> {
-  from: number
-  to: number
-  payload: Payload
-}
 
 export interface MarkClickConfig<Payload> {
   key: PluginKey
   /** The click target must sit inside this selector, tested via `closest`. */
   selector: string
-  /** The mark hit covering `pos`, or `undefined` when the click misses it. */
-  findHitAt: (state: EditorState, pos: number) => MarkClickHit<Payload> | undefined
-  /** Fired once the click passes the caret-edit guard below. */
+  /** The payload for the mark covering `pos`, or `undefined` when the click misses it. */
+  findPayloadAt: (state: EditorState, pos: number) => Payload | undefined
+  /** Fired when a click lands on the mark. */
   onClick: (payload: Payload, event: MouseEvent) => void
   /** Stops native handling (e.g. `<a>` navigation) before firing. */
   preventDefault: boolean
 }
 
 /**
- * Shared click plumbing for text-backed link marks (wikilinks, Markdown links).
- * A plain click inside a mark the caret already sits in just places the caret,
- * so the run stays editable; `Mod`-click always fires.
+ * Shared click plumbing for text-backed marks (wikilinks, Markdown links, tags):
+ * a click anywhere on the rendered mark fires `onClick`.
  */
 export function defineMarkClickHandler<Payload>(config: MarkClickConfig<Payload>): PlainExtension {
-  let selectionBefore: { from: number; to: number; empty: boolean } | undefined
   return definePlugin(
     new Plugin({
       key: config.key,
       props: {
-        handleDOMEvents: {
-          // The browser moves the caret on click, so snapshot the selection first.
-          mousedown: (view) => {
-            const { from, to, empty } = view.state.selection
-            selectionBefore = { from, to, empty }
-            return false
-          },
-        },
         handleClick: (view, pos, event) => {
           const target = event.target as HTMLElement | null
           if (!target?.closest?.(config.selector)) return false
-          const hit = config.findHitAt(view.state, pos)
-          if (!hit) return false
-          const modClick = isApple ? event.metaKey : event.ctrlKey
-          // Caret already resting inside this mark means the user is editing the
-          // run, not following it: let a plain click just move the caret. A
-          // `Mod`-click overrides and always fires.
-          if (
-            !modClick &&
-            selectionBefore?.empty &&
-            selectionBefore.from >= hit.from &&
-            selectionBefore.to <= hit.to
-          ) {
-            return false
-          }
+          const payload = config.findPayloadAt(view.state, pos)
+          if (payload == null) return false
           if (config.preventDefault) event.preventDefault()
-          config.onClick(hit.payload, event)
+          config.onClick(payload, event)
           return true
         },
       },

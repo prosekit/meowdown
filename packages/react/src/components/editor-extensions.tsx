@@ -9,6 +9,7 @@ import {
   defineMarkMode,
   definePlaceholder,
   defineReadonly,
+  defineTagClickHandler,
   defineWikilinkClickHandler,
   defineWikilinkTrigger,
   type ImageClickHandler,
@@ -16,6 +17,7 @@ import {
   type LinkClickHandler,
   type MarkMode,
   type PlaceholderOptions,
+  type TagClickHandler,
   type WikilinkClickHandler,
 } from '@meowdown/core'
 import { defineDocChangeHandler } from '@prosekit/core'
@@ -27,6 +29,7 @@ export interface EditorExtensionsProps {
   onDocChange?: VoidFunction
   onWikilinkClick?: WikilinkClickHandler
   onLinkClick?: LinkClickHandler
+  onTagClick?: TagClickHandler
   resolveImageUrl?: ImageOptions['resolveImageUrl']
   onImagePaste?: ImageOptions['onImagePaste']
   onImageSaveError?: ImageOptions['onImageSaveError']
@@ -46,6 +49,7 @@ export function EditorExtensions({
   onDocChange,
   onWikilinkClick,
   onLinkClick,
+  onTagClick,
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
@@ -84,6 +88,12 @@ export function EditorExtensions({
     useMemo(() => {
       return onLinkClick ? defineLinkClickHandler(onLinkClick) : null
     }, [onLinkClick]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return onTagClick ? defineTagClickHandler(onTagClick) : null
+    }, [onTagClick]),
   )
 
   useExtension(
