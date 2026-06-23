@@ -4,6 +4,7 @@ import type {
   LinkClickHandler,
   MarkMode,
   PlaceholderOptions,
+  TagClickHandler,
   WikilinkClickHandler,
 } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
@@ -75,6 +76,14 @@ export interface EditorProps {
    * from `useCallback`). Ignored in source mode.
    */
   onLinkClick?: LinkClickHandler
+
+  /**
+   * Called with the tag name (without the leading `#`) on click of a rendered
+   * `#tag`. A plain click inside a tag the caret already sits in just places the
+   * caret; `Mod`-click always fires. Pass a stable function (e.g. from
+   * `useCallback`). Ignored in source mode.
+   */
+  onTagClick?: TagClickHandler
 
   /**
    * Maps an image `src` to a displayable URL, or `undefined` to skip that image.
@@ -160,6 +169,7 @@ export function MeowdownEditor({
   onWikilinkSearch,
   onWikilinkClick,
   onLinkClick,
+  onTagClick,
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
@@ -242,6 +252,7 @@ export function MeowdownEditor({
           onWikilinkSearch={onWikilinkSearch}
           onWikilinkClick={onWikilinkClick}
           onLinkClick={onLinkClick}
+          onTagClick={onTagClick}
           resolveImageUrl={resolveImageUrl}
           onImagePaste={onImagePaste}
           onImageSaveError={onImageSaveError}

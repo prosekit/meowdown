@@ -7,6 +7,7 @@ import {
   type LinkClickHandler,
   type MarkMode,
   type PlaceholderOptions,
+  type TagClickHandler,
   type WikilinkClickHandler,
   docToMarkdown,
   markdownToDoc,
@@ -76,6 +77,9 @@ export interface ProseKitEditorProps {
   /** Called on click of a rendered Markdown link. See `EditorProps.onLinkClick`. */
   onLinkClick?: LinkClickHandler
 
+  /** Called on click of a rendered tag. See `EditorProps.onTagClick`. */
+  onTagClick?: TagClickHandler
+
   /** Resolves an image `src` to a URL. See `EditorProps.resolveImageUrl`. */
   resolveImageUrl?: ImageOptions['resolveImageUrl']
 
@@ -127,6 +131,7 @@ export function ProseKitEditor({
   onWikilinkSearch,
   onWikilinkClick,
   onLinkClick,
+  onTagClick,
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
@@ -230,6 +235,7 @@ export function ProseKitEditor({
         onDocChange={handleDocChange}
         onWikilinkClick={onWikilinkClick}
         onLinkClick={onLinkClick}
+        onTagClick={onTagClick}
         resolveImageUrl={resolveImageUrl}
         onImagePaste={onImagePaste}
         onImageSaveError={onImageSaveError}
