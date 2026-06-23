@@ -1,4 +1,4 @@
-import { defineCommands, defineKeymap, union, type Extension } from '@prosekit/core'
+import { defineCommands, defineKeymap, union, type Extension, type PlainExtension } from '@prosekit/core'
 import { triggerAutocomplete } from '@prosekit/extensions/autocomplete'
 import { TextSelection, type Command } from '@prosekit/pm/state'
 
@@ -37,18 +37,7 @@ const openWikilinkMenuCommand: Command = (state, dispatch) => {
   return true
 }
 
-function openWikilinkMenu(): Command {
-  return openWikilinkMenuCommand
-}
 
-/**
- * @internal
- */
-export type WikilinkTriggerExtension = Extension<{
-  Commands: {
-    openWikilinkMenu: []
-  }
-}>
 
 /**
  * Binds `Mod-Shift-k` (Cmd-Shift-K on Apple) to open the wikilink menu, and
@@ -56,9 +45,8 @@ export type WikilinkTriggerExtension = Extension<{
  * when a wikilink search handler is wired, so the shortcut exists exactly when
  * the menu does.
  */
-export function defineWikilinkTrigger(): WikilinkTriggerExtension {
-  return union(
-    defineCommands({ openWikilinkMenu }),
-    defineKeymap({ 'Mod-Shift-k': openWikilinkMenuCommand }),
+export function defineWikilinkTrigger(): PlainExtension {
+  return  (
+    defineKeymap({ 'Mod-Shift-k': openWikilinkMenuCommand })
   )
 }
