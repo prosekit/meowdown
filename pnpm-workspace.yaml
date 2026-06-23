@@ -19,14 +19,6 @@ minimumReleaseAgeExclude:
   - '@prosekit/*'
   - diffable-html-snapshot@0.3.0
 
-# @prosekit/react@0.8.0-beta.10 pins @prosekit/web@0.9.0-beta.10, which pins
-# @prosekit/extensions@0.18.0-beta.8, but @meowdown/core needs the tr-based
-# triggerAutocomplete from 0.18.0-beta.9. Force one extensions version so the
-# autocomplete plugin instance (and its plugin key) is shared. Drop this once
-# @prosekit/react ships a release that pulls @prosekit/extensions@^0.18.0-beta.9.
-overrides:
-  '@prosekit/extensions': 0.18.0-beta.9
-
 # Enable "blockExoticSubdeps" and "overrides" to install packages from pkg.pr.new
 # blockExoticSubdeps: false
 # overrides:

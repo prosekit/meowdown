@@ -5,9 +5,6 @@ settings:
   dedupePeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@prosekit/extensions': 0.18.0-beta.9
-
 importers:
 
   .:
@@ -76,7 +73,7 @@ importers:
         specifier: ^0.13.0-beta.3
         version: 0.13.0-beta.3(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
       '@prosekit/extensions':
-        specifier: 0.18.0-beta.9
+        specifier: ^0.18.0-beta.9
         version: 0.18.0-beta.9(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.41.9)
       '@prosekit/pm':
         specifier: ^0.1.19-beta.0
