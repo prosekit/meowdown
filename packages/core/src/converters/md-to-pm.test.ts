@@ -677,6 +677,36 @@ describe('markdownToDoc', () => {
     })
   })
 
+  it('maps an HTML comment onto an invisible htmlComment node', () => {
+    expect(markdownToDoc('<!-- a comment -->').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [{ type: 'htmlComment', attrs: { content: '<!-- a comment -->' } }],
+    })
+  })
+
+  it('keeps a multi-line HTML comment verbatim on the node', () => {
+    expect(markdownToDoc('<!-- line one\nline two -->').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [{ type: 'htmlComment', attrs: { content: '<!-- line one\nline two -->' } }],
+    })
+  })
+
+  it('separates a comment from adjacent paragraph text', () => {
+    // The shape tools rely on: a sentinel comment, body text, and a closing
+    // sentinel, with no blank lines between them.
+    expect(markdownToDoc('<!-- start -->\nbody text\n<!-- end -->').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        { type: 'htmlComment', attrs: { content: '<!-- start -->' } },
+        { type: 'paragraph', content: [{ type: 'text', text: 'body text' }] },
+        { type: 'htmlComment', attrs: { content: '<!-- end -->' } },
+      ],
+    })
+  })
+
   it('keeps a two-line quote clean', () => {
     expect(markdownToDoc('> l1\n> l2').toJSON()).toEqual({
       type: 'doc',

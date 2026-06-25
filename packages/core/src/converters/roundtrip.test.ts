@@ -179,6 +179,18 @@ describe('inline', () => {
     expect(roundtrip('<!-- comment -->')).toBe('<!-- comment -->\n')
   })
 
+  it('keeps a multi-line HTML comment', () => {
+    expect(roundtrip('<!-- line one\nline two -->')).toBe('<!-- line one\nline two -->\n')
+  })
+
+  it('keeps sentinel comments around body text', () => {
+    // The serializer separates a run of blocks with blank lines (as it does for
+    // any adjacent blocks, comment or not); both sentinels and the body survive.
+    expect(roundtrip('<!-- start -->\nbody text\n<!-- end -->')).toBe(
+      '<!-- start -->\n\nbody text\n\n<!-- end -->\n',
+    )
+  })
+
   it('keeps a processing instruction', () => {
     expect(roundtrip('<?php echo 1; ?>')).toBe('<?php echo 1; ?>\n')
   })

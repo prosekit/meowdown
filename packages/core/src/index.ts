@@ -20,6 +20,7 @@ export {
   type TagClickPayload,
 } from './extensions/tag-click.ts'
 export { defineImage, type ImageOptions, defaultResolveImageUrl } from './extensions/image.ts'
+export { defineHtmlComment, type MeowdownHtmlCommentAttrs } from './extensions/html-comment.ts'
 export { matchEmbed, listenForTweetHeight, type EmbedDescriptor } from './extensions/embed/index.ts'
 export {
   defineCodeBlockSyntaxHighlight,
