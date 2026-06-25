@@ -16,7 +16,7 @@ export interface ExitBoundaryOptions {
   event: KeyboardEvent
 }
 
-export type ExitBoundaryHandler = (options: ExitBoundaryOptions) => void
+export type ExitBoundaryHandler = (options: ExitBoundaryOptions) => boolean | void
 
 // Ported from prosemirror-view's `moveSelectionBlock`
 // https://code.haverbeke.berlin/prosemirror/prosemirror-view/src/tag/1.41.8/src/capturekeys.ts#L7-L12
@@ -65,7 +65,8 @@ function createExitBoundaryPlugin(onExitBoundary: ExitBoundaryHandler) {
         if (!dir) return false
 
         if (canMoveVertically(view, dir)) return false
-        onExitBoundary({ direction: dir < 0 ? 'up' : 'down', event })
+        const result = onExitBoundary({ direction: dir < 0 ? 'up' : 'down', event })
+        if (result === false) return false
         return true
       },
     },
