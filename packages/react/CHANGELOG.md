@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.24.1](https://github.com/prosekit/meowdown/compare/react-v0.24.0...react-v0.24.1) (2026-06-25)
+
+
+### Bug Fixes
+
+* **react:** soften drag selector icon ([#153](https://github.com/prosekit/meowdown/issues/153)) ([04f8e3c](https://github.com/prosekit/meowdown/commit/04f8e3c1fb7ee7b938f4bd405754c5fe09963d4d))
+
 ## [0.24.0](https://github.com/prosekit/meowdown/compare/react-v0.23.0...react-v0.24.0) (2026-06-25)
 
 
