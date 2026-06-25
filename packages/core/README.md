@@ -4,22 +4,16 @@ The engine powering the editor in [`@meowdown/react`](https://www.npmjs.com/pack
 
 ## Quick start
 
-Install the package:
-
 ```sh
 npm install @meowdown/core
 ```
-
-Convert between Markdown and a ProseMirror document with the headless converters:
 
 ```ts
 import { docToMarkdown, markdownToDoc } from '@meowdown/core'
 
 const doc = markdownToDoc('# Hello *world*')
-const markdown = docToMarkdown(doc) // "# Hello *world*\n"
+const markdown = docToMarkdown(doc)
 ```
-
-To mount a live editor, build a ProseKit editor from `defineEditorExtension()`, or use the ready-made React component in [`@meowdown/react`](https://www.npmjs.com/package/@meowdown/react).
 
 ## Supported Markdown features
 
