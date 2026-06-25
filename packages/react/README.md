@@ -2,6 +2,8 @@
 
 React components for Meowdown, a hybrid (live-preview) Markdown editor.
 
+[**Live demo**](https://meowdown.vercel.app/)
+
 ## Quick start
 
 Install the package and its peer dependencies:
