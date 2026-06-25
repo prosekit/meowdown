@@ -131,7 +131,7 @@ function convertBlock(
       // node so it stays in the document (and round-trips) without reading as
       // body text. Raw HTML / processing-instruction blocks fall through to a
       // paragraph - they can carry content a reader expects to see.
-      return [convertHtmlComment(nodes, cursor, text)]
+      return [convertHTMLComment(nodes, cursor, text)]
     case LEZER_NODE_IDS.HTMLBlock:
     case LEZER_NODE_IDS.ProcessingInstructionBlock:
       // The schema has no HTML node, so keep the raw block as literal paragraph
@@ -327,7 +327,7 @@ function convertParagraph(
  * continuation lines are dedented like a paragraph's so the serializer's own
  * line prefix re-applies the container indent instead of doubling it.
  */
-function convertHtmlComment(
+function convertHTMLComment(
   nodes: TypedNodeBuilders,
   cursor: TreeCursor,
   text: string,

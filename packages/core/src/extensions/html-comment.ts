@@ -2,7 +2,7 @@ import { defineNodeSpec, type Extension } from '@prosekit/core'
 
 import type { NodeName } from './node-names.ts'
 
-export interface MeowdownHtmlCommentAttrs {
+export interface MeowdownHTMLCommentAttrs {
   /**
    * The literal markdown comment, including its delimiters, e.g.
    * `<!-- reflect-capture-page-text:start -->`. A multi-line comment keeps its
@@ -11,8 +11,8 @@ export interface MeowdownHtmlCommentAttrs {
   content: string
 }
 
-type HtmlCommentExtension = Extension<{
-  Nodes: { htmlComment: MeowdownHtmlCommentAttrs }
+type HTMLCommentExtension = Extension<{
+  Nodes: { htmlComment: MeowdownHTMLCommentAttrs }
 }>
 
 /**
@@ -34,7 +34,7 @@ type HtmlCommentExtension = Extension<{
  * The node is `atom` (no editable content) and not selectable: it is an opaque,
  * invisible marker the cursor steps over rather than a block the user edits.
  */
-export function defineHtmlComment(): HtmlCommentExtension {
+export function defineHTMLComment(): HTMLCommentExtension {
   return defineNodeSpec({
     name: 'htmlComment' satisfies NodeName,
     group: 'block',
@@ -48,7 +48,7 @@ export function defineHtmlComment(): HtmlCommentExtension {
     toDOM: (node) => [
       'div',
       {
-        'data-html-comment': (node.attrs as MeowdownHtmlCommentAttrs).content,
+        'data-html-comment': (node.attrs as MeowdownHTMLCommentAttrs).content,
         style: 'display: none',
       },
     ],
