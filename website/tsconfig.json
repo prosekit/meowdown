@@ -8,6 +8,9 @@
   },
   "references": [
     {
+      "path": "../packages/core/tsconfig.json"
+    },
+    {
       "path": "../packages/react/tsconfig.json"
     }
   ]

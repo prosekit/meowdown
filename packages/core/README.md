@@ -111,6 +111,8 @@ Pasting rich-text HTML from a browser (a bullet list, **bold**, a link, ...) con
 
 Pressing Enter at the end of the document's first heading (the title line) can start a fresh empty bullet on the next line instead of a plain paragraph. `defineBulletAfterHeading()` binds this. It is not part of `defineEditorExtension`; add it explicitly.
 
+Pressing ArrowUp on the first visual line or ArrowDown on the last, when the caret can move no further, can notify the host so it can move focus elsewhere (a previous/next note or page). `defineExitBoundaryHandler(({ direction, event }) => ...)` (or `@meowdown/react`'s `onExitBoundary` prop) fires with `direction` (`'up'` or `'down'`) and the original `KeyboardEvent`; return `false` to let the editor handle the key normally. It also fires for a selected node at the edge, and ignores arrows carrying a modifier. It is not part of `defineEditorExtension`; add it explicitly.
+
 ## API
 
 See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Fcore/).

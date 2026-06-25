@@ -454,6 +454,28 @@ describe('MeowdownEditor', () => {
     })
   })
 
+  it('calls onExitBoundary with "up" when ArrowUp is pressed at the top', async () => {
+    const onExitBoundary = vi.fn()
+    const screen = await render(
+      <MeowdownEditor initialMarkdown="only line" onExitBoundary={onExitBoundary} />,
+    )
+    await screen.getByText('only line').click()
+    await userEvent.keyboard('{ArrowUp}')
+    await vi.waitFor(() => {
+      expect(onExitBoundary).toHaveBeenCalledWith(expect.objectContaining({ direction: 'up' }))
+    })
+  })
+
+  it('does not call onExitBoundary from a middle paragraph', async () => {
+    const onExitBoundary = vi.fn()
+    const screen = await render(
+      <MeowdownEditor initialMarkdown={'one\n\ntwo\n\nthree'} onExitBoundary={onExitBoundary} />,
+    )
+    await screen.getByText('two').click()
+    await userEvent.keyboard('{ArrowUp}')
+    expect(onExitBoundary).not.toHaveBeenCalled()
+  })
+
   it('does not render children in source mode', async () => {
     await render(
       <MeowdownEditor mode="source" initialMarkdown="Hi">

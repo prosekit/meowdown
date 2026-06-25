@@ -2,6 +2,7 @@ import {
   defineEditorExtension,
   type TypedEditor,
   type EditorExtension,
+  type ExitBoundaryHandler,
   type ImageClickHandler,
   type ImageOptions,
   type LinkClickHandler,
@@ -80,6 +81,9 @@ export interface ProseKitEditorProps {
   /** Called on click of a rendered tag. See `EditorProps.onTagClick`. */
   onTagClick?: TagClickHandler
 
+  /** Called when an arrow press leaves the document boundary. See `EditorProps.onExitBoundary`. */
+  onExitBoundary?: ExitBoundaryHandler
+
   /** Resolves an image `src` to a URL. See `EditorProps.resolveImageUrl`. */
   resolveImageUrl?: ImageOptions['resolveImageUrl']
 
@@ -132,6 +136,7 @@ export function ProseKitEditor({
   onWikilinkClick,
   onLinkClick,
   onTagClick,
+  onExitBoundary,
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
@@ -236,6 +241,7 @@ export function ProseKitEditor({
         onWikilinkClick={onWikilinkClick}
         onLinkClick={onLinkClick}
         onTagClick={onTagClick}
+        onExitBoundary={onExitBoundary}
         resolveImageUrl={resolveImageUrl}
         onImagePaste={onImagePaste}
         onImageSaveError={onImageSaveError}
