@@ -6,10 +6,10 @@ import { parseInline } from '../lezer/inline.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 
 import type {
-  MdPackAttrs,
   MdImageSourceAttrs,
   MdImageViewAttrs,
   MdLinkTextAttrs,
+  MdPackAttrs,
   MdWikilinkSourceAttrs,
   MdWikilinkViewAttrs,
 } from './inline-marks.ts'
@@ -26,9 +26,8 @@ import { parseWikilink } from './wikilink.ts'
  * - `Link` / `Image` / `Autolink` are wrapper nodes; their syntax
  *   characters are emitted by inner `LinkMark` / `URL` children and
  *   handled here. Link text gets `mdLinkText` via `walkLink`.
- * - `Escape` / `Entity` / `HardBreak` / `HTMLTag` / `LinkTitle` /
- *   `LinkLabel` / `Comment` etc. produce no mark for now - they render
- *   as plain text.
+ * - `Escape` / `Entity` / `HardBreak` / `HTMLTag` / `LinkLabel` /
+ *   `Comment` etc. produce no mark for now - they render as plain text.
  */
 const MARK_NAME_BY_TYPE_ID: ReadonlyMap<number, MarkName> = new Map([
   [LEZER_NODE_IDS.Emphasis, 'mdEm'],
@@ -42,6 +41,7 @@ const MARK_NAME_BY_TYPE_ID: ReadonlyMap<number, MarkName> = new Map([
   [LEZER_NODE_IDS.StrikethroughMark, 'mdMark'],
   [LEZER_NODE_IDS.HighlightMark, 'mdMark'],
   [LEZER_NODE_IDS.URL, 'mdLinkUri'],
+  [LEZER_NODE_IDS.LinkTitle, 'mdLinkTitle'],
   [LEZER_NODE_IDS.Hashtag, 'mdTag'],
   [LEZER_NODE_IDS.WikilinkMark, 'mdMark'],
 ])
@@ -63,6 +63,8 @@ export function inlineTextToMarkChunks(
   return out
 }
 
+// TODO: move function getAutolinkHref into lezer/autolink-tld.ts
+
 /**
  * Derive the `href` for a bare autolink from its visible text:
  *
@@ -72,7 +74,7 @@ export function inlineTextToMarkChunks(
  * - a bare domain on the curated TLD list gets an implied `https://`
  * - anything else returns `undefined`
  */
-function getAutolinkHref(urlText: string): string | undefined {
+export function getAutolinkHref(urlText: string): string | undefined {
   if (/^[a-z][a-z0-9+.-]*:/i.test(urlText)) return urlText
   if (/^[^\s@]+@[^\s@]+$/.test(urlText)) return `mailto:${urlText}`
   if (/^www\./i.test(urlText)) return `https://${urlText}`

@@ -23,6 +23,7 @@
   "dependencies": {
     "@codemirror/language": "^6.12.3",
     "@codemirror/language-data": "^6.5.2",
+    "@floating-ui/dom": "^1.7.6",
     "@lezer/common": "^1.5.2",
     "@lezer/highlight": "^1.2.3",
     "@lezer/markdown": "^1.6.4",

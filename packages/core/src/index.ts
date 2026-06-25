@@ -28,6 +28,7 @@ export {
   type EditorExtension,
   type TypedEditor,
 } from './extensions/extension.ts'
+export { getLinkUnitAt, type LinkUnit } from './extensions/get-link-unit-at.ts'
 export { defineHTMLComment, type MeowdownHTMLCommentAttrs } from './extensions/html-comment.ts'
 export { defineHTMLPaste } from './extensions/html-paste.ts'
 export {
@@ -47,7 +48,19 @@ export {
   defineLinkClickHandler,
   type LinkClickHandler,
   type LinkClickPayload,
+  type LinkCopyHandler,
+  type LinkCopyPayload,
 } from './extensions/link-click.ts'
+export {
+  defineLinkCommands,
+  defineLinkEditKeymap,
+  insertLink,
+  removeLink,
+  updateLink,
+  type LinkAttrs,
+} from './extensions/link-commands.ts'
+export type { LinkEditHandler, LinkEditOptions } from './extensions/link-commands.ts'
+export { defineLinkHoverHandler, type LinkHoverHandler } from './extensions/link-hover.ts'
 export type { MarkChunk } from './extensions/mark-chunk.ts'
 export { defineMarkMode, type MarkMode } from './extensions/mark-mode.ts'
 export type { MarkName } from './extensions/mark-names.ts'
@@ -65,3 +78,5 @@ export {
   type WikilinkClickPayload,
 } from './extensions/wikilink-click.ts'
 export { defineWikilinkTrigger } from './extensions/wikilink-trigger.ts'
+export type { PositionRange } from './utils/range.ts'
+export { getVirtualElementFromRange, type VirtualElement } from './utils/virtual-element.ts'

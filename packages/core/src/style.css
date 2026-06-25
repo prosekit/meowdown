@@ -324,6 +324,10 @@
   background: var(--meowdown-selection);
 }
 
+.ProseMirror .prosekit-virtual-selection {
+  background: var(--meowdown-selection);
+}
+
 /* prosemirror-view adds `ProseMirror-hideselection` whenever the selection is
  * not "visible" (a node selection). */
 .ProseMirror:has(.md-atomic-selected),
@@ -466,8 +470,9 @@
   opacity: 0.7;
 }
 
-/* The URL of a link/image */
-.ProseMirror .md-link-uri {
+/* The URL of a link/image, and a link title */
+.ProseMirror .md-link-uri,
+.ProseMirror .md-link-title {
   color: var(--meowdown-accent);
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -486,6 +491,7 @@
 .ProseMirror[data-mark-mode='hide'] {
   .md-mark,
   .md-link-uri,
+  .md-link-title,
   .md-image-source,
   .md-wikilink-source {
     display: none;
@@ -499,6 +505,7 @@
 
   .md-mark,
   .md-link-uri,
+  .md-link-title,
   .md-image-source {
     overflow: hidden;
     display: inline-block;

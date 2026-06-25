@@ -1,0 +1,92 @@
+.Positioner {
+  display: block;
+  z-index: 50;
+  width: min(20rem, calc(100vw - 1rem));
+}
+
+.Popup {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.25rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--meowdown-border);
+  border-radius: 0.75rem;
+  background: var(--meowdown-link-popover-bg, light-dark(#fff, #18181b));
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.Row {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.Url {
+  flex: 1;
+  min-width: 0;
+  padding: 0.25rem 0.5rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--meowdown-accent);
+  cursor: pointer;
+}
+
+.Button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem;
+  color: var(--meowdown-text);
+  border-radius: 0.5rem;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--meowdown-link-popover-hover-bg, light-dark(#f4f4f5, #27272a));
+  }
+
+  & svg {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+.Form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.25rem;
+}
+
+/* A present-but-invisible submit button so Enter submits the two-input form. */
+.SrOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.Input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.375rem 0.5rem;
+  font: inherit;
+  color: var(--meowdown-text);
+  background: transparent;
+  border: 1px solid var(--meowdown-border);
+  border-radius: 0.5rem;
+
+  &:focus {
+    outline: 2px solid var(--meowdown-accent);
+    outline-offset: -1px;
+  }
+}

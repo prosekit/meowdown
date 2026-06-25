@@ -1,20 +1,21 @@
 import {
   defineEditorExtension,
-  type TypedEditor,
+  docToMarkdown,
+  markdownToDoc,
   type EditorExtension,
   type ExitBoundaryHandler,
   type ImageClickHandler,
   type ImageOptions,
   type LinkClickHandler,
+  type LinkCopyHandler,
   type MarkMode,
   type PlaceholderOptions,
   type TagClickHandler,
+  type TypedEditor,
   type WikilinkClickHandler,
-  docToMarkdown,
-  markdownToDoc,
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
-import { createEditor, type SelectionJSON, union } from '@prosekit/core'
+import { createEditor, union, type SelectionJSON } from '@prosekit/core'
 import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit } from '@prosekit/react'
@@ -26,6 +27,7 @@ import { defineCodeBlockView } from '../extensions/code-block-view.ts'
 import { BlockHandle } from './block-handle.tsx'
 import { DropIndicator } from './drop-indicator.tsx'
 import { EditorExtensions } from './editor-extensions.tsx'
+import { LinkMenu } from './link-menu.tsx'
 import { SlashMenu } from './slash-menu.tsx'
 import { TableHandle } from './table-handle.tsx'
 import { TagMenu } from './tag-menu.tsx'
@@ -77,6 +79,9 @@ export interface ProseKitEditorProps {
 
   /** Called on click of a rendered Markdown link. See `EditorProps.onLinkClick`. */
   onLinkClick?: LinkClickHandler
+
+  /** Called after a link is copied from the link menu. See `EditorProps.onLinkCopy`. */
+  onLinkCopy?: LinkCopyHandler
 
   /** Called on click of a rendered tag. See `EditorProps.onTagClick`. */
   onTagClick?: TagClickHandler
@@ -135,6 +140,7 @@ export function ProseKitEditor({
   onWikilinkSearch,
   onWikilinkClick,
   onLinkClick,
+  onLinkCopy,
   onTagClick,
   onExitBoundary,
   resolveImageUrl,
@@ -256,6 +262,7 @@ export function ProseKitEditor({
       {!readOnly && <TableHandle />}
       {blockHandle && !readOnly && <DropIndicator />}
       <SlashMenu />
+      {!readOnly && <LinkMenu onLinkClick={onLinkClick} onLinkCopy={onLinkCopy} />}
       {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
       {onWikilinkSearch && <WikilinkMenu onWikilinkSearch={onWikilinkSearch} />}
       {children}

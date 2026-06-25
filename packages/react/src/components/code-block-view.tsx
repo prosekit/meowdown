@@ -1,17 +1,16 @@
 import { Combobox } from '@base-ui/react/combobox'
 import { type CodeBlockAttrs, codeBlockLanguages } from '@meowdown/core'
 import type { ReactNodeViewProps } from '@prosekit/react'
-import { CheckIcon, ChevronsUpDownIcon, CopyIcon } from 'lucide-react'
-import { useMemo, useRef, useState } from 'react'
+import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
+import { useMemo, useState } from 'react'
 
 import styles from './code-block-view.module.css'
+import { CopyButton } from './copy-button.tsx'
 
 type LanguageItem = {
   label: string
   value: string
 }
-
-const COPIED_RESET_MS = 1500
 
 export function CodeBlockView(props: ReactNodeViewProps) {
   const attrs = props.node.attrs as CodeBlockAttrs
@@ -46,20 +45,6 @@ export function CodeBlockView(props: ReactNodeViewProps) {
 
   const setLanguage = (item: LanguageItem | null) => {
     props.setAttrs({ language: item?.value ?? '' } satisfies CodeBlockAttrs)
-  }
-
-  const [copied, setCopied] = useState(false)
-  const resetTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(props.node.textContent)
-      setCopied(true)
-      clearTimeout(resetTimerRef.current)
-      resetTimerRef.current = setTimeout(() => setCopied(false), COPIED_RESET_MS)
-    } catch (error) {
-      console.warn('[meowdown] Failed to copy code block:', error)
-    }
   }
 
   return (
@@ -110,18 +95,12 @@ export function CodeBlockView(props: ReactNodeViewProps) {
             </Combobox.Positioner>
           </Combobox.Portal>
         </Combobox.Root>
-        <button
-          type="button"
+        <CopyButton
+          getText={() => props.node.textContent}
+          label="Copy code"
           className={styles.CopyButton}
           data-testid="code-block-copy"
-          data-copied={copied ? '' : undefined}
-          aria-label={copied ? 'Copied' : 'Copy code'}
-          title={copied ? 'Copied' : 'Copy code'}
-          onMouseDown={(event) => event.preventDefault()}
-          onClick={copy}
-        >
-          {copied ? <CheckIcon /> : <CopyIcon />}
-        </button>
+        />
       </div>
       <pre ref={props.contentRef} data-language={language}></pre>
     </div>

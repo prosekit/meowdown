@@ -18,7 +18,11 @@ export type MarkMode = 'hide' | 'focus' | 'show'
 
 // Marks whose text is dropped from a clean clipboard copy, so copied markdown
 // omits the rendered syntax. Source marks are exempt (see `cleanCopySerializer`).
-const CLIPBOARD_STRIP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>(['mdMark', 'mdLinkUri'])
+const CLIPBOARD_STRIP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([
+  'mdMark',
+  'mdLinkUri',
+  'mdLinkTitle',
+])
 
 // Source marks whose whole run is kept verbatim in a clean copy, so a rendered
 // image stays `![alt](url)` and a rendered wikilink stays `[[target]]`, even

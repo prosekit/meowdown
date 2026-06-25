@@ -116,6 +116,21 @@ describe('inlineTextToMarkChunks', () => {
     `)
   })
 
+  it('link with a title marks the title with mdLinkTitle', () => {
+    const chunks = inlineTextToMarkChunks(markBuilders, '[docs](http://x "t")')
+    expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
+      "
+      0-1: mdLinkText(href=http://x) + mdMark + mdPack(key=link_http://x)
+      1-5: mdLinkText(href=http://x) + mdPack(key=link_http://x)
+      5-7: mdMark + mdPack(key=link_http://x)
+      7-15: mdLinkUri + mdPack(key=link_http://x)
+      15-16: mdPack(key=link_http://x)
+      16-19: mdLinkTitle + mdPack(key=link_http://x)
+      19-20: mdMark + mdPack(key=link_http://x)
+      "
+    `)
+  })
+
   it('link with emphasis nested inside the text', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '[*ital*](http://x)')
     expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
@@ -171,7 +186,7 @@ describe('inlineTextToMarkChunks', () => {
     `)
   })
 
-  it('image with a title leaves the title node unmarked', () => {
+  it('image with a title marks the title node like a link title', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '![a](http://x "t")')
     expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
@@ -179,7 +194,8 @@ describe('inlineTextToMarkChunks', () => {
       2-3: mdImageSource(src=http://x,alt=a) + mdPack(key=image_http://x)
       3-5: mdImageSource(src=http://x,alt=a) + mdMark + mdPack(key=image_http://x)
       5-13: mdImageSource(src=http://x,alt=a) + mdLinkUri + mdPack(key=image_http://x)
-      13-17: mdImageSource(src=http://x,alt=a) + mdPack(key=image_http://x)
+      13-14: mdImageSource(src=http://x,alt=a) + mdPack(key=image_http://x)
+      14-17: mdImageSource(src=http://x,alt=a) + mdLinkTitle + mdPack(key=image_http://x)
       17-18: mdImageSource(src=http://x,alt=a) + mdImageView(src=http://x,alt=a) + mdMark + mdPack(key=image_http://x)
       "
     `)

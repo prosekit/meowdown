@@ -1,0 +1,98 @@
+import type { EditorState } from '@prosekit/pm/state'
+
+import type { PositionRange } from '../utils/range.ts'
+
+import { getMarkRangeAt } from './get-mark-range-at.ts'
+import type { MdLinkTextAttrs, MdPackAttrs } from './inline-marks.ts'
+import type { MarkName } from './mark-names.ts'
+
+export interface LinkUnit {
+  /** Whole `[text](url "title")` (or autolink) range */
+  unit: PositionRange
+
+  /** Interior of `[ ]`. Absent for an autolink. */
+  label?: PositionRange
+
+  /** Interior of `( )`. What `updateLink` rewrites. Absent for an autolink. */
+  dest?: PositionRange
+
+  /* The link URL. Could be an empty string. */
+  href: string
+
+  /* The link title, unquoted. Could be an empty string. */
+  title: string
+}
+
+/** Drop the surrounding `"" '' ()` delimiters of a `LinkTitle` slice and unescape. */
+export function unquoteTitle(raw: string): string {
+  return raw.slice(1, -1).replaceAll(/\\(.)/g, '$1')
+}
+
+/**
+ * The last text run carrying `markName` inside `range`. "Last" so a linked
+ * image's inner url/title (which comes first) never shadows the link's own.
+ */
+function lastMarkRunIn(
+  state: EditorState,
+  range: PositionRange,
+  markName: MarkName,
+): PositionRange | undefined {
+  let found: PositionRange | undefined
+  state.doc.nodesBetween(range.from, range.to, (node, nodePos) => {
+    if (node.isText && node.marks.some((mark) => mark.type.name === markName)) {
+      found = {
+        from: Math.max(nodePos, range.from),
+        to: Math.min(nodePos + node.nodeSize, range.to),
+      }
+    }
+    return true
+  })
+  return found
+}
+
+/**
+ * The link covering `pos`, with its sub-ranges (`label`, `dest`) and parsed
+ * `href`/`title`. The single query the commands and the hover/click handlers
+ * share, replacing the old `findLinkAt`.
+ *
+ * Derived entirely from the marks already on the document (no re-parse): the
+ * `mdPack` unit and its `key` give the shape, `mdLinkText` gives the href and the
+ * `]` boundary, and the `mdLinkUri`/`mdLinkTitle` runs locate the `( )` body.
+ */
+export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undefined {
+  const linkText = getMarkRangeAt(state, pos, 'mdLinkText')
+  const pack = getMarkRangeAt(state, pos, 'mdPack')
+  // `[text](url)` carries `mdPack` over the whole unit; bare/GFM autolinks carry
+  // only `mdLinkText`. Prefer the wider `mdPack` unit, falling back to the link
+  // text run so autolinks still resolve.
+  const unit = pack ?? linkText
+  if (!unit) return
+
+  const href = (linkText?.mark.attrs as MdLinkTextAttrs | undefined)?.href ?? ''
+  const key = (pack?.mark.attrs as MdPackAttrs | undefined)?.key ?? ''
+
+  // Only a real `[text](dest)` (mdPack key `link_*`) has an editable label/dest.
+  // Autolinks (no mdPack, or key `autolink`) just resolve an href.
+  if (!pack || !key.startsWith('link_')) {
+    return {
+      unit: { from: unit.from, to: unit.to },
+      href,
+      title: '',
+    }
+  }
+
+  // `[` at unit.from, `)` at unit.to - 1. With a url, `]` sits two chars before
+  // the url start (`](`); with an empty `()`, `]` is two chars before the `)`.
+  const uri = lastMarkRunIn(state, unit, 'mdLinkUri')
+  const titleRun = lastMarkRunIn(state, unit, 'mdLinkTitle')
+  const closeBracket = uri ? uri.from - 2 : unit.to - 3
+  const destFrom = uri ? uri.from : unit.to - 1
+
+  return {
+    unit: { from: unit.from, to: unit.to },
+    label: { from: unit.from + 1, to: closeBracket },
+    dest: { from: destFrom, to: unit.to - 1 },
+    href,
+    title: titleRun ? unquoteTitle(state.doc.textBetween(titleRun.from, titleRun.to)) : '',
+  }
+}

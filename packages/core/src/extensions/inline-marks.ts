@@ -112,6 +112,15 @@ function defineMdLinkUri() {
   })
 }
 
+function defineMdLinkTitle() {
+  return defineMarkSpec({
+    name: 'mdLinkTitle' satisfies MarkName,
+    inclusive: false,
+    toDOM: () => ['span', { class: 'md-link-title' }, 0],
+    parseDOM: [{ tag: 'span.md-link-title' }],
+  })
+}
+
 function defineMdDel() {
   return defineMarkSpec({
     name: 'mdDel' satisfies MarkName,
@@ -222,6 +231,7 @@ export function defineInlineMarks() {
     defineMdCode(),
     defineMdLinkText(),
     defineMdLinkUri(),
+    defineMdLinkTitle(),
     defineMdDel(),
     defineMdHighlight(),
     defineMdTag(),
