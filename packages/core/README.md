@@ -81,6 +81,10 @@ Pressing Enter at the end of the document's first heading (the title line) can s
 
 `Priority` and `withPriority` are re-exported from `@prosekit/core`, so you can set extension priorities (e.g. `withPriority(extension, Priority.high)`) without depending on `@prosekit/core` directly.
 
+## API
+
+See the full API reference on [npmx](https://npmx.dev/package-docs/@meowdown%2Fcore/).
+
 ## License
 
 MIT
