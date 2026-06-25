@@ -2,27 +2,27 @@
 
 The engine powering the editor in [`@meowdown/react`](https://www.npmjs.com/package/@meowdown/react): a hybrid (live-preview) Markdown editor core built on ProseKit and Lezer.
 
-## Shortcuts
+## Supported Markdown features
 
-The editor extension binds inline-format toggles (`Mod` = Cmd on macOS, Ctrl elsewhere). Each one inserts or removes the literal Markdown delimiters around the selection; with a caret it plants an empty pair, or hops across a span's closing delimiter so typing enters or leaves the format. Each is also an editor command.
+- CommonMark
+  - ATX headings (`# Heading 1`, `## Heading 2`, etc.)
+  - Setext headings (`Heading 1\n===`, `Heading 2\n---`)
+  - Bullet lists (`- item`, `* item`, `+ item`)
+  - Ordered lists (`1. item`, `2) item`, etc.)
+  - Blockquotes (`> quote`)
+  - Fenced code blocks (```` ```lang\ncode\n``` ````)
+- GitHub Flavored Markdown (GFM)
+  - Tables
+  - Strikethrough
+  - Task lists
+- Wikilinks (`[[target]]` and `[[target|alias]]`)
+- Highlight (`==highlight==`)
 
-| Key           | Command                          | Markdown            |
-| ------------- | -------------------------------- | ------------------- |
-| `Mod-B`       | `editor.commands.toggleStrong()` | `**bold**`          |
-| `Mod-I`       | `editor.commands.toggleEm()`     | `*italic*`          |
-| `Mod-E`       | `editor.commands.toggleCode()`   | `` `code` ``        |
-| `Mod-Shift-X` | `editor.commands.toggleDel()`    | `~~strikethrough~~` |
+TODO
 
-Heading shortcuts toggle the current block to a heading of that level (or back to a paragraph):
+## Keyboard shortcuts
 
-| Key     | Action    |
-| ------- | --------- |
-| `Mod-1` | Heading 1 |
-| `Mod-2` | Heading 2 |
-| `Mod-3` | Heading 3 |
-| `Mod-4` | Heading 4 |
-| `Mod-5` | Heading 5 |
-| `Mod-6` | Heading 6 |
+TODO: a full table 
 
 `EDITOR_KEY_BINDINGS` is a literal (`as const`) object mapping every key above to its description, for host settings UIs and keybinding-collision checks.
 
