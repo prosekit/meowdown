@@ -83,7 +83,7 @@ Pressing Enter at the end of the document's first heading (the title line) can s
 
 ## API
 
-See the full API reference on [npmx](https://npmx.dev/package-docs/@meowdown%2Fcore/).
+See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Fcore/).
 
 ## License
 
