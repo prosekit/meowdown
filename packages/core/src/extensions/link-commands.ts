@@ -107,7 +107,7 @@ export interface LinkEditOptions {
 
 export type LinkEditHandler = (options: LinkEditOptions) => void
 
-export function onpeLinkEdit(onLinkEdit: LinkEditHandler): Command {
+function openLinkEdit(onLinkEdit: LinkEditHandler): Command {
   return (state, dispatch, view) => {
     const link = getLinkUnitAt(state, state.selection.from)
 
@@ -140,6 +140,6 @@ export function onpeLinkEdit(onLinkEdit: LinkEditHandler): Command {
 
 export function defineLinkEditKeymap(onLinkEdit: LinkEditHandler): PlainExtension {
   return defineKeymap({
-    'Mod-k': onpeLinkEdit(onLinkEdit),
+    'Mod-k': openLinkEdit(onLinkEdit),
   })
 }

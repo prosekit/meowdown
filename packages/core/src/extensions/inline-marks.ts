@@ -191,11 +191,16 @@ export interface MdWikilinkViewAttrs {
   display: string
 }
 
+/** mdPack keys for units that store no extra data; the syntax marks carry it. */
+export type MdPackSimpleKey = 'bold' | 'italic' | 'code' | 'strike' | 'highlight' | 'autolink'
+
 /**
  * Content-derived identity of one inline syntax unit. Adjacent units of the
  * same kind are kept apart by it (so they do not merge into one mark run), and
  * it stays stable when unrelated text in the block is edited, so editing one
- * unit never re-marks the others.
+ * unit never re-marks the others. `data` carries the unit's parsed payload (a
+ * link's `href`/`title`, an image's `src`) so callers read it off the mark
+ * instead of re-parsing the text.
  */
 export type MdPackAttrs =
   | {
@@ -207,7 +212,7 @@ export type MdPackAttrs =
       data: { src: string }
     }
   | {
-      key: `bold` | `italic` | `code` | `strike` | `highlight` | `autolink`
+      key: MdPackSimpleKey
       data?: null
     }
 

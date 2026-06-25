@@ -19,7 +19,13 @@ function formatMarkChunk([from, to, marks]: MarkChunk): string {
       if (keys.length === 0) return mark.type.name
       const filtered = keys.filter((k) => attrs[k] !== '' && attrs[k] !== null)
       if (filtered.length === 0) return mark.type.name
-      const attrStr = filtered.map((k) => `${k}=${attrs[k] as string}`).join(',')
+      const attrStr = filtered
+        .map((k) => {
+          const value = attrs[k]
+          const rendered = typeof value === 'object' ? JSON.stringify(value) : (value as string)
+          return `${k}=${rendered}`
+        })
+        .join(',')
       return `${mark.type.name}(${attrStr})`
     })
     .sort()
@@ -106,11 +112,11 @@ describe('inlineTextToMarkChunks', () => {
     expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-4: -
-      4-5: mdLinkText(href=http://x) + mdMark + mdPack(key=link_http://x)
-      5-9: mdLinkText(href=http://x) + mdPack(key=link_http://x)
-      9-11: mdMark + mdPack(key=link_http://x)
-      11-19: mdLinkUri + mdPack(key=link_http://x)
-      19-20: mdMark + mdPack(key=link_http://x)
+      4-5: mdLinkText(href=http://x) + mdMark + mdPack(key=link,data={"href":"http://x","title":""})
+      5-9: mdLinkText(href=http://x) + mdPack(key=link,data={"href":"http://x","title":""})
+      9-11: mdMark + mdPack(key=link,data={"href":"http://x","title":""})
+      11-19: mdLinkUri + mdPack(key=link,data={"href":"http://x","title":""})
+      19-20: mdMark + mdPack(key=link,data={"href":"http://x","title":""})
       20-24: -
       "
     `)
@@ -120,13 +126,13 @@ describe('inlineTextToMarkChunks', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '[docs](http://x "t")')
     expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-1: mdLinkText(href=http://x) + mdMark + mdPack(key=link_http://x)
-      1-5: mdLinkText(href=http://x) + mdPack(key=link_http://x)
-      5-7: mdMark + mdPack(key=link_http://x)
-      7-15: mdLinkUri + mdPack(key=link_http://x)
-      15-16: mdPack(key=link_http://x)
-      16-19: mdLinkTitle + mdPack(key=link_http://x)
-      19-20: mdMark + mdPack(key=link_http://x)
+      0-1: mdLinkText(href=http://x) + mdMark + mdPack(key=link,data={"href":"http://x","title":"t"})
+      1-5: mdLinkText(href=http://x) + mdPack(key=link,data={"href":"http://x","title":"t"})
+      5-7: mdMark + mdPack(key=link,data={"href":"http://x","title":"t"})
+      7-15: mdLinkUri + mdPack(key=link,data={"href":"http://x","title":"t"})
+      15-16: mdPack(key=link,data={"href":"http://x","title":"t"})
+      16-19: mdLinkTitle + mdPack(key=link,data={"href":"http://x","title":"t"})
+      19-20: mdMark + mdPack(key=link,data={"href":"http://x","title":"t"})
       "
     `)
   })
@@ -135,13 +141,13 @@ describe('inlineTextToMarkChunks', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '[*ital*](http://x)')
     expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-1: mdLinkText(href=http://x) + mdMark + mdPack(key=link_http://x)
-      1-2: mdEm + mdLinkText(href=http://x) + mdMark + mdPack(key=link_http://x)
-      2-6: mdEm + mdLinkText(href=http://x) + mdPack(key=link_http://x)
-      6-7: mdEm + mdLinkText(href=http://x) + mdMark + mdPack(key=link_http://x)
-      7-9: mdMark + mdPack(key=link_http://x)
-      9-17: mdLinkUri + mdPack(key=link_http://x)
-      17-18: mdMark + mdPack(key=link_http://x)
+      0-1: mdLinkText(href=http://x) + mdMark + mdPack(key=link,data={"href":"http://x","title":""})
+      1-2: mdEm + mdLinkText(href=http://x) + mdMark + mdPack(key=link,data={"href":"http://x","title":""})
+      2-6: mdEm + mdLinkText(href=http://x) + mdPack(key=link,data={"href":"http://x","title":""})
+      6-7: mdEm + mdLinkText(href=http://x) + mdMark + mdPack(key=link,data={"href":"http://x","title":""})
+      7-9: mdMark + mdPack(key=link,data={"href":"http://x","title":""})
+      9-17: mdLinkUri + mdPack(key=link,data={"href":"http://x","title":""})
+      17-18: mdMark + mdPack(key=link,data={"href":"http://x","title":""})
       "
     `)
   })
@@ -151,11 +157,11 @@ describe('inlineTextToMarkChunks', () => {
     expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-4: -
-      4-6: mdImageSource(src=http://x/p.png,alt=alt) + mdMark + mdPack(key=image_http://x/p.png)
-      6-9: mdImageSource(src=http://x/p.png,alt=alt) + mdPack(key=image_http://x/p.png)
-      9-11: mdImageSource(src=http://x/p.png,alt=alt) + mdMark + mdPack(key=image_http://x/p.png)
-      11-25: mdImageSource(src=http://x/p.png,alt=alt) + mdLinkUri + mdPack(key=image_http://x/p.png)
-      25-26: mdImageSource(src=http://x/p.png,alt=alt) + mdImageView(src=http://x/p.png,alt=alt) + mdMark + mdPack(key=image_http://x/p.png)
+      4-6: mdImageSource(src=http://x/p.png,alt=alt) + mdMark + mdPack(key=image,data={"src":"http://x/p.png"})
+      6-9: mdImageSource(src=http://x/p.png,alt=alt) + mdPack(key=image,data={"src":"http://x/p.png"})
+      9-11: mdImageSource(src=http://x/p.png,alt=alt) + mdMark + mdPack(key=image,data={"src":"http://x/p.png"})
+      11-25: mdImageSource(src=http://x/p.png,alt=alt) + mdLinkUri + mdPack(key=image,data={"src":"http://x/p.png"})
+      25-26: mdImageSource(src=http://x/p.png,alt=alt) + mdImageView(src=http://x/p.png,alt=alt) + mdMark + mdPack(key=image,data={"src":"http://x/p.png"})
       26-30: -
       "
     `)
@@ -165,9 +171,9 @@ describe('inlineTextToMarkChunks', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '![](z.png)')
     expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-4: mdImageSource(src=z.png) + mdMark + mdPack(key=image_z.png)
-      4-9: mdImageSource(src=z.png) + mdLinkUri + mdPack(key=image_z.png)
-      9-10: mdImageSource(src=z.png) + mdImageView(src=z.png) + mdMark + mdPack(key=image_z.png)
+      0-4: mdImageSource(src=z.png) + mdMark + mdPack(key=image,data={"src":"z.png"})
+      4-9: mdImageSource(src=z.png) + mdLinkUri + mdPack(key=image,data={"src":"z.png"})
+      9-10: mdImageSource(src=z.png) + mdImageView(src=z.png) + mdMark + mdPack(key=image,data={"src":"z.png"})
       "
     `)
   })
@@ -177,10 +183,10 @@ describe('inlineTextToMarkChunks', () => {
     expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-2: -
-      2-4: mdMark + mdPack(key=link_)
-      4-5: mdPack(key=link_)
-      5-6: mdMark + mdPack(key=link_)
-      6-10: mdPack(key=link_)
+      2-4: mdMark + mdPack(key=link,data={"href":"","title":""})
+      4-5: mdPack(key=link,data={"href":"","title":""})
+      5-6: mdMark + mdPack(key=link,data={"href":"","title":""})
+      6-10: mdPack(key=link,data={"href":"","title":""})
       10-12: -
       "
     `)
@@ -190,13 +196,13 @@ describe('inlineTextToMarkChunks', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '![a](http://x "t")')
     expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-2: mdImageSource(src=http://x,alt=a) + mdMark + mdPack(key=image_http://x)
-      2-3: mdImageSource(src=http://x,alt=a) + mdPack(key=image_http://x)
-      3-5: mdImageSource(src=http://x,alt=a) + mdMark + mdPack(key=image_http://x)
-      5-13: mdImageSource(src=http://x,alt=a) + mdLinkUri + mdPack(key=image_http://x)
-      13-14: mdImageSource(src=http://x,alt=a) + mdPack(key=image_http://x)
-      14-17: mdImageSource(src=http://x,alt=a) + mdLinkTitle + mdPack(key=image_http://x)
-      17-18: mdImageSource(src=http://x,alt=a) + mdImageView(src=http://x,alt=a) + mdMark + mdPack(key=image_http://x)
+      0-2: mdImageSource(src=http://x,alt=a) + mdMark + mdPack(key=image,data={"src":"http://x"})
+      2-3: mdImageSource(src=http://x,alt=a) + mdPack(key=image,data={"src":"http://x"})
+      3-5: mdImageSource(src=http://x,alt=a) + mdMark + mdPack(key=image,data={"src":"http://x"})
+      5-13: mdImageSource(src=http://x,alt=a) + mdLinkUri + mdPack(key=image,data={"src":"http://x"})
+      13-14: mdImageSource(src=http://x,alt=a) + mdPack(key=image,data={"src":"http://x"})
+      14-17: mdImageSource(src=http://x,alt=a) + mdLinkTitle + mdPack(key=image,data={"src":"http://x"})
+      17-18: mdImageSource(src=http://x,alt=a) + mdImageView(src=http://x,alt=a) + mdMark + mdPack(key=image,data={"src":"http://x"})
       "
     `)
   })
@@ -205,15 +211,15 @@ describe('inlineTextToMarkChunks', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '![a **b** c](http://x)')
     expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-2: mdImageSource(src=http://x,alt=a **b** c) + mdMark + mdPack(key=image_http://x)
-      2-4: mdImageSource(src=http://x,alt=a **b** c) + mdPack(key=image_http://x)
-      4-6: mdImageSource(src=http://x,alt=a **b** c) + mdMark + mdPack(key=image_http://x) + mdStrong
-      6-7: mdImageSource(src=http://x,alt=a **b** c) + mdPack(key=image_http://x) + mdStrong
-      7-9: mdImageSource(src=http://x,alt=a **b** c) + mdMark + mdPack(key=image_http://x) + mdStrong
-      9-11: mdImageSource(src=http://x,alt=a **b** c) + mdPack(key=image_http://x)
-      11-13: mdImageSource(src=http://x,alt=a **b** c) + mdMark + mdPack(key=image_http://x)
-      13-21: mdImageSource(src=http://x,alt=a **b** c) + mdLinkUri + mdPack(key=image_http://x)
-      21-22: mdImageSource(src=http://x,alt=a **b** c) + mdImageView(src=http://x,alt=a **b** c) + mdMark + mdPack(key=image_http://x)
+      0-2: mdImageSource(src=http://x,alt=a **b** c) + mdMark + mdPack(key=image,data={"src":"http://x"})
+      2-4: mdImageSource(src=http://x,alt=a **b** c) + mdPack(key=image,data={"src":"http://x"})
+      4-6: mdImageSource(src=http://x,alt=a **b** c) + mdMark + mdPack(key=image,data={"src":"http://x"}) + mdStrong
+      6-7: mdImageSource(src=http://x,alt=a **b** c) + mdPack(key=image,data={"src":"http://x"}) + mdStrong
+      7-9: mdImageSource(src=http://x,alt=a **b** c) + mdMark + mdPack(key=image,data={"src":"http://x"}) + mdStrong
+      9-11: mdImageSource(src=http://x,alt=a **b** c) + mdPack(key=image,data={"src":"http://x"})
+      11-13: mdImageSource(src=http://x,alt=a **b** c) + mdMark + mdPack(key=image,data={"src":"http://x"})
+      13-21: mdImageSource(src=http://x,alt=a **b** c) + mdLinkUri + mdPack(key=image,data={"src":"http://x"})
+      21-22: mdImageSource(src=http://x,alt=a **b** c) + mdImageView(src=http://x,alt=a **b** c) + mdMark + mdPack(key=image,data={"src":"http://x"})
       "
     `)
   })
@@ -412,11 +418,11 @@ describe('inlineTextToMarkChunks', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '[google.com](http://x)')
     expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-1: mdLinkText(href=http://x) + mdMark + mdPack(key=link_http://x)
-      1-11: mdLinkText(href=http://x) + mdPack(key=link_http://x)
-      11-13: mdMark + mdPack(key=link_http://x)
-      13-21: mdLinkUri + mdPack(key=link_http://x)
-      21-22: mdMark + mdPack(key=link_http://x)
+      0-1: mdLinkText(href=http://x) + mdMark + mdPack(key=link,data={"href":"http://x","title":""})
+      1-11: mdLinkText(href=http://x) + mdPack(key=link,data={"href":"http://x","title":""})
+      11-13: mdMark + mdPack(key=link,data={"href":"http://x","title":""})
+      13-21: mdLinkUri + mdPack(key=link,data={"href":"http://x","title":""})
+      21-22: mdMark + mdPack(key=link,data={"href":"http://x","title":""})
       "
     `)
   })
@@ -557,12 +563,12 @@ describe('inlineTextToMarkChunks', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '[see #tag](http://x)')
     expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-1: mdLinkText(href=http://x) + mdMark + mdPack(key=link_http://x)
-      1-5: mdLinkText(href=http://x) + mdPack(key=link_http://x)
-      5-9: mdLinkText(href=http://x) + mdPack(key=link_http://x) + mdTag
-      9-11: mdMark + mdPack(key=link_http://x)
-      11-19: mdLinkUri + mdPack(key=link_http://x)
-      19-20: mdMark + mdPack(key=link_http://x)
+      0-1: mdLinkText(href=http://x) + mdMark + mdPack(key=link,data={"href":"http://x","title":""})
+      1-5: mdLinkText(href=http://x) + mdPack(key=link,data={"href":"http://x","title":""})
+      5-9: mdLinkText(href=http://x) + mdPack(key=link,data={"href":"http://x","title":""}) + mdTag
+      9-11: mdMark + mdPack(key=link,data={"href":"http://x","title":""})
+      11-19: mdLinkUri + mdPack(key=link,data={"href":"http://x","title":""})
+      19-20: mdMark + mdPack(key=link,data={"href":"http://x","title":""})
       "
     `)
   })
@@ -635,15 +641,15 @@ describe('inlineTextToMarkChunks', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '[see [[x]]](http://y)')
     expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-1: mdLinkText(href=http://y) + mdMark + mdPack(key=link_http://y)
-      1-5: mdLinkText(href=http://y) + mdPack(key=link_http://y)
-      5-7: mdLinkText(href=http://y) + mdMark + mdPack(key=link_http://y) + mdWikilinkSource(target=x)
-      7-8: mdLinkText(href=http://y) + mdPack(key=link_http://y) + mdWikilinkSource(target=x)
-      8-9: mdLinkText(href=http://y) + mdMark + mdPack(key=link_http://y) + mdWikilinkSource(target=x)
-      9-10: mdLinkText(href=http://y) + mdMark + mdPack(key=link_http://y) + mdWikilinkSource(target=x) + mdWikilinkView(target=x)
-      10-12: mdMark + mdPack(key=link_http://y)
-      12-20: mdLinkUri + mdPack(key=link_http://y)
-      20-21: mdMark + mdPack(key=link_http://y)
+      0-1: mdLinkText(href=http://y) + mdMark + mdPack(key=link,data={"href":"http://y","title":""})
+      1-5: mdLinkText(href=http://y) + mdPack(key=link,data={"href":"http://y","title":""})
+      5-7: mdLinkText(href=http://y) + mdMark + mdPack(key=link,data={"href":"http://y","title":""}) + mdWikilinkSource(target=x)
+      7-8: mdLinkText(href=http://y) + mdPack(key=link,data={"href":"http://y","title":""}) + mdWikilinkSource(target=x)
+      8-9: mdLinkText(href=http://y) + mdMark + mdPack(key=link,data={"href":"http://y","title":""}) + mdWikilinkSource(target=x)
+      9-10: mdLinkText(href=http://y) + mdMark + mdPack(key=link,data={"href":"http://y","title":""}) + mdWikilinkSource(target=x) + mdWikilinkView(target=x)
+      10-12: mdMark + mdPack(key=link,data={"href":"http://y","title":""})
+      12-20: mdLinkUri + mdPack(key=link,data={"href":"http://y","title":""})
+      20-21: mdMark + mdPack(key=link,data={"href":"http://y","title":""})
       "
     `)
   })
@@ -667,9 +673,9 @@ describe('inlineTextToMarkChunks', () => {
     expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
       0-1: -
-      1-2: mdMark + mdPack(key=link_)
-      2-3: mdPack(key=link_)
-      3-4: mdMark + mdPack(key=link_)
+      1-2: mdMark + mdPack(key=link,data={"href":"","title":""})
+      2-3: mdPack(key=link,data={"href":"","title":""})
+      3-4: mdMark + mdPack(key=link,data={"href":"","title":""})
       "
     `)
   })
@@ -695,16 +701,16 @@ describe('inlineTextToMarkChunks', () => {
     const chunks = inlineTextToMarkChunks(markBuilders, '[a](x)[b](y)')
     expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
       "
-      0-1: mdLinkText(href=x) + mdMark + mdPack(key=link_x)
-      1-2: mdLinkText(href=x) + mdPack(key=link_x)
-      2-4: mdMark + mdPack(key=link_x)
-      4-5: mdLinkUri + mdPack(key=link_x)
-      5-6: mdMark + mdPack(key=link_x)
-      6-7: mdLinkText(href=y) + mdMark + mdPack(key=link_y)
-      7-8: mdLinkText(href=y) + mdPack(key=link_y)
-      8-10: mdMark + mdPack(key=link_y)
-      10-11: mdLinkUri + mdPack(key=link_y)
-      11-12: mdMark + mdPack(key=link_y)
+      0-1: mdLinkText(href=x) + mdMark + mdPack(key=link,data={"href":"x","title":""})
+      1-2: mdLinkText(href=x) + mdPack(key=link,data={"href":"x","title":""})
+      2-4: mdMark + mdPack(key=link,data={"href":"x","title":""})
+      4-5: mdLinkUri + mdPack(key=link,data={"href":"x","title":""})
+      5-6: mdMark + mdPack(key=link,data={"href":"x","title":""})
+      6-7: mdLinkText(href=y) + mdMark + mdPack(key=link,data={"href":"y","title":""})
+      7-8: mdLinkText(href=y) + mdPack(key=link,data={"href":"y","title":""})
+      8-10: mdMark + mdPack(key=link,data={"href":"y","title":""})
+      10-11: mdLinkUri + mdPack(key=link,data={"href":"y","title":""})
+      11-12: mdMark + mdPack(key=link,data={"href":"y","title":""})
       "
     `)
   })

@@ -196,7 +196,7 @@ describe('focus mode', () => {
         see
         <span
           class="md-pack"
-          data-key="link_http://x.test"
+          data-key="link"
         >
           <a
             class="md-link"
@@ -239,7 +239,7 @@ describe('focus mode', () => {
         see
         <span
           class="md-pack"
-          data-key="link_http://x.test"
+          data-key="link"
         >
           <a
             class="md-link"
@@ -421,7 +421,7 @@ describe('focus mode', () => {
       <p>
         <span
           class="md-pack"
-          data-key="link_http://x"
+          data-key="link"
         >
           <a
             class="md-link"
@@ -493,7 +493,7 @@ describe('focus mode', () => {
         ABC
         <span
           class="md-pack"
-          data-key="link_https://example.com"
+          data-key="link"
         >
           <a
             class="md-link"
@@ -626,7 +626,7 @@ describe('focus mode', () => {
       <p>
         <span
           class="md-pack"
-          data-key="link_x"
+          data-key="link"
         >
           <a
             class="md-link"
@@ -659,7 +659,7 @@ describe('focus mode', () => {
         </span>
         <span
           class="md-pack"
-          data-key="link_y"
+          data-key="link"
         >
           <a
             class="md-link"
@@ -712,7 +712,7 @@ describe('focus mode', () => {
       <p>
         <span
           class="md-pack"
-          data-key="image_pic.png"
+          data-key="image"
         >
           <span class="md-image-source">
             <span class="md-mark">

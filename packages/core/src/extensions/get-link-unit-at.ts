@@ -16,16 +16,11 @@ export interface LinkUnit {
   /** Interior of `( )`. What `updateLink` rewrites. Absent for an autolink. */
   dest?: PositionRange
 
-  /* The link URL. Could be an empty string. */
+  /** The link URL. Could be an empty string. */
   href: string
 
-  /* The link title, unquoted. Could be an empty string. */
+  /** The link title, unquoted. Could be an empty string. */
   title: string
-}
-
-/** Drop the surrounding `"" '' ()` delimiters of a `LinkTitle` slice and unescape. */
-export function unquoteTitle(raw: string): string {
-  return raw.slice(1, -1).replaceAll(/\\(.)/g, '$1')
 }
 
 /**
@@ -56,8 +51,8 @@ function lastMarkRunIn(
  * share, replacing the old `findLinkAt`.
  *
  * Derived entirely from the marks already on the document (no re-parse): the
- * `mdPack` unit and its `key` give the shape, `mdLinkText` gives the href and the
- * `]` boundary, and the `mdLinkUri`/`mdLinkTitle` runs locate the `( )` body.
+ * `mdPack` unit gives the shape and carries the `href`/`title` in its `data`, and
+ * the `mdLinkUri` run locates the `( )` body.
  */
 export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undefined {
   const linkText = getMarkRangeAt(state, pos, 'mdLinkText')

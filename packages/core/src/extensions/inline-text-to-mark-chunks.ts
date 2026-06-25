@@ -10,6 +10,7 @@ import type {
   MdImageViewAttrs,
   MdLinkTextAttrs,
   MdPackAttrs,
+  MdPackSimpleKey,
   MdWikilinkSourceAttrs,
   MdWikilinkViewAttrs,
 } from './inline-marks.ts'
@@ -82,6 +83,11 @@ export function getAutolinkHref(urlText: string): string | undefined {
   return undefined
 }
 
+/** Drop the surrounding `"" '' ()` delimiters of a `LinkTitle` slice and unescape. */
+function unquoteTitle(raw: string): string {
+  return raw.slice(1, -1).replaceAll(/\\(.)/g, '$1')
+}
+
 function walk(
   nodes: readonly InlineElement[],
   parentMarks: readonly Mark[],
@@ -113,7 +119,7 @@ function walk(
         : marks.mdLinkUri.create()
       emit(out, node.from, node.to, [...parentMarks, mark])
     } else {
-      let packKey: string | undefined
+      let packKey: MdPackSimpleKey | undefined
 
       if (type === LEZER_NODE_IDS.Emphasis) {
         packKey = 'italic'
@@ -173,6 +179,7 @@ function walkLink(
 ): void {
   let labelEnd = -1
   let urlNode: InlineElement | null = null
+  let titleNode: InlineElement | null = null
   let bracketCount = 0
   for (const child of node.children) {
     if (child.type === LEZER_NODE_IDS.LinkMark) {
@@ -180,16 +187,16 @@ function walkLink(
       if (bracketCount === 2) labelEnd = child.from
     } else if (child.type === LEZER_NODE_IDS.URL && urlNode === null) {
       urlNode = child
+    } else if (child.type === LEZER_NODE_IDS.LinkTitle && titleNode === null) {
+      titleNode = child
     }
   }
   const href = urlNode ? text.slice(urlNode.from, urlNode.to) : ''
+  const title = titleNode ? unquoteTitle(text.slice(titleNode.from, titleNode.to)) : ''
   const linkTextMark = href ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs) : null
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd && linkTextMark !== null
 
-  const pack = marks.mdPack.create({
-    key: `link`,
-    // TODO: we shoud have href and title here.
-  } satisfies MdPackAttrs)
+  const pack = marks.mdPack.create({ key: 'link', data: { href, title } } satisfies MdPackAttrs)
   const base = [...parentMarks, pack]
 
   let pos = node.from
