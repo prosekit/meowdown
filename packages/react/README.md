@@ -2,6 +2,26 @@
 
 React components for Meowdown, a hybrid (live-preview) Markdown editor.
 
+## Quick start
+
+Install the package and its peer dependencies:
+
+```sh
+npm install @meowdown/react @meowdown/core react react-dom
+```
+
+Import both stylesheets and render the editor:
+
+```tsx
+import '@meowdown/core/style.css'
+import '@meowdown/react/style.css'
+import { MeowdownEditor } from '@meowdown/react'
+
+export function App() {
+  return <MeowdownEditor initialMarkdown="# Hello" />
+}
+```
+
 ## Usage
 
 ```tsx
