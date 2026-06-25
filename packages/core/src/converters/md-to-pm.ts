@@ -126,11 +126,16 @@ function convertBlock(
       return [convertHeading(nodes, cursor, text, 2, true)]
     case LEZER_NODE_IDS.Paragraph:
       return [convertParagraph(nodes, cursor, text)]
-    case LEZER_NODE_IDS.HTMLBlock:
     case LEZER_NODE_IDS.CommentBlock:
+      // A comment is not rendered output: map it onto the invisible `htmlComment`
+      // node so it stays in the document (and round-trips) without reading as
+      // body text. Raw HTML / processing-instruction blocks fall through to a
+      // paragraph - they can carry content a reader expects to see.
+      return [convertHtmlComment(nodes, cursor, text)]
+    case LEZER_NODE_IDS.HTMLBlock:
     case LEZER_NODE_IDS.ProcessingInstructionBlock:
-      // The schema has no HTML / comment node, so keep the raw block as
-      // literal paragraph text; it survives verbatim through a round-trip.
+      // The schema has no HTML node, so keep the raw block as literal paragraph
+      // text; it survives verbatim through a round-trip.
       return [convertParagraph(nodes, cursor, text)]
     case LEZER_NODE_IDS.Blockquote:
       return [convertBlockquote(nodes, cursor, text)]
@@ -314,6 +319,22 @@ function convertParagraph(
     return buildParagraph(nodes, content, column)
   }
   return buildParagraph(nodes, text.slice(from, to), column)
+}
+
+/**
+ * Build the invisible `htmlComment` node from a `CommentBlock`. The raw comment
+ * (delimiters included) is kept verbatim on the node's `content` attribute;
+ * continuation lines are dedented like a paragraph's so the serializer's own
+ * line prefix re-applies the container indent instead of doubling it.
+ */
+function convertHtmlComment(
+  nodes: TypedNodeBuilders,
+  cursor: TreeCursor,
+  text: string,
+): ProseMirrorNode {
+  const column = measureContentColumn(text, cursor.from)
+  const content = dedentContinuation(text.slice(cursor.from, cursor.to), column)
+  return nodes.htmlComment({ content })
 }
 
 function convertBlockquote(

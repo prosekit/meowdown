@@ -18,6 +18,7 @@ import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineDocFrontmatterAttr } from './frontmatter.ts'
 import { defineHeading } from './heading.ts'
 import { defineMeowdownHorizontalRule } from './horizontal-rule.ts'
+import { defineHtmlComment } from './html-comment.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
@@ -39,6 +40,7 @@ function defineEditorExtensionImpl() {
     defineTable(),
     defineCodeBlock(),
     defineMeowdownHorizontalRule(),
+    defineHtmlComment(),
 
     // marks
     defineInlineMarks(),
