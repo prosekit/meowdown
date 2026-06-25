@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.24.0](https://github.com/prosekit/meowdown/compare/core-v0.23.0...core-v0.24.0) (2026-06-25)
+
+
+### Features
+
+* add onExitBoundary callback ([#151](https://github.com/prosekit/meowdown/issues/151)) ([c9162f0](https://github.com/prosekit/meowdown/commit/c9162f0aefb501d6fbf05f98d50ecc1a5cea4cb1))
+
 ## [0.23.0](https://github.com/prosekit/meowdown/compare/core-v0.22.0...core-v0.23.0) (2026-06-25)
 
 
