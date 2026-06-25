@@ -54,5 +54,6 @@
     display: block;
     width: 1.25rem;
     height: 1.25rem;
+    opacity: 0.65;
   }
 }
