@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.0](https://github.com/prosekit/meowdown/compare/core-v0.22.0...core-v0.23.0) (2026-06-25)
+
+
+### Features
+
+* **core:** render block HTML comments as an invisible node ([#145](https://github.com/prosekit/meowdown/issues/145)) ([85de18f](https://github.com/prosekit/meowdown/commit/85de18f06204aa459328fe089339be3cae9fcc65))
+
 ## [0.22.0](https://github.com/prosekit/meowdown/compare/core-v0.21.1...core-v0.22.0) (2026-06-23)
 
 
