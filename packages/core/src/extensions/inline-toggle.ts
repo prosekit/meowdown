@@ -105,6 +105,7 @@ function engulf(nodes: readonly InlineElement[], from: number, to: number): [num
   return [from, to]
 }
 
+// TODO: use isSpaceChar from unicode.ts instead of this function
 const isSpace = (char: string | undefined) => char === ' ' || char === '\t'
 
 /** Shrink [from, to] so it starts and ends on non-whitespace. */
