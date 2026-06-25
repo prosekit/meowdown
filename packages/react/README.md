@@ -30,7 +30,7 @@ export function App() {
 
 ## API
 
-See the full API reference on [npmx](https://npmx.dev/package-docs/@meowdown%2Freact/).
+See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Freact/).
 
 ## Styling
 
