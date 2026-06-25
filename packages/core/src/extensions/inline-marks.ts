@@ -200,7 +200,7 @@ export interface MdWikilinkViewAttrs {
 export type MdPackAttrs =
   | {
       key: 'link'
-      data: { href: string; title?: string }
+      data: { href: string; title: string }
     }
   | {
       key: 'image'

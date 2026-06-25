@@ -186,7 +186,10 @@ function walkLink(
   const linkTextMark = href ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs) : null
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd && linkTextMark !== null
 
-  const pack = marks.mdPack.create({ key: `link_${href}` } satisfies MdPackAttrs)
+  const pack = marks.mdPack.create({
+    key: `link`,
+    // TODO: we shoud have href and title here.
+  } satisfies MdPackAttrs)
   const base = [...parentMarks, pack]
 
   let pos = node.from
@@ -250,7 +253,7 @@ function walkImage(
 
   const source = marks.mdImageSource.create({ src, alt } satisfies MdImageSourceAttrs)
   const view = marks.mdImageView.create({ src, alt } satisfies MdImageViewAttrs)
-  const pack = marks.mdPack.create({ key: `image_${src}` } satisfies MdPackAttrs)
+  const pack = marks.mdPack.create({ key: `image`, data: { src } } satisfies MdPackAttrs)
 
   // The image's final character, where `mdImageView` is anchored: `)` today, a
   // future `]` for `![alt][id]`.

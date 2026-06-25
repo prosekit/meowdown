@@ -68,12 +68,13 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
   const unit = pack ?? linkText
   if (!unit) return
 
-  const href = (linkText?.mark.attrs as MdLinkTextAttrs | undefined)?.href ?? ''
-  const key = (pack?.mark.attrs as MdPackAttrs | undefined)?.key ?? ''
+  const packAttrs = pack?.mark.attrs as MdPackAttrs | undefined
+  const linkTextAttrs = linkText?.mark.attrs as MdLinkTextAttrs | undefined
+  const href = linkTextAttrs?.href ?? ''
 
-  // Only a real `[text](dest)` (mdPack key `link_*`) has an editable label/dest.
-  // Autolinks (no mdPack, or key `autolink`) just resolve an href.
-  if (!pack || !key.startsWith('link_')) {
+  // Only a real `[text](dest)` has an editable label/dest.
+  // Autolinks just resolve an href.
+  if (!pack || packAttrs?.key !== 'link') {
     return {
       unit: { from: unit.from, to: unit.to },
       href,
@@ -84,7 +85,6 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
   // `[` at unit.from, `)` at unit.to - 1. With a url, `]` sits two chars before
   // the url start (`](`); with an empty `()`, `]` is two chars before the `)`.
   const uri = lastMarkRunIn(state, unit, 'mdLinkUri')
-  const titleRun = lastMarkRunIn(state, unit, 'mdLinkTitle')
   const closeBracket = uri ? uri.from - 2 : unit.to - 3
   const destFrom = uri ? uri.from : unit.to - 1
 
@@ -92,7 +92,7 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
     unit: { from: unit.from, to: unit.to },
     label: { from: unit.from + 1, to: closeBracket },
     dest: { from: destFrom, to: unit.to - 1 },
-    href,
-    title: titleRun ? unquoteTitle(state.doc.textBetween(titleRun.from, titleRun.to)) : '',
+    href: packAttrs.data.href,
+    title: packAttrs.data.title,
   }
 }
