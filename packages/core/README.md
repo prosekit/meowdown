@@ -11,18 +11,37 @@ The engine powering the editor in [`@meowdown/react`](https://www.npmjs.com/pack
   - Ordered lists (`1. item`, `2) item`, etc.)
   - Blockquotes (`> quote`)
   - Fenced code blocks (```` ```lang\ncode\n``` ````)
+  - Thematic breaks (`---`, `***`, `___`)
+  - Bold (`**bold**`), italic (`*italic*`), and inline code
+  - Links (`[text](url)`), images (`![alt](src)`), and autolinks (`<https://example.com>`)
+  - Hard line breaks
 - GitHub Flavored Markdown (GFM)
   - Tables
-  - Strikethrough
-  - Task lists
+  - Strikethrough (`~~text~~`)
+  - Task lists (`- [ ]`, `- [x]`)
+  - Autolinks for `www.`, scheme, and email URLs
 - Wikilinks (`[[target]]` and `[[target|alias]]`)
 - Highlight (`==highlight==`)
-
-TODO
+- Tags (`#tag`)
+- Bare-domain autolinks (`google.com`, `sub.domain.io/path`)
 
 ## Keyboard shortcuts
 
-TODO: a full table 
+`Mod` is Cmd on macOS and Ctrl elsewhere. Each formatting shortcut inserts or removes the literal Markdown delimiters around the selection; each heading shortcut toggles the current block to that level (or back to a paragraph).
+
+| Key           | Action        | Markdown            |
+| ------------- | ------------- | ------------------- |
+| `Mod-B`       | Bold          | `**bold**`          |
+| `Mod-I`       | Italic        | `*italic*`          |
+| `Mod-E`       | Inline code   | `` `code` ``        |
+| `Mod-Shift-X` | Strikethrough | `~~strikethrough~~` |
+| `Mod-Shift-H` | Highlight     | `==highlight==`     |
+| `Mod-1`       | Heading 1     | `# heading`         |
+| `Mod-2`       | Heading 2     | `## heading`        |
+| `Mod-3`       | Heading 3     | `### heading`       |
+| `Mod-4`       | Heading 4     | `#### heading`      |
+| `Mod-5`       | Heading 5     | `##### heading`     |
+| `Mod-6`       | Heading 6     | `###### heading`    |
 
 `EDITOR_KEY_BINDINGS` is a literal (`as const`) object mapping every key above to its description, for host settings UIs and keybinding-collision checks.
 
