@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.0](https://github.com/prosekit/meowdown/compare/react-v0.24.1...react-v0.25.0) (2026-06-25)
+
+
+### Features
+
+* add link floating menu ([#149](https://github.com/prosekit/meowdown/issues/149)) ([001257c](https://github.com/prosekit/meowdown/commit/001257cd977fe34873a2dd41eecaff22278d7188))
+
 ## [0.24.1](https://github.com/prosekit/meowdown/compare/react-v0.24.0...react-v0.24.1) (2026-06-25)
 
 

@@ -1,7 +1,7 @@
 {
   "name": "@meowdown/react",
   "type": "module",
-  "version": "0.24.1",
+  "version": "0.25.0",
   "license": "MIT",
   "repository": {
     "type": "git",
