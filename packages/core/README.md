@@ -5,14 +5,22 @@ The engine powering the editor in [`@meowdown/react`](https://www.npmjs.com/pack
 ## Quick start
 
 ```sh
-npm install @meowdown/core
+npm install @meowdown/core @prosekit/core
 ```
 
-```ts
-import { docToMarkdown, markdownToDoc } from '@meowdown/core'
+Mount an editor into any DOM element, no framework required:
 
-const doc = markdownToDoc('# Hello *world*')
-const markdown = docToMarkdown(doc)
+```ts
+import '@meowdown/core/style.css'
+import { createEditor } from '@prosekit/core'
+import { defineEditorExtension, docToMarkdown, markdownToDoc } from '@meowdown/core'
+
+const editor = createEditor({ extension: defineEditorExtension() })
+editor.setContent(markdownToDoc('# Hello', { nodes: editor.nodes }))
+editor.mount(document.querySelector<HTMLElement>('#editor')!)
+
+// Serialize the current document back to Markdown at any time.
+const markdown = docToMarkdown(editor.state.doc)
 ```
 
 ## Supported Markdown features
