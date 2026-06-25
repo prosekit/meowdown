@@ -15,8 +15,13 @@ describe('LinkMenu', () => {
   it('shows the read preview on hover and copies the href', async () => {
     const onLinkCopy = vi.fn()
     const screen = await render(
-      <MeowdownEditor initialMarkdown="see [Docs](https://example.com) here" onLinkCopy={onLinkCopy} />,
+      <MeowdownEditor
+        initialMarkdown="see [Docs](https://example.com) here"
+        onLinkCopy={onLinkCopy}
+      />,
     )
+    // Focus the document first; `clipboard.writeText` rejects otherwise.
+    await pmRoot.click()
     await screen.getByText('Docs').hover()
     await expect.element(popover.getByTestId('link-popover-read')).toBeVisible()
     await popover.getByRole('button', { name: 'Copy link' }).click()
