@@ -1,6 +1,6 @@
 import {
   definePlugin,
-  isNodeSelection,
+  isAllSelection,
   isTextSelection,
   Priority,
   withPriority,
@@ -22,7 +22,8 @@ export type ExitBoundaryHandler = (options: ExitBoundaryOptions) => boolean | vo
 // https://code.haverbeke.berlin/prosemirror/prosemirror-view/src/tag/1.41.8/src/capturekeys.ts#L7-L12
 //
 // Whether moving in `direction` lands the selection on another block (a sibling
-// textblock, a node selection, ...). False only when nothing is reachable.
+// textblock, a node selection, a gap cursor position, ...). False only when
+// nothing is reachable.
 function canMoveBlockwise(state: EditorState, direction: 1 | -1): boolean {
   const { $anchor, $head } = state.selection
   const $side = direction > 0 ? $anchor.max($head) : $anchor.min($head)
@@ -34,22 +35,32 @@ function canMoveBlockwise(state: EditorState, direction: 1 | -1): boolean {
   return !!($start && Selection.findFrom($start, direction))
 }
 
+// Mirrors prosemirror-view's `selectVertically`
+// https://code.haverbeke.berlin/prosemirror/prosemirror-view/src/tag/1.41.8/src/capturekeys.ts#L247
+//
+// Whether pressing an arrow in `direction` can still move the selection within
+// the document. When it cannot, the caret is at the document boundary.
 function canMoveVertically(view: EditorView, direction: 1 | -1): boolean {
   const { state } = view
   const { selection } = state
 
-  if (isTextSelection(selection)) {
-    if (!selection.empty) return true
-    if (!view.endOfTextblock(direction < 0 ? 'up' : 'down')) return true
-    return canMoveBlockwise(state, direction)
+  // A non-empty text selection collapses toward `direction`, and a select-all
+  // collapses to a document end. Either way the caret moves, so never a
+  // boundary. (A gap cursor and a node selection fall through to the checks
+  // below.)
+  if (isTextSelection(selection) && !selection.empty) return true
+  if (isAllSelection(selection)) return true
+
+  // When the selection sits in inline content (a text cursor, or a selected
+  // inline node), the caret can still reach another visual line of the same
+  // textblock. `selectVertically` only consults `endOfTextblock` here, where
+  // the parent holds inline content; a block node selection and a gap cursor
+  // have no visual line, so they skip straight to the blockwise check.
+  if (selection.$from.parent.inlineContent && !view.endOfTextblock(direction < 0 ? 'up' : 'down')) {
+    return true
   }
 
-  if (isNodeSelection(selection)) {
-    if (!view.endOfTextblock(direction < 0 ? 'up' : 'down')) return true
-    return canMoveBlockwise(state, direction)
-  }
-
-  return true
+  return canMoveBlockwise(state, direction)
 }
 
 function createExitBoundaryPlugin(onExitBoundary: ExitBoundaryHandler) {

@@ -88,15 +88,39 @@ describe('defineExitBoundaryHandler', () => {
     expect(onExitBoundary).not.toHaveBeenCalled()
   })
 
-  it('fires "up" for a NodeSelection at the document top', async () => {
+  it('fires "up" only once a node-selected top block has become a gap cursor', async () => {
     const onExitBoundary = vi.fn<ExitBoundaryHandler>()
     using fixture = setup(onExitBoundary)
     const { n, view } = fixture
     fixture.set(n.doc(makeTable(n), n.paragraph('after')))
     view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, 0)))
     view.focus()
+    // First press: gapcursor moves the selection to a gap above the table. The
+    // caret is still inside the document, so the boundary handler must not fire.
     await userEvent.keyboard('{ArrowUp}')
+    expect(onExitBoundary).not.toHaveBeenCalled()
+    // Second press: the gap cursor is at the very top with nothing above it, so
+    // the caret is finally stuck at the boundary.
+    await userEvent.keyboard('{ArrowUp}')
+    expect(onExitBoundary).toHaveBeenCalledTimes(1)
     expect(onExitBoundary).toHaveBeenCalledWith(expect.objectContaining({ direction: 'up' }))
+  })
+
+  it('fires "down" only once a node-selected bottom block has become a gap cursor', async () => {
+    const onExitBoundary = vi.fn<ExitBoundaryHandler>()
+    using fixture = setup(onExitBoundary)
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph('before'), makeTable(n)))
+    const tablePos = view.state.doc.child(0).nodeSize
+    view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, tablePos)))
+    view.focus()
+    // First press: gapcursor moves the selection to a gap below the table.
+    await userEvent.keyboard('{ArrowDown}')
+    expect(onExitBoundary).not.toHaveBeenCalled()
+    // Second press: the gap cursor is at the very bottom with nothing below it.
+    await userEvent.keyboard('{ArrowDown}')
+    expect(onExitBoundary).toHaveBeenCalledTimes(1)
+    expect(onExitBoundary).toHaveBeenCalledWith(expect.objectContaining({ direction: 'down' }))
   })
 
   it('does not fire "down" for a NodeSelection with content below', async () => {
