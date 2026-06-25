@@ -191,16 +191,25 @@ export interface MdWikilinkViewAttrs {
   display: string
 }
 
-export interface MdPackAttrs {
-  /**
-   * Content-derived identity of one inline syntax unit. Adjacent units of the
-   * same kind are kept apart by it (so they do not merge into one mark run), and
-   * it stays stable when unrelated text in the block is edited, so editing one
-   * unit never re-marks the others. Values: `bold` | `italic` | `code` |
-   * `strike` | `highlight` | `autolink` | `link_${href}` | `image_${src}`.
-   */
-  key: string
-}
+/**
+ * Content-derived identity of one inline syntax unit. Adjacent units of the
+ * same kind are kept apart by it (so they do not merge into one mark run), and
+ * it stays stable when unrelated text in the block is edited, so editing one
+ * unit never re-marks the others.
+ */
+export type MdPackAttrs =
+  | {
+      key: 'link'
+      data: { href: string; title?: string }
+    }
+  | {
+      key: 'image'
+      data: { src: string }
+    }
+  | {
+      key: `bold` | `italic` | `code` | `strike` | `highlight` | `autolink`
+      data?: null
+    }
 
 /**
  * Wraps a whole revealable inline unit (emphasis, strong, code, strikethrough,
@@ -213,8 +222,11 @@ function defineMdPack() {
     name: 'mdPack' satisfies MarkName,
     excludes: '',
     inclusive: false,
-    attrs: { key: { default: '' } },
-    toDOM: (mark) => ['span', { class: 'md-pack', 'data-key': (mark.attrs as MdPackAttrs).key }, 0],
+    attrs: { key: {}, data: { default: null } },
+    toDOM: (mark) => {
+      const attrs = mark.attrs as MdPackAttrs
+      return ['span', { class: 'md-pack', 'data-key': attrs.key }, 0]
+    },
     parseDOM: [{ tag: 'span.md-pack' }],
   })
 }
