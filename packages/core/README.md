@@ -2,27 +2,69 @@
 
 The engine powering the editor in [`@meowdown/react`](https://www.npmjs.com/package/@meowdown/react): a hybrid (live-preview) Markdown editor core built on ProseKit and Lezer.
 
-## Shortcuts
+[**Live demo**](https://meowdown.vercel.app/)
 
-The editor extension binds inline-format toggles (`Mod` = Cmd on macOS, Ctrl elsewhere). Each one inserts or removes the literal Markdown delimiters around the selection; with a caret it plants an empty pair, or hops across a span's closing delimiter so typing enters or leaves the format. Each is also an editor command.
+## Quick start
 
-| Key           | Command                          | Markdown            |
-| ------------- | -------------------------------- | ------------------- |
-| `Mod-B`       | `editor.commands.toggleStrong()` | `**bold**`          |
-| `Mod-I`       | `editor.commands.toggleEm()`     | `*italic*`          |
-| `Mod-E`       | `editor.commands.toggleCode()`   | `` `code` ``        |
-| `Mod-Shift-X` | `editor.commands.toggleDel()`    | `~~strikethrough~~` |
+```sh
+npm install @meowdown/core @prosekit/core
+```
 
-Heading shortcuts toggle the current block to a heading of that level (or back to a paragraph):
+Mount an editor into any DOM element, no framework required:
 
-| Key     | Action    |
-| ------- | --------- |
-| `Mod-1` | Heading 1 |
-| `Mod-2` | Heading 2 |
-| `Mod-3` | Heading 3 |
-| `Mod-4` | Heading 4 |
-| `Mod-5` | Heading 5 |
-| `Mod-6` | Heading 6 |
+```ts
+import '@meowdown/core/style.css'
+import { createEditor } from '@prosekit/core'
+import { defineEditorExtension, docToMarkdown, markdownToDoc } from '@meowdown/core'
+
+const editor = createEditor({ extension: defineEditorExtension() })
+editor.setContent(markdownToDoc('# Hello', { nodes: editor.nodes }))
+editor.mount(document.querySelector<HTMLElement>('#editor')!)
+
+// Serialize the current document back to Markdown at any time.
+const markdown = docToMarkdown(editor.state.doc)
+```
+
+## Supported Markdown features
+
+- CommonMark
+  - ATX headings (`# Heading 1`, `## Heading 2`, etc.)
+  - Setext headings (`Heading 1\n===`, `Heading 2\n---`)
+  - Bullet lists (`- item`, `* item`, `+ item`)
+  - Ordered lists (`1. item`, `2) item`, etc.)
+  - Blockquotes (`> quote`)
+  - Fenced code blocks (` ```lang\ncode\n``` `)
+  - Thematic breaks (`---`, `***`, `___`)
+  - Bold (`**bold**`), italic (`*italic*`), and inline code
+  - Links (`[text](url)`), images (`![alt](src)`), and autolinks (`<https://example.com>`)
+  - Hard line breaks
+- GitHub Flavored Markdown (GFM)
+  - Tables
+  - Strikethrough (`~~text~~`)
+  - Task lists (`- [ ]`, `- [x]`)
+  - Autolinks for `www.`, scheme, and email URLs
+- Wikilinks (`[[target]]` and `[[target|alias]]`)
+- Highlight (`==highlight==`)
+- Tags (`#tag`)
+- Bare-domain autolinks (`google.com`, `sub.domain.io/path`)
+
+## Keyboard shortcuts
+
+`Mod` is Cmd on macOS and Ctrl elsewhere. Each formatting shortcut inserts or removes the literal Markdown delimiters around the selection; each heading shortcut toggles the current block to that level (or back to a paragraph).
+
+| Key           | Action        | Markdown            |
+| ------------- | ------------- | ------------------- |
+| `Mod-B`       | Bold          | `**bold**`          |
+| `Mod-I`       | Italic        | `*italic*`          |
+| `Mod-E`       | Inline code   | `` `code` ``        |
+| `Mod-Shift-X` | Strikethrough | `~~strikethrough~~` |
+| `Mod-Shift-H` | Highlight     | `==highlight==`     |
+| `Mod-1`       | Heading 1     | `# heading`         |
+| `Mod-2`       | Heading 2     | `## heading`        |
+| `Mod-3`       | Heading 3     | `### heading`       |
+| `Mod-4`       | Heading 4     | `#### heading`      |
+| `Mod-5`       | Heading 5     | `##### heading`     |
+| `Mod-6`       | Heading 6     | `###### heading`    |
 
 `EDITOR_KEY_BINDINGS` is a literal (`as const`) object mapping every key above to its description, for host settings UIs and keybinding-collision checks.
 
@@ -69,17 +111,9 @@ Pasting rich-text HTML from a browser (a bullet list, **bold**, a link, ...) con
 
 Pressing Enter at the end of the document's first heading (the title line) can start a fresh empty bullet on the next line instead of a plain paragraph. `defineBulletAfterHeading()` binds this. It is not part of `defineEditorExtension`; add it explicitly.
 
-## Static rendering primitives
+## API
 
-`@meowdown/react`'s `<MarkdownView>` renders Markdown to a read-only React tree without an editor by reusing these building blocks, also exported for other renderers:
-
-- `inlineTextToMarkChunks(getMarkBuilders(), text)`: the inline parser the editor uses, returning `[from, to, marks]` chunks (`MarkChunk`) for one line of source text.
-- `getCodeTokens(code, language)`: syntax-highlight tokens (`CodeToken`, the tuple `[from, to, classes]`) tagged with the same `tok-*` classes as the editor. Returns synchronously once the Lezer grammar is cached, otherwise a promise.
-- `matchEmbed(src)`: detects a tweet/YouTube image `src` and returns an `EmbedDescriptor` (no DOM); `listenForTweetHeight(iframe)` syncs a tweet iframe's height and returns a cleanup function.
-
-## Re-exports
-
-`Priority` and `withPriority` are re-exported from `@prosekit/core`, so you can set extension priorities (e.g. `withPriority(extension, Priority.high)`) without depending on `@prosekit/core` directly.
+See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Fcore/).
 
 ## License
 
