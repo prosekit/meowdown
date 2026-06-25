@@ -27,7 +27,7 @@ function searchNotes(query: string): WikilinkItem[] {
 const TWO_BRACKETS = '[[[['
 
 async function pressInsertShortcut(): Promise<void> {
-  await userEvent.keyboard('{ControlOrMeta>}{Shift>}k{/Shift}{/ControlOrMeta}')
+  await userEvent.keyboard('{ControlOrMeta>}{Shift>}K{/Shift}{/ControlOrMeta}')
 }
 
 describe('WikilinkMenu', () => {

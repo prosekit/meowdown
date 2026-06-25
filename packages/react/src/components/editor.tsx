@@ -3,6 +3,7 @@ import type {
   ImageClickHandler,
   ImageOptions,
   LinkClickHandler,
+  LinkCopyHandler,
   MarkMode,
   PlaceholderOptions,
   TagClickHandler,
@@ -76,6 +77,13 @@ export interface EditorProps {
    * in source mode.
    */
   onLinkClick?: LinkClickHandler
+
+  /**
+   * Called after a link is copied from the link menu, with its `href`. Useful
+   * for a toast. Pass a stable function (e.g. from `useCallback`). Ignored in
+   * source mode.
+   */
+  onLinkCopy?: LinkCopyHandler
 
   /**
    * Called with the tag name (without the leading `#`) on click of a rendered
@@ -179,6 +187,7 @@ export function MeowdownEditor({
   onWikilinkSearch,
   onWikilinkClick,
   onLinkClick,
+  onLinkCopy,
   onTagClick,
   onExitBoundary,
   resolveImageUrl,
@@ -263,6 +272,7 @@ export function MeowdownEditor({
           onWikilinkSearch={onWikilinkSearch}
           onWikilinkClick={onWikilinkClick}
           onLinkClick={onLinkClick}
+          onLinkCopy={onLinkCopy}
           onTagClick={onTagClick}
           onExitBoundary={onExitBoundary}
           resolveImageUrl={resolveImageUrl}

@@ -17,6 +17,7 @@ describe('EDITOR_KEY_BINDINGS', () => {
         "Mod-b": "Bold",
         "Mod-e": "Inline code",
         "Mod-i": "Italic",
+        "Mod-k": "Link",
       }
     `)
   })

@@ -112,6 +112,15 @@ function defineMdLinkUri() {
   })
 }
 
+function defineMdLinkTitle() {
+  return defineMarkSpec({
+    name: 'mdLinkTitle' satisfies MarkName,
+    inclusive: false,
+    toDOM: () => ['span', { class: 'md-link-title' }, 0],
+    parseDOM: [{ tag: 'span.md-link-title' }],
+  })
+}
+
 function defineMdDel() {
   return defineMarkSpec({
     name: 'mdDel' satisfies MarkName,
@@ -182,16 +191,30 @@ export interface MdWikilinkViewAttrs {
   display: string
 }
 
-export interface MdPackAttrs {
-  /**
-   * Content-derived identity of one inline syntax unit. Adjacent units of the
-   * same kind are kept apart by it (so they do not merge into one mark run), and
-   * it stays stable when unrelated text in the block is edited, so editing one
-   * unit never re-marks the others. Values: `bold` | `italic` | `code` |
-   * `strike` | `highlight` | `autolink` | `link_${href}` | `image_${src}`.
-   */
-  key: string
-}
+/** mdPack keys for units that store no extra data; the syntax marks carry it. */
+export type MdPackSimpleKey = 'bold' | 'italic' | 'code' | 'strike' | 'highlight' | 'autolink'
+
+/**
+ * Content-derived identity of one inline syntax unit. Adjacent units of the
+ * same kind are kept apart by it (so they do not merge into one mark run), and
+ * it stays stable when unrelated text in the block is edited, so editing one
+ * unit never re-marks the others. `data` carries the unit's parsed payload (a
+ * link's `href`/`title`, an image's `src`) so callers read it off the mark
+ * instead of re-parsing the text.
+ */
+export type MdPackAttrs =
+  | {
+      key: 'link'
+      data: { href: string; title: string }
+    }
+  | {
+      key: 'image'
+      data: { src: string }
+    }
+  | {
+      key: MdPackSimpleKey
+      data?: null
+    }
 
 /**
  * Wraps a whole revealable inline unit (emphasis, strong, code, strikethrough,
@@ -204,8 +227,11 @@ function defineMdPack() {
     name: 'mdPack' satisfies MarkName,
     excludes: '',
     inclusive: false,
-    attrs: { key: { default: '' } },
-    toDOM: (mark) => ['span', { class: 'md-pack', 'data-key': (mark.attrs as MdPackAttrs).key }, 0],
+    attrs: { key: {}, data: { default: null } },
+    toDOM: (mark) => {
+      const attrs = mark.attrs as MdPackAttrs
+      return ['span', { class: 'md-pack', 'data-key': attrs.key }, 0]
+    },
     parseDOM: [{ tag: 'span.md-pack' }],
   })
 }
@@ -222,6 +248,7 @@ export function defineInlineMarks() {
     defineMdCode(),
     defineMdLinkText(),
     defineMdLinkUri(),
+    defineMdLinkTitle(),
     defineMdDel(),
     defineMdHighlight(),
     defineMdTag(),

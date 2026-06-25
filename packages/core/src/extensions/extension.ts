@@ -2,8 +2,8 @@ import {
   defineBaseCommands,
   defineBaseKeymap,
   defineHistory,
-  type Editor,
   union,
+  type Editor,
 } from '@prosekit/core'
 import { defineBlockquote } from '@prosekit/extensions/blockquote'
 import { defineCodeBlock } from '@prosekit/extensions/code-block'
@@ -15,6 +15,7 @@ import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineAtomicMarkNavigation } from './atomic-mark-navigation.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
+import { defineEditorCommands } from './commands.ts'
 import { defineDocFrontmatterAttr } from './frontmatter.ts'
 import { defineHeading } from './heading.ts'
 import { defineMeowdownHorizontalRule } from './horizontal-rule.ts'
@@ -22,6 +23,7 @@ import { defineHTMLComment } from './html-comment.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
+import { defineLinkCommands } from './link-commands.ts'
 import { defineMeowdownList } from './list.ts'
 import { defineMeowdownParagraph } from './paragraph.ts'
 import { defineTable } from './table.ts'
@@ -49,6 +51,7 @@ function defineEditorExtensionImpl() {
     defineCodeBlockSyntaxHighlight(),
     defineInlineMarkPlugin(),
     defineInlineToggle(),
+    defineLinkCommands(),
     defineWikilink(),
     defineAtomicMarkNavigation({
       marks: [
@@ -65,6 +68,7 @@ function defineEditorExtensionImpl() {
     defineGapCursor(),
     defineVirtualSelection(),
     defineModClickPrevention(),
+    defineEditorCommands(),
   )
 }
 
