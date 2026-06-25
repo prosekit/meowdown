@@ -1,6 +1,7 @@
 import {
   defineBulletAfterHeading,
   defineEmbedPaste,
+  defineExitBoundaryHandler,
   defineHTMLPaste,
   defineImage,
   defineImageClickHandler,
@@ -12,6 +13,7 @@ import {
   defineTagClickHandler,
   defineWikilinkClickHandler,
   defineWikilinkTrigger,
+  type ExitBoundaryHandler,
   type ImageClickHandler,
   type ImageOptions,
   type LinkClickHandler,
@@ -30,6 +32,7 @@ export interface EditorExtensionsProps {
   onWikilinkClick?: WikilinkClickHandler
   onLinkClick?: LinkClickHandler
   onTagClick?: TagClickHandler
+  onExitBoundary?: ExitBoundaryHandler
   resolveImageUrl?: ImageOptions['resolveImageUrl']
   onImagePaste?: ImageOptions['onImagePaste']
   onImageSaveError?: ImageOptions['onImageSaveError']
@@ -50,6 +53,7 @@ export function EditorExtensions({
   onWikilinkClick,
   onLinkClick,
   onTagClick,
+  onExitBoundary,
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
@@ -94,6 +98,12 @@ export function EditorExtensions({
     useMemo(() => {
       return onTagClick ? defineTagClickHandler(onTagClick) : null
     }, [onTagClick]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return onExitBoundary ? defineExitBoundaryHandler(onExitBoundary) : null
+    }, [onExitBoundary]),
   )
 
   useExtension(

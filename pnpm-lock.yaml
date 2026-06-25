@@ -21,6 +21,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^4.1.9
         version: 4.1.9(@vitest/browser@4.1.9)(vitest@4.1.9)
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       eslint:
         specifier: ^10.5.0
         version: 10.5.0(jiti@2.7.0)
@@ -239,6 +242,9 @@ importers:
 
   website:
     dependencies:
+      '@meowdown/core':
+        specifier: workspace:*
+        version: link:../packages/core
       '@meowdown/react':
         specifier: workspace:*
         version: link:../packages/react
@@ -258,6 +264,9 @@ importers:
       '@ocavue/tsconfig':
         specifier: ^0.7.1
         version: 0.7.1
+      '@ocavue/utils':
+        specifier: ^1.7.0
+        version: 1.7.0
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.1(vite@8.1.0)

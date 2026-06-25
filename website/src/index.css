@@ -30,6 +30,24 @@ html {
   animation: meowdown-fade-in 0.25s ease;
 }
 
+/* a top/bottom border briefly fades in inside the
+ * editor box when the caret leaves the document boundary */
+@keyframes edge-border {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.edge-border {
+  animation: edge-border 0.5s ease forwards;
+}
+
 /* ---------------------------------------------------------------------------
  * Segmented control
  *

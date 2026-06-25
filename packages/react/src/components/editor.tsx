@@ -1,4 +1,5 @@
 import type {
+  ExitBoundaryHandler,
   ImageClickHandler,
   ImageOptions,
   LinkClickHandler,
@@ -82,6 +83,17 @@ export interface EditorProps {
    * mode.
    */
   onTagClick?: TagClickHandler
+
+  /**
+   * Called when the caret can move no further in the pressed arrow direction
+   * and leaves the document boundary: ArrowUp on the first visual line,
+   * ArrowDown on the last, or an arrow press on a selected node at the edge.
+   * Use it to move focus to a previous/next note or page. Receives the
+   * `direction` and the original `KeyboardEvent`. Return `false` to let the
+   * editor handle the key normally; any other return value consumes it. Pass a
+   * stable function (e.g. from `useCallback`). Ignored in source mode.
+   */
+  onExitBoundary?: ExitBoundaryHandler
 
   /**
    * Maps an image `src` to a displayable URL, or `undefined` to skip that image.
@@ -168,6 +180,7 @@ export function MeowdownEditor({
   onWikilinkClick,
   onLinkClick,
   onTagClick,
+  onExitBoundary,
   resolveImageUrl,
   onImagePaste,
   onImageSaveError,
@@ -251,6 +264,7 @@ export function MeowdownEditor({
           onWikilinkClick={onWikilinkClick}
           onLinkClick={onLinkClick}
           onTagClick={onTagClick}
+          onExitBoundary={onExitBoundary}
           resolveImageUrl={resolveImageUrl}
           onImagePaste={onImagePaste}
           onImageSaveError={onImageSaveError}

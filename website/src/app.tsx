@@ -1,5 +1,8 @@
+import type { ExitBoundaryHandler } from '@meowdown/core'
 import { MeowdownEditor, type TagItem, type WikilinkItem } from '@meowdown/react'
-import { type CSSProperties, useLayoutEffect, useState } from 'react'
+import { getId } from '@ocavue/utils'
+import { clsx } from 'clsx/lite'
+import { type CSSProperties, useCallback, useLayoutEffect, useState } from 'react'
 
 import { uploadFile } from './upload-file.ts'
 import { MODES, useEditorMode } from './use-editor-mode.ts'
@@ -186,6 +189,14 @@ function Brand() {
 export function App() {
   const { mode, setMode, activeMode } = useEditorMode()
 
+  // When the caret leaves the document boundary (onExitBoundary), briefly flash
+  // a top or bottom border inside the editor box. A bumped id remounts the
+  // overlay so its one-shot fade restarts on every press.
+  const [edgeFlash, setEdgeFlash] = useState<{ id: number; direction: 'up' | 'down' }>()
+  const handleExitBoundary: ExitBoundaryHandler = useCallback(({ direction }) => {
+    setEdgeFlash({ id: getId(), direction })
+  }, [])
+
   return (
     <main className="relative min-h-dvh overflow-hidden text-stone-600 dark:bg-stone-950">
       <div className="relative mx-auto flex h-dvh max-w-5xl flex-col px-4 py-5 sm:px-6 sm:py-7">
@@ -231,18 +242,35 @@ export function App() {
             />
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-            <MeowdownEditor
-              mode={mode}
-              spellCheck={false}
-              initialMarkdown={INITIAL_CONTENT}
-              onTagSearch={searchTags}
-              onWikilinkSearch={searchNotes}
-              onImagePaste={uploadFile}
-              onImageClick={handleImageClick}
-              onLinkClick={handleLinkClick}
-              onTagClick={handleTagClick}
-            />
+          <div className="relative flex min-h-0 flex-1 flex-col">
+            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+              <MeowdownEditor
+                mode={mode}
+                spellCheck={false}
+                initialMarkdown={INITIAL_CONTENT}
+                onTagSearch={searchTags}
+                onWikilinkSearch={searchNotes}
+                onImagePaste={uploadFile}
+                onImageClick={handleImageClick}
+                onLinkClick={handleLinkClick}
+                onTagClick={handleTagClick}
+                onExitBoundary={handleExitBoundary}
+              />
+            </div>
+
+            {edgeFlash && (
+              <div
+                key={edgeFlash.id}
+                onAnimationEnd={() => setEdgeFlash(undefined)}
+                aria-hidden
+                className={clsx(
+                  'edge-border',
+                  'border-0 pointer-events-none absolute inset-0 z-10',
+                  'border-(--meowdown-accent)',
+                  edgeFlash.direction === 'up' ? 'border-t-2' : 'border-b-2',
+                )}
+              />
+            )}
           </div>
 
           <div className="flex items-center gap-2 border-t border-stone-200/80 bg-stone-50/60 px-4 py-3 text-sm sm:px-5 dark:border-stone-800 dark:bg-stone-950/30">

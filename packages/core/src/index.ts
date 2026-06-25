@@ -19,6 +19,11 @@ export { codeBlockLanguages } from './extensions/code-block-languages.ts'
 export { defineEmbedPaste } from './extensions/embed-paste.ts'
 export { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './extensions/embed/index.ts'
 export {
+  defineExitBoundaryHandler,
+  type ExitBoundaryHandler,
+  type ExitBoundaryOptions,
+} from './extensions/exit-boundary.ts'
+export {
   defineEditorExtension,
   type EditorExtension,
   type TypedEditor,
