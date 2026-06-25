@@ -29,7 +29,7 @@ To mount a live editor, build a ProseKit editor from `defineEditorExtension()`, 
   - Bullet lists (`- item`, `* item`, `+ item`)
   - Ordered lists (`1. item`, `2) item`, etc.)
   - Blockquotes (`> quote`)
-  - Fenced code blocks (```` ```lang\ncode\n``` ````)
+  - Fenced code blocks (` ```lang\ncode\n``` `)
   - Thematic breaks (`---`, `***`, `___`)
   - Bold (`**bold**`), italic (`*italic*`), and inline code
   - Links (`[text](url)`), images (`![alt](src)`), and autolinks (`<https://example.com>`)
