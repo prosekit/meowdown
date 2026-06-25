@@ -69,18 +69,6 @@ Pasting rich-text HTML from a browser (a bullet list, **bold**, a link, ...) con
 
 Pressing Enter at the end of the document's first heading (the title line) can start a fresh empty bullet on the next line instead of a plain paragraph. `defineBulletAfterHeading()` binds this. It is not part of `defineEditorExtension`; add it explicitly.
 
-## Static rendering primitives
-
-`@meowdown/react`'s `<MarkdownView>` renders Markdown to a read-only React tree without an editor by reusing these building blocks, also exported for other renderers:
-
-- `inlineTextToMarkChunks(getMarkBuilders(), text)`: the inline parser the editor uses, returning `[from, to, marks]` chunks (`MarkChunk`) for one line of source text.
-- `getCodeTokens(code, language)`: syntax-highlight tokens (`CodeToken`, the tuple `[from, to, classes]`) tagged with the same `tok-*` classes as the editor. Returns synchronously once the Lezer grammar is cached, otherwise a promise.
-- `matchEmbed(src)`: detects a tweet/YouTube image `src` and returns an `EmbedDescriptor` (no DOM); `listenForTweetHeight(iframe)` syncs a tweet iframe's height and returns a cleanup function.
-
-## Re-exports
-
-`Priority` and `withPriority` are re-exported from `@prosekit/core`, so you can set extension priorities (e.g. `withPriority(extension, Priority.high)`) without depending on `@prosekit/core` directly.
-
 ## API
 
 See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Fcore/).
