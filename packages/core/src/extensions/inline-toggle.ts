@@ -1,6 +1,7 @@
 import type { InlineElement } from '../lezer/inline.ts'
 import { collectInlineElements, parseInline } from '../lezer/inline.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
+import { isSpaceChar } from '../unicode.ts'
 import { longestBacktickRun } from '../utils/backticks.ts'
 
 /** A text replacement relative to the start of one textblock's text. */
@@ -105,12 +106,10 @@ function engulf(nodes: readonly InlineElement[], from: number, to: number): [num
   return [from, to]
 }
 
-const isSpace = (char: string | undefined) => char === ' ' || char === '\t'
-
 /** Shrink [from, to] so it starts and ends on non-whitespace. */
 export function trimRange(text: string, from: number, to: number): [number, number] {
-  while (from < to && isSpace(text[from])) from++
-  while (to > from && isSpace(text[to - 1])) to--
+  while (from < to && isSpaceChar(text.charCodeAt(from))) from++
+  while (to > from && isSpaceChar(text.charCodeAt(to - 1))) to--
   return [from, to]
 }
 
@@ -126,7 +125,7 @@ export function isInlineActive(text: string, from: number, to: number, spec: Tog
     (node) => node.type === spec.node || MARKER_IDS.has(node.type),
   )
   for (let pos = from; pos < to; pos++) {
-    if (isSpace(text[pos])) continue
+    if (isSpaceChar(text.charCodeAt(pos))) continue
     if (covered.every((span) => !(span.from <= pos && pos < span.to))) return false
   }
   return true
@@ -230,8 +229,8 @@ function removeEdits(
       ;[stripFrom, stripTo] = [open.to, close.from]
     }
     ;[stripFrom, stripTo] = engulf(span.children.slice(1, -1), stripFrom, stripTo)
-    while (stripFrom > open.to && isSpace(text[stripFrom - 1])) stripFrom--
-    while (stripTo < close.from && isSpace(text[stripTo])) stripTo++
+    while (stripFrom > open.to && isSpaceChar(text.charCodeAt(stripFrom - 1))) stripFrom--
+    while (stripTo < close.from && isSpaceChar(text.charCodeAt(stripTo))) stripTo++
     if (stripFrom > open.to) {
       edits.push({ from: stripFrom, to: stripFrom, insert: text.slice(close.from, close.to) })
     } else {
