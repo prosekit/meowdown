@@ -1,6 +1,7 @@
 import { createMarkBuilders } from '@prosekit/core'
 import { beforeAll, describe, expect, it } from 'vitest'
 
+import { once } from '@ocavue/utils'
 import { defineEditorExtension, type EditorExtension } from './extension.ts'
 import { inlineTextToMarkChunks } from './inline-text-to-mark-chunks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
@@ -37,6 +38,17 @@ function formatMarkChunks(chunks: MarkChunk[]): string {
   return '\n' + chunks.map(formatMarkChunk).join('\n') + '\n'
 }
 
+const getMarkBuilders = once((): TypedMarkBuilders => {
+  const schema = defineEditorExtension().schema!
+  return createMarkBuilders<EditorExtension>(schema)
+})
+
+function parse(text: string): string {
+  const markBuilders = getMarkBuilders()
+  const chunks = inlineTextToMarkChunks(markBuilders, text)
+  return '\n' + chunks.map(formatMarkChunk).join('\n') + '\n'
+}
+
 describe('inlineTextToMarkChunks', () => {
   let markBuilders: TypedMarkBuilders
 
@@ -46,10 +58,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('plain text returns no chunks (no marks anywhere)', () => {
-    const chunks = inlineTextToMarkChunks(markBuilders, 'hello world')
-    // Pure text has no inline nodes; the implementation does not emit
-    // a "no-mark" gap when the entire range is plain.
-    expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
+    expect(parse('hello world')).toMatchInlineSnapshot(`
       "
       0-11: -
       "
@@ -57,8 +66,7 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('emphasis yields gap + mark + content + mark', () => {
-    const chunks = inlineTextToMarkChunks(markBuilders, 'Hello *world*')
-    expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
+    expect(parse('Hello *world*')).toMatchInlineSnapshot(`
       "
       0-6: -
       6-7: mdEm + mdMark + mdPack(key=italic)
