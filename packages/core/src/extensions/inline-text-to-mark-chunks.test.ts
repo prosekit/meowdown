@@ -1,5 +1,5 @@
 import { createMarkBuilders } from '@prosekit/core'
-import { beforeAll, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { once } from '@ocavue/utils'
 import { defineEditorExtension, type EditorExtension } from './extension.ts'
@@ -32,10 +32,6 @@ function formatMarkChunk([from, to, marks]: MarkChunk): string {
     .sort()
     .join(' + ')
   return `${from}-${to}: ${names || '-'}`
-}
-
-function formatMarkChunks(chunks: MarkChunk[]): string {
-  return '\n' + chunks.map(formatMarkChunk).join('\n') + '\n'
 }
 
 const getMarkBuilders = once((): TypedMarkBuilders => {
@@ -475,7 +471,11 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('empty input returns no chunks', () => {
-    expect(inlineTextToMarkChunks(markBuilders, '')).toEqual([])
+    expect(parse('')).toMatchInlineSnapshot(`
+      "
+
+      "
+    `)
   })
 
   it('escape characters produce no marks (visible literal text)', () => {
@@ -639,10 +639,9 @@ describe('inlineTextToMarkChunks', () => {
   })
 
   it('nested bold>italic carries both pack keys, inner text in both', () => {
-    const chunks = inlineTextToMarkChunks(markBuilders, '**bold *italic* bold**')
     // The `italic` run carries mdPack(key=bold) AND mdPack(key=italic); the
     // bold-only runs carry only mdPack(key=bold).
-    expect(formatMarkChunks(chunks)).toMatchInlineSnapshot(`
+    expect(parse('**bold *italic* bold**')).toMatchInlineSnapshot(`
       "
       0-2: mdMark + mdPack(key=bold) + mdStrong
       2-7: mdPack(key=bold) + mdStrong
@@ -674,7 +673,7 @@ describe('inlineTextToMarkChunks', () => {
 
   it('wikilink, tag, and bare autolink carry no pack', () => {
     for (const text of ['see [[note]] end', 'hello #tag world', 'visit https://example.com now']) {
-      expect(formatMarkChunks(inlineTextToMarkChunks(markBuilders, text))).not.toContain('mdPack')
+      expect(parse(text)).not.toContain('mdPack')
     }
   })
 })
