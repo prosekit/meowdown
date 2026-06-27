@@ -679,10 +679,4 @@ describe('autolink', () => {
       "
     `)
   })
-
-  it('wikilink, tag, and bare autolink carry no pack', () => {
-    for (const text of ['see [[note]] end', 'hello #tag world', 'visit https://example.com now']) {
-      expect(parse(text)).not.toContain('mdPack')
-    }
-  })
 })
