@@ -10,7 +10,7 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView, MarkViewConstructor } from '@prosekit/pm/view'
 
 import { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './embed/index.ts'
-import type { MdImageViewAttrs } from './inline-marks.ts'
+import type { MdImageV2Attrs, MdImageViewAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
 
 type ImageUrlResolver = (src: string) => string | undefined
@@ -54,6 +54,7 @@ function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
 function renderImagePreview(
   src: string,
   alt: string,
+  // TODO: add a title
   options: ImageOptions,
 ): HTMLElement | undefined {
   const embed = matchEmbed(src)
@@ -63,45 +64,73 @@ function renderImagePreview(
     wrapper.appendChild(buildEmbedIframe(embed))
     return wrapper
   }
+
   const url = (options.resolveImageUrl ?? defaultResolveImageUrl)(src)
   if (!url) return undefined
+
   const wrapper = document.createElement('span')
-  wrapper.className = 'md-image-preview md-image-preview-img'
-  wrapper.dataset.testid = 'image-preview'
+  // wrapper.className = 'md-image-preview md-image-preview-img'
+  // wrapper.dataset.testid = 'image-preview'
   const img = document.createElement('img')
   img.src = url
   img.alt = alt
   img.draggable = false
   wrapper.appendChild(img)
+
   return wrapper
 }
 
 /**
- * Render `mdImageView` (anchored on the image's final character) as the inline
- * image: the anchor char stays editable inside `contentDOM`, and the preview is
- * a non-editable sibling. Mark-mode hides the surrounding `mdImageSource`, so
- * what remains visible is the preview, in place of the raw `![alt](url)`.
+ * Render `mdImageView` (wrapped around the image URI) as the inline image: the
+ * URI stays editable inside `contentDOM`, and the preview is a non-editable
+ * sibling. Mark-mode hides the surrounding `mdImageSource`, so what remains
+ * visible is the preview, in place of the raw `![alt](url)`.
  */
 function createImageMarkView(options: ImageOptions): MarkViewConstructor {
   return (mark) => {
-    const attrs = mark.attrs as MdImageViewAttrs
+    const attrs = mark.attrs as MdImageV2Attrs
+    const { src, alt } = attrs
+
+    const span1 = document.createElement('span')
+    const span2 = document.createElement('span')
+
+    span1.style.width = '20px'
+    span1.style.height = '20px'
+    span1.style.display = 'inline-block'
+    span1.style.margin = '5px'
+    span1.contentEditable = 'false'
+
+    span2.style.width = '20px'
+    span2.style.height = '20px'
+    span2.style.display = 'inline-block'
+    span2.style.margin = '5px'
+
+    span1.style.backgroundColor = 'pink'
+    span2.style.backgroundColor = 'lightblue'
 
     const dom = document.createElement('span')
-    dom.className = 'md-image-view'
+    dom.append(span1)
+    dom.className = 'md-image-view-v2'
     const contentDOM = document.createElement('span')
-    contentDOM.className = 'md-image-view-content'
+    contentDOM.className = 'md-image-view-content-v2'
+    contentDOM.contentEditable = 'true'
+
+    // dom.append(document.createElement('span'))
     dom.appendChild(contentDOM)
 
-    const preview = renderImagePreview(attrs.src, attrs.alt, options)
+    const preview = renderImagePreview(src, alt, options)
     if (preview) {
       preview.contentEditable = 'false'
       dom.appendChild(preview)
     }
+    dom.append(span2)
 
     return {
       dom,
       contentDOM,
-      ignoreMutation: (mutation) => !contentDOM.contains(mutation.target),
+      ignoreMutation: (mutation) => {
+        return !contentDOM.contains(mutation.target)
+      },
     }
   }
 }
@@ -170,7 +199,7 @@ function createImageInputPlugin(options: ImageOptions): Plugin {
 export function defineImage(options: ImageOptions = {}): PlainExtension {
   return union(
     defineMarkView({
-      name: 'mdImageView' satisfies MarkName,
+      name: 'mdImageV2' satisfies MarkName,
       constructor: createImageMarkView(options),
     }),
     // High priority so the drop/paste handler runs before ProseKit's
