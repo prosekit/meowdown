@@ -38,7 +38,7 @@ export {
 } from './extensions/image-click.ts'
 export { defaultResolveImageUrl, defineImage, type ImageOptions } from './extensions/image.ts'
 export type {
-  MdImageViewAttrs,
+  MdImageV2Attrs,
   MdLinkTextAttrs,
   MdWikilinkV2Attrs,
 } from './extensions/inline-marks.ts'

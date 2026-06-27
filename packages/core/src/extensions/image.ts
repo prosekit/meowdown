@@ -54,13 +54,11 @@ function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
 function renderImagePreview(
   src: string,
   alt: string,
-  // TODO: add a title
   options: ImageOptions,
 ): HTMLElement | undefined {
   const embed = matchEmbed(src)
   if (embed) {
     const wrapper = document.createElement('span')
-
     wrapper.className = 'md-image-view-preview-v2 md-atom-view-preview'
     wrapper.appendChild(buildEmbedIframe(embed))
     return wrapper
@@ -71,6 +69,7 @@ function renderImagePreview(
 
   const wrapper = document.createElement('span')
   wrapper.className = 'md-image-view-preview-v2 md-atom-view-preview'
+  wrapper.dataset.testid = 'image-preview'
   const img = document.createElement('img')
   img.src = url
   img.alt = alt
@@ -82,11 +81,9 @@ function renderImagePreview(
 
 function createImageMarkView(options: ImageOptions): MarkViewConstructor {
   return (mark) => {
-    const attrs = mark.attrs as MdImageV2Attrs
-    const { src, alt } = attrs
+    const { src, alt } = mark.attrs as MdImageV2Attrs
 
     const dom = document.createElement('span')
-
     dom.className = 'md-image-view-v2 md-atom-view'
 
     const contentDOM = document.createElement('span')
@@ -100,14 +97,10 @@ function createImageMarkView(options: ImageOptions): MarkViewConstructor {
 
     dom.appendChild(contentDOM)
 
-    // dom.append(span2)
-
     return {
       dom,
       contentDOM,
-      ignoreMutation: (mutation) => {
-        return !contentDOM.contains(mutation.target)
-      },
+      ignoreMutation: (mutation) => !contentDOM.contains(mutation.target),
     }
   }
 }

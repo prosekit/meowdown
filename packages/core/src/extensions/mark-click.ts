@@ -24,13 +24,10 @@ export function defineMarkClickHandler<Payload>(config: MarkClickConfig<Payload>
       props: {
         handleClick: (view, pos, event) => {
           const target = event.target as HTMLElement | null
-          console.log('DEBUG defineMarkClickHandler target', target)
-          console.log('DEBUG defineMarkClickHandler config.selector', config.selector)
           if (!target?.closest?.(config.selector)) return false
           const payload = config.findPayloadAt(view.state, pos)
           if (payload == null) return false
           if (config.preventDefault) event.preventDefault()
-          console.log('DEBUG defineMarkClickHandler onClick')
           config.onClick(payload, event)
           return true
         },

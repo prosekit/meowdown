@@ -2,25 +2,6 @@ import { defineMarkSpec, union } from '@prosekit/core'
 
 import type { MarkName } from './mark-names.ts'
 
-/**
- * Wraps the parsed URI of `![alt](url)`. A mark view (see `defineImage`) renders
- * the image; without it the URI renders as text. Carries the parsed `src`/`alt`.
- */
-function defineMdImageView() {
-  return defineMarkSpec<'mdImageView', MdImageViewAttrs>({
-    name: 'mdImageView' satisfies MarkName,
-    inclusive: false,
-    attrs: { src: { default: '' }, alt: { default: '' } },
-    toDOM: () => ['span', { class: 'md-image-anchor' }, 0],
-    parseDOM: [{ tag: 'span.md-image-anchor' }],
-  })
-}
-
-export interface MdImageViewAttrs {
-  src: string
-  alt: string
-}
-
 export interface MdImageV2Attrs {
   src: string
   alt: string
@@ -142,12 +123,7 @@ function defineMdTag() {
   })
 }
 
-/**
- * Anchors the rendered wikilink label on the final character of
- * `[[target]]`/`[[target|alias]]`. A mark view (see `defineWikilink`) renders the
- * non-editable label; without it the anchor char just renders as text. Carries
- * the parsed `target` and `display` (the alias, or empty when none).
- */
+/** Covers the whole `[[target]]`/`[[target|alias]]` source. */
 function defineMdWikilinkV2() {
   return defineMarkSpec<'mdWikilinkV2', MdWikilinkV2Attrs>({
     name: 'mdWikilinkV2' satisfies MarkName,
@@ -208,24 +184,12 @@ function defineMdPack() {
   })
 }
 
-// mdHide is useless. Remove it. // TODO
-function defineMdHide() {
-  return defineMarkSpec({
-    name: 'mdHide' satisfies MarkName,
-    inclusive: false,
-    toDOM: () => ['span', { class: 'md-hide' }, 0],
-    parseDOM: [{ tag: 'span.md-hide' }],
-  })
-}
-
 export function defineInlineMarks() {
   // The last mark registered gets the lowest rank and becomes the outermost DOM
-  // wrapper, so the wikilink/image marks go last: the view mark (mdWikilinkView /
-  // mdImageView) wraps the source, which wraps the syntax marks. The pack mark
-  // goes last of all, so it wraps the whole unit (including a mark view).
+  // wrapper, so mdWikilinkV2/mdImageV2 go near the end: each covers a whole
+  // wikilink/image source that a mark view renders. The pack mark goes last of
+  // all, so it wraps the whole unit (including a mark view).
   return union(
-    defineMdHide(),
-
     defineMdMark(),
     defineMdEm(),
     defineMdStrong(),
@@ -238,7 +202,6 @@ export function defineInlineMarks() {
     defineMdTag(),
 
     defineMdWikilinkV2(),
-    defineMdImageView(),
     defineMdImageV2(),
     defineMdPack(),
   )

@@ -22,15 +22,15 @@ export interface AtomMarkNavigationOptions {
   marks: AtomMarks
 }
 
-// The source marks that are atom in `state`'s current mark mode (empty when no
-// mode is applied, which keeps the whole feature inert).
+// The source marks that act as one atom in `state`'s current mark mode (empty
+// when no mode is applied, which keeps the whole feature inert).
 function activeMarkNames(marks: AtomMarks, state: EditorState): MarkName[] {
   const mode = getMarkMode(state)
   if (!mode) return []
   return marks.flatMap((mark) => (mark.modes.includes(mode) ? [mark.name] : []))
 }
 
-// The contiguous run of one atom source mark that touches `pos`, or undefined.
+// The contiguous run of a single source mark that touches `pos`, or undefined.
 function getRangeAt(state: EditorState, pos: number, markNames: MarkName[]): MarkRange | undefined {
   for (const name of markNames) {
     const range = getMarkRangeAt(state, pos, name)
@@ -158,24 +158,21 @@ function createForwardDelete(marks: AtomMarks): Command {
   }
 }
 
-// Mark the source range while its whole unit is selected
+const SELECTED_CLASS = 'md-atom-selected'
+
+// Decorate each selected atom's source range with `md-atom-selected`, so its
+// mark view can ring the rendered preview/label.
 function createSelectionPlugin(marks: AtomMarks): Plugin {
   return new Plugin({
-    key: new PluginKey(`atom-mark-selection`),
+    key: new PluginKey('atom-mark-selection'),
     props: {
       decorations: (state) => {
-        // TODO: improve performance
-
-        const selectedClass = 'md-atom-selected'
         const markNames = activeMarkNames(marks, state)
-        console.log('markNames', markNames)
         if (markNames.length === 0) return
         const range = getSelectedRange(state, markNames)
-        console.log('range', range)
         if (range) {
-          console.log('decorations', range.from, range.to)
           return DecorationSet.create(state.doc, [
-            Decoration.inline(range.from, range.to, { class: selectedClass }),
+            Decoration.inline(range.from, range.to, { class: SELECTED_CLASS }),
           ])
         }
 
@@ -183,18 +180,9 @@ function createSelectionPlugin(marks: AtomMarks): Plugin {
         if (empty) return null
 
         const decorations: Decoration[] = []
-        state.doc.nodesBetween(from, to, (node, pos, parent, index) => {
-          for (const mark of node.marks) {
-            if (markNames.includes(mark.type.name as MarkName)) {
-              const atomFrom = pos
-              const atomSize = parent && parent.child(index)?.nodeSize
-
-              if (atomSize) {
-                decorations.push(
-                  Decoration.inline(atomFrom, atomFrom + atomSize, { class: selectedClass }),
-                )
-              }
-            }
+        state.doc.nodesBetween(from, to, (node, pos) => {
+          if (node.marks.some((mark) => markNames.includes(mark.type.name as MarkName))) {
+            decorations.push(Decoration.inline(pos, pos + node.nodeSize, { class: SELECTED_CLASS }))
           }
         })
         return DecorationSet.create(state.doc, decorations)
@@ -204,9 +192,9 @@ function createSelectionPlugin(marks: AtomMarks): Plugin {
 }
 
 /**
- * Make a text-backed source unit a single caret stop in the mark modes listed per mark: arrowing onto it selects the
- * whole source (ringed by a `selectedClass` decoration), and Backspace/Delete
- * remove it as a unit.
+ * Make a text-backed source unit a single caret stop in the listed mark modes:
+ * arrowing onto it selects the whole source, and Backspace/Delete remove it as a
+ * unit.
  */
 export function defineAtomMarkNavigation({ marks }: AtomMarkNavigationOptions): PlainExtension {
   return union(

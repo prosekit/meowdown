@@ -247,10 +247,6 @@ function walkImage(
     bracketNodes.length >= 2 ? text.slice(bracketNodes[0].to, bracketNodes[1].from) : ''
   const title: string = titleNode ? unquoteTitle(text.slice(titleNode.from, titleNode.to)) : ''
 
-  // const source = marks.mdImageSource.create({ src, alt } satisfies MdImageSourceAttrs)
-  // const view = marks.mdImageView.create({ src, alt } satisfies MdImageViewAttrs)
-  // const pack = marks.mdPack.create({ key: `image`, data: { src } } satisfies MdPackAttrs)
-
   emit(out, node.from, node.to, [...parentMarks, marks.mdImageV2.create({ src, alt, title })])
 }
 
@@ -266,11 +262,7 @@ function walkWikilink(
 ): void {
   const { target, display } = parseWikilink(text.slice(node.from, node.to))
 
-  emit(out, node.from, node.to, [
-    ...parentMarks,
-
-    marks.mdWikilinkV2.create({ target, display }),
-  ])
+  emit(out, node.from, node.to, [...parentMarks, marks.mdWikilinkV2.create({ target, display })])
 }
 
 /**

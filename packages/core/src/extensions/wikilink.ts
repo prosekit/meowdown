@@ -18,17 +18,10 @@ export function parseWikilink(text: string): ParsedWikilink {
 }
 
 /**
- * Render `mdWikilinkView` (anchored on the wikilink's final character) as the
- * non-editable label: the anchor char stays inside `contentDOM`, and the label
- * is a `contentEditable="false"` sibling. Mark-mode hides the surrounding
- * `mdWikilinkSource`, so what remains visible is the label, in place of the raw
- * `[[target]]`/`[[target|alias]]`.
- *
- * The label is appended before `contentDOM` so the anchor char (the wikilink's
- * trailing edge) sits after it. A collapsed caret placed just after the wikilink
- * then lands in `contentDOM`, which `style.css` keeps in the layout (zero width)
- * rather than `display:none`, so the caret rests after the label and typing
- * continues after the wikilink instead of being trapped before it.
+ * Render `mdWikilinkV2` as a non-editable label standing in for the raw source.
+ * The source stays in `contentDOM`, after the label, kept in the layout (not
+ * `display:none`) by `style.css` so a caret just after the wikilink lands there
+ * and typing continues after it, never trapped before it.
  */
 function createWikilinkMarkView(): MarkViewConstructor {
   return (mark) => {
@@ -63,9 +56,9 @@ function createWikilinkMarkView(): MarkViewConstructor {
 
 /**
  * Render `[[target]]`/`[[target|alias]]` as an immutable inline label (a mark
- * view) standing in for the raw source. The single-caret-stop behavior in hide
- * mode comes from the shared `defineAtomMarkNavigation` in the editor
- * extension, which treats `mdWikilinkSource` (and `mdImageSource`) as one unit.
+ * view) standing in for the raw source. The single-caret-stop behavior comes
+ * from the shared `defineAtomMarkNavigation` in the editor extension, which
+ * treats `mdWikilinkV2` (and `mdImageV2`) as one unit.
  */
 export function defineWikilink(): PlainExtension {
   return defineMarkView({

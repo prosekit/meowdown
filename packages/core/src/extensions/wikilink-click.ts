@@ -15,7 +15,6 @@ export interface WikilinkHit {
 
 /** Exported for tests. */
 export function findWikilinkAt(state: EditorState, pos: number): WikilinkHit | undefined {
-  console.log('DEBUG findWikilinkAt')
   const range = getMarkRangeAt(state, pos, 'mdWikilinkV2')
   if (!range) return
   const { target } = range.mark.attrs as MdWikilinkV2Attrs

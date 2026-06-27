@@ -12,7 +12,7 @@ import {
  * Inline parser for `[[target]]`: any chars except `[`, `]` and
  * newline, at least one of them not a space/tab. The first `]` must
  * pair into `]]`. Registered before `Link` and claims the whole
- * element eagerly, so the target is atom: no nested markdown, no
+ * element eagerly, so the target is atomic: no nested markdown, no
  * tags.
  */
 export const wikilink: MarkdownConfig = {
