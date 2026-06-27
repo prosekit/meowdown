@@ -13,12 +13,12 @@ function formatMarkChunk([from, to, marks]: MarkChunk): [string, string] {
       const attrs = mark.attrs as Record<string, unknown>
       const keys = Object.keys(attrs)
       if (keys.length === 0) return mark.type.name
-      const filtered = keys.filter((k) => attrs[k] !== '' && attrs[k] !== null)
+      const filtered = keys.filter((k) => attrs[k] !== '' && attrs[k] != null)
       if (filtered.length === 0) return mark.type.name
       const attrStr = filtered
         .map((k) => {
           const value = attrs[k]
-          const rendered = typeof value === 'object' ? JSON.stringify(value) : (value as string)
+          const rendered = typeof value === 'string' ? value : JSON.stringify(value)
           return `${k}=${rendered}`
         })
         .join(',')
@@ -40,7 +40,7 @@ function parse(text: string): string {
   const formatted = chunks.map(formatMarkChunk)
   const headLength = Math.max(...formatted.map(([head]) => head.length))
   const lines = formatted.map(([head, body]) => {
-    return head.padEnd(headLength, ' ') + ' ' + body
+    return (head.padEnd(headLength, ' ') + ' ' + body).trim()
   })
   return '\n' + lines.join('\n') + '\n'
 }
@@ -49,7 +49,7 @@ describe('inlineTextToMarkChunks', () => {
   it('plain text returns no chunks (no marks anywhere)', () => {
     expect(parse('hello world')).toMatchInlineSnapshot(`
       "
-      [0, 11] 
+      [0, 11]
       "
     `)
   })
@@ -57,7 +57,7 @@ describe('inlineTextToMarkChunks', () => {
   it('emphasis yields gap + mark + content + mark', () => {
     expect(parse('Hello *world*')).toMatchInlineSnapshot(`
       "
-      [0, 6]   
+      [0, 6]
       [6, 7]   mdPack(key=italic) + mdEm + mdMark
       [7, 12]  mdPack(key=italic) + mdEm
       [12, 13] mdPack(key=italic) + mdEm + mdMark
@@ -68,11 +68,11 @@ describe('inlineTextToMarkChunks', () => {
   it('strong emphasis', () => {
     expect(parse('a **bold** b')).toMatchInlineSnapshot(`
       "
-      [0, 2]   
+      [0, 2]
       [2, 4]   mdPack(key=bold) + mdStrong + mdMark
       [4, 8]   mdPack(key=bold) + mdStrong
       [8, 10]  mdPack(key=bold) + mdStrong + mdMark
-      [10, 12] 
+      [10, 12]
       "
     `)
   })
@@ -80,11 +80,11 @@ describe('inlineTextToMarkChunks', () => {
   it('inline code', () => {
     expect(parse('a `c` b')).toMatchInlineSnapshot(`
       "
-      [0, 2] 
+      [0, 2]
       [2, 3] mdPack(key=code) + mdCode + mdMark
       [3, 4] mdPack(key=code) + mdCode
       [4, 5] mdPack(key=code) + mdCode + mdMark
-      [5, 7] 
+      [5, 7]
       "
     `)
   })
@@ -92,11 +92,11 @@ describe('inlineTextToMarkChunks', () => {
   it('strikethrough', () => {
     expect(parse('a ~~b~~ c')).toMatchInlineSnapshot(`
       "
-      [0, 2] 
+      [0, 2]
       [2, 4] mdPack(key=strike) + mdDel + mdMark
       [4, 5] mdPack(key=strike) + mdDel
       [5, 7] mdPack(key=strike) + mdDel + mdMark
-      [7, 9] 
+      [7, 9]
       "
     `)
   })
@@ -104,13 +104,13 @@ describe('inlineTextToMarkChunks', () => {
   it('link with href on its text portion', () => {
     expect(parse('see [docs](http://x) now')).toMatchInlineSnapshot(`
       "
-      [0, 4]   
+      [0, 4]
       [4, 5]   mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkText(href=http://x) + mdMark
       [5, 9]   mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkText(href=http://x)
       [9, 11]  mdPack(key=link,data={"href":"http://x","title":""}) + mdMark
       [11, 19] mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkUri
       [19, 20] mdPack(key=link,data={"href":"http://x","title":""}) + mdMark
-      [20, 24] 
+      [20, 24]
       "
     `)
   })
@@ -146,13 +146,13 @@ describe('inlineTextToMarkChunks', () => {
   it('image: mdImageSource over the source, mdImageView on the final char', () => {
     expect(parse('see ![alt](http://x/p.png) end')).toMatchInlineSnapshot(`
       "
-      [0, 4]   
+      [0, 4]
       [4, 6]   mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt) + mdMark
       [6, 9]   mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt)
       [9, 11]  mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt) + mdMark
       [11, 25] mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt) + mdLinkUri
       [25, 26] mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt) + mdImageView(src=http://x/p.png,alt=alt) + mdMark
-      [26, 30] 
+      [26, 30]
       "
     `)
   })
@@ -170,12 +170,12 @@ describe('inlineTextToMarkChunks', () => {
   it('reference image does not get image marks (falls through to the link walk)', () => {
     expect(parse('a ![b][id] c')).toMatchInlineSnapshot(`
       "
-      [0, 2]   
+      [0, 2]
       [2, 4]   mdPack(key=link,data={"href":"","title":""}) + mdMark
       [4, 5]   mdPack(key=link,data={"href":"","title":""})
       [5, 6]   mdPack(key=link,data={"href":"","title":""}) + mdMark
       [6, 10]  mdPack(key=link,data={"href":"","title":""})
-      [10, 12] 
+      [10, 12]
       "
     `)
   })
@@ -213,9 +213,9 @@ describe('inlineTextToMarkChunks', () => {
   it('autolinks a bare https URL', () => {
     expect(parse('visit https://example.com now')).toMatchInlineSnapshot(`
       "
-      [0, 6]   
+      [0, 6]
       [6, 25]  mdLinkText(href=https://example.com)
-      [25, 29] 
+      [25, 29]
       "
     `)
   })
@@ -223,9 +223,9 @@ describe('inlineTextToMarkChunks', () => {
   it('autolinks a www URL with an implied https scheme', () => {
     expect(parse('see www.example.com here')).toMatchInlineSnapshot(`
       "
-      [0, 4]   
+      [0, 4]
       [4, 19]  mdLinkText(href=https://www.example.com)
-      [19, 24] 
+      [19, 24]
       "
     `)
   })
@@ -233,9 +233,9 @@ describe('inlineTextToMarkChunks', () => {
   it('autolinks a bare email as mailto', () => {
     expect(parse('mail me@example.com ok')).toMatchInlineSnapshot(`
       "
-      [0, 5]   
+      [0, 5]
       [5, 19]  mdLinkText(href=mailto:me@example.com)
-      [19, 22] 
+      [19, 22]
       "
     `)
   })
@@ -243,9 +243,9 @@ describe('inlineTextToMarkChunks', () => {
   it('autolinks a bare mailto URL, keeping the scheme', () => {
     expect(parse('a mailto:me@example.com b')).toMatchInlineSnapshot(`
       "
-      [0, 2]   
+      [0, 2]
       [2, 23]  mdLinkText(href=mailto:me@example.com)
-      [23, 25] 
+      [23, 25]
       "
     `)
   })
@@ -253,11 +253,11 @@ describe('inlineTextToMarkChunks', () => {
   it('autolinks an angle-bracket URL, with the brackets as mdMark', () => {
     expect(parse('a <https://example.com> b')).toMatchInlineSnapshot(`
       "
-      [0, 2]   
+      [0, 2]
       [2, 3]   mdPack(key=autolink) + mdMark
       [3, 22]  mdPack(key=autolink) + mdLinkText(href=https://example.com)
       [22, 23] mdPack(key=autolink) + mdMark
-      [23, 25] 
+      [23, 25]
       "
     `)
   })
@@ -265,11 +265,11 @@ describe('inlineTextToMarkChunks', () => {
   it('keeps a non-http scheme in an angle autolink', () => {
     expect(parse('a <ftp://example.com> b')).toMatchInlineSnapshot(`
       "
-      [0, 2]   
+      [0, 2]
       [2, 3]   mdPack(key=autolink) + mdMark
       [3, 20]  mdPack(key=autolink) + mdLinkText(href=ftp://example.com)
       [20, 21] mdPack(key=autolink) + mdMark
-      [21, 23] 
+      [21, 23]
       "
     `)
   })
@@ -277,11 +277,11 @@ describe('inlineTextToMarkChunks', () => {
   it('keeps an ssh scheme in an angle autolink', () => {
     expect(parse('a <ssh://example.com> b')).toMatchInlineSnapshot(`
       "
-      [0, 2]   
+      [0, 2]
       [2, 3]   mdPack(key=autolink) + mdMark
       [3, 20]  mdPack(key=autolink) + mdLinkText(href=ssh://example.com)
       [20, 21] mdPack(key=autolink) + mdMark
-      [21, 23] 
+      [21, 23]
       "
     `)
   })
@@ -289,9 +289,9 @@ describe('inlineTextToMarkChunks', () => {
   it('excludes trailing punctuation from an autolink', () => {
     expect(parse('end https://example.com.')).toMatchInlineSnapshot(`
       "
-      [0, 4]   
+      [0, 4]
       [4, 23]  mdLinkText(href=https://example.com)
-      [23, 24] 
+      [23, 24]
       "
     `)
   })
@@ -309,7 +309,7 @@ describe('inlineTextToMarkChunks', () => {
   it('does not bare-autolink a non-http scheme', () => {
     expect(parse('a ftp://example.com b')).toMatchInlineSnapshot(`
       "
-      [0, 21] 
+      [0, 21]
       "
     `)
   })
@@ -317,9 +317,9 @@ describe('inlineTextToMarkChunks', () => {
   it('autolinks a bare domain on the curated TLD list', () => {
     expect(parse('a example.com b')).toMatchInlineSnapshot(`
       "
-      [0, 2]   
+      [0, 2]
       [2, 13]  mdLinkText(href=https://example.com)
-      [13, 15] 
+      [13, 15]
       "
     `)
   })
@@ -327,7 +327,7 @@ describe('inlineTextToMarkChunks', () => {
   it('does not autolink a bare host whose TLD is off the list', () => {
     expect(parse('a README.md b')).toMatchInlineSnapshot(`
       "
-      [0, 13] 
+      [0, 13]
       "
     `)
   })
@@ -359,9 +359,9 @@ describe('inlineTextToMarkChunks', () => {
   it('excludes a trailing period from a bare autolink', () => {
     expect(parse('Visit google.com.')).toMatchInlineSnapshot(`
       "
-      [0, 6]   
+      [0, 6]
       [6, 16]  mdLinkText(href=https://google.com)
-      [16, 17] 
+      [16, 17]
       "
     `)
   })
@@ -369,7 +369,7 @@ describe('inlineTextToMarkChunks', () => {
   it('does not bare-autolink a code-file name', () => {
     expect(parse('edit node.js then')).toMatchInlineSnapshot(`
       "
-      [0, 17] 
+      [0, 17]
       "
     `)
   })
@@ -407,9 +407,9 @@ describe('inlineTextToMarkChunks', () => {
   it('does not bare-autolink a domain after an @ (it is an email)', () => {
     expect(parse('mail a@google.com here')).toMatchInlineSnapshot(`
       "
-      [0, 5]   
+      [0, 5]
       [5, 17]  mdLinkText(href=mailto:a@google.com)
-      [17, 22] 
+      [17, 22]
       "
     `)
   })
@@ -445,7 +445,7 @@ describe('inlineTextToMarkChunks', () => {
       [0, 1]   mdPack(key=italic) + mdEm + mdMark
       [1, 2]   mdPack(key=italic) + mdEm
       [2, 3]   mdPack(key=italic) + mdEm + mdMark
-      [3, 8]   
+      [3, 8]
       [8, 9]   mdPack(key=italic) + mdEm + mdMark
       [9, 10]  mdPack(key=italic) + mdEm
       [10, 11] mdPack(key=italic) + mdEm + mdMark
@@ -474,7 +474,7 @@ describe('inlineTextToMarkChunks', () => {
   it('escape characters produce no marks (visible literal text)', () => {
     expect(parse(String.raw`\*not\*`)).toMatchInlineSnapshot(`
       "
-      [0, 7] 
+      [0, 7]
       "
     `)
   })
@@ -482,7 +482,7 @@ describe('inlineTextToMarkChunks', () => {
   it('hard break produces no mark', () => {
     expect(parse('a  \nb')).toMatchInlineSnapshot(`
       "
-      [0, 5] 
+      [0, 5]
       "
     `)
   })
@@ -490,9 +490,9 @@ describe('inlineTextToMarkChunks', () => {
   it('tag yields a single mdTag chunk covering the # too', () => {
     expect(parse('a #meow b')).toMatchInlineSnapshot(`
       "
-      [0, 2] 
+      [0, 2]
       [2, 7] mdTag
-      [7, 9] 
+      [7, 9]
       "
     `)
   })
@@ -501,7 +501,7 @@ describe('inlineTextToMarkChunks', () => {
     expect(parse('#a #b')).toMatchInlineSnapshot(`
       "
       [0, 2] mdTag
-      [2, 3] 
+      [2, 3]
       [3, 5] mdTag
       "
     `)
@@ -535,7 +535,7 @@ describe('inlineTextToMarkChunks', () => {
   it('heading-like text produces no tag', () => {
     expect(parse('# heading text')).toMatchInlineSnapshot(`
       "
-      [0, 14] 
+      [0, 14]
       "
     `)
   })
@@ -543,7 +543,7 @@ describe('inlineTextToMarkChunks', () => {
   it('all-digit tag produces no mark', () => {
     expect(parse("we're #1")).toMatchInlineSnapshot(`
       "
-      [0, 8] 
+      [0, 8]
       "
     `)
   })
@@ -551,12 +551,12 @@ describe('inlineTextToMarkChunks', () => {
   it('wikilink yields mdMark brackets around an mdWikilinkSource target', () => {
     expect(parse('a [[note]] b')).toMatchInlineSnapshot(`
       "
-      [0, 2]   
+      [0, 2]
       [2, 4]   mdWikilinkSource(target=note) + mdMark
       [4, 8]   mdWikilinkSource(target=note)
       [8, 9]   mdWikilinkSource(target=note) + mdMark
       [9, 10]  mdWikilinkSource(target=note) + mdWikilinkView(target=note) + mdMark
-      [10, 12] 
+      [10, 12]
       "
     `)
   })
@@ -623,7 +623,7 @@ describe('inlineTextToMarkChunks', () => {
     // reference link (pre-existing lezer behavior).
     expect(parse('[[a]')).toMatchInlineSnapshot(`
       "
-      [0, 1] 
+      [0, 1]
       [1, 2] mdPack(key=link,data={"href":"","title":""}) + mdMark
       [2, 3] mdPack(key=link,data={"href":"","title":""})
       [3, 4] mdPack(key=link,data={"href":"","title":""}) + mdMark
