@@ -1,6 +1,6 @@
+import type { MarkdownParser } from '@lezer/markdown'
 import { describe, expect, it } from 'vitest'
 
-import type { MarkdownParser } from '@lezer/markdown'
 import { gfmBlockOnlyParser, gfmParser } from './parser.ts'
 
 interface AstNode {
