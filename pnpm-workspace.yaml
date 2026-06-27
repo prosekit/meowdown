@@ -18,6 +18,9 @@ minimumReleaseAgeExclude:
   - '@ocavue/eslint-config'
   - '@prosekit/*'
 
+allowBuilds:
+  simple-git-hooks: false
+
 # Enable "blockExoticSubdeps" and "overrides" to install packages from pkg.pr.new
 # blockExoticSubdeps: false
 # overrides:
