@@ -280,8 +280,8 @@ describe('image', () => {
       [4, 6]   mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt) + mdMark
       [6, 9]   mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt)
       [9, 11]  mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt) + mdMark
-      [11, 25] mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt) + mdLinkUri
-      [25, 26] mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt) + mdImageView(src=http://x/p.png,alt=alt) + mdMark
+      [11, 25] mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt) + mdImageView(src=http://x/p.png,alt=alt) + mdLinkUri
+      [25, 26] mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt) + mdMark
       [26, 30]
       "
     `)
@@ -291,8 +291,8 @@ describe('image', () => {
     expect(parse('![](z.png)')).toMatchInlineSnapshot(`
       "
       [0, 4]  mdPack(key=image,data={"src":"z.png"}) + mdImageSource(src=z.png) + mdMark
-      [4, 9]  mdPack(key=image,data={"src":"z.png"}) + mdImageSource(src=z.png) + mdLinkUri
-      [9, 10] mdPack(key=image,data={"src":"z.png"}) + mdImageSource(src=z.png) + mdImageView(src=z.png) + mdMark
+      [4, 9]  mdPack(key=image,data={"src":"z.png"}) + mdImageSource(src=z.png) + mdImageView(src=z.png) + mdLinkUri
+      [9, 10] mdPack(key=image,data={"src":"z.png"}) + mdImageSource(src=z.png) + mdMark
       "
     `)
   })
@@ -303,10 +303,10 @@ describe('image', () => {
       [0, 2]   mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a) + mdMark
       [2, 3]   mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a)
       [3, 5]   mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a) + mdMark
-      [5, 13]  mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a) + mdLinkUri
+      [5, 13]  mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a) + mdImageView(src=http://x,alt=a) + mdLinkUri
       [13, 14] mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a)
       [14, 17] mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a) + mdLinkTitle
-      [17, 18] mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a) + mdImageView(src=http://x,alt=a) + mdMark
+      [17, 18] mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a) + mdMark
       "
     `)
   })
@@ -321,8 +321,8 @@ describe('image', () => {
       [7, 9]   mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c) + mdStrong + mdMark
       [9, 11]  mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c)
       [11, 13] mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c) + mdMark
-      [13, 21] mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c) + mdLinkUri
-      [21, 22] mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c) + mdImageView(src=http://x,alt=a **b** c) + mdMark
+      [13, 21] mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c) + mdImageView(src=http://x,alt=a **b** c) + mdLinkUri
+      [21, 22] mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c) + mdMark
       "
     `)
   })

@@ -728,18 +728,13 @@ describe('focus mode', () => {
                 ](
               </span>
             </span>
-            <span class="md-link-uri">
-              <span class="show">
-                pic.png
-              </span>
-            </span>
           </span>
           <span class="md-image-view">
             <span class="md-image-view-content">
               <span class="md-image-source">
-                <span class="md-mark">
+                <span class="md-link-uri">
                   <span class="show">
-                    )
+                    pic.png
                   </span>
                 </span>
               </span>
@@ -754,6 +749,13 @@ describe('focus mode', () => {
                 draggable="false"
                 src="http://x/p.png"
               >
+            </span>
+          </span>
+          <span class="md-image-source">
+            <span class="md-mark">
+              <span class="show">
+                )
+              </span>
             </span>
           </span>
         </span>

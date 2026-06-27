@@ -52,10 +52,11 @@ describe.each(['hide', 'focus'] as MarkMode[])(
   },
 )
 
-// Regression: the image is NOT reordered (its contentDOM must stay before the
-// preview so show mode reads `![alt](url)` then the preview). Confirm show mode
-// keeps both the raw source and the preview, in that order.
-describe('image show mode keeps source then preview', () => {
+// The image mark view wraps the URL run, so its contentDOM (the URL) sits before
+// the preview: in show mode the preview paints right after the URL, with the raw
+// `![img](url)` still fully visible around it. Confirm show mode keeps both the
+// raw source and the preview.
+describe('image show mode paints the preview after the URL', () => {
   it('shows the raw source and the preview together', async () => {
     using fixture = setup('show', 'A![img](url)B')
     await expect.element(preview).toBeVisible()
@@ -63,14 +64,13 @@ describe('image show mode keeps source then preview', () => {
     // The raw markdown stays visible (not collapsed) in show mode.
     expect(fixture.dom.querySelector('p')?.innerText).toContain('![img](url)')
 
-    // The preview is painted after the source text, not inside or before it.
+    // The preview is painted next to the URL inside the still-visible source.
     const previewRect = (preview.element() as HTMLElement).getBoundingClientRect()
     const range = document.createRange()
     const paragraph = fixture.dom.querySelector('p')!
     range.selectNodeContents(paragraph)
-    // The trailing `B` is the last visible glyph; the preview sits before it but
-    // after the `![img](url)` text. A coarse check: the preview has real width and
-    // is within the paragraph's horizontal box.
+    // A coarse check: the preview has real width and is within the paragraph's
+    // horizontal box.
     const paragraphRect = paragraph.getBoundingClientRect()
     expect(previewRect.width).toBeGreaterThan(0)
     expect(previewRect.left).toBeGreaterThanOrEqual(paragraphRect.left - 1)
