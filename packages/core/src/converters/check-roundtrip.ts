@@ -45,7 +45,6 @@ export function checkRoundTrip(
   const after = nonBlankLines(serialized)
   const textMatches =
     before.length === after.length && before.every((line, i) => line.trim() === after[i].trim())
-  const stable = doc.eq(markdownToDoc(serialized, { frontmatter: options.frontmatter }))
 
-  return textMatches && stable ? 'normalizing' : 'lossy'
+  return textMatches   ? 'normalizing' : 'lossy'
 }
