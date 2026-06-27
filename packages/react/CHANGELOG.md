@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.26.0](https://github.com/prosekit/meowdown/compare/react-v0.25.0...react-v0.26.0) (2026-06-27)
+
+
+### Features
+
+* **react:** add /now slash command ([#157](https://github.com/prosekit/meowdown/issues/157)) ([5e77aed](https://github.com/prosekit/meowdown/commit/5e77aed5711c60e70ba438d32df9b3aec6ee8387))
+
 ## [0.25.0](https://github.com/prosekit/meowdown/compare/react-v0.24.1...react-v0.25.0) (2026-06-25)
 
 
