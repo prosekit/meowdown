@@ -18,6 +18,8 @@ import type { EditorNode, Schema } from '@prosekit/pm/model'
 import type { EditorState, Transaction } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 
+import type { PositionRange } from '../utils/range.ts'
+
 import { BatchSetMarkStep } from './batch-set-mark-step.ts'
 import { inlineTextToMarkChunks } from './inline-text-to-mark-chunks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
@@ -73,11 +75,6 @@ function chunksForTextblock(
   return shifted
 }
 
-interface Range {
-  from: number
-  to: number
-}
-
 /**
  * Compute the union of all position ranges touched by the given
  * transactions, mapped into `newState.doc`'s coordinate space.
@@ -85,7 +82,10 @@ interface Range {
  * Returns the full doc range when no ranges are available (e.g. an
  * inert / no-op transaction used to wake the plugin up).
  */
-function computeAffectedRange(transactions: readonly Transaction[], newState: EditorState): Range {
+function computeAffectedRange(
+  transactions: readonly Transaction[],
+  newState: EditorState,
+): PositionRange {
   let from = Infinity
   let to = -Infinity
   for (const tr of transactions) {
@@ -114,7 +114,7 @@ function computeAffectedRange(transactions: readonly Transaction[], newState: Ed
  * containers (blockquote, list, tableCell), so it picks up nested
  * textblocks without each container needing to be listed explicitly.
  */
-function collectChunksForRange(state: EditorState, range: Range): MarkChunk[] {
+function collectChunksForRange(state: EditorState, range: PositionRange): MarkChunk[] {
   const chunks: MarkChunk[] = []
   state.doc.nodesBetween(range.from, range.to, (node, pos) => {
     if (node.type.spec.code) return false
