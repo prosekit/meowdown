@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.0](https://github.com/prosekit/meowdown/compare/react-v0.26.0...react-v0.27.0) (2026-06-27)
+
+
+### Features
+
+* do not expand wikilink and image marks ([#164](https://github.com/prosekit/meowdown/issues/164)) ([06a4ee7](https://github.com/prosekit/meowdown/commit/06a4ee777f0dae6d6ea57b774c0eae7a547a754c))
+
 ## [0.26.0](https://github.com/prosekit/meowdown/compare/react-v0.25.0...react-v0.26.0) (2026-06-27)
 
 
