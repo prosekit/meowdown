@@ -45,16 +45,18 @@ function parse(text: string): string {
   return '\n' + lines.join('\n') + '\n'
 }
 
-describe('simple inline marks', () => {
-  it('plain text', () => {
+describe('plain text', () => {
+  it('returns no marks for plain text', () => {
     expect(parse('hello world')).toMatchInlineSnapshot(`
       "
       [0, 11]
       "
     `)
   })
+})
 
-  it('emphasis', () => {
+describe('emphasis', () => {
+  it('can parse emphasis', () => {
     expect(parse('Hello *world*')).toMatchInlineSnapshot(`
       "
       [0, 6]
@@ -64,8 +66,10 @@ describe('simple inline marks', () => {
       "
     `)
   })
+})
 
-  it('strong emphasis', () => {
+describe('strong emphasis', () => {
+  it('can parse strong emphasis', () => {
     expect(parse('a **bold** b')).toMatchInlineSnapshot(`
       "
       [0, 2]
@@ -76,8 +80,10 @@ describe('simple inline marks', () => {
       "
     `)
   })
+})
 
-  it('inline code', () => {
+describe('inline code', () => {
+  it('can parse inline code', () => {
     expect(parse('a `c` b')).toMatchInlineSnapshot(`
       "
       [0, 2]
@@ -88,8 +94,10 @@ describe('simple inline marks', () => {
       "
     `)
   })
+})
 
-  it('strikethrough', () => {
+describe('strikethrough', () => {
+  it('can parse strikethrough', () => {
     expect(parse('a ~~b~~ c')).toMatchInlineSnapshot(`
       "
       [0, 2]
@@ -100,8 +108,10 @@ describe('simple inline marks', () => {
       "
     `)
   })
+})
 
-  it('highlight', () => {
+describe('highlight', () => {
+  it('can parse highlight', () => {
     expect(parse('a ==b== c')).toMatchInlineSnapshot(`
       "
       [0, 2]
