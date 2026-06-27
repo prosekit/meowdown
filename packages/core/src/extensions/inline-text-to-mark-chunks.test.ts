@@ -164,7 +164,11 @@ describe('link', () => {
       "
     `)
   })
+})
 
+// ABOVE IS THE NEW TESTS, BELOW IS OLD TESTS FOR IMAGE AND AUTOLINK
+
+describe('link', () => {
   it('image: mdImageSource over the source, mdImageView on the final char', () => {
     expect(parse('see ![alt](http://x/p.png) end')).toMatchInlineSnapshot(`
       "
