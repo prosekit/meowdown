@@ -345,6 +345,14 @@ describe('bullet lists', () => {
     expect(roundtrip(md)).toBe(md + '\n')
   })
 
+  it.fails('keeps a lazy continuation', () => {
+    // A line written flush under an item is a CommonMark lazy continuation: it
+    // joins the item's paragraph, but the model cannot tell it from a properly
+    // indented continuation, so the serializer re-indents it to the canonical
+    // column. The change is semantically lossless and idempotent.
+    expect(roundtrip('- item\nlazy line')).toBe('- item\nlazy line\n')
+  })
+
   it('keeps a bare empty bullet', () => {
     expect(roundtrip('-')).toBe('-\n')
   })
@@ -485,6 +493,12 @@ describe('task lists', () => {
 
   it('keeps a soft break in a task', () => {
     expect(roundtrip('- [ ] line one\n  line two')).toBe('- [ ] line one\n  line two\n')
+  })
+
+  it.fails('keeps a lazy continuation in a task', () => {
+    // Same lazy-continuation limitation as bullet lists; the flush line is
+    // re-indented to the task's content column on serialize.
+    expect(roundtrip('- [ ] todo\neen voorlopig idee')).toBe('- [ ] todo\neen voorlopig idee\n')
   })
 
   it('keeps a tag in a task', () => {

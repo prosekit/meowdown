@@ -63,6 +63,8 @@ describe('checkRoundTrip', () => {
     'trailing spaces   ', // trailing whitespace is insignificant
     '> text\n> - item', // a blockquote gains an empty `>` line before a following list
     '> a\n> - x\n> - y', // same, with a multi-item list inside the blockquote
+    '- [ ] todo\neen voorlopig idee', // a lazy continuation gains the canonical item indent
+    '- item\nlazy line', // same, on a plain bullet
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })
