@@ -365,49 +365,9 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Wikilinks (`[[target]]`/`[[target|alias]]`), rendered in place via a mark
- * view: an immutable label standing in for the raw source.
- * ------------------------------------------------------------------------- */
-.ProseMirror .md-wikilink-label,
-.ProseMirror .md-wikilink-source {
-  color: var(--meowdown-accent);
-  text-decoration: underline;
-  text-decoration-style: dashed;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
-
-/* The label stands in for the source in hide and focus (the source never reveals
- * for a wikilink, since it is atom). In show mode the raw source is visible, so
- * the label would only duplicate it and is hidden. */
-.ProseMirror[data-mark-mode='show'] .md-wikilink-label {
-  display: none;
-}
-
-/* ---------------------------------------------------------------------------
  * Inline image / embed previews (`![alt](url)`), rendered in place via a mark
  * view at the image's source position.
  * ------------------------------------------------------------------------- */
-
-/* Small images flow inline with the surrounding text. */
-.ProseMirror .md-image-preview-img {
-  display: inline-block;
-  vertical-align: bottom;
-}
-
-.ProseMirror .md-image-preview-img img {
-  max-height: var(--meowdown-image-max-height, 24rem);
-  max-width: 100%;
-  border-radius: var(--meowdown-image-radius, 0.5rem);
-}
-
-/* Embeds (YouTube, tweets) are too tall for text flow: render as a block at
- * the source position. */
-.ProseMirror .md-image-preview-embed {
-  display: block;
-  margin-block: 0.5rem;
-}
 
 .ProseMirror .md-embed-youtube {
   display: block;
@@ -423,27 +383,6 @@
   max-width: 550px;
   border: 0;
 }
-
-/* The whole image/wikilink source is selected: a single caret stop. The image
- * is atom in hide mode only; the wikilink is atom in hide and focus. The
- * `md-atom-selected` decoration wraps the source text spans; the rendered
- * preview/label is a sibling of the mark view's content, not a descendant of the
- * decoration, so match the mark view that contains a selected span and ring it
- * like a node selection (`.ProseMirror-selectednode`). In show mode the raw
- * source is visible and uses the native selection highlight instead. */
-/*.ProseMirror[data-mark-mode='hide'] .md-image-view:has(.md-atom-selected) .md-image-preview,*/
-.ProseMirror .md-wikilink-view:has(.md-atom-selected) .md-wikilink-label {
-  outline: 2px solid var(--meowdown-node-outline);
-  outline-offset: 2px;
-  border-radius: 0.25rem;
-  background: var(--meowdown-node-selection);
-}
-/*/* The image preview keeps its own corner radius. */
-.ProseMirror[data-mark-mode='hide'] .md-image-view:has(.md-atom-selected) .md-image-preview {
-  border-radius: var(--meowdown-image-radius, 0.5rem);
-}
-*/
-
 
 /* ---------------------------------------------------------------------------
  * Placeholder text for empty blocks (ProseKit's definePlaceholder)
@@ -485,22 +424,15 @@
 .ProseMirror[data-mark-mode='hide'] {
   .md-mark,
   .md-link-uri,
-  .md-link-title,
-  .md-image-source,
-  .md-wikilink-source {
+  .md-link-title {
     display: none;
   }
 }
 
 .ProseMirror[data-mark-mode='focus'] {
-  .md-wikilink-source {
-    display: none;
-  }
-
   .md-mark,
   .md-link-uri,
-  .md-link-title,
-  .md-image-source {
+  .md-link-title {
     overflow: hidden;
     display: inline-block;
     vertical-align: bottom;
@@ -511,62 +443,6 @@
       letter-spacing: 0;
     }
   }
-}
-
-.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content,
-.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content,
-.ProseMirror[data-mark-mode='hide'] .md-image-view-content,
-.ProseMirror[data-mark-mode='focus'] .md-image-view-content {
-  display: inline-flex;
-  height: 100%;
-  vertical-align: bottom;
-}
-
-.ProseMirror[data-mark-mode='hide'] .md-image-view-content,
-.ProseMirror[data-mark-mode='focus'] .md-image-view-content {
-  overflow: hidden;
-  &:not(:has(.show)) {
-    width: 0px;
-  }
-}
-
-.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content,
-.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content {
-  overflow: visible;
-  width: 0px;
-  max-width: 0px;
-  min-width: 0px;
-  background-color: transparent;
-
-  * {
-    color: transparent;
-    background-color: transparent;
-  }
-}
-
-/* Source inside a view contentDOM is hidden by the general `display:none` above;
- * that leaves it without a box, so the caret falls back before it. Put it back
- * in the layout when hidden so the caret has a real stop right after the unit. */
-.ProseMirror[data-mark-mode='hide'] .md-wikilink-view-content :is(.md-mark, .md-wikilink-source),
-.ProseMirror[data-mark-mode='focus'] .md-wikilink-view-content :is(.md-mark, .md-wikilink-source) {
-  display: inline-flex;
-  width: 0px;
-  max-width: 0px;
-  min-width: 0px;
-  overflow: visible;
-}
-
-.ProseMirror[data-mark-mode='hide']
-  .md-image-view-content
-  :is(.md-mark, .md-link-uri, .md-image-source),
-.ProseMirror[data-mark-mode='focus']
-  .md-image-view-content:not(:has(.show))
-  :is(.md-mark, .md-link-uri, .md-image-source) {
-  display: inline-flex;
-  width: 0px;
-  max-width: 0px;
-  min-width: 0px;
-  overflow: visible;
 }
 
 /* atom marks (image, wikilink) */
@@ -588,7 +464,6 @@
   .md-atom-view:has(.md-atom-selected) {
     .md-atom-view-preview {
       outline: 2px solid var(--meowdown-node-outline);
-      border-radius: 6px;
       background: var(--meowdown-selection);
     }
 
@@ -621,6 +496,12 @@
   .md-image-view-preview-v2 {
     border-radius: 6px;
     outline-offset: 2px;
+  }
+
+  .md-image-view-preview-v2 img {
+    max-height: var(--meowdown-image-max-height, 24rem);
+    max-width: 100%;
+    border-radius: var(--meowdown-image-radius, 0.5rem);
   }
 }
 
