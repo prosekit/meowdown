@@ -7,7 +7,7 @@ import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 
 import type {
   MdImageSourceAttrs,
-  MdImageViewAttrs,
+  MdImageV2Attrs,
   MdLinkTextAttrs,
   MdPackAttrs,
   MdPackSimpleKey,
@@ -154,7 +154,7 @@ function walk(
 }
 
 /**
- * Special walker for `Link` / `Image` nodes.
+ * Special walker for `Link` nodes.
  *
  * Lezer's flat child list looks like:
  *   LinkMark `[` (or `![`), [label children + implicit gaps], LinkMark `]`,
@@ -231,12 +231,6 @@ function walkLink(
 
 /**
  * Special walker for a direct image `![alt](url)`.
- *
- * Emits `mdImageSource` across the whole node (the mark `defineMarkMode` hides)
- * and `mdImageView({ src, alt })` across the parsed URL range, where the mark
- * view renders the inline image. `mdMark`/`mdLinkUri` style the source for show
- * mode; the alt carries no `mdLinkText` (it is not a link), but inline emphasis
- * inside it is still highlighted like any other syntax.
  */
 function walkImage(
   node: InlineElement,
@@ -252,44 +246,52 @@ function walkImage(
     walkLink(node, parentMarks, text, marks, out)
     return
   }
-  const brackets = node.children.filter((child) => child.type === LEZER_NODE_IDS.LinkMark)
-  const src = text.slice(urlNode.from, urlNode.to)
-  const alt = brackets.length >= 2 ? text.slice(brackets[0].to, brackets[1].from) : ''
 
-  const source = marks.mdImageSource.create({ src, alt } satisfies MdImageSourceAttrs)
-  const view = marks.mdImageView.create({ src, alt } satisfies MdImageViewAttrs)
-  const pack = marks.mdPack.create({ key: `image`, data: { src } } satisfies MdPackAttrs)
+  const bracketNodes = node.children.filter((child) => child.type === LEZER_NODE_IDS.LinkMark)
+  const titleNode = node.children.find((child) => child.type === LEZER_NODE_IDS.LinkTitle)
 
-  const viewFrom = urlNode.from
-  const viewTo = urlNode.to
-  const sourceMarks = [...parentMarks, pack, source]
-  const viewMarks = [...sourceMarks, view]
+  const src: string = text.slice(urlNode.from, urlNode.to)
+  const alt: string =
+    bracketNodes.length >= 2 ? text.slice(bracketNodes[0].to, bracketNodes[1].from) : ''
+  const title: string = titleNode ? unquoteTitle(text.slice(titleNode.from, titleNode.to)) : ''
 
-  // Marks shared by every chunk at `from`: the `mdPack` envelope plus
-  // `mdImageSource` over the whole source, plus `mdImageView` across the URL
-  // range. Each child layers its own syntax mark on top.
-  const baseAt = (from: number): Mark[] =>
-    from >= viewFrom && from < viewTo ? viewMarks : sourceMarks
+  // const source = marks.mdImageSource.create({ src, alt } satisfies MdImageSourceAttrs)
+  // const view = marks.mdImageView.create({ src, alt } satisfies MdImageViewAttrs)
+  // const pack = marks.mdPack.create({ key: `image`, data: { src } } satisfies MdPackAttrs)
 
-  let pos = node.from
-  for (const child of node.children) {
-    if (child.from > pos) {
-      emit(out, pos, child.from, baseAt(pos))
-    }
-    const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(child.type)
-    const childMarks = maybeMarkName
-      ? [...baseAt(child.from), marks[maybeMarkName].create()]
-      : baseAt(child.from)
-    if (child.children.length === 0) {
-      emit(out, child.from, child.to, childMarks)
-    } else {
-      walk(child.children, childMarks, child.from, child.to, text, marks, out)
-    }
-    pos = child.to
-  }
-  if (pos < node.to) {
-    emit(out, pos, node.to, baseAt(pos))
-  }
+  emit(out, node.from, node.to, [
+    ...parentMarks,
+
+    marks.mdImageV2.create({ src, alt, title }),
+    marks.mdImageSource.create({ src, alt }),
+    marks.mdHide.create(),
+  ])
+
+  // // Marks shared by every chunk at `from`: the `mdPack` envelope plus
+  // // `mdImageSource` over the whole source, plus `mdImageView` across the URL
+  // // range. Each child layers its own syntax mark on top.
+  // const baseAt = (from: number): Mark[] =>
+  //   from >= viewFrom && from < viewTo ? viewMarks : sourceMarks
+
+  // let pos = node.from
+  // for (const child of node.children) {
+  //   if (child.from > pos) {
+  //     emit(out, pos, child.from, baseAt(pos))
+  //   }
+  //   const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(child.type)
+  //   const childMarks = maybeMarkName
+  //     ? [...baseAt(child.from), marks[maybeMarkName].create()]
+  //     : baseAt(child.from)
+  //   if (child.children.length === 0) {
+  //     emit(out, child.from, child.to, childMarks)
+  //   } else {
+  //     walk(child.children, childMarks, child.from, child.to, text, marks, out)
+  //   }
+  //   pos = child.to
+  // }
+  // if (pos < node.to) {
+  //   emit(out, pos, node.to, baseAt(pos))
+  // }
 }
 
 /**

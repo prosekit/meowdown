@@ -21,6 +21,22 @@ export interface MdImageViewAttrs {
   alt: string
 }
 
+export interface MdImageV2Attrs {
+  src: string
+  alt: string
+  title: string
+}
+
+function defineMdImageV2() {
+  return defineMarkSpec<'mdImageV2', MdImageV2Attrs>({
+    name: 'mdImageV2' satisfies MarkName,
+    inclusive: false,
+    attrs: { src: { default: '' }, alt: { default: '' }, title: { default: '' } },
+    toDOM: () => ['span', { class: 'md-image-v2' }, 0],
+    parseDOM: [{ tag: 'span.md-image-v2' }],
+  })
+}
+
 /**
  * Covers the whole `![alt](url)` source. This is the mark `defineMarkMode`
  * hides in hide/focus mode so the rendered image replaces the raw syntax. The
@@ -33,8 +49,8 @@ function defineMdImageSource() {
     name: 'mdImageSource' satisfies MarkName,
     inclusive: false,
     attrs: { src: { default: '' }, alt: { default: '' } },
-    toDOM: () => ['span', { class: 'md-image-source' }, 0],
-    parseDOM: [{ tag: 'span.md-image-source' }],
+    toDOM: () => ['span', { class: 'md-image-source-v2' }, 0],
+    parseDOM: [{ tag: 'span.md-image-source-v2' }],
   })
 }
 
@@ -235,12 +251,23 @@ function defineMdPack() {
   })
 }
 
+function defineMdHide() {
+  return defineMarkSpec({
+    name: 'mdHide' satisfies MarkName,
+    inclusive: false,
+    toDOM: () => ['span', { class: 'md-hide' }, 0],
+    parseDOM: [{ tag: 'span.md-hide' }],
+  })
+}
+
 export function defineInlineMarks() {
   // The last mark registered gets the lowest rank and becomes the outermost DOM
   // wrapper, so the wikilink/image marks go last: the view mark (mdWikilinkView /
   // mdImageView) wraps the source, which wraps the syntax marks. The pack mark
   // goes last of all, so it wraps the whole unit (including a mark view).
   return union(
+    defineMdHide(),
+
     defineMdMark(),
     defineMdEm(),
     defineMdStrong(),
@@ -256,6 +283,7 @@ export function defineInlineMarks() {
     defineMdWikilinkView(),
     defineMdImageSource(),
     defineMdImageView(),
+    defineMdImageV2(),
     defineMdPack(),
   )
 }

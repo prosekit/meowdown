@@ -432,17 +432,18 @@
  * decoration, so match the mark view that contains a selected span and ring it
  * like a node selection (`.ProseMirror-selectednode`). In show mode the raw
  * source is visible and uses the native selection highlight instead. */
-.ProseMirror[data-mark-mode='hide'] .md-image-view:has(.md-atomic-selected) .md-image-preview,
+/*.ProseMirror[data-mark-mode='hide'] .md-image-view:has(.md-atomic-selected) .md-image-preview,*/
 .ProseMirror .md-wikilink-view:has(.md-atomic-selected) .md-wikilink-label {
   outline: 2px solid var(--meowdown-node-outline);
   outline-offset: 2px;
   border-radius: 0.25rem;
   background: var(--meowdown-node-selection);
 }
-/* The image preview keeps its own corner radius. */
+/*/* The image preview keeps its own corner radius. */
 .ProseMirror[data-mark-mode='hide'] .md-image-view:has(.md-atomic-selected) .md-image-preview {
   border-radius: var(--meowdown-image-radius, 0.5rem);
 }
+*/
 
 /* While a whole atomic unit is selected, the selection covers its (often hidden)
  * source, so hide the text caret: the ring/native selection is the affordance,
@@ -573,4 +574,27 @@
   max-width: 0px;
   min-width: 0px;
   overflow: visible;
+}
+
+.ProseMirror {
+  .md-image-view-v2 img {
+    display: inline-flex;
+    vertical-align: bottom;
+  }
+}
+
+.ProseMirror {
+  .md-hide {
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: bottom;
+
+    letter-spacing: -2em;
+    width: 0px;
+    min-width: 0px;
+    max-width: 0px;
+    max-height: 0px;
+    color: red;
+    visibility: hidden;
+  }
 }
