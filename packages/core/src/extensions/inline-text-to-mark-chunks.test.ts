@@ -45,18 +45,16 @@ function parse(text: string): string {
   return '\n' + lines.join('\n') + '\n'
 }
 
-describe('plain text', () => {
-  it('returns no marks', () => {
+describe('simple inline marks', () => {
+  it('plain text', () => {
     expect(parse('hello world')).toMatchInlineSnapshot(`
       "
       [0, 11]
       "
     `)
   })
-})
 
-describe('emphasis', () => {
-  it('emphasis yields gap + mark + content + mark', () => {
+  it('emphasis', () => {
     expect(parse('Hello *world*')).toMatchInlineSnapshot(`
       "
       [0, 6]
@@ -103,6 +101,20 @@ describe('emphasis', () => {
     `)
   })
 
+  it('highlight', () => {
+    expect(parse('a ==b== c')).toMatchInlineSnapshot(`
+      "
+      [0, 2]
+      [2, 4] mdPack(key=strike) + mdDel + mdMark
+      [4, 5] mdPack(key=strike) + mdDel
+      [5, 7] mdPack(key=strike) + mdDel + mdMark
+      [7, 9]
+      "
+    `)
+  })
+})
+
+describe('link', () => {
   it('link with href on its text portion', () => {
     expect(parse('see [docs](http://x) now')).toMatchInlineSnapshot(`
       "
@@ -211,7 +223,9 @@ describe('emphasis', () => {
       "
     `)
   })
+})
 
+describe('autolink', () => {
   it('autolinks a bare https URL', () => {
     expect(parse('visit https://example.com now')).toMatchInlineSnapshot(`
       "
