@@ -46,10 +46,34 @@ function parse(text: string): string {
 }
 
 describe('plain text', () => {
-  it('returns no marks for plain text', () => {
+  it('plain text', () => {
     expect(parse('hello world')).toMatchInlineSnapshot(`
       "
       [0, 11]
+      "
+    `)
+  })
+
+  it('escaped', () => {
+    expect(parse(String.raw`\*not\*`)).toMatchInlineSnapshot(`
+      "
+      [0, 7]
+      "
+    `)
+  })
+
+  it('hard break', () => {
+    expect(parse('a  \nb')).toMatchInlineSnapshot(`
+      "
+      [0, 5]
+      "
+    `)
+  })
+
+  it('empty', () => {
+    expect(parse('')).toMatchInlineSnapshot(`
+      "
+
       "
     `)
   })
@@ -66,6 +90,30 @@ describe('emphasis', () => {
       "
     `)
   })
+
+  it('whole text', () => {
+    expect(parse('*all*')).toMatchInlineSnapshot(`
+      "
+      [0, 1] mdPack(key=italic) + mdEm + mdMark
+      [1, 4] mdPack(key=italic) + mdEm
+      [4, 5] mdPack(key=italic) + mdEm + mdMark
+      "
+    `)
+  })
+
+  it('twice', () => {
+    expect(parse('*a* mid *b*')).toMatchInlineSnapshot(`
+      "
+      [0, 1]   mdPack(key=italic) + mdEm + mdMark
+      [1, 2]   mdPack(key=italic) + mdEm
+      [2, 3]   mdPack(key=italic) + mdEm + mdMark
+      [3, 8]
+      [8, 9]   mdPack(key=italic) + mdEm + mdMark
+      [9, 10]  mdPack(key=italic) + mdEm
+      [10, 11] mdPack(key=italic) + mdEm + mdMark
+      "
+    `)
+  })
 })
 
 describe('strong emphasis', () => {
@@ -77,6 +125,47 @@ describe('strong emphasis', () => {
       [4, 8]   mdPack(key=bold) + mdStrong
       [8, 10]  mdPack(key=bold) + mdStrong + mdMark
       [10, 12]
+      "
+    `)
+  })
+})
+
+describe('emphasis and strong', () => {
+  it('triple', () => {
+    expect(parse('***foo***')).toMatchInlineSnapshot(`
+      "
+      [0, 1] mdPack(key=italic) + mdEm + mdMark
+      [1, 3] mdPack(key=italic) + mdEm + mdPack(key=bold) + mdStrong + mdMark
+      [3, 6] mdPack(key=italic) + mdEm + mdPack(key=bold) + mdStrong
+      [6, 8] mdPack(key=italic) + mdEm + mdPack(key=bold) + mdStrong + mdMark
+      [8, 9] mdPack(key=italic) + mdEm + mdMark
+      "
+    `)
+  })
+
+  it('adjacent', () => {
+    expect(parse('*a***b**')).toMatchInlineSnapshot(`
+      "
+      [0, 1] mdPack(key=italic) + mdEm + mdMark
+      [1, 2] mdPack(key=italic) + mdEm
+      [2, 3] mdPack(key=italic) + mdEm + mdMark
+      [3, 5] mdPack(key=bold) + mdStrong + mdMark
+      [5, 6] mdPack(key=bold) + mdStrong
+      [6, 8] mdPack(key=bold) + mdStrong + mdMark
+      "
+    `)
+  })
+
+  it('nested', () => {
+    expect(parse('**bold *italic* bold**')).toMatchInlineSnapshot(`
+      "
+      [0, 2]   mdPack(key=bold) + mdStrong + mdMark
+      [2, 7]   mdPack(key=bold) + mdStrong
+      [7, 8]   mdPack(key=bold) + mdStrong + mdPack(key=italic) + mdEm + mdMark
+      [8, 14]  mdPack(key=bold) + mdStrong + mdPack(key=italic) + mdEm
+      [14, 15] mdPack(key=bold) + mdStrong + mdPack(key=italic) + mdEm + mdMark
+      [15, 20] mdPack(key=bold) + mdStrong
+      [20, 22] mdPack(key=bold) + mdStrong + mdMark
       "
     `)
   })
@@ -137,7 +226,7 @@ describe('link', () => {
     `)
   })
 
-  it('link with a title', () => {
+  it('title', () => {
     expect(parse('[docs](url "title")')).toMatchInlineSnapshot(`
       "
       [0, 1]   mdPack(key=link,data={"href":"url","title":"title"}) + mdLinkText(href=url) + mdMark
@@ -151,7 +240,7 @@ describe('link', () => {
     `)
   })
 
-  it('link with emphasis nested inside the text', () => {
+  it('emphasis inside', () => {
     expect(parse('[*italic*](http://x)')).toMatchInlineSnapshot(`
       "
       [0, 1]   mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkText(href=http://x) + mdMark
@@ -164,12 +253,27 @@ describe('link', () => {
       "
     `)
   })
+
+  it('adjacent', () => {
+    expect(parse('[a](x)[b](y)')).toMatchInlineSnapshot(`
+      "
+      [0, 1]   mdPack(key=link,data={"href":"x","title":""}) + mdLinkText(href=x) + mdMark
+      [1, 2]   mdPack(key=link,data={"href":"x","title":""}) + mdLinkText(href=x)
+      [2, 4]   mdPack(key=link,data={"href":"x","title":""}) + mdMark
+      [4, 5]   mdPack(key=link,data={"href":"x","title":""}) + mdLinkUri
+      [5, 6]   mdPack(key=link,data={"href":"x","title":""}) + mdMark
+      [6, 7]   mdPack(key=link,data={"href":"y","title":""}) + mdLinkText(href=y) + mdMark
+      [7, 8]   mdPack(key=link,data={"href":"y","title":""}) + mdLinkText(href=y)
+      [8, 10]  mdPack(key=link,data={"href":"y","title":""}) + mdMark
+      [10, 11] mdPack(key=link,data={"href":"y","title":""}) + mdLinkUri
+      [11, 12] mdPack(key=link,data={"href":"y","title":""}) + mdMark
+      "
+    `)
+  })
 })
 
-// ABOVE IS THE NEW TESTS, BELOW IS OLD TESTS FOR IMAGE AND AUTOLINK
-
-describe('link', () => {
-  it('image: mdImageSource over the source, mdImageView on the final char', () => {
+describe('image', () => {
+  it('image', () => {
     expect(parse('see ![alt](http://x/p.png) end')).toMatchInlineSnapshot(`
       "
       [0, 4]
@@ -183,7 +287,7 @@ describe('link', () => {
     `)
   })
 
-  it('image with empty alt', () => {
+  it('empty alt', () => {
     expect(parse('![](z.png)')).toMatchInlineSnapshot(`
       "
       [0, 4]  mdPack(key=image,data={"src":"z.png"}) + mdImageSource(src=z.png) + mdMark
@@ -193,20 +297,7 @@ describe('link', () => {
     `)
   })
 
-  it('reference image does not get image marks (falls through to the link walk)', () => {
-    expect(parse('a ![b][id] c')).toMatchInlineSnapshot(`
-      "
-      [0, 2]
-      [2, 4]   mdPack(key=link,data={"href":"","title":""}) + mdMark
-      [4, 5]   mdPack(key=link,data={"href":"","title":""})
-      [5, 6]   mdPack(key=link,data={"href":"","title":""}) + mdMark
-      [6, 10]  mdPack(key=link,data={"href":"","title":""})
-      [10, 12]
-      "
-    `)
-  })
-
-  it('image with a title marks the title node like a link title', () => {
+  it('title', () => {
     expect(parse('![a](http://x "t")')).toMatchInlineSnapshot(`
       "
       [0, 2]   mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a) + mdMark
@@ -220,7 +311,7 @@ describe('link', () => {
     `)
   })
 
-  it('image with formatted alt marks the nested emphasis', () => {
+  it('formatted alt', () => {
     expect(parse('![a **b** c](http://x)')).toMatchInlineSnapshot(`
       "
       [0, 2]   mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c) + mdMark
@@ -235,10 +326,23 @@ describe('link', () => {
       "
     `)
   })
+
+  it('reference', () => {
+    expect(parse('a ![b][id] c')).toMatchInlineSnapshot(`
+      "
+      [0, 2]
+      [2, 4]   mdPack(key=link,data={"href":"","title":""}) + mdMark
+      [4, 5]   mdPack(key=link,data={"href":"","title":""})
+      [5, 6]   mdPack(key=link,data={"href":"","title":""}) + mdMark
+      [6, 10]  mdPack(key=link,data={"href":"","title":""})
+      [10, 12]
+      "
+    `)
+  })
 })
 
 describe('autolink', () => {
-  it('autolinks a bare https URL', () => {
+  it('https', () => {
     expect(parse('visit https://example.com now')).toMatchInlineSnapshot(`
       "
       [0, 6]
@@ -248,7 +352,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('autolinks a www URL with an implied https scheme', () => {
+  it('www', () => {
     expect(parse('see www.example.com here')).toMatchInlineSnapshot(`
       "
       [0, 4]
@@ -258,7 +362,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('autolinks a bare email as mailto', () => {
+  it('email', () => {
     expect(parse('mail me@example.com ok')).toMatchInlineSnapshot(`
       "
       [0, 5]
@@ -268,7 +372,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('autolinks a bare mailto URL, keeping the scheme', () => {
+  it('mailto', () => {
     expect(parse('a mailto:me@example.com b')).toMatchInlineSnapshot(`
       "
       [0, 2]
@@ -278,7 +382,37 @@ describe('autolink', () => {
     `)
   })
 
-  it('autolinks an angle-bracket URL, with the brackets as mdMark', () => {
+  it('trailing punctuation', () => {
+    expect(parse('end https://example.com.')).toMatchInlineSnapshot(`
+      "
+      [0, 4]
+      [4, 23]  mdLinkText(href=https://example.com)
+      [23, 24]
+      "
+    `)
+  })
+
+  it('inside emphasis', () => {
+    expect(parse('*https://example.com*')).toMatchInlineSnapshot(`
+      "
+      [0, 1]   mdPack(key=italic) + mdEm + mdMark
+      [1, 20]  mdPack(key=italic) + mdEm + mdLinkText(href=https://example.com)
+      [20, 21] mdPack(key=italic) + mdEm + mdMark
+      "
+    `)
+  })
+
+  it('non-http scheme', () => {
+    expect(parse('a ftp://example.com b')).toMatchInlineSnapshot(`
+      "
+      [0, 21]
+      "
+    `)
+  })
+})
+
+describe('angle autolink', () => {
+  it('https', () => {
     expect(parse('a <https://example.com> b')).toMatchInlineSnapshot(`
       "
       [0, 2]
@@ -290,7 +424,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('keeps a non-http scheme in an angle autolink', () => {
+  it('ftp', () => {
     expect(parse('a <ftp://example.com> b')).toMatchInlineSnapshot(`
       "
       [0, 2]
@@ -302,7 +436,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('keeps an ssh scheme in an angle autolink', () => {
+  it('ssh', () => {
     expect(parse('a <ssh://example.com> b')).toMatchInlineSnapshot(`
       "
       [0, 2]
@@ -313,36 +447,10 @@ describe('autolink', () => {
       "
     `)
   })
+})
 
-  it('excludes trailing punctuation from an autolink', () => {
-    expect(parse('end https://example.com.')).toMatchInlineSnapshot(`
-      "
-      [0, 4]
-      [4, 23]  mdLinkText(href=https://example.com)
-      [23, 24]
-      "
-    `)
-  })
-
-  it('autolinks a URL nested in emphasis', () => {
-    expect(parse('*https://example.com*')).toMatchInlineSnapshot(`
-      "
-      [0, 1]   mdPack(key=italic) + mdEm + mdMark
-      [1, 20]  mdPack(key=italic) + mdEm + mdLinkText(href=https://example.com)
-      [20, 21] mdPack(key=italic) + mdEm + mdMark
-      "
-    `)
-  })
-
-  it('does not bare-autolink a non-http scheme', () => {
-    expect(parse('a ftp://example.com b')).toMatchInlineSnapshot(`
-      "
-      [0, 21]
-      "
-    `)
-  })
-
-  it('autolinks a bare domain on the curated TLD list', () => {
+describe('bare autolink', () => {
+  it('curated TLD', () => {
     expect(parse('a example.com b')).toMatchInlineSnapshot(`
       "
       [0, 2]
@@ -352,7 +460,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('does not autolink a bare host whose TLD is off the list', () => {
+  it('off-list TLD', () => {
     expect(parse('a README.md b')).toMatchInlineSnapshot(`
       "
       [0, 13]
@@ -360,7 +468,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('bare-autolinks a domain that starts the text', () => {
+  it('starts text', () => {
     expect(parse('google.com')).toMatchInlineSnapshot(`
       "
       [0, 10] mdLinkText(href=https://google.com)
@@ -368,7 +476,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('bare-autolinks a domain with a path, keeping the path in the href', () => {
+  it('with path', () => {
     expect(parse('sub.domain.com/path?q=1')).toMatchInlineSnapshot(`
       "
       [0, 23] mdLinkText(href=https://sub.domain.com/path?q=1)
@@ -376,7 +484,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('preserves case in the bare-autolink href', () => {
+  it('preserves case', () => {
     expect(parse('GOOGLE.COM')).toMatchInlineSnapshot(`
       "
       [0, 10] mdLinkText(href=https://GOOGLE.COM)
@@ -384,7 +492,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('excludes a trailing period from a bare autolink', () => {
+  it('trailing period', () => {
     expect(parse('Visit google.com.')).toMatchInlineSnapshot(`
       "
       [0, 6]
@@ -394,7 +502,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('does not bare-autolink a code-file name', () => {
+  it('code-file name', () => {
     expect(parse('edit node.js then')).toMatchInlineSnapshot(`
       "
       [0, 17]
@@ -402,7 +510,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('claims a www. autolink as one chunk, not a nested bare domain', () => {
+  it('www prefix', () => {
     expect(parse('www.example.com')).toMatchInlineSnapshot(`
       "
       [0, 15] mdLinkText(href=https://www.example.com)
@@ -410,7 +518,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('does not bare-autolink the label of an explicit link', () => {
+  it('explicit link label', () => {
     expect(parse('[google.com](http://x)')).toMatchInlineSnapshot(`
       "
       [0, 1]   mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkText(href=http://x) + mdMark
@@ -422,7 +530,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('does not bare-autolink inside inline code', () => {
+  it('inside inline code', () => {
     expect(parse('`see google.com`')).toMatchInlineSnapshot(`
       "
       [0, 1]   mdPack(key=code) + mdCode + mdMark
@@ -432,7 +540,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('does not bare-autolink a domain after an @ (it is an email)', () => {
+  it('email after @', () => {
     expect(parse('mail a@google.com here')).toMatchInlineSnapshot(`
       "
       [0, 5]
@@ -441,81 +549,10 @@ describe('autolink', () => {
       "
     `)
   })
+})
 
-  it('nested emphasis inside strong (***foo***)', () => {
-    expect(parse('***foo***')).toMatchInlineSnapshot(`
-      "
-      [0, 1] mdPack(key=italic) + mdEm + mdMark
-      [1, 3] mdPack(key=italic) + mdEm + mdPack(key=bold) + mdStrong + mdMark
-      [3, 6] mdPack(key=italic) + mdEm + mdPack(key=bold) + mdStrong
-      [6, 8] mdPack(key=italic) + mdEm + mdPack(key=bold) + mdStrong + mdMark
-      [8, 9] mdPack(key=italic) + mdEm + mdMark
-      "
-    `)
-  })
-
-  it('adjacent emphasis and strong', () => {
-    expect(parse('*a***b**')).toMatchInlineSnapshot(`
-      "
-      [0, 1] mdPack(key=italic) + mdEm + mdMark
-      [1, 2] mdPack(key=italic) + mdEm
-      [2, 3] mdPack(key=italic) + mdEm + mdMark
-      [3, 5] mdPack(key=bold) + mdStrong + mdMark
-      [5, 6] mdPack(key=bold) + mdStrong
-      [6, 8] mdPack(key=bold) + mdStrong + mdMark
-      "
-    `)
-  })
-
-  it('emphasis at start and end of text', () => {
-    expect(parse('*a* mid *b*')).toMatchInlineSnapshot(`
-      "
-      [0, 1]   mdPack(key=italic) + mdEm + mdMark
-      [1, 2]   mdPack(key=italic) + mdEm
-      [2, 3]   mdPack(key=italic) + mdEm + mdMark
-      [3, 8]
-      [8, 9]   mdPack(key=italic) + mdEm + mdMark
-      [9, 10]  mdPack(key=italic) + mdEm
-      [10, 11] mdPack(key=italic) + mdEm + mdMark
-      "
-    `)
-  })
-
-  it('entire content is emphasized', () => {
-    expect(parse('*all*')).toMatchInlineSnapshot(`
-      "
-      [0, 1] mdPack(key=italic) + mdEm + mdMark
-      [1, 4] mdPack(key=italic) + mdEm
-      [4, 5] mdPack(key=italic) + mdEm + mdMark
-      "
-    `)
-  })
-
-  it('empty input returns no chunks', () => {
-    expect(parse('')).toMatchInlineSnapshot(`
-      "
-
-      "
-    `)
-  })
-
-  it('escape characters produce no marks (visible literal text)', () => {
-    expect(parse(String.raw`\*not\*`)).toMatchInlineSnapshot(`
-      "
-      [0, 7]
-      "
-    `)
-  })
-
-  it('hard break produces no mark', () => {
-    expect(parse('a  \nb')).toMatchInlineSnapshot(`
-      "
-      [0, 5]
-      "
-    `)
-  })
-
-  it('tag yields a single mdTag chunk covering the # too', () => {
+describe('tag', () => {
+  it('tag', () => {
     expect(parse('a #meow b')).toMatchInlineSnapshot(`
       "
       [0, 2]
@@ -525,7 +562,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('two tags', () => {
+  it('twice', () => {
     expect(parse('#a #b')).toMatchInlineSnapshot(`
       "
       [0, 2] mdTag
@@ -535,7 +572,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('tag inside emphasis', () => {
+  it('inside emphasis', () => {
     expect(parse('*x #tag y*')).toMatchInlineSnapshot(`
       "
       [0, 1]  mdPack(key=italic) + mdEm + mdMark
@@ -547,7 +584,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('tag inside a link label', () => {
+  it('inside link label', () => {
     expect(parse('[see #tag](http://x)')).toMatchInlineSnapshot(`
       "
       [0, 1]   mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkText(href=http://x) + mdMark
@@ -560,7 +597,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('heading-like text produces no tag', () => {
+  it('heading-like', () => {
     expect(parse('# heading text')).toMatchInlineSnapshot(`
       "
       [0, 14]
@@ -568,15 +605,17 @@ describe('autolink', () => {
     `)
   })
 
-  it('all-digit tag produces no mark', () => {
+  it('all-digit', () => {
     expect(parse("we're #1")).toMatchInlineSnapshot(`
       "
       [0, 8]
       "
     `)
   })
+})
 
-  it('wikilink yields mdMark brackets around an mdWikilinkSource target', () => {
+describe('wikilink', () => {
+  it('wikilink', () => {
     expect(parse('a [[note]] b')).toMatchInlineSnapshot(`
       "
       [0, 2]
@@ -589,7 +628,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('adjacent wikilinks stay distinct via their target attribute', () => {
+  it('adjacent', () => {
     expect(parse('[[a]][[b]]')).toMatchInlineSnapshot(`
       "
       [0, 2]  mdWikilinkSource(target=a) + mdMark
@@ -604,7 +643,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('wikilink inside emphasis', () => {
+  it('inside emphasis', () => {
     expect(parse('*x [[n]] y*')).toMatchInlineSnapshot(`
       "
       [0, 1]   mdPack(key=italic) + mdEm + mdMark
@@ -619,7 +658,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('wikilink inside a link label', () => {
+  it('inside link label', () => {
     expect(parse('[see [[x]]](http://y)')).toMatchInlineSnapshot(`
       "
       [0, 1]   mdPack(key=link,data={"href":"http://y","title":""}) + mdLinkText(href=http://y) + mdMark
@@ -635,7 +674,7 @@ describe('autolink', () => {
     `)
   })
 
-  it('no mdTag inside a wikilink target', () => {
+  it('tag inside target', () => {
     expect(parse('[[note #tag]]')).toMatchInlineSnapshot(`
       "
       [0, 2]   mdWikilinkSource(target=note #tag) + mdMark
@@ -646,48 +685,14 @@ describe('autolink', () => {
     `)
   })
 
-  it('unclosed wikilink falls back to link parsing of the inner [a]', () => {
-    // No mdWikilinkSource anywhere; the inner `[a]` becomes a shortcut
-    // reference link (pre-existing lezer behavior).
+  it('unclosed', () => {
+    // The inner `[a]` becomes a shortcut reference link (lezer behavior).
     expect(parse('[[a]')).toMatchInlineSnapshot(`
       "
       [0, 1]
       [1, 2] mdPack(key=link,data={"href":"","title":""}) + mdMark
       [2, 3] mdPack(key=link,data={"href":"","title":""})
       [3, 4] mdPack(key=link,data={"href":"","title":""}) + mdMark
-      "
-    `)
-  })
-
-  it('nested bold>italic carries both pack keys, inner text in both', () => {
-    // The `italic` run carries mdPack(key=bold) AND mdPack(key=italic); the
-    // bold-only runs carry only mdPack(key=bold).
-    expect(parse('**bold *italic* bold**')).toMatchInlineSnapshot(`
-      "
-      [0, 2]   mdPack(key=bold) + mdStrong + mdMark
-      [2, 7]   mdPack(key=bold) + mdStrong
-      [7, 8]   mdPack(key=bold) + mdStrong + mdPack(key=italic) + mdEm + mdMark
-      [8, 14]  mdPack(key=bold) + mdStrong + mdPack(key=italic) + mdEm
-      [14, 15] mdPack(key=bold) + mdStrong + mdPack(key=italic) + mdEm + mdMark
-      [15, 20] mdPack(key=bold) + mdStrong
-      [20, 22] mdPack(key=bold) + mdStrong + mdMark
-      "
-    `)
-  })
-
-  it('adjacent links to different urls get distinct pack keys', () => {
-    expect(parse('[a](x)[b](y)')).toMatchInlineSnapshot(`
-      "
-      [0, 1]   mdPack(key=link,data={"href":"x","title":""}) + mdLinkText(href=x) + mdMark
-      [1, 2]   mdPack(key=link,data={"href":"x","title":""}) + mdLinkText(href=x)
-      [2, 4]   mdPack(key=link,data={"href":"x","title":""}) + mdMark
-      [4, 5]   mdPack(key=link,data={"href":"x","title":""}) + mdLinkUri
-      [5, 6]   mdPack(key=link,data={"href":"x","title":""}) + mdMark
-      [6, 7]   mdPack(key=link,data={"href":"y","title":""}) + mdLinkText(href=y) + mdMark
-      [7, 8]   mdPack(key=link,data={"href":"y","title":""}) + mdLinkText(href=y)
-      [8, 10]  mdPack(key=link,data={"href":"y","title":""}) + mdMark
-      [10, 11] mdPack(key=link,data={"href":"y","title":""}) + mdLinkUri
-      [11, 12] mdPack(key=link,data={"href":"y","title":""}) + mdMark
       "
     `)
   })
