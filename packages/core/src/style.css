@@ -457,6 +457,8 @@
     vertical-align: bottom;
     overflow: hidden;
 
+    border-radius: 6px;
+
     -webkit-user-select: none;
     user-select: none;
   }
