@@ -492,9 +492,21 @@
   .md-mark,
   .md-link-uri,
   .md-link-title,
-  .md-image-source,
   .md-wikilink-source {
     display: none;
+  }
+
+  /* Keep the image source and its inner syntax chars in layout as zero-width,
+   * clipped boxes (their text is clipped to nothing, so only the preview shows)
+   * so a caret can stop on a source char that follows the preview, e.g. the
+   * trailing `)` or title now that `mdImageView` covers only the URL run. */
+  .md-image-source,
+  .md-image-source :is(.md-mark, .md-link-uri, .md-link-title) {
+    display: inline-flex;
+    width: 0px;
+    max-width: 0px;
+    min-width: 0px;
+    overflow: hidden;
   }
 }
 

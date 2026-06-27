@@ -233,10 +233,9 @@ function walkLink(
  * Special walker for a direct image `![alt](url)`.
  *
  * Emits `mdImageSource` across the whole node (the mark `defineMarkMode` hides)
- * and `mdImageView({ src, alt })` on the node's final character, which is the
- * anchor a mark view renders the inline image on. The final character is `)`
- * today and would be `]` for a future reference image `![alt][id]`, so the
- * anchor is `node.to - 1`, never a hardcoded `)`. `mdMark`/`mdLinkUri` style the
+ * and `mdImageView({ src, alt })` over the `URL` run, the anchor a mark view
+ * renders the inline image on. The view wraps the same range as `mdLinkUri`, so
+ * the preview paints next to the URL it came from. `mdMark`/`mdLinkUri` style the
  * source for show mode; the alt carries no `mdLinkText` (it is not a link), but
  * inline emphasis inside it is still highlighted like any other syntax.
  */
@@ -262,15 +261,13 @@ function walkImage(
   const view = marks.mdImageView.create({ src, alt } satisfies MdImageViewAttrs)
   const pack = marks.mdPack.create({ key: `image`, data: { src } } satisfies MdPackAttrs)
 
-  // The image's final character, where `mdImageView` is anchored: `)` today, a
-  // future `]` for `![alt][id]`.
-  const anchorFrom = node.to - 1
-
   // Marks shared by every chunk at `from`: the `mdPack` envelope plus
-  // `mdImageSource` over the whole source, plus `mdImageView` once we reach the
-  // final character (the render anchor). Each child layers its own syntax mark on top.
+  // `mdImageSource` over the whole source, plus `mdImageView` while inside the
+  // `URL` run (the render anchor, coincident with `mdLinkUri`). Each child layers
+  // its own syntax mark on top.
+  const inUrl = (from: number): boolean => from >= urlNode.from && from < urlNode.to
   const baseAt = (from: number): Mark[] =>
-    from >= anchorFrom ? [...parentMarks, pack, source, view] : [...parentMarks, pack, source]
+    inUrl(from) ? [...parentMarks, pack, source, view] : [...parentMarks, pack, source]
 
   let pos = node.from
   for (const child of node.children) {
