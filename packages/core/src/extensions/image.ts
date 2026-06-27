@@ -77,10 +77,10 @@ function renderImagePreview(
 }
 
 /**
- * Render `mdImageView` (anchored on the image's final character) as the inline
- * image: the anchor char stays editable inside `contentDOM`, and the preview is
- * a non-editable sibling. Mark-mode hides the surrounding `mdImageSource`, so
- * what remains visible is the preview, in place of the raw `![alt](url)`.
+ * Render `mdImageView` (wrapped around the image URI) as the inline image: the
+ * URI stays editable inside `contentDOM`, and the preview is a non-editable
+ * sibling. Mark-mode hides the surrounding `mdImageSource`, so what remains
+ * visible is the preview, in place of the raw `![alt](url)`.
  */
 function createImageMarkView(options: ImageOptions): MarkViewConstructor {
   return (mark) => {

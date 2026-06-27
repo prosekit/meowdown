@@ -3,9 +3,8 @@ import { defineMarkSpec, union } from '@prosekit/core'
 import type { MarkName } from './mark-names.ts'
 
 /**
- * Anchors an inline image preview on the final character of `![alt](url)`. A
- * mark view (see `defineImage`) renders the image; without it the anchor char
- * just renders as text. Carries the parsed `src`/`alt`.
+ * Wraps the parsed URI of `![alt](url)`. A mark view (see `defineImage`) renders
+ * the image; without it the URI renders as text. Carries the parsed `src`/`alt`.
  */
 function defineMdImageView() {
   return defineMarkSpec<'mdImageView', MdImageViewAttrs>({
