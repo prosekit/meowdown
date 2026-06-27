@@ -23,6 +23,7 @@ const LABELS = [
   'Checkbox list',
   'Code block',
   'Table',
+  'Now',
 ]
 
 describe('SlashMenu', () => {
@@ -75,5 +76,25 @@ describe('SlashMenu', () => {
     await menu.getByText('Checkbox list', { exact: true }).click()
 
     expect(ref.current?.getMarkdown()).toContain('- [ ] Buy milk')
+  })
+
+  it('inserts the current time in 12-hour format by default', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} />)
+    await pmRoot.click()
+    await userEvent.keyboard('/now')
+    await menu.getByText('Now', { exact: true }).click()
+
+    expect(ref.current?.getMarkdown()).toMatch(/^\d{1,2}:\d{2}(am|pm)\n$/)
+  })
+
+  it('inserts the current time in 24-hour format when timeFormat is "24"', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} timeFormat="24" />)
+    await pmRoot.click()
+    await userEvent.keyboard('/now')
+    await menu.getByText('Now', { exact: true }).click()
+
+    expect(ref.current?.getMarkdown()).toMatch(/^\d{2}:\d{2}\n$/)
   })
 })

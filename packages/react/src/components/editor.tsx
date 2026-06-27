@@ -13,6 +13,8 @@ import type { SelectionJSON } from '@prosekit/core'
 import { clsx } from 'clsx/lite'
 import { useImperativeHandle, useRef, type ReactNode, type Ref } from 'react'
 
+import type { TimeFormat } from '../utils/date-format.ts'
+
 import { CodeMirrorEditor } from './codemirror-editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
 import type {
@@ -166,6 +168,12 @@ export interface EditorProps {
    */
   spellCheck?: boolean
 
+  /**
+   * Clock format the `/now` slash command inserts: '12' for "3:45pm" or '24'
+   * for "15:45". Defaults to '12'. Ignored in source mode.
+   */
+  timeFormat?: TimeFormat
+
   /** Class on the editable root (the contenteditable). Rich modes only. */
   editorClassName?: string
 
@@ -201,6 +209,7 @@ export function MeowdownEditor({
   placeholder,
   readOnly,
   spellCheck,
+  timeFormat,
   editorClassName,
   wrapperClassName,
   handleRef,
@@ -286,6 +295,7 @@ export function MeowdownEditor({
           placeholder={placeholder}
           readOnly={readOnly}
           spellCheck={spellCheck}
+          timeFormat={timeFormat}
           editorClassName={editorClassName}
         >
           {children}
