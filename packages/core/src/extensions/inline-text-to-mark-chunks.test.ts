@@ -46,13 +46,6 @@ function parse(text: string): string {
 }
 
 describe('inlineTextToMarkChunks', () => {
-  let markBuilders: TypedMarkBuilders
-
-  beforeAll(() => {
-    const schema = defineEditorExtension().schema!
-    markBuilders = createMarkBuilders<EditorExtension>(schema)
-  })
-
   it('plain text returns no chunks (no marks anywhere)', () => {
     expect(parse('hello world')).toMatchInlineSnapshot(`
       "
