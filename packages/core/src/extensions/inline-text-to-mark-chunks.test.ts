@@ -29,9 +29,8 @@ function formatMarkChunk([from, to, marks]: MarkChunk): string {
         .join(',')
       return `${mark.type.name}(${attrStr})`
     })
-    .sort()
     .join(' + ')
-  return `${from}-${to}: ${names || '-'}`
+  return `[${from}-${to}]: ${names || '-'}`
 }
 
 const getMarkBuilders = once((): TypedMarkBuilders => {
