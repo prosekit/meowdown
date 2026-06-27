@@ -1,4 +1,3 @@
-/** The clock format the `/now` slash command inserts. */
 export type TimeFormat = '12' | '24'
 
 /** Formats the current wall-clock time for the `/now` slash command. */
@@ -6,7 +5,8 @@ export function formatNowTime(timeFormat: TimeFormat): string {
   return formatTime(new Date(), timeFormat)
 }
 
-function formatTime(date: Date, timeFormat: TimeFormat): string {
+/** Formats a given time as `3:45pm` ('12') or `15:45` ('24'). */
+export function formatTime(date: Date, timeFormat: TimeFormat): string {
   return timeFormat === '12' ? formatTime12(date) : formatTime24(date)
 }
 
