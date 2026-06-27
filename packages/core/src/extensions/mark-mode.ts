@@ -27,10 +27,7 @@ const CLIPBOARD_STRIP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([
 // Source marks whose whole run is kept verbatim in a clean copy, so a rendered
 // image stays `![alt](url)` and a rendered wikilink stays `[[target]]`, even
 // though their punctuation/url carry otherwise-stripped marks.
-const CLIPBOARD_KEEP_SOURCE_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([
-  'mdImageSource',
-  'mdWikilinkSource',
-])
+const CLIPBOARD_KEEP_SOURCE_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([])
 
 const markModeKey = new PluginKey<MarkMode>('mark-mode')
 

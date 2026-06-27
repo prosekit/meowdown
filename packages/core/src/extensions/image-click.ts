@@ -2,7 +2,7 @@ import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
 import { getMarkRangeAt } from './get-mark-range-at.ts'
-import type { MdImageSourceAttrs } from './inline-marks.ts'
+import type { MdImageV2Attrs } from './inline-marks.ts'
 
 const imageClickKey = new PluginKey('meowdown-image-click')
 
@@ -13,11 +13,10 @@ interface ImageHit {
   alt: string
 }
 
-/** The image covering `pos`, found via the `mdImageSource` run. */
 function findImageAt(state: EditorState, pos: number): ImageHit | undefined {
-  const range = getMarkRangeAt(state, pos, 'mdImageSource')
+  const range = getMarkRangeAt(state, pos, 'mdImageV2')
   if (!range) return
-  const { src, alt } = range.mark.attrs as MdImageSourceAttrs
+  const { src, alt } = range.mark.attrs as MdImageV2Attrs
   return { from: range.from, to: range.to, src, alt }
 }
 
@@ -39,12 +38,14 @@ export function defineImageClickHandler(onClick: ImageClickHandler): PlainExtens
       props: {
         handleClick: (view, _pos, event) => {
           const target = event.target as HTMLElement | null
-          const preview = target?.closest?.('.md-image-preview')
+          const preview = target?.closest?.('.md-image-view-preview-v2')
           if (!preview) return false
           // Resolve the position from the preview's own content holder, not the
           // click's `pos`: a click on the non-editable preview lands on the run
           // boundary, where `getMarkRange` would pick the next adjacent image.
-          const content = preview.closest('.md-image-view')?.querySelector('.md-image-view-content')
+          const content = preview
+            .closest('.md-image-view-v2')
+            ?.querySelector('.md-image-view-content-v2')
           if (!content) return false
           const hit = findImageAt(view.state, view.posAtDOM(content, 0))
           if (!hit) return false

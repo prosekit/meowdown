@@ -16,7 +16,7 @@ type HTMLCommentExtension = Extension<{
 }>
 
 /**
- * A block-level HTML comment (`<!-- ... -->`) as an invisible, atomic node.
+ * A block-level HTML comment (`<!-- ... -->`) as an invisible, atom node.
  *
  * Markdown is the source of truth, so a comment must survive a round-trip — but
  * a comment is, by definition, not rendered output. Rather than spilling the raw

@@ -19,7 +19,7 @@ const label = pmRoot.getByTestId('wikilink')
 // Offset: 0   1   2   3   4   5   6   7   8   9  10  11  12
 //
 // The wikilink source `[[Note]]` occupies the characters between offsets 2 and
-// 10. It is one atomic caret stop in every mark mode.
+// 10. It is one atom caret stop in every mark mode.
 const TEXT = 'AB[[Note]]CD'
 
 // A factory for an editor in `mode` showing the wikilink, shared by the suites

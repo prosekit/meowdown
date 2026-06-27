@@ -3,9 +3,8 @@ import { defineMarkSpec, union } from '@prosekit/core'
 import type { MarkName } from './mark-names.ts'
 
 /**
- * Anchors an inline image preview on the final character of `![alt](url)`. A
- * mark view (see `defineImage`) renders the image; without it the anchor char
- * just renders as text. Carries the parsed `src`/`alt`.
+ * Wraps the parsed URI of `![alt](url)`. A mark view (see `defineImage`) renders
+ * the image; without it the URI renders as text. Carries the parsed `src`/`alt`.
  */
 function defineMdImageView() {
   return defineMarkSpec<'mdImageView', MdImageViewAttrs>({
@@ -22,26 +21,20 @@ export interface MdImageViewAttrs {
   alt: string
 }
 
-/**
- * Covers the whole `![alt](url)` source. This is the mark `defineMarkMode`
- * hides in hide/focus mode so the rendered image replaces the raw syntax. The
- * `src`/`alt` attributes keep adjacent images distinct so their ranges stay
- * separate, and carry the parsed values so a click can resolve the image
- * without re-parsing the source.
- */
-function defineMdImageSource() {
-  return defineMarkSpec<'mdImageSource', MdImageSourceAttrs>({
-    name: 'mdImageSource' satisfies MarkName,
-    inclusive: false,
-    attrs: { src: { default: '' }, alt: { default: '' } },
-    toDOM: () => ['span', { class: 'md-image-source' }, 0],
-    parseDOM: [{ tag: 'span.md-image-source' }],
-  })
-}
-
-export interface MdImageSourceAttrs {
+export interface MdImageV2Attrs {
   src: string
   alt: string
+  title: string
+}
+
+function defineMdImageV2() {
+  return defineMarkSpec<'mdImageV2', MdImageV2Attrs>({
+    name: 'mdImageV2' satisfies MarkName,
+    inclusive: false,
+    attrs: { src: { default: '' }, alt: { default: '' }, title: { default: '' } },
+    toDOM: () => ['span', { class: 'md-image-v2' }, 0],
+    parseDOM: [{ tag: 'span.md-image-v2' }],
+  })
 }
 
 /**
@@ -150,43 +143,22 @@ function defineMdTag() {
 }
 
 /**
- * Covers the whole `[[target]]`/`[[target|alias]]` source. This is the mark
- * `defineMarkMode` hides in hide/focus mode so the rendered label replaces the
- * raw syntax. The `target` attribute keeps adjacent wikilinks distinct so their
- * ranges stay separate. The `[[` `]]` brackets also carry `mdMark` (removable
- * syntax, unlike a tag's `#`).
- */
-function defineMdWikilinkSource() {
-  return defineMarkSpec<'mdWikilinkSource', MdWikilinkSourceAttrs>({
-    name: 'mdWikilinkSource' satisfies MarkName,
-    inclusive: false,
-    attrs: { target: { default: '' } },
-    toDOM: () => ['span', { class: 'md-wikilink-source' }, 0],
-    parseDOM: [{ tag: 'span.md-wikilink-source' }],
-  })
-}
-
-export interface MdWikilinkSourceAttrs {
-  target: string
-}
-
-/**
  * Anchors the rendered wikilink label on the final character of
  * `[[target]]`/`[[target|alias]]`. A mark view (see `defineWikilink`) renders the
  * non-editable label; without it the anchor char just renders as text. Carries
  * the parsed `target` and `display` (the alias, or empty when none).
  */
-function defineMdWikilinkView() {
-  return defineMarkSpec<'mdWikilinkView', MdWikilinkViewAttrs>({
-    name: 'mdWikilinkView' satisfies MarkName,
+function defineMdWikilinkV2() {
+  return defineMarkSpec<'mdWikilinkV2', MdWikilinkV2Attrs>({
+    name: 'mdWikilinkV2' satisfies MarkName,
     inclusive: false,
     attrs: { target: { default: '' }, display: { default: '' } },
-    toDOM: () => ['span', { class: 'md-wikilink-anchor' }, 0],
-    parseDOM: [{ tag: 'span.md-wikilink-anchor' }],
+    toDOM: () => ['span', { class: 'md-wikilink' }, 0],
+    parseDOM: [{ tag: 'span.md-wikilink' }],
   })
 }
 
-export interface MdWikilinkViewAttrs {
+export interface MdWikilinkV2Attrs {
   target: string
   display: string
 }
@@ -236,12 +208,23 @@ function defineMdPack() {
   })
 }
 
+function defineMdHide() {
+  return defineMarkSpec({
+    name: 'mdHide' satisfies MarkName,
+    inclusive: false,
+    toDOM: () => ['span', { class: 'md-hide' }, 0],
+    parseDOM: [{ tag: 'span.md-hide' }],
+  })
+}
+
 export function defineInlineMarks() {
   // The last mark registered gets the lowest rank and becomes the outermost DOM
   // wrapper, so the wikilink/image marks go last: the view mark (mdWikilinkView /
   // mdImageView) wraps the source, which wraps the syntax marks. The pack mark
   // goes last of all, so it wraps the whole unit (including a mark view).
   return union(
+    defineMdHide(),
+
     defineMdMark(),
     defineMdEm(),
     defineMdStrong(),
@@ -253,10 +236,9 @@ export function defineInlineMarks() {
     defineMdHighlight(),
     defineMdTag(),
 
-    defineMdWikilinkSource(),
-    defineMdWikilinkView(),
-    defineMdImageSource(),
+    defineMdWikilinkV2(),
     defineMdImageView(),
+    defineMdImageV2(),
     defineMdPack(),
   )
 }

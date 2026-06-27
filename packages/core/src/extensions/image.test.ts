@@ -162,10 +162,10 @@ describe('image caret navigation in hide mode', () => {
   })
 })
 
-// The image is atomic only in hide mode (per-mark policy); the wikilink is atomic
+// The image is atom only in hide mode (per-mark policy); the wikilink is atom
 // in every mode. In show mode the image's raw `![img](url)` is ordinary editable
 // text, so Backspace removes one character instead of the whole image.
-describe('image is not atomic outside hide mode', () => {
+describe('image is not atom outside hide mode', () => {
   function setupShow(): Fixture {
     const fixture = setupFixture()
     const { editor, n } = fixture

@@ -96,6 +96,20 @@ describe('image', () => {
     `)
   })
 
+  it('can parse image with title', () => {
+    expect(parse('![alt](url "title")')).toMatchInlineSnapshot(`
+      "
+      Image [0, 19] "![alt](url \\"title\\")"
+        LinkMark [0, 2] "!["
+        LinkMark [5, 6] "]"
+        LinkMark [6, 7] "("
+        URL [7, 10] "url"
+        LinkTitle [11, 18] "\\"title\\""
+        LinkMark [18, 19] ")"
+      "
+    `)
+  })
+
   it('can parse image with inline HTML comment', () => {
     expect(parse('![alt](url)<!-- {"width":100} -->')).toMatchInlineSnapshot(`
       "

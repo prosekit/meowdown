@@ -1,7 +1,7 @@
 import { defineMarkView, type PlainExtension } from '@prosekit/core'
 import type { MarkViewConstructor } from '@prosekit/pm/view'
 
-import type { MdWikilinkViewAttrs } from './inline-marks.ts'
+import type { MdWikilinkV2Attrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
 
 export interface ParsedWikilink {
@@ -32,20 +32,25 @@ export function parseWikilink(text: string): ParsedWikilink {
  */
 function createWikilinkMarkView(): MarkViewConstructor {
   return (mark) => {
-    const attrs = mark.attrs as MdWikilinkViewAttrs
+    const attrs = mark.attrs as MdWikilinkV2Attrs
 
     const dom = document.createElement('span')
-    dom.className = 'md-wikilink-view'
+    dom.className = 'md-wikilink-view-v2 md-atom-view'
+
+    const preview = document.createElement('span')
+    preview.className = 'md-wikilink-view-preview-v2 md-atom-view-preview'
+    preview.contentEditable = 'false'
+    preview.dataset.testid = 'wikilink'
+    dom.appendChild(preview)
 
     const label = document.createElement('span')
-    label.className = 'md-wikilink-label'
+    label.className = 'md-wikilink-view-label-v2'
     label.contentEditable = 'false'
-    label.dataset.testid = 'wikilink'
     label.textContent = attrs.display || attrs.target
-    dom.appendChild(label)
+    preview.appendChild(label)
 
     const contentDOM = document.createElement('span')
-    contentDOM.className = 'md-wikilink-view-content'
+    contentDOM.className = 'md-wikilink-view-content-v2 md-atom-view-content'
     dom.appendChild(contentDOM)
 
     return {
@@ -59,12 +64,12 @@ function createWikilinkMarkView(): MarkViewConstructor {
 /**
  * Render `[[target]]`/`[[target|alias]]` as an immutable inline label (a mark
  * view) standing in for the raw source. The single-caret-stop behavior in hide
- * mode comes from the shared `defineAtomicMarkNavigation` in the editor
+ * mode comes from the shared `defineAtomMarkNavigation` in the editor
  * extension, which treats `mdWikilinkSource` (and `mdImageSource`) as one unit.
  */
 export function defineWikilink(): PlainExtension {
   return defineMarkView({
-    name: 'mdWikilinkView' satisfies MarkName,
+    name: 'mdWikilinkV2' satisfies MarkName,
     constructor: createWikilinkMarkView(),
   }) as PlainExtension
 }

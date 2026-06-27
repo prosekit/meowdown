@@ -274,39 +274,25 @@ describe('link', () => {
 
 describe('image', () => {
   it('image', () => {
-    expect(parse('see ![alt](http://x/p.png) end')).toMatchInlineSnapshot(`
+    expect(parse('![ALT](URL "TITLE")')).toMatchInlineSnapshot(`
       "
-      [0, 4]
-      [4, 6]   mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt) + mdMark
-      [6, 9]   mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt)
-      [9, 11]  mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt) + mdMark
-      [11, 25] mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt) + mdLinkUri
-      [25, 26] mdPack(key=image,data={"src":"http://x/p.png"}) + mdImageSource(src=http://x/p.png,alt=alt) + mdImageView(src=http://x/p.png,alt=alt) + mdMark
-      [26, 30]
+      [0, 19] mdImageV2(src=URL,alt=ALT,title=TITLE) + mdImageSource(src=URL,alt=ALT)
       "
     `)
   })
 
-  it('empty alt', () => {
-    expect(parse('![](z.png)')).toMatchInlineSnapshot(`
+  it('only URL', () => {
+    expect(parse('![](image.png)')).toMatchInlineSnapshot(`
       "
-      [0, 4]  mdPack(key=image,data={"src":"z.png"}) + mdImageSource(src=z.png) + mdMark
-      [4, 9]  mdPack(key=image,data={"src":"z.png"}) + mdImageSource(src=z.png) + mdLinkUri
-      [9, 10] mdPack(key=image,data={"src":"z.png"}) + mdImageSource(src=z.png) + mdImageView(src=z.png) + mdMark
+      [0, 14] mdImageV2(src=image.png) + mdImageSource(src=image.png)
       "
     `)
   })
 
-  it('title', () => {
-    expect(parse('![a](http://x "t")')).toMatchInlineSnapshot(`
+  it('empty title', () => {
+    expect(parse('![a](http://x "")')).toMatchInlineSnapshot(`
       "
-      [0, 2]   mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a) + mdMark
-      [2, 3]   mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a)
-      [3, 5]   mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a) + mdMark
-      [5, 13]  mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a) + mdLinkUri
-      [13, 14] mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a)
-      [14, 17] mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a) + mdLinkTitle
-      [17, 18] mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a) + mdImageView(src=http://x,alt=a) + mdMark
+      [0, 17] mdImageV2(src=http://x,alt=a) + mdImageSource(src=http://x,alt=a)
       "
     `)
   })
@@ -314,15 +300,17 @@ describe('image', () => {
   it('formatted alt', () => {
     expect(parse('![a **b** c](http://x)')).toMatchInlineSnapshot(`
       "
-      [0, 2]   mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c) + mdMark
-      [2, 4]   mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c)
-      [4, 6]   mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c) + mdStrong + mdMark
-      [6, 7]   mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c) + mdStrong
-      [7, 9]   mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c) + mdStrong + mdMark
-      [9, 11]  mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c)
-      [11, 13] mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c) + mdMark
-      [13, 21] mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c) + mdLinkUri
-      [21, 22] mdPack(key=image,data={"src":"http://x"}) + mdImageSource(src=http://x,alt=a **b** c) + mdImageView(src=http://x,alt=a **b** c) + mdMark
+      [0, 22] mdImageV2(src=http://x,alt=a **b** c) + mdImageSource(src=http://x,alt=a **b** c)
+      "
+    `)
+  })
+
+  it('wrapped by text', () => {
+    expect(parse('text ![a](url) text')).toMatchInlineSnapshot(`
+      "
+      [0, 5]
+      [5, 14]  mdImageV2(src=url,alt=a) + mdImageSource(src=url,alt=a)
+      [14, 19]
       "
     `)
   })

@@ -16,7 +16,7 @@ import {
   type MarkName,
   type MdImageViewAttrs,
   type MdLinkTextAttrs,
-  type MdWikilinkViewAttrs,
+  type MdWikilinkV2Attrs,
   type NodeName,
   type WikilinkClickHandler,
 } from '@meowdown/core'
@@ -210,8 +210,8 @@ function CodeBlock({ code, language }: { code: string; language: string }): Reac
 function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): ReactNode {
   const name = mark.type.name as MarkName
   switch (name) {
-    case 'mdWikilinkView': {
-      const attrs = mark.attrs as MdWikilinkViewAttrs
+    case 'mdWikilinkV2': {
+      const attrs = mark.attrs as MdWikilinkV2Attrs
       return (
         <WikilinkChip
           target={attrs.target}

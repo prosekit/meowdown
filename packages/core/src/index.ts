@@ -40,7 +40,7 @@ export { defaultResolveImageUrl, defineImage, type ImageOptions } from './extens
 export type {
   MdImageViewAttrs,
   MdLinkTextAttrs,
-  MdWikilinkViewAttrs,
+  MdWikilinkV2Attrs,
 } from './extensions/inline-marks.ts'
 export { inlineTextToMarkChunks } from './extensions/inline-text-to-mark-chunks.ts'
 export { EDITOR_KEY_BINDINGS } from './extensions/key-bindings.ts'
