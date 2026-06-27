@@ -24,7 +24,7 @@ function parse(text: string) {
 }
 
 describe('parseInline', () => {
-  it('parses emphasis into an inline element tree', () => {
+  it('can parses emphasis', () => {
     const text = '*foo* bar **baz**'
     expect(parse(text)).toMatchInlineSnapshot(`
       "Emphasis [0, 5] "*foo*"
@@ -33,6 +33,18 @@ describe('parseInline', () => {
       StrongEmphasis [10, 17] "**baz**"
         EmphasisMark [10, 12] "**"
         EmphasisMark [15, 17] "**""
+    `)
+  })
+
+  it('can parse image', () => {
+    const text = '![alt](url)'
+    expect(parse(text)).toMatchInlineSnapshot(`
+      "Image [0, 11] "![alt](url)"
+        LinkMark [0, 2] "!["
+        LinkMark [5, 6] "]"
+        LinkMark [6, 7] "("
+        URL [7, 10] "url"
+        LinkMark [10, 11] ")""
     `)
   })
 })
