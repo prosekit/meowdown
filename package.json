@@ -24,7 +24,7 @@
     "typecheck": "tsc -b"
   },
   "devDependencies": {
-    "@ocavue/eslint-config": "^4.9.1",
+    "@ocavue/eslint-config": "^4.10.0",
     "@ocavue/tsconfig": "^0.7.1",
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^4.1.9",
