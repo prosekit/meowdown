@@ -23,6 +23,7 @@ import { clsx } from 'clsx/lite'
 import { useImperativeHandle, useMemo, useRef, useState, type ReactNode, type Ref } from 'react'
 
 import { defineCodeBlockView } from '../extensions/code-block-view.ts'
+import type { TimeFormat } from '../utils/date-format.ts'
 
 import { BlockHandle } from './block-handle.tsx'
 import { DropIndicator } from './drop-indicator.tsx'
@@ -122,6 +123,9 @@ export interface ProseKitEditorProps {
   /** Enables or disables spell checking in the editor. */
   spellCheck?: boolean
 
+  /** Clock format the `/now` slash command inserts. See `EditorProps.timeFormat`. */
+  timeFormat?: TimeFormat
+
   /** Class on the editable root. See `EditorProps.editorClassName`. */
   editorClassName?: string
 
@@ -154,6 +158,7 @@ export function ProseKitEditor({
   placeholder,
   readOnly,
   spellCheck,
+  timeFormat,
   editorClassName,
   ref,
   children,
@@ -261,7 +266,7 @@ export function ProseKitEditor({
       {blockHandle && !readOnly && <BlockHandle />}
       {!readOnly && <TableHandle />}
       {blockHandle && !readOnly && <DropIndicator />}
-      <SlashMenu />
+      <SlashMenu timeFormat={timeFormat} />
       {!readOnly && <LinkMenu onLinkClick={onLinkClick} onLinkCopy={onLinkCopy} />}
       {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
       {onWikilinkSearch && <WikilinkMenu onWikilinkSearch={onWikilinkSearch} />}

@@ -1,5 +1,6 @@
 export { MeowdownEditor, type EditorMode, type EditorProps } from './components/editor.tsx'
 export { MarkdownView, type MarkdownViewProps } from './components/markdown-view.tsx'
+export type { TimeFormat } from './utils/date-format.ts'
 export type {
   EditorHandle,
   EditorStateSnapshot,

@@ -9,6 +9,8 @@ import {
   AutocompleteRoot,
 } from '@prosekit/react/autocomplete'
 
+import { formatNowTime, type TimeFormat } from '../utils/date-format.ts'
+
 import styles from './autocomplete-menu.module.css'
 
 // Match inputs like "/", "/table", "/heading 1" etc. Do not match "/ heading".
@@ -29,7 +31,12 @@ function SlashMenuItem({ label, kbd, onSelect }: SlashMenuItemProps) {
   )
 }
 
-export function SlashMenu() {
+interface SlashMenuProps {
+  /** The clock format the "Now" item inserts. Defaults to '12'. */
+  timeFormat?: TimeFormat
+}
+
+export function SlashMenu({ timeFormat = '12' }: SlashMenuProps) {
   const editor = useEditor<EditorExtension>()
 
   return (
@@ -92,6 +99,10 @@ export function SlashMenu() {
           <SlashMenuItem
             label="Table"
             onSelect={() => editor.commands.insertTable({ row: 3, col: 3, header: true })}
+          />
+          <SlashMenuItem
+            label="Now"
+            onSelect={() => editor.commands.insertText({ text: formatNowTime(timeFormat) })}
           />
           <AutocompleteEmpty className={styles.Item}>No results</AutocompleteEmpty>
         </AutocompletePopup>
