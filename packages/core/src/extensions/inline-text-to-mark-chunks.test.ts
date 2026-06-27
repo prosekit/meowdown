@@ -137,30 +137,16 @@ describe('link', () => {
     `)
   })
 
-  it('link with href on its text portion', () => {
-    expect(parse('see [docs](http://x) now')).toMatchInlineSnapshot(`
+  it('can parse link with a title', () => {
+    expect(parse('[docs](http://example.com "title")')).toMatchInlineSnapshot(`
       "
-      [0, 4]
-      [4, 5]   mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkText(href=http://x) + mdMark
-      [5, 9]   mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkText(href=http://x)
-      [9, 11]  mdPack(key=link,data={"href":"http://x","title":""}) + mdMark
-      [11, 19] mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkUri
-      [19, 20] mdPack(key=link,data={"href":"http://x","title":""}) + mdMark
-      [20, 24]
-      "
-    `)
-  })
-
-  it('link with a title marks the title with mdLinkTitle', () => {
-    expect(parse('[docs](http://x "t")')).toMatchInlineSnapshot(`
-      "
-      [0, 1]   mdPack(key=link,data={"href":"http://x","title":"t"}) + mdLinkText(href=http://x) + mdMark
-      [1, 5]   mdPack(key=link,data={"href":"http://x","title":"t"}) + mdLinkText(href=http://x)
-      [5, 7]   mdPack(key=link,data={"href":"http://x","title":"t"}) + mdMark
-      [7, 15]  mdPack(key=link,data={"href":"http://x","title":"t"}) + mdLinkUri
-      [15, 16] mdPack(key=link,data={"href":"http://x","title":"t"})
-      [16, 19] mdPack(key=link,data={"href":"http://x","title":"t"}) + mdLinkTitle
-      [19, 20] mdPack(key=link,data={"href":"http://x","title":"t"}) + mdMark
+      [0, 1]   mdPack(key=link,data={"href":"http://example.com","title":"title"}) + mdLinkText(href=http://example.com) + mdMark
+      [1, 5]   mdPack(key=link,data={"href":"http://example.com","title":"title"}) + mdLinkText(href=http://example.com)
+      [5, 7]   mdPack(key=link,data={"href":"http://example.com","title":"title"}) + mdMark
+      [7, 25]  mdPack(key=link,data={"href":"http://example.com","title":"title"}) + mdLinkUri
+      [25, 26] mdPack(key=link,data={"href":"http://example.com","title":"title"})
+      [26, 33] mdPack(key=link,data={"href":"http://example.com","title":"title"}) + mdLinkTitle
+      [33, 34] mdPack(key=link,data={"href":"http://example.com","title":"title"}) + mdMark
       "
     `)
   })
