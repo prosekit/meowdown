@@ -111,7 +111,7 @@ describe('inserted wikilink rendering', () => {
     await expect.element(label).toHaveTextContent('Alias')
   })
 
-  it('renders the label in show mode too, since the wikilink is atomic everywhere', async () => {
+  it('renders the label in show mode', async () => {
     using fixture = setupAfterA('show')
     insertWikilink(fixture, '[[Note]]')
     await expect.element(label).toBeVisible()

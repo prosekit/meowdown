@@ -54,8 +54,7 @@ describe('wikilink rendering', () => {
     await expect.element(label).toHaveTextContent('My Note')
   })
 
-  // TODO: REVIEW: REMOVE " too, since the wikilink is atomic everywhere"
-  it('renders the label in show mode too, since the wikilink is atomic everywhere', async () => {
+  it('renders the label in show mode', async () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     editor.use(defineMarkMode('show'))

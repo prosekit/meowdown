@@ -184,7 +184,7 @@ describe('Backspace inside the image source deletes one character', () => {
 
 describe('image selection ring in hide mode', () => {
   // Selecting the whole `![img](url)` rings the preview; a collapsed caret next
-  // to it does not. This is what the `md-image-selected` decoration drives.
+  // to it does not. This is what the `md-atom-selected` decoration drives.
   it('rings the preview only while the image is selected', async () => {
     using fixture = setupHidden()
 
