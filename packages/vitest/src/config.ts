@@ -31,7 +31,7 @@ export function defineSharedConfig() {
     test: {
       setupFiles,
       retry: process.env.CI ? 3 : 0,
-      bail: process.env.CI ? 0 : 1,
+      bail: process.env.CI || process.env.AI_AGENT ? 0 : 1,
       fileParallelism: false,
       browser: {
         enabled: true,
