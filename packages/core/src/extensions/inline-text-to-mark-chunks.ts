@@ -5,15 +5,7 @@ import type { InlineElement } from '../lezer/inline.ts'
 import { parseInline } from '../lezer/inline.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 
-import type {
-  MdImageSourceAttrs,
-  MdImageViewAttrs,
-  MdLinkTextAttrs,
-  MdPackAttrs,
-  MdPackSimpleKey,
-  MdWikilinkSourceAttrs,
-  MdWikilinkViewAttrs,
-} from './inline-marks.ts'
+import type { MdLinkTextAttrs, MdPackAttrs, MdPackSimpleKey } from './inline-marks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
 import type { MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
@@ -114,7 +106,7 @@ function walk(
       // `[text](url)` is handled inside `walkLink`, not here). Linkify the
       // shapes we recognize; anything else keeps the muted `mdLinkUri`.
       const href = getAutolinkHref(text.slice(node.from, node.to))
-      const mark = href
+      const mark: Mark = href
         ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs)
         : marks.mdLinkUri.create()
       emit(out, node.from, node.to, [...parentMarks, mark])
@@ -154,7 +146,7 @@ function walk(
 }
 
 /**
- * Special walker for `Link` / `Image` nodes.
+ * Special walker for `Link` nodes.
  *
  * Lezer's flat child list looks like:
  *   LinkMark `[` (or `![`), [label children + implicit gaps], LinkMark `]`,
@@ -231,14 +223,6 @@ function walkLink(
 
 /**
  * Special walker for a direct image `![alt](url)`.
- *
- * Emits `mdImageSource` across the whole node (the mark `defineMarkMode` hides)
- * and `mdImageView({ src, alt })` on the node's final character, which is the
- * anchor a mark view renders the inline image on. The final character is `)`
- * today and would be `]` for a future reference image `![alt][id]`, so the
- * anchor is `node.to - 1`, never a hardcoded `)`. `mdMark`/`mdLinkUri` style the
- * source for show mode; the alt carries no `mdLinkText` (it is not a link), but
- * inline emphasis inside it is still highlighted like any other syntax.
  */
 function walkImage(
   node: InlineElement,
@@ -254,55 +238,20 @@ function walkImage(
     walkLink(node, parentMarks, text, marks, out)
     return
   }
-  const brackets = node.children.filter((child) => child.type === LEZER_NODE_IDS.LinkMark)
-  const src = text.slice(urlNode.from, urlNode.to)
-  const alt = brackets.length >= 2 ? text.slice(brackets[0].to, brackets[1].from) : ''
 
-  const source = marks.mdImageSource.create({ src, alt } satisfies MdImageSourceAttrs)
-  const view = marks.mdImageView.create({ src, alt } satisfies MdImageViewAttrs)
-  const pack = marks.mdPack.create({ key: `image`, data: { src } } satisfies MdPackAttrs)
+  const bracketNodes = node.children.filter((child) => child.type === LEZER_NODE_IDS.LinkMark)
+  const titleNode = node.children.find((child) => child.type === LEZER_NODE_IDS.LinkTitle)
 
-  // The image's final character, where `mdImageView` is anchored: `)` today, a
-  // future `]` for `![alt][id]`.
-  const anchorFrom = node.to - 1
+  const src: string = text.slice(urlNode.from, urlNode.to)
+  const alt: string =
+    bracketNodes.length >= 2 ? text.slice(bracketNodes[0].to, bracketNodes[1].from) : ''
+  const title: string = titleNode ? unquoteTitle(text.slice(titleNode.from, titleNode.to)) : ''
 
-  // Marks shared by every chunk at `from`: the `mdPack` envelope plus
-  // `mdImageSource` over the whole source, plus `mdImageView` once we reach the
-  // final character (the render anchor). Each child layers its own syntax mark on top.
-  const baseAt = (from: number): Mark[] =>
-    from >= anchorFrom ? [...parentMarks, pack, source, view] : [...parentMarks, pack, source]
-
-  let pos = node.from
-  for (const child of node.children) {
-    if (child.from > pos) {
-      emit(out, pos, child.from, baseAt(pos))
-    }
-    const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(child.type)
-    const childMarks = maybeMarkName
-      ? [...baseAt(child.from), marks[maybeMarkName].create()]
-      : baseAt(child.from)
-    if (child.children.length === 0) {
-      emit(out, child.from, child.to, childMarks)
-    } else {
-      walk(child.children, childMarks, child.from, child.to, text, marks, out)
-    }
-    pos = child.to
-  }
-  if (pos < node.to) {
-    emit(out, pos, node.to, baseAt(pos))
-  }
+  emit(out, node.from, node.to, [...parentMarks, marks.mdImage.create({ src, alt, title })])
 }
 
 /**
  * Special walker for a wikilink `[[target]]`/`[[target|alias]]`.
- *
- * Emits `mdWikilinkSource({ target })` across the whole node (the mark
- * `defineMarkMode` hides) and `mdWikilinkView({ target, display })` on the
- * wikilink's final character, the anchor a mark view renders the non-editable
- * label on (the same rule as `walkImage`). The node's only children are the two
- * `WikilinkMark` brackets (`[[` and `]]`); they carry `mdMark` for show mode,
- * and the target text between them carries only `mdWikilinkSource`. The closing
- * `]]` is one child, so it is split here so only its last `]` carries the view.
  */
 function walkWikilink(
   node: InlineElement,
@@ -312,31 +261,8 @@ function walkWikilink(
   out: MarkChunk[],
 ): void {
   const { target, display } = parseWikilink(text.slice(node.from, node.to))
-  const source = marks.mdWikilinkSource.create({ target } satisfies MdWikilinkSourceAttrs)
-  const view = marks.mdWikilinkView.create({ target, display } satisfies MdWikilinkViewAttrs)
 
-  // The wikilink's final character, where `mdWikilinkView` is anchored.
-  const anchorFrom = node.to - 1
-  const baseAt = (from: number): Mark[] =>
-    from >= anchorFrom ? [...parentMarks, source, view] : [...parentMarks, source]
-
-  let pos = node.from
-  for (const child of node.children) {
-    if (child.from > pos) {
-      emit(out, pos, child.from, baseAt(pos))
-    }
-    const mark = marks.mdMark.create()
-    if (child.from < anchorFrom && child.to > anchorFrom) {
-      emit(out, child.from, anchorFrom, [...baseAt(child.from), mark])
-      emit(out, anchorFrom, child.to, [...baseAt(anchorFrom), mark])
-    } else {
-      emit(out, child.from, child.to, [...baseAt(child.from), mark])
-    }
-    pos = child.to
-  }
-  if (pos < node.to) {
-    emit(out, pos, node.to, baseAt(pos))
-  }
+  emit(out, node.from, node.to, [...parentMarks, marks.mdWikilink.create({ target, display })])
 }
 
 /**

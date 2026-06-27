@@ -10,7 +10,7 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView, MarkViewConstructor } from '@prosekit/pm/view'
 
 import { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './embed/index.ts'
-import type { MdImageViewAttrs } from './inline-marks.ts'
+import type { MdImageAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
 
 type ImageUrlResolver = (src: string) => string | undefined
@@ -59,44 +59,43 @@ function renderImagePreview(
   const embed = matchEmbed(src)
   if (embed) {
     const wrapper = document.createElement('span')
-    wrapper.className = 'md-image-preview md-image-preview-embed'
+    wrapper.className = 'md-image-view-preview md-atom-view-preview'
     wrapper.appendChild(buildEmbedIframe(embed))
     return wrapper
   }
+
   const url = (options.resolveImageUrl ?? defaultResolveImageUrl)(src)
   if (!url) return undefined
+
   const wrapper = document.createElement('span')
-  wrapper.className = 'md-image-preview md-image-preview-img'
+  wrapper.className = 'md-image-view-preview md-atom-view-preview'
   wrapper.dataset.testid = 'image-preview'
   const img = document.createElement('img')
   img.src = url
   img.alt = alt
   img.draggable = false
   wrapper.appendChild(img)
+
   return wrapper
 }
 
-/**
- * Render `mdImageView` (anchored on the image's final character) as the inline
- * image: the anchor char stays editable inside `contentDOM`, and the preview is
- * a non-editable sibling. Mark-mode hides the surrounding `mdImageSource`, so
- * what remains visible is the preview, in place of the raw `![alt](url)`.
- */
 function createImageMarkView(options: ImageOptions): MarkViewConstructor {
   return (mark) => {
-    const attrs = mark.attrs as MdImageViewAttrs
+    const { src, alt } = mark.attrs as MdImageAttrs
 
     const dom = document.createElement('span')
-    dom.className = 'md-image-view'
-    const contentDOM = document.createElement('span')
-    contentDOM.className = 'md-image-view-content'
-    dom.appendChild(contentDOM)
+    dom.className = 'md-image-view md-atom-view'
 
-    const preview = renderImagePreview(attrs.src, attrs.alt, options)
+    const contentDOM = document.createElement('span')
+    contentDOM.className = 'md-image-view-content md-atom-view-content'
+
+    const preview = renderImagePreview(src, alt, options)
     if (preview) {
       preview.contentEditable = 'false'
       dom.appendChild(preview)
     }
+
+    dom.appendChild(contentDOM)
 
     return {
       dom,
@@ -170,7 +169,7 @@ function createImageInputPlugin(options: ImageOptions): Plugin {
 export function defineImage(options: ImageOptions = {}): PlainExtension {
   return union(
     defineMarkView({
-      name: 'mdImageView' satisfies MarkName,
+      name: 'mdImage' satisfies MarkName,
       constructor: createImageMarkView(options),
     }),
     // High priority so the drop/paste handler runs before ProseKit's

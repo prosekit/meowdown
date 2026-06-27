@@ -13,7 +13,7 @@ import { defineModClickPrevention } from '@prosekit/extensions/mod-click-prevent
 import { defineText } from '@prosekit/extensions/text'
 import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
-import { defineAtomicMarkNavigation } from './atomic-mark-navigation.ts'
+import { defineAtomMarkNavigation } from './atom-mark-navigation.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineEditorCommands } from './commands.ts'
 import { defineDocFrontmatterAttr } from './frontmatter.ts'
@@ -53,12 +53,11 @@ function defineEditorExtensionImpl() {
     defineInlineToggle(),
     defineLinkCommands(),
     defineWikilink(),
-    defineAtomicMarkNavigation({
+    defineAtomMarkNavigation({
       marks: [
-        { name: 'mdImageSource', modes: ['hide'] },
-        { name: 'mdWikilinkSource', modes: ['hide', 'focus', 'show'] },
+        { name: 'mdImage', modes: ['hide', 'focus', 'show'] },
+        { name: 'mdWikilink', modes: ['hide', 'focus', 'show'] },
       ],
-      selectedClass: 'md-atomic-selected',
     }),
 
     // others

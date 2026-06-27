@@ -37,11 +37,7 @@ export {
   type ImageClickPayload,
 } from './extensions/image-click.ts'
 export { defaultResolveImageUrl, defineImage, type ImageOptions } from './extensions/image.ts'
-export type {
-  MdImageViewAttrs,
-  MdLinkTextAttrs,
-  MdWikilinkViewAttrs,
-} from './extensions/inline-marks.ts'
+export type { MdImageAttrs, MdLinkTextAttrs, MdWikilinkAttrs } from './extensions/inline-marks.ts'
 export { inlineTextToMarkChunks } from './extensions/inline-text-to-mark-chunks.ts'
 export { EDITOR_KEY_BINDINGS } from './extensions/key-bindings.ts'
 export {

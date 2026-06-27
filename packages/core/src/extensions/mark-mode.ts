@@ -17,19 +17,12 @@ import type { MarkName } from './mark-names.ts'
 export type MarkMode = 'hide' | 'focus' | 'show'
 
 // Marks whose text is dropped from a clean clipboard copy, so copied markdown
-// omits the rendered syntax. Source marks are exempt (see `cleanCopySerializer`).
+// omits the rendered syntax. The image/wikilink sources carry only their own
+// mark, so they are kept verbatim (`![alt](url)`, `[[target]]`).
 const CLIPBOARD_STRIP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([
   'mdMark',
   'mdLinkUri',
   'mdLinkTitle',
-])
-
-// Source marks whose whole run is kept verbatim in a clean copy, so a rendered
-// image stays `![alt](url)` and a rendered wikilink stays `[[target]]`, even
-// though their punctuation/url carry otherwise-stripped marks.
-const CLIPBOARD_KEEP_SOURCE_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([
-  'mdImageSource',
-  'mdWikilinkSource',
 ])
 
 const markModeKey = new PluginKey<MarkMode>('mark-mode')
@@ -64,12 +57,9 @@ function cleanCopySerializer(slice: Slice): string {
     const parts: string[] = []
     blockNode.descendants((textNode) => {
       if (!textNode.isText || !textNode.text) return true
-      const isKeptSource = textNode.marks.some((m: Mark) =>
-        CLIPBOARD_KEEP_SOURCE_MARK_NAMES.has(m.type.name as MarkName),
+      const stripped = textNode.marks.some((m: Mark) =>
+        CLIPBOARD_STRIP_MARK_NAMES.has(m.type.name as MarkName),
       )
-      const stripped =
-        !isKeptSource &&
-        textNode.marks.some((m: Mark) => CLIPBOARD_STRIP_MARK_NAMES.has(m.type.name as MarkName))
       if (!stripped) parts.push(textNode.text)
       return false
     })

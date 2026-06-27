@@ -140,7 +140,7 @@ describe('MarkdownView parity with the editor', () => {
   const staticHost = page.getByTestId('parity-static')
   // A rich element appears once marks are applied (editor) or on first render
   // (static); waiting on it avoids reading the DOM mid-render.
-  const richSelector = 'strong, em, code, del, .md-tag, .md-link, .md-wikilink-label'
+  const richSelector = 'strong, em, code, del, .md-tag, .md-link, .md-wikilink-view-label'
 
   it.each([
     '**bold** text',

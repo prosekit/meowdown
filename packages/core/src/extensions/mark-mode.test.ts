@@ -379,34 +379,26 @@ describe('focus mode', () => {
     `)
   })
 
-  it('reveals nothing inside a wikilink (the source is atomic, never revealed)', () => {
+  it('reveals nothing inside a wikilink (the source is one atom, never revealed)', () => {
     expect(renderHTML('focus', 'see [[no<a>te]] end')).toMatchInlineSnapshot(`
       "
       <p>
         see
-        <span class="md-wikilink-source">
-          <span class="md-mark">
-            [[
-          </span>
-          note
-          <span class="md-mark">
-            ]
-          </span>
-        </span>
-        <span class="md-wikilink-view">
+        <span class="md-wikilink-view md-atom-view">
           <span
-            class="md-wikilink-label"
+            class="md-wikilink-view-preview md-atom-view-preview"
             contenteditable="false"
             data-testid="wikilink"
           >
-            note
-          </span>
-          <span class="md-wikilink-view-content">
-            <span class="md-wikilink-source">
-              <span class="md-mark">
-                ]
-              </span>
+            <span
+              class="md-wikilink-view-label"
+              contenteditable="false"
+            >
+              note
             </span>
+          </span>
+          <span class="md-wikilink-view-content md-atom-view-content">
+            [[note]]
           </span>
         </span>
         end
@@ -442,29 +434,21 @@ describe('focus mode', () => {
             )
           </span>
         </span>
-        <span class="md-wikilink-source">
-          <span class="md-mark">
-            [[
-          </span>
-          note
-          <span class="md-mark">
-            ]
-          </span>
-        </span>
-        <span class="md-wikilink-view">
+        <span class="md-wikilink-view md-atom-view">
           <span
-            class="md-wikilink-label"
+            class="md-wikilink-view-preview md-atom-view-preview"
             contenteditable="false"
             data-testid="wikilink"
           >
-            note
-          </span>
-          <span class="md-wikilink-view-content">
-            <span class="md-wikilink-source">
-              <span class="md-mark">
-                ]
-              </span>
+            <span
+              class="md-wikilink-view-label"
+              contenteditable="false"
+            >
+              note
             </span>
+          </span>
+          <span class="md-wikilink-view-content md-atom-view-content">
+            [[note]]
           </span>
         </span>
       </p>
@@ -701,7 +685,7 @@ describe('focus mode', () => {
     `)
   })
 
-  it('renders an inline image as a pack wrapping the preview', () => {
+  it('renders an inline image as an atomic mark view, source kept in its content', () => {
     using fixture = setupFixture()
     fixture.editor.use(defineImage({ resolveImageUrl: () => 'http://x/p.png' }))
     fixture.editor.use(defineMarkMode('focus'))
@@ -710,51 +694,20 @@ describe('focus mode', () => {
     expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
       "
       <p>
-        <span
-          class="md-pack"
-          data-key="image"
-        >
-          <span class="md-image-source">
-            <span class="md-mark">
-              <span class="show">
-                ![
-              </span>
-            </span>
-            <span class="show">
-              alt
-            </span>
-            <span class="md-mark">
-              <span class="show">
-                ](
-              </span>
-            </span>
-            <span class="md-link-uri">
-              <span class="show">
-                pic.png
-              </span>
-            </span>
-          </span>
-          <span class="md-image-view">
-            <span class="md-image-view-content">
-              <span class="md-image-source">
-                <span class="md-mark">
-                  <span class="show">
-                    )
-                  </span>
-                </span>
-              </span>
-            </span>
-            <span
-              class="md-image-preview md-image-preview-img"
-              contenteditable="false"
-              data-testid="image-preview"
+        <span class="md-image-view md-atom-view">
+          <span
+            class="md-image-view-preview md-atom-view-preview"
+            contenteditable="false"
+            data-testid="image-preview"
+          >
+            <img
+              alt="alt"
+              draggable="false"
+              src="http://x/p.png"
             >
-              <img
-                alt="alt"
-                draggable="false"
-                src="http://x/p.png"
-              >
-            </span>
+          </span>
+          <span class="md-image-view-content md-atom-view-content">
+            ![alt](pic.png)
           </span>
         </span>
       </p>
@@ -886,29 +839,21 @@ describe('hide mode', () => {
       "
       <p>
         see
-        <span class="md-wikilink-source">
-          <span class="md-mark">
-            [[
-          </span>
-          note
-          <span class="md-mark">
-            ]
-          </span>
-        </span>
-        <span class="md-wikilink-view">
+        <span class="md-wikilink-view md-atom-view">
           <span
-            class="md-wikilink-label"
+            class="md-wikilink-view-preview md-atom-view-preview"
             contenteditable="false"
             data-testid="wikilink"
           >
-            note
-          </span>
-          <span class="md-wikilink-view-content">
-            <span class="md-wikilink-source">
-              <span class="md-mark">
-                ]
-              </span>
+            <span
+              class="md-wikilink-view-label"
+              contenteditable="false"
+            >
+              note
             </span>
+          </span>
+          <span class="md-wikilink-view-content md-atom-view-content">
+            [[note]]
           </span>
         </span>
         end

@@ -1,6 +1,6 @@
 export const MARK_NAMES = [
-  'mdImageView',
-  'mdImageSource',
+  'mdWikilink',
+  'mdImage',
   'mdMark',
   'mdEm',
   'mdStrong',
@@ -11,8 +11,6 @@ export const MARK_NAMES = [
   'mdDel',
   'mdHighlight',
   'mdTag',
-  'mdWikilinkSource',
-  'mdWikilinkView',
   'mdPack',
 ] as const
 

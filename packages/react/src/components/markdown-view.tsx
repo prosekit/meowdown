@@ -14,9 +14,9 @@ import {
   type MarkChunk,
   type MarkMode,
   type MarkName,
-  type MdImageViewAttrs,
+  type MdImageAttrs,
   type MdLinkTextAttrs,
-  type MdWikilinkViewAttrs,
+  type MdWikilinkAttrs,
   type NodeName,
   type WikilinkClickHandler,
 } from '@meowdown/core'
@@ -72,16 +72,18 @@ function WikilinkChip(props: {
     ? (event: MouseEvent) => onWikilinkClick({ target, event: event.nativeEvent })
     : undefined
   return (
-    <span className="md-wikilink-view">
+    <span className="md-wikilink-view md-atom-view">
       <span
-        className="md-wikilink-label"
+        className="md-wikilink-view-preview md-atom-view-preview"
         data-testid="wikilink"
         contentEditable={false}
         onClick={handleClick}
       >
-        {display || target}
+        <span className="md-wikilink-view-label" contentEditable={false}>
+          {display || target}
+        </span>
       </span>
-      <span className="md-wikilink-view-content">{children}</span>
+      <span className="md-wikilink-view-content md-atom-view-content">{children}</span>
     </span>
   )
 }
@@ -95,7 +97,7 @@ function EmbedFrame({ embed }: { embed: EmbedDescriptor }): ReactElement {
     return listenForTweetHeight(iframe)
   }, [embed.kind, embed.key])
   return (
-    <span className="md-image-preview md-image-preview-embed" contentEditable={false}>
+    <span className="md-image-view-preview md-atom-view-preview" contentEditable={false}>
       <iframe
         ref={iframeRef}
         key={embed.key}
@@ -130,7 +132,7 @@ function ImagePreview(props: {
     : undefined
   return (
     <span
-      className="md-image-preview md-image-preview-img"
+      className="md-image-view-preview md-atom-view-preview"
       data-testid="image-preview"
       contentEditable={false}
     >
@@ -147,14 +149,14 @@ function ImageView(props: {
 }): ReactElement {
   const { src, alt, context, children } = props
   return (
-    <span className="md-image-view">
-      <span className="md-image-view-content">{children}</span>
+    <span className="md-image-view md-atom-view">
       <ImagePreview
         src={src}
         alt={alt}
         resolveImageUrl={context.resolveImageUrl}
         onImageClick={context.onImageClick}
       />
+      <span className="md-image-view-content md-atom-view-content">{children}</span>
     </span>
   )
 }
@@ -210,8 +212,8 @@ function CodeBlock({ code, language }: { code: string; language: string }): Reac
 function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): ReactNode {
   const name = mark.type.name as MarkName
   switch (name) {
-    case 'mdWikilinkView': {
-      const attrs = mark.attrs as MdWikilinkViewAttrs
+    case 'mdWikilink': {
+      const attrs = mark.attrs as MdWikilinkAttrs
       return (
         <WikilinkChip
           target={attrs.target}
@@ -222,8 +224,8 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
         </WikilinkChip>
       )
     }
-    case 'mdImageView': {
-      const attrs = mark.attrs as MdImageViewAttrs
+    case 'mdImage': {
+      const attrs = mark.attrs as MdImageAttrs
       return (
         <ImageView src={attrs.src} alt={attrs.alt} context={context}>
           {children}

@@ -18,7 +18,7 @@ type HTMLCommentExtension = Extension<{
 /**
  * A block-level HTML comment (`<!-- ... -->`) as an invisible, atomic node.
  *
- * Markdown is the source of truth, so a comment must survive a round-trip — but
+ * Markdown is the source of truth, so a comment must survive a round-trip, but
  * a comment is, by definition, not rendered output. Rather than spilling the raw
  * `<!-- ... -->` into a paragraph (where it reads as body text), the parser maps
  * a `CommentBlock` onto this node: the text rides on the `content` attribute and

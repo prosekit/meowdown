@@ -96,8 +96,8 @@ describe.each(ALL_MODES)('typing before an inserted wikilink in %s mode', (mode)
   })
 })
 
-// The reordered mark view (label before contentDOM) still renders the label as
-// the stand-in, and show mode still falls back to the raw source.
+// The mark view renders the label as the stand-in for the source in every mode,
+// the wikilink being atomic everywhere.
 describe('inserted wikilink rendering', () => {
   it('renders the target as the visible label in hide mode', async () => {
     using fixture = setupAfterA('hide')
@@ -111,9 +111,10 @@ describe('inserted wikilink rendering', () => {
     await expect.element(label).toHaveTextContent('Alias')
   })
 
-  it('hides the label in show mode, where the raw source stands in for it', async () => {
+  it('renders the label in show mode', async () => {
     using fixture = setupAfterA('show')
     insertWikilink(fixture, '[[Note]]')
-    await expect.element(label).toHaveStyle({ display: 'none' })
+    await expect.element(label).toBeVisible()
+    await expect.element(label).toHaveTextContent('Note')
   })
 })

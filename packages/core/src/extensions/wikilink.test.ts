@@ -19,7 +19,7 @@ const label = pmRoot.getByTestId('wikilink')
 // Offset: 0   1   2   3   4   5   6   7   8   9  10  11  12
 //
 // The wikilink source `[[Note]]` occupies the characters between offsets 2 and
-// 10. It is one atomic caret stop in every mark mode.
+// 10. It is one atom caret stop in every mark mode.
 const TEXT = 'AB[[Note]]CD'
 
 // A factory for an editor in `mode` showing the wikilink, shared by the suites
@@ -54,12 +54,13 @@ describe('wikilink rendering', () => {
     await expect.element(label).toHaveTextContent('My Note')
   })
 
-  it('hides the label in show mode, where the raw source stands in for it', async () => {
+  it('renders the label in show mode', async () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     editor.use(defineMarkMode('show'))
     fixture.set(n.doc(n.paragraph('see [[Note]] here')))
-    await expect.element(label).toHaveStyle({ display: 'none' })
+    await expect.element(label).toBeVisible()
+    await expect.element(label).toHaveTextContent('Note')
   })
 })
 
@@ -114,9 +115,8 @@ describe.each(ALL_MODES)('wikilink caret navigation in %s mode', (mode) => {
   })
 })
 
-// In hide and focus mode the rendered label stands in for the source, so a
-// selected wikilink rings the label. Show mode shows the raw source and uses the
-// native selection highlight, so it is covered by the navigation suite instead.
+// A selected wikilink rings its rendered label. Checked in hide and focus mode;
+// show mode behaves the same.
 describe.each(LABEL_MODES)('wikilink selection ring in %s mode', (mode) => {
   const setup = setupMode(mode)
 
