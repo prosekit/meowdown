@@ -49,9 +49,7 @@ Track things two ways. Type \`+ \` for a circle checkbox task, or \`[] \` for a 
 
 Drop in an image and it renders right where you wrote it. Paste or drag one in to upload your own:
 
-![A sunny placeholder photo](https://static.photos/yellow/640x360/42)
-
-Small images flow inline ![dot](https://static.photos/yellow/16x16/3) with the surrounding text.
+Small images flow inline ![](https://static.photos/yellow/16x16/3) with the surrounding text.
 
 Paste a YouTube or tweet link and it embeds itself. Undo once to get the plain link back:
 

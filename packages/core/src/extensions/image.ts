@@ -98,10 +98,19 @@ function createImageMarkView(options: ImageOptions): MarkViewConstructor {
       dom.appendChild(preview)
     }
 
+    console.log('creating image mark view', attrs.src, attrs.alt, preview)
+
     return {
       dom,
       contentDOM,
-      ignoreMutation: (mutation) => !contentDOM.contains(mutation.target),
+      ignoreMutation: (mutation) => {
+        let result = !contentDOM.contains(mutation.target)
+        console.log('ignoreMutation', result, mutation)
+        return false
+      },
+      destroy: () => {
+        console.log('destroying image mark view')
+      },
     }
   }
 }
