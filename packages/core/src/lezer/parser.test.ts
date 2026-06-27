@@ -1,7 +1,45 @@
-import type { TreeCursor } from '@lezer/common'
+import type { MarkdownParser } from '@lezer/markdown'
 import { describe, expect, it } from 'vitest'
 
 import { gfmBlockOnlyParser, gfmParser } from './parser.ts'
+
+interface AstNode {
+  name: string
+  from: number
+  to: number
+  text: string
+  children?: AstNode[]
+}
+
+function formatAstNode(node: AstNode, depth = 0): string {
+  const indent = '  '.repeat(depth)
+  const head = `${indent}${node.name} [${node.from}, ${node.to}] ${JSON.stringify(node.text)}`
+  const children = (node.children ?? []).map((child) => formatAstNode(child, depth + 1))
+  return [head, ...children].join('\n')
+}
+
+function parse(parser: MarkdownParser, text: string): string {
+  const cursor = parser.parse(text).cursor()
+
+  const build = (): AstNode => {
+    const node: AstNode = {
+      name: cursor.name,
+      from: cursor.from,
+      to: cursor.to,
+      text: text.slice(cursor.from, cursor.to),
+    }
+    if (cursor.firstChild()) {
+      do {
+        const children = (node.children ??= [])
+        children.push(build())
+      } while (cursor.nextSibling())
+      cursor.parent()
+    }
+    return node
+  }
+
+  return formatAstNode(build())
+}
 
 const sample = `
 A *emph* paragraph.
@@ -21,406 +59,69 @@ paragraph line2
 > blockquote line2
 `
 
-interface AstNode {
-  name: string
-  from: number
-  to: number
-  text: string
-  children?: AstNode[]
-}
-
-function buildAst(cursor: TreeCursor, text: string): AstNode {
-  const node: AstNode = {
-    name: cursor.name,
-    from: cursor.from,
-    to: cursor.to,
-    text: text.slice(cursor.from, cursor.to),
-  }
-  if (cursor.firstChild()) {
-    do {
-      const children = (node.children ??= [])
-      children.push(buildAst(cursor, text))
-    } while (cursor.nextSibling())
-    cursor.parent()
-  }
-  return node
-}
-
-const show = (ast: AstNode) => JSON.stringify(ast, null, 2)
-
 describe('gfmParser', () => {
   it('parses block and inline structure', () => {
-    expect(show(buildAst(gfmParser.parse(sample).cursor(), sample))).toMatchInlineSnapshot(`
-      "{
-        "name": "Document",
-        "from": 0,
-        "to": 187,
-        "text": "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\nparagraph line1\\nparagraph line2\\n\\n> blockquote line1\\n> blockquote line2\\n",
-        "children": [
-          {
-            "name": "Paragraph",
-            "from": 1,
-            "to": 20,
-            "text": "A *emph* paragraph.",
-            "children": [
-              {
-                "name": "Emphasis",
-                "from": 3,
-                "to": 9,
-                "text": "*emph*",
-                "children": [
-                  {
-                    "name": "EmphasisMark",
-                    "from": 3,
-                    "to": 4,
-                    "text": "*"
-                  },
-                  {
-                    "name": "EmphasisMark",
-                    "from": 8,
-                    "to": 9,
-                    "text": "*"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "name": "Table",
-            "from": 22,
-            "to": 72,
-            "text": "| table header |\\n| ------------ |\\n| table cell   |",
-            "children": [
-              {
-                "name": "TableHeader",
-                "from": 22,
-                "to": 38,
-                "text": "| table header |",
-                "children": [
-                  {
-                    "name": "TableDelimiter",
-                    "from": 22,
-                    "to": 23,
-                    "text": "|"
-                  },
-                  {
-                    "name": "TableCell",
-                    "from": 24,
-                    "to": 36,
-                    "text": "table header"
-                  },
-                  {
-                    "name": "TableDelimiter",
-                    "from": 37,
-                    "to": 38,
-                    "text": "|"
-                  }
-                ]
-              },
-              {
-                "name": "TableDelimiter",
-                "from": 39,
-                "to": 55,
-                "text": "| ------------ |"
-              },
-              {
-                "name": "TableRow",
-                "from": 56,
-                "to": 72,
-                "text": "| table cell   |",
-                "children": [
-                  {
-                    "name": "TableDelimiter",
-                    "from": 56,
-                    "to": 57,
-                    "text": "|"
-                  },
-                  {
-                    "name": "TableCell",
-                    "from": 58,
-                    "to": 68,
-                    "text": "table cell"
-                  },
-                  {
-                    "name": "TableDelimiter",
-                    "from": 71,
-                    "to": 72,
-                    "text": "|"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "name": "BulletList",
-            "from": 74,
-            "to": 114,
-            "text": "- bullet list item\\n\\n- [x] task list item",
-            "children": [
-              {
-                "name": "ListItem",
-                "from": 74,
-                "to": 92,
-                "text": "- bullet list item",
-                "children": [
-                  {
-                    "name": "ListMark",
-                    "from": 74,
-                    "to": 75,
-                    "text": "-"
-                  },
-                  {
-                    "name": "Paragraph",
-                    "from": 76,
-                    "to": 92,
-                    "text": "bullet list item"
-                  }
-                ]
-              },
-              {
-                "name": "ListItem",
-                "from": 94,
-                "to": 114,
-                "text": "- [x] task list item",
-                "children": [
-                  {
-                    "name": "ListMark",
-                    "from": 94,
-                    "to": 95,
-                    "text": "-"
-                  },
-                  {
-                    "name": "Task",
-                    "from": 96,
-                    "to": 114,
-                    "text": "[x] task list item",
-                    "children": [
-                      {
-                        "name": "TaskMarker",
-                        "from": 96,
-                        "to": 99,
-                        "text": "[x]"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "name": "Paragraph",
-            "from": 116,
-            "to": 147,
-            "text": "paragraph line1\\nparagraph line2"
-          },
-          {
-            "name": "Blockquote",
-            "from": 149,
-            "to": 186,
-            "text": "> blockquote line1\\n> blockquote line2",
-            "children": [
-              {
-                "name": "QuoteMark",
-                "from": 149,
-                "to": 150,
-                "text": ">"
-              },
-              {
-                "name": "Paragraph",
-                "from": 151,
-                "to": 186,
-                "text": "blockquote line1\\n> blockquote line2",
-                "children": [
-                  {
-                    "name": "QuoteMark",
-                    "from": 168,
-                    "to": 169,
-                    "text": ">"
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }"
+    expect(parse(gfmParser, sample)).toMatchInlineSnapshot(`
+      "Document [0, 187] "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\nparagraph line1\\nparagraph line2\\n\\n> blockquote line1\\n> blockquote line2\\n"
+        Paragraph [1, 20] "A *emph* paragraph."
+          Emphasis [3, 9] "*emph*"
+            EmphasisMark [3, 4] "*"
+            EmphasisMark [8, 9] "*"
+        Table [22, 72] "| table header |\\n| ------------ |\\n| table cell   |"
+          TableHeader [22, 38] "| table header |"
+            TableDelimiter [22, 23] "|"
+            TableCell [24, 36] "table header"
+            TableDelimiter [37, 38] "|"
+          TableDelimiter [39, 55] "| ------------ |"
+          TableRow [56, 72] "| table cell   |"
+            TableDelimiter [56, 57] "|"
+            TableCell [58, 68] "table cell"
+            TableDelimiter [71, 72] "|"
+        BulletList [74, 114] "- bullet list item\\n\\n- [x] task list item"
+          ListItem [74, 92] "- bullet list item"
+            ListMark [74, 75] "-"
+            Paragraph [76, 92] "bullet list item"
+          ListItem [94, 114] "- [x] task list item"
+            ListMark [94, 95] "-"
+            Task [96, 114] "[x] task list item"
+              TaskMarker [96, 99] "[x]"
+        Paragraph [116, 147] "paragraph line1\\nparagraph line2"
+        Blockquote [149, 186] "> blockquote line1\\n> blockquote line2"
+          QuoteMark [149, 150] ">"
+          Paragraph [151, 186] "blockquote line1\\n> blockquote line2"
+            QuoteMark [168, 169] ">""
     `)
   })
 })
 
 describe('gfmBlockOnlyParser', () => {
   it('parses block structure but never emits inline nodes', () => {
-    expect(show(buildAst(gfmBlockOnlyParser.parse(sample).cursor(), sample)))
-      .toMatchInlineSnapshot(`
-      "{
-        "name": "Document",
-        "from": 0,
-        "to": 187,
-        "text": "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\nparagraph line1\\nparagraph line2\\n\\n> blockquote line1\\n> blockquote line2\\n",
-        "children": [
-          {
-            "name": "Paragraph",
-            "from": 1,
-            "to": 20,
-            "text": "A *emph* paragraph."
-          },
-          {
-            "name": "Table",
-            "from": 22,
-            "to": 72,
-            "text": "| table header |\\n| ------------ |\\n| table cell   |",
-            "children": [
-              {
-                "name": "TableHeader",
-                "from": 22,
-                "to": 38,
-                "text": "| table header |",
-                "children": [
-                  {
-                    "name": "TableDelimiter",
-                    "from": 22,
-                    "to": 23,
-                    "text": "|"
-                  },
-                  {
-                    "name": "TableCell",
-                    "from": 24,
-                    "to": 36,
-                    "text": "table header"
-                  },
-                  {
-                    "name": "TableDelimiter",
-                    "from": 37,
-                    "to": 38,
-                    "text": "|"
-                  }
-                ]
-              },
-              {
-                "name": "TableDelimiter",
-                "from": 39,
-                "to": 55,
-                "text": "| ------------ |"
-              },
-              {
-                "name": "TableRow",
-                "from": 56,
-                "to": 72,
-                "text": "| table cell   |",
-                "children": [
-                  {
-                    "name": "TableDelimiter",
-                    "from": 56,
-                    "to": 57,
-                    "text": "|"
-                  },
-                  {
-                    "name": "TableCell",
-                    "from": 58,
-                    "to": 68,
-                    "text": "table cell"
-                  },
-                  {
-                    "name": "TableDelimiter",
-                    "from": 71,
-                    "to": 72,
-                    "text": "|"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "name": "BulletList",
-            "from": 74,
-            "to": 114,
-            "text": "- bullet list item\\n\\n- [x] task list item",
-            "children": [
-              {
-                "name": "ListItem",
-                "from": 74,
-                "to": 92,
-                "text": "- bullet list item",
-                "children": [
-                  {
-                    "name": "ListMark",
-                    "from": 74,
-                    "to": 75,
-                    "text": "-"
-                  },
-                  {
-                    "name": "Paragraph",
-                    "from": 76,
-                    "to": 92,
-                    "text": "bullet list item"
-                  }
-                ]
-              },
-              {
-                "name": "ListItem",
-                "from": 94,
-                "to": 114,
-                "text": "- [x] task list item",
-                "children": [
-                  {
-                    "name": "ListMark",
-                    "from": 94,
-                    "to": 95,
-                    "text": "-"
-                  },
-                  {
-                    "name": "Task",
-                    "from": 96,
-                    "to": 114,
-                    "text": "[x] task list item",
-                    "children": [
-                      {
-                        "name": "TaskMarker",
-                        "from": 96,
-                        "to": 99,
-                        "text": "[x]"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "name": "Paragraph",
-            "from": 116,
-            "to": 147,
-            "text": "paragraph line1\\nparagraph line2"
-          },
-          {
-            "name": "Blockquote",
-            "from": 149,
-            "to": 186,
-            "text": "> blockquote line1\\n> blockquote line2",
-            "children": [
-              {
-                "name": "QuoteMark",
-                "from": 149,
-                "to": 150,
-                "text": ">"
-              },
-              {
-                "name": "Paragraph",
-                "from": 151,
-                "to": 186,
-                "text": "blockquote line1\\n> blockquote line2",
-                "children": [
-                  {
-                    "name": "QuoteMark",
-                    "from": 168,
-                    "to": 169,
-                    "text": ">"
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }"
+    expect(parse(gfmBlockOnlyParser, sample)).toMatchInlineSnapshot(`
+      "Document [0, 187] "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\nparagraph line1\\nparagraph line2\\n\\n> blockquote line1\\n> blockquote line2\\n"
+        Paragraph [1, 20] "A *emph* paragraph."
+        Table [22, 72] "| table header |\\n| ------------ |\\n| table cell   |"
+          TableHeader [22, 38] "| table header |"
+            TableDelimiter [22, 23] "|"
+            TableCell [24, 36] "table header"
+            TableDelimiter [37, 38] "|"
+          TableDelimiter [39, 55] "| ------------ |"
+          TableRow [56, 72] "| table cell   |"
+            TableDelimiter [56, 57] "|"
+            TableCell [58, 68] "table cell"
+            TableDelimiter [71, 72] "|"
+        BulletList [74, 114] "- bullet list item\\n\\n- [x] task list item"
+          ListItem [74, 92] "- bullet list item"
+            ListMark [74, 75] "-"
+            Paragraph [76, 92] "bullet list item"
+          ListItem [94, 114] "- [x] task list item"
+            ListMark [94, 95] "-"
+            Task [96, 114] "[x] task list item"
+              TaskMarker [96, 99] "[x]"
+        Paragraph [116, 147] "paragraph line1\\nparagraph line2"
+        Blockquote [149, 186] "> blockquote line1\\n> blockquote line2"
+          QuoteMark [149, 150] ">"
+          Paragraph [151, 186] "blockquote line1\\n> blockquote line2"
+            QuoteMark [168, 169] ">""
     `)
   })
 
@@ -429,49 +130,13 @@ describe('gfmBlockOnlyParser', () => {
     // after the first line's indent, but the continuation line's 2-space indent
     // stays inside the node's [from, to) span (see the `\n  line two` in `text`).
     const input = '- x\n\n  line one\n  line two\n'
-    expect(show(buildAst(gfmBlockOnlyParser.parse(input).cursor(), input))).toMatchInlineSnapshot(`
-      "{
-        "name": "Document",
-        "from": 0,
-        "to": 27,
-        "text": "- x\\n\\n  line one\\n  line two\\n",
-        "children": [
-          {
-            "name": "BulletList",
-            "from": 0,
-            "to": 26,
-            "text": "- x\\n\\n  line one\\n  line two",
-            "children": [
-              {
-                "name": "ListItem",
-                "from": 0,
-                "to": 26,
-                "text": "- x\\n\\n  line one\\n  line two",
-                "children": [
-                  {
-                    "name": "ListMark",
-                    "from": 0,
-                    "to": 1,
-                    "text": "-"
-                  },
-                  {
-                    "name": "Paragraph",
-                    "from": 2,
-                    "to": 3,
-                    "text": "x"
-                  },
-                  {
-                    "name": "Paragraph",
-                    "from": 7,
-                    "to": 26,
-                    "text": "line one\\n  line two"
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }"
+    expect(parse(gfmBlockOnlyParser, input)).toMatchInlineSnapshot(`
+      "Document [0, 27] "- x\\n\\n  line one\\n  line two\\n"
+        BulletList [0, 26] "- x\\n\\n  line one\\n  line two"
+          ListItem [0, 26] "- x\\n\\n  line one\\n  line two"
+            ListMark [0, 1] "-"
+            Paragraph [2, 3] "x"
+            Paragraph [7, 26] "line one\\n  line two""
     `)
   })
 
@@ -491,137 +156,18 @@ describe('gfmBlockOnlyParser', () => {
       '  line3',
       '  ```',
     ].join('\n')
-    expect(show(buildAst(gfmBlockOnlyParser.parse(input).cursor(), input))).toMatchInlineSnapshot(`
-      "{
-        "name": "Document",
-        "from": 0,
-        "to": 40,
-        "text": "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
-        "children": [
-          {
-            "name": "BulletList",
-            "from": 0,
-            "to": 40,
-            "text": "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
-            "children": [
-              {
-                "name": "ListItem",
-                "from": 0,
-                "to": 40,
-                "text": "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
-                "children": [
-                  {
-                    "name": "ListMark",
-                    "from": 0,
-                    "to": 1,
-                    "text": "-"
-                  },
-                  {
-                    "name": "Paragraph",
-                    "from": 2,
-                    "to": 3,
-                    "text": "x"
-                  },
-                  {
-                    "name": "FencedCode",
-                    "from": 7,
-                    "to": 40,
-                    "text": "\`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`",
-                    "children": [
-                      {
-                        "name": "CodeMark",
-                        "from": 7,
-                        "to": 10,
-                        "text": "\`\`\`"
-                      },
-                      {
-                        "name": "CodeText",
-                        "from": 13,
-                        "to": 19,
-                        "text": "line1\\n"
-                      },
-                      {
-                        "name": "CodeText",
-                        "from": 21,
-                        "to": 27,
-                        "text": "line2\\n"
-                      },
-                      {
-                        "name": "CodeText",
-                        "from": 29,
-                        "to": 34,
-                        "text": "line3"
-                      },
-                      {
-                        "name": "CodeMark",
-                        "from": 37,
-                        "to": 40,
-                        "text": "\`\`\`"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }"
+    expect(parse(gfmBlockOnlyParser, input)).toMatchInlineSnapshot(`
+      "Document [0, 40] "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`"
+        BulletList [0, 40] "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`"
+          ListItem [0, 40] "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`"
+            ListMark [0, 1] "-"
+            Paragraph [2, 3] "x"
+            FencedCode [7, 40] "\`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`"
+              CodeMark [7, 10] "\`\`\`"
+              CodeText [13, 19] "line1\\n"
+              CodeText [21, 27] "line2\\n"
+              CodeText [29, 34] "line3"
+              CodeMark [37, 40] "\`\`\`""
     `)
-  })
-})
-
-/** Flatten an inline parse to `Name[from,to]` tokens for compact assertions. */
-function inlineTokens(src: string): string[] {
-  const tokens: string[] = []
-  gfmParser.parse(src).iterate({
-    enter: (node) => {
-      if (node.name !== 'Document' && node.name !== 'Paragraph') {
-        tokens.push(`${node.name}[${node.from},${node.to}]`)
-      }
-    },
-  })
-  return tokens
-}
-
-describe('highlight (==text==)', () => {
-  it('wraps the run in Highlight with HighlightMark delimiters', () => {
-    expect(inlineTokens('==hi==')).toEqual([
-      'Highlight[0,6]',
-      'HighlightMark[0,2]',
-      'HighlightMark[4,6]',
-    ])
-  })
-
-  it('finds a highlight surrounded by text', () => {
-    expect(inlineTokens('a ==hi== b')).toEqual([
-      'Highlight[2,8]',
-      'HighlightMark[2,4]',
-      'HighlightMark[6,8]',
-    ])
-  })
-
-  it('allows nested inline syntax inside a highlight', () => {
-    expect(inlineTokens('==**bold**==')).toEqual([
-      'Highlight[0,12]',
-      'HighlightMark[0,2]',
-      'StrongEmphasis[2,10]',
-      'EmphasisMark[2,4]',
-      'EmphasisMark[8,10]',
-      'HighlightMark[10,12]',
-    ])
-  })
-
-  it('nests with strikethrough both ways', () => {
-    expect(inlineTokens('~~==hi==~~')).toContain('Highlight[2,8]')
-    expect(inlineTokens('==~~hi~~==')).toContain('Strikethrough[2,8]')
-  })
-
-  it('does not highlight space-flanked equals runs', () => {
-    expect(inlineTokens('a == b == c').some((token) => token.startsWith('Highlight'))).toBe(false)
-    expect(inlineTokens('== x ==').some((token) => token.startsWith('Highlight'))).toBe(false)
-  })
-
-  it('does not consume a third equals as a delimiter', () => {
-    expect(inlineTokens('foo === bar').some((token) => token.startsWith('Highlight'))).toBe(false)
   })
 })
