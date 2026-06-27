@@ -37,6 +37,42 @@ describe('emphasis', () => {
   })
 })
 
+describe('link', () => {
+  it('can parse link', () => {
+    expect(parse('[](url)')).toMatchInlineSnapshot(`
+      "Link [0, 7] "[](url)"
+        LinkMark [0, 1] "["
+        LinkMark [1, 2] "]"
+        LinkMark [2, 3] "("
+        URL [3, 6] "url"
+        LinkMark [6, 7] ")""
+    `)
+  })
+
+  it('can parse link with text', () => {
+    expect(parse('[text](url)')).toMatchInlineSnapshot(`
+      "Link [0, 11] "[text](url)"
+        LinkMark [0, 1] "["
+        LinkMark [5, 6] "]"
+        LinkMark [6, 7] "("
+        URL [7, 10] "url"
+        LinkMark [10, 11] ")""
+    `)
+  })
+
+  it('can parse link with title', () => {
+    expect(parse('[](url "title")')).toMatchInlineSnapshot(`
+      "Link [0, 15] "[](url \\"title\\")"
+        LinkMark [0, 1] "["
+        LinkMark [1, 2] "]"
+        LinkMark [2, 3] "("
+        URL [3, 6] "url"
+        LinkTitle [7, 14] "\\"title\\""
+        LinkMark [14, 15] ")""
+    `)
+  })
+})
+
 describe('image', () => {
   it('can parse image', () => {
     expect(parse('![alt](url)')).toMatchInlineSnapshot(`
