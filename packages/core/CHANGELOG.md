@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.26.0](https://github.com/prosekit/meowdown/compare/core-v0.25.0...core-v0.26.0) (2026-06-27)
+
+
+### Bug Fixes
+
+* relax roundtrip fidelity grading ([#156](https://github.com/prosekit/meowdown/issues/156)) ([edb0b99](https://github.com/prosekit/meowdown/commit/edb0b994f365d6c5a32316c146747d8aceebb7a6))
+
 ## [0.25.0](https://github.com/prosekit/meowdown/compare/core-v0.24.1...core-v0.25.0) (2026-06-25)
 
 
