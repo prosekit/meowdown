@@ -45,15 +45,17 @@ function parse(text: string): string {
   return '\n' + lines.join('\n') + '\n'
 }
 
-describe('inlineTextToMarkChunks', () => {
-  it('plain text returns no chunks (no marks anywhere)', () => {
+describe('plain text', () => {
+  it('returns no marks', () => {
     expect(parse('hello world')).toMatchInlineSnapshot(`
       "
       [0, 11]
       "
     `)
   })
+})
 
+describe('emphasis', () => {
   it('emphasis yields gap + mark + content + mark', () => {
     expect(parse('Hello *world*')).toMatchInlineSnapshot(`
       "
