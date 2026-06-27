@@ -4,10 +4,10 @@ import { docToMarkdown } from './pm-to-md.ts'
 /**
  * How faithfully markdown survives a parse-then-serialize round trip:
  * - `exact`: byte-identical (modulo the trailing newline).
- * - `normalizing`: same non-blank lines ignoring trailing whitespace; only
- *   blank-line layout (including empty `>` lines inside a blockquote) or
- *   insignificant trailing whitespace differs.
- * - `lossy`: a non-blank line changed, so content would be lost or altered.
+ * - `normalizing`: bytes differ, but only as layout the parser collapses back -
+ *   no non-blank line content is lost and re-parsing the output yields the same
+ *   doc (e.g. a lazy continuation re-indented to its canonical column).
+ * - `lossy`: content changed - a non-blank line differs, or the re-parsed doc does.
  */
 export type RoundTripFidelity = 'exact' | 'normalizing' | 'lossy'
 
@@ -40,16 +40,12 @@ export function checkRoundTrip(
   const doc = markdownToDoc(markdown, { frontmatter: options.frontmatter })
   const serialized = docToMarkdown(doc, { frontmatter: options.frontmatter })
   if (trimTrailingNewlines(serialized) === trimTrailingNewlines(markdown)) return 'exact'
+
   const before = nonBlankLines(markdown)
   const after = nonBlankLines(serialized)
-  // Compare by trimEnd: trailing whitespace is insignificant in Markdown and the
-  // serializer normalizes it away, so a trailing-space-only difference is
-  // `normalizing`, not `lossy`. Leading indentation is structural and must match.
-  if (
-    before.length === after.length &&
-    before.every((line, index) => line.trimEnd() === after[index].trimEnd())
-  ) {
-    return 'normalizing'
-  }
-  return 'lossy'
+  const textMatches =
+    before.length === after.length && before.every((line, i) => line.trim() === after[i].trim())
+  const stable = doc.eq(markdownToDoc(serialized, { frontmatter: options.frontmatter }))
+
+  return textMatches && stable ? 'normalizing' : 'lossy'
 }
