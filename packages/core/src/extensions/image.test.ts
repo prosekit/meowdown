@@ -162,10 +162,10 @@ describe('image caret navigation in hide mode', () => {
   })
 })
 
-// The image is atom only in hide mode (per-mark policy); the wikilink is atom
-// in every mode. In show mode the image's raw `![img](url)` is ordinary editable
-// text, so Backspace removes one character instead of the whole image.
-describe('image is not atom outside hide mode', () => {
+// A caret inside the image source, not at its edge, is not an atom boundary, so
+// Backspace deletes a single character rather than the whole image (which holds
+// in every mode).
+describe('Backspace inside the image source deletes one character', () => {
   function setupShow(): Fixture {
     const fixture = setupFixture()
     const { editor, n } = fixture
