@@ -1,7 +1,7 @@
+import { once } from '@ocavue/utils'
 import { createMarkBuilders } from '@prosekit/core'
 import { describe, expect, it } from 'vitest'
 
-import { once } from '@ocavue/utils'
 import { defineEditorExtension, type EditorExtension } from './extension.ts'
 import { inlineTextToMarkChunks } from './inline-text-to-mark-chunks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
