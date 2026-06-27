@@ -23,7 +23,7 @@ function parse(text: string) {
     .join('\n')
 }
 
-describe('parseInline', () => {
+describe('emphasis', () => {
   it('can parses emphasis', () => {
     const text = '*foo* bar **baz**'
     expect(parse(text)).toMatchInlineSnapshot(`
@@ -35,7 +35,9 @@ describe('parseInline', () => {
         EmphasisMark [15, 17] "**""
     `)
   })
+})
 
+describe('image', () => {
   it('can parse image', () => {
     expect(parse('![alt](url)')).toMatchInlineSnapshot(`
       "Image [0, 11] "![alt](url)"
@@ -45,8 +47,9 @@ describe('parseInline', () => {
         URL [7, 10] "url"
         LinkMark [10, 11] ")""
     `)
+  })
 
-    // Image with inline HTML comment after it
+  it('can parse image with inline HTML comment', () => {
     expect(parse('![alt](url)<!-- {"width":100} -->')).toMatchInlineSnapshot(`
       "Image [0, 11] "![alt](url)"
         LinkMark [0, 2] "!["
@@ -59,7 +62,7 @@ describe('parseInline', () => {
   })
 })
 
-describe('highlight (==text==)', () => {
+describe('highlight', () => {
   it('wraps the run in Highlight with HighlightMark delimiters', () => {
     expect(parse('==hi==')).toMatchInlineSnapshot(`
       "Highlight [0, 6] "==hi=="
