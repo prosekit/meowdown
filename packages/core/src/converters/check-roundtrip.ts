@@ -46,5 +46,5 @@ export function checkRoundTrip(
   const textMatches =
     before.length === after.length && before.every((line, i) => line.trim() === after[i].trim())
 
-  return textMatches   ? 'normalizing' : 'lossy'
+  return textMatches ? 'normalizing' : 'lossy'
 }
