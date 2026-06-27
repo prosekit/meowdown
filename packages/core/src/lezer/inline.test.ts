@@ -37,14 +37,24 @@ describe('parseInline', () => {
   })
 
   it('can parse image', () => {
-    const text = '![alt](url)'
-    expect(parse(text)).toMatchInlineSnapshot(`
+    expect(parse('![alt](url)')).toMatchInlineSnapshot(`
       "Image [0, 11] "![alt](url)"
         LinkMark [0, 2] "!["
         LinkMark [5, 6] "]"
         LinkMark [6, 7] "("
         URL [7, 10] "url"
         LinkMark [10, 11] ")""
+    `)
+
+    // Image with inline HTML comment after it
+    expect(parse('![alt](url)<!-- {"width":100} -->')).toMatchInlineSnapshot(`
+      "Image [0, 11] "![alt](url)"
+        LinkMark [0, 2] "!["
+        LinkMark [5, 6] "]"
+        LinkMark [6, 7] "("
+        URL [7, 10] "url"
+        LinkMark [10, 11] ")"
+      Comment [11, 33] "<!-- {\\"width\\":100} -->""
     `)
   })
 })
