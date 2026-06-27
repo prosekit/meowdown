@@ -13,6 +13,7 @@ export const MARK_NAMES = [
   'mdHighlight',
   'mdTag',
   'mdPack',
+  // mdHide is useless. Remove it. // TODO
   'mdHide',
 ] as const
 

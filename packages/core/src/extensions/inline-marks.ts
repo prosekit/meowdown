@@ -208,6 +208,7 @@ function defineMdPack() {
   })
 }
 
+// mdHide is useless. Remove it. // TODO
 function defineMdHide() {
   return defineMarkSpec({
     name: 'mdHide' satisfies MarkName,
