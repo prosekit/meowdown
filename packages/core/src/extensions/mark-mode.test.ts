@@ -384,20 +384,20 @@ describe('focus mode', () => {
       "
       <p>
         see
-        <span class="md-wikilink-view-v2 md-atom-view">
+        <span class="md-wikilink-view md-atom-view">
           <span
-            class="md-wikilink-view-preview-v2 md-atom-view-preview"
+            class="md-wikilink-view-preview md-atom-view-preview"
             contenteditable="false"
             data-testid="wikilink"
           >
             <span
-              class="md-wikilink-view-label-v2"
+              class="md-wikilink-view-label"
               contenteditable="false"
             >
               note
             </span>
           </span>
-          <span class="md-wikilink-view-content-v2 md-atom-view-content">
+          <span class="md-wikilink-view-content md-atom-view-content">
             [[note]]
           </span>
         </span>
@@ -434,20 +434,20 @@ describe('focus mode', () => {
             )
           </span>
         </span>
-        <span class="md-wikilink-view-v2 md-atom-view">
+        <span class="md-wikilink-view md-atom-view">
           <span
-            class="md-wikilink-view-preview-v2 md-atom-view-preview"
+            class="md-wikilink-view-preview md-atom-view-preview"
             contenteditable="false"
             data-testid="wikilink"
           >
             <span
-              class="md-wikilink-view-label-v2"
+              class="md-wikilink-view-label"
               contenteditable="false"
             >
               note
             </span>
           </span>
-          <span class="md-wikilink-view-content-v2 md-atom-view-content">
+          <span class="md-wikilink-view-content md-atom-view-content">
             [[note]]
           </span>
         </span>
@@ -694,9 +694,9 @@ describe('focus mode', () => {
     expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
       "
       <p>
-        <span class="md-image-view-v2 md-atom-view">
+        <span class="md-image-view md-atom-view">
           <span
-            class="md-image-view-preview-v2 md-atom-view-preview"
+            class="md-image-view-preview md-atom-view-preview"
             contenteditable="false"
             data-testid="image-preview"
           >
@@ -706,7 +706,7 @@ describe('focus mode', () => {
               src="http://x/p.png"
             >
           </span>
-          <span class="md-image-view-content-v2 md-atom-view-content">
+          <span class="md-image-view-content md-atom-view-content">
             ![alt](pic.png)
           </span>
         </span>
@@ -839,20 +839,20 @@ describe('hide mode', () => {
       "
       <p>
         see
-        <span class="md-wikilink-view-v2 md-atom-view">
+        <span class="md-wikilink-view md-atom-view">
           <span
-            class="md-wikilink-view-preview-v2 md-atom-view-preview"
+            class="md-wikilink-view-preview md-atom-view-preview"
             contenteditable="false"
             data-testid="wikilink"
           >
             <span
-              class="md-wikilink-view-label-v2"
+              class="md-wikilink-view-label"
               contenteditable="false"
             >
               note
             </span>
           </span>
-          <span class="md-wikilink-view-content-v2 md-atom-view-content">
+          <span class="md-wikilink-view-content md-atom-view-content">
             [[note]]
           </span>
         </span>

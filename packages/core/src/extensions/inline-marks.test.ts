@@ -15,6 +15,6 @@ describe('inline-marks', () => {
     // so a reveal range can cover the entire unit.
     const schema = defineEditorExtension().schema!
     const order = Object.keys(schema.marks)
-    expect(order.indexOf('mdPack')).toBeLessThan(order.indexOf('mdImageV2'))
+    expect(order.indexOf('mdPack')).toBeLessThan(order.indexOf('mdImage'))
   })
 })

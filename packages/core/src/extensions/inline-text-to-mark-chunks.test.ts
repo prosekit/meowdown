@@ -276,7 +276,7 @@ describe('image', () => {
   it('image', () => {
     expect(parse('![ALT](URL "TITLE")')).toMatchInlineSnapshot(`
       "
-      [0, 19] mdImageV2(src=URL,alt=ALT,title=TITLE)
+      [0, 19] mdImage(src=URL,alt=ALT,title=TITLE)
       "
     `)
   })
@@ -284,7 +284,7 @@ describe('image', () => {
   it('only URL', () => {
     expect(parse('![](image.png)')).toMatchInlineSnapshot(`
       "
-      [0, 14] mdImageV2(src=image.png)
+      [0, 14] mdImage(src=image.png)
       "
     `)
   })
@@ -292,7 +292,7 @@ describe('image', () => {
   it('empty title', () => {
     expect(parse('![a](http://x "")')).toMatchInlineSnapshot(`
       "
-      [0, 17] mdImageV2(src=http://x,alt=a)
+      [0, 17] mdImage(src=http://x,alt=a)
       "
     `)
   })
@@ -300,7 +300,7 @@ describe('image', () => {
   it('formatted alt', () => {
     expect(parse('![a **b** c](http://x)')).toMatchInlineSnapshot(`
       "
-      [0, 22] mdImageV2(src=http://x,alt=a **b** c)
+      [0, 22] mdImage(src=http://x,alt=a **b** c)
       "
     `)
   })
@@ -309,7 +309,7 @@ describe('image', () => {
     expect(parse('text ![a](url) text')).toMatchInlineSnapshot(`
       "
       [0, 5]
-      [5, 14]  mdImageV2(src=url,alt=a)
+      [5, 14]  mdImage(src=url,alt=a)
       [14, 19]
       "
     `)
@@ -607,7 +607,7 @@ describe('wikilink', () => {
     expect(parse('a [[note]] b')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 10]  mdWikilinkV2(target=note)
+      [2, 10]  mdWikilink(target=note)
       [10, 12]
       "
     `)
@@ -616,8 +616,8 @@ describe('wikilink', () => {
   it('adjacent', () => {
     expect(parse('[[a]][[b]]')).toMatchInlineSnapshot(`
       "
-      [0, 5]  mdWikilinkV2(target=a)
-      [5, 10] mdWikilinkV2(target=b)
+      [0, 5]  mdWikilink(target=a)
+      [5, 10] mdWikilink(target=b)
       "
     `)
   })
@@ -627,7 +627,7 @@ describe('wikilink', () => {
       "
       [0, 1]   mdPack(key=italic) + mdEm + mdMark
       [1, 3]   mdPack(key=italic) + mdEm
-      [3, 8]   mdPack(key=italic) + mdEm + mdWikilinkV2(target=n)
+      [3, 8]   mdPack(key=italic) + mdEm + mdWikilink(target=n)
       [8, 10]  mdPack(key=italic) + mdEm
       [10, 11] mdPack(key=italic) + mdEm + mdMark
       "
@@ -639,7 +639,7 @@ describe('wikilink', () => {
       "
       [0, 1]   mdPack(key=link,data={"href":"http://y","title":""}) + mdLinkText(href=http://y) + mdMark
       [1, 5]   mdPack(key=link,data={"href":"http://y","title":""}) + mdLinkText(href=http://y)
-      [5, 10]  mdPack(key=link,data={"href":"http://y","title":""}) + mdLinkText(href=http://y) + mdWikilinkV2(target=x)
+      [5, 10]  mdPack(key=link,data={"href":"http://y","title":""}) + mdLinkText(href=http://y) + mdWikilink(target=x)
       [10, 12] mdPack(key=link,data={"href":"http://y","title":""}) + mdMark
       [12, 20] mdPack(key=link,data={"href":"http://y","title":""}) + mdLinkUri
       [20, 21] mdPack(key=link,data={"href":"http://y","title":""}) + mdMark
@@ -650,7 +650,7 @@ describe('wikilink', () => {
   it('tag inside target', () => {
     expect(parse('[[note #tag]]')).toMatchInlineSnapshot(`
       "
-      [0, 13] mdWikilinkV2(target=note #tag)
+      [0, 13] mdWikilink(target=note #tag)
       "
     `)
   })

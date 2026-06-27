@@ -2,19 +2,19 @@ import { defineMarkSpec, union } from '@prosekit/core'
 
 import type { MarkName } from './mark-names.ts'
 
-export interface MdImageV2Attrs {
+export interface MdImageAttrs {
   src: string
   alt: string
   title: string
 }
 
-function defineMdImageV2() {
-  return defineMarkSpec<'mdImageV2', MdImageV2Attrs>({
-    name: 'mdImageV2' satisfies MarkName,
+function defineMdImage() {
+  return defineMarkSpec<'mdImage', MdImageAttrs>({
+    name: 'mdImage' satisfies MarkName,
     inclusive: false,
     attrs: { src: { default: '' }, alt: { default: '' }, title: { default: '' } },
-    toDOM: () => ['span', { class: 'md-image-v2' }, 0],
-    parseDOM: [{ tag: 'span.md-image-v2' }],
+    toDOM: () => ['span', { class: 'md-image' }, 0],
+    parseDOM: [{ tag: 'span.md-image' }],
   })
 }
 
@@ -124,9 +124,9 @@ function defineMdTag() {
 }
 
 /** Covers the whole `[[target]]`/`[[target|alias]]` source. */
-function defineMdWikilinkV2() {
-  return defineMarkSpec<'mdWikilinkV2', MdWikilinkV2Attrs>({
-    name: 'mdWikilinkV2' satisfies MarkName,
+function defineMdWikilink() {
+  return defineMarkSpec<'mdWikilink', MdWikilinkAttrs>({
+    name: 'mdWikilink' satisfies MarkName,
     inclusive: false,
     attrs: { target: { default: '' }, display: { default: '' } },
     toDOM: () => ['span', { class: 'md-wikilink' }, 0],
@@ -134,7 +134,7 @@ function defineMdWikilinkV2() {
   })
 }
 
-export interface MdWikilinkV2Attrs {
+export interface MdWikilinkAttrs {
   target: string
   display: string
 }
@@ -186,7 +186,7 @@ function defineMdPack() {
 
 export function defineInlineMarks() {
   // The last mark registered gets the lowest rank and becomes the outermost DOM
-  // wrapper, so mdWikilinkV2/mdImageV2 go near the end: each covers a whole
+  // wrapper, so mdWikilink/mdImage go near the end: each covers a whole
   // wikilink/image source that a mark view renders. The pack mark goes last of
   // all, so it wraps the whole unit (including a mark view).
   return union(
@@ -201,8 +201,8 @@ export function defineInlineMarks() {
     defineMdHighlight(),
     defineMdTag(),
 
-    defineMdWikilinkV2(),
-    defineMdImageV2(),
+    defineMdWikilink(),
+    defineMdImage(),
     defineMdPack(),
   )
 }

@@ -55,8 +55,8 @@ function defineEditorExtensionImpl() {
     defineWikilink(),
     defineAtomMarkNavigation({
       marks: [
-        { name: 'mdImageV2', modes: ['hide', 'focus', 'show'] },
-        { name: 'mdWikilinkV2', modes: ['hide', 'focus', 'show'] },
+        { name: 'mdImage', modes: ['hide', 'focus', 'show'] },
+        { name: 'mdWikilink', modes: ['hide', 'focus', 'show'] },
       ],
     }),
 

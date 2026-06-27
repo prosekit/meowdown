@@ -10,7 +10,7 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView, MarkViewConstructor } from '@prosekit/pm/view'
 
 import { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './embed/index.ts'
-import type { MdImageV2Attrs } from './inline-marks.ts'
+import type { MdImageAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
 
 type ImageUrlResolver = (src: string) => string | undefined
@@ -59,7 +59,7 @@ function renderImagePreview(
   const embed = matchEmbed(src)
   if (embed) {
     const wrapper = document.createElement('span')
-    wrapper.className = 'md-image-view-preview-v2 md-atom-view-preview'
+    wrapper.className = 'md-image-view-preview md-atom-view-preview'
     wrapper.appendChild(buildEmbedIframe(embed))
     return wrapper
   }
@@ -68,7 +68,7 @@ function renderImagePreview(
   if (!url) return undefined
 
   const wrapper = document.createElement('span')
-  wrapper.className = 'md-image-view-preview-v2 md-atom-view-preview'
+  wrapper.className = 'md-image-view-preview md-atom-view-preview'
   wrapper.dataset.testid = 'image-preview'
   const img = document.createElement('img')
   img.src = url
@@ -81,13 +81,13 @@ function renderImagePreview(
 
 function createImageMarkView(options: ImageOptions): MarkViewConstructor {
   return (mark) => {
-    const { src, alt } = mark.attrs as MdImageV2Attrs
+    const { src, alt } = mark.attrs as MdImageAttrs
 
     const dom = document.createElement('span')
-    dom.className = 'md-image-view-v2 md-atom-view'
+    dom.className = 'md-image-view md-atom-view'
 
     const contentDOM = document.createElement('span')
-    contentDOM.className = 'md-image-view-content-v2 md-atom-view-content'
+    contentDOM.className = 'md-image-view-content md-atom-view-content'
 
     const preview = renderImagePreview(src, alt, options)
     if (preview) {
@@ -169,7 +169,7 @@ function createImageInputPlugin(options: ImageOptions): Plugin {
 export function defineImage(options: ImageOptions = {}): PlainExtension {
   return union(
     defineMarkView({
-      name: 'mdImageV2' satisfies MarkName,
+      name: 'mdImage' satisfies MarkName,
       constructor: createImageMarkView(options),
     }),
     // High priority so the drop/paste handler runs before ProseKit's

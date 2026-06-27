@@ -240,7 +240,7 @@ describe('inlineMarkPlugin', () => {
     expect(marksAt(fixture.doc, pos + 1)).toEqual([])
   })
 
-  it('applies mdWikilinkV2 across the whole [[note]]', () => {
+  it('applies mdWikilink across the whole [[note]]', () => {
     using fixture = setupFixture()
     const { n } = fixture
     const doc = n.doc(n.paragraph('see [[note]] end'))
@@ -249,8 +249,8 @@ describe('inlineMarkPlugin', () => {
     const open = findText(fixture.doc, '[[')
     const target = findText(fixture.doc, 'note')
     expect(open).toBeGreaterThan(0)
-    expect(marksAt(fixture.doc, open + 1)).toEqual(['mdWikilinkV2'])
-    expect(marksAt(fixture.doc, target + 1)).toEqual(['mdWikilinkV2'])
+    expect(marksAt(fixture.doc, open + 1)).toEqual(['mdWikilink'])
+    expect(marksAt(fixture.doc, target + 1)).toEqual(['mdWikilink'])
     expect(marksAt(fixture.doc, open)).toEqual([]) // the space before
   })
 
@@ -261,7 +261,7 @@ describe('inlineMarkPlugin', () => {
     fixture.set(doc)
 
     const pos = findText(fixture.doc, 'note')
-    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilinkV2'])
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilink'])
   })
 
   it('does not mark [[note]] inside code blocks', () => {
@@ -274,16 +274,16 @@ describe('inlineMarkPlugin', () => {
     expect(marksAt(fixture.doc, pos + 1)).toEqual([])
   })
 
-  it('removes mdWikilinkV2 when the closing ] is deleted', () => {
+  it('removes mdWikilink when the closing ] is deleted', () => {
     using fixture = setupFixture()
     const { n } = fixture
     const doc = n.doc(n.paragraph('see [[note]] end'))
     fixture.set(doc)
 
     const pos = findText(fixture.doc, 'note')
-    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilinkV2'])
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilink'])
     // Delete one ']': "see [[note] end" is no longer a wikilink. The inner
-    // `[note]` becomes a shortcut reference link, so it loses mdWikilinkV2
+    // `[note]` becomes a shortcut reference link, so it loses mdWikilink
     // but gains the link pack wrapper.
     const firstBracket = findText(fixture.doc, ']')
     fixture.view.dispatch(fixture.state.tr.delete(firstBracket + 1, firstBracket + 2))

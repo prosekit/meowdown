@@ -488,17 +488,17 @@
 
 /* image */
 .ProseMirror {
-  .md-image-view-v2 {
+  .md-image-view {
     margin-left: 2px;
     margin-right: 2px;
   }
 
-  .md-image-view-preview-v2 {
+  .md-image-view-preview {
     border-radius: 6px;
     outline-offset: 2px;
   }
 
-  .md-image-view-preview-v2 img {
+  .md-image-view-preview img {
     max-height: var(--meowdown-image-max-height, 24rem);
     max-width: 100%;
     border-radius: var(--meowdown-image-radius, 0.5rem);
@@ -507,7 +507,7 @@
 
 /* wikilink */
 .ProseMirror {
-  .md-wikilink-view-label-v2 {
+  .md-wikilink-view-label {
     overflow: hidden;
     padding: 2px 5px;
     border-radius: 6px;
@@ -522,7 +522,7 @@
     cursor: pointer;
   }
 
-  .md-wikilink-view-v2:has(.md-atom-selected) .md-wikilink-view-label-v2 {
+  .md-wikilink-view:has(.md-atom-selected) .md-wikilink-view-label {
     background-color: transparent;
     outline-color: transparent;
   }
