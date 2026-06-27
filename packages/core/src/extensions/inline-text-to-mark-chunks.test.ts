@@ -56,7 +56,7 @@ describe('plain text', () => {
 })
 
 describe('emphasis', () => {
-  it('can parse emphasis', () => {
+  it('emphasis', () => {
     expect(parse('Hello *world*')).toMatchInlineSnapshot(`
       "
       [0, 6]
@@ -69,7 +69,7 @@ describe('emphasis', () => {
 })
 
 describe('strong emphasis', () => {
-  it('can parse strong emphasis', () => {
+  it('strong emphasis', () => {
     expect(parse('a **bold** b')).toMatchInlineSnapshot(`
       "
       [0, 2]
@@ -83,7 +83,7 @@ describe('strong emphasis', () => {
 })
 
 describe('inline code', () => {
-  it('can parse inline code', () => {
+  it('inline code', () => {
     expect(parse('a `c` b')).toMatchInlineSnapshot(`
       "
       [0, 2]
@@ -97,7 +97,7 @@ describe('inline code', () => {
 })
 
 describe('strikethrough', () => {
-  it('can parse strikethrough', () => {
+  it('strikethrough', () => {
     expect(parse('a ~~b~~ c')).toMatchInlineSnapshot(`
       "
       [0, 2]
@@ -111,7 +111,7 @@ describe('strikethrough', () => {
 })
 
 describe('highlight', () => {
-  it('can parse highlight', () => {
+  it('highlight', () => {
     expect(parse('a ==b== c')).toMatchInlineSnapshot(`
       "
       [0, 2]
@@ -125,7 +125,7 @@ describe('highlight', () => {
 })
 
 describe('link', () => {
-  it('can parse link', () => {
+  it('link', () => {
     expect(parse('[text](url)')).toMatchInlineSnapshot(`
       "
       [0, 1]   mdPack(key=link,data={"href":"url","title":""}) + mdLinkText(href=url) + mdMark
@@ -137,30 +137,30 @@ describe('link', () => {
     `)
   })
 
-  it('can parse link with a title', () => {
-    expect(parse('[docs](http://example.com "title")')).toMatchInlineSnapshot(`
+  it('link with a title', () => {
+    expect(parse('[docs](url "title")')).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"href":"http://example.com","title":"title"}) + mdLinkText(href=http://example.com) + mdMark
-      [1, 5]   mdPack(key=link,data={"href":"http://example.com","title":"title"}) + mdLinkText(href=http://example.com)
-      [5, 7]   mdPack(key=link,data={"href":"http://example.com","title":"title"}) + mdMark
-      [7, 25]  mdPack(key=link,data={"href":"http://example.com","title":"title"}) + mdLinkUri
-      [25, 26] mdPack(key=link,data={"href":"http://example.com","title":"title"})
-      [26, 33] mdPack(key=link,data={"href":"http://example.com","title":"title"}) + mdLinkTitle
-      [33, 34] mdPack(key=link,data={"href":"http://example.com","title":"title"}) + mdMark
+      [0, 1]   mdPack(key=link,data={"href":"url","title":"title"}) + mdLinkText(href=url) + mdMark
+      [1, 5]   mdPack(key=link,data={"href":"url","title":"title"}) + mdLinkText(href=url)
+      [5, 7]   mdPack(key=link,data={"href":"url","title":"title"}) + mdMark
+      [7, 10]  mdPack(key=link,data={"href":"url","title":"title"}) + mdLinkUri
+      [10, 11] mdPack(key=link,data={"href":"url","title":"title"})
+      [11, 18] mdPack(key=link,data={"href":"url","title":"title"}) + mdLinkTitle
+      [18, 19] mdPack(key=link,data={"href":"url","title":"title"}) + mdMark
       "
     `)
   })
 
   it('link with emphasis nested inside the text', () => {
-    expect(parse('[*ital*](http://x)')).toMatchInlineSnapshot(`
+    expect(parse('[*italic*](http://x)')).toMatchInlineSnapshot(`
       "
       [0, 1]   mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkText(href=http://x) + mdMark
       [1, 2]   mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkText(href=http://x) + mdEm + mdMark
-      [2, 6]   mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkText(href=http://x) + mdEm
-      [6, 7]   mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkText(href=http://x) + mdEm + mdMark
-      [7, 9]   mdPack(key=link,data={"href":"http://x","title":""}) + mdMark
-      [9, 17]  mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkUri
-      [17, 18] mdPack(key=link,data={"href":"http://x","title":""}) + mdMark
+      [2, 8]   mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkText(href=http://x) + mdEm
+      [8, 9]   mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkText(href=http://x) + mdEm + mdMark
+      [9, 11]  mdPack(key=link,data={"href":"http://x","title":""}) + mdMark
+      [11, 19] mdPack(key=link,data={"href":"http://x","title":""}) + mdLinkUri
+      [19, 20] mdPack(key=link,data={"href":"http://x","title":""}) + mdMark
       "
     `)
   })
