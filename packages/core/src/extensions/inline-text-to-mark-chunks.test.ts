@@ -115,9 +115,9 @@ describe('highlight', () => {
     expect(parse('a ==b== c')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 4] mdPack(key=strike) + mdDel + mdMark
-      [4, 5] mdPack(key=strike) + mdDel
-      [5, 7] mdPack(key=strike) + mdDel + mdMark
+      [2, 4] mdPack(key=highlight) + mdHighlight + mdMark
+      [4, 5] mdPack(key=highlight) + mdHighlight
+      [5, 7] mdPack(key=highlight) + mdHighlight + mdMark
       [7, 9]
       "
     `)
@@ -125,6 +125,18 @@ describe('highlight', () => {
 })
 
 describe('link', () => {
+  it('can parse link', () => {
+    expect(parse('[text](url)')).toMatchInlineSnapshot(`
+      "
+      [0, 1]   mdPack(key=link,data={"href":"url","title":""}) + mdLinkText(href=url) + mdMark
+      [1, 5]   mdPack(key=link,data={"href":"url","title":""}) + mdLinkText(href=url)
+      [5, 7]   mdPack(key=link,data={"href":"url","title":""}) + mdMark
+      [7, 10]  mdPack(key=link,data={"href":"url","title":""}) + mdLinkUri
+      [10, 11] mdPack(key=link,data={"href":"url","title":""}) + mdMark
+      "
+    `)
+  })
+
   it('link with href on its text portion', () => {
     expect(parse('see [docs](http://x) now')).toMatchInlineSnapshot(`
       "
