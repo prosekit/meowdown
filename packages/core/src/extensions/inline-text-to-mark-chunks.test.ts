@@ -15,6 +15,7 @@ function formatMarkChunk([from, to, marks]: MarkChunk): string {
   const names = marks
     .map((mark) => {
       const attrs = mark.attrs as Record<string, unknown>
+
       const keys = Object.keys(attrs)
       if (keys.length === 0) return mark.type.name
       const filtered = keys.filter((k) => attrs[k] !== '' && attrs[k] !== null)
