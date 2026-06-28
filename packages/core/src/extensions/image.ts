@@ -119,10 +119,6 @@ function buildResizableImage(
     const ratio = naturalWidth / naturalHeight
     if (!Number.isFinite(ratio) || ratio <= 0) return
     root.setAttribute('data-aspect-ratio', String(ratio))
-    // The component renders at 1px until it has both dimensions, and sizes the
-    // box from width and height together. Honor a persisted width; otherwise cap
-    // the natural height at MAX_DISPLAY_HEIGHT (never upscale) and derive the
-    // width from it. CSS max-width clamps the container.
     const displayHeight =
       width == null ? Math.min(naturalHeight, MAX_DISPLAY_HEIGHT) : width / ratio
     const displayWidth = width ?? displayHeight * ratio
