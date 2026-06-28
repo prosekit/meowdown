@@ -1,12 +1,11 @@
 import { defineNodeAttr, union, type Extension, type Union } from '@prosekit/core'
-import {
-  defineHorizontalRuleCommands,
-  defineHorizontalRuleSpec,
-  type HorizontalRuleCommandsExtension,
-  type HorizontalRuleSpecExtension,
-} from '@prosekit/extensions/horizontal-rule'
 
 import type { NodeName } from './node-names.ts'
+
+import {
+  defineHorizontalRule,
+  type HorizontalRuleExtension,
+} from '@prosekit/extensions/horizontal-rule'
 
 export interface MeowdownHorizontalRuleAttrs {
   /**
@@ -34,13 +33,9 @@ function defineHorizontalRuleMarkerAttr(): HorizontalRuleMarkerExtension {
 }
 
 export type MeowdownHorizontalRuleExtension = Union<
-  [HorizontalRuleSpecExtension, HorizontalRuleCommandsExtension, HorizontalRuleMarkerExtension]
+  [HorizontalRuleExtension, HorizontalRuleMarkerExtension]
 >
 
 export function defineMeowdownHorizontalRule(): MeowdownHorizontalRuleExtension {
-  return union(
-    defineHorizontalRuleSpec(),
-    defineHorizontalRuleCommands(),
-    defineHorizontalRuleMarkerAttr(),
-  )
+  return union(defineHorizontalRule(), defineHorizontalRuleMarkerAttr())
 }
