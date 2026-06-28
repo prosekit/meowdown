@@ -537,9 +537,13 @@
     border-right: 3px solid #fff;
     border-bottom: 3px solid #fff;
     border-bottom-right-radius: 5px;
-    /* Invert against the image so the corner bracket reads on both light and
-     * dark photos. Pairs with `isolation: isolate` on `.md-image-resizable`. */
-    mix-blend-mode: difference;
+    /* Clip to the visible L so the transparent interior passes clicks through to
+     * the image: a corner grab must not block clicking a small image. Matches the
+     * 16px box / 3px arms (3/16 = 18.75%, 13/16 = 81.25%). */
+    clip-path: polygon(100% 0, 100% 100%, 0 100%, 0 81.25%, 81.25% 81.25%, 81.25% 0);
+    /* Blend against the image so the corner bracket reads on both light and dark
+     * photos. Pairs with `isolation: isolate` on `.md-image-resizable`. */
+    mix-blend-mode: exclusion;
     cursor: nwse-resize;
     opacity: 0;
     /* Hidden handle never intercepts a click meant for the image. */
