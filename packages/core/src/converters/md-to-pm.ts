@@ -9,6 +9,7 @@ import {
   CHAR_ASTERISK,
   CHAR_DOT,
   CHAR_EQUAL,
+  CHAR_HASH,
   CHAR_HYPHEN_MINUS,
   CHAR_LOWERCASE_X,
   CHAR_PLUS,
@@ -185,8 +186,8 @@ function convertHeading(
   const headingFrom = cursor.from
   let contentStart = cursor.from
   let contentEnd = cursor.to
-  let underlineFrom = -1
-  let underlineTo = -1
+  let trailingMarkFrom = -1
+  let trailingMarkTo = -1
   if (cursor.firstChild()) {
     if (cursor.type.id === LEZER_NODE_IDS.HeaderMark && cursor.from === headingFrom) {
       contentStart = cursor.to
@@ -201,8 +202,8 @@ function convertHeading(
     } while (cursor.nextSibling())
     if (lastId === LEZER_NODE_IDS.HeaderMark && lastFrom > contentStart) {
       contentEnd = lastFrom
-      underlineFrom = lastFrom
-      underlineTo = lastTo
+      trailingMarkFrom = lastFrom
+      trailingMarkTo = lastTo
     }
     cursor.parent()
   }
@@ -211,12 +212,17 @@ function convertHeading(
   // (rare) keeps its continuation lines aligned; trim then drops the outer ends.
   const raw = text.slice(contentStart, contentEnd)
   const content = dedentContinuation(raw, measureContentColumn(text, contentStart)).trim()
-  // CommonMark setext underlines may be any length; keep the source count so
-  // the round-trip is lossless. Fall back to 1 if lezer reported no run.
+  // A trailing HeaderMark is the setext underline of a setext heading, or the
+  // closing `#` run of an ATX heading (`# foo #`). CommonMark allows either run
+  // any length, so keep the source count to make the round-trip lossless.
   const setextUnderline = isSetext
-    ? countUnderlineChars(text, underlineFrom, underlineTo) || 1
+    ? countUnderlineChars(text, trailingMarkFrom, trailingMarkTo) || 1
     : null
-  return nodes.heading({ level, setextUnderline }, content)
+  const closingHashes =
+    !isSetext && trailingMarkFrom >= 0
+      ? countHashChars(text, trailingMarkFrom, trailingMarkTo) || null
+      : null
+  return nodes.heading({ level, setextUnderline, closingHashes }, content)
 }
 
 /** Count the `=` / `-` characters in a setext underline run. */
@@ -226,6 +232,17 @@ function countUnderlineChars(text: string, from: number, to: number): number {
   for (let i = from; i < to; i++) {
     const code = text.charCodeAt(i)
     if (code === CHAR_EQUAL || code === CHAR_HYPHEN_MINUS) count++
+  }
+  return count
+}
+
+// REVIEW: TODO: simpluy the comment: {{Count the `#` characters between `from` and `to`}}
+/** Count the `#` characters in an ATX heading's closing mark run. */
+function countHashChars(text: string, from: number, to: number): number {
+  if (from < 0) return 0
+  let count = 0
+  for (let i = from; i < to; i++) {
+    if (text.charCodeAt(i) === CHAR_HASH) count++
   }
   return count
 }
