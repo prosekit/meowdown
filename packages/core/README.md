@@ -84,7 +84,6 @@ const markdown = docToMarkdown(editor.state.doc)
 - `--meowdown-border`: horizontal rules and table borders.
 - `--meowdown-code-bg`: code block background.
 - `--meowdown-table-header-bg`: table header row background.
-- `--meowdown-image-max-height`: max height of rendered inline images.
 - `--meowdown-image-radius`: corner radius of rendered inline images.
 - `--meowdown-placeholder`: placeholder text color (defaults to `--meowdown-muted`).
 - `--meowdown-font-mono`: monospace font stack.

@@ -41,6 +41,13 @@ export function defaultResolveImageUrl(src: string): string | undefined {
   return /^https?:\/\//i.test(src) ? src : undefined
 }
 
+/**
+ * Default cap on an image's displayed height in CSS pixels (mirrors the former
+ * `24rem` rule). It only bounds the auto-picked display width of an image with no
+ * persisted width; a user-resized width is honored as-is.
+ */
+const MAX_DISPLAY_HEIGHT = 384
+
 /** Build the iframe DOM for an embed descriptor and start its height listener. */
 function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
   const iframe = document.createElement('iframe')
@@ -110,14 +117,18 @@ function buildResizableImage(
   img.alt = alt
   img.draggable = false
   img.addEventListener('load', () => {
-    const ratio = img.naturalWidth / img.naturalHeight
+    const { naturalWidth, naturalHeight } = img
+    const ratio = naturalWidth / naturalHeight
     if (Number.isFinite(ratio) && ratio > 0) {
       root.setAttribute('data-aspect-ratio', String(ratio))
     }
-    // The component renders at 1px when width is null; feed it the natural width
-    // for display only (never persisted). CSS max-width clamps oversized images.
-    if (width == null && img.naturalWidth > 0) {
-      root.setAttribute('data-width', String(img.naturalWidth))
+    // The component renders at 1px when width is null; feed it a display width
+    // (never persisted). The component drives height from width via the aspect
+    // ratio, so cap the width to keep the height within MAX_DISPLAY_HEIGHT. Never
+    // upscale past the natural size; CSS max-width clamps the container.
+    if (width == null && naturalWidth > 0 && naturalHeight > 0) {
+      const displayWidth = Math.round(Math.min(naturalWidth, MAX_DISPLAY_HEIGHT * ratio))
+      root.setAttribute('data-width', String(displayWidth))
     }
   })
   root.appendChild(img)
