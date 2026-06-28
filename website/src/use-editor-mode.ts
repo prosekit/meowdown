@@ -27,7 +27,7 @@ export const MODES: ModeOption[] = [
   {
     value: 'source',
     label: 'Source',
-    description: 'Raw Markdown with syntax highlighting, like an IDE.',
+    description: 'Raw Markdown text.',
   },
 ]
 
