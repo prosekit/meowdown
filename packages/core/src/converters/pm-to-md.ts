@@ -81,6 +81,10 @@ function emitHeading(node: ProseMirrorNode, out: MdOut): void {
   }
   out.write(HEADING_PREFIX[attrs.level] ?? '# ')
   emitInlineChildren(node, out)
+  const closingHashes = attrs.closingHashes
+  if (closingHashes != null && closingHashes > 0) {
+    out.write(' ' + '#'.repeat(closingHashes))
+  }
   out.closeBlock()
 }
 
