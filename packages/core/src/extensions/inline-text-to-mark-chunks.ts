@@ -6,10 +6,10 @@ import { parseInline } from '../lezer/inline.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 
 import type { MdLinkTextAttrs, MdPackAttrs, MdPackSimpleKey } from './inline-marks.ts'
+import { parseMagicComment, type MagicComment } from './magic-comment.ts'
 import type { MarkChunk } from './mark-chunk.ts'
 import type { MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
-import { parseMagicComment, type MagicComment } from './magic-comment.ts'
 import type { TypedMarkBuilders } from './schema.ts'
 import { parseWikilink } from './wikilink.ts'
 

@@ -17,8 +17,8 @@ import {
 import { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './embed/index.ts'
 import { getMarkRangeAt } from './get-mark-range-at.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
-import type { MarkName } from './mark-names.ts'
 import { formatMagicComment, parseMagicComment, stripMagicComment } from './magic-comment.ts'
+import type { MarkName } from './mark-names.ts'
 
 type ImageUrlResolver = (src: string) => string | undefined
 type ImagePasteHandler = (file: File) => string | undefined | Promise<string | undefined>

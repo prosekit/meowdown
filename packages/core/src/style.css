@@ -541,31 +541,23 @@
      * photos. Pairs with `isolation: isolate` on `.md-image-resizable`. */
     mix-blend-mode: exclusion;
     cursor: nwse-resize;
-    opacity: 0;
     /* Hidden handle never intercepts a click meant for the image. */
     pointer-events: none;
-    transition: opacity 0.1s ease;
     touch-action: none;
+    /* A light one-shot pop: scale up to full size when revealed on hover. */
+    opacity: 0;
+    transform: scale(0.8);
+    transform-origin: bottom right;
+    transition:
+      opacity 0.12s ease,
+      transform 0.12s ease;
   }
 
   .md-image-resizable:hover .md-image-resize-handle,
   .md-image-resizable[data-resizing] .md-image-resize-handle {
     opacity: 1;
-    pointer-events: auto;
-  }
-
-  .md-image-resize-handle {
-    animation: md-handle-pulse 0.1s ease-in-out;
-    transform-origin: bottom right;
-  }
-}
-
-@keyframes md-handle-pulse {
-  0% {
-    transform: scale(0.8);
-  }
-  100% {
     transform: scale(1);
+    pointer-events: auto;
   }
 }
 
