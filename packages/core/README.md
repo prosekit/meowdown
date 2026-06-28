@@ -50,7 +50,7 @@ const markdown = docToMarkdown(editor.state.doc)
 
 ## Keyboard shortcuts
 
-`Mod` is Cmd on macOS and Ctrl elsewhere. Each formatting shortcut inserts or removes the literal Markdown delimiters around the selection; each heading shortcut toggles the current block to that level (or back to a paragraph). The fold shortcut collapses or expands the bullet at the cursor, recording the state in its marker (`+` is collapsed).
+`Mod` is Cmd on macOS and Ctrl elsewhere. Each formatting shortcut inserts or removes the literal Markdown delimiters around the selection; each heading shortcut toggles the current block to that level (or back to a paragraph).
 
 | Key           | Action                  | Markdown            |
 | ------------- | ----------------------- | ------------------- |
@@ -65,7 +65,7 @@ const markdown = docToMarkdown(editor.state.doc)
 | `Mod-4`       | Heading 4               | `#### heading`      |
 | `Mod-5`       | Heading 5               | `##### heading`     |
 | `Mod-6`       | Heading 6               | `###### heading`    |
-| `Mod-.`       | Fold or unfold a bullet | `+ item`            |
+| `Mod-.`       | Fold or unfold a bullet |                     |
 
 `EDITOR_KEY_BINDINGS` is a literal (`as const`) object mapping every key above to its description, for host settings UIs and keybinding-collision checks.
 
