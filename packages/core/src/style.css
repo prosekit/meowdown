@@ -497,6 +497,10 @@
   }
 
   .md-image-view-preview {
+    /* inline-flex (not inline-block) so the box tightly wraps the image with no
+     * baseline descender gap below it, which would otherwise show as empty space
+     * inside the selection outline. */
+    display: inline-flex;
     max-width: 100%;
     border-radius: 6px;
     outline-offset: 2px;
@@ -505,6 +509,9 @@
   .md-image-resizable {
     position: relative;
     display: inline-block;
+    /* New stacking context so the handle's `mix-blend-mode` mixes only with the
+     * image, not the page behind it. */
+    isolation: isolate;
     max-width: 100%;
     /* Avoid a 1px collapse before the image loads / a width is known, and keep
      * the corner handle clear of the image center. */
@@ -524,10 +531,15 @@
     position: absolute;
     right: 4px;
     bottom: 4px;
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
-    background: var(--meowdown-node-outline);
+    box-sizing: border-box;
+    width: 16px;
+    height: 16px;
+    border-right: 3px solid #fff;
+    border-bottom: 3px solid #fff;
+    border-bottom-right-radius: 5px;
+    /* Invert against the image so the corner bracket reads on both light and
+     * dark photos. Pairs with `isolation: isolate` on `.md-image-resizable`. */
+    mix-blend-mode: difference;
     cursor: nwse-resize;
     opacity: 0;
     /* Hidden handle never intercepts a click meant for the image. */
