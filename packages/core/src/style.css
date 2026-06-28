@@ -31,7 +31,7 @@
 
   /* Collapsible bullets: the filled circle drawn behind a collapsed item's dot
    * (so it reads as a target). Standalone so folding can be themed apart. */
-  --meowdown-fold-halo: var(--meowdown-selection);
+  --meowdown-fold-halo: var(--meowdown-accent);
 
   /* Horizontal editor padding. Floating UI tracking the hovered block (the
    * block handle in @meowdown/react) must fit inside it: hover tracking only
@@ -240,12 +240,16 @@
     pointer-events: none;
   }
 
-  &[data-list-collapsable]:hover::before {
-    opacity: 0.65;
+  &[data-list-collapsable]:has(> .list-marker:hover)::before {
+    opacity: 0.2;
   }
 
   &[data-list-collapsable][data-list-collapsed]::before {
-    opacity: 1;
+    opacity: 0.35;
+  }
+
+  &[data-list-collapsable][data-list-collapsed]:has(> .list-marker:hover)::before {
+    opacity: 0.45;
   }
 
   /* Hide the descendants of a collapsed bullet, keeping its first block. */
