@@ -26,6 +26,15 @@ function nonBlankLines(text: string): string[] {
   return text.split('\n').filter((line) => !isBlankLine(line))
 }
 
+// Collapse internal whitespace runs to a single space and trim the ends. The
+// serializer normalizes insignificant spacing without changing content (a double
+// space after a heading marker, `#  x` becomes `# x`; a re-indented lazy
+// continuation), so two lines that differ only in their whitespace runs carry
+// the same content: that is layout, not loss.
+function collapseWhitespace(line: string): string {
+  return line.trim().replace(/\s+/gu, ' ')
+}
+
 /** Options for {@link checkRoundTrip}. */
 export interface CheckRoundTripOptions {
   /** Whether to handle a leading `---` frontmatter block. Off by default. */
@@ -44,7 +53,8 @@ export function checkRoundTrip(
   const before = nonBlankLines(markdown)
   const after = nonBlankLines(serialized)
   const textMatches =
-    before.length === after.length && before.every((line, i) => line.trim() === after[i].trim())
+    before.length === after.length &&
+    before.every((line, i) => collapseWhitespace(line) === collapseWhitespace(after[i]))
 
   return textMatches ? 'normalizing' : 'lossy'
 }

@@ -65,6 +65,7 @@ describe('checkRoundTrip', () => {
     '> a\n> - x\n> - y', // same, with a multi-item list inside the blockquote
     '- [ ] todo\neen voorlopig idee', // a lazy continuation gains the canonical item indent
     '- item\nlazy line', // same, on a plain bullet
+    '#  Journal', // a double space after the ATX marker collapses to one
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })
@@ -75,15 +76,5 @@ describe('checkRoundTrip', () => {
     '~~~\ntilde\n~~~', // a tilde fence becomes a backtick fence: same line count, content differs
   ])('reports lossy for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('lossy')
-  })
-
-  it.fails('reports normalizing for a heading with a double marker space', () => {
-    // The serializer collapses two spaces after the ATX `#` to one
-    // (`#  Journal` becomes `# Journal`), which is layout, not content: the heading
-    // text and the re-parsed doc are unchanged. But `nonBlankLines` compares with
-    // `line.trim()`, which keeps the internal double space, so the lines read as
-    // different content and an otherwise faithful note is wrongly flagged `lossy`.
-    const markdown = ['#  Journal', '', 'A paragraph of body text.'].join('\n')
-    expect(checkRoundTrip(markdown)).toBe('normalizing')
   })
 })
