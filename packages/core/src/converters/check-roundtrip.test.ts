@@ -76,4 +76,14 @@ describe('checkRoundTrip', () => {
   ])('reports lossy for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('lossy')
   })
+
+  it.fails('reports normalizing for a heading with a double marker space', () => {
+    // The serializer collapses two spaces after the ATX `#` to one
+    // (`#  Journal` becomes `# Journal`), which is layout, not content: the heading
+    // text and the re-parsed doc are unchanged. But `nonBlankLines` compares with
+    // `line.trim()`, which keeps the internal double space, so the lines read as
+    // different content and an otherwise faithful note is wrongly flagged `lossy`.
+    const markdown = ['#  Journal', '', 'A paragraph of body text.'].join('\n')
+    expect(checkRoundTrip(markdown)).toBe('normalizing')
+  })
 })
