@@ -491,11 +491,13 @@
 /* image */
 .ProseMirror {
   .md-image-view {
+    max-width: 100%;
     margin-left: 2px;
     margin-right: 2px;
   }
 
   .md-image-view-preview {
+    max-width: 100%;
     border-radius: 6px;
     outline-offset: 2px;
   }
