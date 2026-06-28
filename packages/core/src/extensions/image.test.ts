@@ -18,7 +18,10 @@ const pmRoot = page.locate('.ProseMirror')
 const preview = pmRoot.getByTestId('image-preview')
 
 function getSVGImageURL(width: number, height: number): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="${width}" height="${height}" fill="pink"/></svg>`
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+    `<rect width="${width}" height="${height}" fill="pink"/>` +
+    `</svg>`
   return `data:image/svg+xml;base64,${btoa(svg)}`
 }
 
