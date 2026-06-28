@@ -12,6 +12,7 @@ const preview = pmRoot.getByTestId('image-preview')
 const IMAGE_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10" fill="pink"/></svg>'
 const IMAGE_URL = `data:image/svg+xml;base64,${btoa(IMAGE_SVG)}`
+// REVIEW: Merge image-insert-caret.test.ts into image.test.ts;
 
 function setup(mode: MarkMode, text: string): Fixture {
   const fixture = setupFixture()

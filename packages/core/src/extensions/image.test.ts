@@ -20,11 +20,13 @@ const preview = pmRoot.getByTestId('image-preview')
 const IMAGE_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10" fill="pink"/></svg>'
 const IMAGE_URL = `data:image/svg+xml;base64,${btoa(IMAGE_SVG)}`
+// REVIEW: remove IMAGE_SVG, IMAGE_URL, PORTRAIT_SVG and PORTRAIT_URL. Add a new function getSVGImageURL(width: number, height: number): string
 
 // Portrait image (aspect ratio 0.5) for the resize-collapse regression below.
 const PORTRAIT_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="20"><rect width="10" height="20" fill="pink"/></svg>'
 const PORTRAIT_URL = `data:image/svg+xml;base64,${btoa(PORTRAIT_SVG)}`
+// REVIEW: ensure you have all 3 test cases: portrait, landscape, and square
 
 // Text:     A   B   C   !   [   i   m   g   ]   (   u   r   l   )   D   E   F
 // Offset: 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17
