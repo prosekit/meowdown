@@ -33,6 +33,7 @@ describe('defineEditorExtension', () => {
         "content": [
           {
             "attrs": {
+              "closingHashes": null,
               "level": 1,
               "setextUnderline": null,
             },

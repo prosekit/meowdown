@@ -6,7 +6,7 @@ export const sampleContent: NodeJSON = {
   content: [
     {
       type: 'heading',
-      attrs: { level: 1, setextUnderline: null },
+      attrs: { level: 1, setextUnderline: null, closingHashes: null },
       content: [{ type: 'text', text: 'Meowdown' }],
     },
     {
@@ -29,17 +29,17 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'heading',
-      attrs: { level: 2, setextUnderline: null },
+      attrs: { level: 2, setextUnderline: null, closingHashes: null },
       content: [{ type: 'text', text: 'Headings' }],
     },
     {
       type: 'heading',
-      attrs: { level: 3, setextUnderline: null },
+      attrs: { level: 3, setextUnderline: null, closingHashes: null },
       content: [{ type: 'text', text: 'This is an H3' }],
     },
     {
       type: 'heading',
-      attrs: { level: 2, setextUnderline: null },
+      attrs: { level: 2, setextUnderline: null, closingHashes: null },
       content: [{ type: 'text', text: 'Blockquote' }],
     },
     {
@@ -58,7 +58,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'heading',
-      attrs: { level: 2, setextUnderline: null },
+      attrs: { level: 2, setextUnderline: null, closingHashes: null },
       content: [{ type: 'text', text: 'Bullet list' }],
     },
     {
@@ -117,7 +117,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'heading',
-      attrs: { level: 2, setextUnderline: null },
+      attrs: { level: 2, setextUnderline: null, closingHashes: null },
       content: [{ type: 'text', text: 'Ordered list' }],
     },
     {
@@ -158,7 +158,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'heading',
-      attrs: { level: 2, setextUnderline: null },
+      attrs: { level: 2, setextUnderline: null, closingHashes: null },
       content: [{ type: 'text', text: 'Code block' }],
     },
     {
@@ -173,7 +173,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'heading',
-      attrs: { level: 2, setextUnderline: null },
+      attrs: { level: 2, setextUnderline: null, closingHashes: null },
       content: [{ type: 'text', text: 'Table' }],
     },
     {

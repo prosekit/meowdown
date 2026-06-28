@@ -170,4 +170,29 @@ describe('gfmBlockOnlyParser', () => {
               CodeMark [37, 40] "\`\`\`""
     `)
   })
+
+  it('tokenizes the opening and closing marks of an ATX heading', () => {
+    expect(parse(gfmBlockOnlyParser, '# title')).toMatchInlineSnapshot(`
+      "Document [0, 7] "# title"
+        ATXHeading1 [0, 7] "# title"
+          HeaderMark [0, 1] "#""
+    `)
+    expect(parse(gfmBlockOnlyParser, '##  title')).toMatchInlineSnapshot(`
+      "Document [0, 9] "##  title"
+        ATXHeading2 [0, 9] "##  title"
+          HeaderMark [0, 2] "##""
+    `)
+    expect(parse(gfmBlockOnlyParser, '# title #')).toMatchInlineSnapshot(`
+      "Document [0, 9] "# title #"
+        ATXHeading1 [0, 9] "# title #"
+          HeaderMark [0, 1] "#"
+          HeaderMark [8, 9] "#""
+    `)
+    expect(parse(gfmBlockOnlyParser, '## title #######')).toMatchInlineSnapshot(`
+      "Document [0, 16] "## title #######"
+        ATXHeading2 [0, 16] "## title #######"
+          HeaderMark [0, 2] "##"
+          HeaderMark [9, 16] "#######""
+    `)
+  })
 })

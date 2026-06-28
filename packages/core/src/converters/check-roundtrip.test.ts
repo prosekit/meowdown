@@ -7,6 +7,7 @@ describe('checkRoundTrip', () => {
   it.each([
     'hello world',
     '<div class="x">hi</div>',
+    '# Hello #', // an ATX heading with a closing `#` sequence round-trips
     dedent`
       # Hello
 
@@ -65,12 +66,12 @@ describe('checkRoundTrip', () => {
     '> a\n> - x\n> - y', // same, with a multi-item list inside the blockquote
     '- [ ] todo\neen voorlopig idee', // a lazy continuation gains the canonical item indent
     '- item\nlazy line', // same, on a plain bullet
+    '#  Journal', // a double space after the ATX marker collapses to one
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })
 
   it.each([
-    '# Hello #', // a closing ATX hash sequence is dropped (same line count, content differs)
     '    indented', // an indented code block becomes a fence: the non-blank line count grows
     '~~~\ntilde\n~~~', // a tilde fence becomes a backtick fence: same line count, content differs
   ])('reports lossy for %j', (markdown) => {

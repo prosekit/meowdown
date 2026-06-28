@@ -27,7 +27,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'heading',
-          attrs: { level: 1, setextUnderline: null },
+          attrs: { level: 1, setextUnderline: null, closingHashes: null },
           content: [{ type: 'text', text: 'Hello' }],
         },
       ],
@@ -610,7 +610,9 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('# ').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null },
-      content: [{ type: 'heading', attrs: { level: 1, setextUnderline: null } }],
+      content: [
+        { type: 'heading', attrs: { level: 1, setextUnderline: null, closingHashes: null } },
+      ],
     })
   })
 
@@ -640,7 +642,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'heading',
-          attrs: { level: 1, setextUnderline: 3 },
+          attrs: { level: 1, setextUnderline: 3, closingHashes: null },
           content: [{ type: 'text', text: 'Setext1' }],
         },
       ],
@@ -654,7 +656,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'heading',
-          attrs: { level: 2, setextUnderline: 3 },
+          attrs: { level: 2, setextUnderline: 3, closingHashes: null },
           content: [{ type: 'text', text: 'Setext2' }],
         },
       ],
@@ -763,7 +765,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'heading',
-          attrs: { level: 1, setextUnderline: null },
+          attrs: { level: 1, setextUnderline: null, closingHashes: null },
           content: [{ type: 'text', text: 'heading' }],
         },
       ],

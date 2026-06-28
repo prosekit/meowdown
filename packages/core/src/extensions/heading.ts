@@ -29,6 +29,14 @@ export interface MeowdownHeadingAttrs extends HeadingAttrs {
    * can be setext, and the level alone decides the underline character.
    */
   setextUnderline?: number | null
+
+  /**
+   * For an ATX heading written with a closing `#` sequence (`# foo #`), the
+   * number of `#` characters in that closing run, so the round-trip is lossless.
+   * The opening and closing runs may differ in length, so the count is kept on
+   * its own. `null` (the default) means the heading had no closing sequence.
+   */
+  closingHashes?: number | null
 }
 
 type HeadingSpecExtension = Extension<{
@@ -67,6 +75,28 @@ function defineSetextUnderlineAttr(): SetextUnderlineExtension {
   })
 }
 
+type ClosingHashesExtension = Extension<{
+  Nodes: { heading: { closingHashes?: number | null } }
+}>
+
+function defineHeadingClosingHashesAttr(): ClosingHashesExtension {
+  return defineNodeAttr<'heading', 'closingHashes', number | null>({
+    type: 'heading' satisfies NodeName,
+    attr: 'closingHashes',
+    default: null,
+    // Only a parsed ATX heading with a closing `#` run carries a count; a heading
+    // created or edited in the editor has none, and the count must survive a DOM
+    // re-parse.
+    toDOM: (value) => (value != null ? ['data-closing-hashes', String(value)] : null),
+    parseDOM: (node) => {
+      const raw = node.getAttribute('data-closing-hashes')
+      if (raw == null) return null
+      const length = Number.parseInt(raw, 10)
+      return Number.isSafeInteger(length) && length > 0 ? length : null
+    },
+  })
+}
+
 function toggleHeading(level: number): Command {
   return withSkipCodeBlock(toggleNode({ type: 'heading' satisfies NodeName, attrs: { level } }))
 }
@@ -96,6 +126,7 @@ export function defineHeading() {
     defineHeadingSpec(),
     defineHeadingWhitespace(),
     defineSetextUnderlineAttr(),
+    defineHeadingClosingHashesAttr(),
     defineHeadingInputRule(),
     defineHeadingCommands(),
     defineHeadingKeymap(),
