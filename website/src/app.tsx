@@ -34,13 +34,6 @@ function handleWikilinkClick({ target }: { target: string }): void {
 const INITIAL_CONTENT = `
 # Welcome to Meowdown
 
-![](https://static.photos/yellow/16x16/3)
-
-![](https://static.photos/black/16x16/5)
-
-![](https://static.photos/white/16x16/5)
-![](https://static.photos/white/16x16/7)
-
 A hybrid Markdown editor that renders as you type, so you never break your flow.
 
 Weave in **bold**, *italic*, \`inline code\`, or ~~strikethrough~~ without reaching for a toolbar.
