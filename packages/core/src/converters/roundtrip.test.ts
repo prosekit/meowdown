@@ -234,14 +234,12 @@ describe('headings', () => {
     expect(roundtrip('# foo#')).toBe('# foo#\n')
   })
 
-  // TODO: update this test so that it's not a "fails" case anymore. We do want to remove the extra space
-  it.fails('keeps extra space after the hash', () => {
-    expect(roundtrip('#  extra')).toBe('#  extra\n')
+  it('normalizes extra space after the hash', () => {
+    expect(roundtrip('#  extra')).toBe('# extra\n')
   })
 
-  // TODO: update this test so that it's not a "fails" case anymore.
-  it.fails('keeps an empty heading trailing space', () => {
-    expect(roundtrip('# ')).toBe('# \n')
+  it('drops an empty heading trailing space', () => {
+    expect(roundtrip('# ')).toBe('#\n')
   })
 
   it('keeps setext text (level 1)', () => {
