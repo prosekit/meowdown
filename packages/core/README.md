@@ -39,7 +39,7 @@ const markdown = docToMarkdown(editor.state.doc)
   - Links (`[text](url)`), images (`![alt](src)`), and autolinks (`<https://example.com>`)
   - Hard line breaks
 - GitHub Flavored Markdown (GFM)
-  - Tables (cells hold inline content only, never nested blocks like lists)
+  - Tables
   - Strikethrough (`~~text~~`)
   - Task lists (`- [ ]`, `- [x]`)
   - Autolinks for `www.`, scheme, and email URLs
