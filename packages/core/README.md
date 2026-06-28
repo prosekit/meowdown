@@ -30,7 +30,7 @@ const markdown = docToMarkdown(editor.state.doc)
 - CommonMark
   - ATX headings (`# Heading 1`, `## Heading 2`, etc.)
   - Setext headings (`Heading 1\n===`, `Heading 2\n---`)
-  - Bullet lists (`- item`, `* item`); a `+ item` marker means a collapsed (folded) bullet
+  - Bullet lists (`- item`, `* item`, `+ item`)
   - Ordered lists (`1. item`, `2) item`, etc.)
   - Blockquotes (`> quote`)
   - Fenced code blocks (` ```lang\ncode\n``` `)
