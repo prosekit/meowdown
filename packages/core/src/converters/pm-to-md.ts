@@ -350,9 +350,10 @@ function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
   const gap = Math.min(Math.max(attrs.markerGap ?? 1, 1), 4)
   const delimiter = attrs.kind === 'ordered' ? `${attrs.order ?? 1}${orderMarker}` : bulletMarker
   const prefix = `${delimiter}${' '.repeat(gap)}`
-  const marker = attrs.kind === 'task' ? `${prefix}[${attrs.checked ? checkMark : ' '}] ` : prefix
+  const outputMarker =
+    attrs.kind === 'task' ? `${prefix}[${attrs.checked ? checkMark : ' '}] ` : prefix
   const continuation = ' '.repeat(prefix.length)
-  out.withPrefix(continuation, marker, () => emitBlockChildren(node, out, tight))
+  out.withPrefix(continuation, outputMarker, () => emitBlockChildren(node, out, tight))
   out.closeBlock()
 }
 
