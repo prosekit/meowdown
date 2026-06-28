@@ -35,7 +35,7 @@ describe('toggleListCollapsed', () => {
     expect(editor.commands.toggleListCollapsed.canExec()).toBe(false)
   })
 
-  it('does not fold a task (v1 folds bullets only)', () => {
+  it('does not fold a task', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(
