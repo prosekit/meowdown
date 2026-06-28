@@ -237,8 +237,7 @@ function countUnderlineChars(text: string, from: number, to: number): number {
   return count
 }
 
-// REVIEW: TODO: simpluy the comment: {{Count the `#` characters between `from` and `to`}}
-/** Count the `#` characters in an ATX heading's closing mark run. */
+/** Count the `#` characters between `from` and `to`. */
 function countHashChars(text: string, from: number, to: number): number {
   if (from < 0) return 0
   let count = 0
