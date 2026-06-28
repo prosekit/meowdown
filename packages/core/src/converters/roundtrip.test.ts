@@ -221,14 +221,25 @@ describe('headings', () => {
     expect(roundtrip('# with *stars*')).toBe('# with *stars*\n')
   })
 
-  it.fails('keeps a trailing closing hash', () => {
+  it('keeps a trailing closing hash', () => {
     expect(roundtrip('# trailing #')).toBe('# trailing #\n')
   })
 
+  it('keeps a multi-hash closing sequence', () => {
+    expect(roundtrip('## title ####')).toBe('## title ####\n')
+  })
+
+  it('keeps text that ends with a hash', () => {
+    // No space before the final `#`, so it is content, not a closing sequence.
+    expect(roundtrip('# foo#')).toBe('# foo#\n')
+  })
+
+  // TODO: update this test so that it's not a "fails" case anymore. We do want to remove the extra space
   it.fails('keeps extra space after the hash', () => {
     expect(roundtrip('#  extra')).toBe('#  extra\n')
   })
 
+  // TODO: update this test so that it's not a "fails" case anymore.
   it.fails('keeps an empty heading trailing space', () => {
     expect(roundtrip('# ')).toBe('# \n')
   })
