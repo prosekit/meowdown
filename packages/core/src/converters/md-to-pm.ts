@@ -179,10 +179,11 @@ function convertHeading(
   level: number,
   isSetext: boolean,
 ): ProseMirrorNode {
-  // Strip the opening HeaderMark (the "#" run + following space) and any
-  // optional closing HeaderMark used in "# foo #" style. A setext heading's
-  // only HeaderMark is the trailing underline, so guard on the mark starting
-  // at the heading's left edge before treating it as the opening mark.
+  // Strip the opening HeaderMark (just the "#" run; the space after it is not
+  // part of the mark) and capture any optional closing HeaderMark of "# foo #"
+  // style. A setext heading's only HeaderMark is the trailing underline, so
+  // guard on the mark starting at the heading's left edge before treating it as
+  // the opening mark.
   const headingFrom = cursor.from
   let contentStart = cursor.from
   let contentEnd = cursor.to
