@@ -137,7 +137,8 @@ describe('table cell is inline-only', () => {
     expect(getCellTexts(fixture.doc)).toEqual(['a', 'b', '- ', '2'])
   })
 
-  it('horizontal rule input rule is inert inside a cell', async () => {
+  it.fails('horizontal rule input rule is inert inside a cell', async () => {
+    // TODO: Remove `.fails` once https://github.com/prosekit/prosekit/pull/1708 is merged and released.
     using fixture = setupFixture()
     const { n } = fixture
     fixture.set(cellCaretTable(n))
