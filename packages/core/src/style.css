@@ -553,6 +553,20 @@
     opacity: 1;
     pointer-events: auto;
   }
+
+  .md-image-resize-handle {
+    animation: md-handle-pulse 0.1s ease-in-out;
+    transform-origin: bottom right;
+  }
+}
+
+@keyframes md-handle-pulse {
+  0% {
+    transform: scale(0.8);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* wikilink */

@@ -18,7 +18,7 @@ import { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './embed/
 import { getMarkRangeAt } from './get-mark-range-at.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
-import { formatMetaComment, parseMetaComment, stripMetaComment } from './meta-comment.ts'
+import { formatMagicComment, parseMagicComment, stripMagicComment } from './magic-comment.ts'
 
 type ImageUrlResolver = (src: string) => string | undefined
 type ImagePasteHandler = (file: File) => string | undefined | Promise<string | undefined>
@@ -146,7 +146,7 @@ function buildResizableImage(
 }
 
 /**
- * Persist a resized width by rewriting only the trailing metadata comment, leaving
+ * Persist a resized width by rewriting only the trailing magic comment, leaving
  * the `![alt](url)` source untouched. The inline-mark plugin re-derives the
  * `width` attribute from the new text.
  */
@@ -159,12 +159,12 @@ function commitImageWidth(view: EditorView, content: HTMLElement, rawWidth: numb
   // Split the range into the `![alt](url)` source and its optional comment;
   // positions in a textblock are 1:1 with characters, so `from + base.length` is
   // exactly where the source ends and the comment begins.
-  const base = stripMetaComment(current)
+  const base = stripMagicComment(current)
   const commentFrom = range.from + base.length
   const currentComment = current.slice(base.length)
 
-  const nextComment = formatMetaComment({
-    ...(parseMetaComment(currentComment) ?? {}),
+  const nextComment = formatMagicComment({
+    ...(parseMagicComment(currentComment) ?? {}),
     width: Math.round(rawWidth),
   })
   if (nextComment === currentComment) return

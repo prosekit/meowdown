@@ -9,7 +9,7 @@ import type { MdLinkTextAttrs, MdPackAttrs, MdPackSimpleKey } from './inline-mar
 import type { MarkChunk } from './mark-chunk.ts'
 import type { MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
-import { parseMetaComment, type MetaComment } from './meta-comment.ts'
+import { parseMagicComment, type MagicComment } from './magic-comment.ts'
 import type { TypedMarkBuilders } from './schema.ts'
 import { parseWikilink } from './wikilink.ts'
 
@@ -100,7 +100,7 @@ function walk(
     if (type === LEZER_NODE_IDS.Link) {
       walkLink(node, parentMarks, text, marks, out)
     } else if (type === LEZER_NODE_IDS.Image) {
-      const trailing = takeMetaComment(node, nodes[index + 1], text)
+      const trailing = takeMagicComment(node, nodes[index + 1], text)
       walkImage(node, parentMarks, text, marks, out, trailing)
       if (trailing) index++ // skip the folded comment
       pos = trailing ? trailing.to : node.to
@@ -227,27 +227,27 @@ function walkLink(
   }
 }
 
-interface AdjacentMetaComment {
-  meta: MetaComment
+interface AdjacentMagicComment {
+  magic: MagicComment
   to: number
 }
 
-// A metadata comment sitting immediately after `image`, or undefined.
-function takeMetaComment(
+// A magic comment sitting immediately after `image`, or undefined.
+function takeMagicComment(
   image: InlineElement,
   next: InlineElement | undefined,
   text: string,
-): AdjacentMetaComment | undefined {
+): AdjacentMagicComment | undefined {
   if (!next || next.type !== LEZER_NODE_IDS.Comment || next.from !== image.to) return undefined
-  const meta = parseMetaComment(text.slice(next.from, next.to))
-  if (!meta) return undefined
-  return { meta, to: next.to }
+  const magic = parseMagicComment(text.slice(next.from, next.to))
+  if (!magic) return undefined
+  return { magic, to: next.to }
 }
 
 /**
  * Special walker for a direct image `![alt](url)`.
  *
- * A `trailing` metadata comment immediately after the image (e.g.
+ * A `trailing` magic comment immediately after the image (e.g.
  * `<!-- {"width":320} -->`) is folded into the mark range so it round-trips as
  * source while supplying the image's `width`.
  */
@@ -257,7 +257,7 @@ function walkImage(
   text: string,
   marks: TypedMarkBuilders,
   out: MarkChunk[],
-  trailing?: AdjacentMetaComment,
+  trailing?: AdjacentMagicComment,
 ): void {
   const urlNode = node.children.find((child) => child.type === LEZER_NODE_IDS.URL)
   if (!urlNode) {
@@ -274,7 +274,7 @@ function walkImage(
   const alt: string =
     bracketNodes.length >= 2 ? text.slice(bracketNodes[0].to, bracketNodes[1].from) : ''
   const title: string = titleNode ? unquoteTitle(text.slice(titleNode.from, titleNode.to)) : ''
-  const width = trailing?.meta.width ?? null
+  const width = trailing?.magic.width ?? null
   const to = trailing?.to ?? node.to
 
   emit(out, node.from, to, [...parentMarks, marks.mdImage.create({ src, alt, title, width })])
