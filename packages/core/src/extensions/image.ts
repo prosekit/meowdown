@@ -42,11 +42,9 @@ export function defaultResolveImageUrl(src: string): string | undefined {
 }
 
 /**
- * Default cap on an image's displayed height in CSS pixels (mirrors the former
- * `24rem` rule). It only bounds the auto-picked display width of an image with no
- * persisted width; a user-resized width is honored as-is.
+ * Default cap on an image's displayed height in CSS pixels.
  */
-const MAX_DISPLAY_HEIGHT = 384
+const MAX_DISPLAY_HEIGHT = 500
 
 /** Build the iframe DOM for an embed descriptor and start its height listener. */
 function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
