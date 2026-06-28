@@ -23,15 +23,15 @@
   --meowdown-autocomplete-highlight-bg: light-dark(#f4f4f5, #27272a);
   --meowdown-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Collapsible bullets: the filled circle drawn behind a collapsed item's dot
-   * (so it reads as a target). Standalone so folding can be themed apart. */
-  --meowdown-fold-halo: light-dark(#d4d4d8, #52525b);
-
   /* Selection colors. Deliberately standalone variables, not derived from
    * `--meowdown-accent`, so selection can be restyled independently. */
   --meowdown-node-outline: light-dark(hsl(250 100% 60%), hsl(250 100% 72%));
   --meowdown-node-selection: light-dark(hsl(250 100% 60% / 0.1), hsl(250 100% 72% / 0.12));
   --meowdown-selection: light-dark(hsl(250 100% 60% / 0.22), hsl(250 100% 72% / 0.3));
+
+  /* Collapsible bullets: the filled circle drawn behind a collapsed item's dot
+   * (so it reads as a target). Standalone so folding can be themed apart. */
+  --meowdown-fold-halo: var(--meowdown-selection);
 
   /* Horizontal editor padding. Floating UI tracking the hovered block (the
    * block handle in @meowdown/react) must fit inside it: hover tracking only
@@ -212,66 +212,39 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Collapsible bullets (reflect-editor style)
- *
- * A bullet records its fold state in the Markdown marker: `+` is collapsed,
- * `-`/`*` are expanded. In the editor the `collapsed` attribute drives it; the
- * converter maps it to `+` on save. The bullet glyph moves into `.list-marker`
- * so the collapsed/hover states can restyle it and so the marker is a reliable
- * click target. `data-list-collapsable` (>= 2 children) marks a foldable item.
+ * Collapsible bullets
  * ------------------------------------------------------------------------- */
 .ProseMirror .prosemirror-flat-list[data-list-kind='bullet'] {
-  /* Draw the dot ourselves instead of the native list marker, so a collapsed
-   * item can wear a halo. */
-  list-style: none;
+  /* A foldable bullet's marker is clickable. */
+  &[data-list-collapsable] > .list-marker {
+    cursor: pointer;
+  }
 
-  & > .list-marker {
+  /* The halo: a filled circle behind the dot, aligned to the marker column.
+   * Hidden by default, hinted on hover of a foldable item, fully shown when
+   * collapsed, so a folded bullet reads as a target (a dot inside a disc). */
+  &[data-list-collapsable]::before {
+    content: '';
     position: absolute;
-    right: 100%;
+    inset-inline-start: 0;
+    top: 0;
     width: 1lh;
     height: 1lh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-  }
-
-  /* The halo: a filled circle behind the dot. Hidden by default, hinted on
-   * hover of a foldable item, and fully shown when collapsed, so a folded
-   * bullet reads as a target (a dot inside a disc) at a glance. */
-  & > .list-marker::before {
-    content: '';
-    position: absolute;
-    width: 1.05em;
-    height: 1.05em;
-    border-radius: 100rem;
-    background: var(--meowdown-fold-halo);
+    background: radial-gradient(
+      circle at center,
+      var(--meowdown-fold-halo) 0 0.45rem,
+      transparent 0.45rem
+    );
     opacity: 0;
     transition: opacity 120ms ease;
+    pointer-events: none;
   }
 
-  /* The bullet dot, layered above the halo. */
-  & > .list-marker::after {
-    content: '';
-    position: relative;
-    width: 0.4em;
-    height: 0.4em;
-    border-radius: 100rem;
-    background: currentColor;
+  &[data-list-collapsable]:hover::before {
+    opacity: 0.65;
   }
 
-  /* A foldable item: the marker is clickable and hovering hints the halo. */
-  &[data-list-collapsable] {
-    & > .list-marker {
-      cursor: pointer;
-    }
-    &:hover > .list-marker::before {
-      opacity: 0.5;
-    }
-  }
-
-  /* Collapsed: the halo is fully shown. */
-  &[data-list-collapsable][data-list-collapsed] > .list-marker::before {
+  &[data-list-collapsable][data-list-collapsed]::before {
     opacity: 1;
   }
 
