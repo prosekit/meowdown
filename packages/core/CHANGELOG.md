@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.1](https://github.com/prosekit/meowdown/compare/core-v0.27.0...core-v0.27.1) (2026-06-28)
+
+
+### Bug Fixes
+
+* **core:** capture and emit ATX heading closing marks ([#167](https://github.com/prosekit/meowdown/issues/167)) ([06e378d](https://github.com/prosekit/meowdown/commit/06e378d8137220965e29db67328651a81fa61b79))
+
 ## [0.27.0](https://github.com/prosekit/meowdown/compare/core-v0.26.0...core-v0.27.0) (2026-06-27)
 
 
