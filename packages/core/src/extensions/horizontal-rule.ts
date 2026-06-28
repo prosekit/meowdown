@@ -1,11 +1,10 @@
 import { defineNodeAttr, union, type Extension, type Union } from '@prosekit/core'
-
-import type { NodeName } from './node-names.ts'
-
 import {
   defineHorizontalRule,
   type HorizontalRuleExtension,
 } from '@prosekit/extensions/horizontal-rule'
+
+import type { NodeName } from './node-names.ts'
 
 export interface MeowdownHorizontalRuleAttrs {
   /**
