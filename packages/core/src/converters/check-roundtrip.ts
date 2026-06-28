@@ -32,7 +32,7 @@ function nonBlankLines(text: string): string[] {
 // continuation), so two lines that differ only in their whitespace runs carry
 // the same content: that is layout, not loss.
 function collapseWhitespace(line: string): string {
-  return line.trim().replace(/\s+/gu, ' ')
+  return line.trim().replaceAll(/\s+/gu, ' ')
 }
 
 /** Options for {@link checkRoundTrip}. */
