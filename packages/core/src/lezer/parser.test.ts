@@ -170,4 +170,28 @@ describe('gfmBlockOnlyParser', () => {
               CodeMark [37, 40] "\`\`\`""
     `)
   })
+
+  it('shows ATX heading variants for debugging the round-trip', () => {
+    // The opening HeaderMark is just the `#` run; the space(s) after it sit in
+    // the gap before the content, not inside the mark (`# title` and `#  title`
+    // both show HeaderMark [0, 1]). A closing `# title #` sequence shows up as a
+    // second, trailing HeaderMark, which is what the converter must capture to
+    // round-trip it.
+    expect(parse(gfmBlockOnlyParser, '# title')).toMatchInlineSnapshot(`
+      "Document [0, 7] "# title"
+        ATXHeading1 [0, 7] "# title"
+          HeaderMark [0, 1] "#""
+    `)
+    expect(parse(gfmBlockOnlyParser, '#  title')).toMatchInlineSnapshot(`
+      "Document [0, 8] "#  title"
+        ATXHeading1 [0, 8] "#  title"
+          HeaderMark [0, 1] "#""
+    `)
+    expect(parse(gfmBlockOnlyParser, '# title #')).toMatchInlineSnapshot(`
+      "Document [0, 9] "# title #"
+        ATXHeading1 [0, 9] "# title #"
+          HeaderMark [0, 1] "#"
+          HeaderMark [8, 9] "#""
+    `)
+  })
 })
