@@ -23,10 +23,9 @@
   --meowdown-autocomplete-highlight-bg: light-dark(#f4f4f5, #27272a);
   --meowdown-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Collapsible bullets: the fold chevron glyph and the ring drawn behind a
-   * collapsed item's dot. Standalone so folding can be themed independently. */
-  --meowdown-fold-chevron: light-dark(#9ca3af, #6b7280);
-  --meowdown-fold-halo: light-dark(#d1d5db, #4b5563);
+  /* Collapsible bullets: the filled circle drawn behind a collapsed item's dot
+   * (so it reads as a target). Standalone so folding can be themed apart. */
+  --meowdown-fold-halo: light-dark(#d4d4d8, #52525b);
 
   /* Selection colors. Deliberately standalone variables, not derived from
    * `--meowdown-accent`, so selection can be restyled independently. */
@@ -222,78 +221,58 @@
  * click target. `data-list-collapsable` (>= 2 children) marks a foldable item.
  * ------------------------------------------------------------------------- */
 .ProseMirror .prosemirror-flat-list[data-list-kind='bullet'] {
-  /* Draw the dot ourselves instead of the native list marker. */
+  /* Draw the dot ourselves instead of the native list marker, so a collapsed
+   * item can wear a halo. */
   list-style: none;
 
-  /* The marker sits in the left gutter and lays a fold chevron next to the dot.
-   * `flex-end` keeps the dot snug against the content; the chevron reserves its
-   * slot on the left so the dot never shifts when it appears. */
   & > .list-marker {
     position: absolute;
     right: 100%;
-    width: 1.4em;
+    width: 1lh;
     height: 1lh;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 0.05em;
+    justify-content: center;
     user-select: none;
   }
 
-  /* The fold chevron (left of the dot). Hidden until the item is foldable and
-   * hovered, or collapsed. */
+  /* The halo: a filled circle behind the dot. Hidden by default, hinted on
+   * hover of a foldable item, and fully shown when collapsed, so a folded
+   * bullet reads as a target (a dot inside a disc) at a glance. */
   & > .list-marker::before {
     content: '';
-    flex: none;
-    width: 0.45em;
-    height: 0.7em;
-    background: var(--meowdown-fold-chevron);
-    clip-path: polygon(15% 0%, 85% 50%, 15% 100%); /* points right */
+    position: absolute;
+    width: 1.05em;
+    height: 1.05em;
+    border-radius: 100rem;
+    background: var(--meowdown-fold-halo);
     opacity: 0;
-    transform: rotate(0deg);
-    transition:
-      opacity 120ms ease,
-      transform 120ms ease;
+    transition: opacity 120ms ease;
   }
 
-  /* The bullet dot (right, beside the content). */
+  /* The bullet dot, layered above the halo. */
   & > .list-marker::after {
     content: '';
-    flex: none;
+    position: relative;
     width: 0.4em;
     height: 0.4em;
     border-radius: 100rem;
     background: currentColor;
-    transition:
-      box-shadow 120ms ease,
-      background-color 120ms ease;
   }
 
-  /* A foldable item: marker is clickable; the chevron fades in on hover. */
+  /* A foldable item: the marker is clickable and hovering hints the halo. */
   &[data-list-collapsable] {
     & > .list-marker {
       cursor: pointer;
     }
     &:hover > .list-marker::before {
-      opacity: 0.7;
+      opacity: 0.5;
     }
   }
 
-  /* Expanded foldable item: the chevron points down. */
-  &[data-list-collapsable]:not([data-list-collapsed]) > .list-marker::before {
-    transform: rotate(90deg);
-  }
-
-  /* Collapsed: the chevron stays (points right) and a clearly visible halo
-   * rings the dot, so a folded bullet reads differently at a glance. */
-  &[data-list-collapsable][data-list-collapsed] {
-    & > .list-marker::before {
-      opacity: 0.7;
-      transform: rotate(0deg);
-    }
-    & > .list-marker::after {
-      box-shadow: 0 0 0 0.3em var(--meowdown-fold-halo);
-    }
+  /* Collapsed: the halo is fully shown. */
+  &[data-list-collapsable][data-list-collapsed] > .list-marker::before {
+    opacity: 1;
   }
 
   /* Hide the descendants of a collapsed bullet, keeping its first block. */
