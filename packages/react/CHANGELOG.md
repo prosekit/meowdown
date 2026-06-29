@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.29.0](https://github.com/prosekit/meowdown/compare/react-v0.28.0...react-v0.29.0) (2026-06-29)
+
+
+### Features
+
+* **react:** remove the CodeMirror source mode ([#171](https://github.com/prosekit/meowdown/issues/171)) ([ca53cc0](https://github.com/prosekit/meowdown/commit/ca53cc0942678ecbe1b929bdf5cf5dc0de1d3a11))
+
+
+### Bug Fixes
+
+* restrict table cells to inline content ([#172](https://github.com/prosekit/meowdown/issues/172)) ([e6db446](https://github.com/prosekit/meowdown/commit/e6db44630400ada6646876842156713ad27f31d9))
+
 ## [0.28.0](https://github.com/prosekit/meowdown/compare/react-v0.27.1...react-v0.28.0) (2026-06-29)
 
 

@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.29.0](https://github.com/prosekit/meowdown/compare/core-v0.28.0...core-v0.29.0) (2026-06-29)
+
+
+### Features
+
+* support collapsible bullets ([#170](https://github.com/prosekit/meowdown/issues/170)) ([005920e](https://github.com/prosekit/meowdown/commit/005920e30c5a616b5ec4576abd54f0182993f85d))
+
+
+### Bug Fixes
+
+* restrict table cells to inline content ([#172](https://github.com/prosekit/meowdown/issues/172)) ([e6db446](https://github.com/prosekit/meowdown/commit/e6db44630400ada6646876842156713ad27f31d9))
+
 ## [0.28.0](https://github.com/prosekit/meowdown/compare/core-v0.27.1...core-v0.28.0) (2026-06-29)
 
 
