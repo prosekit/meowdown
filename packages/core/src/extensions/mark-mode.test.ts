@@ -700,11 +700,22 @@ describe('focus mode', () => {
             contenteditable="false"
             data-testid="image-preview"
           >
-            <img
-              alt="alt"
-              draggable="false"
-              src="http://x/p.png"
+            <prosekit-resizable-root
+              class="md-image-resizable"
+              data-testid="image-resizable"
+              style="width: 1px; height: 1px;"
             >
+              <img
+                alt="alt"
+                draggable="false"
+                src="http://x/p.png"
+              >
+              <prosekit-resizable-handle
+                class="md-image-resize-handle"
+                position="bottom-right"
+              >
+              </prosekit-resizable-handle>
+            </prosekit-resizable-root>
           </span>
           <span class="md-image-view-content md-atom-view-content">
             ![alt](pic.png)

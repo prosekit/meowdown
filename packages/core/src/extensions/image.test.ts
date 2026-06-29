@@ -283,3 +283,49 @@ describe('image click callback', () => {
     expect(onImageClick.mock.calls.map((call) => call[0].alt)).toEqual(['one', 'two'])
   })
 })
+
+// Releasing a resize rewrites only the trailing `<!-- {"width":N} -->` comment;
+// the inline-mark plugin re-derives the `width` attribute back onto the mark.
+describe('image resize', () => {
+  const resizable = pmRoot.getByTestId('image-resizable')
+
+  function setupResize(markdown: string): Fixture {
+    const fixture = setupFixture()
+    const { editor, n } = fixture
+    editor.use(defineImage({ resolveImageUrl: () => IMAGE_URL }))
+    editor.use(defineMarkMode('hide'))
+    fixture.set(n.doc(n.paragraph(markdown)))
+    return fixture
+  }
+
+  function endResize(width: number): void {
+    resizable
+      .element()
+      .dispatchEvent(new CustomEvent('resizeEnd', { detail: { width, height: 100 } }))
+  }
+
+  it('applies a persisted width to the resizable root', async () => {
+    using fixture = setupResize('![cat](u)<!-- {"width":200} -->')
+    void fixture
+    await expect.element(resizable).toHaveAttribute('data-width', '200')
+  })
+
+  it('writes a width comment when resized', async () => {
+    using fixture = setupResize('![cat](u)')
+    await expect.element(resizable).toBeInTheDocument()
+    endResize(320)
+    await vi.waitFor(() => {
+      expect(fixture.doc.textContent).toBe('![cat](u)<!-- {"width":320} -->')
+    })
+  })
+
+  it('replaces an existing width comment when resized again', async () => {
+    using fixture = setupResize('![cat](u)<!-- {"width":100} -->')
+    await expect.element(resizable).toHaveAttribute('data-width', '100')
+    endResize(320)
+    await vi.waitFor(() => {
+      expect(fixture.doc.textContent).toBe('![cat](u)<!-- {"width":320} -->')
+    })
+    await expect.element(resizable).toHaveAttribute('data-width', '320')
+  })
+})

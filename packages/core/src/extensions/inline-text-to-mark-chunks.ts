@@ -6,6 +6,7 @@ import { parseInline } from '../lezer/inline.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 
 import type { MdLinkTextAttrs, MdPackAttrs, MdPackSimpleKey } from './inline-marks.ts'
+import { parseMagicComment, type MagicComment } from './magic-comment.ts'
 import type { MarkChunk } from './mark-chunk.ts'
 import type { MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
@@ -90,7 +91,8 @@ function walk(
   out: MarkChunk[],
 ): void {
   let pos = rangeStart
-  for (const node of nodes) {
+  for (let index = 0; index < nodes.length; index++) {
+    const node = nodes[index]
     if (node.from > pos) {
       emit(out, pos, node.from, parentMarks)
     }
@@ -98,7 +100,11 @@ function walk(
     if (type === LEZER_NODE_IDS.Link) {
       walkLink(node, parentMarks, text, marks, out)
     } else if (type === LEZER_NODE_IDS.Image) {
-      walkImage(node, parentMarks, text, marks, out)
+      const trailing = takeMagicComment(node, nodes[index + 1], text)
+      walkImage(node, parentMarks, text, marks, out, trailing)
+      if (trailing) index++ // skip the folded comment
+      pos = trailing ? trailing.to : node.to
+      continue
     } else if (type === LEZER_NODE_IDS.Wikilink) {
       walkWikilink(node, parentMarks, text, marks, out)
     } else if (type === LEZER_NODE_IDS.URL) {
@@ -221,8 +227,29 @@ function walkLink(
   }
 }
 
+interface AdjacentMagicComment {
+  magic: MagicComment
+  to: number
+}
+
+// A magic comment sitting immediately after `image`, or undefined.
+function takeMagicComment(
+  image: InlineElement,
+  next: InlineElement | undefined,
+  text: string,
+): AdjacentMagicComment | undefined {
+  if (!next || next.type !== LEZER_NODE_IDS.Comment || next.from !== image.to) return undefined
+  const magic = parseMagicComment(text.slice(next.from, next.to))
+  if (!magic) return undefined
+  return { magic, to: next.to }
+}
+
 /**
  * Special walker for a direct image `![alt](url)`.
+ *
+ * A `trailing` magic comment immediately after the image (e.g.
+ * `<!-- {"width":320} -->`) is folded into the mark range so it round-trips as
+ * source while supplying the image's `width`.
  */
 function walkImage(
   node: InlineElement,
@@ -230,6 +257,7 @@ function walkImage(
   text: string,
   marks: TypedMarkBuilders,
   out: MarkChunk[],
+  trailing?: AdjacentMagicComment,
 ): void {
   const urlNode = node.children.find((child) => child.type === LEZER_NODE_IDS.URL)
   if (!urlNode) {
@@ -246,8 +274,10 @@ function walkImage(
   const alt: string =
     bracketNodes.length >= 2 ? text.slice(bracketNodes[0].to, bracketNodes[1].from) : ''
   const title: string = titleNode ? unquoteTitle(text.slice(titleNode.from, titleNode.to)) : ''
+  const width = trailing?.magic.width ?? null
+  const to = trailing?.to ?? node.to
 
-  emit(out, node.from, node.to, [...parentMarks, marks.mdImage.create({ src, alt, title })])
+  emit(out, node.from, to, [...parentMarks, marks.mdImage.create({ src, alt, title, width })])
 }
 
 /**

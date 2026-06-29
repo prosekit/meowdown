@@ -491,19 +491,73 @@
 /* image */
 .ProseMirror {
   .md-image-view {
+    max-width: 100%;
     margin-left: 2px;
     margin-right: 2px;
   }
 
   .md-image-view-preview {
+    /* inline-flex (not inline-block) so the box tightly wraps the image with no
+     * baseline descender gap below it, which would otherwise show as empty space
+     * inside the selection outline. */
+    display: inline-flex;
+    max-width: 100%;
     border-radius: 6px;
     outline-offset: 2px;
   }
 
-  .md-image-view-preview img {
-    max-height: var(--meowdown-image-max-height, 24rem);
+  .md-image-resizable {
+    position: relative;
+    display: inline-block;
+    /* New stacking context so the handle's `mix-blend-mode` mixes only with the
+     * image, not the page behind it. */
+    isolation: isolate;
     max-width: 100%;
+    /* Avoid a 1px collapse before the image loads / a width is known, and keep
+     * the corner handle clear of the image center. */
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+  }
+
+  .md-image-resizable img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
     border-radius: var(--meowdown-image-radius, 0.5rem);
+  }
+
+  .md-image-resize-handle {
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    box-sizing: border-box;
+    width: 14px;
+    height: 14px;
+    border-right: 3px solid #fff;
+    border-bottom: 3px solid #fff;
+    border-bottom-right-radius: 5px;
+    /* Blend against the image so the corner bracket reads on both light and dark
+     * photos. Pairs with `isolation: isolate` on `.md-image-resizable`. */
+    mix-blend-mode: exclusion;
+    cursor: nwse-resize;
+    /* Hidden handle never intercepts a click meant for the image. */
+    pointer-events: none;
+    touch-action: none;
+    /* A light one-shot pop: scale up to full size when revealed on hover. */
+    opacity: 0;
+    transform: scale(0.8);
+    transform-origin: bottom right;
+    transition:
+      opacity 0.12s ease,
+      transform 0.12s ease;
+  }
+
+  .md-image-resizable:hover .md-image-resize-handle,
+  .md-image-resizable[data-resizing] .md-image-resize-handle {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
   }
 }
 

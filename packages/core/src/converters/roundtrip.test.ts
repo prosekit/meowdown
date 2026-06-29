@@ -83,6 +83,12 @@ describe('inline', () => {
     expect(roundtrip('![img](src)')).toBe('![img](src)\n')
   })
 
+  it('keeps an image width comment', () => {
+    expect(roundtrip('![img](src)<!-- {"width":320} -->')).toBe(
+      '![img](src)<!-- {"width":320} -->\n',
+    )
+  })
+
   it('keeps an angle autolink', () => {
     expect(roundtrip('<https://auto.com>')).toBe('<https://auto.com>\n')
   })

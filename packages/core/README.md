@@ -84,7 +84,6 @@ const markdown = docToMarkdown(editor.state.doc)
 - `--meowdown-border`: horizontal rules and table borders.
 - `--meowdown-code-bg`: code block background.
 - `--meowdown-table-header-bg`: table header row background.
-- `--meowdown-image-max-height`: max height of rendered inline images.
 - `--meowdown-image-radius`: corner radius of rendered inline images.
 - `--meowdown-placeholder`: placeholder text color (defaults to `--meowdown-muted`).
 - `--meowdown-font-mono`: monospace font stack.
@@ -104,6 +103,8 @@ Markdown links (`[text](url)`) render the label as an `<a href>` with the `.md-l
 Bare URLs autolink without `[text](url)` brackets and share the same `.md-link` rendering and click handling: a scheme URL (`https://example.com`), an angle autolink (`<https://example.com>`), a `www.` host (`www.example.com`), an email (`me@example.com`), and a bare domain (`google.com`, `sub.domain.io/path`). Bare domains are matched against a curated list of common TLDs, so file names and prose keep their dots without linkifying (`README.md`, `node.js`, `i.e.` stay plain text); reach for `[text](url)` or `<url>` to link anything off that list. Autolinks are derived live from the text, so editing one re-evaluates it; the caret sitting inside a link never un-links it.
 
 Inline images (`![alt](src)`) stay literal text and render in place via a mark view, with the raw `![alt](src)` hidden in hide and focus modes. Add it with `defineImage({ resolveImageUrl, onImagePaste })` (or `@meowdown/react`'s image props). `resolveImageUrl` is optional and defaults to showing http(s) URLs as-is. Wire click handling with `defineImageClickHandler(({ src, alt, event }) => ...)` (or `@meowdown/react`'s `onImageClick` prop).
+
+Rendered images are resizable: drag the corner handle and the chosen width is written back into the source as a trailing comment, `![alt](src)<!-- {"width":320} -->`, which round-trips as plain Markdown. A comment immediately after an image is folded into its mark and drives the image's `width` attribute; any other comment stays literal text.
 
 Pasting a lone tweet or YouTube link can auto-embed it. `defineEmbedPaste()` (or `@meowdown/react`'s `embedPaste` prop) rewrites the pasted link to `![](url)` so it renders as an embed; one undo turns the embed back into the raw link. It is not part of `defineEditorExtension`; add it explicitly.
 

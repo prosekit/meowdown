@@ -118,10 +118,11 @@ function EmbedFrame({ embed }: { embed: EmbedDescriptor }): ReactElement {
 function ImagePreview(props: {
   src: string
   alt: string
+  width: number | null
   resolveImageUrl?: (src: string) => string | undefined
   onImageClick?: ImageClickHandler
 }): ReactElement | null {
-  const { src, alt, resolveImageUrl, onImageClick } = props
+  const { src, alt, width, resolveImageUrl, onImageClick } = props
   const embed = matchEmbed(src)
   if (embed) return <EmbedFrame embed={embed} />
 
@@ -136,7 +137,13 @@ function ImagePreview(props: {
       data-testid="image-preview"
       contentEditable={false}
     >
-      <img src={url} alt={alt} draggable={false} onClick={handleClick} />
+      <img
+        src={url}
+        alt={alt}
+        draggable={false}
+        onClick={handleClick}
+        style={width == null ? undefined : { width: `${width}px` }}
+      />
     </span>
   )
 }
@@ -144,15 +151,17 @@ function ImagePreview(props: {
 function ImageView(props: {
   src: string
   alt: string
+  width: number | null
   context: RenderContext
   children: ReactNode
 }): ReactElement {
-  const { src, alt, context, children } = props
+  const { src, alt, width, context, children } = props
   return (
     <span className="md-image-view md-atom-view">
       <ImagePreview
         src={src}
         alt={alt}
+        width={width}
         resolveImageUrl={context.resolveImageUrl}
         onImageClick={context.onImageClick}
       />
@@ -227,7 +236,7 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
     case 'mdImage': {
       const attrs = mark.attrs as MdImageAttrs
       return (
-        <ImageView src={attrs.src} alt={attrs.alt} context={context}>
+        <ImageView src={attrs.src} alt={attrs.alt} width={attrs.width} context={context}>
           {children}
         </ImageView>
       )

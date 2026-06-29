@@ -6,13 +6,19 @@ export interface MdImageAttrs {
   src: string
   alt: string
   title: string
+  width: number | null
 }
 
 function defineMdImage() {
   return defineMarkSpec<'mdImage', MdImageAttrs>({
     name: 'mdImage' satisfies MarkName,
     inclusive: false,
-    attrs: { src: { default: '' }, alt: { default: '' }, title: { default: '' } },
+    attrs: {
+      src: { default: '' },
+      alt: { default: '' },
+      title: { default: '' },
+      width: { default: null },
+    },
     toDOM: () => ['span', { class: 'md-image' }, 0],
     parseDOM: [{ tag: 'span.md-image' }],
   })

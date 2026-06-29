@@ -327,6 +327,42 @@ describe('image', () => {
       "
     `)
   })
+
+  it('folds a trailing width comment into the image mark', () => {
+    expect(parse('![a](u)<!-- {"width":320} -->')).toMatchInlineSnapshot(`
+      "
+      [0, 29] mdImage(src=u,alt=a,width=320)
+      "
+    `)
+  })
+
+  it('keeps a non-adjacent comment separate', () => {
+    expect(parse('![a](u) <!-- {"width":320} -->')).toMatchInlineSnapshot(`
+      "
+      [0, 7]  mdImage(src=u,alt=a)
+      [7, 30]
+      "
+    `)
+  })
+
+  it('folds the comment when the image is wrapped by text', () => {
+    expect(parse('x ![a](u)<!-- {"width":50} --> y')).toMatchInlineSnapshot(`
+      "
+      [0, 2]
+      [2, 30]  mdImage(src=u,alt=a,width=50)
+      [30, 32]
+      "
+    `)
+  })
+
+  it('ignores a non-metadata comment after an image', () => {
+    expect(parse('![a](u)<!-- note -->')).toMatchInlineSnapshot(`
+      "
+      [0, 7]  mdImage(src=u,alt=a)
+      [7, 20]
+      "
+    `)
+  })
 })
 
 describe('autolink', () => {

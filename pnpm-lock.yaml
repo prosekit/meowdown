@@ -90,6 +90,9 @@ importers:
       '@prosekit/pm':
         specifier: ^0.1.19-beta.0
         version: 0.1.19-beta.0
+      '@prosekit/web':
+        specifier: ^0.9.0-beta.11
+        version: 0.9.0-beta.11(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.41.9)
       prosemirror-flat-list:
         specifier: ^0.6.0
         version: 0.6.0
@@ -4638,7 +4641,7 @@ snapshots:
     dependencies:
       '@prosekit/core': 0.13.0-beta.3(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
       '@prosekit/pm': 0.1.19-beta.0
-      '@prosekit/web': 0.9.0-beta.11(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
+      '@prosekit/web': 0.9.0-beta.11(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.41.9)
       '@prosemirror-adapter/core': 0.5.3
       '@prosemirror-adapter/react': 0.5.3(react-dom@19.2.7)(react@19.2.7)
     optionalDependencies:
@@ -4662,7 +4665,7 @@ snapshots:
       - y-prosemirror
       - yjs
 
-  '@prosekit/web@0.9.0-beta.11(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)':
+  '@prosekit/web@0.9.0-beta.11(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.41.9)':
     dependencies:
       '@aria-ui/core': 0.2.1
       '@aria-ui/elements': 0.1.10

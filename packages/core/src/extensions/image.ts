@@ -8,9 +8,16 @@ import {
 } from '@prosekit/core'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView, MarkViewConstructor } from '@prosekit/pm/view'
+import {
+  registerResizableHandleElement,
+  registerResizableRootElement,
+  type ResizeEndEvent,
+} from '@prosekit/web/resizable'
 
 import { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './embed/index.ts'
+import { getMarkRangeAt } from './get-mark-range-at.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
+import { formatMagicComment, parseMagicComment, stripMagicComment } from './magic-comment.ts'
 import type { MarkName } from './mark-names.ts'
 
 type ImageUrlResolver = (src: string) => string | undefined
@@ -34,6 +41,11 @@ export function defaultResolveImageUrl(src: string): string | undefined {
   return /^https?:\/\//i.test(src) ? src : undefined
 }
 
+/**
+ * Default cap on an image's displayed height in CSS pixels.
+ */
+const MAX_DISPLAY_HEIGHT = 500
+
 /** Build the iframe DOM for an embed descriptor and start its height listener. */
 function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
   const iframe = document.createElement('iframe')
@@ -50,11 +62,14 @@ function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
   return iframe
 }
 
-/** Build the inline preview for an image `src`: an embed iframe or an `<img>`. */
+/** Build the inline preview for an image `src`: an embed iframe or a resizable `<img>`. */
 function renderImagePreview(
   src: string,
   alt: string,
+  width: number | null,
   options: ImageOptions,
+  view: EditorView,
+  content: HTMLElement,
 ): HTMLElement | undefined {
   const embed = matchEmbed(src)
   if (embed) {
@@ -70,18 +85,96 @@ function renderImagePreview(
   const wrapper = document.createElement('span')
   wrapper.className = 'md-image-view-preview md-atom-view-preview'
   wrapper.dataset.testid = 'image-preview'
+  wrapper.appendChild(buildResizableImage(url, alt, width, view, content))
+  return wrapper
+}
+
+/**
+ * A resizable `<img>`: ProseKit's resizable web component wrapping the image, plus
+ * a drag handle. Releasing a drag writes the new width into the markdown source as
+ * a `<!-- {"width":N} -->` comment, which the inline-mark plugin re-derives back
+ * into the mark's `width` attribute.
+ */
+function buildResizableImage(
+  url: string,
+  alt: string,
+  width: number | null,
+  view: EditorView,
+  content: HTMLElement,
+): HTMLElement {
+  registerResizableRootElement()
+  registerResizableHandleElement()
+
+  const root = document.createElement('prosekit-resizable-root')
+  root.className = 'md-image-resizable'
+  root.dataset.testid = 'image-resizable'
+  if (width != null) root.setAttribute('data-width', String(width))
+
   const img = document.createElement('img')
   img.src = url
   img.alt = alt
   img.draggable = false
-  wrapper.appendChild(img)
+  img.addEventListener('load', () => {
+    const { naturalWidth, naturalHeight } = img
+    const ratio = naturalWidth / naturalHeight
+    if (Number.isFinite(ratio) && ratio > 0) {
+      root.setAttribute('data-aspect-ratio', String(ratio))
+    }
+    // The component renders at 1px when width is null; feed it a display width
+    // (never persisted). The component drives height from width via the aspect
+    // ratio, so cap the width to keep the height within MAX_DISPLAY_HEIGHT. Never
+    // upscale past the natural size; CSS max-width clamps the container.
+    if (width == null && naturalWidth > 0 && naturalHeight > 0) {
+      const displayWidth = Math.round(Math.min(naturalWidth, MAX_DISPLAY_HEIGHT * ratio))
+      root.setAttribute('data-width', String(displayWidth))
+    }
+  })
+  root.appendChild(img)
 
-  return wrapper
+  const handle = document.createElement('prosekit-resizable-handle')
+  handle.className = 'md-image-resize-handle'
+  handle.setAttribute('position', 'bottom-right')
+  // A click (no drag) on the handle must not bubble to the image-click handler.
+  handle.addEventListener('click', (event) => event.stopPropagation())
+  root.appendChild(handle)
+
+  root.addEventListener('resizeEnd', (event) => {
+    commitImageWidth(view, content, (event as ResizeEndEvent).detail.width)
+  })
+
+  return root
+}
+
+/**
+ * Persist a resized width by rewriting only the trailing magic comment, leaving
+ * the `![alt](url)` source untouched. The inline-mark plugin re-derives the
+ * `width` attribute from the new text.
+ */
+function commitImageWidth(view: EditorView, content: HTMLElement, rawWidth: number): void {
+  const pos = view.posAtDOM(content, 0)
+  const range = getMarkRangeAt(view.state, pos, 'mdImage')
+  if (!range) return
+  const current = view.state.doc.textBetween(range.from, range.to)
+
+  // Split the range into the `![alt](url)` source and its optional comment;
+  // positions in a textblock are 1:1 with characters, so `from + base.length` is
+  // exactly where the source ends and the comment begins.
+  const base = stripMagicComment(current)
+  const commentFrom = range.from + base.length
+  const currentComment = current.slice(base.length)
+
+  const nextComment = formatMagicComment({
+    ...(parseMagicComment(currentComment) ?? {}),
+    width: Math.round(rawWidth),
+  })
+  if (nextComment === currentComment) return
+
+  view.dispatch(view.state.tr.insertText(nextComment, commentFrom, range.to))
 }
 
 function createImageMarkView(options: ImageOptions): MarkViewConstructor {
-  return (mark) => {
-    const { src, alt } = mark.attrs as MdImageAttrs
+  return (mark, view) => {
+    const { src, alt, width } = mark.attrs as MdImageAttrs
 
     const dom = document.createElement('span')
     dom.className = 'md-image-view md-atom-view'
@@ -89,7 +182,7 @@ function createImageMarkView(options: ImageOptions): MarkViewConstructor {
     const contentDOM = document.createElement('span')
     contentDOM.className = 'md-image-view-content md-atom-view-content'
 
-    const preview = renderImagePreview(src, alt, options)
+    const preview = renderImagePreview(src, alt, width, options, view, contentDOM)
     if (preview) {
       preview.contentEditable = 'false'
       dom.appendChild(preview)
