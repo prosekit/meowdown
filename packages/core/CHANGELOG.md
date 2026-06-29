@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.0](https://github.com/prosekit/meowdown/compare/core-v0.27.1...core-v0.28.0) (2026-06-29)
+
+
+### Features
+
+* make images resizable ([#166](https://github.com/prosekit/meowdown/issues/166)) ([79c109f](https://github.com/prosekit/meowdown/commit/79c109f529bf6e57826198a70ba255c2b0abd3d8))
+
 ## [0.27.1](https://github.com/prosekit/meowdown/compare/core-v0.27.0...core-v0.27.1) (2026-06-28)
 
 
