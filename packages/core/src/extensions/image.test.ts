@@ -21,6 +21,11 @@ const IMAGE_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10" fill="pink"/></svg>'
 const IMAGE_URL = `data:image/svg+xml;base64,${btoa(IMAGE_SVG)}`
 
+// Portrait image (aspect ratio 0.5) for the resize-collapse regression below.
+const PORTRAIT_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="20"><rect width="10" height="20" fill="pink"/></svg>'
+const PORTRAIT_URL = `data:image/svg+xml;base64,${btoa(PORTRAIT_SVG)}`
+
 // Text:     A   B   C   !   [   i   m   g   ]   (   u   r   l   )   D   E   F
 // Offset: 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17
 //
@@ -289,10 +294,10 @@ describe('image click callback', () => {
 describe('image resize', () => {
   const resizable = pmRoot.getByTestId('image-resizable')
 
-  function setupResize(markdown: string): Fixture {
+  function setupResize(markdown: string, url = IMAGE_URL): Fixture {
     const fixture = setupFixture()
     const { editor, n } = fixture
-    editor.use(defineImage({ resolveImageUrl: () => IMAGE_URL }))
+    editor.use(defineImage({ resolveImageUrl: () => url }))
     editor.use(defineMarkMode('hide'))
     fixture.set(n.doc(n.paragraph(markdown)))
     return fixture
@@ -308,6 +313,16 @@ describe('image resize', () => {
     using fixture = setupResize('![cat](u)<!-- {"width":200} -->')
     void fixture
     await expect.element(resizable).toHaveAttribute('data-width', '200')
+  })
+
+  // A portrait image (aspect ratio < 1) makes the component switch to
+  // `width: min-content`; without a paired height it collapses to the CSS
+  // min-width floor. The load handler must derive height from width and ratio.
+  it('pairs a portrait width with a height so it does not collapse', async () => {
+    using fixture = setupResize('![cat](u)<!-- {"width":200} -->', PORTRAIT_URL)
+    void fixture
+    await expect.element(resizable).toHaveAttribute('data-width', '200')
+    await expect.element(resizable).toHaveAttribute('data-height', '400')
   })
 
   it('writes a width comment when resized', async () => {

@@ -117,17 +117,18 @@ function buildResizableImage(
   img.addEventListener('load', () => {
     const { naturalWidth, naturalHeight } = img
     const ratio = naturalWidth / naturalHeight
-    if (Number.isFinite(ratio) && ratio > 0) {
-      root.setAttribute('data-aspect-ratio', String(ratio))
-    }
+    if (!Number.isFinite(ratio) || ratio <= 0) return
+    root.setAttribute('data-aspect-ratio', String(ratio))
     // The component renders at 1px when width is null; feed it a display width
     // (never persisted). The component drives height from width via the aspect
     // ratio, so cap the width to keep the height within MAX_DISPLAY_HEIGHT. Never
     // upscale past the natural size; CSS max-width clamps the container.
-    if (width == null && naturalWidth > 0 && naturalHeight > 0) {
-      const displayWidth = Math.round(Math.min(naturalWidth, MAX_DISPLAY_HEIGHT * ratio))
-      root.setAttribute('data-width', String(displayWidth))
-    }
+    const displayWidth = width ?? Math.round(Math.min(naturalWidth, MAX_DISPLAY_HEIGHT * ratio))
+    root.setAttribute('data-width', String(displayWidth))
+    // Pair the width with a height. For a portrait image (aspect ratio < 1) the
+    // component switches to `width: min-content`, which without a real height
+    // collapses to the CSS min-width floor instead of honoring the width.
+    root.setAttribute('data-height', String(Math.round(displayWidth / ratio)))
   })
   root.appendChild(img)
 
