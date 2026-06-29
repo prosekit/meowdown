@@ -287,8 +287,9 @@ describe('image click callback', () => {
   })
 })
 
-// Releasing a resize rewrites only the trailing `<!-- {"width":N} -->` comment;
-// the inline-mark plugin re-derives the `width` attribute back onto the mark.
+// Releasing a resize rewrites only the trailing `<!-- {"width":N,"height":M} -->`
+// comment; the inline-mark plugin re-derives the `width`/`height` attributes back
+// onto the mark.
 describe('image resize', () => {
   const resizable = pmRoot.getByTestId('image-resizable')
 
@@ -313,6 +314,19 @@ describe('image resize', () => {
     await expect.element(resizable).toHaveAttribute('data-width', '200')
   })
 
+  // A persisted height is applied directly, not recomputed from width. The
+  // portrait image's derived height would be 200 / 0.5 = 400; the comment's 150
+  // proves the seeded height wins, so the box has its size before the load event.
+  it('applies a persisted width and height to the resizable root', async () => {
+    using fixture = setupResize(
+      '![cat](u)<!-- {"width":200,"height":150} -->',
+      getSVGImageURL(10, 20),
+    )
+    void fixture
+    await expect.element(resizable).toHaveAttribute('data-width', '200')
+    await expect.element(resizable).toHaveAttribute('data-height', '150')
+  })
+
   // Every orientation must pair the persisted width with a derived height. A
   // portrait image (aspect ratio < 1) is the regression: the component switches
   // to `width: min-content`, which without a real height collapses to the CSS
@@ -334,21 +348,21 @@ describe('image resize', () => {
     },
   )
 
-  it('writes a width comment when resized', async () => {
+  it('writes a width and height comment when resized', async () => {
     using fixture = setupResize('![cat](u)')
     await expect.element(resizable).toBeInTheDocument()
     endResize(320)
     await vi.waitFor(() => {
-      expect(fixture.doc.textContent).toBe('![cat](u)<!-- {"width":320} -->')
+      expect(fixture.doc.textContent).toBe('![cat](u)<!-- {"width":320,"height":100} -->')
     })
   })
 
-  it('replaces an existing width comment when resized again', async () => {
+  it('replaces an existing size comment when resized again', async () => {
     using fixture = setupResize('![cat](u)<!-- {"width":100} -->')
     await expect.element(resizable).toHaveAttribute('data-width', '100')
     endResize(320)
     await vi.waitFor(() => {
-      expect(fixture.doc.textContent).toBe('![cat](u)<!-- {"width":320} -->')
+      expect(fixture.doc.textContent).toBe('![cat](u)<!-- {"width":320,"height":100} -->')
     })
     await expect.element(resizable).toHaveAttribute('data-width', '320')
   })

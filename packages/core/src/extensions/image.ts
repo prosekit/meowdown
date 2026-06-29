@@ -67,6 +67,7 @@ function renderImagePreview(
   src: string,
   alt: string,
   width: number | null,
+  height: number | null,
   options: ImageOptions,
   view: EditorView,
   content: HTMLElement,
@@ -85,20 +86,21 @@ function renderImagePreview(
   const wrapper = document.createElement('span')
   wrapper.className = 'md-image-view-preview md-atom-view-preview'
   wrapper.dataset.testid = 'image-preview'
-  wrapper.appendChild(buildResizableImage(url, alt, width, view, content))
+  wrapper.appendChild(buildResizableImage(url, alt, width, height, view, content))
   return wrapper
 }
 
 /**
  * A resizable `<img>`: ProseKit's resizable web component wrapping the image, plus
- * a drag handle. Releasing a drag writes the new width into the markdown source as
- * a `<!-- {"width":N} -->` comment, which the inline-mark plugin re-derives back
- * into the mark's `width` attribute.
+ * a drag handle. Releasing a drag writes the new width and height into the markdown
+ * source as a `<!-- {"width":N,"height":M} -->` comment, which the inline-mark
+ * plugin re-derives back into the mark's `width`/`height` attributes.
  */
 function buildResizableImage(
   url: string,
   alt: string,
   width: number | null,
+  height: number | null,
   view: EditorView,
   content: HTMLElement,
 ): HTMLElement {
@@ -108,8 +110,11 @@ function buildResizableImage(
   const root = document.createElement('prosekit-resizable-root')
   root.className = 'md-image-resizable'
   root.dataset.testid = 'image-resizable'
-  // REVIEW: why do we not add data-height here?
+  // A persisted size is known up front, so seed both dimensions before the image
+  // loads. This gives the box its final dimensions immediately, with no layout
+  // shift when the natural size arrives.
   if (width != null) root.setAttribute('data-width', String(width))
+  if (height != null) root.setAttribute('data-height', String(height))
 
   const img = document.createElement('img')
   img.src = url
@@ -120,6 +125,10 @@ function buildResizableImage(
     const ratio = naturalWidth / naturalHeight
     if (!Number.isFinite(ratio) || ratio <= 0) return
     root.setAttribute('data-aspect-ratio', String(ratio))
+    // A persisted size already seeded both dimensions above. Otherwise default to
+    // the natural size, capping the height at MAX_DISPLAY_HEIGHT and never
+    // upscaling, then derive the width. CSS max-width clamps the container.
+    if (width != null && height != null) return
     const displayHeight =
       width == null ? Math.min(naturalHeight, MAX_DISPLAY_HEIGHT) : width / ratio
     const displayWidth = width ?? displayHeight * ratio
@@ -136,18 +145,24 @@ function buildResizableImage(
   root.appendChild(handle)
 
   root.addEventListener('resizeEnd', (event) => {
-    commitImageWidth(view, content, (event as ResizeEndEvent).detail.width)
+    const { width: nextWidth, height: nextHeight } = (event as ResizeEndEvent).detail
+    commitImageSize(view, content, nextWidth, nextHeight)
   })
 
   return root
 }
 
 /**
- * Persist a resized width by rewriting only the trailing magic comment, leaving
- * the `![alt](url)` source untouched. The inline-mark plugin re-derives the
- * `width` attribute from the new text.
+ * Persist a resized width and height by rewriting only the trailing magic
+ * comment, leaving the `![alt](url)` source untouched. The inline-mark plugin
+ * re-derives the `width`/`height` attributes from the new text.
  */
-function commitImageWidth(view: EditorView, content: HTMLElement, rawWidth: number): void {
+function commitImageSize(
+  view: EditorView,
+  content: HTMLElement,
+  rawWidth: number,
+  rawHeight: number,
+): void {
   const pos = view.posAtDOM(content, 0)
   const range = getMarkRangeAt(view.state, pos, 'mdImage')
   if (!range) return
@@ -163,6 +178,7 @@ function commitImageWidth(view: EditorView, content: HTMLElement, rawWidth: numb
   const nextComment = formatMagicComment({
     ...(parseMagicComment(currentComment) ?? {}),
     width: Math.round(rawWidth),
+    height: Math.round(rawHeight),
   })
   if (nextComment === currentComment) return
 
@@ -171,7 +187,7 @@ function commitImageWidth(view: EditorView, content: HTMLElement, rawWidth: numb
 
 function createImageMarkView(options: ImageOptions): MarkViewConstructor {
   return (mark, view) => {
-    const { src, alt, width } = mark.attrs as MdImageAttrs
+    const { src, alt, width, height } = mark.attrs as MdImageAttrs
 
     const dom = document.createElement('span')
     dom.className = 'md-image-view md-atom-view'
@@ -179,7 +195,7 @@ function createImageMarkView(options: ImageOptions): MarkViewConstructor {
     const contentDOM = document.createElement('span')
     contentDOM.className = 'md-image-view-content md-atom-view-content'
 
-    const preview = renderImagePreview(src, alt, width, options, view, contentDOM)
+    const preview = renderImagePreview(src, alt, width, height, options, view, contentDOM)
     if (preview) {
       preview.contentEditable = 'false'
       dom.appendChild(preview)

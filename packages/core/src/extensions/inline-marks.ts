@@ -7,6 +7,7 @@ export interface MdImageAttrs {
   alt: string
   title: string
   width: number | null
+  height: number | null
 }
 
 function defineMdImage() {
@@ -18,6 +19,7 @@ function defineMdImage() {
       alt: { default: '' },
       title: { default: '' },
       width: { default: null },
+      height: { default: null },
     },
     toDOM: () => ['span', { class: 'md-image' }, 0],
     parseDOM: [{ tag: 'span.md-image' }],

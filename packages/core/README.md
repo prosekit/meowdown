@@ -105,7 +105,7 @@ Bare URLs autolink without `[text](url)` brackets and share the same `.md-link` 
 
 Inline images (`![alt](src)`) stay literal text and render in place via a mark view, with the raw `![alt](src)` hidden in hide and focus modes. Add it with `defineImage({ resolveImageUrl, onImagePaste })` (or `@meowdown/react`'s image props). `resolveImageUrl` is optional and defaults to showing http(s) URLs as-is. Wire click handling with `defineImageClickHandler(({ src, alt, event }) => ...)` (or `@meowdown/react`'s `onImageClick` prop).
 
-Rendered images are resizable: drag the corner handle and the chosen width is written back into the source as a trailing comment, `![alt](src)<!-- {"width":320} -->`, which round-trips as plain Markdown. A comment immediately after an image is folded into its mark and drives the image's `width` attribute; any other comment stays literal text.
+Rendered images are resizable: drag the corner handle and the chosen size is written back into the source as a trailing comment, `![alt](src)<!-- {"width":320,"height":240} -->`, which round-trips as plain Markdown. A comment immediately after an image is folded into its mark and drives the image's `width` and `height` attributes, so the box keeps its dimensions before the image loads; any other comment stays literal text.
 
 Pasting a lone tweet or YouTube link can auto-embed it. `defineEmbedPaste()` (or `@meowdown/react`'s `embedPaste` prop) rewrites the pasted link to `![](url)` so it renders as an embed; one undo turns the embed back into the raw link. It is not part of `defineEditorExtension`; add it explicitly.
 
