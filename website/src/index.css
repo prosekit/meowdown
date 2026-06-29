@@ -13,6 +13,28 @@ html {
   background-color: light-dark(var(--color-orange-50), var(--color-stone-950));
 }
 
+/* The source mode renders a CodeMirror editor. */
+.meowdown [data-editor='codemirror'] {
+  display: flex;
+  flex: 1 0 auto;
+
+  .cm-editor {
+    flex: 1;
+    font-size: 0.95rem;
+
+    &.cm-focused {
+      outline: none;
+    }
+  }
+
+  .cm-content {
+    /* Same gutter as .ProseMirror so switching modes does not shift text. */
+    padding: 1.25rem var(--meowdown-gutter) 1.75rem;
+    font-family: var(--meowdown-font-mono);
+    caret-color: var(--meowdown-accent);
+  }
+}
+
 /* The active mode description re-animates whenever the mode changes (keyed
  * remount in app.tsx). */
 @keyframes meowdown-fade-in {

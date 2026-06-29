@@ -254,12 +254,30 @@ importers:
 
   website:
     dependencies:
+      '@codemirror/commands':
+        specifier: ^6.10.4
+        version: 6.10.4
+      '@codemirror/lang-markdown':
+        specifier: ^6.5.0
+        version: 6.5.0
+      '@codemirror/language':
+        specifier: ^6.12.3
+        version: 6.12.3
+      '@codemirror/state':
+        specifier: ^6.7.0
+        version: 6.7.0
+      '@codemirror/view':
+        specifier: ^6.43.1
+        version: 6.43.1
       '@meowdown/core':
         specifier: workspace:*
         version: link:../packages/core
       '@meowdown/react':
         specifier: workspace:*
         version: link:../packages/react
+      '@ocavue/utils':
+        specifier: ^1.7.0
+        version: 1.7.0
       react:
         specifier: ^19.2.7
         version: 19.2.7
@@ -276,9 +294,6 @@ importers:
       '@ocavue/tsconfig':
         specifier: ^0.7.1
         version: 0.7.1
-      '@ocavue/utils':
-        specifier: ^1.7.0
-        version: 1.7.0
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.1(vite@8.1.0)

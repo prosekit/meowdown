@@ -1,8 +1,9 @@
-import type { EditorMode } from '@meowdown/react'
 import { useEffect, useState } from 'react'
 
+import type { DemoMode } from './components/demo-editor.tsx'
+
 interface ModeOption {
-  value: EditorMode
+  value: DemoMode
   label: string
   description: string
 }
@@ -32,7 +33,7 @@ export const MODES: ModeOption[] = [
 
 const MODE_STORAGE_KEY = 'meowdown:mode'
 
-function readStoredMode(): EditorMode {
+function readStoredMode(): DemoMode {
   const stored = sessionStorage.getItem(MODE_STORAGE_KEY)
   if (stored) {
     for (const option of MODES) {
@@ -44,12 +45,12 @@ function readStoredMode(): EditorMode {
   return 'focus'
 }
 
-function writeStoredMode(mode: EditorMode): void {
+function writeStoredMode(mode: DemoMode): void {
   sessionStorage.setItem(MODE_STORAGE_KEY, mode)
 }
 
 export function useEditorMode() {
-  const [mode, setMode] = useState<EditorMode>(readStoredMode)
+  const [mode, setMode] = useState<DemoMode>(readStoredMode)
 
   useEffect(() => {
     writeStoredMode(mode)
