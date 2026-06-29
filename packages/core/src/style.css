@@ -23,6 +23,11 @@
   --meowdown-autocomplete-highlight-bg: light-dark(#f4f4f5, #27272a);
   --meowdown-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
+  /* Collapsible bullets: the fold chevron glyph and the ring drawn behind a
+   * collapsed item's dot. Standalone so folding can be themed independently. */
+  --meowdown-fold-chevron: light-dark(#a1a1aa, #71717a);
+  --meowdown-fold-halo: light-dark(#e4e4e7, #3f3f46);
+
   /* Selection colors. Deliberately standalone variables, not derived from
    * `--meowdown-accent`, so selection can be restyled independently. */
   --meowdown-node-outline: light-dark(hsl(250 100% 60%), hsl(250 100% 72%));
@@ -204,6 +209,89 @@
     border-radius: 100rem;
     width: 1.05rem;
     height: 1.05rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Collapsible bullets (reflect-editor style)
+ *
+ * A bullet records its fold state in the Markdown marker: `+` is collapsed,
+ * `-`/`*` are expanded. In the editor the `collapsed` attribute drives it; the
+ * converter maps it to `+` on save. The bullet glyph moves into `.list-marker`
+ * so the collapsed/hover states can restyle it and so the marker is a reliable
+ * click target. `data-list-collapsable` (>= 2 children) marks a foldable item.
+ * ------------------------------------------------------------------------- */
+.ProseMirror .prosemirror-flat-list[data-list-kind='bullet'] {
+  /* Draw the dot ourselves instead of the native list marker. */
+  list-style: none;
+
+  & > .list-marker {
+    position: absolute;
+    right: 100%;
+    width: 1lh;
+    height: 1lh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+  }
+
+  /* The bullet dot. */
+  & > .list-marker::after {
+    content: '';
+    width: 0.36em;
+    height: 0.36em;
+    border-radius: 100rem;
+    background: currentColor;
+    transition: box-shadow 120ms ease;
+  }
+
+  /* The fold chevron, hidden until the item is foldable and hovered. */
+  & > .list-marker::before {
+    content: '';
+    position: absolute;
+    right: calc(100% - 0.15em);
+    width: 0.6em;
+    height: 0.6em;
+    background: var(--meowdown-fold-chevron);
+    clip-path: polygon(25% 8%, 78% 50%, 25% 92%); /* points right */
+    opacity: 0;
+    transform: rotate(0deg);
+    transition:
+      opacity 120ms ease,
+      transform 120ms ease;
+    pointer-events: none;
+  }
+
+  /* A foldable item: marker is clickable; the chevron fades in on hover. */
+  &[data-list-collapsable] {
+    & > .list-marker {
+      cursor: pointer;
+    }
+    &:hover > .list-marker::before {
+      opacity: 0.55;
+    }
+  }
+
+  /* Expanded foldable item: the chevron points down. */
+  &[data-list-collapsable]:not([data-list-collapsed]) > .list-marker::before {
+    transform: rotate(90deg);
+  }
+
+  /* Collapsed: chevron stays (points right) and a halo rings the dot. */
+  &[data-list-collapsable][data-list-collapsed] {
+    & > .list-marker::before {
+      opacity: 0.55;
+      transform: rotate(0deg);
+    }
+    & > .list-marker::after {
+      box-shadow: 0 0 0 0.26em var(--meowdown-fold-halo);
+    }
+  }
+
+  /* Hide the descendants of a collapsed bullet, keeping its first block. */
+  &[data-list-collapsable][data-list-collapsed] > .list-content > *:nth-child(n + 2) {
+    display: none;
   }
 }
 

@@ -30,7 +30,7 @@ const markdown = docToMarkdown(editor.state.doc)
 - CommonMark
   - ATX headings (`# Heading 1`, `## Heading 2`, etc.)
   - Setext headings (`Heading 1\n===`, `Heading 2\n---`)
-  - Bullet lists (`- item`, `* item`, `+ item`)
+  - Bullet lists (`- item`, `* item`); a `+ item` marker means a collapsed (folded) bullet
   - Ordered lists (`1. item`, `2) item`, etc.)
   - Blockquotes (`> quote`)
   - Fenced code blocks (` ```lang\ncode\n``` `)
@@ -50,21 +50,22 @@ const markdown = docToMarkdown(editor.state.doc)
 
 ## Keyboard shortcuts
 
-`Mod` is Cmd on macOS and Ctrl elsewhere. Each formatting shortcut inserts or removes the literal Markdown delimiters around the selection; each heading shortcut toggles the current block to that level (or back to a paragraph).
+`Mod` is Cmd on macOS and Ctrl elsewhere. Each formatting shortcut inserts or removes the literal Markdown delimiters around the selection; each heading shortcut toggles the current block to that level (or back to a paragraph). The fold shortcut collapses or expands the bullet at the cursor, recording the state in its marker (`+` is collapsed).
 
-| Key           | Action        | Markdown            |
-| ------------- | ------------- | ------------------- |
-| `Mod-B`       | Bold          | `**bold**`          |
-| `Mod-I`       | Italic        | `*italic*`          |
-| `Mod-E`       | Inline code   | `` `code` ``        |
-| `Mod-Shift-X` | Strikethrough | `~~strikethrough~~` |
-| `Mod-Shift-H` | Highlight     | `==highlight==`     |
-| `Mod-1`       | Heading 1     | `# heading`         |
-| `Mod-2`       | Heading 2     | `## heading`        |
-| `Mod-3`       | Heading 3     | `### heading`       |
-| `Mod-4`       | Heading 4     | `#### heading`      |
-| `Mod-5`       | Heading 5     | `##### heading`     |
-| `Mod-6`       | Heading 6     | `###### heading`    |
+| Key           | Action                  | Markdown            |
+| ------------- | ----------------------- | ------------------- |
+| `Mod-B`       | Bold                    | `**bold**`          |
+| `Mod-I`       | Italic                  | `*italic*`          |
+| `Mod-E`       | Inline code             | `` `code` ``        |
+| `Mod-Shift-X` | Strikethrough           | `~~strikethrough~~` |
+| `Mod-Shift-H` | Highlight               | `==highlight==`     |
+| `Mod-1`       | Heading 1               | `# heading`         |
+| `Mod-2`       | Heading 2               | `## heading`        |
+| `Mod-3`       | Heading 3               | `### heading`       |
+| `Mod-4`       | Heading 4               | `#### heading`      |
+| `Mod-5`       | Heading 5               | `##### heading`     |
+| `Mod-6`       | Heading 6               | `###### heading`    |
+| `Mod-.`       | Fold or unfold a bullet | `+ item`            |
 
 `EDITOR_KEY_BINDINGS` is a literal (`as const`) object mapping every key above to its description, for host settings UIs and keybinding-collision checks.
 

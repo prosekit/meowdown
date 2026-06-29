@@ -104,6 +104,31 @@ describe('markdownToDoc', () => {
     })
   })
 
+  it('marks a `+` bullet collapsed and clears the marker', () => {
+    const md = dedent`
+      + parent
+        - child
+    `
+    expect(markdownToDoc(md).child(0).attrs).toMatchObject({
+      kind: 'bullet',
+      collapsed: true,
+      marker: null,
+    })
+  })
+
+  it('keeps `-` and `*` bullets expanded', () => {
+    expect(markdownToDoc('- a').child(0).attrs).toMatchObject({ collapsed: false, marker: '-' })
+    expect(markdownToDoc('* a').child(0).attrs).toMatchObject({ collapsed: false, marker: '*' })
+  })
+
+  it('keeps `+ [ ]` as an expanded circle task', () => {
+    expect(markdownToDoc('+ [ ] a').child(0).attrs).toMatchObject({
+      kind: 'task',
+      marker: '+',
+      collapsed: false,
+    })
+  })
+
   it('keeps each ordered item number', () => {
     const md = dedent`
       5. five

@@ -328,7 +328,22 @@ function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
 
 function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
   const attrs = node.attrs as MeowdownListAttrs
-  const bulletMarker = attrs.marker === '*' || attrs.marker === '+' ? attrs.marker : '-'
+  // A bullet records its fold state in the marker: `+` is collapsed, `-`/`*` are
+  // expanded. A task uses `+` for the circle shape, independent of collapse (a
+  // task's fold is view-state and never written to Markdown). Ordered lists use
+  // the `delimiter` below, so `bulletMarker` does not apply to them.
+  const bulletMarker =
+    attrs.kind === 'task'
+      ? attrs.marker === '+'
+        ? '+'
+        : attrs.marker === '*'
+          ? '*'
+          : '-'
+      : attrs.collapsed
+        ? '+'
+        : attrs.marker === '*'
+          ? '*'
+          : '-'
   const orderMarker = attrs.marker === ')' ? ')' : '.'
   const checkMark = attrs.taskMarker === 'X' ? 'X' : 'x'
   // The delimiter plus its original gap (1-4 spaces).

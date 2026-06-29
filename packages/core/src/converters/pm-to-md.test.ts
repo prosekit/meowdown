@@ -86,6 +86,33 @@ describe('docToMarkdown', () => {
     expect(markdown).toBe('5. five\n5. six\n')
   })
 
+  it('writes a collapsed bullet with `+`', () => {
+    const doc = n.doc(
+      n.list(
+        { kind: 'bullet', collapsed: true },
+        n.paragraph('parent'),
+        n.list({ kind: 'bullet' }, n.paragraph('child')),
+      ),
+    )
+    expect(docToMarkdown(doc)).toBe('+ parent\n  - child\n')
+  })
+
+  it('writes an expanded bullet with `-` or `*`', () => {
+    expect(
+      docToMarkdown(n.doc(n.list({ kind: 'bullet', collapsed: false }, n.paragraph('a')))),
+    ).toBe('- a\n')
+    expect(docToMarkdown(n.doc(n.list({ kind: 'bullet', marker: '*' }, n.paragraph('a'))))).toBe(
+      '* a\n',
+    )
+  })
+
+  it('keeps `+` as the circle task shape regardless of collapsed', () => {
+    const doc = n.doc(
+      n.list({ kind: 'task', marker: '+', checked: false, collapsed: true }, n.paragraph('a')),
+    )
+    expect(docToMarkdown(doc)).toBe('+ [ ] a\n')
+  })
+
   it('keeps task markers', () => {
     const doc = n.doc(
       n.list({ kind: 'task', checked: false }, n.paragraph('A')),
