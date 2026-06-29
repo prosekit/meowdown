@@ -63,6 +63,7 @@ export type { MarkName } from './extensions/mark-names.ts'
 export { defineMarkdownCopy } from './extensions/markdown-copy.ts'
 export type { NodeName } from './extensions/node-names.ts'
 export { getMarkBuilders, type TypedMarkBuilders } from './extensions/schema.ts'
+export { isSelectionInTableCell } from './extensions/table.ts'
 export {
   defineTagClickHandler,
   type TagClickHandler,

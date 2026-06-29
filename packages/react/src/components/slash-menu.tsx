@@ -1,6 +1,6 @@
-import type { EditorExtension } from '@meowdown/core'
+import { isSelectionInTableCell, type EditorExtension, type TypedEditor } from '@meowdown/core'
 import { canUseRegexLookbehind } from '@prosekit/core'
-import { useEditor } from '@prosekit/react'
+import { useEditor, useEditorDerivedValue } from '@prosekit/react'
 import {
   AutocompleteEmpty,
   AutocompleteItem,
@@ -36,70 +36,84 @@ interface SlashMenuProps {
   timeFormat?: TimeFormat
 }
 
+// Hoisted so its identity is stable across renders, as useEditorDerivedValue
+// requires.
+function selectionInTableCell(editor: TypedEditor): boolean {
+  return isSelectionInTableCell(editor.state)
+}
+
 export function SlashMenu({ timeFormat = '12' }: SlashMenuProps) {
   const editor = useEditor<EditorExtension>()
+
+  // A table cell holds inline content only, so the block-creating items below
+  // are no-ops there. Hide them and offer only the inline "Now" item.
+  const inTableCell = useEditorDerivedValue(selectionInTableCell)
 
   return (
     <AutocompleteRoot regex={regex}>
       <AutocompletePositioner className={styles.Positioner}>
         <AutocompletePopup className={styles.Popup} data-testid="slash-menu">
-          <SlashMenuItem
-            label="Heading 1"
-            kbd="#"
-            onSelect={() => editor.commands.setHeading({ level: 1 })}
-          />
-          <SlashMenuItem
-            label="Heading 2"
-            kbd="##"
-            onSelect={() => editor.commands.setHeading({ level: 2 })}
-          />
-          <SlashMenuItem
-            label="Heading 3"
-            kbd="###"
-            onSelect={() => editor.commands.setHeading({ level: 3 })}
-          />
-          <SlashMenuItem
-            label="Heading 4"
-            kbd="####"
-            onSelect={() => editor.commands.setHeading({ level: 4 })}
-          />
-          <SlashMenuItem
-            label="Blockquote"
-            kbd=">"
-            onSelect={() => editor.commands.setBlockquote()}
-          />
-          <SlashMenuItem
-            label="Bullet list"
-            kbd="-"
-            onSelect={() => editor.commands.wrapInList({ kind: 'bullet' })}
-          />
-          <SlashMenuItem
-            label="Ordered list"
-            kbd="1."
-            onSelect={() => editor.commands.wrapInList({ kind: 'ordered' })}
-          />
-          {/* The user-facing copy ("Task list" / "Checkbox list") intentionally
-              differs from the internal command names (`wrapInCircleTask` /
-              `wrapInSquareTask`, "circle / square checkbox task"). */}
-          <SlashMenuItem
-            label="Task list"
-            kbd="+ [ ] "
-            onSelect={() => editor.commands.wrapInCircleTask()}
-          />
-          <SlashMenuItem
-            label="Checkbox list"
-            kbd="- [ ] "
-            onSelect={() => editor.commands.wrapInSquareTask()}
-          />
-          <SlashMenuItem
-            label="Code block"
-            kbd="```"
-            onSelect={() => editor.commands.setCodeBlock()}
-          />
-          <SlashMenuItem
-            label="Table"
-            onSelect={() => editor.commands.insertTable({ row: 3, col: 3, header: true })}
-          />
+          {!inTableCell && (
+            <>
+              <SlashMenuItem
+                label="Heading 1"
+                kbd="#"
+                onSelect={() => editor.commands.setHeading({ level: 1 })}
+              />
+              <SlashMenuItem
+                label="Heading 2"
+                kbd="##"
+                onSelect={() => editor.commands.setHeading({ level: 2 })}
+              />
+              <SlashMenuItem
+                label="Heading 3"
+                kbd="###"
+                onSelect={() => editor.commands.setHeading({ level: 3 })}
+              />
+              <SlashMenuItem
+                label="Heading 4"
+                kbd="####"
+                onSelect={() => editor.commands.setHeading({ level: 4 })}
+              />
+              <SlashMenuItem
+                label="Blockquote"
+                kbd=">"
+                onSelect={() => editor.commands.setBlockquote()}
+              />
+              <SlashMenuItem
+                label="Bullet list"
+                kbd="-"
+                onSelect={() => editor.commands.wrapInList({ kind: 'bullet' })}
+              />
+              <SlashMenuItem
+                label="Ordered list"
+                kbd="1."
+                onSelect={() => editor.commands.wrapInList({ kind: 'ordered' })}
+              />
+              {/* The user-facing copy ("Task list" / "Checkbox list") intentionally
+                  differs from the internal command names (`wrapInCircleTask` /
+                  `wrapInSquareTask`, "circle / square checkbox task"). */}
+              <SlashMenuItem
+                label="Task list"
+                kbd="+ [ ] "
+                onSelect={() => editor.commands.wrapInCircleTask()}
+              />
+              <SlashMenuItem
+                label="Checkbox list"
+                kbd="- [ ] "
+                onSelect={() => editor.commands.wrapInSquareTask()}
+              />
+              <SlashMenuItem
+                label="Code block"
+                kbd="```"
+                onSelect={() => editor.commands.setCodeBlock()}
+              />
+              <SlashMenuItem
+                label="Table"
+                onSelect={() => editor.commands.insertTable({ row: 3, col: 3, header: true })}
+              />
+            </>
+          )}
           <SlashMenuItem
             label="Now"
             onSelect={() => editor.commands.insertText({ text: formatNowTime(timeFormat) })}

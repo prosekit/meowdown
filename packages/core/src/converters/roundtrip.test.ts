@@ -648,6 +648,12 @@ describe('tables', () => {
       '| a \\| b | c |\n| --- | --- |\n| 1 | 2 |\n',
     )
   })
+
+  it('keeps inline markup in a cell', () => {
+    expect(roundtrip('| **a** | [c](d) |\n| --- | --- |\n| e | f |')).toBe(
+      '| **a** | [c](d) |\n| --- | --- |\n| e | f |\n',
+    )
+  })
 })
 
 describe('escapes and whitespace', () => {
