@@ -1,8 +1,19 @@
-import { defineNodeAttr, union, type Extension, type Union } from '@prosekit/core'
 import {
-  defineHorizontalRule,
-  type HorizontalRuleExtension,
+  defineNodeAttr,
+  getNodeType,
+  union,
+  type Extension,
+  type PlainExtension,
+  type Union,
+} from '@prosekit/core'
+import {
+  defineHorizontalRuleCommands,
+  defineHorizontalRuleSpec,
+  type HorizontalRuleCommandsExtension,
+  type HorizontalRuleSpecExtension,
 } from '@prosekit/extensions/horizontal-rule'
+import { defineInputRule } from '@prosekit/extensions/input-rule'
+import { InputRule } from '@prosekit/pm/inputrules'
 
 import type { NodeName } from './node-names.ts'
 
@@ -31,10 +42,36 @@ function defineHorizontalRuleMarkerAttr(): HorizontalRuleMarkerExtension {
   })
 }
 
+// ProseKit's bundled input rule inserts the rule without checking whether the
+// parent accepts it, so typing `---` in an inline-only container (a table cell)
+// throws. This guarded rule mirrors ProseKit's but bails when the parent forbids
+// a horizontal rule, matching how `textblockTypeInputRule` guards headings.
+function defineGuardedHorizontalRuleInputRule(): PlainExtension {
+  return defineInputRule(
+    new InputRule(/^---$/, (state, _match, start, end) => {
+      const type = getNodeType(state.schema, 'horizontalRule' satisfies NodeName)
+      const $start = state.doc.resolve(start)
+      const index = $start.index(-1)
+      if (!$start.node(-1).canReplaceWith(index, index, type)) {
+        return null
+      }
+      return state.tr
+        .delete(start, end)
+        .insert(start - 1, type.createChecked())
+        .scrollIntoView()
+    }),
+  )
+}
+
 export type MeowdownHorizontalRuleExtension = Union<
-  [HorizontalRuleExtension, HorizontalRuleMarkerExtension]
+  [HorizontalRuleSpecExtension, HorizontalRuleCommandsExtension, HorizontalRuleMarkerExtension]
 >
 
 export function defineMeowdownHorizontalRule(): MeowdownHorizontalRuleExtension {
-  return union(defineHorizontalRule(), defineHorizontalRuleMarkerAttr())
+  return union(
+    defineHorizontalRuleSpec(),
+    defineHorizontalRuleCommands(),
+    defineGuardedHorizontalRuleInputRule(),
+    defineHorizontalRuleMarkerAttr(),
+  )
 }
