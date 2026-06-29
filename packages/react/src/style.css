@@ -6,25 +6,4 @@
   .ProseMirror {
     flex: 1 0 auto;
   }
-
-  [data-editor='codemirror'] {
-    display: flex;
-    flex: 1 0 auto;
-
-    .cm-editor {
-      flex: 1;
-      font-size: 0.95rem;
-
-      &.cm-focused {
-        outline: none;
-      }
-    }
-
-    .cm-content {
-      /* Same gutter as .ProseMirror so switching modes does not shift text. */
-      padding: 1.25rem var(--meowdown-gutter) 1.75rem;
-      font-family: var(--meowdown-font-mono);
-      caret-color: var(--meowdown-accent);
-    }
-  }
 }

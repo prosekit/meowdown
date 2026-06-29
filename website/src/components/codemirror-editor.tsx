@@ -3,11 +3,14 @@ import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { Compartment, EditorSelection, EditorState } from '@codemirror/state'
 import { EditorView, keymap } from '@codemirror/view'
+import type {
+  EditorHandle,
+  EditorStateSnapshot,
+  SelectionHint,
+  SelectionJSON,
+} from '@meowdown/react'
 import { clamp } from '@ocavue/utils'
-import type { SelectionJSON } from '@prosekit/core'
 import { useImperativeHandle, useLayoutEffect, useRef, type Ref } from 'react'
-
-import type { EditorHandle, EditorStateSnapshot, SelectionHint } from './types.ts'
 
 function resolveSelection(selection: SelectionHint, docLength: number): EditorSelection {
   if (selection === 'start') return EditorSelection.single(0)
@@ -28,7 +31,7 @@ export interface CodeMirrorEditorProps {
   /** Called on every user-driven document change, not on programmatic setState. */
   onDocChange?: VoidFunction
 
-  /** Makes the editor read-only. See `EditorProps.readOnly`. */
+  /** Makes the editor read-only. */
   readOnly?: boolean
 
   /** Imperative handle for the editor. */
