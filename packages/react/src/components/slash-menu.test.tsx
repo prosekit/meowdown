@@ -1,5 +1,7 @@
 import '../testing/index.ts'
 
+import type { EditorNode } from '@prosekit/pm/model'
+import { TextSelection } from '@prosekit/pm/state'
 import { createRef } from 'react'
 import { describe, expect, it } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -97,4 +99,37 @@ describe('SlashMenu', () => {
 
     expect(ref.current?.getMarkdown()).toMatch(/^\d{2}:\d{2}\n$/)
   })
+
+  it('omits block items inside a table cell but keeps inline items', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} initialMarkdown={'| a | b |\n| --- | --- |\n|  |  |'} />)
+    await pmRoot.click()
+
+    const view = ref.current?.editor?.view
+    if (!view) throw new Error('editor not mounted')
+    view.dispatch(
+      view.state.tr.setSelection(
+        TextSelection.create(view.state.doc, firstBodyCellCaret(view.state.doc)),
+      ),
+    )
+    view.focus()
+
+    await userEvent.keyboard('/')
+    await expect.element(menu).toBeVisible()
+    await expect.element(menu.getByText('Now')).toBeVisible()
+    for (const label of ['Heading 1', 'Blockquote', 'Bullet list', 'Code block', 'Table']) {
+      await expect.element(menu.getByText(label)).not.toBeInTheDocument()
+    }
+  })
 })
+
+/** A caret position inside the first body cell's paragraph. */
+function firstBodyCellCaret(doc: EditorNode): number {
+  let caret = -1
+  doc.descendants((node, pos) => {
+    if (caret < 0 && node.type.name === 'tableCell') caret = pos + 2
+    return caret < 0
+  })
+  if (caret < 0) throw new Error('no body cell found')
+  return caret
+}

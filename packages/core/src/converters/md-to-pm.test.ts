@@ -352,6 +352,21 @@ describe('markdownToDoc', () => {
     })
   })
 
+  it('wraps each table cell text in a single paragraph', () => {
+    const md = dedent`
+      | a | b |
+      |---|---|
+      | 1 | 2 |
+    `
+    const table = markdownToDoc(md).child(0)
+    table.descendants((node) => {
+      if (node.type.name !== 'tableCell' && node.type.name !== 'tableHeaderCell') return true
+      expect(node.childCount).toBe(1)
+      expect(node.child(0).type.name).toBe('paragraph')
+      return false
+    })
+  })
+
   it('keeps a table with a header', () => {
     const md = dedent`
       | a | b |
