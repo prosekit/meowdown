@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.1](https://github.com/prosekit/meowdown/compare/core-v0.29.0...core-v0.29.1) (2026-06-29)
+
+
+### Bug Fixes
+
+* prevent width collapse for tall images ([#174](https://github.com/prosekit/meowdown/issues/174)) ([c778d74](https://github.com/prosekit/meowdown/commit/c778d7411e605482051c4ada06a9135b1602b66a))
+
 ## [0.29.0](https://github.com/prosekit/meowdown/compare/core-v0.28.0...core-v0.29.0) (2026-06-29)
 
 
