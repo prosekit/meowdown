@@ -15,7 +15,6 @@ import { useImperativeHandle, useRef, type ReactNode, type Ref } from 'react'
 
 import type { TimeFormat } from '../utils/date-format.ts'
 
-import { CodeMirrorEditor } from './codemirror-editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
 import type {
   EditorHandle,
@@ -25,14 +24,12 @@ import type {
   WikilinkSearchHandler,
 } from './types.ts'
 
-export type EditorMode = MarkMode | 'source'
+export type EditorMode = MarkMode
 
 export interface EditorProps {
   /**
-   * The editor mode. The three rich modes ('focus', 'show', 'hide') render a ProseKit
-   * editor; 'source' renders a CodeMirror editor showing the raw Markdown text.
-   * Content carries over when switching between the two editor families, but undo
-   * history and selection do not. Defaults to 'focus'.
+   * The editor mode ('focus', 'show', 'hide'), controlling how much Markdown
+   * syntax stays in view. Defaults to 'focus'.
    */
   mode?: EditorMode
 
@@ -50,47 +47,42 @@ export interface EditorProps {
 
   /**
    * Searches tags for the tag menu, which opens when typing `#` followed by
-   * text in a rich mode. Receives the query (lowercased, punctuation
-   * stripped) and returns the tags to show, synchronously or as a promise.
-   * Pass a stable function (e.g. from `useCallback`). Omit to disable the
-   * tag menu. Ignored in source mode.
+   * text. Receives the query (lowercased, punctuation stripped) and returns the
+   * tags to show, synchronously or as a promise. Pass a stable function (e.g.
+   * from `useCallback`). Omit to disable the tag menu.
    */
   onTagSearch?: TagSearchHandler
 
   /**
    * Searches notes for the wikilink menu, which opens as soon as `[[` or `@`
-   * is typed in a rich mode. Receives the query (lowercased, punctuation
-   * stripped, may be empty) and returns the note names to show,
-   * synchronously or as a promise. Pass a stable function (e.g. from
-   * `useCallback`). Omit to disable the wikilink menu. Ignored in source
-   * mode.
+   * is typed. Receives the query (lowercased, punctuation stripped, may be
+   * empty) and returns the note names to show, synchronously or as a promise.
+   * Pass a stable function (e.g. from `useCallback`). Omit to disable the
+   * wikilink menu.
    */
   onWikilinkSearch?: WikilinkSearchHandler
 
   /**
    * Called with the link target on click of a rendered wiki link. Pass a stable
-   * function (e.g. from `useCallback`). Ignored in source mode.
+   * function (e.g. from `useCallback`).
    */
   onWikilinkClick?: WikilinkClickHandler
 
   /**
    * Called with the link `href` on click of a rendered Markdown link
-   * (`[text](url)`). Pass a stable function (e.g. from `useCallback`). Ignored
-   * in source mode.
+   * (`[text](url)`). Pass a stable function (e.g. from `useCallback`).
    */
   onLinkClick?: LinkClickHandler
 
   /**
    * Called after a link is copied from the link menu, with its `href`. Useful
-   * for a toast. Pass a stable function (e.g. from `useCallback`). Ignored in
-   * source mode.
+   * for a toast. Pass a stable function (e.g. from `useCallback`).
    */
   onLinkCopy?: LinkCopyHandler
 
   /**
    * Called with the tag name (without the leading `#`) on click of a rendered
-   * `#tag`. Pass a stable function (e.g. from `useCallback`). Ignored in source
-   * mode.
+   * `#tag`. Pass a stable function (e.g. from `useCallback`).
    */
   onTagClick?: TagClickHandler
 
@@ -101,80 +93,80 @@ export interface EditorProps {
    * Use it to move focus to a previous/next note or page. Receives the
    * `direction` and the original `KeyboardEvent`. Return `false` to let the
    * editor handle the key normally; any other return value consumes it. Pass a
-   * stable function (e.g. from `useCallback`). Ignored in source mode.
+   * stable function (e.g. from `useCallback`).
    */
   onExitBoundary?: ExitBoundaryHandler
 
   /**
    * Maps an image `src` to a displayable URL, or `undefined` to skip that image.
    * Defaults to showing http(s) URLs as-is. Pass a stable function (e.g. from
-   * `useCallback`). Ignored in source mode.
+   * `useCallback`).
    */
   resolveImageUrl?: ImageOptions['resolveImageUrl']
 
   /**
    * Persists a pasted/dropped image file and returns its markdown `src`. Pass a
-   * stable function. Ignored in source mode.
+   * stable function.
    */
   onImagePaste?: ImageOptions['onImagePaste']
 
-  /** Called when persisting a pasted/dropped image throws. Ignored in source mode. */
+  /** Called when persisting a pasted/dropped image throws. */
   onImageSaveError?: ImageOptions['onImageSaveError']
 
   /**
    * Called when the user clicks a rendered image, with its markdown `src`,
    * `alt`, and the originating `MouseEvent`. Pass a stable function (e.g. from
-   * `useCallback`). Ignored in source mode.
+   * `useCallback`).
    */
   onImageClick?: ImageClickHandler
 
   /**
    * Auto-embeds a pasted tweet or YouTube link as a rich embed; one undo turns
-   * the embed back into the raw link. On by default. Ignored in source mode.
+   * the embed back into the raw link. On by default.
    */
   embedPaste?: boolean
 
   /**
    * Pressing Enter at the end of the document's first heading (the title line)
    * starts a fresh empty bullet on the next line instead of a plain paragraph.
-   * Off by default. Ignored in source mode.
+   * Off by default.
    */
   bulletAfterHeading?: boolean
 
-  /** Handles a leading `---` frontmatter block in the rich modes (off by default, ignored in source mode). */
+  /** Handles a leading `---` frontmatter block (off by default). */
   frontmatter?: boolean
 
   /**
-   * Shows the per-block gutter handle in the rich modes: a drag grip for
-   * reordering blocks and a "+" add button, plus the drop indicator that
-   * visualizes where a dragged block will land. On by default. Set to `false`
-   * to hide the gutter affordance entirely, e.g. when the host does not want
-   * block reordering. Ignored in source mode and when `readOnly` is set.
+   * Shows the per-block gutter handle: a drag grip for reordering blocks and a
+   * "+" add button, plus the drop indicator that visualizes where a dragged
+   * block will land. On by default. Set to `false` to hide the gutter
+   * affordance entirely, e.g. when the host does not want block reordering.
+   * Ignored when `readOnly` is set.
    */
   blockHandle?: boolean
 
   /**
    * Placeholder text shown when the whole document is empty. A function
-   * receives the editor state. Pass a stable function. Ignored in source mode.
+   * receives the editor state. Pass a stable function.
    */
   placeholder?: PlaceholderOptions['placeholder']
 
-  /** Makes the editor read-only, in both the rich and source modes. */
+  /** Makes the editor read-only. */
   readOnly?: boolean
 
   /**
-   * Enables the browser's native spell checking in the rich modes. Defaults
-   * to the browser's behavior. Ignored in source mode.
+   * Enables the browser's native spell checking. Defaults to the browser's
+   * behavior.
    */
   spellCheck?: boolean
 
   /**
    * Clock format the `/now` slash command inserts: '12' for "3:45pm" or '24'
-   * for "15:45". Defaults to '12'. Ignored in source mode.
+   * for "15:45". Defaults to '12'.
    */
   timeFormat?: TimeFormat
 
-  /** Class on the editable root (the contenteditable). Rich modes only. */
+  /** Class on the editable root (the contenteditable). */
   editorClassName?: string
 
   /** Class on the outer `.meowdown` wrapper div. */
@@ -183,7 +175,7 @@ export interface EditorProps {
   /** Imperative handle for the editor. */
   handleRef?: Ref<EditorHandle>
 
-  /** Nodes rendered inside the editor's ProseKit context (rich modes only). */
+  /** Nodes rendered inside the editor's ProseKit context. */
   children?: ReactNode
 }
 
@@ -215,7 +207,7 @@ export function MeowdownEditor({
   handleRef,
   children,
 }: EditorProps) {
-  // Handle of whichever editor is currently mounted.
+  // Handle of the mounted editor.
   const childRef = useRef<EditorHandle>(null)
 
   useImperativeHandle(handleRef, () => {
@@ -258,49 +250,36 @@ export function MeowdownEditor({
     }
   }, [])
 
-  // Seed for the mounted editor: the initial markdown on the first render,
-  // the previous editor's content when the mode family flips.
-  const seedMarkdown = childRef.current?.getMarkdown() ?? initialMarkdown ?? ''
-
   return (
     <div className={clsx('meowdown', wrapperClassName)}>
-      {mode === 'source' ? (
-        <CodeMirrorEditor
-          ref={childRef}
-          initialMarkdown={seedMarkdown}
-          onDocChange={onDocChange}
-          readOnly={readOnly}
-        />
-      ) : (
-        <ProseKitEditor
-          ref={childRef}
-          markMode={mode}
-          initialMarkdown={seedMarkdown}
-          onDocChange={onDocChange}
-          onTagSearch={onTagSearch}
-          onWikilinkSearch={onWikilinkSearch}
-          onWikilinkClick={onWikilinkClick}
-          onLinkClick={onLinkClick}
-          onLinkCopy={onLinkCopy}
-          onTagClick={onTagClick}
-          onExitBoundary={onExitBoundary}
-          resolveImageUrl={resolveImageUrl}
-          onImagePaste={onImagePaste}
-          onImageSaveError={onImageSaveError}
-          onImageClick={onImageClick}
-          embedPaste={embedPaste}
-          bulletAfterHeading={bulletAfterHeading}
-          frontmatter={frontmatter}
-          blockHandle={blockHandle}
-          placeholder={placeholder}
-          readOnly={readOnly}
-          spellCheck={spellCheck}
-          timeFormat={timeFormat}
-          editorClassName={editorClassName}
-        >
-          {children}
-        </ProseKitEditor>
-      )}
+      <ProseKitEditor
+        ref={childRef}
+        markMode={mode}
+        initialMarkdown={initialMarkdown}
+        onDocChange={onDocChange}
+        onTagSearch={onTagSearch}
+        onWikilinkSearch={onWikilinkSearch}
+        onWikilinkClick={onWikilinkClick}
+        onLinkClick={onLinkClick}
+        onLinkCopy={onLinkCopy}
+        onTagClick={onTagClick}
+        onExitBoundary={onExitBoundary}
+        resolveImageUrl={resolveImageUrl}
+        onImagePaste={onImagePaste}
+        onImageSaveError={onImageSaveError}
+        onImageClick={onImageClick}
+        embedPaste={embedPaste}
+        bulletAfterHeading={bulletAfterHeading}
+        frontmatter={frontmatter}
+        blockHandle={blockHandle}
+        placeholder={placeholder}
+        readOnly={readOnly}
+        spellCheck={spellCheck}
+        timeFormat={timeFormat}
+        editorClassName={editorClassName}
+      >
+        {children}
+      </ProseKitEditor>
     </div>
   )
 }

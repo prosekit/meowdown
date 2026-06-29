@@ -6,8 +6,7 @@ export type SelectionHint = SelectionJSON | 'start' | 'end'
 
 /**
  * The current Markdown and selection. Selection positions are in the mounted
- * editor's coordinate space: ProseMirror positions in the rich modes,
- * character offsets in source mode. Not portable across a mode switch.
+ * editor's coordinate space and are not portable across editors.
  */
 export type EditorStateSnapshot = [markdown: string, selection: SelectionJSON]
 
@@ -44,7 +43,10 @@ export interface EditorHandle {
   /** Scrolls the selection into view. */
   scrollIntoView: () => void
 
-  /** Escape hatch: the underlying ProseKit editor, or `undefined` in source mode. */
+  /**
+   * Escape hatch: the underlying ProseKit editor, or `undefined` when the
+   * handle does not wrap one.
+   */
   readonly editor: TypedEditor | undefined
 }
 
