@@ -2,6 +2,8 @@
 export interface MagicComment {
   /** Rendered width in CSS pixels. */
   width?: number
+  /** Rendered height in CSS pixels. */
+  height?: number
 }
 
 // A whole inline comment carrying a JSON object: `<!-- {...} -->`.
@@ -31,9 +33,12 @@ export function parseMagicComment(comment: string): MagicComment | undefined {
 // Pick + validate the known fields. The single place new metadata fields are added.
 function readMagicComment(data: Record<string, unknown>): MagicComment {
   const magic: MagicComment = {}
-  const { width } = data
+  const { width, height } = data
   if (typeof width === 'number' && Number.isFinite(width) && width > 0) {
     magic.width = Math.round(width)
+  }
+  if (typeof height === 'number' && Number.isFinite(height) && height > 0) {
+    magic.height = Math.round(height)
   }
   return magic
 }

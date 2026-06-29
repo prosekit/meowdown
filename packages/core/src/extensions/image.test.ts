@@ -12,14 +12,18 @@ import {
 
 import { defineImageClickHandler, type ImageClickHandler } from './image-click.ts'
 import { defineImage } from './image.ts'
-import { defineMarkMode } from './mark-mode.ts'
+import { defineMarkMode, type MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const preview = pmRoot.getByTestId('image-preview')
 
-const IMAGE_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10" fill="pink"/></svg>'
-const IMAGE_URL = `data:image/svg+xml;base64,${btoa(IMAGE_SVG)}`
+function getSVGImageURL(width: number, height: number): string {
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+    `<rect width="${width}" height="${height}" fill="pink"/>` +
+    `</svg>`
+  return `data:image/svg+xml;base64,${btoa(svg)}`
+}
 
 // Text:     A   B   C   !   [   i   m   g   ]   (   u   r   l   )   D   E   F
 // Offset: 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17
@@ -28,15 +32,21 @@ const IMAGE_URL = `data:image/svg+xml;base64,${btoa(IMAGE_SVG)}`
 // 3 and 14.
 const TEXT = 'ABC![img](url)DEF'
 
+// An editor showing the image in the given mark mode, shared across the suites
+// below.
+function setup(mode: MarkMode, text: string): Fixture {
+  const fixture = setupFixture()
+  const { editor, n } = fixture
+  editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(10, 10) }))
+  editor.use(defineMarkMode(mode))
+  fixture.set(n.doc(n.paragraph(text)))
+  return fixture
+}
+
 // A hide-mode editor showing the image, shared by the caret-navigation and
 // selection-ring suites below.
 function setupHidden(): Fixture {
-  const fixture = setupFixture()
-  const { editor, n } = fixture
-  editor.use(defineImage({ resolveImageUrl: () => IMAGE_URL }))
-  editor.use(defineMarkMode('hide'))
-  fixture.set(n.doc(n.paragraph(TEXT)))
-  return fixture
+  return setup('hide', TEXT)
 }
 
 describe('image', () => {
@@ -166,14 +176,7 @@ describe('image caret navigation in hide mode', () => {
 // Backspace deletes a single character rather than the whole image (which holds
 // in every mode).
 describe('Backspace inside the image source deletes one character', () => {
-  function setupShow(): Fixture {
-    const fixture = setupFixture()
-    const { editor, n } = fixture
-    editor.use(defineImage({ resolveImageUrl: () => IMAGE_URL }))
-    editor.use(defineMarkMode('show'))
-    fixture.set(n.doc(n.paragraph(TEXT)))
-    return fixture
-  }
+  const setupShow = (): Fixture => setup('show', TEXT)
 
   it('Backspace deletes one source character, not the whole image', async () => {
     expect(await traceKeyAt(setupShow, 7, 'Backspace')).toMatchInlineSnapshot(
@@ -284,15 +287,16 @@ describe('image click callback', () => {
   })
 })
 
-// Releasing a resize rewrites only the trailing `<!-- {"width":N} -->` comment;
-// the inline-mark plugin re-derives the `width` attribute back onto the mark.
+// Releasing a resize rewrites only the trailing `<!-- {"width":N,"height":M} -->`
+// comment; the inline-mark plugin re-derives the `width`/`height` attributes back
+// onto the mark.
 describe('image resize', () => {
   const resizable = pmRoot.getByTestId('image-resizable')
 
-  function setupResize(markdown: string): Fixture {
+  function setupResize(markdown: string, url = getSVGImageURL(10, 10)): Fixture {
     const fixture = setupFixture()
     const { editor, n } = fixture
-    editor.use(defineImage({ resolveImageUrl: () => IMAGE_URL }))
+    editor.use(defineImage({ resolveImageUrl: () => url }))
     editor.use(defineMarkMode('hide'))
     fixture.set(n.doc(n.paragraph(markdown)))
     return fixture
@@ -310,22 +314,105 @@ describe('image resize', () => {
     await expect.element(resizable).toHaveAttribute('data-width', '200')
   })
 
-  it('writes a width comment when resized', async () => {
+  // A persisted height is applied directly, not recomputed from width. The
+  // portrait image's derived height would be 200 / 0.5 = 400; the comment's 150
+  // proves the seeded height wins, so the box has its size before the load event.
+  it('applies a persisted width and height to the resizable root', async () => {
+    using fixture = setupResize(
+      '![cat](u)<!-- {"width":200,"height":150} -->',
+      getSVGImageURL(10, 20),
+    )
+    void fixture
+    await expect.element(resizable).toHaveAttribute('data-width', '200')
+    await expect.element(resizable).toHaveAttribute('data-height', '150')
+  })
+
+  // Every orientation must pair the persisted width with a derived height. A
+  // portrait image (aspect ratio < 1) is the regression: the component switches
+  // to `width: min-content`, which without a real height collapses to the CSS
+  // min-width floor instead of honoring the width.
+  it.each([
+    { orientation: 'portrait', imageWidth: 10, imageHeight: 20, dataHeight: '400' },
+    { orientation: 'landscape', imageWidth: 20, imageHeight: 10, dataHeight: '100' },
+    { orientation: 'square', imageWidth: 10, imageHeight: 10, dataHeight: '200' },
+  ])(
+    'pairs a persisted width with a height for a $orientation image',
+    async ({ imageWidth, imageHeight, dataHeight }) => {
+      using fixture = setupResize(
+        '![cat](u)<!-- {"width":200} -->',
+        getSVGImageURL(imageWidth, imageHeight),
+      )
+      void fixture
+      await expect.element(resizable).toHaveAttribute('data-width', '200')
+      await expect.element(resizable).toHaveAttribute('data-height', dataHeight)
+    },
+  )
+
+  it('writes a width and height comment when resized', async () => {
     using fixture = setupResize('![cat](u)')
     await expect.element(resizable).toBeInTheDocument()
     endResize(320)
     await vi.waitFor(() => {
-      expect(fixture.doc.textContent).toBe('![cat](u)<!-- {"width":320} -->')
+      expect(fixture.doc.textContent).toBe('![cat](u)<!-- {"width":320,"height":100} -->')
     })
   })
 
-  it('replaces an existing width comment when resized again', async () => {
+  it('replaces an existing size comment when resized again', async () => {
     using fixture = setupResize('![cat](u)<!-- {"width":100} -->')
     await expect.element(resizable).toHaveAttribute('data-width', '100')
     endResize(320)
     await vi.waitFor(() => {
-      expect(fixture.doc.textContent).toBe('![cat](u)<!-- {"width":320} -->')
+      expect(fixture.doc.textContent).toBe('![cat](u)<!-- {"width":320,"height":100} -->')
     })
     await expect.element(resizable).toHaveAttribute('data-width', '320')
+  })
+})
+
+// The image mark view has the same hidden-source/non-editable-preview shape as
+// the wikilink, so a caret just after an inline image must also be a real caret
+// stop: typing continues after the image, never before it. (Block-inserted
+// images masked this, but inline images hit it.)
+describe.each(['hide', 'focus'] as MarkMode[])(
+  'typing after an inline image in %s mode',
+  (mode) => {
+    it('types the next character after the image, not before it', async () => {
+      using fixture = setup(mode, 'A![img](url)')
+      await expect.element(preview).toBeVisible()
+      // Offset 12 = right after the image's closing `)`.
+      setCaret(fixture, 12)
+
+      await userEvent.keyboard('B')
+      expect(fixture.doc.textContent).toBe('A![img](url)B')
+      expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A![img](url)B┃"`)
+    })
+
+    it('types after an image that sits between words', async () => {
+      using fixture = setup(mode, 'see ![img](url) here')
+      await expect.element(preview).toBeVisible()
+      // Offset 15 = right after the closing `)` of `see ![img](url)`.
+      setCaret(fixture, 15)
+
+      await userEvent.keyboard('X')
+      expect(fixture.doc.textContent).toBe('see ![img](url)X here')
+    })
+  },
+)
+
+// In show mode the image still renders its preview, and the raw source survives
+// in the mark view's contentDOM so the markdown round-trips.
+describe('image show mode keeps the source and the preview', () => {
+  it('shows the preview while keeping the raw source in the DOM', async () => {
+    using fixture = setup('show', 'A![img](url)B')
+    await expect.element(preview).toBeVisible()
+
+    // The raw markdown survives in the DOM (it round-trips).
+    expect(fixture.dom.querySelector('p')?.innerText).toContain('![img](url)')
+
+    // The preview has real width and sits within the paragraph's box.
+    const previewRect = (preview.element() as HTMLElement).getBoundingClientRect()
+    const paragraph = fixture.dom.querySelector('p')!
+    const paragraphRect = paragraph.getBoundingClientRect()
+    expect(previewRect.width).toBeGreaterThan(0)
+    expect(previewRect.left).toBeGreaterThanOrEqual(paragraphRect.left - 1)
   })
 })

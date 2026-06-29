@@ -275,9 +275,13 @@ function walkImage(
     bracketNodes.length >= 2 ? text.slice(bracketNodes[0].to, bracketNodes[1].from) : ''
   const title: string = titleNode ? unquoteTitle(text.slice(titleNode.from, titleNode.to)) : ''
   const width = trailing?.magic.width ?? null
+  const height = trailing?.magic.height ?? null
   const to = trailing?.to ?? node.to
 
-  emit(out, node.from, to, [...parentMarks, marks.mdImage.create({ src, alt, title, width })])
+  emit(out, node.from, to, [
+    ...parentMarks,
+    marks.mdImage.create({ src, alt, title, width, height }),
+  ])
 }
 
 /**
