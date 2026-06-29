@@ -17,16 +17,10 @@ import { defineMarkMode } from './mark-mode.ts'
 const pmRoot = page.locate('.ProseMirror')
 const preview = pmRoot.getByTestId('image-preview')
 
-const IMAGE_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10" fill="pink"/></svg>'
-const IMAGE_URL = `data:image/svg+xml;base64,${btoa(IMAGE_SVG)}`
-// REVIEW: remove IMAGE_SVG, IMAGE_URL, PORTRAIT_SVG and PORTRAIT_URL. Add a new function getSVGImageURL(width: number, height: number): string
-
-// Portrait image (aspect ratio 0.5) for the resize-collapse regression below.
-const PORTRAIT_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="20"><rect width="10" height="20" fill="pink"/></svg>'
-const PORTRAIT_URL = `data:image/svg+xml;base64,${btoa(PORTRAIT_SVG)}`
-// REVIEW: ensure you have all 3 test cases: portrait, landscape, and square
+function getSVGImageURL(width: number, height: number): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><rect width="${width}" height="${height}" fill="pink"/></svg>`
+  return `data:image/svg+xml;base64,${btoa(svg)}`
+}
 
 // Text:     A   B   C   !   [   i   m   g   ]   (   u   r   l   )   D   E   F
 // Offset: 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17
@@ -40,7 +34,7 @@ const TEXT = 'ABC![img](url)DEF'
 function setupHidden(): Fixture {
   const fixture = setupFixture()
   const { editor, n } = fixture
-  editor.use(defineImage({ resolveImageUrl: () => IMAGE_URL }))
+  editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(10, 10) }))
   editor.use(defineMarkMode('hide'))
   fixture.set(n.doc(n.paragraph(TEXT)))
   return fixture
@@ -176,7 +170,7 @@ describe('Backspace inside the image source deletes one character', () => {
   function setupShow(): Fixture {
     const fixture = setupFixture()
     const { editor, n } = fixture
-    editor.use(defineImage({ resolveImageUrl: () => IMAGE_URL }))
+    editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(10, 10) }))
     editor.use(defineMarkMode('show'))
     fixture.set(n.doc(n.paragraph(TEXT)))
     return fixture
@@ -296,7 +290,7 @@ describe('image click callback', () => {
 describe('image resize', () => {
   const resizable = pmRoot.getByTestId('image-resizable')
 
-  function setupResize(markdown: string, url = IMAGE_URL): Fixture {
+  function setupResize(markdown: string, url = getSVGImageURL(10, 10)): Fixture {
     const fixture = setupFixture()
     const { editor, n } = fixture
     editor.use(defineImage({ resolveImageUrl: () => url }))
@@ -317,15 +311,26 @@ describe('image resize', () => {
     await expect.element(resizable).toHaveAttribute('data-width', '200')
   })
 
-  // A portrait image (aspect ratio < 1) makes the component switch to
-  // `width: min-content`; without a paired height it collapses to the CSS
-  // min-width floor. The load handler must derive height from width and ratio.
-  it('pairs a portrait width with a height so it does not collapse', async () => {
-    using fixture = setupResize('![cat](u)<!-- {"width":200} -->', PORTRAIT_URL)
-    void fixture
-    await expect.element(resizable).toHaveAttribute('data-width', '200')
-    await expect.element(resizable).toHaveAttribute('data-height', '400')
-  })
+  // Every orientation must pair the persisted width with a derived height. A
+  // portrait image (aspect ratio < 1) is the regression: the component switches
+  // to `width: min-content`, which without a real height collapses to the CSS
+  // min-width floor instead of honoring the width.
+  it.each([
+    { orientation: 'portrait', imageWidth: 10, imageHeight: 20, dataHeight: '400' },
+    { orientation: 'landscape', imageWidth: 20, imageHeight: 10, dataHeight: '100' },
+    { orientation: 'square', imageWidth: 10, imageHeight: 10, dataHeight: '200' },
+  ])(
+    'pairs a persisted width with a height for a $orientation image',
+    async ({ imageWidth, imageHeight, dataHeight }) => {
+      using fixture = setupResize(
+        '![cat](u)<!-- {"width":200} -->',
+        getSVGImageURL(imageWidth, imageHeight),
+      )
+      void fixture
+      await expect.element(resizable).toHaveAttribute('data-width', '200')
+      await expect.element(resizable).toHaveAttribute('data-height', dataHeight)
+    },
+  )
 
   it('writes a width comment when resized', async () => {
     using fixture = setupResize('![cat](u)')
