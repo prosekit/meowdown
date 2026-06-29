@@ -12,7 +12,7 @@ import {
 
 import { defineImageClickHandler, type ImageClickHandler } from './image-click.ts'
 import { defineImage } from './image.ts'
-import { defineMarkMode } from './mark-mode.ts'
+import { defineMarkMode, type MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const preview = pmRoot.getByTestId('image-preview')
@@ -32,15 +32,21 @@ function getSVGImageURL(width: number, height: number): string {
 // 3 and 14.
 const TEXT = 'ABC![img](url)DEF'
 
-// A hide-mode editor showing the image, shared by the caret-navigation and
-// selection-ring suites below.
-function setupHidden(): Fixture {
+// An editor showing the image in the given mark mode, shared across the suites
+// below.
+function setup(mode: MarkMode, text: string): Fixture {
   const fixture = setupFixture()
   const { editor, n } = fixture
   editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(10, 10) }))
-  editor.use(defineMarkMode('hide'))
-  fixture.set(n.doc(n.paragraph(TEXT)))
+  editor.use(defineMarkMode(mode))
+  fixture.set(n.doc(n.paragraph(text)))
   return fixture
+}
+
+// A hide-mode editor showing the image, shared by the caret-navigation and
+// selection-ring suites below.
+function setupHidden(): Fixture {
+  return setup('hide', TEXT)
 }
 
 describe('image', () => {
@@ -170,14 +176,7 @@ describe('image caret navigation in hide mode', () => {
 // Backspace deletes a single character rather than the whole image (which holds
 // in every mode).
 describe('Backspace inside the image source deletes one character', () => {
-  function setupShow(): Fixture {
-    const fixture = setupFixture()
-    const { editor, n } = fixture
-    editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(10, 10) }))
-    editor.use(defineMarkMode('show'))
-    fixture.set(n.doc(n.paragraph(TEXT)))
-    return fixture
-  }
+  const setupShow = (): Fixture => setup('show', TEXT)
 
   it('Backspace deletes one source character, not the whole image', async () => {
     expect(await traceKeyAt(setupShow, 7, 'Backspace')).toMatchInlineSnapshot(
@@ -352,5 +351,54 @@ describe('image resize', () => {
       expect(fixture.doc.textContent).toBe('![cat](u)<!-- {"width":320} -->')
     })
     await expect.element(resizable).toHaveAttribute('data-width', '320')
+  })
+})
+
+// The image mark view has the same hidden-source/non-editable-preview shape as
+// the wikilink, so a caret just after an inline image must also be a real caret
+// stop: typing continues after the image, never before it. (Block-inserted
+// images masked this, but inline images hit it.)
+describe.each(['hide', 'focus'] as MarkMode[])(
+  'typing after an inline image in %s mode',
+  (mode) => {
+    it('types the next character after the image, not before it', async () => {
+      using fixture = setup(mode, 'A![img](url)')
+      await expect.element(preview).toBeVisible()
+      // Offset 12 = right after the image's closing `)`.
+      setCaret(fixture, 12)
+
+      await userEvent.keyboard('B')
+      expect(fixture.doc.textContent).toBe('A![img](url)B')
+      expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A![img](url)B┃"`)
+    })
+
+    it('types after an image that sits between words', async () => {
+      using fixture = setup(mode, 'see ![img](url) here')
+      await expect.element(preview).toBeVisible()
+      // Offset 15 = right after the closing `)` of `see ![img](url)`.
+      setCaret(fixture, 15)
+
+      await userEvent.keyboard('X')
+      expect(fixture.doc.textContent).toBe('see ![img](url)X here')
+    })
+  },
+)
+
+// In show mode the image still renders its preview, and the raw source survives
+// in the mark view's contentDOM so the markdown round-trips.
+describe('image show mode keeps the source and the preview', () => {
+  it('shows the preview while keeping the raw source in the DOM', async () => {
+    using fixture = setup('show', 'A![img](url)B')
+    await expect.element(preview).toBeVisible()
+
+    // The raw markdown survives in the DOM (it round-trips).
+    expect(fixture.dom.querySelector('p')?.innerText).toContain('![img](url)')
+
+    // The preview has real width and sits within the paragraph's box.
+    const previewRect = (preview.element() as HTMLElement).getBoundingClientRect()
+    const paragraph = fixture.dom.querySelector('p')!
+    const paragraphRect = paragraph.getBoundingClientRect()
+    expect(previewRect.width).toBeGreaterThan(0)
+    expect(previewRect.left).toBeGreaterThanOrEqual(paragraphRect.left - 1)
   })
 })

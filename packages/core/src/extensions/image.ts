@@ -108,6 +108,7 @@ function buildResizableImage(
   const root = document.createElement('prosekit-resizable-root')
   root.className = 'md-image-resizable'
   root.dataset.testid = 'image-resizable'
+  // REVIEW: why do we not add data-height here?
   if (width != null) root.setAttribute('data-width', String(width))
 
   const img = document.createElement('img')
