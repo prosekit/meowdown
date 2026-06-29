@@ -1,9 +1,10 @@
 import type { ExitBoundaryHandler } from '@meowdown/core'
-import { MeowdownEditor, type TagItem, type WikilinkItem } from '@meowdown/react'
+import type { TagItem, WikilinkItem } from '@meowdown/react'
 import { getId } from '@ocavue/utils'
 import { clsx } from 'clsx/lite'
 import { type CSSProperties, useCallback, useLayoutEffect, useState } from 'react'
 
+import { DemoEditor } from './components/demo-editor.tsx'
 import { uploadFile } from './upload-file.ts'
 import { MODES, useEditorMode } from './use-editor-mode.ts'
 
@@ -258,7 +259,7 @@ export function App() {
 
           <div className="relative flex min-h-0 flex-1 flex-col">
             <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-              <MeowdownEditor
+              <DemoEditor
                 mode={mode}
                 spellCheck={false}
                 initialMarkdown={INITIAL_CONTENT}

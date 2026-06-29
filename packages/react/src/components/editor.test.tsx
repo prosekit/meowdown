@@ -12,8 +12,6 @@ import { MeowdownEditor } from './editor.tsx'
 import type { EditorHandle } from './types.ts'
 
 const pmRoot = page.locate('.ProseMirror')
-const cmRoot = page.locate('.cm-editor')
-const cmContent = page.locate('[data-editor="codemirror"] .cm-content')
 
 // Renders only when it sits inside the editor's ProseKit context; `useEditor`
 // throws otherwise.
@@ -27,31 +25,6 @@ describe('MeowdownEditor', () => {
     const screen = await render(<MeowdownEditor initialMarkdown="Hello" />)
     await expect.element(screen.getByText('Hello')).toBeInTheDocument()
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'focus')
-    await expect.element(cmRoot).not.toBeInTheDocument()
-  })
-
-  it('renders a CodeMirror editor in source mode', async () => {
-    await render(<MeowdownEditor mode="source" initialMarkdown="# Hi" />)
-    await expect.element(cmRoot).toBeInTheDocument()
-    await expect.element(pmRoot).not.toBeInTheDocument()
-  })
-
-  it('carries content over from a rich mode to source mode', async () => {
-    const screen = await render(<MeowdownEditor mode="focus" initialMarkdown="# Hello" />)
-    await expect.element(screen.getByText('Hello')).toBeInTheDocument()
-
-    await screen.rerender(<MeowdownEditor mode="source" initialMarkdown="# Hello" />)
-    await expect.element(cmContent).toHaveTextContent('# Hello')
-  })
-
-  it('carries edits over from source mode to a rich mode', async () => {
-    const screen = await render(<MeowdownEditor mode="source" initialMarkdown="# Hello" />)
-
-    await cmContent.click()
-    await userEvent.keyboard('{End} World')
-
-    await screen.rerender(<MeowdownEditor mode="focus" initialMarkdown="# Hello" />)
-    await expect.element(screen.getByText('Hello World')).toBeInTheDocument()
   })
 
   it('keeps the ProseKit editor instance when switching among rich modes', async () => {
@@ -65,7 +38,7 @@ describe('MeowdownEditor', () => {
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'show')
   })
 
-  it('notifies onDocChange and exposes markdown via ref in both editors', async () => {
+  it('notifies onDocChange and exposes markdown via the ref', async () => {
     const onDocChange = vi.fn()
     const ref = createRef<EditorHandle>()
     const screen = await render(
@@ -85,26 +58,9 @@ describe('MeowdownEditor', () => {
       expect(onDocChange).toHaveBeenCalled()
     })
     expect(ref.current?.getMarkdown()).toContain('1')
-
-    onDocChange.mockClear()
-    await screen.rerender(
-      <MeowdownEditor
-        handleRef={ref}
-        mode="source"
-        initialMarkdown="Hello"
-        onDocChange={onDocChange}
-      />,
-    )
-
-    await cmContent.click()
-    await userEvent.keyboard('2')
-    await vi.waitFor(() => {
-      expect(onDocChange).toHaveBeenCalled()
-    })
-    expect(ref.current?.getMarkdown()).toContain('2')
   })
 
-  it('replaces content via setMarkdown in both editors', async () => {
+  it('replaces content via setMarkdown', async () => {
     const onDocChange = vi.fn()
     const ref = createRef<EditorHandle>()
     const screen = await render(
@@ -116,19 +72,6 @@ describe('MeowdownEditor', () => {
     await expect.element(screen.getByText('New title')).toBeInTheDocument()
     expect(ref.current?.getMarkdown()).toBe('# New title\n')
     // Programmatic setMarkdown is silent: the host that called it already knows.
-    expect(onDocChange).not.toHaveBeenCalled()
-
-    await screen.rerender(
-      <MeowdownEditor
-        handleRef={ref}
-        mode="source"
-        initialMarkdown="Old text"
-        onDocChange={onDocChange}
-      />,
-    )
-    ref.current?.setMarkdown('plain')
-    await expect.element(cmContent).toHaveTextContent('plain')
-    expect(ref.current?.getMarkdown()).toBe('plain')
     expect(onDocChange).not.toHaveBeenCalled()
   })
 
@@ -221,18 +164,6 @@ describe('MeowdownEditor', () => {
     ref.current?.setState(state?.[0], state?.[1])
     expect(ref.current?.getMarkdown()).toBe('# Title\n')
     expect(ref.current?.getState()).toEqual(state)
-  })
-
-  it('applies setState in source mode', async () => {
-    const ref = createRef<EditorHandle>()
-    await render(<MeowdownEditor handleRef={ref} mode="source" initialMarkdown="Hello World" />)
-    await expect.element(cmContent).toHaveTextContent('Hello World')
-
-    await cmContent.click()
-    ref.current?.setState('Hi', { type: 'text', anchor: 999, head: 999 })
-    await expect.element(cmContent).toHaveTextContent('Hi')
-    await userEvent.keyboard('!')
-    await expect.element(cmContent).toHaveTextContent('Hi!')
   })
 
   it('renders an image when resolveImageUrl returns a url', async () => {
@@ -358,24 +289,12 @@ describe('MeowdownEditor', () => {
     expect(ref.current?.getMarkdown()).toContain('Y')
   })
 
-  it('makes the source editor read-only', async () => {
-    const ref = createRef<EditorHandle>()
-    await render(<MeowdownEditor handleRef={ref} mode="source" initialMarkdown="Hi" readOnly />)
-    await expect.element(cmContent).toHaveTextContent('Hi')
-    await cmContent.click()
-    await userEvent.keyboard('X')
-    expect(ref.current?.getMarkdown()).toBe('Hi')
-  })
-
-  it('exposes the underlying editor on the handle in rich modes only', async () => {
+  it('exposes the underlying editor on the handle', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Hi" />)
     await expect.element(screen.getByText('Hi')).toBeInTheDocument()
     expect(ref.current?.editor).toBeTruthy()
     expect(ref.current?.editor?.state.doc.textContent).toBe('Hi')
-
-    await screen.rerender(<MeowdownEditor handleRef={ref} mode="source" initialMarkdown="Hi" />)
-    expect(ref.current?.editor).toBeUndefined()
   })
 
   it('applies editorClassName and wrapperClassName', async () => {
@@ -476,17 +395,7 @@ describe('MeowdownEditor', () => {
     expect(onExitBoundary).not.toHaveBeenCalled()
   })
 
-  it('does not render children in source mode', async () => {
-    await render(
-      <MeowdownEditor mode="source" initialMarkdown="Hi">
-        <EditorProbe />
-      </MeowdownEditor>,
-    )
-    await expect.element(cmRoot).toBeInTheDocument()
-    await expect.element(page.getByTestId('probe')).not.toBeInTheDocument()
-  })
-
-  it('focuses and scrolls via the handle in both editors', async () => {
+  it('focuses and scrolls via the handle', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Hi" />)
     await expect.element(screen.getByText('Hi')).toBeInTheDocument()
@@ -495,11 +404,5 @@ describe('MeowdownEditor', () => {
     ref.current?.scrollIntoView()
     await userEvent.keyboard('!')
     await expect.element(screen.getByText('!Hi')).toBeInTheDocument()
-
-    await screen.rerender(<MeowdownEditor handleRef={ref} mode="source" initialMarkdown="Hi" />)
-    ref.current?.focus()
-    ref.current?.scrollIntoView()
-    await userEvent.keyboard('A')
-    await expect.element(cmContent).toHaveTextContent('A!Hi')
   })
 })
