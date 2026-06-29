@@ -29,6 +29,10 @@
   --meowdown-node-selection: light-dark(hsl(250 100% 60% / 0.1), hsl(250 100% 72% / 0.12));
   --meowdown-selection: light-dark(hsl(250 100% 60% / 0.22), hsl(250 100% 72% / 0.3));
 
+  /* Collapsible bullets: the filled circle drawn behind a collapsed item's dot
+   * (so it reads as a target). Standalone so folding can be themed apart. */
+  --meowdown-fold-halo: var(--meowdown-accent);
+
   /* Horizontal editor padding. Floating UI tracking the hovered block (the
    * block handle in @meowdown/react) must fit inside it: hover tracking only
    * sees pointer events on the editor element, so a handle outside the
@@ -204,6 +208,53 @@
     border-radius: 100rem;
     width: 1.05rem;
     height: 1.05rem;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Collapsible bullets
+ * ------------------------------------------------------------------------- */
+.ProseMirror .prosemirror-flat-list[data-list-kind='bullet'] {
+  /* A foldable bullet's marker is clickable. */
+  &[data-list-collapsable] > .list-marker {
+    cursor: pointer;
+  }
+
+  /* The halo: a filled circle behind the dot, aligned to the marker column.
+   * Hidden by default, hinted on hover of a foldable item, fully shown when
+   * collapsed, so a folded bullet reads as a target (a dot inside a disc). */
+  &[data-list-collapsable]::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0;
+    width: 1lh;
+    height: 1lh;
+    background: radial-gradient(
+      circle at center,
+      var(--meowdown-fold-halo) 0 0.45rem,
+      transparent 0.45rem
+    );
+    opacity: 0;
+    transition: opacity 120ms ease;
+    pointer-events: none;
+  }
+
+  &[data-list-collapsable]:has(> .list-marker:hover)::before {
+    opacity: 0.2;
+  }
+
+  &[data-list-collapsable][data-list-collapsed]::before {
+    opacity: 0.35;
+  }
+
+  &[data-list-collapsable][data-list-collapsed]:has(> .list-marker:hover)::before {
+    opacity: 0.45;
+  }
+
+  /* Hide the descendants of a collapsed bullet, keeping its first block. */
+  &[data-list-collapsable][data-list-collapsed] > .list-content > *:nth-child(n + 2) {
+    display: none;
   }
 }
 

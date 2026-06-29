@@ -6,6 +6,7 @@ describe('EDITOR_KEY_BINDINGS', () => {
   it('lists every formatting and heading shortcut', () => {
     expect(EDITOR_KEY_BINDINGS).toMatchInlineSnapshot(`
       {
+        "Mod-.": "Fold or unfold a bullet",
         "Mod-1": "Heading 1",
         "Mod-2": "Heading 2",
         "Mod-3": "Heading 3",

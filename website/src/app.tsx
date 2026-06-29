@@ -52,6 +52,18 @@ Track things two ways. Type \`+ \` for a circle checkbox task, or \`[] \` for a 
 - [ ] Buy cat food
 - [x] Water the plants
 
+Outline your thoughts with nested bullets. Hover a bullet that has children and click it (or press \`Mod-.\`) to fold. A folded bullet is saved with a \`+\` marker, so it stays folded next time:
+
+- Project ideas
+  - A cozy reading nook
+  - A cat-shaped bookshelf
+- Groceries
+  - Cat food
+  - Houseplants
++ This one is already folded (click to expand)
+  - Hidden child one
+  - Hidden child two
+
 Drop in an image and it renders right where you wrote it. Paste or drag one in to upload your own:
 
 Small images flow inline ![](https://static.photos/yellow/16x16/3) with the surrounding text.

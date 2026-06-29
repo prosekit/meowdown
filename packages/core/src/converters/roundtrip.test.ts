@@ -423,6 +423,21 @@ describe('bullet lists', () => {
   })
 })
 
+describe('list folding', () => {
+  it('keeps a collapsed bullet as `+`', () => {
+    expect(roundtrip('+ parent\n  - child')).toBe('+ parent\n  - child\n')
+  })
+
+  it('keeps `-` and `*` bullets', () => {
+    expect(roundtrip('- a')).toBe('- a\n')
+    expect(roundtrip('* a')).toBe('* a\n')
+  })
+
+  it('keeps a `+ [ ]` circle task', () => {
+    expect(roundtrip('+ [ ] a')).toBe('+ [ ] a\n')
+  })
+})
+
 describe('ordered lists', () => {
   it('keeps an ordered item', () => {
     expect(roundtrip('1. one')).toBe('1. one\n')

@@ -461,13 +461,19 @@ function convertListItem(
   // canonical default; only a 2-4 space gap is a faithful, content-preserving variation.
   const gap =
     firstContentColumn != null && markEndColumn != null ? firstContentColumn - markEndColumn : 1
+  // A bullet whose marker is `+` is a collapsed item (`-`/`*` are expanded). The
+  // marker is normalized to null so an expanded item later serializes as `-`. A
+  // `+ [ ]` is still a circle task, so collapse only applies when there is no
+  // checkbox.
+  const isTask = taskChecked != null
+  const collapsed = !isTask && kind === 'bullet' && marker === '+'
   return nodes.list(
     {
-      kind: taskChecked == null ? kind : 'task',
+      kind: isTask ? 'task' : kind,
       order: kind === 'ordered' ? (order ?? 1) : null,
       checked: taskChecked ?? false,
-      collapsed: false,
-      marker,
+      collapsed,
+      marker: collapsed ? null : marker,
       taskMarker,
       markerGap: gap >= 2 && gap <= 4 ? gap : 1,
     } satisfies MeowdownListAttrs,

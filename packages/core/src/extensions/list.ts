@@ -2,6 +2,7 @@ import {
   defineCommands,
   defineKeymap,
   defineNodeAttr,
+  definePlugin,
   union,
   type Extension,
   type PlainExtension,
@@ -11,14 +12,23 @@ import {
   defineListCommands,
   defineListDropIndicator,
   defineListKeymap,
-  defineListPlugins,
   defineListSerializer,
   defineListSpec,
   wrapInList,
   type ListAttrs,
 } from '@prosekit/extensions/list'
+import type { ProseMirrorNode } from '@prosekit/pm/model'
+import { Plugin } from '@prosekit/pm/state'
 import type { Command, EditorState } from '@prosekit/pm/state'
-import { wrappingListInputRule } from 'prosemirror-flat-list'
+import {
+  createListRenderingPlugin,
+  createSafariInputMethodWorkaroundPlugin,
+  createToggleCollapsedCommand,
+  handleListMarkerMouseDown,
+  unwrapListSlice,
+  wrappingListInputRule,
+  type ListClickHandler,
+} from 'prosemirror-flat-list'
 
 import type { NodeName } from './node-names.ts'
 
@@ -229,17 +239,73 @@ function rotateCircleTask(): Command {
   }
 }
 
+/**
+ * A bullet is collapsible when it has descendants to hide: the first child is the
+ * item's own content and the rest (a nested list or extra blocks) collapse away.
+ * Only bullets fold in v1; their fold state round-trips through the `+` marker.
+ */
+function isCollapsibleBullet(node: ProseMirrorNode): boolean {
+  return (
+    node.type.name === ('list' satisfies NodeName) &&
+    node.attrs.kind === 'bullet' &&
+    node.childCount >= 2 &&
+    node.firstChild?.type !== node.type
+  )
+}
+
+/**
+ * Clicking a list marker toggles the checkbox on a task and the fold on a
+ * collapsible bullet; any other click is a no-op.
+ */
+const onListClick: ListClickHandler = (node) => {
+  const attrs = node.attrs as MeowdownListAttrs
+  if (attrs.kind === 'task') {
+    return { ...attrs, checked: !attrs.checked }
+  }
+  if (isCollapsibleBullet(node)) {
+    return { ...attrs, collapsed: !attrs.collapsed }
+  }
+  return attrs
+}
+
+/**
+ * The list plugins, mirroring ProseKit's `defineListPlugins` but with a marker
+ * mousedown handler that also folds bullets. ProseKit's default handler swallows
+ * every marker click, so it must be replaced rather than layered on top.
+ */
+function defineMeowdownListPlugins(): PlainExtension {
+  return definePlugin(() => [
+    new Plugin({
+      props: {
+        handleDOMEvents: {
+          mousedown: (view, event) => handleListMarkerMouseDown({ view, event, onListClick }),
+        },
+      },
+    }),
+    createListRenderingPlugin(),
+    new Plugin({ props: { transformCopied: unwrapListSlice } }),
+    createSafariInputMethodWorkaroundPlugin(),
+  ])
+}
+
+function defineCollapseCommands() {
+  return defineCommands({
+    toggleListCollapsed: () => createToggleCollapsedCommand({ isToggleable: isCollapsibleBullet }),
+  })
+}
+
 function defineMeowdownListKeymap(): PlainExtension {
   return defineKeymap({
     'Mod-Enter': rotateSquareTask(),
     'Mod-Shift-Enter': rotateCircleTask(),
+    'Mod-.': createToggleCollapsedCommand({ isToggleable: isCollapsibleBullet }),
   })
 }
 
 export function defineMeowdownList() {
   return union(
     defineListSpec(),
-    defineListPlugins(),
+    defineMeowdownListPlugins(),
     defineListKeymap(),
     defineListCommands(),
     defineListSerializer(),
@@ -251,5 +317,6 @@ export function defineMeowdownList() {
     defineListTaskMarkerAttr(),
     defineListMarkerGapAttr(),
     defineTaskCommands(),
+    defineCollapseCommands(),
   )
 }

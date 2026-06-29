@@ -327,17 +327,33 @@ function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
 // ─────────────────────────────────────────────────────────────────────
 
 function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
-  const attrs = node.attrs as MeowdownListAttrs
-  const bulletMarker = attrs.marker === '*' || attrs.marker === '+' ? attrs.marker : '-'
-  const orderMarker = attrs.marker === ')' ? ')' : '.'
-  const checkMark = attrs.taskMarker === 'X' ? 'X' : 'x'
+  const { kind, marker, order, taskMarker, collapsed, markerGap, checked } =
+    node.attrs as MeowdownListAttrs
+  // A bullet records its fold state in the marker: `+` is collapsed, `-`/`*` are
+  // expanded. A task uses `+` for the circle shape, independent of collapse (a
+  // task's fold is view-state and never written to Markdown). Ordered lists use
+  // the `delimiter` below, so `bulletMarker` does not apply to them.
+  const bulletMarker =
+    kind === 'task'
+      ? marker === '+'
+        ? '+'
+        : marker === '*'
+          ? '*'
+          : '-'
+      : collapsed
+        ? '+'
+        : marker === '*'
+          ? '*'
+          : '-'
+  const orderMarker = marker === ')' ? ')' : '.'
+  const checkMark = taskMarker === 'X' ? 'X' : 'x'
   // The delimiter plus its original gap (1-4 spaces).
-  const gap = Math.min(Math.max(attrs.markerGap ?? 1, 1), 4)
-  const delimiter = attrs.kind === 'ordered' ? `${attrs.order ?? 1}${orderMarker}` : bulletMarker
+  const gap = Math.min(Math.max(markerGap ?? 1, 1), 4)
+  const delimiter = kind === 'ordered' ? `${order ?? 1}${orderMarker}` : bulletMarker
   const prefix = `${delimiter}${' '.repeat(gap)}`
-  const marker = attrs.kind === 'task' ? `${prefix}[${attrs.checked ? checkMark : ' '}] ` : prefix
+  const outputMarker = kind === 'task' ? `${prefix}[${checked ? checkMark : ' '}] ` : prefix
   const continuation = ' '.repeat(prefix.length)
-  out.withPrefix(continuation, marker, () => emitBlockChildren(node, out, tight))
+  out.withPrefix(continuation, outputMarker, () => emitBlockChildren(node, out, tight))
   out.closeBlock()
 }
 
