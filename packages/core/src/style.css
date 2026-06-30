@@ -72,6 +72,8 @@
     --meowdown-node-selection: light-dark(hsl(25 95% 50% / 0.1), hsl(25 95% 60% / 0.12));
     --meowdown-selection: light-dark(hsl(25 95% 50% / 0.22), hsl(25 95% 60% / 0.3));
 
+    /*REVIEW: let's use oklch for all colors so that it's clear to view the meaning of the color by reading the source code */
+
     /* Collapsible bullets: the filled circle drawn behind a collapsed item's dot
      * (so it reads as a target). Standalone so folding can be themed apart. */
     --meowdown-fold-halo: var(--meowdown-accent);
