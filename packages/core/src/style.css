@@ -108,8 +108,10 @@
    * handle's drag preview clones a block into a bare `.ProseMirror` container, which
    * must not pick up the gutter padding. */
   .meowdown-content {
-    /*REVIEW: let's do not use this pattern. Let's write down -top -bottom -left -right to make it clear */
-    padding: 1.25rem var(--meowdown-gutter) 1.75rem;
+    padding-top: 1.25rem;
+    padding-right: var(--meowdown-gutter);
+    padding-bottom: 1.75rem;
+    padding-left: var(--meowdown-gutter);
   }
 
   .ProseMirror > * + * {
@@ -203,10 +205,18 @@
     margin-top: 0.25em;
   }
 
-  /* The bullet dot: flat-list (prosekit) masks `.list-marker` into a dot filled
-   * by its `background-color` (defaulting to `currentColor`). Quiet gray here. */
+  /* The bullet dot is painted as a radial-gradient on the (1lh square)
+   * `.list-marker` box, so the dot and, when collapsed, its halo always share one
+   * center (a separate halo element drifts by a sub-pixel). Override prosekit's
+   * icon mask so the gradient shows; `--meowdown-bullet` colors the resting dot. */
   .ProseMirror .prosemirror-flat-list[data-list-kind='bullet'] > .list-marker {
-    background-color: var(--meowdown-bullet);
+    mask: none;
+    -webkit-mask: none;
+    background: radial-gradient(
+      circle at center,
+      var(--meowdown-bullet) 0 0.2rem,
+      transparent 0.2rem
+    );
   }
 
   /* ---------------------------------------------------------------------------
@@ -277,42 +287,26 @@
       cursor: pointer;
     }
 
-    /* A collapsed bullet recolors its dot to the themed fold color, so it reads
-     * as a saturated target centered in the halo below. */
-    &[data-list-collapsable][data-list-collapsed] > .list-marker {
-      background-color: var(--meowdown-fold-halo);
-    }
-
-    /* The halo: a filled circle behind the dot, aligned to the marker column.
-     * Hidden by default, hinted on hover of a foldable item, fully shown when
-     * collapsed, so a folded bullet reads as a target (a dot inside a disc). */
-    &[data-list-collapsable]::before {
-      content: '';
-      position: absolute;
-      inset-inline-start: 0;
-      top: 0;
-      width: 1lh;
-      height: 1lh;
+    /* Hovering a foldable bullet hints a faint halo around the resting dot, so it
+     * reads as foldable. Same gradient as the dot, so it stays concentric. */
+    &[data-list-collapsable] > .list-marker:hover {
       background: radial-gradient(
         circle at center,
-        var(--meowdown-fold-halo) 0 0.25rem,
-        transparent 0.25rem
+        var(--meowdown-bullet) 0 0.2rem,
+        color-mix(in oklab, var(--meowdown-fold-halo) 20%, transparent) 0.2rem 0.45rem,
+        transparent 0.45rem
       );
-      opacity: 0;
-      transition: opacity 120ms ease;
-      pointer-events: none;
     }
 
-    &[data-list-collapsable]:has(> .list-marker:hover)::before {
-      opacity: 0.2;
-    }
-
-    &[data-list-collapsable][data-list-collapsed]::before {
-      opacity: 0.35;
-    }
-
-    &[data-list-collapsable][data-list-collapsed]:has(> .list-marker:hover)::before {
-      opacity: 0.45;
+    /* A collapsed bullet reads as a target: the dot recolors to the themed fold
+     * color and gains a lighter halo ring, all in one concentric gradient. */
+    &[data-list-collapsable][data-list-collapsed] > .list-marker {
+      background: radial-gradient(
+        circle at center,
+        var(--meowdown-fold-halo) 0 0.2rem,
+        color-mix(in oklab, var(--meowdown-fold-halo) 35%, transparent) 0.2rem 0.45rem,
+        transparent 0.45rem
+      );
     }
 
     /* Hide the descendants of a collapsed bullet, keeping its first block. */
