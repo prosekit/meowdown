@@ -266,54 +266,29 @@ describe('image resize', () => {
     await expect.element(resizable).toHaveAttribute('data-width', '320')
   })
 
-  it('sizes the preview from its aspect ratio', async () => {
-    using fixture = setupResize('![wide](url)', getSVGImageURL(240, 120))
+  it.each([
+    { width: 150, height: 150 }, // square
+    { width: 200, height: 100 }, // landscape
+    { width: 100, height: 200 }, // portrait
+  ])('sizes the preview from its aspect ratio $width / $height', async ({ width, height }) => {
+    const expectedRatio = width / height
+
+    using fixture = setupResize('![](url)', getSVGImageURL(width, height))
     void fixture
 
     await vi.waitFor(() => {
       const element = resizable.element()
 
       const dataRatio = Number.parseFloat(element.getAttribute('data-aspect-ratio') || '-1')
-      expect(dataRatio).toBeGreaterThan(1.9)
-      expect(dataRatio).toBeLessThan(2.1)
 
-      const { width, height } = element.getBoundingClientRect()
-      expect(width).toBeGreaterThan(200)
-      expect(height).toBeGreaterThan(100)
-
+      const { width: displayWidth, height: displayHeight } = element.getBoundingClientRect()
       const displayRatio = width / height
-      expect(displayRatio).toBeGreaterThan(1.9)
-      expect(displayRatio).toBeLessThan(2.1)
-      return true
+
+      expect(displayWidth / width).toBeCloseTo(1)
+      expect(displayHeight / height).toBeCloseTo(1)
+      expect(dataRatio / expectedRatio).toBeCloseTo(1)
+      expect(displayRatio / expectedRatio).toBeGreaterThan(1.9)
     })
-  })
-
-  // Portrait is the regression seen in reflect-open: a portrait image (aspect
-  // ratio < 1) collapses to the CSS min-width floor instead of rendering at its
-  // size, because the resizable root is driven by `width: min-content`, which
-  // relies on the aspect-ratio transferred size that WKWebView does not resolve.
-  // A 120x240 image must render at roughly that box (ratio ~0.5).
-  it.only('sizes a portrait preview from its aspect ratio', async () => {
-    using fixture = setupResize('![tall](url)', 'https://placehold.co/200x400.png')
-    void fixture
-
-    await expect.element(resizable).toHaveAttribute('data-aspect-ratio', '0.5')
-
-    await vi.waitFor(() => {
-      const { width, height } = resizable.element().getBoundingClientRect()
-      expect(width).toBeGreaterThan(80)
-      expect(height).toBeGreaterThan(160)
-      const ratio = width / height
-      expect(ratio).toBeGreaterThan(0.45)
-      expect(ratio).toBeLessThan(0.55)
-      return true
-    })
-
-    // JUST FOR DEBUG, do not delete yet.
-    for (let i = 1; i < 100; i++) {
-      console.debug('Sleep iteration', i)
-      await sleep(1000)
-    }
   })
 
   it('shows a loading placeholder until the image loads', async () => {
