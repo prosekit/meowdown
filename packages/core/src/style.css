@@ -75,17 +75,16 @@
     --meowdown-selection: light-dark(oklch(0.693 0.194 46 / 0.22), oklch(0.741 0.165 52 / 0.3));
 
     /* The resting bullet dot color (a collapsed bullet's dot uses the themed
-     * `--meowdown-fold-halo` instead). */
+     * `--meowdown-bullet-collapsed` instead). */
     --meowdown-bullet: var(--meowdown-muted);
 
     /* Bullet dot radius, and the outer radius of a collapsed/hovered bullet's halo. */
     --meowdown-bullet-radius: 2.5px;
     --meowdown-bullet-halo-radius: 5.5px;
 
-    /* Collapsible bullets: the themed dot, plus the halo ring drawn around it when a
-     * foldable bullet is collapsed or hovered. Standalone so folding can be themed
-     * apart. */
-    --meowdown-fold-halo: var(--meowdown-accent);
+    /* The dot color of a collapsed (or hovered) foldable bullet; its halo ring is a
+     * lighter mix of this. Standalone so folding can be themed apart from the accent. */
+    --meowdown-bullet-collapsed: var(--meowdown-accent);
 
     /* Horizontal editor padding. Floating UI tracking the hovered block (the block
      * handle in @meowdown/react) must fit inside it: hover tracking only sees
@@ -298,7 +297,7 @@
       background: radial-gradient(
         circle at center,
         var(--meowdown-bullet) 0 var(--meowdown-bullet-radius),
-        color-mix(in oklab, var(--meowdown-fold-halo) 20%, transparent)
+        color-mix(in oklab, var(--meowdown-bullet-collapsed) 20%, transparent)
           var(--meowdown-bullet-radius) var(--meowdown-bullet-halo-radius),
         transparent var(--meowdown-bullet-halo-radius)
       );
@@ -309,8 +308,8 @@
     &[data-list-collapsable][data-list-collapsed] > .list-marker {
       background: radial-gradient(
         circle at center,
-        var(--meowdown-fold-halo) 0 var(--meowdown-bullet-radius),
-        color-mix(in oklab, var(--meowdown-fold-halo) 35%, transparent)
+        var(--meowdown-bullet-collapsed) 0 var(--meowdown-bullet-radius),
+        color-mix(in oklab, var(--meowdown-bullet-collapsed) 35%, transparent)
           var(--meowdown-bullet-radius) var(--meowdown-bullet-halo-radius),
         transparent var(--meowdown-bullet-halo-radius)
       );
