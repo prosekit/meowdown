@@ -306,6 +306,7 @@ describe('image resize', () => {
       return true
     })
 
+    // JUST FOR DEBUG, do not delete yet.
     for (let i = 1; i < 100; i++) {
       console.debug('Sleep iteration', i)
       await sleep(1000)
