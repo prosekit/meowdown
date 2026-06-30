@@ -702,6 +702,7 @@ describe('focus mode', () => {
           >
             <prosekit-resizable-root
               class="md-image-resizable"
+              data-loading
               data-testid="image-resizable"
               style="width: 1px; height: 1px;"
             >
