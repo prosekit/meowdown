@@ -295,8 +295,8 @@
       height: 1lh;
       background: radial-gradient(
         circle at center,
-        var(--meowdown-fold-halo) 0 0.45rem,
-        transparent 0.45rem
+        var(--meowdown-fold-halo) 0 0.25rem,
+        transparent 0.25rem
       );
       opacity: 0;
       transition: opacity 120ms ease;
