@@ -134,8 +134,8 @@ describe('image', () => {
         // Height tracks width / ratio, so the box keeps its 2:1 ratio. The flex-item
         // bug collapsed the height to the 2.5rem (40px) min-height floor while the
         // width stayed wide.
-        expect(width).toBeGreaterThan(100)
-        expect(height).toBeGreaterThan(50)
+        expect(width).toBeGreaterThan(200)
+        expect(height).toBeGreaterThan(100)
         const ratio = width / height
         expect(ratio).toBeGreaterThan(1.9)
         expect(ratio).toBeLessThan(2.1)
