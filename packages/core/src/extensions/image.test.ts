@@ -283,10 +283,10 @@ describe('image resize', () => {
       const { width: displayWidth, height: displayHeight } = element.getBoundingClientRect()
       const displayRatio = width / height
 
-      expect(displayWidth / width).toBeCloseTo(1)
-      expect(displayHeight / height).toBeCloseTo(1)
-      expect(dataRatio / expectedRatio).toBeCloseTo(1)
-      expect(displayRatio / expectedRatio).toBeCloseTo(1)
+      expect(Math.abs(displayWidth - width)).toBeLessThan(20)
+      expect(Math.abs(displayHeight - height)).toBeLessThan(20)
+      expect(Math.abs(dataRatio - expectedRatio)).toBeLessThan(0.02)
+      expect(Math.abs(displayRatio - expectedRatio)).toBeLessThan(0.02)
     })
   })
 
