@@ -2,6 +2,8 @@ import { playwright } from '@vitest/browser-playwright'
 import { playwrightCommands } from 'vitest-browser-commands'
 import { defineProject } from 'vitest/config'
 
+const IS_BOT = !!(process.env.AI_AGENT || process.env.CI)
+
 export function defineSharedConfig() {
   const browserName = (() => {
     if (process.env.MEOWDOWN_TEST_BROWSER === 'webkit') {
@@ -30,8 +32,8 @@ export function defineSharedConfig() {
         : undefined,
     test: {
       setupFiles,
-      retry: process.env.CI ? 3 : 0,
-      bail: process.env.CI || process.env.AI_AGENT ? 0 : 1,
+      retry: IS_BOT ? 3 : 0,
+      bail: IS_BOT ? 0 : 1,
       fileParallelism: false,
       browser: {
         enabled: true,
