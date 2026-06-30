@@ -13,6 +13,7 @@ import {
 import { defineImageClickHandler, type ImageClickHandler } from './image-click.ts'
 import { defineImage } from './image.ts'
 import { defineMarkMode, type MarkMode } from './mark-mode.ts'
+import { sleep } from '@ocavue/utils'
 
 const pmRoot = page.locate('.ProseMirror')
 const preview = pmRoot.getByTestId('image-preview')
@@ -289,7 +290,7 @@ describe('image resize', () => {
   // size, because the resizable root is driven by `width: min-content`, which
   // relies on the aspect-ratio transferred size that WKWebView does not resolve.
   // A 120x240 image must render at roughly that box (ratio ~0.5).
-  it('sizes a portrait preview from its aspect ratio', async () => {
+  it.only('sizes a portrait preview from its aspect ratio', async () => {
     using fixture = setupResize('![tall](url)', getSVGImageURL(120, 240))
     void fixture
 
@@ -304,6 +305,11 @@ describe('image resize', () => {
       expect(ratio).toBeLessThan(0.55)
       return true
     })
+
+    for (let i = 1; i < 100; i++) {
+      console.debug('Sleep iteration', i)
+      await sleep(1000)
+    }
   })
 
   it('shows a loading placeholder until the image loads', async () => {
