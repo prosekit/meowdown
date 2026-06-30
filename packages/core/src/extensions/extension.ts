@@ -14,6 +14,7 @@ import { defineText } from '@prosekit/extensions/text'
 import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineAtomMarkNavigation } from './atom-mark-navigation.ts'
+import { defineCaretMarkerSnap } from './caret-marker-snap.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineEditorCommands } from './commands.ts'
 import { defineDocFrontmatterAttr } from './frontmatter.ts'
@@ -59,6 +60,7 @@ function defineEditorExtensionImpl() {
         { name: 'mdWikilink', modes: ['hide', 'focus', 'show'] },
       ],
     }),
+    defineCaretMarkerSnap(),
 
     // others
     defineBaseKeymap(),
