@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.30.0](https://github.com/prosekit/meowdown/compare/react-v0.29.2...react-v0.30.0) (2026-06-30)
+
+
+### Features
+
+* refactor editor theme ([#181](https://github.com/prosekit/meowdown/issues/181)) ([7ab0344](https://github.com/prosekit/meowdown/commit/7ab034492f8f0531d2df36bd039706437e479176))
+
+
+### Bug Fixes
+
+* size portrait resizable images by width ([#182](https://github.com/prosekit/meowdown/issues/182)) ([9dd53f4](https://github.com/prosekit/meowdown/commit/9dd53f4065701c112f011656d48c7ce85912a77c))
+
 ## [0.29.2](https://github.com/prosekit/meowdown/compare/react-v0.29.1...react-v0.29.2) (2026-06-30)
 
 
