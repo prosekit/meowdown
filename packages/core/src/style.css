@@ -17,6 +17,7 @@
   --meowdown-mark: var(--meowdown-muted);
   --meowdown-highlight: light-dark(#fef08a, #854d0e);
   --meowdown-border: light-dark(#e4e4e7, #3f3f46);
+  --meowdown-blockquote-border: color-mix(in oklab, var(--meowdown-accent) 35%, transparent);
   --meowdown-code-bg: light-dark(#f4f4f5, #18181b);
   --meowdown-image-loading-bg: light-dark(#f4f4f5, #27272a);
   --meowdown-table-header-bg: light-dark(#fafafa, #27272a);
@@ -128,16 +129,15 @@
   font-size: 0.9em;
   padding: 0.1em 0.35em;
   border-radius: 0.35rem;
-  background: color-mix(in oklab, var(--meowdown-accent) 10%, transparent);
-  color: color-mix(in oklab, var(--meowdown-accent) 80%, var(--meowdown-heading));
+  background: var(--meowdown-code-bg);
+  color: inherit;
 }
 
 .ProseMirror blockquote {
   margin-left: 0;
   padding-left: 1rem;
-  border-left: 3px solid color-mix(in oklab, var(--meowdown-accent) 35%, transparent);
+  border-left: 3px solid var(--meowdown-blockquote-border);
   color: var(--meowdown-muted);
-  font-style: italic;
 }
 
 .ProseMirror ul,
@@ -152,6 +152,10 @@
 }
 .ProseMirror li {
   margin-top: 0.25em;
+}
+
+.ProseMirror .prosemirror-flat-list[data-list-kind='bullet']::marker {
+  color: var(--meowdown-muted);
 }
 
 /* ---------------------------------------------------------------------------
@@ -189,7 +193,7 @@
       box-sizing: border-box;
       width: 0.95rem;
       height: 0.95rem;
-      border: 1.5px solid var(--meowdown-border);
+      border: 1px solid var(--meowdown-muted);
       border-radius: 0.25rem; /* square */
       background: transparent center / 100% 100% no-repeat;
       /* Animation: fade the fill and border when (un)checked. */
