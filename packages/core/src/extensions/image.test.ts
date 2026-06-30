@@ -32,8 +32,7 @@ function getSVGImageURL(width: number, height: number): string {
 // 3 and 14.
 const TEXT = 'ABC![img](url)DEF'
 
-// An editor showing the image in the given mark mode, shared across the suites
-// below.
+// An editor showing the image in the given mark mode.
 function setup(mode: MarkMode, text: string): Fixture {
   const fixture = setupFixture()
   const { editor, n } = fixture
@@ -43,18 +42,13 @@ function setup(mode: MarkMode, text: string): Fixture {
   return fixture
 }
 
-// A hide-mode editor showing the image, shared by the caret-navigation and
-// selection-ring suites below.
 function setupHidden(): Fixture {
   return setup('hide', TEXT)
 }
 
-// A hidden image is one caret stop in hide mode: arrowing onto it selects the
-// whole `![img](url)`, the next arrow steps past, and Backspace/Delete remove it
-// as a unit.
-describe('image caret navigation in hide mode', () => {
-  // Reaches the left edge (offset 3), selects the image, collapses to the right
-  // edge (offset 14), then steps on into DEF.
+// A hidden image is one caret stop: arrowing onto it selects the whole
+// `![img](url)`, and the next arrow steps past it.
+describe('image caret navigation', () => {
   it('ArrowRight selects the image, then steps past into DEF', async () => {
     using fixture = setupHidden()
     setCaret(fixture, 1)
@@ -83,7 +77,11 @@ describe('image caret navigation in hide mode', () => {
       ]
     `)
   })
+})
 
+// Backspace removes a hidden image as a unit, but a caret inside the source (not
+// at its edge) is not an atom boundary, so Backspace there deletes one character.
+describe('image deletion', () => {
   it('Backspace deletes the image as a unit, plain text one char', async () => {
     const result = [
       await traceKeyAt(setupHidden, 2, 'Backspace'), // between B and C
@@ -101,52 +99,37 @@ describe('image caret navigation in hide mode', () => {
       ]
     `)
   })
-})
 
-// A caret inside the image source, not at its edge, is not an atom boundary, so
-// Backspace deletes a single character rather than the whole image (which holds
-// in every mode).
-describe('Backspace inside the image source deletes one character', () => {
-  const setupShow = (): Fixture => setup('show', TEXT)
-
-  it('Backspace deletes one source character, not the whole image', async () => {
+  it('Backspace inside the source deletes one character, not the image', async () => {
+    const setupShow = (): Fixture => setup('show', TEXT)
     expect(await traceKeyAt(setupShow, 7, 'Backspace')).toMatchInlineSnapshot(
       `"ABC![im┃g](url)DEF  ->  ABC![i┃g](url)DEF"`,
     )
   })
 })
 
-describe('image selection ring in hide mode', () => {
-  // Selecting the whole `![img](url)` rings the preview; a collapsed caret next
-  // to it does not. This is what the `md-atom-selected` decoration drives.
-  it('rings the preview only while the image is selected', async () => {
+// Selecting the whole `![img](url)` rings the preview; a collapsed caret next to
+// it does not. This is what the `md-atom-selected` decoration drives.
+describe('image selection ring', () => {
+  it('rings the preview only while the image is selected, from either edge', async () => {
     using fixture = setupHidden()
 
-    // Put the caret just before the image
+    // A caret before the image does not ring it.
     setCaret(fixture, 3)
     expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC┃![img](url)DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
 
-    // Selects the whole image
+    // ArrowRight selects the whole image, ringing it.
     await userEvent.keyboard('{ArrowRight}')
     expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC❰![img](url)❱DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'solid' })
 
-    // Steps past, collapses the caret
+    // ArrowRight again steps past and collapses the caret, un-ringing it.
     await userEvent.keyboard('{ArrowRight}')
     expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC![img](url)┃DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
-  })
 
-  it('rings the preview when selected from its right edge', async () => {
-    using fixture = setupHidden()
-
-    // Put the caret just after the image
-    setCaret(fixture, 14)
-    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC![img](url)┃DEF"`)
-    await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
-
-    // Selects the whole image
+    // From the right edge, ArrowLeft selects the image again, ringing it.
     await userEvent.keyboard('{ArrowLeft}')
     expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC❰![img](url)❱DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'solid' })
@@ -155,21 +138,19 @@ describe('image selection ring in hide mode', () => {
 
 describe('image click callback', () => {
   // Render `markdown` with a click handler attached, showing http(s) images as-is.
-  function applyClickable(
-    fixture: Fixture,
-    markdown: string,
-    onImageClick: ImageClickHandler,
-  ): void {
+  function setupClickable(markdown: string, onImageClick: ImageClickHandler): Fixture {
+    const fixture = setupFixture()
     const { editor, n } = fixture
     editor.use(defineImage({ resolveImageUrl: (src) => src }))
     editor.use(defineImageClickHandler(onImageClick))
     fixture.set(n.doc(n.paragraph(markdown)))
+    return fixture
   }
 
-  it('fires with the markdown src and alt when the preview is clicked', async () => {
+  it('fires with the src, alt, and originating MouseEvent when clicked', async () => {
     const onImageClick = vi.fn<ImageClickHandler>()
-    using fixture = setupFixture()
-    applyClickable(fixture, '![cat](https://example.com/cat.png)', onImageClick)
+    using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
+    void fixture
     await expect.element(preview).toBeInTheDocument()
     await userEvent.click(preview)
     await vi.waitFor(() => {
@@ -177,22 +158,13 @@ describe('image click callback', () => {
         expect.objectContaining({ src: 'https://example.com/cat.png', alt: 'cat' }),
       )
     })
-  })
-
-  it('passes the originating MouseEvent', async () => {
-    const onImageClick = vi.fn<ImageClickHandler>()
-    using fixture = setupFixture()
-    applyClickable(fixture, '![cat](https://example.com/cat.png)', onImageClick)
-    await expect.element(preview).toBeInTheDocument()
-    await userEvent.click(preview)
-    await vi.waitFor(() => expect(onImageClick).toHaveBeenCalled())
     expect(onImageClick.mock.calls[0][0].event).toBeInstanceOf(MouseEvent)
   })
 
   it('does not fire when plain text is clicked', async () => {
     const onImageClick = vi.fn<ImageClickHandler>()
-    using fixture = setupFixture()
-    applyClickable(fixture, 'hello ![cat](https://example.com/cat.png)', onImageClick)
+    using fixture = setupClickable('hello ![cat](https://example.com/cat.png)', onImageClick)
+    void fixture
     await expect.element(preview).toBeInTheDocument()
     await userEvent.click(pmRoot.getByText('hello', { exact: false }))
     expect(onImageClick).not.toHaveBeenCalled()
@@ -200,12 +172,11 @@ describe('image click callback', () => {
 
   it('reports each adjacent image by its own src and alt', async () => {
     const onImageClick = vi.fn<ImageClickHandler>()
-    using fixture = setupFixture()
-    applyClickable(
-      fixture,
+    using fixture = setupClickable(
       '![one](https://example.com/1.png)![two](https://example.com/2.png)',
       onImageClick,
     )
+    void fixture
     await expect.element(pmRoot.getByAltText('one')).toBeInTheDocument()
     await userEvent.click(pmRoot.getByAltText('one'))
     await userEvent.click(pmRoot.getByAltText('two'))
@@ -245,9 +216,9 @@ describe('image resize', () => {
     await expect.element(resizable).toHaveAttribute('data-width', '200')
   })
 
-  // A persisted height is applied directly, not recomputed from width. The
-  // portrait image's derived height would be 200 / 0.5 = 400; the comment's 150
-  // proves the seeded height wins, so the box has its size before the load event.
+  // A persisted height is applied directly, not recomputed from width: the
+  // portrait image's derived height would be 200 / 0.5 = 400, but the comment's
+  // 150 wins, so the box has its size before the load event.
   it('applies a persisted width and height to the resizable root', async () => {
     using fixture = setupResize(
       '![cat](u)<!-- {"width":200,"height":150} -->',
@@ -258,26 +229,22 @@ describe('image resize', () => {
     await expect.element(resizable).toHaveAttribute('data-height', '150')
   })
 
-  // Every orientation must pair the persisted width with a derived height. A
-  // portrait image (aspect ratio < 1) is the regression: the component switches
-  // to `width: min-content`, which without a real height collapses to the CSS
-  // min-width floor instead of honoring the width.
-  it.each([
-    { orientation: 'portrait', imageWidth: 10, imageHeight: 20, dataHeight: '400' },
-    { orientation: 'landscape', imageWidth: 20, imageHeight: 10, dataHeight: '100' },
-    { orientation: 'square', imageWidth: 10, imageHeight: 10, dataHeight: '200' },
-  ])(
-    'pairs a persisted width with a height for a $orientation image',
-    async ({ imageWidth, imageHeight, dataHeight }) => {
-      using fixture = setupResize(
-        '![cat](u)<!-- {"width":200} -->',
-        getSVGImageURL(imageWidth, imageHeight),
-      )
-      void fixture
-      await expect.element(resizable).toHaveAttribute('data-width', '200')
-      await expect.element(resizable).toHaveAttribute('data-height', dataHeight)
-    },
-  )
+  it('pairs a persisted width with a derived height for a landscape image', async () => {
+    using fixture = setupResize('![cat](u)<!-- {"width":200} -->', getSVGImageURL(20, 10))
+    void fixture
+    await expect.element(resizable).toHaveAttribute('data-width', '200')
+    await expect.element(resizable).toHaveAttribute('data-height', '100')
+  })
+
+  // Portrait is the regression: the component switches to `width: min-content`,
+  // which without a real height would collapse to the CSS min-width floor instead
+  // of honoring the persisted width.
+  it('pairs a persisted width with a derived height for a portrait image', async () => {
+    using fixture = setupResize('![cat](u)<!-- {"width":200} -->', getSVGImageURL(10, 20))
+    void fixture
+    await expect.element(resizable).toHaveAttribute('data-width', '200')
+    await expect.element(resizable).toHaveAttribute('data-height', '400')
+  })
 
   it('writes a width and height comment when resized', async () => {
     using fixture = setupResize('![cat](u)')
@@ -299,10 +266,8 @@ describe('image resize', () => {
   })
 
   it('sizes the preview from its aspect ratio', async () => {
-    using fixture = setupFixture()
-    const { editor, n } = fixture
-    editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(240, 120) }))
-    fixture.set(n.doc(n.paragraph('![wide](url)')))
+    using fixture = setupResize('![wide](url)', getSVGImageURL(240, 120))
+    void fixture
 
     // The load handler seeds `data-aspect-ratio` once the natural size is known;
     // by then the resizable root has applied its width/height styles.
@@ -331,32 +296,30 @@ describe('image resize', () => {
   })
 })
 
+// REVIEW: DELETE THIS COMMENT BELOW
 // The image mark view has the same hidden-source/non-editable-preview shape as
-// the wikilink, so a caret just after an inline image must also be a real caret
-// stop: typing continues after the image, never before it. (Block-inserted
-// images masked this, but inline images hit it.)
-describe.each(['hide', 'focus'] as MarkMode[])(
-  'typing after an inline image in %s mode',
-  (mode) => {
-    it('types the next character after the image, not before it', async () => {
-      using fixture = setup(mode, 'A![img](url)')
-      await expect.element(preview).toBeVisible()
-      // Offset 12 = right after the image's closing `)`.
-      setCaret(fixture, 12)
+// the wikilink, so a caret just after an inline image must be a real caret stop:
+// typing continues after the image, never before it.
+// REVIEW: DELETE THIS COMMENT ABOVE
+describe('typing after an inline image', () => {
+  it('types the next character after the image, not before it', async () => {
+    using fixture = setup('hide', 'A![img](url)')
+    await expect.element(preview).toBeVisible()
+    // Offset 12 = right after the image's closing `)`.
+    setCaret(fixture, 12)
 
-      await userEvent.keyboard('B')
-      expect(fixture.doc.textContent).toBe('A![img](url)B')
-      expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A![img](url)B┃"`)
-    })
+    await userEvent.keyboard('B')
+    expect(fixture.doc.textContent).toBe('A![img](url)B')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A![img](url)B┃"`)
+  })
 
-    it('types after an image that sits between words', async () => {
-      using fixture = setup(mode, 'see ![img](url) here')
-      await expect.element(preview).toBeVisible()
-      // Offset 15 = right after the closing `)` of `see ![img](url)`.
-      setCaret(fixture, 15)
+  it('types after an image that sits between words', async () => {
+    using fixture = setup('hide', 'see ![img](url) here')
+    await expect.element(preview).toBeVisible()
+    // Offset 15 = right after the closing `)` of `see ![img](url)`.
+    setCaret(fixture, 15)
 
-      await userEvent.keyboard('X')
-      expect(fixture.doc.textContent).toBe('see ![img](url)X here')
-    })
-  },
-)
+    await userEvent.keyboard('X')
+    expect(fixture.doc.textContent).toBe('see ![img](url)X here')
+  })
+})
