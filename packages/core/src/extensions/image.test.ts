@@ -265,25 +265,31 @@ describe('image resize', () => {
     await expect.element(resizable).toHaveAttribute('data-width', '320')
   })
 
-  it('sizes the preview from its aspect ratio', async () => {
-    using fixture = setupResize('![wide](url)', getSVGImageURL(240, 120))
+  it.each([
+    { width: 150, height: 150 }, // square
+    { width: 200, height: 100 }, // landscape
+    { width: 100, height: 200 }, // portrait
+  ])('sizes the preview from its aspect ratio $width / $height', async ({ width, height }) => {
+    const expectedRatio = width / height
+
+    using fixture = setupResize('![](url)', getSVGImageURL(width, height))
     void fixture
 
-    // The load handler seeds `data-aspect-ratio` once the natural size is known;
-    // by then the resizable root has applied its width/height styles.
-    await expect.element(resizable).toHaveAttribute('data-aspect-ratio', '2')
+    await vi.waitFor(() => {
+      const element = resizable.element()
 
-    await expect
-      .poll(() => {
-        const { width, height } = resizable.element().getBoundingClientRect()
-        expect(width).toBeGreaterThan(200)
-        expect(height).toBeGreaterThan(100)
-        const ratio = width / height
-        expect(ratio).toBeGreaterThan(1.9)
-        expect(ratio).toBeLessThan(2.1)
-        return true
-      })
-      .toBeTruthy()
+      const dataRatio = Number.parseFloat(element.getAttribute('data-aspect-ratio') || '-1')
+
+      const { width: displayWidth, height: displayHeight } = element
+        .querySelector('img')!
+        .getBoundingClientRect()
+      const displayRatio = displayWidth / displayHeight
+
+      expect(Math.abs(displayWidth - width)).toBeLessThan(20)
+      expect(Math.abs(displayHeight - height)).toBeLessThan(20)
+      expect(Math.abs(dataRatio - expectedRatio)).toBeLessThan(0.02)
+      expect(Math.abs(displayRatio - expectedRatio)).toBeLessThan(0.02)
+    })
   })
 
   it('shows a loading placeholder until the image loads', async () => {

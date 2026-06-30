@@ -704,7 +704,7 @@ describe('focus mode', () => {
               class="md-image-resizable"
               data-loading
               data-testid="image-resizable"
-              style="width: 1px; height: 1px;"
+              style="width: auto; height: auto;"
             >
               <img
                 alt="alt"
