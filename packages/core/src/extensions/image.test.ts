@@ -273,17 +273,15 @@ describe('image resize', () => {
     // by then the resizable root has applied its width/height styles.
     await expect.element(resizable).toHaveAttribute('data-aspect-ratio', '2')
 
-    await expect
-      .poll(() => {
-        const { width, height } = resizable.element().getBoundingClientRect()
-        expect(width).toBeGreaterThan(200)
-        expect(height).toBeGreaterThan(100)
-        const ratio = width / height
-        expect(ratio).toBeGreaterThan(1.9)
-        expect(ratio).toBeLessThan(2.1)
-        return true
-      })
-      .toBeTruthy()
+    await vi.waitFor(() => {
+      const { width, height } = resizable.element().getBoundingClientRect()
+      expect(width).toBeGreaterThan(200)
+      expect(height).toBeGreaterThan(100)
+      const ratio = width / height
+      expect(ratio).toBeGreaterThan(1.9)
+      expect(ratio).toBeLessThan(2.1)
+      return true
+    })
   })
 
   // Portrait is the regression seen in reflect-open: a portrait image (aspect
@@ -297,17 +295,15 @@ describe('image resize', () => {
 
     await expect.element(resizable).toHaveAttribute('data-aspect-ratio', '0.5')
 
-    await expect
-      .poll(() => {
-        const { width, height } = resizable.element().getBoundingClientRect()
-        expect(width).toBeGreaterThan(80)
-        expect(height).toBeGreaterThan(160)
-        const ratio = width / height
-        expect(ratio).toBeGreaterThan(0.45)
-        expect(ratio).toBeLessThan(0.55)
-        return true
-      })
-      .toBeTruthy()
+    await vi.waitFor(() => {
+      const { width, height } = resizable.element().getBoundingClientRect()
+      expect(width).toBeGreaterThan(80)
+      expect(height).toBeGreaterThan(160)
+      const ratio = width / height
+      expect(ratio).toBeGreaterThan(0.45)
+      expect(ratio).toBeLessThan(0.55)
+      return true
+    })
   })
 
   it('shows a loading placeholder until the image loads', async () => {
