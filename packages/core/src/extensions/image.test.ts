@@ -13,7 +13,6 @@ import {
 import { defineImageClickHandler, type ImageClickHandler } from './image-click.ts'
 import { defineImage } from './image.ts'
 import { defineMarkMode, type MarkMode } from './mark-mode.ts'
-import { sleep } from '@ocavue/utils'
 
 const pmRoot = page.locate('.ProseMirror')
 const preview = pmRoot.getByTestId('image-preview')
