@@ -281,7 +281,7 @@ describe('image resize', () => {
       const dataRatio = Number.parseFloat(element.getAttribute('data-aspect-ratio') || '-1')
 
       const { width: displayWidth, height: displayHeight } = element.getBoundingClientRect()
-      const displayRatio = width / height
+      const displayRatio = displayWidth / displayHeight
 
       expect(Math.abs(displayWidth - width)).toBeLessThan(20)
       expect(Math.abs(displayHeight - height)).toBeLessThan(20)
