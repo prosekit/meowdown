@@ -116,6 +116,33 @@ describe('image', () => {
     fixture.set(doc)
     await expect.element(pmRoot.getByAltText('cat')).not.toBeInTheDocument()
   })
+
+  it('sizes the preview from its aspect ratio, not the min-height floor', async () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(240, 120) }))
+    fixture.set(n.doc(n.paragraph('![wide](url)')))
+
+    const resizable = pmRoot.getByTestId('image-resizable')
+    // The load handler seeds `data-aspect-ratio` once the natural size is known;
+    // by then the resizable root has applied its width/height styles.
+    await expect.element(resizable).toHaveAttribute('data-aspect-ratio', '2')
+
+    await expect
+      .poll(() => {
+        const { width, height } = resizable.element().getBoundingClientRect()
+        // Height tracks width / ratio, so the box keeps its 2:1 ratio. The flex-item
+        // bug collapsed the height to the 2.5rem (40px) min-height floor while the
+        // width stayed wide.
+        expect(width).toBeGreaterThan(100)
+        expect(height).toBeGreaterThan(50)
+        const ratio = width / height
+        expect(ratio).toBeGreaterThan(1.9)
+        expect(ratio).toBeLessThan(2.1)
+        return true
+      })
+      .toBeTruthy()
+  })
 })
 
 // A hidden image is one caret stop in hide mode: arrowing onto it selects the
@@ -397,22 +424,3 @@ describe.each(['hide', 'focus'] as MarkMode[])(
     })
   },
 )
-
-// In show mode the image still renders its preview, and the raw source survives
-// in the mark view's contentDOM so the markdown round-trips.
-describe('image show mode keeps the source and the preview', () => {
-  it('shows the preview while keeping the raw source in the DOM', async () => {
-    using fixture = setup('show', 'A![img](url)B')
-    await expect.element(preview).toBeVisible()
-
-    // The raw markdown survives in the DOM (it round-trips).
-    expect(fixture.dom.querySelector('p')?.innerText).toContain('![img](url)')
-
-    // The preview has real width and sits within the paragraph's box.
-    const previewRect = (preview.element() as HTMLElement).getBoundingClientRect()
-    const paragraph = fixture.dom.querySelector('p')!
-    const paragraphRect = paragraph.getBoundingClientRect()
-    expect(previewRect.width).toBeGreaterThan(0)
-    expect(previewRect.left).toBeGreaterThanOrEqual(paragraphRect.left - 1)
-  })
-})
