@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.2](https://github.com/prosekit/meowdown/compare/react-v0.29.1...react-v0.29.2) (2026-06-30)
+
+
+### Bug Fixes
+
+* preserve wikilink query casing ([#177](https://github.com/prosekit/meowdown/issues/177)) ([b992d4a](https://github.com/prosekit/meowdown/commit/b992d4aea576cfecd9ca36185ab0ad5ef4c039c3))
+
 ## [0.29.1](https://github.com/prosekit/meowdown/compare/react-v0.29.0...react-v0.29.1) (2026-06-29)
 
 
