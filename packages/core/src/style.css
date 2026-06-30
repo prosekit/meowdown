@@ -15,73 +15,75 @@
    * any ancestor to customize.
    * ------------------------------------------------------------------------- */
   :root {
-    /*
-      REVIEW: let's put the comment at a line and put the css at the next line for better readability. Let's have an empty line between two variables. for example:
+    /* body text */
+    --meowdown-text: light-dark(oklch(0.37 0.012 286), oklch(0.871 0.005 286));
 
-      comment1
-      --meowdown-var1: 123;
+    /* headings and table header text */
+    --meowdown-heading: light-dark(oklch(0.21 0.006 286), oklch(0.985 0 0));
 
-      comment2
-      --meowdown-var2: 234;
-      */
+    /* secondary text: blockquotes, syntax marks, bullets */
+    --meowdown-muted: light-dark(oklch(0.442 0.015 286), oklch(0.712 0.013 286));
 
-    --meowdown-text: light-dark(#3f3f46, #d4d4d8); /* body text */
-    --meowdown-heading: light-dark(#18181b, #fafafa); /* headings and table header text */
-    --meowdown-muted: light-dark(
-      #52525b,
-      #a1a1aa
-    ); /* secondary text: blockquotes, syntax marks, bullets */
-    --meowdown-accent: light-dark(
-      #ea580c,
-      #fb923c
-    ); /* links, wikilinks, tags, caret, drop indicator */
-    --meowdown-mark: var(--meowdown-muted); /* Markdown syntax characters */
-    --meowdown-highlight: light-dark(#fef08a, #854d0e); /* `==highlight==` background */
-    --meowdown-border: light-dark(
-      #e4e4e7,
-      #3f3f46
-    ); /* rules, table cell borders, popover borders */
-    --meowdown-blockquote-border: color-mix(
-      in oklab,
-      var(--meowdown-accent) 35%,
-      transparent
-    ); /* blockquote left bar */
-    --meowdown-code-bg: light-dark(#f4f4f5, #18181b); /* inline and block code background */
-    --meowdown-image-loading-bg: light-dark(
-      #f4f4f5,
-      #27272a
-    ); /* placeholder fill while an image loads */
-    --meowdown-image-radius: 0.5rem; /* corner radius of rendered inline images */
-    --meowdown-table-header-bg: light-dark(#fafafa, #27272a); /* table header row background */
-    --meowdown-popover-bg: light-dark(
-      #fff,
-      #18181b
-    ); /* floating menus: autocomplete, link, table, block, code */
-    --meowdown-popover-hover-bg: light-dark(
-      #f4f4f5,
-      #27272a
-    ); /* highlighted/hovered row in those menus */
-    --meowdown-danger: light-dark(#ef4444, #f87171); /* destructive menu items */
-    --meowdown-placeholder: var(--meowdown-muted); /* empty-block placeholder text */
-    --meowdown-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace; /* code font stack */
+    /* links, wikilinks, tags, caret, drop indicator */
+    --meowdown-accent: light-dark(oklch(0.646 0.194 41), oklch(0.758 0.159 56));
 
-    /* Selection colors. Deliberately standalone variables, not derived from
-     * `--meowdown-accent`, so selection can be restyled independently. Warm by
-     * default to sit with the orange accent; a consumer can map them to its own. */
-    --meowdown-node-outline: light-dark(hsl(25 95% 45%), hsl(25 95% 60%));
-    --meowdown-node-selection: light-dark(hsl(25 95% 50% / 0.1), hsl(25 95% 60% / 0.12));
-    --meowdown-selection: light-dark(hsl(25 95% 50% / 0.22), hsl(25 95% 60% / 0.3));
+    /* Markdown syntax characters */
+    --meowdown-mark: var(--meowdown-muted);
 
-    /*REVIEW: let's use oklch for all colors so that it's clear to view the meaning of the color by reading the source code */
+    /* `==highlight==` background */
+    --meowdown-highlight: light-dark(oklch(0.945 0.124 102), oklch(0.476 0.103 62));
 
-    /* Collapsible bullets: the filled circle drawn behind a collapsed item's dot
-     * (so it reads as a target). Standalone so folding can be themed apart. */
+    /* rules, table cell borders, popover borders */
+    --meowdown-border: light-dark(oklch(0.92 0.004 286), oklch(0.37 0.012 286));
+
+    /* blockquote left bar */
+    --meowdown-blockquote-border: color-mix(in oklab, var(--meowdown-accent) 35%, transparent);
+
+    /* inline and block code background */
+    --meowdown-code-bg: light-dark(oklch(0.967 0 0), oklch(0.21 0.006 286));
+
+    /* placeholder fill while an image loads */
+    --meowdown-image-loading-bg: light-dark(oklch(0.967 0 0), oklch(0.274 0.005 286));
+
+    /* corner radius of rendered inline images */
+    --meowdown-image-radius: 0.5rem;
+
+    /* table header row background */
+    --meowdown-table-header-bg: light-dark(oklch(0.985 0 0), oklch(0.274 0.005 286));
+
+    /* floating menus: autocomplete, link, table, block, code */
+    --meowdown-popover-bg: light-dark(oklch(1 0 0), oklch(0.21 0.006 286));
+
+    /* highlighted/hovered row in those menus */
+    --meowdown-popover-hover-bg: light-dark(oklch(0.967 0 0), oklch(0.274 0.005 286));
+
+    /* destructive menu items */
+    --meowdown-danger: light-dark(oklch(0.637 0.208 25), oklch(0.711 0.166 22));
+
+    /* empty-block placeholder text */
+    --meowdown-placeholder: var(--meowdown-muted);
+
+    /* code font stack */
+    --meowdown-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* Selection colors: standalone, not derived from `--meowdown-accent`, so
+     * selection can be restyled independently. Warm by default to sit with the
+     * orange accent; a consumer can remap the hue. */
+    --meowdown-node-outline: light-dark(oklch(0.642 0.178 46), oklch(0.741 0.165 52));
+    --meowdown-node-selection: light-dark(
+      oklch(0.693 0.194 46 / 0.1),
+      oklch(0.741 0.165 52 / 0.12)
+    );
+    --meowdown-selection: light-dark(oklch(0.693 0.194 46 / 0.22), oklch(0.741 0.165 52 / 0.3));
+
+    /* Collapsible bullets: the filled circle behind a collapsed item's dot (so it
+     * reads as a target). Standalone so folding can be themed apart. */
     --meowdown-fold-halo: var(--meowdown-accent);
 
-    /* Horizontal editor padding. Floating UI tracking the hovered block (the
-     * block handle in @meowdown/react) must fit inside it: hover tracking only
-     * sees pointer events on the editor element, so a handle outside the
-     * padding closes before it can be clicked. Keep it >= 3.5rem. */
+    /* Horizontal editor padding. Floating UI tracking the hovered block (the block
+     * handle in @meowdown/react) must fit inside it: hover tracking only sees
+     * pointer events on the editor element, so a handle outside the padding closes
+     * before it can be clicked. Keep it >= 3.5rem. */
     --meowdown-gutter: 3.5rem;
   }
 
