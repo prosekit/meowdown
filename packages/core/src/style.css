@@ -102,6 +102,7 @@
    * handle's drag preview clones a block into a bare `.ProseMirror` container, which
    * must not pick up the gutter padding. */
   .meowdown-content {
+    /*REVIEW: let's do not use this pattern. Let's write down -top -bottom -left -right to make it clear */
     padding: 1.25rem var(--meowdown-gutter) 1.75rem;
   }
 
