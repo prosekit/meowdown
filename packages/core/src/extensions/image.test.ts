@@ -117,7 +117,7 @@ describe('image', () => {
     await expect.element(pmRoot.getByAltText('cat')).not.toBeInTheDocument()
   })
 
-  it('sizes the preview from its aspect ratio, not the min-height floor', async () => {
+  it('sizes the preview from its aspect ratio', async () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(240, 120) }))
