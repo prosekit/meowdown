@@ -548,10 +548,13 @@
   }
 
   .md-image-view-preview {
-    /* inline-flex (not inline-block) so the box tightly wraps the image with no
-     * baseline descender gap below it, which would otherwise show as empty space
-     * inside the selection outline. */
-    display: inline-flex;
+    /* inline-block, not inline-flex: the resizable root sizes itself with
+     * `aspect-ratio` + `height: auto`, which only resolves in normal flow. As a
+     * flex item the root loses that derivation and collapses to its
+     * `min-height`. The root's `vertical-align: bottom` removes the baseline
+     * descender gap that would otherwise show as empty space inside the
+     * selection outline. */
+    display: inline-block;
     max-width: 100%;
     border-radius: 6px;
     outline-offset: 2px;
@@ -560,6 +563,9 @@
   .md-image-resizable {
     position: relative;
     display: inline-block;
+    /* Sit on the line-box bottom so the inline-block preview wrapper wraps the
+     * image with no baseline descender gap below it. */
+    vertical-align: bottom;
     /* New stacking context so the handle's `mix-blend-mode` mixes only with the
      * image, not the page behind it. */
     isolation: isolate;
