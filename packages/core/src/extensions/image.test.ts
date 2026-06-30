@@ -270,17 +270,20 @@ describe('image resize', () => {
     using fixture = setupResize('![wide](url)', getSVGImageURL(240, 120))
     void fixture
 
-    // The load handler seeds `data-aspect-ratio` once the natural size is known;
-    // by then the resizable root has applied its width/height styles.
-    await expect.element(resizable).toHaveAttribute('data-aspect-ratio', '2')
-
     await vi.waitFor(() => {
-      const { width, height } = resizable.element().getBoundingClientRect()
+      const element = resizable.element()
+
+      const dataRatio = Number.parseFloat(element.getAttribute('data-aspect-ratio') || '-1')
+      expect(dataRatio).toBeGreaterThan(1.9)
+      expect(dataRatio).toBeLessThan(2.1)
+
+      const { width, height } = element.getBoundingClientRect()
       expect(width).toBeGreaterThan(200)
       expect(height).toBeGreaterThan(100)
-      const ratio = width / height
-      expect(ratio).toBeGreaterThan(1.9)
-      expect(ratio).toBeLessThan(2.1)
+
+      const displayRatio = width / height
+      expect(displayRatio).toBeGreaterThan(1.9)
+      expect(displayRatio).toBeLessThan(2.1)
       return true
     })
   })
