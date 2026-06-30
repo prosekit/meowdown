@@ -291,7 +291,7 @@ describe('image resize', () => {
   // relies on the aspect-ratio transferred size that WKWebView does not resolve.
   // A 120x240 image must render at roughly that box (ratio ~0.5).
   it.only('sizes a portrait preview from its aspect ratio', async () => {
-    using fixture = setupResize('![tall](url)', getSVGImageURL(120, 240))
+    using fixture = setupResize('![tall](url)', 'https://placehold.co/200x400.png')
     void fixture
 
     await expect.element(resizable).toHaveAttribute('data-aspect-ratio', '0.5')
