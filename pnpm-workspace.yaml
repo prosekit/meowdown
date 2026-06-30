@@ -17,6 +17,7 @@ trustLockfile: true
 minimumReleaseAgeExclude:
   - '@ocavue/eslint-config'
   - '@prosekit/*'
+  - '@aria-ui/*'
 
 allowBuilds:
   simple-git-hooks: false
