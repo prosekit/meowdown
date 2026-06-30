@@ -286,25 +286,28 @@ describe('image resize', () => {
       .toBeTruthy()
   })
 
-  // A portrait image (aspect ratio < 1) with a known width must be driven by
-  // that width (`width: <N>px; height: auto`), not `width: min-content`. The
-  // min-content path relies on the CSS aspect-ratio transferred size
-  // (`height * ratio`), which Apple's shipping WKWebView does not resolve, so the
-  // box collapses to the CSS min-width floor (the reflect-open regression).
-  //
-  // Asserted on the inline style, not the rendered box: Playwright's bundled
-  // WebKit, unlike shipping WKWebView, does resolve the transfer, so the box
-  // renders correctly here even with the bug. The inline style is what differs.
-  // Fixed upstream in prosekit/prosekit#1715; this stays red until meowdown bumps
-  // to a `@prosekit/web` that includes it.
-  it('drives a portrait preview by width, not min-content', async () => {
+  // Portrait is the regression seen in reflect-open: a portrait image (aspect
+  // ratio < 1) collapses to the CSS min-width floor instead of rendering at its
+  // size, because the resizable root is driven by `width: min-content`, which
+  // relies on the aspect-ratio transferred size that WKWebView does not resolve.
+  // A 120x240 image must render at roughly that box (ratio ~0.5).
+  it('sizes a portrait preview from its aspect ratio', async () => {
     using fixture = setupResize('![tall](url)', getSVGImageURL(120, 240))
     void fixture
 
     await expect.element(resizable).toHaveAttribute('data-aspect-ratio', '0.5')
 
-    await expect.poll(() => resizable.element().style.height).toBe('auto')
-    expect(resizable.element().style.width).toBe('120px')
+    await expect
+      .poll(() => {
+        const { width, height } = resizable.element().getBoundingClientRect()
+        expect(width).toBeGreaterThan(80)
+        expect(height).toBeGreaterThan(160)
+        const ratio = width / height
+        expect(ratio).toBeGreaterThan(0.45)
+        expect(ratio).toBeLessThan(0.55)
+        return true
+      })
+      .toBeTruthy()
   })
 
   it('shows a loading placeholder until the image loads', async () => {
