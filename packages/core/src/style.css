@@ -1,651 +1,715 @@
-@import '@prosekit/pm/view/style/prosemirror.css';
-@import '@prosekit/extensions/list/style.css';
+@layer meowdown.base, meowdown.theme, meowdown.editor;
 
-/* ---------------------------------------------------------------------------
- * Default theme
- *
- * Colors resolve through `light-dark()`, so the editor follows the host
- * page's `color-scheme` (set `color-scheme: light dark` on `:root` to get
- * automatic dark mode). Override the `--meowdown-*` variables on `:root` or
- * any ancestor to customize.
- * ------------------------------------------------------------------------- */
-:root {
-  --meowdown-text: light-dark(#3f3f46, #d4d4d8);
-  --meowdown-heading: light-dark(#18181b, #fafafa);
-  --meowdown-muted: light-dark(#52525b, #a1a1aa);
-  --meowdown-accent: light-dark(#7c3aed, #c084fc);
-  --meowdown-mark: light-dark(#a78bfa, #8b5cf6);
-  --meowdown-highlight: light-dark(#fef08a, #854d0e);
-  --meowdown-border: light-dark(#e4e4e7, #3f3f46);
-  --meowdown-code-bg: light-dark(#f4f4f5, #18181b);
-  --meowdown-image-loading-bg: light-dark(#f4f4f5, #27272a);
-  --meowdown-table-header-bg: light-dark(#fafafa, #27272a);
-  --meowdown-autocomplete-bg: light-dark(#fff, #18181b);
-  --meowdown-autocomplete-highlight-bg: light-dark(#f4f4f5, #27272a);
-  --meowdown-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+@import '@prosekit/pm/view/style/prosemirror.css' layer(meowdown.base);
+@import '@prosekit/extensions/list/style.css' layer(meowdown.base);
 
-  /* Selection colors. Deliberately standalone variables, not derived from
-   * `--meowdown-accent`, so selection can be restyled independently. */
-  --meowdown-node-outline: light-dark(hsl(250 100% 60%), hsl(250 100% 72%));
-  --meowdown-node-selection: light-dark(hsl(250 100% 60% / 0.1), hsl(250 100% 72% / 0.12));
-  --meowdown-selection: light-dark(hsl(250 100% 60% / 0.22), hsl(250 100% 72% / 0.3));
+@layer meowdown.theme {
+  /* ---------------------------------------------------------------------------
+   * Default theme: the themeable `--meowdown-*` variables and their defaults.
+   *
+   * Colors resolve through `light-dark()`, so the editor follows the host
+   * page's `color-scheme` (set `color-scheme: light dark` on `:root` to get
+   * automatic dark mode). Override any `--meowdown-*` variable on `:root` or
+   * any ancestor to customize.
+   * ------------------------------------------------------------------------- */
+  :root {
+    /* body text */
+    --meowdown-text: light-dark(oklch(0.37 0.012 286), oklch(0.871 0.005 286));
 
-  /* Collapsible bullets: the filled circle drawn behind a collapsed item's dot
-   * (so it reads as a target). Standalone so folding can be themed apart. */
-  --meowdown-fold-halo: var(--meowdown-accent);
+    /* headings and table header text */
+    --meowdown-heading: light-dark(oklch(0.21 0.006 286), oklch(0.985 0 0));
 
-  /* Horizontal editor padding. Floating UI tracking the hovered block (the
-   * block handle in @meowdown/react) must fit inside it: hover tracking only
-   * sees pointer events on the editor element, so a handle outside the
-   * padding closes before it can be clicked. Keep it >= 3.5rem. */
-  --meowdown-gutter: 3.5rem;
-}
+    /* secondary text: blockquotes, syntax marks, bullets */
+    --meowdown-muted: light-dark(oklch(0.442 0.015 286), oklch(0.712 0.013 286));
 
-/* ---------------------------------------------------------------------------
- * Editor surface
- * ------------------------------------------------------------------------- */
-.ProseMirror {
-  box-sizing: border-box;
-  outline: none;
-  font-size: 1.0625rem;
-  line-height: 1.7;
-  color: var(--meowdown-text);
-  caret-color: var(--meowdown-accent);
-  -webkit-font-smoothing: antialiased;
-}
+    /* links, wikilinks, tags, caret, drop indicator */
+    --meowdown-accent: light-dark(oklch(0.646 0.194 41), oklch(0.758 0.159 56));
 
-/* Surface padding stays on a meowdown-owned class, not `.ProseMirror`: the block
- * handle's drag preview clones a block into a bare `.ProseMirror` container, which
- * must not pick up the gutter padding. */
-.meowdown-content {
-  padding: 1.25rem var(--meowdown-gutter) 1.75rem;
-}
+    /* Markdown syntax characters */
+    --meowdown-mark: var(--meowdown-muted);
 
-.ProseMirror > * + * {
-  margin-top: 0.85em;
-}
+    /* `==highlight==` background */
+    --meowdown-highlight: light-dark(oklch(0.945 0.124 102), oklch(0.476 0.103 62));
 
-/* Render soft line breaks (a literal `\n` kept by the paragraph's
- * `whitespace: 'pre'` spec) as line breaks, while still wrapping long lines. */
-.ProseMirror p {
-  white-space: pre-wrap;
-}
+    /* rules, table cell borders, popover borders */
+    --meowdown-border: light-dark(oklch(0.92 0.004 286), oklch(0.37 0.012 286));
 
-.ProseMirror h1,
-.ProseMirror h2,
-.ProseMirror h3,
-.ProseMirror h4,
-.ProseMirror h5,
-.ProseMirror h6 {
-  font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
-  color: var(--meowdown-heading);
-  /* Render a multi-line setext heading's soft break (kept by the heading's
-   * `whitespace: 'pre'` spec) as a line break, while still wrapping long lines. */
-  white-space: pre-wrap;
-}
+    /* blockquote left bar */
+    --meowdown-blockquote-border: color-mix(in oklab, var(--meowdown-accent) 35%, transparent);
 
-.ProseMirror h1 {
-  font-size: 1.75rem;
-}
-.ProseMirror h2 {
-  font-size: 1.4rem;
-}
-.ProseMirror h3 {
-  font-size: 1.2rem;
-}
-.ProseMirror h4 {
-  font-size: 1.1rem;
-}
-.ProseMirror h5 {
-  font-size: 1rem;
-}
-.ProseMirror h6 {
-  font-size: 0.95rem;
-}
+    /* inline and block code background */
+    --meowdown-code-bg: light-dark(oklch(0.967 0 0), oklch(0.21 0.006 286));
 
-.ProseMirror .md-link {
-  color: var(--meowdown-accent);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
+    /* placeholder fill while an image loads */
+    --meowdown-image-loading-bg: light-dark(oklch(0.967 0 0), oklch(0.274 0.005 286));
 
-.ProseMirror mark {
-  background: var(--meowdown-highlight);
-  color: inherit;
-  border-radius: 2px;
-  padding: 0 1px;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-}
+    /* corner radius of rendered inline images */
+    --meowdown-image-radius: 0.5rem;
 
-.ProseMirror code {
-  font-family: var(--meowdown-font-mono);
-  font-size: 0.9em;
-  padding: 0.1em 0.35em;
-  border-radius: 0.35rem;
-  background: color-mix(in oklab, var(--meowdown-accent) 10%, transparent);
-  color: color-mix(in oklab, var(--meowdown-accent) 80%, var(--meowdown-heading));
-}
+    /* table header row background */
+    --meowdown-table-header-bg: light-dark(oklch(0.985 0 0), oklch(0.274 0.005 286));
 
-.ProseMirror blockquote {
-  margin-left: 0;
-  padding-left: 1rem;
-  border-left: 3px solid color-mix(in oklab, var(--meowdown-accent) 35%, transparent);
-  color: var(--meowdown-muted);
-  font-style: italic;
-}
+    /* floating menus: autocomplete, link, table, block, code */
+    --meowdown-popover-bg: light-dark(oklch(1 0 0), oklch(0.21 0.006 286));
 
-.ProseMirror ul,
-.ProseMirror ol {
-  padding-left: 1.5rem;
-}
-.ProseMirror ul {
-  list-style: disc;
-}
-.ProseMirror ol {
-  list-style: decimal;
-}
-.ProseMirror li {
-  margin-top: 0.25em;
-}
+    /* highlighted/hovered row in those menus */
+    --meowdown-popover-hover-bg: light-dark(oklch(0.967 0 0), oklch(0.274 0.005 286));
 
-/* ---------------------------------------------------------------------------
- * Checkbox task list items
- *
- * `kind: 'task'` is the single checkable list kind; the bullet marker picks the
- * shape. `+` (data-list-marker="+") is a circle checkbox task, any other marker
- * is a square checkbox task. Plain GFM on disk (`+ [ ]` vs `- [ ]`), mirroring
- * reflect-editor.
- * ------------------------------------------------------------------------- */
-.ProseMirror .prosemirror-flat-list[data-list-kind='task'] {
-  /* Animation: fade the opacity when an item is (un)checked. */
-  transition: opacity 200ms ease;
+    /* destructive menu items */
+    --meowdown-danger: light-dark(oklch(0.637 0.208 25), oklch(0.711 0.166 22));
 
-  /* Dim a checked item; reset nested checked items so it does not compound. */
-  &[data-list-checked] {
-    opacity: 0.5;
+    /* empty-block placeholder text */
+    --meowdown-placeholder: var(--meowdown-muted);
 
-    & .prosemirror-flat-list[data-list-kind='task'][data-list-checked] {
-      opacity: 1;
-    }
-  }
+    /* code font stack */
+    --meowdown-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  & > .list-marker {
-    /* Animation: grow the checkbox slightly on hover. */
-    transition: transform 120ms ease;
-
-    &:hover {
-      transform: scale(1.1);
-    }
-
-    & input[type='checkbox'] {
-      appearance: none;
-      -webkit-appearance: none;
-      box-sizing: border-box;
-      width: 0.95rem;
-      height: 0.95rem;
-      border: 1.5px solid var(--meowdown-border);
-      border-radius: 0.25rem; /* square */
-      background: transparent center / 100% 100% no-repeat;
-      /* Animation: fade the fill and border when (un)checked. */
-      transition:
-        background-color 150ms ease,
-        border-color 150ms ease;
-
-      &:checked {
-        border-color: transparent;
-        background-color: var(--meowdown-accent);
-        background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
-      }
-    }
-  }
-
-  /* A `+` marker is the circle checkbox task. */
-  &[data-list-marker='+'] > .list-marker input[type='checkbox'] {
-    border-radius: 100rem;
-    width: 1.05rem;
-    height: 1.05rem;
-  }
-}
-
-/* ---------------------------------------------------------------------------
- * Collapsible bullets
- * ------------------------------------------------------------------------- */
-.ProseMirror .prosemirror-flat-list[data-list-kind='bullet'] {
-  /* A foldable bullet's marker is clickable. */
-  &[data-list-collapsable] > .list-marker {
-    cursor: pointer;
-  }
-
-  /* The halo: a filled circle behind the dot, aligned to the marker column.
-   * Hidden by default, hinted on hover of a foldable item, fully shown when
-   * collapsed, so a folded bullet reads as a target (a dot inside a disc). */
-  &[data-list-collapsable]::before {
-    content: '';
-    position: absolute;
-    inset-inline-start: 0;
-    top: 0;
-    width: 1lh;
-    height: 1lh;
-    background: radial-gradient(
-      circle at center,
-      var(--meowdown-fold-halo) 0 0.45rem,
-      transparent 0.45rem
+    /* Selection colors: standalone, not derived from `--meowdown-accent`, so
+     * selection can be restyled independently. Warm by default to sit with the
+     * orange accent; a consumer can remap the hue. */
+    --meowdown-node-outline: light-dark(oklch(0.642 0.178 46), oklch(0.741 0.165 52));
+    --meowdown-node-selection: light-dark(
+      oklch(0.693 0.194 46 / 0.1),
+      oklch(0.741 0.165 52 / 0.12)
     );
-    opacity: 0;
-    transition: opacity 120ms ease;
-    pointer-events: none;
-  }
+    --meowdown-selection: light-dark(oklch(0.693 0.194 46 / 0.22), oklch(0.741 0.165 52 / 0.3));
 
-  &[data-list-collapsable]:has(> .list-marker:hover)::before {
-    opacity: 0.2;
-  }
+    /* The resting bullet dot color (a collapsed bullet's dot uses the themed
+     * `--meowdown-bullet-collapsed` instead). */
+    --meowdown-bullet: var(--meowdown-muted);
 
-  &[data-list-collapsable][data-list-collapsed]::before {
-    opacity: 0.35;
-  }
+    /* Bullet dot radius, and the outer radius of a collapsed/hovered bullet's halo. */
+    --meowdown-bullet-radius: 2.5px;
+    --meowdown-bullet-halo-radius: 5.5px;
 
-  &[data-list-collapsable][data-list-collapsed]:has(> .list-marker:hover)::before {
-    opacity: 0.45;
-  }
+    /* The dot color of a collapsed (or hovered) foldable bullet; its halo ring is a
+     * lighter mix of this. Standalone so folding can be themed apart from the accent. */
+    --meowdown-bullet-collapsed: var(--meowdown-accent);
 
-  /* Hide the descendants of a collapsed bullet, keeping its first block. */
-  &[data-list-collapsable][data-list-collapsed] > .list-content > *:nth-child(n + 2) {
-    display: none;
-  }
-}
-
-.ProseMirror pre {
-  padding: 0.9rem 1rem;
-  border-radius: 0.6rem;
-  overflow-x: auto;
-  background: var(--meowdown-code-bg);
-  font-family: var(--meowdown-font-mono);
-  font-size: 0.9em;
-  line-height: 1.5;
-}
-.ProseMirror pre code {
-  padding: 0;
-  background: none;
-  color: inherit;
-}
-
-/* Lezer syntax highlighting. `prosemirror-highlight` tags tokens with the
- * `@lezer/highlight` `tok-*` classes; colors follow the page color scheme via
- * `light-dark()` like the rest of the theme. The palette mirrors GitHub's. */
-.ProseMirror pre code .tok-keyword {
-  color: light-dark(#cf222e, #ff7b72);
-}
-.ProseMirror pre code .tok-comment {
-  color: light-dark(#6e7781, #8b949e);
-  font-style: italic;
-}
-.ProseMirror pre code .tok-string,
-.ProseMirror pre code .tok-url {
-  color: light-dark(#0a3069, #a5d6ff);
-}
-.ProseMirror pre code .tok-number,
-.ProseMirror pre code .tok-bool,
-.ProseMirror pre code .tok-atom,
-.ProseMirror pre code .tok-literal {
-  color: light-dark(#0550ae, #79c0ff);
-}
-.ProseMirror pre code .tok-className,
-.ProseMirror pre code .tok-typeName,
-.ProseMirror pre code .tok-namespace {
-  color: light-dark(#953800, #ffa657);
-}
-.ProseMirror pre code .tok-definition {
-  color: light-dark(#8250df, #d2a8ff);
-}
-.ProseMirror pre code .tok-macroName,
-.ProseMirror pre code .tok-meta,
-.ProseMirror pre code .tok-inserted {
-  color: light-dark(#116329, #7ee787);
-}
-.ProseMirror pre code .tok-invalid,
-.ProseMirror pre code .tok-deleted {
-  color: light-dark(#82071e, #ffa198);
-}
-.ProseMirror pre code .tok-heading {
-  font-weight: 600;
-  color: light-dark(#0550ae, #79c0ff);
-}
-.ProseMirror pre code .tok-strong {
-  font-weight: 600;
-}
-.ProseMirror pre code .tok-emphasis {
-  font-style: italic;
-}
-.ProseMirror pre code .tok-link {
-  text-decoration: underline;
-}
-
-.ProseMirror hr {
-  margin: 1.5em 0;
-  border: none;
-  border-top: 1px solid var(--meowdown-border);
-}
-
-/* ---------------------------------------------------------------------------
- * Tables
- * ------------------------------------------------------------------------- */
-.ProseMirror table {
-  width: 100%;
-  overflow: hidden;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-.ProseMirror td,
-.ProseMirror th {
-  box-sizing: border-box;
-  padding: 0.4rem 0.75rem;
-  border: 1px solid var(--meowdown-border);
-  vertical-align: top;
-  text-align: left;
-}
-
-.ProseMirror th {
-  font-weight: 600;
-  color: var(--meowdown-heading);
-  background: var(--meowdown-table-header-bg);
-}
-
-.ProseMirror table.ProseMirror-selectednode td,
-.ProseMirror table.ProseMirror-selectednode th {
-  border-color: var(--meowdown-node-outline);
-}
-
-.ProseMirror .selectedCell {
-  /* `double` wins the collapsed-border conflict against the solid borders of
-   * unselected neighbors, so the whole selection perimeter recolors. */
-  border: 1px double var(--meowdown-node-outline);
-  background: var(--meowdown-node-selection);
-  caret-color: transparent;
-}
-
-/* ---------------------------------------------------------------------------
- * Selection
- * ------------------------------------------------------------------------- */
-.ProseMirror ::selection {
-  background: var(--meowdown-selection);
-}
-
-.ProseMirror .prosekit-virtual-selection {
-  background: var(--meowdown-selection);
-}
-
-/* prosemirror-view adds `ProseMirror-hideselection` whenever the selection is
- * not "visible" (a node selection). */
-.ProseMirror.ProseMirror-hideselection ::selection {
-  --meowdown-selection: transparent;
-  caret-color: transparent;
-}
-
-/* Node selection (e.g. from the block handle): thin outline + faint wash,
- * replacing prosemirror-view's stock blue outline. */
-.ProseMirror .ProseMirror-selectednode {
-  border-radius: 2px;
-  outline: 1px solid var(--meowdown-node-outline);
-  background: var(--meowdown-node-selection);
-}
-
-.ProseMirror pre.ProseMirror-selectednode {
-  border-radius: 0.6rem;
-}
-
-/* While dragging via the block handle, keep only the outline on the
- * source block so it does not sit tinted under the drag preview. */
-.ProseMirror.prosekit-dragging {
-  --meowdown-node-selection: transparent;
-}
-
-/* ---------------------------------------------------------------------------
- * Tags (`#tag`)
- * ------------------------------------------------------------------------- */
-.ProseMirror .md-tag {
-  padding: 2px 6px;
-  border-radius: 6px;
-  background: color-mix(in oklab, var(--meowdown-accent) 10%, transparent);
-  color: color-mix(in oklab, var(--meowdown-accent) 80%, var(--meowdown-heading));
-  cursor: pointer;
-}
-
-/* ---------------------------------------------------------------------------
- * Inline image / embed previews (`![alt](url)`), rendered in place via a mark
- * view at the image's source position.
- * ------------------------------------------------------------------------- */
-
-.ProseMirror .md-embed-youtube {
-  display: block;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border: 0;
-  border-radius: var(--meowdown-image-radius, 0.5rem);
-}
-
-.ProseMirror .md-embed-tweet {
-  display: block;
-  width: 100%;
-  max-width: 550px;
-  border: 0;
-}
-
-/* ---------------------------------------------------------------------------
- * Placeholder text for empty blocks (ProseKit's definePlaceholder)
- * ------------------------------------------------------------------------- */
-.ProseMirror .prosekit-placeholder::before {
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
-  color: var(--meowdown-placeholder, var(--meowdown-muted));
-}
-
-/* ---------------------------------------------------------------------------
- * Markdown syntax characters (`md-mark`) and link URIs
- * ------------------------------------------------------------------------- */
-.ProseMirror .md-mark {
-  color: var(--meowdown-mark);
-  opacity: 0.7;
-}
-
-/* The URL of a link/image, and a link title */
-.ProseMirror .md-link-uri,
-.ProseMirror .md-link-title {
-  color: var(--meowdown-accent);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-  opacity: 0.7;
-}
-
-/* The mdPack mark wraps a whole inline unit so focus mode can reveal it with one
- * range lookup. It is layout-only: `display: contents` keeps it out of the box
- * tree, so it never affects flow or an inner image mark view, while still being a
- * real element a `.show` decoration can land inside. */
-.ProseMirror .md-pack {
-  display: contents;
-}
-
-.ProseMirror[data-mark-mode='hide'] {
-  .md-mark,
-  .md-link-uri,
-  .md-link-title {
-    display: none;
+    /* Horizontal editor padding. Floating UI tracking the hovered block (the block
+     * handle in @meowdown/react) must fit inside it: hover tracking only sees
+     * pointer events on the editor element, so a handle outside the padding closes
+     * before it can be clicked. Keep it >= 3.5rem. */
+    --meowdown-gutter: 3.5rem;
   }
 }
 
-.ProseMirror[data-mark-mode='focus'] {
-  .md-mark,
-  .md-link-uri,
-  .md-link-title {
-    overflow: hidden;
-    display: inline-block;
-    vertical-align: bottom;
-
-    letter-spacing: -2em;
-
-    &:has(.show) {
-      letter-spacing: 0;
-    }
-  }
-}
-
-/* atom marks (image, wikilink) */
-.ProseMirror {
-  .md-atom-view {
-    display: inline-block;
-    vertical-align: bottom;
-  }
-
-  .md-atom-view-preview {
-    display: inline-block;
-    vertical-align: bottom;
-    overflow: hidden;
-
-    border-radius: 6px;
-
-    -webkit-user-select: none;
-    user-select: none;
-  }
-
-  .md-atom-view:has(.md-atom-selected) {
-    .md-atom-view-preview {
-      outline: 2px solid var(--meowdown-node-outline);
-      background: var(--meowdown-selection);
-    }
-
-    & ::selection {
-      background-color: transparent;
-    }
-  }
-
-  .md-atom-view-content {
-    overflow: visible;
-    display: inline-flex;
-    align-items: end;
-    letter-spacing: -2em;
-    width: 2px;
+@layer meowdown.editor {
+  /* ---------------------------------------------------------------------------
+   * Editor surface
+   * ------------------------------------------------------------------------- */
+  .ProseMirror {
     box-sizing: border-box;
-    background-color: transparent;
-    color: transparent;
-    margin-left: 2px;
-    margin-right: -4px;
-  }
-}
-
-/* image */
-.ProseMirror {
-  .md-image-view {
-    max-width: 100%;
-    margin-left: 2px;
-    margin-right: 2px;
+    outline: none;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: var(--meowdown-text);
+    caret-color: var(--meowdown-accent);
+    -webkit-font-smoothing: antialiased;
   }
 
-  .md-image-view-preview {
-    /* inline-block, not inline-flex: the resizable root sizes itself with
-     * `aspect-ratio` + `height: auto`, which only resolves in normal flow. As a
-     * flex item the root loses that derivation and collapses to its
-     * `min-height`. The root's `vertical-align: bottom` removes the baseline
-     * descender gap that would otherwise show as empty space inside the
-     * selection outline. */
-    display: inline-block;
-    max-width: 100%;
-    border-radius: 6px;
-    outline-offset: 2px;
+  /* Surface padding stays on a meowdown-owned class, not `.ProseMirror`: the block
+   * handle's drag preview clones a block into a bare `.ProseMirror` container, which
+   * must not pick up the gutter padding. */
+  .meowdown-content {
+    padding-top: 1.25rem;
+    padding-right: var(--meowdown-gutter);
+    padding-bottom: 1.75rem;
+    padding-left: var(--meowdown-gutter);
   }
 
-  .md-image-resizable {
-    position: relative;
-    display: inline-block;
-    /* Sit on the line-box bottom so the inline-block preview wrapper wraps the
-     * image with no baseline descender gap below it. */
-    vertical-align: bottom;
-    /* New stacking context so the handle's `mix-blend-mode` mixes only with the
-     * image, not the page behind it. */
-    isolation: isolate;
-    max-width: 100%;
-    /* Avoid a 1px collapse before the image loads / a width is known, and keep
-     * the corner handle clear of the image center. */
-    min-width: 2.5rem;
-    min-height: 2.5rem;
+  .ProseMirror > * + * {
+    margin-top: 0.85em;
   }
 
-  /* While the image is still loading (e.g. a freshly dropped image), fill the
-   * box with a placeholder so it reads as an image, not an empty gap. Cleared
-   * once the image paints (`data-loading` is removed on load/error). */
-  .md-image-resizable[data-loading] {
-    background: var(--meowdown-image-loading-bg);
-    border-radius: var(--meowdown-image-radius, 0.5rem);
+  /* Render soft line breaks (a literal `\n` kept by the paragraph's
+   * `whitespace: 'pre'` spec) as line breaks, while still wrapping long lines. */
+  .ProseMirror p {
+    white-space: pre-wrap;
   }
 
-  .md-image-resizable img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: var(--meowdown-image-radius, 0.5rem);
+  .ProseMirror h1,
+  .ProseMirror h2,
+  .ProseMirror h3,
+  .ProseMirror h4,
+  .ProseMirror h5,
+  .ProseMirror h6 {
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--meowdown-heading);
+    /* Render a multi-line setext heading's soft break (kept by the heading's
+     * `whitespace: 'pre'` spec) as a line break, while still wrapping long lines. */
+    white-space: pre-wrap;
   }
 
-  .md-image-resize-handle {
-    position: absolute;
-    right: 4px;
-    bottom: 4px;
-    box-sizing: border-box;
-    width: 14px;
-    height: 14px;
-    border-right: 3px solid #fff;
-    border-bottom: 3px solid #fff;
-    border-bottom-right-radius: 5px;
-    /* Blend against the image so the corner bracket reads on both light and dark
-     * photos. Pairs with `isolation: isolate` on `.md-image-resizable`. */
-    mix-blend-mode: exclusion;
-    cursor: nwse-resize;
-    /* Hidden handle never intercepts a click meant for the image. */
-    pointer-events: none;
-    touch-action: none;
-    /* A light one-shot pop: scale up to full size when revealed on hover. */
-    opacity: 0;
-    transform: scale(0.8);
-    transform-origin: bottom right;
-    transition:
-      opacity 0.12s ease,
-      transform 0.12s ease;
+  .ProseMirror h1 {
+    font-size: 1.75rem;
+  }
+  .ProseMirror h2 {
+    font-size: 1.4rem;
+  }
+  .ProseMirror h3 {
+    font-size: 1.2rem;
+  }
+  .ProseMirror h4 {
+    font-size: 1.1rem;
+  }
+  .ProseMirror h5 {
+    font-size: 1rem;
+  }
+  .ProseMirror h6 {
+    font-size: 0.95rem;
   }
 
-  .md-image-resizable:hover .md-image-resize-handle,
-  .md-image-resizable[data-resizing] .md-image-resize-handle {
-    opacity: 1;
-    transform: scale(1);
-    pointer-events: auto;
-  }
-}
-
-/* wikilink */
-.ProseMirror {
-  .md-wikilink-view-label {
-    overflow: hidden;
-    padding: 2px 5px;
-    border-radius: 6px;
-
-    background: color-mix(in oklab, var(--meowdown-accent) 10%, transparent);
-    color: color-mix(in oklab, var(--meowdown-accent) 80%, var(--meowdown-heading));
-
-    text-decoration-line: underline;
-    text-decoration-style: dashed;
+  .ProseMirror .md-link {
+    color: var(--meowdown-accent);
+    text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 2px;
     cursor: pointer;
   }
 
-  .md-wikilink-view:has(.md-atom-selected) .md-wikilink-view-label {
-    background-color: transparent;
-    outline-color: transparent;
+  .ProseMirror mark {
+    background: var(--meowdown-highlight);
+    color: inherit;
+    border-radius: 2px;
+    padding: 0 1px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .ProseMirror code {
+    font-family: var(--meowdown-font-mono);
+    font-size: 0.9em;
+    padding: 0.1em 0.35em;
+    border-radius: 0.35rem;
+    background: var(--meowdown-code-bg);
+    color: inherit;
+  }
+
+  .ProseMirror blockquote {
+    margin-left: 0;
+    padding-left: 1rem;
+    border-left: 3px solid var(--meowdown-blockquote-border);
+    color: var(--meowdown-muted);
+  }
+
+  .ProseMirror ul,
+  .ProseMirror ol {
+    padding-left: 1.5rem;
+  }
+  .ProseMirror ul {
+    list-style: disc;
+  }
+  .ProseMirror ol {
+    list-style: decimal;
+  }
+  .ProseMirror li {
+    margin-top: 0.25em;
+  }
+
+  /* The bullet dot is painted as a radial-gradient on the (1lh square)
+   * `.list-marker` box, so the dot and, when collapsed, its halo always share one
+   * center (a separate halo element drifts by a sub-pixel). Override prosekit's
+   * icon mask so the gradient shows; `--meowdown-bullet` colors the resting dot. */
+  .ProseMirror .prosemirror-flat-list[data-list-kind='bullet'] > .list-marker {
+    mask: none;
+    -webkit-mask: none;
+    background: radial-gradient(
+      circle at center,
+      var(--meowdown-bullet) 0 var(--meowdown-bullet-radius),
+      transparent var(--meowdown-bullet-radius)
+    );
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Checkbox task list items
+   *
+   * `kind: 'task'` is the single checkable list kind; the bullet marker picks the
+   * shape. `+` (data-list-marker="+") is a circle checkbox task, any other marker
+   * is a square checkbox task. Plain GFM on disk (`+ [ ]` vs `- [ ]`), mirroring
+   * reflect-editor.
+   * ------------------------------------------------------------------------- */
+  .ProseMirror .prosemirror-flat-list[data-list-kind='task'] {
+    /* Animation: fade the opacity when an item is (un)checked. */
+    transition: opacity 200ms ease;
+
+    /* Dim a checked item; reset nested checked items so it does not compound. */
+    &[data-list-checked] {
+      opacity: 0.5;
+
+      & .prosemirror-flat-list[data-list-kind='task'][data-list-checked] {
+        opacity: 1;
+      }
+    }
+
+    & > .list-marker {
+      /* Animation: grow the checkbox slightly on hover. */
+      transition: transform 120ms ease;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+
+      & input[type='checkbox'] {
+        appearance: none;
+        -webkit-appearance: none;
+        box-sizing: border-box;
+        width: 0.95rem;
+        height: 0.95rem;
+        border: 1px solid var(--meowdown-muted);
+        border-radius: 0.25rem; /* square */
+        background: transparent center / 100% 100% no-repeat;
+        /* Animation: fade the fill and border when (un)checked. */
+        transition:
+          background-color 150ms ease,
+          border-color 150ms ease;
+
+        &:checked {
+          border-color: transparent;
+          background-color: var(--meowdown-accent);
+          background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+        }
+      }
+    }
+
+    /* A `+` marker is the circle checkbox task. */
+    &[data-list-marker='+'] > .list-marker input[type='checkbox'] {
+      border-radius: 100rem;
+      width: 1.05rem;
+      height: 1.05rem;
+    }
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Collapsible bullets
+   * ------------------------------------------------------------------------- */
+  .ProseMirror .prosemirror-flat-list[data-list-kind='bullet'] {
+    /* A foldable bullet's marker is clickable. */
+    &[data-list-collapsable] > .list-marker {
+      cursor: pointer;
+    }
+
+    /* Hovering a foldable bullet hints a faint halo around the resting dot, so it
+     * reads as foldable. Same gradient as the dot, so it stays concentric. */
+    &[data-list-collapsable] > .list-marker:hover {
+      background: radial-gradient(
+        circle at center,
+        var(--meowdown-bullet) 0 var(--meowdown-bullet-radius),
+        color-mix(in oklab, var(--meowdown-bullet-collapsed) 20%, transparent)
+          var(--meowdown-bullet-radius) var(--meowdown-bullet-halo-radius),
+        transparent var(--meowdown-bullet-halo-radius)
+      );
+    }
+
+    /* A collapsed bullet reads as a target: the dot recolors to the themed fold
+     * color and gains a lighter halo ring, all in one concentric gradient. */
+    &[data-list-collapsable][data-list-collapsed] > .list-marker {
+      background: radial-gradient(
+        circle at center,
+        var(--meowdown-bullet-collapsed) 0 var(--meowdown-bullet-radius),
+        color-mix(in oklab, var(--meowdown-bullet-collapsed) 35%, transparent)
+          var(--meowdown-bullet-radius) var(--meowdown-bullet-halo-radius),
+        transparent var(--meowdown-bullet-halo-radius)
+      );
+    }
+
+    /* Hide the descendants of a collapsed bullet, keeping its first block. */
+    &[data-list-collapsable][data-list-collapsed] > .list-content > *:nth-child(n + 2) {
+      display: none;
+    }
+  }
+
+  .ProseMirror pre {
+    padding: 0.9rem 1rem;
+    border-radius: 0.6rem;
+    overflow-x: auto;
+    background: var(--meowdown-code-bg);
+    font-family: var(--meowdown-font-mono);
+    font-size: 0.9em;
+    line-height: 1.5;
+  }
+  .ProseMirror pre code {
+    padding: 0;
+    background: none;
+    color: inherit;
+  }
+
+  /* Lezer syntax highlighting. `prosemirror-highlight` tags tokens with the
+   * `@lezer/highlight` `tok-*` classes; colors follow the page color scheme via
+   * `light-dark()` like the rest of the theme. The palette mirrors GitHub's. */
+  .ProseMirror pre code .tok-keyword {
+    color: light-dark(#cf222e, #ff7b72);
+  }
+  .ProseMirror pre code .tok-comment {
+    color: light-dark(#6e7781, #8b949e);
+    font-style: italic;
+  }
+  .ProseMirror pre code .tok-string,
+  .ProseMirror pre code .tok-url {
+    color: light-dark(#0a3069, #a5d6ff);
+  }
+  .ProseMirror pre code .tok-number,
+  .ProseMirror pre code .tok-bool,
+  .ProseMirror pre code .tok-atom,
+  .ProseMirror pre code .tok-literal {
+    color: light-dark(#0550ae, #79c0ff);
+  }
+  .ProseMirror pre code .tok-className,
+  .ProseMirror pre code .tok-typeName,
+  .ProseMirror pre code .tok-namespace {
+    color: light-dark(#953800, #ffa657);
+  }
+  .ProseMirror pre code .tok-definition {
+    color: light-dark(#8250df, #d2a8ff);
+  }
+  .ProseMirror pre code .tok-macroName,
+  .ProseMirror pre code .tok-meta,
+  .ProseMirror pre code .tok-inserted {
+    color: light-dark(#116329, #7ee787);
+  }
+  .ProseMirror pre code .tok-invalid,
+  .ProseMirror pre code .tok-deleted {
+    color: light-dark(#82071e, #ffa198);
+  }
+  .ProseMirror pre code .tok-heading {
+    font-weight: 600;
+    color: light-dark(#0550ae, #79c0ff);
+  }
+  .ProseMirror pre code .tok-strong {
+    font-weight: 600;
+  }
+  .ProseMirror pre code .tok-emphasis {
+    font-style: italic;
+  }
+  .ProseMirror pre code .tok-link {
+    text-decoration: underline;
+  }
+
+  .ProseMirror hr {
+    margin: 1.5em 0;
+    border: none;
+    border-top: 1px solid var(--meowdown-border);
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Tables
+   * ------------------------------------------------------------------------- */
+  .ProseMirror table {
+    width: 100%;
+    overflow: hidden;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .ProseMirror td,
+  .ProseMirror th {
+    box-sizing: border-box;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--meowdown-border);
+    vertical-align: top;
+    text-align: left;
+  }
+
+  .ProseMirror th {
+    font-weight: 600;
+    color: var(--meowdown-heading);
+    background: var(--meowdown-table-header-bg);
+  }
+
+  .ProseMirror table.ProseMirror-selectednode td,
+  .ProseMirror table.ProseMirror-selectednode th {
+    border-color: var(--meowdown-node-outline);
+  }
+
+  .ProseMirror .selectedCell {
+    /* `double` wins the collapsed-border conflict against the solid borders of
+     * unselected neighbors, so the whole selection perimeter recolors. */
+    border: 1px double var(--meowdown-node-outline);
+    background: var(--meowdown-node-selection);
+    caret-color: transparent;
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Selection
+   * ------------------------------------------------------------------------- */
+  .ProseMirror ::selection {
+    background: var(--meowdown-selection);
+  }
+
+  .ProseMirror .prosekit-virtual-selection {
+    background: var(--meowdown-selection);
+  }
+
+  /* prosemirror-view adds `ProseMirror-hideselection` whenever the selection is
+   * not "visible" (a node selection). */
+  .ProseMirror.ProseMirror-hideselection ::selection {
+    background: transparent;
+    caret-color: transparent;
+  }
+
+  /* Node selection (e.g. from the block handle): thin outline + faint wash,
+   * replacing prosemirror-view's stock blue outline. */
+  .ProseMirror .ProseMirror-selectednode {
+    border-radius: 2px;
+    outline: 1px solid var(--meowdown-node-outline);
+    background: var(--meowdown-node-selection);
+  }
+
+  .ProseMirror pre.ProseMirror-selectednode {
+    border-radius: 0.6rem;
+  }
+
+  /* While dragging via the block handle, keep only the outline on the
+   * source block so it does not sit tinted under the drag preview. */
+  .ProseMirror.prosekit-dragging .ProseMirror-selectednode,
+  .ProseMirror.prosekit-dragging .selectedCell {
+    background: transparent;
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Tags (`#tag`)
+   * ------------------------------------------------------------------------- */
+  .ProseMirror .md-tag {
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: color-mix(in oklab, var(--meowdown-accent) 10%, transparent);
+    color: color-mix(in oklab, var(--meowdown-accent) 80%, var(--meowdown-heading));
+    cursor: pointer;
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Inline image / embed previews (`![alt](url)`), rendered in place via a mark
+   * view at the image's source position.
+   * ------------------------------------------------------------------------- */
+
+  .ProseMirror .md-embed-youtube {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 0;
+    border-radius: var(--meowdown-image-radius, 0.5rem);
+  }
+
+  .ProseMirror .md-embed-tweet {
+    display: block;
+    width: 100%;
+    max-width: 550px;
+    border: 0;
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Placeholder text for empty blocks (ProseKit's definePlaceholder)
+   * ------------------------------------------------------------------------- */
+  .ProseMirror .prosekit-placeholder::before {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+    color: var(--meowdown-placeholder, var(--meowdown-muted));
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Markdown syntax characters (`md-mark`) and link URIs
+   * ------------------------------------------------------------------------- */
+  .ProseMirror .md-mark {
+    color: var(--meowdown-mark);
+    opacity: 0.7;
+  }
+
+  /* The URL of a link/image, and a link title */
+  .ProseMirror .md-link-uri,
+  .ProseMirror .md-link-title {
+    color: var(--meowdown-accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    opacity: 0.7;
+  }
+
+  /* The mdPack mark wraps a whole inline unit so focus mode can reveal it with one
+   * range lookup. It is layout-only: `display: contents` keeps it out of the box
+   * tree, so it never affects flow or an inner image mark view, while still being a
+   * real element a `.show` decoration can land inside. */
+  .ProseMirror .md-pack {
+    display: contents;
+  }
+
+  .ProseMirror[data-mark-mode='hide'] {
+    .md-mark,
+    .md-link-uri,
+    .md-link-title {
+      display: none;
+    }
+  }
+
+  .ProseMirror[data-mark-mode='focus'] {
+    .md-mark,
+    .md-link-uri,
+    .md-link-title {
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: bottom;
+
+      letter-spacing: -2em;
+
+      &:has(.show) {
+        letter-spacing: 0;
+      }
+    }
+  }
+
+  /* atom marks (image, wikilink) */
+  .ProseMirror {
+    .md-atom-view {
+      display: inline-block;
+      vertical-align: bottom;
+    }
+
+    .md-atom-view-preview {
+      display: inline-block;
+      vertical-align: bottom;
+      overflow: hidden;
+
+      border-radius: 6px;
+
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .md-atom-view:has(.md-atom-selected) {
+      .md-atom-view-preview {
+        outline: 2px solid var(--meowdown-node-outline);
+        background: var(--meowdown-selection);
+      }
+
+      & ::selection {
+        background-color: transparent;
+      }
+    }
+
+    .md-atom-view-content {
+      overflow: visible;
+      display: inline-flex;
+      align-items: end;
+      letter-spacing: -2em;
+      width: 2px;
+      box-sizing: border-box;
+      background-color: transparent;
+      color: transparent;
+      margin-left: 2px;
+      margin-right: -4px;
+    }
+  }
+
+  /* image */
+  .ProseMirror {
+    .md-image-view {
+      max-width: 100%;
+      margin-left: 2px;
+      margin-right: 2px;
+    }
+
+    .md-image-view-preview {
+      /* inline-block, not inline-flex: the resizable root sizes itself with
+       * `aspect-ratio` + `height: auto`, which only resolves in normal flow. As a
+       * flex item the root loses that derivation and collapses to its
+       * `min-height`. The root's `vertical-align: bottom` removes the baseline
+       * descender gap that would otherwise show as empty space inside the
+       * selection outline. */
+      display: inline-block;
+      max-width: 100%;
+      border-radius: 6px;
+      outline-offset: 2px;
+    }
+
+    .md-image-resizable {
+      position: relative;
+      display: inline-block;
+      /* Sit on the line-box bottom so the inline-block preview wrapper wraps the
+       * image with no baseline descender gap below it. */
+      vertical-align: bottom;
+      /* New stacking context so the handle's `mix-blend-mode` mixes only with the
+       * image, not the page behind it. */
+      isolation: isolate;
+      max-width: 100%;
+      /* Avoid a 1px collapse before the image loads / a width is known, and keep
+       * the corner handle clear of the image center. */
+      min-width: 2.5rem;
+      min-height: 2.5rem;
+    }
+
+    /* While the image is still loading (e.g. a freshly dropped image), fill the
+     * box with a placeholder so it reads as an image, not an empty gap. Cleared
+     * once the image paints (`data-loading` is removed on load/error). */
+    .md-image-resizable[data-loading] {
+      background: var(--meowdown-image-loading-bg);
+      border-radius: var(--meowdown-image-radius, 0.5rem);
+    }
+
+    .md-image-resizable img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: var(--meowdown-image-radius, 0.5rem);
+    }
+
+    .md-image-resize-handle {
+      position: absolute;
+      right: 4px;
+      bottom: 4px;
+      box-sizing: border-box;
+      width: 14px;
+      height: 14px;
+      border-right: 3px solid #fff;
+      border-bottom: 3px solid #fff;
+      border-bottom-right-radius: 5px;
+      /* Blend against the image so the corner bracket reads on both light and dark
+       * photos. Pairs with `isolation: isolate` on `.md-image-resizable`. */
+      mix-blend-mode: exclusion;
+      cursor: nwse-resize;
+      /* Hidden handle never intercepts a click meant for the image. */
+      pointer-events: none;
+      touch-action: none;
+      /* A light one-shot pop: scale up to full size when revealed on hover. */
+      opacity: 0;
+      transform: scale(0.8);
+      transform-origin: bottom right;
+      transition:
+        opacity 0.12s ease,
+        transform 0.12s ease;
+    }
+
+    .md-image-resizable:hover .md-image-resize-handle,
+    .md-image-resizable[data-resizing] .md-image-resize-handle {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+  }
+
+  /* wikilink */
+  .ProseMirror {
+    .md-wikilink-view-label {
+      overflow: hidden;
+      padding: 2px 5px;
+      border-radius: 6px;
+
+      background: color-mix(in oklab, var(--meowdown-accent) 10%, transparent);
+      color: color-mix(in oklab, var(--meowdown-accent) 80%, var(--meowdown-heading));
+
+      text-decoration-line: underline;
+      text-decoration-style: dashed;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+      cursor: pointer;
+    }
+
+    .md-wikilink-view:has(.md-atom-selected) .md-wikilink-view-label {
+      background-color: transparent;
+      outline-color: transparent;
+    }
   }
 }

@@ -75,29 +75,23 @@ const markdown = docToMarkdown(editor.state.doc)
 
 ## Styling
 
-`@meowdown/core/style.css` ships a default editor theme. Colors use `light-dark()`, so they follow the page's `color-scheme` (set `color-scheme: light dark` on `:root` for automatic dark mode). Customize by overriding these variables on `:root` or any ancestor:
+`@meowdown/core/style.css` ships a default editor theme. Colors use `light-dark()`, so they follow the page's `color-scheme` (set `color-scheme: light dark` on `:root` for automatic dark mode). Theme it by overriding the `--meowdown-*` variables on `:root` or any ancestor. The full list, with a one-line description and default for each, lives in the commented `:root` block at the top of [`style.css`](./src/style.css), which is the single source of truth.
 
-- `--meowdown-text`: body text color.
-- `--meowdown-heading`: heading color.
-- `--meowdown-muted`: secondary text (blockquotes).
-- `--meowdown-accent`: links, wikilinks, caret, inline code, tags.
-- `--meowdown-mark`: Markdown syntax characters.
-- `--meowdown-border`: horizontal rules and table borders.
-- `--meowdown-code-bg`: code block background.
-- `--meowdown-table-header-bg`: table header row background.
-- `--meowdown-image-radius`: corner radius of rendered inline images.
-- `--meowdown-placeholder`: placeholder text color (defaults to `--meowdown-muted`).
-- `--meowdown-font-mono`: monospace font stack.
-- `--meowdown-gutter`: horizontal editor padding. Applied to the editable root's `.meowdown-content` class (set by `@meowdown/react`), not `.ProseMirror`, so the block handle's drag preview stays unpadded. Floating UI such as the block handle lives inside it; keep it at least `3.5rem`.
-- `--meowdown-selection`: text `::selection` background.
-- `--meowdown-node-outline`: outline of a selected node; border color of selected tables and cells.
-- `--meowdown-node-selection`: background wash of a selected node or selected cells.
+meowdown's CSS is wrapped in a cascade layer, `@layer meowdown` (with sub-layers `meowdown.base` for the bundled ProseMirror / prosekit base styles, `meowdown.theme` for the variables, and `meowdown.editor` for the editor rules). Because an un-layered rule always beats a layered one, **any plain rule you write overrides meowdown with no `!important` and no specificity hacks** (e.g. `.ProseMirror h1 { font-size: 2rem }` wins over meowdown's layered heading rule). Put your overrides outside any `@layer`, or in a layer you declare after `meowdown`.
 
-Selection colors are standalone variables, not derived from `--meowdown-accent`, so selection can be restyled independently.
+**With Tailwind CSS v4**, import `@meowdown/core/style.css` _after_ `@import 'tailwindcss'` so the `meowdown` layer sorts after Tailwind's `theme` / `base` / `components` / `utilities`. That keeps meowdown's editor styles from being reset by Tailwind's `base` (Preflight) while your own un-layered rules still win. One caveat: with that order the `meowdown` layer also sorts after `utilities`, so a Tailwind utility _class_ placed directly on an editor element will not beat meowdown. If you need utilities to win (while meowdown still beats Preflight), declare the layer order yourself with `utilities` last, referencing the umbrella `meowdown` layer (not its sub-layers). Doing this at the top of your CSS also pins the order even when meowdown's stylesheet is code-split / lazy-loaded:
+
+```css
+@layer theme, base, components, meowdown, utilities;
+@import 'tailwindcss';
+@import '@meowdown/core/style.css';
+```
+
+Two things the variable list cannot show: `--meowdown-gutter` is the horizontal editor padding, applied to the editable root's `.meowdown-content` class (set by `@meowdown/react`), not `.ProseMirror`, so the block handle's drag preview stays unpadded; floating UI such as the block handle lives inside it, so keep it at least `3.5rem`. The selection variables (`--meowdown-selection`, `--meowdown-node-outline`, `--meowdown-node-selection`) are standalone, not derived from `--meowdown-accent`, so selection can be restyled independently.
 
 Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-accent`. Wire click handling with `defineTagClickHandler(({ tag, event }) => ...)` (or `@meowdown/react`'s `onTagClick` prop); `tag` is read from the rendered text without the leading `#`.
 
-Wikilinks (`[[target]]`/`[[target|alias]]`) render in place via a mark view as an immutable label (the alias, or the target when there is no alias), with the raw source hidden in hide and focus modes and shown dimmed in show mode. The label uses the `.md-wikilink-label` class and the raw source the `.md-wikilink-source` class, both dashed-underlined and colored by `--meowdown-accent`. In every mark mode the link is a single immutable caret stop: arrowing onto it selects the whole source (ringed with `--meowdown-node-outline` in hide and focus, the native selection over the visible source in show), and Backspace/Delete remove it as a unit. Wire click navigation with `defineWikilinkClickHandler(({ target, event }) => ...)` (or `@meowdown/react`'s `onWikilinkClick` prop).
+Wikilinks (`[[target]]`/`[[target|alias]]`) render in place via a mark view as an immutable label (the alias, or the target when there is no alias), with the raw source hidden in hide and focus modes and shown dimmed in show mode. The label uses the `.md-wikilink-view-label` class, dashed-underlined and colored by `--meowdown-accent`. In every mark mode the link is a single immutable caret stop: arrowing onto it selects the whole source (ringed with `--meowdown-node-outline` in hide and focus, the native selection over the visible source in show), and Backspace/Delete remove it as a unit. Wire click navigation with `defineWikilinkClickHandler(({ target, event }) => ...)` (or `@meowdown/react`'s `onWikilinkClick` prop).
 
 Markdown links (`[text](url)`) render the label as an `<a href>` with the `.md-link` class, colored by `--meowdown-accent`; the `[`, `]`, and `(url)` syntax dims in show mode and hides in hide and focus modes. Wire click handling with `defineLinkClickHandler(({ href, event }) => ...)` (or `@meowdown/react`'s `onLinkClick` prop).
 
