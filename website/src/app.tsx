@@ -109,7 +109,8 @@ const NOTES = [
 async function searchNotes(query: string): Promise<WikilinkItem[]> {
   // Simulate network latency so the wikilink menu's loading state shows up.
   await new Promise((resolve) => setTimeout(resolve, 200))
-  return NOTES.filter((note) => note.toLowerCase().includes(query)).map((note) => ({
+  const normalizedQuery = query.toLowerCase()
+  return NOTES.filter((note) => note.toLowerCase().includes(normalizedQuery)).map((note) => ({
     target: note,
   }))
 }

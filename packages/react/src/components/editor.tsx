@@ -55,10 +55,10 @@ export interface EditorProps {
 
   /**
    * Searches notes for the wikilink menu, which opens as soon as `[[` or `@`
-   * is typed. Receives the query (lowercased, punctuation stripped, may be
-   * empty) and returns the note names to show, synchronously or as a promise.
-   * Pass a stable function (e.g. from `useCallback`). Omit to disable the
-   * wikilink menu.
+   * is typed. Receives the query (trimmed, with casing and punctuation
+   * preserved, may be empty) and returns the note names to show, synchronously
+   * or as a promise. Pass a stable function (e.g. from `useCallback`). Omit to
+   * disable the wikilink menu.
    */
   onWikilinkSearch?: WikilinkSearchHandler
 

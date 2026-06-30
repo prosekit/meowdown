@@ -20,7 +20,8 @@ const WIKILINKS: WikilinkItem[] = [
 ]
 
 function searchNotes(query: string): WikilinkItem[] {
-  return WIKILINKS.filter((item) => item.target.toLowerCase().includes(query))
+  const normalizedQuery = query.toLowerCase()
+  return WIKILINKS.filter((item) => item.target.toLowerCase().includes(normalizedQuery))
 }
 
 // In `userEvent.keyboard`, a literal `[` is escaped by doubling it.
@@ -48,6 +49,28 @@ describe('WikilinkMenu', () => {
     await userEvent.keyboard(`${TWO_BRACKETS}re`)
     await expect.element(menu.getByText('Reading list')).toBeVisible()
     await expect.element(menu.getByText('Cat naps')).not.toBeInTheDocument()
+  })
+
+  it('passes the typed wikilink query with casing preserved', async () => {
+    const onWikilinkSearch = vi.fn((): WikilinkItem[] => [{ target: 'Project Note' }])
+    await render(<ProseKitEditor onWikilinkSearch={onWikilinkSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard(`${TWO_BRACKETS}Project Note`)
+
+    await vi.waitFor(() => {
+      expect(onWikilinkSearch).toHaveBeenLastCalledWith('Project Note')
+    })
+  })
+
+  it('passes the typed wikilink query with punctuation preserved', async () => {
+    const onWikilinkSearch = vi.fn((): WikilinkItem[] => [{ target: 'C++ Notes' }])
+    await render(<ProseKitEditor onWikilinkSearch={onWikilinkSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard(`${TWO_BRACKETS}C++ Notes`)
+
+    await vi.waitFor(() => {
+      expect(onWikilinkSearch).toHaveBeenLastCalledWith('C++ Notes')
+    })
   })
 
   it('does not open on a single "["', async () => {
