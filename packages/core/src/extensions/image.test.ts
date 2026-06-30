@@ -286,6 +286,27 @@ describe('image resize', () => {
       .toBeTruthy()
   })
 
+  // A portrait image (aspect ratio < 1) with a known width must be driven by
+  // that width (`width: <N>px; height: auto`), not `width: min-content`. The
+  // min-content path relies on the CSS aspect-ratio transferred size
+  // (`height * ratio`), which Apple's shipping WKWebView does not resolve, so the
+  // box collapses to the CSS min-width floor (the reflect-open regression).
+  //
+  // Asserted on the inline style, not the rendered box: Playwright's bundled
+  // WebKit, unlike shipping WKWebView, does resolve the transfer, so the box
+  // renders correctly here even with the bug. The inline style is what differs.
+  // Fixed upstream in prosekit/prosekit#1715; this stays red until meowdown bumps
+  // to a `@prosekit/web` that includes it.
+  it('drives a portrait preview by width, not min-content', async () => {
+    using fixture = setupResize('![tall](url)', getSVGImageURL(120, 240))
+    void fixture
+
+    await expect.element(resizable).toHaveAttribute('data-aspect-ratio', '0.5')
+
+    await expect.poll(() => resizable.element().style.height).toBe('auto')
+    expect(resizable.element().style.width).toBe('120px')
+  })
+
   it('shows a loading placeholder until the image loads', async () => {
     using fixture = setupResize('![cat](u)')
     void fixture
