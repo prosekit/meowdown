@@ -1,5 +1,5 @@
-import type { EditorExtension, TypedEditor } from '@meowdown/core'
-import { canUseRegexLookbehind, OBJECT_REPLACEMENT_CHARACTER } from '@prosekit/core'
+import type { EditorExtension } from '@meowdown/core'
+import { canUseRegexLookbehind } from '@prosekit/core'
 import { useEditor } from '@prosekit/react'
 import {
   AutocompleteEmpty,
@@ -27,39 +27,11 @@ const regex = canUseRegexLookbehind()
   ? /(?:\[\[[^[\]]*|(?<!\S)@(?:[^[\]\s][^[\]]*)?)$/u
   : /(?:\[\[[^[\]]*|@(?:[^[\]\s][^[\]]*)?)$/u
 
-const MAX_AUTOCOMPLETE_MATCH = 200
-
-function queryFromMatchedText(text: string): string {
-  if (text.startsWith('[[')) return text.slice(2).trim()
-  if (text.startsWith('@')) return text.slice(1).trim()
-  return text.trim()
-}
-
-// AutocompleteRoot exposes only its normalized query, but defineAutocomplete
-// documents the raw matched text on this decoration.
-function getActiveMatchedText(editor: TypedEditor): string | undefined {
-  const activeMatch = editor.view.dom.querySelector('.prosekit-autocomplete-match')
-  return activeMatch?.getAttribute('data-autocomplete-match-text') ?? undefined
-}
-
-function getMatchedTextBeforeCursor(editor: TypedEditor): string | undefined {
-  const { $from } = editor.state.selection
-  const from = Math.max(0, $from.parentOffset - MAX_AUTOCOMPLETE_MATCH)
-  const textBeforeCursor = $from.parent.textBetween(
-    from,
-    $from.parentOffset,
-    null,
-    OBJECT_REPLACEMENT_CHARACTER,
-  )
-  return regex.exec(textBeforeCursor)?.[0]
-}
-
-function queryFromAutocomplete(editor: TypedEditor, autocompleteQuery: string): string {
-  const activeMatchedText = getActiveMatchedText(editor)
-  if (activeMatchedText != null) return queryFromMatchedText(activeMatchedText)
-  if (autocompleteQuery === '') return ''
-  const matchedText = getMatchedTextBeforeCursor(editor)
-  return matchedText != null ? queryFromMatchedText(matchedText) : autocompleteQuery
+function queryFromRegexMatch(match: RegExpMatchArray): string {
+  return match[0]
+    .replace(/^((?:\[\[)|@)/, '')
+    .replace(/(?:\]{1,2}\s*)$/, '')
+    .trim()
 }
 
 interface WikilinkMenuProps {
@@ -106,10 +78,9 @@ export function WikilinkMenu({ onWikilinkSearch }: WikilinkMenuProps) {
     <AutocompleteRoot
       regex={regex}
       filter={returnsTrue}
+      queryBuilder={queryFromRegexMatch}
       onOpenChange={(event) => setOpen(event.detail)}
-      onQueryChange={(event) => {
-        setQuery(queryFromAutocomplete(editor, event.detail))
-      }}
+      onQueryChange={(event) => setQuery(event.detail)}
     >
       <AutocompletePositioner className={styles.Positioner}>
         <AutocompletePopup className={styles.Popup} data-testid="wikilink-menu">
