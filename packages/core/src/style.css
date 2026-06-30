@@ -6,8 +6,6 @@
 @layer meowdown.theme {
   /* ---------------------------------------------------------------------------
    * Default theme: the themeable `--meowdown-*` variables and their defaults.
-   * This block is the canonical reference for theming; the README links here
-   * instead of duplicating the list.
    *
    * Colors resolve through `light-dark()`, so the editor follows the host
    * page's `color-scheme` (set `color-scheme: light dark` on `:root` to get
