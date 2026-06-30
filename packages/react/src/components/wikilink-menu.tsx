@@ -28,10 +28,7 @@ const regex = canUseRegexLookbehind()
   : /(?:\[\[[^[\]]*|@(?:[^[\]\s][^[\]]*)?)$/u
 
 function queryFromRegexMatch(match: RegExpExecArray): string {
-  return match[0]
-    .replace(/^((?:\[\[)|@)/, '')
-    .replace(/(?:\]{1,2}\s*)$/, '')
-    .trim()
+  return match[0].replace(/^(?:\[\[|@)/, '').trim()
 }
 
 interface WikilinkMenuProps {
