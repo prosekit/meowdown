@@ -35,6 +35,8 @@ function handleWikilinkClick({ target }: { target: string }): void {
 const INITIAL_CONTENT = `
 # Welcome to Meowdown
 
+![](https://placehold.co/300x400.png)
+
 A hybrid Markdown editor that renders as you type, so you never break your flow.
 
 Weave in **bold**, *italic*, \`inline code\`, or ~~strikethrough~~ without reaching for a toolbar.
