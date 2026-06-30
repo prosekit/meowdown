@@ -286,7 +286,7 @@ describe('image resize', () => {
       expect(displayWidth / width).toBeCloseTo(1)
       expect(displayHeight / height).toBeCloseTo(1)
       expect(dataRatio / expectedRatio).toBeCloseTo(1)
-      expect(displayRatio / expectedRatio).toBeGreaterThan(1.9)
+      expect(displayRatio / expectedRatio).toBeCloseTo(1)
     })
   })
 
