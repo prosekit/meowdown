@@ -1,4 +1,4 @@
-@layer meowdown.base, meowdown.theme;
+@layer meowdown.base, meowdown.theme, meowdown.editor;
 
 @import '@prosekit/pm/view/style/prosemirror.css' layer(meowdown.base);
 @import '@prosekit/extensions/list/style.css' layer(meowdown.base);
@@ -84,7 +84,9 @@
      * before it can be clicked. Keep it >= 3.5rem. */
     --meowdown-gutter: 3.5rem;
   }
+}
 
+@layer meowdown.editor {
   /* ---------------------------------------------------------------------------
    * Editor surface
    * ------------------------------------------------------------------------- */
