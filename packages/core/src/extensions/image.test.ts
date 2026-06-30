@@ -296,11 +296,6 @@ describe('image resize', () => {
   })
 })
 
-// REVIEW: DELETE THIS COMMENT BELOW
-// The image mark view has the same hidden-source/non-editable-preview shape as
-// the wikilink, so a caret just after an inline image must be a real caret stop:
-// typing continues after the image, never before it.
-// REVIEW: DELETE THIS COMMENT ABOVE
 describe('typing after an inline image', () => {
   it('types the next character after the image, not before it', async () => {
     using fixture = setup('hide', 'A![img](url)')
