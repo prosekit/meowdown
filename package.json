@@ -7,7 +7,6 @@
   "scripts": {
     "dev": "pnpm --filter ./website run dev",
     "build": "pnpm -r run build",
-    "preview": "pnpm run build && pnpm --filter ./website run preview",
     "ci:publish:snapshot": "pkg-pr-new publish --pnpm ./packages/core ./packages/react",
     "lint": "pnpm run lint:eslint && pnpm run lint:oxfmt && pnpm run lint:knip",
     "lint:oxfmt": "oxfmt --check",

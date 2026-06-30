@@ -3,7 +3,6 @@ import { playwrightCommands } from 'vitest-browser-commands'
 import { defineProject } from 'vitest/config'
 
 const IS_BOT = !!(process.env.AI_AGENT || process.env.CI)
-const IS_DEBUG = !!process.env.DEBUG
 
 export function defineSharedConfig() {
   const browserName = (() => {
@@ -52,7 +51,7 @@ export function defineSharedConfig() {
               browserName === 'chromium' ? ['clipboard-read', 'clipboard-write'] : undefined,
           },
         }),
-        headless: IS_DEBUG ? false : true,
+        headless: true,
         ui: false,
         instances: [
           {
