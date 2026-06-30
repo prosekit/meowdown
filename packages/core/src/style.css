@@ -74,6 +74,10 @@
     );
     --meowdown-selection: light-dark(oklch(0.693 0.194 46 / 0.22), oklch(0.741 0.165 52 / 0.3));
 
+    /* The resting bullet dot color (a collapsed bullet's dot uses the themed
+     * `--meowdown-fold-halo` instead). */
+    --meowdown-bullet: var(--meowdown-muted);
+
     /* Collapsible bullets: the filled circle behind a collapsed item's dot (so it
      * reads as a target). Standalone so folding can be themed apart. */
     --meowdown-fold-halo: var(--meowdown-accent);
@@ -202,7 +206,7 @@
   /* The bullet dot: flat-list (prosekit) masks `.list-marker` into a dot filled
    * by its `background-color` (defaulting to `currentColor`). Quiet gray here. */
   .ProseMirror .prosemirror-flat-list[data-list-kind='bullet'] > .list-marker {
-    background-color: var(--meowdown-muted);
+    background-color: var(--meowdown-bullet);
   }
 
   /* ---------------------------------------------------------------------------
