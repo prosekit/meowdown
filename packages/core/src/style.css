@@ -18,6 +18,7 @@
   --meowdown-highlight: light-dark(#fef08a, #854d0e);
   --meowdown-border: light-dark(#e4e4e7, #3f3f46);
   --meowdown-code-bg: light-dark(#f4f4f5, #18181b);
+  --meowdown-image-loading-bg: light-dark(#f4f4f5, #27272a);
   --meowdown-table-header-bg: light-dark(#fafafa, #27272a);
   --meowdown-autocomplete-bg: light-dark(#fff, #18181b);
   --meowdown-autocomplete-highlight-bg: light-dark(#f4f4f5, #27272a);
@@ -574,6 +575,14 @@
      * the corner handle clear of the image center. */
     min-width: 2.5rem;
     min-height: 2.5rem;
+  }
+
+  /* While the image is still loading (e.g. a freshly dropped image), fill the
+   * box with a placeholder so it reads as an image, not an empty gap. Cleared
+   * once the image paints (`data-loading` is removed on load/error). */
+  .md-image-resizable[data-loading] {
+    background: var(--meowdown-image-loading-bg);
+    border-radius: var(--meowdown-image-radius, 0.5rem);
   }
 
   .md-image-resizable img {

@@ -110,6 +110,9 @@ function buildResizableImage(
   const root = document.createElement('prosekit-resizable-root')
   root.className = 'md-image-resizable'
   root.dataset.testid = 'image-resizable'
+  // Show a placeholder background until the image paints, so a freshly dropped,
+  // not-yet-loaded image still fills a visible box. Removed on load/error.
+  root.setAttribute('data-loading', '')
   // A persisted size is known up front, so seed both dimensions before the image
   // loads. This gives the box its final dimensions immediately, with no layout
   // shift when the natural size arrives.
@@ -121,6 +124,7 @@ function buildResizableImage(
   img.alt = alt
   img.draggable = false
   img.addEventListener('load', () => {
+    root.removeAttribute('data-loading')
     const { naturalWidth, naturalHeight } = img
     const ratio = naturalWidth / naturalHeight
     if (!Number.isFinite(ratio) || ratio <= 0) return
@@ -134,6 +138,9 @@ function buildResizableImage(
     const displayWidth = width ?? displayHeight * ratio
     root.setAttribute('data-width', String(Math.round(displayWidth)))
     root.setAttribute('data-height', String(Math.round(displayHeight)))
+  })
+  img.addEventListener('error', () => {
+    root.removeAttribute('data-loading')
   })
   root.appendChild(img)
 

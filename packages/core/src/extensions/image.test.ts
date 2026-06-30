@@ -320,6 +320,15 @@ describe('image resize', () => {
       })
       .toBeTruthy()
   })
+
+  it('shows a loading placeholder until the image loads', async () => {
+    using fixture = setupResize('![cat](u)')
+    void fixture
+    // The placeholder is on as soon as the box renders, before the async load
+    // fires; it is cleared once the image paints.
+    expect(resizable.element()).toHaveAttribute('data-loading', '')
+    await expect.element(resizable).not.toHaveAttribute('data-loading')
+  })
 })
 
 // The image mark view has the same hidden-source/non-editable-preview shape as
