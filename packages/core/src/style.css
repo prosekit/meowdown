@@ -13,8 +13,8 @@
   --meowdown-text: light-dark(#3f3f46, #d4d4d8);
   --meowdown-heading: light-dark(#18181b, #fafafa);
   --meowdown-muted: light-dark(#52525b, #a1a1aa);
-  --meowdown-accent: light-dark(#7c3aed, #c084fc);
-  --meowdown-mark: light-dark(#a78bfa, #8b5cf6);
+  --meowdown-accent: light-dark(#ea580c, #fb923c);
+  --meowdown-mark: var(--meowdown-muted);
   --meowdown-highlight: light-dark(#fef08a, #854d0e);
   --meowdown-border: light-dark(#e4e4e7, #3f3f46);
   --meowdown-code-bg: light-dark(#f4f4f5, #18181b);
@@ -25,10 +25,11 @@
   --meowdown-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Selection colors. Deliberately standalone variables, not derived from
-   * `--meowdown-accent`, so selection can be restyled independently. */
-  --meowdown-node-outline: light-dark(hsl(250 100% 60%), hsl(250 100% 72%));
-  --meowdown-node-selection: light-dark(hsl(250 100% 60% / 0.1), hsl(250 100% 72% / 0.12));
-  --meowdown-selection: light-dark(hsl(250 100% 60% / 0.22), hsl(250 100% 72% / 0.3));
+   * `--meowdown-accent`, so selection can be restyled independently. Warm by
+   * default to sit with the orange accent; a consumer can map them to its own. */
+  --meowdown-node-outline: light-dark(hsl(25 95% 45%), hsl(25 95% 60%));
+  --meowdown-node-selection: light-dark(hsl(25 95% 50% / 0.1), hsl(25 95% 60% / 0.12));
+  --meowdown-selection: light-dark(hsl(25 95% 50% / 0.22), hsl(25 95% 60% / 0.3));
 
   /* Collapsible bullets: the filled circle drawn behind a collapsed item's dot
    * (so it reads as a target). Standalone so folding can be themed apart. */
