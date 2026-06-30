@@ -224,29 +224,6 @@ describe('image click callback', () => {
 describe('image resize', () => {
   const resizable = pmRoot.getByTestId('image-resizable')
 
-  it('sizes the preview from its aspect ratio', async () => {
-    using fixture = setupFixture()
-    const { editor, n } = fixture
-    editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(240, 120) }))
-    fixture.set(n.doc(n.paragraph('![wide](url)')))
-
-    // The load handler seeds `data-aspect-ratio` once the natural size is known;
-    // by then the resizable root has applied its width/height styles.
-    await expect.element(resizable).toHaveAttribute('data-aspect-ratio', '2')
-
-    await expect
-      .poll(() => {
-        const { width, height } = resizable.element().getBoundingClientRect()
-        expect(width).toBeGreaterThan(200)
-        expect(height).toBeGreaterThan(100)
-        const ratio = width / height
-        expect(ratio).toBeGreaterThan(1.9)
-        expect(ratio).toBeLessThan(2.1)
-        return true
-      })
-      .toBeTruthy()
-  })
-
   function setupResize(markdown: string, url = getSVGImageURL(10, 10)): Fixture {
     const fixture = setupFixture()
     const { editor, n } = fixture
@@ -319,6 +296,29 @@ describe('image resize', () => {
       expect(fixture.doc.textContent).toBe('![cat](u)<!-- {"width":320,"height":100} -->')
     })
     await expect.element(resizable).toHaveAttribute('data-width', '320')
+  })
+
+  it('sizes the preview from its aspect ratio', async () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(240, 120) }))
+    fixture.set(n.doc(n.paragraph('![wide](url)')))
+
+    // The load handler seeds `data-aspect-ratio` once the natural size is known;
+    // by then the resizable root has applied its width/height styles.
+    await expect.element(resizable).toHaveAttribute('data-aspect-ratio', '2')
+
+    await expect
+      .poll(() => {
+        const { width, height } = resizable.element().getBoundingClientRect()
+        expect(width).toBeGreaterThan(200)
+        expect(height).toBeGreaterThan(100)
+        const ratio = width / height
+        expect(ratio).toBeGreaterThan(1.9)
+        expect(ratio).toBeLessThan(2.1)
+        return true
+      })
+      .toBeTruthy()
   })
 })
 
