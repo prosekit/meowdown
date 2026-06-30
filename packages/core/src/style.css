@@ -2,29 +2,52 @@
 @import '@prosekit/extensions/list/style.css';
 
 /* ---------------------------------------------------------------------------
- * Default theme
+ * Default theme: the themeable `--meowdown-*` variables and their defaults.
+ * This block is the canonical reference for theming; the README links here
+ * instead of duplicating the list.
  *
  * Colors resolve through `light-dark()`, so the editor follows the host
  * page's `color-scheme` (set `color-scheme: light dark` on `:root` to get
- * automatic dark mode). Override the `--meowdown-*` variables on `:root` or
+ * automatic dark mode). Override any `--meowdown-*` variable on `:root` or
  * any ancestor to customize.
  * ------------------------------------------------------------------------- */
 :root {
-  --meowdown-text: light-dark(#3f3f46, #d4d4d8);
-  --meowdown-heading: light-dark(#18181b, #fafafa);
-  --meowdown-muted: light-dark(#52525b, #a1a1aa);
-  --meowdown-accent: light-dark(#ea580c, #fb923c);
-  --meowdown-mark: var(--meowdown-muted);
-  --meowdown-highlight: light-dark(#fef08a, #854d0e);
-  --meowdown-border: light-dark(#e4e4e7, #3f3f46);
-  --meowdown-blockquote-border: color-mix(in oklab, var(--meowdown-accent) 35%, transparent);
-  --meowdown-code-bg: light-dark(#f4f4f5, #18181b);
-  --meowdown-image-loading-bg: light-dark(#f4f4f5, #27272a);
-  --meowdown-table-header-bg: light-dark(#fafafa, #27272a);
-  --meowdown-popover-bg: light-dark(#fff, #18181b);
-  --meowdown-popover-hover-bg: light-dark(#f4f4f5, #27272a);
-  --meowdown-danger: light-dark(#ef4444, #f87171);
-  --meowdown-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --meowdown-text: light-dark(#3f3f46, #d4d4d8); /* body text */
+  --meowdown-heading: light-dark(#18181b, #fafafa); /* headings and table header text */
+  --meowdown-muted: light-dark(
+    #52525b,
+    #a1a1aa
+  ); /* secondary text: blockquotes, syntax marks, bullets */
+  --meowdown-accent: light-dark(
+    #ea580c,
+    #fb923c
+  ); /* links, wikilinks, tags, caret, drop indicator */
+  --meowdown-mark: var(--meowdown-muted); /* Markdown syntax characters */
+  --meowdown-highlight: light-dark(#fef08a, #854d0e); /* `==highlight==` background */
+  --meowdown-border: light-dark(#e4e4e7, #3f3f46); /* rules, table cell borders, popover borders */
+  --meowdown-blockquote-border: color-mix(
+    in oklab,
+    var(--meowdown-accent) 35%,
+    transparent
+  ); /* blockquote left bar */
+  --meowdown-code-bg: light-dark(#f4f4f5, #18181b); /* inline and block code background */
+  --meowdown-image-loading-bg: light-dark(
+    #f4f4f5,
+    #27272a
+  ); /* placeholder fill while an image loads */
+  --meowdown-image-radius: 0.5rem; /* corner radius of rendered inline images */
+  --meowdown-table-header-bg: light-dark(#fafafa, #27272a); /* table header row background */
+  --meowdown-popover-bg: light-dark(
+    #fff,
+    #18181b
+  ); /* floating menus: autocomplete, link, table, block, code */
+  --meowdown-popover-hover-bg: light-dark(
+    #f4f4f5,
+    #27272a
+  ); /* highlighted/hovered row in those menus */
+  --meowdown-danger: light-dark(#ef4444, #f87171); /* destructive menu items */
+  --meowdown-placeholder: var(--meowdown-muted); /* empty-block placeholder text */
+  --meowdown-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace; /* code font stack */
 
   /* Selection colors. Deliberately standalone variables, not derived from
    * `--meowdown-accent`, so selection can be restyled independently. Warm by
