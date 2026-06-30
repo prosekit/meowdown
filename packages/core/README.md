@@ -77,6 +77,16 @@ const markdown = docToMarkdown(editor.state.doc)
 
 `@meowdown/core/style.css` ships a default editor theme. Colors use `light-dark()`, so they follow the page's `color-scheme` (set `color-scheme: light dark` on `:root` for automatic dark mode). Theme it by overriding the `--meowdown-*` variables on `:root` or any ancestor. The full list, with a one-line description and default for each, lives in the commented `:root` block at the top of [`style.css`](./src/style.css), which is the single source of truth.
 
+meowdown's CSS is wrapped in a cascade layer, `@layer meowdown` (with sub-layers `meowdown.base` for the bundled ProseMirror / prosekit base styles, `meowdown.theme` for the variables, and `meowdown.editor` for the editor rules). Because an un-layered rule always beats a layered one, **any plain rule you write overrides meowdown with no `!important` and no specificity hacks** (e.g. `.ProseMirror h1 { font-size: 2rem }` wins over meowdown's layered heading rule). Put your overrides outside any `@layer`, or in a layer you declare after `meowdown`.
+
+**With Tailwind CSS v4**, import `@meowdown/core/style.css` _after_ `@import 'tailwindcss'` so the `meowdown` layer sorts after Tailwind's `theme` / `base` / `components` / `utilities`. That keeps meowdown's editor styles from being reset by Tailwind's `base` (Preflight) while your own un-layered rules still win. One caveat: with that order the `meowdown` layer also sorts after `utilities`, so a Tailwind utility _class_ placed directly on an editor element will not beat meowdown. If you need utilities to win (while meowdown still beats Preflight), declare the layer order yourself with `utilities` last, referencing the umbrella `meowdown` layer (not its sub-layers). Doing this at the top of your CSS also pins the order even when meowdown's stylesheet is code-split / lazy-loaded:
+
+```css
+@layer theme, base, components, meowdown, utilities;
+@import 'tailwindcss';
+@import '@meowdown/core/style.css';
+```
+
 Two things the variable list cannot show: `--meowdown-gutter` is the horizontal editor padding, applied to the editable root's `.meowdown-content` class (set by `@meowdown/react`), not `.ProseMirror`, so the block handle's drag preview stays unpadded; floating UI such as the block handle lives inside it, so keep it at least `3.5rem`. The selection variables (`--meowdown-selection`, `--meowdown-node-outline`, `--meowdown-node-selection`) are standalone, not derived from `--meowdown-accent`, so selection can be restyled independently.
 
 Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-accent`. Wire click handling with `defineTagClickHandler(({ tag, event }) => ...)` (or `@meowdown/react`'s `onTagClick` prop); `tag` is read from the rendered text without the leading `#`.
