@@ -27,7 +27,7 @@ const regex = canUseRegexLookbehind()
   ? /(?:\[\[[^[\]]*|(?<!\S)@(?:[^[\]\s][^[\]]*)?)$/u
   : /(?:\[\[[^[\]]*|@(?:[^[\]\s][^[\]]*)?)$/u
 
-function queryFromRegexMatch(match: RegExpMatchArray): string {
+function queryFromRegexMatch(match: RegExpExecArray): string {
   return match[0]
     .replace(/^((?:\[\[)|@)/, '')
     .replace(/(?:\]{1,2}\s*)$/, '')
