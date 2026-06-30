@@ -47,7 +47,7 @@
   cursor: grab;
 
   &:hover {
-    background: light-dark(#f4f4f5, #27272a);
+    background: var(--meowdown-popover-hover-bg);
   }
 
   svg {

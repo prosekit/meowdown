@@ -21,8 +21,9 @@
   --meowdown-code-bg: light-dark(#f4f4f5, #18181b);
   --meowdown-image-loading-bg: light-dark(#f4f4f5, #27272a);
   --meowdown-table-header-bg: light-dark(#fafafa, #27272a);
-  --meowdown-autocomplete-bg: light-dark(#fff, #18181b);
-  --meowdown-autocomplete-highlight-bg: light-dark(#f4f4f5, #27272a);
+  --meowdown-popover-bg: light-dark(#fff, #18181b);
+  --meowdown-popover-hover-bg: light-dark(#f4f4f5, #27272a);
+  --meowdown-danger: light-dark(#ef4444, #f87171);
   --meowdown-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Selection colors. Deliberately standalone variables, not derived from

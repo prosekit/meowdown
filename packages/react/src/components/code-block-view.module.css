@@ -32,7 +32,7 @@
   padding: 0 0.4rem;
   border: 1px solid var(--meowdown-border);
   border-radius: 0.35rem;
-  background: light-dark(#ffffff, #27272a);
+  background: var(--meowdown-popover-bg);
   color: var(--meowdown-muted);
   font-family: ui-sans-serif, system-ui, sans-serif;
   font-size: 0.75rem;
@@ -68,7 +68,7 @@
   padding: 0;
   border: 1px solid var(--meowdown-border);
   border-radius: 0.35rem;
-  background: light-dark(#ffffff, #27272a);
+  background: var(--meowdown-popover-bg);
   color: var(--meowdown-muted);
   cursor: pointer;
 
@@ -100,7 +100,7 @@
   width: 14rem;
   border: 1px solid var(--meowdown-border);
   border-radius: 0.5rem;
-  background: light-dark(#ffffff, #27272a);
+  background: var(--meowdown-popover-bg);
   box-shadow:
     0 4px 6px -1px rgb(0 0 0 / 0.1),
     0 2px 4px -2px rgb(0 0 0 / 0.1);
