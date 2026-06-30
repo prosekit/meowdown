@@ -78,8 +78,13 @@
      * `--meowdown-fold-halo` instead). */
     --meowdown-bullet: var(--meowdown-muted);
 
-    /* Collapsible bullets: the filled circle behind a collapsed item's dot (so it
-     * reads as a target). Standalone so folding can be themed apart. */
+    /* Bullet dot radius, and the outer radius of a collapsed/hovered bullet's halo. */
+    --meowdown-bullet-radius: 2.5px;
+    --meowdown-bullet-halo-radius: 5.5px;
+
+    /* Collapsible bullets: the themed dot, plus the halo ring drawn around it when a
+     * foldable bullet is collapsed or hovered. Standalone so folding can be themed
+     * apart. */
     --meowdown-fold-halo: var(--meowdown-accent);
 
     /* Horizontal editor padding. Floating UI tracking the hovered block (the block
@@ -214,8 +219,8 @@
     -webkit-mask: none;
     background: radial-gradient(
       circle at center,
-      var(--meowdown-bullet) 0 0.2rem,
-      transparent 0.2rem
+      var(--meowdown-bullet) 0 var(--meowdown-bullet-radius),
+      transparent var(--meowdown-bullet-radius)
     );
   }
 
@@ -292,9 +297,10 @@
     &[data-list-collapsable] > .list-marker:hover {
       background: radial-gradient(
         circle at center,
-        var(--meowdown-bullet) 0 0.2rem,
-        color-mix(in oklab, var(--meowdown-fold-halo) 20%, transparent) 0.2rem 0.45rem,
-        transparent 0.45rem
+        var(--meowdown-bullet) 0 var(--meowdown-bullet-radius),
+        color-mix(in oklab, var(--meowdown-fold-halo) 20%, transparent)
+          var(--meowdown-bullet-radius) var(--meowdown-bullet-halo-radius),
+        transparent var(--meowdown-bullet-halo-radius)
       );
     }
 
@@ -303,9 +309,10 @@
     &[data-list-collapsable][data-list-collapsed] > .list-marker {
       background: radial-gradient(
         circle at center,
-        var(--meowdown-fold-halo) 0 0.2rem,
-        color-mix(in oklab, var(--meowdown-fold-halo) 35%, transparent) 0.2rem 0.45rem,
-        transparent 0.45rem
+        var(--meowdown-fold-halo) 0 var(--meowdown-bullet-radius),
+        color-mix(in oklab, var(--meowdown-fold-halo) 35%, transparent)
+          var(--meowdown-bullet-radius) var(--meowdown-bullet-halo-radius),
+        transparent var(--meowdown-bullet-halo-radius)
       );
     }
 
