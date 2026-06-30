@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.2](https://github.com/prosekit/meowdown/compare/core-v0.29.1...core-v0.29.2) (2026-06-30)
+
+
+### Bug Fixes
+
+* size the image preview correctly in Safari ([#178](https://github.com/prosekit/meowdown/issues/178)) ([762bd18](https://github.com/prosekit/meowdown/commit/762bd184a3a8443b1ff6e41469a85218c85520d2))
+
 ## [0.29.1](https://github.com/prosekit/meowdown/compare/core-v0.29.0...core-v0.29.1) (2026-06-29)
 
 
