@@ -167,7 +167,7 @@
   }
 
   .ProseMirror .md-link {
-    color: var(--meowdown-link);
+    color: var(--meowdown-link, var(--meowdown-accent));
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 2px;
