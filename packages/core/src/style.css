@@ -179,6 +179,14 @@
     -webkit-box-decoration-break: clone;
   }
 
+  /* Source range of a staged (pending) replacement. */
+  .ProseMirror .md-pending-replacement {
+    background: var(--meowdown-selection);
+    border-radius: 2px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
   .ProseMirror code {
     font-family: var(--meowdown-font-mono);
     font-size: 0.9em;

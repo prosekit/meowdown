@@ -4,7 +4,11 @@ export type { TimeFormat } from './utils/date-format.ts'
 export type {
   EditorHandle,
   EditorStateSnapshot,
+  PendingReplacementResolveHandler,
   SelectionHint,
+  SelectionMenuContext,
+  SelectionMenuItem,
+  SelectionMenuSearchHandler,
   SlashMenuItem,
   SlashMenuSearchHandler,
   TagItem,

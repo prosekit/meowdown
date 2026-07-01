@@ -28,6 +28,7 @@ import { defineLinkCommands } from './link-commands.ts'
 import { defineMeowdownList } from './list.ts'
 import { defineMoveBlock } from './move-block.ts'
 import { defineMeowdownParagraph } from './paragraph.ts'
+import { definePendingReplacement } from './pending-replacement.ts'
 import { defineTable } from './table.ts'
 import { defineWikilink } from './wikilink.ts'
 
@@ -72,6 +73,7 @@ function defineEditorExtensionImpl() {
     defineVirtualSelection(),
     defineModClickPrevention(),
     defineEditorCommands(),
+    definePendingReplacement(),
   )
 }
 

@@ -1,4 +1,9 @@
-import type { TypedEditor } from '@meowdown/core'
+import type {
+  PendingReplacement,
+  PendingReplacementOutcome,
+  StartPendingReplacementOptions,
+  TypedEditor,
+} from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
 
 /** A selection to restore: an exact JSON selection, or a document edge. */
@@ -52,6 +57,35 @@ export interface EditorHandle {
 
   /** Scrolls the selection into view. */
   scrollIntoView: () => void
+
+  /**
+   * The plain text of the current selection, with block boundaries as blank
+   * lines. Inline Markdown syntax is literal text, so the result reads as
+   * Markdown for inline content.
+   */
+  getSelectedText: () => string
+
+  /**
+   * Opens the selection menu over the current selection. A no-op when the
+   * selection is empty or `onSelectionMenuSearch` is not set.
+   */
+  openSelectionMenu: () => void
+
+  /**
+   * Stages a pending replacement over a document range. Returns `false` when
+   * the range is invalid. Calling it again resets the accumulated text, which
+   * is how a retry starts.
+   */
+  startPendingReplacement: (options: StartPendingReplacementOptions) => boolean
+
+  /** Appends streamed text to the staged replacement. */
+  appendPendingReplacementText: (text: string) => void
+
+  /** Applies the staged replacement to the document as a single edit. */
+  acceptPendingReplacement: () => void
+
+  /** Clears the staged replacement without touching the document. */
+  discardPendingReplacement: () => void
 
   /**
    * Escape hatch: the underlying ProseKit editor, or `undefined` when the
@@ -117,3 +151,41 @@ export interface WikilinkItem {
  * a promise.
  */
 export type WikilinkSearchHandler = (query: string) => WikilinkItem[] | Promise<WikilinkItem[]>
+
+/** The selection the selection menu was opened over. */
+export interface SelectionMenuContext {
+  /** The selected text, with block boundaries as blank lines. */
+  selectedText: string
+  /** Start of the selection. */
+  from: number
+  /** End of the selection. */
+  to: number
+}
+
+/** One row in the selection menu. The host ranks the rows; the menu does not re-sort. */
+export interface SelectionMenuItem {
+  /** Stable identity for the row. */
+  id: string
+  /** Display text. */
+  label: string
+  /** Secondary text shown beside the label. */
+  detail?: string
+  /** Runs when the row is picked, with the selection the menu was opened over. */
+  onSelect: (context: SelectionMenuContext) => void
+}
+
+/**
+ * Searches commands for the selection menu. Receives the filter text typed in
+ * the menu (may be empty) and the selection the menu was opened over, and
+ * returns the rows to show, either synchronously or as a promise.
+ */
+export type SelectionMenuSearchHandler = (
+  query: string,
+  context: SelectionMenuContext,
+) => SelectionMenuItem[] | Promise<SelectionMenuItem[]>
+
+/** Reports how a pending replacement ended and its final staged value. */
+export type PendingReplacementResolveHandler = (
+  outcome: PendingReplacementOutcome,
+  pending: PendingReplacement,
+) => void
