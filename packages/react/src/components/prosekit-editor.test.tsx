@@ -76,4 +76,89 @@ describe('ProseKitEditor', () => {
     await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}')
     await expect.element(screen.getByText('Hello')).toBeInTheDocument()
   })
+
+  it('inserts a lone-paragraph fragment inline at the cursor', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<ProseKitEditor ref={ref} initialMarkdown="Hello world" />)
+    await expect.element(screen.getByText('Hello world')).toBeInTheDocument()
+
+    // Cursor after "Hello ".
+    ref.current?.setSelection({ type: 'text', anchor: 7, head: 7 })
+    ref.current?.insertMarkdown('brave **new** ')
+
+    expect(ref.current?.getMarkdown()).toBe('Hello brave **new** world\n')
+    // The cursor lands at the end of the inserted text.
+    expect(ref.current?.getSelection()).toMatchObject({ type: 'text', anchor: 21, head: 21 })
+  })
+
+  it('replaces the current selection with the inserted fragment', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<ProseKitEditor ref={ref} initialMarkdown="Hello world" />)
+    await expect.element(screen.getByText('Hello world')).toBeInTheDocument()
+
+    // "Hello" is selected.
+    ref.current?.setSelection({ type: 'text', anchor: 1, head: 6 })
+    ref.current?.insertMarkdown('Goodbye')
+
+    expect(ref.current?.getMarkdown()).toBe('Goodbye world\n')
+  })
+
+  it('inserts a multi-block fragment as blocks with the cursor at its end', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<ProseKitEditor ref={ref} initialMarkdown={'Hello\n\nWorld'} />)
+    await expect.element(screen.getByText('Hello')).toBeInTheDocument()
+
+    // Cursor at the end of "Hello".
+    ref.current?.setSelection({ type: 'text', anchor: 6, head: 6 })
+    ref.current?.insertMarkdown('# Title\n\n- item')
+    expect(ref.current?.getMarkdown()).toBe('Hello\n\n# Title\n\n- item\n\nWorld\n')
+
+    // Typing continues at the end of the inserted content.
+    ref.current?.focus()
+    await userEvent.keyboard('!')
+    expect(ref.current?.getMarkdown()).toBe('Hello\n\n# Title\n\n- item!\n\nWorld\n')
+  })
+
+  it('undoes an inserted fragment as a single history entry', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<ProseKitEditor ref={ref} initialMarkdown="Hello" />)
+    await expect.element(screen.getByText('Hello')).toBeInTheDocument()
+
+    ref.current?.setSelection('end')
+    ref.current?.insertMarkdown('# Title\n\n- item')
+    await expect.element(screen.getByText('Title')).toBeInTheDocument()
+
+    await pmRoot.click()
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}')
+    expect(ref.current?.getMarkdown()).toBe('Hello\n')
+  })
+
+  it('ignores an empty or whitespace-only fragment', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<ProseKitEditor ref={ref} initialMarkdown="Hello" />)
+    await expect.element(screen.getByText('Hello')).toBeInTheDocument()
+
+    ref.current?.insertMarkdown('')
+    ref.current?.insertMarkdown('  \n\t ')
+    expect(ref.current?.getMarkdown()).toBe('Hello\n')
+  })
+
+  it('fires onDocChange for insertMarkdown, unlike setMarkdown', async () => {
+    const onDocChange = vi.fn()
+    const ref = createRef<EditorHandle>()
+    const screen = await render(
+      <ProseKitEditor ref={ref} initialMarkdown="Hello" onDocChange={onDocChange} />,
+    )
+    await expect.element(screen.getByText('Hello')).toBeInTheDocument()
+
+    ref.current?.setMarkdown('World')
+    ref.current?.setSelection('end')
+    ref.current?.insertMarkdown('!')
+
+    // Only the insert fires: the host already knows the setMarkdown content.
+    await vi.waitFor(() => {
+      expect(onDocChange).toHaveBeenCalledTimes(1)
+    })
+    expect(ref.current?.getMarkdown()).toBe('World!\n')
+  })
 })

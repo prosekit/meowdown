@@ -16,7 +16,7 @@ import {
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
 import { createEditor, union, type SelectionJSON } from '@prosekit/core'
-import type { EditorNode } from '@prosekit/pm/model'
+import { Slice, type EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit } from '@prosekit/react'
 import { clsx } from 'clsx/lite'
@@ -36,6 +36,7 @@ import type {
   EditorHandle,
   EditorStateSnapshot,
   SelectionHint,
+  SlashMenuSearchHandler,
   TagSearchHandler,
   WikilinkSearchHandler,
 } from './types.ts'
@@ -68,6 +69,9 @@ export interface ProseKitEditorProps {
 
   /** Called on every user-driven document change, not on programmatic setState. */
   onDocChange?: VoidFunction
+
+  /** Adds host items to the slash menu. See `EditorProps.onSlashMenuSearch`. */
+  onSlashMenuSearch?: SlashMenuSearchHandler
 
   /** Enables the tag menu. See `EditorProps.onTagSearch`. */
   onTagSearch?: TagSearchHandler
@@ -140,6 +144,7 @@ export function ProseKitEditor({
   markMode = 'focus',
   initialMarkdown,
   onDocChange,
+  onSlashMenuSearch,
   onTagSearch,
   onWikilinkSearch,
   onWikilinkClick,
@@ -207,6 +212,22 @@ export function ProseKitEditor({
     function setMarkdown(markdown: string): void {
       setState(markdown)
     }
+    function insertMarkdown(markdown: string): void {
+      if (!markdown.trim()) return
+      const content = markdownToDoc(markdown, { nodes: editor.nodes }).content
+      // A lone paragraph is inline content for the current textblock. Anything
+      // else starts as whole blocks (a closed start keeps e.g. a heading from
+      // collapsing into the surrounding paragraph) while the end stays
+      // maximally open, like a paste, so the text after the cursor joins the
+      // last inserted block instead of splitting off on its own. Either way,
+      // `replaceSelection` leaves the cursor at the end of the insertion.
+      const isLoneParagraph =
+        content.childCount === 1 && content.firstChild?.type.name === 'paragraph'
+      const slice = isLoneParagraph
+        ? new Slice(content, 1, 1)
+        : new Slice(content, 0, Slice.maxOpen(content).openEnd)
+      editor.view.dispatch(editor.state.tr.replaceSelection(slice).scrollIntoView())
+    }
     function setSelection(selection: SelectionHint): void {
       setState(undefined, selection)
     }
@@ -219,6 +240,7 @@ export function ProseKitEditor({
     return {
       getMarkdown,
       setMarkdown,
+      insertMarkdown,
       getState,
       setState,
       getSelection,
@@ -263,7 +285,7 @@ export function ProseKitEditor({
       {blockHandle && !readOnly && <BlockHandle />}
       {!readOnly && <TableHandle />}
       {blockHandle && !readOnly && <DropIndicator />}
-      <SlashMenu timeFormat={timeFormat} />
+      <SlashMenu timeFormat={timeFormat} onSlashMenuSearch={onSlashMenuSearch} />
       {!readOnly && <LinkMenu onLinkClick={onLinkClick} onLinkCopy={onLinkCopy} />}
       {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
       {onWikilinkSearch && <WikilinkMenu onWikilinkSearch={onWikilinkSearch} />}

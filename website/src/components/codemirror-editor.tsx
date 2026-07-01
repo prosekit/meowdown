@@ -97,6 +97,19 @@ export function CodeMirrorEditor({
     function setMarkdown(markdown: string): void {
       setState(markdown)
     }
+    function insertMarkdown(markdown: string): void {
+      const view = viewRef.current
+      if (!view || !markdown.trim()) return
+      // CodeMirror shows raw Markdown, so inserting the source text verbatim
+      // is the "parsed" insert. Unlike setState it fires onDocChange: the
+      // host cannot know the resulting document.
+      const { from, to } = view.state.selection.main
+      view.dispatch({
+        changes: { from, to, insert: markdown },
+        selection: EditorSelection.cursor(from + markdown.length),
+        scrollIntoView: true,
+      })
+    }
     function setSelection(selection: SelectionHint): void {
       setState(undefined, selection)
     }
@@ -109,6 +122,7 @@ export function CodeMirrorEditor({
     return {
       getMarkdown,
       setMarkdown,
+      insertMarkdown,
       getState,
       setState,
       getSelection,
