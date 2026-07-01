@@ -1,4 +1,3 @@
-import { pasteFiles } from '@prosekit/core/test'
 import type { EditorView } from '@prosekit/pm/view'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -22,6 +21,22 @@ function pdf(name: string): File {
 
 function png(name: string): File {
   return new File(['png'], name, { type: 'image/png' })
+}
+
+// Like `pasteFiles` from `@prosekit/core/test`, but working in every browser:
+// Firefox discards the DataTransfer passed to the ClipboardEvent constructor
+// (`event.clipboardData` comes back as a different, empty DataTransfer), so
+// when the files did not survive, shadow the getter with the real object.
+function pasteFiles(view: EditorView, files: File[]): void {
+  const clipboardData = new DataTransfer()
+  for (const file of files) {
+    clipboardData.items.add(file)
+  }
+  const event = new ClipboardEvent('paste', { clipboardData })
+  if (event.clipboardData?.files.length !== files.length) {
+    Object.defineProperty(event, 'clipboardData', { value: clipboardData })
+  }
+  view.pasteHTML('<div></div>', event)
 }
 
 // Mirror of `pasteFiles` for the drop path: a synthetic `drop` event carrying
