@@ -76,7 +76,7 @@ jobs:
       - name: Install
         run: pnpm run test:install:${{ matrix.browser }}
 
-      - name: Check macOS config
+      - name: Check macOS config 1
         if: ${{ matrix.os == 'mac' }}
         run: |
           # Disable automatic capitalization as it’s annoying when typing code
@@ -93,6 +93,24 @@ jobs:
 
           # Disable auto-correct
           defaults read -g NSAutomaticSpellingCorrectionEnabled || echo "NSAutomaticSpellingCorrectionEnabled not set"
+
+      - name: Check macOS config 2
+        if: ${{ matrix.os == 'mac' }}
+        run: |
+          # Disable automatic capitalization as it’s annoying when typing code
+          defaults read NSGlobalDomain NSAutomaticCapitalizationEnabled || echo "NSAutomaticCapitalizationEnabled not set"
+
+          # Disable smart dashes as they’re annoying when typing code
+          defaults read NSGlobalDomain NSAutomaticDashSubstitutionEnabled || echo "NSAutomaticDashSubstitutionEnabled not set"
+
+          # Disable automatic period substitution as it’s annoying when typing code
+          defaults read NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled || echo "NSAutomaticPeriodSubstitutionEnabled not set"
+
+          # Disable smart quotes as they’re annoying when typing code
+          defaults read NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled || echo "NSAutomaticQuoteSubstitutionEnabled not set"
+
+          # Disable auto-correct
+          defaults read NSGlobalDomain NSAutomaticSpellingCorrectionEnabled || echo "NSAutomaticSpellingCorrectionEnabled not set"
 
       - name: Check macOS config
         if: ${{ matrix.os == 'mac' }}
@@ -111,6 +129,42 @@ jobs:
 
           # Disable auto-correct
           defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool true
+
+      - name: Check macOS config 3
+        if: ${{ matrix.os == 'mac' }}
+        run: |
+          # Disable automatic capitalization as it’s annoying when typing code
+          defaults read -g NSAutomaticCapitalizationEnabled || echo "NSAutomaticCapitalizationEnabled not set"
+
+          # Disable smart dashes as they’re annoying when typing code
+          defaults read -g NSAutomaticDashSubstitutionEnabled || echo "NSAutomaticDashSubstitutionEnabled not set"
+
+          # Disable automatic period substitution as it’s annoying when typing code
+          defaults read -g NSAutomaticPeriodSubstitutionEnabled || echo "NSAutomaticPeriodSubstitutionEnabled not set"
+
+          # Disable smart quotes as they’re annoying when typing code
+          defaults read -g NSAutomaticQuoteSubstitutionEnabled || echo "NSAutomaticQuoteSubstitutionEnabled not set"
+
+          # Disable auto-correct
+          defaults read -g NSAutomaticSpellingCorrectionEnabled || echo "NSAutomaticSpellingCorrectionEnabled not set"
+
+      - name: Check macOS config 4
+        if: ${{ matrix.os == 'mac' }}
+        run: |
+          # Disable automatic capitalization as it’s annoying when typing code
+          defaults read NSGlobalDomain NSAutomaticCapitalizationEnabled || echo "NSAutomaticCapitalizationEnabled not set"
+
+          # Disable smart dashes as they’re annoying when typing code
+          defaults read NSGlobalDomain NSAutomaticDashSubstitutionEnabled || echo "NSAutomaticDashSubstitutionEnabled not set"
+
+          # Disable automatic period substitution as it’s annoying when typing code
+          defaults read NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled || echo "NSAutomaticPeriodSubstitutionEnabled not set"
+
+          # Disable smart quotes as they’re annoying when typing code
+          defaults read NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled || echo "NSAutomaticQuoteSubstitutionEnabled not set"
+
+          # Disable auto-correct
+          defaults read NSGlobalDomain NSAutomaticSpellingCorrectionEnabled || echo "NSAutomaticSpellingCorrectionEnabled not set"
 
       - name: Test
         run: pnpm run test
