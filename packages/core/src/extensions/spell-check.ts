@@ -5,6 +5,16 @@ import type { EditorView } from '@prosekit/pm/view'
 
 import { isMarkStep } from '../utils/is-mark-step.ts'
 
+function hasContentChanged(transactions: readonly Transaction[]): boolean {
+  for (const tr of transactions) {
+    for (const step of tr.steps) {
+      if (!isMarkStep(step)) {
+        return true
+      }
+    }
+  }
+  return false
+}
 /**
  * Stop macOS from rewriting straight punctuation into "smart" punctuation as
  * the user types.
@@ -22,25 +32,38 @@ function createSpellCheckPluginState(spellCheck: boolean) {
   let view: EditorView | undefined
   let timeoutId: ReturnType<typeof setTimeout> | undefined
   let disabled = false
+  let currentValue: boolean | undefined
+
+  const update = () => {
+    const dom = view && !view.isDestroyed && view.dom
+    if (!dom) return
+
+    const newValue = spellCheck && !disabled
+
+    if (newValue !== currentValue) {
+      currentValue = newValue
+      dom.spellcheck = newValue
+    }
+  }
+
+  const pause = () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
+    disabled = true
+    update()
+    timeoutId = setTimeout(() => {
+      disabled = false
+      update()
+    }, 1200)
+  }
 
   return {
-    apply(tr: Transaction): void {
-      if (!spellCheck || !view || !tr.docChanged || tr.steps.every(isMarkStep)) {
-        return
+    pause,
+    apply(transactions: readonly Transaction[]): void {
+      if (hasContentChanged(transactions)) {
+        pause()
       }
-
-      if (timeoutId) {
-        clearTimeout(timeoutId)
-      }
-      disabled = true
-      timeoutId = setTimeout(() => {
-        disabled = false
-      }, 1200)
-    },
-
-    attributes(): Record<string, string> {
-      const enabled = spellCheck && !disabled
-      return { spellcheck: enabled ? 'true' : 'false' }
     },
 
     view(editorView: EditorView) {
@@ -67,21 +90,27 @@ function createSpellCheckPlugin(spellCheck: boolean) {
         return createSpellCheckPluginState(spellCheck)
       },
       apply: (tr, pluginState) => {
-        pluginState.apply(tr)
         return pluginState
-      },
-    },
-
-    props: {
-      attributes: (state): Record<string, string> => {
-        const plugnState = spellCheckKey.getState(state)
-        return plugnState?.attributes() || {}
       },
     },
 
     view(view) {
       const plugnState = spellCheckKey.getState(view.state)
       return plugnState?.view(view) || {}
+    },
+
+    props: {
+      handleDOMEvents: {
+        beforeinput: (view) => {
+          const plugnState = spellCheckKey.getState(view.state)
+          plugnState?.pause()
+        },
+      },
+    },
+
+    appendTransaction(transactions, state) {
+      const plugnState = spellCheckKey.getState(state)
+      plugnState?.apply(transactions)
     },
   })
 }
