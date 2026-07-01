@@ -50,8 +50,6 @@ export const CHAR_9 = 57 /* 9 */
 // Boundaries.
 export const CHAR_MAX_ASCII = 127
 
-export const UNICODE_HYPHEN_MINUS = '\u{002D}' /* - */
-export const UNICODE_EM_DASH = '\u{2014}' /* — */
 export const UNICODE_LEFT_BLACK_LENTICULAR_BRACKET = '\u{3010}' /* 【 */
 export const UNICODE_RIGHT_BLACK_LENTICULAR_BRACKET = '\u{3011}' /* 】 */
 export const UNICODE_LEFT_HALF_BLOCK = '\u{258C}' /* ▌ */

@@ -76,96 +76,6 @@ jobs:
       - name: Install
         run: pnpm run test:install:${{ matrix.browser }}
 
-      - name: Check macOS config 1
-        if: ${{ matrix.os == 'mac' }}
-        run: |
-          # Disable automatic capitalization as it’s annoying when typing code
-          defaults read -g NSAutomaticCapitalizationEnabled || echo "NSAutomaticCapitalizationEnabled not set"
-
-          # Disable smart dashes as they’re annoying when typing code
-          defaults read -g NSAutomaticDashSubstitutionEnabled || echo "NSAutomaticDashSubstitutionEnabled not set"
-
-          # Disable automatic period substitution as it’s annoying when typing code
-          defaults read -g NSAutomaticPeriodSubstitutionEnabled || echo "NSAutomaticPeriodSubstitutionEnabled not set"
-
-          # Disable smart quotes as they’re annoying when typing code
-          defaults read -g NSAutomaticQuoteSubstitutionEnabled || echo "NSAutomaticQuoteSubstitutionEnabled not set"
-
-          # Disable auto-correct
-          defaults read -g NSAutomaticSpellingCorrectionEnabled || echo "NSAutomaticSpellingCorrectionEnabled not set"
-
-      - name: Check macOS config 2
-        if: ${{ matrix.os == 'mac' }}
-        run: |
-          # Disable automatic capitalization as it’s annoying when typing code
-          defaults read NSGlobalDomain NSAutomaticCapitalizationEnabled || echo "NSAutomaticCapitalizationEnabled not set"
-
-          # Disable smart dashes as they’re annoying when typing code
-          defaults read NSGlobalDomain NSAutomaticDashSubstitutionEnabled || echo "NSAutomaticDashSubstitutionEnabled not set"
-
-          # Disable automatic period substitution as it’s annoying when typing code
-          defaults read NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled || echo "NSAutomaticPeriodSubstitutionEnabled not set"
-
-          # Disable smart quotes as they’re annoying when typing code
-          defaults read NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled || echo "NSAutomaticQuoteSubstitutionEnabled not set"
-
-          # Disable auto-correct
-          defaults read NSGlobalDomain NSAutomaticSpellingCorrectionEnabled || echo "NSAutomaticSpellingCorrectionEnabled not set"
-
-      - name: Check macOS config
-        if: ${{ matrix.os == 'mac' }}
-        run: |
-          # Disable automatic capitalization as it’s annoying when typing code
-          defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool true
-
-          # Disable smart dashes as they’re annoying when typing code
-          defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool true
-
-          # Disable automatic period substitution as it’s annoying when typing code
-          defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool true
-
-          # Disable smart quotes as they’re annoying when typing code
-          defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool true
-
-          # Disable auto-correct
-          defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool true
-
-      - name: Check macOS config 3
-        if: ${{ matrix.os == 'mac' }}
-        run: |
-          # Disable automatic capitalization as it’s annoying when typing code
-          defaults read -g NSAutomaticCapitalizationEnabled || echo "NSAutomaticCapitalizationEnabled not set"
-
-          # Disable smart dashes as they’re annoying when typing code
-          defaults read -g NSAutomaticDashSubstitutionEnabled || echo "NSAutomaticDashSubstitutionEnabled not set"
-
-          # Disable automatic period substitution as it’s annoying when typing code
-          defaults read -g NSAutomaticPeriodSubstitutionEnabled || echo "NSAutomaticPeriodSubstitutionEnabled not set"
-
-          # Disable smart quotes as they’re annoying when typing code
-          defaults read -g NSAutomaticQuoteSubstitutionEnabled || echo "NSAutomaticQuoteSubstitutionEnabled not set"
-
-          # Disable auto-correct
-          defaults read -g NSAutomaticSpellingCorrectionEnabled || echo "NSAutomaticSpellingCorrectionEnabled not set"
-
-      - name: Check macOS config 4
-        if: ${{ matrix.os == 'mac' }}
-        run: |
-          # Disable automatic capitalization as it’s annoying when typing code
-          defaults read NSGlobalDomain NSAutomaticCapitalizationEnabled || echo "NSAutomaticCapitalizationEnabled not set"
-
-          # Disable smart dashes as they’re annoying when typing code
-          defaults read NSGlobalDomain NSAutomaticDashSubstitutionEnabled || echo "NSAutomaticDashSubstitutionEnabled not set"
-
-          # Disable automatic period substitution as it’s annoying when typing code
-          defaults read NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled || echo "NSAutomaticPeriodSubstitutionEnabled not set"
-
-          # Disable smart quotes as they’re annoying when typing code
-          defaults read NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled || echo "NSAutomaticQuoteSubstitutionEnabled not set"
-
-          # Disable auto-correct
-          defaults read NSGlobalDomain NSAutomaticSpellingCorrectionEnabled || echo "NSAutomaticSpellingCorrectionEnabled not set"
-
       - name: Test
         run: pnpm run test
         env:
@@ -175,6 +85,49 @@ jobs:
       - name: Report Coverage
         if: ${{ matrix.coverage }}
         uses: davelosert/vitest-coverage-report-action@3c054a2d2e2ca45446417ad5d6d5eb33092af8f1 # v2.12.1
+
+  # Reproduces the macOS WebKit smart-dash bug that the Playwright based browser
+  # tests cannot see. Playwright drives WebKit through the automation session,
+  # which never runs the WebContent editor's text substitution. This job drives
+  # the system WebKit (same engine as Safari) through a real WKWebView with
+  # synthesized AppKit key events, so typing "--" is substituted with an em dash
+  # exactly as it is in Safari. The step fails (red) while the bug is present.
+  webkit-dash:
+    runs-on: macos-latest
+    name: reproduce-webkit-smart-dash
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+
+      - name: Reproduce smart-dash substitution in system WebKit
+        run: |
+          # WebKit's TextChecker falls back to this global setting, so enabling
+          # it makes system WebKit substitute "--" with an em dash on typing.
+          defaults write -g NSAutomaticDashSubstitutionEnabled -bool true
+
+          pnpm dev > /tmp/meowdown-dev.log 2>&1 &
+          dev_pid=$!
+
+          ready=""
+          for _ in $(seq 1 60); do
+            if curl -sf http://localhost:5173/ >/dev/null 2>&1; then ready=1; break; fi
+            sleep 1
+          done
+          if [ -z "$ready" ]; then
+            echo "dev server did not start"
+            cat /tmp/meowdown-dev.log
+            kill "$dev_pid" 2>/dev/null || true
+            exit 1
+          fi
+
+          repro_status=0
+          swift test/webkit-dash/repro.swift http://localhost:5173/ || repro_status=$?
+          kill "$dev_pid" 2>/dev/null || true
+          exit "$repro_status"
 
   publish-snapshot:
     runs-on: ubuntu-latest
