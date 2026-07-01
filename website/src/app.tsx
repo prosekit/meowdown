@@ -2,7 +2,7 @@ import type { ExitBoundaryHandler } from '@meowdown/core'
 import type { TagItem, WikilinkItem } from '@meowdown/react'
 import { getId } from '@ocavue/utils'
 import { clsx } from 'clsx/lite'
-import { type CSSProperties, useCallback, useLayoutEffect, useState } from 'react'
+import { type CSSProperties, useCallback, useEffect, useLayoutEffect, useState } from 'react'
 
 import { DemoEditor } from './components/demo-editor.tsx'
 import { uploadFile } from './upload-file.ts'
@@ -205,6 +205,31 @@ function Brand() {
 export function App() {
   const { mode, setMode, activeMode } = useEditorMode()
 
+  const [spellCheck, setSpellCheck] = useState<boolean | undefined>(undefined)
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      const urlParams = new URLSearchParams(window.location.search)
+      const value = urlParams.get('spellcheck') || urlParams.get('spellCheck')
+
+      if (value === 'true') {
+        setSpellCheck(true)
+        console.log('[meowdown] Spellcheck enabled')
+      } else if (value === 'false') {
+        setSpellCheck(false)
+        console.log('[meowdown] Spellcheck disabled')
+      } else if (value) {
+        console.warn(
+          `[meowdown] Invalid spellcheck value in URL query: ${value}. Expected "true" or "false".`,
+        )
+      }
+    }, 0)
+
+    return () => {
+      clearTimeout(id)
+    }
+  }, [])
+
   // When the caret leaves the document boundary (onExitBoundary), briefly flash
   // a top or bottom border inside the editor box. A bumped id remounts the
   // overlay so its one-shot fade restarts on every press.
@@ -262,7 +287,7 @@ export function App() {
             <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
               <DemoEditor
                 mode={mode}
-                spellCheck={false}
+                spellCheck={spellCheck}
                 initialMarkdown={INITIAL_CONTENT}
                 onTagSearch={searchTags}
                 onWikilinkSearch={searchNotes}

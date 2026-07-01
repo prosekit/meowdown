@@ -77,3 +77,4 @@ export {
 export { defineWikilinkTrigger } from './extensions/wikilink-trigger.ts'
 export type { PositionRange } from './utils/range.ts'
 export { getVirtualElementFromRange, type VirtualElement } from './utils/virtual-element.ts'
+export { defineSpellCheckPlugin } from './extensions/spell-check.ts'
