@@ -22,8 +22,12 @@
     /* secondary text: blockquotes, syntax marks, bullets */
     --meowdown-muted: light-dark(oklch(0.442 0.015 286), oklch(0.712 0.013 286));
 
-    /* links, wikilinks, tags, caret, drop indicator */
+    /* wikilinks, tags, caret, drop indicator */
     --meowdown-accent: light-dark(oklch(0.646 0.194 41), oklch(0.758 0.159 56));
+
+    /* link and autolink text (`.md-link`); defaults to the accent so links can be
+     * recolored apart from tags, wikilinks, and the caret */
+    --meowdown-link: var(--meowdown-accent);
 
     /* Markdown syntax characters */
     --meowdown-mark: var(--meowdown-muted);
@@ -163,7 +167,7 @@
   }
 
   .ProseMirror .md-link {
-    color: var(--meowdown-accent);
+    color: var(--meowdown-link, var(--meowdown-accent));
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 2px;
