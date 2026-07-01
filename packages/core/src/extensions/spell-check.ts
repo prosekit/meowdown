@@ -81,9 +81,9 @@ function createSpellCheckPluginState(spellCheck: boolean) {
 
 type SpellCheckPluginState = ReturnType<typeof createSpellCheckPluginState>
 
-const spellCheckKey = new PluginKey<SpellCheckPluginState>('spell-check')
-
 function createSpellCheckPlugin(spellCheck: boolean) {
+  const spellCheckKey = new PluginKey<SpellCheckPluginState>('spell-check')
+
   return new Plugin<SpellCheckPluginState>({
     key: spellCheckKey,
 
