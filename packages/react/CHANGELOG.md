@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.30.1](https://github.com/prosekit/meowdown/compare/react-v0.30.0...react-v0.30.1) (2026-07-01)
+
+
+### Bug Fixes
+
+* stop WebKit dash substitution ([#186](https://github.com/prosekit/meowdown/issues/186)) ([5cafa9c](https://github.com/prosekit/meowdown/commit/5cafa9c442a352cd01c0ff10946cdb55864937e8))
+
 ## [0.30.0](https://github.com/prosekit/meowdown/compare/react-v0.29.2...react-v0.30.0) (2026-06-30)
 
 
