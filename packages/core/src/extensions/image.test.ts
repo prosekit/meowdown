@@ -1,3 +1,4 @@
+import { sleep } from '@ocavue/utils'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
@@ -9,6 +10,7 @@ import {
   traceKeySelection,
   type Fixture,
 } from '../testing/index.ts'
+import { UNICODE_EM_DASH, UNICODE_HYPHEN_MINUS } from '../unicode.ts'
 
 import { defineImageClickHandler, type ImageClickHandler } from './image-click.ts'
 import { defineImage } from './image.ts'
@@ -299,6 +301,38 @@ describe('image resize', () => {
     // fires; it is cleared once the image paints.
     expect(resizable.element()).toHaveAttribute('data-loading', '')
     await expect.element(resizable).not.toHaveAttribute('data-loading')
+  })
+
+  it('does not apply automatic dash substitution', async () => {
+    using fixture = setupResize(
+      '![](url)<!-- {"width":100,"height":100} -->',
+      getSVGImageURL(10, 10),
+    )
+
+    fixture.dom.autocorrect = true
+    fixture.dom.autocapitalize = 'on'
+    fixture.dom.spellcheck = true
+
+    // put the text cursor at the end of the document, right after the comment
+    setCaret(fixture, fixture.doc.textContent.length)
+
+    // In macOS WebKit, typing two ASCII hyphen (-) characters might input an em dash (—). This breaks the HTML comment, so we need to ensure that the editor does not perform automatic dash substitution.
+    // https://developer.apple.com/documentation/appkit/nstextview/isautomaticdashsubstitutionenabled
+    await userEvent.keyboard(' ')
+    await userEvent.keyboard('-')
+    await userEvent.keyboard('-')
+    await userEvent.keyboard(' ')
+
+    await sleep(1000)
+
+    const textContent = fixture.doc.textContent
+    const chars = [...textContent]
+    const hyphenCount = chars.filter((char) => char === UNICODE_HYPHEN_MINUS).length
+    const emDashCount = chars.filter((char) => char === UNICODE_EM_DASH).length
+
+    expect(hyphenCount).toBe(6)
+    expect(emDashCount).toBe(0)
+    expect(textContent).toMatchInlineSnapshot(`"![](url)<!-- {"width":100,"height":100} --> -- "`)
   })
 })
 

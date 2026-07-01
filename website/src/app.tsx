@@ -35,6 +35,8 @@ function handleWikilinkClick({ target }: { target: string }): void {
 const INITIAL_CONTENT = `
 # Welcome to Meowdown
 
+![](https://static.photos/yellow/16x16/3)<!-- {"width": 20, "height": 20} -->
+
 A hybrid Markdown editor that renders as you type, so you never break your flow.
 
 Weave in **bold**, *italic*, \`inline code\`, or ~~strikethrough~~ without reaching for a toolbar.
@@ -262,7 +264,7 @@ export function App() {
             <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
               <DemoEditor
                 mode={mode}
-                spellCheck={false}
+                spellCheck={true}
                 initialMarkdown={INITIAL_CONTENT}
                 onTagSearch={searchTags}
                 onWikilinkSearch={searchNotes}

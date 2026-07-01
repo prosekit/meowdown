@@ -244,6 +244,8 @@ export function ProseKitEditor({
       <div
         ref={editor.mount}
         spellCheck={spellCheck}
+        // autoCorrect="off"
+        // autoCapitalize="off"
         className={clsx('meowdown-content', editorClassName)}
       ></div>
       <EditorExtensions
