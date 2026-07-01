@@ -5,6 +5,8 @@ import type { EditorView } from '@prosekit/pm/view'
 
 import { isMarkStep } from '../utils/is-mark-step.ts'
 
+const SPELL_CHECK_PAUSE_TIMEOUT = 1200
+
 function hasContentChanged(transactions: readonly Transaction[]): boolean {
   for (const tr of transactions) {
     for (const step of tr.steps) {
@@ -31,14 +33,14 @@ function hasContentChanged(transactions: readonly Transaction[]): boolean {
 function createSpellCheckPluginState(spellCheck: boolean) {
   let view: EditorView | undefined
   let timeoutId: ReturnType<typeof setTimeout> | undefined
-  let disabled = false
+  let paused = false
   let currentValue: boolean | undefined
 
   const update = () => {
     const dom = view && !view.isDestroyed && view.dom
     if (!dom) return
 
-    const newValue = spellCheck && !disabled
+    const newValue = spellCheck && !paused
 
     if (newValue !== currentValue) {
       currentValue = newValue
@@ -50,12 +52,12 @@ function createSpellCheckPluginState(spellCheck: boolean) {
     if (timeoutId) {
       clearTimeout(timeoutId)
     }
-    disabled = true
+    paused = true
     update()
     timeoutId = setTimeout(() => {
-      disabled = false
+      paused = false
       update()
-    }, 1200)
+    }, SPELL_CHECK_PAUSE_TIMEOUT)
   }
 
   return {
