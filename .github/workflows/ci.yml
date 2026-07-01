@@ -98,19 +98,19 @@ jobs:
         if: ${{ matrix.os == 'mac' }}
         run: |
           # Disable automatic capitalization as it’s annoying when typing code
-          defaults write -g NSAutomaticCapitalizationEnabled -bool true
+          defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool true
 
           # Disable smart dashes as they’re annoying when typing code
-          defaults write -g NSAutomaticDashSubstitutionEnabled -bool true
+          defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool true
 
           # Disable automatic period substitution as it’s annoying when typing code
-          defaults write -g NSAutomaticPeriodSubstitutionEnabled -bool true
+          defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool true
 
           # Disable smart quotes as they’re annoying when typing code
-          defaults write -g NSAutomaticQuoteSubstitutionEnabled -bool true
+          defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool true
 
           # Disable auto-correct
-          defaults write -g NSAutomaticSpellingCorrectionEnabled -bool true
+          defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool true
 
       - name: Test
         run: pnpm run test
