@@ -10,6 +10,7 @@ import {
   defineMarkMode,
   definePlaceholder,
   defineReadonly,
+  defineSpellCheckPlugin,
   defineTagClickHandler,
   defineWikilinkClickHandler,
   defineWikilinkTrigger,
@@ -42,6 +43,7 @@ export interface EditorExtensionsProps {
   placeholder?: PlaceholderOptions['placeholder']
   readOnly?: boolean
   wikilinkEnabled?: boolean
+  spellCheck?: boolean
 }
 
 // A leaf that renders nothing and holds every reactive `useExtension` call (each
@@ -63,6 +65,7 @@ export function EditorExtensions({
   placeholder,
   readOnly,
   wikilinkEnabled,
+  spellCheck,
 }: EditorExtensionsProps): null {
   useExtension(
     useMemo(() => {
@@ -124,9 +127,17 @@ export function EditorExtensions({
     }, [embedPaste]),
   )
 
-  useExtension(useMemo(() => defineHTMLPaste(), []))
+  useExtension(
+    useMemo(() => {
+      return defineHTMLPaste()
+    }, []),
+  )
 
-  useExtension(useMemo(() => defineMarkdownCopy(), []))
+  useExtension(
+    useMemo(() => {
+      return defineMarkdownCopy()
+    }, []),
+  )
 
   useExtension(
     useMemo(() => {
@@ -146,6 +157,12 @@ export function EditorExtensions({
     useMemo(() => {
       return wikilinkEnabled ? defineWikilinkTrigger() : null
     }, [wikilinkEnabled]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return spellCheck == null ? null : defineSpellCheckPlugin(spellCheck)
+    }, [spellCheck]),
   )
 
   return null

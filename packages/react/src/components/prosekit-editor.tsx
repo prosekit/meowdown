@@ -241,11 +241,7 @@ export function ProseKitEditor({
 
   return (
     <ProseKit editor={editor}>
-      <div
-        ref={editor.mount}
-        spellCheck={spellCheck}
-        className={clsx('meowdown-content', editorClassName)}
-      ></div>
+      <div ref={editor.mount} className={clsx('meowdown-content', editorClassName)}></div>
       <EditorExtensions
         markMode={markMode}
         onDocChange={handleDocChange}
@@ -262,6 +258,7 @@ export function ProseKitEditor({
         placeholder={placeholder}
         readOnly={readOnly}
         wikilinkEnabled={!!onWikilinkSearch}
+        spellCheck={spellCheck}
       />
       {blockHandle && !readOnly && <BlockHandle />}
       {!readOnly && <TableHandle />}
