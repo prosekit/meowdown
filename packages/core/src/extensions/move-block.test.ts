@@ -158,6 +158,6 @@ describe('defineMoveBlock', () => {
     using fixture = setupFixture()
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('p<a>1'), n.paragraph('p<b>2'), n.paragraph('p3')))
-    expect(swapTopLevelBlock('down')(fixture.state)).toBe(false)
+    expect(swapTopLevelBlock(1)(fixture.state)).toBe(false)
   })
 })

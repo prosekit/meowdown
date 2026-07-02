@@ -4,43 +4,43 @@ import { NodeSelection, TextSelection, type Command, type EditorState } from '@p
 
 import { isSelectionInTableCell } from './table.ts'
 
-export type MoveBlockDirection = 'up' | 'down'
-
 /**
- * The index of the top-level block holding the whole selection, or null when
- * the selection spans several top-level blocks or floats between them (a gap
- * cursor or a select-all).
+ * The index of the top-level block holding the whole selection, or undefined
+ * when the selection spans several top-level blocks or floats between them (a
+ * gap cursor or a select-all).
  */
-function getTopLevelIndex(state: EditorState): number | null {
+function getTopLevelIndex(state: EditorState): number | undefined {
   const { selection } = state
   const { $from, $to } = selection
+  // A node selection wrapping a whole top-level block resolves at depth 0.
   if (isNodeSelection(selection) && $from.depth === 0) {
     return $from.index(0)
   }
+  // Both selection ends sit inside the same top-level block.
   if ($from.depth > 0 && $to.depth > 0 && $from.index(0) === $to.index(0)) {
     return $from.index(0)
   }
-  return null
+  return undefined
 }
 
 /**
- * Swaps the top-level block holding the selection with its previous or next
- * sibling, keeping the selection inside the moved block. Inside a table cell
- * it does nothing: rows have their own structure, and a cell's text should
- * not drag the whole table around.
+ * Swaps the top-level block holding the selection with its previous (`-1`) or
+ * next (`1`) sibling, keeping the selection inside the moved block. Inside a
+ * table cell it does nothing: rows have their own structure, and a cell's
+ * text should not drag the whole table around.
  */
-export function swapTopLevelBlock(direction: MoveBlockDirection): Command {
+export function swapTopLevelBlock(direction: -1 | 1): Command {
   return (state, dispatch) => {
     if (isSelectionInTableCell(state)) {
       return false
     }
 
     const index = getTopLevelIndex(state)
-    if (index === null) {
+    if (index == null) {
       return false
     }
 
-    const target = direction === 'up' ? index - 1 : index + 1
+    const target = index + direction
     if (target < 0 || target >= state.doc.childCount) {
       return false
     }
@@ -56,7 +56,7 @@ export function swapTopLevelBlock(direction: MoveBlockDirection): Command {
 
       // The moved block keeps its content, so the selection transplants by the
       // size of the block it jumped over.
-      const delta = direction === 'up' ? -a.nodeSize : b.nodeSize
+      const delta = direction === -1 ? -a.nodeSize : b.nodeSize
       const next = isNodeSelection(selection)
         ? NodeSelection.create(tr.doc, selection.from + delta)
         : TextSelection.create(tr.doc, selection.anchor + delta, selection.head + delta)
@@ -73,11 +73,11 @@ export function swapTopLevelBlock(direction: MoveBlockDirection): Command {
  * down; outside a list, moves the whole top-level block instead, so the
  * shortcut behaves uniformly across the document.
  */
-function moveBlock(direction: MoveBlockDirection): Command {
+function moveBlock(direction: 'up' | 'down'): Command {
   return (state, dispatch, view) => {
     return (
       moveList(direction)(state, dispatch, view) ||
-      swapTopLevelBlock(direction)(state, dispatch, view)
+      swapTopLevelBlock(direction === 'up' ? -1 : 1)(state, dispatch, view)
     )
   }
 }

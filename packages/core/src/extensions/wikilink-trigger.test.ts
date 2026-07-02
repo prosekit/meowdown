@@ -9,8 +9,6 @@ import { defineWikilinkTrigger } from './wikilink-trigger.ts'
 const pressBracket = () => userEvent.keyboard('[[')
 const pressModShiftK = () => userEvent.keyboard('{ControlOrMeta>}{Shift>}k{/Shift}{/ControlOrMeta}')
 
-// The trigger is opt-in (the React layer installs it when wikilinks are
-// enabled), so the fixture applies it explicitly.
 function setup(): Fixture {
   const fixture = setupFixture()
   fixture.editor.use(defineWikilinkTrigger())

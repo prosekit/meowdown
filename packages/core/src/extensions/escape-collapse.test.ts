@@ -40,6 +40,7 @@ describe('defineEscapeCollapse', () => {
     const hrPos = view.state.doc.child(0).nodeSize
     view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, hrPos)))
     view.focus()
+    expect(fixture.state.selection.empty).toBe(false)
     await userEvent.keyboard('{Escape}')
     expect(fixture.state.selection.empty).toBe(true)
   })

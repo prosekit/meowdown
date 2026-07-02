@@ -6,9 +6,7 @@ const WIKILINK_OPEN = '[['
 
 interface OpenWikilinkMenuOptions {
   /**
-   * Whether an empty selection may open the menu. The `Mod-Shift-k` binding
-   * allows it (drops a bare `[[` at the caret); the `[` binding does not, so a
-   * plain keystroke still types a literal bracket.
+   * Whether an empty selection may open the menu.
    */
   allowEmpty: boolean
 }
