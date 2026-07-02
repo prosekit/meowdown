@@ -32,6 +32,36 @@ function handleWikilinkClick({ target }: { target: string }): void {
   window.alert(`Clicked wikilink: ${target}`)
 }
 
+// Sizes for the file pills: the demo file in INITIAL_CONTENT, plus every
+// upload recorded by `uploadAndTrackFile`. Stands in for the stat lookup a
+// real host would do.
+const FILE_SIZE_BY_HREF = new Map<string, number>([['files/meowdown-press-kit.zip', 3_481_294]])
+
+function resolveFileLink({ href }: { href: string }): boolean {
+  return href.startsWith('files/') || href.includes('tmpfiles.org/dl/')
+}
+
+async function resolveFileInfo(href: string): Promise<{ size: number } | undefined> {
+  // Simulate a stat round-trip so the size visibly fills in after the pill.
+  await new Promise((resolve) => setTimeout(resolve, 300))
+  const size = FILE_SIZE_BY_HREF.get(href)
+  return size == null ? undefined : { size }
+}
+
+async function uploadAndTrackFile(file: File): Promise<string> {
+  const url = await uploadFile(file)
+  FILE_SIZE_BY_HREF.set(url, file.size)
+  return url
+}
+
+function handleFileClick({ name, href }: { name: string; href: string }): void {
+  if (/^https?:\/\//i.test(href)) {
+    confirmAndOpen(`the file "${name}"`, href)
+  } else {
+    window.alert(`Clicked file: ${name} (${href})`)
+  }
+}
+
 const INITIAL_CONTENT = `
 # Welcome to Meowdown
 
@@ -73,6 +103,10 @@ Paste a YouTube or tweet link and it embeds itself. Undo once to get the plain l
 ![](https://www.youtube.com/watch?v=aqz-KE-bpKQ)
 
 ![](https://twitter.com/jack/status/20)
+
+A link to a file renders as a tidy pill, with its size filled in by the host. Paste or drop any non-image file to add your own, and click a pill to open it:
+
+[Meowdown press kit.zip](files/meowdown-press-kit.zip)
 
 Drop in a fenced code block and pick its language from the selector:
 
@@ -291,7 +325,10 @@ export function App() {
                 initialMarkdown={INITIAL_CONTENT}
                 onTagSearch={searchTags}
                 onWikilinkSearch={searchNotes}
-                onFilePaste={uploadFile}
+                onFilePaste={uploadAndTrackFile}
+                resolveFileLink={resolveFileLink}
+                resolveFileInfo={resolveFileInfo}
+                onFileClick={handleFileClick}
                 onImageClick={handleImageClick}
                 onLinkClick={handleLinkClick}
                 onTagClick={handleTagClick}
