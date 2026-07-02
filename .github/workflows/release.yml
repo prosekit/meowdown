@@ -9,6 +9,7 @@ permissions: {}
 jobs:
   version:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: write
       pull-requests: write
@@ -22,6 +23,7 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [version]
     permissions:
       contents: read
