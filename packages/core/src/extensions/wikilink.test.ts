@@ -137,3 +137,116 @@ describe.each(LABEL_MODES)('wikilink selection ring in %s mode', (mode) => {
     await expect.element(label).toHaveStyle({ outlineStyle: 'solid' })
   })
 })
+
+// Vertical caret motion must walk through a paragraph containing a wikilink,
+describe('wikilink vertical caret navigation', () => {
+  async function run(mode: MarkMode): Promise<string> {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    editor.use(defineMarkMode(mode))
+    fixture.set(
+      n.doc(
+        n.paragraph('paragraph <a>1'),
+        n.paragraph('paragraph 2 [[WIKILINK]] text'),
+        n.paragraph('paragraph 3 [[WIKILINK]]'),
+        n.paragraph('paragraph 4'),
+      ),
+    )
+    fixture.view.focus()
+    const steps = await traceKeySelection(fixture, 'ArrowDown', 7)
+    const uniqueSteps = Array.from(new Set(steps))
+
+    return uniqueSteps.map((step) => '\n' + step + '\n').join('-'.repeat(10))
+  }
+
+  it('can ArrowDown from the first paragraph to the last paragraph in hide mode', async () => {
+    expect(await run('hide')).toMatchInlineSnapshot(`
+      "
+      paragraph ┃1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph ┃2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph ┃3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph ┃4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4┃
+      "
+    `)
+  })
+  it('can ArrowDown from the first paragraph to the last paragraph in show mode', async () => {
+    expect(await run('show')).toMatchInlineSnapshot(`
+      "
+      paragraph ┃1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph ┃2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph ┃3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph ┃4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4┃
+      "
+    `)
+  })
+  it('can ArrowDown from the first paragraph to the last paragraph in focus mode', async () => {
+    expect(await run('focus')).toMatchInlineSnapshot(`
+      "
+      paragraph ┃1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph ┃2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph ┃3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph ┃4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4┃
+      "
+    `)
+  })
+})
