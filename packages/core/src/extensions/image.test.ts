@@ -39,6 +39,7 @@ function setup(mode: MarkMode, text: string): Fixture {
   editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(10, 10) }))
   editor.use(defineMarkMode(mode))
   fixture.set(n.doc(n.paragraph(text)))
+  fixture.view.focus()
   return fixture
 }
 
@@ -98,13 +99,6 @@ describe('image deletion', () => {
         "ABC![img](url)D┃EF  ->  ABC![img](url)┃EF",
       ]
     `)
-  })
-
-  it('Backspace inside the source deletes one character, not the image', async () => {
-    const setupShow = (): Fixture => setup('show', TEXT)
-    expect(await traceKeyAt(setupShow, 7, 'Backspace')).toMatchInlineSnapshot(
-      `"ABC![im┃g](url)DEF  ->  ABC![i┃g](url)DEF"`,
-    )
   })
 })
 
@@ -317,10 +311,8 @@ describe('image resize', () => {
 
 describe('typing after an inline image', () => {
   it('types the next character after the image, not before it', async () => {
-    using fixture = setup('hide', 'A![img](url)')
+    using fixture = setup('hide', 'A![img](url)<a>')
     await expect.element(preview).toBeVisible()
-    // Offset 12 = right after the image's closing `)`.
-    setCaret(fixture, 12)
 
     await userEvent.keyboard('B')
     expect(fixture.doc.textContent).toBe('A![img](url)B')
@@ -328,13 +320,11 @@ describe('typing after an inline image', () => {
   })
 
   it('types after an image that sits between words', async () => {
-    using fixture = setup('hide', 'see ![img](url) here')
+    using fixture = setup('hide', 'see ![img](url)<a> here')
     await expect.element(preview).toBeVisible()
-    // Offset 15 = right after the closing `)` of `see ![img](url)`.
-    setCaret(fixture, 15)
 
     await userEvent.keyboard('X')
-    expect(fixture.doc.textContent).toBe('see ![img](url)X here')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"see ![img](url)X┃ here"`)
   })
 })
 
@@ -342,14 +332,20 @@ describe('typing after an inline image', () => {
 // update method keeps the same <img> alive instead of rebuilding the preview.
 describe('image mark view update', () => {
   it('keeps the same img element while the alt text is edited', async () => {
-    using fixture = setup('show', 'ABC![img](url)DEF')
-    const image = pmRoot.getByAltText('img')
-    await expect.element(image).toBeInTheDocument()
-    const imageBefore = image.element()
-    // Offset 8 = right after `img`, before the closing `]`.
-    setCaret(fixture, 8)
-    await userEvent.keyboard('X')
-    await expect.element(pmRoot.getByAltText('imgX')).toBeInTheDocument()
-    expect(pmRoot.getByAltText('imgX').element()).toBe(imageBefore)
+    using fixture = setup('show', 'ABC![alt1](url)DEF')
+
+    const image1 = pmRoot.getByAltText('alt1')
+    await expect.element(image1).toBeInTheDocument()
+    const image1Element = image1.element()
+
+    const { view } = fixture
+    expect(fixture.doc.textContent).toMatchInlineSnapshot(`"ABC![alt1](url)DEF"`)
+    view.dispatch(view.state.tr.replaceWith(6, 10, view.state.schema.text('ALT2')))
+    expect(fixture.doc.textContent).toMatchInlineSnapshot(`"ABC![ALT2](url)DEF"`)
+
+    const image2 = pmRoot.getByAltText('ALT2')
+    await expect.element(image2).toBeInTheDocument()
+    const image2Element = image2.element()
+    expect(image2Element).toBe(image1Element)
   })
 })

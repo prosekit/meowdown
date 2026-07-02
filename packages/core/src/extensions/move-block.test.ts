@@ -95,7 +95,12 @@ describe('defineMoveBlock', () => {
     fixture.set(n.doc(n.paragraph('p1'), n.paragraph('p<a>2')))
     fixture.view.focus()
     await pressAltUp()
-    expect(fixture.selectionSnapshot).toBe('p┃2p1')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`
+      "
+      p┃2
+      p1
+      "
+    `)
   })
 
   it('moves a node-selected block, keeping it selected', async () => {
@@ -119,7 +124,12 @@ describe('defineMoveBlock', () => {
     fixture.view.focus()
     await pressAltUp()
     expect(docToMarkdown(fixture.doc)).toBe('> quote\n\np1\n')
-    expect(fixture.selectionSnapshot).toBe('q┃uotep1')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`
+      "
+      q┃uote
+      p1
+      "
+    `)
   })
 
   it('does nothing at the document top and bottom', async () => {
