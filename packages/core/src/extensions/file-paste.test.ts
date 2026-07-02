@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
-import { defineFilePaste, type FilePasteOptions } from './file-paste.ts'
+import { buildFileMarkdown, defineFilePaste, type FilePasteOptions } from './file-paste.ts'
 
 // An editor with the file paste extension configured with the given handlers.
 function setup(options: FilePasteOptions, text = ''): Fixture {
@@ -136,5 +136,26 @@ describe('file drop', () => {
     })
     // The links round-trip to markdown one per line.
     expect(docToMarkdown(fixture.doc)).toBe(expected + '\n')
+  })
+})
+
+describe('buildFileMarkdown', () => {
+  it('builds image syntax for an image type', () => {
+    expect(buildFileMarkdown({ name: 'cat.png', type: 'image/png' }, 'saved://cat.png')).toBe(
+      '![](saved://cat.png)',
+    )
+  })
+
+  it('builds a link for any other file, with or without a type', () => {
+    expect(buildFileMarkdown({ name: 'a.pdf', type: 'application/pdf' }, 'assets/a.pdf')).toBe(
+      '[a.pdf](assets/a.pdf)',
+    )
+    expect(buildFileMarkdown({ name: 'a.pdf' }, 'assets/a.pdf')).toBe('[a.pdf](assets/a.pdf)')
+  })
+
+  it('escapes backslashes and brackets in the name', () => {
+    expect(buildFileMarkdown({ name: String.raw`a\[1].pdf` }, 'assets/a.pdf')).toBe(
+      String.raw`[a\\\[1\].pdf](assets/a.pdf)`,
+    )
   })
 })

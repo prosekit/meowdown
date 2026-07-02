@@ -30,6 +30,7 @@ export {
   type TypedEditor,
 } from './extensions/extension.ts'
 export {
+  buildFileMarkdown,
   defineFilePaste,
   type FilePasteHandler,
   type FilePasteOptions,
