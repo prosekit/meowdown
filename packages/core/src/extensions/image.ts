@@ -215,6 +215,16 @@ class ImageMarkView implements MarkView {
     this.dom.appendChild(this.contentDOM)
   }
 
+  update(mark): boolean {
+    /**
+    When the update method is given, this is called when the view is updating itself. It
+    will be given a mark (of the same type as the current one). When it
+    returns true, the existing DOM is kept and reused (its content is
+    still managed by ProseMirror); when it returns false, the mark view
+    is rebuilt.
+    */
+  }
+
   ignoreMutation(mutation: ViewMutationRecord): boolean {
     return !this.contentDOM.contains(mutation.target)
   }
