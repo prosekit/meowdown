@@ -1,13 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
-import {
-  setCaret,
-  setupFixture,
-  traceKeyAt,
-  traceKeySelection,
-  type Fixture,
-} from '../testing/index.ts'
+import { setupFixture, traceKeyAt, traceKeySelection, type Fixture } from '../testing/index.ts'
 
 import { defineFileClickHandler, type FileClickHandler } from './file-click.ts'
 import { defineFileView, type FileInfoResolver } from './file-view.ts'
@@ -32,6 +26,7 @@ function setup(
   editor.use(defineFileView({ resolveFileInfo }))
   editor.use(defineMarkMode(mode))
   fixture.set(n.doc(n.paragraph(markdown)))
+  fixture.view.focus()
   return fixture
 }
 
@@ -133,11 +128,9 @@ describe('file pill size', () => {
 
 describe('file pill update', () => {
   it('keeps the same pill element while the name is edited', async () => {
-    using fixture = setup('[report.pdf](assets/report.pdf)', undefined, 'show')
+    using fixture = setup('[report<a>.pdf](assets/report.pdf)', undefined, 'show')
     await expect.element(pill).toHaveTextContent('report.pdf')
     const pillBefore = pill.element()
-    // Offset 7 = after `report`, before `.pdf` inside the label.
-    setCaret(fixture, 7)
     await userEvent.keyboard('X')
     await expect.element(pill).toHaveTextContent('reportX.pdf')
     expect(pill.element()).toBe(pillBefore)
@@ -146,11 +139,10 @@ describe('file pill update', () => {
 
   it('rebuilds the pill when the href is edited', async () => {
     const resolveFileInfo = vi.fn(() => ({ size: 1000 }))
-    using fixture = setup('[report.pdf](assets/report.pdf)', resolveFileInfo, 'show')
+    using fixture = setup('[report.pdf](assets/report<a>.pdf)', resolveFileInfo, 'show')
+    void fixture
     await expect.element(pillSize).toHaveTextContent('1 KB')
     const pillBefore = pill.element()
-    // Offset 26 = inside the href, right after `assets/report`.
-    setCaret(fixture, 26)
     await userEvent.keyboard('X')
     await expect.element(pill).toBeInTheDocument()
     await vi.waitFor(() => {
@@ -160,10 +152,8 @@ describe('file pill update', () => {
   })
 
   it('drops the pill when the href is edited out of the resolver claim', async () => {
-    using fixture = setup('A[report.pdf](assets/report.pdf)', undefined, 'show')
+    using fixture = setup('A[report.pdf](<a>assets/report.pdf)', undefined, 'show')
     await expect.element(pill).toBeInTheDocument()
-    // Offset 14 = right after the `(`, before `assets/…`.
-    setCaret(fixture, 14)
     await userEvent.keyboard('x')
     await vi.waitFor(() => {
       expect(pill.query()).toBeNull()
@@ -172,16 +162,10 @@ describe('file pill update', () => {
   })
 })
 
-// Text:     A   B   C   [  ...29 more chars...  )   D   E   F
-// The file link `[report.pdf](assets/report.pdf)` occupies offsets 3 to 34.
+// The file link `[report.pdf](assets/report.pdf)` is one atom caret stop.
 describe('file pill caret navigation', () => {
-  function setupNavigation(): Fixture {
-    return setup('ABC[report.pdf](assets/report.pdf)DEF')
-  }
-
   it('ArrowRight selects the pill, then steps past into DEF', async () => {
-    using fixture = setupNavigation()
-    setCaret(fixture, 1)
+    using fixture = setup('A<a>BC[report.pdf](assets/report.pdf)DEF')
     expect(await traceKeySelection(fixture, 'ArrowRight', 6)).toMatchInlineSnapshot(`
       [
         "A┃BC[report.pdf](assets/report.pdf)DEF",
@@ -196,8 +180,7 @@ describe('file pill caret navigation', () => {
   })
 
   it('ArrowLeft selects the pill, then collapses to its left edge', async () => {
-    using fixture = setupNavigation()
-    setCaret(fixture, 35)
+    using fixture = setup('ABC[report.pdf](assets/report.pdf)D<a>EF')
     expect(await traceKeySelection(fixture, 'ArrowLeft', 3)).toMatchInlineSnapshot(`
       [
         "ABC[report.pdf](assets/report.pdf)D┃EF",
@@ -209,9 +192,9 @@ describe('file pill caret navigation', () => {
   })
 
   it('Backspace deletes the pill as a unit', async () => {
-    expect(await traceKeyAt(setupNavigation, 34, 'Backspace')).toMatchInlineSnapshot(
-      `"ABC[report.pdf](assets/report.pdf)┃DEF  ->  ABC┃DEF"`,
-    )
+    expect(
+      await traceKeyAt(setup, 'ABC[report.pdf](assets/report.pdf)<a>DEF', 'Backspace'),
+    ).toMatchInlineSnapshot(`"ABC[report.pdf](assets/report.pdf)┃DEF  ->  ABC┃DEF"`)
   })
 })
 

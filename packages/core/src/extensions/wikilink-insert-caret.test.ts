@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
-import { getSelectionSnapshot, setCaret, setupFixture, type Fixture } from '../testing/index.ts'
+import { getSelectionSnapshot, setupFixture, type Fixture } from '../testing/index.ts'
 
 import { defineMarkMode, type MarkMode } from './mark-mode.ts'
 
@@ -11,14 +11,14 @@ const label = pmRoot.getByTestId('wikilink')
 const ALL_MODES: MarkMode[] = ['hide', 'focus', 'show']
 
 // An editor in `mode` whose only content is the letter `A`, caret right after it
-// (text offset 1), exactly the state of a user who typed `A` then opened the
+// (the `<a>` tag), exactly the state of a user who typed `A` then opened the
 // wikilink menu.
 function setupAfterA(mode: MarkMode): Fixture {
   const fixture = setupFixture()
   const { editor, n } = fixture
   editor.use(defineMarkMode(mode))
-  fixture.set(n.doc(n.paragraph('A')))
-  setCaret(fixture, 1)
+  fixture.set(n.doc(n.paragraph('A<a>')))
+  fixture.view.focus()
   return fixture
 }
 
@@ -85,9 +85,8 @@ describe.each(ALL_MODES)('typing before an inserted wikilink in %s mode', (mode)
     using fixture = setupFixture()
     const { editor, n } = fixture
     editor.use(defineMarkMode(mode))
-    fixture.set(n.doc(n.paragraph('A[[Note]]C')))
-    // Offset 1 = right after `A`, just before the first `[`.
-    setCaret(fixture, 1)
+    fixture.set(n.doc(n.paragraph('A<a>[[Note]]C')))
+    fixture.view.focus()
     await expect.element(pmRoot).toBeVisible()
 
     await userEvent.keyboard('X')

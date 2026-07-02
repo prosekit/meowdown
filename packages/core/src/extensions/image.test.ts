@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
+import { findText } from '../testing/find-text.ts'
 import {
   getSelectionSnapshot,
-  setCaret,
   setupFixture,
   traceKeyAt,
   traceKeySelection,
@@ -25,13 +25,6 @@ function getSVGImageURL(width: number, height: number): string {
   return `data:image/svg+xml;base64,${btoa(svg)}`
 }
 
-// Text:     A   B   C   !   [   i   m   g   ]   (   u   r   l   )   D   E   F
-// Offset: 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17
-//
-// The hidden image source `![img](url)` occupies the characters between offsets
-// 3 and 14.
-const TEXT = 'ABC![img](url)DEF'
-
 // An editor showing the image in the given mark mode.
 function setup(mode: MarkMode, text: string): Fixture {
   const fixture = setupFixture()
@@ -43,16 +36,15 @@ function setup(mode: MarkMode, text: string): Fixture {
   return fixture
 }
 
-function setupHidden(): Fixture {
-  return setup('hide', TEXT)
+function setupHidden(text: string): Fixture {
+  return setup('hide', text)
 }
 
 // A hidden image is one caret stop: arrowing onto it selects the whole
 // `![img](url)`, and the next arrow steps past it.
 describe('image caret navigation', () => {
   it('ArrowRight selects the image, then steps past into DEF', async () => {
-    using fixture = setupHidden()
-    setCaret(fixture, 1)
+    using fixture = setupHidden('A<a>BC![img](url)DEF')
     expect(await traceKeySelection(fixture, 'ArrowRight', 6)).toMatchInlineSnapshot(`
       [
         "A┃BC![img](url)DEF",
@@ -67,8 +59,7 @@ describe('image caret navigation', () => {
   })
 
   it('ArrowLeft selects the image, then collapses to its left edge', async () => {
-    using fixture = setupHidden()
-    setCaret(fixture, 15)
+    using fixture = setupHidden('ABC![img](url)D<a>EF')
     expect(await traceKeySelection(fixture, 'ArrowLeft', 3)).toMatchInlineSnapshot(`
       [
         "ABC![img](url)D┃EF",
@@ -85,10 +76,10 @@ describe('image caret navigation', () => {
 describe('image deletion', () => {
   it('Backspace deletes the image as a unit, plain text one char', async () => {
     const result = [
-      await traceKeyAt(setupHidden, 2, 'Backspace'), // between B and C
-      await traceKeyAt(setupHidden, 3, 'Backspace'), // just before the image
-      await traceKeyAt(setupHidden, 14, 'Backspace'), // just after the image
-      await traceKeyAt(setupHidden, 15, 'Backspace'), // between D and E
+      await traceKeyAt(setupHidden, 'AB<a>C![img](url)DEF', 'Backspace'),
+      await traceKeyAt(setupHidden, 'ABC<a>![img](url)DEF', 'Backspace'),
+      await traceKeyAt(setupHidden, 'ABC![img](url)<a>DEF', 'Backspace'),
+      await traceKeyAt(setupHidden, 'ABC![img](url)D<a>EF', 'Backspace'),
     ]
 
     expect(result).toMatchInlineSnapshot(`
@@ -106,10 +97,8 @@ describe('image deletion', () => {
 // it does not. This is what the `md-atom-selected` decoration drives.
 describe('image selection ring', () => {
   it('rings the preview only while the image is selected, from either edge', async () => {
-    using fixture = setupHidden()
-
     // A caret before the image does not ring it.
-    setCaret(fixture, 3)
+    using fixture = setupHidden('ABC<a>![img](url)DEF')
     expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC┃![img](url)DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
 
@@ -340,7 +329,10 @@ describe('image mark view update', () => {
 
     const { view } = fixture
     expect(fixture.doc.textContent).toMatchInlineSnapshot(`"ABC![alt1](url)DEF"`)
-    view.dispatch(view.state.tr.replaceWith(6, 10, view.state.schema.text('ALT2')))
+    const altStart = findText(fixture.doc, 'alt1')
+    view.dispatch(
+      view.state.tr.replaceWith(altStart, altStart + 'alt1'.length, view.state.schema.text('ALT2')),
+    )
     expect(fixture.doc.textContent).toMatchInlineSnapshot(`"ABC![ALT2](url)DEF"`)
 
     const image2 = pmRoot.getByAltText('ALT2')

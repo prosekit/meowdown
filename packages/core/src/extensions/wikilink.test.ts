@@ -3,7 +3,6 @@ import { page, userEvent } from 'vitest/browser'
 
 import {
   getSelectionSnapshot,
-  setCaret,
   setupFixture,
   traceKeyAt,
   traceKeySelection,
@@ -15,21 +14,15 @@ import { defineMarkMode, type MarkMode } from './mark-mode.ts'
 const pmRoot = page.locate('.ProseMirror')
 const label = pmRoot.getByTestId('wikilink')
 
-// Text:    A   B   [   [   N   o   t   e   ]   ]   C   D
-// Offset: 0   1   2   3   4   5   6   7   8   9  10  11  12
-//
-// The wikilink source `[[Note]]` occupies the characters between offsets 2 and
-// 10. It is one atom caret stop in every mark mode.
-const TEXT = 'AB[[Note]]CD'
-
-// A factory for an editor in `mode` showing the wikilink, shared by the suites
-// below.
-function setupMode(mode: MarkMode): () => Fixture {
-  return () => {
+// A factory for an editor in `mode` showing the wikilink `[[Note]]`, one atom
+// caret stop in every mark mode. `text` places the caret with a `<a>` tag.
+function setupMode(mode: MarkMode): (text: string) => Fixture {
+  return (text: string) => {
     const fixture = setupFixture()
     const { editor, n } = fixture
     editor.use(defineMarkMode(mode))
-    fixture.set(n.doc(n.paragraph(TEXT)))
+    fixture.set(n.doc(n.paragraph(text)))
+    fixture.view.focus()
     return fixture
   }
 }
@@ -71,8 +64,7 @@ describe.each(ALL_MODES)('wikilink caret navigation in %s mode', (mode) => {
   const setup = setupMode(mode)
 
   it('ArrowRight selects the wikilink, then steps past into CD', async () => {
-    using fixture = setup()
-    setCaret(fixture, 1)
+    using fixture = setup('A<a>B[[Note]]CD')
     expect(await traceKeySelection(fixture, 'ArrowRight', 5)).toMatchInlineSnapshot(`
       [
         "A┃B[[Note]]CD",
@@ -86,8 +78,7 @@ describe.each(ALL_MODES)('wikilink caret navigation in %s mode', (mode) => {
   })
 
   it('ArrowLeft selects the wikilink, then collapses to its left edge', async () => {
-    using fixture = setup()
-    setCaret(fixture, 11)
+    using fixture = setup('AB[[Note]]C<a>D')
     expect(await traceKeySelection(fixture, 'ArrowLeft', 3)).toMatchInlineSnapshot(`
       [
         "AB[[Note]]C┃D",
@@ -100,10 +91,10 @@ describe.each(ALL_MODES)('wikilink caret navigation in %s mode', (mode) => {
 
   it('Backspace deletes the wikilink as a unit, plain text one char', async () => {
     expect([
-      await traceKeyAt(setup, 1, 'Backspace'), // between A and B
-      await traceKeyAt(setup, 2, 'Backspace'), // just before the wikilink
-      await traceKeyAt(setup, 10, 'Backspace'), // just after the wikilink
-      await traceKeyAt(setup, 11, 'Backspace'), // between C and D
+      await traceKeyAt(setup, 'A<a>B[[Note]]CD', 'Backspace'),
+      await traceKeyAt(setup, 'AB<a>[[Note]]CD', 'Backspace'),
+      await traceKeyAt(setup, 'AB[[Note]]<a>CD', 'Backspace'),
+      await traceKeyAt(setup, 'AB[[Note]]C<a>D', 'Backspace'),
     ]).toMatchInlineSnapshot(`
       [
         "A┃B[[Note]]CD  ->  ┃B[[Note]]CD",
@@ -121,9 +112,8 @@ describe.each(LABEL_MODES)('wikilink selection ring in %s mode', (mode) => {
   const setup = setupMode(mode)
 
   it('rings the label only while the wikilink is selected', async () => {
-    using fixture = setup()
+    using fixture = setup('AB<a>[[Note]]CD')
 
-    setCaret(fixture, 2)
     expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"AB┃[[Note]]CD"`)
     await expect.element(label).toHaveStyle({ outlineStyle: 'none' })
 
@@ -137,9 +127,8 @@ describe.each(LABEL_MODES)('wikilink selection ring in %s mode', (mode) => {
   })
 
   it('rings the label when selected from its right edge', async () => {
-    using fixture = setup()
+    using fixture = setup('AB[[Note]]<a>CD')
 
-    setCaret(fixture, 10)
     expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"AB[[Note]]┃CD"`)
     await expect.element(label).toHaveStyle({ outlineStyle: 'none' })
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
-import { setCaret, setupFixture } from '../testing/index.ts'
+import { setupFixture } from '../testing/index.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 
@@ -13,12 +13,11 @@ describe('toggleListCollapsed', () => {
       n.doc(
         n.list(
           { kind: 'bullet' },
-          n.paragraph('parent'),
+          n.paragraph('<a>parent'),
           n.list({ kind: 'bullet' }, n.paragraph('child')),
         ),
       ),
     )
-    setCaret(fixture, 2)
 
     expect(editor.commands.toggleListCollapsed.canExec()).toBe(true)
     editor.commands.toggleListCollapsed()
@@ -30,8 +29,7 @@ describe('toggleListCollapsed', () => {
   it('cannot fold a leaf bullet', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
-    fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('leaf'))))
-    setCaret(fixture, 2)
+    fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('<a>leaf'))))
     expect(editor.commands.toggleListCollapsed.canExec()).toBe(false)
   })
 
@@ -40,10 +38,9 @@ describe('toggleListCollapsed', () => {
     const { editor, n } = fixture
     fixture.set(
       n.doc(
-        n.list({ kind: 'task' }, n.paragraph('a'), n.list({ kind: 'bullet' }, n.paragraph('b'))),
+        n.list({ kind: 'task' }, n.paragraph('<a>a'), n.list({ kind: 'bullet' }, n.paragraph('b'))),
       ),
     )
-    setCaret(fixture, 2)
     expect(editor.commands.toggleListCollapsed.canExec()).toBe(false)
   })
 })
