@@ -1,6 +1,9 @@
 import type {
   ExitBoundaryHandler,
+  FileClickHandler,
+  FileLinkResolver,
   FilePasteOptions,
+  FileViewOptions,
   ImageClickHandler,
   ImageOptions,
   LinkClickHandler,
@@ -118,6 +121,33 @@ export interface EditorProps {
   resolveImageUrl?: ImageOptions['resolveImageUrl']
 
   /**
+   * Claims a `[label](url)` link as a file: a claimed link renders as an
+   * inline pill (file icon, name, size) instead of a link, behaves as one
+   * caret unit, and reports clicks through `onFileClick` instead of
+   * `onLinkClick`. The markdown text is untouched. Must be pure (same link,
+   * same answer). Read once when the editor is created: later identity
+   * changes are ignored, like `initialMarkdown`.
+   */
+  resolveFileLink?: FileLinkResolver
+
+  /**
+   * Resolves the metadata (file size in bytes) shown on a file pill, directly
+   * or as a promise; the pill renders immediately and fills the size in when
+   * the promise settles. May be called repeatedly for the same `href`, so
+   * cache in the host when resolving is expensive. Pass a stable function
+   * (e.g. from `useCallback`).
+   */
+  resolveFileInfo?: FileViewOptions['resolveFileInfo']
+
+  /**
+   * Called when the user clicks a rendered file pill, with its `href`,
+   * `name`, and the originating `MouseEvent`. The host decides what a click
+   * does (e.g. open the file in the OS default app). Pass a stable function
+   * (e.g. from `useCallback`).
+   */
+  onFileClick?: FileClickHandler
+
+  /**
    * Persists a pasted/dropped file and returns its markdown destination,
    * inserted as `![](src)` for an image and as a `[name](src)` link for any
    * other file. Return `undefined` to decline. Pass a stable function.
@@ -206,6 +236,9 @@ export function MeowdownEditor({
   onTagClick,
   onExitBoundary,
   resolveImageUrl,
+  resolveFileLink,
+  resolveFileInfo,
+  onFileClick,
   onFilePaste,
   onFileSaveError,
   onImageClick,
@@ -285,6 +318,9 @@ export function MeowdownEditor({
         onTagClick={onTagClick}
         onExitBoundary={onExitBoundary}
         resolveImageUrl={resolveImageUrl}
+        resolveFileLink={resolveFileLink}
+        resolveFileInfo={resolveFileInfo}
+        onFileClick={onFileClick}
         onFilePaste={onFilePaste}
         onFileSaveError={onFileSaveError}
         onImageClick={onImageClick}

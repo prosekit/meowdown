@@ -397,3 +397,51 @@ describe('MeowdownEditor', () => {
     await expect.element(screen.getByText('!Hi')).toBeInTheDocument()
   })
 })
+
+describe('file pill props', () => {
+  const claimAssets = ({ href }: { href: string }) => href.startsWith('assets/')
+
+  it('renders a claimed link as a pill with its resolved size and reports clicks', async () => {
+    const onFileClick = vi.fn()
+    await render(
+      <MeowdownEditor
+        mode="hide"
+        initialMarkdown="[report.pdf](assets/report.pdf)"
+        resolveFileLink={claimAssets}
+        resolveFileInfo={() => Promise.resolve({ size: 1_400_000 })}
+        onFileClick={onFileClick}
+      />,
+    )
+    const pill = pmRoot.getByTestId('file-pill')
+    await expect.element(pill).toHaveTextContent('report.pdf')
+    await expect.element(pmRoot.getByTestId('file-pill-size')).toHaveTextContent('1.4 MB')
+    await userEvent.click(pill)
+    await vi.waitFor(() => {
+      expect(onFileClick).toHaveBeenCalledWith(
+        expect.objectContaining({ href: 'assets/report.pdf', name: 'report.pdf' }),
+      )
+    })
+  })
+
+  it('renders a pasted file as a pill once onFilePaste persists it', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(
+      <MeowdownEditor
+        handleRef={ref}
+        mode="hide"
+        resolveFileLink={claimAssets}
+        onFilePaste={(file) => `assets/${file.name}`}
+      />,
+    )
+    const view = ref.current!.editor!.view
+    dropFiles(view, [new File(['%PDF'], 'report.pdf', { type: 'application/pdf' })], 1)
+    await expect.element(pmRoot.getByTestId('file-pill')).toHaveTextContent('report.pdf')
+    expect(ref.current!.getMarkdown()).toBe('[report.pdf](assets/report.pdf)\n')
+  })
+
+  it('leaves links as links without resolveFileLink', async () => {
+    await render(<MeowdownEditor mode="hide" initialMarkdown="[report.pdf](assets/report.pdf)" />)
+    await expect.element(pmRoot.getByRole('link')).toBeInTheDocument()
+    expect(pmRoot.getByTestId('file-pill').query()).toBeNull()
+  })
+})
