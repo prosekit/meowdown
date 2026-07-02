@@ -58,6 +58,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
       marks: [
         { name: 'mdImage', modes: ['hide', 'focus', 'show'] },
         { name: 'mdWikilink', modes: ['hide', 'focus', 'show'] },
+        { name: 'mdFile', modes: ['hide', 'focus', 'show'] },
       ],
     }),
 

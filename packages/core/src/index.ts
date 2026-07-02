@@ -36,6 +36,11 @@ export {
   type FileSaveErrorHandler,
 } from './extensions/file-paste.ts'
 export {
+  defineFileClickHandler,
+  type FileClickHandler,
+  type FileClickPayload,
+} from './extensions/file-click.ts'
+export {
   defineFileView,
   type FileInfo,
   type FileInfoResolver,
