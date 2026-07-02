@@ -18,14 +18,14 @@ export function getSelectionSnapshot(state: EditorState): string {
   const { from, to } = selection
 
   if (from === to) {
-    return doc.textBetween(0, from) + TEXT_CARET + doc.textBetween(to, doc.content.size)
+    return doc.textBetween(0, from, '\n') + TEXT_CARET + doc.textBetween(to, doc.content.size, '\n')
   } else {
     return (
-      doc.textBetween(0, from) +
+      doc.textBetween(0, from, '\n') +
       SELECTION_START +
-      doc.textBetween(from, to) +
+      doc.textBetween(from, to, '\n') +
       SELECTION_END +
-      doc.textBetween(to, doc.content.size)
+      doc.textBetween(to, doc.content.size, '\n')
     )
   }
 }
