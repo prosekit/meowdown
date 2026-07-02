@@ -54,6 +54,8 @@ export function App() {
 
 See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Freact/).
 
+Slash menu host items can include `keywords` to match hidden terms without changing the displayed label.
+
 ## Styling
 
 Import both stylesheets: `@meowdown/core/style.css` (the editor theme and variables) and `@meowdown/react/style.css` (the component layout). The core theme is documented in [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core).

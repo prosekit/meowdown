@@ -105,6 +105,8 @@ export interface SlashMenuItem {
   id?: string
   /** Display text, matched against the typed query like the built-in items. */
   label: string
+  /** Extra match terms beyond the label; never displayed. */
+  keywords?: string[]
   /** Secondary text shown beside the label. */
   detail?: string
   /** Runs after the menu closes and the typed `/query` text is removed. */
