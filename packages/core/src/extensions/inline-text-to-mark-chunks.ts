@@ -5,7 +5,7 @@ import type { InlineElement } from '../lezer/inline.ts'
 import { parseInline } from '../lezer/inline.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 
-import type { MdLinkTextAttrs, MdPackAttrs, MdPackSimpleKey } from './inline-marks.ts'
+import type { MdFileAttrs, MdLinkTextAttrs, MdPackAttrs, MdPackSimpleKey } from './inline-marks.ts'
 import { parseMagicComment, type MagicComment } from './magic-comment.ts'
 import type { MarkChunk } from './mark-chunk.ts'
 import type { MarkName } from './mark-names.ts'
@@ -40,6 +40,30 @@ const MARK_NAME_BY_TYPE_ID: ReadonlyMap<number, MarkName> = new Map([
   [LEZER_NODE_IDS.WikilinkMark, 'mdMark'],
 ])
 
+/** What {@link FileLinkResolver} sees for one `[label](url)` link. */
+export interface FileLinkPayload {
+  /** The link destination, exactly as written in the source. */
+  href: string
+  /** The raw label slice between the brackets; may be empty or contain nested syntax. */
+  label: string
+  /** The link title, or `''` when the source has none. */
+  title: string
+}
+
+/**
+ * Claims a `[label](url)` link as a file attachment. A claimed link carries a
+ * single `mdFile` mark over its whole source (rendered as a file pill by
+ * `defineFileView`) instead of the usual link marks, so link click/hover/menu
+ * no longer apply to it. Must be pure: parse results are cached and diffed,
+ * so the same input must always produce the same answer.
+ */
+export type FileLinkResolver = (link: FileLinkPayload) => boolean
+
+/** Host options that influence inline parsing. */
+export interface FileLinkOptions {
+  resolveFileLink?: FileLinkResolver
+}
+
 /**
  * Walk a textblock's inline content and produce a list of mark chunks
  * with positions relative to the start of `text` (i.e. zero-based).
@@ -50,10 +74,12 @@ export function inlineTextToMarkChunks(
   marks: TypedMarkBuilders,
   /** The raw inline text of one textblock (no block prefix). */
   text: string,
+  /** Host options; omit for the default parse. */
+  options?: FileLinkOptions,
 ): MarkChunk[] {
   const elements = parseInline(text)
   const out: MarkChunk[] = []
-  walk(elements, [], 0, text.length, text, marks, out)
+  walk(elements, [], 0, text.length, text, marks, out, options)
   return out
 }
 
@@ -89,6 +115,7 @@ function walk(
   text: string,
   marks: TypedMarkBuilders,
   out: MarkChunk[],
+  options: FileLinkOptions | undefined,
 ): void {
   let pos = rangeStart
   for (let index = 0; index < nodes.length; index++) {
@@ -98,7 +125,12 @@ function walk(
     }
     const type: number = node.type
     if (type === LEZER_NODE_IDS.Link) {
-      walkLink(node, parentMarks, text, marks, out)
+      const fileMarks = claimFileLink(node, parentMarks, text, marks, options)
+      if (fileMarks) {
+        emit(out, node.from, node.to, fileMarks)
+      } else {
+        walkLink(node, parentMarks, text, marks, out)
+      }
     } else if (type === LEZER_NODE_IDS.Image) {
       const trailing = takeMagicComment(node, nodes[index + 1], text)
       walkImage(node, parentMarks, text, marks, out, trailing)
@@ -141,7 +173,7 @@ function walk(
       if (node.children.length === 0) {
         emit(out, node.from, node.to, childMarks)
       } else {
-        walk(node.children, childMarks, node.from, node.to, text, marks, out)
+        walk(node.children, childMarks, node.from, node.to, text, marks, out, options)
       }
     }
     pos = node.to
@@ -149,6 +181,77 @@ function walk(
   if (pos < rangeEnd) {
     emit(out, pos, rangeEnd, parentMarks)
   }
+}
+
+interface LinkParts {
+  /** End of the `[` that opens the label, or -1 when there is no label. */
+  labelFrom: number
+  /** Start of the `]` that closes the label, or -1 when the label never closes. */
+  labelTo: number
+  urlNode: InlineElement | null
+  titleNode: InlineElement | null
+}
+
+/**
+ * Locate the pieces of a `Link` node in Lezer's flat child list:
+ *   LinkMark `[`, [label children], LinkMark `]`, LinkMark `(`, URL,
+ *   optional LinkTitle, LinkMark `)`.
+ */
+function scanLinkParts(node: InlineElement): LinkParts {
+  let labelFrom = -1
+  let labelTo = -1
+  let urlNode: InlineElement | null = null
+  let titleNode: InlineElement | null = null
+  let bracketCount = 0
+  for (const child of node.children) {
+    if (child.type === LEZER_NODE_IDS.LinkMark) {
+      bracketCount++
+      if (bracketCount === 1) labelFrom = child.to
+      if (bracketCount === 2) labelTo = child.from
+    } else if (child.type === LEZER_NODE_IDS.URL && urlNode === null) {
+      urlNode = child
+    } else if (child.type === LEZER_NODE_IDS.LinkTitle && titleNode === null) {
+      titleNode = child
+    }
+  }
+  return { labelFrom, labelTo, urlNode, titleNode }
+}
+
+/** The last path segment of `href` (query/hash stripped), decoded when possible. */
+function hrefBasename(href: string): string {
+  const path = href.split(/[?#]/, 1)[0]
+  const segment = path.split(/[/\\]/).findLast(Boolean) ?? path
+  try {
+    return decodeURIComponent(segment)
+  } catch {
+    return segment
+  }
+}
+
+/**
+ * The marks for a whole `[label](url)` link that the host's `resolveFileLink`
+ * claimed as a file, or `undefined` when the link stays a regular link. The
+ * resolver is never consulted for a link without a closed label or an inline
+ * destination (reference links, empty `()`).
+ */
+function claimFileLink(
+  node: InlineElement,
+  parentMarks: readonly Mark[],
+  text: string,
+  marks: TypedMarkBuilders,
+  options: FileLinkOptions | undefined,
+): readonly Mark[] | undefined {
+  const resolveFileLink = options?.resolveFileLink
+  if (!resolveFileLink) return undefined
+  const { labelFrom, labelTo, urlNode, titleNode } = scanLinkParts(node)
+  if (labelFrom < 0 || labelTo < 0 || !urlNode) return undefined
+  const href = text.slice(urlNode.from, urlNode.to)
+  if (!href) return undefined
+  const label = text.slice(labelFrom, labelTo)
+  const title = titleNode ? unquoteTitle(text.slice(titleNode.from, titleNode.to)) : ''
+  if (!resolveFileLink({ href, label, title })) return undefined
+  const name = label || hrefBasename(href)
+  return [...parentMarks, marks.mdFile.create({ href, name, title } satisfies MdFileAttrs)]
 }
 
 /**
@@ -175,20 +278,7 @@ function walkLink(
   marks: TypedMarkBuilders,
   out: MarkChunk[],
 ): void {
-  let labelEnd = -1
-  let urlNode: InlineElement | null = null
-  let titleNode: InlineElement | null = null
-  let bracketCount = 0
-  for (const child of node.children) {
-    if (child.type === LEZER_NODE_IDS.LinkMark) {
-      bracketCount++
-      if (bracketCount === 2) labelEnd = child.from
-    } else if (child.type === LEZER_NODE_IDS.URL && urlNode === null) {
-      urlNode = child
-    } else if (child.type === LEZER_NODE_IDS.LinkTitle && titleNode === null) {
-      titleNode = child
-    }
-  }
+  const { labelTo: labelEnd, urlNode, titleNode } = scanLinkParts(node)
   const href = urlNode ? text.slice(urlNode.from, urlNode.to) : ''
   const title = titleNode ? unquoteTitle(text.slice(titleNode.from, titleNode.to)) : ''
   const linkTextMark = href ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs) : null
@@ -218,7 +308,8 @@ function walkLink(
     if (child.children.length === 0) {
       emit(out, child.from, child.to, childMarks)
     } else {
-      walk(child.children, childMarks, child.from, child.to, text, marks, out)
+      // No options: a link label cannot contain another `[label](url)` link.
+      walk(child.children, childMarks, child.from, child.to, text, marks, out, undefined)
     }
     pos = child.to
   }

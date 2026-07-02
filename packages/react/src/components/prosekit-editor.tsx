@@ -6,7 +6,10 @@ import {
   type AcceptPendingReplacementOptions,
   type EditorExtension,
   type ExitBoundaryHandler,
+  type FileClickHandler,
+  type FileLinkResolver,
   type FilePasteOptions,
+  type FileViewOptions,
   type ImageClickHandler,
   type ImageOptions,
   type LinkClickHandler,
@@ -126,6 +129,15 @@ export interface ProseKitEditorProps {
   /** Resolves an image `src` to a URL. See `EditorProps.resolveImageUrl`. */
   resolveImageUrl?: ImageOptions['resolveImageUrl']
 
+  /** Claims links as file pills. Read once on mount; see `EditorProps.resolveFileLink`. */
+  resolveFileLink?: FileLinkResolver
+
+  /** Resolves the size shown on a file pill. See `EditorProps.resolveFileInfo`. */
+  resolveFileInfo?: FileViewOptions['resolveFileInfo']
+
+  /** Called on click or Mod-Enter of a rendered file pill. See `EditorProps.onFileClick`. */
+  onFileClick?: FileClickHandler
+
   /** Persists a pasted/dropped file. See `EditorProps.onFilePaste`. */
   onFilePaste?: FilePasteOptions['onFilePaste']
 
@@ -186,6 +198,9 @@ export function ProseKitEditor({
   onTagClick,
   onExitBoundary,
   resolveImageUrl,
+  resolveFileLink,
+  resolveFileInfo,
+  onFileClick,
   onFilePaste,
   onFileSaveError,
   onImageClick,
@@ -202,7 +217,9 @@ export function ProseKitEditor({
   children,
 }: ProseKitEditorProps) {
   const [editor] = useState((): TypedEditor => {
-    const baseExtension: EditorExtension = defineEditorExtension()
+    // Creation-time options: `resolveFileLink` is baked into the parse
+    // pipeline, so only the value from the first render counts.
+    const baseExtension: EditorExtension = defineEditorExtension({ resolveFileLink })
     const extension = union(baseExtension, defineCodeBlockView())
     const editor: TypedEditor = createEditor({ extension })
     if (initialMarkdown) {
@@ -333,6 +350,8 @@ export function ProseKitEditor({
         onTagClick={onTagClick}
         onExitBoundary={onExitBoundary}
         resolveImageUrl={resolveImageUrl}
+        resolveFileInfo={resolveFileInfo}
+        onFileClick={onFileClick}
         onFilePaste={onFilePaste}
         onFileSaveError={onFileSaveError}
         onImageClick={onImageClick}

@@ -18,12 +18,21 @@ export interface FilePasteOptions {
   onFileSaveError?: FileSaveErrorHandler
 }
 
-function isImageFile(file: File): boolean {
-  return file.type.startsWith('image/')
+function isImageFile(file: { type?: string }): boolean {
+  return !!file.type?.startsWith('image/')
 }
 
-/** The markdown a saved file becomes: image syntax for an image, a plain link otherwise. */
-function buildFileMarkdown(file: File, destination: string): string {
+/**
+ * The markdown a saved file becomes: `![](destination)` for an image (a
+ * `type` starting with `image/`), a `[name](destination)` link otherwise,
+ * with `\`, `[`, and `]` escaped in the name. Exported so a host command that
+ * inserts file links itself (e.g. an attach-file picker) produces markdown
+ * byte-identical to a paste/drop.
+ */
+export function buildFileMarkdown(
+  file: { name: string; type?: string },
+  destination: string,
+): string {
   return isImageFile(file)
     ? `![](${destination})`
     : `[${escapeLinkText(file.name)}](${destination})`

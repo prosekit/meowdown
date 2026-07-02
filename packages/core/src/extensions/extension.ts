@@ -23,6 +23,7 @@ import { defineMeowdownHorizontalRule } from './horizontal-rule.ts'
 import { defineHTMLComment } from './html-comment.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
+import type { FileLinkOptions } from './inline-text-to-mark-chunks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
 import { defineLinkCommands } from './link-commands.ts'
 import { defineMeowdownList } from './list.ts'
@@ -32,7 +33,7 @@ import { definePendingReplacement } from './pending-replacement.ts'
 import { defineTable } from './table.ts'
 import { defineWikilink } from './wikilink.ts'
 
-function defineEditorExtensionImpl() {
+function defineEditorExtensionImpl(options: EditorExtensionOptions) {
   return union(
     // nodes
     defineMeowdownParagraph(),
@@ -54,7 +55,7 @@ function defineEditorExtensionImpl() {
     defineCodeBlockSyntaxHighlight(),
     defineEscapeCollapse(),
     defineMoveBlock(),
-    defineInlineMarkPlugin(),
+    defineInlineMarkPlugin(options),
     defineInlineToggle(),
     defineLinkCommands(),
     defineWikilink(),
@@ -62,6 +63,7 @@ function defineEditorExtensionImpl() {
       marks: [
         { name: 'mdImage', modes: ['hide', 'focus', 'show'] },
         { name: 'mdWikilink', modes: ['hide', 'focus', 'show'] },
+        { name: 'mdFile', modes: ['hide', 'focus', 'show'] },
       ],
     }),
 
@@ -79,8 +81,15 @@ function defineEditorExtensionImpl() {
 
 export type EditorExtension = ReturnType<typeof defineEditorExtensionImpl>
 
-export function defineEditorExtension(): EditorExtension {
-  return defineEditorExtensionImpl()
+/**
+ * Options for {@link defineEditorExtension}. Creation-time configuration: it
+ * is baked into the editor's parse pipeline, so changing it requires
+ * rebuilding the editor.
+ */
+export type EditorExtensionOptions = FileLinkOptions
+
+export function defineEditorExtension(options: EditorExtensionOptions = {}): EditorExtension {
+  return defineEditorExtensionImpl(options)
 }
 
 export type TypedEditor = Editor<EditorExtension>

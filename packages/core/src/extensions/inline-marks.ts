@@ -157,6 +157,33 @@ export interface MdWikilinkAttrs {
   display: string
 }
 
+/**
+ * Attributes of the `mdFile` mark: a whole `[label](url)` link that the host's
+ * `resolveFileLink` claimed as a file attachment, rendered as a file pill.
+ */
+export interface MdFileAttrs {
+  /** The link destination, exactly as written in the source. */
+  href: string
+  /** The display name: the raw label slice, or the `href` basename when the label is empty. */
+  name: string
+  /** The link title, or `''` when the source has none. */
+  title: string
+}
+
+function defineMdFile() {
+  return defineMarkSpec<'mdFile', MdFileAttrs>({
+    name: 'mdFile' satisfies MarkName,
+    inclusive: false,
+    attrs: {
+      href: { default: '' },
+      name: { default: '' },
+      title: { default: '' },
+    },
+    toDOM: () => ['span', { class: 'md-file' }, 0],
+    parseDOM: [{ tag: 'span.md-file' }],
+  })
+}
+
 /** mdPack keys for units that store no extra data; the syntax marks carry it. */
 export type MdPackSimpleKey = 'bold' | 'italic' | 'code' | 'strike' | 'highlight' | 'autolink'
 
@@ -221,6 +248,7 @@ export function defineInlineMarks() {
 
     defineMdWikilink(),
     defineMdImage(),
+    defineMdFile(),
     defineMdPack(),
   )
 }

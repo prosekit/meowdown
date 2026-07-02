@@ -2,7 +2,9 @@ import {
   defineBulletAfterHeading,
   defineEmbedPaste,
   defineExitBoundaryHandler,
+  defineFileClickHandler,
   defineFilePaste,
+  defineFileView,
   defineFollowLinkHandler,
   defineHTMLPaste,
   defineImage,
@@ -17,7 +19,9 @@ import {
   defineWikilinkClickHandler,
   defineWikilinkTrigger,
   type ExitBoundaryHandler,
+  type FileClickHandler,
   type FilePasteOptions,
+  type FileViewOptions,
   type ImageClickHandler,
   type ImageOptions,
   type LinkClickHandler,
@@ -38,6 +42,8 @@ export interface EditorExtensionsProps {
   onTagClick?: TagClickHandler
   onExitBoundary?: ExitBoundaryHandler
   resolveImageUrl?: ImageOptions['resolveImageUrl']
+  resolveFileInfo?: FileViewOptions['resolveFileInfo']
+  onFileClick?: FileClickHandler
   onFilePaste?: FilePasteOptions['onFilePaste']
   onFileSaveError?: FilePasteOptions['onFileSaveError']
   onImageClick?: ImageClickHandler
@@ -60,6 +66,8 @@ export function EditorExtensions({
   onTagClick,
   onExitBoundary,
   resolveImageUrl,
+  resolveFileInfo,
+  onFileClick,
   onFilePaste,
   onFileSaveError,
   onImageClick,
@@ -110,10 +118,10 @@ export function EditorExtensions({
     useMemo(() => {
       // Mod-Enter follows the link under the caret through the same handlers
       // a click uses.
-      return onWikilinkClick || onTagClick || onLinkClick
-        ? defineFollowLinkHandler({ onWikilinkClick, onTagClick, onLinkClick })
+      return onWikilinkClick || onTagClick || onFileClick || onLinkClick
+        ? defineFollowLinkHandler({ onWikilinkClick, onTagClick, onFileClick, onLinkClick })
         : null
-    }, [onWikilinkClick, onTagClick, onLinkClick]),
+    }, [onWikilinkClick, onTagClick, onFileClick, onLinkClick]),
   )
 
   useExtension(
@@ -126,6 +134,18 @@ export function EditorExtensions({
     useMemo(() => {
       return defineImage({ resolveImageUrl })
     }, [resolveImageUrl]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return defineFileView({ resolveFileInfo })
+    }, [resolveFileInfo]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return onFileClick ? defineFileClickHandler(onFileClick) : null
+    }, [onFileClick]),
   )
 
   useExtension(

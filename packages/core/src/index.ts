@@ -26,14 +26,27 @@ export {
 export {
   defineEditorExtension,
   type EditorExtension,
+  type EditorExtensionOptions,
   type TypedEditor,
 } from './extensions/extension.ts'
 export {
+  buildFileMarkdown,
   defineFilePaste,
   type FilePasteHandler,
   type FilePasteOptions,
   type FileSaveErrorHandler,
 } from './extensions/file-paste.ts'
+export {
+  defineFileClickHandler,
+  type FileClickHandler,
+  type FileClickPayload,
+} from './extensions/file-click.ts'
+export {
+  defineFileView,
+  type FileInfo,
+  type FileInfoResolver,
+  type FileViewOptions,
+} from './extensions/file-view.ts'
 export { defineFollowLinkHandler, type FollowLinkHandlers } from './extensions/follow-link.ts'
 export { getLinkUnitAt, type LinkUnit } from './extensions/get-link-unit-at.ts'
 export { defineHTMLComment, type MeowdownHTMLCommentAttrs } from './extensions/html-comment.ts'
@@ -44,8 +57,18 @@ export {
   type ImageClickPayload,
 } from './extensions/image-click.ts'
 export { defaultResolveImageUrl, defineImage, type ImageOptions } from './extensions/image.ts'
-export type { MdImageAttrs, MdLinkTextAttrs, MdWikilinkAttrs } from './extensions/inline-marks.ts'
-export { inlineTextToMarkChunks } from './extensions/inline-text-to-mark-chunks.ts'
+export type {
+  MdFileAttrs,
+  MdImageAttrs,
+  MdLinkTextAttrs,
+  MdWikilinkAttrs,
+} from './extensions/inline-marks.ts'
+export {
+  inlineTextToMarkChunks,
+  type FileLinkOptions,
+  type FileLinkPayload,
+  type FileLinkResolver,
+} from './extensions/inline-text-to-mark-chunks.ts'
 export { EDITOR_KEY_BINDINGS } from './extensions/key-bindings.ts'
 export {
   defineLinkClickHandler,

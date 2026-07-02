@@ -4,6 +4,7 @@ import { userEvent } from 'vitest/browser'
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
+import type { FileClickHandler } from './file-click.ts'
 import { defineFollowLinkHandler, type FollowLinkHandlers } from './follow-link.ts'
 import type { LinkClickHandler } from './link-click.ts'
 import type { TagClickHandler } from './tag-click.ts'
@@ -52,6 +53,23 @@ describe('defineFollowLinkHandler', () => {
     expect(onLinkClick).toHaveBeenCalledWith(
       expect.objectContaining({ href: 'https://example.com' }),
     )
+  })
+
+  it('follows the file pill under the caret instead of the link handler', async () => {
+    const onFileClick = vi.fn<FileClickHandler>()
+    const onLinkClick = vi.fn<LinkClickHandler>()
+    using fixture = setupFixture({
+      extensionOptions: { resolveFileLink: ({ href }) => href.startsWith('assets/') },
+    })
+    fixture.editor.use(defineFollowLinkHandler({ onFileClick, onLinkClick }))
+    fixture.set(fixture.n.doc(fixture.n.paragraph('see [repo<a>rt.pdf](assets/report.pdf) here')))
+    fixture.view.focus()
+    await pressModEnter()
+    expect(onFileClick).toHaveBeenCalledWith(
+      expect.objectContaining({ href: 'assets/report.pdf', name: 'report.pdf' }),
+    )
+    expect(onFileClick.mock.calls[0][0].event).toBeInstanceOf(KeyboardEvent)
+    expect(onLinkClick).not.toHaveBeenCalled()
   })
 
   it('on a wikilink inside a task item follows instead of rotating the task', async () => {

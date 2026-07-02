@@ -21,25 +21,17 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { PositionRange } from '../utils/range.ts'
 
 import { BatchSetMarkStep } from './batch-set-mark-step.ts'
-import { inlineTextToMarkChunks } from './inline-text-to-mark-chunks.ts'
+import { inlineTextToMarkChunks, type FileLinkOptions } from './inline-text-to-mark-chunks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
 import { getMarkBuildersForSchema } from './schema.ts'
 
 const META_KEY = 'inline-marks-applied'
 
 /**
- * Cache of chunks per textblock node, keyed by the immutable
- * `ProseMirrorNode` instance. Stored chunks are baseOffset-relative
- * (i.e. positions are offsets into the node's text, not absolute doc
- * positions) so an entry stays valid when the same node moves around
- * the doc (a paragraph below it was inserted or deleted).
- *
  * Test instrumentation: `chunkCacheParses` / `chunkCacheHits` count
  * parses we did and parses we avoided. Exposed via `getCacheStats` /
  * `resetCacheStats` for spy tests; never read in production code.
  */
-const CHUNK_CACHE = new WeakMap<EditorNode, readonly MarkChunk[]>()
-
 let chunkCacheParses = 0
 let chunkCacheHits = 0
 
@@ -52,27 +44,6 @@ export function resetCacheStats(): void {
 /** @internal only for test */
 export function getCacheStats(): { parses: number; hits: number } {
   return { parses: chunkCacheParses, hits: chunkCacheHits }
-}
-
-function chunksForTextblock(
-  node: EditorNode,
-  baseOffset: number,
-  schema: Schema,
-): readonly MarkChunk[] {
-  let relative = CHUNK_CACHE.get(node)
-  if (relative) {
-    chunkCacheHits++
-  } else {
-    chunkCacheParses++
-    relative = inlineTextToMarkChunks(getMarkBuildersForSchema(schema), node.textContent)
-    CHUNK_CACHE.set(node, relative)
-  }
-  if (baseOffset === 0) return relative
-  const shifted: MarkChunk[] = []
-  for (const [from, to, marks] of relative) {
-    shifted.push([from + baseOffset, to + baseOffset, marks])
-  }
-  return shifted
 }
 
 /**
@@ -106,28 +77,59 @@ function computeAffectedRange(
   }
 }
 
-/**
- * Walk a doc range and collect mark chunks for every participating
- * textblock encountered.
- *
- * The walker uses `nodesBetween` which naturally recurses into
- * containers (blockquote, list, tableCell), so it picks up nested
- * textblocks without each container needing to be listed explicitly.
- */
-function collectChunksForRange(state: EditorState, range: PositionRange): MarkChunk[] {
-  const chunks: MarkChunk[] = []
-  state.doc.nodesBetween(range.from, range.to, (node, pos) => {
-    if (node.type.spec.code) return false
-    if (!node.isTextblock) return true
-    if (node.childCount === 0) return false
-    const nodeChunks = chunksForTextblock(node, pos + 1, state.schema)
-    if (nodeChunks.length > 0) chunks.push(...nodeChunks)
-    return false
-  })
-  return chunks
-}
+function createInlineMarkPlugin(options: FileLinkOptions | undefined): Plugin {
+  /**
+   * Cache of chunks per textblock node, keyed by the immutable
+   * `ProseMirrorNode` instance. Stored chunks are baseOffset-relative
+   * (i.e. positions are offsets into the node's text, not absolute doc
+   * positions) so an entry stays valid when the same node moves around
+   * the doc (a paragraph below it was inserted or deleted). Scoped to the
+   * plugin instance because the chunks depend on this editor's `options`.
+   */
+  const chunkCache = new WeakMap<EditorNode, readonly MarkChunk[]>()
 
-function createInlineMarkPlugin(): Plugin {
+  function chunksForTextblock(
+    node: EditorNode,
+    baseOffset: number,
+    schema: Schema,
+  ): readonly MarkChunk[] {
+    let relative = chunkCache.get(node)
+    if (relative) {
+      chunkCacheHits++
+    } else {
+      chunkCacheParses++
+      relative = inlineTextToMarkChunks(getMarkBuildersForSchema(schema), node.textContent, options)
+      chunkCache.set(node, relative)
+    }
+    if (baseOffset === 0) return relative
+    const shifted: MarkChunk[] = []
+    for (const [from, to, marks] of relative) {
+      shifted.push([from + baseOffset, to + baseOffset, marks])
+    }
+    return shifted
+  }
+
+  /**
+   * Walk a doc range and collect mark chunks for every participating
+   * textblock encountered.
+   *
+   * The walker uses `nodesBetween` which naturally recurses into
+   * containers (blockquote, list, tableCell), so it picks up nested
+   * textblocks without each container needing to be listed explicitly.
+   */
+  function collectChunksForRange(state: EditorState, range: PositionRange): MarkChunk[] {
+    const chunks: MarkChunk[] = []
+    state.doc.nodesBetween(range.from, range.to, (node, pos) => {
+      if (node.type.spec.code) return false
+      if (!node.isTextblock) return true
+      if (node.childCount === 0) return false
+      const nodeChunks = chunksForTextblock(node, pos + 1, state.schema)
+      if (nodeChunks.length > 0) chunks.push(...nodeChunks)
+      return false
+    })
+    return chunks
+  }
+
   return new Plugin({
     key: new PluginKey('inline-mark'),
     appendTransaction(transactions, _oldState, newState) {
@@ -157,6 +159,6 @@ function triggerInlineMarks(state: EditorState): Transaction {
   return state.tr.setMeta('inline-marks-trigger', true)
 }
 
-export function defineInlineMarkPlugin() {
-  return definePlugin(createInlineMarkPlugin())
+export function defineInlineMarkPlugin(options?: FileLinkOptions) {
+  return definePlugin(createInlineMarkPlugin(options))
 }
