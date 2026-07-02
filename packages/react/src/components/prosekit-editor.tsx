@@ -36,6 +36,7 @@ import type {
   EditorHandle,
   EditorStateSnapshot,
   SelectionHint,
+  SlashMenuSearchHandler,
   TagSearchHandler,
   WikilinkSearchHandler,
 } from './types.ts'
@@ -68,6 +69,9 @@ export interface ProseKitEditorProps {
 
   /** Called on every user-driven document change, not on programmatic setState. */
   onDocChange?: VoidFunction
+
+  /** Adds host items to the slash menu. See `EditorProps.onSlashMenuSearch`. */
+  onSlashMenuSearch?: SlashMenuSearchHandler
 
   /** Enables the tag menu. See `EditorProps.onTagSearch`. */
   onTagSearch?: TagSearchHandler
@@ -143,6 +147,7 @@ export function ProseKitEditor({
   markMode = 'focus',
   initialMarkdown,
   onDocChange,
+  onSlashMenuSearch,
   onTagSearch,
   onWikilinkSearch,
   onWikilinkClick,
@@ -272,7 +277,7 @@ export function ProseKitEditor({
       {blockHandle && !readOnly && <BlockHandle />}
       {!readOnly && <TableHandle />}
       {blockHandle && !readOnly && <DropIndicator />}
-      <SlashMenu timeFormat={timeFormat} />
+      <SlashMenu timeFormat={timeFormat} onSlashMenuSearch={onSlashMenuSearch} />
       {!readOnly && <LinkMenu onLinkClick={onLinkClick} onLinkCopy={onLinkCopy} />}
       {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
       {onWikilinkSearch && <WikilinkMenu onWikilinkSearch={onWikilinkSearch} />}

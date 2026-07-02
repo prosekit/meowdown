@@ -60,7 +60,25 @@ export interface EditorHandle {
   readonly editor: TypedEditor | undefined
 }
 
+/** One row of host items in the slash menu. The host ranks the rows; the menu does not re-sort. */
+export interface SlashMenuItem {
+  /** Stable row key; defaults to `label`. */
+  id?: string
+  /** Display text, matched against the typed query like the built-in items. */
+  label: string
+  /** Secondary text shown beside the label. */
+  detail?: string
+  /** Runs after the menu closes and the typed `/query` text is removed. */
+  onSelect: () => void
+}
+
 /**
+ * Searches host items for the slash menu. Receives the query typed after `/`
+ * (lowercased, punctuation stripped; may be empty) and returns the rows to
+ * show after the built-in items, either synchronously or as a promise.
+ */
+export type SlashMenuSearchHandler = (query: string) => SlashMenuItem[] | Promise<SlashMenuItem[]>
+
 /** One row in the tag menu. The host ranks the rows; the menu does not re-sort. */
 export interface TagItem {
   /** Inserted as `#tag `. */

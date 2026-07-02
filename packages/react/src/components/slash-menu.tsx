@@ -8,24 +8,28 @@ import {
   AutocompletePositioner,
   AutocompleteRoot,
 } from '@prosekit/react/autocomplete'
+import { useCallback, useEffect, useState } from 'react'
 
 import { formatNowTime, type TimeFormat } from '../utils/date-format.ts'
 
 import styles from './autocomplete-menu.module.css'
+import type { SlashMenuItem, SlashMenuSearchHandler } from './types.ts'
 
 // Match inputs like "/", "/table", "/heading 1" etc. Do not match "/ heading".
 const regex = canUseRegexLookbehind() ? /(?<!\S)\/(\S.*)?$/u : /\/(\S.*)?$/u
 
 interface SlashMenuItemProps {
   label: string
+  detail?: string
   kbd?: string
   onSelect: VoidFunction
 }
 
-function SlashMenuItem({ label, kbd, onSelect }: SlashMenuItemProps) {
+function SlashMenuItem({ label, detail, kbd, onSelect }: SlashMenuItemProps) {
   return (
-    <AutocompleteItem className={styles.Item} onSelect={onSelect}>
-      <span>{label}</span>
+    <AutocompleteItem value={label} className={styles.Item} onSelect={onSelect}>
+      <span className={detail ? styles.Label : undefined}>{label}</span>
+      {detail ? <span className={styles.Detail}>{detail}</span> : null}
       {kbd && <kbd>{kbd}</kbd>}
     </AutocompleteItem>
   )
@@ -34,6 +38,9 @@ function SlashMenuItem({ label, kbd, onSelect }: SlashMenuItemProps) {
 interface SlashMenuProps {
   /** The clock format the "Now" item inserts. Defaults to '12'. */
   timeFormat?: TimeFormat
+
+  /** Adds host items after the built-in ones. See `EditorProps.onSlashMenuSearch`. */
+  onSlashMenuSearch?: SlashMenuSearchHandler
 }
 
 // Hoisted so its identity is stable across renders, as useEditorDerivedValue
@@ -42,15 +49,45 @@ function selectionInTableCell(editor: TypedEditor): boolean {
   return isSelectionInTableCell(editor.state)
 }
 
-export function SlashMenu({ timeFormat = '12' }: SlashMenuProps) {
+export function SlashMenu({ timeFormat = '12', onSlashMenuSearch }: SlashMenuProps) {
   const editor = useEditor<EditorExtension>()
 
   // A table cell holds inline content only, so the block-creating items below
   // are no-ops there. Hide them and offer only the inline "Now" item.
   const inTableCell = useEditorDerivedValue(selectionInTableCell)
 
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [hostItems, setHostItems] = useState<SlashMenuItem[]>([])
+
+  const fetchHostItems = useCallback(
+    async (query: string, signal: AbortSignal): Promise<void> => {
+      if (!onSlashMenuSearch || signal.aborted) return
+      const result = await onSlashMenuSearch(query)
+      if (signal.aborted) return
+      setHostItems(result)
+    },
+    [onSlashMenuSearch],
+  )
+
+  useEffect(() => {
+    if (!open) return
+    const controller = new AbortController()
+    // Defer so the effect body doesn't call setState synchronously.
+    queueMicrotask(() => {
+      void fetchHostItems(query, controller.signal)
+    })
+    return () => {
+      controller.abort()
+    }
+  }, [open, query, fetchHostItems])
+
   return (
-    <AutocompleteRoot regex={regex}>
+    <AutocompleteRoot
+      regex={regex}
+      onOpenChange={(event) => setOpen(event.detail)}
+      onQueryChange={(event) => setQuery(event.detail)}
+    >
       <AutocompletePositioner className={styles.Positioner}>
         <AutocompletePopup className={styles.Popup} data-testid="slash-menu">
           {!inTableCell && (
@@ -118,6 +155,14 @@ export function SlashMenu({ timeFormat = '12' }: SlashMenuProps) {
             label="Now"
             onSelect={() => editor.commands.insertText({ text: formatNowTime(timeFormat) })}
           />
+          {hostItems.map((item) => (
+            <SlashMenuItem
+              key={item.id ?? item.label}
+              label={item.label}
+              detail={item.detail}
+              onSelect={item.onSelect}
+            />
+          ))}
           <AutocompleteEmpty className={styles.Item}>No results</AutocompleteEmpty>
         </AutocompletePopup>
       </AutocompletePositioner>
