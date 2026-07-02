@@ -40,7 +40,13 @@ function insertMarkdown(markdown: string): Command {
     const slice = isSingleParagraph
       ? new Slice(content, 1, 1)
       : new Slice(content, 0, Slice.maxOpen(content).openEnd)
-    if (dispatch) dispatch(state.tr.replaceSelection(slice).scrollIntoView())
+    if (dispatch) {
+      // Collapse any selection first: this is a host-initiated insert (a
+      // template, not a paste), and it must never delete user content.
+      const tr = state.tr
+      tr.setSelection(TextSelection.near(tr.selection.$from))
+      dispatch(tr.replaceSelection(slice).scrollIntoView())
+    }
     return true
   }
 }

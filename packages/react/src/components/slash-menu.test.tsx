@@ -143,6 +143,23 @@ describe('SlashMenu', () => {
     await expect.element(menu.getByText('Heading 1')).not.toBeVisible()
   })
 
+  it('matches host-item keywords, never displaying them', async () => {
+    const onSlashMenuSearch = (): SlashMenuItem[] => [
+      { label: 'Meeting note', keywords: ['template'], onSelect: () => {} },
+      { label: 'Daily log', keywords: ['template'], onSelect: () => {} },
+      { label: 'Untagged', onSelect: () => {} },
+    ]
+    await render(<ProseKitEditor onSlashMenuSearch={onSlashMenuSearch} />)
+    await pmRoot.click()
+    // Typing the shared keyword lists every keyworded row (the v1 template
+    // affordance) without it appearing in any label.
+    await userEvent.keyboard('/template')
+
+    await expect.element(menu.getByText('Meeting note')).toBeVisible()
+    await expect.element(menu.getByText('Daily log')).toBeVisible()
+    await expect.element(menu.getByText('Untagged')).not.toBeVisible()
+  })
+
   it('closes the menu and calls onSelect on a host item click', async () => {
     const onSelect = vi.fn()
     const onSlashMenuSearch = (): SlashMenuItem[] => [{ label: 'Meeting note', onSelect }]

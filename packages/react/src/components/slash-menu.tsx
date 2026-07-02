@@ -20,14 +20,20 @@ const regex = canUseRegexLookbehind() ? /(?<!\S)\/(\S.*)?$/u : /\/(\S.*)?$/u
 
 interface SlashMenuItemProps {
   label: string
+  /** Extra match terms folded into the filter value, never displayed. */
+  keywords?: string[]
   detail?: string
   kbd?: string
   onSelect: VoidFunction
 }
 
-function SlashMenuItem({ label, detail, kbd, onSelect }: SlashMenuItemProps) {
+function SlashMenuItem({ label, keywords, detail, kbd, onSelect }: SlashMenuItemProps) {
   return (
-    <AutocompleteItem value={label} className={styles.Item} onSelect={onSelect}>
+    <AutocompleteItem
+      value={[label, ...(keywords ?? [])].join(' ')}
+      className={styles.Item}
+      onSelect={onSelect}
+    >
       <span className={detail ? styles.Label : undefined}>{label}</span>
       {detail ? <span className={styles.Detail}>{detail}</span> : null}
       {kbd && <kbd>{kbd}</kbd>}
@@ -159,6 +165,7 @@ export function SlashMenu({ timeFormat = '12', onSlashMenuSearch }: SlashMenuPro
             <SlashMenuItem
               key={item.id ?? item.label}
               label={item.label}
+              keywords={item.keywords}
               detail={item.detail}
               onSelect={item.onSelect}
             />

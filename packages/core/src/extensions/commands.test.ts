@@ -14,14 +14,16 @@ describe('insertMarkdown', () => {
     expect(docToMarkdown(fixture.doc)).toBe('Hello brave **new** world\n')
   })
 
-  it('replaces the current selection with the inserted fragment', () => {
+  it('collapses an active selection instead of deleting it', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('<a>Hello<b> world')))
 
-    editor.commands.insertMarkdown('Goodbye')
+    // A host-initiated insert is not a paste: the selected text must
+    // survive, with the fragment landing at the caret.
+    editor.commands.insertMarkdown('Goodbye ')
 
-    expect(docToMarkdown(fixture.doc)).toBe('Goodbye world\n')
+    expect(docToMarkdown(fixture.doc)).toBe('Goodbye Hello world\n')
   })
 
   it('inserts a multi-block fragment as blocks with the cursor at its end', () => {
