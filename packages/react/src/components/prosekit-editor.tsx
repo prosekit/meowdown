@@ -96,7 +96,10 @@ export interface ProseKitEditorProps {
   /** Persists a pasted/dropped image. See `EditorProps.onImagePaste`. */
   onImagePaste?: ImageOptions['onImagePaste']
 
-  /** Called when an image fails to persist. See `EditorProps.onImageSaveError`. */
+  /** Persists a pasted/dropped non-image file. See `EditorProps.onFilePaste`. */
+  onFilePaste?: ImageOptions['onFilePaste']
+
+  /** Called when a pasted/dropped file fails to persist. See `EditorProps.onImageSaveError`. */
   onImageSaveError?: ImageOptions['onImageSaveError']
 
   /** Called on click of a rendered image. See `EditorProps.onImageClick`. */
@@ -149,6 +152,7 @@ export function ProseKitEditor({
   onExitBoundary,
   resolveImageUrl,
   onImagePaste,
+  onFilePaste,
   onImageSaveError,
   onImageClick,
   embedPaste,
@@ -251,6 +255,7 @@ export function ProseKitEditor({
         onExitBoundary={onExitBoundary}
         resolveImageUrl={resolveImageUrl}
         onImagePaste={onImagePaste}
+        onFilePaste={onFilePaste}
         onImageSaveError={onImageSaveError}
         onImageClick={onImageClick}
         embedPaste={embedPaste}

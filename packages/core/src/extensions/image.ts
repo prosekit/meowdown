@@ -22,8 +22,8 @@ import { formatMagicComment, parseMagicComment, stripMagicComment } from './magi
 import type { MarkName } from './mark-names.ts'
 
 type ImageUrlResolver = (src: string) => string | undefined
-type ImagePasteHandler = (file: File) => string | undefined | Promise<string | undefined>
-type ImageSaveErrorHandler = (error: unknown, file: File) => void
+type FilePasteHandler = (file: File) => string | undefined | Promise<string | undefined>
+type FileSaveErrorHandler = (error: unknown, file: File) => void
 
 export interface ImageOptions {
   /**
@@ -32,9 +32,11 @@ export interface ImageOptions {
    */
   resolveImageUrl?: ImageUrlResolver
   /** Persist a pasted/dropped image file and return its markdown `src`, or `undefined` to decline. */
-  onImagePaste?: ImagePasteHandler
-  /** Called when persisting a pasted/dropped image throws. Defaults to `console.error`. */
-  onImageSaveError?: ImageSaveErrorHandler
+  onImagePaste?: FilePasteHandler
+  /** Called for each pasted/dropped non-image file; returns the markdown link destination (or `undefined` to decline). */
+  onFilePaste?: FilePasteHandler
+  /** Called when persisting a pasted/dropped file (image or not) throws. Defaults to `console.error`. */
+  onImageSaveError?: FileSaveErrorHandler
 }
 
 /** Show an `src` as-is when it is an http(s) URL, otherwise skip rendering it. */
@@ -264,38 +266,69 @@ class ImageMarkView implements MarkView {
   }
 }
 
-function filterImageFiles(data: DataTransfer | null): File[] {
+interface PastedFile {
+  file: File
+  /** Which handler saves the file and which markdown it becomes. */
+  kind: 'image' | 'file'
+}
+
+/**
+ * Collect the files a configured handler can take, in DataTransfer order:
+ * `image/*` files when `onImagePaste` is set, every other file when
+ * `onFilePaste` is set. Files without a handler are left alone, so e.g. a
+ * PDF drop with only `onImagePaste` configured is not consumed.
+ */
+function filterHandledFiles(data: DataTransfer | null, options: ImageOptions): PastedFile[] {
   if (!data) return []
-  return Array.from(data.files).filter((file) => file.type.startsWith('image/'))
+  const handled: PastedFile[] = []
+  for (const file of Array.from(data.files)) {
+    const kind = file.type.startsWith('image/') ? 'image' : 'file'
+    const handler = kind === 'image' ? options.onImagePaste : options.onFilePaste
+    if (handler) handled.push({ file, kind })
+  }
+  return handled
 }
 
-const defaultOnImageSaveError: ImageSaveErrorHandler = (error) => {
-  console.error('[meowdown] failed to save pasted image:', error)
+const defaultOnFileSaveError: FileSaveErrorHandler = (error) => {
+  console.error('[meowdown] failed to save pasted file:', error)
 }
 
-async function insertSavedImages(
+/** Escape `\`, `[`, and `]` so a filename stays inside its `[text]` label. */
+function escapeLinkText(name: string): string {
+  return name.replaceAll(/[\\[\]]/g, String.raw`\$&`)
+}
+
+async function insertSavedFiles(
   view: EditorView,
-  files: File[],
-  onImagePaste: ImagePasteHandler,
-  onImageSaveError: ImageSaveErrorHandler = defaultOnImageSaveError,
+  files: PastedFile[],
+  options: ImageOptions,
   at?: number,
 ): Promise<void> {
+  const onSaveError = options.onImageSaveError ?? defaultOnFileSaveError
   let position = at
-  for (const file of files) {
+  let insertedAny = false
+  for (const { file, kind } of files) {
+    const save = kind === 'image' ? options.onImagePaste : options.onFilePaste
+    if (!save) continue
     let saved: string | undefined
     try {
-      saved = await onImagePaste(file)
+      saved = await save(file)
     } catch (error) {
-      onImageSaveError(error, file)
+      onSaveError(error, file)
       continue
     }
     if (!saved || view.isDestroyed) continue
-    const markdown = `![](${saved})`
+    const link = kind === 'image' ? `![](${saved})` : `[${escapeLinkText(file.name)}](${saved})`
+    // Each link after the first starts its own line. `\n` is a soft break in
+    // this schema (paragraphs are `whitespace: 'pre'`) and serializes as a
+    // literal newline, so the links round-trip one per line.
+    const markdown = insertedAny ? `\n${link}` : link
     const transaction =
       position == null
         ? view.state.tr.insertText(markdown)
         : view.state.tr.insertText(markdown, position)
     view.dispatch(transaction)
+    insertedAny = true
     // Chain later drops after the one just inserted.
     if (position != null) position += markdown.length
   }
@@ -306,18 +339,16 @@ function createImageInputPlugin(options: ImageOptions): Plugin {
     key: new PluginKey('image-input'),
     props: {
       handlePaste: (view, event) => {
-        const files = filterImageFiles(event.clipboardData)
-        const { onImagePaste, onImageSaveError } = options
-        if (files.length === 0 || !onImagePaste) return false
-        void insertSavedImages(view, files, onImagePaste, onImageSaveError)
+        const files = filterHandledFiles(event.clipboardData, options)
+        if (files.length === 0) return false
+        void insertSavedFiles(view, files, options)
         return true
       },
       handleDrop: (view, event) => {
-        const files = filterImageFiles(event.dataTransfer)
-        const { onImagePaste, onImageSaveError } = options
-        if (files.length === 0 || !onImagePaste) return false
+        const files = filterHandledFiles(event.dataTransfer, options)
+        if (files.length === 0) return false
         const drop = view.posAtCoords({ left: event.clientX, top: event.clientY })
-        void insertSavedImages(view, files, onImagePaste, onImageSaveError, drop?.pos)
+        void insertSavedFiles(view, files, options, drop?.pos)
         return true
       },
     },
