@@ -4,13 +4,13 @@ import { describe, expect, it, vi } from 'vitest'
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
-import { defineImage, type ImageOptions } from './image.ts'
+import { defineFilePaste, type FilePasteOptions } from './file-paste.ts'
 
-// An editor with the image extension configured with the given paste handlers.
-function setup(options: ImageOptions, text = ''): Fixture {
+// An editor with the file paste extension configured with the given handlers.
+function setup(options: FilePasteOptions, text = ''): Fixture {
   const fixture = setupFixture()
   const { editor, n } = fixture
-  editor.use(defineImage({ resolveImageUrl: (src) => src, ...options }))
+  editor.use(defineFilePaste(options))
   fixture.set(n.doc(n.paragraph(text)))
   return fixture
 }
@@ -98,21 +98,33 @@ describe('file paste', () => {
   })
 
   it('continues with the remaining files when a save throws', async () => {
-    const onImageSaveError = vi.fn()
+    const onFileSaveError = vi.fn()
     using fixture = setup({
       onFilePaste: (file) => {
         if (file.name === 'bad.pdf') throw new Error('boom')
         return `saved://${file.name}`
       },
-      onImageSaveError,
+      onFileSaveError,
     })
     pasteFiles(fixture.view, [pdf('bad.pdf'), pdf('good.pdf')])
     await vi.waitFor(() => {
       expect(fixture.doc.textContent).toBe('[good.pdf](saved://good.pdf)')
     })
-    expect(onImageSaveError).toHaveBeenCalledExactlyOnceWith(
+    expect(onFileSaveError).toHaveBeenCalledExactlyOnceWith(
       expect.any(Error),
       expect.objectContaining({ name: 'bad.pdf' }),
+    )
+  })
+
+  it('inserts image syntax for a pasted image', async () => {
+    const onFilePaste = vi.fn((file: File) => `saved://${file.name}`)
+    using fixture = setup({ onFilePaste })
+    pasteFiles(fixture.view, [png('cat.png')])
+    await vi.waitFor(() => {
+      expect(fixture.doc.textContent).toBe('![](saved://cat.png)')
+    })
+    expect(onFilePaste).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ name: 'cat.png' }),
     )
   })
 })
@@ -133,24 +145,28 @@ describe('file drop', () => {
     expect(event.defaultPrevented).toBe(true)
   })
 
-  it('ignores non-image files when only onImagePaste is configured', async () => {
-    const onImagePaste = vi.fn(() => 'https://cdn/img.png')
-    using fixture = setup({ onImagePaste }, 'text')
+  it('ignores files when onFilePaste is not configured', async () => {
+    using fixture = setup({}, 'text')
     const event = dropFiles(fixture.view, [pdf('doc.pdf')], 1)
     // Not consumed: the webview's default handling stays in charge.
     expect(event.defaultPrevented).toBe(false)
     await new Promise((resolve) => setTimeout(resolve, 20))
-    expect(onImagePaste).not.toHaveBeenCalled()
+    expect(fixture.doc.textContent).toBe('text')
+  })
+
+  it('consumes a declined drop without inserting anything', async () => {
+    const onFilePaste = vi.fn(() => undefined)
+    using fixture = setup({ onFilePaste }, 'text')
+    const event = dropFiles(fixture.view, [png('cat.png')], 1)
+    expect(event.defaultPrevented).toBe(true)
+    await vi.waitFor(() => expect(onFilePaste).toHaveBeenCalledOnce())
     expect(fixture.doc.textContent).toBe('text')
   })
 
   it('inserts a mixed drop one link per line, in DataTransfer order', async () => {
-    using fixture = setup({
-      onImagePaste: (file) => `https://cdn/${file.name}`,
-      onFilePaste: (file) => `saved://${file.name}`,
-    })
+    using fixture = setup({ onFilePaste: (file) => `saved://${file.name}` })
     dropFiles(fixture.view, [png('cat.png'), pdf('a.pdf'), png('dog.png')], 1)
-    const expected = '![](https://cdn/cat.png)\n[a.pdf](saved://a.pdf)\n![](https://cdn/dog.png)'
+    const expected = '![](saved://cat.png)\n[a.pdf](saved://a.pdf)\n![](saved://dog.png)'
     await vi.waitFor(() => {
       expect(fixture.doc.textContent).toBe(expected)
     })

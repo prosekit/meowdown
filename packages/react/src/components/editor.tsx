@@ -1,5 +1,6 @@
 import type {
   ExitBoundaryHandler,
+  FilePasteOptions,
   ImageClickHandler,
   ImageOptions,
   LinkClickHandler,
@@ -105,20 +106,14 @@ export interface EditorProps {
   resolveImageUrl?: ImageOptions['resolveImageUrl']
 
   /**
-   * Persists a pasted/dropped image file and returns its markdown `src`. Pass a
-   * stable function.
+   * Persists a pasted/dropped file and returns its markdown destination,
+   * inserted as `![](src)` for an image and as a `[name](src)` link for any
+   * other file. Return `undefined` to decline. Pass a stable function.
    */
-  onImagePaste?: ImageOptions['onImagePaste']
-
-  /**
-   * Persists a pasted/dropped non-image file and returns the markdown link
-   * destination, inserted as `[name](src)`. Return `undefined` to decline.
-   * Pass a stable function.
-   */
-  onFilePaste?: ImageOptions['onFilePaste']
+  onFilePaste?: FilePasteOptions['onFilePaste']
 
   /** Called when persisting a pasted/dropped file throws. */
-  onImageSaveError?: ImageOptions['onImageSaveError']
+  onFileSaveError?: FilePasteOptions['onFileSaveError']
 
   /**
    * Called when the user clicks a rendered image, with its markdown `src`,
@@ -198,9 +193,8 @@ export function MeowdownEditor({
   onTagClick,
   onExitBoundary,
   resolveImageUrl,
-  onImagePaste,
   onFilePaste,
-  onImageSaveError,
+  onFileSaveError,
   onImageClick,
   embedPaste = true,
   bulletAfterHeading = false,
@@ -273,9 +267,8 @@ export function MeowdownEditor({
         onTagClick={onTagClick}
         onExitBoundary={onExitBoundary}
         resolveImageUrl={resolveImageUrl}
-        onImagePaste={onImagePaste}
         onFilePaste={onFilePaste}
-        onImageSaveError={onImageSaveError}
+        onFileSaveError={onFileSaveError}
         onImageClick={onImageClick}
         embedPaste={embedPaste}
         bulletAfterHeading={bulletAfterHeading}

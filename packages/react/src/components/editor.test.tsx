@@ -223,14 +223,14 @@ describe('MeowdownEditor', () => {
   })
 
   it('uploads and inserts an image dropped from outside the editor', async () => {
-    const onImagePaste = vi.fn(() => 'https://cdn/cat.png')
+    const onFilePaste = vi.fn(() => 'https://cdn/cat.png')
     const ref = createRef<EditorHandle>()
     const screen = await render(
       <MeowdownEditor
         handleRef={ref}
         initialMarkdown="Drop zone"
         resolveImageUrl={(src) => src}
-        onImagePaste={onImagePaste}
+        onFilePaste={onFilePaste}
       />,
     )
     await expect.element(screen.getByText('Drop zone')).toBeInTheDocument()
@@ -252,7 +252,7 @@ describe('MeowdownEditor', () => {
       }),
     )
 
-    await vi.waitFor(() => expect(onImagePaste).toHaveBeenCalledWith(file))
+    await vi.waitFor(() => expect(onFilePaste).toHaveBeenCalledWith(file))
     await vi.waitFor(() => expect(ref.current?.getMarkdown()).toContain('![](https://cdn/cat.png)'))
   })
 

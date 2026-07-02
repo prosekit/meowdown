@@ -1,13 +1,5 @@
-import {
-  defineMarkView,
-  definePlugin,
-  Priority,
-  union,
-  withPriority,
-  type PlainExtension,
-} from '@prosekit/core'
+import { defineMarkView, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
-import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView, MarkView, ViewMutationRecord } from '@prosekit/pm/view'
 import {
   registerResizableHandleElement,
@@ -22,21 +14,14 @@ import { formatMagicComment, parseMagicComment, stripMagicComment } from './magi
 import type { MarkName } from './mark-names.ts'
 
 type ImageUrlResolver = (src: string) => string | undefined
-type FilePasteHandler = (file: File) => string | undefined | Promise<string | undefined>
-type FileSaveErrorHandler = (error: unknown, file: File) => void
 
+/** Options for {@link defineImage}. */
 export interface ImageOptions {
   /**
    * Map a markdown `src` to a displayable URL, or `undefined` to skip rendering
    * that image. Defaults to `defaultResolveImageUrl`.
    */
   resolveImageUrl?: ImageUrlResolver
-  /** Persist a pasted/dropped image file and return its markdown `src`, or `undefined` to decline. */
-  onImagePaste?: FilePasteHandler
-  /** Called for each pasted/dropped non-image file; returns the markdown link destination (or `undefined` to decline). */
-  onFilePaste?: FilePasteHandler
-  /** Called when persisting a pasted/dropped file (image or not) throws. Defaults to `console.error`. */
-  onImageSaveError?: FileSaveErrorHandler
 }
 
 /** Show an `src` as-is when it is an http(s) URL, otherwise skip rendering it. */
@@ -266,104 +251,10 @@ class ImageMarkView implements MarkView {
   }
 }
 
-interface PastedFile {
-  file: File
-  /** Which handler saves the file and which markdown it becomes. */
-  kind: 'image' | 'file'
-}
-
-/**
- * Collect the files a configured handler can take, in DataTransfer order:
- * `image/*` files when `onImagePaste` is set, every other file when
- * `onFilePaste` is set. Files without a handler are left alone, so e.g. a
- * PDF drop with only `onImagePaste` configured is not consumed.
- */
-function filterHandledFiles(data: DataTransfer | null, options: ImageOptions): PastedFile[] {
-  if (!data) return []
-  const handled: PastedFile[] = []
-  for (const file of Array.from(data.files)) {
-    const kind = file.type.startsWith('image/') ? 'image' : 'file'
-    const handler = kind === 'image' ? options.onImagePaste : options.onFilePaste
-    if (handler) handled.push({ file, kind })
-  }
-  return handled
-}
-
-const defaultOnFileSaveError: FileSaveErrorHandler = (error) => {
-  console.error('[meowdown] failed to save pasted file:', error)
-}
-
-/** Escape `\`, `[`, and `]` so a filename stays inside its `[text]` label. */
-function escapeLinkText(name: string): string {
-  return name.replaceAll(/[\\[\]]/g, String.raw`\$&`)
-}
-
-async function insertSavedFiles(
-  view: EditorView,
-  files: PastedFile[],
-  options: ImageOptions,
-  at?: number,
-): Promise<void> {
-  const onSaveError = options.onImageSaveError ?? defaultOnFileSaveError
-  let position = at
-  let insertedAny = false
-  for (const { file, kind } of files) {
-    const save = kind === 'image' ? options.onImagePaste : options.onFilePaste
-    if (!save) continue
-    let saved: string | undefined
-    try {
-      saved = await save(file)
-    } catch (error) {
-      onSaveError(error, file)
-      continue
-    }
-    if (!saved || view.isDestroyed) continue
-    const link = kind === 'image' ? `![](${saved})` : `[${escapeLinkText(file.name)}](${saved})`
-    // Each link after the first starts its own line. `\n` is a soft break in
-    // this schema (paragraphs are `whitespace: 'pre'`) and serializes as a
-    // literal newline, so the links round-trip one per line.
-    const markdown = insertedAny ? `\n${link}` : link
-    const transaction =
-      position == null
-        ? view.state.tr.insertText(markdown)
-        : view.state.tr.insertText(markdown, position)
-    view.dispatch(transaction)
-    insertedAny = true
-    // Chain later drops after the one just inserted.
-    if (position != null) position += markdown.length
-  }
-}
-
-function createImageInputPlugin(options: ImageOptions): Plugin {
-  return new Plugin({
-    key: new PluginKey('image-input'),
-    props: {
-      handlePaste: (view, event) => {
-        const files = filterHandledFiles(event.clipboardData, options)
-        if (files.length === 0) return false
-        void insertSavedFiles(view, files, options)
-        return true
-      },
-      handleDrop: (view, event) => {
-        const files = filterHandledFiles(event.dataTransfer, options)
-        if (files.length === 0) return false
-        const drop = view.posAtCoords({ left: event.clientX, top: event.clientY })
-        void insertSavedFiles(view, files, options, drop?.pos)
-        return true
-      },
-    },
-  })
-}
-
-/** Inline image/embed rendering (a mark view) plus paste/drop persistence. */
+/** Inline image/embed rendering: a mark view on the `mdImage` mark. */
 export function defineImage(options: ImageOptions = {}): PlainExtension {
-  return union(
-    defineMarkView({
-      name: 'mdImage' satisfies MarkName,
-      constructor: (mark, view) => new ImageMarkView(mark, view, options),
-    }),
-    // High priority so the drop/paste handler runs before ProseKit's
-    // drop-indicator plugin.
-    withPriority(definePlugin(createImageInputPlugin(options)), Priority.high),
-  ) as PlainExtension
+  return defineMarkView({
+    name: 'mdImage' satisfies MarkName,
+    constructor: (mark, view) => new ImageMarkView(mark, view, options),
+  }) as PlainExtension
 }
