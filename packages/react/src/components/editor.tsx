@@ -1,4 +1,5 @@
 import type {
+  AcceptPendingReplacementOptions,
   ExitBoundaryHandler,
   FilePasteOptions,
   ImageClickHandler,
@@ -306,8 +307,8 @@ export function MeowdownEditor({
     function appendPendingReplacementText(text: string): void {
       childRef.current?.appendPendingReplacementText(text)
     }
-    function acceptPendingReplacement(): void {
-      childRef.current?.acceptPendingReplacement()
+    function acceptPendingReplacement(options?: AcceptPendingReplacementOptions): void {
+      childRef.current?.acceptPendingReplacement(options)
     }
     function discardPendingReplacement(): void {
       childRef.current?.discardPendingReplacement()

@@ -3,6 +3,7 @@ import {
   docToMarkdown,
   getSelectedText,
   markdownToDoc,
+  type AcceptPendingReplacementOptions,
   type EditorExtension,
   type ExitBoundaryHandler,
   type FilePasteOptions,
@@ -285,8 +286,8 @@ export function ProseKitEditor({
     function appendPendingReplacementText(text: string): void {
       editor.commands.appendPendingReplacementText(text)
     }
-    function acceptPendingReplacement(): void {
-      editor.commands.acceptPendingReplacement()
+    function acceptPendingReplacement(options?: AcceptPendingReplacementOptions): void {
+      editor.commands.acceptPendingReplacement(options ?? {})
     }
     function discardPendingReplacement(): void {
       editor.commands.discardPendingReplacement()

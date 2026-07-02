@@ -166,17 +166,24 @@ function discardPendingReplacement(): Command {
   }
 }
 
-function acceptPendingReplacement(): Command {
+/** Options for the `acceptPendingReplacement` command. */
+export interface AcceptPendingReplacementOptions {
+  /** Overrides the staged mode for this accept (e.g. "Insert below" on a replace stage). */
+  mode?: PendingReplacementMode
+}
+
+function acceptPendingReplacement(options: AcceptPendingReplacementOptions = {}): Command {
   return (state, dispatch) => {
     const pending = getPendingReplacement(state)
     if (!pending || !pending.text.trim()) return false
     if (dispatch) {
+      const mode = options.mode ?? pending.mode
       const nodes = getNodeBuildersForSchema(state.schema)
       const parsed = markdownToDoc(pending.text, { nodes })
       const tr = state.tr
       tr.setMeta(pendingReplacementKey, { type: 'accept' } satisfies PendingReplacementMeta)
 
-      if (pending.mode === 'append') {
+      if (mode === 'append') {
         // Insert the parsed blocks after the top-level block containing `to`.
         const insertPos = state.doc.resolve(pending.to).after(1)
         tr.insert(insertPos, parsed.content)

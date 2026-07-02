@@ -72,6 +72,7 @@ export type { NodeName } from './extensions/node-names.ts'
 export {
   definePendingReplacementHandler,
   getPendingReplacement,
+  type AcceptPendingReplacementOptions,
   type PendingReplacement,
   type PendingReplacementEvent,
   type PendingReplacementHandler,

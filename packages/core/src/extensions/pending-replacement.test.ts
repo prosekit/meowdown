@@ -79,6 +79,19 @@ describe('pending replacement', () => {
     expect(docToMarkdown(fixture.doc)).toBe('- one\n- two\n')
   })
 
+  it('accepts with a mode override (insert-below on a replace stage)', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('say <a>hello<b> end')))
+
+    const { from, to } = selectionRange(fixture)
+    editor.commands.startPendingReplacement({ from, to, mode: 'replace' })
+    editor.commands.appendPendingReplacementText('a summary')
+    expect(editor.commands.acceptPendingReplacement({ mode: 'append' })).toBe(true)
+
+    expect(docToMarkdown(fixture.doc)).toBe('say hello end\n\na summary\n')
+  })
+
   it('accepts in append mode after the source block', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture

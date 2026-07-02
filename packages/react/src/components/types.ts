@@ -1,4 +1,5 @@
 import type {
+  AcceptPendingReplacementOptions,
   PendingReplacement,
   PendingReplacementOutcome,
   StartPendingReplacementOptions,
@@ -59,9 +60,9 @@ export interface EditorHandle {
   scrollIntoView: () => void
 
   /**
-   * The plain text of the current selection, with block boundaries as blank
-   * lines. Inline Markdown syntax is literal text, so the result reads as
-   * Markdown for inline content.
+   * The current selection as Markdown: block structure (list markers,
+   * headings) is serialized, and inline syntax is already literal text. A
+   * selection inside one textblock comes back as its bare text.
    */
   getSelectedText: () => string
 
@@ -81,8 +82,12 @@ export interface EditorHandle {
   /** Appends streamed text to the staged replacement. */
   appendPendingReplacementText: (text: string) => void
 
-  /** Applies the staged replacement to the document as a single edit. */
-  acceptPendingReplacement: () => void
+  /**
+   * Applies the staged replacement to the document as a single edit. Pass a
+   * `mode` to override the staged placement for this accept (e.g. "Insert
+   * below" on a replace stage).
+   */
+  acceptPendingReplacement: (options?: AcceptPendingReplacementOptions) => void
 
   /** Clears the staged replacement without touching the document. */
   discardPendingReplacement: () => void
