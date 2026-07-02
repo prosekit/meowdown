@@ -11,11 +11,19 @@ import type { EditorView } from '@prosekit/pm/view'
 
 const exitBoundaryKey = new PluginKey('meowdown-exit-boundary')
 
+/** Payload for {@link ExitBoundaryHandler}. */
 export interface ExitBoundaryOptions {
+  /** The boundary the caret would leave: `up` at the document start, `down` at the end. */
   direction: 'up' | 'down'
+  /** The originating arrow key press. */
   event: KeyboardEvent
 }
 
+/**
+ * Called when an arrow key press would move the caret past the document
+ * boundary. Return `false` to let the editor handle the key normally; any
+ * other return value consumes it.
+ */
 export type ExitBoundaryHandler = (options: ExitBoundaryOptions) => boolean | void
 
 // Ported from prosemirror-view's `moveSelectionBlock`
@@ -84,6 +92,7 @@ function createExitBoundaryPlugin(onExitBoundary: ExitBoundaryHandler) {
   })
 }
 
+/** Call `onExitBoundary` when an arrow key press would leave the document boundary. */
 export function defineExitBoundaryHandler(onExitBoundary: ExitBoundaryHandler): PlainExtension {
   return withPriority(definePlugin(createExitBoundaryPlugin(onExitBoundary)), Priority.low)
 }

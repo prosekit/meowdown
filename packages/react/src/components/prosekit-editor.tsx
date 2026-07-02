@@ -4,6 +4,7 @@ import {
   markdownToDoc,
   type EditorExtension,
   type ExitBoundaryHandler,
+  type FilePasteOptions,
   type ImageClickHandler,
   type ImageOptions,
   type LinkClickHandler,
@@ -97,14 +98,11 @@ export interface ProseKitEditorProps {
   /** Resolves an image `src` to a URL. See `EditorProps.resolveImageUrl`. */
   resolveImageUrl?: ImageOptions['resolveImageUrl']
 
-  /** Persists a pasted/dropped image. See `EditorProps.onImagePaste`. */
-  onImagePaste?: ImageOptions['onImagePaste']
+  /** Persists a pasted/dropped file. See `EditorProps.onFilePaste`. */
+  onFilePaste?: FilePasteOptions['onFilePaste']
 
-  /** Persists a pasted/dropped non-image file. See `EditorProps.onFilePaste`. */
-  onFilePaste?: ImageOptions['onFilePaste']
-
-  /** Called when a pasted/dropped file fails to persist. See `EditorProps.onImageSaveError`. */
-  onImageSaveError?: ImageOptions['onImageSaveError']
+  /** Called when a pasted/dropped file fails to persist. See `EditorProps.onFileSaveError`. */
+  onFileSaveError?: FilePasteOptions['onFileSaveError']
 
   /** Called on click of a rendered image. See `EditorProps.onImageClick`. */
   onImageClick?: ImageClickHandler
@@ -156,9 +154,8 @@ export function ProseKitEditor({
   onTagClick,
   onExitBoundary,
   resolveImageUrl,
-  onImagePaste,
   onFilePaste,
-  onImageSaveError,
+  onFileSaveError,
   onImageClick,
   embedPaste,
   bulletAfterHeading,
@@ -263,9 +260,8 @@ export function ProseKitEditor({
         onTagClick={onTagClick}
         onExitBoundary={onExitBoundary}
         resolveImageUrl={resolveImageUrl}
-        onImagePaste={onImagePaste}
         onFilePaste={onFilePaste}
-        onImageSaveError={onImageSaveError}
+        onFileSaveError={onFileSaveError}
         onImageClick={onImageClick}
         embedPaste={embedPaste}
         bulletAfterHeading={bulletAfterHeading}

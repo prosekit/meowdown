@@ -59,6 +59,7 @@ const markdown = docToMarkdown(editor.state.doc)
 | `Mod-E`       | Inline code             | `` `code` ``        |
 | `Mod-Shift-X` | Strikethrough           | `~~strikethrough~~` |
 | `Mod-Shift-H` | Highlight               | `==highlight==`     |
+| `Mod-K`       | Link                    | `[text](url)`       |
 | `Mod-1`       | Heading 1               | `# heading`         |
 | `Mod-2`       | Heading 2               | `## heading`        |
 | `Mod-3`       | Heading 3               | `### heading`       |
@@ -71,7 +72,7 @@ const markdown = docToMarkdown(editor.state.doc)
 
 ## Round-trip fidelity
 
-`checkRoundTrip(markdown)` reports how faithfully markdown survives a parse-then-serialize round trip: `'exact'` (byte-identical modulo the trailing newline), `'normalizing'` (same non-blank lines, only blank-line layout differs), or `'lossy'` (a non-blank line changed, e.g. a closing ATX hash sequence or unaligned table columns). Hosts that keep markdown on disk can gate saves on it, opening lossy files read-only so a save never rewrites content.
+[`checkRoundTrip(markdown)`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-checkRoundTrip) reports how faithfully markdown survives a parse-then-serialize round trip: `'exact'`, `'normalizing'`, or `'lossy'`. Hosts that keep markdown on disk can gate saves on it, opening lossy files read-only so a save never rewrites content.
 
 ## Styling
 
@@ -87,7 +88,7 @@ meowdown's CSS is wrapped in a cascade layer, `@layer meowdown` (with sub-layers
 @import '@meowdown/core/style.css';
 ```
 
-Two things the variable list cannot show: `--meowdown-gutter` is the horizontal editor padding, applied to the editable root's `.meowdown-content` class (set by `@meowdown/react`), not `.ProseMirror`, so the block handle's drag preview stays unpadded; floating UI such as the block handle lives inside it, so keep it at least `3.5rem`. The selection variables (`--meowdown-selection`, `--meowdown-node-outline`, `--meowdown-node-selection`) are standalone, not derived from `--meowdown-accent`, so selection can be restyled independently.
+Two things the variable list cannot show: `--meowdown-gutter` is the horizontal editor padding, applied to the editable root's `.meowdown-content` class (set by `@meowdown/react`), not `.ProseMirror`, so the block handle's drag preview stays unpadded; floating UI such as the block handle lives inside it, so keep it at least `3.5rem`. A headless mount (like the quick start above) has no `.meowdown-content`, so add that class to the mount element (or your own padding) yourself. The selection variables (`--meowdown-selection`, `--meowdown-node-outline`, `--meowdown-node-selection`) are standalone, not derived from `--meowdown-accent`, so selection can be restyled independently.
 
 Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-accent`. Wire click handling with `defineTagClickHandler(({ tag, event }) => ...)` (or `@meowdown/react`'s `onTagClick` prop); `tag` is read from the rendered text without the leading `#`.
 
@@ -97,19 +98,19 @@ Markdown links (`[text](url)`) render the label as an `<a href>` with the `.md-l
 
 Bare URLs autolink without `[text](url)` brackets and share the same `.md-link` rendering and click handling: a scheme URL (`https://example.com`), an angle autolink (`<https://example.com>`), a `www.` host (`www.example.com`), an email (`me@example.com`), and a bare domain (`google.com`, `sub.domain.io/path`). Bare domains are matched against a curated list of common TLDs, so file names and prose keep their dots without linkifying (`README.md`, `node.js`, `i.e.` stay plain text); reach for `[text](url)` or `<url>` to link anything off that list. Autolinks are derived live from the text, so editing one re-evaluates it; the caret sitting inside a link never un-links it.
 
-Inline images (`![alt](src)`) stay literal text and render in place via a mark view, with the raw `![alt](src)` hidden in hide and focus modes. Add it with `defineImage({ resolveImageUrl, onImagePaste })` (or `@meowdown/react`'s image props). `resolveImageUrl` is optional and defaults to showing http(s) URLs as-is. Wire click handling with `defineImageClickHandler(({ src, alt, event }) => ...)` (or `@meowdown/react`'s `onImageClick` prop).
+Inline images (`![alt](src)`) stay literal text and render in place via a mark view, with the raw `![alt](src)` hidden in hide and focus modes. Add it with [`defineImage`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineImage) (or `@meowdown/react`'s image props) and wire click handling with [`defineImageClickHandler`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineImageClickHandler) (`@meowdown/react`'s `onImageClick` prop).
 
-Pasted or dropped files route through the same extension: `image/*` files go to `onImagePaste` and insert `![](src)`, every other file goes to `onFilePaste` (or `@meowdown/react`'s `onFilePaste` prop) and inserts a `[name](src)` link. Each handler persists the file and returns the markdown destination, or `undefined` to decline; a save error goes to `onImageSaveError` and the remaining files still insert. Multiple files insert one link per line, in the order they appear in the drop. Files without a configured handler are left to the browser's default handling.
+Pasted or dropped files persist through [`defineFilePaste`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineFilePaste) (or `@meowdown/react`'s `onFilePaste` prop): the handler persists each file and returns its markdown destination. An image (`image/*` MIME type) inserts `![](src)`; any other file inserts a `[name](src)` link; multiple files insert one link per line, in the order they appear in the drop. Without `onFilePaste`, file events are left to the browser's default handling.
 
 Rendered images are resizable: drag the corner handle and the chosen size is written back into the source as a trailing comment, `![alt](src)<!-- {"width":320,"height":240} -->`, which round-trips as plain Markdown. A comment immediately after an image is folded into its mark and drives the image's `width` and `height` attributes, so the box keeps its dimensions before the image loads; any other comment stays literal text.
 
-Pasting a lone tweet or YouTube link can auto-embed it. `defineEmbedPaste()` (or `@meowdown/react`'s `embedPaste` prop) rewrites the pasted link to `![](url)` so it renders as an embed; one undo turns the embed back into the raw link. It is not part of `defineEditorExtension`; add it explicitly.
+Pasting a lone tweet or YouTube link can auto-embed it: [`defineEmbedPaste`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineEmbedPaste) (`@meowdown/react`'s `embedPaste` prop, on by default).
 
-Pasting rich-text HTML from a browser (a bullet list, **bold**, a link, ...) converts it to Markdown so the formatting survives instead of arriving as plain text. `defineHTMLPaste()` (applied by default in `@meowdown/react`) rewrites the clipboard's `text/html` through the unified (rehype / remark) pipeline and reparses the Markdown with the editor's schema; meowdown's own clipboard (tagged `data-pm-slice`) and any paste landing in a code block are left to the default path. Going the other way, `defineMarkdownCopy()` serializes copied content to Markdown for the clipboard's `text/plain` flavor, so pasting into a plain-text field keeps list markers and block structure. Neither is part of `defineEditorExtension`; add them explicitly.
+Pasting rich-text HTML from a browser (a bullet list, **bold**, a link, ...) converts it to Markdown so the formatting survives instead of arriving as plain text: [`defineHTMLPaste`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineHTMLPaste) rewrites the clipboard's `text/html` through the unified (rehype / remark) pipeline; meowdown's own clipboard (tagged `data-pm-slice`) and any paste landing in a code block are left to the default path. Going the other way, [`defineMarkdownCopy`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineMarkdownCopy) serializes copied content to Markdown for the clipboard's `text/plain` flavor. Neither is part of `defineEditorExtension`; `@meowdown/react` applies both by default, a headless host adds them explicitly.
 
-Pressing Enter at the end of the document's first heading (the title line) can start a fresh empty bullet on the next line instead of a plain paragraph. `defineBulletAfterHeading()` binds this. It is not part of `defineEditorExtension`; add it explicitly.
+Enter at the end of the document's first heading (the title line) can start a fresh empty bullet instead of a plain paragraph: [`defineBulletAfterHeading`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineBulletAfterHeading) (`@meowdown/react`'s `bulletAfterHeading` prop). Not part of `defineEditorExtension`.
 
-Pressing ArrowUp on the first visual line or ArrowDown on the last, when the caret can move no further, can notify the host so it can move focus elsewhere (a previous/next note or page). `defineExitBoundaryHandler(({ direction, event }) => ...)` (or `@meowdown/react`'s `onExitBoundary` prop) fires with `direction` (`'up'` or `'down'`) and the original `KeyboardEvent`; return `false` to let the editor handle the key normally. It also fires for a selected node at the edge, and ignores arrows carrying a modifier. It is not part of `defineEditorExtension`; add it explicitly.
+An arrow press that can move the caret no further can notify the host, so it can move focus elsewhere (a previous/next note or page): [`defineExitBoundaryHandler`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineExitBoundaryHandler) (`@meowdown/react`'s `onExitBoundary` prop). Not part of `defineEditorExtension`.
 
 ## API
 

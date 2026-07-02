@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import { dropFiles } from '@meowdown/vitest/file-events'
 import { pasteText } from '@prosekit/core/test'
 import { TextSelection } from '@prosekit/pm/state'
 import { useEditor } from '@prosekit/react'
@@ -223,36 +224,26 @@ describe('MeowdownEditor', () => {
   })
 
   it('uploads and inserts an image dropped from outside the editor', async () => {
-    const onImagePaste = vi.fn(() => 'https://cdn/cat.png')
+    const onFilePaste = vi.fn(() => 'https://cdn/cat.png')
     const ref = createRef<EditorHandle>()
     const screen = await render(
       <MeowdownEditor
         handleRef={ref}
         initialMarkdown="Drop zone"
         resolveImageUrl={(src) => src}
-        onImagePaste={onImagePaste}
+        onFilePaste={onFilePaste}
       />,
     )
     await expect.element(screen.getByText('Drop zone')).toBeInTheDocument()
 
+    const view = ref.current?.editor?.view
+    if (!view) throw new Error('editor not mounted')
     // Simulate a Finder drop: a synthetic `drop` carrying an image File, aimed
     // at the paragraph so ProseKit's drop-indicator also claims the position.
-    const target = pmRoot.getByText('Drop zone').element()
-    const rect = target.getBoundingClientRect()
     const file = new File(['cat'], 'cat.png', { type: 'image/png' })
-    const dataTransfer = new DataTransfer()
-    dataTransfer.items.add(file)
-    pmRoot.element().dispatchEvent(
-      new DragEvent('drop', {
-        dataTransfer,
-        clientX: rect.left + rect.width / 2,
-        clientY: rect.top + rect.height / 2,
-        bubbles: true,
-        cancelable: true,
-      }),
-    )
+    dropFiles(view, [file], 1)
 
-    await vi.waitFor(() => expect(onImagePaste).toHaveBeenCalledWith(file))
+    await vi.waitFor(() => expect(onFilePaste).toHaveBeenCalledWith(file))
     await vi.waitFor(() => expect(ref.current?.getMarkdown()).toContain('![](https://cdn/cat.png)'))
   })
 

@@ -2,6 +2,7 @@ import {
   defineBulletAfterHeading,
   defineEmbedPaste,
   defineExitBoundaryHandler,
+  defineFilePaste,
   defineHTMLPaste,
   defineImage,
   defineImageClickHandler,
@@ -15,6 +16,7 @@ import {
   defineWikilinkClickHandler,
   defineWikilinkTrigger,
   type ExitBoundaryHandler,
+  type FilePasteOptions,
   type ImageClickHandler,
   type ImageOptions,
   type LinkClickHandler,
@@ -35,9 +37,8 @@ export interface EditorExtensionsProps {
   onTagClick?: TagClickHandler
   onExitBoundary?: ExitBoundaryHandler
   resolveImageUrl?: ImageOptions['resolveImageUrl']
-  onImagePaste?: ImageOptions['onImagePaste']
-  onFilePaste?: ImageOptions['onFilePaste']
-  onImageSaveError?: ImageOptions['onImageSaveError']
+  onFilePaste?: FilePasteOptions['onFilePaste']
+  onFileSaveError?: FilePasteOptions['onFileSaveError']
   onImageClick?: ImageClickHandler
   embedPaste?: boolean
   bulletAfterHeading?: boolean
@@ -58,9 +59,8 @@ export function EditorExtensions({
   onTagClick,
   onExitBoundary,
   resolveImageUrl,
-  onImagePaste,
   onFilePaste,
-  onImageSaveError,
+  onFileSaveError,
   onImageClick,
   embedPaste,
   bulletAfterHeading,
@@ -113,8 +113,14 @@ export function EditorExtensions({
 
   useExtension(
     useMemo(() => {
-      return defineImage({ resolveImageUrl, onImagePaste, onFilePaste, onImageSaveError })
-    }, [resolveImageUrl, onImagePaste, onFilePaste, onImageSaveError]),
+      return defineImage({ resolveImageUrl })
+    }, [resolveImageUrl]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return onFilePaste ? defineFilePaste({ onFilePaste, onFileSaveError }) : null
+    }, [onFilePaste, onFileSaveError]),
   )
 
   useExtension(

@@ -291,7 +291,7 @@ export function App() {
                 initialMarkdown={INITIAL_CONTENT}
                 onTagSearch={searchTags}
                 onWikilinkSearch={searchNotes}
-                onImagePaste={uploadFile}
+                onFilePaste={uploadFile}
                 onImageClick={handleImageClick}
                 onLinkClick={handleLinkClick}
                 onTagClick={handleTagClick}

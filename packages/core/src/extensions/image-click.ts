@@ -20,6 +20,7 @@ function findImageAt(state: EditorState, pos: number): ImageHit | undefined {
   return { from: range.from, to: range.to, src, alt }
 }
 
+/** Payload for {@link ImageClickHandler}. */
 export interface ImageClickPayload {
   /** The markdown `src`, exactly as written in `![alt](src)`. */
   src: string
@@ -31,6 +32,10 @@ export interface ImageClickPayload {
 
 export type ImageClickHandler = (payload: ImageClickPayload) => void
 
+/**
+ * Call `onClick` when the user clicks a rendered image preview, with the
+ * image's markdown `src`, `alt`, and the originating `MouseEvent`.
+ */
 export function defineImageClickHandler(onClick: ImageClickHandler): PlainExtension {
   return definePlugin(
     new Plugin({

@@ -227,6 +227,9 @@ importers:
       '@ocavue/tsconfig':
         specifier: ^0.7.1
         version: 0.7.1
+      '@prosekit/pm':
+        specifier: ^0.1.19-beta.1
+        version: 0.1.19-beta.1
       '@vitest/browser-playwright':
         specifier: ^4.1.9
         version: 4.1.9(playwright@1.61.0)(vite@8.1.0)(vitest@4.1.9)
