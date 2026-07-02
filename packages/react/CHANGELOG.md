@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.32.0](https://github.com/prosekit/meowdown/compare/react-v0.31.0...react-v0.32.0) (2026-07-02)
+
+
+### Features
+
+* add advanced keyboard shortcuts ([#196](https://github.com/prosekit/meowdown/issues/196)) ([49dfc87](https://github.com/prosekit/meowdown/commit/49dfc870ca352126e5992971025f87f8e7491c37))
+* add selection command menu ([#191](https://github.com/prosekit/meowdown/issues/191)) ([286628f](https://github.com/prosekit/meowdown/commit/286628f6ae834f6e246aa3601ff994ff0d7ef26d))
+* render file links as inline pills ([#202](https://github.com/prosekit/meowdown/issues/202)) ([3ad27b9](https://github.com/prosekit/meowdown/commit/3ad27b9d0c4ce07ded16dd5688d982f6943803b9))
+
 ## [0.31.0](https://github.com/prosekit/meowdown/compare/react-v0.30.1...react-v0.31.0) (2026-07-02)
 
 
