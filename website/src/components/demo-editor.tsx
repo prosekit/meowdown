@@ -4,7 +4,7 @@ import {
   type EditorMode,
   type EditorProps,
 } from '@meowdown/react'
-import { useRef } from 'react'
+import { useRef, type RefObject } from 'react'
 
 import { CodeMirrorEditor } from './codemirror-editor.tsx'
 
@@ -18,6 +18,12 @@ export interface DemoEditorProps extends Omit<EditorProps, 'mode' | 'handleRef'>
    * 'focus'.
    */
   mode?: DemoMode
+
+  /**
+   * Handle of whichever editor is currently mounted. In source mode the
+   * selection and pending-replacement methods are no-ops.
+   */
+  handleRef?: RefObject<EditorHandle | null>
 }
 
 export function DemoEditor({
@@ -26,12 +32,14 @@ export function DemoEditor({
   onDocChange,
   readOnly,
   children,
+  handleRef,
   ...richProps
 }: DemoEditorProps) {
   // Handle of whichever editor is currently mounted. Reading it during render
   // seeds the next editor with the previous one's content when the mode flips
   // between the rich and source families.
-  const childRef = useRef<EditorHandle>(null)
+  const fallbackRef = useRef<EditorHandle>(null)
+  const childRef = handleRef ?? fallbackRef
   const seedMarkdown = childRef.current?.getMarkdown() ?? initialMarkdown ?? ''
 
   if (mode === 'source') {
