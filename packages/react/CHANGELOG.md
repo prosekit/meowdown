@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.31.0](https://github.com/prosekit/meowdown/compare/react-v0.30.1...react-v0.31.0) (2026-07-02)
+
+
+### Features
+
+* add `insertMarkdown` command ([#197](https://github.com/prosekit/meowdown/issues/197)) ([d44282f](https://github.com/prosekit/meowdown/commit/d44282f816c4a98a57f7559207a370b4252fba74))
+* **react:** add `onSlashMenuSearch` prop ([#198](https://github.com/prosekit/meowdown/issues/198)) ([a202234](https://github.com/prosekit/meowdown/commit/a2022346822627cb0dfd25bf4b6a49554261a0b2))
+* replace `onImagePaste` with a single `onFilePaste` in new `defineFilePaste` ([#199](https://github.com/prosekit/meowdown/issues/199)) ([458385c](https://github.com/prosekit/meowdown/commit/458385c53156fac769a2f4298b69885f483082ee))
+* route non-image file paste/drop to `onFilePaste` ([#190](https://github.com/prosekit/meowdown/issues/190)) ([ab379d4](https://github.com/prosekit/meowdown/commit/ab379d4ca18156c003614faeb45092bb43c5739e))
+
 ## [0.30.1](https://github.com/prosekit/meowdown/compare/react-v0.30.0...react-v0.30.1) (2026-07-01)
 
 
