@@ -1,10 +1,18 @@
 import type { ExitBoundaryHandler } from '@meowdown/core'
-import type { TagItem, WikilinkItem } from '@meowdown/react'
+import type { EditorHandle, TagItem, WikilinkItem } from '@meowdown/react'
 import { getId } from '@ocavue/utils'
 import { clsx } from 'clsx/lite'
-import { type CSSProperties, useCallback, useEffect, useLayoutEffect, useState } from 'react'
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 
 import { DemoEditor } from './components/demo-editor.tsx'
+import { SelectionMenuShortcut, useSelectionDemo } from './selection-demo.tsx'
 import { uploadFile } from './upload-file.ts'
 import { MODES, useEditorMode } from './use-editor-mode.ts'
 
@@ -74,6 +82,8 @@ Drop a [link](https://github.com/prosekit/meowdown) and keep on writing.
 Label your notes with tags like #meow and #markdown. Type \`#\` followed by a letter to see suggestions.
 
 Connect notes with wikilinks like [[Daily journal]] and [[Reading list]]. Type \`[[\` to link another note.
+
+Select some text and click the sparkle button (or press \`Mod-Shift-J\`) to run a command on it. The result streams into a preview, and nothing changes until you accept it.
 
 Track things two ways. Type \`+ \` for a circle checkbox task, or \`[] \` for a square checkbox task:
 
@@ -239,6 +249,9 @@ function Brand() {
 export function App() {
   const { mode, setMode, activeMode } = useEditorMode()
 
+  const editorRef = useRef<EditorHandle>(null)
+  const selectionDemo = useSelectionDemo(editorRef)
+
   const [spellCheck, setSpellCheck] = useState<boolean | undefined>(undefined)
 
   useEffect(() => {
@@ -323,8 +336,12 @@ export function App() {
                 mode={mode}
                 spellCheck={spellCheck}
                 initialMarkdown={INITIAL_CONTENT}
+                handleRef={editorRef}
                 onTagSearch={searchTags}
                 onWikilinkSearch={searchNotes}
+                onSelectionMenuSearch={selectionDemo.onSelectionMenuSearch}
+                pendingReplacementActions={selectionDemo.pendingReplacementActions}
+                onPendingReplacementResolve={selectionDemo.onPendingReplacementResolve}
                 onFilePaste={uploadAndTrackFile}
                 resolveFileLink={resolveFileLink}
                 resolveFileInfo={resolveFileInfo}
@@ -334,7 +351,9 @@ export function App() {
                 onTagClick={handleTagClick}
                 onWikilinkClick={handleWikilinkClick}
                 onExitBoundary={handleExitBoundary}
-              />
+              >
+                <SelectionMenuShortcut onTrigger={selectionDemo.openMenu} />
+              </DemoEditor>
             </div>
 
             {edgeFlash && (
