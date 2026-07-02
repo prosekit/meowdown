@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.33.1](https://github.com/prosekit/meowdown/compare/core-v0.33.0...core-v0.33.1) (2026-07-02)
+
+
+### Bug Fixes
+
+* anchor the link popover to the visible label ([#213](https://github.com/prosekit/meowdown/issues/213)) ([98bebde](https://github.com/prosekit/meowdown/commit/98bebde1058cc30c8a1efdf2e5ebf6bf8916a8c6))
+* fix wikilink vertical caret navigation ([#204](https://github.com/prosekit/meowdown/issues/204)) ([58d0207](https://github.com/prosekit/meowdown/commit/58d020733e6a866c144c76bf6066ccf93f85833f))
+
 ## [0.33.0](https://github.com/prosekit/meowdown/compare/core-v0.32.0...core-v0.33.0) (2026-07-02)
 
 

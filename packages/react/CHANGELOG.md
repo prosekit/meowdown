@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.1](https://github.com/prosekit/meowdown/compare/react-v0.33.0...react-v0.33.1) (2026-07-02)
+
+
+### Bug Fixes
+
+* anchor the link popover to the visible label ([#213](https://github.com/prosekit/meowdown/issues/213)) ([98bebde](https://github.com/prosekit/meowdown/commit/98bebde1058cc30c8a1efdf2e5ebf6bf8916a8c6))
+
 ## [0.33.0](https://github.com/prosekit/meowdown/compare/react-v0.32.0...react-v0.33.0) (2026-07-02)
 
 
