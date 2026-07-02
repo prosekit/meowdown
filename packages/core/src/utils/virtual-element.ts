@@ -17,8 +17,12 @@ export function getVirtualElementFromRange(view: EditorView, range: PositionRang
   const getBoundingClientRect = (): DOMRect => {
     if (view.isDestroyed) return lastRect
     try {
-      const start = view.coordsAtPos(range.from)
-      const end = view.coordsAtPos(range.to)
+      // Bias both measurements into the range's own content. Measured outward
+      // (the default `side`), an edge that sits against hidden markdown syntax
+      // at a block boundary has no visible neighbor and yields a bogus
+      // zero rect, anchoring the popover at the viewport corner.
+      const start = view.coordsAtPos(range.from, 1)
+      const end = view.coordsAtPos(range.to, -1)
       const left = Math.min(start.left, end.left)
       const right = Math.max(start.right, end.right)
       const top = Math.min(start.top, end.top)
