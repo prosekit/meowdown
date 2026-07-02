@@ -18,9 +18,13 @@ minimumReleaseAgeExclude:
   - '@ocavue/eslint-config'
   - '@prosekit/*'
   - '@aria-ui/*'
+  - prosemirror-view@1.42.0
 
 allowBuilds:
   simple-git-hooks: false
+
+overrides:
+  prosemirror-view: ^1.42.0
 
 # Enable "blockExoticSubdeps" and "overrides" to install packages from pkg.pr.new
 # blockExoticSubdeps: false
