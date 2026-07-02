@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
 import { setupFixture, traceKeyAt, traceKeySelection, type Fixture } from '../testing/index.ts'
-
 import { replaceText } from '../testing/replace-text.ts'
+
 import { defineFileClickHandler, type FileClickHandler } from './file-click.ts'
 import { defineFileView, type FileInfoResolver } from './file-view.ts'
 import type { FileLinkResolver } from './inline-text-to-mark-chunks.ts'

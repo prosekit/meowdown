@@ -1,4 +1,5 @@
 import type { EditorView } from '@prosekit/pm/view'
+
 import { findText } from './find-text.ts'
 
 export function replaceText(view: EditorView, query: string, replacement: string) {
