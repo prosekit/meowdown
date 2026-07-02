@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.33.0](https://github.com/prosekit/meowdown/compare/react-v0.32.0...react-v0.33.0) (2026-07-02)
+
+
+### Features
+
+* make `insertMarkdown` preserve selected content ([#208](https://github.com/prosekit/meowdown/issues/208)) ([5046126](https://github.com/prosekit/meowdown/commit/504612604758d8e12c0f3eaddbf6577610a5ed44))
+* support slash menu keywords ([#209](https://github.com/prosekit/meowdown/issues/209)) ([59df457](https://github.com/prosekit/meowdown/commit/59df457b9f2f09595c826e194dfa43c90300622c))
+
 ## [0.32.0](https://github.com/prosekit/meowdown/compare/react-v0.31.0...react-v0.32.0) (2026-07-02)
 
 
