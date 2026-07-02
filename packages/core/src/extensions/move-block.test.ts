@@ -95,7 +95,12 @@ describe('defineMoveBlock', () => {
     fixture.set(n.doc(n.paragraph('p1'), n.paragraph('p<a>2')))
     fixture.view.focus()
     await pressAltUp()
-    expect(fixture.selectionSnapshot).toBe('p┃2p1')
+    expect('\n' + fixture.selectionSnapshot + '\n').toMatchInlineSnapshot(`
+      "
+      p┃2
+      p1
+      "
+    `)
   })
 
   it('moves a node-selected block, keeping it selected', async () => {
