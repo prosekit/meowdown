@@ -231,12 +231,18 @@ export function LinkMenu({ onLinkClick, onLinkCopy }: LinkMenuProps) {
   let rangeFrom: number | undefined
   let rangeTo: number | undefined
 
+  // Anchor on the visible `[ ]` label rather than the whole unit: the unit's
+  // outer edges sit inside the hidden `[`/`](url)` syntax, whose collapsed
+  // glyphs measure at bogus coordinates. Autolinks (no `label`) are fully
+  // visible, so their unit is safe.
   if (edit) {
-    rangeFrom = edit.from
-    rangeTo = edit.to
+    const anchorRange = edit.link?.label ?? edit
+    rangeFrom = anchorRange.from
+    rangeTo = anchorRange.to
   } else if (hover) {
-    rangeFrom = hover.unit.from
-    rangeTo = hover.unit.to
+    const anchorRange = hover.label ?? hover.unit
+    rangeFrom = anchorRange.from
+    rangeTo = anchorRange.to
   }
 
   const anchor: VirtualElement | undefined = useMemo(() => {

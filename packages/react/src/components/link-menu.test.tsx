@@ -30,6 +30,29 @@ describe('LinkMenu', () => {
     })
   })
 
+  it('anchors the preview to the link when hidden syntax ends the block', async () => {
+    // The whole block is one link: the hidden `](url)` syntax reaches the block
+    // boundary, so a unit-edge measurement has no visible neighbor to snap to
+    // and used to collapse to a zero rect at the viewport origin.
+    const label = 'export-Meters-1780294218812-20260601.xlsx'
+    const screen = await render(
+      <MeowdownEditor initialMarkdown={`[${label}](assets/export.xlsx)`} />,
+    )
+    const link = screen.getByText(label)
+    await link.hover()
+    await expect.element(popover.getByTestId('link-popover-read')).toBeVisible()
+
+    const linkRect = link.element().getBoundingClientRect()
+    const popRect = popover.element().getBoundingClientRect()
+    // Just below the link...
+    expect(popRect.top).toBeGreaterThan(linkRect.bottom)
+    expect(popRect.top).toBeLessThan(linkRect.bottom + 40)
+    // ...and centered on it, not dragged toward the viewport corner.
+    const linkCenter = (linkRect.left + linkRect.right) / 2
+    const popCenter = (popRect.left + popRect.right) / 2
+    expect(Math.abs(popCenter - linkCenter)).toBeLessThan(20)
+  })
+
   it('creates a link from a selection with Mod-k', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Docs" />)
