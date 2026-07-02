@@ -1,0 +1,66 @@
+diff --git a/dist/index.js b/dist/index.js
+index fbdab41ffc4d8fb62a43b773624792371b4147e8..2605d7f5117a1b8712e3d9622f070b571477c1e3 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -207,6 +207,10 @@ function clientRect(node) {
+         top: rect.top, bottom: rect.top + node.clientHeight * scaleY };
+ }
+ function scrollRectIntoView(view, rect, startDOM) {
++    console.log("DEBUG1")
++    https://code.haverbeke.berlin/prosemirror/prosemirror-view/pulls/198
++    if (!nonZero(rect) && rect.left == 0) return
++
+     let scrollThreshold = view.someProp("scrollThreshold") || 0, scrollMargin = view.someProp("scrollMargin") || 5;
+     let doc = view.dom.ownerDocument;
+     for (let parent = startDOM || view.dom;;) {
+@@ -739,7 +743,7 @@ const NOT_DIRTY = 0, CHILD_DIRTY = 1, CONTENT_DIRTY = 2, NODE_DIRTY = 3;
+ // Superclass for the various kinds of descriptions. Defines their
+ // basic structure and shared methods.
+ class ViewDesc {
+-    constructor(parent, children, dom, 
++    constructor(parent, children, dom,
+     // This is the node that holds the child views. It may be null for
+     // descs that don't have children.
+     contentDOM) {
+@@ -4021,12 +4025,12 @@ class Decoration {
+     /**
+     The start position of the decoration.
+     */
+-    from, 
++    from,
+     /**
+     The end position. Will be the same as `from` for [widget
+     decorations](https://prosemirror.net/docs/ref/#view.Decoration^widget).
+     */
+-    to, 
++    to,
+     /**
+     @internal
+     */
+@@ -5764,7 +5768,7 @@ class EditorView {
+     possible to the content before the position. When positive,
+     prefer positions close to the content after the position. When
+     zero, prefer as shallow a position as possible.
+-    
++
+     Note that you should **not** mutate the editor's internal DOM,
+     only inspect it (and even that is usually not necessary).
+     */
+@@ -5775,7 +5779,7 @@ class EditorView {
+     Find the DOM node that represents the document node after the
+     given position. May return `null` when the position doesn't point
+     in front of a node or if the node is inside an opaque node view.
+-    
++
+     This is intended to be able to call things like
+     `getBoundingClientRect` on that DOM node. Do **not** mutate the
+     editor DOM directly, or add styling this way, since that will be
+@@ -5791,7 +5795,7 @@ class EditorView {
+     document structure directly, rather than poking around in the
+     DOM, but sometimes—for example when interpreting an event
+     target—you don't have a choice.)
+-    
++
+     The `bias` parameter can be used to influence which side of a DOM
+     node to use when the position is inside a leaf node.
+     */
