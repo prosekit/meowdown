@@ -154,17 +154,99 @@ describe('wikilink vertical caret navigation', () => {
     )
     fixture.view.focus()
     const steps = await traceKeySelection(fixture, 'ArrowDown', 7)
+    const uniqueSteps = Array.from(new Set(steps))
 
-    return '\n' + Array.from(new Set(steps)).join('\n' + '-'.repeat(10) + '\n') + '\n'
+    return uniqueSteps.map((step) => '\n' + step + '\n').join('-'.repeat(10))
   }
 
   it('can ArrowDown from the first paragraph to the last paragraph in hide mode', async () => {
-    expect(await run('hide')).toMatchInlineSnapshot()
+    expect(await run('hide')).toMatchInlineSnapshot(`
+      "
+      paragraph ┃1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph ┃2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph ┃3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph ┃4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4┃
+      "
+    `)
   })
   it('can ArrowDown from the first paragraph to the last paragraph in show mode', async () => {
-    expect(await run('show')).toMatchInlineSnapshot()
+    expect(await run('show')).toMatchInlineSnapshot(`
+      "
+      paragraph ┃1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph ┃2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph ┃3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph ┃4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4┃
+      "
+    `)
   })
   it('can ArrowDown from the first paragraph to the last paragraph in focus mode', async () => {
-    expect(await run('focus')).toMatchInlineSnapshot()
+    expect(await run('focus')).toMatchInlineSnapshot(`
+      "
+      paragraph ┃1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph ┃2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph ┃3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph ┃4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4┃
+      "
+    `)
   })
 })
