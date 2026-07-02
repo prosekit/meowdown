@@ -21,6 +21,7 @@ import type {
   EditorHandle,
   EditorStateSnapshot,
   SelectionHint,
+  SlashMenuSearchHandler,
   TagSearchHandler,
   WikilinkSearchHandler,
 } from './types.ts'
@@ -45,6 +46,17 @@ export interface EditorProps {
    * `setState` on the handle do not fire it.
    */
   onDocChange?: VoidFunction
+
+  /**
+   * Searches host items for the slash menu, which opens when typing `/`.
+   * Receives the query (lowercased, punctuation stripped, may be empty) and
+   * returns the items to show after the built-in ones, synchronously or as a
+   * promise. Selecting an item removes the typed `/query` text before its
+   * `onSelect` runs, so `onSelect` can insert at the cursor (e.g. via the
+   * handle's `insertMarkdown`). Pass a stable function (e.g. from
+   * `useCallback`). Omit to show only the built-in items.
+   */
+  onSlashMenuSearch?: SlashMenuSearchHandler
 
   /**
    * Searches tags for the tag menu, which opens when typing `#` followed by
@@ -185,6 +197,7 @@ export function MeowdownEditor({
   mode = 'focus',
   initialMarkdown,
   onDocChange,
+  onSlashMenuSearch,
   onTagSearch,
   onWikilinkSearch,
   onWikilinkClick,
@@ -219,6 +232,9 @@ export function MeowdownEditor({
     function setMarkdown(markdown: string): void {
       childRef.current?.setMarkdown(markdown)
     }
+    function insertMarkdown(markdown: string): void {
+      childRef.current?.insertMarkdown(markdown)
+    }
     function getState(): EditorStateSnapshot {
       return childRef.current?.getState() ?? ['', { type: 'text', anchor: 0, head: 0 }]
     }
@@ -240,6 +256,7 @@ export function MeowdownEditor({
     return {
       getMarkdown,
       setMarkdown,
+      insertMarkdown,
       getState,
       setState,
       getSelection,
@@ -259,6 +276,7 @@ export function MeowdownEditor({
         markMode={mode}
         initialMarkdown={initialMarkdown}
         onDocChange={onDocChange}
+        onSlashMenuSearch={onSlashMenuSearch}
         onTagSearch={onTagSearch}
         onWikilinkSearch={onWikilinkSearch}
         onWikilinkClick={onWikilinkClick}

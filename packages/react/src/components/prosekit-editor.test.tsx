@@ -76,4 +76,22 @@ describe('ProseKitEditor', () => {
     await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}')
     await expect.element(screen.getByText('Hello')).toBeInTheDocument()
   })
+
+  it('fires onDocChange for insertMarkdown, unlike setMarkdown', async () => {
+    const onDocChange = vi.fn()
+    const ref = createRef<EditorHandle>()
+    const screen = await render(
+      <ProseKitEditor ref={ref} initialMarkdown="Hello" onDocChange={onDocChange} />,
+    )
+    await expect.element(screen.getByText('Hello')).toBeInTheDocument()
+
+    ref.current?.setMarkdown('World')
+    ref.current?.setSelection('end')
+    ref.current?.insertMarkdown('!')
+
+    await vi.waitFor(() => {
+      expect(onDocChange).toHaveBeenCalledTimes(1)
+    })
+    expect(ref.current?.getMarkdown()).toBe('World!\n')
+  })
 })

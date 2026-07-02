@@ -3,12 +3,12 @@ import '../testing/index.ts'
 import type { EditorNode } from '@prosekit/pm/model'
 import { TextSelection } from '@prosekit/pm/state'
 import { createRef } from 'react'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
 import { ProseKitEditor } from './prosekit-editor.tsx'
-import type { EditorHandle } from './types.ts'
+import type { EditorHandle, SlashMenuItem } from './types.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const menu = page.getByTestId('slash-menu')
@@ -98,6 +98,74 @@ describe('SlashMenu', () => {
     await menu.getByText('Now', { exact: true }).click()
 
     expect(ref.current?.getMarkdown()).toMatch(/^\d{2}:\d{2}\n$/)
+  })
+
+  it('shows host items after the built-in ones', async () => {
+    const onSlashMenuSearch = (): SlashMenuItem[] => [
+      { label: 'Meeting note', detail: 'Template', onSelect: () => {} },
+      { label: 'Daily log', onSelect: () => {} },
+    ]
+    await render(<ProseKitEditor onSlashMenuSearch={onSlashMenuSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard('/')
+
+    await expect.element(menu.getByText('Meeting note')).toBeVisible()
+    await expect.element(menu.getByText('Template')).toBeVisible()
+    await expect.element(menu.getByText('Daily log')).toBeVisible()
+
+    const text = menu.element().textContent ?? ''
+    expect(text.indexOf('Now')).toBeLessThan(text.indexOf('Meeting note'))
+  })
+
+  it('supports an async host search handler', async () => {
+    const onSlashMenuSearch = async (): Promise<SlashMenuItem[]> => {
+      await Promise.resolve()
+      return [{ label: 'Async item', onSelect: () => {} }]
+    }
+    await render(<ProseKitEditor onSlashMenuSearch={onSlashMenuSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard('/')
+
+    await expect.element(menu.getByText('Async item')).toBeVisible()
+  })
+
+  it('filters host items by the query like the built-in items', async () => {
+    const onSlashMenuSearch = (): SlashMenuItem[] => [
+      { label: 'Meeting note', onSelect: () => {} },
+      { label: 'Daily log', onSelect: () => {} },
+    ]
+    await render(<ProseKitEditor onSlashMenuSearch={onSlashMenuSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard('/meeting')
+
+    await expect.element(menu.getByText('Meeting note')).toBeVisible()
+    await expect.element(menu.getByText('Daily log')).not.toBeVisible()
+    await expect.element(menu.getByText('Heading 1')).not.toBeVisible()
+  })
+
+  it('closes the menu and calls onSelect on a host item click', async () => {
+    const onSelect = vi.fn()
+    const onSlashMenuSearch = (): SlashMenuItem[] => [{ label: 'Meeting note', onSelect }]
+    await render(<ProseKitEditor onSlashMenuSearch={onSlashMenuSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard('/meet')
+    await menu.getByText('Meeting note').click()
+
+    await expect.element(menu).not.toBeVisible()
+    expect(onSelect).toHaveBeenCalledOnce()
+  })
+
+  it('removes the typed query text before a host onSelect runs', async () => {
+    const ref = createRef<EditorHandle>()
+    const onSlashMenuSearch = (): SlashMenuItem[] => [
+      { label: 'Meeting note', onSelect: () => ref.current?.insertMarkdown('**Agenda**') },
+    ]
+    await render(<ProseKitEditor ref={ref} onSlashMenuSearch={onSlashMenuSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard('Hello /meet')
+    await menu.getByText('Meeting note').click()
+
+    expect(ref.current?.getMarkdown()).toBe('Hello **Agenda**\n')
   })
 
   it('omits block items inside a table cell but keeps inline items', async () => {

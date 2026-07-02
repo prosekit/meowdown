@@ -97,6 +97,9 @@ export function CodeMirrorEditor({
     function setMarkdown(markdown: string): void {
       setState(markdown)
     }
+    function insertMarkdown(_markdown: string): void {
+      throw new Error('CodeMirrorEditor.insertMarkdown is not implemented')
+    }
     function setSelection(selection: SelectionHint): void {
       setState(undefined, selection)
     }
@@ -109,6 +112,7 @@ export function CodeMirrorEditor({
     return {
       getMarkdown,
       setMarkdown,
+      insertMarkdown,
       getState,
       setState,
       getSelection,
