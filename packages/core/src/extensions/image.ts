@@ -6,8 +6,9 @@ import {
   withPriority,
   type PlainExtension,
 } from '@prosekit/core'
+import type { Mark } from '@prosekit/pm/model'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
-import type { EditorView, MarkViewConstructor } from '@prosekit/pm/view'
+import type { EditorView, MarkView, ViewMutationRecord } from '@prosekit/pm/view'
 import {
   registerResizableHandleElement,
   registerResizableRootElement,
@@ -192,29 +193,30 @@ function commitImageSize(
   view.dispatch(view.state.tr.insertText(nextComment, commentFrom, range.to))
 }
 
-function createImageMarkView(options: ImageOptions): MarkViewConstructor {
-  return (mark, view) => {
+class ImageMarkView implements MarkView {
+  readonly dom: HTMLElement
+  readonly contentDOM: HTMLElement
+
+  constructor(mark: Mark, view: EditorView, options: ImageOptions) {
     const { src, alt, width, height } = mark.attrs as MdImageAttrs
 
-    const dom = document.createElement('span')
-    dom.className = 'md-image-view md-atom-view'
+    this.dom = document.createElement('span')
+    this.dom.className = 'md-image-view md-atom-view'
 
-    const contentDOM = document.createElement('span')
-    contentDOM.className = 'md-image-view-content md-atom-view-content'
+    this.contentDOM = document.createElement('span')
+    this.contentDOM.className = 'md-image-view-content md-atom-view-content'
 
-    const preview = renderImagePreview(src, alt, width, height, options, view, contentDOM)
+    const preview = renderImagePreview(src, alt, width, height, options, view, this.contentDOM)
     if (preview) {
       preview.contentEditable = 'false'
-      dom.appendChild(preview)
+      this.dom.appendChild(preview)
     }
 
-    dom.appendChild(contentDOM)
+    this.dom.appendChild(this.contentDOM)
+  }
 
-    return {
-      dom,
-      contentDOM,
-      ignoreMutation: (mutation) => !contentDOM.contains(mutation.target),
-    }
+  ignoreMutation(mutation: ViewMutationRecord): boolean {
+    return !this.contentDOM.contains(mutation.target)
   }
 }
 
@@ -283,7 +285,7 @@ export function defineImage(options: ImageOptions = {}): PlainExtension {
   return union(
     defineMarkView({
       name: 'mdImage' satisfies MarkName,
-      constructor: createImageMarkView(options),
+      constructor: (mark, view) => new ImageMarkView(mark, view, options),
     }),
     // High priority so the drop/paste handler runs before ProseKit's
     // drop-indicator plugin.
