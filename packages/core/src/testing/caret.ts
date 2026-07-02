@@ -1,16 +1,8 @@
-import { TextSelection } from '@prosekit/pm/state'
 import { userEvent } from 'vitest/browser'
 
 import { getSelectionSnapshot } from './selection-snapshot.ts'
 
 import type { Fixture } from './index.ts'
-
-/** Place a collapsed caret at text offset `offset`. */
-export function setCaret(fixture: Fixture, offset: number): void {
-  const { view } = fixture
-  view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, offset + 1)))
-  view.focus()
-}
 
 /**
  * Press `key` `times` times, capturing the selection snapshot before the first
@@ -30,16 +22,16 @@ export async function traceKeySelection(
 }
 
 /**
- * On a fresh fixture from `setup`, place the caret at text offset `offset`,
- * press `key` once, and return the `before  ->  after` selection snapshot.
+ * On a fresh fixture from `setup(text)`, with the caret at the `<a>` tag in
+ * `text`, press `key` once, and return the `before  ->  after` selection
+ * snapshot.
  */
 export async function traceKeyAt(
-  setup: () => Fixture,
-  offset: number,
+  setup: (text: string) => Fixture,
+  text: string,
   key: string,
 ): Promise<string> {
-  using fixture = setup()
-  setCaret(fixture, offset)
+  using fixture = setup(text)
   const before = getSelectionSnapshot(fixture.state)
   await userEvent.keyboard(`{${key}}`)
   return `${before}  ->  ${getSelectionSnapshot(fixture.state)}`

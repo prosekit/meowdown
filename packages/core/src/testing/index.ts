@@ -11,7 +11,7 @@ import { defineEditorExtension, type EditorExtensionOptions } from '../extension
 import { getSelectionSnapshot } from './selection-snapshot.ts'
 
 export { getSelectionSnapshot } from './selection-snapshot.ts'
-export { setCaret, traceKeySelection, traceKeyAt } from './caret.ts'
+export { traceKeySelection, traceKeyAt } from './caret.ts'
 
 export interface SetupFixtureOptions {
   /** Whether to mount the editor onto a real DOM container. Defaults to `true`. */
