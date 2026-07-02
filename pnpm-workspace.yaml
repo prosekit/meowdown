@@ -26,6 +26,9 @@ allowBuilds:
 overrides:
   prosemirror-view: ^1.42.0
 
+patchedDependencies:
+  prosemirror-view: patches/prosemirror-view.patch
+
 # Enable "blockExoticSubdeps" and "overrides" to install packages from pkg.pr.new
 # blockExoticSubdeps: false
 # overrides:
