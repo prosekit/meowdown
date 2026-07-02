@@ -7,7 +7,7 @@ import {
   type SelectionMenuContext,
   type SelectionMenuSearchHandler,
 } from '@meowdown/react'
-import { useCallback, useMemo, useRef, type ReactNode, type RefObject } from 'react'
+import { useCallback, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
 
 /**
  * A selection-menu command for the demo: the result is computed locally from
@@ -81,20 +81,28 @@ const ACTION_BUTTON_CLASS =
   'inline-flex cursor-pointer items-center rounded-lg px-2.5 py-1 text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800'
 
 function DemoReplacementActions({
+  mode,
   onRetry,
-  onInsertBelow,
+  onAcceptAs,
 }: {
+  mode: PendingReplacementMode | null
   onRetry: () => void
-  onInsertBelow: () => void
+  onAcceptAs: (mode: PendingReplacementMode) => void
 }) {
   return (
     <>
       <button type="button" className={ACTION_BUTTON_CLASS} onClick={onRetry}>
         Retry
       </button>
-      <button type="button" className={ACTION_BUTTON_CLASS} onClick={onInsertBelow}>
-        Insert below
-      </button>
+      {mode !== null ? (
+        <button
+          type="button"
+          className={ACTION_BUTTON_CLASS}
+          onClick={() => onAcceptAs(mode === 'replace' ? 'append' : 'replace')}
+        >
+          {mode === 'replace' ? 'Insert below' : 'Replace selection'}
+        </button>
+      ) : null}
     </>
   )
 }
@@ -114,6 +122,9 @@ export interface SelectionDemoValue {
  */
 export function useSelectionDemo(handleRef: RefObject<EditorHandle | null>): SelectionDemoValue {
   const runRef = useRef<DemoRun | undefined>(undefined)
+  // The staged placement of the current run — state (not just the ref) so the
+  // preview's alternate-placement button can label itself.
+  const [runMode, setRunMode] = useState<PendingReplacementMode | null>(null)
 
   const beginStream = useCallback(
     (command: DemoCommand, context: SelectionMenuContext) => {
@@ -143,6 +154,7 @@ export function useSelectionDemo(handleRef: RefObject<EditorHandle | null>): Sel
       if (!handle) return
       const { from, to } = context
       if (!handle.startPendingReplacement({ from, to, mode: command.mode })) return
+      setRunMode(command.mode)
       beginStream(command, context)
     },
     [handleRef, beginStream],
@@ -182,18 +194,22 @@ export function useSelectionDemo(handleRef: RefObject<EditorHandle | null>): Sel
     beginStream(run.command, run.context)
   }, [handleRef, beginStream])
 
-  const insertBelow = useCallback(() => {
-    handleRef.current?.acceptPendingReplacement({ mode: 'append' })
-  }, [handleRef])
+  const acceptAs = useCallback(
+    (mode: PendingReplacementMode) => {
+      handleRef.current?.acceptPendingReplacement({ mode })
+    },
+    [handleRef],
+  )
 
   const pendingReplacementActions = useMemo<ReactNode>(
-    () => <DemoReplacementActions onRetry={retry} onInsertBelow={insertBelow} />,
-    [retry, insertBelow],
+    () => <DemoReplacementActions mode={runMode} onRetry={retry} onAcceptAs={acceptAs} />,
+    [runMode, retry, acceptAs],
   )
 
   const onPendingReplacementResolve = useCallback<PendingReplacementResolveHandler>(() => {
     if (runRef.current) runRef.current.cancelled = true
     runRef.current = undefined
+    setRunMode(null)
   }, [])
 
   const openMenu = useCallback(() => {
