@@ -83,16 +83,16 @@ export interface ProseKitEditorProps {
   /** Enables the wikilink menu. See `EditorProps.onWikilinkSearch`. */
   onWikilinkSearch?: WikilinkSearchHandler
 
-  /** Called on click of a rendered wiki link. See `EditorProps.onWikilinkClick`. */
+  /** Called on click or Mod-Enter of a rendered wiki link. See `EditorProps.onWikilinkClick`. */
   onWikilinkClick?: WikilinkClickHandler
 
-  /** Called on click of a rendered Markdown link. See `EditorProps.onLinkClick`. */
+  /** Called on click or Mod-Enter of a rendered Markdown link. See `EditorProps.onLinkClick`. */
   onLinkClick?: LinkClickHandler
 
   /** Called after a link is copied from the link menu. See `EditorProps.onLinkCopy`. */
   onLinkCopy?: LinkCopyHandler
 
-  /** Called on click of a rendered tag. See `EditorProps.onTagClick`. */
+  /** Called on click or Mod-Enter of a rendered tag. See `EditorProps.onTagClick`. */
   onTagClick?: TagClickHandler
 
   /** Called when an arrow press leaves the document boundary. See `EditorProps.onExitBoundary`. */
@@ -107,7 +107,7 @@ export interface ProseKitEditorProps {
   /** Resolves the size shown on a file pill. See `EditorProps.resolveFileInfo`. */
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
 
-  /** Called on click of a rendered file pill. See `EditorProps.onFileClick`. */
+  /** Called on click or Mod-Enter of a rendered file pill. See `EditorProps.onFileClick`. */
   onFileClick?: FileClickHandler
 
   /** Persists a pasted/dropped file. See `EditorProps.onFilePaste`. */

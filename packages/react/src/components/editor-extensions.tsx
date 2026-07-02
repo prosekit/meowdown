@@ -5,6 +5,7 @@ import {
   defineFileClickHandler,
   defineFilePaste,
   defineFileView,
+  defineFollowLinkHandler,
   defineHTMLPaste,
   defineImage,
   defineImageClickHandler,
@@ -111,6 +112,16 @@ export function EditorExtensions({
     useMemo(() => {
       return onTagClick ? defineTagClickHandler(onTagClick) : null
     }, [onTagClick]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      // Mod-Enter follows the link under the caret through the same handlers
+      // a click uses.
+      return onWikilinkClick || onTagClick || onFileClick || onLinkClick
+        ? defineFollowLinkHandler({ onWikilinkClick, onTagClick, onFileClick, onLinkClick })
+        : null
+    }, [onWikilinkClick, onTagClick, onFileClick, onLinkClick]),
   )
 
   useExtension(

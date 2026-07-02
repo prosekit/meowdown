@@ -52,21 +52,32 @@ const markdown = docToMarkdown(editor.state.doc)
 
 `Mod` is Cmd on macOS and Ctrl elsewhere. Each formatting shortcut inserts or removes the literal Markdown delimiters around the selection; each heading shortcut toggles the current block to that level (or back to a paragraph).
 
-| Key           | Action                  | Markdown            |
-| ------------- | ----------------------- | ------------------- |
-| `Mod-B`       | Bold                    | `**bold**`          |
-| `Mod-I`       | Italic                  | `*italic*`          |
-| `Mod-E`       | Inline code             | `` `code` ``        |
-| `Mod-Shift-X` | Strikethrough           | `~~strikethrough~~` |
-| `Mod-Shift-H` | Highlight               | `==highlight==`     |
-| `Mod-K`       | Link                    | `[text](url)`       |
-| `Mod-1`       | Heading 1               | `# heading`         |
-| `Mod-2`       | Heading 2               | `## heading`        |
-| `Mod-3`       | Heading 3               | `### heading`       |
-| `Mod-4`       | Heading 4               | `#### heading`      |
-| `Mod-5`       | Heading 5               | `##### heading`     |
-| `Mod-6`       | Heading 6               | `###### heading`    |
-| `Mod-.`       | Fold or unfold a bullet |                     |
+| Key               | Action                                                    | Markdown            |
+| ----------------- | --------------------------------------------------------- | ------------------- |
+| `Mod-B`           | Bold                                                      | `**bold**`          |
+| `Mod-I`           | Italic                                                    | `*italic*`          |
+| `Mod-E`           | Inline code                                               | `` `code` ``        |
+| `Mod-Shift-X`     | Strikethrough                                             | `~~strikethrough~~` |
+| `Mod-Shift-H`     | Highlight                                                 | `==highlight==`     |
+| `Mod-K`           | Link                                                      | `[text](url)`       |
+| `Mod-Shift-K`     | Insert a wikilink                                         | `[[target]]`        |
+| `Mod-1`           | Heading 1                                                 | `# heading`         |
+| `Mod-2`           | Heading 2                                                 | `## heading`        |
+| `Mod-3`           | Heading 3                                                 | `### heading`       |
+| `Mod-4`           | Heading 4                                                 | `#### heading`      |
+| `Mod-5`           | Heading 5                                                 | `##### heading`     |
+| `Mod-6`           | Heading 6                                                 | `###### heading`    |
+| `Mod-.`           | Fold or unfold a bullet                                   |                     |
+| `Mod-Enter`       | Follow the link under the caret, or cycle a checkbox task | `- [ ]` / `- [x]`   |
+| `Mod-Shift-Enter` | Cycle a circle checkbox task                              | `+ [ ]` / `+ [x]`   |
+| `Mod-Shift-7`     | Ordered list                                              | `1. item`           |
+| `Mod-Shift-8`     | Bullet list                                               | `- item`            |
+| `Mod-Shift-9`     | Checkbox task list                                        | `- [ ] item`        |
+| `Alt-ArrowUp`     | Move the block or list item up                            |                     |
+| `Alt-ArrowDown`   | Move the block or list item down                          |                     |
+| `Escape`          | Collapse the selection                                    |                     |
+
+The list-type toggles wrap the current block, convert a list of a different kind in place, and unwrap a list of the same kind back to a paragraph. `Mod-Shift-7/8/9` follow the physical digit key, so they work on layouts where Shift+digit types punctuation. `Alt-ArrowUp`/`Alt-ArrowDown` move a list item together with its nested children, or swap a non-list block with its neighbor. Typing `[` over a selection wraps it into an open wikilink (`[[selection`) with the wikilink menu searching it.
 
 `EDITOR_KEY_BINDINGS` is a literal (`as const`) object mapping every key above to its description, for host settings UIs and keybinding-collision checks.
 
@@ -92,7 +103,7 @@ Two things the variable list cannot show: `--meowdown-gutter` is the horizontal 
 
 Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-accent`. Wire click handling with `defineTagClickHandler(({ tag, event }) => ...)` (or `@meowdown/react`'s `onTagClick` prop); `tag` is read from the rendered text without the leading `#`.
 
-Wikilinks (`[[target]]`/`[[target|alias]]`) render in place via a mark view as an immutable label (the alias, or the target when there is no alias), with the raw source hidden in hide and focus modes and shown dimmed in show mode. The label uses the `.md-wikilink-view-label` class, dashed-underlined and colored by `--meowdown-accent`. In every mark mode the link is a single immutable caret stop: arrowing onto it selects the whole source (ringed with `--meowdown-node-outline` in hide and focus, the native selection over the visible source in show), and Backspace/Delete remove it as a unit. Wire click navigation with `defineWikilinkClickHandler(({ target, event }) => ...)` (or `@meowdown/react`'s `onWikilinkClick` prop).
+Wikilinks (`[[target]]`/`[[target|alias]]`) render in place via a mark view as an immutable label (the alias, or the target when there is no alias), with the raw source hidden in hide and focus modes and shown dimmed in show mode. The label uses the `.md-wikilink-view-label` class, dashed-underlined and colored by `--meowdown-accent`. In every mark mode the link is a single immutable caret stop: arrowing onto it selects the whole source (ringed with `--meowdown-node-outline` in hide and focus, the native selection over the visible source in show), and Backspace/Delete remove it as a unit. Wire click navigation with `defineWikilinkClickHandler(({ target, event }) => ...)` (or `@meowdown/react`'s `onWikilinkClick` prop); `Mod-Enter` with the caret on a wikilink, tag, or Markdown link fires the same handler, with the `KeyboardEvent` as `event`.
 
 Markdown links (`[text](url)`) render the label as an `<a href>` with the `.md-link` class, colored by `--meowdown-accent`; the `[`, `]`, and `(url)` syntax dims in show mode and hides in hide and focus modes. Wire click handling with `defineLinkClickHandler(({ href, event }) => ...)` (or `@meowdown/react`'s `onLinkClick` prop).
 
@@ -102,7 +113,7 @@ Inline images (`![alt](src)`) stay literal text and render in place via a mark v
 
 Pasted or dropped files persist through [`defineFilePaste`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineFilePaste) (or `@meowdown/react`'s `onFilePaste` prop): the handler persists each file and returns its markdown destination. An image (`image/*` MIME type) inserts `![](src)`; any other file inserts a `[name](src)` link; multiple files insert one link per line, in the order they appear in the drop. Without `onFilePaste`, file events are left to the browser's default handling. A host command that inserts file links itself (e.g. an attach-file picker) can build the same markdown with [`buildFileMarkdown`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-buildFileMarkdown).
 
-A host can render chosen file links as inline **file pills**: pass `resolveFileLink` to [`defineEditorExtension`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineEditorExtension) (or `@meowdown/react`'s `resolveFileLink` prop) to claim links by their href (e.g. everything under `assets/`), and add [`defineFileView`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineFileView) to render each claimed link as a pill: a file-kind icon, the name, and the size supplied (possibly async) by `resolveFileInfo`. The markdown text is untouched, and a claimed link behaves like an image: one caret unit with an editable source, clicks reported through [`defineFileClickHandler`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineFileClickHandler) (`@meowdown/react`'s `onFileClick`) rather than the link click handler, and no link hover or edit menu.
+A host can render chosen file links as inline **file pills**: pass `resolveFileLink` to [`defineEditorExtension`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineEditorExtension) (or `@meowdown/react`'s `resolveFileLink` prop) to claim links by their href (e.g. everything under `assets/`), and add [`defineFileView`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineFileView) to render each claimed link as a pill: a file-kind icon, the name, and the size supplied (possibly async) by `resolveFileInfo`. The markdown text is untouched, and a claimed link behaves like an image: one caret unit with an editable source, clicks (and `Mod-Enter` with the caret on it) reported through [`defineFileClickHandler`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineFileClickHandler) (`@meowdown/react`'s `onFileClick`) rather than the link click handler, and no link hover or edit menu.
 
 Rendered images are resizable: drag the corner handle and the chosen size is written back into the source as a trailing comment, `![alt](src)<!-- {"width":320,"height":240} -->`, which round-trips as plain Markdown. A comment immediately after an image is folded into its mark and drives the image's `width` and `height` attributes, so the box keeps its dimensions before the image loads; any other comment stays literal text.
 

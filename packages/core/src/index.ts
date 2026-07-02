@@ -47,6 +47,7 @@ export {
   type FileInfoResolver,
   type FileViewOptions,
 } from './extensions/file-view.ts'
+export { defineFollowLinkHandler, type FollowLinkHandlers } from './extensions/follow-link.ts'
 export { getLinkUnitAt, type LinkUnit } from './extensions/get-link-unit-at.ts'
 export { defineHTMLComment, type MeowdownHTMLCommentAttrs } from './extensions/html-comment.ts'
 export { defineHTMLPaste } from './extensions/html-paste.ts'

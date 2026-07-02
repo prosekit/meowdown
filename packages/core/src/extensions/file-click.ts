@@ -11,7 +11,7 @@ interface FileHit {
   name: string
 }
 
-function findFileAt(state: EditorState, pos: number): FileHit | undefined {
+export function findFileAt(state: EditorState, pos: number): FileHit | undefined {
   const range = getMarkRangeAt(state, pos, 'mdFile')
   if (!range) return
   const { href, name } = range.mark.attrs as MdFileAttrs
@@ -24,8 +24,11 @@ export interface FileClickPayload {
   href: string
   /** The file name shown on the pill. */
   name: string
-  /** The originating click. Read modifier keys or position a popover from it. */
-  event: MouseEvent
+  /**
+   * The originating click, or the `Mod-Enter` key press that followed the
+   * pill. Read modifier keys or position a popover from it.
+   */
+  event: MouseEvent | KeyboardEvent
 }
 
 export type FileClickHandler = (payload: FileClickPayload) => void
