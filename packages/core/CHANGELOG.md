@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.0](https://github.com/prosekit/meowdown/compare/core-v0.32.0...core-v0.33.0) (2026-07-02)
+
+
+### Features
+
+* make `insertMarkdown` preserve selected content ([#208](https://github.com/prosekit/meowdown/issues/208)) ([5046126](https://github.com/prosekit/meowdown/commit/504612604758d8e12c0f3eaddbf6577610a5ed44))
+
 ## [0.32.0](https://github.com/prosekit/meowdown/compare/core-v0.31.0...core-v0.32.0) (2026-07-02)
 
 
