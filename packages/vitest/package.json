@@ -5,12 +5,14 @@
   "private": true,
   "exports": {
     "./config": "./src/config.ts",
+    "./file-events": "./src/file-events.ts",
     "./helpers": "./src/helpers.ts",
     "./setup-console": "./src/setup-console.ts",
     "./setup-webkit": "./src/setup-webkit.ts"
   },
   "devDependencies": {
     "@ocavue/tsconfig": "^0.7.1",
+    "@prosekit/pm": "^0.1.19-beta.1",
     "@vitest/browser-playwright": "^4.1.9",
     "vitest": "^4.1.9",
     "vitest-browser-commands": "^0.2.1",
