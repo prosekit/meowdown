@@ -19,7 +19,7 @@ const DOMAIN_RE = /^[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s<]*)?/i
 // `( * _ ~`. Mirrors GFM's "start of line, after whitespace, or one of these"
 // boundary rule. A `.`, `-`, alphanumeric, or `@` before the match means we are
 // mid-word or mid-email, so no autolink starts there.
-const BOUNDARY_BEFORE_RE = /[\s(*_~]/
+export const BOUNDARY_BEFORE_RE = /[\s(*_~]/
 
 function isDomainStartChar(code: number): boolean {
   return (
@@ -44,7 +44,7 @@ function countChar(text: string, end: number, ch: string): number {
 // Returns the kept length of `matched`.
 //
 // Ported from https://code.haverbeke.berlin/lezer/markdown/src/commit/1.6.4/src/extension.ts#L179-L195
-function trimAutolinkEnd(matched: string): number {
+export function trimAutolinkEnd(matched: string): number {
   let end = matched.length
   for (;;) {
     const last = matched[end - 1]

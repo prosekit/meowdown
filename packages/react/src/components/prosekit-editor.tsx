@@ -132,6 +132,9 @@ export interface ProseKitEditorProps {
   /** Claims links as file pills. Read once on mount; see `EditorProps.resolveFileLink`. */
   resolveFileLink?: FileLinkResolver
 
+  /** Extra autolinked URL schemes. Read once on mount; see `EditorProps.autolinkSchemes`. */
+  autolinkSchemes?: readonly string[]
+
   /** Resolves the size shown on a file pill. See `EditorProps.resolveFileInfo`. */
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
 
@@ -199,6 +202,7 @@ export function ProseKitEditor({
   onExitBoundary,
   resolveImageUrl,
   resolveFileLink,
+  autolinkSchemes,
   resolveFileInfo,
   onFileClick,
   onFilePaste,
@@ -217,9 +221,12 @@ export function ProseKitEditor({
   children,
 }: ProseKitEditorProps) {
   const [editor] = useState((): TypedEditor => {
-    // Creation-time options: `resolveFileLink` is baked into the parse
-    // pipeline, so only the value from the first render counts.
-    const baseExtension: EditorExtension = defineEditorExtension({ resolveFileLink })
+    // Creation-time options: `resolveFileLink` and `autolinkSchemes` are baked
+    // into the parse pipeline, so only the values from the first render count.
+    const baseExtension: EditorExtension = defineEditorExtension({
+      resolveFileLink,
+      autolinkSchemes,
+    })
     const extension = union(baseExtension, defineCodeBlockView())
     const editor: TypedEditor = createEditor({ extension })
     if (initialMarkdown) {

@@ -65,7 +65,7 @@ export type {
 } from './extensions/inline-marks.ts'
 export {
   inlineTextToMarkChunks,
-  type FileLinkOptions,
+  type InlineParseOptions,
   type FileLinkPayload,
   type FileLinkResolver,
 } from './extensions/inline-text-to-mark-chunks.ts'

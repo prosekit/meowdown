@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { defineEditorExtension, type EditorExtension } from './extension.ts'
 import {
   inlineTextToMarkChunks,
-  type FileLinkOptions,
+  type InlineParseOptions,
   type FileLinkResolver,
 } from './inline-text-to-mark-chunks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
@@ -38,7 +38,7 @@ const getMarkBuilders = once((): TypedMarkBuilders => {
   return createMarkBuilders<EditorExtension>(schema)
 })
 
-function parse(text: string, options?: FileLinkOptions): string {
+function parse(text: string, options?: InlineParseOptions): string {
   const markBuilders = getMarkBuilders()
   const chunks = inlineTextToMarkChunks(markBuilders, text, options)
   const formatted = chunks.map(formatMarkChunk)

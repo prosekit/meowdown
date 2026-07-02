@@ -169,6 +169,14 @@ export interface EditorProps {
   resolveFileLink?: FileLinkResolver
 
   /**
+   * Extra URL schemes autolinked as bare text: with `['reflect']`, typing
+   * `reflect://today` renders as a clickable link the way `https://…` does.
+   * Each entry is a scheme name without the `://`. Read once when the editor
+   * is created: later changes are ignored, like `initialMarkdown`.
+   */
+  autolinkSchemes?: readonly string[]
+
+  /**
    * Resolves the metadata (file size in bytes) shown on a file pill, directly
    * or as a promise; the pill renders immediately and fills the size in when
    * the promise settles. May be called repeatedly for the same `href`, so
@@ -279,6 +287,7 @@ export function MeowdownEditor({
   onExitBoundary,
   resolveImageUrl,
   resolveFileLink,
+  autolinkSchemes,
   resolveFileInfo,
   onFileClick,
   onFilePaste,
@@ -389,6 +398,7 @@ export function MeowdownEditor({
         onExitBoundary={onExitBoundary}
         resolveImageUrl={resolveImageUrl}
         resolveFileLink={resolveFileLink}
+        autolinkSchemes={autolinkSchemes}
         resolveFileInfo={resolveFileInfo}
         onFileClick={onFileClick}
         onFilePaste={onFilePaste}

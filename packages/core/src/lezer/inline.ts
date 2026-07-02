@@ -1,4 +1,4 @@
-import { gfmParser } from './parser.ts'
+import { gfmParserWithSchemes } from './parser.ts'
 
 /**
  * Narrow shape for `parser.parseInline()`'s returned elements.
@@ -17,12 +17,17 @@ export interface InlineElement {
 
 /**
  * Run `gfmParser`'s inline phase on a string and return the top-level
- * inline elements. Wraps the cast that's needed because Lezer's
+ * inline elements. `autolinkSchemes` adds host-configured scheme
+ * autolinks (e.g. `['reflect']` links `reflect://today`); omit for the
+ * default parse. Wraps the cast that's needed because Lezer's
  * `parseInline` is typed as returning `Element[]` (with `children`
  * marked `@internal`).
  */
-export function parseInline(text: string): readonly InlineElement[] {
-  return gfmParser.parseInline(text, 0) as InlineElement[]
+export function parseInline(
+  text: string,
+  autolinkSchemes?: readonly string[],
+): readonly InlineElement[] {
+  return gfmParserWithSchemes(autolinkSchemes).parseInline(text, 0) as InlineElement[]
 }
 
 /** Depth-first list of every element matching `test`. */

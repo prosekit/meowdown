@@ -60,8 +60,16 @@ export interface FileLinkPayload {
 export type FileLinkResolver = (link: FileLinkPayload) => boolean
 
 /** Host options that influence inline parsing. */
-export interface FileLinkOptions {
+export interface InlineParseOptions {
+  /** Claims a `[label](url)` link as a file attachment; see {@link FileLinkResolver}. */
   resolveFileLink?: FileLinkResolver
+  /**
+   * Extra URL schemes autolinked as bare `<scheme>://…` text: with
+   * `['reflect']`, typing `reflect://today` renders as a clickable link the
+   * way `https://…` does. Each entry is a scheme name without the `://`.
+   * Defaults to none.
+   */
+  autolinkSchemes?: readonly string[]
 }
 
 /**
@@ -75,9 +83,9 @@ export function inlineTextToMarkChunks(
   /** The raw inline text of one textblock (no block prefix). */
   text: string,
   /** Host options; omit for the default parse. */
-  options?: FileLinkOptions,
+  options?: InlineParseOptions,
 ): MarkChunk[] {
-  const elements = parseInline(text)
+  const elements = parseInline(text, options?.autolinkSchemes)
   const out: MarkChunk[] = []
   walk(elements, [], 0, text.length, text, marks, out, options)
   return out
@@ -115,7 +123,7 @@ function walk(
   text: string,
   marks: TypedMarkBuilders,
   out: MarkChunk[],
-  options: FileLinkOptions | undefined,
+  options: InlineParseOptions | undefined,
 ): void {
   let pos = rangeStart
   for (let index = 0; index < nodes.length; index++) {
@@ -239,7 +247,7 @@ function claimFileLink(
   parentMarks: readonly Mark[],
   text: string,
   marks: TypedMarkBuilders,
-  options: FileLinkOptions | undefined,
+  options: InlineParseOptions | undefined,
 ): readonly Mark[] | undefined {
   const resolveFileLink = options?.resolveFileLink
   if (!resolveFileLink) return undefined
