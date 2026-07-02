@@ -102,7 +102,8 @@ export interface EditorProps {
 
   /**
    * Extra controls rendered in the pending-replacement preview footer, next to
-   * the built-in Accept and Discard buttons (e.g. a retry button).
+   * the built-in accept ("Replace selection" / "Insert below", per the staged
+   * mode) and Discard buttons (e.g. a retry button).
    */
   pendingReplacementActions?: ReactNode
 
