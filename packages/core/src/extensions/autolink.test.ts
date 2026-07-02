@@ -39,4 +39,24 @@ describe('autolink rendering', () => {
     fixture.set(n.doc(n.paragraph('go to goo<a>gle.com now')))
     await expect.element(pmRoot.getByRole('link', { name: 'google.com' })).toBeInTheDocument()
   })
+
+  it('renders a configured custom scheme URL as a link', async () => {
+    using fixture = setupFixture({ extensionOptions: { autolinkSchemes: ['reflect'] } })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('open reflect://today now')))
+    const link = pmRoot.getByRole('link', { name: 'reflect://today' })
+    await expect.element(link).toBeInTheDocument()
+    await expect.element(link).toHaveAttribute('href', 'reflect://today')
+  })
+
+  it('leaves a custom scheme URL plain text without the option', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('open reflect://today or google.com now')))
+    // The bare domain linking proves the inline-mark pass has run.
+    await expect.element(pmRoot.getByRole('link', { name: 'google.com' })).toBeInTheDocument()
+    await expect
+      .element(pmRoot.getByRole('link', { name: 'reflect://today' }))
+      .not.toBeInTheDocument()
+  })
 })

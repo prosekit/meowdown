@@ -145,6 +145,13 @@ describe('inline', () => {
     expect(roundtrip('see google.com here')).toBe('see google.com here\n')
   })
 
+  it('keeps a custom scheme URL', () => {
+    // A custom scheme autolink (`autolinkSchemes: ['reflect']`) is plain text
+    // in the markdown source, so it round-trips unchanged and re-parses to the
+    // same URL node in an editor configured with that scheme.
+    expect(roundtrip('open reflect://today now')).toBe('open reflect://today now\n')
+  })
+
   it('keeps a domain with a path', () => {
     expect(roundtrip('paths sub.domain.net/a/b?x=1 end')).toBe('paths sub.domain.net/a/b?x=1 end\n')
   })

@@ -1,8 +1,14 @@
-import { GFM, type InlineContext, parser as defaultParser } from '@lezer/markdown'
+import {
+  GFM,
+  type InlineContext,
+  type MarkdownParser,
+  parser as defaultParser,
+} from '@lezer/markdown'
 
 import { bareAutolink } from './bare-autolink.ts'
 import { hashtag } from './hashtag.ts'
 import { highlight } from './highlight.ts'
+import { schemeAutolink } from './scheme-autolink.ts'
 import { wikilink } from './wikilink.ts'
 
 /**
@@ -34,3 +40,26 @@ export const gfmParser = defaultParser.configure([GFM, hashtag, wikilink, bareAu
 export const gfmBlockOnlyParser = gfmParser.configure({
   parseInline: [{ name: 'SkipInline', before: 'Escape', parse: consumeAllInline }],
 })
+
+// One configured parser per distinct `autolinkSchemes` list, so every editor
+// created with the same option shares a parser instead of rebuilding one per
+// `parseInline` call.
+const parserBySchemesKey = new Map<string, MarkdownParser>()
+
+/**
+ * `gfmParser` extended with `SchemeAutolink` for the given custom URL schemes
+ * (e.g. `['reflect']` makes `reflect://today` a link). Returns the shared
+ * `gfmParser` when no schemes are configured. Only inline parsing is
+ * extended - no node types are added - so `LEZER_NODE_IDS` (computed from
+ * `gfmParser`) is valid for the returned parser too.
+ */
+export function gfmParserWithSchemes(autolinkSchemes?: readonly string[]): MarkdownParser {
+  if (!autolinkSchemes || autolinkSchemes.length === 0) return gfmParser
+  const key = autolinkSchemes.join('\n')
+  let parser = parserBySchemesKey.get(key)
+  if (!parser) {
+    parser = gfmParser.configure(schemeAutolink(autolinkSchemes))
+    parserBySchemesKey.set(key, parser)
+  }
+  return parser
+}

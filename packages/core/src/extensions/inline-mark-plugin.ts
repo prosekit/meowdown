@@ -21,7 +21,7 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { PositionRange } from '../utils/range.ts'
 
 import { BatchSetMarkStep } from './batch-set-mark-step.ts'
-import { inlineTextToMarkChunks, type FileLinkOptions } from './inline-text-to-mark-chunks.ts'
+import { inlineTextToMarkChunks, type InlineParseOptions } from './inline-text-to-mark-chunks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
 import { getMarkBuildersForSchema } from './schema.ts'
 
@@ -77,7 +77,7 @@ function computeAffectedRange(
   }
 }
 
-function createInlineMarkPlugin(options: FileLinkOptions | undefined): Plugin {
+function createInlineMarkPlugin(options: InlineParseOptions | undefined): Plugin {
   /**
    * Cache of chunks per textblock node, keyed by the immutable
    * `ProseMirrorNode` instance. Stored chunks are baseOffset-relative
@@ -159,6 +159,6 @@ function triggerInlineMarks(state: EditorState): Transaction {
   return state.tr.setMeta('inline-marks-trigger', true)
 }
 
-export function defineInlineMarkPlugin(options?: FileLinkOptions) {
+export function defineInlineMarkPlugin(options?: InlineParseOptions) {
   return definePlugin(createInlineMarkPlugin(options))
 }

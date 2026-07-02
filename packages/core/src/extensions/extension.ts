@@ -23,7 +23,7 @@ import { defineMeowdownHorizontalRule } from './horizontal-rule.ts'
 import { defineHTMLComment } from './html-comment.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
-import type { FileLinkOptions } from './inline-text-to-mark-chunks.ts'
+import type { InlineParseOptions } from './inline-text-to-mark-chunks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
 import { defineLinkCommands } from './link-commands.ts'
 import { defineMeowdownList } from './list.ts'
@@ -86,7 +86,7 @@ export type EditorExtension = ReturnType<typeof defineEditorExtensionImpl>
  * is baked into the editor's parse pipeline, so changing it requires
  * rebuilding the editor.
  */
-export type EditorExtensionOptions = FileLinkOptions
+export type EditorExtensionOptions = InlineParseOptions
 
 export function defineEditorExtension(options: EditorExtensionOptions = {}): EditorExtension {
   return defineEditorExtensionImpl(options)
