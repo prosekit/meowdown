@@ -3,6 +3,7 @@ import {
   defineEmbedPaste,
   defineExitBoundaryHandler,
   defineFilePaste,
+  defineFollowLinkHandler,
   defineHTMLPaste,
   defineImage,
   defineImageClickHandler,
@@ -103,6 +104,16 @@ export function EditorExtensions({
     useMemo(() => {
       return onTagClick ? defineTagClickHandler(onTagClick) : null
     }, [onTagClick]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      // Mod-Enter follows the link under the caret through the same handlers
+      // a click uses.
+      return onWikilinkClick || onTagClick || onLinkClick
+        ? defineFollowLinkHandler({ onWikilinkClick, onTagClick, onLinkClick })
+        : null
+    }, [onWikilinkClick, onTagClick, onLinkClick]),
   )
 
   useExtension(

@@ -76,14 +76,16 @@ export interface EditorProps {
   onWikilinkSearch?: WikilinkSearchHandler
 
   /**
-   * Called with the link target on click of a rendered wiki link. Pass a stable
-   * function (e.g. from `useCallback`).
+   * Called with the link target on click of a rendered wiki link, or on
+   * `Mod-Enter` with the caret on one. Pass a stable function (e.g. from
+   * `useCallback`).
    */
   onWikilinkClick?: WikilinkClickHandler
 
   /**
    * Called with the link `href` on click of a rendered Markdown link
-   * (`[text](url)`). Pass a stable function (e.g. from `useCallback`).
+   * (`[text](url)`), or on `Mod-Enter` with the caret on one. Pass a stable
+   * function (e.g. from `useCallback`).
    */
   onLinkClick?: LinkClickHandler
 
@@ -95,7 +97,8 @@ export interface EditorProps {
 
   /**
    * Called with the tag name (without the leading `#`) on click of a rendered
-   * `#tag`. Pass a stable function (e.g. from `useCallback`).
+   * `#tag`, or on `Mod-Enter` with the caret on one. Pass a stable function
+   * (e.g. from `useCallback`).
    */
   onTagClick?: TagClickHandler
 

@@ -44,7 +44,7 @@ export function isSelectionInTableCell(state: EditorState): boolean {
 // content to a single paragraph so a cell can never hold another block.
 // `defineNodeSpec` merges specs of the same name, so this keeps ProseKit's cell
 // attrs and DOM and only swaps the content expression.
-const CELL_CONTENT = 'paragraph'
+const CELL_CONTENT = 'paragraph' satisfies NodeName
 
 function defineTableCellContent() {
   return union(
