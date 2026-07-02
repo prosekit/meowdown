@@ -35,6 +35,12 @@ export {
   type FilePasteOptions,
   type FileSaveErrorHandler,
 } from './extensions/file-paste.ts'
+export {
+  defineFileView,
+  type FileInfo,
+  type FileInfoResolver,
+  type FileViewOptions,
+} from './extensions/file-view.ts'
 export { getLinkUnitAt, type LinkUnit } from './extensions/get-link-unit-at.ts'
 export { defineHTMLComment, type MeowdownHTMLCommentAttrs } from './extensions/html-comment.ts'
 export { defineHTMLPaste } from './extensions/html-paste.ts'

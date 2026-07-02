@@ -6,7 +6,7 @@ import { createTestEditor } from '@prosekit/core/test'
 import type { EditorNode } from '@prosekit/pm/model'
 import { formatHTML } from 'diffable-html-snapshot'
 
-import { defineEditorExtension } from '../extensions/extension.ts'
+import { defineEditorExtension, type EditorExtensionOptions } from '../extensions/extension.ts'
 
 import { getSelectionSnapshot } from './selection-snapshot.ts'
 
@@ -16,10 +16,12 @@ export { setCaret, traceKeySelection, traceKeyAt } from './caret.ts'
 export interface SetupFixtureOptions {
   /** Whether to mount the editor onto a real DOM container. Defaults to `true`. */
   mount?: boolean
+  /** Creation-time options for `defineEditorExtension` (e.g. `resolveFileLink`). */
+  extensionOptions?: EditorExtensionOptions
 }
 
-export function setupFixture({ mount = true }: SetupFixtureOptions = {}) {
-  const extension = defineEditorExtension()
+export function setupFixture({ mount = true, extensionOptions }: SetupFixtureOptions = {}) {
+  const extension = defineEditorExtension(extensionOptions)
   const editor = createTestEditor({ extension })
   const n = editor.nodes
   const m = editor.marks

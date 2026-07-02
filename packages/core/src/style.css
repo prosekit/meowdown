@@ -46,6 +46,12 @@
     /* corner radius of rendered inline images */
     --meowdown-image-radius: 0.5rem;
 
+    /* file pill (a claimed file link rendered as an inline pill) */
+    --meowdown-file-pill-bg: light-dark(oklch(0.985 0 0), oklch(0.21 0.006 286));
+    --meowdown-file-pill-bg-hover: light-dark(oklch(0.967 0 0), oklch(0.274 0.005 286));
+    --meowdown-file-pill-border: var(--meowdown-border);
+    --meowdown-file-pill-muted: var(--meowdown-muted);
+
     /* table header row background */
     --meowdown-table-header-bg: light-dark(oklch(0.985 0 0), oklch(0.274 0.005 286));
 
@@ -687,6 +693,53 @@
       opacity: 1;
       transform: scale(1);
       pointer-events: auto;
+    }
+  }
+
+  /* file pill */
+  .ProseMirror {
+    .md-file-view {
+      max-width: 100%;
+      margin-left: 2px;
+      margin-right: 2px;
+    }
+
+    .md-file-view-preview {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4em;
+      max-width: 100%;
+      padding: 0.1em 0.65em;
+      border: 1px solid var(--meowdown-file-pill-border);
+      /* The pill shape; overrides the shared atom-preview 6px radius. */
+      border-radius: 999px;
+      background: var(--meowdown-file-pill-bg);
+      cursor: pointer;
+    }
+
+    .md-file-view-preview:hover {
+      background: var(--meowdown-file-pill-bg-hover);
+    }
+
+    .md-file-view-icon {
+      flex: none;
+      width: 1em;
+      height: 1em;
+      color: var(--meowdown-file-pill-muted);
+    }
+
+    /* A long name truncates with an ellipsis; the size suffix never does. */
+    .md-file-view-name {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .md-file-view-size {
+      flex: none;
+      white-space: nowrap;
+      font-size: 0.85em;
+      color: var(--meowdown-file-pill-muted);
     }
   }
 
