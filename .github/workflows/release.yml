@@ -19,8 +19,20 @@ jobs:
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
+      # release-please titles the grouped release PR "chore: release master": the
+      # merge plugin fills ${version} only from a root-path package, which this repo
+      # does not have (https://github.com/googleapis/release-please/issues/2386), and
+      # the linked-versions plugin hardcodes its own title
+      # (https://github.com/googleapis/release-please/issues/2305). This step
+      # retitles the PR with the version from the manifest on the PR branch.
+      #
       # The title must keep the exact shape "chore: release X.Y.Z": release-please
-      # re-parses it when the PR merges, and any other shape breaks tagging.
+      # re-parses the title when the PR merges, and a shape it cannot parse skips
+      # tagging and publish (https://github.com/googleapis/release-please/issues/2712).
+      # Component versions still come from the PR body, not the title
+      # (https://github.com/googleapis/release-please/issues/2101), so the rewrite is
+      # safe. Delete this step once the grouped title becomes configurable upstream
+      # (https://github.com/googleapis/release-please/pull/2617).
       - name: Add version to release PR title
         if: ${{ steps.release-please.outputs.prs_created == 'true' }}
         continue-on-error: true
