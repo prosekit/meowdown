@@ -1,4 +1,4 @@
-import { defineCommands } from '@prosekit/core'
+import { defineCommands, isTextSelection } from '@prosekit/core'
 import { Slice, type ResolvedPos } from '@prosekit/pm/model'
 import { TextSelection, type Command } from '@prosekit/pm/state'
 
@@ -40,7 +40,14 @@ function insertMarkdown(markdown: string): Command {
     const slice = isSingleParagraph
       ? new Slice(content, 1, 1)
       : new Slice(content, 0, Slice.maxOpen(content).openEnd)
-    if (dispatch) dispatch(state.tr.replaceSelection(slice).scrollIntoView())
+    if (dispatch) {
+      const tr = state.tr
+      const selection = tr.selection
+      if (!isTextSelection(selection) || !selection.empty) {
+        tr.setSelection(TextSelection.near(selection.$from))
+      }
+      dispatch(tr.replaceSelection(slice).scrollIntoView())
+    }
     return true
   }
 }
