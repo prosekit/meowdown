@@ -1,3 +1,4 @@
+import { NodeSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
 import { userEvent } from 'vitest/browser'
 
@@ -95,6 +96,30 @@ describe('defineMoveBlock', () => {
     fixture.view.focus()
     await pressAltUp()
     expect(fixture.selectionSnapshot).toBe('p┃2p1')
+  })
+
+  it('moves a node-selected block, keeping it selected', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph('p1'), n.horizontalRule(), n.paragraph('p2')))
+    const hrPos = view.state.doc.child(0).nodeSize
+    view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, hrPos)))
+    view.focus()
+    await pressAltUp()
+    expect(docToMarkdown(fixture.doc)).toBe('---\n\np1\n\np2\n')
+    const { selection } = fixture.state
+    expect(selection).toBeInstanceOf(NodeSelection)
+    expect((selection as NodeSelection).node.type.name).toBe('horizontalRule')
+  })
+
+  it('moves the whole blockquote when the caret sits inside it', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('p1'), n.blockquote(n.paragraph('q<a>uote'))))
+    fixture.view.focus()
+    await pressAltUp()
+    expect(docToMarkdown(fixture.doc)).toBe('> quote\n\np1\n')
+    expect(fixture.selectionSnapshot).toBe('q┃uotep1')
   })
 
   it('does nothing at the document top and bottom', async () => {
