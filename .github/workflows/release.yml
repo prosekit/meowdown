@@ -18,6 +18,25 @@ jobs:
         id: release-please
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+      # The title must keep the exact shape "chore: release X.Y.Z": release-please
+      # re-parses it when the PR merges, and any other shape breaks tagging.
+      - name: Add version to release PR title
+        if: ${{ steps.release-please.outputs.prs_created == 'true' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+          PRS: ${{ steps.release-please.outputs.prs }}
+        run: |
+          number=$(jq -r '.[0].number' <<< "$PRS")
+          branch=$(jq -r '.[0].headBranchName' <<< "$PRS")
+          version=$(gh api "repos/${{ github.repository }}/contents/.release-please-manifest.json?ref=$branch" \
+            -H 'Accept: application/vnd.github.raw+json' | jq -r '.["packages/core"]')
+          if [ -z "$version" ] || [ "$version" = "null" ]; then
+            echo "could not resolve version from manifest on $branch" >&2
+            exit 1
+          fi
+          gh pr edit "$number" --repo "${{ github.repository }}" --title "chore: release $version"
     outputs:
       releases_created: ${{ steps.release-please.outputs.releases_created }}
 
