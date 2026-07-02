@@ -78,7 +78,7 @@ interface DemoRun {
 }
 
 const ACTION_BUTTON_CLASS =
-  'inline-flex cursor-pointer items-center rounded-lg px-2.5 py-1 text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800'
+  'inline-flex cursor-pointer items-center rounded-lg px-2.5 py-1 whitespace-nowrap text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800'
 
 function DemoReplacementActions({
   mode,
