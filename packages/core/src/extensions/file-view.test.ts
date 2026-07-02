@@ -3,6 +3,7 @@ import { page, userEvent } from 'vitest/browser'
 
 import { setupFixture, traceKeyAt, traceKeySelection, type Fixture } from '../testing/index.ts'
 
+import { replaceText } from '../testing/replace-text.ts'
 import { defineFileClickHandler, type FileClickHandler } from './file-click.ts'
 import { defineFileView, type FileInfoResolver } from './file-view.ts'
 import type { FileLinkResolver } from './inline-text-to-mark-chunks.ts'
@@ -127,38 +128,37 @@ describe('file pill size', () => {
 })
 
 describe('file pill update', () => {
-  it('keeps the same pill element while the name is edited', async () => {
-    using fixture = setup('[report<a>.pdf](assets/report.pdf)', undefined, 'show')
+  it('keeps the same pill element while the name is updated', async () => {
+    using fixture = setup('[report.pdf](assets/report.pdf)', undefined, 'show')
     await expect.element(pill).toHaveTextContent('report.pdf')
     const pillBefore = pill.element()
-    await userEvent.keyboard('X')
-    await expect.element(pill).toHaveTextContent('reportX.pdf')
+    replaceText(fixture.view, 'report.pdf', '123456.pdf')
+    await expect.element(pill).toHaveTextContent('123456.pdf')
     expect(pill.element()).toBe(pillBefore)
-    expect(fixture.doc.textContent).toBe('[reportX.pdf](assets/report.pdf)')
+    expect(fixture.doc.textContent).toBe('[123456.pdf](assets/report.pdf)')
   })
 
   it('rebuilds the pill when the href is edited', async () => {
     const resolveFileInfo = vi.fn(() => ({ size: 1000 }))
-    using fixture = setup('[report.pdf](assets/report<a>.pdf)', resolveFileInfo, 'show')
-    void fixture
+    using fixture = setup('[report.pdf](assets/report.pdf)', resolveFileInfo, 'show')
     await expect.element(pillSize).toHaveTextContent('1 KB')
     const pillBefore = pill.element()
-    await userEvent.keyboard('X')
+    replaceText(fixture.view, 'assets/report.pdf', 'assets/123456.pdf')
     await expect.element(pill).toBeInTheDocument()
     await vi.waitFor(() => {
-      expect(resolveFileInfo).toHaveBeenCalledWith('assets/reportX.pdf')
+      expect(resolveFileInfo).toHaveBeenCalledWith('assets/123456.pdf')
     })
     expect(pill.element()).not.toBe(pillBefore)
   })
 
   it('drops the pill when the href is edited out of the resolver claim', async () => {
-    using fixture = setup('A[report.pdf](<a>assets/report.pdf)', undefined, 'show')
+    using fixture = setup('[report.pdf](assets/report.pdf)', undefined, 'show')
     await expect.element(pill).toBeInTheDocument()
-    await userEvent.keyboard('x')
+    replaceText(fixture.view, 'assets/report.pdf', 'ssets/report.pdf')
     await vi.waitFor(() => {
       expect(pill.query()).toBeNull()
     })
-    expect(fixture.doc.textContent).toBe('A[report.pdf](xassets/report.pdf)')
+    expect(fixture.doc.textContent).toBe('[report.pdf](ssets/report.pdf)')
   })
 })
 
