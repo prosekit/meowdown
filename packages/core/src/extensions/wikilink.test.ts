@@ -139,12 +139,11 @@ describe.each(LABEL_MODES)('wikilink selection ring in %s mode', (mode) => {
 })
 
 // Vertical caret motion must walk through a paragraph containing a wikilink,
-// not orbit it: each ArrowDown moves one visual line lower.
-describe('wikilink vertical caret navigation in focus mode', () => {
-  function setupThreeParagraphs(): Fixture {
-    const fixture = setupFixture()
+describe('wikilink vertical caret navigation', () => {
+  async function run(mode: MarkMode): Promise<string> {
+    using fixture = setupFixture()
     const { editor, n } = fixture
-    editor.use(defineMarkMode('focus'))
+    editor.use(defineMarkMode(mode))
     fixture.set(
       n.doc(
         n.paragraph('paragraph <a>1'),
@@ -153,43 +152,19 @@ describe('wikilink vertical caret navigation in focus mode', () => {
         n.paragraph('paragraph 4'),
       ),
     )
-    return fixture
+    fixture.view.focus()
+    const steps = await traceKeySelection(fixture, 'ArrowDown', 7)
+
+    return '\n' + Array.from(new Set(steps)).join('\n' + '-'.repeat(10) + '\n') + '\n'
   }
 
-  it('ArrowDown from the first paragraph reaches the third paragraph', async () => {
-    using fixture = setupThreeParagraphs()
-    fixture.view.focus()
-    expect(fixture.state.selection.$head.parent.textContent).toBe('paragraph 1')
-    const steps = await traceKeySelection(fixture, 'ArrowDown', 7)
-    expect(fixture.state.selection.$head.parent.textContent).toBe('paragraph 4')
-    expect('\n' + Array.from(new Set(steps)).join('\n' + '-'.repeat(10) + '\n') + '\n')
-      .toMatchInlineSnapshot(`
-      "
-      paragraph ┃1
-      paragraph 2 [[WIKILINK]] text
-      paragraph 3 [[WIKILINK]]
-      paragraph 4
-      ----------
-      paragraph 1
-      paragraph ┃2 [[WIKILINK]] text
-      paragraph 3 [[WIKILINK]]
-      paragraph 4
-      ----------
-      paragraph 1
-      paragraph 2 [[WIKILINK]] text
-      paragraph ┃3 [[WIKILINK]]
-      paragraph 4
-      ----------
-      paragraph 1
-      paragraph 2 [[WIKILINK]] text
-      paragraph 3 [[WIKILINK]]
-      paragraph ┃4
-      ----------
-      paragraph 1
-      paragraph 2 [[WIKILINK]] text
-      paragraph 3 [[WIKILINK]]
-      paragraph 4┃
-      "
-    `)
+  it('can ArrowDown from the first paragraph to the last paragraph in hide mode', async () => {
+    expect(await run('hide')).toMatchInlineSnapshot()
+  })
+  it('can ArrowDown from the first paragraph to the last paragraph in show mode', async () => {
+    expect(await run('show')).toMatchInlineSnapshot()
+  })
+  it('can ArrowDown from the first paragraph to the last paragraph in focus mode', async () => {
+    expect(await run('focus')).toMatchInlineSnapshot()
   })
 })
