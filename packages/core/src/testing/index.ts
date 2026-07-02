@@ -62,7 +62,9 @@ export function setupFixture({ mount = true }: SetupFixtureOptions = {}) {
     },
 
     get selectionSnapshot() {
-      return getSelectionSnapshot(editor.view.state)
+      const snapshot = getSelectionSnapshot(editor.view.state)
+      // Wrap the snapshot in newlines if it contains multiple lines, so that snapshot testing is easier to read and diff.
+      return snapshot.includes('\n') ? `\n${snapshot}\n` : snapshot
     },
 
     get htmlSnapshot() {
