@@ -1,4 +1,5 @@
 import type {
+  AcceptPendingReplacementOptions,
   ExitBoundaryHandler,
   FilePasteOptions,
   ImageClickHandler,
@@ -7,6 +8,7 @@ import type {
   LinkCopyHandler,
   MarkMode,
   PlaceholderOptions,
+  StartPendingReplacementOptions,
   TagClickHandler,
   WikilinkClickHandler,
 } from '@meowdown/core'
@@ -20,7 +22,9 @@ import { ProseKitEditor } from './prosekit-editor.tsx'
 import type {
   EditorHandle,
   EditorStateSnapshot,
+  PendingReplacementResolveHandler,
   SelectionHint,
+  SelectionMenuSearchHandler,
   SlashMenuSearchHandler,
   TagSearchHandler,
   WikilinkSearchHandler,
@@ -74,6 +78,37 @@ export interface EditorProps {
    * disable the wikilink menu.
    */
   onWikilinkSearch?: WikilinkSearchHandler
+
+  /**
+   * Searches commands for the selection menu, which opens over a non-empty
+   * selection via `EditorHandle.openSelectionMenu()` or the selection
+   * affordance. Receives the filter text typed in the menu (may be empty) and
+   * the selection the menu was opened over, and returns the rows to show,
+   * synchronously or as a promise. The host ranks the rows; the menu does not
+   * re-sort. Pass a stable function (e.g. from `useCallback`). Omit to disable
+   * the selection menu.
+   */
+  onSelectionMenuSearch?: SelectionMenuSearchHandler
+
+  /**
+   * Shows a small floating button on a non-empty text selection that opens the
+   * selection menu. On by default; only relevant when `onSelectionMenuSearch`
+   * is set. Ignored when `readOnly` is set.
+   */
+  selectionMenuAffordance?: boolean
+
+  /**
+   * Extra controls rendered in the pending-replacement preview footer, next to
+   * the built-in Accept and Discard buttons (e.g. a retry button).
+   */
+  pendingReplacementActions?: ReactNode
+
+  /**
+   * Called when a pending replacement ends, with the outcome ('accepted' or
+   * 'discarded') and the final staged value. Use it to stop a stream that is
+   * still appending. Pass a stable function (e.g. from `useCallback`).
+   */
+  onPendingReplacementResolve?: PendingReplacementResolveHandler
 
   /**
    * Called with the link target on click of a rendered wiki link, or on
@@ -203,6 +238,10 @@ export function MeowdownEditor({
   onSlashMenuSearch,
   onTagSearch,
   onWikilinkSearch,
+  onSelectionMenuSearch,
+  selectionMenuAffordance = true,
+  pendingReplacementActions,
+  onPendingReplacementResolve,
   onWikilinkClick,
   onLinkClick,
   onLinkCopy,
@@ -256,6 +295,24 @@ export function MeowdownEditor({
     function scrollIntoView(): void {
       childRef.current?.scrollIntoView()
     }
+    function getSelectedText(): string {
+      return childRef.current?.getSelectedText() ?? ''
+    }
+    function openSelectionMenu(): void {
+      childRef.current?.openSelectionMenu()
+    }
+    function startPendingReplacement(options: StartPendingReplacementOptions): boolean {
+      return childRef.current?.startPendingReplacement(options) ?? false
+    }
+    function appendPendingReplacementText(text: string): void {
+      childRef.current?.appendPendingReplacementText(text)
+    }
+    function acceptPendingReplacement(options?: AcceptPendingReplacementOptions): void {
+      childRef.current?.acceptPendingReplacement(options)
+    }
+    function discardPendingReplacement(): void {
+      childRef.current?.discardPendingReplacement()
+    }
     return {
       getMarkdown,
       setMarkdown,
@@ -266,6 +323,12 @@ export function MeowdownEditor({
       setSelection,
       focus,
       scrollIntoView,
+      getSelectedText,
+      openSelectionMenu,
+      startPendingReplacement,
+      appendPendingReplacementText,
+      acceptPendingReplacement,
+      discardPendingReplacement,
       get editor() {
         return childRef.current?.editor
       },
@@ -282,6 +345,10 @@ export function MeowdownEditor({
         onSlashMenuSearch={onSlashMenuSearch}
         onTagSearch={onTagSearch}
         onWikilinkSearch={onWikilinkSearch}
+        onSelectionMenuSearch={onSelectionMenuSearch}
+        selectionMenuAffordance={selectionMenuAffordance}
+        pendingReplacementActions={pendingReplacementActions}
+        onPendingReplacementResolve={onPendingReplacementResolve}
         onWikilinkClick={onWikilinkClick}
         onLinkClick={onLinkClick}
         onLinkCopy={onLinkCopy}

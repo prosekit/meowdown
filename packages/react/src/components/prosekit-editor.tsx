@@ -1,7 +1,9 @@
 import {
   defineEditorExtension,
   docToMarkdown,
+  getSelectedText,
   markdownToDoc,
+  type AcceptPendingReplacementOptions,
   type EditorExtension,
   type ExitBoundaryHandler,
   type FilePasteOptions,
@@ -11,6 +13,7 @@ import {
   type LinkCopyHandler,
   type MarkMode,
   type PlaceholderOptions,
+  type StartPendingReplacementOptions,
   type TagClickHandler,
   type TypedEditor,
   type WikilinkClickHandler,
@@ -21,7 +24,15 @@ import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit } from '@prosekit/react'
 import { clsx } from 'clsx/lite'
-import { useImperativeHandle, useMemo, useRef, useState, type ReactNode, type Ref } from 'react'
+import {
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type Ref,
+} from 'react'
 
 import { defineCodeBlockView } from '../extensions/code-block-view.ts'
 import type { TimeFormat } from '../utils/date-format.ts'
@@ -30,13 +41,18 @@ import { BlockHandle } from './block-handle.tsx'
 import { DropIndicator } from './drop-indicator.tsx'
 import { EditorExtensions } from './editor-extensions.tsx'
 import { LinkMenu } from './link-menu.tsx'
+import { PendingReplacementPreview } from './pending-replacement-preview.tsx'
+import { SelectionMenu } from './selection-menu.tsx'
 import { SlashMenu } from './slash-menu.tsx'
 import { TableHandle } from './table-handle.tsx'
 import { TagMenu } from './tag-menu.tsx'
 import type {
   EditorHandle,
   EditorStateSnapshot,
+  PendingReplacementResolveHandler,
   SelectionHint,
+  SelectionMenuContext,
+  SelectionMenuSearchHandler,
   SlashMenuSearchHandler,
   TagSearchHandler,
   WikilinkSearchHandler,
@@ -79,6 +95,18 @@ export interface ProseKitEditorProps {
 
   /** Enables the wikilink menu. See `EditorProps.onWikilinkSearch`. */
   onWikilinkSearch?: WikilinkSearchHandler
+
+  /** Enables the selection menu. See `EditorProps.onSelectionMenuSearch`. */
+  onSelectionMenuSearch?: SelectionMenuSearchHandler
+
+  /** Shows the selection affordance. See `EditorProps.selectionMenuAffordance`. */
+  selectionMenuAffordance?: boolean
+
+  /** Extra pending-replacement controls. See `EditorProps.pendingReplacementActions`. */
+  pendingReplacementActions?: ReactNode
+
+  /** Called when a pending replacement ends. See `EditorProps.onPendingReplacementResolve`. */
+  onPendingReplacementResolve?: PendingReplacementResolveHandler
 
   /** Called on click or Mod-Enter of a rendered wiki link. See `EditorProps.onWikilinkClick`. */
   onWikilinkClick?: WikilinkClickHandler
@@ -148,6 +176,10 @@ export function ProseKitEditor({
   onSlashMenuSearch,
   onTagSearch,
   onWikilinkSearch,
+  onSelectionMenuSearch,
+  selectionMenuAffordance = true,
+  pendingReplacementActions,
+  onPendingReplacementResolve,
   onWikilinkClick,
   onLinkClick,
   onLinkCopy,
@@ -182,6 +214,22 @@ export function ProseKitEditor({
   // Set while a programmatic setState/setMarkdown dispatch runs, so the
   // doc-change handler can ignore it: a host replacing content already knows.
   const suppressDocChangeRef = useRef(false)
+
+  // The selection the menu is open over, captured at open time so it survives
+  // focus moving into the menu's filter input. Undefined while closed.
+  const [selectionMenuContext, setSelectionMenuContext] = useState<SelectionMenuContext>()
+  const hasSelectionMenu = !!onSelectionMenuSearch
+
+  const openSelectionMenu = useCallback(() => {
+    const { state } = editor
+    const { from, to, empty } = state.selection
+    if (empty) return
+    setSelectionMenuContext({ selectedText: getSelectedText(state), from, to })
+  }, [editor])
+
+  const closeSelectionMenu = useCallback(() => {
+    setSelectionMenuContext(undefined)
+  }, [])
 
   useImperativeHandle(ref, () => {
     function getMarkdown(): string {
@@ -225,6 +273,25 @@ export function ProseKitEditor({
     function scrollIntoView(): void {
       editor.view.dispatch(editor.state.tr.scrollIntoView())
     }
+    function getSelectedTextFromState(): string {
+      return getSelectedText(editor.state)
+    }
+    function openSelectionMenuFromHandle(): void {
+      if (!hasSelectionMenu) return
+      openSelectionMenu()
+    }
+    function startPendingReplacement(options: StartPendingReplacementOptions): boolean {
+      return editor.commands.startPendingReplacement(options)
+    }
+    function appendPendingReplacementText(text: string): void {
+      editor.commands.appendPendingReplacementText(text)
+    }
+    function acceptPendingReplacement(options?: AcceptPendingReplacementOptions): void {
+      editor.commands.acceptPendingReplacement(options ?? {})
+    }
+    function discardPendingReplacement(): void {
+      editor.commands.discardPendingReplacement()
+    }
     return {
       getMarkdown,
       setMarkdown,
@@ -235,9 +302,15 @@ export function ProseKitEditor({
       setSelection,
       focus,
       scrollIntoView,
+      getSelectedText: getSelectedTextFromState,
+      openSelectionMenu: openSelectionMenuFromHandle,
+      startPendingReplacement,
+      appendPendingReplacementText,
+      acceptPendingReplacement,
+      discardPendingReplacement,
       editor,
     }
-  }, [editor, frontmatter])
+  }, [editor, frontmatter, hasSelectionMenu, openSelectionMenu])
 
   // Guard the host callback so programmatic setState/setMarkdown stays silent.
   // Stable per `onDocChange` identity, so the extension is not rebuilt every render.
@@ -277,6 +350,21 @@ export function ProseKitEditor({
       {!readOnly && <LinkMenu onLinkClick={onLinkClick} onLinkCopy={onLinkCopy} />}
       {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
       {onWikilinkSearch && <WikilinkMenu onWikilinkSearch={onWikilinkSearch} />}
+      {onSelectionMenuSearch && !readOnly && (
+        <SelectionMenu
+          onSelectionMenuSearch={onSelectionMenuSearch}
+          context={selectionMenuContext}
+          onOpen={openSelectionMenu}
+          onClose={closeSelectionMenu}
+          affordance={selectionMenuAffordance}
+        />
+      )}
+      {!readOnly && (
+        <PendingReplacementPreview
+          actions={pendingReplacementActions}
+          onResolve={onPendingReplacementResolve}
+        />
+      )}
       {children}
     </ProseKit>
   )

@@ -69,6 +69,17 @@ export { defineMarkMode, type MarkMode } from './extensions/mark-mode.ts'
 export type { MarkName } from './extensions/mark-names.ts'
 export { defineMarkdownCopy } from './extensions/markdown-copy.ts'
 export type { NodeName } from './extensions/node-names.ts'
+export {
+  definePendingReplacementHandler,
+  getPendingReplacement,
+  type AcceptPendingReplacementOptions,
+  type PendingReplacement,
+  type PendingReplacementEvent,
+  type PendingReplacementHandler,
+  type PendingReplacementMode,
+  type PendingReplacementOutcome,
+  type StartPendingReplacementOptions,
+} from './extensions/pending-replacement.ts'
 export { getMarkBuilders, type TypedMarkBuilders } from './extensions/schema.ts'
 export { isSelectionInTableCell } from './extensions/table.ts'
 export {
@@ -83,5 +94,6 @@ export {
 } from './extensions/wikilink-click.ts'
 export { defineWikilinkTrigger } from './extensions/wikilink-trigger.ts'
 export type { PositionRange } from './utils/range.ts'
+export { getSelectedText } from './utils/selected-text.ts'
 export { getVirtualElementFromRange, type VirtualElement } from './utils/virtual-element.ts'
 export { defineSpellCheckPlugin } from './extensions/spell-check.ts'

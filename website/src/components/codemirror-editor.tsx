@@ -109,6 +109,12 @@ export function CodeMirrorEditor({
     function scrollIntoView(): void {
       viewRef.current?.dispatch({ scrollIntoView: true })
     }
+    function getSelectedText(): string {
+      const view = viewRef.current
+      if (!view) return ''
+      const main = view.state.selection.main
+      return view.state.sliceDoc(main.from, main.to)
+    }
     return {
       getMarkdown,
       setMarkdown,
@@ -119,6 +125,13 @@ export function CodeMirrorEditor({
       setSelection,
       focus,
       scrollIntoView,
+      getSelectedText,
+      // The raw-Markdown editor has no selection menu or staged replacements.
+      openSelectionMenu: () => {},
+      startPendingReplacement: () => false,
+      appendPendingReplacementText: () => {},
+      acceptPendingReplacement: () => {},
+      discardPendingReplacement: () => {},
       editor: undefined,
     }
   }, [])
