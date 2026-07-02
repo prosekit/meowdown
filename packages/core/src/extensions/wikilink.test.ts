@@ -137,3 +137,59 @@ describe.each(LABEL_MODES)('wikilink selection ring in %s mode', (mode) => {
     await expect.element(label).toHaveStyle({ outlineStyle: 'solid' })
   })
 })
+
+// Vertical caret motion must walk through a paragraph containing a wikilink,
+// not orbit it: each ArrowDown moves one visual line lower.
+describe('wikilink vertical caret navigation in focus mode', () => {
+  function setupThreeParagraphs(): Fixture {
+    const fixture = setupFixture()
+    const { editor, n } = fixture
+    editor.use(defineMarkMode('focus'))
+    fixture.set(
+      n.doc(
+        n.paragraph('paragraph <a>1'),
+        n.paragraph('paragraph 2 [[WIKILINK]] text'),
+        n.paragraph('paragraph 3 [[WIKILINK]]'),
+        n.paragraph('paragraph 4'),
+      ),
+    )
+    return fixture
+  }
+
+  it('ArrowDown from the first paragraph reaches the third paragraph', async () => {
+    using fixture = setupThreeParagraphs()
+    fixture.view.focus()
+    expect(fixture.state.selection.$head.parent.textContent).toBe('paragraph 1')
+    const steps = await traceKeySelection(fixture, 'ArrowDown', 7)
+    expect(fixture.state.selection.$head.parent.textContent).toBe('paragraph 4')
+    expect('\n' + Array.from(new Set(steps)).join('\n' + '-'.repeat(10) + '\n') + '\n')
+      .toMatchInlineSnapshot(`
+      "
+      paragraph ┃1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph ┃2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph ┃3 [[WIKILINK]]
+      paragraph 4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph ┃4
+      ----------
+      paragraph 1
+      paragraph 2 [[WIKILINK]] text
+      paragraph 3 [[WIKILINK]]
+      paragraph 4┃
+      "
+    `)
+  })
+})
