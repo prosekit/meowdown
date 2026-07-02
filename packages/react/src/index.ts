@@ -5,6 +5,8 @@ export type {
   EditorHandle,
   EditorStateSnapshot,
   SelectionHint,
+  SlashMenuItem,
+  SlashMenuSearchHandler,
   TagItem,
   TagSearchHandler,
   WikilinkItem,
