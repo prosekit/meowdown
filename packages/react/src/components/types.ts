@@ -28,7 +28,8 @@ export interface EditorHandle {
 
   /**
    * Parses `markdown` and inserts it at the current selection as a single
-   * undoable edit, replacing any selected content. A lone paragraph is
+   * undoable edit. An active selection collapses first and is never
+   * deleted - this is a host-initiated insert, not a paste. A lone paragraph is
    * inserted inline at the cursor; anything else is inserted as blocks. The
    * cursor lands at the end of the inserted content. An empty or
    * whitespace-only string is a no-op. Unlike `setMarkdown`, it fires
