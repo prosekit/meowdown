@@ -26,6 +26,7 @@ export {
 export {
   defineEditorExtension,
   type EditorExtension,
+  type EditorExtensionOptions,
   type TypedEditor,
 } from './extensions/extension.ts'
 export {
@@ -43,8 +44,18 @@ export {
   type ImageClickPayload,
 } from './extensions/image-click.ts'
 export { defaultResolveImageUrl, defineImage, type ImageOptions } from './extensions/image.ts'
-export type { MdImageAttrs, MdLinkTextAttrs, MdWikilinkAttrs } from './extensions/inline-marks.ts'
-export { inlineTextToMarkChunks } from './extensions/inline-text-to-mark-chunks.ts'
+export type {
+  MdFileAttrs,
+  MdImageAttrs,
+  MdLinkTextAttrs,
+  MdWikilinkAttrs,
+} from './extensions/inline-marks.ts'
+export {
+  inlineTextToMarkChunks,
+  type FileLinkOptions,
+  type FileLinkPayload,
+  type FileLinkResolver,
+} from './extensions/inline-text-to-mark-chunks.ts'
 export { EDITOR_KEY_BINDINGS } from './extensions/key-bindings.ts'
 export {
   defineLinkClickHandler,
