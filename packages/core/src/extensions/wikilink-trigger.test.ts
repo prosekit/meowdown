@@ -1,0 +1,93 @@
+import { describe, expect, it } from 'vitest'
+import { userEvent } from 'vitest/browser'
+
+import { setupFixture, type Fixture } from '../testing/index.ts'
+
+import { defineWikilinkTrigger } from './wikilink-trigger.ts'
+
+// In `userEvent.keyboard` a literal `[` must be escaped by doubling it.
+const pressBracket = () => userEvent.keyboard('[[')
+const pressModShiftK = () => userEvent.keyboard('{ControlOrMeta>}{Shift>}k{/Shift}{/ControlOrMeta}')
+
+// The trigger is opt-in (the React layer installs it when wikilinks are
+// enabled), so the fixture applies it explicitly.
+function setup(): Fixture {
+  const fixture = setupFixture()
+  fixture.editor.use(defineWikilinkTrigger())
+  return fixture
+}
+
+describe('defineWikilinkTrigger', () => {
+  it("'[' wraps a selected word into an open wikilink", async () => {
+    using fixture = setup()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('Cat <a>naps<b>')))
+    fixture.view.focus()
+    await pressBracket()
+    expect(fixture.selectionSnapshot).toBe('Cat [[naps┃')
+  })
+
+  it("'[' with an empty selection types a literal bracket", async () => {
+    using fixture = setup()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('Cat <a>')))
+    fixture.view.focus()
+    await pressBracket()
+    expect(fixture.selectionSnapshot).toBe('Cat [┃')
+  })
+
+  it("'[' drops a leading single bracket from the selection", async () => {
+    using fixture = setup()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('Cat <a>[naps<b>')))
+    fixture.view.focus()
+    await pressBracket()
+    expect(fixture.selectionSnapshot).toBe('Cat [[naps┃')
+  })
+
+  it("'[' over a selection already starting with '[[' falls through to typing", async () => {
+    using fixture = setup()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('Cat <a>[[naps<b>')))
+    fixture.view.focus()
+    await pressBracket()
+    // The command declines, so the keystroke replaces the selection normally.
+    expect(fixture.selectionSnapshot).toBe('Cat [┃')
+  })
+
+  it("'[' over a selection spanning two blocks types normally", async () => {
+    using fixture = setup()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('o<a>ne'), n.paragraph('tw<b>o')))
+    fixture.view.focus()
+    await pressBracket()
+    expect(fixture.selectionSnapshot).toBe('o[┃o')
+  })
+
+  it("'[' in a code block types a literal bracket", async () => {
+    using fixture = setup()
+    const { n } = fixture
+    fixture.set(n.doc(n.codeBlock('co<a>de<b>')))
+    fixture.view.focus()
+    await pressBracket()
+    expect(fixture.selectionSnapshot).toBe('co[┃')
+  })
+
+  it('Mod-Shift-k inserts an open wikilink at an empty selection', async () => {
+    using fixture = setup()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('Cat <a>')))
+    fixture.view.focus()
+    await pressModShiftK()
+    expect(fixture.selectionSnapshot).toBe('Cat [[┃')
+  })
+
+  it('Mod-Shift-k wraps a selection like the bracket does', async () => {
+    using fixture = setup()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('Cat <a>naps<b>')))
+    fixture.view.focus()
+    await pressModShiftK()
+    expect(fixture.selectionSnapshot).toBe('Cat [[naps┃')
+  })
+})

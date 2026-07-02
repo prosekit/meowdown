@@ -23,7 +23,8 @@ export function findWikilinkAt(state: EditorState, pos: number): WikilinkHit | u
 
 export interface WikilinkClickPayload {
   target: string
-  event: MouseEvent
+  /** The originating click, or the `Mod-Enter` key press that followed the link. */
+  event: MouseEvent | KeyboardEvent
 }
 
 export type WikilinkClickHandler = (payload: WikilinkClickPayload) => void

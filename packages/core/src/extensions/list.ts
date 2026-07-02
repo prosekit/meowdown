@@ -14,6 +14,7 @@ import {
   defineListKeymap,
   defineListSerializer,
   defineListSpec,
+  toggleList,
   wrapInList,
   type ListAttrs,
 } from '@prosekit/extensions/list'
@@ -299,6 +300,15 @@ function defineMeowdownListKeymap(): PlainExtension {
     'Mod-Enter': rotateSquareTask(),
     'Mod-Shift-Enter': rotateCircleTask(),
     'Mod-.': createToggleCollapsedCommand({ isToggleable: isCollapsibleBullet }),
+    // Google-Docs muscle memory: same kind unwraps, a different kind converts
+    // in place, and a non-list block wraps.
+    'Mod-Shift-7': toggleList<MeowdownListAttrs>({ kind: 'ordered', collapsed: false }),
+    'Mod-Shift-8': toggleList<MeowdownListAttrs>({ kind: 'bullet', collapsed: false }),
+    'Mod-Shift-9': toggleList<MeowdownListAttrs>({
+      kind: 'task',
+      checked: false,
+      collapsed: false,
+    }),
   })
 }
 

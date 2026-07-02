@@ -122,4 +122,51 @@ describe('keymap', () => {
     await pressModShiftEnter()
     expect(docToMarkdown(fixture.doc)).toBe('+ [ ] todo\n')
   })
+
+  // The physical digit keys, so the shifted character ('&', '*', '(' on a US
+  // layout) exercises prosemirror-keymap's keyCode fallback.
+  const pressModShiftDigit = (digit: 7 | 8 | 9) =>
+    userEvent.keyboard(`{ControlOrMeta>}{Shift>}[Digit${digit}]{/Shift}{/ControlOrMeta}`)
+
+  it('Mod-Shift-8 wraps a paragraph into a bullet and unwraps it again', async () => {
+    using fixture = setupFixture()
+    fixture.set(fixture.n.doc(fixture.n.paragraph('todo<a>')))
+    fixture.view.focus()
+
+    await pressModShiftDigit(8)
+    expect(docToMarkdown(fixture.doc)).toBe('- todo\n')
+    await pressModShiftDigit(8)
+    expect(docToMarkdown(fixture.doc)).toBe('todo\n')
+  })
+
+  it('Mod-Shift-7 wraps a paragraph into an ordered list and unwraps it again', async () => {
+    using fixture = setupFixture()
+    fixture.set(fixture.n.doc(fixture.n.paragraph('todo<a>')))
+    fixture.view.focus()
+
+    await pressModShiftDigit(7)
+    expect(docToMarkdown(fixture.doc)).toBe('1. todo\n')
+    await pressModShiftDigit(7)
+    expect(docToMarkdown(fixture.doc)).toBe('todo\n')
+  })
+
+  it('Mod-Shift-9 wraps a paragraph into a square checkbox task and unwraps it again', async () => {
+    using fixture = setupFixture()
+    fixture.set(fixture.n.doc(fixture.n.paragraph('todo<a>')))
+    fixture.view.focus()
+
+    await pressModShiftDigit(9)
+    expect(docToMarkdown(fixture.doc)).toBe('- [ ] todo\n')
+    await pressModShiftDigit(9)
+    expect(docToMarkdown(fixture.doc)).toBe('todo\n')
+  })
+
+  it('Mod-Shift-7 converts a bullet into an ordered list in place', async () => {
+    using fixture = setupFixture()
+    fixture.set(fixture.n.doc(fixture.n.list({ kind: 'bullet' }, fixture.n.paragraph('todo<a>'))))
+    fixture.view.focus()
+
+    await pressModShiftDigit(7)
+    expect(docToMarkdown(fixture.doc)).toBe('1. todo\n')
+  })
 })

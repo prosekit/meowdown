@@ -249,6 +249,52 @@ describe('WikilinkMenu', () => {
   })
 })
 
+describe('"[" over a selection', () => {
+  it('wraps the selection and opens the menu with it as the query', async () => {
+    await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard('Cat')
+    await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}')
+    await userEvent.keyboard('[[')
+    await expect.element(menu).toBeVisible()
+    await expect.element(menu.getByText('Cat naps')).toBeVisible()
+    await expect.element(menu.getByText('Reading list')).not.toBeInTheDocument()
+  })
+
+  it('types a literal bracket when nothing is selected', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard('Cat [[')
+    await expect.element(menu).not.toBeVisible()
+    expect(ref.current?.getMarkdown()).toContain('Cat [')
+  })
+})
+
+describe('Escape', () => {
+  it('closes an open menu and keeps the typed text', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard(`${TWO_BRACKETS}Cat`)
+    await expect.element(menu).toBeVisible()
+    await userEvent.keyboard('{Escape}')
+    await expect.element(menu).not.toBeVisible()
+    expect(ref.current?.getMarkdown()).toContain('[[Cat')
+  })
+
+  it('collapses a plain selection when no menu is open', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard('Cat')
+    await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{ArrowLeft}{/Shift}')
+    await userEvent.keyboard('{Escape}')
+    const selection = ref.current?.getSelection()
+    expect(selection?.anchor).toBe(selection?.head)
+  })
+})
+
 describe('Mod-Shift-K shortcut', () => {
   it('opens the menu with every note', async () => {
     await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)

@@ -28,8 +28,11 @@ export function findTagAt(state: EditorState, pos: number): TagHit | undefined {
 export interface TagClickPayload {
   /** The tag name, without the leading `#`. */
   tag: string
-  /** The originating click. Read modifier keys or position a popover from it. */
-  event: MouseEvent
+  /**
+   * The originating click, or the `Mod-Enter` key press that followed the tag.
+   * Read modifier keys or position a popover from it.
+   */
+  event: MouseEvent | KeyboardEvent
 }
 
 export type TagClickHandler = (payload: TagClickPayload) => void

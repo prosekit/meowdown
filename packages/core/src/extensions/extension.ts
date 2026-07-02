@@ -16,6 +16,7 @@ import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 import { defineAtomMarkNavigation } from './atom-mark-navigation.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineEditorCommands } from './commands.ts'
+import { defineEscapeCollapse } from './escape-collapse.ts'
 import { defineDocFrontmatterAttr } from './frontmatter.ts'
 import { defineHeading } from './heading.ts'
 import { defineMeowdownHorizontalRule } from './horizontal-rule.ts'
@@ -25,6 +26,7 @@ import { defineInlineMarks } from './inline-marks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
 import { defineLinkCommands } from './link-commands.ts'
 import { defineMeowdownList } from './list.ts'
+import { defineMoveBlock } from './move-block.ts'
 import { defineMeowdownParagraph } from './paragraph.ts'
 import { defineTable } from './table.ts'
 import { defineWikilink } from './wikilink.ts'
@@ -49,6 +51,8 @@ function defineEditorExtensionImpl() {
 
     // plugins
     defineCodeBlockSyntaxHighlight(),
+    defineEscapeCollapse(),
+    defineMoveBlock(),
     defineInlineMarkPlugin(),
     defineInlineToggle(),
     defineLinkCommands(),
