@@ -36,6 +36,7 @@ export interface EditorExtensionsProps {
   onExitBoundary?: ExitBoundaryHandler
   resolveImageUrl?: ImageOptions['resolveImageUrl']
   onImagePaste?: ImageOptions['onImagePaste']
+  onFilePaste?: ImageOptions['onFilePaste']
   onImageSaveError?: ImageOptions['onImageSaveError']
   onImageClick?: ImageClickHandler
   embedPaste?: boolean
@@ -58,6 +59,7 @@ export function EditorExtensions({
   onExitBoundary,
   resolveImageUrl,
   onImagePaste,
+  onFilePaste,
   onImageSaveError,
   onImageClick,
   embedPaste,
@@ -111,8 +113,8 @@ export function EditorExtensions({
 
   useExtension(
     useMemo(() => {
-      return defineImage({ resolveImageUrl, onImagePaste, onImageSaveError })
-    }, [resolveImageUrl, onImagePaste, onImageSaveError]),
+      return defineImage({ resolveImageUrl, onImagePaste, onFilePaste, onImageSaveError })
+    }, [resolveImageUrl, onImagePaste, onFilePaste, onImageSaveError]),
   )
 
   useExtension(

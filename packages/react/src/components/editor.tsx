@@ -122,7 +122,14 @@ export interface EditorProps {
    */
   onImagePaste?: ImageOptions['onImagePaste']
 
-  /** Called when persisting a pasted/dropped image throws. */
+  /**
+   * Persists a pasted/dropped non-image file and returns the markdown link
+   * destination, inserted as `[name](src)`. Return `undefined` to decline.
+   * Pass a stable function.
+   */
+  onFilePaste?: ImageOptions['onFilePaste']
+
+  /** Called when persisting a pasted/dropped file throws. */
   onImageSaveError?: ImageOptions['onImageSaveError']
 
   /**
@@ -205,6 +212,7 @@ export function MeowdownEditor({
   onExitBoundary,
   resolveImageUrl,
   onImagePaste,
+  onFilePaste,
   onImageSaveError,
   onImageClick,
   embedPaste = true,
@@ -284,6 +292,7 @@ export function MeowdownEditor({
         onExitBoundary={onExitBoundary}
         resolveImageUrl={resolveImageUrl}
         onImagePaste={onImagePaste}
+        onFilePaste={onFilePaste}
         onImageSaveError={onImageSaveError}
         onImageClick={onImageClick}
         embedPaste={embedPaste}
