@@ -265,6 +265,19 @@ describe('image resize', () => {
     await expect.element(resizable).toHaveAttribute('data-width', '320')
   })
 
+  it('keeps the same preview DOM when resized', async () => {
+    using fixture = setupResize('![cat](u)<!-- {"width":100} -->')
+    void fixture
+    await expect.element(resizable).toHaveAttribute('data-width', '100')
+    const rootBefore = resizable.element()
+    const imageBefore = pmRoot.getByAltText('cat').element()
+    endResize(320)
+    await expect.element(resizable).toHaveAttribute('data-width', '320')
+    await expect.element(resizable).toHaveAttribute('data-height', '100')
+    expect(resizable.element()).toBe(rootBefore)
+    expect(pmRoot.getByAltText('cat').element()).toBe(imageBefore)
+  })
+
   it.each([
     { width: 150, height: 150 }, // square
     { width: 200, height: 100 }, // landscape
@@ -322,5 +335,21 @@ describe('typing after an inline image', () => {
 
     await userEvent.keyboard('X')
     expect(fixture.doc.textContent).toBe('see ![img](url)X here')
+  })
+})
+
+// Typing inside the alt text changes the mark's attrs on every keystroke; the
+// update method keeps the same <img> alive instead of rebuilding the preview.
+describe('image mark view update', () => {
+  it('keeps the same img element while the alt text is edited', async () => {
+    using fixture = setup('show', 'ABC![img](url)DEF')
+    const image = pmRoot.getByAltText('img')
+    await expect.element(image).toBeInTheDocument()
+    const imageBefore = image.element()
+    // Offset 8 = right after `img`, before the closing `]`.
+    setCaret(fixture, 8)
+    await userEvent.keyboard('X')
+    await expect.element(pmRoot.getByAltText('imgX')).toBeInTheDocument()
+    expect(pmRoot.getByAltText('imgX').element()).toBe(imageBefore)
   })
 })
