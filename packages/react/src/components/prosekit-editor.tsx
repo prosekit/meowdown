@@ -211,6 +211,9 @@ export function ProseKitEditor({
     function setMarkdown(markdown: string): void {
       setState(markdown)
     }
+    function insertMarkdown(markdown: string): void {
+      editor.commands.insertMarkdown(markdown)
+    }
     function setSelection(selection: SelectionHint): void {
       setState(undefined, selection)
     }
@@ -223,6 +226,7 @@ export function ProseKitEditor({
     return {
       getMarkdown,
       setMarkdown,
+      insertMarkdown,
       getState,
       setState,
       getSelection,

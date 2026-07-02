@@ -225,6 +225,9 @@ export function MeowdownEditor({
     function setMarkdown(markdown: string): void {
       childRef.current?.setMarkdown(markdown)
     }
+    function insertMarkdown(markdown: string): void {
+      childRef.current?.insertMarkdown(markdown)
+    }
     function getState(): EditorStateSnapshot {
       return childRef.current?.getState() ?? ['', { type: 'text', anchor: 0, head: 0 }]
     }
@@ -246,6 +249,7 @@ export function MeowdownEditor({
     return {
       getMarkdown,
       setMarkdown,
+      insertMarkdown,
       getState,
       setState,
       getSelection,

@@ -20,6 +20,16 @@ export interface EditorHandle {
   /** Replaces the whole document as a single undoable edit. */
   setMarkdown: (markdown: string) => void
 
+  /**
+   * Parses `markdown` and inserts it at the current selection as a single
+   * undoable edit, replacing any selected content. A lone paragraph is
+   * inserted inline at the cursor; anything else is inserted as blocks. The
+   * cursor lands at the end of the inserted content. An empty or
+   * whitespace-only string is a no-op. Unlike `setMarkdown`, it fires
+   * `onDocChange`: the host cannot know the resulting document.
+   */
+  insertMarkdown: (markdown: string) => void
+
   /** Returns the current Markdown and selection. */
   getState: () => EditorStateSnapshot
 
