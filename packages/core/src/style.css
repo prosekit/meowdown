@@ -562,14 +562,13 @@
     .md-mark,
     .md-link-uri,
     .md-link-title {
-      overflow: hidden;
-      display: inline-block;
-      vertical-align: bottom;
-
-      letter-spacing: -2em;
+      display: inline;
+      font-size: 0;
+      opacity: 0;
 
       &:has(.show) {
-        letter-spacing: 0;
+        opacity: 1;
+        font-size: inherit;
       }
     }
   }
@@ -577,8 +576,7 @@
   /* atom marks (image, wikilink) */
   .ProseMirror {
     .md-atom-view {
-      display: inline-block;
-      vertical-align: bottom;
+      display: contents;
     }
 
     .md-atom-view-preview {
@@ -604,16 +602,7 @@
     }
 
     .md-atom-view-content {
-      overflow: visible;
-      display: inline-flex;
-      align-items: end;
-      letter-spacing: -2em;
-      width: 2px;
-      box-sizing: border-box;
-      background-color: transparent;
-      color: transparent;
-      margin-left: 2px;
-      margin-right: -4px;
+      display: none;
     }
   }
 
