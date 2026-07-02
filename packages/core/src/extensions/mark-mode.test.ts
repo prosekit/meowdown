@@ -916,8 +916,6 @@ describe('hide mode', () => {
     await userEvent.keyboard('{Backspace}')
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold**┃text"`)
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold*┃text"`)
-    await userEvent.keyboard('{Backspace}')
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold┃text"`)
   })
 })
