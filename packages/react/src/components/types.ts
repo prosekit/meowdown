@@ -50,7 +50,6 @@ export interface EditorHandle {
   readonly editor: TypedEditor | undefined
 }
 
-/**
 /** One row in the tag menu. The host ranks the rows; the menu does not re-sort. */
 export interface TagItem {
   /** Inserted as `#tag `. */

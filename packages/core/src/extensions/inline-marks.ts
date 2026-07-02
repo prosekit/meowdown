@@ -2,11 +2,21 @@ import { defineMarkSpec, union } from '@prosekit/core'
 
 import type { MarkName } from './mark-names.ts'
 
+/**
+ * Attributes of the `mdImage` mark, derived from the image source
+ * `![alt](src "title")` and its optional trailing size comment
+ * `<!-- {"width":N,"height":M} -->`.
+ */
 export interface MdImageAttrs {
+  /** The image destination, exactly as written in the source. */
   src: string
+  /** The image alt text. */
   alt: string
+  /** The image title, or `''` when the source has none. */
   title: string
+  /** Display width in CSS pixels from the trailing comment, or `null`. */
   width: number | null
+  /** Display height in CSS pixels from the trailing comment, or `null`. */
   height: number | null
 }
 
