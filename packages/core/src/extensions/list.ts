@@ -3,6 +3,7 @@ import {
   defineKeymap,
   defineNodeAttr,
   definePlugin,
+  isNodeSelection,
   union,
   type Extension,
   type PlainExtension,
@@ -18,14 +19,18 @@ import {
   wrapInList,
   type ListAttrs,
 } from '@prosekit/extensions/list'
+import { chainCommands } from '@prosekit/pm/commands'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
-import { Plugin } from '@prosekit/pm/state'
+import { Plugin, Selection } from '@prosekit/pm/state'
 import type { Command, EditorState } from '@prosekit/pm/state'
+import { canSplit } from '@prosekit/pm/transform'
 import {
   createListRenderingPlugin,
   createSafariInputMethodWorkaroundPlugin,
   createToggleCollapsedCommand,
   handleListMarkerMouseDown,
+  isListNode,
+  protectCollapsed,
   unwrapListSlice,
   wrappingListInputRule,
   type ListClickHandler,
@@ -295,8 +300,96 @@ function defineCollapseCommands() {
   })
 }
 
+/**
+ * The attrs Enter carries over to the list item it creates: `kind` plus the
+ * attrs declared `splittable` above. The per-item state (`checked`,
+ * `collapsed`, `order`) resets, matching prosemirror-flat-list.
+ */
+function deriveSplittableListAttrs(attrs: MeowdownListAttrs): MeowdownListAttrs {
+  return {
+    kind: attrs.kind,
+    marker: attrs.marker ?? null,
+    taskMarker: attrs.taskMarker ?? null,
+    markerGap: attrs.markerGap ?? 1,
+  }
+}
+
+/**
+ * Split the current list item, keeping the splittable attrs on the new item.
+ *
+ * prosemirror-flat-list's own Enter command derives the new item's attrs from
+ * `kind` alone, so pressing Enter at the end of a circle checkbox task
+ * (`+ [ ]`) would continue with a square one, and a `*` bullet with a `-`
+ * bullet. This mirrors its `splitListCommand`, covering only the paths that
+ * create a new item; the rest (an empty item dedents, a later block of an
+ * item splits in place) return false and fall through to the stock binding.
+ */
+const splitListKeepingMarker: Command = (state, dispatch) => {
+  if (isNodeSelection(state.selection)) {
+    return false
+  }
+  const { $from, $to } = state.selection
+  if (!$from.sameParent($to) || $from.depth < 2) {
+    return false
+  }
+  const listDepth = $from.depth - 1
+  const listNode = $from.node(listDepth)
+  if (!isListNode(listNode)) {
+    return false
+  }
+  const attrs = listNode.attrs as MeowdownListAttrs
+  const newAttrs = deriveSplittableListAttrs(attrs)
+  if (newAttrs.marker === null && newAttrs.taskMarker === null && newAttrs.markerGap === 1) {
+    // Nothing beyond `kind` to keep: the stock command's result is identical.
+    return false
+  }
+  if ($from.index(listDepth) !== 0 || $from.parent.content.size === 0) {
+    // Enter creates no new item here: an empty first block dedents and a
+    // later block splits in place. Nothing to keep either way.
+    return false
+  }
+
+  const tr = state.tr
+  tr.delete(tr.selection.from, tr.selection.to)
+  const $cut = tr.selection.$to
+  const atStart = $cut.parentOffset === 0
+  const atEnd = $cut.parentOffset === $cut.parent.content.size
+
+  if (atStart || (atEnd && attrs.collapsed)) {
+    // The new item is empty: above the caret (`atStart`) or, for a collapsed
+    // item, below its hidden children. The original item stays untouched.
+    const newItem = listNode.type.createAndFill(newAttrs)
+    if (!newItem) {
+      return false
+    }
+    if (dispatch) {
+      const pos = atStart ? tr.selection.$from.before(-1) : tr.selection.$from.after(-1)
+      tr.insert(pos, newItem)
+      if (!atStart) {
+        tr.setSelection(Selection.near(tr.doc.resolve(pos)))
+      }
+      dispatch(tr.scrollIntoView())
+    }
+    return true
+  }
+
+  const nextType = atEnd ? listNode.contentMatchAt(0).defaultType : undefined
+  const typesAfter = [
+    { type: listNode.type, attrs: newAttrs },
+    nextType ? { type: nextType } : null,
+  ]
+  if (!canSplit(tr.doc, tr.selection.from, 2, typesAfter)) {
+    return false
+  }
+  dispatch?.(tr.split(tr.selection.from, 2, typesAfter).scrollIntoView())
+  return true
+}
+
 function defineMeowdownListKeymap(): PlainExtension {
   return defineKeymap({
+    // Runs before prosemirror-flat-list's Enter binding (keymaps registered
+    // later win), which would drop the splittable attrs from the new item.
+    Enter: chainCommands(protectCollapsed, splitListKeepingMarker),
     'Mod-Enter': rotateSquareTask(),
     'Mod-Shift-Enter': rotateCircleTask(),
     'Mod-.': createToggleCollapsedCommand({ isToggleable: isCollapsibleBullet }),
