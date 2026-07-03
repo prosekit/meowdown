@@ -215,6 +215,36 @@ describe('keymap', () => {
     expect(docToMarkdown(fixture.doc)).toBe('* todo\n* next\n')
   })
 
+  it('Enter on an empty circle checkbox task still unwraps it', async () => {
+    using fixture = setupFixture()
+    fixture.set(
+      fixture.n.doc(
+        fixture.n.list({ kind: 'task', marker: '+', checked: false }, fixture.n.paragraph('<a>')),
+      ),
+    )
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}')
+    expect(fixture.doc.firstChild?.type.name).toBe('paragraph')
+  })
+
+  it('Enter at the end of a collapsed bullet adds the next item below its hidden children', async () => {
+    using fixture = setupFixture()
+    fixture.set(
+      fixture.n.doc(
+        fixture.n.list(
+          { kind: 'bullet', marker: '*', collapsed: true },
+          fixture.n.paragraph('parent<a>'),
+          fixture.n.list({ kind: 'bullet' }, fixture.n.paragraph('child')),
+        ),
+      ),
+    )
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}next')
+    expect(docToMarkdown(fixture.doc)).toBe('+ parent\n  - child\n* next\n')
+  })
+
   it('Enter keeps the marker gap on the next item', async () => {
     using fixture = setupFixture()
     fixture.set(
