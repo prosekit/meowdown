@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.34.0](https://github.com/prosekit/meowdown/compare/react-v0.33.1...react-v0.34.0) (2026-07-04)
+
+
+### Features
+
+* **react:** keep the pending-replacement preview beside the text it previews ([#212](https://github.com/prosekit/meowdown/issues/212)) ([4a13499](https://github.com/prosekit/meowdown/commit/4a13499f96e4a6ee0731d13782b47766665b9ff7))
+
+
+### Bug Fixes
+
+* keep the list marker when Enter splits a list item ([#218](https://github.com/prosekit/meowdown/issues/218)) ([8f3500d](https://github.com/prosekit/meowdown/commit/8f3500da3166a495a95d177d5c27aa1407f8e209))
+
 ## [0.33.1](https://github.com/prosekit/meowdown/compare/react-v0.33.0...react-v0.33.1) (2026-07-02)
 
 
