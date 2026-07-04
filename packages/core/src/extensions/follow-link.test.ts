@@ -26,7 +26,8 @@ describe('defineFollowLinkHandler', () => {
   it('follows the wikilink under the caret and passes the KeyboardEvent', async () => {
     const onWikilinkClick = vi.fn<WikilinkClickHandler>()
     using fixture = setup({ onWikilinkClick })
-    fixture.set(fixture.n.doc(fixture.n.paragraph('see [[No<a>te]] here')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see [[No<a>te]] here')))
     fixture.view.focus()
     await pressModEnter()
     expect(onWikilinkClick).toHaveBeenCalledWith(expect.objectContaining({ target: 'Note' }))
@@ -38,7 +39,8 @@ describe('defineFollowLinkHandler', () => {
   it('follows the tag under the caret', async () => {
     const onTagClick = vi.fn<TagClickHandler>()
     using fixture = setup({ onTagClick })
-    fixture.set(fixture.n.doc(fixture.n.paragraph('about #ca<a>ts today')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('about #ca<a>ts today')))
     fixture.view.focus()
     await pressModEnter()
     expect(onTagClick).toHaveBeenCalledWith(expect.objectContaining({ tag: 'cats' }))
@@ -47,7 +49,8 @@ describe('defineFollowLinkHandler', () => {
   it('follows the Markdown link under the caret', async () => {
     const onLinkClick = vi.fn<LinkClickHandler>()
     using fixture = setup({ onLinkClick })
-    fixture.set(fixture.n.doc(fixture.n.paragraph('see [do<a>cs](https://example.com) here')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see [do<a>cs](https://example.com) here')))
     fixture.view.focus()
     await pressModEnter()
     expect(onLinkClick).toHaveBeenCalledWith(
@@ -62,7 +65,8 @@ describe('defineFollowLinkHandler', () => {
       extensionOptions: { resolveFileLink: ({ href }) => href.startsWith('assets/') },
     })
     fixture.editor.use(defineFollowLinkHandler({ onFileClick, onLinkClick }))
-    fixture.set(fixture.n.doc(fixture.n.paragraph('see [repo<a>rt.pdf](assets/report.pdf) here')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see [repo<a>rt.pdf](assets/report.pdf) here')))
     fixture.view.focus()
     await pressModEnter()
     expect(onFileClick).toHaveBeenCalledWith(
@@ -101,7 +105,8 @@ describe('defineFollowLinkHandler', () => {
   it('Mod-Shift-Enter still rotates a circle task even on a link', async () => {
     const onWikilinkClick = vi.fn<WikilinkClickHandler>()
     using fixture = setup({ onWikilinkClick })
-    fixture.set(fixture.n.doc(fixture.n.paragraph('see [[No<a>te]] here')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see [[No<a>te]] here')))
     fixture.view.focus()
     await pressModShiftEnter()
     expect(onWikilinkClick).not.toHaveBeenCalled()
@@ -111,7 +116,8 @@ describe('defineFollowLinkHandler', () => {
   it('falls through to the task rotation when no handler matches the unit', async () => {
     const onTagClick = vi.fn<TagClickHandler>()
     using fixture = setup({ onTagClick })
-    fixture.set(fixture.n.doc(fixture.n.paragraph('see [[No<a>te]] here')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see [[No<a>te]] here')))
     fixture.view.focus()
     await pressModEnter()
     expect(onTagClick).not.toHaveBeenCalled()

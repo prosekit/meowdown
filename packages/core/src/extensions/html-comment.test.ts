@@ -34,11 +34,12 @@ describe('html comment node', () => {
 describe('html comment in a mounted editor', () => {
   it('renders the comment invisibly without spilling into the visible text', () => {
     using fixture = setupFixture()
+    const { n } = fixture
     fixture.set(
-      fixture.n.doc(
-        fixture.n.paragraph('before'),
-        fixture.n.htmlComment({ content: '<!-- reflect-capture-page-text:start -->' }),
-        fixture.n.paragraph('after'),
+      n.doc(
+        n.paragraph('before'),
+        n.htmlComment({ content: '<!-- reflect-capture-page-text:start -->' }),
+        n.paragraph('after'),
       ),
     )
 
@@ -53,11 +54,12 @@ describe('html comment in a mounted editor', () => {
 
   it('keeps the comment in the document so it round-trips to markdown', () => {
     using fixture = setupFixture()
+    const { n } = fixture
     fixture.set(
-      fixture.n.doc(
-        fixture.n.htmlComment({ content: '<!-- start -->' }),
-        fixture.n.paragraph('body text'),
-        fixture.n.htmlComment({ content: '<!-- end -->' }),
+      n.doc(
+        n.htmlComment({ content: '<!-- start -->' }),
+        n.paragraph('body text'),
+        n.htmlComment({ content: '<!-- end -->' }),
       ),
     )
 
@@ -66,11 +68,12 @@ describe('html comment in a mounted editor', () => {
 
   it('steps the caret past the hidden comment without error', async () => {
     using fixture = setupFixture()
+    const { n } = fixture
     fixture.set(
-      fixture.n.doc(
-        fixture.n.paragraph('first<a>'),
-        fixture.n.htmlComment({ content: '<!-- between -->' }),
-        fixture.n.paragraph('second'),
+      n.doc(
+        n.paragraph('first<a>'),
+        n.htmlComment({ content: '<!-- between -->' }),
+        n.paragraph('second'),
       ),
     )
     fixture.view.focus()
