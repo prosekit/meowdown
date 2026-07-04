@@ -64,8 +64,20 @@ function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   return undefined
 }
 
+// The measured rect is the glyph box, which reads short against the airy
+// line-height; stand the caret taller around its center. Done here rather
+// than with a CSS scaleY, which would also thicken a tail's horizontal foot
+// relative to the vertical bar.
+const CARET_STRETCH = 1.4
+
+function stretchCaretRect(rect: CaretRect): CaretRect {
+  const extra = rect.height * (CARET_STRETCH - 1)
+  return { left: rect.left, top: rect.top - extra / 2, height: rect.height + extra }
+}
+
 function measureCaretRect(view: EditorView): CaretRect | undefined {
-  return findNativeCaretRect(view) ?? findCoordsCaretRect(view)
+  const rect = findNativeCaretRect(view) ?? findCoordsCaretRect(view)
+  return rect == null ? undefined : stretchCaretRect(rect)
 }
 
 function forceReflow(element: HTMLElement): void {

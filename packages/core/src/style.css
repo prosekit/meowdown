@@ -31,9 +31,6 @@
     /* how long the caret glides when it moves (0 disables the animation) */
     --meowdown-caret-glide: 80ms;
 
-    /* how much taller the caret stands than the measured glyph box */
-    --meowdown-caret-stretch: 1.4;
-
     /* Markdown syntax characters */
     --meowdown-mark: var(--meowdown-muted);
 
@@ -148,8 +145,6 @@
     pointer-events: none;
     user-select: none;
     -webkit-user-select: none;
-    /* The measured rect is the glyph box, which reads short against the airy line-height; stretch from the center to stand a little taller. */
-    transform: scaleY(var(--meowdown-caret-stretch));
     transition:
       left var(--meowdown-caret-glide) cubic-bezier(0.25, 1, 0.5, 1),
       top var(--meowdown-caret-glide) cubic-bezier(0.25, 1, 0.5, 1),
