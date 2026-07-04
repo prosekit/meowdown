@@ -81,52 +81,50 @@ function sameRect(left: CaretRect | undefined, right: CaretRect | undefined): bo
 // caret's coordinates are re-derived from the layer's own measured rect, so no
 // positioned ancestor is required.
 class VirtualCaretView {
-  // REVIEW: do not use `private`. Use `#`.
-  private readonly view: EditorView
-  private readonly layer: HTMLElement
-  private readonly caret: HTMLElement
-  private readonly document: Document
-  private readonly resizeObserver: ResizeObserver | undefined
-  private lastRect: CaretRect | undefined
-  private lastTail: CaretTail | undefined
-  private blinkIndex = 0
+  readonly #view: EditorView
+  readonly #layer: HTMLElement
+  readonly #caret: HTMLElement
+  readonly #document: Document
+  readonly #resizeObserver: ResizeObserver | undefined
+  #lastRect: CaretRect | undefined
+  #lastTail: CaretTail | undefined
+  #blinkIndex = 0
 
   constructor(view: EditorView) {
-    this.view = view
-    this.document = view.dom.ownerDocument
-    this.layer = this.document.createElement('div')
-    this.layer.className = 'md-virtual-caret-layer'
-    this.caret = this.layer.appendChild(this.document.createElement('div'))
-    this.caret.className = 'md-virtual-caret'
-    this.caret.dataset.testid = 'virtual-caret'
-    view.dom.insertAdjacentElement('afterend', this.layer)
-    this.document.addEventListener('selectionchange', this.reposition)
+    this.#view = view
+    this.#document = view.dom.ownerDocument
+    this.#layer = this.#document.createElement('div')
+    this.#layer.className = 'md-virtual-caret-layer'
+    this.#caret = this.#layer.appendChild(this.#document.createElement('div'))
+    this.#caret.className = 'md-virtual-caret'
+    this.#caret.dataset.testid = 'virtual-caret'
+    view.dom.insertAdjacentElement('afterend', this.#layer)
+    this.#document.addEventListener('selectionchange', this.#reposition)
     if (typeof ResizeObserver !== 'undefined') {
-      this.resizeObserver = new ResizeObserver(this.reposition)
-      this.resizeObserver.observe(view.dom)
+      this.#resizeObserver = new ResizeObserver(this.#reposition)
+      this.#resizeObserver.observe(view.dom)
     }
-    this.reposition()
+    this.#reposition()
   }
 
   update(view: EditorView, prevState: EditorState) {
-    if (!view.state.selection.eq(prevState.selection)) this.restartBlink()
-    this.reposition()
+    if (!view.state.selection.eq(prevState.selection)) this.#restartBlink()
+    this.#reposition()
   }
 
   destroy() {
-    this.document.removeEventListener('selectionchange', this.reposition)
-    this.resizeObserver?.disconnect()
-    this.layer.remove()
+    this.#document.removeEventListener('selectionchange', this.#reposition)
+    this.#resizeObserver?.disconnect()
+    this.#layer.remove()
   }
 
-  // REVIEW: do not use `private`. Use `#`.
-  private restartBlink() {
-    this.blinkIndex = 1 - this.blinkIndex
-    this.caret.style.animationName = BLINK_ANIMATIONS[this.blinkIndex]
+  #restartBlink() {
+    this.#blinkIndex = 1 - this.#blinkIndex
+    this.#caret.style.animationName = BLINK_ANIMATIONS[this.#blinkIndex]
   }
 
-  private readonly reposition = (): void => {
-    const view = this.view
+  readonly #reposition = (): void => {
+    const view = this.#view
     if (view.isDestroyed) return
     const state = view.state
     const selection = state.selection
@@ -137,23 +135,23 @@ class VirtualCaretView {
       rect != null && getMarkMode(state) === 'hide'
         ? getCaretTail(state, selection.head)
         : undefined
-    if (sameRect(rect, this.lastRect) && tail === this.lastTail) return
-    this.lastRect = rect
-    this.lastTail = tail
+    if (sameRect(rect, this.#lastRect) && tail === this.#lastTail) return
+    this.#lastRect = rect
+    this.#lastTail = tail
     if (tail == null) {
-      delete this.caret.dataset.tail
+      delete this.#caret.dataset.tail
     } else {
-      this.caret.dataset.tail = tail
+      this.#caret.dataset.tail = tail
     }
     if (rect == null) {
-      this.caret.style.visibility = 'hidden'
+      this.#caret.style.visibility = 'hidden'
       return
     }
-    const layerRect = this.layer.getBoundingClientRect()
-    this.caret.style.visibility = ''
-    this.caret.style.left = `${rect.left - layerRect.left}px`
-    this.caret.style.top = `${rect.top - layerRect.top}px`
-    this.caret.style.height = `${rect.height}px`
+    const layerRect = this.#layer.getBoundingClientRect()
+    this.#caret.style.visibility = ''
+    this.#caret.style.left = `${rect.left - layerRect.left}px`
+    this.#caret.style.top = `${rect.top - layerRect.top}px`
+    this.#caret.style.height = `${rect.height}px`
   }
 }
 
