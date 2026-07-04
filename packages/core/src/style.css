@@ -31,6 +31,9 @@
     /* how long the caret glides when it moves (0 disables the animation) */
     --meowdown-caret-glide: 80ms;
 
+    /* how much taller the caret stands than the measured glyph box */
+    --meowdown-caret-stretch: 1.1;
+
     /* Markdown syntax characters */
     --meowdown-mark: var(--meowdown-muted);
 
@@ -145,6 +148,9 @@
     pointer-events: none;
     user-select: none;
     -webkit-user-select: none;
+    /* The measured rect is the glyph box, which reads short against the airy
+     * 1.7 line-height; stretch from the center to stand a little taller. */
+    transform: scaleY(var(--meowdown-caret-stretch));
     transition:
       left var(--meowdown-caret-glide) cubic-bezier(0.25, 1, 0.5, 1),
       top var(--meowdown-caret-glide) cubic-bezier(0.25, 1, 0.5, 1),
@@ -159,7 +165,7 @@
 
   .ProseMirror.ProseMirror-focused ~ .md-virtual-caret-layer .md-virtual-caret {
     display: block;
-    animation: md-virtual-caret-blink 1.2s steps(1) infinite;
+    animation: md-virtual-caret-blink 1.2s ease-in-out infinite;
   }
 
   /* Typing-affinity tails: the foot points to the side a typed character
@@ -178,16 +184,33 @@
     border-bottom: 2px solid var(--meowdown-caret);
   }
 
-  /* Two identical keyframe sets so a name swap restarts the blink without a
+  /* macOS-style blink: dwell solid, fade out, dwell off, fade back in.
+   * Two identical keyframe sets so a name swap restarts the blink without a
    * forced reflow. */
   @keyframes md-virtual-caret-blink {
-    50% {
+    0%,
+    40% {
+      opacity: 1;
+    }
+    60%,
+    90% {
       opacity: 0;
+    }
+    100% {
+      opacity: 1;
     }
   }
   @keyframes md-virtual-caret-blink2 {
-    50% {
+    0%,
+    40% {
+      opacity: 1;
+    }
+    60%,
+    90% {
       opacity: 0;
+    }
+    100% {
+      opacity: 1;
     }
   }
 
