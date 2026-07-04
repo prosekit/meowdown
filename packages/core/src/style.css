@@ -526,6 +526,16 @@
     background: var(--meowdown-table-header-bg);
   }
 
+  .ProseMirror td[data-align='center'],
+  .ProseMirror th[data-align='center'] {
+    text-align: center;
+  }
+
+  .ProseMirror td[data-align='right'],
+  .ProseMirror th[data-align='right'] {
+    text-align: right;
+  }
+
   .ProseMirror table.ProseMirror-selectednode td,
   .ProseMirror table.ProseMirror-selectednode th {
     border-color: var(--meowdown-node-outline);

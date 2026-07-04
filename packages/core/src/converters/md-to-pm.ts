@@ -4,6 +4,7 @@ import type { ProseMirrorNode } from '@prosekit/pm/model'
 import type { CodeBlockFenceStyle } from '../extensions/code-block.ts'
 import type { ListMarker, MeowdownListAttrs, TaskMarker } from '../extensions/list.ts'
 import { getNodeBuilders, type TypedNodeBuilders } from '../extensions/schema.ts'
+import type { TableColumnAlign } from '../extensions/table-column-align.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 import { gfmBlockOnlyParser } from '../lezer/parser.ts'
 import {
@@ -523,13 +524,14 @@ function convertCodeBlock(
 function convertTable(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string): ProseMirrorNode {
   // The delimiter row (a `TableDelimiter` that is a direct child of `Table`)
   // is the only source that always encodes every column, so it drives the
-  // column count. `@lezer/markdown` emits no `TableCell` for an empty cell, so
-  // counting per-row cells would drop empty columns and misalign the rest.
-  let columnCount = 0
+  // column count and the column alignment. `@lezer/markdown` emits no
+  // `TableCell` for an empty cell, so counting per-row cells would drop empty
+  // columns and misalign the rest.
+  let aligns: Array<TableColumnAlign | null> = []
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.TableDelimiter) {
-        columnCount = countDelimiterColumns(text.slice(cursor.from, cursor.to))
+        aligns = parseDelimiterAligns(text.slice(cursor.from, cursor.to))
       }
     } while (cursor.nextSibling())
     cursor.parent()
@@ -540,9 +542,9 @@ function convertTable(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string
     do {
       const id = cursor.type.id
       if (id === LEZER_NODE_IDS.TableHeader) {
-        rows.push(convertTableRow(nodes, cursor, text, true, columnCount))
+        rows.push(convertTableRow(nodes, cursor, text, true, aligns))
       } else if (id === LEZER_NODE_IDS.TableRow) {
-        rows.push(convertTableRow(nodes, cursor, text, false, columnCount))
+        rows.push(convertTableRow(nodes, cursor, text, false, aligns))
       }
     } while (cursor.nextSibling())
     cursor.parent()
@@ -550,8 +552,19 @@ function convertTable(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string
   return nodes.table(rows)
 }
 
-function countDelimiterColumns(separator: string): number {
-  return separator.split('|').filter((segment) => segment.trim() !== '').length
+function parseDelimiterAligns(separator: string): Array<TableColumnAlign | null> {
+  return separator
+    .split('|')
+    .map((segment) => segment.trim())
+    .filter((segment) => segment !== '')
+    .map((segment) => {
+      const left = segment.startsWith(':')
+      const right = segment.endsWith(':')
+      if (left && right) return 'center'
+      if (left) return 'left'
+      if (right) return 'right'
+      return null
+    })
 }
 
 function convertTableRow(
@@ -559,8 +572,9 @@ function convertTableRow(
   cursor: TreeCursor,
   text: string,
   isHeader: boolean,
-  columnCount: number,
+  aligns: ReadonlyArray<TableColumnAlign | null>,
 ): ProseMirrorNode {
+  const columnCount = aligns.length
   const cellTexts: string[] = Array<string>(columnCount).fill('')
   if (cursor.firstChild()) {
     const hasLeadingPipe = cursor.type.id === LEZER_NODE_IDS.TableDelimiter
@@ -582,9 +596,10 @@ function convertTableRow(
     cursor.parent()
   }
 
-  const cells = cellTexts.map((cellText) => {
+  const cells = cellTexts.map((cellText, column) => {
     const paragraph = nodes.paragraph(cellText)
-    return isHeader ? nodes.tableHeaderCell(paragraph) : nodes.tableCell(paragraph)
+    const attrs = { align: aligns[column] }
+    return isHeader ? nodes.tableHeaderCell(attrs, paragraph) : nodes.tableCell(attrs, paragraph)
   })
   return nodes.tableRow(cells)
 }
