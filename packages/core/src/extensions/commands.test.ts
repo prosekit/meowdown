@@ -57,3 +57,45 @@ describe('insertMarkdown', () => {
     expect(docToMarkdown(fixture.doc)).toBe('Hello\n')
   })
 })
+
+describe('insertTrigger', () => {
+  it('inserts the trigger text at the cursor', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('Hello <a>')))
+
+    expect(editor.commands.insertTrigger('/')).toBe(true)
+
+    expect(docToMarkdown(fixture.doc)).toBe('Hello /\n')
+  })
+
+  it('prefixes a space after a non-space character', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('Hello<a>')))
+
+    editor.commands.insertTrigger('[[')
+
+    expect(docToMarkdown(fixture.doc)).toBe('Hello [[\n')
+  })
+
+  it('inserts as-is in a code block', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.codeBlock('const a<a>')))
+
+    editor.commands.insertTrigger('/')
+
+    expect(docToMarkdown(fixture.doc)).toBe('```\nconst a/\n```\n')
+  })
+
+  it('ignores empty trigger text', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('Hello<a>')))
+
+    expect(editor.commands.insertTrigger('')).toBe(false)
+
+    expect(docToMarkdown(fixture.doc)).toBe('Hello\n')
+  })
+})
