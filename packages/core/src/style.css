@@ -598,11 +598,19 @@
     display: contents;
   }
 
-  .ProseMirror[data-mark-mode='hide'] {
+  /* Hidden syntax keeps a real zero-width inline box (font-size: 0) instead of
+   * leaving the box tree (display: none): the caret, click hit-testing, native
+   * deletion, and scrolling all assume the text has a box. letter-spacing is
+   * zeroed defensively; the current -0.01em is em-based and already collapses. */
+  .ProseMirror[data-mark-mode='hide'],
+  .ProseMirror[data-mark-mode='focus'] {
     .md-mark,
     .md-link-uri,
     .md-link-title {
-      display: none;
+      display: inline;
+      font-size: 0;
+      letter-spacing: 0;
+      opacity: 0;
     }
   }
 
@@ -610,13 +618,10 @@
     .md-mark,
     .md-link-uri,
     .md-link-title {
-      display: inline;
-      font-size: 0;
-      opacity: 0;
-
       &:has(.show) {
         opacity: 1;
         font-size: inherit;
+        letter-spacing: inherit;
       }
     }
   }

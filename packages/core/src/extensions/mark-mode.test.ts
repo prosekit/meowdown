@@ -913,11 +913,12 @@ describe('hide mode', () => {
     fixture.view.focus()
 
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold** ┃text"`)
-    // TODO: this is a bug. Pressing backspace should not delete the closing **
+    // TODO(unformat deletion): Backspace next to the hidden ** should dissolve
+    // the whole unit instead of eating a single marker char.
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold┃text"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold**┃text"`)
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bol┃text"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold*┃text"`)
   })
 })
 

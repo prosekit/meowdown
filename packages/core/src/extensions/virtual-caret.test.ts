@@ -88,3 +88,42 @@ describe('virtual caret rendering', () => {
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"hello x┃world"`)
   })
 })
+
+describe('virtual caret geometry next to hidden runs (hide mode)', () => {
+  it('is visible and full-height right after a hidden closing run', async () => {
+    using fixture = setupMode('hide', 'foo **bold**<a> bar')
+    void fixture
+    await expect.element(caret).toBeVisible()
+    const height = Number.parseFloat(getCaretElement().style.height)
+    expect(height).toBeGreaterThan(0)
+  })
+
+  it('is visible at a unit outer edge at paragraph start', async () => {
+    using fixture = setupMode('hide', '<a>**bold** rest')
+    void fixture
+    await expect.element(caret).toBeVisible()
+    const height = Number.parseFloat(getCaretElement().style.height)
+    expect(height).toBeGreaterThan(0)
+  })
+
+  it('draws the two coincident boundary positions at one x', async () => {
+    const measureLeftAt = async (text: string): Promise<number> => {
+      using fixture = setupMode('hide', text)
+      void fixture
+      await expect.element(caret).toBeVisible()
+      return Number.parseFloat(getCaretElement().style.left)
+    }
+    const contentEdge = await measureLeftAt('foo **bold<a>** bar')
+    const outerEdge = await measureLeftAt('foo **bold**<a> bar')
+    expect(Math.abs(contentEdge - outerEdge)).toBeLessThanOrEqual(1)
+  })
+
+  it('is visible inside an empty paragraph', async () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    editor.use(defineMarkMode('hide'))
+    fixture.set(n.doc(n.paragraph()))
+    fixture.view.focus()
+    await expect.element(caret).toBeVisible()
+  })
+})
