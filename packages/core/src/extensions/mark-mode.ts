@@ -27,6 +27,10 @@ const CLIPBOARD_STRIP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([
 
 const markModeKey = new PluginKey<MarkMode>('mark-mode')
 
+function getCurrentMarkMode(state: EditorState): MarkMode | undefined {
+  return markModeKey.getState(state)
+}
+
 function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
   return new Plugin<MarkMode>({
     key: markModeKey,
@@ -36,16 +40,16 @@ function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
     },
     props: {
       attributes: (state) => {
-        return { 'data-mark-mode': markModeKey.getState(state) ?? initialMode }
+        return { 'data-mark-mode': getCurrentMarkMode(state) ?? initialMode }
       },
       decorations: (state) => {
-        return markModeKey.getState(state) === 'focus' ? computeFocusDecorations(state) : undefined
+        return getCurrentMarkMode(state) === 'focus' ? computeFocusDecorations(state) : undefined
       },
       // In show mode the empty string is falsy, so `someProp` falls through to
       // the next serializer (`defineMarkdownCopy` in the full editor) and the
       // copied text keeps the syntax.
       clipboardTextSerializer: (slice, view) => {
-        return markModeKey.getState(view.state) === 'show' ? '' : cleanCopySerializer(slice)
+        return getCurrentMarkMode(view.state) === 'show' ? '' : cleanCopySerializer(slice)
       },
     },
   })
