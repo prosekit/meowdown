@@ -13,7 +13,6 @@ import {
   defineMarkdownCopy,
   definePlaceholder,
   defineReadonly,
-  defineSlashMenuTrigger,
   defineSpellCheckPlugin,
   defineTagClickHandler,
   defineWikilinkClickHandler,
@@ -53,7 +52,6 @@ export interface EditorExtensionsProps {
   placeholder?: PlaceholderOptions['placeholder']
   readOnly?: boolean
   wikilinkEnabled?: boolean
-  slashMenuTrigger?: boolean
   spellCheck?: boolean
 }
 
@@ -78,7 +76,6 @@ export function EditorExtensions({
   placeholder,
   readOnly,
   wikilinkEnabled,
-  slashMenuTrigger,
   spellCheck,
 }: EditorExtensionsProps): null {
   // The mark-mode plugin ships in the creation extension so the first paint
@@ -201,12 +198,6 @@ export function EditorExtensions({
     useMemo(() => {
       return wikilinkEnabled ? defineWikilinkTrigger() : null
     }, [wikilinkEnabled]),
-  )
-
-  useExtension(
-    useMemo(() => {
-      return slashMenuTrigger ? defineSlashMenuTrigger() : null
-    }, [slashMenuTrigger]),
   )
 
   useExtension(

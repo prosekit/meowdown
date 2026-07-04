@@ -66,14 +66,6 @@ export interface EditorProps {
   onSlashMenuSearch?: SlashMenuSearchHandler
 
   /**
-   * Opens the slash menu the moment `/` is typed in a triggering spot (the
-   * start of a textblock or right after whitespace, outside code), by
-   * intercepting the keystroke and opening the menu in the same transaction
-   * instead of relying on the text-input matcher alone. Off by default.
-   */
-  slashMenuTrigger?: boolean
-
-  /**
    * Searches tags for the tag menu, which opens when typing `#` followed by
    * text. Receives the query (lowercased, punctuation stripped) and returns the
    * tags to show, synchronously or as a promise. Pass a stable function (e.g.
@@ -275,7 +267,6 @@ export function MeowdownEditor({
   initialMarkdown,
   onDocChange,
   onSlashMenuSearch,
-  slashMenuTrigger = false,
   onTagSearch,
   onWikilinkSearch,
   onSelectionMenuSearch,
@@ -386,7 +377,6 @@ export function MeowdownEditor({
         initialMarkdown={initialMarkdown}
         onDocChange={onDocChange}
         onSlashMenuSearch={onSlashMenuSearch}
-        slashMenuTrigger={slashMenuTrigger}
         onTagSearch={onTagSearch}
         onWikilinkSearch={onWikilinkSearch}
         onSelectionMenuSearch={onSelectionMenuSearch}

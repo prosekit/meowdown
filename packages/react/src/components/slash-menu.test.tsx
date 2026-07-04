@@ -184,22 +184,23 @@ describe('SlashMenu', () => {
     expect(ref.current?.getMarkdown()).toBe('Hello **Agenda**\n')
   })
 
-  it('opens via the trigger keymap and keeps the typed slash as text', async () => {
+  it('opens when the insertTrigger command inserts "/"', async () => {
     const ref = createRef<EditorHandle>()
-    await render(<ProseKitEditor ref={ref} slashMenuTrigger />)
+    await render(<ProseKitEditor ref={ref} />)
     await pmRoot.click()
-    await userEvent.keyboard('/head')
-    await expect.element(menu.getByText('Heading 1')).toBeVisible()
-    expect(ref.current?.getMarkdown()).toBe('/head\n')
+    ref.current?.editor?.commands.insertTrigger('/')
+    await expect.element(menu).toBeVisible()
+    expect(ref.current?.getMarkdown()).toBe('/\n')
   })
 
-  it('leaves a mid-word slash to normal typing when the trigger is on', async () => {
+  it('prefixes a space when insertTrigger runs right after a word', async () => {
     const ref = createRef<EditorHandle>()
-    await render(<ProseKitEditor ref={ref} slashMenuTrigger />)
+    await render(<ProseKitEditor ref={ref} />)
     await pmRoot.click()
-    await userEvent.keyboard('3/4')
-    await expect.element(menu).not.toBeVisible()
-    expect(ref.current?.getMarkdown()).toBe('3/4\n')
+    await userEvent.keyboard('Hello')
+    ref.current?.editor?.commands.insertTrigger('/')
+    await expect.element(menu).toBeVisible()
+    expect(ref.current?.getMarkdown()).toBe('Hello /\n')
   })
 
   it('omits block items inside a table cell but keeps inline items', async () => {
