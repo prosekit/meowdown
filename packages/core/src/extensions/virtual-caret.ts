@@ -65,9 +65,9 @@ function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
 }
 
 // The measured rect is the glyph box, which reads short against the airy
-// line-height; stand the caret taller around its center. Done here rather
+// line-height; stand the caret taller around its center. <REVIEW: REMOVE the comment after>Done here rather
 // than with a CSS scaleY, which would also thicken a tail's horizontal foot
-// relative to the vertical bar.
+// relative to the vertical bar.<REVIEW: REMOVE the comment beefore>
 const CARET_STRETCH = 1.4
 
 function stretchCaretRect(rect: CaretRect): CaretRect {
