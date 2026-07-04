@@ -25,6 +25,10 @@ editor.mount(document.querySelector<HTMLElement>('#editor')!)
 const markdown = docToMarkdown(editor.state.doc)
 ```
 
+## Mark modes
+
+The editor renders Markdown syntax characters in one of three mark modes: `'hide'` (syntax never visible; copy strips it), `'focus'` (syntax hidden, revealed around the caret; copy strips it), and `'show'` (syntax always visible, dimmed; copy keeps it). Pass the initial mode as `defineEditorExtension({ markMode })`; it defaults to `'focus'` and is applied from the first paint. Switch it at runtime with `editor.commands.setMarkMode('hide')`. A mode switch is not recorded in history, so undo reverts document changes only, never the mode. Note that `editor.setContent` rebuilds the editor state, which resets the mode back to the creation-time value (the same way it resets undo history).
+
 ## Supported Markdown features
 
 - CommonMark

@@ -54,6 +54,8 @@ export function App() {
 
 See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Freact/).
 
+The `mode` prop (`'hide'` / `'focus'` / `'show'`, default `'focus'`) picks how much Markdown syntax stays in view. It is applied from the editor's first paint, and changing the prop switches the mode in place without touching the document or its undo history.
+
 Slash menu host items can include `keywords` to match hidden terms without changing the displayed label.
 
 ## Styling
