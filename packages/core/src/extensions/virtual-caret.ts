@@ -4,6 +4,7 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
 import { tryCoordsAtPos } from '../utils/caret-coords.ts'
+import { forceReflow } from '../utils/force-reflow.ts'
 
 import { ATOM_SOURCE_MARK_NAMES } from './atom-mark-navigation.ts'
 import { getMarkRangeAt } from './get-mark-range-at.ts'
@@ -14,7 +15,6 @@ import {
   type CaretTail,
 } from './hidden-run.ts'
 import { getMarkMode } from './mark-mode.ts'
-import { forceReflow } from '../utils/force-reflow.ts'
 
 const key = new PluginKey('meowdown-virtual-caret')
 
@@ -55,17 +55,17 @@ function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   const head = state.selection.head
   const runBefore = getHiddenRunBefore(state, head)
   const runAfter = getHiddenRunAfter(state, head)
-  const preferredSide: -1 | 1 = runBefore == null ? -1 : 1
+  const preferredBeforeSide: boolean = runBefore == null
   // `side` picks which neighbor to measure: -1 the character before the
   // position, 1 the character after it.
-  const probes: [pos: number, side: -1 | 1][] = [
-    [head, preferredSide],
-    [head, -preferredSide as -1 | 1],
+  const probes: [pos: number, beforeSide: boolean][] = [
+    [head, preferredBeforeSide],
+    [head, !preferredBeforeSide],
   ]
-  if (runBefore != null) probes.push([runBefore.from, -1])
-  if (runAfter != null) probes.push([runAfter.to, 1])
-  for (const [pos, side] of probes) {
-    const coords = tryCoordsAtPos(view, pos, side)
+  if (runBefore != null) probes.push([runBefore.from, true])
+  if (runAfter != null) probes.push([runAfter.to, false])
+  for (const [pos, beforeSide] of probes) {
+    const coords = tryCoordsAtPos(view, pos, beforeSide ? -1 : 1)
     if (coords != null && coords.bottom > coords.top) {
       return { left: coords.left, top: coords.top, height: coords.bottom - coords.top }
     }
