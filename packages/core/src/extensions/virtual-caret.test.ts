@@ -3,6 +3,7 @@ import { page, userEvent } from 'vitest/browser'
 
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
+import { defineFileView } from './file-view.ts'
 import { defineMarkMode, type MarkMode } from './mark-mode.ts'
 
 const caret = page.getByTestId('virtual-caret')
@@ -124,6 +125,88 @@ describe('virtual caret geometry next to hidden runs (hide mode)', () => {
     editor.use(defineMarkMode('hide'))
     fixture.set(n.doc(n.paragraph()))
     fixture.view.focus()
+    await expect.element(caret).toBeVisible()
+  })
+})
+
+describe('virtual caret next to atom marks', () => {
+  const wikilink = page.getByTestId('wikilink')
+
+  function setupFilePill(text: string): Fixture {
+    const fixture = setupFixture({
+      extensionOptions: { resolveFileLink: ({ href }) => href.startsWith('assets/') },
+    })
+    const { editor, n } = fixture
+    editor.use(defineFileView({}))
+    editor.use(defineMarkMode('hide'))
+    fixture.set(n.doc(n.paragraph(text)))
+    fixture.view.focus()
+    return fixture
+  }
+
+  it('is visible at the end of a paragraph holding only a wikilink', async () => {
+    using fixture = setupMode('hide', '[[note]]<a>')
+    void fixture
+    await expect.element(caret).toBeVisible()
+  })
+
+  it('is visible at the start of a paragraph holding only a wikilink', async () => {
+    using fixture = setupMode('hide', '<a>[[note]]')
+    void fixture
+    await expect.element(caret).toBeVisible()
+  })
+
+  it('is visible at the end of a wikilink preceded by text', async () => {
+    using fixture = setupMode('hide', 'head [[note]]<a>')
+    void fixture
+    await expect.element(caret).toBeVisible()
+  })
+
+  it('is visible at the start of a wikilink followed by text', async () => {
+    using fixture = setupMode('hide', '<a>[[note]] tail')
+    void fixture
+    await expect.element(caret).toBeVisible()
+  })
+
+  it('is visible at the end of a wikilink followed by text', async () => {
+    using fixture = setupMode('hide', '[[note]]<a> tail')
+    void fixture
+    await expect.element(caret).toBeVisible()
+  })
+
+  it('is visible between two adjacent wikilinks', async () => {
+    using fixture = setupMode('hide', '[[a]]<a>[[b]]')
+    void fixture
+    await expect.element(caret).toBeVisible()
+  })
+
+  it('is visible at the end of a lone wikilink in show mode', async () => {
+    using fixture = setupMode('show', '[[note]]<a>')
+    void fixture
+    await expect.element(caret).toBeVisible()
+  })
+
+  it('draws the caret flush against the wikilink label right edge', async () => {
+    using fixture = setupMode('hide', 'head [[note]]<a>')
+    void fixture
+    await expect.element(caret).toBeVisible()
+    const previewRight = () => wikilink.element().getBoundingClientRect().right
+    const caretLeft = () => getCaretElement().getBoundingClientRect().left
+    await expect.poll(() => Math.abs(caretLeft() - previewRight())).toBeLessThanOrEqual(2)
+  })
+
+  it('draws the caret flush against the wikilink label left edge', async () => {
+    using fixture = setupMode('hide', '<a>[[note]] tail')
+    void fixture
+    await expect.element(caret).toBeVisible()
+    const previewLeft = () => wikilink.element().getBoundingClientRect().left
+    const caretLeft = () => getCaretElement().getBoundingClientRect().left
+    await expect.poll(() => Math.abs(caretLeft() - previewLeft())).toBeLessThanOrEqual(2)
+  })
+
+  it('is visible at the end of a paragraph holding only a file pill', async () => {
+    using fixture = setupFilePill('[report.pdf](assets/report.pdf)<a>')
+    void fixture
     await expect.element(caret).toBeVisible()
   })
 })

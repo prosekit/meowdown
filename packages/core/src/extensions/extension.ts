@@ -12,7 +12,7 @@ import { defineModClickPrevention } from '@prosekit/extensions/mod-click-prevent
 import { defineText } from '@prosekit/extensions/text'
 import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
-import { defineAtomMarkNavigation } from './atom-mark-navigation.ts'
+import { ATOM_SOURCE_MARK_NAMES, defineAtomMarkNavigation } from './atom-mark-navigation.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineCodeBlock } from './code-block.ts'
 import { defineEditorCommands } from './commands.ts'
@@ -64,11 +64,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineVirtualCaret(),
     defineHiddenRunCaret(),
     defineAtomMarkNavigation({
-      marks: [
-        { name: 'mdImage', modes: ['hide', 'focus', 'show'] },
-        { name: 'mdWikilink', modes: ['hide', 'focus', 'show'] },
-        { name: 'mdFile', modes: ['hide', 'focus', 'show'] },
-      ],
+      marks: ATOM_SOURCE_MARK_NAMES.map((name) => ({ name, modes: ['hide', 'focus', 'show'] })),
     }),
 
     // others

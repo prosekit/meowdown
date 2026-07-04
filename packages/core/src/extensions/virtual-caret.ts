@@ -5,6 +5,8 @@ import type { EditorView } from '@prosekit/pm/view'
 
 import { tryCoordsAtPos } from '../utils/caret-coords.ts'
 
+import { ATOM_SOURCE_MARK_NAMES } from './atom-mark-navigation.ts'
+import { getMarkRangeAt } from './get-mark-range-at.ts'
 import {
   getCaretTail,
   getHiddenRunAfter,
@@ -66,6 +68,33 @@ function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   return undefined
 }
 
+// Step 3: an atom mark view (image, wikilink, file pill) hides its source
+// text with `display: none`, so no position beside it has a box the earlier
+// steps can measure. The preview element standing in for the source is the
+// visible geometry; the caret sits flush against its outer edge.
+function findAtomPreviewElement(view: EditorView, insidePos: number): Element | undefined {
+  const { node } = view.domAtPos(insidePos, 0)
+  const element = node instanceof Element ? node : node.parentElement
+  const preview = element?.closest('.md-atom-view')?.querySelector('.md-atom-view-preview')
+  return preview ?? undefined
+}
+
+function findAtomCaretRect(view: EditorView): CaretRect | undefined {
+  const state = view.state
+  const head = state.selection.head
+  for (const markName of ATOM_SOURCE_MARK_NAMES) {
+    const range = getMarkRangeAt(state, head, markName)
+    if (range == null || (range.from !== head && range.to !== head)) continue
+    const preview = findAtomPreviewElement(view, range.from + 1)
+    if (preview == null) continue
+    const rect = preview.getBoundingClientRect()
+    if (rect.height === 0) continue
+    const left = range.to === head ? rect.right : rect.left
+    return { left, top: rect.top, height: rect.height }
+  }
+  return undefined
+}
+
 // The measured rect is the glyph box, which reads short against the airy
 // line-height; stand the caret taller around its center.
 const CARET_STRETCH = 1.4
@@ -77,7 +106,8 @@ function stretchCaretRect(rect: CaretRect): CaretRect {
 
 function measureCaretRect(view: EditorView): CaretRect | undefined {
   const rect = findNativeCaretRect(view) ?? findCoordsCaretRect(view)
-  return rect == null ? undefined : stretchCaretRect(rect)
+  if (rect != null) return stretchCaretRect(rect)
+  return findAtomCaretRect(view)
 }
 
 function forceReflow(element: HTMLElement): void {
