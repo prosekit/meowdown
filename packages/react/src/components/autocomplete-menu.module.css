@@ -1,5 +1,9 @@
+/* A flex column, so the popup respects the inline `max-height` the
+ * positioner's viewport-fitting logic writes here when space is short; a
+ * block child would keep its own 25rem cap and overflow the viewport. */
 .Positioner {
-  display: block;
+  display: flex;
+  flex-direction: column;
   z-index: 50;
   width: min(24rem, calc(100vw - 1rem));
   height: min-content;
@@ -13,6 +17,7 @@
   width: 100%;
   min-width: min(15rem, 100%);
   max-width: 100%;
+  min-height: 0;
   max-height: 25rem;
   padding: 0.25rem;
   overflow-x: hidden;

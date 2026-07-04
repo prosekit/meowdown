@@ -203,6 +203,25 @@ describe('SlashMenu', () => {
     expect(ref.current?.getMarkdown()).toBe('Hello /\n')
   })
 
+  it('fits inside a short viewport instead of overflowing it', async () => {
+    // Shorter than the popup's natural 25rem, so the positioner's
+    // viewport-fitting max-height must constrain it.
+    await page.viewport(375, 300)
+    try {
+      await render(<ProseKitEditor />)
+      await pmRoot.click()
+      await userEvent.keyboard('/')
+      await expect.element(menu).toBeVisible()
+
+      await expect.poll(() => menu.element().getBoundingClientRect().top).toBeGreaterThanOrEqual(0)
+      await expect
+        .poll(() => menu.element().getBoundingClientRect().bottom)
+        .toBeLessThanOrEqual(300)
+    } finally {
+      await page.viewport(900, 600)
+    }
+  })
+
   it('omits block items inside a table cell but keeps inline items', async () => {
     const ref = createRef<EditorHandle>()
     await render(<ProseKitEditor ref={ref} initialMarkdown={'| a | b |\n| --- | --- |\n|  |  |'} />)
