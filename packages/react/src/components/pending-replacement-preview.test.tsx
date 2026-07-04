@@ -34,6 +34,17 @@ describe('PendingReplacementPreview', () => {
     expect(ref.current?.getMarkdown()).toBe('say hello end\n')
   })
 
+  it('labels the accept control by the staged mode', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} initialMarkdown="say hello end" />)
+
+    ref.current?.startPendingReplacement({ ...HELLO_RANGE, mode: 'replace' })
+    await expect.element(acceptButton).toHaveTextContent('Replace selection')
+
+    ref.current?.startPendingReplacement({ ...HELLO_RANGE, mode: 'append' })
+    await expect.element(acceptButton).toHaveTextContent('Insert below')
+  })
+
   it('Accept applies the text and reports the outcome', async () => {
     const ref = createRef<EditorHandle>()
     const onResolve = vi.fn()
