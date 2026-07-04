@@ -22,7 +22,7 @@ const BLINK_ANIMATIONS = ['md-virtual-caret-blink', 'md-virtual-caret-blink2'] a
 
 // The measured rect is the glyph box, which reads short against the airy
 // line-height; stand the caret taller around its center.
-const CARET_STRETCH = 1.4
+const CARET_STRETCH = 1.2
 
 interface CaretRect {
   left: number
