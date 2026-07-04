@@ -49,6 +49,8 @@ function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   const runBefore = getHiddenRunBefore(state, head)
   const runAfter = getHiddenRunAfter(state, head)
   const preferredSide: -1 | 1 = runBefore == null ? -1 : 1
+  // REVIEW: probe should be a tuple [pos: number, side: -1 | +1]
+  // REVIEW: add a short simple comment to explain what -1 | +1 means in this context
   const probes: Array<{ pos: number; side: -1 | 1 }> = [
     { pos: head, side: preferredSide },
     { pos: head, side: -preferredSide as -1 | 1 },
