@@ -1,5 +1,5 @@
 import { definePlugin, isTextSelection, type PlainExtension } from '@prosekit/core'
-import type { EditorState } from '@prosekit/pm/state'
+import type { EditorState, PluginView } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
@@ -96,7 +96,7 @@ function sameRect(left: CaretRect | undefined, right: CaretRect | undefined): bo
 // textblock). The layer moves with the content when the host scrolls, and the
 // caret's coordinates are re-derived from the layer's own measured rect, so no
 // positioned ancestor is required.
-class VirtualCaretView {
+class VirtualCaretView implements PluginView {
   readonly #view: EditorView
   readonly #layer: HTMLElement
   readonly #caret: HTMLElement
