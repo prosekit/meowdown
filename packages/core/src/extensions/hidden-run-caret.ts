@@ -50,6 +50,7 @@ function createSnapPlugin(): Plugin {
       if (!isTextSelection(selection)) return null
       // prosemirror-view tags pointer-originated selections with this meta in
       // its input handling (`updateSelection` in input.ts).
+      // REVIEW: add a permlink here using the format like https://code.haverbeke.berlin/prosemirror/prosemirror-view/src/tag/1.42.0/package.json#L2
       const isPointer = transactions.some((tr) => tr.getMeta('pointer') != null)
       if (selection.empty) {
         const next = getRestPosition(newState, oldState.selection.head, selection.head, isPointer)
