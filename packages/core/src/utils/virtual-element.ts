@@ -1,6 +1,7 @@
 import type { VirtualElement } from '@floating-ui/dom'
 import type { EditorView } from '@prosekit/pm/view'
 
+import { tryCoordsAtPos } from './caret-coords.ts'
 import type { PositionRange } from './range.ts'
 
 export type { VirtualElement }
@@ -16,41 +17,22 @@ export function getVirtualElementFromRange(view: EditorView, range: PositionRang
   let lastRect = new DOMRect(0, 0, 0, 0)
   const getBoundingClientRect = (): DOMRect => {
     if (view.isDestroyed) return lastRect
-    try {
-      // Bias both measurements into the range's own content. Measured outward
-      // (the default `side`), an edge that sits against hidden markdown syntax
-      // at a block boundary has no visible neighbor and yields a bogus
-      // zero rect, anchoring the popover at the viewport corner.
-      const start = tryCoordsAtPos(view, range.from, 1)
-      const end = tryCoordsAtPos(view, range.to, -1)
-      const left = Math.min(start.left, end.left)
-      const right = Math.max(start.right, end.right)
-      const top = Math.min(start.top, end.top)
-      const bottom = Math.max(start.bottom, end.bottom)
-      lastRect = new DOMRect(left, top, right - left, bottom - top)
-    } catch {
-      // Out-of-range position (e.g. the document shrank mid-measure).
-    }
+    // Bias both measurements into the range's own content. Measured outward
+    // (the default `side`), an edge that sits against hidden markdown syntax
+    // at a block boundary has no visible neighbor and yields a bogus
+    // zero rect, anchoring the popover at the viewport corner.
+    const start = tryCoordsAtPos(view, range.from, 1) ?? tryCoordsAtPos(view, range.from, -1)
+    const end = tryCoordsAtPos(view, range.to, -1) ?? tryCoordsAtPos(view, range.to, 1)
+    if (start == null || end == null) return lastRect
+    const left = Math.min(start.left, end.left)
+    const right = Math.max(start.right, end.right)
+    const top = Math.min(start.top, end.top)
+    const bottom = Math.max(start.bottom, end.bottom)
+    lastRect = new DOMRect(left, top, right - left, bottom - top)
     return lastRect
   }
   return {
     getBoundingClientRect,
     getClientRects: () => [getBoundingClientRect()],
   }
-}
-
-interface Rect {
-  left: number
-  top: number
-  right: number
-  bottom: number
-}
-
-function isZeroRect(rect: Rect): boolean {
-  return rect.left === 0 && rect.top === 0 && rect.right === 0 && rect.bottom === 0
-}
-
-function tryCoordsAtPos(view: EditorView, pos: number, bias: -1 | 1): Rect {
-  const rect: Rect = view.coordsAtPos(pos, bias)
-  return isZeroRect(rect) ? view.coordsAtPos(pos, -bias) : rect
 }

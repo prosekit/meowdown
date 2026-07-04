@@ -25,6 +25,9 @@
     /* links, wikilinks, tags, caret, drop indicator */
     --meowdown-accent: light-dark(oklch(0.646 0.194 41), oklch(0.758 0.159 56));
 
+    /* the self-drawn caret */
+    --meowdown-caret: var(--meowdown-accent);
+
     /* Markdown syntax characters */
     --meowdown-mark: var(--meowdown-muted);
 
@@ -110,8 +113,53 @@
     font-size: 1.0625rem;
     line-height: 1.7;
     color: var(--meowdown-text);
-    caret-color: var(--meowdown-accent);
+    /* The virtual caret (`.md-virtual-caret`) replaces the native caret. */
+    caret-color: transparent;
     -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Virtual caret
+   *
+   * A zero-height in-flow layer right after `.ProseMirror` (outside the
+   * contenteditable), so it scrolls with the content and never disturbs the
+   * browser's editing behavior. The caret is positioned against the layer.
+   * ------------------------------------------------------------------------- */
+  .md-virtual-caret-layer {
+    position: relative;
+    width: 0;
+    height: 0;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .md-virtual-caret-layer .md-virtual-caret {
+    position: absolute;
+    display: none;
+    width: 0;
+    border-left: 2px solid var(--meowdown-caret);
+    margin-left: -1px;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .ProseMirror.ProseMirror-focused ~ .md-virtual-caret-layer .md-virtual-caret {
+    display: block;
+    animation: md-virtual-caret-blink 1.2s steps(1) infinite;
+  }
+
+  /* Two identical keyframe sets so a name swap restarts the blink without a
+   * forced reflow. */
+  @keyframes md-virtual-caret-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  @keyframes md-virtual-caret-blink2 {
+    50% {
+      opacity: 0;
+    }
   }
 
   /* Surface padding stays on a meowdown-owned class, not `.ProseMirror`: the block
