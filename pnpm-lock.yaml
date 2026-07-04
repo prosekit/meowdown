@@ -97,8 +97,8 @@ importers:
         specifier: ^0.1.19-beta.2
         version: 0.1.19-beta.2
       '@prosekit/web':
-        specifier: ^0.9.0-beta.16
-        version: 0.9.0-beta.16(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.3.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.42.0)
+        specifier: ^0.9.0-beta.17
+        version: 0.9.0-beta.17(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.3.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.42.0)
       prosemirror-flat-list:
         specifier: ^0.7.0
         version: 0.7.0
@@ -173,8 +173,8 @@ importers:
         specifier: ^0.1.19-beta.2
         version: 0.1.19-beta.2
       '@prosekit/react':
-        specifier: ^0.8.0-beta.16
-        version: 0.8.0-beta.16(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)
+        specifier: ^0.8.0-beta.17
+        version: 0.8.0-beta.17(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -318,11 +318,11 @@ packages:
   '@aria-ui/core@0.2.1':
     resolution: {integrity: sha512-EEh2mIHL4HnfjIgZocxhCCqPRU6EE5eLFQcGw4FOfomil11jIBKtmqCQkz8qJ9Ni3IBoh/5DvUFaY206X0oY6A==}
 
-  '@aria-ui/elements@0.1.11':
-    resolution: {integrity: sha512-NNqFOnS4nGeWzSmFgCuuEoFkf5uIGHyzon8g/Robm/IdtDgIPCcjVVOhiB+ajgHgWQep9jOMSVdIYR8QgIH2Ow==}
+  '@aria-ui/elements@0.1.12':
+    resolution: {integrity: sha512-NnYKMCpUoSZYUSSXYrWOSiLih67iptxc+kLfrHbPW1BG1aFz9Bmofb2rljE7mQzU1iA5fUzPIFC0tgFH8DUoCA==}
 
-  '@aria-ui/utils@0.1.6':
-    resolution: {integrity: sha512-zdbOstUfJ6Hq92EZZhGT3CLQgnIl3keBkhoFz//6L8l0IMbtdBjYOkd/4nlSCrppQllQNrGOsUSfYSrWOPr9ZA==}
+  '@aria-ui/utils@0.1.7':
+    resolution: {integrity: sha512-ZKc/JOugSEYqsPUHYomxSbLyK9TcypsnhGL/yK2X14q6qyXVax5vHjLqgZmX5pwm28vYP4FOsUiUUtuSIK/eKw==}
 
   '@babel/code-frame@7.29.7':
     resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
@@ -1201,8 +1201,8 @@ packages:
   '@prosekit/pm@0.1.19-beta.2':
     resolution: {integrity: sha512-YE48yEDzv7S++N9TV8DwJihBnAgdtMFWuqWtt6wXr9aXauUFZhNxdcEggMYRQcb5IK6Jyk96cE33uqlR682SWg==}
 
-  '@prosekit/react@0.8.0-beta.16':
-    resolution: {integrity: sha512-Lg/0ufoL0n9i/89oJGC53kDw6vPzlxTBJ6nhNdwlvLdsf+qUM7vWFYMuMJDihUy2MESJ8oO5s5Qf74Ic76w5Gw==}
+  '@prosekit/react@0.8.0-beta.17':
+    resolution: {integrity: sha512-y6UsbNSKaFF5snsFpQUZrCtW6kJqlvP3STGtzFr/2rxTy+4BVo4NGp8y3bX+FUSUQ4UXExZvpcRvXPAdJ+kMZw==}
     peerDependencies:
       react: '>= 18.2.0'
       react-dom: '>= 18.2.0'
@@ -1212,8 +1212,8 @@ packages:
       react-dom:
         optional: true
 
-  '@prosekit/web@0.9.0-beta.16':
-    resolution: {integrity: sha512-G8mQWOAWvoBAgLFe9LD1GAZQXuGPpOry7xC3SpPxZSndxhBCZlBNf8+tPTSVWkuVo3uuC/enNuDFEqxPsHdqCg==}
+  '@prosekit/web@0.9.0-beta.17':
+    resolution: {integrity: sha512-usbx/BWC1VN5OhzFXZcjVKEHXCimG87WW7WQtEBTPJFPv1jxxmyYh7SD2/9aQ4fugFItu+aTEidVMeq1+z7D2Q==}
 
   '@prosemirror-adapter/core@0.5.3':
     resolution: {integrity: sha512-jGcI/eq3USFqf1fCaejgCmifmXYDyFco6/5KjyyNBnuEhLqyLjD+020CtcduEOsnN4xPZr5ikclgHIR6kEFkQg==}
@@ -1723,20 +1723,20 @@ packages:
   '@vitest/utils@4.1.9':
     resolution: {integrity: sha512-A51o8ymO5PpqlWNnBP9ZHPXDIpuMtTLlGSjN7la4US+LJzoUMyhwjA5QXlm39JexgwHKW4Xjs8Z2d3dLCXOeuA==}
 
-  '@zag-js/dismissable@1.41.2':
-    resolution: {integrity: sha512-hO/tFhRZ7S+LOOljGOQJIubbc3MXg41+iWR1yUXKl76cAenbxaCit1LZmUCwQPvRN0GndK6bDQo5ETjHZz/k7A==}
+  '@zag-js/dismissable@1.42.0':
+    resolution: {integrity: sha512-Cx/FAQ2MuQy3kecdmswrFk94Zie1ieBa1Pnt/2ECI5FR914EJd3DwY9Krsmlrq4Z15Wm+pVtfLXgakDewVgsiQ==}
 
-  '@zag-js/dom-query@1.41.2':
-    resolution: {integrity: sha512-+eBk1nlJA312mNmY/GSThLRwcCRqMIL+A1pLsWvTlQLQjmH1/UxoAuv6l2yvRCT33XmC8FBlBIKnXhOCpDvIZA==}
+  '@zag-js/dom-query@1.42.0':
+    resolution: {integrity: sha512-JgCNfp7F+YNFNb7Xmt6rXQr3N3V9Mp+pFRvZ8j5BTC3/G8ZYj/enrgOcuVwPlXPBGtA7ysvjig2x1c0Uou/6kg==}
 
-  '@zag-js/interact-outside@1.41.2':
-    resolution: {integrity: sha512-dM4Fn9iyqQeqkCMRYZP+bAgWEPKRVQRqMmcPsN0OXBhhFKC31Em15LTIZXaOtVKAjH+iwx+UvSYFRiWwEjkOEA==}
+  '@zag-js/interact-outside@1.42.0':
+    resolution: {integrity: sha512-CNNT1OtASacXEst8NMWDGmDwkOQgVQ0Ahc2SpPjSBZoVpxQIfhZ9FoeqcggDX7Nvze7kl6/OwA7pPi5TGQTVZQ==}
 
-  '@zag-js/types@1.41.2':
-    resolution: {integrity: sha512-L6CNvK06lIVpy0X8eG3kbDIx8Uuv+3KHElxXYSzRXSJ7/OLCv1sTRgEvnxNtdIWOrksGgxF4JtT7PXtoClGqNQ==}
+  '@zag-js/types@1.42.0':
+    resolution: {integrity: sha512-4ghao1wuLouepdYMheEYtyOlKpVsvL0Eg9tf//5VyAf7S9zC7cgGxD6ttGTlIMxqKqnAuxIMsYHG76qkb8tv1w==}
 
-  '@zag-js/utils@1.41.2':
-    resolution: {integrity: sha512-Yj8FSrR7vGA6ahUhjrThfHAF+PM2Y1Yv2lkXkqZZd60mPBhixcot1+SHOfEMV63JimQcWrmQ8QbeYYMmF+ZpLQ==}
+  '@zag-js/utils@1.42.0':
+    resolution: {integrity: sha512-Km0r9hY+f6/oCJXrO4nqCIuo+4gTqbloD0V0q7B8Jq8qeWte7HN+YJSagVlk8tfADqFMRgEW4Rug0bYHzrGbVA==}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -3554,22 +3554,22 @@ snapshots:
   '@aria-ui/core@0.2.1':
     dependencies:
       '@ocavue/utils': 1.7.0
-      '@zag-js/dom-query': 1.41.2
+      '@zag-js/dom-query': 1.42.0
       alien-signals: 3.2.1
       server-dom-shim: 1.1.0
 
-  '@aria-ui/elements@0.1.11':
+  '@aria-ui/elements@0.1.12':
     dependencies:
       '@aria-ui/core': 0.2.1
-      '@aria-ui/utils': 0.1.6
+      '@aria-ui/utils': 0.1.7
       '@floating-ui/dom': 1.7.6
-      '@zag-js/dismissable': 1.41.2
-      '@zag-js/dom-query': 1.41.2
+      '@zag-js/dismissable': 1.42.0
+      '@zag-js/dom-query': 1.42.0
 
-  '@aria-ui/utils@0.1.6':
+  '@aria-ui/utils@0.1.7':
     dependencies:
       '@aria-ui/core': 0.2.1
-      '@zag-js/dom-query': 1.41.2
+      '@zag-js/dom-query': 1.42.0
 
   '@babel/code-frame@7.29.7':
     dependencies:
@@ -4633,11 +4633,11 @@ snapshots:
       prosemirror-transform: 1.12.0
       prosemirror-view: 1.42.0(patch_hash=01138620071ca804f9a8ea1da8da8b33627cc4a241cf042480fa56863b2c6f25)
 
-  '@prosekit/react@0.8.0-beta.16(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)':
+  '@prosekit/react@0.8.0-beta.17(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)':
     dependencies:
       '@prosekit/core': 0.13.0-beta.5(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
       '@prosekit/pm': 0.1.19-beta.2
-      '@prosekit/web': 0.9.0-beta.16(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.3.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.42.0)
+      '@prosekit/web': 0.9.0-beta.17(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.3.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.42.0)
       '@prosemirror-adapter/core': 0.5.3
       '@prosemirror-adapter/react': 0.5.3(react-dom@19.2.7)(react@19.2.7)
     optionalDependencies:
@@ -4661,11 +4661,11 @@ snapshots:
       - y-prosemirror
       - yjs
 
-  '@prosekit/web@0.9.0-beta.16(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.3.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.42.0)':
+  '@prosekit/web@0.9.0-beta.17(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.3.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.42.0)':
     dependencies:
       '@aria-ui/core': 0.2.1
-      '@aria-ui/elements': 0.1.11
-      '@aria-ui/utils': 0.1.6
+      '@aria-ui/elements': 0.1.12
+      '@aria-ui/utils': 0.1.7
       '@floating-ui/dom': 1.7.6
       '@ocavue/utils': 1.7.0
       '@prosekit/core': 0.13.0-beta.5(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
@@ -5234,26 +5234,26 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  '@zag-js/dismissable@1.41.2':
+  '@zag-js/dismissable@1.42.0':
     dependencies:
-      '@zag-js/dom-query': 1.41.2
-      '@zag-js/interact-outside': 1.41.2
-      '@zag-js/utils': 1.41.2
+      '@zag-js/dom-query': 1.42.0
+      '@zag-js/interact-outside': 1.42.0
+      '@zag-js/utils': 1.42.0
 
-  '@zag-js/dom-query@1.41.2':
+  '@zag-js/dom-query@1.42.0':
     dependencies:
-      '@zag-js/types': 1.41.2
+      '@zag-js/types': 1.42.0
 
-  '@zag-js/interact-outside@1.41.2':
+  '@zag-js/interact-outside@1.42.0':
     dependencies:
-      '@zag-js/dom-query': 1.41.2
-      '@zag-js/utils': 1.41.2
+      '@zag-js/dom-query': 1.42.0
+      '@zag-js/utils': 1.42.0
 
-  '@zag-js/types@1.41.2':
+  '@zag-js/types@1.42.0':
     dependencies:
       csstype: 3.2.3
 
-  '@zag-js/utils@1.41.2': {}
+  '@zag-js/utils@1.42.0': {}
 
   acorn-jsx@5.3.2(acorn@8.17.0):
     dependencies:
