@@ -1,3 +1,4 @@
+import { NodeSelection } from '@prosekit/pm/state'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
@@ -115,6 +116,13 @@ describe('image selection ring', () => {
     await userEvent.keyboard('{ArrowLeft}')
     expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC❰![img](url)❱DEF"`)
     await expect.element(preview).toHaveStyle({ outlineStyle: 'solid' })
+  })
+
+  it('does not ring the preview inside a node-selected block', async () => {
+    using fixture = setupHidden('ABC![img](url)DEF')
+    const { view } = fixture
+    view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, 0)))
+    await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
   })
 })
 

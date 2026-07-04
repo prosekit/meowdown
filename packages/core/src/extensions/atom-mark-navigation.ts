@@ -1,6 +1,7 @@
 import {
   defineKeymap,
   definePlugin,
+  isNodeSelection,
   isTextSelection,
   Priority,
   union,
@@ -175,6 +176,9 @@ function createSelectionPlugin(marks: AtomMarks): Plugin {
       decorations: (state) => {
         const markNames = activeMarkNames(marks, state)
         if (markNames.length === 0) return
+        // A node selection already outlines the whole block; atom rings inside
+        // it would read as a second, nested selection.
+        if (isNodeSelection(state.selection)) return
         const range = getSelectedRange(state, markNames)
         if (range) {
           return DecorationSet.create(state.doc, [
