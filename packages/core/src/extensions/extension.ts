@@ -6,7 +6,6 @@ import {
   type Editor,
 } from '@prosekit/core'
 import { defineBlockquote } from '@prosekit/extensions/blockquote'
-import { defineCodeBlock } from '@prosekit/extensions/code-block'
 import { defineDoc } from '@prosekit/extensions/doc'
 import { defineGapCursor } from '@prosekit/extensions/gap-cursor'
 import { defineModClickPrevention } from '@prosekit/extensions/mod-click-prevention'
@@ -15,10 +14,12 @@ import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineAtomMarkNavigation } from './atom-mark-navigation.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
+import { defineCodeBlock } from './code-block.ts'
 import { defineEditorCommands } from './commands.ts'
 import { defineEscapeCollapse } from './escape-collapse.ts'
 import { defineDocFrontmatterAttr } from './frontmatter.ts'
 import { defineHeading } from './heading.ts'
+import { defineHiddenRunCaret } from './hidden-run-caret.ts'
 import { defineMeowdownHorizontalRule } from './horizontal-rule.ts'
 import { defineHTMLComment } from './html-comment.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
@@ -31,6 +32,7 @@ import { defineMoveBlock } from './move-block.ts'
 import { defineMeowdownParagraph } from './paragraph.ts'
 import { definePendingReplacement } from './pending-replacement.ts'
 import { defineTable } from './table.ts'
+import { defineVirtualCaret } from './virtual-caret.ts'
 import { defineWikilink } from './wikilink.ts'
 
 function defineEditorExtensionImpl(options: EditorExtensionOptions) {
@@ -59,6 +61,8 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineInlineToggle(),
     defineLinkCommands(),
     defineWikilink(),
+    defineVirtualCaret(),
+    defineHiddenRunCaret(),
     defineAtomMarkNavigation({
       marks: [
         { name: 'mdImage', modes: ['hide', 'focus', 'show'] },

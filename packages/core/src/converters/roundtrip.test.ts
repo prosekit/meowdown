@@ -635,12 +635,57 @@ describe('code blocks', () => {
     expect(roundtrip('```\n```')).toBe('```\n```\n')
   })
 
-  it.fails('keeps a tilde fence', () => {
+  it('keeps a tilde fence', () => {
     expect(roundtrip('~~~\ntilde\n~~~')).toBe('~~~\ntilde\n~~~\n')
   })
 
-  it.fails('keeps an indented code block', () => {
+  it('keeps a tilde fence with a language', () => {
+    expect(roundtrip('~~~js\ncode\n~~~')).toBe('~~~js\ncode\n~~~\n')
+  })
+
+  it('keeps a five-character tilde fence', () => {
+    expect(roundtrip('~~~~~\ncode\n~~~~~')).toBe('~~~~~\ncode\n~~~~~\n')
+  })
+
+  it('keeps a four-character backtick fence', () => {
+    expect(roundtrip('````\ncode\n````')).toBe('````\ncode\n````\n')
+  })
+
+  it('keeps a four-character fence around a nested fence', () => {
+    const md = '````\n```\nnested\n```\n````'
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
+
+  it('normalizes a longer closing fence to the opening length', () => {
+    expect(roundtrip('~~~\ncode\n~~~~~')).toBe('~~~\ncode\n~~~\n')
+  })
+
+  it('keeps an indented code block', () => {
     expect(roundtrip('    indented')).toBe('    indented\n')
+  })
+
+  it('keeps a multi-line indented code block', () => {
+    expect(roundtrip('    line1\n    line2')).toBe('    line1\n    line2\n')
+  })
+
+  it('keeps a blank line inside an indented code block', () => {
+    expect(roundtrip('    line1\n\n    line2')).toBe('    line1\n\n    line2\n')
+  })
+
+  it('keeps extra indentation inside an indented code block', () => {
+    expect(roundtrip('    code\n      more')).toBe('    code\n      more\n')
+  })
+
+  it('keeps an indented code block inside a blockquote', () => {
+    expect(roundtrip('>     code')).toBe('>     code\n')
+  })
+
+  it('keeps an indented code block starting a list item', () => {
+    expect(roundtrip('-     code')).toBe('-     code\n')
+  })
+
+  it('keeps an indented code block after a paragraph', () => {
+    expect(roundtrip('text\n\n    code')).toBe('text\n\n    code\n')
   })
 })
 

@@ -33,7 +33,8 @@ const markdown = docToMarkdown(editor.state.doc)
   - Bullet lists (`- item`, `* item`, `+ item`)
   - Ordered lists (`1. item`, `2) item`, etc.)
   - Blockquotes (`> quote`)
-  - Fenced code blocks (` ```lang\ncode\n``` `)
+  - Fenced code blocks (` ```lang\ncode\n``` `), keeping tilde fences (`~~~`) and fence lengths through a round-trip
+  - Indented code blocks (four leading spaces)
   - Thematic breaks (`---`, `***`, `___`)
   - Bold (`**bold**`), italic (`*italic*`), and inline code
   - Links (`[text](url)`), images (`![alt](src)`), and autolinks (`<https://example.com>`)

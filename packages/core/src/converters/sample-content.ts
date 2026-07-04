@@ -168,7 +168,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'codeBlock',
-      attrs: { language: 'ts' },
+      attrs: { language: 'ts', fenceStyle: null, fenceLength: null },
       content: [
         {
           type: 'text',

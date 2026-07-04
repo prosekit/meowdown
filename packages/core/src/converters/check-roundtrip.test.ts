@@ -54,6 +54,11 @@ describe('checkRoundTrip', () => {
           line one
           line two
     `,
+
+    // an indented code block keeps its indented form
+    '    indented',
+    // a tilde fence keeps its fence character
+    '~~~\ntilde\n~~~',
   ])('reports exact for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('exact')
   })
@@ -72,8 +77,7 @@ describe('checkRoundTrip', () => {
   })
 
   it.each([
-    '    indented', // an indented code block becomes a fence: the non-blank line count grows
-    '~~~\ntilde\n~~~', // a tilde fence becomes a backtick fence: same line count, content differs
+    '| a |\n| :---: |\n| b |', // table column alignment is dropped: same line count, content differs
   ])('reports lossy for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('lossy')
   })

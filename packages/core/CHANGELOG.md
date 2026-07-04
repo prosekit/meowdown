@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.34.0](https://github.com/prosekit/meowdown/compare/core-v0.33.1...core-v0.34.0) (2026-07-04)
+
+
+### Features
+
+* draw the caret ourselves instead of relying on the native one ([#220](https://github.com/prosekit/meowdown/issues/220)) ([7f6ba20](https://github.com/prosekit/meowdown/commit/7f6ba2084b7ce5ee918c440de5881672a7f37806))
+
+
+### Bug Fixes
+
+* keep code block fence style and length through a round-trip ([#221](https://github.com/prosekit/meowdown/issues/221)) ([695d77b](https://github.com/prosekit/meowdown/commit/695d77b289e2ee85c327d5a9134e8079d653eac4))
+* keep the list marker when Enter splits a list item ([#218](https://github.com/prosekit/meowdown/issues/218)) ([8f3500d](https://github.com/prosekit/meowdown/commit/8f3500da3166a495a95d177d5c27aa1407f8e209))
+
 ## [0.33.1](https://github.com/prosekit/meowdown/compare/core-v0.33.0...core-v0.33.1) (2026-07-02)
 
 

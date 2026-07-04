@@ -1,6 +1,7 @@
 import type { TreeCursor } from '@lezer/common'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
+import type { CodeBlockFenceStyle } from '../extensions/code-block.ts'
 import type { ListMarker, MeowdownListAttrs, TaskMarker } from '../extensions/list.ts'
 import { getNodeBuilders, type TypedNodeBuilders } from '../extensions/schema.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
@@ -18,6 +19,7 @@ import {
   CHAR_RIGHT_PARENTHESIS,
   CHAR_SPACE,
   CHAR_TAB,
+  CHAR_TILDE,
   CHAR_UPPERCASE_X,
   isSpaceChar,
 } from '../unicode.ts'
@@ -546,11 +548,25 @@ function convertCodeBlock(
   cursor: TreeCursor,
   text: string,
 ): ProseMirrorNode {
+  const indented = cursor.type.id === LEZER_NODE_IDS.CodeBlock
   let language = ''
   let code = ''
+  let fenceStyle: CodeBlockFenceStyle | null = indented ? 'indented' : null
+  let fenceLength: number | null = null
+  let sawOpeningMark = false
   if (cursor.firstChild()) {
     do {
       switch (cursor.type.id) {
+        case LEZER_NODE_IDS.CodeMark: {
+          // Only the opening fence sets the style and length; a longer
+          // closing fence is normalized back to the opening length.
+          if (sawOpeningMark) break
+          sawOpeningMark = true
+          if (text.charCodeAt(cursor.from) === CHAR_TILDE) fenceStyle = 'tilde'
+          const markLength = cursor.to - cursor.from
+          if (markLength > 3) fenceLength = markLength
+          break
+        }
         case LEZER_NODE_IDS.CodeInfo:
           language = text.slice(cursor.from, cursor.to)
           break
@@ -561,7 +577,7 @@ function convertCodeBlock(
     } while (cursor.nextSibling())
     cursor.parent()
   }
-  return nodes.codeBlock({ language }, code)
+  return nodes.codeBlock({ language, fenceStyle, fenceLength }, code)
 }
 
 function convertTable(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string): ProseMirrorNode {

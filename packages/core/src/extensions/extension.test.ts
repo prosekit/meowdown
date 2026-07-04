@@ -142,6 +142,8 @@ describe('defineEditorExtension', () => {
           },
           {
             "attrs": {
+              "fenceLength": null,
+              "fenceStyle": null,
               "language": "ts",
             },
             "content": [
