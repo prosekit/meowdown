@@ -19,12 +19,16 @@ minimumReleaseAgeExclude:
   - '@prosekit/*'
   - '@aria-ui/*'
   - prosemirror-view@1.42.0
+  - prosemirror-splittable@1.1.0
 
 allowBuilds:
   simple-git-hooks: false
 
 overrides:
   prosemirror-view: ^1.42.0
+  prosemirror-flat-list: https://pkg.pr.new/prosemirror-flat-list@fdc88d78f1e22cc0c663f5939937f99e680b9a8c
+
+blockExoticSubdeps: false
 
 patchedDependencies:
   prosemirror-view: patches/prosemirror-view.patch

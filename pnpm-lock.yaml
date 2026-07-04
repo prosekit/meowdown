@@ -7,6 +7,7 @@ settings:
 
 overrides:
   prosemirror-view: ^1.42.0
+  prosemirror-flat-list: https://pkg.pr.new/prosemirror-flat-list@fdc88d78f1e22cc0c663f5939937f99e680b9a8c
 
 patchedDependencies:
   prosemirror-view: 01138620071ca804f9a8ea1da8da8b33627cc4a241cf042480fa56863b2c6f25
@@ -100,8 +101,8 @@ importers:
         specifier: ^0.9.0-beta.15
         version: 0.9.0-beta.15(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.42.0)
       prosemirror-flat-list:
-        specifier: ^0.6.0
-        version: 0.6.0
+        specifier: https://pkg.pr.new/prosemirror-flat-list@fdc88d78f1e22cc0c663f5939937f99e680b9a8c
+        version: https://pkg.pr.new/prosemirror-flat-list@fdc88d78f1e22cc0c663f5939937f99e680b9a8c
       prosemirror-highlight:
         specifier: ^0.15.2
         version: 0.15.2(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.42.0)
@@ -2895,8 +2896,9 @@ packages:
   prosemirror-enter-rules@0.1.5:
     resolution: {integrity: sha512-7K0r48x821Mptgx5rHDipmNRlOW+GxRtF0K7AJuoKnfhJTdtHb67WvpJ32IzSPnCG7oSNR0cbq3/eP8ule/2/A==}
 
-  prosemirror-flat-list@0.6.0:
-    resolution: {integrity: sha512-/C11nhH5gdNxj9qVKRlaox/ndK4+X1o/hGTkNCJWdzGVqBVgRkKI/dc6GdZ4/RNvudEtgnTk4QOMOB0zcFTeHQ==}
+  prosemirror-flat-list@https://pkg.pr.new/prosemirror-flat-list@fdc88d78f1e22cc0c663f5939937f99e680b9a8c:
+    resolution: {integrity: sha512-r9/5sLpMZY2DEe9x66sK6ASftBicM9kn5J74c1ksB1Zwkvt7IkglPdGVxDc+FvB5uNpPTsgW0i2oS1G/o1ecqQ==, tarball: https://pkg.pr.new/prosemirror-flat-list@fdc88d78f1e22cc0c663f5939937f99e680b9a8c}
+    version: 0.6.0
 
   prosemirror-gapcursor@1.4.1:
     resolution: {integrity: sha512-pMdYaEnjNMSwl11yjEGtgTmLkR08m/Vl+Jj443167p9eB3HVQKhYCc4gmHVDsLPODfZfjr/MmirsdyZziXbQKw==}
@@ -2965,6 +2967,20 @@ packages:
 
   prosemirror-splittable@1.0.0:
     resolution: {integrity: sha512-ItHOL57msNnu6G5IBAvZDglPrlBAI3404vhe2yVWW73jSAKCH76bh5TzMA6hYWi4vB+Y6popf+kxSXrMDWye+w==}
+    peerDependencies:
+      prosemirror-model: ^1.21.0
+      prosemirror-state: ^1.4.3
+      prosemirror-transform: ^1.9.0
+    peerDependenciesMeta:
+      prosemirror-model:
+        optional: true
+      prosemirror-state:
+        optional: true
+      prosemirror-transform:
+        optional: true
+
+  prosemirror-splittable@1.1.0:
+    resolution: {integrity: sha512-UOdkczz10n/I2S4cmM/DUvFlKILDqOiFKDsYZy6Elx4TublHhTY99uzXMDK2zQO9oQqmmhEPMa44+tNxD/eAwA==}
     peerDependencies:
       prosemirror-model: ^1.21.0
       prosemirror-state: ^1.4.3
@@ -4600,7 +4616,7 @@ snapshots:
       prosemirror-drop-indicator: 0.1.4
       prosemirror-dropcursor: 1.8.2
       prosemirror-enter-rules: 0.1.5
-      prosemirror-flat-list: 0.6.0
+      prosemirror-flat-list: https://pkg.pr.new/prosemirror-flat-list@fdc88d78f1e22cc0c663f5939937f99e680b9a8c
       prosemirror-gapcursor: 1.4.1
       prosemirror-highlight: 0.15.2(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.2.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.42.0)
       prosemirror-math: 0.2.2
@@ -6677,12 +6693,13 @@ snapshots:
       prosemirror-state: 1.4.4
       prosemirror-view: 1.42.0(patch_hash=01138620071ca804f9a8ea1da8da8b33627cc4a241cf042480fa56863b2c6f25)
 
-  prosemirror-flat-list@0.6.0:
+  prosemirror-flat-list@https://pkg.pr.new/prosemirror-flat-list@fdc88d78f1e22cc0c663f5939937f99e680b9a8c:
     dependencies:
       prosemirror-commands: 1.7.1
       prosemirror-inputrules: 1.5.1
       prosemirror-model: 1.25.9
       prosemirror-safari-ime-span: 1.0.2
+      prosemirror-splittable: 1.1.0(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
       prosemirror-state: 1.4.4
       prosemirror-transform: 1.12.0
       prosemirror-view: 1.42.0(patch_hash=01138620071ca804f9a8ea1da8da8b33627cc4a241cf042480fa56863b2c6f25)
@@ -6747,6 +6764,12 @@ snapshots:
       prosemirror-view: 1.42.0(patch_hash=01138620071ca804f9a8ea1da8da8b33627cc4a241cf042480fa56863b2c6f25)
 
   prosemirror-splittable@1.0.0(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0):
+    optionalDependencies:
+      prosemirror-model: 1.25.9
+      prosemirror-state: 1.4.4
+      prosemirror-transform: 1.12.0
+
+  prosemirror-splittable@1.1.0(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0):
     optionalDependencies:
       prosemirror-model: 1.25.9
       prosemirror-state: 1.4.4
