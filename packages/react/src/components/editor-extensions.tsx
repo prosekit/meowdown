@@ -11,13 +11,13 @@ import {
   defineImageClickHandler,
   defineLinkClickHandler,
   defineMarkdownCopy,
-  defineMarkMode,
   definePlaceholder,
   defineReadonly,
   defineSpellCheckPlugin,
   defineTagClickHandler,
   defineWikilinkClickHandler,
   defineWikilinkTrigger,
+  type EditorExtension,
   type ExitBoundaryHandler,
   type FileClickHandler,
   type FilePasteOptions,
@@ -31,8 +31,8 @@ import {
   type WikilinkClickHandler,
 } from '@meowdown/core'
 import { defineDocChangeHandler } from '@prosekit/core'
-import { useExtension } from '@prosekit/react'
-import { useMemo } from 'react'
+import { useEditor, useExtension } from '@prosekit/react'
+import { useEffect, useMemo } from 'react'
 
 export interface EditorExtensionsProps {
   markMode: MarkMode
@@ -78,11 +78,13 @@ export function EditorExtensions({
   wikilinkEnabled,
   spellCheck,
 }: EditorExtensionsProps): null {
-  useExtension(
-    useMemo(() => {
-      return defineMarkMode(markMode)
-    }, [markMode]),
-  )
+  // The mark-mode plugin ships in the creation extension so the first paint
+  // already hides the syntax; here only later `markMode` changes are applied.
+  // The command no-ops when the state already has that mode.
+  const editor = useEditor<EditorExtension>()
+  useEffect(() => {
+    editor.commands.setMarkMode(markMode)
+  }, [editor, markMode])
 
   useExtension(
     useMemo(() => {

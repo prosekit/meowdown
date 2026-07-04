@@ -217,9 +217,7 @@ export function ProseKitEditor({
   children,
 }: ProseKitEditorProps) {
   const [editor] = useState((): TypedEditor => {
-    // Creation-time options: `resolveFileLink` is baked into the parse
-    // pipeline, so only the value from the first render counts.
-    const baseExtension: EditorExtension = defineEditorExtension({ resolveFileLink })
+    const baseExtension: EditorExtension = defineEditorExtension({ resolveFileLink, markMode })
     const extension = union(baseExtension, defineCodeBlockView())
     const editor: TypedEditor = createEditor({ extension })
     if (initialMarkdown) {

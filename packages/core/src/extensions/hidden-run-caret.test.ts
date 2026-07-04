@@ -7,14 +7,13 @@ import { findText } from '../testing/find-text.ts'
 import { setupFixture, traceKeySelection, type Fixture } from '../testing/index.ts'
 
 import { isHiddenRunInterior } from './hidden-run.ts'
-import { defineMarkMode, type MarkMode } from './mark-mode.ts'
+import type { MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 
 function setupMode(mode: MarkMode, text: string): Fixture {
-  const fixture = setupFixture()
-  const { editor, n } = fixture
-  editor.use(defineMarkMode(mode))
+  const fixture = setupFixture({ extensionOptions: { markMode: mode } })
+  const { n } = fixture
   fixture.set(n.doc(n.paragraph(text)))
   fixture.view.focus()
   return fixture
@@ -182,9 +181,8 @@ describe('hide mode Enter relocation', () => {
   })
 
   it('keeps the unit whole when splitting inside a bullet', async () => {
-    using fixture = setupFixture()
-    const { editor, n } = fixture
-    editor.use(defineMarkMode('hide'))
+    using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    const { n } = fixture
     fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('**<a>foo**'))))
     fixture.view.focus()
     await userEvent.keyboard('{Enter}')
@@ -388,9 +386,8 @@ describe('hide mode complex cases', () => {
   })
 
   it('leaves code blocks untouched', async () => {
-    using fixture = setupFixture()
-    const { editor, n } = fixture
-    editor.use(defineMarkMode('hide'))
+    using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    const { n } = fixture
     fixture.set(n.doc(n.codeBlock('**fo<a>o**')))
     fixture.view.focus()
     await userEvent.keyboard('{ArrowLeft}')
@@ -432,9 +429,8 @@ describe('hide mode complex cases', () => {
   })
 
   it('Backspace at paragraph start joins across a trailing unit', async () => {
-    using fixture = setupFixture()
-    const { editor, n } = fixture
-    editor.use(defineMarkMode('hide'))
+    using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    const { n } = fixture
     fixture.set(n.doc(n.paragraph('foo **bold**'), n.paragraph('<a>bar')))
     fixture.view.focus()
     await userEvent.keyboard('{Backspace}')

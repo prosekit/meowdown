@@ -9,7 +9,7 @@ import {
   type Fixture,
 } from '../testing/index.ts'
 
-import { defineMarkMode, type MarkMode } from './mark-mode.ts'
+import type { MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const label = pmRoot.getByTestId('wikilink')
@@ -18,9 +18,8 @@ const label = pmRoot.getByTestId('wikilink')
 // caret stop in every mark mode. `text` places the caret with a `<a>` tag.
 function setupMode(mode: MarkMode): (text: string) => Fixture {
   return (text: string) => {
-    const fixture = setupFixture()
-    const { editor, n } = fixture
-    editor.use(defineMarkMode(mode))
+    const fixture = setupFixture({ extensionOptions: { markMode: mode } })
+    const { n } = fixture
     fixture.set(n.doc(n.paragraph(text)))
     fixture.view.focus()
     return fixture
@@ -32,25 +31,22 @@ const LABEL_MODES: MarkMode[] = ['hide', 'focus']
 
 describe('wikilink rendering', () => {
   it('renders the target as the label', async () => {
-    using fixture = setupFixture()
-    const { editor, n } = fixture
-    editor.use(defineMarkMode('hide'))
+    using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    const { n } = fixture
     fixture.set(n.doc(n.paragraph('see [[Note]] here')))
     await expect.element(label).toHaveTextContent('Note')
   })
 
   it('renders the alias as the label', async () => {
-    using fixture = setupFixture()
-    const { editor, n } = fixture
-    editor.use(defineMarkMode('hide'))
+    using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    const { n } = fixture
     fixture.set(n.doc(n.paragraph('see [[Note|My Note]] here')))
     await expect.element(label).toHaveTextContent('My Note')
   })
 
   it('renders the label in show mode', async () => {
-    using fixture = setupFixture()
-    const { editor, n } = fixture
-    editor.use(defineMarkMode('show'))
+    using fixture = setupFixture({ extensionOptions: { markMode: 'show' } })
+    const { n } = fixture
     fixture.set(n.doc(n.paragraph('see [[Note]] here')))
     await expect.element(label).toBeVisible()
     await expect.element(label).toHaveTextContent('Note')
@@ -141,9 +137,8 @@ describe.each(LABEL_MODES)('wikilink selection ring in %s mode', (mode) => {
 // Vertical caret motion must walk through a paragraph containing a wikilink,
 describe('wikilink vertical caret navigation', () => {
   async function run(mode: MarkMode): Promise<string> {
-    using fixture = setupFixture()
-    const { editor, n } = fixture
-    editor.use(defineMarkMode(mode))
+    using fixture = setupFixture({ extensionOptions: { markMode: mode } })
+    const { n } = fixture
     fixture.set(
       n.doc(
         n.paragraph('paragraph <a>1'),

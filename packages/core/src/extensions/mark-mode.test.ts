@@ -7,23 +7,21 @@ import { findText } from '../testing/find-text.ts'
 import { setupFixture } from '../testing/index.ts'
 
 import { defineImage } from './image.ts'
-import { defineMarkMode, type MarkMode } from './mark-mode.ts'
+import type { MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 
 /** Mount one paragraph in `mode` (caret at `<a>`) and freeze the rendered HTML. */
 function renderHTML(mode: MarkMode, text: string): string {
-  using fixture = setupFixture()
-  fixture.editor.use(defineMarkMode(mode))
+  using fixture = setupFixture({ extensionOptions: { markMode: mode } })
   const { n } = fixture
   fixture.set(n.doc(n.paragraph(text)))
   return fixture.htmlSnapshot
 }
 
-/** Mount one paragraph in `mode` and assert what a full-document copy yields (`null` = no serializer). */
-function expectClipboard(mode: MarkMode, text: string, expected: string | null): void {
-  using fixture = setupFixture()
-  fixture.editor.use(defineMarkMode(mode))
+/** Mount one paragraph in `mode` and assert what a full-document copy yields. */
+function expectClipboard(mode: MarkMode, text: string, expected: string): void {
+  using fixture = setupFixture({ extensionOptions: { markMode: mode } })
   const { n } = fixture
   fixture.set(n.doc(n.paragraph(text)))
   const serialize = fixture.view.someProp('clipboardTextSerializer')
@@ -35,7 +33,7 @@ function expectClipboard(mode: MarkMode, text: string, expected: string | null):
 describe('focus mode', () => {
   it("sets data-mark-mode attribute to 'focus'", async () => {
     using fixture = setupFixture()
-    fixture.editor.use(defineMarkMode('focus'))
+    fixture.editor.commands.setMarkMode('focus')
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'focus')
   })
 
@@ -670,8 +668,7 @@ describe('focus mode', () => {
   })
 
   it('reveals nothing when the cursor is inside a code block', () => {
-    using fixture = setupFixture()
-    fixture.editor.use(defineMarkMode('focus'))
+    using fixture = setupFixture({ extensionOptions: { markMode: 'focus' } })
     const { n } = fixture
     fixture.set(n.doc(n.codeBlock({ language: '' }, '*not<a> italic*')))
     expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
@@ -686,9 +683,8 @@ describe('focus mode', () => {
   })
 
   it('renders an inline image as an atomic mark view, source kept in its content', () => {
-    using fixture = setupFixture()
+    using fixture = setupFixture({ extensionOptions: { markMode: 'focus' } })
     fixture.editor.use(defineImage({ resolveImageUrl: () => 'http://x/p.png' }))
-    fixture.editor.use(defineMarkMode('focus'))
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('![alt](pic.png)')))
     expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
@@ -728,8 +724,7 @@ describe('focus mode', () => {
   })
 
   it('updates the reveal as the cursor moves between paragraphs', () => {
-    using fixture = setupFixture()
-    fixture.editor.use(defineMarkMode('focus'))
+    using fixture = setupFixture({ extensionOptions: { markMode: 'focus' } })
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('**<a>alpha** one'), n.paragraph('beta two')))
     expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
@@ -802,8 +797,7 @@ describe('focus mode', () => {
     // mode still relies on the native deletion here.
     isFirefox(),
   )('handles backspace correctly around bold', async () => {
-    using fixture = setupFixture()
-    fixture.editor.use(defineMarkMode('focus'))
+    using fixture = setupFixture({ extensionOptions: { markMode: 'focus' } })
     const { n } = fixture
     // Caret sits between the space after `**bold**` and the `*italic*`.
     fixture.set(n.doc(n.paragraph('text **bold** <a>*italic* text')))
@@ -820,7 +814,7 @@ describe('focus mode', () => {
 describe('hide mode', () => {
   it("sets data-mark-mode attribute to 'hide'", async () => {
     using fixture = setupFixture()
-    fixture.editor.use(defineMarkMode('hide'))
+    fixture.editor.commands.setMarkMode('hide')
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'hide')
   })
 
@@ -906,8 +900,7 @@ describe('hide mode', () => {
   })
 
   it('handles backspace correctly around bold', async () => {
-    using fixture = setupFixture()
-    fixture.editor.use(defineMarkMode('hide'))
+    using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('text **bold** <a>text')))
     fixture.view.focus()
@@ -927,7 +920,7 @@ describe('hide mode', () => {
 describe('show mode', () => {
   it("sets data-mark-mode attribute to 'show'", async () => {
     using fixture = setupFixture()
-    fixture.editor.use(defineMarkMode('show'))
+    fixture.editor.commands.setMarkMode('show')
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'show')
   })
 
@@ -956,7 +949,50 @@ describe('show mode', () => {
     `)
   })
 
-  it('installs no clipboard serializer, so copied text keeps the ** syntax', () => {
-    expectClipboard('show', 'Hello **bold** end', null)
+  it('yields no clipboard text of its own, so copy falls through and keeps the ** syntax', () => {
+    expectClipboard('show', 'Hello **bold** end', '')
+  })
+})
+
+describe('mark mode lifecycle', () => {
+  // No await before the reads: the attribute must come from view creation
+  // itself, not from an extension applied by a queued task after the first
+  // paint (the flash this guards against).
+  it('carries data-mark-mode from the first paint', () => {
+    using fixture = setupFixture()
+    expect(fixture.dom.getAttribute('data-mark-mode')).toBe('focus')
+  })
+
+  it('honors the markMode extension option', () => {
+    using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    expect(fixture.dom.getAttribute('data-mark-mode')).toBe('hide')
+  })
+
+  it('switches the mode with the setMarkMode command', async () => {
+    using fixture = setupFixture()
+    fixture.editor.commands.setMarkMode('hide')
+    await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'hide')
+    fixture.editor.commands.setMarkMode('show')
+    await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'show')
+  })
+
+  it('keeps the mode when undo reverts a doc change made before the switch', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('hello')))
+    fixture.view.dispatch(fixture.state.tr.insertText(' world', 6))
+    editor.commands.setMarkMode('hide')
+    expect(editor.commands.undo()).toBe(true)
+    expect(fixture.doc.textContent).toBe('hello')
+    expect(fixture.dom.getAttribute('data-mark-mode')).toBe('hide')
+  })
+
+  it('creates no undo entry for a bare mode switch', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('hello')))
+    editor.commands.setMarkMode('hide')
+    expect(editor.commands.undo()).toBe(false)
+    expect(fixture.dom.getAttribute('data-mark-mode')).toBe('hide')
   })
 })
