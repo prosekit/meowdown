@@ -36,13 +36,15 @@ function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
     },
     props: {
       attributes: (state) => ({ 'data-mark-mode': markModeKey.getState(state) ?? initialMode }),
-      decorations: (state) =>
-        markModeKey.getState(state) === 'focus' ? computeFocusDecorations(state) : undefined,
+      decorations: (state) => {
+        return markModeKey.getState(state) === 'focus' ? computeFocusDecorations(state) : undefined
+      },
       // In show mode the empty string is falsy, so `someProp` falls through to
       // the next serializer (`defineMarkdownCopy` in the full editor) and the
       // copied text keeps the syntax.
-      clipboardTextSerializer: (slice, view) =>
-        markModeKey.getState(view.state) === 'show' ? '' : cleanCopySerializer(slice),
+      clipboardTextSerializer: (slice, view) => {
+        return markModeKey.getState(view.state) === 'show' ? '' : cleanCopySerializer(slice)
+      },
     },
   })
 }
