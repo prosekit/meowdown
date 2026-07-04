@@ -35,7 +35,9 @@ function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
       apply: (tr, value) => (tr.getMeta(markModeKey) as MarkMode | undefined) ?? value,
     },
     props: {
-      attributes: (state) => ({ 'data-mark-mode': markModeKey.getState(state) ?? initialMode }),
+      attributes: (state) => {
+        return { 'data-mark-mode': markModeKey.getState(state) ?? initialMode }
+      },
       decorations: (state) => {
         return markModeKey.getState(state) === 'focus' ? computeFocusDecorations(state) : undefined
       },
