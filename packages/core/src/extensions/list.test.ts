@@ -113,6 +113,112 @@ describe('keymap', () => {
     expect(docToMarkdown(fixture.doc)).toBe('+ [ ] todo\n')
   })
 
+  it('Enter continues a circle checkbox task with another circle checkbox task', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(n.list({ kind: 'task', marker: '+', checked: false }, n.paragraph('todo<a>'))),
+    )
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}next')
+    expect(docToMarkdown(fixture.doc)).toBe('+ [ ] todo\n+ [ ] next\n')
+  })
+
+  it('Enter on a checked circle checkbox task continues with an unchecked one', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'task', marker: '+', checked: true }, n.paragraph('done<a>'))))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}next')
+    expect(docToMarkdown(fixture.doc)).toBe('+ [x] done\n+ [ ] next\n')
+  })
+
+  it('Enter in the middle of a circle checkbox task keeps the circle on both halves', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(n.list({ kind: 'task', marker: '+', checked: false }, n.paragraph('to<a>do'))),
+    )
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}')
+    expect(docToMarkdown(fixture.doc)).toBe('+ [ ] to\n+ [ ] do\n')
+  })
+
+  it('Enter at the start of a circle checkbox task inserts an empty circle task above', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(n.list({ kind: 'task', marker: '+', checked: false }, n.paragraph('<a>todo'))),
+    )
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}')
+    expect(fixture.doc.childCount).toBe(2)
+    expect(fixture.doc.child(0).attrs).toMatchObject({ kind: 'task', marker: '+' })
+    expect(docToMarkdown(fixture.doc)).toContain('+ [ ] todo\n')
+  })
+
+  it('Enter continues a square checkbox task with a square checkbox task', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'task', checked: false }, n.paragraph('todo<a>'))))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}next')
+    expect(docToMarkdown(fixture.doc)).toBe('- [ ] todo\n- [ ] next\n')
+  })
+
+  it('Enter continues a `*` bullet with a `*` bullet', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet', marker: '*' }, n.paragraph('todo<a>'))))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}next')
+    expect(docToMarkdown(fixture.doc)).toBe('* todo\n* next\n')
+  })
+
+  it('Enter on an empty circle checkbox task still unwraps it', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'task', marker: '+', checked: false }, n.paragraph('<a>'))))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}')
+    expect(fixture.doc.child(0).type.name).toBe('paragraph')
+  })
+
+  it('Enter at the end of a collapsed bullet adds the next item below its hidden children', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.list(
+          { kind: 'bullet', marker: '*', collapsed: true },
+          n.paragraph('parent<a>'),
+          n.list({ kind: 'bullet' }, n.paragraph('child')),
+        ),
+      ),
+    )
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}next')
+    expect(docToMarkdown(fixture.doc)).toBe('+ parent\n  - child\n* next\n')
+  })
+
+  it('Enter keeps the marker gap on the next item', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet', markerGap: 3 }, n.paragraph('todo<a>'))))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}next')
+    expect(docToMarkdown(fixture.doc)).toBe('-   todo\n-   next\n')
+  })
+
   // The physical digit keys, so the shifted character ('&', '*', '(' on a US
   // layout) exercises prosemirror-keymap's keyCode fallback.
   const pressModShiftDigit = (digit: 7 | 8 | 9) =>

@@ -19,6 +19,8 @@ minimumReleaseAgeExclude:
   - '@prosekit/*'
   - '@aria-ui/*'
   - prosemirror-view@1.42.0
+  - prosemirror-splittable@1.1.0
+  - prosemirror-flat-list@0.7.0
 
 allowBuilds:
   simple-git-hooks: false
