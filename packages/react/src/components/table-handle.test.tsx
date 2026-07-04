@@ -90,4 +90,44 @@ describe('TableHandle', () => {
     await columnMenu.getByTestId('table-delete-table-column').click()
     expect(ref.current?.getMarkdown().includes('|')).toBe(false)
   })
+
+  it('aligns a column to the center', async () => {
+    const ref = createRef<EditorHandle>()
+    await renderEditor(ref)
+    await hover(firstBodyCell())
+    await columnHandle.click()
+    await columnMenu.getByTestId('table-align-center').click()
+    expect(ref.current?.getMarkdown()).toBe('| a | b |\n| :-: | --- |\n| 1 | 2 |\n')
+    await expect.element(pmRoot.locate('th[data-align="center"]')).toBeVisible()
+    await expect.element(pmRoot.locate('td[data-align="center"]')).toBeVisible()
+  })
+
+  it('marks the active alignment and clears it on a second click', async () => {
+    const ref = createRef<EditorHandle>()
+    await renderEditor(ref)
+    await hover(firstBodyCell())
+    await columnHandle.click()
+    await columnMenu.getByTestId('table-align-right').click()
+    expect(ref.current?.getMarkdown()).toBe('| a | b |\n| --: | --- |\n| 1 | 2 |\n')
+
+    await hover(firstBodyCell())
+    await columnHandle.click()
+    await expect.element(columnMenu.getByTestId('table-align-right')).toHaveAttribute('data-active')
+    await columnMenu.getByTestId('table-align-right').click()
+    expect(ref.current?.getMarkdown()).toBe('| a | b |\n| --- | --- |\n| 1 | 2 |\n')
+  })
+
+  it('keeps the column alignment in an inserted row', async () => {
+    const ref = createRef<EditorHandle>()
+    await renderEditor(ref)
+    await hover(firstBodyCell())
+    await columnHandle.click()
+    await columnMenu.getByTestId('table-align-center').click()
+
+    await hover(firstBodyCell())
+    await rowHandle.click()
+    await rowMenu.getByTestId('table-insert-below').click()
+    expect(ref.current?.getMarkdown()).toBe('| a | b |\n| :-: | --- |\n| 1 | 2 |\n|  |  |\n')
+    await expect.element(pmRoot.locate('tr').last().locate('td[data-align="center"]')).toBeVisible()
+  })
 })
