@@ -14,6 +14,7 @@ import {
   type CaretTail,
 } from './hidden-run.ts'
 import { getMarkMode } from './mark-mode.ts'
+import { forceReflow } from '../utils/force-reflow.ts'
 
 const key = new PluginKey('meowdown-virtual-caret')
 
@@ -99,19 +100,15 @@ function findAtomPreviewElement(view: EditorView, insidePos: number): Element | 
   return preview ?? undefined
 }
 
-function measureCaretRect(view: EditorView): CaretRect | undefined {
-  const rect = findNativeCaretRect(view) ?? findCoordsCaretRect(view)
-  if (rect != null) return stretchCaretRect(rect)
-  return findAtomCaretRect(view)
-}
-
 function stretchCaretRect(rect: CaretRect): CaretRect {
   const extra = rect.height * (CARET_STRETCH - 1)
   return { left: rect.left, top: rect.top - extra / 2, height: rect.height + extra }
 }
 
-function forceReflow(element: HTMLElement): void {
-  void element.offsetWidth
+function measureCaretRect(view: EditorView): CaretRect | undefined {
+  const rect = findNativeCaretRect(view) ?? findCoordsCaretRect(view)
+  if (rect != null) return stretchCaretRect(rect)
+  return findAtomCaretRect(view)
 }
 
 function sameRect(left: CaretRect | undefined, right: CaretRect | undefined): boolean {
