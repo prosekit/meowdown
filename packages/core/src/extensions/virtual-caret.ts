@@ -4,7 +4,10 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
 import { tryCoordsAtPos } from '../utils/caret-coords.ts'
+import { forceReflow } from '../utils/force-reflow.ts'
 
+import { ATOM_SOURCE_MARK_NAMES } from './atom-mark-navigation.ts'
+import { getMarkRangeAt } from './get-mark-range-at.ts'
 import {
   getCaretTail,
   getHiddenRunAfter,
@@ -16,6 +19,10 @@ import { getMarkMode } from './mark-mode.ts'
 const key = new PluginKey('meowdown-virtual-caret')
 
 const BLINK_ANIMATIONS = ['md-virtual-caret-blink', 'md-virtual-caret-blink2'] as const
+
+// The measured rect is the glyph box, which reads short against the airy
+// line-height; stand the caret taller around its center.
+const CARET_STRETCH = 1.4
 
 interface CaretRect {
   left: number
@@ -48,17 +55,17 @@ function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   const head = state.selection.head
   const runBefore = getHiddenRunBefore(state, head)
   const runAfter = getHiddenRunAfter(state, head)
-  const preferredSide: -1 | 1 = runBefore == null ? -1 : 1
+  const preferredBeforeSide: boolean = runBefore == null
   // `side` picks which neighbor to measure: -1 the character before the
   // position, 1 the character after it.
-  const probes: [pos: number, side: -1 | 1][] = [
-    [head, preferredSide],
-    [head, -preferredSide as -1 | 1],
+  const probes: [pos: number, beforeSide: boolean][] = [
+    [head, preferredBeforeSide],
+    [head, !preferredBeforeSide],
   ]
-  if (runBefore != null) probes.push([runBefore.from, -1])
-  if (runAfter != null) probes.push([runAfter.to, 1])
-  for (const [pos, side] of probes) {
-    const coords = tryCoordsAtPos(view, pos, side)
+  if (runBefore != null) probes.push([runBefore.from, true])
+  if (runAfter != null) probes.push([runAfter.to, false])
+  for (const [pos, beforeSide] of probes) {
+    const coords = tryCoordsAtPos(view, pos, beforeSide ? -1 : 1)
     if (coords != null && coords.bottom > coords.top) {
       return { left: coords.left, top: coords.top, height: coords.bottom - coords.top }
     }
@@ -66,9 +73,32 @@ function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   return undefined
 }
 
-// The measured rect is the glyph box, which reads short against the airy
-// line-height; stand the caret taller around its center.
-const CARET_STRETCH = 1.4
+// Step 3: an atom mark view hides its source
+// text with `display: none`, so no position beside it has a box the earlier
+// steps can measure. The preview element standing in for the source is the
+// visible geometry; the caret sits flush against its outer edge.
+function findAtomCaretRect(view: EditorView): CaretRect | undefined {
+  const state = view.state
+  const head = state.selection.head
+  for (const markName of ATOM_SOURCE_MARK_NAMES) {
+    const range = getMarkRangeAt(state, head, markName)
+    if (range == null || (range.from !== head && range.to !== head)) continue
+    const preview = findAtomPreviewElement(view, range.from + 1)
+    if (preview == null) continue
+    const rect = preview.getBoundingClientRect()
+    if (rect.height === 0) continue
+    const left = range.to === head ? rect.right : rect.left
+    return { left, top: rect.top, height: rect.height }
+  }
+  return undefined
+}
+
+function findAtomPreviewElement(view: EditorView, insidePos: number): Element | undefined {
+  const { node } = view.domAtPos(insidePos, 0)
+  const element = node instanceof Element ? node : node.parentElement
+  const preview = element?.closest('.md-atom-view')?.querySelector('.md-atom-view-preview')
+  return preview ?? undefined
+}
 
 function stretchCaretRect(rect: CaretRect): CaretRect {
   const extra = rect.height * (CARET_STRETCH - 1)
@@ -77,11 +107,8 @@ function stretchCaretRect(rect: CaretRect): CaretRect {
 
 function measureCaretRect(view: EditorView): CaretRect | undefined {
   const rect = findNativeCaretRect(view) ?? findCoordsCaretRect(view)
-  return rect == null ? undefined : stretchCaretRect(rect)
-}
-
-function forceReflow(element: HTMLElement): void {
-  void element.offsetWidth
+  if (rect != null) return stretchCaretRect(rect)
+  return findAtomCaretRect(view)
 }
 
 function sameRect(left: CaretRect | undefined, right: CaretRect | undefined): boolean {

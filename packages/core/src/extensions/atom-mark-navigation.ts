@@ -16,6 +16,12 @@ import { getMarkRangeAt } from './get-mark-range-at.ts'
 import { getMarkMode, type MarkMode } from './mark-mode.ts'
 import type { MarkName } from './mark-names.ts'
 
+/**
+ * The source marks whose mark views hide the raw text behind a rendered
+ * preview (`.md-atom-view-preview`) and act as one caret stop.
+ */
+export const ATOM_SOURCE_MARK_NAMES: readonly MarkName[] = ['mdImage', 'mdWikilink', 'mdFile']
+
 type AtomMarks = Array<{ name: MarkName; modes: ReadonlyArray<MarkMode> }>
 
 export interface AtomMarkNavigationOptions {
