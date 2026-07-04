@@ -81,6 +81,7 @@ function sameRect(left: CaretRect | undefined, right: CaretRect | undefined): bo
 // caret's coordinates are re-derived from the layer's own measured rect, so no
 // positioned ancestor is required.
 class VirtualCaretView {
+  // REVIEW: do not use `private`. Use `#`.
   private readonly view: EditorView
   private readonly layer: HTMLElement
   private readonly caret: HTMLElement
