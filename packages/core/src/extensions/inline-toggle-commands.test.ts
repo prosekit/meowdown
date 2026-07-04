@@ -178,7 +178,8 @@ describe('keymap', () => {
     ['e', '`bold`'],
   ])('Mod-%s wraps the selection', async (key, expected) => {
     using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.paragraph('<a>bold<b>')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>bold<b>')))
     fixture.view.focus()
     await userEvent.keyboard(`{ControlOrMeta>}${key}{/ControlOrMeta}`)
     expect(docToMarkdown(fixture.doc)).toBe(`${expected}\n`)
@@ -186,7 +187,8 @@ describe('keymap', () => {
 
   it('Mod-Shift-x wraps the selection in ~~', async () => {
     using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.paragraph('<a>bold<b>')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>bold<b>')))
     fixture.view.focus()
     await userEvent.keyboard(`{ControlOrMeta>}{Shift>}x{/Shift}{/ControlOrMeta}`)
     expect(docToMarkdown(fixture.doc)).toBe('~~bold~~\n')
@@ -194,7 +196,8 @@ describe('keymap', () => {
 
   it('Mod-Shift-h wraps the selection in ==', async () => {
     using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.paragraph('<a>bold<b>')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>bold<b>')))
     fixture.view.focus()
     await userEvent.keyboard(`{ControlOrMeta>}{Shift>}h{/Shift}{/ControlOrMeta}`)
     expect(docToMarkdown(fixture.doc)).toBe('==bold==\n')
@@ -202,7 +205,8 @@ describe('keymap', () => {
 
   it('Mod-Shift-h unwraps an existing highlight', async () => {
     using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.paragraph('==<a>bold<b>==')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('==<a>bold<b>==')))
     fixture.view.focus()
     await userEvent.keyboard(`{ControlOrMeta>}{Shift>}h{/Shift}{/ControlOrMeta}`)
     expect(docToMarkdown(fixture.doc)).toBe('bold\n')
