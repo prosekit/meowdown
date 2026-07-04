@@ -19,6 +19,10 @@ const key = new PluginKey('meowdown-virtual-caret')
 
 const BLINK_ANIMATIONS = ['md-virtual-caret-blink', 'md-virtual-caret-blink2'] as const
 
+// The measured rect is the glyph box, which reads short against the airy
+// line-height; stand the caret taller around its center.
+const CARET_STRETCH = 1.4
+
 interface CaretRect {
   left: number
   top: number
@@ -68,17 +72,10 @@ function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   return undefined
 }
 
-// Step 3: an atom mark view (image, wikilink, file pill) hides its source
+// Step 3: an atom mark view hides its source
 // text with `display: none`, so no position beside it has a box the earlier
 // steps can measure. The preview element standing in for the source is the
 // visible geometry; the caret sits flush against its outer edge.
-function findAtomPreviewElement(view: EditorView, insidePos: number): Element | undefined {
-  const { node } = view.domAtPos(insidePos, 0)
-  const element = node instanceof Element ? node : node.parentElement
-  const preview = element?.closest('.md-atom-view')?.querySelector('.md-atom-view-preview')
-  return preview ?? undefined
-}
-
 function findAtomCaretRect(view: EditorView): CaretRect | undefined {
   const state = view.state
   const head = state.selection.head
@@ -95,19 +92,22 @@ function findAtomCaretRect(view: EditorView): CaretRect | undefined {
   return undefined
 }
 
-// The measured rect is the glyph box, which reads short against the airy
-// line-height; stand the caret taller around its center.
-const CARET_STRETCH = 1.4
-
-function stretchCaretRect(rect: CaretRect): CaretRect {
-  const extra = rect.height * (CARET_STRETCH - 1)
-  return { left: rect.left, top: rect.top - extra / 2, height: rect.height + extra }
+function findAtomPreviewElement(view: EditorView, insidePos: number): Element | undefined {
+  const { node } = view.domAtPos(insidePos, 0)
+  const element = node instanceof Element ? node : node.parentElement
+  const preview = element?.closest('.md-atom-view')?.querySelector('.md-atom-view-preview')
+  return preview ?? undefined
 }
 
 function measureCaretRect(view: EditorView): CaretRect | undefined {
   const rect = findNativeCaretRect(view) ?? findCoordsCaretRect(view)
   if (rect != null) return stretchCaretRect(rect)
   return findAtomCaretRect(view)
+}
+
+function stretchCaretRect(rect: CaretRect): CaretRect {
+  const extra = rect.height * (CARET_STRETCH - 1)
+  return { left: rect.left, top: rect.top - extra / 2, height: rect.height + extra }
 }
 
 function forceReflow(element: HTMLElement): void {
