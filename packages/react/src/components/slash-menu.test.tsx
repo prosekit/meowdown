@@ -184,6 +184,25 @@ describe('SlashMenu', () => {
     expect(ref.current?.getMarkdown()).toBe('Hello **Agenda**\n')
   })
 
+  it('opens when the insertTrigger command inserts "/"', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} />)
+    await pmRoot.click()
+    ref.current?.editor?.commands.insertTrigger('/')
+    await expect.element(menu).toBeVisible()
+    expect(ref.current?.getMarkdown()).toBe('/\n')
+  })
+
+  it('prefixes a space when insertTrigger runs right after a word', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} />)
+    await pmRoot.click()
+    await userEvent.keyboard('Hello')
+    ref.current?.editor?.commands.insertTrigger('/')
+    await expect.element(menu).toBeVisible()
+    expect(ref.current?.getMarkdown()).toBe('Hello /\n')
+  })
+
   it('omits block items inside a table cell but keeps inline items', async () => {
     const ref = createRef<EditorHandle>()
     await render(<ProseKitEditor ref={ref} initialMarkdown={'| a | b |\n| --- | --- |\n|  |  |'} />)
