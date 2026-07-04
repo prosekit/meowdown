@@ -127,3 +127,53 @@ describe('virtual caret geometry next to hidden runs (hide mode)', () => {
     await expect.element(caret).toBeVisible()
   })
 })
+
+describe('virtual caret tails (hide mode)', () => {
+  it('shows a right tail after a closing run', async () => {
+    using fixture = setupMode('hide', 'foo **bold**<a> bar')
+    void fixture
+    await expect.element(caret).toHaveAttribute('data-tail', 'right')
+  })
+
+  it('shows a left tail before a closing run', async () => {
+    using fixture = setupMode('hide', 'foo **bold<a>** bar')
+    void fixture
+    await expect.element(caret).toHaveAttribute('data-tail', 'left')
+  })
+
+  it('shows tails at the opening edges', async () => {
+    {
+      using fixture = setupMode('hide', 'foo <a>**bold** bar')
+      void fixture
+      await expect.element(caret).toHaveAttribute('data-tail', 'left')
+    }
+    {
+      using fixture = setupMode('hide', 'foo **<a>bold** bar')
+      void fixture
+      await expect.element(caret).toHaveAttribute('data-tail', 'right')
+    }
+  })
+
+  it('shows no tail in plain text', async () => {
+    using fixture = setupMode('hide', 'hello <a>world')
+    void fixture
+    await expect.element(caret).toBeVisible()
+    await expect.element(caret).not.toHaveAttribute('data-tail')
+  })
+
+  it('shows no tail in focus mode', async () => {
+    using fixture = setupMode('focus', 'foo **bold**<a> bar')
+    void fixture
+    await expect.element(caret).toBeVisible()
+    await expect.element(caret).not.toHaveAttribute('data-tail')
+  })
+
+  it('flips the tail while arrowing across a boundary', async () => {
+    using fixture = setupMode('hide', 'foo **bold** <a>bar')
+    void fixture
+    await userEvent.keyboard('{ArrowLeft}')
+    await expect.element(caret).toHaveAttribute('data-tail', 'right')
+    await userEvent.keyboard('{ArrowLeft}')
+    await expect.element(caret).toHaveAttribute('data-tail', 'left')
+  })
+})

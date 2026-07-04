@@ -5,7 +5,13 @@ import type { EditorView } from '@prosekit/pm/view'
 
 import { tryCoordsAtPos } from '../utils/caret-coords.ts'
 
-import { getHiddenRunAfter, getHiddenRunBefore } from './hidden-run.ts'
+import {
+  getCaretTail,
+  getHiddenRunAfter,
+  getHiddenRunBefore,
+  type CaretTail,
+} from './hidden-run.ts'
+import { getMarkMode } from './mark-mode.ts'
 
 const key = new PluginKey('meowdown-virtual-caret')
 
@@ -81,6 +87,7 @@ class VirtualCaretView {
   private readonly document: Document
   private readonly resizeObserver: ResizeObserver | undefined
   private lastRect: CaretRect | undefined
+  private lastTail: CaretTail | undefined
   private blinkIndex = 0
 
   constructor(view: EditorView) {
@@ -119,10 +126,23 @@ class VirtualCaretView {
   private readonly reposition = (): void => {
     const view = this.view
     if (view.isDestroyed) return
-    const selection = view.state.selection
+    const state = view.state
+    const selection = state.selection
     const rect = isTextSelection(selection) && selection.empty ? measureCaretRect(view) : undefined
-    if (sameRect(rect, this.lastRect)) return
+    // In hide mode the two doc positions at a hidden run boundary render at
+    // one x; the tail (typing affinity) tells them apart.
+    const tail =
+      rect != null && getMarkMode(state) === 'hide'
+        ? getCaretTail(state, selection.head)
+        : undefined
+    if (sameRect(rect, this.lastRect) && tail === this.lastTail) return
     this.lastRect = rect
+    this.lastTail = tail
+    if (tail == null) {
+      delete this.caret.dataset.tail
+    } else {
+      this.caret.dataset.tail = tail
+    }
     if (rect == null) {
       this.caret.style.visibility = 'hidden'
       return

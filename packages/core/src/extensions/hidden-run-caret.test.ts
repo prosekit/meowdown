@@ -36,8 +36,8 @@ describe('hide mode arrow traversal', () => {
     expect(steps).toMatchInlineSnapshot(`
       [
         "foo **bold** ┃bar",
-        "foo **bold**┃ bar",
-        "foo **bold┃** bar",
+        "foo **bold**┣ bar",
+        "foo **bold┫** bar",
         "foo **bol┃d** bar",
       ]
     `)
@@ -48,8 +48,8 @@ describe('hide mode arrow traversal', () => {
     const steps = await traceKeySelection(fixture, 'ArrowRight', 3)
     expect(steps).toMatchInlineSnapshot(`
       [
-        "foo ┃**bold** bar",
-        "foo **┃bold** bar",
+        "foo ┫**bold** bar",
+        "foo **┣bold** bar",
         "foo **b┃old** bar",
         "foo **bo┃ld** bar",
       ]
@@ -62,8 +62,8 @@ describe('hide mode arrow traversal', () => {
     expect(steps).toMatchInlineSnapshot(`
       [
         "foo **bol┃d** bar",
-        "foo **bold┃** bar",
-        "foo **bold**┃ bar",
+        "foo **bold┫** bar",
+        "foo **bold**┣ bar",
         "foo **bold** ┃bar",
       ]
     `)
@@ -75,8 +75,8 @@ describe('hide mode arrow traversal', () => {
     expect(steps).toMatchInlineSnapshot(`
       [
         "foo [docs](https://a.io) ┃bar",
-        "foo [docs](https://a.io)┃ bar",
-        "foo [docs┃](https://a.io) bar",
+        "foo [docs](https://a.io)┣ bar",
+        "foo [docs┫](https://a.io) bar",
       ]
     `)
   })
@@ -86,11 +86,11 @@ describe('hide mode arrow traversal', () => {
     const steps = await traceKeySelection(fixture, 'ArrowLeft', 4)
     expect(steps).toMatchInlineSnapshot(`
       [
-        "**a**_b_┃",
-        "**a**_b┃_",
-        "**a**_┃b_",
-        "**a┃**_b_",
-        "**┃a**_b_",
+        "**a**_b_┣",
+        "**a**_b┫_",
+        "**a**_┣b_",
+        "**a┫**_b_",
+        "**┣a**_b_",
       ]
     `)
   })
@@ -113,14 +113,14 @@ describe('hide mode pointer snapping', () => {
     using fixture = setupMode('hide', 'foo **bold** bar')
     const coords = fixture.view.coordsAtPos(findText(fixture.doc, 'bold'), 1)
     await clickAt(fixture, coords.left + 1, (coords.top + coords.bottom) / 2)
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo ┃**bold** bar"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo ┫**bold** bar"`)
   })
 
   it('lands after the unit when clicking at the right edge of a word', async () => {
     using fixture = setupMode('hide', 'foo **bold** bar')
     const coords = fixture.view.coordsAtPos(findText(fixture.doc, 'bold') + 4, -1)
     await clickAt(fixture, coords.right - 1, (coords.top + coords.bottom) / 2)
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bold**┃ bar"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bold**┣ bar"`)
   })
 })
 
@@ -154,7 +154,7 @@ describe('hide mode caret invariants', () => {
     fixture.view.dispatch(
       fixture.view.state.tr.setSelection(TextSelection.create(fixture.view.state.doc, interior)),
     )
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bold┃** bar"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bold┫** bar"`)
   })
 })
 
@@ -176,7 +176,7 @@ describe('hide mode Enter relocation', () => {
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`
       "
       foo 
-      ┃**bold** bar
+      ┫**bold** bar
       "
     `)
   })
@@ -218,7 +218,7 @@ describe('hide mode unformat deletion', () => {
   it('Backspace at the content edge deletes a content char', async () => {
     using fixture = setupMode('hide', 'foo **bold<a>** bar')
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bol┃** bar"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bol┫** bar"`)
     expect(docToMarkdown(fixture.doc)).toBe('foo **bol** bar\n')
   })
 
@@ -239,7 +239,7 @@ describe('hide mode unformat deletion', () => {
     await userEvent.keyboard('{Backspace}')
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo docs┃ bar"`)
     fixture.editor.commands.undo()
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo [docs](https://a.io)┃ bar"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo [docs](https://a.io)┣ bar"`)
   })
 
   it("Backspace at a link's content start dissolves the link", async () => {
@@ -264,7 +264,7 @@ describe('hide mode unformat deletion', () => {
   it('a merged run dissolves only the adjacent unit', async () => {
     using fixture = setupMode('hide', '**a**_<a>b_')
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"**a**┃b"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"**a**┣b"`)
     expect(docToMarkdown(fixture.doc)).toBe('**a**b\n')
   })
 
@@ -277,7 +277,7 @@ describe('hide mode unformat deletion', () => {
   it('atom deletion stays with atom navigation at a shared boundary', async () => {
     using fixture = setupMode('hide', '**bold**[[note]]<a>')
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"**bold**┃"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"**bold**┣"`)
   })
 
   it('unformat wins over atom one-char deletion at a shared boundary', async () => {
@@ -305,7 +305,7 @@ describe('hide mode typing at coincident positions', () => {
   it('typing at the content edge joins the unit', async () => {
     using fixture = setupMode('hide', 'foo **bold<a>** bar')
     await userEvent.keyboard('x')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **boldx┃** bar"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **boldx┫** bar"`)
     expect(docToMarkdown(fixture.doc)).toBe('foo **boldx** bar\n')
   })
 

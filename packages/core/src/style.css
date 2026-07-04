@@ -149,6 +149,22 @@
     animation: md-virtual-caret-blink 1.2s steps(1) infinite;
   }
 
+  /* Typing-affinity tails: the foot points to the side a typed character
+   * would join, disambiguating the two coincident positions at a hidden run
+   * boundary. The vertical bar stays exactly on the caret x. */
+  .md-virtual-caret-layer .md-virtual-caret[data-tail='left'] {
+    width: 6px;
+    margin-left: -7px;
+    border-left: none;
+    border-right: 2px solid var(--meowdown-caret);
+    border-bottom: 2px solid var(--meowdown-caret);
+  }
+
+  .md-virtual-caret-layer .md-virtual-caret[data-tail='right'] {
+    width: 6px;
+    border-bottom: 2px solid var(--meowdown-caret);
+  }
+
   /* Two identical keyframe sets so a name swap restarts the blink without a
    * forced reflow. */
   @keyframes md-virtual-caret-blink {
