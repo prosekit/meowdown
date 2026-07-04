@@ -327,6 +327,11 @@ describe('blockquotes', () => {
     const md = ['> - a', '>', '> - b'].join('\n')
     expect(roundtrip(md)).toBe(md + '\n')
   })
+
+  it('keeps a quoted item with two paragraphs', () => {
+    const md = ['> - a', '>', '>   b'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
 })
 
 describe('bullet lists', () => {
@@ -432,6 +437,14 @@ describe('bullet lists', () => {
   it('normalizes a partially loose list to fully loose', () => {
     const loose = ['- a', '', '- b', '', '- c'].join('\n') + '\n'
     expect(roundtrip('- a\n- b\n\n- c')).toBe(loose)
+    expect(roundtrip(loose)).toBe(loose)
+  })
+
+  it('normalizes a loose list to blank lines on every boundary', () => {
+    // One blank line anywhere makes the run loose, so the canonical loose form
+    // also separates an item's paragraph from its nested list.
+    const loose = ['- a', '', '- b', '', '  - c'].join('\n') + '\n'
+    expect(roundtrip('- a\n\n- b\n  - c')).toBe(loose)
     expect(roundtrip(loose)).toBe(loose)
   })
 
