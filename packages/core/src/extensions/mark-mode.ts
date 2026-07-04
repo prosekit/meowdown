@@ -60,7 +60,10 @@ export function defineMarkMode(mode: MarkMode) {
   return union(definePlugin(createMarkModePlugin(mode)), defineCommands({ setMarkMode }))
 }
 
-/** The active mark mode, or `undefined` when `defineMarkMode` is not applied. */
+/**
+ * The active mark mode. `defineEditorExtension` always applies
+ * `defineMarkMode`, so this is `undefined` only for a state built without it.
+ */
 export function getMarkMode(state: EditorState): MarkMode | undefined {
   return markModeKey.getState(state)
 }

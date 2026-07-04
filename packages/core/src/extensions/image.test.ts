@@ -12,7 +12,7 @@ import {
 
 import { defineImageClickHandler, type ImageClickHandler } from './image-click.ts'
 import { defineImage } from './image.ts'
-import { defineMarkMode, type MarkMode } from './mark-mode.ts'
+import type { MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const preview = pmRoot.getByTestId('image-preview')
@@ -27,10 +27,9 @@ function getSVGImageURL(width: number, height: number): string {
 
 // An editor showing the image in the given mark mode.
 function setup(mode: MarkMode, text: string): Fixture {
-  const fixture = setupFixture()
+  const fixture = setupFixture({ extensionOptions: { markMode: mode } })
   const { editor, n } = fixture
   editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(10, 10) }))
-  editor.use(defineMarkMode(mode))
   fixture.set(n.doc(n.paragraph(text)))
   fixture.view.focus()
   return fixture
@@ -179,10 +178,9 @@ describe('image resize', () => {
   const resizable = pmRoot.getByTestId('image-resizable')
 
   function setupResize(markdown: string, url = getSVGImageURL(10, 10)): Fixture {
-    const fixture = setupFixture()
+    const fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
     const { editor, n } = fixture
     editor.use(defineImage({ resolveImageUrl: () => url }))
-    editor.use(defineMarkMode('hide'))
     fixture.set(n.doc(n.paragraph(markdown)))
     return fixture
   }
