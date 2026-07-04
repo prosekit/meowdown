@@ -145,4 +145,11 @@
     color: var(--meowdown-muted);
     opacity: 0.8;
   }
+
+  svg {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    color: var(--meowdown-muted);
+  }
 }
