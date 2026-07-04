@@ -224,7 +224,7 @@ function emit(node: ProseMirrorNode, out: MdOut): void {
       out.closeBlock()
       return
     case 'list':
-      emitList(node, out, isTightItem(node))
+      emitList(node, out, !(node.attrs as MeowdownListAttrs).loose && isTightItem(node))
       return
     case 'codeBlock':
       emitCodeBlock(node, out)
@@ -283,15 +283,17 @@ function emitBlockChildren(node: ProseMirrorNode, out: MdOut, tightItem = false)
 }
 
 /**
- * A run of sibling `list` nodes serializes tight iff every item is "simple":
- * at most one leading paragraph, then only nested lists. Any other shape
+ * A run of sibling `list` nodes serializes tight iff no item carries the
+ * `loose` attr (a blank line in the source) and every item is "simple": at
+ * most one leading paragraph, then only nested lists. Any other shape
  * (multiple paragraphs, a blockquote, a code block, …) needs blank-line
  * separation inside the item, which per CommonMark makes the whole list
  * loose.
  */
 function isTightRun(parent: ProseMirrorNode, from: number, to: number): boolean {
   for (let i = from; i < to; i++) {
-    if (!isTightItem(parent.child(i))) return false
+    const item = parent.child(i)
+    if ((item.attrs as MeowdownListAttrs).loose || !isTightItem(item)) return false
   }
   return true
 }

@@ -370,22 +370,57 @@ function convertBlockquote(
   return nodes.blockquote(content)
 }
 
+/**
+ * The gap between two sibling blocks inside a list holds only structural line
+ * prefixes (indentation and blockquote `>` markers), so a whole line of
+ * spaces, tabs, and `>` is a blank line in the CommonMark sense.
+ */
+const LINE_PREFIX_ONLY_RE = /^[ \t>]*$/
+
+function hasBlankLineBetween(text: string, from: number, to: number): boolean {
+  const lines = text.slice(from, to).split('\n')
+  return lines.slice(1, -1).some((line) => LINE_PREFIX_ONLY_RE.test(line))
+}
+
 function convertList(
   nodes: TypedNodeBuilders,
   cursor: TreeCursor,
   text: string,
   kind: 'bullet' | 'ordered',
 ): ProseMirrorNode[] {
-  const items: ProseMirrorNode[] = []
+  const drafts: ListItemDraft[] = []
+  // CommonMark's loose is a list-wide property: one blank line between items,
+  // or between the blocks of one item, makes every item of the list loose.
+  let loose = false
+  let previousItemEnd: number | undefined
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.ListItem) {
-        items.push(convertListItem(nodes, cursor, text, kind))
+        if (previousItemEnd != null && hasBlankLineBetween(text, previousItemEnd, cursor.from)) {
+          loose = true
+        }
+        const draft = convertListItem(nodes, cursor, text, kind)
+        if (draft.blankSeparatedBlocks) loose = true
+        drafts.push(draft)
+        previousItemEnd = draft.contentEnd
       }
     } while (cursor.nextSibling())
     cursor.parent()
   }
-  return items
+  return drafts.map((draft) => nodes.list({ ...draft.attrs, loose }, draft.content))
+}
+
+interface ListItemDraft {
+  attrs: MeowdownListAttrs
+  content: ProseMirrorNode[]
+  blankSeparatedBlocks: boolean
+  /**
+   * End of the item's last content child. Inside a blockquote a `ListItem`
+   * range swallows the `>` of a following blank quoted line, so measuring the
+   * between-item gap from here (not from `ListItem.to`) keeps that blank line
+   * visible to the looseness check.
+   */
+  contentEnd: number
 }
 
 function convertListItem(
@@ -393,8 +428,10 @@ function convertListItem(
   cursor: TreeCursor,
   text: string,
   kind: 'bullet' | 'ordered',
-): ProseMirrorNode {
+): ListItemDraft {
   const content: ProseMirrorNode[] = []
+  let blankSeparatedBlocks = false
+  let previousChildEnd: number | undefined
   let taskChecked: boolean | undefined
   let taskMarker: TaskMarker | undefined
   let order: number | undefined
@@ -403,8 +440,18 @@ function convertListItem(
   let firstContentColumn: number | undefined
   if (cursor.firstChild()) {
     do {
-      if (cursor.type.id !== LEZER_NODE_IDS.ListMark && firstContentColumn == null) {
-        firstContentColumn = measureContentColumn(text, cursor.from)
+      // The `>` prefix of a quoted line; the line's content, if any, arrives
+      // as its own child. Skipping it also keeps a blank quoted line inside
+      // the gap that `hasBlankLineBetween` inspects.
+      if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) continue
+      if (cursor.type.id !== LEZER_NODE_IDS.ListMark) {
+        if (firstContentColumn == null) {
+          firstContentColumn = measureContentColumn(text, cursor.from)
+        }
+        if (previousChildEnd != null && hasBlankLineBetween(text, previousChildEnd, cursor.from)) {
+          blankSeparatedBlocks = true
+        }
+        previousChildEnd = cursor.to
       }
       if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
         if (kind === 'ordered') {
@@ -467,8 +514,8 @@ function convertListItem(
   // checkbox.
   const isTask = taskChecked != null
   const collapsed = !isTask && kind === 'bullet' && marker === '+'
-  return nodes.list(
-    {
+  return {
+    attrs: {
       kind: isTask ? 'task' : kind,
       order: kind === 'ordered' ? (order ?? 1) : null,
       checked: taskChecked ?? false,
@@ -478,7 +525,9 @@ function convertListItem(
       markerGap: gap >= 2 && gap <= 4 ? gap : 1,
     } satisfies MeowdownListAttrs,
     content,
-  )
+    blankSeparatedBlocks,
+    contentEnd: previousChildEnd ?? cursor.to,
+  }
 }
 
 function convertCodeBlock(

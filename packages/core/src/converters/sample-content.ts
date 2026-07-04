@@ -71,6 +71,7 @@ export const sampleContent: NodeJSON = {
         marker: '-',
         taskMarker: null,
         markerGap: 1,
+        loose: false,
       },
       content: [
         {
@@ -89,6 +90,7 @@ export const sampleContent: NodeJSON = {
         marker: '-',
         taskMarker: null,
         markerGap: 1,
+        loose: false,
       },
       content: [
         {
@@ -105,6 +107,7 @@ export const sampleContent: NodeJSON = {
             marker: '-',
             taskMarker: null,
             markerGap: 1,
+            loose: false,
           },
           content: [
             {
@@ -130,6 +133,7 @@ export const sampleContent: NodeJSON = {
         marker: '.',
         taskMarker: null,
         markerGap: 1,
+        loose: false,
       },
       content: [
         {
@@ -148,6 +152,7 @@ export const sampleContent: NodeJSON = {
         marker: '.',
         taskMarker: null,
         markerGap: 1,
+        loose: false,
       },
       content: [
         {

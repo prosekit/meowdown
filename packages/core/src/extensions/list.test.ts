@@ -219,6 +219,21 @@ describe('keymap', () => {
     expect(docToMarkdown(fixture.doc)).toBe('-   todo\n-   next\n')
   })
 
+  it('Enter keeps a loose list loose', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.list({ kind: 'bullet', loose: true }, n.paragraph('a<a>')),
+        n.list({ kind: 'bullet', loose: true }, n.paragraph('b')),
+      ),
+    )
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}next')
+    expect(docToMarkdown(fixture.doc)).toBe('- a\n\n- next\n\n- b\n')
+  })
+
   // The physical digit keys, so the shifted character ('&', '*', '(' on a US
   // layout) exercises prosemirror-keymap's keyCode fallback.
   const pressModShiftDigit = (digit: 7 | 8 | 9) =>

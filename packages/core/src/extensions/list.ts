@@ -56,6 +56,7 @@ export interface MeowdownListAttrs extends ListAttrs {
   marker?: ListMarker
   taskMarker?: TaskMarker
   markerGap?: number
+  loose?: boolean
 }
 
 type ListMarkerExtension = Extension<{ Nodes: { list: { marker?: ListMarker } } }>
@@ -131,6 +132,27 @@ function defineListMarkerGapAttr(): ListMarkerGapExtension {
       const value = Number.parseInt(node.getAttribute('data-list-marker-gap') ?? '', 10)
       return isValidMarkerGap(value) ? value : 1
     },
+  })
+}
+
+type ListLooseExtension = Extension<{ Nodes: { list: { loose?: boolean } } }>
+
+/**
+ * CommonMark's list-wide loose flag: the source separated items (or an item's
+ * blocks) with blank lines. It only affects serialization; a loose list
+ * renders exactly like a tight one.
+ */
+function defineListLooseAttr(): ListLooseExtension {
+  return defineNodeAttr<'list', 'loose', boolean>({
+    type: 'list' satisfies NodeName,
+    attr: 'loose',
+    default: false,
+    // A new item created by pressing Enter keeps the run loose.
+    splittable: true,
+    // Persist only `true`; tight is the default the serializer emits anyway,
+    // and looseness must survive an editor DOM re-parse.
+    toDOM: (value) => (value ? ['data-list-loose', ''] : null),
+    parseDOM: (node) => node.getAttribute('data-list-loose') != null,
   })
 }
 
@@ -326,6 +348,7 @@ export function defineMeowdownList() {
     defineListMarkerAttr(),
     defineListTaskMarkerAttr(),
     defineListMarkerGapAttr(),
+    defineListLooseAttr(),
     defineTaskCommands(),
     defineCollapseCommands(),
   )

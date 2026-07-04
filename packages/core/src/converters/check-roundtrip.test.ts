@@ -17,6 +17,7 @@ describe('checkRoundTrip', () => {
       - a
       - b
     `,
+    '- a\n\n- b', // a loose list stays loose
     dedent`
       * a
       * b
@@ -59,7 +60,6 @@ describe('checkRoundTrip', () => {
 
   it.each([
     'a\n\n\nb', // extra blank lines collapse to one
-    '- a\n\n- b', // a loose list serializes tight
     '- [ ] Asdf\n- [ ]\n- [ ] ', // a trailing space on an empty task is normalized away
     'trailing spaces   ', // trailing whitespace is insignificant
     '> text\n> - item', // a blockquote gains an empty `>` line before a following list

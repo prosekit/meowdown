@@ -322,6 +322,11 @@ describe('blockquotes', () => {
   it('keeps a two-item list in a quote', () => {
     expect(roundtrip('> - a\n> - b')).toBe('> - a\n> - b\n')
   })
+
+  it('keeps a loose list in a quote', () => {
+    const md = ['> - a', '>', '> - b'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
 })
 
 describe('bullet lists', () => {
@@ -409,9 +414,25 @@ describe('bullet lists', () => {
     expect(roundtrip('- a\n    - deep')).toBe('- a\n    - deep\n')
   })
 
-  it.fails('keeps a loose list', () => {
+  it('keeps a loose list', () => {
     const md = ['- a', '', '- b'].join('\n')
     expect(roundtrip(md)).toBe(md + '\n')
+  })
+
+  it('keeps a loose list with a blank line before a nested list', () => {
+    const md = ['- a', '', '  - b'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
+
+  it('keeps an inner loose list inside a tight outer list', () => {
+    const md = ['- a', '  - x', '', '  - y'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
+
+  it('normalizes a partially loose list to fully loose', () => {
+    const loose = ['- a', '', '- b', '', '- c'].join('\n') + '\n'
+    expect(roundtrip('- a\n- b\n\n- c')).toBe(loose)
+    expect(roundtrip(loose)).toBe(loose)
   })
 
   it.fails('keeps a trailing space after the marker', () => {
@@ -474,6 +495,11 @@ describe('ordered lists', () => {
   it('keeps a marker gap', () => {
     expect(roundtrip('1.   three spaces')).toBe('1.   three spaces\n')
   })
+
+  it('keeps a loose ordered list', () => {
+    const md = ['1. a', '', '2. b'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
 })
 
 describe('task lists', () => {
@@ -489,6 +515,11 @@ describe('task lists', () => {
     expect(roundtrip('- [ ] todo\n- [x] done\n- [ ] another')).toBe(
       '- [ ] todo\n- [x] done\n- [ ] another\n',
     )
+  })
+
+  it('keeps a loose task list', () => {
+    const md = ['- [ ] a', '', '- [ ] b'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 
   it('keeps mixed task and plain items', () => {
@@ -768,6 +799,11 @@ describe('idempotency', () => {
 
   it('keeps a tight list stable', () => {
     const once = roundtrip('- a\n- b')
+    expect(roundtrip(once)).toBe(once)
+  })
+
+  it('keeps a loose list stable', () => {
+    const once = roundtrip('- a\n\n- b')
     expect(roundtrip(once)).toBe(once)
   })
 
