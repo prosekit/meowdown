@@ -4,14 +4,13 @@ import { page, userEvent } from 'vitest/browser'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
 import { defineFileView } from './file-view.ts'
-import { defineMarkMode, type MarkMode } from './mark-mode.ts'
+import type { MarkMode } from './mark-mode.ts'
 
 const caret = page.getByTestId('virtual-caret')
 
-function setupMode(mode: MarkMode | undefined, text: string): Fixture {
-  const fixture = setupFixture()
-  const { editor, n } = fixture
-  if (mode != null) editor.use(defineMarkMode(mode))
+function setupMode(mode: MarkMode, text: string): Fixture {
+  const fixture = setupFixture({ extensionOptions: { markMode: mode } })
+  const { n } = fixture
   fixture.set(n.doc(n.paragraph(text)))
   fixture.view.focus()
   return fixture
@@ -30,8 +29,8 @@ describe('virtual caret rendering', () => {
     expect(height).toBeGreaterThan(0)
   })
 
-  it('draws in every mark mode and without a mode', async () => {
-    for (const mode of ['hide', 'focus', 'show', undefined] as const) {
+  it('draws in every mark mode', async () => {
+    for (const mode of ['hide', 'focus', 'show'] as const) {
       using fixture = setupMode(mode, 'hello <a>world')
       void fixture
       await expect.element(caret).toBeVisible()
@@ -120,9 +119,8 @@ describe('virtual caret geometry next to hidden runs (hide mode)', () => {
   })
 
   it('is visible inside an empty paragraph', async () => {
-    using fixture = setupFixture()
-    const { editor, n } = fixture
-    editor.use(defineMarkMode('hide'))
+    using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    const { n } = fixture
     fixture.set(n.doc(n.paragraph()))
     fixture.view.focus()
     await expect.element(caret).toBeVisible()
@@ -134,11 +132,13 @@ describe('virtual caret next to atom marks', () => {
 
   function setupFilePill(text: string): Fixture {
     const fixture = setupFixture({
-      extensionOptions: { resolveFileLink: ({ href }) => href.startsWith('assets/') },
+      extensionOptions: {
+        resolveFileLink: ({ href }) => href.startsWith('assets/'),
+        markMode: 'hide',
+      },
     })
     const { editor, n } = fixture
     editor.use(defineFileView({}))
-    editor.use(defineMarkMode('hide'))
     fixture.set(n.doc(n.paragraph(text)))
     fixture.view.focus()
     return fixture

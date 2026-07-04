@@ -3,7 +3,6 @@ import { page, userEvent } from 'vitest/browser'
 
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
-import { defineMarkMode } from './mark-mode.ts'
 import {
   defineWikilinkClickHandler,
   findWikilinkAt,
@@ -61,9 +60,10 @@ describe('wikilink click callback', () => {
     onWikilinkClick: WikilinkClickHandler,
   ): void {
     const { editor, n } = fixture
-    editor.use(defineMarkMode('hide'))
     editor.use(defineWikilinkClickHandler(onWikilinkClick))
     fixture.set(n.doc(n.paragraph(markdown)))
+    // After `set`: `setContent` rebuilds the state, resetting the mode.
+    editor.commands.setMarkMode('hide')
   }
 
   it('fires with the target when the label is clicked', async () => {

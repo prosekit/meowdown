@@ -28,6 +28,7 @@ import type { FileLinkOptions } from './inline-text-to-mark-chunks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
 import { defineLinkCommands } from './link-commands.ts'
 import { defineMeowdownList } from './list.ts'
+import { defineMarkMode, type MarkMode } from './mark-mode.ts'
 import { defineMoveBlock } from './move-block.ts'
 import { defineMeowdownParagraph } from './paragraph.ts'
 import { definePendingReplacement } from './pending-replacement.ts'
@@ -61,6 +62,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineInlineToggle(),
     defineLinkCommands(),
     defineWikilink(),
+    defineMarkMode(options.markMode ?? 'focus'),
     defineVirtualCaret(),
     defineHiddenRunCaret(),
     defineAtomMarkNavigation({
@@ -82,11 +84,17 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
 export type EditorExtension = ReturnType<typeof defineEditorExtensionImpl>
 
 /**
- * Options for {@link defineEditorExtension}. Creation-time configuration: it
- * is baked into the editor's parse pipeline, so changing it requires
- * rebuilding the editor.
+ * Options for {@link defineEditorExtension}. Creation-time configuration:
+ * `resolveFileLink` is baked into the editor's parse pipeline, so changing it
+ * requires rebuilding the editor; `markMode` is only the initial value.
  */
-export type EditorExtensionOptions = FileLinkOptions
+export type EditorExtensionOptions = FileLinkOptions & {
+  /**
+   * The initial mark mode, applied from the first paint. Defaults to
+   * `'focus'`. Switch later with the `setMarkMode` command.
+   */
+  markMode?: MarkMode
+}
 
 export function defineEditorExtension(options: EditorExtensionOptions = {}): EditorExtension {
   return defineEditorExtensionImpl(options)

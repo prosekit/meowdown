@@ -8,7 +8,7 @@ import { defineFileClickHandler, type FileClickHandler } from './file-click.ts'
 import { defineFileView, type FileInfoResolver } from './file-view.ts'
 import type { FileLinkResolver } from './inline-text-to-mark-chunks.ts'
 import { defineLinkClickHandler, type LinkClickHandler } from './link-click.ts'
-import { defineMarkMode, type MarkMode } from './mark-mode.ts'
+import type { MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const pill = pmRoot.getByTestId('file-pill')
@@ -22,10 +22,11 @@ function setup(
   resolveFileInfo?: FileInfoResolver,
   mode: MarkMode = 'hide',
 ): Fixture {
-  const fixture = setupFixture({ extensionOptions: { resolveFileLink: claimAssets } })
+  const fixture = setupFixture({
+    extensionOptions: { resolveFileLink: claimAssets, markMode: mode },
+  })
   const { editor, n } = fixture
   editor.use(defineFileView({ resolveFileInfo }))
-  editor.use(defineMarkMode(mode))
   fixture.set(n.doc(n.paragraph(markdown)))
   fixture.view.focus()
   return fixture
@@ -204,12 +205,13 @@ describe('file pill click callback', () => {
     onFileClick: FileClickHandler,
     onLinkClick?: LinkClickHandler,
   ): Fixture {
-    const fixture = setupFixture({ extensionOptions: { resolveFileLink: claimAssets } })
+    const fixture = setupFixture({
+      extensionOptions: { resolveFileLink: claimAssets, markMode: 'hide' },
+    })
     const { editor, n } = fixture
     editor.use(defineFileView())
     editor.use(defineFileClickHandler(onFileClick))
     if (onLinkClick) editor.use(defineLinkClickHandler(onLinkClick))
-    editor.use(defineMarkMode('hide'))
     fixture.set(n.doc(n.paragraph(markdown)))
     return fixture
   }

@@ -3,7 +3,7 @@ import { page, userEvent } from 'vitest/browser'
 
 import { getSelectionSnapshot, setupFixture, type Fixture } from '../testing/index.ts'
 
-import { defineMarkMode, type MarkMode } from './mark-mode.ts'
+import type { MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const label = pmRoot.getByTestId('wikilink')
@@ -14,9 +14,8 @@ const ALL_MODES: MarkMode[] = ['hide', 'focus', 'show']
 // (the `<a>` tag), exactly the state of a user who typed `A` then opened the
 // wikilink menu.
 function setupAfterA(mode: MarkMode): Fixture {
-  const fixture = setupFixture()
-  const { editor, n } = fixture
-  editor.use(defineMarkMode(mode))
+  const fixture = setupFixture({ extensionOptions: { markMode: mode } })
+  const { n } = fixture
   fixture.set(n.doc(n.paragraph('A<a>')))
   fixture.view.focus()
   return fixture
@@ -82,9 +81,8 @@ describe.each(ALL_MODES)('typing after an inserted wikilink in %s mode', (mode) 
 // break it.
 describe.each(ALL_MODES)('typing before an inserted wikilink in %s mode', (mode) => {
   it('lands a character typed before the wikilink between A and the link', async () => {
-    using fixture = setupFixture()
-    const { editor, n } = fixture
-    editor.use(defineMarkMode(mode))
+    using fixture = setupFixture({ extensionOptions: { markMode: mode } })
+    const { n } = fixture
     fixture.set(n.doc(n.paragraph('A<a>[[Note]]C')))
     fixture.view.focus()
     await expect.element(pmRoot).toBeVisible()

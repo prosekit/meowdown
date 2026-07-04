@@ -22,6 +22,27 @@ describe('ProseKitEditor', () => {
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'hide')
   })
 
+  it('switches the mark mode when the prop changes', async () => {
+    const screen = await render(<ProseKitEditor markMode="hide" initialMarkdown="Hello" />)
+    await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'hide')
+    await screen.rerender(<ProseKitEditor markMode="show" initialMarkdown="Hello" />)
+    await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'show')
+  })
+
+  it('keeps the mark mode across undo', async () => {
+    const screen = await render(<ProseKitEditor markMode="hide" initialMarkdown="Hello" />)
+    await expect.element(screen.getByText('Hello')).toBeInTheDocument()
+
+    await pmRoot.click()
+    await userEvent.keyboard('abc')
+    await screen.rerender(<ProseKitEditor markMode="show" initialMarkdown="Hello" />)
+    await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'show')
+
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}')
+    await expect.element(screen.getByText('Hello')).toBeInTheDocument()
+    await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'show')
+  })
+
   it('notifies onDocChange and serializes markdown via the handle', async () => {
     const onDocChange = vi.fn()
     const ref = createRef<EditorHandle>()
