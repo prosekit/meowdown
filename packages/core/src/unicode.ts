@@ -60,8 +60,8 @@ export const UNICODE_MATHEMATICAL_LEFT_ANGLE_BRACKET = '\u{27E8}' /* ⟨ */
 export const UNICODE_MATHEMATICAL_RIGHT_ANGLE_BRACKET = '\u{27E9}' /* ⟩ */
 export const UNICODE_VERTICAL_LINE = '\u{007C}' /* | */
 export const UNICODE_BOX_DRAWINGS_HEAVY_VERTICAL = '\u{2503}' /* ┃ */
-export const UNICODE_BOX_DRAWINGS_HEAVY_VERTICAL_AND_LEFT = '\u{252B}' /* ┫ */ // REVIEW: use Right Square Bracket Lower Corner (U+23A6)⎦
-export const UNICODE_BOX_DRAWINGS_HEAVY_VERTICAL_AND_RIGHT = '\u{2523}' /* ┣ */ // review: use left square bracket lower corner (U+23A3) ⎣
+export const UNICODE_RIGHT_SQUARE_BRACKET_LOWER_CORNER = '\u{23A6}' /* ⎦ */
+export const UNICODE_LEFT_SQUARE_BRACKET_LOWER_CORNER = '\u{23A3}' /* ⎣ */
 export const UNICODE_HEAVY_LEFT_POINTING_ANGLE_BRACKET_ORNAMENT = '\u{2770}' /* ❰ */
 export const UNICODE_HEAVY_RIGHT_POINTING_ANGLE_BRACKET_ORNAMENT = '\u{2771}' /* ❱ */
 
