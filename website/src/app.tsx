@@ -337,6 +337,7 @@ export function App() {
                 spellCheck={spellCheck}
                 initialMarkdown={INITIAL_CONTENT}
                 handleRef={editorRef}
+                slashMenuTrigger
                 onTagSearch={searchTags}
                 onWikilinkSearch={searchNotes}
                 onSelectionMenuSearch={selectionDemo.onSelectionMenuSearch}

@@ -93,6 +93,9 @@ export interface ProseKitEditorProps {
   /** Adds host items to the slash menu. See `EditorProps.onSlashMenuSearch`. */
   onSlashMenuSearch?: SlashMenuSearchHandler
 
+  /** Opens the slash menu the moment `/` is typed. See `EditorProps.slashMenuTrigger`. */
+  slashMenuTrigger?: boolean
+
   /** Enables the tag menu. See `EditorProps.onTagSearch`. */
   onTagSearch?: TagSearchHandler
 
@@ -186,6 +189,7 @@ export function ProseKitEditor({
   initialMarkdown,
   onDocChange,
   onSlashMenuSearch,
+  slashMenuTrigger,
   onTagSearch,
   onWikilinkSearch,
   onSelectionMenuSearch,
@@ -358,6 +362,7 @@ export function ProseKitEditor({
         placeholder={placeholder}
         readOnly={readOnly}
         wikilinkEnabled={!!onWikilinkSearch}
+        slashMenuTrigger={slashMenuTrigger}
         spellCheck={spellCheck}
       />
       {blockHandle && !readOnly && <BlockHandle />}

@@ -184,6 +184,24 @@ describe('SlashMenu', () => {
     expect(ref.current?.getMarkdown()).toBe('Hello **Agenda**\n')
   })
 
+  it('opens via the trigger keymap and keeps the typed slash as text', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} slashMenuTrigger />)
+    await pmRoot.click()
+    await userEvent.keyboard('/head')
+    await expect.element(menu.getByText('Heading 1')).toBeVisible()
+    expect(ref.current?.getMarkdown()).toBe('/head\n')
+  })
+
+  it('leaves a mid-word slash to normal typing when the trigger is on', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} slashMenuTrigger />)
+    await pmRoot.click()
+    await userEvent.keyboard('3/4')
+    await expect.element(menu).not.toBeVisible()
+    expect(ref.current?.getMarkdown()).toBe('3/4\n')
+  })
+
   it('omits block items inside a table cell but keeps inline items', async () => {
     const ref = createRef<EditorHandle>()
     await render(<ProseKitEditor ref={ref} initialMarkdown={'| a | b |\n| --- | --- |\n|  |  |'} />)
