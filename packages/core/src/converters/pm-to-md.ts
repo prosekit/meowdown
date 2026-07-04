@@ -1,13 +1,14 @@
-import type { CodeBlockAttrs } from '@prosekit/extensions/code-block'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
+import type { MeowdownCodeBlockAttrs } from '../extensions/code-block.ts'
 import type { Frontmatter } from '../extensions/frontmatter.ts'
 import type { MeowdownHeadingAttrs } from '../extensions/heading.ts'
 import type { MeowdownHorizontalRuleAttrs } from '../extensions/horizontal-rule.ts'
 import type { MeowdownHTMLCommentAttrs } from '../extensions/html-comment.ts'
 import type { MeowdownListAttrs } from '../extensions/list.ts'
 import type { NodeName } from '../extensions/node-names.ts'
-import { longestBacktickRun } from '../utils/backticks.ts'
+import { CHAR_BACKTICK, CHAR_TILDE } from '../unicode.ts'
+import { longestCharRun } from '../utils/backticks.ts'
 
 /** Options for {@link docToMarkdown}. */
 export interface DocToMarkdownOptions {
@@ -362,11 +363,24 @@ function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
 // ─────────────────────────────────────────────────────────────────────
 
 function emitCodeBlock(node: ProseMirrorNode, out: MdOut): void {
-  const attrs = node.attrs as CodeBlockAttrs
+  const attrs = node.attrs as MeowdownCodeBlockAttrs
   const language: string = attrs.language || ''
   const code = node.textContent
-  // min 2 keeps the fence width >= 3, CommonMark's minimum.
-  const fence = '`'.repeat(longestBacktickRun(code, 2) + 1)
+
+  if (attrs.fenceStyle === 'indented' && !language) {
+    const indentedCode = toIndentedCode(code)
+    if (indentedCode != null) {
+      out.write(indentedCode)
+      out.closeBlock()
+      return
+    }
+  }
+
+  const tilde = attrs.fenceStyle === 'tilde'
+  // min 2 keeps the fence width >= 3, CommonMark's minimum; a recorded
+  // opening-fence length only ever widens it.
+  const minWidth = longestCharRun(code, tilde ? CHAR_TILDE : CHAR_BACKTICK, 2) + 1
+  const fence = (tilde ? '~' : '`').repeat(Math.max(attrs.fenceLength ?? 0, minWidth))
 
   out.write(fence)
   if (language) out.write(language)
@@ -377,6 +391,23 @@ function emitCodeBlock(node: ProseMirrorNode, out: MdOut): void {
   }
   out.write(fence)
   out.closeBlock()
+}
+
+/**
+ * Indent `code` for an indented code block, or return `undefined` for shapes
+ * the indented form cannot express (empty content, or a leading or trailing
+ * blank line), which fall back to a fence. Blank interior lines stay empty so
+ * a round-trip adds no trailing whitespace; `MdOut.write` still prepends the
+ * enclosing `linePrefix` (blockquote or list continuation) per line.
+ */
+function toIndentedCode(code: string): string | undefined {
+  if (code === '') return undefined
+  const lines = code.split('\n')
+  if (lines[0] === '' || lines[lines.length - 1] === '') return undefined
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i] !== '') lines[i] = `    ${lines[i]}`
+  }
+  return lines.join('\n')
 }
 
 // ─────────────────────────────────────────────────────────────────────
