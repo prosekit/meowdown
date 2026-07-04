@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.36.0](https://github.com/prosekit/meowdown/compare/react-v0.35.0...react-v0.36.0) (2026-07-04)
+
+
+### Features
+
+* add insertTrigger command ([#232](https://github.com/prosekit/meowdown/issues/232)) ([972b64e](https://github.com/prosekit/meowdown/commit/972b64ef253e47d0495b38a744db314df212a48d))
+
 ## [0.35.0](https://github.com/prosekit/meowdown/compare/react-v0.34.0...react-v0.35.0) (2026-07-04)
 
 
