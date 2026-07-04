@@ -796,6 +796,7 @@ describe('focus mode', () => {
   })
 
   it.skipIf(
+    // TODO: this test fails in Firefox.
     // Firefox's native backspace splits the paragraph next to a zero-size
     // marker span; hide mode is command-driven and passes everywhere, focus
     // mode still relies on the native deletion here.
