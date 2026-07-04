@@ -250,6 +250,38 @@ describe('docToMarkdown', () => {
     expect(markdown).toBe('| A | B |\n| --- | --- |\n| 1 | 2 |\n')
   })
 
+  it('emits column alignment from the header row', () => {
+    const doc = n.doc(
+      n.table(
+        n.tableRow(
+          n.tableHeaderCell({ align: 'left' }, n.paragraph('A')),
+          n.tableHeaderCell({ align: 'center' }, n.paragraph('B')),
+          n.tableHeaderCell({ align: 'right' }, n.paragraph('C')),
+        ),
+        n.tableRow(
+          n.tableCell(n.paragraph('1')),
+          n.tableCell(n.paragraph('2')),
+          n.tableCell(n.paragraph('3')),
+        ),
+      ),
+    )
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('| A | B | C |\n| :-- | :-: | --: |\n| 1 | 2 | 3 |\n')
+  })
+
+  it('emits column alignment from the first row of a headerless table', () => {
+    const doc = n.doc(
+      n.table(
+        n.tableRow(
+          n.tableCell({ align: 'center' }, n.paragraph('1')),
+          n.tableCell(n.paragraph('2')),
+        ),
+      ),
+    )
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('|  |  |\n| :-: | --- |\n| 1 | 2 |\n')
+  })
+
   it('keeps a nested bullet', () => {
     const doc = n.doc(
       n.list({ kind: 'bullet' }, n.paragraph('a'), n.list({ kind: 'bullet' }, n.paragraph('b'))),

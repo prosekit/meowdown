@@ -7,6 +7,7 @@ import type { MeowdownHorizontalRuleAttrs } from '../extensions/horizontal-rule.
 import type { MeowdownHTMLCommentAttrs } from '../extensions/html-comment.ts'
 import type { MeowdownListAttrs } from '../extensions/list.ts'
 import type { NodeName } from '../extensions/node-names.ts'
+import type { MeowdownTableCellAttrs, TableColumnAlign } from '../extensions/table-column-align.ts'
 import { CHAR_BACKTICK, CHAR_TILDE } from '../unicode.ts'
 import { longestCharRun } from '../utils/backticks.ts'
 
@@ -437,8 +438,17 @@ function emitTable(node: ProseMirrorNode, out: MdOut): void {
   if (colCount === 0) return
 
   // GFM requires a header row + separator. Synthesize an empty header if
-  // there isn't one in the source (rare but possible).
-  const separator = '| ' + new Array(colCount).fill('---').join(' | ') + ' |'
+  // there isn't one in the source (rare but possible). The alignment row
+  // (header row, or the first row of a headerless table) drives the
+  // delimiter row's `:` markers.
+  const alignmentRow = node.child(headerIdx >= 0 ? headerIdx : 0)
+  const delimiters: string[] = []
+  for (let c = 0; c < colCount; c++) {
+    const cell = c < alignmentRow.childCount ? alignmentRow.child(c) : undefined
+    const align = cell ? (cell.attrs as MeowdownTableCellAttrs).align : undefined
+    delimiters.push(formatDelimiter(align))
+  }
+  const separator = '| ' + delimiters.join(' | ') + ' |'
   const headRow = headerIdx >= 0 ? rows[headerIdx] : new Array(colCount).fill('')
 
   out.write(formatTableRow(headRow, colCount))
@@ -450,6 +460,19 @@ function emitTable(node: ProseMirrorNode, out: MdOut): void {
     out.write(formatTableRow(rows[r], colCount))
   }
   out.closeBlock()
+}
+
+function formatDelimiter(align: TableColumnAlign | null | undefined): string {
+  switch (align) {
+    case 'left':
+      return ':--'
+    case 'center':
+      return ':-:'
+    case 'right':
+      return '--:'
+    default:
+      return '---'
+  }
 }
 
 function formatTableRow(cells: ReadonlyArray<string>, colCount: number): string {

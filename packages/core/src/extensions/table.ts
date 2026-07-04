@@ -20,6 +20,7 @@ import {
 import type { Command, EditorState } from '@prosekit/pm/state'
 
 import type { NodeName } from './node-names.ts'
+import { defineTableColumnAlign } from './table-column-align.ts'
 
 /**
  * Whether the selection sits inside a table cell (data or header). Useful for
@@ -79,6 +80,7 @@ export function defineTable() {
     defineTableCellSpec(),
     defineTableHeaderCellSpec(),
     defineTableCellContent(),
+    defineTableColumnAlign(),
     defineTableEditingPlugin({ allowTableNodeSelection: true }),
     defineTableCommands(),
     defineTableDropIndicator(),

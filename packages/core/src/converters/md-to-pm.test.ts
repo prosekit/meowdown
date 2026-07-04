@@ -1,8 +1,24 @@
 import dedent from 'dedent'
 import { describe, expect, it } from 'vitest'
 
+import type { MeowdownTableCellAttrs, TableColumnAlign } from '../extensions/table-column-align.ts'
+
 import { dedentContinuation, markdownToDoc, measureContentColumn, sliceColumn } from './md-to-pm.ts'
 import { sampleContent, sampleContentMarkdown } from './sample-content.ts'
+
+function tableAligns(markdown: string): Array<Array<TableColumnAlign | null | undefined>> {
+  const table = markdownToDoc(markdown).child(0)
+  const rows: Array<Array<TableColumnAlign | null | undefined>> = []
+  for (let r = 0; r < table.childCount; r++) {
+    const row = table.child(r)
+    const cells: Array<TableColumnAlign | null | undefined> = []
+    for (let c = 0; c < row.childCount; c++) {
+      cells.push((row.child(c).attrs as MeowdownTableCellAttrs).align)
+    }
+    rows.push(cells)
+  }
+  return rows
+}
 
 function tableShape(markdown: string): Array<Array<{ type: string; text: string }>> {
   const table = markdownToDoc(markdown).child(0)
@@ -385,7 +401,7 @@ describe('markdownToDoc', () => {
               content: [
                 {
                   type: 'tableHeaderCell',
-                  attrs: { colspan: 1, rowspan: 1, colwidth: null },
+                  attrs: { colspan: 1, rowspan: 1, colwidth: null, align: null },
                   content: [
                     {
                       type: 'paragraph',
@@ -395,7 +411,7 @@ describe('markdownToDoc', () => {
                 },
                 {
                   type: 'tableHeaderCell',
-                  attrs: { colspan: 1, rowspan: 1, colwidth: null },
+                  attrs: { colspan: 1, rowspan: 1, colwidth: null, align: null },
                   content: [
                     {
                       type: 'paragraph',
@@ -410,7 +426,7 @@ describe('markdownToDoc', () => {
               content: [
                 {
                   type: 'tableCell',
-                  attrs: { colspan: 1, rowspan: 1, colwidth: null },
+                  attrs: { colspan: 1, rowspan: 1, colwidth: null, align: null },
                   content: [
                     {
                       type: 'paragraph',
@@ -420,7 +436,7 @@ describe('markdownToDoc', () => {
                 },
                 {
                   type: 'tableCell',
-                  attrs: { colspan: 1, rowspan: 1, colwidth: null },
+                  attrs: { colspan: 1, rowspan: 1, colwidth: null, align: null },
                   content: [
                     {
                       type: 'paragraph',
@@ -434,6 +450,30 @@ describe('markdownToDoc', () => {
         },
       ],
     })
+  })
+
+  it('parses column alignment from the delimiter row', () => {
+    const md = dedent`
+      | a | b | c | d |
+      | :-- | :-: | --: | --- |
+      | 1 |  | 3 | 4 |
+    `
+    expect(tableAligns(md)).toEqual([
+      ['left', 'center', 'right', null],
+      ['left', 'center', 'right', null],
+    ])
+  })
+
+  it('parses alignment regardless of delimiter width', () => {
+    const md = dedent`
+      | a | b |
+      | :----: | -----: |
+      | 1 | 2 |
+    `
+    expect(tableAligns(md)).toEqual([
+      ['center', 'right'],
+      ['center', 'right'],
+    ])
   })
 
   it('keeps empty table cells', () => {
