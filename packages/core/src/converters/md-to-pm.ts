@@ -11,8 +11,10 @@ import {
   CHAR_EQUAL,
   CHAR_HASH,
   CHAR_HYPHEN_MINUS,
+  CHAR_LINE_FEED,
   CHAR_LOWERCASE_X,
   CHAR_PLUS,
+  CHAR_RIGHT_ANGLE_BRACKET,
   CHAR_RIGHT_PARENTHESIS,
   CHAR_SPACE,
   CHAR_TAB,
@@ -373,13 +375,22 @@ function convertBlockquote(
 /**
  * The gap between two sibling blocks inside a list holds only structural line
  * prefixes (indentation and blockquote `>` markers), so a whole line of
- * spaces, tabs, and `>` is a blank line in the CommonMark sense.
+ * spaces, tabs, and `>` is a blank line in the CommonMark sense. Only lines
+ * that both start and end inside the gap count: the fragments before the
+ * first `\n` and after the last one belong to the surrounding blocks.
  */
-const LINE_PREFIX_ONLY_RE = /^[ \t>]*$/
-
 function hasBlankLineBetween(text: string, from: number, to: number): boolean {
-  const lines = text.slice(from, to).split('\n')
-  return lines.slice(1, -1).some((line) => LINE_PREFIX_ONLY_RE.test(line))
+  let blankSoFar = false
+  for (let i = from; i < to; i++) {
+    const code = text.charCodeAt(i)
+    if (code === CHAR_LINE_FEED) {
+      if (blankSoFar) return true
+      blankSoFar = true
+    } else if (code !== CHAR_SPACE && code !== CHAR_TAB && code !== CHAR_RIGHT_ANGLE_BRACKET) {
+      blankSoFar = false
+    }
+  }
+  return false
 }
 
 function convertList(
