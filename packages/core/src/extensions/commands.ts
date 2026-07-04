@@ -8,10 +8,6 @@ import { markdownToDoc } from '../converters/md-to-pm.ts'
 import type { NodeName } from './node-names.ts'
 import { getNodeBuildersForSchema } from './schema.ts'
 
-// Placeholder for a leaf node (image, hard break) so it reads as a non-space
-// character, matching how the autocomplete matcher sees the text.
-const OBJECT_REPLACEMENT_CHARACTER = '￼'
-
 function selectText(anchor: number, head?: number): Command {
   return (state, dispatch) => {
     if (dispatch) {
@@ -64,20 +60,17 @@ function insertMarkdown(markdown: string): Command {
  * from a toolbar button) must go through this command instead of a plain
  * `insertText`. When a non-space character sits right before the caret, a
  * space is inserted first so the trigger can match, like a user would type
- * it — except in code, where no menu opens and the text is inserted as-is.
+ * it. In a code block, where no menu can open, the command does nothing.
  */
 function insertTrigger(text: string): Command {
   return (state, dispatch) => {
     if (!text) return false
+    const $from = state.selection.$from
+    if ($from.parent.type.spec.code) return false
     if (dispatch) {
-      const $from = state.selection.$from
       const offset = $from.parentOffset
-      const charBefore =
-        offset === 0
-          ? ''
-          : $from.parent.textBetween(offset - 1, offset, null, OBJECT_REPLACEMENT_CHARACTER)
-      const needsSpace =
-        !$from.parent.type.spec.code && charBefore !== '' && !/\s/u.test(charBefore)
+      const charBefore = offset === 0 ? '' : $from.parent.textBetween(offset - 1, offset)
+      const needsSpace = charBefore !== '' && !/\s/u.test(charBefore)
       // Without an explicit range, insertText inherits the marks at the
       // cursor, like normal typing would.
       const tr = state.tr.insertText(needsSpace ? ` ${text}` : text)

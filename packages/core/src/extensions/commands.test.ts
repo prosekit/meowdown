@@ -79,14 +79,14 @@ describe('insertTrigger', () => {
     expect(docToMarkdown(fixture.doc)).toBe('Hello [[\n')
   })
 
-  it('inserts as-is in a code block', () => {
+  it('does nothing in a code block', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.codeBlock('const a<a>')))
 
-    editor.commands.insertTrigger('/')
+    expect(editor.commands.insertTrigger('/')).toBe(false)
 
-    expect(docToMarkdown(fixture.doc)).toBe('```\nconst a/\n```\n')
+    expect(docToMarkdown(fixture.doc)).toBe('```\nconst a\n```\n')
   })
 
   it('ignores empty trigger text', () => {
