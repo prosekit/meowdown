@@ -7,7 +7,7 @@ export interface CaretCoords {
   bottom: number
 }
 
-export function isZeroRect(rect: CaretCoords): boolean {
+function isZeroRect(rect: CaretCoords): boolean {
   return rect.left === 0 && rect.top === 0 && rect.right === 0 && rect.bottom === 0
 }
 

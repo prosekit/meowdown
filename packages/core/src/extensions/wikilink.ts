@@ -19,9 +19,9 @@ export function parseWikilink(text: string): ParsedWikilink {
 
 /**
  * Render `mdWikilink` as a non-editable label standing in for the raw source.
- * The source stays in `contentDOM`, after the label, kept in the layout (not
- * `display:none`) by `style.css` so a caret just after the wikilink lands there
- * and typing continues after it, never trapped before it.
+ * The source stays in `contentDOM` after the label, hidden by `style.css`
+ * (`.md-atom-view-content`); the whole wikilink is one caret stop owned by
+ * `defineAtomMarkNavigation`.
  */
 function createWikilinkMarkView(): MarkViewConstructor {
   return (mark) => {

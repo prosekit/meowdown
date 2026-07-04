@@ -1,3 +1,4 @@
+import { isFirefox, isSafari } from '@meowdown/vitest/helpers'
 import { TextSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
@@ -298,6 +299,159 @@ describe('hide mode unformat deletion', () => {
     using fixture = setupMode('focus', 'foo **bold**<a> bar')
     await userEvent.keyboard('{Backspace}')
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bold*┃ bar"`)
+  })
+})
+
+describe('hide mode complex cases', () => {
+  it('treats a link title as part of the hidden tail', async () => {
+    // The space between the url and the title carries no hidden mark (it
+    // renders visible in hide mode today, a pre-existing parser quirk), so the
+    // tail is two runs with a rest position between them.
+    using fixture = setupMode('hide', 'foo [docs](https://a.io "hi") <a>bar')
+    const steps = await traceKeySelection(fixture, 'ArrowLeft', 3)
+    expect(steps).toMatchInlineSnapshot(`
+      [
+        "foo [docs](https://a.io "hi") ┃bar",
+        "foo [docs](https://a.io "hi")┣ bar",
+        "foo [docs](https://a.io ┫"hi") bar",
+        "foo [docs](https://a.io┣ "hi") bar",
+      ]
+    `)
+  })
+
+  it('Enter never orphans link markers', async () => {
+    using fixture = setupMode('hide', 'foo [docs<a>](https://a.io) bar')
+    await userEvent.keyboard('{Enter}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`
+      "
+      foo [docs](https://a.io)
+      ┃ bar
+      "
+    `)
+  })
+
+  it('clicking into the link text keeps typing inside the link', async () => {
+    using fixture = setupMode('hide', 'foo [docs](https://a.io) bar')
+    const boundary = findText(fixture.doc, 'docs') + 2
+    const coords = fixture.view.coordsAtPos(boundary, -1)
+    await clickAt(fixture, coords.left, (coords.top + coords.bottom) / 2)
+    await userEvent.keyboard('x')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo [dox┃cs](https://a.io) bar"`)
+  })
+
+  it('traverses a triple marker as one run per side', async () => {
+    using fixture = setupMode('hide', '***x***<a>')
+    const steps = await traceKeySelection(fixture, 'ArrowLeft', 3)
+    expect(steps).toMatchInlineSnapshot(`
+      [
+        "***x***┣",
+        "***x┫***",
+        "***┣x***",
+        "┫***x***",
+      ]
+    `)
+  })
+
+  it('Enter at an inner content edge relocates to the inner unit edge', async () => {
+    using fixture = setupMode('hide', '**a *b<a>* c**')
+    await userEvent.keyboard('{Enter}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`
+      "
+      **a *b*
+      ┃ c**
+      "
+    `)
+  })
+
+  it('steps through a tag character by character', async () => {
+    using fixture = setupMode('hide', 'a #tag <a>b')
+    const steps = await traceKeySelection(fixture, 'ArrowLeft', 3)
+    expect(steps).toMatchInlineSnapshot(`
+      [
+        "a #tag ┃b",
+        "a #tag┃ b",
+        "a #ta┃g b",
+        "a #t┃ag b",
+      ]
+    `)
+  })
+
+  it('steps through a bare autolink character by character', async () => {
+    using fixture = setupMode('hide', 'see https://a.io<a> end')
+    const steps = await traceKeySelection(fixture, 'ArrowLeft', 2)
+    expect(steps).toMatchInlineSnapshot(`
+      [
+        "see https://a.io┃ end",
+        "see https://a.i┃o end",
+        "see https://a.┃io end",
+      ]
+    `)
+  })
+
+  it('leaves code blocks untouched', async () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    editor.use(defineMarkMode('hide'))
+    fixture.set(n.doc(n.codeBlock('**fo<a>o**')))
+    fixture.view.focus()
+    await userEvent.keyboard('{ArrowLeft}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"**f┃oo**"`)
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"**┃oo**"`)
+  })
+
+  it('dissolves inline code like bold', async () => {
+    using fixture = setupMode('hide', 'run `ls`<a> now')
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"run ls┃ now"`)
+  })
+
+  it('dissolves highlight and strikethrough like bold', async () => {
+    {
+      using fixture = setupMode('hide', '==x==<a>')
+      await userEvent.keyboard('{Backspace}')
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"x┃"`)
+    }
+    {
+      using fixture = setupMode('hide', '~~x~~<a>')
+      await userEvent.keyboard('{Backspace}')
+      expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"x┃"`)
+    }
+  })
+
+  it('keeps a unit alone in a paragraph fully reachable', async () => {
+    using fixture = setupMode('hide', '**bold**<a>')
+    const steps = await traceKeySelection(fixture, 'ArrowLeft', 3)
+    expect(steps).toMatchInlineSnapshot(`
+      [
+        "**bold**┣",
+        "**bold┫**",
+        "**bol┃d**",
+        "**bo┃ld**",
+      ]
+    `)
+  })
+
+  it('Backspace at paragraph start joins across a trailing unit', async () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    editor.use(defineMarkMode('hide'))
+    fixture.set(n.doc(n.paragraph('foo **bold**'), n.paragraph('<a>bar')))
+    fixture.view.focus()
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bold**┣bar"`)
+  })
+
+  it.skipIf(
+    // Native word deletion is engine-defined: Firefox deletes the whole word
+    // plus the markers, Chromium only the space and the markers. This test
+    // documents the Chromium behavior; the snap invariant holds everywhere.
+    isFirefox() || isSafari(),
+  )('documents native word deletion across hidden runs', async () => {
+    using fixture = setupMode('hide', 'foo **bold** <a>bar')
+    await userEvent.keyboard('{Alt>}{Backspace}{/Alt}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bold┃bar"`)
+    expect(isHiddenRunInterior(fixture.state, fixture.state.selection.head)).toBe(false)
   })
 })
 
