@@ -1,6 +1,6 @@
-import { definePlugin, getMarkRange, getMarkType, type PlainExtension } from '@prosekit/core'
+import { defineCommands, definePlugin, getMarkRange, getMarkType, union } from '@prosekit/core'
 import type { Mark, Slice } from '@prosekit/pm/model'
-import type { EditorState } from '@prosekit/pm/state'
+import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
@@ -27,23 +27,37 @@ const CLIPBOARD_STRIP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([
 
 const markModeKey = new PluginKey<MarkMode>('mark-mode')
 
-function createMarkModePlugin(mode: MarkMode): Plugin<MarkMode> {
+function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
   return new Plugin<MarkMode>({
     key: markModeKey,
     state: {
-      init: () => mode,
-      apply: (_tr, value) => value,
+      init: () => initialMode,
+      apply: (tr, value) => (tr.getMeta(markModeKey) as MarkMode | undefined) ?? value,
     },
     props: {
-      attributes: { 'data-mark-mode': mode },
-      decorations: mode === 'focus' ? (state) => computeFocusDecorations(state) : undefined,
-      clipboardTextSerializer: mode === 'show' ? undefined : cleanCopySerializer,
+      attributes: (state) => ({ 'data-mark-mode': markModeKey.getState(state) ?? initialMode }),
+      decorations: (state) =>
+        markModeKey.getState(state) === 'focus' ? computeFocusDecorations(state) : undefined,
+      // In show mode the empty string is falsy, so `someProp` falls through to
+      // the next serializer (`defineMarkdownCopy` in the full editor) and the
+      // copied text keeps the syntax.
+      clipboardTextSerializer: (slice, view) =>
+        markModeKey.getState(view.state) === 'show' ? '' : cleanCopySerializer(slice),
     },
   })
 }
 
-export function defineMarkMode(mode: MarkMode): PlainExtension {
-  return definePlugin(createMarkModePlugin(mode))
+function setMarkMode(mode: MarkMode): Command {
+  return (state, dispatch) => {
+    if (getMarkMode(state) === mode) return false
+    // A meta-only transaction: no doc steps, so undo cannot revert the mode.
+    dispatch?.(state.tr.setMeta(markModeKey, mode))
+    return true
+  }
+}
+
+export function defineMarkMode(mode: MarkMode) {
+  return union(definePlugin(createMarkModePlugin(mode)), defineCommands({ setMarkMode }))
 }
 
 /** The active mark mode, or `undefined` when `defineMarkMode` is not applied. */

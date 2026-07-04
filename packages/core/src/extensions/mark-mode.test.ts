@@ -20,8 +20,8 @@ function renderHTML(mode: MarkMode, text: string): string {
   return fixture.htmlSnapshot
 }
 
-/** Mount one paragraph in `mode` and assert what a full-document copy yields (`null` = no serializer). */
-function expectClipboard(mode: MarkMode, text: string, expected: string | null): void {
+/** Mount one paragraph in `mode` and assert what a full-document copy yields. */
+function expectClipboard(mode: MarkMode, text: string, expected: string): void {
   using fixture = setupFixture()
   fixture.editor.use(defineMarkMode(mode))
   const { n } = fixture
@@ -956,7 +956,7 @@ describe('show mode', () => {
     `)
   })
 
-  it('installs no clipboard serializer, so copied text keeps the ** syntax', () => {
-    expectClipboard('show', 'Hello **bold** end', null)
+  it('yields no clipboard text of its own, so copy falls through and keeps the ** syntax', () => {
+    expectClipboard('show', 'Hello **bold** end', '')
   })
 })
