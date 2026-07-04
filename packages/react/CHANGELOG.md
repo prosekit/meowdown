@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.36.1](https://github.com/prosekit/meowdown/compare/react-v0.36.0...react-v0.36.1) (2026-07-04)
+
+
+### Bug Fixes
+
+* keep the autocomplete popup inside the viewport ([#233](https://github.com/prosekit/meowdown/issues/233)) ([5e63fa2](https://github.com/prosekit/meowdown/commit/5e63fa20deb8be25b3e665c99d99d87ef106fd88))
+
 ## [0.36.0](https://github.com/prosekit/meowdown/compare/react-v0.35.0...react-v0.36.0) (2026-07-04)
 
 
