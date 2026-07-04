@@ -1,4 +1,3 @@
-import { isFirefox, isSafari } from '@meowdown/vitest/helpers'
 import { TextSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
@@ -442,15 +441,15 @@ describe('hide mode complex cases', () => {
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bold**┣bar"`)
   })
 
-  it.skipIf(
-    // Native word deletion is engine-defined: Firefox deletes the whole word
-    // plus the markers, Chromium only the space and the markers. This test
-    // documents the Chromium behavior; the snap invariant holds everywhere.
-    isFirefox() || isSafari(),
-  )('documents native word deletion across hidden runs', async () => {
+  it('keeps the caret on a rest position after native word deletion', async () => {
+    // Native word deletion is engine- and platform-defined: macOS Chromium
+    // deletes the space plus the closing markers, Firefox the whole word plus
+    // markers, and Linux binds the shortcut to Ctrl instead of Alt. The exact
+    // deletion is deliberately unspecified; the snap invariant must hold
+    // everywhere (the reparse turns any orphaned markers into literal text).
     using fixture = setupMode('hide', 'foo **bold** <a>bar')
     await userEvent.keyboard('{Alt>}{Backspace}{/Alt}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bold┃bar"`)
+    await userEvent.keyboard('{Control>}{Backspace}{/Control}')
     expect(isHiddenRunInterior(fixture.state, fixture.state.selection.head)).toBe(false)
   })
 })
