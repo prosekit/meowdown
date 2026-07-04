@@ -1,4 +1,5 @@
 import {
+  defineCommands,
   defineNodeAttr,
   definePlugin,
   union,
@@ -6,8 +7,15 @@ import {
   type PlainExtension,
   type Union,
 } from '@prosekit/core'
+import { isCellSelection } from '@prosekit/extensions/table'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
-import { Plugin, PluginKey, type Transaction } from '@prosekit/pm/state'
+import {
+  Plugin,
+  PluginKey,
+  type Command,
+  type EditorState,
+  type Transaction,
+} from '@prosekit/pm/state'
 
 import type { NodeName } from './node-names.ts'
 
@@ -34,7 +42,7 @@ type TableHeaderCellAlignExtension = Extension<{
   Nodes: { tableHeaderCell: MeowdownTableCellAttrs }
 }>
 
-export function parseTableColumnAlign(value: string | null): TableColumnAlign | null {
+function parseTableColumnAlign(value: string | null): TableColumnAlign | null {
   return value === 'left' || value === 'center' || value === 'right' ? value : null
 }
 
@@ -63,14 +71,18 @@ function defineTableHeaderCellAlignAttr(): TableHeaderCellAlignExtension {
  * the header row, or the first row of a headerless table. Matches the row the
  * serializer reads when it writes the delimiter row.
  */
-function findAlignmentRow(table: ProseMirrorNode): ProseMirrorNode {
+function findAlignmentRowIndex(table: ProseMirrorNode): number {
   for (let rowIndex = 0; rowIndex < table.childCount; rowIndex++) {
     const row = table.child(rowIndex)
     for (let column = 0; column < row.childCount; column++) {
-      if (row.child(column).type.name === ('tableHeaderCell' satisfies NodeName)) return row
+      if (row.child(column).type.name === ('tableHeaderCell' satisfies NodeName)) return rowIndex
     }
   }
-  return table.child(0)
+  return 0
+}
+
+function findAlignmentRow(table: ProseMirrorNode): ProseMirrorNode {
+  return table.child(findAlignmentRowIndex(table))
 }
 
 function getCellAlign(row: ProseMirrorNode, column: number): TableColumnAlign | null {
@@ -159,10 +171,117 @@ function defineTableAlignSync(): PlainExtension {
   return definePlugin(createTableAlignSyncPlugin())
 }
 
+interface SelectedColumns {
+  table: ProseMirrorNode
+  tablePos: number
+  firstColumn: number
+  lastColumn: number
+}
+
+/**
+ * The table and column range the selection acts on. Cells are always 1x1 in a
+ * GFM table, so a cell's index within its row is its column index.
+ */
+function findSelectedColumns(state: EditorState): SelectedColumns | undefined {
+  const { selection } = state
+  if (isCellSelection(selection)) {
+    const { $anchorCell, $headCell } = selection
+    const tableDepth = $anchorCell.depth - 1
+    const anchorColumn = $anchorCell.index()
+    const headColumn = $headCell.index()
+    return {
+      table: $anchorCell.node(tableDepth),
+      tablePos: $anchorCell.before(tableDepth),
+      firstColumn: Math.min(anchorColumn, headColumn),
+      lastColumn: Math.max(anchorColumn, headColumn),
+    }
+  }
+  const { $from } = selection
+  for (let depth = $from.depth; depth > 2; depth--) {
+    const name = $from.node(depth).type.name
+    if (
+      name === ('tableCell' satisfies NodeName) ||
+      name === ('tableHeaderCell' satisfies NodeName)
+    ) {
+      const column = $from.index(depth - 1)
+      return {
+        table: $from.node(depth - 2),
+        tablePos: $from.before(depth - 2),
+        firstColumn: column,
+        lastColumn: column,
+      }
+    }
+  }
+  return undefined
+}
+
+/**
+ * Set the column alignment of every column the selection touches. Writes only
+ * the alignment row's cells; the align sync plugin copies the value to the
+ * data cells in the same dispatch. Pass null to reset a column to the
+ * unaligned `---` delimiter.
+ */
+function setTableColumnAlign(align: TableColumnAlign | null): Command {
+  return (state, dispatch) => {
+    const selected = findSelectedColumns(state)
+    if (!selected || selected.table.childCount === 0) return false
+    if (dispatch) {
+      const { table, tablePos, firstColumn, lastColumn } = selected
+      const rowIndex = findAlignmentRowIndex(table)
+      let rowPos = tablePos + 1
+      for (let i = 0; i < rowIndex; i++) rowPos += table.child(i).nodeSize
+      const row = table.child(rowIndex)
+      const tr = state.tr
+      let cellPos = rowPos + 1
+      for (let column = 0; column < row.childCount; column++) {
+        const cell = row.child(column)
+        const inRange = column >= firstColumn && column <= lastColumn
+        if (inRange && ((cell.attrs as MeowdownTableCellAttrs).align ?? null) !== align) {
+          tr.setNodeMarkup(cellPos, undefined, { ...cell.attrs, align })
+        }
+        cellPos += cell.nodeSize
+      }
+      dispatch(tr)
+    }
+    return true
+  }
+}
+
+/**
+ * The column alignment of the table column the selection sits in, or
+ * undefined when the selection is outside a table or the column has no
+ * alignment.
+ */
+export function getTableColumnAlign(state: EditorState): TableColumnAlign | undefined {
+  const selected = findSelectedColumns(state)
+  if (!selected || selected.table.childCount === 0) return undefined
+  return getCellAlign(findAlignmentRow(selected.table), selected.lastColumn) ?? undefined
+}
+
+type TableColumnAlignCommandsExtension = Extension<{
+  Commands: {
+    setTableColumnAlign: [align: TableColumnAlign | null]
+  }
+}>
+
+function defineTableColumnAlignCommands(): TableColumnAlignCommandsExtension {
+  return defineCommands({ setTableColumnAlign })
+}
+
 export type TableColumnAlignExtension = Union<
-  [TableCellAlignExtension, TableHeaderCellAlignExtension, PlainExtension]
+  [
+    TableCellAlignExtension,
+    TableHeaderCellAlignExtension,
+    PlainExtension,
+    TableColumnAlignCommandsExtension,
+  ]
 >
 
 export function defineTableColumnAlign(): TableColumnAlignExtension {
-  return union(defineTableCellAlignAttr(), defineTableHeaderCellAlignAttr(), defineTableAlignSync())
+  return union(
+    defineTableCellAlignAttr(),
+    defineTableHeaderCellAlignAttr(),
+    defineTableAlignSync(),
+    defineTableColumnAlignCommands(),
+  )
 }

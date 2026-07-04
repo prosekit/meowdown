@@ -40,7 +40,7 @@ const markdown = docToMarkdown(editor.state.doc)
   - Links (`[text](url)`), images (`![alt](src)`), and autolinks (`<https://example.com>`)
   - Hard line breaks
 - GitHub Flavored Markdown (GFM)
-  - Tables
+  - Tables, including column alignment (`:--`, `:-:`, `--:`)
   - Strikethrough (`~~text~~`)
   - Task lists (`- [ ]`, `- [x]`)
   - Autolinks for `www.`, scheme, and email URLs
@@ -117,6 +117,8 @@ Pasted or dropped files persist through [`defineFilePaste`](https://npmx.dev/pac
 A host can render chosen file links as inline **file pills**: pass `resolveFileLink` to [`defineEditorExtension`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineEditorExtension) (or `@meowdown/react`'s `resolveFileLink` prop) to claim links by their href (e.g. everything under `assets/`), and add [`defineFileView`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineFileView) to render each claimed link as a pill: a file-kind icon, the name, and the size supplied (possibly async) by `resolveFileInfo`. The markdown text is untouched, and a claimed link behaves like an image: one caret unit with an editable source, clicks (and `Mod-Enter` with the caret on it) reported through [`defineFileClickHandler`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineFileClickHandler) (`@meowdown/react`'s `onFileClick`) rather than the link click handler, and no link hover or edit menu.
 
 Rendered images are resizable: drag the corner handle and the chosen size is written back into the source as a trailing comment, `![alt](src)<!-- {"width":320,"height":240} -->`, which round-trips as plain Markdown. A comment immediately after an image is folded into its mark and drives the image's `width` and `height` attributes, so the box keeps its dimensions before the image loads; any other comment stays literal text.
+
+GFM table column alignment (`| :-: |` in the delimiter row) is kept as an `align` attribute on every cell and rendered through a `data-align` DOM attribute (`text-align` in the bundled stylesheet). Alignment is a column property: the header row's cells carry the source of truth, data cells (including rows inserted later) follow it automatically. Change it with the `setTableColumnAlign` command (`editor.commands.setTableColumnAlign('center')`, `null` resets to `---`), and read the alignment of the selection's column with [`getTableColumnAlign`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-getTableColumnAlign).
 
 Pasting a lone tweet or YouTube link can auto-embed it: [`defineEmbedPaste`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineEmbedPaste) (`@meowdown/react`'s `embedPaste` prop, on by default).
 
