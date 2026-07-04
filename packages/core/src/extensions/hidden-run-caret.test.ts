@@ -207,6 +207,100 @@ describe('hide mode Enter relocation', () => {
   })
 })
 
+describe('hide mode unformat deletion', () => {
+  it('Backspace after a unit dissolves it', async () => {
+    using fixture = setupMode('hide', 'foo **bold**<a> bar')
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo bold┃ bar"`)
+    expect(docToMarkdown(fixture.doc)).toBe('foo bold bar\n')
+  })
+
+  it('Backspace at the content edge deletes a content char', async () => {
+    using fixture = setupMode('hide', 'foo **bold<a>** bar')
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bol┃** bar"`)
+    expect(docToMarkdown(fixture.doc)).toBe('foo **bol** bar\n')
+  })
+
+  it('Delete at the content edge dissolves the unit', async () => {
+    using fixture = setupMode('hide', 'foo **bold<a>** bar')
+    await userEvent.keyboard('{Delete}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo bold┃ bar"`)
+  })
+
+  it('Delete before a unit dissolves it', async () => {
+    using fixture = setupMode('hide', 'foo <a>**bold** bar')
+    await userEvent.keyboard('{Delete}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo ┃bold bar"`)
+  })
+
+  it('Backspace after a link dissolves the whole link in one undo step', async () => {
+    using fixture = setupMode('hide', 'foo [docs](https://a.io)<a> bar')
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo docs┃ bar"`)
+    fixture.editor.commands.undo()
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo [docs](https://a.io)┃ bar"`)
+  })
+
+  it("Backspace at a link's content start dissolves the link", async () => {
+    using fixture = setupMode('hide', 'foo [<a>docs](https://a.io) bar')
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo ┃docs bar"`)
+  })
+
+  it('dissolving an inner unit keeps the outer unit', async () => {
+    using fixture = setupMode('hide', '**a *b*<a> c**')
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"**a b┃ c**"`)
+    expect(docToMarkdown(fixture.doc)).toBe('**a b c**\n')
+  })
+
+  it('dissolving a triple run removes both nested units', async () => {
+    using fixture = setupMode('hide', '***x***<a>')
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"x┃"`)
+  })
+
+  it('a merged run dissolves only the adjacent unit', async () => {
+    using fixture = setupMode('hide', '**a**_<a>b_')
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"**a**┃b"`)
+    expect(docToMarkdown(fixture.doc)).toBe('**a**b\n')
+  })
+
+  it('a fully hidden unit deletes entirely', async () => {
+    using fixture = setupMode('hide', 'x[](https://a.io)<a>y')
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"x┃y"`)
+  })
+
+  it('atom deletion stays with atom navigation at a shared boundary', async () => {
+    using fixture = setupMode('hide', '**bold**[[note]]<a>')
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"**bold**┃"`)
+  })
+
+  it('unformat wins over atom one-char deletion at a shared boundary', async () => {
+    using fixture = setupMode('hide', '**bold**<a>[[note]]')
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"bold┃[[note]]"`)
+  })
+
+  it('a range selection still deletes natively', async () => {
+    using fixture = setupMode('hide', 'foo **bold** <a>bar')
+    await userEvent.keyboard('{Shift>}{ArrowLeft}{ArrowLeft}{/Shift}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bold❰** ❱bar"`)
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bold┃bar"`)
+  })
+
+  it('keeps the per-char deletion in focus mode', async () => {
+    using fixture = setupMode('focus', 'foo **bold**<a> bar')
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bold*┃ bar"`)
+  })
+})
+
 describe('hide mode typing at coincident positions', () => {
   it('typing at the content edge joins the unit', async () => {
     using fixture = setupMode('hide', 'foo **bold<a>** bar')
