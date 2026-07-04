@@ -25,6 +25,12 @@
     /* links, wikilinks, tags, caret, drop indicator */
     --meowdown-accent: light-dark(oklch(0.646 0.194 41), oklch(0.758 0.159 56));
 
+    /* the self-drawn caret */
+    --meowdown-caret: var(--meowdown-accent);
+
+    /* how long the caret glides when it moves (0 disables the animation) */
+    --meowdown-caret-glide: 80ms;
+
     /* Markdown syntax characters */
     --meowdown-mark: var(--meowdown-muted);
 
@@ -110,8 +116,96 @@
     font-size: 1.0625rem;
     line-height: 1.7;
     color: var(--meowdown-text);
-    caret-color: var(--meowdown-accent);
+    /* The virtual caret (`.md-virtual-caret`) replaces the native caret. */
+    caret-color: transparent;
     -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Virtual caret
+   *
+   * A zero-height in-flow layer right after `.ProseMirror` (outside the
+   * contenteditable), so it scrolls with the content and never disturbs the
+   * browser's editing behavior. The caret is positioned against the layer.
+   * ------------------------------------------------------------------------- */
+  .md-virtual-caret-layer {
+    position: relative;
+    width: 0;
+    height: 0;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .md-virtual-caret-layer .md-virtual-caret {
+    position: absolute;
+    display: none;
+    width: 0;
+    border-left: 2px solid var(--meowdown-caret);
+    margin-left: -1px;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    transition:
+      left var(--meowdown-caret-glide) cubic-bezier(0.25, 1, 0.5, 1),
+      top var(--meowdown-caret-glide) cubic-bezier(0.25, 1, 0.5, 1),
+      height var(--meowdown-caret-glide) cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .md-virtual-caret-layer .md-virtual-caret {
+      transition: none;
+    }
+  }
+
+  .ProseMirror.ProseMirror-focused ~ .md-virtual-caret-layer .md-virtual-caret {
+    display: block;
+    animation: md-virtual-caret-blink 1.2s ease-in-out infinite;
+  }
+
+  /* Typing-affinity tails: the foot points to the side a typed character
+   * would join, disambiguating the two coincident positions at a hidden run
+   * boundary. The vertical bar stays exactly on the caret x. */
+  .md-virtual-caret-layer .md-virtual-caret[data-tail='left'] {
+    width: 6px;
+    margin-left: -7px;
+    border-left: none;
+    border-right: 2px solid var(--meowdown-caret);
+    border-bottom: 2px solid var(--meowdown-caret);
+  }
+
+  .md-virtual-caret-layer .md-virtual-caret[data-tail='right'] {
+    width: 6px;
+    border-bottom: 2px solid var(--meowdown-caret);
+  }
+
+  /* macOS-style blink: dwell solid, fade out, dwell off, fade back in.
+   * Two identical keyframe sets so a name swap restarts the blink without a
+   * forced reflow. */
+  @keyframes md-virtual-caret-blink {
+    0%,
+    40% {
+      opacity: 1;
+    }
+    60%,
+    90% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  @keyframes md-virtual-caret-blink2 {
+    0%,
+    40% {
+      opacity: 1;
+    }
+    60%,
+    90% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
   }
 
   /* Surface padding stays on a meowdown-owned class, not `.ProseMirror`: the block
@@ -550,11 +644,19 @@
     display: contents;
   }
 
-  .ProseMirror[data-mark-mode='hide'] {
+  /* Hidden syntax keeps a real zero-width inline box (font-size: 0) instead of
+   * leaving the box tree (display: none): the caret, click hit-testing, native
+   * deletion, and scrolling all assume the text has a box. letter-spacing is
+   * zeroed defensively; the current -0.01em is em-based and already collapses. */
+  .ProseMirror[data-mark-mode='hide'],
+  .ProseMirror[data-mark-mode='focus'] {
     .md-mark,
     .md-link-uri,
     .md-link-title {
-      display: none;
+      display: inline;
+      font-size: 0;
+      letter-spacing: 0;
+      opacity: 0;
     }
   }
 
@@ -562,13 +664,10 @@
     .md-mark,
     .md-link-uri,
     .md-link-title {
-      display: inline;
-      font-size: 0;
-      opacity: 0;
-
       &:has(.show) {
         opacity: 1;
         font-size: inherit;
+        letter-spacing: inherit;
       }
     }
   }

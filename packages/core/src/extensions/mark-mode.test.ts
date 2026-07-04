@@ -797,6 +797,9 @@ describe('focus mode', () => {
 
   it.skipIf(
     // TODO: this test fails in Firefox.
+    // Firefox's native backspace splits the paragraph next to a zero-size
+    // marker span; hide mode is command-driven and passes everywhere, focus
+    // mode still relies on the native deletion here.
     isFirefox(),
   )('handles backspace correctly around bold', async () => {
     using fixture = setupFixture()
@@ -902,10 +905,7 @@ describe('hide mode', () => {
     expectClipboard('hide', 'Hello #meow end', 'Hello #meow end')
   })
 
-  it.skipIf(
-    // TODO: this test fails in Firefox.
-    isFirefox(),
-  )('handles backspace correctly around bold', async () => {
+  it('handles backspace correctly around bold', async () => {
     using fixture = setupFixture()
     fixture.editor.use(defineMarkMode('hide'))
     const { n } = fixture
@@ -913,11 +913,14 @@ describe('hide mode', () => {
     fixture.view.focus()
 
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold** ┃text"`)
-    // TODO: this is a bug. Pressing backspace should not delete the closing **
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold┃text"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold**⎣text"`)
+    // Deleting into the hidden ** dissolves the whole unit: both marker runs
+    // go, the content stays.
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bol┃text"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text bold┃text"`)
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text bol┃text"`)
   })
 })
 

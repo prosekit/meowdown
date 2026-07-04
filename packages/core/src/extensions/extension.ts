@@ -19,6 +19,7 @@ import { defineEditorCommands } from './commands.ts'
 import { defineEscapeCollapse } from './escape-collapse.ts'
 import { defineDocFrontmatterAttr } from './frontmatter.ts'
 import { defineHeading } from './heading.ts'
+import { defineHiddenRunCaret } from './hidden-run-caret.ts'
 import { defineMeowdownHorizontalRule } from './horizontal-rule.ts'
 import { defineHTMLComment } from './html-comment.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
@@ -31,6 +32,7 @@ import { defineMoveBlock } from './move-block.ts'
 import { defineMeowdownParagraph } from './paragraph.ts'
 import { definePendingReplacement } from './pending-replacement.ts'
 import { defineTable } from './table.ts'
+import { defineVirtualCaret } from './virtual-caret.ts'
 import { defineWikilink } from './wikilink.ts'
 
 function defineEditorExtensionImpl(options: EditorExtensionOptions) {
@@ -59,6 +61,8 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineInlineToggle(),
     defineLinkCommands(),
     defineWikilink(),
+    defineVirtualCaret(),
+    defineHiddenRunCaret(),
     defineAtomMarkNavigation({
       marks: [
         { name: 'mdImage', modes: ['hide', 'focus', 'show'] },
