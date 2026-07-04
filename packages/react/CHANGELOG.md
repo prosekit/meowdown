@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.35.0](https://github.com/prosekit/meowdown/compare/react-v0.34.0...react-v0.35.0) (2026-07-04)
+
+
+### Features
+
+* support GFM table column alignment ([#222](https://github.com/prosekit/meowdown/issues/222)) ([50f423f](https://github.com/prosekit/meowdown/commit/50f423f7bd282362a9cf6ec0f2d52668318ed01c))
+
+
+### Bug Fixes
+
+* apply the mark mode at editor creation ([#226](https://github.com/prosekit/meowdown/issues/226)) ([9d847f9](https://github.com/prosekit/meowdown/commit/9d847f96ca07975f4980480da11f0a75ff91131e))
+
 ## [0.34.0](https://github.com/prosekit/meowdown/compare/react-v0.33.1...react-v0.34.0) (2026-07-04)
 
 

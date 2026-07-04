@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.35.0](https://github.com/prosekit/meowdown/compare/core-v0.34.0...core-v0.35.0) (2026-07-04)
+
+
+### Features
+
+* round the virtual caret caps ([#228](https://github.com/prosekit/meowdown/issues/228)) ([be4d52b](https://github.com/prosekit/meowdown/commit/be4d52b7ea290ef7a9b7925e4e9cd3696529b94d))
+* support GFM table column alignment ([#222](https://github.com/prosekit/meowdown/issues/222)) ([50f423f](https://github.com/prosekit/meowdown/commit/50f423f7bd282362a9cf6ec0f2d52668318ed01c))
+
+
+### Bug Fixes
+
+* apply the mark mode at editor creation ([#226](https://github.com/prosekit/meowdown/issues/226)) ([9d847f9](https://github.com/prosekit/meowdown/commit/9d847f96ca07975f4980480da11f0a75ff91131e))
+* draw the virtual caret at an atom mark edge ([#227](https://github.com/prosekit/meowdown/issues/227)) ([3a5f3fe](https://github.com/prosekit/meowdown/commit/3a5f3fec309fe69c9c20f710f97e3fda492bc55a))
+* pin `box-sizing` on the virtual caret ([#225](https://github.com/prosekit/meowdown/issues/225)) ([da727fd](https://github.com/prosekit/meowdown/commit/da727fdff69bd45ae6876eb4746fc093e3df87ae))
+
 ## [0.34.0](https://github.com/prosekit/meowdown/compare/core-v0.33.1...core-v0.34.0) (2026-07-04)
 
 
