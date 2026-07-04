@@ -1,5 +1,6 @@
 import { DOMParser, DOMSerializer } from '@prosekit/pm/model'
 import { describe, expect, it } from 'vitest'
+import { userEvent } from 'vitest/browser'
 
 import { setupFixture } from '../testing/index.ts'
 
@@ -19,5 +20,39 @@ describe('codeBlock attrs', () => {
       fenceStyle: 'tilde',
       fenceLength: 4,
     })
+  })
+})
+
+describe('tilde fence rules', () => {
+  it('creates a tilde code block from `~~~` and Enter', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    fixture.view.focus()
+    await userEvent.keyboard('~~~')
+    await userEvent.keyboard('{Enter}')
+    const expected = n.doc(n.codeBlock({ language: '', fenceStyle: 'tilde' }))
+    expect(fixture.doc.eq(expected)).toBe(true)
+  })
+
+  it('creates a tilde code block with a language from `~~~js` and Enter', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    fixture.view.focus()
+    await userEvent.keyboard('~~~js')
+    await userEvent.keyboard('{Enter}')
+    const expected = n.doc(n.codeBlock({ language: 'js', fenceStyle: 'tilde' }))
+    expect(fixture.doc.eq(expected)).toBe(true)
+  })
+
+  it('creates a tilde code block from `~~~` and Space', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    fixture.view.focus()
+    await userEvent.keyboard('~~~ ')
+    const expected = n.doc(n.codeBlock({ language: '', fenceStyle: 'tilde' }))
+    expect(fixture.doc.eq(expected)).toBe(true)
   })
 })

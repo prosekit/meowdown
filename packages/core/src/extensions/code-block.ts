@@ -1,8 +1,10 @@
-import { defineNodeAttr, union, type Extension } from '@prosekit/core'
+import { defineNodeAttr, union, type Extension, type PlainExtension } from '@prosekit/core'
 import {
   defineCodeBlock as defineBaseCodeBlock,
   type CodeBlockAttrs,
 } from '@prosekit/extensions/code-block'
+import { defineTextBlockEnterRule } from '@prosekit/extensions/enter-rule'
+import { defineTextBlockInputRule } from '@prosekit/extensions/input-rule'
 
 import type { NodeName } from './node-names.ts'
 
@@ -64,6 +66,32 @@ function defineFenceLengthAttr(): FenceLengthExtension {
   })
 }
 
+function getTildeFenceAttrs(match: RegExpMatchArray): MeowdownCodeBlockAttrs {
+  return { language: match[1] || '', fenceStyle: 'tilde' }
+}
+
+function defineTildeFenceInputRule(): PlainExtension {
+  return defineTextBlockInputRule({
+    regex: /^~~~(\S*)\s$/,
+    type: 'codeBlock' satisfies NodeName,
+    attrs: getTildeFenceAttrs,
+  })
+}
+
+function defineTildeFenceEnterRule(): PlainExtension {
+  return defineTextBlockEnterRule({
+    regex: /^~~~(\S*)$/,
+    type: 'codeBlock' satisfies NodeName,
+    attrs: getTildeFenceAttrs,
+  })
+}
+
 export function defineCodeBlock() {
-  return union(defineBaseCodeBlock(), defineFenceStyleAttr(), defineFenceLengthAttr())
+  return union(
+    defineBaseCodeBlock(),
+    defineFenceStyleAttr(),
+    defineFenceLengthAttr(),
+    defineTildeFenceInputRule(),
+    defineTildeFenceEnterRule(),
+  )
 }
