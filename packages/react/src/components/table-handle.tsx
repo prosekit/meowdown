@@ -1,4 +1,4 @@
-import type { EditorExtension } from '@meowdown/core'
+import { getTableColumnAlign, type EditorExtension, type TableColumnAlign } from '@meowdown/core'
 import type { Editor } from '@prosekit/core'
 import { useEditorDerivedValue } from '@prosekit/react'
 import { MenuItem, MenuPopup, MenuPositioner } from '@prosekit/react/menu'
@@ -15,13 +15,21 @@ import {
   TableHandleRowPopup,
   TableHandleRowPositioner,
 } from '@prosekit/react/table-handle'
-import { GripHorizontalIcon, GripVerticalIcon } from 'lucide-react'
+import { CheckIcon, GripHorizontalIcon, GripVerticalIcon } from 'lucide-react'
 
 import styles from './table-handle.module.css'
 
 function getTableHandleState(editor: Editor<EditorExtension>) {
   const commands = editor.commands
+  const columnAlign = getTableColumnAlign(editor.state)
   return {
+    columnAlign,
+    setTableColumnAlign: {
+      canExec: commands.setTableColumnAlign.canExec('left'),
+      // Selecting the current alignment again clears it back to `---`.
+      command: (align: TableColumnAlign) =>
+        commands.setTableColumnAlign(columnAlign === align ? null : align),
+    },
     addTableColumnBefore: {
       canExec: commands.addTableColumnBefore.canExec(),
       command: () => commands.addTableColumnBefore(),
@@ -55,6 +63,35 @@ function getTableHandleState(editor: Editor<EditorExtension>) {
       command: () => commands.deleteTable(),
     },
   }
+}
+
+const COLUMN_ALIGN_LABELS: Record<TableColumnAlign, string> = {
+  left: 'Align Left',
+  center: 'Align Center',
+  right: 'Align Right',
+}
+
+function ColumnAlignMenuItem({
+  align,
+  columnAlign,
+  onSelect,
+}: {
+  align: TableColumnAlign
+  columnAlign: TableColumnAlign | undefined
+  onSelect: () => void
+}) {
+  const active = columnAlign === align
+  return (
+    <MenuItem
+      className={styles.MenuItem}
+      data-testid={`table-align-${align}`}
+      data-active={active ? '' : undefined}
+      onSelect={onSelect}
+    >
+      <span>{COLUMN_ALIGN_LABELS[align]}</span>
+      {active && <CheckIcon />}
+    </MenuItem>
+  )
 }
 
 export function TableHandle() {
@@ -93,6 +130,25 @@ export function TableHandle() {
                   >
                     <span>Insert Right</span>
                   </MenuItem>
+                )}
+                {state.setTableColumnAlign.canExec && (
+                  <>
+                    <ColumnAlignMenuItem
+                      align="left"
+                      columnAlign={state.columnAlign}
+                      onSelect={() => state.setTableColumnAlign.command('left')}
+                    />
+                    <ColumnAlignMenuItem
+                      align="center"
+                      columnAlign={state.columnAlign}
+                      onSelect={() => state.setTableColumnAlign.command('center')}
+                    />
+                    <ColumnAlignMenuItem
+                      align="right"
+                      columnAlign={state.columnAlign}
+                      onSelect={() => state.setTableColumnAlign.command('right')}
+                    />
+                  </>
                 )}
                 {state.deleteCellSelection.canExec && (
                   <MenuItem

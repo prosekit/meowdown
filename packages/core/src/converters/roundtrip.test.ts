@@ -697,9 +697,21 @@ describe('tables', () => {
     )
   })
 
-  it.fails('keeps column alignment', () => {
+  it('keeps column alignment', () => {
     expect(roundtrip('| a | b |\n| :-- | --: |\n| 1 | 2 |')).toBe(
       '| a | b |\n| :-- | --: |\n| 1 | 2 |\n',
+    )
+  })
+
+  it('keeps center alignment', () => {
+    expect(roundtrip('| a | b | c |\n| :-- | :-: | --: |\n| 1 | 2 | 3 |')).toBe(
+      '| a | b | c |\n| :-- | :-: | --: |\n| 1 | 2 | 3 |\n',
+    )
+  })
+
+  it('normalizes delimiter width to three characters', () => {
+    expect(roundtrip('| a | b |\n| :---: | ----: |\n| 1 | 2 |')).toBe(
+      '| a | b |\n| :-: | --: |\n| 1 | 2 |\n',
     )
   })
 

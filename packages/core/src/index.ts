@@ -107,6 +107,11 @@ export {
 export { getMarkBuilders, type TypedMarkBuilders } from './extensions/schema.ts'
 export { isSelectionInTableCell } from './extensions/table.ts'
 export {
+  getTableColumnAlign,
+  type MeowdownTableCellAttrs,
+  type TableColumnAlign,
+} from './extensions/table-column-align.ts'
+export {
   defineTagClickHandler,
   type TagClickHandler,
   type TagClickPayload,

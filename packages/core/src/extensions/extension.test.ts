@@ -157,6 +157,7 @@ describe('defineEditorExtension', () => {
                 "content": [
                   {
                     "attrs": {
+                      "align": null,
                       "colspan": 1,
                       "colwidth": null,
                       "rowspan": 1,
@@ -176,6 +177,7 @@ describe('defineEditorExtension', () => {
                   },
                   {
                     "attrs": {
+                      "align": null,
                       "colspan": 1,
                       "colwidth": null,
                       "rowspan": 1,
@@ -200,6 +202,7 @@ describe('defineEditorExtension', () => {
                 "content": [
                   {
                     "attrs": {
+                      "align": null,
                       "colspan": 1,
                       "colwidth": null,
                       "rowspan": 1,
@@ -219,6 +222,7 @@ describe('defineEditorExtension', () => {
                   },
                   {
                     "attrs": {
+                      "align": null,
                       "colspan": 1,
                       "colwidth": null,
                       "rowspan": 1,

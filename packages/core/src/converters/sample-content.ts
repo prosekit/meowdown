@@ -184,7 +184,7 @@ export const sampleContent: NodeJSON = {
           content: [
             {
               type: 'tableHeaderCell',
-              attrs: { colspan: 1, rowspan: 1, colwidth: null },
+              attrs: { colspan: 1, rowspan: 1, colwidth: null, align: null },
               content: [
                 {
                   type: 'paragraph',
@@ -194,7 +194,7 @@ export const sampleContent: NodeJSON = {
             },
             {
               type: 'tableHeaderCell',
-              attrs: { colspan: 1, rowspan: 1, colwidth: null },
+              attrs: { colspan: 1, rowspan: 1, colwidth: null, align: null },
               content: [
                 {
                   type: 'paragraph',
@@ -209,7 +209,7 @@ export const sampleContent: NodeJSON = {
           content: [
             {
               type: 'tableCell',
-              attrs: { colspan: 1, rowspan: 1, colwidth: null },
+              attrs: { colspan: 1, rowspan: 1, colwidth: null, align: null },
               content: [
                 {
                   type: 'paragraph',
@@ -219,7 +219,7 @@ export const sampleContent: NodeJSON = {
             },
             {
               type: 'tableCell',
-              attrs: { colspan: 1, rowspan: 1, colwidth: null },
+              attrs: { colspan: 1, rowspan: 1, colwidth: null, align: null },
               content: [
                 {
                   type: 'paragraph',
@@ -234,7 +234,7 @@ export const sampleContent: NodeJSON = {
           content: [
             {
               type: 'tableCell',
-              attrs: { colspan: 1, rowspan: 1, colwidth: null },
+              attrs: { colspan: 1, rowspan: 1, colwidth: null, align: null },
               content: [
                 {
                   type: 'paragraph',
@@ -244,7 +244,7 @@ export const sampleContent: NodeJSON = {
             },
             {
               type: 'tableCell',
-              attrs: { colspan: 1, rowspan: 1, colwidth: null },
+              attrs: { colspan: 1, rowspan: 1, colwidth: null, align: null },
               content: [
                 {
                   type: 'paragraph',
