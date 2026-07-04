@@ -38,8 +38,7 @@ export type EditorMode = MarkMode
 export interface EditorProps {
   /**
    * The editor mode ('focus', 'show', 'hide'), controlling how much Markdown
-   * syntax stays in view. Defaults to 'focus'. Applied from the first paint;
-   * a later prop change switches the mode in place, outside undo history.
+   * syntax stays in view. Defaults to 'focus'.
    */
   mode?: EditorMode
 
