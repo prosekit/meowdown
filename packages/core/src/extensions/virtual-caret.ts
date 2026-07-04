@@ -49,16 +49,16 @@ function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   const runBefore = getHiddenRunBefore(state, head)
   const runAfter = getHiddenRunAfter(state, head)
   const preferredSide: -1 | 1 = runBefore == null ? -1 : 1
-  // REVIEW: probe should be a tuple [pos: number, side: -1 | +1]
-  // REVIEW: add a short simple comment to explain what -1 | +1 means in this context
-  const probes: Array<{ pos: number; side: -1 | 1 }> = [
-    { pos: head, side: preferredSide },
-    { pos: head, side: -preferredSide as -1 | 1 },
+  // `side` picks which neighbor to measure: -1 the character before the
+  // position, 1 the character after it.
+  const probes: [pos: number, side: -1 | 1][] = [
+    [head, preferredSide],
+    [head, -preferredSide as -1 | 1],
   ]
-  if (runBefore != null) probes.push({ pos: runBefore.from, side: -1 })
-  if (runAfter != null) probes.push({ pos: runAfter.to, side: 1 })
-  for (const probe of probes) {
-    const coords = tryCoordsAtPos(view, probe.pos, probe.side)
+  if (runBefore != null) probes.push([runBefore.from, -1])
+  if (runAfter != null) probes.push([runAfter.to, 1])
+  for (const [pos, side] of probes) {
+    const coords = tryCoordsAtPos(view, pos, side)
     if (coords != null && coords.bottom > coords.top) {
       return { left: coords.left, top: coords.top, height: coords.bottom - coords.top }
     }
@@ -67,9 +67,7 @@ function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
 }
 
 // The measured rect is the glyph box, which reads short against the airy
-// line-height; stand the caret taller around its center. <REVIEW: REMOVE the comment after>Done here rather
-// than with a CSS scaleY, which would also thicken a tail's horizontal foot
-// relative to the vertical bar.<REVIEW: REMOVE the comment beefore>
+// line-height; stand the caret taller around its center.
 const CARET_STRETCH = 1.4
 
 function stretchCaretRect(rect: CaretRect): CaretRect {
