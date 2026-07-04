@@ -7,7 +7,8 @@ import { setupFixture } from '../testing/index.ts'
 describe('input rule', () => {
   it('wraps a block into a circle checkbox task on `+ `', async () => {
     using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.paragraph('<a>todo')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>todo')))
     fixture.view.focus()
     await userEvent.keyboard('+ ')
     expect(docToMarkdown(fixture.doc)).toBe('+ [ ] todo\n')
@@ -15,7 +16,8 @@ describe('input rule', () => {
 
   it('wraps a block into a plain bullet on `- ` (not a checkbox task)', async () => {
     using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.paragraph('<a>todo')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>todo')))
     fixture.view.focus()
     await userEvent.keyboard('- ')
     expect(docToMarkdown(fixture.doc)).toBe('- todo\n')
@@ -25,39 +27,32 @@ describe('input rule', () => {
 describe('commands', () => {
   it('wrapInCircleTask makes a circle checkbox task', () => {
     using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.paragraph('todo<a>')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('todo<a>')))
     fixture.editor.commands.wrapInCircleTask()
     expect(docToMarkdown(fixture.doc)).toBe('+ [ ] todo\n')
   })
 
   it('wrapInSquareTask makes a square checkbox task', () => {
     using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.paragraph('todo<a>')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('todo<a>')))
     fixture.editor.commands.wrapInSquareTask()
     expect(docToMarkdown(fixture.doc)).toBe('- [ ] todo\n')
   })
 
   it('converts a square checkbox task to a circle checkbox task, keeping checked', () => {
     using fixture = setupFixture()
-    fixture.set(
-      fixture.n.doc(
-        fixture.n.list({ kind: 'task', checked: true }, fixture.n.paragraph('done<a>')),
-      ),
-    )
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'task', checked: true }, n.paragraph('done<a>'))))
     fixture.editor.commands.wrapInCircleTask()
     expect(docToMarkdown(fixture.doc)).toBe('+ [x] done\n')
   })
 
   it('converts a circle checkbox task back to a square checkbox task, keeping checked', () => {
     using fixture = setupFixture()
-    fixture.set(
-      fixture.n.doc(
-        fixture.n.list(
-          { kind: 'task', marker: '+', checked: true },
-          fixture.n.paragraph('done<a>'),
-        ),
-      ),
-    )
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'task', marker: '+', checked: true }, n.paragraph('done<a>'))))
     fixture.editor.commands.wrapInSquareTask()
     expect(docToMarkdown(fixture.doc)).toBe('- [x] done\n')
   })
@@ -70,7 +65,8 @@ describe('keymap', () => {
 
   it('Mod-Enter cycles a square checkbox task: unchecked -> checked -> bullet', async () => {
     using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.paragraph('todo<a>')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('todo<a>')))
     fixture.view.focus()
 
     await pressModEnter()
@@ -83,7 +79,8 @@ describe('keymap', () => {
 
   it('Mod-Shift-Enter cycles a circle checkbox task: unchecked -> checked -> bullet', async () => {
     using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.paragraph('todo<a>')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('todo<a>')))
     fixture.view.focus()
 
     await pressModShiftEnter()
@@ -96,13 +93,9 @@ describe('keymap', () => {
 
   it('Mod-Enter converts a circle checkbox task into a square checkbox task', async () => {
     using fixture = setupFixture()
+    const { n } = fixture
     fixture.set(
-      fixture.n.doc(
-        fixture.n.list(
-          { kind: 'task', marker: '+', checked: false },
-          fixture.n.paragraph('todo<a>'),
-        ),
-      ),
+      n.doc(n.list({ kind: 'task', marker: '+', checked: false }, n.paragraph('todo<a>'))),
     )
     fixture.view.focus()
 
@@ -112,15 +105,118 @@ describe('keymap', () => {
 
   it('Mod-Shift-Enter converts a square checkbox task into a circle checkbox task', async () => {
     using fixture = setupFixture()
-    fixture.set(
-      fixture.n.doc(
-        fixture.n.list({ kind: 'task', checked: false }, fixture.n.paragraph('todo<a>')),
-      ),
-    )
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'task', checked: false }, n.paragraph('todo<a>'))))
     fixture.view.focus()
 
     await pressModShiftEnter()
     expect(docToMarkdown(fixture.doc)).toBe('+ [ ] todo\n')
+  })
+
+  it('Enter continues a circle checkbox task with another circle checkbox task', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(n.list({ kind: 'task', marker: '+', checked: false }, n.paragraph('todo<a>'))),
+    )
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}next')
+    expect(docToMarkdown(fixture.doc)).toBe('+ [ ] todo\n+ [ ] next\n')
+  })
+
+  it('Enter on a checked circle checkbox task continues with an unchecked one', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'task', marker: '+', checked: true }, n.paragraph('done<a>'))))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}next')
+    expect(docToMarkdown(fixture.doc)).toBe('+ [x] done\n+ [ ] next\n')
+  })
+
+  it('Enter in the middle of a circle checkbox task keeps the circle on both halves', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(n.list({ kind: 'task', marker: '+', checked: false }, n.paragraph('to<a>do'))),
+    )
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}')
+    expect(docToMarkdown(fixture.doc)).toBe('+ [ ] to\n+ [ ] do\n')
+  })
+
+  it('Enter at the start of a circle checkbox task inserts an empty circle task above', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(n.list({ kind: 'task', marker: '+', checked: false }, n.paragraph('<a>todo'))),
+    )
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}')
+    expect(fixture.doc.childCount).toBe(2)
+    expect(fixture.doc.child(0).attrs).toMatchObject({ kind: 'task', marker: '+' })
+    expect(docToMarkdown(fixture.doc)).toContain('+ [ ] todo\n')
+  })
+
+  it('Enter continues a square checkbox task with a square checkbox task', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'task', checked: false }, n.paragraph('todo<a>'))))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}next')
+    expect(docToMarkdown(fixture.doc)).toBe('- [ ] todo\n- [ ] next\n')
+  })
+
+  it('Enter continues a `*` bullet with a `*` bullet', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet', marker: '*' }, n.paragraph('todo<a>'))))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}next')
+    expect(docToMarkdown(fixture.doc)).toBe('* todo\n* next\n')
+  })
+
+  it('Enter on an empty circle checkbox task still unwraps it', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'task', marker: '+', checked: false }, n.paragraph('<a>'))))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}')
+    expect(fixture.doc.child(0).type.name).toBe('paragraph')
+  })
+
+  it('Enter at the end of a collapsed bullet adds the next item below its hidden children', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.list(
+          { kind: 'bullet', marker: '*', collapsed: true },
+          n.paragraph('parent<a>'),
+          n.list({ kind: 'bullet' }, n.paragraph('child')),
+        ),
+      ),
+    )
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}next')
+    expect(docToMarkdown(fixture.doc)).toBe('+ parent\n  - child\n* next\n')
+  })
+
+  it('Enter keeps the marker gap on the next item', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet', markerGap: 3 }, n.paragraph('todo<a>'))))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Enter}next')
+    expect(docToMarkdown(fixture.doc)).toBe('-   todo\n-   next\n')
   })
 
   // The physical digit keys, so the shifted character ('&', '*', '(' on a US
@@ -130,7 +226,8 @@ describe('keymap', () => {
 
   it('Mod-Shift-8 wraps a paragraph into a bullet and unwraps it again', async () => {
     using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.paragraph('todo<a>')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('todo<a>')))
     fixture.view.focus()
 
     await pressModShiftDigit(8)
@@ -141,7 +238,8 @@ describe('keymap', () => {
 
   it('Mod-Shift-7 wraps a paragraph into an ordered list and unwraps it again', async () => {
     using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.paragraph('todo<a>')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('todo<a>')))
     fixture.view.focus()
 
     await pressModShiftDigit(7)
@@ -152,7 +250,8 @@ describe('keymap', () => {
 
   it('Mod-Shift-9 wraps a paragraph into a square checkbox task and unwraps it again', async () => {
     using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.paragraph('todo<a>')))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('todo<a>')))
     fixture.view.focus()
 
     await pressModShiftDigit(9)
@@ -163,7 +262,8 @@ describe('keymap', () => {
 
   it('Mod-Shift-7 converts a bullet into an ordered list in place', async () => {
     using fixture = setupFixture()
-    fixture.set(fixture.n.doc(fixture.n.list({ kind: 'bullet' }, fixture.n.paragraph('todo<a>'))))
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('todo<a>'))))
     fixture.view.focus()
 
     await pressModShiftDigit(7)
