@@ -16,6 +16,7 @@ export {
   type CodeToken,
 } from './extensions/code-block-highlight.ts'
 export { codeBlockLanguages } from './extensions/code-block-languages.ts'
+export type { CodeBlockFenceStyle, MeowdownCodeBlockAttrs } from './extensions/code-block.ts'
 export { defineEmbedPaste } from './extensions/embed-paste.ts'
 export { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './extensions/embed/index.ts'
 export {

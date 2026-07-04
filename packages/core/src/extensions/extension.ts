@@ -6,7 +6,6 @@ import {
   type Editor,
 } from '@prosekit/core'
 import { defineBlockquote } from '@prosekit/extensions/blockquote'
-import { defineCodeBlock } from '@prosekit/extensions/code-block'
 import { defineDoc } from '@prosekit/extensions/doc'
 import { defineGapCursor } from '@prosekit/extensions/gap-cursor'
 import { defineModClickPrevention } from '@prosekit/extensions/mod-click-prevention'
@@ -15,6 +14,7 @@ import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineAtomMarkNavigation } from './atom-mark-navigation.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
+import { defineCodeBlock } from './code-block.ts'
 import { defineEditorCommands } from './commands.ts'
 import { defineEscapeCollapse } from './escape-collapse.ts'
 import { defineDocFrontmatterAttr } from './frontmatter.ts'

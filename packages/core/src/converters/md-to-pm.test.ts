@@ -298,7 +298,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'codeBlock',
-          attrs: { language: 'js' },
+          attrs: { language: 'js', fenceStyle: null, fenceLength: null },
           content: [{ type: 'text', text: 'console.log(1)' }],
         },
       ],
@@ -335,7 +335,7 @@ describe('markdownToDoc', () => {
             { type: 'paragraph', content: [{ type: 'text', text: 'x' }] },
             {
               type: 'codeBlock',
-              attrs: { language: '' },
+              attrs: { language: '', fenceStyle: null, fenceLength: null },
               content: [{ type: 'text', text: 'line1\nline2\nline3' }],
             },
           ],
@@ -613,7 +613,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'codeBlock',
-          attrs: { language: '' },
+          attrs: { language: '', fenceStyle: 'indented', fenceLength: null },
           content: [{ type: 'text', text: 'indented' }],
         },
       ],
@@ -625,7 +625,25 @@ describe('markdownToDoc', () => {
       type: 'doc',
       attrs: { frontmatter: null },
       content: [
-        { type: 'codeBlock', attrs: { language: '' }, content: [{ type: 'text', text: 'tilde' }] },
+        {
+          type: 'codeBlock',
+          attrs: { language: '', fenceStyle: 'tilde', fenceLength: null },
+          content: [{ type: 'text', text: 'tilde' }],
+        },
+      ],
+    })
+  })
+
+  it('keeps a four-character fence length', () => {
+    expect(markdownToDoc('````\ncode\n````').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        {
+          type: 'codeBlock',
+          attrs: { language: '', fenceStyle: null, fenceLength: 4 },
+          content: [{ type: 'text', text: 'code' }],
+        },
       ],
     })
   })
