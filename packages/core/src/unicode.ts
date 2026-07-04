@@ -39,6 +39,7 @@ export const CHAR_PERCENT = 37 /* % */
 export const CHAR_SEMICOLON = 59 /* ; */
 export const CHAR_CIRCUMFLEX_ACCENT = 94 /* ^ */
 export const CHAR_BACKTICK = 96 /* ` */
+export const CHAR_TILDE = 126 /* ~ */
 export const CHAR_AT = 64 /* @ */
 export const CHAR_AMPERSAND = 38 /* & */
 export const CHAR_EQUAL = 61 /* = */

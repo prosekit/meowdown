@@ -193,6 +193,46 @@ describe('docToMarkdown', () => {
     expect(markdown).toBe('````\n```\nnested fence\n```\n````\n')
   })
 
+  it('emits a tilde fence from `fenceStyle`', () => {
+    const doc = n.doc(n.codeBlock({ language: '', fenceStyle: 'tilde' }, 'code'))
+    expect(docToMarkdown(doc)).toBe('~~~\ncode\n~~~\n')
+  })
+
+  it('grows a tilde fence around tilde content', () => {
+    const doc = n.doc(n.codeBlock({ language: '', fenceStyle: 'tilde' }, '~~~\nnested\n~~~'))
+    expect(docToMarkdown(doc)).toBe('~~~~\n~~~\nnested\n~~~\n~~~~\n')
+  })
+
+  it('keeps a recorded fence length', () => {
+    const doc = n.doc(n.codeBlock({ language: '', fenceLength: 5 }, 'code'))
+    expect(docToMarkdown(doc)).toBe('`````\ncode\n`````\n')
+  })
+
+  it('grows a fence beyond the recorded length when the content demands it', () => {
+    const doc = n.doc(n.codeBlock({ language: '', fenceLength: 4 }, '`````'))
+    expect(docToMarkdown(doc)).toBe('``````\n`````\n``````\n')
+  })
+
+  it('emits an indented code block from `fenceStyle`', () => {
+    const doc = n.doc(n.codeBlock({ language: '', fenceStyle: 'indented' }, 'code'))
+    expect(docToMarkdown(doc)).toBe('    code\n')
+  })
+
+  it('falls back to a fence for an indented block with a language', () => {
+    const doc = n.doc(n.codeBlock({ language: 'js', fenceStyle: 'indented' }, 'code'))
+    expect(docToMarkdown(doc)).toBe('```js\ncode\n```\n')
+  })
+
+  it('falls back to a fence for an empty indented block', () => {
+    const doc = n.doc(n.codeBlock({ language: '', fenceStyle: 'indented' }))
+    expect(docToMarkdown(doc)).toBe('```\n```\n')
+  })
+
+  it('falls back to a fence when an indented block starts with a blank line', () => {
+    const doc = n.doc(n.codeBlock({ language: '', fenceStyle: 'indented' }, '\ncode'))
+    expect(docToMarkdown(doc)).toBe('```\n\ncode\n```\n')
+  })
+
   it('keeps a horizontal rule', () => {
     const doc = n.doc(n.horizontalRule())
     const markdown = docToMarkdown(doc)
