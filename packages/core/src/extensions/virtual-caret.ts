@@ -119,6 +119,7 @@ class VirtualCaretView {
     this.layer.remove()
   }
 
+  // REVIEW: do not use `private`. Use `#`.
   private restartBlink() {
     this.blinkIndex = 1 - this.blinkIndex
     this.caret.style.animationName = BLINK_ANIMATIONS[this.blinkIndex]
