@@ -68,6 +68,10 @@ function measureCaretRect(view: EditorView): CaretRect | undefined {
   return findNativeCaretRect(view) ?? findCoordsCaretRect(view)
 }
 
+function forceReflow(element: HTMLElement): void {
+  void element.offsetWidth
+}
+
 function sameRect(left: CaretRect | undefined, right: CaretRect | undefined): boolean {
   if (left == null || right == null) return left === right
   return left.left === right.left && left.top === right.top && left.height === right.height
@@ -136,6 +140,7 @@ class VirtualCaretView {
         ? getCaretTail(state, selection.head)
         : undefined
     if (sameRect(rect, this.#lastRect) && tail === this.#lastTail) return
+    const wasHidden = this.#lastRect == null
     this.#lastRect = rect
     this.#lastTail = tail
     if (tail == null) {
@@ -148,10 +153,16 @@ class VirtualCaretView {
       return
     }
     const layerRect = this.#layer.getBoundingClientRect()
+    // A reappearing caret must not glide in from its stale position.
+    if (wasHidden) this.#caret.style.transitionProperty = 'none'
     this.#caret.style.visibility = ''
     this.#caret.style.left = `${rect.left - layerRect.left}px`
     this.#caret.style.top = `${rect.top - layerRect.top}px`
     this.#caret.style.height = `${rect.height}px`
+    if (wasHidden) {
+      forceReflow(this.#caret)
+      this.#caret.style.transitionProperty = ''
+    }
   }
 }
 

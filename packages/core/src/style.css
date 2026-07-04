@@ -28,6 +28,9 @@
     /* the self-drawn caret */
     --meowdown-caret: var(--meowdown-accent);
 
+    /* how long the caret glides when it moves (0 disables the animation) */
+    --meowdown-caret-glide: 80ms;
+
     /* Markdown syntax characters */
     --meowdown-mark: var(--meowdown-muted);
 
@@ -142,6 +145,16 @@
     pointer-events: none;
     user-select: none;
     -webkit-user-select: none;
+    transition:
+      left var(--meowdown-caret-glide) cubic-bezier(0.25, 1, 0.5, 1),
+      top var(--meowdown-caret-glide) cubic-bezier(0.25, 1, 0.5, 1),
+      height var(--meowdown-caret-glide) cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .md-virtual-caret-layer .md-virtual-caret {
+      transition: none;
+    }
   }
 
   .ProseMirror.ProseMirror-focused ~ .md-virtual-caret-layer .md-virtual-caret {
