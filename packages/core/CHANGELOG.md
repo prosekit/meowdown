@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.36.0](https://github.com/prosekit/meowdown/compare/core-v0.35.0...core-v0.36.0) (2026-07-04)
+
+
+### Features
+
+* add insertTrigger command ([#232](https://github.com/prosekit/meowdown/issues/232)) ([972b64e](https://github.com/prosekit/meowdown/commit/972b64ef253e47d0495b38a744db314df212a48d))
+
+
+### Bug Fixes
+
+* do not ring atoms inside a node-selected block ([#230](https://github.com/prosekit/meowdown/issues/230)) ([267986a](https://github.com/prosekit/meowdown/commit/267986a059ec014e7b7a8388266b28e5b8e87711))
+
 ## [0.35.0](https://github.com/prosekit/meowdown/compare/core-v0.34.0...core-v0.35.0) (2026-07-04)
 
 
