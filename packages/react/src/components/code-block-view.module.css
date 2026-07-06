@@ -14,6 +14,7 @@
   display: none;
 }
 
+/*REVIEW: do not call this class name as MathPreview. Currently we only have math using this, but in the future we might want to use mermaid too */
 .MathPreview {
   display: block;
   padding: 0.25rem 0;
