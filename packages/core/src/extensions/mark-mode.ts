@@ -48,7 +48,12 @@ function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
         return { 'data-mark-mode': getCurrentMarkMode(state) ?? initialMode }
       },
       decorations: (state) => {
-        return getCurrentMarkMode(state) === 'focus' ? computeFocusDecorations(state) : undefined
+        const mode = getCurrentMarkMode(state)
+        if (mode === 'focus') return computeFocusDecorations(state)
+        // Hide mode never reveals ordinary syntax, but a math unit hides its
+        // content too, so without a reveal it could not be edited in place.
+        if (mode === 'hide') return computeMathRevealDecorations(state)
+        return
       },
       // In show mode the empty string is falsy, so `someProp` falls through to
       // the next serializer (`defineMarkdownCopy` in the full editor) and the
@@ -112,6 +117,23 @@ function cleanCopySerializer(slice: Slice): string {
  * `#tag` carry no `mdPack`, so they never reveal.
  */
 function computeFocusDecorations(state: EditorState): DecorationSet {
+  return computeRevealDecorations(state, undefined)
+}
+
+/**
+ * In hide mode, reveal only the math unit under the caret. A math unit hides
+ * its whole source (content included), so it is the one construct that must
+ * still reveal in hide mode to stay editable; everything else follows the
+ * hide-mode contract and never reveals.
+ */
+function computeMathRevealDecorations(state: EditorState): DecorationSet {
+  return computeRevealDecorations(state, { key: 'math' })
+}
+
+function computeRevealDecorations(
+  state: EditorState,
+  packAttrs: Record<string, unknown> | undefined,
+): DecorationSet {
   const { selection } = state
   if (!selection.empty) return DecorationSet.empty
 
@@ -119,7 +141,11 @@ function computeFocusDecorations(state: EditorState): DecorationSet {
   const { parent } = $pos
   if (!parent.isTextblock || parent.type.spec.code) return DecorationSet.empty
 
-  const range = getMarkRange($pos, getMarkType(state.schema, 'mdPack' satisfies MarkName))
+  const range = getMarkRange(
+    $pos,
+    getMarkType(state.schema, 'mdPack' satisfies MarkName),
+    packAttrs,
+  )
   if (!range) return DecorationSet.empty
 
   return DecorationSet.create(state.doc, [

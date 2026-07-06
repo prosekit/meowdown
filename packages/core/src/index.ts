@@ -58,6 +58,7 @@ export {
   type ImageClickPayload,
 } from './extensions/image-click.ts'
 export { defaultResolveImageUrl, defineImage, type ImageOptions } from './extensions/image.ts'
+export { defineMath } from './extensions/math.ts'
 export type {
   MdFileAttrs,
   MdImageAttrs,
