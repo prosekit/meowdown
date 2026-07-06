@@ -1,4 +1,4 @@
-import { defineKeymap, type PlainExtension } from '@prosekit/core'
+import { defineKeymap, isApple, type PlainExtension } from '@prosekit/core'
 import { Selection, TextSelection, type Command } from '@prosekit/pm/state'
 
 function selectDocBoundary(direction: -1 | 1, extend: boolean): Command {
@@ -24,10 +24,14 @@ function selectDocBoundary(direction: -1 | 1, extend: boolean): Command {
  * 200ms of a focus event.
  */
 export function defineSelectDocBoundary(): PlainExtension {
-  return defineKeymap({
-    'Meta-ArrowUp': selectDocBoundary(-1, false),
-    'Meta-ArrowDown': selectDocBoundary(1, false),
-    'Shift-Meta-ArrowUp': selectDocBoundary(-1, true),
-    'Shift-Meta-ArrowDown': selectDocBoundary(1, true),
-  })
+  return defineKeymap(
+    isApple
+      ? {
+          'Meta-ArrowUp': selectDocBoundary(-1, false),
+          'Meta-ArrowDown': selectDocBoundary(1, false),
+          'Shift-Meta-ArrowUp': selectDocBoundary(-1, true),
+          'Shift-Meta-ArrowDown': selectDocBoundary(1, true),
+        }
+      : {},
+  )
 }
