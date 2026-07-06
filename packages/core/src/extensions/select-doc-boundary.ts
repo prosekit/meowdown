@@ -19,19 +19,15 @@ function selectDocBoundary(direction: -1 | 1, extend: boolean): Command {
  * move the caret to the document start / end; the Shift variants extend the
  * selection there). Bound explicitly instead of relying on the browser's
  * native handling: WebKit gives up the native move when the document starts
- * with a `contenteditable=false` element (a list marker or checkbox), and
- * prosemirror-view rolls a native move to the document start back within
- * 200ms of a focus event.
+ * with a `contenteditable=false` element (a list marker or checkbox).
+ *
+ * See also https://bugs.webkit.org/show_bug.cgi?id=108987
  */
 export function defineSelectDocBoundary(): PlainExtension {
-  return defineKeymap(
-    isApple
-      ? {
-          'Meta-ArrowUp': selectDocBoundary(-1, false),
-          'Meta-ArrowDown': selectDocBoundary(1, false),
-          'Shift-Meta-ArrowUp': selectDocBoundary(-1, true),
-          'Shift-Meta-ArrowDown': selectDocBoundary(1, true),
-        }
-      : {},
-  )
+  return defineKeymap({
+    'Meta-ArrowUp': selectDocBoundary(-1, false),
+    'Meta-ArrowDown': selectDocBoundary(1, false),
+    'Shift-Meta-ArrowUp': selectDocBoundary(-1, true),
+    'Shift-Meta-ArrowDown': selectDocBoundary(1, true),
+  })
 }
