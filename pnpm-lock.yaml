@@ -1820,11 +1820,6 @@ packages:
     resolution: {integrity: sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==}
     engines: {node: 18 || 20 || >=22}
 
-  baseline-browser-mapping@2.10.37:
-    resolution: {integrity: sha512-girxaJ7WZssDOFhzCGZTDKoTa1gk6A1TbflaYTpykLJ4UU9Fz9kx1aREM8JCuoVHbL8X8T/mJg7w2oYSq72Oig==}
-    engines: {node: '>=6.0.0'}
-    hasBin: true
-
   baseline-browser-mapping@2.10.42:
     resolution: {integrity: sha512-c/jurFrDLyui7o1J86yLkRu4LMsTYcBohveus7/I2Hzdn9KIP2bdJPTue/lR1KH46enoPbD77GKeSYNdyPoD3Q==}
     engines: {node: '>=6.0.0'}
@@ -1842,11 +1837,6 @@ packages:
   brace-expansion@5.0.6:
     resolution: {integrity: sha512-kLpxurY4Z4r9sgMsyG0Z9uzsBlgiU/EFKhj/h91/8yHu0edo7XuixOIH3VcJ8kkxs6/jPzoI6U9Vj3WqbMQ94g==}
     engines: {node: 18 || 20 || >=22}
-
-  browserslist@4.28.2:
-    resolution: {integrity: sha512-48xSriZYYg+8qXna9kwqjIVzuQxi+KYWp2+5nCYnYKPTr0LvD89Jqk2Or5ogxz0NUMfIjhh2lIUX/LyX9B4oIg==}
-    engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
-    hasBin: true
 
   browserslist@4.28.4:
     resolution: {integrity: sha512-MTc8i/x9jBQd1iMw2CFGS+rwMa07eYjLR0CCTLDACl9xhxy+nIs3KeML/biicXtk9JrZ6dnnTatmc7ErPXIxqw==}
@@ -2017,9 +2007,6 @@ packages:
     peerDependenciesMeta:
       oxc-resolver:
         optional: true
-
-  electron-to-chromium@1.5.372:
-    resolution: {integrity: sha512-M3yhbAlilnwqC8D21t28UCDGHyitShTmmLRU/H+b74P6Ski16Nb9HONYEaVpMj/pwC7BEo5B95FpjODLCWbtfA==}
 
   electron-to-chromium@1.5.387:
     resolution: {integrity: sha512-TaxwufTFDufvPEoXdhwVrA3UdFWBeWGkYoJ1K8ldF1xe6gKfth6iRNS5lTQ5JPNOHdGQm8PT1QYKUqFLCiUefQ==}
@@ -2811,10 +2798,6 @@ packages:
     resolution: {integrity: sha512-kKHJhxwpR/Okycz4HhQKKlhWe4ASEfPgkSWNmKFHd7+ezuQlxkA5cM3+XkBPvm1gmHen3w53qsYAv+8GwRrBlg==}
     engines: {node: '>=18'}
 
-  node-releases@2.0.47:
-    resolution: {integrity: sha512-Uzmd6LXpouKo8EUK68IjH4+E01w/hXyV3R3g/geCJo+rXLNfh1xucB+LOzYEOQPSiUK3h/xZf0cQGcSsmyL2Og==}
-    engines: {node: '>=18'}
-
   node-releases@2.0.50:
     resolution: {integrity: sha512-J6l92tKHX6w8Jy5nO1Vuc01NoIiRGi/d6qBKVxh+IQ8Cr3b6HbVNfKiF8ZpFKufTwpwxMmce2W3iQZ861ZRyTg==}
     engines: {node: '>=18'}
@@ -3193,11 +3176,6 @@ packages:
 
   semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
-    hasBin: true
-
-  semver@7.8.4:
-    resolution: {integrity: sha512-rUCObTnP32Q08R2uuIrt7r9PlEonuTmtuXYcW6s5kjdlj3xbnwe+21yXptAUYcMAABLkYYTtnmzb3w3EDZfueA==}
-    engines: {node: '>=10'}
     hasBin: true
 
   semver@7.8.5:
@@ -3755,7 +3733,7 @@ snapshots:
     dependencies:
       '@babel/compat-data': 7.29.7
       '@babel/helper-validator-option': 7.29.7
-      browserslist: 4.28.2
+      browserslist: 4.28.4
       lru-cache: 5.1.1
       semver: 6.3.1
 
@@ -4151,7 +4129,7 @@ snapshots:
   '@es-joy/jsdoccomment@0.84.0':
     dependencies:
       '@types/estree': 1.0.9
-      '@typescript-eslint/types': 8.62.0
+      '@typescript-eslint/types': 8.62.1
       comment-parser: 1.4.5
       esquery: 1.7.0
       jsdoc-type-pratt-parser: 7.1.1
@@ -5115,8 +5093,8 @@ snapshots:
 
   '@typescript-eslint/project-service@8.61.0(typescript@6.0.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.62.0(typescript@6.0.3)
-      '@typescript-eslint/types': 8.62.0
+      '@typescript-eslint/tsconfig-utils': 8.62.1(typescript@6.0.3)
+      '@typescript-eslint/types': 8.62.1
       debug: 4.4.3
       typescript: 6.0.3
     transitivePeerDependencies:
@@ -5124,8 +5102,8 @@ snapshots:
 
   '@typescript-eslint/project-service@8.62.0(typescript@6.0.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.62.0(typescript@6.0.3)
-      '@typescript-eslint/types': 8.62.0
+      '@typescript-eslint/tsconfig-utils': 8.62.1(typescript@6.0.3)
+      '@typescript-eslint/types': 8.62.1
       debug: 4.4.3
       typescript: 6.0.3
     transitivePeerDependencies:
@@ -5149,7 +5127,7 @@ snapshots:
       eslint: 10.6.0(jiti@2.7.0)
       json-stable-stringify-without-jsonify: 1.0.1
       lodash.merge: 4.6.2
-      semver: 7.8.4
+      semver: 7.8.5
       typescript: 6.0.3
     transitivePeerDependencies:
       - supports-color
@@ -5219,7 +5197,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.61.0
       debug: 4.4.3
       minimatch: 10.2.5
-      semver: 7.8.4
+      semver: 7.8.5
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@6.0.3)
       typescript: 6.0.3
@@ -5234,7 +5212,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.62.0
       debug: 4.4.3
       minimatch: 10.2.5
-      semver: 7.8.4
+      semver: 7.8.5
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@6.0.3)
       typescript: 6.0.3
@@ -5249,7 +5227,7 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.62.1
       debug: 4.4.3
       minimatch: 10.2.5
-      semver: 7.8.4
+      semver: 7.8.5
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@6.0.3)
       typescript: 6.0.3
@@ -5325,7 +5303,7 @@ snapshots:
 
   '@unocss/eslint-plugin@66.7.4(eslint@10.6.0)(typescript@6.0.3)':
     dependencies:
-      '@typescript-eslint/utils': 8.62.0(eslint@10.6.0)(typescript@6.0.3)
+      '@typescript-eslint/utils': 8.62.1(eslint@10.6.0)(typescript@6.0.3)
       '@unocss/config': 66.7.4
       '@unocss/core': 66.7.4
       '@unocss/rule-utils': 66.7.4
@@ -5489,8 +5467,6 @@ snapshots:
 
   balanced-match@4.0.4: {}
 
-  baseline-browser-mapping@2.10.37: {}
-
   baseline-browser-mapping@2.10.42: {}
 
   birecord@0.1.1: {}
@@ -5502,14 +5478,6 @@ snapshots:
   brace-expansion@5.0.6:
     dependencies:
       balanced-match: 4.0.4
-
-  browserslist@4.28.2:
-    dependencies:
-      baseline-browser-mapping: 2.10.37
-      caniuse-lite: 1.0.30001799
-      electron-to-chromium: 1.5.372
-      node-releases: 2.0.47
-      update-browserslist-db: 1.2.3(browserslist@4.28.2)
 
   browserslist@4.28.4:
     dependencies:
@@ -5565,7 +5533,7 @@ snapshots:
 
   core-js-compat@3.49.0:
     dependencies:
-      browserslist: 4.28.2
+      browserslist: 4.28.4
 
   crelt@1.0.6: {}
 
@@ -5630,8 +5598,6 @@ snapshots:
   dts-resolver@3.0.0(oxc-resolver@11.21.3):
     optionalDependencies:
       oxc-resolver: 11.21.3
-
-  electron-to-chromium@1.5.372: {}
 
   electron-to-chromium@1.5.387: {}
 
@@ -5700,7 +5666,7 @@ snapshots:
       eslint-json-compat-utils: 0.2.3(eslint@10.6.0)(jsonc-eslint-parser@3.1.0)
       jsonc-eslint-parser: 3.1.0
       package-json-validator: 1.5.2
-      semver: 7.8.4
+      semver: 7.8.5
       sort-object-keys: 2.1.0
       sort-package-json: 4.0.0
     transitivePeerDependencies:
@@ -5708,7 +5674,7 @@ snapshots:
 
   eslint-plugin-perfectionist@5.9.1(eslint@10.6.0)(typescript@6.0.3):
     dependencies:
-      '@typescript-eslint/utils': 8.62.0(eslint@10.6.0)(typescript@6.0.3)
+      '@typescript-eslint/utils': 8.62.1(eslint@10.6.0)(typescript@6.0.3)
       eslint: 10.6.0(jiti@2.7.0)
       natural-orderby: 5.0.0
     transitivePeerDependencies:
@@ -5859,7 +5825,7 @@ snapshots:
       natural-compare: 1.4.0
       nth-check: 2.1.1
       postcss-selector-parser: 7.1.4
-      semver: 7.8.4
+      semver: 7.8.5
       vue-eslint-parser: 10.4.1(eslint@10.6.0)
       xml-name-validator: 4.0.0
     optionalDependencies:
@@ -6215,7 +6181,7 @@ snapshots:
     dependencies:
       acorn: 8.17.0
       eslint-visitor-keys: 5.0.1
-      semver: 7.8.4
+      semver: 7.8.5
 
   jsonc-parser@3.3.1: {}
 
@@ -6335,7 +6301,7 @@ snapshots:
 
   make-dir@4.0.0:
     dependencies:
-      semver: 7.8.4
+      semver: 7.8.5
 
   markdown-table@3.0.4: {}
 
@@ -6708,15 +6674,13 @@ snapshots:
 
   natural-orderby@5.0.0: {}
 
-  node-releases@2.0.47: {}
-
   node-releases@2.0.50: {}
 
   npm-package-arg@13.0.2:
     dependencies:
       hosted-git-info: 9.0.3
       proc-log: 6.1.0
-      semver: 7.8.4
+      semver: 7.8.5
       validate-npm-package-name: 7.0.2
 
   nth-check@2.1.1:
@@ -6832,7 +6796,7 @@ snapshots:
   package-json-validator@1.5.2:
     dependencies:
       npm-package-arg: 13.0.2
-      semver: 7.8.4
+      semver: 7.8.5
       validate-npm-package-license: 3.0.4
       validate-npm-package-name: 7.0.2
 
@@ -7165,8 +7129,6 @@ snapshots:
 
   semver@6.3.1: {}
 
-  semver@7.8.4: {}
-
   semver@7.8.5: {}
 
   server-dom-shim@1.1.0:
@@ -7210,7 +7172,7 @@ snapshots:
       detect-newline: 4.0.1
       git-hooks-list: 4.2.1
       is-plain-obj: 4.1.0
-      semver: 7.8.4
+      semver: 7.8.5
       sort-object-keys: 2.1.0
       tinyglobby: 0.2.17
 
@@ -7314,7 +7276,7 @@ snapshots:
       picomatch: 4.0.4
       rolldown: 1.1.2
       rolldown-plugin-dts: 0.26.0(oxc-resolver@11.21.3)(rolldown@1.1.2)(typescript@6.0.3)
-      semver: 7.8.4
+      semver: 7.8.5
       tinyexec: 1.2.4
       tinyglobby: 0.2.17
       tree-kill: 1.2.2
@@ -7413,12 +7375,6 @@ snapshots:
       '@types/unist': 3.0.3
       unist-util-is: 6.0.1
       unist-util-visit-parents: 6.0.2
-
-  update-browserslist-db@1.2.3(browserslist@4.28.2):
-    dependencies:
-      browserslist: 4.28.2
-      escalade: 3.2.0
-      picocolors: 1.1.1
 
   update-browserslist-db@1.2.3(browserslist@4.28.4):
     dependencies:
@@ -7529,7 +7485,7 @@ snapshots:
       eslint-visitor-keys: 5.0.1
       espree: 11.2.0
       esquery: 1.7.0
-      semver: 7.8.4
+      semver: 7.8.5
     transitivePeerDependencies:
       - supports-color
 
