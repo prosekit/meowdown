@@ -1,6 +1,5 @@
 import '../testing/index.ts'
 
-import { isFirefox } from '@meowdown/vitest/helpers'
 import { createRef, type Ref } from 'react'
 import { describe, expect, it } from 'vitest'
 import { mouse } from 'vitest-browser-commands/playwright'
@@ -100,10 +99,7 @@ describe('BlockHandle', () => {
     await expect.element(handle).not.toBeInTheDocument()
   })
 
-  it.skipIf(
-    // TODO: Fix the test on Firefox
-    isFirefox(),
-  )('drags a block to a new position, showing the drop indicator', async () => {
+  it('drags a block to a new position, showing the drop indicator', async () => {
     const ref = createRef<EditorHandle>()
     await renderEditor({ ref })
     await hover(pmRoot.getByText('Bravo'))
