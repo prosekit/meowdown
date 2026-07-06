@@ -23,7 +23,7 @@ interface DemoCommand {
 }
 
 /** Leading Markdown block markers: heading, list, blockquote, task box. */
-const LEADING_BLOCK_MARKERS = /^\s*(?:(?:[-*+]|\d+[.)]|#{1,6}|>)\s+)*(?:\[[ xX]\]\s+)?/
+const LEADING_BLOCK_MARKERS = /^\s*(?:(?:[\-*+>]|\d+[.)]|#{1,6})\s+)*(?:\[[ x]\]\s+)?/i
 
 const DEMO_COMMANDS: DemoCommand[] = [
   {

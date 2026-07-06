@@ -148,7 +148,7 @@ const listInputRules = [
       order: num && num >= 2 && Number.isSafeInteger(num) ? num : null,
     }
   }),
-  wrappingListInputRule<MeowdownListAttrs>(/^\s?\[([\sXx]?)]\s$/, ({ match }) => {
+  wrappingListInputRule<MeowdownListAttrs>(/^\s?\[([\sX]?)\]\s$/i, ({ match }) => {
     return {
       kind: 'task',
       checked: ['x', 'X'].includes(match[1]),
