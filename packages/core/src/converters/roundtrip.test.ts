@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
+import { setupFixture } from '../testing/index.ts'
+
 import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
+
+const fixture = setupFixture({ mount: false })
+const { n } = fixture
 
 function roundtrip(markdown: string, options?: { frontmatter?: boolean }): string {
   return docToMarkdown(markdownToDoc(markdown, options), options)
@@ -280,6 +285,10 @@ describe('blockquotes', () => {
 
   it('keeps an inner blank line', () => {
     expect(roundtrip('> p1\n>\n> p2')).toBe('> p1\n>\n> p2\n')
+  })
+
+  it('keeps an inner blank-line run', () => {
+    expect(roundtrip('> p1\n>\n>\n> p2')).toBe('> p1\n>\n>\n> p2\n')
   })
 
   it('keeps an empty quote marker', () => {
@@ -749,9 +758,21 @@ describe('escapes and whitespace', () => {
     expect(roundtrip('   ')).toBe('   \n')
   })
 
-  it.fails('keeps internal blank-line runs', () => {
+  it('keeps internal blank-line runs', () => {
     const md = ['a', '', '', '', 'b'].join('\n')
     expect(roundtrip(md)).toBe(md + '\n')
+  })
+
+  it('keeps typed empty paragraphs', () => {
+    const doc = n.doc(
+      n.paragraph('Foo'),
+      n.paragraph(),
+      n.paragraph(),
+      n.paragraph(),
+      n.paragraph('Bar'),
+    )
+    const reparsed = markdownToDoc(docToMarkdown(doc))
+    expect(reparsed.toJSON()).toEqual(doc.toJSON())
   })
 
   it('keeps YAML frontmatter', () => {
@@ -777,6 +798,11 @@ describe('escapes and whitespace', () => {
 describe('mixed structures', () => {
   it('keeps a paragraph-list-paragraph sequence', () => {
     const md = ['para', '', '- list', '', 'para2'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
+
+  it('keeps a blank-line run after a list', () => {
+    const md = ['- a', '', '', 'x'].join('\n')
     expect(roundtrip(md)).toBe(md + '\n')
   })
 
@@ -830,6 +856,16 @@ describe('idempotency', () => {
 
   it('keeps a marker-gap bullet stable', () => {
     const once = roundtrip('-  x')
+    expect(roundtrip(once)).toBe(once)
+  })
+
+  it('keeps a blank-line run stable', () => {
+    const once = roundtrip(['a', '', '', '', 'b'].join('\n'))
+    expect(roundtrip(once)).toBe(once)
+  })
+
+  it('keeps a normalized leading blank line stable', () => {
+    const once = roundtrip('\n\nhello')
     expect(roundtrip(once)).toBe(once)
   })
 

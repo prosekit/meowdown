@@ -58,12 +58,13 @@ describe('checkRoundTrip', () => {
     '    indented',
     // a tilde fence keeps its fence character
     '~~~\ntilde\n~~~',
+    // extra blank lines round-trip as empty paragraphs
+    'a\n\n\nb',
   ])('reports exact for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('exact')
   })
 
   it.each([
-    'a\n\n\nb', // extra blank lines collapse to one
     '- a\n\n- b', // a loose list serializes tight
     '- [ ] Asdf\n- [ ]\n- [ ] ', // a trailing space on an empty task is normalized away
     'trailing spaces   ', // trailing whitespace is insignificant

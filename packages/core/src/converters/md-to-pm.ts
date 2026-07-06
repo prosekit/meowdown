@@ -13,6 +13,7 @@ import {
   CHAR_EQUAL,
   CHAR_HASH,
   CHAR_HYPHEN_MINUS,
+  CHAR_LINE_FEED,
   CHAR_LOWERCASE_X,
   CHAR_PLUS,
   CHAR_RIGHT_PARENTHESIS,
@@ -99,11 +100,35 @@ function collectBlocks(
 ): ProseMirrorNode[] {
   const out: ProseMirrorNode[] = []
   if (!cursor.firstChild()) return out
+  let previousTo: number | undefined
   do {
+    if (previousTo != null) appendGapParagraphs(out, nodes, text, previousTo, cursor.from)
+    previousTo = cursor.to
     out.push(...convertBlock(nodes, cursor, text))
   } while (cursor.nextSibling())
   cursor.parent()
   return out
+}
+
+/**
+ * Blank lines between two sibling blocks are content: a run of K blank lines
+ * is one block separator plus K-1 empty paragraphs. The gap slice between the
+ * siblings' ranges holds only line terminators and structural prefixes
+ * (indent, blockquote `>`), so counting newlines is enough - the gap has K+1
+ * of them (the previous block's own terminator plus one per blank line).
+ */
+function appendGapParagraphs(
+  out: ProseMirrorNode[],
+  nodes: TypedNodeBuilders,
+  text: string,
+  gapFrom: number,
+  gapTo: number,
+): void {
+  let newlineCount = 0
+  for (let i = gapFrom; i < gapTo; i++) {
+    if (text.charCodeAt(i) === CHAR_LINE_FEED) newlineCount++
+  }
+  for (let i = 2; i < newlineCount; i++) out.push(nodes.paragraph())
 }
 
 function convertBlock(
@@ -364,8 +389,11 @@ function convertBlockquote(
 ): ProseMirrorNode {
   const content: ProseMirrorNode[] = []
   if (cursor.firstChild()) {
+    let previousTo: number | undefined
     do {
       if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) continue
+      if (previousTo != null) appendGapParagraphs(content, nodes, text, previousTo, cursor.from)
+      previousTo = cursor.to
       content.push(...convertBlock(nodes, cursor, text))
     } while (cursor.nextSibling())
     cursor.parent()
