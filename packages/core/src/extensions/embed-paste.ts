@@ -14,7 +14,7 @@ export function detectEmbedUrl(text: string): string | undefined {
   return matchEmbed(trimmed) ? trimmed : undefined
 }
 
-function getPastedText(event: ClipboardEvent, slice: Slice): string {
+export function getPastedText(event: ClipboardEvent, slice: Slice): string {
   const fromClipboard = event.clipboardData?.getData('text/plain')
   if (fromClipboard) return fromClipboard
   // Firefox ignores the standard `clipboardData` init member of the ClipboardEvent

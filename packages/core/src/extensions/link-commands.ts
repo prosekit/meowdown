@@ -25,7 +25,12 @@ function destText(href: string, title: string): string {
   return href + quoted
 }
 
-function getWrapRange(state: EditorState): undefined | PositionRange {
+/**
+ * The range a new link would wrap: the current selection when it is a
+ * non-empty text selection inside a single non-code textblock, trimmed of
+ * surrounding whitespace. `undefined` when there is nothing to wrap.
+ */
+export function getWrapRange(state: EditorState): undefined | PositionRange {
   const { selection } = state
   const { $from, $to, empty } = selection
   if (empty || !$from.sameParent($to) || !isTextSelection(selection)) {
