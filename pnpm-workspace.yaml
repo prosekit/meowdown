@@ -19,6 +19,7 @@ minimumReleaseAgeExclude:
   - '@prosekit/*'
   - '@aria-ui/*'
   - eslint-plugin-unicorn@71.0.0
+  - prosemirror-flat-list@0.7.1
 
 allowBuilds:
   simple-git-hooks: false
