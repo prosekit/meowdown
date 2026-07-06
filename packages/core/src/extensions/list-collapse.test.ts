@@ -141,7 +141,7 @@ describe('deleting a selection that contains a folded bullet', () => {
         n.paragraph('folded parent'),
         n.list({ kind: 'bullet' }, n.paragraph('hidden child')),
       ),
-      n.paragraph('beta<a>'),
+      n.paragraph('beta'),
     )
 
     const doc2 = n.doc(n.paragraph())
@@ -151,6 +151,6 @@ describe('deleting a selection that contains a folded bullet', () => {
     editor.commands.selectAll()
 
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.doc.toJSON()).toEqual(doc2)
+    expect(fixture.doc.toJSON()).toEqual(doc2.toJSON())
   })
 })
