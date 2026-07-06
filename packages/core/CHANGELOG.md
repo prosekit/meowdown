@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.37.0](https://github.com/prosekit/meowdown/compare/core-v0.36.2...core-v0.37.0) (2026-07-06)
+
+
+### Features
+
+* add math (LaTeX) support ([#241](https://github.com/prosekit/meowdown/issues/241)) ([9a67daf](https://github.com/prosekit/meowdown/commit/9a67daf5a1262f96c0ba0f0631d52033e0b040c6))
+
+
+### Bug Fixes
+
+* skip collapse protection when everything is selected ([#242](https://github.com/prosekit/meowdown/issues/242)) ([e5736fc](https://github.com/prosekit/meowdown/commit/e5736fc99bab582af3eee122cef353c6247da8ef))
+
 ## [0.36.2](https://github.com/prosekit/meowdown/compare/core-v0.36.1...core-v0.36.2) (2026-07-06)
 
 
