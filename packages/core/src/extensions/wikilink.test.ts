@@ -134,6 +134,46 @@ describe.each(LABEL_MODES)('wikilink selection ring in %s mode', (mode) => {
   })
 })
 
+// A wikilink whose label wraps across lines must not grow the paragraph by a
+// phantom blank line: with an inline-block preview, the wrapped block fills
+// the full line width, and on WebKit the trailing zero-width source box
+// (`.md-atom-view-content`) then no longer fits beside it — it wraps onto an
+// empty line with the paragraph's full strut height. The preview is a plain
+// inline instead, fragmenting across lines and keeping the source box on the
+// last fragment's line.
+describe.each(ALL_MODES)('wrapped wikilink layout in %s mode', (mode) => {
+  const setup = setupMode(mode)
+  const longTarget = Array.from({ length: 60 }, (_, i) => `word${i}`).join(' ')
+
+  it('adds no phantom line below a wrapped wikilink', async () => {
+    using fixture = setup(`before [[${longTarget}]]<a>`)
+    await expect.element(label).toBeVisible()
+
+    const labelElement = fixture.dom.querySelector('.md-wikilink-view-label')!
+    const fragments = Array.from(labelElement.getClientRects())
+    // The label actually wrapped; otherwise the assertion below is vacuous.
+    expect(fragments.length).toBeGreaterThan(1)
+
+    // The paragraph ends flush under the label's last line fragment; a phantom
+    // line would push its bottom a full line-height lower.
+    const lastFragment = fragments[fragments.length - 1]
+    const paragraphBottom = fixture.dom.querySelector('p')!.getBoundingClientRect().bottom
+    expect(paragraphBottom - lastFragment.bottom).toBeLessThan(lastFragment.height / 2)
+  })
+
+  // The phantom line only reproduces on iOS WebKit — desktop engines (including
+  // Playwright's WebKit) fit the zero-width source box beside a full-width
+  // inline-block, so the geometry assertion above cannot catch a regression in
+  // CI. Pin the inline display that fixes it directly.
+  it('renders the preview as a plain inline', async () => {
+    using fixture = setup(`before [[${longTarget}]]<a>`)
+    await expect.element(label).toBeVisible()
+
+    const preview = fixture.dom.querySelector('.md-wikilink-view-preview')!
+    expect(getComputedStyle(preview).display).toBe('inline')
+  })
+})
+
 // Vertical caret motion must walk through a paragraph containing a wikilink,
 describe('wikilink vertical caret navigation', () => {
   async function run(mode: MarkMode): Promise<string> {
