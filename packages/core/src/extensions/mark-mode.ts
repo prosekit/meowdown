@@ -1,5 +1,5 @@
 import { defineCommands, definePlugin, getMarkRange, getMarkType, union } from '@prosekit/core'
-import type { Mark, Slice } from '@prosekit/pm/model'
+import type { Slice } from '@prosekit/pm/model'
 import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
