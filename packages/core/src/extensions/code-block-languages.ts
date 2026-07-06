@@ -24,6 +24,11 @@ const excludeLanguages = new Set([
   'Mathematica',
 ])
 
+const extraLanguages = [
+  { label: 'Plain text', value: '' },
+  { label: 'Math', value: 'math' },
+]
+
 /**
  * A list of languages for code block syntax-highlight.
  */
@@ -31,5 +36,5 @@ export const codeBlockLanguages: ReadonlyArray<{ label: string; value: string }>
   .map((language) => language.name)
   .filter((name) => !excludeLanguages.has(name))
   .map((name) => ({ label: name, value: name.toLowerCase() }))
-  .concat({ label: 'Plain text', value: '' })
+  .concat(extraLanguages)
   .sort((a, b) => a.label.localeCompare(b.label))
