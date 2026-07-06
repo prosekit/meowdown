@@ -2,6 +2,7 @@ export const MARK_NAMES = [
   'mdWikilink',
   'mdImage',
   'mdFile',
+  'mdMath',
   'mdMark',
   'mdEm',
   'mdStrong',

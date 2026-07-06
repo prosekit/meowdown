@@ -895,6 +895,10 @@ describe('hide mode', () => {
     expectClipboard('hide', 'see [[note]] end', 'see [[note]] end')
   })
 
+  it('keeps the whole $math$ source so a copied formula stays markdown', () => {
+    expectClipboard('hide', 'see $E=mc^2$ end', 'see $E=mc^2$ end')
+  })
+
   it('keeps #tag verbatim in the copied text', () => {
     expectClipboard('hide', 'Hello #meow end', 'Hello #meow end')
   })

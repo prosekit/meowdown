@@ -76,6 +76,18 @@ describe('inline', () => {
     expect(roundtrip('- a ==hi== b')).toBe('- a ==hi== b\n')
   })
 
+  it('keeps inline math', () => {
+    expect(roundtrip('$E=mc^2$')).toBe('$E=mc^2$\n')
+  })
+
+  it('keeps double-dollar inline math', () => {
+    expect(roundtrip('a $$x+y$$ b')).toBe('a $$x+y$$ b\n')
+  })
+
+  it('keeps currency dollars', () => {
+    expect(roundtrip('$20,000 and $30,000')).toBe('$20,000 and $30,000\n')
+  })
+
   it('keeps inline code', () => {
     expect(roundtrip('`inline`')).toBe('`inline`\n')
   })

@@ -25,6 +25,11 @@ const CLIPBOARD_STRIP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([
   'mdLinkTitle',
 ])
 
+// Marks whose text survives a clean copy even when a strip mark also covers
+// it. A math dollar carries `mdMark` for hiding, but stripping it would paste
+// bare TeX; `$E=mc^2$` should copy whole, like an image source.
+const CLIPBOARD_KEEP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>(['mdMath'])
+
 const markModeKey = new PluginKey<MarkMode>('mark-mode')
 
 function getCurrentMarkMode(state: EditorState): MarkMode | undefined {
@@ -82,9 +87,9 @@ function cleanCopySerializer(slice: Slice): string {
     const parts: string[] = []
     blockNode.descendants((textNode) => {
       if (!textNode.isText || !textNode.text) return true
-      const stripped = textNode.marks.some((m: Mark) =>
-        CLIPBOARD_STRIP_MARK_NAMES.has(m.type.name as MarkName),
-      )
+      const stripped =
+        textNode.marks.some((m: Mark) => CLIPBOARD_STRIP_MARK_NAMES.has(m.type.name as MarkName)) &&
+        !textNode.marks.some((m: Mark) => CLIPBOARD_KEEP_MARK_NAMES.has(m.type.name as MarkName))
       if (!stripped) parts.push(textNode.text)
       return false
     })

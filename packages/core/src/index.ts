@@ -62,6 +62,7 @@ export type {
   MdFileAttrs,
   MdImageAttrs,
   MdLinkTextAttrs,
+  MdMathAttrs,
   MdWikilinkAttrs,
 } from './extensions/inline-marks.ts'
 export {

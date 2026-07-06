@@ -184,8 +184,35 @@ function defineMdFile() {
   })
 }
 
+/**
+ * Attributes of the `mdMath` mark: a whole `$formula$` / `$$formula$$` inline
+ * math expression, rendered by `MathMarkView`.
+ */
+export interface MdMathAttrs {
+  /** The TeX source between the dollar delimiters. */
+  formula: string
+}
+
+/** Covers the whole `$formula$` source, dollars included. */
+function defineMdMath() {
+  return defineMarkSpec<'mdMath', MdMathAttrs>({
+    name: 'mdMath' satisfies MarkName,
+    inclusive: false,
+    attrs: { formula: { default: '' } },
+    toDOM: () => ['span', { class: 'md-math' }, 0],
+    parseDOM: [{ tag: 'span.md-math' }],
+  })
+}
+
 /** mdPack keys for units that store no extra data; the syntax marks carry it. */
-export type MdPackSimpleKey = 'bold' | 'italic' | 'code' | 'strike' | 'highlight' | 'autolink'
+export type MdPackSimpleKey =
+  | 'bold'
+  | 'italic'
+  | 'code'
+  | 'strike'
+  | 'highlight'
+  | 'autolink'
+  | 'math'
 
 /**
  * Content-derived identity of one inline syntax unit. Adjacent units of the
@@ -249,6 +276,7 @@ export function defineInlineMarks() {
     defineMdWikilink(),
     defineMdImage(),
     defineMdFile(),
+    defineMdMath(),
     defineMdPack(),
   )
 }

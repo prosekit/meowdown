@@ -5,7 +5,13 @@ import type { InlineElement } from '../lezer/inline.ts'
 import { parseInline } from '../lezer/inline.ts'
 import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 
-import type { MdFileAttrs, MdLinkTextAttrs, MdPackAttrs, MdPackSimpleKey } from './inline-marks.ts'
+import type {
+  MdFileAttrs,
+  MdLinkTextAttrs,
+  MdMathAttrs,
+  MdPackAttrs,
+  MdPackSimpleKey,
+} from './inline-marks.ts'
 import { parseMagicComment, type MagicComment } from './magic-comment.ts'
 import type { MarkChunk } from './mark-chunk.ts'
 import type { MarkName } from './mark-names.ts'
@@ -139,6 +145,8 @@ function walk(
       continue
     } else if (type === LEZER_NODE_IDS.Wikilink) {
       walkWikilink(node, parentMarks, text, marks, out)
+    } else if (type === LEZER_NODE_IDS.InlineMath) {
+      walkMath(node, parentMarks, text, marks, out)
     } else if (type === LEZER_NODE_IDS.URL) {
       // A standalone `URL` node is a GFM autolink (the address part of a real
       // `[text](url)` is handled inside `walkLink`, not here). Linkify the
@@ -373,6 +381,37 @@ function walkImage(
     ...parentMarks,
     marks.mdImage.create({ src, alt, title, width, height }),
   ])
+}
+
+/**
+ * Special walker for inline math `$formula$`/`$$formula$$`.
+ *
+ * The whole run carries `mdPack({key:'math'})` (so focus mode reveals it) and
+ * `mdMath({formula})` (so `MathMarkView` renders it); the dollar runs
+ * additionally carry `mdMark`, the shared syntax-character mark, so the
+ * existing hide/reveal CSS applies to them.
+ */
+function walkMath(
+  node: InlineElement,
+  parentMarks: readonly Mark[],
+  text: string,
+  marks: TypedMarkBuilders,
+  out: MarkChunk[],
+): void {
+  const markNodes = node.children.filter((child) => child.type === LEZER_NODE_IDS.InlineMathMark)
+  if (markNodes.length < 2) {
+    emit(out, node.from, node.to, parentMarks)
+    return
+  }
+  const formula = text.slice(markNodes[0].to, markNodes[1].from)
+  const base = [
+    ...parentMarks,
+    marks.mdPack.create({ key: 'math' } satisfies MdPackAttrs),
+    marks.mdMath.create({ formula } satisfies MdMathAttrs),
+  ]
+  emit(out, node.from, markNodes[0].to, [...base, marks.mdMark.create()])
+  emit(out, markNodes[0].to, markNodes[1].from, base)
+  emit(out, markNodes[1].from, node.to, [...base, marks.mdMark.create()])
 }
 
 /**
