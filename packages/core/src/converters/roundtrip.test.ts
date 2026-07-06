@@ -76,6 +76,18 @@ describe('inline', () => {
     expect(roundtrip('- a ==hi== b')).toBe('- a ==hi== b\n')
   })
 
+  it('keeps inline math', () => {
+    expect(roundtrip('$E=mc^2$')).toBe('$E=mc^2$\n')
+  })
+
+  it('keeps double-dollar inline math', () => {
+    expect(roundtrip('a $$x+y$$ b')).toBe('a $$x+y$$ b\n')
+  })
+
+  it('keeps currency dollars', () => {
+    expect(roundtrip('$20,000 and $30,000')).toBe('$20,000 and $30,000\n')
+  })
+
   it('keeps inline code', () => {
     expect(roundtrip('`inline`')).toBe('`inline`\n')
   })
@@ -623,6 +635,44 @@ describe('code blocks', () => {
 
   it('normalizes a longer closing fence to the opening length', () => {
     expect(roundtrip('~~~\ncode\n~~~~~')).toBe('~~~\ncode\n~~~\n')
+  })
+
+  it('keeps a dollar math block', () => {
+    expect(roundtrip('$$\nE=mc^2\n$$')).toBe('$$\nE=mc^2\n$$\n')
+  })
+
+  it('keeps a multi-line dollar math block', () => {
+    expect(roundtrip('$$\na\nb\n$$')).toBe('$$\na\nb\n$$\n')
+  })
+
+  it('keeps an empty dollar math block', () => {
+    expect(roundtrip('$$\n$$')).toBe('$$\n$$\n')
+  })
+
+  it('keeps a dollar math block containing single dollars', () => {
+    expect(roundtrip('$$\na $ b $x$ c\n$$')).toBe('$$\na $ b $x$ c\n$$\n')
+  })
+
+  it('keeps an unclosed dollar math block to the end of input', () => {
+    expect(roundtrip('$$\nE=mc^2')).toBe('$$\nE=mc^2\n$$\n')
+  })
+
+  it('keeps a dollar math block inside a blockquote', () => {
+    expect(roundtrip('> $$\n> E=mc^2\n> $$')).toBe('> $$\n> E=mc^2\n> $$\n')
+  })
+
+  it('keeps a dollar math block starting a list item', () => {
+    expect(roundtrip('- $$\n  E=mc^2\n  $$')).toBe('- $$\n  E=mc^2\n  $$\n')
+  })
+
+  it('keeps a dollar math block interrupting a paragraph, normalizing the separator', () => {
+    // `$$` interrupts the paragraph (no blank line needed), and the
+    // serializer emits the canonical blank separator between blocks.
+    expect(roundtrip('para\n$$\nx\n$$')).toBe('para\n\n$$\nx\n$$\n')
+  })
+
+  it('keeps a math fence', () => {
+    expect(roundtrip('```math\nE=mc^2\n```')).toBe('```math\nE=mc^2\n```\n')
   })
 
   it('keeps an indented code block', () => {

@@ -24,6 +24,7 @@ const LABELS = [
   'Task list',
   'Checkbox list',
   'Code block',
+  'Math',
   'Table',
   'Now',
 ]
@@ -36,7 +37,7 @@ describe('SlashMenu', () => {
     await userEvent.keyboard('/')
     await expect.element(menu).toBeVisible()
     for (const label of LABELS) {
-      await expect.element(menu.getByText(label)).toBeVisible()
+      await expect.element(menu.getByText(label, { exact: true })).toBeVisible()
     }
   })
 
@@ -78,6 +79,16 @@ describe('SlashMenu', () => {
     await menu.getByText('Checkbox list', { exact: true }).click()
 
     expect(ref.current?.getMarkdown()).toContain('- [ ] Buy milk')
+  })
+
+  it('inserts a math code block', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} />)
+    await pmRoot.click()
+    await userEvent.keyboard('/math')
+    await menu.getByText('Math', { exact: true }).click()
+
+    expect(ref.current?.getMarkdown()).toBe('```math\n```\n')
   })
 
   it('inserts the current time in 12-hour format by default', async () => {
@@ -239,7 +250,7 @@ describe('SlashMenu', () => {
     await userEvent.keyboard('/')
     await expect.element(menu).toBeVisible()
     await expect.element(menu.getByText('Now')).toBeVisible()
-    for (const label of ['Heading 1', 'Blockquote', 'Bullet list', 'Code block', 'Table']) {
+    for (const label of ['Heading 1', 'Blockquote', 'Bullet list', 'Code block', 'Math', 'Table']) {
       await expect.element(menu.getByText(label)).not.toBeInTheDocument()
     }
   })

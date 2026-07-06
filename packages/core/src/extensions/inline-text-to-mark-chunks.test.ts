@@ -217,6 +217,70 @@ describe('highlight', () => {
   })
 })
 
+describe('math', () => {
+  it('math', () => {
+    expect(parse('a $x$ b')).toMatchInlineSnapshot(`
+      "
+      [0, 2]
+      [2, 3] mdPack(key=math) + mdMath(formula=x) + mdMark
+      [3, 4] mdPack(key=math) + mdMath(formula=x)
+      [4, 5] mdPack(key=math) + mdMath(formula=x) + mdMark
+      [5, 7]
+      "
+    `)
+  })
+
+  it('double dollar', () => {
+    expect(parse('$$x+y$$')).toMatchInlineSnapshot(`
+      "
+      [0, 2] mdPack(key=math) + mdMath(formula=x+y) + mdMark
+      [2, 5] mdPack(key=math) + mdMath(formula=x+y)
+      [5, 7] mdPack(key=math) + mdMath(formula=x+y) + mdMark
+      "
+    `)
+  })
+
+  it('formula with backslashes', () => {
+    expect(parse(String.raw`$\frac{1}{2}$`)).toMatchInlineSnapshot(`
+      "
+      [0, 1]   mdPack(key=math) + mdMath(formula=\\frac{1}{2}) + mdMark
+      [1, 12]  mdPack(key=math) + mdMath(formula=\\frac{1}{2})
+      [12, 13] mdPack(key=math) + mdMath(formula=\\frac{1}{2}) + mdMark
+      "
+    `)
+  })
+
+  it('escaped dollar inside the formula', () => {
+    expect(parse(String.raw`$a \$ b$`)).toMatchInlineSnapshot(`
+      "
+      [0, 1] mdPack(key=math) + mdMath(formula=a \\$ b) + mdMark
+      [1, 7] mdPack(key=math) + mdMath(formula=a \\$ b)
+      [7, 8] mdPack(key=math) + mdMath(formula=a \\$ b) + mdMark
+      "
+    `)
+  })
+
+  it('inside bold', () => {
+    expect(parse('**$x$**')).toMatchInlineSnapshot(`
+      "
+      [0, 2] mdPack(key=bold) + mdStrong + mdMark
+      [2, 3] mdPack(key=bold) + mdStrong + mdPack(key=math) + mdMath(formula=x) + mdMark
+      [3, 4] mdPack(key=bold) + mdStrong + mdPack(key=math) + mdMath(formula=x)
+      [4, 5] mdPack(key=bold) + mdStrong + mdPack(key=math) + mdMath(formula=x) + mdMark
+      [5, 7] mdPack(key=bold) + mdStrong + mdMark
+      "
+    `)
+  })
+
+  it('currency stays plain text', () => {
+    expect(parse('$20,000 and $30,000')).toMatchInlineSnapshot(`
+      "
+      [0, 19]
+      "
+    `)
+  })
+})
+
 describe('link', () => {
   it('link', () => {
     expect(parse('[text](url)')).toMatchInlineSnapshot(`

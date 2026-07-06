@@ -58,6 +58,10 @@ describe('checkRoundTrip', () => {
     '    indented',
     // a tilde fence keeps its fence character
     '~~~\ntilde\n~~~',
+    // a dollar math block keeps its dollar fences
+    '$$\nE=mc^2\n$$',
+    // inline math is plain text to the converter
+    'a $x$ b $$y$$ c',
     // extra blank lines round-trip as empty paragraphs
     'a\n\n\nb',
   ])('reports exact for %j', (markdown) => {

@@ -233,6 +233,26 @@ describe('docToMarkdown', () => {
     expect(docToMarkdown(doc)).toBe('    code\n')
   })
 
+  it('emits a dollar fence from `fenceStyle`', () => {
+    const doc = n.doc(n.codeBlock({ language: 'math', fenceStyle: 'dollar' }, 'E=mc^2'))
+    expect(docToMarkdown(doc)).toBe('$$\nE=mc^2\n$$\n')
+  })
+
+  it('emits an empty dollar fence', () => {
+    const doc = n.doc(n.codeBlock({ language: 'math', fenceStyle: 'dollar' }))
+    expect(docToMarkdown(doc)).toBe('$$\n$$\n')
+  })
+
+  it('falls back to a fence for a dollar block whose language changed', () => {
+    const doc = n.doc(n.codeBlock({ language: 'js', fenceStyle: 'dollar' }, 'code'))
+    expect(docToMarkdown(doc)).toBe('```js\ncode\n```\n')
+  })
+
+  it('falls back to a math fence when the content contains a $$ line', () => {
+    const doc = n.doc(n.codeBlock({ language: 'math', fenceStyle: 'dollar' }, 'a\n$$\nb'))
+    expect(docToMarkdown(doc)).toBe('```math\na\n$$\nb\n```\n')
+  })
+
   it('falls back to a fence for an indented block with a language', () => {
     const doc = n.doc(n.codeBlock({ language: 'js', fenceStyle: 'indented' }, 'code'))
     expect(docToMarkdown(doc)).toBe('```js\ncode\n```\n')

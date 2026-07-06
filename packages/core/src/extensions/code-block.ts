@@ -8,13 +8,14 @@ import { defineTextBlockInputRule } from '@prosekit/extensions/input-rule'
 
 import type { NodeName } from './node-names.ts'
 
-export type CodeBlockFenceStyle = 'tilde' | 'indented'
+export type CodeBlockFenceStyle = 'tilde' | 'indented' | 'dollar'
 
 export interface MeowdownCodeBlockAttrs extends CodeBlockAttrs {
   /**
-   * How the code block was written in the source: a tilde fence (`~~~`) or an
-   * indented block (four leading spaces). `null` (the default) is a backtick
-   * fence, so a block created in the editor serializes to the canonical form.
+   * How the code block was written in the source: a tilde fence (`~~~`), an
+   * indented block (four leading spaces), or a `$$` math fence. `null` (the
+   * default) is a backtick fence, so a block created in the editor serializes
+   * to the canonical form.
    */
   fenceStyle?: CodeBlockFenceStyle | null
 
@@ -40,7 +41,7 @@ function defineFenceStyleAttr(): FenceStyleExtension {
     toDOM: (value) => (value != null ? ['data-fence-style', value] : null),
     parseDOM: (node) => {
       const raw = node.getAttribute('data-fence-style')
-      return raw === 'tilde' || raw === 'indented' ? raw : null
+      return raw === 'tilde' || raw === 'indented' || raw === 'dollar' ? raw : null
     },
   })
 }
@@ -86,6 +87,14 @@ function defineTildeFenceEnterRule(): PlainExtension {
   })
 }
 
+function defineDollarFenceEnterRule(): PlainExtension {
+  return defineTextBlockEnterRule({
+    regex: /^\$\$$/,
+    type: 'codeBlock' satisfies NodeName,
+    attrs: (): MeowdownCodeBlockAttrs => ({ language: 'math', fenceStyle: 'dollar' }),
+  })
+}
+
 export function defineCodeBlock() {
   return union(
     defineBaseCodeBlock(),
@@ -93,5 +102,6 @@ export function defineCodeBlock() {
     defineFenceLengthAttr(),
     defineTildeFenceInputRule(),
     defineTildeFenceEnterRule(),
+    defineDollarFenceEnterRule(),
   )
 }

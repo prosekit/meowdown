@@ -680,7 +680,11 @@
     }
   }
 
-  .ProseMirror[data-mark-mode='focus'] {
+  /* Hide mode is included because math is its one revealable unit: the
+   * decoration logic only ever emits `.show` inside a math pack there, so
+   * ordinary syntax still never reveals in hide mode. */
+  .ProseMirror[data-mark-mode='focus'],
+  .ProseMirror[data-mark-mode='hide'] {
     .md-mark,
     .md-link-uri,
     .md-link-title {
@@ -722,6 +726,40 @@
 
     .md-atom-view-content {
       display: none;
+    }
+  }
+
+  /* inline math */
+  .ProseMirror {
+    .md-math-view {
+      display: contents;
+    }
+
+    .md-math-view-preview {
+      display: none;
+
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  }
+
+  /* A math unit not under the caret collapses its whole source (font-size: 0
+   * keeps the boxes, same as .md-mark) and shows the KaTeX preview instead.
+   * The `.show` reveal decoration (caret inside the unit) flips it back:
+   * source visible, preview gone. Show mode keeps the source and never
+   * renders the preview. */
+  .ProseMirror[data-mark-mode='hide'],
+  .ProseMirror[data-mark-mode='focus'] {
+    .md-math-view:not(:has(.show)) {
+      .md-math-view-content {
+        font-size: 0;
+        letter-spacing: 0;
+        opacity: 0;
+      }
+
+      .md-math-view-preview {
+        display: inline-block;
+      }
     }
   }
 

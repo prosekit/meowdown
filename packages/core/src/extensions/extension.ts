@@ -29,6 +29,7 @@ import { defineInlineToggle } from './inline-toggle-commands.ts'
 import { defineLinkCommands } from './link-commands.ts'
 import { defineMeowdownList } from './list.ts'
 import { defineMarkMode, type MarkMode } from './mark-mode.ts'
+import { defineMath } from './math.ts'
 import { defineMoveBlock } from './move-block.ts'
 import { defineMeowdownParagraph } from './paragraph.ts'
 import { definePendingReplacement } from './pending-replacement.ts'
@@ -64,6 +65,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineInlineToggle(),
     defineLinkCommands(),
     defineWikilink(),
+    defineMath(),
     defineMarkMode(options.markMode ?? 'focus'),
     defineVirtualCaret(),
     defineHiddenRunCaret(),

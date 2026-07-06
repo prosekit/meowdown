@@ -52,6 +52,37 @@ describe('inlineMarkPlugin', () => {
     expect(marksAt(fixture.doc, pos - 1)).toEqual(['mdHighlight', 'mdMark', 'mdPack'])
   })
 
+  it('applies mdMath across the whole $x$', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('pre $x+y$ post'))
+    fixture.set(doc)
+
+    const pos = findText(fixture.doc, 'x+y')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdMath', 'mdPack'])
+    // The single-char `$` run never has an interior position, so read the
+    // marks off its text node: the pack, mdMath + mdMark.
+    const dollarNode = fixture.doc.nodeAt(pos - 1)
+    expect(dollarNode?.marks.map((mark) => mark.type.name).sort()).toEqual([
+      'mdMark',
+      'mdMath',
+      'mdPack',
+    ])
+  })
+
+  it('removes mdMath when a dollar disappears', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const doc = n.doc(n.paragraph('pre $x$ post'))
+    fixture.set(doc)
+
+    const dollar = findText(fixture.doc, '$')
+    expect(dollar).toBeGreaterThan(0)
+    fixture.view.dispatch(fixture.state.tr.delete(dollar, dollar + 1))
+    const pos = findText(fixture.doc, 'x')
+    expect(marksAt(fixture.doc, pos + 1)).toEqual([])
+  })
+
   it('keeps nested mdStrong inside ==**bold**==', () => {
     using fixture = setupFixture()
     const { n } = fixture

@@ -127,13 +127,40 @@ function canonicalize(root: Element): string {
     if (el.tagName === 'BR' && el.classList.contains('ProseMirror-trailingBreak')) return ''
     const attrs = Array.from(el.attributes)
       .filter((attr) => !SKIP.has(attr.name) && !(attr.name === 'class' && attr.value === ''))
-      .map((attr) => `${attr.name}=${JSON.stringify(attr.value)}`)
+      // A style attribute set from an HTML string keeps its original spacing,
+      // while one round-tripped through the DOM is reformatted; KaTeX output
+      // hits both paths, so compare styles whitespace-free.
+      .map((attr) => {
+        const value = attr.name === 'style' ? attr.value.replaceAll(/\s+/g, '') : attr.value
+        return `${attr.name}=${JSON.stringify(value)}`
+      })
       .sort()
     const children = Array.from(el.childNodes).map(walk).join('')
     return `<${el.tagName.toLowerCase()} ${attrs.join(' ')}>${children}</${el.tagName.toLowerCase()}>`
   }
   return Array.from(root.childNodes).map(walk).join('')
 }
+
+describe('MarkdownView math', () => {
+  it('renders inline math as KaTeX', async () => {
+    await renderView('a $E=mc^2$ b')
+    await expect.element(view.getByTestId('math-preview').locate('.katex')).toBeInTheDocument()
+  })
+
+  it('renders a dollar math block as a display formula', async () => {
+    await renderView('$$\nE=mc^2\n$$')
+    await expect
+      .element(view.getByTestId('code-block-math-preview').locate('.katex'))
+      .toBeInTheDocument()
+  })
+
+  it('renders a math fence as a display formula', async () => {
+    await renderView('```math\nE=mc^2\n```')
+    await expect
+      .element(view.getByTestId('code-block-math-preview').locate('.katex'))
+      .toBeInTheDocument()
+  })
+})
 
 describe('MarkdownView parity with the editor', () => {
   const editorHost = page.getByTestId('parity-editor')
@@ -161,6 +188,27 @@ describe('MarkdownView parity with the editor', () => {
     )
     await expect.element(editorHost.locate(richSelector).first()).toBeInTheDocument()
     await expect.element(staticHost.locate(richSelector).first()).toBeInTheDocument()
+
+    const editorRoot = editorHost.locate('.ProseMirror').element()
+    const staticRoot = staticHost.locate('.ProseMirror').element()
+    expect(canonicalize(staticRoot)).toBe(canonicalize(editorRoot))
+  })
+
+  it('matches the editor for inline math', async () => {
+    const markdown = 'a $E=mc^2$ b'
+    await render(
+      <div data-testid="parity-editor">
+        <ProseKitEditor initialMarkdown={markdown} markMode="hide" readOnly />
+      </div>,
+    )
+    await render(
+      <div data-testid="parity-static">
+        <MarkdownView markdown={markdown} />
+      </div>,
+    )
+    // KaTeX renders asynchronously in both hosts; wait for each before diffing.
+    await expect.element(editorHost.locate('.katex').first()).toBeInTheDocument()
+    await expect.element(staticHost.locate('.katex').first()).toBeInTheDocument()
 
     const editorRoot = editorHost.locate('.ProseMirror').element()
     const staticRoot = staticHost.locate('.ProseMirror').element()

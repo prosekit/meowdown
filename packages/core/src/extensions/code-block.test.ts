@@ -56,3 +56,42 @@ describe('tilde fence rules', () => {
     expect(fixture.doc.eq(expected)).toBe(true)
   })
 })
+
+describe('dollar fence rules', () => {
+  it('keeps `fenceStyle: dollar` through a DOM round-trip', () => {
+    using fixture = setupFixture()
+    const { schema, n } = fixture
+    const doc = n.doc(n.codeBlock({ language: 'math', fenceStyle: 'dollar' }, 'E=mc^2'))
+
+    const dom = DOMSerializer.fromSchema(schema).serializeFragment(doc.content)
+    const container = document.createElement('div')
+    container.appendChild(dom)
+
+    const parsed = DOMParser.fromSchema(schema).parse(container)
+    expect(parsed.child(0).attrs).toMatchObject({
+      language: 'math',
+      fenceStyle: 'dollar',
+      fenceLength: null,
+    })
+  })
+
+  it('creates a math block from `$$` and Enter', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    fixture.view.focus()
+    await userEvent.keyboard('$$')
+    await userEvent.keyboard('{Enter}')
+    const expected = n.doc(n.codeBlock({ language: 'math', fenceStyle: 'dollar' }))
+    expect(fixture.doc.eq(expected)).toBe(true)
+  })
+
+  it('does not create a math block from `$$` inside other text', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('price $$<a>')))
+    fixture.view.focus()
+    await userEvent.keyboard('{Enter}')
+    expect(fixture.doc.child(0).type.name).toBe('paragraph')
+  })
+})

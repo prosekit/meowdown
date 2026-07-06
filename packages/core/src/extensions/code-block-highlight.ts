@@ -17,11 +17,19 @@ const supportCache = new Map<string, LanguageSupport | null>()
 // cached support, for the editor's decoration path.
 const parserCache = new Map<string, HighlightParser>()
 
+// `math` is not a @codemirror/language-data name: alias it to LaTeX (the
+// legacy stex mode) so the TeX source inside a math block gets highlighted.
+const LANGUAGE_ALIASES: Record<string, string> = { math: 'latex' }
+
 async function loadLanguageSupport(language: string): Promise<LanguageSupport | null> {
   const cached = supportCache.get(language)
   if (cached !== undefined) return cached
 
-  const description = LanguageDescription.matchLanguageName(languages, language, true)
+  const description = LanguageDescription.matchLanguageName(
+    languages,
+    LANGUAGE_ALIASES[language] ?? language,
+    true,
+  )
   if (!description) {
     supportCache.set(language, null)
     return null

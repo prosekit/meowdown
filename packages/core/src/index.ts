@@ -1,5 +1,9 @@
 export { Priority, withPriority } from '@prosekit/core'
-export type { CodeBlockAttrs } from '@prosekit/extensions/code-block'
+export {
+  defineCodeBlockPreviewPlugin,
+  isCodeBlockPreviewHiddenDecoration,
+  type CodeBlockAttrs,
+} from '@prosekit/extensions/code-block'
 export { definePlaceholder, type PlaceholderOptions } from '@prosekit/extensions/placeholder'
 export { defineReadonly } from '@prosekit/extensions/readonly'
 export {
@@ -15,7 +19,7 @@ export {
   getCodeTokens,
   type CodeToken,
 } from './extensions/code-block-highlight.ts'
-export { codeBlockLanguages } from './extensions/code-block-languages.ts'
+export { codeBlockLanguages, type LanguageItem } from './extensions/code-block-languages.ts'
 export type { CodeBlockFenceStyle, MeowdownCodeBlockAttrs } from './extensions/code-block.ts'
 export { defineEmbedPaste } from './extensions/embed-paste.ts'
 export { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './extensions/embed/index.ts'
@@ -58,10 +62,13 @@ export {
   type ImageClickPayload,
 } from './extensions/image-click.ts'
 export { defaultResolveImageUrl, defineImage, type ImageOptions } from './extensions/image.ts'
+export { defineMath } from './extensions/math.ts'
+export { loadKaTeX, renderMathInto, type KaTeXRender } from './utils/katex.ts'
 export type {
   MdFileAttrs,
   MdImageAttrs,
   MdLinkTextAttrs,
+  MdMathAttrs,
   MdWikilinkAttrs,
 } from './extensions/inline-marks.ts'
 export {

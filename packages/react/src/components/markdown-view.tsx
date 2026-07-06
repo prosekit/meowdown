@@ -16,6 +16,7 @@ import {
   type MarkName,
   type MdImageAttrs,
   type MdLinkTextAttrs,
+  type MdMathAttrs,
   type MdWikilinkAttrs,
   type NodeName,
   type WikilinkClickHandler,
@@ -33,7 +34,11 @@ import {
   type ReactNode,
 } from 'react'
 
+import { useKaTeX } from '../hooks/use-katex.ts'
+
+import styles from './code-block-view.module.css'
 import { outputSpecToReact } from './dom-output-spec.tsx'
+import { MathRender } from './math-render.tsx'
 
 export interface MarkdownViewProps {
   /** The Markdown to render. Live: changing it re-renders the content. */
@@ -217,6 +222,43 @@ function CodeBlock({ code, language }: { code: string; language: string }): Reac
   )
 }
 
+/**
+ * Mirrors the editor's `MathMarkView` DOM: a KaTeX preview next to the source
+ * text, flipped by the same mode CSS (the read-only view has no caret, so the
+ * preview always shows in hide/focus modes).
+ */
+function MathView(props: { formula: string; children: ReactNode }): ReactElement {
+  const { formula, children } = props
+  const katex = useKaTeX(true)
+  return (
+    <span className="md-math-view">
+      <MathRender
+        katex={katex}
+        formula={formula}
+        displayMode={false}
+        className="md-math-view-preview"
+        data-testid="math-preview"
+      />
+      <span className="md-math-view-content">{children}</span>
+    </span>
+  )
+}
+
+/** A `math` code block: the rendered formula alone, the source while KaTeX loads. */
+function MathCodeBlock({ code }: { code: string }): ReactElement {
+  const katex = useKaTeX(true)
+  if (!katex) return <CodeBlock code={code} language="math" />
+  return (
+    <MathRender
+      katex={katex}
+      formula={code}
+      displayMode
+      className={styles.Preview}
+      data-testid="code-block-math-preview"
+    />
+  )
+}
+
 /** Wrap inline `children` in one mark, special-casing the view/link marks. */
 function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): ReactNode {
   const name = mark.type.name as MarkName
@@ -240,6 +282,10 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
           {children}
         </ImageView>
       )
+    }
+    case 'mdMath': {
+      const attrs = mark.attrs as MdMathAttrs
+      return <MathView formula={attrs.formula}>{children}</MathView>
     }
     case 'mdLinkText': {
       const attrs = mark.attrs as MdLinkTextAttrs
@@ -319,6 +365,9 @@ function renderBlock(node: ProseMirrorNode, key: number, context: RenderContext)
   if (node.type.name === ('codeBlock' satisfies NodeName)) {
     const attrs = node.attrs as CodeBlockAttrs
     const language: string = typeof attrs.language === 'string' ? attrs.language : ''
+    if (language === 'math') {
+      return <MathCodeBlock key={key} code={node.textContent} />
+    }
     return <CodeBlock key={key} code={node.textContent} language={language} />
   }
 

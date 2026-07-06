@@ -1,5 +1,5 @@
 import { defineCommands, definePlugin, getMarkRange, getMarkType, union } from '@prosekit/core'
-import type { Mark, Slice } from '@prosekit/pm/model'
+import type { Slice } from '@prosekit/pm/model'
 import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
@@ -25,6 +25,11 @@ const CLIPBOARD_STRIP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([
   'mdLinkTitle',
 ])
 
+// Marks whose text survives a clean copy even when a strip mark also covers
+// it. A math dollar carries `mdMark` for hiding, but stripping it would paste
+// bare TeX; `$E=mc^2$` should copy whole, like an image source.
+const CLIPBOARD_KEEP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>(['mdMath'])
+
 const markModeKey = new PluginKey<MarkMode>('mark-mode')
 
 function getCurrentMarkMode(state: EditorState): MarkMode | undefined {
@@ -43,7 +48,12 @@ function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
         return { 'data-mark-mode': getCurrentMarkMode(state) ?? initialMode }
       },
       decorations: (state) => {
-        return getCurrentMarkMode(state) === 'focus' ? computeFocusDecorations(state) : undefined
+        const mode = getCurrentMarkMode(state)
+        if (mode === 'focus') return computeFocusDecorations(state)
+        // Hide mode never reveals ordinary syntax, but a math unit hides its
+        // content too, so without a reveal it could not be edited in place.
+        if (mode === 'hide') return computeMathRevealDecorations(state)
+        return
       },
       // In show mode the empty string is falsy, so `someProp` falls through to
       // the next serializer (`defineMarkdownCopy` in the full editor) and the
@@ -82,9 +92,10 @@ function cleanCopySerializer(slice: Slice): string {
     const parts: string[] = []
     blockNode.descendants((textNode) => {
       if (!textNode.isText || !textNode.text) return true
-      const stripped = textNode.marks.some((m: Mark) =>
-        CLIPBOARD_STRIP_MARK_NAMES.has(m.type.name as MarkName),
-      )
+      const textNodeMarks = textNode.marks.map((mark) => mark.type.name as MarkName)
+      const stripped =
+        textNodeMarks.some((markName) => CLIPBOARD_STRIP_MARK_NAMES.has(markName)) &&
+        !textNodeMarks.some((markName) => CLIPBOARD_KEEP_MARK_NAMES.has(markName))
       if (!stripped) parts.push(textNode.text)
       return false
     })
@@ -107,6 +118,23 @@ function cleanCopySerializer(slice: Slice): string {
  * `#tag` carry no `mdPack`, so they never reveal.
  */
 function computeFocusDecorations(state: EditorState): DecorationSet {
+  return computeRevealDecorations(state, undefined)
+}
+
+/**
+ * In hide mode, reveal only the math unit under the caret. A math unit hides
+ * its whole source (content included), so it is the one construct that must
+ * still reveal in hide mode to stay editable; everything else follows the
+ * hide-mode contract and never reveals.
+ */
+function computeMathRevealDecorations(state: EditorState): DecorationSet {
+  return computeRevealDecorations(state, { key: 'math' })
+}
+
+function computeRevealDecorations(
+  state: EditorState,
+  packAttrs: Record<string, unknown> | undefined,
+): DecorationSet {
   const { selection } = state
   if (!selection.empty) return DecorationSet.empty
 
@@ -114,7 +142,11 @@ function computeFocusDecorations(state: EditorState): DecorationSet {
   const { parent } = $pos
   if (!parent.isTextblock || parent.type.spec.code) return DecorationSet.empty
 
-  const range = getMarkRange($pos, getMarkType(state.schema, 'mdPack' satisfies MarkName))
+  const range = getMarkRange(
+    $pos,
+    getMarkType(state.schema, 'mdPack' satisfies MarkName),
+    packAttrs,
+  )
   if (!range) return DecorationSet.empty
 
   return DecorationSet.create(state.doc, [

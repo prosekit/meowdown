@@ -118,6 +118,12 @@ A link to a file renders as a tidy pill, with its size filled in by the host. Pa
 
 [Meowdown press kit.zip](files/meowdown-press-kit.zip)
 
+Write math with dollars: an inline formula like $E=mc^2$ renders in place, and a \`$$\` block becomes a display equation with a live preview while you edit:
+
+$$
+\\int_{-\\infty}^{\\infty} e^{-x^2} \\, dx = \\sqrt{\\pi}
+$$
+
 Drop in a fenced code block and pick its language from the selector:
 
 \`\`\`typescript

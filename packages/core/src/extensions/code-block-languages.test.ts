@@ -231,8 +231,8 @@ describe('codeBlockLanguages', () => {
           "value": "markdown",
         },
         {
-          "label": "Mathematica",
-          "value": "mathematica",
+          "label": "Math",
+          "value": "math",
         },
         {
           "label": "Mbox",
