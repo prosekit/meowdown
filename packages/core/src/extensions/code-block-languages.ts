@@ -1,6 +1,7 @@
 import { languages } from '@codemirror/language-data'
 
 const excludeLanguages = new Set([
+  // Uncommon languages
   'MscGen',
   'Xù',
   'MsGenny',
@@ -18,6 +19,9 @@ const excludeLanguages = new Set([
   'Pig',
   'Asterisk',
   'Z80',
+
+  // Replaced by 'Math'
+  'Mathematica',
 ])
 
 /**
