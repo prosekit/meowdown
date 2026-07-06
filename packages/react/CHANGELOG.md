@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.37.0](https://github.com/prosekit/meowdown/compare/react-v0.36.2...react-v0.37.0) (2026-07-06)
+
+
+### Features
+
+* add math (LaTeX) support ([#241](https://github.com/prosekit/meowdown/issues/241)) ([9a67daf](https://github.com/prosekit/meowdown/commit/9a67daf5a1262f96c0ba0f0631d52033e0b040c6))
+
 ## [0.36.2](https://github.com/prosekit/meowdown/compare/react-v0.36.1...react-v0.36.2) (2026-07-06)
 
 
