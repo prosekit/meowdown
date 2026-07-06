@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.37.1](https://github.com/prosekit/meowdown/compare/core-v0.37.0...core-v0.37.1) (2026-07-06)
+
+
+### Bug Fixes
+
+* allow typing before a leading wikilink ([#247](https://github.com/prosekit/meowdown/issues/247)) ([1801d71](https://github.com/prosekit/meowdown/commit/1801d71201fad5f74186601e09a44e93fe81d341))
+* replace an empty list item with the horizontal rule on `---` ([#249](https://github.com/prosekit/meowdown/issues/249)) ([05d5294](https://github.com/prosekit/meowdown/commit/05d5294151a8abcd471ba5053d967baefd6dc71a))
+
 ## [0.37.0](https://github.com/prosekit/meowdown/compare/core-v0.36.2...core-v0.37.0) (2026-07-06)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.37.1](https://github.com/prosekit/meowdown/compare/react-v0.37.0...react-v0.37.1) (2026-07-06)
+
+
+### Bug Fixes
+
+* replace an empty list item with the horizontal rule on `---` ([#249](https://github.com/prosekit/meowdown/issues/249)) ([05d5294](https://github.com/prosekit/meowdown/commit/05d5294151a8abcd471ba5053d967baefd6dc71a))
+
 ## [0.37.0](https://github.com/prosekit/meowdown/compare/react-v0.36.2...react-v0.37.0) (2026-07-06)
 
 
