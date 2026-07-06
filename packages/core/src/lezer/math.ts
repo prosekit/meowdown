@@ -1,4 +1,4 @@
-import type { MarkdownConfig } from '@lezer/markdown'
+import type { Line, MarkdownConfig } from '@lezer/markdown'
 
 import {
   CHAR_0,
@@ -11,6 +11,25 @@ import {
 
 function isDigit(code: number): boolean {
   return code >= CHAR_0 && code <= CHAR_9
+}
+
+/** A line whose content is exactly `$$`, allowing trailing whitespace. */
+function isBlockMathFence(line: Line): boolean {
+  if (line.next !== CHAR_DOLLAR) return false
+  if (line.text.charCodeAt(line.pos + 1) !== CHAR_DOLLAR) return false
+  if (line.text.charCodeAt(line.pos + 2) === CHAR_DOLLAR) return false
+  return line.skipSpace(line.pos + 2) === line.text.length
+}
+
+/**
+ * How many composite contexts (blockquote, list item) the line still sits
+ * inside. `Line.depth` is not in the public typings (the FencedCode parser
+ * reads it the same way); if a future upgrade drops it, every line counts as
+ * still inside, and an unterminated block simply runs longer.
+ */
+function getLineDepth(line: Line): number {
+  const { depth } = line as Line & { depth?: number }
+  return typeof depth === 'number' ? depth : Number.MAX_SAFE_INTEGER
 }
 
 /**
@@ -26,7 +45,59 @@ function isDigit(code: number): boolean {
  * element eagerly, so the content is atomic: no nested markdown.
  */
 export const math: MarkdownConfig = {
-  defineNodes: [{ name: 'InlineMath' }, { name: 'InlineMathMark' }],
+  defineNodes: [
+    { name: 'InlineMath' },
+    { name: 'InlineMathMark' },
+    { name: 'BlockMath', block: true },
+    { name: 'BlockMathMark' },
+  ],
+  parseBlock: [
+    {
+      name: 'BlockMath',
+      before: 'FencedCode',
+      // Mirrors the FencedCode block parser: the fences become
+      // `BlockMathMark`s and the TeX lines become `CodeText` elements
+      // (excluding container prefixes such as a blockquote's `> `), so the
+      // converter reads the content the same way it reads a code fence.
+      // Container markers (`Line.markers` is internal API) are not re-emitted;
+      // nothing in meowdown reads them inside a math block. An unterminated
+      // block runs to the end of its container.
+      parse(cx, line) {
+        if (!isBlockMathFence(line)) return false
+        const from = cx.lineStart + line.pos
+        const marks = [cx.elt('BlockMathMark', from, from + 2)]
+        for (let first = true, empty = true, hasLine = false; ; first = false) {
+          if (!cx.nextLine() || getLineDepth(line) < cx.depth) break
+          if (isBlockMathFence(line)) {
+            if (empty && hasLine) {
+              marks.push(cx.elt('CodeText', cx.lineStart - 1, cx.lineStart))
+            }
+            marks.push(
+              cx.elt('BlockMathMark', cx.lineStart + line.pos, cx.lineStart + line.pos + 2),
+            )
+            cx.nextLine()
+            break
+          }
+          hasLine = true
+          if (!first) {
+            marks.push(cx.elt('CodeText', cx.lineStart - 1, cx.lineStart))
+            empty = false
+          }
+          const textFrom = cx.lineStart + line.basePos
+          const textTo = cx.lineStart + line.text.length
+          if (textFrom < textTo) {
+            marks.push(cx.elt('CodeText', textFrom, textTo))
+            empty = false
+          }
+        }
+        cx.addElement(cx.elt('BlockMath', from, cx.prevLineEnd(), marks))
+        return true
+      },
+      endLeaf(_cx, line) {
+        return isBlockMathFence(line)
+      },
+    },
+  ],
   parseInline: [
     {
       name: 'InlineMath',

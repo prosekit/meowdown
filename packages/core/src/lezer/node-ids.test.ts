@@ -14,6 +14,8 @@ describe('LEZER_NODE_IDS', () => {
         "ATXHeading5": 13,
         "ATXHeading6": 14,
         "Autolink": 33,
+        "BlockMath": 61,
+        "BlockMathMark": 62,
         "Blockquote": 4,
         "BulletList": 6,
         "CodeBlock": 2,

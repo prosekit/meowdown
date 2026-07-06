@@ -175,6 +175,8 @@ function convertBlock(
     case LEZER_NODE_IDS.FencedCode:
     case LEZER_NODE_IDS.CodeBlock:
       return [convertCodeBlock(nodes, cursor, text)]
+    case LEZER_NODE_IDS.BlockMath:
+      return [convertBlockMath(nodes, cursor, text)]
     case LEZER_NODE_IDS.HorizontalRule: {
       // Keep the source marker (`***`, `___`, `- - -`, ...); `---` is canonical
       // and stays null. Trailing spaces are insignificant, so drop them.
@@ -547,6 +549,27 @@ function convertCodeBlock(
     cursor.parent()
   }
   return nodes.codeBlock({ language, fenceStyle, fenceLength }, code)
+}
+
+/**
+ * A `$$` display math block is a code block whose `language` is `math`; the
+ * `dollar` fence style makes it serialize back to `$$` fences.
+ */
+function convertBlockMath(
+  nodes: TypedNodeBuilders,
+  cursor: TreeCursor,
+  text: string,
+): ProseMirrorNode {
+  let code = ''
+  if (cursor.firstChild()) {
+    do {
+      if (cursor.type.id === LEZER_NODE_IDS.CodeText) {
+        code += text.slice(cursor.from, cursor.to)
+      }
+    } while (cursor.nextSibling())
+    cursor.parent()
+  }
+  return nodes.codeBlock({ language: 'math', fenceStyle: 'dollar', fenceLength: null }, code)
 }
 
 function convertTable(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string): ProseMirrorNode {

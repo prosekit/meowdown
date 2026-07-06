@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import { type InlineElement, parseInline } from './inline.ts'
 import { LEZER_NODE_IDS } from './node-ids.ts'
-import { gfmBlockOnlyParser } from './parser.ts'
+import { gfmBlockOnlyParser, gfmParser } from './parser.ts'
 
 /** Every `$...$` slice in the inline element tree, in document order. */
 function findMath(text: string): string[] {
@@ -146,5 +146,147 @@ describe('math inline parser', () => {
       },
     })
     expect(sawMath).toBe(false)
+  })
+})
+
+/** Render a full block tree into an indented, human-readable string. */
+function formatBlockTree(text: string): string {
+  const cursor = gfmParser.parse(text).cursor()
+  const lines: string[] = []
+  const walk = (depth: number): void => {
+    const slice = JSON.stringify(text.slice(cursor.from, cursor.to))
+    lines.push(`${'  '.repeat(depth)}${cursor.name} [${cursor.from}, ${cursor.to}] ${slice}`)
+    if (cursor.firstChild()) {
+      do {
+        walk(depth + 1)
+      } while (cursor.nextSibling())
+      cursor.parent()
+    }
+  }
+  walk(0)
+  return lines.join('\n')
+}
+
+function findBlockMath(text: string): string[] {
+  const expressions: string[] = []
+  gfmParser.parse(text).iterate({
+    enter(node) {
+      if (node.type.id === LEZER_NODE_IDS.BlockMath) {
+        expressions.push(text.slice(node.from, node.to))
+      }
+    },
+  })
+  return expressions
+}
+
+describe('math block parser', () => {
+  it('parses a dollar fence with marks and code text', () => {
+    expect(formatBlockTree('$$\nE=mc^2\n$$')).toMatchInlineSnapshot(`
+      "Document [0, 12] "$$\\nE=mc^2\\n$$"
+        BlockMath [0, 12] "$$\\nE=mc^2\\n$$"
+          BlockMathMark [0, 2] "$$"
+          CodeText [3, 9] "E=mc^2"
+          BlockMathMark [10, 12] "$$""
+    `)
+  })
+
+  it('parses a multi-line formula with an interior blank line', () => {
+    expect(formatBlockTree('$$\na\n\nb\n$$')).toMatchInlineSnapshot(`
+      "Document [0, 10] "$$\\na\\n\\nb\\n$$"
+        BlockMath [0, 10] "$$\\na\\n\\nb\\n$$"
+          BlockMathMark [0, 2] "$$"
+          CodeText [3, 4] "a"
+          CodeText [4, 5] "\\n"
+          CodeText [5, 6] "\\n"
+          CodeText [6, 7] "b"
+          BlockMathMark [8, 10] "$$""
+    `)
+  })
+
+  it('runs to the end of input when unclosed', () => {
+    expect(formatBlockTree('$$\nE=mc^2')).toMatchInlineSnapshot(`
+      "Document [0, 9] "$$\\nE=mc^2"
+        BlockMath [0, 9] "$$\\nE=mc^2"
+          BlockMathMark [0, 2] "$$"
+          CodeText [3, 9] "E=mc^2""
+    `)
+  })
+
+  it('interrupts a paragraph', () => {
+    expect(formatBlockTree('para\n$$\nx\n$$')).toMatchInlineSnapshot(`
+      "Document [0, 12] "para\\n$$\\nx\\n$$"
+        Paragraph [0, 4] "para"
+        BlockMath [5, 12] "$$\\nx\\n$$"
+          BlockMathMark [5, 7] "$$"
+          CodeText [8, 9] "x"
+          BlockMathMark [10, 12] "$$""
+    `)
+  })
+
+  it('parses inside a blockquote', () => {
+    expect(formatBlockTree('> $$\n> x\n> $$')).toMatchInlineSnapshot(`
+      "Document [0, 13] "> $$\\n> x\\n> $$"
+        Blockquote [0, 13] "> $$\\n> x\\n> $$"
+          QuoteMark [0, 1] ">"
+          BlockMath [2, 13] "$$\\n> x\\n> $$"
+            BlockMathMark [2, 4] "$$"
+            CodeText [7, 8] "x"
+            BlockMathMark [11, 13] "$$""
+    `)
+  })
+
+  it('parses inside a list item', () => {
+    expect(formatBlockTree('- $$\n  x\n  $$')).toMatchInlineSnapshot(`
+      "Document [0, 13] "- $$\\n  x\\n  $$"
+        BulletList [0, 13] "- $$\\n  x\\n  $$"
+          ListItem [0, 13] "- $$\\n  x\\n  $$"
+            ListMark [0, 1] "-"
+            BlockMath [2, 13] "$$\\n  x\\n  $$"
+              BlockMathMark [2, 4] "$$"
+              CodeText [7, 8] "x"
+              BlockMathMark [11, 13] "$$""
+    `)
+  })
+
+  it('does not swallow content after an unterminated block leaves its blockquote', () => {
+    expect(formatBlockTree('> $$\n> x\n\nafter')).toMatchInlineSnapshot(`
+      "Document [0, 15] "> $$\\n> x\\n\\nafter"
+        Blockquote [0, 8] "> $$\\n> x"
+          QuoteMark [0, 1] ">"
+          BlockMath [2, 8] "$$\\n> x"
+            BlockMathMark [2, 4] "$$"
+            CodeText [7, 8] "x"
+        Paragraph [10, 15] "after""
+    `)
+  })
+
+  it('allows trailing whitespace on the fences', () => {
+    // The node span runs to the end of the closing line, whitespace included,
+    // mirroring how FencedCode spans its closing fence line.
+    expect(findBlockMath('$$  \nx\n$$ ')).toEqual(['$$  \nx\n$$ '])
+  })
+
+  it('ignores dollar runs longer than two', () => {
+    expect(findBlockMath('$$$\nx\n$$$')).toEqual([])
+  })
+
+  it('does not treat a single-line $$x$$ as a block', () => {
+    expect(findBlockMath('$$x$$')).toEqual([])
+    expect(findMath('$$x$$')).toEqual(['$$x$$'])
+  })
+
+  it('keeps single dollars inside the block as plain content', () => {
+    expect(findBlockMath('$$\na $ b $x$ c\n$$')).toEqual(['$$\na $ b $x$ c\n$$'])
+  })
+
+  it('is still produced by gfmBlockOnlyParser', () => {
+    const tree = gfmBlockOnlyParser.parse('$$\nx\n$$')
+    let sawBlockMath = false
+    tree.iterate({
+      enter(node) {
+        if (node.type.id === LEZER_NODE_IDS.BlockMath) sawBlockMath = true
+      },
+    })
+    expect(sawBlockMath).toBe(true)
   })
 })

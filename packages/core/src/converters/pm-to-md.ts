@@ -400,6 +400,21 @@ function emitCodeBlock(node: ProseMirrorNode, out: MdOut): void {
     }
   }
 
+  // A `$$` fence cannot widen, so a content line reading `$$` (which would
+  // close it early) and a language other than `math` (e.g. re-picked in the
+  // language selector) both fall back to a backtick ```math fence.
+  if (attrs.fenceStyle === 'dollar' && language === 'math' && !hasDollarFenceLine(code)) {
+    out.write('$$')
+    out.write('\n')
+    if (code) {
+      out.write(code)
+      out.write('\n')
+    }
+    out.write('$$')
+    out.closeBlock()
+    return
+  }
+
   const tilde = attrs.fenceStyle === 'tilde'
   // min 2 keeps the fence width >= 3, CommonMark's minimum; a recorded
   // opening-fence length only ever widens it.
@@ -432,6 +447,11 @@ function toIndentedCode(code: string): string | undefined {
     if (lines[i] !== '') lines[i] = `    ${lines[i]}`
   }
   return lines.join('\n')
+}
+
+/** Whether any content line would read as a closing `$$` fence. */
+function hasDollarFenceLine(code: string): boolean {
+  return code.split('\n').some((line) => line.trim() === '$$')
 }
 
 // ─────────────────────────────────────────────────────────────────────

@@ -681,6 +681,48 @@ describe('markdownToDoc', () => {
     })
   })
 
+  it('keeps a dollar math block', () => {
+    expect(markdownToDoc('$$\nE=mc^2\n$$').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        {
+          type: 'codeBlock',
+          attrs: { language: 'math', fenceStyle: 'dollar', fenceLength: null },
+          content: [{ type: 'text', text: 'E=mc^2' }],
+        },
+      ],
+    })
+  })
+
+  it('keeps a math fence as a plain code block', () => {
+    expect(markdownToDoc('```math\nE=mc^2\n```').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        {
+          type: 'codeBlock',
+          attrs: { language: 'math', fenceStyle: null, fenceLength: null },
+          content: [{ type: 'text', text: 'E=mc^2' }],
+        },
+      ],
+    })
+  })
+
+  it('keeps an unclosed dollar math block', () => {
+    expect(markdownToDoc('$$\nE=mc^2').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        {
+          type: 'codeBlock',
+          attrs: { language: 'math', fenceStyle: 'dollar', fenceLength: null },
+          content: [{ type: 'text', text: 'E=mc^2' }],
+        },
+      ],
+    })
+  })
+
   it('keeps a tilde fence', () => {
     expect(markdownToDoc('~~~\ntilde\n~~~').toJSON()).toEqual({
       type: 'doc',

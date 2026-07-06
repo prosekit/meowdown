@@ -75,6 +75,10 @@ export const LEZER_NODE_NAMES = [
   'HighlightMark',
   'InlineMath',
   'InlineMathMark',
+
+  // Custom block (meowdown extensions)
+  'BlockMath',
+  'BlockMathMark',
 ] as const
 
 export type LezerNodeName = (typeof LEZER_NODE_NAMES)[number]
