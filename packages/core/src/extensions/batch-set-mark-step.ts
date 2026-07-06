@@ -32,7 +32,7 @@ export class BatchSetMarkStep extends Step {
     const docSize = doc.content.size
 
     let tr: Transform | undefined
-    for (const [from, to, expected] of this.chunks) {
+    for (const [from, to, expectedUnsorted] of this.chunks) {
       if (from >= to) continue
 
       const safeFrom = Math.max(0, Math.min(from, docSize))
@@ -42,7 +42,7 @@ export class BatchSetMarkStep extends Step {
       // Rank-sorted like a node's own mark set; equal-rank marks (nested
       // mdPack) keep the parser's outer-first emit order, so rewriting a node
       // whose set merely differs in order keeps same-type marks canonical.
-      const expectedSet = Mark.setFrom(expected)
+      const expected = Mark.setFrom(expectedUnsorted)
 
       doc.nodesBetween(safeFrom, safeTo, (node, pos) => {
         if (!node.isText) return true
@@ -50,13 +50,13 @@ export class BatchSetMarkStep extends Step {
         const nodeTo = Math.min(safeTo, pos + node.nodeSize)
         if (nodeFrom >= nodeTo) return false
         const current = node.marks
-        if (marksEqual(current, expectedSet)) return false
+        if (marksEqual(current, expected)) return false
 
         tr ??= new Transform(doc)
         for (const mark of current) {
           tr.removeMark(nodeFrom, nodeTo, mark)
         }
-        for (const mark of expectedSet) {
+        for (const mark of expected) {
           tr.addMark(nodeFrom, nodeTo, mark)
         }
         return false
