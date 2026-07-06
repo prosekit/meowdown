@@ -21,6 +21,7 @@ minimumReleaseAgeExclude:
   - prosemirror-view@1.42.0
   - prosemirror-splittable@1.1.0
   - prosemirror-flat-list@0.7.0
+  - eslint-plugin-unicorn@71.0.0
 
 allowBuilds:
   simple-git-hooks: false
