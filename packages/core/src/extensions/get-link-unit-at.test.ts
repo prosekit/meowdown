@@ -71,4 +71,24 @@ describe('getLinkUnitAt', () => {
     fixture.set(n.doc(n.paragraph('plain text')))
     expect(getLinkUnitAt(fixture.state, findText(fixture.doc, 'plain') + 1)).toBeUndefined()
   })
+
+  it('returns undefined inside a non-link unit', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('**bold**')))
+    expect(getLinkUnitAt(fixture.state, findText(fixture.doc, 'bold') + 1)).toBeUndefined()
+  })
+
+  it('resolves the link unit when the link nests inside an emphasis', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    // The italic pack covers the whole `*...*` and sits before the link pack
+    // in the mark set; the lookup must pick the pack by key, not by set order.
+    fixture.set(n.doc(n.paragraph('*[a](http://x.test)*')))
+    const link = getLinkUnitAt(fixture.state, findText(fixture.doc, 'a'))!
+    expect(link.href).toBe('http://x.test')
+    expect(fixture.doc.textBetween(link.unit.from, link.unit.to)).toBe('[a](http://x.test)')
+    expect(fixture.doc.textBetween(link.label!.from, link.label!.to)).toBe('a')
+    expect(fixture.doc.textBetween(link.dest!.from, link.dest!.to)).toBe('http://x.test')
+  })
 })
