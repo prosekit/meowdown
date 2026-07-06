@@ -96,9 +96,9 @@ describe('deleting a selection that contains a folded bullet', () => {
       n.list(
         { kind: 'bullet', collapsed: true },
         n.paragraph('folded parent'),
-        n.list({ kind: 'bullet' }, n.paragraph('hidden<a> child')),
+        n.list({ kind: 'bullet' }, n.paragraph('hidden <a>child<b>')),
       ),
-      n.paragraph('beta<a>'),
+      n.paragraph('beta'),
     )
 
     const doc2 = n.doc(
@@ -108,7 +108,7 @@ describe('deleting a selection that contains a folded bullet', () => {
         n.paragraph('folded parent'),
         n.list({ kind: 'bullet' }, n.paragraph('hidden child')),
       ),
-      n.paragraph('beta<a>'),
+      n.paragraph('beta'),
     )
 
     const doc3 = n.doc(
@@ -116,13 +116,95 @@ describe('deleting a selection that contains a folded bullet', () => {
       n.list(
         { kind: 'bullet', collapsed: false },
         n.paragraph('folded parent'),
-        n.list({ kind: 'bullet' }, n.paragraph('hidde child')),
+        n.list({ kind: 'bullet' }, n.paragraph('hidden ')),
       ),
-      n.paragraph('beta<a>'),
+      n.paragraph('beta'),
     )
 
     fixture.set(doc1)
     editor.view.focus()
+
+    expect(fixture.state.toJSON()).toMatchInlineSnapshot(`
+      {
+        "doc": {
+          "attrs": {
+            "frontmatter": null,
+          },
+          "content": [
+            {
+              "content": [
+                {
+                  "text": "alpha",
+                  "type": "text",
+                },
+              ],
+              "type": "paragraph",
+            },
+            {
+              "attrs": {
+                "checked": false,
+                "collapsed": true,
+                "kind": "bullet",
+                "marker": null,
+                "markerGap": 1,
+                "order": null,
+                "taskMarker": null,
+              },
+              "content": [
+                {
+                  "content": [
+                    {
+                      "text": "folded parent",
+                      "type": "text",
+                    },
+                  ],
+                  "type": "paragraph",
+                },
+                {
+                  "attrs": {
+                    "checked": false,
+                    "collapsed": false,
+                    "kind": "bullet",
+                    "marker": null,
+                    "markerGap": 1,
+                    "order": null,
+                    "taskMarker": null,
+                  },
+                  "content": [
+                    {
+                      "content": [
+                        {
+                          "text": "hidden child",
+                          "type": "text",
+                        },
+                      ],
+                      "type": "paragraph",
+                    },
+                  ],
+                  "type": "list",
+                },
+              ],
+              "type": "list",
+            },
+            {
+              "content": [
+                {
+                  "text": "beta",
+                  "type": "text",
+                },
+              ],
+              "type": "paragraph",
+            },
+          ],
+          "type": "doc",
+        },
+        "selection": {
+          "anchor": 32,
+          "head": 37,
+          "type": "text",
+        },
+      }
+    `)
 
     await userEvent.keyboard('{Backspace}')
     expect(fixture.doc.toJSON()).toEqual(doc2.toJSON())
