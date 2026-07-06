@@ -134,7 +134,7 @@ describe('deleting a selection that contains a folded bullet', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
 
-    let doc1 = n.doc(
+    const doc1 = n.doc(
       n.paragraph('alpha'),
       n.list(
         { kind: 'bullet', collapsed: true },
@@ -144,7 +144,7 @@ describe('deleting a selection that contains a folded bullet', () => {
       n.paragraph('beta<a>'),
     )
 
-    let doc2 = n.doc(n.paragraph())
+    const doc2 = n.doc(n.paragraph())
 
     fixture.set(doc1)
     editor.view.focus()
