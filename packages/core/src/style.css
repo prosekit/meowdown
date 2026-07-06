@@ -724,8 +724,14 @@
       }
     }
 
+    /* The source keeps a zero-width inline box (font-size: 0, same as .md-mark)
+     * instead of leaving the box tree (display: none): a boxless source next to
+     * the contenteditable=false preview makes the browser relocate typing at a
+     * textblock start past the whole mark view. */
     .md-atom-view-content {
-      display: none;
+      font-size: 0;
+      letter-spacing: 0;
+      opacity: 0;
     }
   }
 

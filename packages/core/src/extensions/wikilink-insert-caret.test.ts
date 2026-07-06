@@ -93,6 +93,96 @@ describe.each(ALL_MODES)('typing before an inserted wikilink in %s mode', (mode)
   })
 })
 
+// An editor in `mode` showing a single paragraph `text`, caret at the `<a>` tag.
+function setupParagraph(mode: MarkMode, text: string): Fixture {
+  const fixture = setupFixture({ extensionOptions: { markMode: mode } })
+  const { n } = fixture
+  fixture.set(n.doc(n.paragraph(text)))
+  fixture.view.focus()
+  return fixture
+}
+
+// The mirror boundary at the paragraph start: with no editable text before the
+// wikilink, the browser used to relocate the insertion point past the
+// `contenteditable=false` preview, landing the character after the link.
+describe.each(ALL_MODES)('typing before a wikilink at the paragraph start in %s mode', (mode) => {
+  it('types before a lone wikilink', async () => {
+    using fixture = setupParagraph(mode, '<a>[[Note]]')
+    await expect.element(pmRoot).toBeVisible()
+
+    await userEvent.keyboard('B')
+    expect(fixture.doc.textContent).toBe('B[[Note]]')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"B┃[[Note]]"`)
+  })
+
+  it('keeps typing before the wikilink across several characters', async () => {
+    using fixture = setupParagraph(mode, '<a>[[Note]]')
+    await expect.element(pmRoot).toBeVisible()
+
+    await userEvent.keyboard('Bar')
+    expect(fixture.doc.textContent).toBe('Bar[[Note]]')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"Bar┃[[Note]]"`)
+  })
+
+  it('types before a leading wikilink followed by text', async () => {
+    using fixture = setupParagraph(mode, '<a>[[Note]]C')
+    await expect.element(pmRoot).toBeVisible()
+
+    await userEvent.keyboard('B')
+    expect(fixture.doc.textContent).toBe('B[[Note]]C')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"B┃[[Note]]C"`)
+  })
+
+  it('types between two adjacent wikilinks', async () => {
+    using fixture = setupParagraph(mode, '[[One]]<a>[[Two]]')
+    await expect.element(pmRoot).toBeVisible()
+
+    await userEvent.keyboard('B')
+    expect(fixture.doc.textContent).toBe('[[One]]B[[Two]]')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"[[One]]B┃[[Two]]"`)
+  })
+})
+
+// Typing over a unit selected with ArrowLeft replaces the whole source, like
+// typing over any other selection.
+describe.each(ALL_MODES)('typing over a selected wikilink in %s mode', (mode) => {
+  it('replaces a selected lone wikilink', async () => {
+    using fixture = setupParagraph(mode, '[[Note]]<a>')
+    await expect.element(pmRoot).toBeVisible()
+
+    await userEvent.keyboard('{ArrowLeft}')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"❰[[Note]]❱"`)
+
+    await userEvent.keyboard('B')
+    expect(fixture.doc.textContent).toBe('B')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"B┃"`)
+  })
+
+  it('replaces a selected leading wikilink followed by text', async () => {
+    using fixture = setupParagraph(mode, '[[Note]]<a>C')
+    await expect.element(pmRoot).toBeVisible()
+
+    await userEvent.keyboard('{ArrowLeft}')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"❰[[Note]]❱C"`)
+
+    await userEvent.keyboard('B')
+    expect(fixture.doc.textContent).toBe('BC')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"B┃C"`)
+  })
+
+  it('replaces a selected wikilink in the middle of text', async () => {
+    using fixture = setupParagraph(mode, 'A[[Note]]<a>C')
+    await expect.element(pmRoot).toBeVisible()
+
+    await userEvent.keyboard('{ArrowLeft}')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"A❰[[Note]]❱C"`)
+
+    await userEvent.keyboard('B')
+    expect(fixture.doc.textContent).toBe('ABC')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"AB┃C"`)
+  })
+})
+
 // The mark view renders the label as the stand-in for the source in every mode,
 // the wikilink being atomic everywhere.
 describe('inserted wikilink rendering', () => {
