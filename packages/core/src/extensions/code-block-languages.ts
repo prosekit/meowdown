@@ -33,8 +33,7 @@ const extraLanguages = [
  * A list of languages for code block syntax-highlight.
  */
 export const codeBlockLanguages: ReadonlyArray<{ label: string; value: string }> = languages
-  .map((language) => language.name)
-  .filter((name) => !excludeLanguages.has(name))
-  .map((name) => ({ label: name, value: name.toLowerCase() }))
+  .map((language) => ({ label: language.name, value: language.name.toLowerCase() }))
+  .filter((language) => !excludeLanguages.has(language.label))
   .concat(extraLanguages)
   .sort((a, b) => a.label.localeCompare(b.label))
