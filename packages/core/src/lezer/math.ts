@@ -29,6 +29,7 @@ function isBlockMathFence(line: Line): boolean {
  */
 function getLineDepth(line: Line): number {
   // @ts-expect-error `Line.depth` is not in the public typings
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const depth: number = line.depth
   return typeof depth === 'number' ? depth : Number.MAX_SAFE_INTEGER
 }
