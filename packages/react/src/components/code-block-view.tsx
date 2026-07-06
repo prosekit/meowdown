@@ -2,6 +2,7 @@ import { Combobox } from '@base-ui/react/combobox'
 import {
   type CodeBlockAttrs,
   codeBlockLanguages,
+  type LanguageItem,
   isCodeBlockPreviewHiddenDecoration,
 } from '@meowdown/core'
 import { TextSelection } from '@prosekit/pm/state'
@@ -14,11 +15,6 @@ import { useKaTeX } from '../hooks/use-katex.ts'
 import styles from './code-block-view.module.css'
 import { CopyButton } from './copy-button.tsx'
 import { MathRender } from './math-render.tsx'
-
-type LanguageItem = {
-  label: string
-  value: string
-}
 
 export function CodeBlockView(props: ReactNodeViewProps) {
   const attrs = props.node.attrs as CodeBlockAttrs

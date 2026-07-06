@@ -1,5 +1,10 @@
 import { languages } from '@codemirror/language-data'
 
+export type LanguageItem = {
+  label: string
+  value: string
+}
+
 const excludeLanguages = new Set([
   // Uncommon languages
   'MscGen',
@@ -32,7 +37,7 @@ const extraLanguages = [
 /**
  * A list of languages for code block syntax-highlight.
  */
-export const codeBlockLanguages: ReadonlyArray<{ label: string; value: string }> = languages
+export const codeBlockLanguages: ReadonlyArray<LanguageItem> = languages
   .map((language) => ({ label: language.name, value: language.name.toLowerCase() }))
   .filter((language) => !excludeLanguages.has(language.label))
   .concat(extraLanguages)
