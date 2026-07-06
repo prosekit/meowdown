@@ -174,7 +174,7 @@ describe('hide mode Enter relocation', () => {
     await userEvent.keyboard('{Enter}')
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`
       "
-      foo 
+      foo
       ⎦**bold** bar
       "
     `)

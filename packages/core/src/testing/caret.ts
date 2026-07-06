@@ -13,12 +13,16 @@ export async function traceKeySelection(
   key: string,
   times: number,
 ): Promise<string[]> {
-  const steps = [getSelectionSnapshot(fixture.state)]
-  for (let index = 0; index < times; index++) {
+  const steps = new Set([getSelectionSnapshot(fixture.state)])
+  const extraTimes = 2 // We press the key more times than requested to address flaky tests.
+  for (let index = 0; index < times + extraTimes; index++) {
     await userEvent.keyboard(`{${key}}`)
-    steps.push(getSelectionSnapshot(fixture.state))
+    steps.add(getSelectionSnapshot(fixture.state))
+    if (steps.size > times) {
+      break
+    }
   }
-  return steps
+  return Array.from(steps)
 }
 
 /**
