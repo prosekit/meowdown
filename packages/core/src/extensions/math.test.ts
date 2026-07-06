@@ -1,4 +1,3 @@
-import { TextSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
@@ -18,11 +17,6 @@ function setup(mode: MarkMode, text: string): Fixture {
   fixture.set(n.doc(n.paragraph(text)))
   fixture.view.focus()
   return fixture
-}
-
-// REVIEW: do not use setCaret. use the magic `<a>` `<b>` markers in the test text instead to set the inital selection. And use ArrowLeft and ArrowRight to move the selection in the test instead of manually setting it with setCaret. This is more realistic and tests the actual user behavior.
-function setCaret(fixture: Fixture, pos: number): void {
-  fixture.view.dispatch(fixture.state.tr.setSelection(TextSelection.create(fixture.doc, pos)))
 }
 
 describe('math preview rendering', () => {
@@ -58,10 +52,10 @@ describe('math preview rendering', () => {
 
   it('re-renders the preview after the formula is edited', async () => {
     using fixture = setup('focus', 'A $x<a>$ B')
+    void fixture
     await userEvent.keyboard('y')
     // Leave the unit so the preview shows again, now with the new formula.
-    const end = findText(fixture.doc, ' B')
-    setCaret(fixture, end + 2)
+    await userEvent.keyboard('{ArrowRight}{ArrowRight}')
     await expect.element(preview).toBeVisible()
     await expect.element(preview.locate('.katex')).toBeInTheDocument()
     await expect.element(preview).toHaveTextContent(/xy/)
@@ -87,11 +81,10 @@ describe('math source reveal', () => {
   })
 
   it('reveals at the unit boundary, before the opening dollar', async () => {
-    using fixture = setup('focus', 'A<a>B $x$ C')
+    using fixture = setup('focus', 'A B<a> $x$ C')
     void fixture
     await expect.element(preview).toBeVisible()
-    const dollar = findText(fixture.doc, '$')
-    setCaret(fixture, dollar)
+    await userEvent.keyboard('{ArrowRight}')
     await expect.element(mathContent).toBeVisible()
     await expect.element(preview).not.toBeVisible()
   })
@@ -105,8 +98,7 @@ describe('math source reveal', () => {
     using fixture = setup('focus', 'A $x<a>$ B')
     void fixture
     await expect.element(mathContent).toBeVisible()
-    const start = findText(fixture.doc, 'A')
-    setCaret(fixture, start)
+    await userEvent.keyboard('{ArrowRight}{ArrowRight}')
     await expect.element(preview).toBeVisible()
     await expect.element(mathContent).not.toBeVisible()
   })

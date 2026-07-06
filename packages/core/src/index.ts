@@ -63,7 +63,7 @@ export {
 } from './extensions/image-click.ts'
 export { defaultResolveImageUrl, defineImage, type ImageOptions } from './extensions/image.ts'
 export { defineMath } from './extensions/math.ts'
-export { loadKaTeX, renderMathInto, type KaTeX } from './utils/katex.ts'
+export { loadKaTeX, renderMathInto, type KaTeXRender } from './utils/katex.ts'
 export type {
   MdFileAttrs,
   MdImageAttrs,

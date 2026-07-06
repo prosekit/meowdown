@@ -1,17 +1,16 @@
-import type katex from 'katex'
+import type { render } from 'katex'
 
-export type KaTeX = typeof katex
+export type KaTeXRender = typeof render
 
-let katexPromise: Promise<KaTeX> | undefined
+let katexRenderPromise: Promise<KaTeXRender> | undefined
 
 /**
- * Load KaTeX on first use and cache the module. Most documents contain no
- * math, so the library stays out of the initial bundle.
+ * Load KaTeX's render function on first use and cache it. Most documents
+ * contain no math, so the library stays out of the initial bundle.
  */
-export function loadKaTeX(): Promise<KaTeX> {
-  // REVIEW：to reduce bundle size, we could import only the functions we need instead of the whole module. We can use named import to import only the "render" function from the "katex" module.
-  katexPromise ??= import('katex').then((module) => module.default)
-  return katexPromise
+export function loadKaTeX(): Promise<KaTeXRender> {
+  katexRenderPromise ??= import('katex').then((module) => module.render)
+  return katexRenderPromise
 }
 
 /**
@@ -21,13 +20,13 @@ export function loadKaTeX(): Promise<KaTeX> {
  * render.
  */
 export function renderMathInto(
-  katex: KaTeX,
+  katexRender: KaTeXRender,
   element: HTMLElement,
   formula: string,
   displayMode: boolean,
 ): void {
   try {
-    katex.render(formula, element, { displayMode, throwOnError: false, output: 'mathml' })
+    katexRender(formula, element, { displayMode, throwOnError: false, output: 'mathml' })
   } catch (error) {
     element.textContent = String(error)
   }

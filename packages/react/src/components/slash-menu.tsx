@@ -151,6 +151,12 @@ export function SlashMenu({ timeFormat = '12', onSlashMenuSearch }: SlashMenuPro
                 onSelect={() => editor.commands.setCodeBlock()}
               />
               <SlashMenuItem
+                label="Math"
+                keywords={['latex']}
+                kbd="```math"
+                onSelect={() => editor.commands.insertMarkdown('```math\n```')}
+              />
+              <SlashMenuItem
                 label="Table"
                 onSelect={() => editor.commands.insertTable({ row: 3, col: 3, header: true })}
               />
