@@ -28,7 +28,8 @@ function isBlockMathFence(line: Line): boolean {
  * still inside, and an unterminated block simply runs longer.
  */
 function getLineDepth(line: Line): number {
-  const { depth } = line as Line & { depth?: number }
+  // @ts-expect-error `Line.depth` is not in the public typings
+  const depth: number = line.depth
   return typeof depth === 'number' ? depth : Number.MAX_SAFE_INTEGER
 }
 
