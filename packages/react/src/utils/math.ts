@@ -1,5 +1,7 @@
 import type { KaTeX } from '@meowdown/core'
 
+// REVIEW: DO NOT ADD this function `renderMathInto` to @meowdown/react. Just wrap it in core package and re-export. This logic is shared for both core and react.
+
 /**
  * Render TeX into `element` as native MathML (no KaTeX stylesheet or fonts
  * required). `throwOnError: false` renders parse errors as red text; the
