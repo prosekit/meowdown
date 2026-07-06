@@ -9,6 +9,8 @@ describe('EDITOR_KEY_BINDINGS', () => {
         "Alt-ArrowDown": "Move the block or list item down",
         "Alt-ArrowUp": "Move the block or list item up",
         "Escape": "Collapse the selection",
+        "Meta-ArrowDown": "Move the caret to the document end",
+        "Meta-ArrowUp": "Move the caret to the document start",
         "Mod-.": "Fold or unfold a bullet",
         "Mod-1": "Heading 1",
         "Mod-2": "Heading 2",
@@ -28,6 +30,8 @@ describe('EDITOR_KEY_BINDINGS', () => {
         "Mod-e": "Inline code",
         "Mod-i": "Italic",
         "Mod-k": "Link",
+        "Shift-Meta-ArrowDown": "Select to the document end",
+        "Shift-Meta-ArrowUp": "Select to the document start",
       }
     `)
   })

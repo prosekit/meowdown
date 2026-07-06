@@ -32,6 +32,7 @@ import { defineMarkMode, type MarkMode } from './mark-mode.ts'
 import { defineMoveBlock } from './move-block.ts'
 import { defineMeowdownParagraph } from './paragraph.ts'
 import { definePendingReplacement } from './pending-replacement.ts'
+import { defineSelectDocBoundary } from './select-doc-boundary.ts'
 import { defineTable } from './table.ts'
 import { defineVirtualCaret } from './virtual-caret.ts'
 import { defineWikilink } from './wikilink.ts'
@@ -58,6 +59,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineCodeBlockSyntaxHighlight(),
     defineEscapeCollapse(),
     defineMoveBlock(),
+    defineSelectDocBoundary(),
     defineInlineMarkPlugin(options),
     defineInlineToggle(),
     defineLinkCommands(),
