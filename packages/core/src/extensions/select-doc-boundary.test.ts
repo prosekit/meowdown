@@ -5,15 +5,11 @@ import { setupFixture, type Fixture } from '../testing/index.ts'
 
 import { defineExitBoundaryHandler, type ExitBoundaryHandler } from './exit-boundary.ts'
 
-// The Meta-Arrow document-boundary motions are a macOS convention, so these
-// tests only run on Apple hosts (the mac-chromium and mac-webkit CI jobs).
-const applePlatform = /Mac|iP(hone|[oa]d)/.test(navigator.platform)
-
 function setup(): Fixture {
   return setupFixture({ extensionOptions: { markMode: 'hide' } })
 }
 
-describe.runIf(applePlatform)('Meta-ArrowUp / Meta-ArrowDown', () => {
+describe('Meta-ArrowUp / Meta-ArrowDown', () => {
   it('moves the caret to the document start when the document begins with a task list', async () => {
     using fixture = setup()
     const { n } = fixture
