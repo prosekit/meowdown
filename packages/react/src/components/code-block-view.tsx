@@ -22,6 +22,8 @@ export function CodeBlockView(props: ReactNodeViewProps) {
   const language = attrs.language || ''
   const isMath = language === 'math'
   const code = props.node.textContent
+
+  // REVIEW: do not add @prosekit/extensions as a dependency of @meowdown/react just beccause you want to use `isCodeBlockPreviewHiddenDecoration`. Re-export it from core.
   const caretInside = props.decorations.some(isCodeBlockPreviewHiddenDecoration)
 
   const katex = useKaTeX(isMath)
