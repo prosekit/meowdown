@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
+import { setupFixture } from '../testing/index.ts'
+
 import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
+
+const fixture = setupFixture({ mount: false })
+const { n } = fixture
 
 function roundtrip(markdown: string, options?: { frontmatter?: boolean }): string {
   return docToMarkdown(markdownToDoc(markdown, options), options)
@@ -752,6 +757,18 @@ describe('escapes and whitespace', () => {
   it.fails('keeps internal blank-line runs', () => {
     const md = ['a', '', '', '', 'b'].join('\n')
     expect(roundtrip(md)).toBe(md + '\n')
+  })
+
+  it.fails('keeps typed empty paragraphs', () => {
+    const doc = n.doc(
+      n.paragraph('Foo'),
+      n.paragraph(),
+      n.paragraph(),
+      n.paragraph(),
+      n.paragraph('Bar'),
+    )
+    const reparsed = markdownToDoc(docToMarkdown(doc))
+    expect(reparsed.toJSON()).toEqual(doc.toJSON())
   })
 
   it('keeps YAML frontmatter', () => {
