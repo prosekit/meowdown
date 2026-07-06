@@ -1,4 +1,3 @@
-import { isApple } from '@prosekit/core'
 import { pasteText } from '@prosekit/core/test'
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
@@ -188,10 +187,7 @@ describe('undo restores the raw link', () => {
 
     view.focus()
     // `Mod-z` is bound to undo by defineHistory; exercise the actual binding.
-    // TODO: rewrite this to {ControlOrMeta}
-    await userEvent.keyboard(
-      `{${isApple ? 'Meta' : 'Control'}>}z{/${isApple ? 'Meta' : 'Control'}}`,
-    )
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}')
     expect(editor.state.doc.textContent).toBe(YT)
     await expect.element(youtubeEmbed).not.toBeInTheDocument()
   })
