@@ -53,32 +53,36 @@ const markdown = docToMarkdown(editor.state.doc)
 
 `Mod` is Cmd on macOS and Ctrl elsewhere. Each formatting shortcut inserts or removes the literal Markdown delimiters around the selection; each heading shortcut toggles the current block to that level (or back to a paragraph).
 
-| Key               | Action                                                    | Markdown            |
-| ----------------- | --------------------------------------------------------- | ------------------- |
-| `Mod-B`           | Bold                                                      | `**bold**`          |
-| `Mod-I`           | Italic                                                    | `*italic*`          |
-| `Mod-E`           | Inline code                                               | `` `code` ``        |
-| `Mod-Shift-X`     | Strikethrough                                             | `~~strikethrough~~` |
-| `Mod-Shift-H`     | Highlight                                                 | `==highlight==`     |
-| `Mod-K`           | Link                                                      | `[text](url)`       |
-| `Mod-Shift-K`     | Insert a wikilink                                         | `[[target]]`        |
-| `Mod-1`           | Heading 1                                                 | `# heading`         |
-| `Mod-2`           | Heading 2                                                 | `## heading`        |
-| `Mod-3`           | Heading 3                                                 | `### heading`       |
-| `Mod-4`           | Heading 4                                                 | `#### heading`      |
-| `Mod-5`           | Heading 5                                                 | `##### heading`     |
-| `Mod-6`           | Heading 6                                                 | `###### heading`    |
-| `Mod-.`           | Fold or unfold a bullet                                   |                     |
-| `Mod-Enter`       | Follow the link under the caret, or cycle a checkbox task | `- [ ]` / `- [x]`   |
-| `Mod-Shift-Enter` | Cycle a circle checkbox task                              | `+ [ ]` / `+ [x]`   |
-| `Mod-Shift-7`     | Ordered list                                              | `1. item`           |
-| `Mod-Shift-8`     | Bullet list                                               | `- item`            |
-| `Mod-Shift-9`     | Checkbox task list                                        | `- [ ] item`        |
-| `Alt-ArrowUp`     | Move the block or list item up                            |                     |
-| `Alt-ArrowDown`   | Move the block or list item down                          |                     |
-| `Escape`          | Collapse the selection                                    |                     |
+| Key                    | Action                                                    | Markdown            |
+| ---------------------- | --------------------------------------------------------- | ------------------- |
+| `Mod-B`                | Bold                                                      | `**bold**`          |
+| `Mod-I`                | Italic                                                    | `*italic*`          |
+| `Mod-E`                | Inline code                                               | `` `code` ``        |
+| `Mod-Shift-X`          | Strikethrough                                             | `~~strikethrough~~` |
+| `Mod-Shift-H`          | Highlight                                                 | `==highlight==`     |
+| `Mod-K`                | Link                                                      | `[text](url)`       |
+| `Mod-Shift-K`          | Insert a wikilink                                         | `[[target]]`        |
+| `Mod-1`                | Heading 1                                                 | `# heading`         |
+| `Mod-2`                | Heading 2                                                 | `## heading`        |
+| `Mod-3`                | Heading 3                                                 | `### heading`       |
+| `Mod-4`                | Heading 4                                                 | `#### heading`      |
+| `Mod-5`                | Heading 5                                                 | `##### heading`     |
+| `Mod-6`                | Heading 6                                                 | `###### heading`    |
+| `Mod-.`                | Fold or unfold a bullet                                   |                     |
+| `Mod-Enter`            | Follow the link under the caret, or cycle a checkbox task | `- [ ]` / `- [x]`   |
+| `Mod-Shift-Enter`      | Cycle a circle checkbox task                              | `+ [ ]` / `+ [x]`   |
+| `Mod-Shift-7`          | Ordered list                                              | `1. item`           |
+| `Mod-Shift-8`          | Bullet list                                               | `- item`            |
+| `Mod-Shift-9`          | Checkbox task list                                        | `- [ ] item`        |
+| `Alt-ArrowUp`          | Move the block or list item up                            |                     |
+| `Alt-ArrowDown`        | Move the block or list item down                          |                     |
+| `Meta-ArrowUp`         | Move the caret to the document start                      |                     |
+| `Meta-ArrowDown`       | Move the caret to the document end                        |                     |
+| `Shift-Meta-ArrowUp`   | Select to the document start                              |                     |
+| `Shift-Meta-ArrowDown` | Select to the document end                                |                     |
+| `Escape`               | Collapse the selection                                    |                     |
 
-The list-type toggles wrap the current block, convert a list of a different kind in place, and unwrap a list of the same kind back to a paragraph. `Mod-Shift-7/8/9` follow the physical digit key, so they work on layouts where Shift+digit types punctuation. `Alt-ArrowUp`/`Alt-ArrowDown` move a list item together with its nested children, or swap a non-list block with its neighbor. Typing `[` over a selection wraps it into an open wikilink (`[[selection`) with the wikilink menu searching it.
+The list-type toggles wrap the current block, convert a list of a different kind in place, and unwrap a list of the same kind back to a paragraph. `Mod-Shift-7/8/9` follow the physical digit key, so they work on layouts where Shift+digit types punctuation. `Alt-ArrowUp`/`Alt-ArrowDown` move a list item together with its nested children, or swap a non-list block with its neighbor. The `Meta-Arrow` document-boundary motions (Cmd on macOS) are bound explicitly because browsers do not reliably perform the native move (WebKit gives up when the document starts with a list marker). Typing `[` over a selection wraps it into an open wikilink (`[[selection`) with the wikilink menu searching it.
 
 `EDITOR_KEY_BINDINGS` is a literal (`as const`) object mapping every key above to its description, for host settings UIs and keybinding-collision checks.
 
