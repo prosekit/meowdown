@@ -13,6 +13,6 @@ export function defineCodeBlockView(): Extension {
     }),
     // Decorates the code block under the caret; `CodeBlockView` reads it to
     // decide whether the math preview shows alone or below the source.
-    defineCodeBlockPreviewPlugin(),
+    defineCodeBlockPreviewPlugin(), // REVIEW: do not add @prosekit/extensions as a dependency of @meowdown/react just beccause you want to use `defineCodeBlockPreviewPlugin`. Re-export it from core.
   )
 }
