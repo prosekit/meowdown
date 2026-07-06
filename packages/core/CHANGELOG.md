@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.36.2](https://github.com/prosekit/meowdown/compare/core-v0.36.1...core-v0.36.2) (2026-07-06)
+
+
+### Bug Fixes
+
+* canonicalize mark order ([#239](https://github.com/prosekit/meowdown/issues/239)) ([7c0a44e](https://github.com/prosekit/meowdown/commit/7c0a44e408f9af60622d2419095f1e93dc1ad79a))
+* keep empty paragraphs across the markdown roundtrip ([#235](https://github.com/prosekit/meowdown/issues/235)) ([5d400c0](https://github.com/prosekit/meowdown/commit/5d400c0bfed321db35475b02dcdaa36283a20bc4))
+* make `Mod-ArrowUp` reach the document start when the doc begins with a list ([#237](https://github.com/prosekit/meowdown/issues/237)) ([41623cd](https://github.com/prosekit/meowdown/commit/41623cd7a2b994deaee9f400aac562a9ef97e68f))
+
 ## [0.36.1](https://github.com/prosekit/meowdown/compare/core-v0.36.0...core-v0.36.1) (2026-07-04)
 
 
