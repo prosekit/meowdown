@@ -36,6 +36,27 @@ function tableShape(markdown: string): Array<Array<{ type: string; text: string 
 }
 
 describe('markdownToDoc', () => {
+  it('materializes empty paragraphs from a blank-line run', () => {
+    expect(markdownToDoc('a\n\n\n\nb').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'a' }] },
+        { type: 'paragraph' },
+        { type: 'paragraph' },
+        { type: 'paragraph', content: [{ type: 'text', text: 'b' }] },
+      ],
+    })
+  })
+
+  it('skips leading and trailing blank lines', () => {
+    expect(markdownToDoc('\n\na\n\n\n').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'a' }] }],
+    })
+  })
+
   it('keeps a heading', () => {
     expect(markdownToDoc('# Hello').toJSON()).toEqual({
       type: 'doc',
@@ -230,7 +251,7 @@ describe('markdownToDoc', () => {
 
   it('keeps different markers for tasks', () => {
     // `-` parses as a square checkbox task, `+` as a circle checkbox task.
-    expect(markdownToDoc('- [x] Square Task\n\n\n+ [ ] Circle Task').toJSON()).toEqual({
+    expect(markdownToDoc('- [x] Square Task\n\n+ [ ] Circle Task').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null },
       content: [

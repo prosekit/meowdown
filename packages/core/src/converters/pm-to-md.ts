@@ -137,6 +137,25 @@ class MdOut {
     }
   }
 
+  /**
+   * End a block that owns no line of its own (an empty paragraph): flush the
+   * blank line owed by the previous block now and owe the next block a fresh
+   * one, so each empty block yields one extra blank line. A marker-bearing
+   * block (an empty list item's `- `) still owns its first line and falls
+   * through to `closeBlock`. At the very start of the output there is no
+   * blank line to flush or owe - leading empty blocks vanish, mirroring the
+   * parser, which materializes empty paragraphs only between sibling blocks.
+   */
+  closeEmptyBlock(): void {
+    if (!this.atLineStart || this.pendingFirst !== null) {
+      this.closeBlock()
+      return
+    }
+    if (this.parts.length === 0) return
+    this.emitDeferredBlankLine()
+    this.deferredBlankPrefix = this.linePrefix
+  }
+
   /** End the current block; the next write gets a blank line before it. */
   closeBlock(): void {
     // An empty block (e.g. an empty list item `- `) still owns a line: flush
@@ -215,6 +234,10 @@ function emit(node: ProseMirrorNode, out: MdOut): void {
       emitBlockChildren(node, out)
       return
     case 'paragraph':
+      if (node.childCount === 0) {
+        out.closeEmptyBlock()
+        return
+      }
       emitInlineChildren(node, out)
       out.closeBlock()
       return

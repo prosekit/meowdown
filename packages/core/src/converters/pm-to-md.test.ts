@@ -17,6 +17,21 @@ describe('docToMarkdown', () => {
     expect(markdown).toBe('hello world\n')
   })
 
+  it('keeps an empty paragraph between paragraphs', () => {
+    const doc = n.doc(n.paragraph('a'), n.paragraph(), n.paragraph('b'))
+    expect(docToMarkdown(doc)).toBe('a\n\n\nb\n')
+  })
+
+  it('drops a leading empty paragraph', () => {
+    const doc = n.doc(n.paragraph(), n.paragraph('a'))
+    expect(docToMarkdown(doc)).toBe('a\n')
+  })
+
+  it('drops a trailing empty paragraph', () => {
+    const doc = n.doc(n.paragraph('a'), n.paragraph())
+    expect(docToMarkdown(doc)).toBe('a\n')
+  })
+
   it('keeps a level-1 heading', () => {
     const doc = n.doc(n.heading({ level: 1 }, 'Level 1'))
     const markdown = docToMarkdown(doc)
