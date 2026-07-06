@@ -11,6 +11,7 @@ import {
   type EmbedDescriptor,
   type ImageClickHandler,
   type LinkClickHandler,
+  type ListMarker,
   type MarkChunk,
   type MarkMode,
   type MarkName,
@@ -18,6 +19,7 @@ import {
   type MdLinkTextAttrs,
   type MdMathAttrs,
   type MdWikilinkAttrs,
+  type MeowdownListAttrs,
   type NodeName,
   type WikilinkClickHandler,
 } from '@meowdown/core'
@@ -37,8 +39,39 @@ import {
 import { useKaTeX } from '../hooks/use-katex.ts'
 
 import styles from './code-block-view.module.css'
-import { outputSpecToReact } from './dom-output-spec.tsx'
+import { outputSpecAttrs, outputSpecToReact, toReactProps } from './dom-output-spec.tsx'
 import { MathRender } from './math-render.tsx'
+
+/** Payload for {@link TaskClickHandler}. */
+export interface TaskClickPayload {
+  /**
+   * Zero-based position of the clicked checkbox among all the checkboxes this
+   * view renders, in document order. Stable for a given `markdown`, so a host
+   * can map it back to the corresponding task item in its own parse of the
+   * same source.
+   */
+  index: number
+  /** The checkbox's rendered state. The view never flips it — see the handler doc. */
+  checked: boolean
+  /** The item's list marker as written (`+` renders a circle checkbox, `-`/`*` a square). */
+  marker: ListMarker
+  /**
+   * First line of the item's own inline content, exactly as it appears in the
+   * source after the `[ ]`/`[x]` marker and one space. A host locating the task
+   * by {@link index} can cross-check this against its own parse and refuse a
+   * mismatch instead of toggling the wrong item.
+   */
+  text: string
+  /** The originating click. Read modifier keys or position a popover from it. */
+  event: globalThis.MouseEvent
+}
+
+/**
+ * Called when a rendered task checkbox is clicked. The view is a pure render
+ * of `markdown` and never flips the box itself: apply the toggle to the
+ * source and re-render, exactly like the other click handlers.
+ */
+export type TaskClickHandler = (payload: TaskClickPayload) => void
 
 export interface MarkdownViewProps {
   /** The Markdown to render. Live: changing it re-renders the content. */
@@ -55,6 +88,8 @@ export interface MarkdownViewProps {
   onLinkClick?: LinkClickHandler
   /** Called when a rendered image is clicked. Pass a stable function. */
   onImageClick?: ImageClickHandler
+  /** Called when a rendered task checkbox is clicked. Pass a stable function. */
+  onTaskClick?: TaskClickHandler
   /** Extra class on the content root (alongside `ProseMirror meowdown-content`). */
   className?: string
 }
@@ -64,6 +99,9 @@ interface RenderContext {
   onWikilinkClick?: WikilinkClickHandler
   onLinkClick?: LinkClickHandler
   onImageClick?: ImageClickHandler
+  onTaskClick?: TaskClickHandler
+  /** Document-order checkbox counter feeding {@link TaskClickPayload.index}. */
+  taskCounter: { value: number }
 }
 
 function WikilinkChip(props: {
@@ -361,6 +399,56 @@ function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode 
   return renderRuns(runs, 0, context)
 }
 
+/**
+ * A task list item, mirroring `prosemirror-flat-list`'s `listToDOM` DOM shape
+ * (which the generic `toDOM` walk would produce) but with a live checkbox: the
+ * generic walk hands React `checked: ''` — falsy, so a checked task rendered
+ * unchecked — and no way to click. The outer element's attributes still come
+ * from the node's real `toDOM`, so extension attributes (`data-list-marker`,
+ * `data-list-checked`, …) and their CSS keep working. The input is keyed by its
+ * state so a `markdown` change re-seats `defaultChecked`, while `preventDefault`
+ * keeps a click from flipping the DOM out from under the source of truth.
+ */
+function TaskItemView(props: {
+  node: ProseMirrorNode
+  index: number
+  onTaskClick?: TaskClickHandler
+  children: ReactNode
+}): ReactElement {
+  const { node, index, onTaskClick, children } = props
+  const attrs = node.attrs as MeowdownListAttrs
+  const checked = attrs.checked === true
+  const toDOM = node.type.spec.toDOM
+  const outerProps = toReactProps(toDOM ? outputSpecAttrs(toDOM(node)) : undefined)
+  const handleClick = (event: MouseEvent) => {
+    event.preventDefault()
+    const lead = node.firstChild
+    const text = lead?.isTextblock ? (lead.textContent.split('\n', 1)[0] ?? '') : ''
+    onTaskClick?.({
+      index,
+      checked,
+      marker: attrs.marker ?? null,
+      text,
+      event: event.nativeEvent,
+    })
+  }
+  return (
+    <div {...outerProps}>
+      <div className="list-marker list-marker-click-target" contentEditable={false}>
+        <label>
+          <input
+            key={checked ? 'checked' : 'unchecked'}
+            type="checkbox"
+            defaultChecked={checked}
+            onClick={handleClick}
+          />
+        </label>
+      </div>
+      <div className="list-content">{children}</div>
+    </div>
+  )
+}
+
 function renderBlock(node: ProseMirrorNode, key: number, context: RenderContext): ReactNode {
   if (node.type.name === ('codeBlock' satisfies NodeName)) {
     const attrs = node.attrs as CodeBlockAttrs
@@ -381,10 +469,28 @@ function renderBlock(node: ProseMirrorNode, key: number, context: RenderContext)
     )
   }
 
+  // A checkbox task item renders through the interactive special case. Claim
+  // the document-order index before descending so a nested task numbers after
+  // its parent — the order a source-based parse of the same markdown sees.
+  // (When the first child is itself a list the node is a bare wrapper with no
+  // marker of its own, so the generic path applies.)
+  const isTaskItem =
+    node.type.name === ('list' satisfies NodeName) &&
+    (node.attrs as MeowdownListAttrs).kind === 'task' &&
+    node.firstChild?.type !== node.type
+  const taskIndex = isTaskItem ? context.taskCounter.value++ : 0
+
   const children: ReactNode[] = []
   node.forEach((child, _offset, index) => {
     children.push(renderBlock(child, index, context))
   })
+  if (isTaskItem) {
+    return (
+      <TaskItemView key={key} node={node} index={taskIndex} onTaskClick={context.onTaskClick}>
+        {children}
+      </TaskItemView>
+    )
+  }
   return toDOM ? (
     outputSpecToReact(toDOM(node), children, key)
   ) : (
@@ -411,17 +517,33 @@ export function MarkdownView({
   onWikilinkClick,
   onLinkClick,
   onImageClick,
+  onTaskClick,
   className,
 }: MarkdownViewProps): ReactElement {
   const content = useMemo(() => {
     const doc = markdownToDoc(markdown, { frontmatter })
-    const context: RenderContext = { resolveImageUrl, onWikilinkClick, onLinkClick, onImageClick }
+    const context: RenderContext = {
+      resolveImageUrl,
+      onWikilinkClick,
+      onLinkClick,
+      onImageClick,
+      onTaskClick,
+      taskCounter: { value: 0 },
+    }
     const blocks: ReactNode[] = []
     doc.forEach((node, _offset, index) => {
       blocks.push(renderBlock(node, index, context))
     })
     return blocks
-  }, [markdown, frontmatter, resolveImageUrl, onWikilinkClick, onLinkClick, onImageClick])
+  }, [
+    markdown,
+    frontmatter,
+    resolveImageUrl,
+    onWikilinkClick,
+    onLinkClick,
+    onImageClick,
+    onTaskClick,
+  ])
 
   return (
     <div className={clsx('ProseMirror', 'meowdown-content', className)} data-mark-mode={markMode}>

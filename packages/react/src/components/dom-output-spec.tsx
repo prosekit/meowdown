@@ -19,11 +19,17 @@ const ATTR_NAME_MAP: Record<string, string> = {
 type SpecChild = DOMOutputSpec | 0 | Record<string, string>
 type SpecArray = readonly [string, ...SpecChild[]]
 
-function toReactProps(
+/**
+ * Convert a `DOMOutputSpec` attribute object into React props, mapping the DOM
+ * attribute names React spells differently. Exported for renderers that build
+ * an element by hand (the static task checkbox) but source their attributes
+ * from a node's real `toDOM` — see {@link outputSpecAttrs}.
+ */
+export function toReactProps(
   attrs: Record<string, string> | undefined,
-  key: number | string,
+  key?: number | string,
 ): Record<string, string | number> {
-  const props: Record<string, string | number> = { key }
+  const props: Record<string, string | number> = key === undefined ? {} : { key }
   if (!attrs) return props
   for (const [name, value] of Object.entries(attrs)) {
     // DOMOutputSpec `style` is a CSS string, which React rejects. Our specs do
@@ -32,6 +38,16 @@ function toReactProps(
     props[ATTR_NAME_MAP[name] ?? name] = value
   }
   return props
+}
+
+/** The attribute object of an array-form `DOMOutputSpec`, when it carries one. */
+export function outputSpecAttrs(spec: DOMOutputSpec): Record<string, string> | undefined {
+  if (typeof spec === 'string' || !Array.isArray(spec)) return undefined
+  const second = (spec as SpecArray)[1]
+  if (second != null && second !== 0 && typeof second === 'object' && !Array.isArray(second)) {
+    return second as Record<string, string>
+  }
+  return undefined
 }
 
 /**
