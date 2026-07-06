@@ -1,4 +1,4 @@
-import { defineKeymap, isApple, type PlainExtension } from '@prosekit/core'
+import { defineKeymap, type PlainExtension } from '@prosekit/core'
 import { Selection, TextSelection, type Command } from '@prosekit/pm/state'
 
 function selectDocBoundary(direction: -1 | 1, extend: boolean): Command {
