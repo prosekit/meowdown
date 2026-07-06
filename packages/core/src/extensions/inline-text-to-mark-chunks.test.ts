@@ -497,7 +497,19 @@ describe('autolink', () => {
   it('non-http scheme', () => {
     expect(parse('a ftp://example.com b')).toMatchInlineSnapshot(`
       "
-      [0, 21]
+      [0, 2]
+      [2, 19]  mdLinkText(href=ftp://example.com)
+      [19, 21]
+      "
+    `)
+  })
+
+  it('custom app scheme', () => {
+    expect(parse('a x-devonthink-item://40C8E9F8 b')).toMatchInlineSnapshot(`
+      "
+      [0, 2]
+      [2, 30]  mdLinkText(href=x-devonthink-item://40C8E9F8)
+      [30, 32]
       "
     `)
   })

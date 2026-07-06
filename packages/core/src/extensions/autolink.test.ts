@@ -22,6 +22,15 @@ describe('autolink rendering', () => {
     await expect.element(pmRoot.getByRole('link', { name: 'google.com' })).toBeInTheDocument()
   })
 
+  it('renders a bare custom-scheme URI as a link', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see x-devonthink-item://40C8E9F8 here')))
+    await expect
+      .element(pmRoot.getByRole('link', { name: 'x-devonthink-item://40C8E9F8' }))
+      .toBeInTheDocument()
+  })
+
   // Locks the product decision: a link is never un-linked by moving the caret
   // into it. The link keeps its blue `<a>` and stays editable.
   it('keeps a scheme autolink a link when the caret is inside it', async () => {
