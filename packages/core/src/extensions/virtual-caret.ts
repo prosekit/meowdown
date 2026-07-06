@@ -73,10 +73,10 @@ function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   return undefined
 }
 
-// Step 3: an atom mark view hides its source
-// text with `display: none`, so no position beside it has a box the earlier
-// steps can measure. The preview element standing in for the source is the
-// visible geometry; the caret sits flush against its outer edge.
+// Step 3: an atom mark view collapses its source text to a zero-size box
+// (font-size: 0), so no position beside it has a box the earlier steps can
+// measure. The preview element standing in for the source is the visible
+// geometry; the caret sits flush against its outer edge.
 function findAtomCaretRect(view: EditorView): CaretRect | undefined {
   const state = view.state
   const head = state.selection.head
