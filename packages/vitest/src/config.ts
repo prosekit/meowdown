@@ -34,7 +34,6 @@ export function defineSharedConfig() {
     test: {
       setupFiles,
       retry: IS_BOT ? 3 : 0,
-      bail: IS_BOT ? 0 : 1,
       fileParallelism: false,
       browser: {
         enabled: true,
