@@ -92,9 +92,10 @@ function cleanCopySerializer(slice: Slice): string {
     const parts: string[] = []
     blockNode.descendants((textNode) => {
       if (!textNode.isText || !textNode.text) return true
+      const textNodeMarks = textNode.marks.map((mark) => mark.type.name as MarkName)
       const stripped =
-        textNode.marks.some((m: Mark) => CLIPBOARD_STRIP_MARK_NAMES.has(m.type.name as MarkName)) &&
-        !textNode.marks.some((m: Mark) => CLIPBOARD_KEEP_MARK_NAMES.has(m.type.name as MarkName))
+        textNodeMarks.some((markName) => CLIPBOARD_STRIP_MARK_NAMES.has(markName)) &&
+        !textNodeMarks.some((markName) => CLIPBOARD_KEEP_MARK_NAMES.has(markName))
       if (!stripped) parts.push(textNode.text)
       return false
     })
