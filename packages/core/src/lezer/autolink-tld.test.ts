@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { hostFromUrl, isLinkableBareHost } from './autolink-tld.ts'
+import { getAutolinkHref, hostFromUrl, isLinkableBareHost } from './autolink-tld.ts'
 
 describe('hostFromUrl', () => {
   it('returns the whole string when there is no path', () => {
@@ -53,4 +53,26 @@ describe('isLinkableBareHost', () => {
       expect(isLinkableBareHost(host)).toBe(false)
     })
   }
+})
+
+describe('getAutolinkHref', () => {
+  it('keeps a URL with a scheme', () => {
+    expect(getAutolinkHref('https://example.com')).toBe('https://example.com')
+  })
+
+  it('adds mailto for an email', () => {
+    expect(getAutolinkHref('me@example.com')).toBe('mailto:me@example.com')
+  })
+
+  it('adds https for a www URL', () => {
+    expect(getAutolinkHref('www.example.com')).toBe('https://www.example.com')
+  })
+
+  it('adds https for a linkable bare domain', () => {
+    expect(getAutolinkHref('google.com/path')).toBe('https://google.com/path')
+  })
+
+  it('declines a non-linkable bare domain', () => {
+    expect(getAutolinkHref('README.md')).toBeUndefined()
+  })
 })

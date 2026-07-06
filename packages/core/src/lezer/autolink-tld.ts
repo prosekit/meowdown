@@ -53,3 +53,20 @@ export function isLinkableBareHost(host: string): boolean {
   }
   return true
 }
+
+/**
+ * Derive the `href` for an autolink from its visible text:
+ *
+ * - a URL with a scheme is used as-is
+ * - an email becomes `mailto:`
+ * - a `www.` URL gets an implied `https://`
+ * - a bare domain on the curated TLD list gets an implied `https://`
+ * - anything else returns `undefined`
+ */
+export function getAutolinkHref(urlText: string): string | undefined {
+  if (/^[a-z][a-z0-9+.-]*:/i.test(urlText)) return urlText
+  if (/^[^\s@]+@[^\s@]+$/.test(urlText)) return `mailto:${urlText}`
+  if (/^www\./i.test(urlText)) return `https://${urlText}`
+  if (isLinkableBareHost(hostFromUrl(urlText))) return `https://${urlText}`
+  return undefined
+}

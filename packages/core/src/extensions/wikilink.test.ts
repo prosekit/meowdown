@@ -149,9 +149,7 @@ describe('wikilink vertical caret navigation', () => {
     )
     fixture.view.focus()
     const steps = await traceKeySelection(fixture, 'ArrowDown', 7)
-    const uniqueSteps = Array.from(new Set(steps))
-
-    return uniqueSteps.map((step) => '\n' + step + '\n').join('-'.repeat(10))
+    return steps.map((step) => '\n' + step + '\n').join('-'.repeat(10))
   }
 
   it('can ArrowDown from the first paragraph to the last paragraph in hide mode', async () => {
