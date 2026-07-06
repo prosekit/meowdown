@@ -253,7 +253,7 @@ function MathCodeBlock({ code }: { code: string }): ReactElement {
       katex={katex}
       formula={code}
       displayMode
-      className={styles.MathPreview}
+      className={styles.Preview}
       data-testid="code-block-math-preview"
     />
   )

@@ -3,7 +3,7 @@ import type { Mark } from '@prosekit/pm/model'
 import { TextSelection } from '@prosekit/pm/state'
 import type { EditorView, MarkView, ViewMutationRecord } from '@prosekit/pm/view'
 
-import { loadKaTeX } from '../utils/katex.ts'
+import { loadKaTeX, renderMathInto } from '../utils/katex.ts'
 
 import type { MdMathAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
@@ -77,9 +77,7 @@ class MathMarkView implements MarkView {
     void loadKaTeX().then((katex) => {
       // A newer formula may have rendered while the module loaded.
       if (formula !== this.#formula) return
-      // MathML output renders natively in every current browser, so no KaTeX
-      // stylesheet or fonts are required.
-      katex.render(formula, this.#preview, { throwOnError: false, output: 'mathml' })
+      renderMathInto(katex, this.#preview, formula, false)
     })
   }
 }

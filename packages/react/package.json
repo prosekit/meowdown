@@ -25,7 +25,6 @@
     "@meowdown/core": "workspace:*",
     "@ocavue/utils": "^1.7.0",
     "@prosekit/core": "^0.13.0-beta.5",
-    "@prosekit/extensions": "^0.18.0-beta.12",
     "@prosekit/pm": "^0.1.19-beta.2",
     "@prosekit/react": "^0.8.0-beta.17",
     "clsx": "^2.1.1",

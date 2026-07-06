@@ -4,7 +4,7 @@ declare const styles = {
   'Root': '' as string,
   'Root': '' as string,
   'Toolbar': '' as string,
-  'MathPreview': '' as string,
+  'Preview': '' as string,
   'Toolbar': '' as string,
   'Root': '' as string,
   'Toolbar': '' as string,

@@ -1,5 +1,9 @@
 export { Priority, withPriority } from '@prosekit/core'
-export type { CodeBlockAttrs } from '@prosekit/extensions/code-block'
+export {
+  defineCodeBlockPreviewPlugin,
+  isCodeBlockPreviewHiddenDecoration,
+  type CodeBlockAttrs,
+} from '@prosekit/extensions/code-block'
 export { definePlaceholder, type PlaceholderOptions } from '@prosekit/extensions/placeholder'
 export { defineReadonly } from '@prosekit/extensions/readonly'
 export {
@@ -59,7 +63,7 @@ export {
 } from './extensions/image-click.ts'
 export { defaultResolveImageUrl, defineImage, type ImageOptions } from './extensions/image.ts'
 export { defineMath } from './extensions/math.ts'
-export { loadKaTeX, type KaTeX } from './utils/katex.ts'
+export { loadKaTeX, renderMathInto, type KaTeX } from './utils/katex.ts'
 export type {
   MdFileAttrs,
   MdImageAttrs,

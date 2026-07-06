@@ -1,6 +1,9 @@
 import { Combobox } from '@base-ui/react/combobox'
-import { type CodeBlockAttrs, codeBlockLanguages } from '@meowdown/core'
-import { isCodeBlockPreviewHiddenDecoration } from '@prosekit/extensions/code-block'
+import {
+  type CodeBlockAttrs,
+  codeBlockLanguages,
+  isCodeBlockPreviewHiddenDecoration,
+} from '@meowdown/core'
 import { TextSelection } from '@prosekit/pm/state'
 import type { ReactNodeViewProps } from '@prosekit/react'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
@@ -23,7 +26,6 @@ export function CodeBlockView(props: ReactNodeViewProps) {
   const isMath = language === 'math'
   const code = props.node.textContent
 
-  // REVIEW: do not add @prosekit/extensions as a dependency of @meowdown/react just beccause you want to use `isCodeBlockPreviewHiddenDecoration`. Re-export it from core.
   const caretInside = props.decorations.some(isCodeBlockPreviewHiddenDecoration)
 
   const katex = useKaTeX(isMath)
@@ -137,7 +139,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
           katex={katex}
           formula={code}
           displayMode
-          className={styles.MathPreview}
+          className={styles.Preview}
           data-testid="code-block-math-preview"
           onMouseDown={focusSource}
         />

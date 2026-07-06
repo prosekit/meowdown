@@ -1,7 +1,5 @@
-import type { KaTeX } from '@meowdown/core'
+import { renderMathInto, type KaTeX } from '@meowdown/core'
 import { useLayoutEffect, useRef, type MouseEventHandler, type ReactElement } from 'react'
-
-import { renderMathInto } from '../utils/math.ts'
 
 interface MathRenderProps {
   /** The KaTeX module, or `undefined` while it loads (renders empty). */
