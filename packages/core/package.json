@@ -32,7 +32,7 @@
     "@prosekit/extensions": "^0.18.0-beta.12",
     "@prosekit/pm": "^0.1.19-beta.2",
     "@prosekit/web": "^0.9.0-beta.17",
-    "prosemirror-flat-list": "^0.7.1",
+    "prosemirror-flat-list": "^0.7.0",
     "prosemirror-highlight": "^0.15.2",
     "rehype-parse": "^9.0.1",
     "rehype-remark": "^10.0.1",
