@@ -24,9 +24,6 @@ minimumReleaseAgeExclude:
 allowBuilds:
   simple-git-hooks: false
 
-overrides:
-  prosemirror-view: ^1.42.0
-
 patchedDependencies:
   prosemirror-view: patches/prosemirror-view.patch
 
