@@ -1,4 +1,4 @@
-import type { EditorNode, Schema } from '@prosekit/pm/model'
+import { Mark, type EditorNode, type Schema } from '@prosekit/pm/model'
 import type { Mappable } from '@prosekit/pm/transform'
 import { ReplaceStep, Step, StepResult, Transform } from '@prosekit/pm/transform'
 
@@ -8,6 +8,7 @@ import {
   type MarkChunk,
   type MarkChunkJSON,
 } from './mark-chunk.ts'
+import { marksEqual } from './marks-equal.ts'
 
 interface BatchSetMarkStepJSON {
   stepType: 'batchSetMark'
@@ -38,24 +39,25 @@ export class BatchSetMarkStep extends Step {
       const safeTo = Math.max(safeFrom, Math.min(to, docSize))
       if (safeFrom >= safeTo) continue
 
+      // Rank-sorted like a node's own mark set; equal-rank marks (nested
+      // mdPack) keep the parser's outer-first emit order, so rewriting a node
+      // whose set merely differs in order keeps same-type marks canonical.
+      const expectedSet = Mark.setFrom(expected)
+
       doc.nodesBetween(safeFrom, safeTo, (node, pos) => {
         if (!node.isText) return true
         const nodeFrom = Math.max(safeFrom, pos)
         const nodeTo = Math.min(safeTo, pos + node.nodeSize)
         if (nodeFrom >= nodeTo) return false
         const current = node.marks
+        if (marksEqual(current, expectedSet)) return false
 
+        tr ??= new Transform(doc)
         for (const mark of current) {
-          if (!mark.isInSet(expected)) {
-            tr ??= new Transform(doc)
-            tr.removeMark(nodeFrom, nodeTo, mark)
-          }
+          tr.removeMark(nodeFrom, nodeTo, mark)
         }
-        for (const mark of expected) {
-          if (!mark.isInSet(current)) {
-            tr ??= new Transform(doc)
-            tr.addMark(nodeFrom, nodeTo, mark)
-          }
+        for (const mark of expectedSet) {
+          tr.addMark(nodeFrom, nodeTo, mark)
         }
         return false
       })
