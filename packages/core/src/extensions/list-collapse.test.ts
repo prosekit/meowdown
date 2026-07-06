@@ -1,4 +1,3 @@
-import { AllSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
@@ -87,30 +86,71 @@ describe('bullet fold rendering', () => {
   })
 })
 
-describe('deleting a select-all that contains a folded bullet', () => {
-  // prosemirror-flat-list's `protectCollapsed` consumes the first Backspace to
-  // expand the folded bullet instead of deleting the selection, so deleting a
-  // select-all takes two presses. Remove the `fails` marker once
-  // https://github.com/ocavue/prosemirror-flat-list/pull/319 ships and the
-  // dependency is bumped.
-  it.fails('deletes everything on the first Backspace', async () => {
+describe('deleting a selection that contains a folded bullet', () => {
+  it('expands hidden content before deleting', async () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
-    fixture.set(
-      n.doc(
-        n.paragraph('alpha'),
-        n.list(
-          { kind: 'bullet', collapsed: true },
-          n.paragraph('folded parent'),
-          n.list({ kind: 'bullet' }, n.paragraph('hidden child')),
-        ),
-        n.paragraph('beta<a>'),
+
+    const doc1 = n.doc(
+      n.paragraph('alpha'),
+      n.list(
+        { kind: 'bullet', collapsed: true },
+        n.paragraph('folded parent'),
+        n.list({ kind: 'bullet' }, n.paragraph('hidden<a> child')),
       ),
+      n.paragraph('beta<a>'),
     )
+
+    const doc2 = n.doc(
+      n.paragraph('alpha'),
+      n.list(
+        { kind: 'bullet', collapsed: false },
+        n.paragraph('folded parent'),
+        n.list({ kind: 'bullet' }, n.paragraph('hidden child')),
+      ),
+      n.paragraph('beta<a>'),
+    )
+
+    const doc3 = n.doc(
+      n.paragraph('alpha'),
+      n.list(
+        { kind: 'bullet', collapsed: false },
+        n.paragraph('folded parent'),
+        n.list({ kind: 'bullet' }, n.paragraph('hidde child')),
+      ),
+      n.paragraph('beta<a>'),
+    )
+
+    fixture.set(doc1)
     editor.view.focus()
-    editor.view.dispatch(editor.view.state.tr.setSelection(new AllSelection(editor.view.state.doc)))
 
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.doc.toJSON()).toEqual(n.doc(n.paragraph()).toJSON())
+    expect(fixture.doc.toJSON()).toEqual(doc2.toJSON())
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.doc.toJSON()).toEqual(doc3.toJSON())
+  })
+
+  it('deletes everything on the first Backspace in an AllSelection', async () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+
+    let doc1 = n.doc(
+      n.paragraph('alpha'),
+      n.list(
+        { kind: 'bullet', collapsed: true },
+        n.paragraph('folded parent'),
+        n.list({ kind: 'bullet' }, n.paragraph('hidden child')),
+      ),
+      n.paragraph('beta<a>'),
+    )
+
+    let doc2 = n.doc(n.paragraph())
+
+    fixture.set(doc1)
+    editor.view.focus()
+    editor.commands.selectAll()
+
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.doc.toJSON()).toEqual(doc2)
   })
 })
