@@ -2,6 +2,29 @@
   position: relative;
 }
 
+/* Preview-only state: the caret is outside a math block, so the source and
+ * its toolbar give way to the rendered formula. The caret can never sit in
+ * the hidden source (entering it flips the state back), so the missing box
+ * does not disturb caret geometry. */
+.Root[data-preview] pre {
+  display: none;
+}
+
+.Root[data-preview] .Toolbar {
+  display: none;
+}
+
+.MathPreview {
+  display: block;
+  padding: 0.25rem 0;
+  overflow-x: auto;
+  text-align: center;
+  cursor: text;
+
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 .Toolbar {
   display: flex;
   align-items: center;

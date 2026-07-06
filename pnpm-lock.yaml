@@ -172,12 +172,15 @@ importers:
       '@prosekit/core':
         specifier: ^0.13.0-beta.5
         version: 0.13.0-beta.5(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
+      '@prosekit/extensions':
+        specifier: ^0.18.0-beta.12
+        version: 0.18.0-beta.12(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.3.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.42.0)
       '@prosekit/pm':
         specifier: ^0.1.19-beta.2
         version: 0.1.19-beta.2
       '@prosekit/react':
         specifier: ^0.8.0-beta.17
-        version: 0.8.0-beta.17(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)
+        version: 0.8.0-beta.17(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.3.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.42.0)(react-dom@19.2.7)(react@19.2.7)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -275,6 +278,9 @@ importers:
       '@ocavue/utils':
         specifier: ^1.7.0
         version: 1.7.0
+      katex:
+        specifier: ^0.17.0
+        version: 0.17.0
       react:
         specifier: ^19.2.7
         version: 19.2.7
@@ -4640,7 +4646,7 @@ snapshots:
       prosemirror-transform: 1.12.0
       prosemirror-view: 1.42.0(patch_hash=01138620071ca804f9a8ea1da8da8b33627cc4a241cf042480fa56863b2c6f25)
 
-  '@prosekit/react@0.8.0-beta.17(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(react-dom@19.2.7)(react@19.2.7)':
+  '@prosekit/react@0.8.0-beta.17(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.3.0)(@types/hast@3.0.4)(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.42.0)(react-dom@19.2.7)(react@19.2.7)':
     dependencies:
       '@prosekit/core': 0.13.0-beta.5(prosemirror-model@1.25.9)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
       '@prosekit/pm': 0.1.19-beta.2

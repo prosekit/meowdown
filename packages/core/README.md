@@ -48,6 +48,10 @@ const markdown = docToMarkdown(editor.state.doc)
 - Highlight (`==highlight==`)
 - Tags (`#tag`)
 - Bare-domain autolinks (`google.com`, `sub.domain.io/path`)
+- Math, rendered with KaTeX (import `katex/dist/katex.min.css`)
+  - Inline math (`$x$` and `$$x$$`), Pandoc-style delimiter rules so `$20,000 and $30,000` stays plain text
+  - Display math (`$$` fences on their own lines), kept as `$$` through a round-trip
+  - ` ```math ` fenced code blocks
 
 ## Keyboard shortcuts
 

@@ -12,11 +12,12 @@ Install the package and its peer dependencies:
 npm install @meowdown/react @meowdown/core react react-dom
 ```
 
-Import both stylesheets and render the editor:
+Import the stylesheets and render the editor:
 
 ```tsx
 import '@meowdown/core/style.css'
 import '@meowdown/react/style.css'
+import 'katex/dist/katex.min.css' // math rendering
 import { MeowdownEditor } from '@meowdown/react'
 
 export function App() {
@@ -59,6 +60,8 @@ Slash menu host items can include `keywords` to match hidden terms without chang
 ## Styling
 
 Import both stylesheets: `@meowdown/core/style.css` (the editor theme and variables) and `@meowdown/react/style.css` (the component layout). The core theme is documented in [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core).
+
+Math rendering (`$E=mc^2$` inline, `$$` blocks, and ` ```math ` fences) uses KaTeX, which needs its own stylesheet: `katex/dist/katex.min.css`. Skip it if your documents never contain math.
 
 ## License
 

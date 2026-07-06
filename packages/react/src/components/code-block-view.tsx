@@ -1,11 +1,16 @@
 import { Combobox } from '@base-ui/react/combobox'
 import { type CodeBlockAttrs, codeBlockLanguages } from '@meowdown/core'
+import { isCodeBlockPreviewHiddenDecoration } from '@prosekit/extensions/code-block'
+import { TextSelection } from '@prosekit/pm/state'
 import type { ReactNodeViewProps } from '@prosekit/react'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type MouseEvent } from 'react'
+
+import { useKaTeX } from '../hooks/use-katex.ts'
 
 import styles from './code-block-view.module.css'
 import { CopyButton } from './copy-button.tsx'
+import { MathRender } from './math-render.tsx'
 
 type LanguageItem = {
   label: string
@@ -15,6 +20,28 @@ type LanguageItem = {
 export function CodeBlockView(props: ReactNodeViewProps) {
   const attrs = props.node.attrs as CodeBlockAttrs
   const language = attrs.language || ''
+  const isMath = language === 'math'
+  const code = props.node.textContent
+  const caretInside = props.decorations.some(isCodeBlockPreviewHiddenDecoration)
+
+  const katex = useKaTeX(isMath)
+  const showMathPreview = isMath && katex != null
+
+  // The preview replaces the source only when the caret is elsewhere; with the
+  // caret inside, the source stays on top and the preview updates live below.
+  // An empty or not-yet-rendered block keeps its source, so it never turns
+  // invisible and unclickable.
+  const previewOnly = showMathPreview && !caretInside && code.trim() !== ''
+
+  const focusSource = (event: MouseEvent) => {
+    event.preventDefault()
+    const pos = props.getPos()
+    if (pos == null) return
+    const { view } = props
+    const selection = TextSelection.near(view.state.doc.resolve(pos + 1), 1)
+    view.dispatch(view.state.tr.setSelection(selection))
+    view.focus()
+  }
 
   // Fall back to the raw value so an alias or unknown language still shows in
   // the trigger instead of looking empty.
@@ -48,7 +75,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
   }
 
   return (
-    <div className={styles.Root}>
+    <div className={styles.Root} data-preview={previewOnly || undefined}>
       <div className={styles.Toolbar} contentEditable={false} data-open={comboboxOpen || undefined}>
         <Combobox.Root
           items={itemsForView}
@@ -103,6 +130,16 @@ export function CodeBlockView(props: ReactNodeViewProps) {
         />
       </div>
       <pre ref={props.contentRef} data-language={language}></pre>
+      {showMathPreview && (
+        <MathRender
+          katex={katex}
+          formula={code}
+          displayMode
+          className={styles.MathPreview}
+          data-testid="code-block-math-preview"
+          onMouseDown={focusSource}
+        />
+      )}
     </div>
   )
 }
