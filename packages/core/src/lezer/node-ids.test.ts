@@ -38,6 +38,8 @@ describe('LEZER_NODE_IDS', () => {
         "HorizontalRule": 5,
         "Image": 28,
         "InlineCode": 29,
+        "InlineMath": 59,
+        "InlineMathMark": 60,
         "Link": 27,
         "LinkLabel": 43,
         "LinkMark": 37,

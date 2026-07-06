@@ -73,6 +73,8 @@ export const LEZER_NODE_NAMES = [
   'WikilinkMark',
   'Highlight',
   'HighlightMark',
+  'InlineMath',
+  'InlineMathMark',
 ] as const
 
 export type LezerNodeName = (typeof LEZER_NODE_NAMES)[number]

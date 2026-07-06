@@ -43,6 +43,7 @@ export const CHAR_TILDE = 126 /* ~ */
 export const CHAR_AT = 64 /* @ */
 export const CHAR_AMPERSAND = 38 /* & */
 export const CHAR_EQUAL = 61 /* = */
+export const CHAR_DOLLAR = 36 /* $ */
 
 // Digits
 export const CHAR_0 = 48 /* 0 */
