@@ -1,3 +1,4 @@
+import { AllSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
@@ -83,5 +84,33 @@ describe('bullet fold rendering', () => {
     await userEvent.click(pmRoot.locate('.list-marker-click-target').first())
     expect(fixture.doc.child(0).attrs.collapsed).toBe(true)
     await expect.element(pmRoot.getByText('child')).not.toBeVisible()
+  })
+})
+
+describe('deleting a select-all that contains a folded bullet', () => {
+  // prosemirror-flat-list's `protectCollapsed` consumes the first Backspace to
+  // expand the folded bullet instead of deleting the selection, so deleting a
+  // select-all takes two presses. Remove the `fails` marker once
+  // https://github.com/ocavue/prosemirror-flat-list/pull/319 ships and the
+  // dependency is bumped.
+  it.fails('deletes everything on the first Backspace', async () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(
+      n.doc(
+        n.paragraph('alpha'),
+        n.list(
+          { kind: 'bullet', collapsed: true },
+          n.paragraph('folded parent'),
+          n.list({ kind: 'bullet' }, n.paragraph('hidden child')),
+        ),
+        n.paragraph('beta<a>'),
+      ),
+    )
+    editor.view.focus()
+    editor.view.dispatch(editor.view.state.tr.setSelection(new AllSelection(editor.view.state.doc)))
+
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.doc.toJSON()).toEqual(n.doc(n.paragraph()).toJSON())
   })
 })
