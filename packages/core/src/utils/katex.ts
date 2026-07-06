@@ -9,6 +9,7 @@ let katexPromise: Promise<KaTeX> | undefined
  * math, so the library stays out of the initial bundle.
  */
 export function loadKaTeX(): Promise<KaTeX> {
+  // REVIEW：to reduce bundle size, we could import only the functions we need instead of the whole module. We can use named import to import only the "render" function from the "katex" module.
   katexPromise ??= import('katex').then((module) => module.default)
   return katexPromise
 }
