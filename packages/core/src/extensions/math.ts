@@ -77,7 +77,9 @@ class MathMarkView implements MarkView {
     void loadKaTeX().then((katex) => {
       // A newer formula may have rendered while the module loaded.
       if (formula !== this.#formula) return
-      katex.render(formula, this.#preview, { throwOnError: false })
+      // MathML output renders natively in every current browser, so no KaTeX
+      // stylesheet or fonts are required.
+      katex.render(formula, this.#preview, { throwOnError: false, output: 'mathml' })
     })
   }
 }

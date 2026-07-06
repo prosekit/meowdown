@@ -1,7 +1,6 @@
 @import 'tailwindcss';
 @import '@meowdown/core/style.css';
 @import '@meowdown/react/style.css';
-@import 'katex/dist/katex.min.css';
 @plugin '@egoist/tailwindcss-icons';
 
 @custom-variant dark (&:where(.dark, .dark *));

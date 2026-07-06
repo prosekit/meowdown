@@ -16,7 +16,7 @@ interface MathRenderProps {
 /**
  * KaTeX output rendered into a real element, the same way the editor's
  * `MathMarkView` does. A span host matches KaTeX's own output shape; display
- * mode wraps itself in a block-level `.katex-display`.
+ * mode emits a block-level `math[display="block"]` element.
  */
 export function MathRender(props: MathRenderProps): ReactElement {
   const { katex, formula, displayMode, className, onMouseDown } = props

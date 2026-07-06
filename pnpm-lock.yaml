@@ -278,9 +278,6 @@ importers:
       '@ocavue/utils':
         specifier: ^1.7.0
         version: 1.7.0
-      katex:
-        specifier: ^0.17.0
-        version: 0.17.0
       react:
         specifier: ^19.2.7
         version: 19.2.7

@@ -17,7 +17,6 @@
     "@meowdown/core": "workspace:*",
     "@meowdown/react": "workspace:*",
     "@ocavue/utils": "^1.7.0",
-    "katex": "^0.17.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
