@@ -8,6 +8,7 @@ import {
   getHiddenRunAfter,
   getHiddenRunBefore,
   getInnermostPackRangeAt,
+  getOutermostPackRangeAt,
   getRestPosition,
   getUnitMarkerRuns,
   isHiddenChar,
@@ -116,6 +117,27 @@ describe('getInnermostPackRangeAt', () => {
     const posX = findText(fixture.doc, 'x')
     const pack = getInnermostPackRangeAt(fixture.state, posX + 3)
     expect(runText(fixture, pack)).toBe('***x***')
+  })
+})
+
+describe('getOutermostPackRangeAt', () => {
+  it('resolves a nested unit character to the outer unit', () => {
+    using fixture = setup('**a *b* c**')
+    const posB = findText(fixture.doc, 'b')
+    const pack = getOutermostPackRangeAt(fixture.state, posB)
+    expect(runText(fixture, pack)).toBe('**a *b* c**')
+  })
+
+  it('resolves the text of a triple unit to the outer unit', () => {
+    using fixture = setup('***x***')
+    const posX = findText(fixture.doc, 'x')
+    const pack = getOutermostPackRangeAt(fixture.state, posX)
+    expect(runText(fixture, pack)).toBe('***x***')
+  })
+
+  it('is undefined on plain text', () => {
+    using fixture = setup('plain **x**')
+    expect(getOutermostPackRangeAt(fixture.state, 1)).toBeUndefined()
   })
 })
 

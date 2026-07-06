@@ -1,9 +1,10 @@
-import { defineCommands, definePlugin, getMarkRange, getMarkType, union } from '@prosekit/core'
+import { defineCommands, definePlugin, union } from '@prosekit/core'
 import type { Mark, Slice } from '@prosekit/pm/model'
 import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
+import { getOutermostPackRangeAt } from './hidden-run.ts'
 import type { MarkName } from './mark-names.ts'
 
 /**
@@ -99,11 +100,13 @@ function cleanCopySerializer(slice: Slice): string {
  * In focus mode, reveal the markdown syntax of the inline unit under the caret.
  *
  * Every revealable unit (emphasis, strong, code, strikethrough, link, autolink,
- * image) carries one `mdPack` mark spanning it, so a single boundary-inclusive
- * `getMarkRange` finds the unit, returning the outermost when units nest. One
- * decoration over its range flips the hidden punctuation/url/source visible via
- * the `.show` CSS rule. Because the range covers the whole unit, a caret at
- * either edge (e.g. right after a link's `)`) still reveals it. Wikilink and
+ * image) carries one `mdPack` mark spanning it. Nested units stack one pack per
+ * level and the order of same-type marks in a mark set follows edit history,
+ * so the reveal expands every pack instance on the caret's character and takes
+ * the outermost range. One decoration over that range flips the hidden
+ * punctuation/url/source visible via the `.show` CSS rule. The character after
+ * the caret is preferred, falling back to the one before, so a caret at either
+ * edge (e.g. right after a link's `)`) still reveals the unit. Wikilink and
  * `#tag` carry no `mdPack`, so they never reveal.
  */
 function computeFocusDecorations(state: EditorState): DecorationSet {
@@ -114,7 +117,8 @@ function computeFocusDecorations(state: EditorState): DecorationSet {
   const { parent } = $pos
   if (!parent.isTextblock || parent.type.spec.code) return DecorationSet.empty
 
-  const range = getMarkRange($pos, getMarkType(state.schema, 'mdPack' satisfies MarkName))
+  const range =
+    getOutermostPackRangeAt(state, $pos.pos) ?? getOutermostPackRangeAt(state, $pos.pos - 1)
   if (!range) return DecorationSet.empty
 
   return DecorationSet.create(state.doc, [

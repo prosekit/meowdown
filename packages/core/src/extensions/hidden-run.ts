@@ -79,32 +79,55 @@ function charHasMark(state: EditorState, pos: number, mark: Mark): boolean {
   return marks != null && mark.isInSet(marks)
 }
 
-// The range of the smallest mdPack unit containing the character at `charPos`.
-// mdPack uses `excludes: ''`, so a nested unit's character carries up to two
-// pack marks; expand each instance separately and keep the smallest.
-export function getInnermostPackRangeAt(
-  state: EditorState,
-  charPos: number,
-): HiddenRun | undefined {
+// The identity run of every mdPack instance on the character at `charPos`.
+// mdPack uses `excludes: ''`, so a nested unit's character carries one pack
+// per level; each instance expands to its own unit's range. The order of
+// same-type marks in a mark set follows edit history, so callers must never
+// rely on it: pick the smallest or largest range instead.
+function getPackRangesAt(state: EditorState, charPos: number): HiddenRun[] {
   const marks = getCharMarks(state, charPos)
-  if (marks == null) return undefined
+  if (marks == null) return []
   const packType = getMarkType(state.schema, 'mdPack' satisfies MarkName)
   const packs = marks.filter((mark) => mark.type === packType)
-  if (packs.length === 0) return undefined
+  if (packs.length === 0) return []
   const $pos = state.doc.resolve(charPos)
   const blockStart = $pos.start()
   const blockEnd = $pos.end()
-  let innermost: HiddenRun | undefined
-  for (const pack of packs) {
+  return packs.map((pack) => {
     let from = charPos
     while (from > blockStart && charHasMark(state, from - 1, pack)) from--
     let to = charPos + 1
     while (to < blockEnd && charHasMark(state, to, pack)) to++
-    if (innermost == null || to - from < innermost.to - innermost.from) {
-      innermost = { from, to }
+    return { from, to }
+  })
+}
+
+/** The range of the smallest mdPack unit containing the character at `charPos`. */
+export function getInnermostPackRangeAt(
+  state: EditorState,
+  charPos: number,
+): HiddenRun | undefined {
+  let innermost: HiddenRun | undefined
+  for (const range of getPackRangesAt(state, charPos)) {
+    if (innermost == null || range.to - range.from < innermost.to - innermost.from) {
+      innermost = range
     }
   }
   return innermost
+}
+
+/** The range of the largest mdPack unit containing the character at `charPos`. */
+export function getOutermostPackRangeAt(
+  state: EditorState,
+  charPos: number,
+): HiddenRun | undefined {
+  let outermost: HiddenRun | undefined
+  for (const range of getPackRangesAt(state, charPos)) {
+    if (outermost == null || range.to - range.from > outermost.to - outermost.from) {
+      outermost = range
+    }
+  }
+  return outermost
 }
 
 function isPackOuterEdge(state: EditorState, run: HiddenRun, edge: 'from' | 'to'): boolean {
