@@ -13,6 +13,14 @@ interface ImageHit {
   alt: string
 }
 
+function closestImagePreview(target: EventTarget | null): HTMLElement | null {
+  return target instanceof HTMLElement ? target.closest('.md-image-view-preview') : null
+}
+
+function isMousePointerEvent(event: Event): boolean {
+  return 'pointerType' in event && event.pointerType === 'mouse'
+}
+
 function findImageAt(state: EditorState, pos: number): ImageHit | undefined {
   const range = getMarkRangeAt(state, pos, 'mdImage')
   if (!range) return
@@ -41,9 +49,16 @@ export function defineImageClickHandler(onClick: ImageClickHandler): PlainExtens
     new Plugin({
       key: imageClickKey,
       props: {
+        handleDOMEvents: {
+          pointerdown: (_view, event) => {
+            if (closestImagePreview(event.target) && !isMousePointerEvent(event)) {
+              event.preventDefault()
+            }
+            return false
+          },
+        },
         handleClick: (view, _pos, event) => {
-          const target = event.target as HTMLElement | null
-          const preview = target?.closest?.('.md-image-view-preview')
+          const preview = closestImagePreview(event.target)
           if (!preview) return false
           // Resolve the position from the preview's own content holder, not the
           // click's `pos`: a click on the non-editable preview lands on the run
