@@ -23,7 +23,7 @@ const LABELS = [
   'Ordered list',
   'Task list',
   'Checkbox list',
-  'Code block',
+  'Code block', // REVIEW: add a new /math item that inserts a math block, Use the ```math format instead of the $$ format
   'Table',
   'Now',
 ]
