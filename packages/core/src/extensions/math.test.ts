@@ -20,6 +20,7 @@ function setup(mode: MarkMode, text: string): Fixture {
   return fixture
 }
 
+// REVIEW: do not use setCaret. use the magic `<a>` `<b>` markers in the test text instead to set the inital selection. And use ArrowLeft and ArrowRight to move the selection in the test instead of manually setting it with setCaret. This is more realistic and tests the actual user behavior.
 function setCaret(fixture: Fixture, pos: number): void {
   fixture.view.dispatch(fixture.state.tr.setSelection(TextSelection.create(fixture.doc, pos)))
 }
