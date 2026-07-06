@@ -187,6 +187,65 @@ describe('focus mode', () => {
     `)
   })
 
+  it('reveals all six stars after the italic unit forms around an existing bold', () => {
+    using fixture = setupFixture({ extensionOptions: { markMode: 'focus' } })
+    const { n } = fixture
+    // Reach ***bold_and_italic*** through the ***x** strong-only state, like a
+    // left-to-right typist: the bold pack lands first and the italic pack is
+    // added by a later reparse. The reveal must not depend on that history.
+    fixture.set(n.doc(n.paragraph('***bold_and_italic**')))
+    fixture.view.dispatch(fixture.state.tr.insertText('*', 21))
+    const caret = findText(fixture.doc, 'bold_and_italic') + 'bold_and_italic'.length
+    fixture.view.dispatch(fixture.state.tr.setSelection(TextSelection.create(fixture.doc, caret)))
+    expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
+      "
+      <p>
+        <span
+          class="md-pack"
+          data-key="italic"
+        >
+          <em>
+            <span class="md-mark">
+              <span class="show">
+                *
+              </span>
+            </span>
+          </em>
+          <span
+            class="md-pack"
+            data-key="bold"
+          >
+            <strong>
+              <em>
+                <span class="md-mark">
+                  <span class="show">
+                    **
+                  </span>
+                </span>
+                <span class="show">
+                  bold_and_italic
+                </span>
+                <span class="md-mark">
+                  <span class="show">
+                    **
+                  </span>
+                </span>
+              </em>
+            </strong>
+          </span>
+          <em>
+            <span class="md-mark">
+              <span class="show">
+                *
+              </span>
+            </span>
+          </em>
+        </span>
+      </p>
+      "
+    `)
+  })
+
   it('reveals every link marker when the cursor is in the text', () => {
     expect(renderHTML('focus', 'see [<a>docs](http://x.test)')).toMatchInlineSnapshot(`
       "

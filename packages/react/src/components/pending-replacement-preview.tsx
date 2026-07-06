@@ -26,7 +26,10 @@ const SCROLL_TOP_MARGIN = 16
 function closestScrollable(element: Element): Element | null {
   for (let node = element.parentElement; node; node = node.parentElement) {
     const { overflowY } = getComputedStyle(node)
-    if (/(auto|scroll|overlay)/.test(overflowY) && node.scrollHeight > node.clientHeight) {
+    if (
+      (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') &&
+      node.scrollHeight > node.clientHeight
+    ) {
       return node
     }
   }

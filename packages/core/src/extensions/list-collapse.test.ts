@@ -85,3 +85,72 @@ describe('bullet fold rendering', () => {
     await expect.element(pmRoot.getByText('child')).not.toBeVisible()
   })
 })
+
+describe('deleting a selection that contains a folded bullet', () => {
+  it('expands hidden content before deleting', async () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+
+    const doc1 = n.doc(
+      n.paragraph('alpha'),
+      n.list(
+        { kind: 'bullet', collapsed: true },
+        n.paragraph('folded parent'),
+        n.list({ kind: 'bullet' }, n.paragraph('hidden <a>child<b>')),
+      ),
+      n.paragraph('beta'),
+    )
+
+    const doc2 = n.doc(
+      n.paragraph('alpha'),
+      n.list(
+        { kind: 'bullet', collapsed: false },
+        n.paragraph('folded parent'),
+        n.list({ kind: 'bullet' }, n.paragraph('hidden child')),
+      ),
+      n.paragraph('beta'),
+    )
+
+    const doc3 = n.doc(
+      n.paragraph('alpha'),
+      n.list(
+        { kind: 'bullet', collapsed: false },
+        n.paragraph('folded parent'),
+        n.list({ kind: 'bullet' }, n.paragraph('hidden ')),
+      ),
+      n.paragraph('beta'),
+    )
+
+    fixture.set(doc1)
+    editor.view.focus()
+
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.doc.toJSON()).toEqual(doc2.toJSON())
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.doc.toJSON()).toEqual(doc3.toJSON())
+  })
+
+  it('deletes everything on the first Backspace in an AllSelection', async () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+
+    const doc1 = n.doc(
+      n.paragraph('alpha'),
+      n.list(
+        { kind: 'bullet', collapsed: true },
+        n.paragraph('folded parent'),
+        n.list({ kind: 'bullet' }, n.paragraph('hidden child')),
+      ),
+      n.paragraph('beta'),
+    )
+
+    const doc2 = n.doc(n.paragraph())
+
+    fixture.set(doc1)
+    editor.view.focus()
+    editor.commands.selectAll()
+
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.doc.toJSON()).toEqual(doc2.toJSON())
+  })
+})
