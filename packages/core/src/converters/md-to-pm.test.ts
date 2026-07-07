@@ -824,19 +824,69 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it('keeps a raw HTML block', () => {
+  it('maps a raw HTML block onto an htmlBlock node', () => {
     expect(markdownToDoc('<div>html</div>').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null },
-      content: [{ type: 'paragraph', content: [{ type: 'text', text: '<div>html</div>' }] }],
+      content: [{ type: 'htmlBlock', content: [{ type: 'text', text: '<div>html</div>' }] }],
     })
   })
 
-  it('keeps a processing instruction', () => {
+  it('keeps a multi-line HTML block in one htmlBlock node', () => {
+    expect(markdownToDoc('<div class="x">\nhello\n</div>').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        { type: 'htmlBlock', content: [{ type: 'text', text: '<div class="x">\nhello\n</div>' }] },
+      ],
+    })
+  })
+
+  it('keeps a blank line inside a type-1 HTML block', () => {
+    // `<pre>` blocks end on `</pre>`, not on a blank line (CommonMark 4.6
+    // type 1), so the blank line is block content.
+    expect(markdownToDoc('<pre>\none\n\ntwo\n</pre>').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        { type: 'htmlBlock', content: [{ type: 'text', text: '<pre>\none\n\ntwo\n</pre>' }] },
+      ],
+    })
+  })
+
+  it('swallows markdown lines into an unclosed type-6 block', () => {
+    // `<div>` without a following blank line absorbs the next lines up to the
+    // first blank line, heading syntax included (CommonMark 4.6).
+    expect(markdownToDoc('<div>\n# heading\n</div>\n\nafter').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        { type: 'htmlBlock', content: [{ type: 'text', text: '<div>\n# heading\n</div>' }] },
+        { type: 'paragraph', content: [{ type: 'text', text: 'after' }] },
+      ],
+    })
+  })
+
+  it('dedents a multi-line HTML block inside a blockquote', () => {
+    expect(markdownToDoc('> <div>\n> hello\n> </div>').toJSON()).toEqual({
+      type: 'doc',
+      attrs: { frontmatter: null },
+      content: [
+        {
+          type: 'blockquote',
+          content: [
+            { type: 'htmlBlock', content: [{ type: 'text', text: '<div>\nhello\n</div>' }] },
+          ],
+        },
+      ],
+    })
+  })
+
+  it('maps a processing instruction onto an htmlBlock node', () => {
     expect(markdownToDoc('<?php echo 1; ?>').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null },
-      content: [{ type: 'paragraph', content: [{ type: 'text', text: '<?php echo 1; ?>' }] }],
+      content: [{ type: 'htmlBlock', content: [{ type: 'text', text: '<?php echo 1; ?>' }] }],
     })
   })
 

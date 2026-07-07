@@ -260,6 +260,10 @@ function emit(node: ProseMirrorNode, out: MdOut): void {
       out.closeBlock()
       return
     }
+    case 'htmlBlock':
+      out.write(node.textContent)
+      out.closeBlock()
+      return
     case 'htmlComment': {
       const { content } = node.attrs as MeowdownHTMLCommentAttrs
       out.write(content)
