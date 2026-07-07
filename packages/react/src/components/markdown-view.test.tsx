@@ -145,11 +145,11 @@ describe('MarkdownView', () => {
     const onTaskClick = vi.fn()
     await renderView('+ [ ] open', { onTaskClick })
     const box = view.locate('input[type="checkbox"]')
+    await expect.element(box, { timeout: 2000 }).not.toBeChecked()
     expect(onTaskClick).toHaveBeenCalledTimes(0)
-    await expect.element(box, { timeout: 2000 }).not.toBeChecked()
     await box.click()
-    expect(onTaskClick).toHaveBeenCalledTimes(1)
     await expect.element(box, { timeout: 2000 }).not.toBeChecked()
+    expect(onTaskClick).toHaveBeenCalledTimes(1)
   })
 
   it('keeps checkboxes inert without an onTaskClick handler', async () => {
