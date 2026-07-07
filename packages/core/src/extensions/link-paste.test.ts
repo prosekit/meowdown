@@ -21,7 +21,7 @@ function useLinkPaste(fixture: Fixture): void {
 describe('detectLinkUrl', () => {
   it.each([
     ['https://example.com/page?q=1', 'https://example.com/page?q=1'],
-    ['x-devonthink-item://40C8E9F8-DEAD-BEEF', 'x-devonthink-item://40C8E9F8-DEAD-BEEF'],
+    ['x-devonthink-item://ABCD-1234', 'x-devonthink-item://ABCD-1234'],
     ['obsidian://open?vault=notes', 'obsidian://open?vault=notes'],
     ['www.example.com', 'https://www.example.com'],
     ['google.com/path', 'https://google.com/path'],
@@ -81,8 +81,8 @@ describe('paste a URL over a selection', () => {
     const { editor, n, view } = fixture
     useLinkPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>my note<b>')))
-    pasteText(view, 'x-devonthink-item://40C8E9F8')
-    expect(editor.state.doc.textContent).toBe('[my note](x-devonthink-item://40C8E9F8)')
+    pasteText(view, 'x-cutsom-schema://ABCD-1234')
+    expect(editor.state.doc.textContent).toBe('[my note](x-cutsom-schema://ABCD-1234)')
   })
 
   it('wraps only the trimmed selection, keeping edge whitespace as text', () => {

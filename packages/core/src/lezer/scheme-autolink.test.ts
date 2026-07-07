@@ -13,19 +13,17 @@ function urls(text: string): Array<[number, number, string]> {
 describe('schemeAutolink', () => {
   describe('detects a bare custom-scheme URI', () => {
     it('at the start of the text', () => {
-      expect(urls('x-devonthink-item://40C8E9F8')).toEqual([
-        [0, 28, 'x-devonthink-item://40C8E9F8'],
-      ])
+      expect(urls('x-cutsom-schema://ABCD-1234')).toEqual([[0, 27, 'x-cutsom-schema://ABCD-1234']])
     })
 
     it('after whitespace', () => {
-      expect(urls('open obsidian://open?vault=notes now')).toEqual([
-        [5, 32, 'obsidian://open?vault=notes'],
+      expect(urls('open x-cutsom-schema://sub?key=value now')).toEqual([
+        [5, 36, 'x-cutsom-schema://sub?key=value'],
       ])
     })
 
     it('with an uppercase scheme', () => {
-      expect(urls('X-DevonThink-Item://ABC')).toEqual([[0, 23, 'X-DevonThink-Item://ABC']])
+      expect(urls('X-Custom-Schema://abc')).toEqual([[0, 21, 'X-Custom-Schema://abc']])
     })
 
     it('with digits and plus in the scheme', () => {

@@ -505,11 +505,11 @@ describe('autolink', () => {
   })
 
   it('custom app scheme', () => {
-    expect(parse('a x-devonthink-item://40C8E9F8 b')).toMatchInlineSnapshot(`
+    expect(parse('a x-cutsom-schema://ABCD b')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 30]  mdLinkText(href=x-devonthink-item://40C8E9F8)
-      [30, 32]
+      [2, 24]  mdLinkText(href=x-cutsom-schema://ABCD)
+      [24, 26]
       "
     `)
   })
