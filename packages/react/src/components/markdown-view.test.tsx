@@ -234,6 +234,26 @@ describe('MarkdownView math', () => {
       .element(view.getByTestId('code-block-math-preview').locate('.katex'))
       .toBeInTheDocument()
   })
+
+  it('renders an element HTML block as a sanitized preview', async () => {
+    await renderView('<div class="box">hello</div>')
+    const preview = view.getByTestId('html-block-preview')
+    await expect.element(preview.locate('.box')).toBeInTheDocument()
+    await expect.element(preview).toHaveTextContent('hello')
+  })
+
+  it('strips a script tag from an HTML block preview', async () => {
+    await renderView('<div>ok<script>alert(1)</script></div>')
+    const preview = view.getByTestId('html-block-preview')
+    await expect.element(preview.locate('div')).toBeInTheDocument()
+    expect(preview.element().querySelector('script')).toBeNull()
+  })
+
+  it('renders a comment block as source, never a preview', async () => {
+    await renderView('<!-- a note -->')
+    await expect.element(view.locate('pre[data-html-block]')).toHaveTextContent('<!-- a note -->')
+    await expect.element(view.getByTestId('html-block-preview')).not.toBeInTheDocument()
+  })
 })
 
 describe('MarkdownView parity with the editor', () => {
