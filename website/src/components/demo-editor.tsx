@@ -7,21 +7,26 @@ import {
 import { useRef, type RefObject } from 'react'
 
 import { CodeMirrorEditor } from './codemirror-editor.tsx'
+import type { MarkdownSource } from './markdown-source.ts'
+import { ReadonlyView } from './readonly-view.tsx'
 
-/** The four demo modes: the three rich modes plus the CodeMirror source mode. */
-export type DemoMode = EditorMode | 'source'
+/**
+ * The five demo modes: the three rich modes, the CodeMirror source mode, and
+ * the read-only `MarkdownView` mode.
+ */
+export type DemoMode = EditorMode | 'source' | 'readonly'
 
 export interface DemoEditorProps extends Omit<EditorProps, 'mode' | 'handleRef'> {
   /**
    * The editor mode. 'source' renders a CodeMirror editor showing the raw
-   * Markdown text; the three rich modes render the Meowdown editor. Defaults to
-   * 'focus'.
+   * Markdown text, 'readonly' renders the document with `MarkdownView`; the
+   * three rich modes render the Meowdown editor. Defaults to 'focus'.
    */
   mode?: DemoMode
 
   /**
-   * Handle of whichever editor is currently mounted. In source mode the
-   * selection and pending-replacement methods are no-ops.
+   * Handle of the rich editor. Detached (null) in the source and readonly
+   * modes, which support none of its methods.
    */
   handleRef?: RefObject<EditorHandle | null>
 }
@@ -29,41 +34,40 @@ export interface DemoEditorProps extends Omit<EditorProps, 'mode' | 'handleRef'>
 export function DemoEditor({
   mode = 'focus',
   initialMarkdown,
-  onDocChange,
-  readOnly,
   children,
   handleRef,
   ...richProps
 }: DemoEditorProps) {
-  // Handle of whichever editor is currently mounted. Reading it during render
-  // seeds the next editor with the previous one's content when the mode flips
-  // between the rich and source families.
+  // Handles of whichever pane is currently mounted. Reading them during render
+  // seeds the next pane with the previous one's content when the mode flips.
   const fallbackRef = useRef<EditorHandle>(null)
-  const childRef = handleRef ?? fallbackRef
-  const seedMarkdown = childRef.current?.getMarkdown() ?? initialMarkdown ?? ''
+  const richRef = handleRef ?? fallbackRef
+  const plainRef = useRef<MarkdownSource>(null)
+  const seedMarkdown =
+    richRef.current?.getMarkdown() ?? plainRef.current?.getMarkdown() ?? initialMarkdown ?? ''
 
   if (mode === 'source') {
     return (
       <div className="meowdown">
-        <CodeMirrorEditor
-          ref={childRef}
-          initialMarkdown={seedMarkdown}
-          onDocChange={onDocChange}
-          readOnly={readOnly}
-        />
+        <CodeMirrorEditor ref={plainRef} initialMarkdown={seedMarkdown} />
       </div>
     )
   }
 
+  if (mode === 'readonly') {
+    return (
+      <ReadonlyView
+        ref={plainRef}
+        markdown={seedMarkdown}
+        onWikilinkClick={richProps.onWikilinkClick}
+        onLinkClick={richProps.onLinkClick}
+        onImageClick={richProps.onImageClick}
+      />
+    )
+  }
+
   return (
-    <MeowdownEditor
-      handleRef={childRef}
-      mode={mode}
-      initialMarkdown={seedMarkdown}
-      onDocChange={onDocChange}
-      readOnly={readOnly}
-      {...richProps}
-    >
+    <MeowdownEditor handleRef={richRef} mode={mode} initialMarkdown={seedMarkdown} {...richProps}>
       {children}
     </MeowdownEditor>
   )

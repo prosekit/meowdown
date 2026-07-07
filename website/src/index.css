@@ -105,7 +105,7 @@ html {
   pointer-events: none;
 }
 
-/* Slide the thumb onto the checked option (supports up to 4 segments). */
+/* Slide the thumb onto the checked option (supports up to 5 segments). */
 .segmented:has(> label:nth-child(2) input:checked)::before {
   transform: translateX(100%);
 }
@@ -114,6 +114,9 @@ html {
 }
 .segmented:has(> label:nth-child(4) input:checked)::before {
   transform: translateX(300%);
+}
+.segmented:has(> label:nth-child(5) input:checked)::before {
+  transform: translateX(400%);
 }
 
 .segmented label {
