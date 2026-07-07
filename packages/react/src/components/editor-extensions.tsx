@@ -10,6 +10,7 @@ import {
   defineImage,
   defineImageClickHandler,
   defineLinkClickHandler,
+  defineLinkPaste,
   defineMarkdownCopy,
   definePlaceholder,
   defineReadonly,
@@ -48,6 +49,7 @@ export interface EditorExtensionsProps {
   onFileSaveError?: FilePasteOptions['onFileSaveError']
   onImageClick?: ImageClickHandler
   embedPaste?: boolean
+  linkPaste?: boolean
   bulletAfterHeading?: boolean
   placeholder?: PlaceholderOptions['placeholder']
   readOnly?: boolean
@@ -72,6 +74,7 @@ export function EditorExtensions({
   onFileSaveError,
   onImageClick,
   embedPaste,
+  linkPaste,
   bulletAfterHeading,
   placeholder,
   readOnly,
@@ -166,6 +169,12 @@ export function EditorExtensions({
     useMemo(() => {
       return embedPaste ? defineEmbedPaste() : null
     }, [embedPaste]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return linkPaste ? defineLinkPaste() : null
+    }, [linkPaste]),
   )
 
   useExtension(

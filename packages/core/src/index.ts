@@ -96,6 +96,7 @@ export {
 export type { LinkEditHandler, LinkEditOptions } from './extensions/link-commands.ts'
 export { defineLinkHoverHandler, type LinkHoverHandler } from './extensions/link-hover.ts'
 export type { ListMarker, MeowdownListAttrs } from './extensions/list.ts'
+export { defineLinkPaste } from './extensions/link-paste.ts'
 export type { MarkChunk } from './extensions/mark-chunk.ts'
 export type { MarkMode } from './extensions/mark-mode.ts'
 export type { MarkName } from './extensions/mark-names.ts'

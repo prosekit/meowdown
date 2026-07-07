@@ -29,6 +29,11 @@ export const MODES: ModeOption[] = [
     label: 'Source',
     description: 'Raw Markdown text.',
   },
+  {
+    value: 'readonly',
+    label: 'Readonly',
+    description: 'A read-only render of the document, with no editor behind it.',
+  },
 ]
 
 const MODE_STORAGE_KEY = 'meowdown:mode'

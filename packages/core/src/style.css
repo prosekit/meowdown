@@ -702,6 +702,8 @@
       display: contents;
     }
 
+    /* inline-block suits box-shaped previews (image, file pill); the wikilink
+     * section below overrides it to a plain inline for its text label. */
     .md-atom-view-preview {
       display: inline-block;
       vertical-align: bottom;
@@ -905,10 +907,20 @@
 
   /* wikilink */
   .ProseMirror {
+    /* A plain inline, not the shared inline-block in .md-atom-view-preview */
+    .md-wikilink-view-preview.md-atom-view-preview {
+      display: inline;
+    }
+
     .md-wikilink-view-label {
       overflow: hidden;
       padding: 2px 5px;
       border-radius: 6px;
+      /* Give each wrapped line fragment its own full padding and rounded
+       * background, so a wikilink broken across lines reads as a chip on
+       * every line. */
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
 
       background: color-mix(in oklab, var(--meowdown-accent) 10%, transparent);
       color: color-mix(in oklab, var(--meowdown-accent) 80%, var(--meowdown-heading));
