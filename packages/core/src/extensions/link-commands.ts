@@ -53,18 +53,31 @@ function getWrapRange(state: EditorState): undefined | PositionRange {
   }
 }
 
-export function insertLink(attrs: LinkAttrs = {}): Command {
+export function insertLink({
+  href,
+  title,
+  wrapText = true,
+}: {
+  href?: string
+  title?: string
+  wrapText?: boolean
+} = {}): Command {
   return (state, dispatch) => {
     const range = getWrapRange(state)
     if (!range) return false
     if (dispatch) {
       const { from, to } = range
       const tr = state.tr
-      const dest = destText(normalizeHref(attrs.href ?? ''), attrs.title ?? '')
+      const dest = destText(normalizeHref(href ?? ''), title ?? '')
       const close = `](${dest})`
       tr.insertText(close, to).insertText('[', from)
-      // Park the caret after the closing `)` so typing continues outside the link.
-      tr.setSelection(TextSelection.create(tr.doc, from, to + 1 + close.length))
+      // The position after the closing `)`
+      const linkTo = to + 1 + close.length
+      tr.setSelection(
+        wrapText
+          ? TextSelection.create(tr.doc, from, linkTo)
+          : TextSelection.create(tr.doc, linkTo),
+      )
       tr.scrollIntoView()
       dispatch(tr)
     }

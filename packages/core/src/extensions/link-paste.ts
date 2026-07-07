@@ -44,7 +44,14 @@ export function defineLinkPaste(): PlainExtension {
             if (!text) return false
             const href = detectLinkUrl(text)
             if (!href) return false
-            return executeCommand(view, insertLink({ href }))
+            return executeCommand(
+              view,
+              insertLink({
+                href,
+                // Put the caret after the link so the user can continue typing without having to move it.
+                wrapText: false,
+              }),
+            )
           },
         },
       }),
