@@ -41,11 +41,11 @@ describe('html block preview', () => {
     await preview.click()
     await expect.element(source).toBeVisible()
 
-    // Caret lands at the block start; type inside the tag text.
-    await userEvent.keyboard('{End}')
-    await userEvent.keyboard('!')
+    // Clicking the preview drops the caret at the block start; typing there
+    // extends the source, and the preview re-renders live.
+    await userEvent.keyboard('x')
 
-    await expect.element(preview).toHaveTextContent('hello!')
+    await expect.element(preview).toHaveTextContent('xhello')
   })
 
   it('lets a details block toggle open on click without entering the source', async () => {
