@@ -68,6 +68,11 @@ export function attributesToProps(
       continue
     }
 
+    // Ignore contentEditable
+    if (attributeNameLowerCased === 'contenteditable') {
+      continue
+    }
+
     // ARIA (aria-*) or custom data (data-*) attribute
     if (
       attributeNameLowerCased.startsWith('aria-') ||
