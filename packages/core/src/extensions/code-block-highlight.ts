@@ -1,8 +1,9 @@
 import { LanguageDescription, type LanguageSupport } from '@codemirror/language'
 import { languages } from '@codemirror/language-data'
 import { classHighlighter, highlightTree } from '@lezer/highlight'
-import type { Extension } from '@prosekit/core'
+import { definePlugin, union, type Extension } from '@prosekit/core'
 import { defineCodeBlockHighlight, type HighlightParser } from '@prosekit/extensions/code-block'
+import { createHighlightPlugin } from 'prosemirror-highlight'
 import { createParser } from 'prosemirror-highlight/lezer'
 
 import type { NodeName } from './node-names.ts'
@@ -74,16 +75,26 @@ const lazyParser: HighlightParser = (options) => {
 }
 
 /**
- * Adds syntax highlighting to `codeBlock` nodes, parsing each block with the
- * matching CodeMirror/Lezer grammar (loaded on demand from
+ * Adds syntax highlighting to `codeBlock` and `htmlBlock` nodes, parsing each
+ * block with the matching CodeMirror/Lezer grammar (loaded on demand from
  * `@codemirror/language-data`). Tokens are tagged with `@lezer/highlight`
- * `tok-*` classes; the default theme colors them per color scheme.
+ * `tok-*` classes; the default theme colors them per color scheme. An
+ * `htmlBlock` has no `language` attr, so its plugin pins the language.
  */
 export function defineCodeBlockSyntaxHighlight(): Extension {
-  return defineCodeBlockHighlight({
-    parser: lazyParser,
-    nodeTypes: ['codeBlock' satisfies NodeName],
-  })
+  return union(
+    defineCodeBlockHighlight({
+      parser: lazyParser,
+      nodeTypes: ['codeBlock' satisfies NodeName],
+    }),
+    definePlugin(
+      createHighlightPlugin({
+        parser: lazyParser,
+        nodeTypes: ['htmlBlock' satisfies NodeName],
+        languageExtractor: () => 'html',
+      }),
+    ),
+  )
 }
 
 /** A highlighted span of code: `[from, to)` carries the `@lezer/highlight` classes. */
