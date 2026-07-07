@@ -24,8 +24,6 @@ import {
   type WikilinkClickHandler,
 } from '@meowdown/core'
 import type { DOMOutputSpec } from '@prosekit/pm/model'
-import { attributesToProps } from './attributes-to-props.ts'
-
 import { Mark, type Node as ProseMirrorNode } from '@prosekit/pm/model'
 import { clsx } from 'clsx/lite'
 import {
@@ -43,6 +41,7 @@ import {
 
 import { useKaTeX } from '../hooks/use-katex.ts'
 
+import { attributesToProps } from './attributes-to-props.ts'
 import styles from './code-block-view.module.css'
 import { normalizeDOMOutputSpec, type TypedDOMOutputSpec } from './dom-output-spec.tsx'
 import { MathRender } from './math-render.tsx'
