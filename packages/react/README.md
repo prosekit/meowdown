@@ -62,6 +62,8 @@ Import both stylesheets: `@meowdown/core/style.css` (the editor theme and variab
 
 Math (`$E=mc^2$` inline, `$$` blocks, and ` ```math ` fences) is compiled by KaTeX to native MathML.
 
+Raw HTML blocks render a live preview sanitized with DOMPurify (`<script>`, event handlers, `javascript:` URLs, remote embeds, and form controls are removed); the caret reveals the source below the preview. Comments and other non-visual blocks stay source-only. Pass `renderHTMLPreview={false}` to show every HTML block as source instead.
+
 ## License
 
 MIT

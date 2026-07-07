@@ -136,6 +136,15 @@ function greet(name: string): string {
 | ----- | ------ | -- | --------- |
 | even  | **in** | *tables* too! | :D |
 
+Drop in raw HTML and it renders as a live preview; click it to edit the source. A collapsible section works out of the box:
+
+<details>
+<summary>What can I tuck away in here?</summary>
+Anything that needs raw HTML, from <kbd>keyboard keys</kbd> to sized <img src="https://static.photos/yellow/16x16/8" width="16">.
+</details>
+
+<!-- Comments stay visible as source, so notes to yourself never disappear. -->
+
 > Switch modes above to choose how much Markdown syntax stays in view.
 `
 
