@@ -22,7 +22,7 @@ describe('defineEditorExtension', () => {
         n.tableRow(n.tableCell(n.paragraph('A1')), n.tableCell(n.paragraph('B1'))),
       ),
       n.horizontalRule(),
-      n.htmlComment({ content: '<!-- a comment -->' }),
+      n.htmlBlock('<!-- a comment -->'),
     )
 
     expect(doc.toJSON()).toMatchInlineSnapshot(`
@@ -253,10 +253,13 @@ describe('defineEditorExtension', () => {
             "type": "horizontalRule",
           },
           {
-            "attrs": {
-              "content": "<!-- a comment -->",
-            },
-            "type": "htmlComment",
+            "content": [
+              {
+                "text": "<!-- a comment -->",
+                "type": "text",
+              },
+            ],
+            "type": "htmlBlock",
           },
         ],
         "type": "doc",

@@ -890,19 +890,21 @@ describe('markdownToDoc', () => {
     })
   })
 
-  it('maps an HTML comment onto an invisible htmlComment node', () => {
+  it('maps an HTML comment onto an htmlBlock node', () => {
     expect(markdownToDoc('<!-- a comment -->').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null },
-      content: [{ type: 'htmlComment', attrs: { content: '<!-- a comment -->' } }],
+      content: [{ type: 'htmlBlock', content: [{ type: 'text', text: '<!-- a comment -->' }] }],
     })
   })
 
-  it('keeps a multi-line HTML comment verbatim on the node', () => {
+  it('keeps a multi-line HTML comment in one htmlBlock node', () => {
     expect(markdownToDoc('<!-- line one\nline two -->').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null },
-      content: [{ type: 'htmlComment', attrs: { content: '<!-- line one\nline two -->' } }],
+      content: [
+        { type: 'htmlBlock', content: [{ type: 'text', text: '<!-- line one\nline two -->' }] },
+      ],
     })
   })
 
@@ -913,9 +915,9 @@ describe('markdownToDoc', () => {
       type: 'doc',
       attrs: { frontmatter: null },
       content: [
-        { type: 'htmlComment', attrs: { content: '<!-- start -->' } },
+        { type: 'htmlBlock', content: [{ type: 'text', text: '<!-- start -->' }] },
         { type: 'paragraph', content: [{ type: 'text', text: 'body text' }] },
-        { type: 'htmlComment', attrs: { content: '<!-- end -->' } },
+        { type: 'htmlBlock', content: [{ type: 'text', text: '<!-- end -->' }] },
       ],
     })
   })

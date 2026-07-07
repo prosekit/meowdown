@@ -39,6 +39,7 @@ const markdown = docToMarkdown(editor.state.doc)
   - Bold (`**bold**`), italic (`*italic*`), and inline code
   - Links (`[text](url)`), images (`![alt](src)`), and autolinks (`<https://example.com>`)
   - Hard line breaks
+  - HTML blocks (`<div>`, `<details>`, `<!-- comments -->`, `<?instructions?>`, ...): the raw source lives on a dedicated `htmlBlock` node, byte-exact through a round-trip, with no markdown parsing inside (per CommonMark). Use [`getHTMLBlockKind`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-getHTMLBlockKind) to classify a block's source; only an `element` block produces visible output. Inline HTML tags stay literal text.
 - GitHub Flavored Markdown (GFM)
   - Tables, including column alignment (`:--`, `:-:`, `--:`)
   - Strikethrough (`~~text~~`)

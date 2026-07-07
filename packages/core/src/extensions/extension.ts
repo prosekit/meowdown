@@ -22,7 +22,6 @@ import { defineHeading } from './heading.ts'
 import { defineHiddenRunCaret } from './hidden-run-caret.ts'
 import { defineMeowdownHorizontalRule } from './horizontal-rule.ts'
 import { defineHTMLBlock } from './html-block.ts'
-import { defineHTMLComment } from './html-comment.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
 import type { FileLinkOptions } from './inline-text-to-mark-chunks.ts'
@@ -53,7 +52,6 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineCodeBlock(),
     defineMeowdownHorizontalRule(),
     defineHTMLBlock(),
-    defineHTMLComment(),
 
     // marks
     defineInlineMarks(),

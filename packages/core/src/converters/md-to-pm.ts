@@ -156,10 +156,6 @@ function convertBlock(
     case LEZER_NODE_IDS.Paragraph:
       return [convertParagraph(nodes, cursor, text)]
     case LEZER_NODE_IDS.CommentBlock:
-      // A comment is not rendered output: map it onto the invisible `htmlComment`
-      // node so it stays in the document (and round-trips) without reading as
-      // body text.
-      return [convertHTMLComment(nodes, cursor, text)]
     case LEZER_NODE_IDS.HTMLBlock:
     case LEZER_NODE_IDS.ProcessingInstructionBlock:
       // Raw HTML keeps its literal source as an `htmlBlock` node: byte-exact
@@ -387,22 +383,6 @@ function convertHTMLBlock(
   text: string,
 ): ProseMirrorNode {
   return nodes.htmlBlock(sliceLeafBlockText(cursor, text))
-}
-
-/**
- * Build the invisible `htmlComment` node from a `CommentBlock`. The raw comment
- * (delimiters included) is kept verbatim on the node's `content` attribute;
- * continuation lines are dedented like a paragraph's so the serializer's own
- * line prefix re-applies the container indent instead of doubling it.
- */
-function convertHTMLComment(
-  nodes: TypedNodeBuilders,
-  cursor: TreeCursor,
-  text: string,
-): ProseMirrorNode {
-  const column = measureContentColumn(text, cursor.from)
-  const content = dedentContinuation(text.slice(cursor.from, cursor.to), column)
-  return nodes.htmlComment({ content })
 }
 
 function convertBlockquote(
