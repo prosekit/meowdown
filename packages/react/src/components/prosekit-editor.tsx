@@ -38,6 +38,7 @@ import {
 } from 'react'
 
 import { defineCodeBlockView } from '../extensions/code-block-view.ts'
+import { defineHTMLBlockView } from '../extensions/html-block-view.tsx'
 import type { TimeFormat } from '../utils/date-format.ts'
 
 import { BlockHandle } from './block-handle.tsx'
@@ -80,6 +81,12 @@ function resolveSelection(doc: EditorNode, selection: SelectionHint): Selection 
 
 export interface ProseKitEditorProps {
   markMode?: MarkMode
+
+  /**
+   * Whether raw HTML blocks render a sanitized preview. When false, every HTML
+   * block stays source-only. Read once at editor creation. Defaults to `true`.
+   */
+  renderHTMLPreview?: boolean
 
   /**
    * The initial Markdown text of the editor. Only the value provided on the
@@ -186,6 +193,7 @@ export interface ProseKitEditorProps {
 
 export function ProseKitEditor({
   markMode = 'focus',
+  renderHTMLPreview = true,
   initialMarkdown,
   onDocChange,
   onSlashMenuSearch,
@@ -222,7 +230,11 @@ export function ProseKitEditor({
 }: ProseKitEditorProps) {
   const [editor] = useState((): TypedEditor => {
     const baseExtension: EditorExtension = defineEditorExtension({ resolveFileLink, markMode })
-    const extension = union(baseExtension, defineCodeBlockView())
+    const extension = union(
+      baseExtension,
+      defineCodeBlockView(),
+      defineHTMLBlockView({ renderPreview: renderHTMLPreview }),
+    )
     const editor: TypedEditor = createEditor({ extension })
     if (initialMarkdown) {
       editor.setContent(markdownToDoc(initialMarkdown, { nodes: editor.nodes, frontmatter }))

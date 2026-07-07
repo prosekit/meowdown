@@ -1,0 +1,24 @@
+.Root {
+  position: relative;
+}
+
+/* Preview-only state: the caret is outside an element block, so the source
+ * gives way to the rendered HTML. The caret can never sit in the hidden source
+ * (entering it flips the state back), so the missing box does not disturb caret
+ * geometry. */
+.Root[data-preview] pre {
+  display: none;
+}
+
+.Preview {
+  padding: 0.5rem 0.25rem 0;
+  overflow-x: auto;
+  cursor: text;
+}
+
+/* Stacked state: with the caret inside, the live preview sits below the source,
+ * separated from it. */
+.Root:not([data-preview]) .Preview {
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--meowdown-border);
+}

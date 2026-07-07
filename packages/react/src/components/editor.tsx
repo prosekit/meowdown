@@ -49,6 +49,13 @@ export interface EditorProps {
   initialMarkdown?: string
 
   /**
+   * Whether raw HTML blocks render a sanitized preview. When false, every HTML
+   * block stays source-only (raw HTML shown as code). Read once at editor
+   * creation. Defaults to `true`.
+   */
+  renderHTMLPreview?: boolean
+
+  /**
    * Called on every user-driven document change. Programmatic `setMarkdown` and
    * `setState` on the handle do not fire it.
    */
@@ -271,6 +278,7 @@ export interface EditorProps {
 export function MeowdownEditor({
   mode = 'focus',
   initialMarkdown,
+  renderHTMLPreview,
   onDocChange,
   onSlashMenuSearch,
   onTagSearch,
@@ -382,6 +390,7 @@ export function MeowdownEditor({
         ref={childRef}
         markMode={mode}
         initialMarkdown={initialMarkdown}
+        renderHTMLPreview={renderHTMLPreview}
         onDocChange={onDocChange}
         onSlashMenuSearch={onSlashMenuSearch}
         onTagSearch={onTagSearch}
