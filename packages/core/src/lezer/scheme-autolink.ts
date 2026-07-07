@@ -23,7 +23,7 @@ function isSchemeStartChar(code: number): boolean {
 
 /**
  * Inline parser for a bare custom-scheme URI such as
- * `x-devonthink-item://40C8…` or `obsidian://open?vault=notes`. GFM's own
+ * `x-devonthink-item://ABCD-1234` or `obsidian://open?vault=notes`. GFM's own
  * `Autolink` only recognizes `www.`/`http(s)://`/`mailto:`/`xmpp:`/email
  * forms, so an app URI typed or pasted as plain text stayed unlinkified.
  *
