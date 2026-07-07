@@ -452,6 +452,7 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
         ? (node.firstChild.textContent.split('\n', 1)[0] ?? '')
         : ''
       handleTaskClick = (event) => {
+        event.preventDefault()
         onTaskClick({ index, checked, marker, text, event: event.nativeEvent })
       }
     }
