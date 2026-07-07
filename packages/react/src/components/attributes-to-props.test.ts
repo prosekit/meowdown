@@ -63,6 +63,9 @@ describe('attributesToProps', () => {
     expect(attributesToProps({ type: 'checkbox' }, 'input')).toEqual({
       type: 'checkbox',
     })
+    expect(attributesToProps({ type: 'checkbox', checked: undefined }, 'input')).toEqual({
+      type: 'checkbox',
+    })
   })
 
   it('keeps value on an input element', () => {

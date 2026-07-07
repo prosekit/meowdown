@@ -48,7 +48,7 @@ type UncontrolledComponentNames = (typeof UNCONTROLLED_COMPONENT_NAMES)[number]
  * @returns - React props.
  */
 export function attributesToProps(
-  attributes: Record<string, string> = {},
+  attributes: Record<string, string | undefined> = {},
   nodeName?: string,
 ): Record<PropertyKey, string | boolean | number> {
   const props: Record<PropertyKey, string | boolean | number> = {}
@@ -56,13 +56,17 @@ export function attributesToProps(
   const isInputValueOnly = nodeName === 'input' || !!attributes['reset'] || !!attributes['submit']
 
   for (const [attributeName, attributeValue] of Object.entries(attributes)) {
-    // Ignore style attribute
-    if (attributeName === 'style') {
+    if (attributeValue === undefined) {
       continue
     }
 
     // convert HTML/SVG attribute to React prop
     const attributeNameLowerCased = attributeName.toLowerCase()
+
+    // Ignore style attribute
+    if (attributeNameLowerCased === 'style') {
+      continue
+    }
 
     // ARIA (aria-*) or custom data (data-*) attribute
     if (
@@ -105,9 +109,6 @@ export function attributesToProps(
     props[attributeName] = attributeValue
   }
 
-  if (nodeName === 'input') {
-    console.log('attributesToProps', JSON.stringify({ attributes, nodeName, props }, null, 2))
-  }
   return props
 }
 
