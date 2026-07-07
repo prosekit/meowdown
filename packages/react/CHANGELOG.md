@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.39.0](https://github.com/prosekit/meowdown/compare/react-v0.38.0...react-v0.39.0) (2026-07-07)
+
+
+### Features
+
+* **react:** interactive task checkboxes in `MarkdownView` ([#251](https://github.com/prosekit/meowdown/issues/251)) ([79716a4](https://github.com/prosekit/meowdown/commit/79716a49cd87b0e86a3f974c79d44e8838099fa9))
+
 ## [0.38.0](https://github.com/prosekit/meowdown/compare/react-v0.37.1...react-v0.38.0) (2026-07-07)
 
 
