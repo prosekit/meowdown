@@ -3,8 +3,9 @@ import {
   type EditorHandle,
   type EditorMode,
   type EditorProps,
+  type TaskClickHandler,
 } from '@meowdown/react'
-import { useRef, type RefObject } from 'react'
+import { useCallback, useRef, type RefObject } from 'react'
 
 import { CodeMirrorEditor } from './codemirror-editor.tsx'
 import type { MarkdownSource } from './markdown-source.ts'
@@ -46,6 +47,10 @@ export function DemoEditor({
   const seedMarkdown =
     richRef.current?.getMarkdown() ?? plainRef.current?.getMarkdown() ?? initialMarkdown ?? ''
 
+  const taskClickHandler: TaskClickHandler = useCallback((payload) => {
+    console.log('Task clicked:', payload)
+  }, [])
+
   if (mode === 'source') {
     return (
       <div className="meowdown">
@@ -62,6 +67,7 @@ export function DemoEditor({
         onWikilinkClick={richProps.onWikilinkClick}
         onLinkClick={richProps.onLinkClick}
         onImageClick={richProps.onImageClick}
+        onTaskClick={taskClickHandler}
       />
     )
   }

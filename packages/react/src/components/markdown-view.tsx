@@ -11,6 +11,7 @@ import {
   type EmbedDescriptor,
   type ImageClickHandler,
   type LinkClickHandler,
+  type ListMarker,
   type MarkChunk,
   type MarkMode,
   type MarkName,
@@ -18,12 +19,16 @@ import {
   type MdLinkTextAttrs,
   type MdMathAttrs,
   type MdWikilinkAttrs,
+  type MeowdownListAttrs,
   type NodeName,
   type WikilinkClickHandler,
 } from '@meowdown/core'
+import type { DOMOutputSpec } from '@prosekit/pm/model'
 import { Mark, type Node as ProseMirrorNode } from '@prosekit/pm/model'
 import { clsx } from 'clsx/lite'
 import {
+  cloneElement,
+  createElement,
   Fragment,
   useEffect,
   useMemo,
@@ -36,9 +41,41 @@ import {
 
 import { useKaTeX } from '../hooks/use-katex.ts'
 
+import { attributesToProps } from './attributes-to-props.ts'
 import styles from './code-block-view.module.css'
-import { outputSpecToReact } from './dom-output-spec.tsx'
+import { normalizeDOMOutputSpec, type TypedDOMOutputSpec } from './dom-output-spec.tsx'
 import { MathRender } from './math-render.tsx'
+
+/** Payload for {@link TaskClickHandler}. */
+export interface TaskClickPayload {
+  /**
+   * Zero-based position of the clicked checkbox among all the checkboxes this
+   * view renders, in document order. Stable for a given `markdown`, so a host
+   * can map it back to the corresponding task item in its own parse of the
+   * same source.
+   */
+  index: number
+  /** The checkbox's rendered state. The view never flips it — see the handler doc. */
+  checked: boolean
+  /** The item's list marker as written (`+` renders a circle checkbox, `-`/`*` a square). */
+  marker: ListMarker
+  /**
+   * First line of the item's own inline content, exactly as it appears in the
+   * source after the `[ ]`/`[x]` marker and one space. A host locating the task
+   * by {@link index} can cross-check this against its own parse and refuse a
+   * mismatch instead of toggling the wrong item.
+   */
+  text: string
+  /** The originating click. Read modifier keys or position a popover from it. */
+  event: globalThis.MouseEvent
+}
+
+/**
+ * Called when a rendered task checkbox is clicked. The view is a pure render
+ * of `markdown` and never flips the box itself: apply the toggle to the
+ * source and re-render, exactly like the other click handlers.
+ */
+export type TaskClickHandler = (payload: TaskClickPayload) => void
 
 export interface MarkdownViewProps {
   /** The Markdown to render. Live: changing it re-renders the content. */
@@ -55,6 +92,8 @@ export interface MarkdownViewProps {
   onLinkClick?: LinkClickHandler
   /** Called when a rendered image is clicked. Pass a stable function. */
   onImageClick?: ImageClickHandler
+  /** Called when a rendered task checkbox is clicked. Pass a stable function. */
+  onTaskClick?: TaskClickHandler
   /** Extra class on the content root (alongside `ProseMirror meowdown-content`). */
   className?: string
 }
@@ -64,6 +103,41 @@ interface RenderContext {
   onWikilinkClick?: WikilinkClickHandler
   onLinkClick?: LinkClickHandler
   onImageClick?: ImageClickHandler
+  onTaskClick?: TaskClickHandler
+  /** Document-order checkbox counter feeding {@link TaskClickPayload.index}. */
+  taskCounter: { value: number }
+  keyCounter: { value: number }
+}
+
+/**
+ * Convert a ProseMirror `DOMOutputSpec` into a React node, substituting `content`
+ * for the spec's content hole (`0`). Reused for every node/mark spec the static
+ * walker does not special-case, so blocks and plain marks render off their real
+ * `toDOM`, exactly as the editor serializes them.
+ */
+function outputSpecToReact(
+  spec: DOMOutputSpec | 0 | string,
+  content: ReactNode,
+  context: RenderContext,
+): ReactElement | string | null {
+  const key = context.keyCounter.value++
+
+  if (typeof spec === 'string') return spec
+  if (spec === 0) return <Fragment key={key}>{content}</Fragment>
+
+  const normalized = normalizeDOMOutputSpec(spec as TypedDOMOutputSpec)
+  if (!normalized) return null
+
+  const [tag, attrs, rest] = normalized
+  const reactProps = { ...attributesToProps(attrs, tag) }
+  reactProps.key = `${key} ${JSON.stringify(attrs)}`
+
+  if (tag === 'input' && attrs?.['type'] === 'checkbox') {
+    reactProps.readOnly = true
+  }
+
+  const reactChildren = rest.map((child) => outputSpecToReact(child, content, context))
+  return createElement(tag, reactProps, ...reactChildren)
 }
 
 function WikilinkChip(props: {
@@ -302,7 +376,7 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
     default: {
       const toDOM = mark.type.spec.toDOM
       if (!toDOM) return children
-      return outputSpecToReact(toDOM(mark, true), children)
+      return outputSpecToReact(toDOM(mark, true), children, context)
     }
   }
 }
@@ -361,8 +435,31 @@ function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode 
   return renderRuns(runs, 0, context)
 }
 
-function renderBlock(node: ProseMirrorNode, key: number, context: RenderContext): ReactNode {
-  if (node.type.name === ('codeBlock' satisfies NodeName)) {
+function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
+  const key = context.keyCounter.value++
+  const typeName = node.type.name as NodeName
+
+  let handleTaskClick: ((event: MouseEvent) => void) | undefined
+
+  if (typeName === 'list') {
+    const attrs = node.attrs as MeowdownListAttrs
+    const { onTaskClick } = context
+    if (attrs.kind === 'task' && onTaskClick) {
+      const index = context.taskCounter.value++
+      const checked = attrs.checked === true
+      const marker = attrs.marker ?? null
+      // TODO: the rule to get the text is a bit weird. Re-visit this later.
+      const text = node.firstChild?.isTextblock
+        ? (node.firstChild.textContent.split('\n', 1)[0] ?? '')
+        : ''
+      handleTaskClick = (event) => {
+        event.preventDefault()
+        onTaskClick({ index, checked, marker, text, event: event.nativeEvent })
+      }
+    }
+  }
+
+  if (typeName === 'codeBlock') {
     const attrs = node.attrs as CodeBlockAttrs
     const language: string = typeof attrs.language === 'string' ? attrs.language : ''
     if (language === 'math') {
@@ -375,21 +472,31 @@ function renderBlock(node: ProseMirrorNode, key: number, context: RenderContext)
   if (node.isTextblock) {
     const inline = renderInline(node, context)
     return toDOM ? (
-      outputSpecToReact(toDOM(node), inline, key)
+      outputSpecToReact(toDOM(node), inline, context)
     ) : (
       <Fragment key={key}>{inline}</Fragment>
     )
   }
 
-  const children: ReactNode[] = []
-  node.forEach((child, _offset, index) => {
-    children.push(renderBlock(child, index, context))
-  })
-  return toDOM ? (
-    outputSpecToReact(toDOM(node), children, key)
+  const children: ReactNode[] = node.content.content.map((child) => renderBlock(child, context))
+
+  const reactNode = toDOM ? (
+    outputSpecToReact(toDOM(node), children, context)
   ) : (
     <Fragment key={key}>{children}</Fragment>
   )
+
+  if (
+    typeName === 'list' &&
+    handleTaskClick &&
+    typeof reactNode !== 'string' &&
+    reactNode != null
+  ) {
+    // eslint-disable-next-line @eslint-react/no-clone-element
+    return cloneElement(reactNode, { onClick: handleTaskClick })
+  }
+
+  return reactNode
 }
 
 /**
@@ -411,17 +518,30 @@ export function MarkdownView({
   onWikilinkClick,
   onLinkClick,
   onImageClick,
+  onTaskClick,
   className,
 }: MarkdownViewProps): ReactElement {
   const content = useMemo(() => {
     const doc = markdownToDoc(markdown, { frontmatter })
-    const context: RenderContext = { resolveImageUrl, onWikilinkClick, onLinkClick, onImageClick }
-    const blocks: ReactNode[] = []
-    doc.forEach((node, _offset, index) => {
-      blocks.push(renderBlock(node, index, context))
-    })
-    return blocks
-  }, [markdown, frontmatter, resolveImageUrl, onWikilinkClick, onLinkClick, onImageClick])
+    const context: RenderContext = {
+      resolveImageUrl,
+      onWikilinkClick,
+      onLinkClick,
+      onImageClick,
+      onTaskClick,
+      taskCounter: { value: 0 },
+      keyCounter: { value: 0 },
+    }
+    return doc.content.content.map((node) => renderBlock(node, context))
+  }, [
+    markdown,
+    frontmatter,
+    resolveImageUrl,
+    onWikilinkClick,
+    onLinkClick,
+    onImageClick,
+    onTaskClick,
+  ])
 
   return (
     <div className={clsx('ProseMirror', 'meowdown-content', className)} data-mark-mode={markMode}>
