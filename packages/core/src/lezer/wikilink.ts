@@ -6,11 +6,12 @@ import {
   CHAR_RIGHT_SQUARE_BRACKET,
   CHAR_SPACE,
   CHAR_TAB,
+  CHAR_VERTICAL_LINE,
 } from '../unicode.ts'
 
 /**
  * Inline parser for `[[target]]`: any chars except `[`, `]` and
- * newline, at least one of them not a space/tab. The first `]` must
+ * newline, at least one of them not a space/tab/pipe. The first `]` must
  * pair into `]]`. Registered before `Link` and claims the whole
  * element eagerly, so the target is atomic: no nested markdown, no
  * tags.
@@ -39,7 +40,9 @@ export const wikilink: MarkdownConfig = {
             )
           }
           if (code === CHAR_LEFT_SQUARE_BRACKET || code === CHAR_LINE_FEED) return -1
-          if (code !== CHAR_SPACE && code !== CHAR_TAB) hasContent = true
+          if (code !== CHAR_SPACE && code !== CHAR_TAB && code !== CHAR_VERTICAL_LINE) {
+            hasContent = true
+          }
         }
         return -1
       },

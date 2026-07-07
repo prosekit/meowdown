@@ -14,7 +14,7 @@ import type {
 } from './inline-marks.ts'
 import { parseMagicComment, type MagicComment } from './magic-comment.ts'
 import type { MarkChunk } from './mark-chunk.ts'
-import type { MarkName } from './mark-names.ts'
+import { HIDDEN_SYNTAX_MARK_NAMES, type MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
 import type { TypedMarkBuilders } from './schema.ts'
 import { parseWikilink } from './wikilink.ts'
@@ -46,9 +46,15 @@ const MARK_NAME_BY_TYPE_ID: ReadonlyMap<number, MarkName> = new Map([
   [LEZER_NODE_IDS.WikilinkMark, 'mdMark'],
 ])
 
+const ATOM_SOURCE_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([
+  'mdImage',
+  'mdWikilink',
+  'mdFile',
+])
+
 /** What {@link FileLinkResolver} sees for one `[label](url)` link. */
 export interface FileLinkPayload {
-  /** The link destination, exactly as written in the source. */
+  /** The link destination, with surrounding angle brackets removed. */
   href: string
   /** The raw label slice between the brackets; may be empty or contain nested syntax. */
   label: string
@@ -94,6 +100,28 @@ function unquoteTitle(raw: string): string {
   return raw.slice(1, -1).replaceAll(/\\(.)/g, '$1')
 }
 
+interface LiteralRange {
+  from: number
+  to: number
+}
+
+function getEmptyTargetWikilinkLiteralRange(
+  node: InlineElement,
+  text: string,
+  rangeStart: number,
+  rangeEnd: number,
+): LiteralRange | undefined {
+  if (node.type !== LEZER_NODE_IDS.Link) return
+  const outerFrom = node.from - 1
+  const outerTo = node.to + 1
+  if (outerFrom < rangeStart || outerTo > rangeEnd) return
+  const source = text.slice(outerFrom, outerTo)
+  if (!source.startsWith('[[') || !source.endsWith(']]')) return
+  const { target, display } = parseWikilink(source)
+  if (target || display) return
+  return { from: outerFrom, to: outerTo }
+}
+
 function walk(
   nodes: readonly InlineElement[],
   parentMarks: readonly Mark[],
@@ -107,6 +135,15 @@ function walk(
   let pos = rangeStart
   for (let index = 0; index < nodes.length; index++) {
     const node = nodes[index]
+    const literalRange = getEmptyTargetWikilinkLiteralRange(node, text, rangeStart, rangeEnd)
+    if (literalRange && literalRange.from >= pos) {
+      if (literalRange.from > pos) {
+        emit(out, pos, literalRange.from, parentMarks)
+      }
+      emit(out, literalRange.from, literalRange.to, parentMarks)
+      pos = literalRange.to
+      continue
+    }
     if (node.from > pos) {
       emit(out, pos, node.from, parentMarks)
     }
@@ -131,12 +168,12 @@ function walk(
     } else if (type === LEZER_NODE_IDS.URL) {
       // A standalone `URL` node is a GFM autolink (the address part of a real
       // `[text](url)` is handled inside `walkLink`, not here). Linkify the
-      // shapes we recognize; anything else keeps the muted `mdLinkUri`.
+      // shapes we recognize; anything else stays plain text.
       const href = getAutolinkHref(text.slice(node.from, node.to))
-      const mark: Mark = href
+      const mark: Mark | undefined = href
         ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs)
-        : marks.mdLinkUri.create()
-      emit(out, node.from, node.to, [...parentMarks, mark])
+        : undefined
+      emit(out, node.from, node.to, mark ? [...parentMarks, mark] : parentMarks)
     } else {
       let packKey: MdPackSimpleKey | undefined
 
@@ -217,6 +254,22 @@ function hrefBasename(href: string): string {
   }
 }
 
+function stripAngleBrackets(url: string): string {
+  if (url.startsWith('<') && url.endsWith('>')) return url.slice(1, -1)
+  return url
+}
+
+function hasVisibleContent(chunks: readonly MarkChunk[], text: string): boolean {
+  for (const [from, to, marks] of chunks) {
+    if (!/\S/.test(text.slice(from, to))) continue
+    const markNames = marks.map((mark) => mark.type.name as MarkName)
+    if (markNames.some((markName) => HIDDEN_SYNTAX_MARK_NAMES.has(markName))) continue
+    if (markNames.some((markName) => ATOM_SOURCE_MARK_NAMES.has(markName))) continue
+    return true
+  }
+  return false
+}
+
 /**
  * The marks for a whole `[label](url)` link that the host's `resolveFileLink`
  * claimed as a file, or `undefined` when the link stays a regular link. The
@@ -234,7 +287,7 @@ function claimFileLink(
   if (!resolveFileLink) return undefined
   const { labelFrom, labelTo, urlNode, titleNode } = scanLinkParts(node)
   if (labelFrom < 0 || labelTo < 0 || !urlNode) return undefined
-  const href = text.slice(urlNode.from, urlNode.to)
+  const href = stripAngleBrackets(text.slice(urlNode.from, urlNode.to))
   if (!href) return undefined
   const label = text.slice(labelFrom, labelTo)
   const title = titleNode ? unquoteTitle(text.slice(titleNode.from, titleNode.to)) : ''
@@ -268,25 +321,26 @@ function walkLink(
   out: MarkChunk[],
 ): void {
   const { labelTo: labelEnd, urlNode, titleNode } = scanLinkParts(node)
-  const href = urlNode ? text.slice(urlNode.from, urlNode.to) : ''
+  const href = urlNode ? stripAngleBrackets(text.slice(urlNode.from, urlNode.to)) : ''
   const title = titleNode ? unquoteTitle(text.slice(titleNode.from, titleNode.to)) : ''
   const linkTextMark = href ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs) : null
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd && linkTextMark !== null
 
   const pack = marks.mdPack.create({ key: 'link', data: { href, title } } satisfies MdPackAttrs)
   const base = [...parentMarks, pack]
+  const unitChunks: MarkChunk[] = []
 
   let pos = node.from
   for (const child of node.children) {
     if (child.from > pos) {
       const childMarks = inLabel(pos) ? [...base, linkTextMark!] : base
-      emit(out, pos, child.from, childMarks)
+      emit(unitChunks, pos, child.from, childMarks)
     }
     const baseForChild = inLabel(child.from) ? [...base, linkTextMark!] : base
     // A wikilink in the label needs its own source/view walk, not the generic
     // per-child mark mapping.
     if (child.type === LEZER_NODE_IDS.Wikilink) {
-      walkWikilink(child, baseForChild, text, marks, out)
+      walkWikilink(child, baseForChild, text, marks, unitChunks)
       pos = child.to
       continue
     }
@@ -295,15 +349,22 @@ function walkLink(
       ? [...baseForChild, marks[maybeMarkName].create()]
       : baseForChild
     if (child.children.length === 0) {
-      emit(out, child.from, child.to, childMarks)
+      emit(unitChunks, child.from, child.to, childMarks)
     } else {
       // No options: a link label cannot contain another `[label](url)` link.
-      walk(child.children, childMarks, child.from, child.to, text, marks, out, undefined)
+      walk(child.children, childMarks, child.from, child.to, text, marks, unitChunks, undefined)
     }
     pos = child.to
   }
   if (pos < node.to) {
-    emit(out, pos, node.to, base)
+    emit(unitChunks, pos, node.to, base)
+  }
+  if (!hasVisibleContent(unitChunks, text)) {
+    emit(out, node.from, node.to, parentMarks)
+    return
+  }
+  for (const [from, to, chunkMarks] of unitChunks) {
+    emit(out, from, to, chunkMarks)
   }
 }
 
@@ -350,7 +411,7 @@ function walkImage(
   const bracketNodes = node.children.filter((child) => child.type === LEZER_NODE_IDS.LinkMark)
   const titleNode = node.children.find((child) => child.type === LEZER_NODE_IDS.LinkTitle)
 
-  const src: string = text.slice(urlNode.from, urlNode.to)
+  const src: string = stripAngleBrackets(text.slice(urlNode.from, urlNode.to))
   const alt: string =
     bracketNodes.length >= 2 ? text.slice(bracketNodes[0].to, bracketNodes[1].from) : ''
   const title: string = titleNode ? unquoteTitle(text.slice(titleNode.from, titleNode.to)) : ''
@@ -406,6 +467,10 @@ function walkWikilink(
   out: MarkChunk[],
 ): void {
   const { target, display } = parseWikilink(text.slice(node.from, node.to))
+  if (!target) {
+    emit(out, node.from, node.to, parentMarks)
+    return
+  }
 
   emit(out, node.from, node.to, [...parentMarks, marks.mdWikilink.create({ target, display })])
 }

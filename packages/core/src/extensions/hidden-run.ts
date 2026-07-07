@@ -2,17 +2,7 @@ import { getMarkType } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
 
-import type { MarkName } from './mark-names.ts'
-
-// The marks whose text hide mode renders at font-size 0. Mirrors the CSS rules
-// in style.css and CLIPBOARD_STRIP_MARK_NAMES in mark-mode.ts. Atom sources
-// (mdImage / mdWikilink / mdFile) are not here: defineAtomMarkNavigation owns
-// them.
-const HIDDEN_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([
-  'mdMark',
-  'mdLinkUri',
-  'mdLinkTitle',
-])
+import { HIDDEN_SYNTAX_MARK_NAMES, type MarkName } from './mark-names.ts'
 
 export interface HiddenRun {
   from: number
@@ -32,7 +22,7 @@ function getCharMarks(state: EditorState, pos: number): readonly Mark[] | undefi
 export function isHiddenChar(state: EditorState, pos: number): boolean {
   const marks = getCharMarks(state, pos)
   if (marks == null) return false
-  return marks.some((mark) => HIDDEN_MARK_NAMES.has(mark.type.name as MarkName))
+  return marks.some((mark) => HIDDEN_SYNTAX_MARK_NAMES.has(mark.type.name as MarkName))
 }
 
 function isInsideNonCodeTextblock(state: EditorState, pos: number): boolean {

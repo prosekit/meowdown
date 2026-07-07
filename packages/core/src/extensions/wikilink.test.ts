@@ -63,6 +63,24 @@ describe.each(ALL_MODES)('wikilink rendering in %s mode', (mode) => {
   })
 })
 
+describe('degenerate wikilink rendering', () => {
+  it('renders a pipe-only wikilink as literal text in hide mode', async () => {
+    using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see [[|]] here')))
+    await expect.element(pmRoot.getByText('[[|]]')).toBeVisible()
+    await expect.element(label).not.toBeInTheDocument()
+  })
+
+  it('still renders a target with an empty alias as a wikilink', async () => {
+    using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see [[x|]] here')))
+    await expect.element(label).toBeVisible()
+    await expect.element(label).toHaveTextContent('x')
+  })
+})
+
 // A wikilink is one caret stop in every mode: arrowing onto it selects the whole
 // `[[Note]]`, the next arrow steps past, and Backspace deletes it as a unit. The
 // selection positions are identical across modes; only the rendering differs.

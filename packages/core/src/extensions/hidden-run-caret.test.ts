@@ -266,10 +266,10 @@ describe('hide mode unformat deletion', () => {
     expect(docToMarkdown(fixture.doc)).toBe('**a**b\n')
   })
 
-  it('a fully hidden unit deletes entirely', async () => {
+  it('a degenerate literal link deletes one character', async () => {
     using fixture = setupMode('hide', 'x[](https://a.io)<a>y')
     await userEvent.keyboard('{Backspace}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"x┃y"`)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"x[](https://a.io┃y"`)
   })
 
   it('atom deletion stays with atom navigation at a shared boundary', async () => {

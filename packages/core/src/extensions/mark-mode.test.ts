@@ -527,6 +527,16 @@ describe('focus mode', () => {
     `)
   })
 
+  it('renders a degenerate image as literal text', () => {
+    expect(renderHTML('focus', 'a ![]()<a> b')).toMatchInlineSnapshot(`
+      "
+      <p>
+        a ![]() b
+      </p>
+      "
+    `)
+  })
+
   it('reveals the whole link when the cursor sits right after the closing )', () => {
     expect(renderHTML('focus', 'ABC[link](https://example.com)<a>DEF')).toMatchInlineSnapshot(`
       "
@@ -773,7 +783,10 @@ describe('focus mode', () => {
               </prosekit-resizable-handle>
             </prosekit-resizable-root>
           </span>
-          <span class="md-image-view-content md-atom-view-content">
+          <span
+            class="md-image-view-content md-atom-view-content"
+            data-testid="image-source"
+          >
             ![alt](pic.png)
           </span>
         </span>
@@ -940,6 +953,50 @@ describe('hide mode', () => {
 
   it('keeps a bare autolink in the copied text', () => {
     expectClipboard('hide', 'visit https://example.com now', 'visit https://example.com now')
+  })
+
+  it('renders a degenerate image as literal text', () => {
+    expect(renderHTML('hide', 'a ![]()<a> b')).toMatchInlineSnapshot(`
+      "
+      <p>
+        a ![]() b
+      </p>
+      "
+    `)
+  })
+
+  it('renders an empty-label link as literal text', () => {
+    expect(renderHTML('hide', 'a [](https://x.test)<a> b')).toMatchInlineSnapshot(`
+      "
+      <p>
+        a [](https://x.test) b
+      </p>
+      "
+    `)
+  })
+
+  it('keeps an empty-label link in the copied text', () => {
+    expectClipboard('hide', 'a [](https://x.test) b', 'a [](https://x.test) b')
+  })
+
+  it('shows degenerate image text', async () => {
+    using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('a ![]() b')))
+    await expect.element(pmRoot.getByText('![]()')).toBeVisible()
+  })
+
+  it('keeps an incrementally inserted degenerate image visible', async () => {
+    using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    fixture.view.focus()
+
+    const prefixes = ['!', '![', '![]', '![](', '![]()'] as const
+    for (const prefix of prefixes) {
+      fixture.view.dispatch(fixture.state.tr.insertText(prefix[prefix.length - 1]))
+      await expect.element(pmRoot.getByText(prefix, { exact: false })).toBeVisible()
+    }
   })
 
   it('keeps the whole image source so a copied image stays markdown', () => {

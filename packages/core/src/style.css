@@ -735,6 +735,17 @@
       letter-spacing: 0;
       opacity: 0;
     }
+
+    .md-atom-view:not(:has(.md-atom-view-preview)) > .md-atom-view-content {
+      font-size: inherit;
+      letter-spacing: inherit;
+      opacity: 1;
+      color: var(--meowdown-mark);
+    }
+
+    .md-atom-view:not(:has(.md-atom-view-preview)) .md-atom-selected {
+      background: var(--meowdown-node-selection);
+    }
   }
 
   /* inline math */
@@ -808,10 +819,10 @@
       min-height: 2.5rem;
     }
 
-    /* While the image is still loading (e.g. a freshly dropped image), fill the
-     * box with a placeholder so it reads as an image, not an empty gap. Cleared
-     * once the image paints (`data-loading` is removed on load/error). */
-    .md-image-resizable[data-loading] {
+    /* While the image is still loading or failed, fill the box with a placeholder
+     * so it reads as an image, not an empty gap. */
+    .md-image-resizable[data-loading],
+    .md-image-resizable[data-error] {
       background: var(--meowdown-image-loading-bg);
       border-radius: var(--meowdown-image-radius, 0.5rem);
     }

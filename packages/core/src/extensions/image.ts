@@ -132,6 +132,7 @@ class ImageMarkView implements MarkView {
 
     this.#contentDOM = document.createElement('span')
     this.#contentDOM.className = 'md-image-view-content md-atom-view-content'
+    this.#contentDOM.dataset.testid = 'image-source'
 
     const preview = this.#renderPreview()
     if (preview) {
@@ -222,6 +223,7 @@ class ImageMarkView implements MarkView {
     applyDisplaySize(root, image, this.#attrs.width, this.#attrs.height)
     image.addEventListener('load', () => {
       root.removeAttribute('data-loading')
+      root.removeAttribute('data-error')
       const ratio = image.naturalWidth / image.naturalHeight
       if (!Number.isFinite(ratio) || ratio <= 0) return
       root.setAttribute('data-aspect-ratio', String(ratio))
@@ -230,6 +232,7 @@ class ImageMarkView implements MarkView {
     })
     image.addEventListener('error', () => {
       root.removeAttribute('data-loading')
+      root.setAttribute('data-error', '')
     })
     root.appendChild(image)
 

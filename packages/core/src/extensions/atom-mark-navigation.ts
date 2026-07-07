@@ -166,6 +166,7 @@ function createForwardDelete(marks: AtomMarks): Command {
 }
 
 const SELECTED_CLASS = 'md-atom-selected'
+const SELECTED_TEST_ID = 'atom-selection'
 
 // Decorate each selected atom's source range with `md-atom-selected`, so its
 // mark view can ring the rendered preview/label.
@@ -182,7 +183,10 @@ function createSelectionPlugin(marks: AtomMarks): Plugin {
         const range = getSelectedRange(state, markNames)
         if (range) {
           return DecorationSet.create(state.doc, [
-            Decoration.inline(range.from, range.to, { class: SELECTED_CLASS }),
+            Decoration.inline(range.from, range.to, {
+              class: SELECTED_CLASS,
+              'data-testid': SELECTED_TEST_ID,
+            }),
           ])
         }
 
@@ -192,7 +196,12 @@ function createSelectionPlugin(marks: AtomMarks): Plugin {
         const decorations: Decoration[] = []
         state.doc.nodesBetween(from, to, (node, pos) => {
           if (node.marks.some((mark) => markNames.includes(mark.type.name as MarkName))) {
-            decorations.push(Decoration.inline(pos, pos + node.nodeSize, { class: SELECTED_CLASS }))
+            decorations.push(
+              Decoration.inline(pos, pos + node.nodeSize, {
+                class: SELECTED_CLASS,
+                'data-testid': SELECTED_TEST_ID,
+              }),
+            )
           }
         })
         return DecorationSet.create(state.doc, decorations)

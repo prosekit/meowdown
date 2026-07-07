@@ -202,10 +202,10 @@ describe('getUnitMarkerRuns', () => {
     expect(runs.map((run) => runText(fixture, run))).toEqual(['***', '***'])
   })
 
-  it('returns one run for a fully hidden unit', () => {
+  it('returns no runs for a degenerate literal link', () => {
     using fixture = setup('x[](https://a.io)y')
     const start = findText(fixture.doc, 'x') + 1
     const runs = getUnitMarkerRuns(fixture.state, start)
-    expect(runs.map((run) => runText(fixture, run))).toEqual(['[](https://a.io)'])
+    expect(runs.map((run) => runText(fixture, run))).toEqual([])
   })
 })

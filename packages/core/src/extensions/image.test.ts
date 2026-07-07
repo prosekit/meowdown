@@ -17,6 +17,8 @@ import type { MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const preview = pmRoot.getByTestId('image-preview')
+const imageSource = pmRoot.getByTestId('image-source')
+const atomSelection = pmRoot.getByTestId('atom-selection')
 
 function getSVGImageURL(width: number, height: number): string {
   const svg =
@@ -123,6 +125,60 @@ describe('image selection ring', () => {
     const { view } = fixture
     view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, 0)))
     await expect.element(preview).toHaveStyle({ outlineStyle: 'none' })
+  })
+})
+
+describe('unresolvable image source', () => {
+  function setupUnresolvable(mode: MarkMode, text: string): Fixture {
+    const fixture = setupFixture({ extensionOptions: { markMode: mode } })
+    const { editor, n } = fixture
+    editor.use(defineImage({ resolveImageUrl: () => undefined }))
+    fixture.set(n.doc(n.paragraph(text)))
+    fixture.view.focus()
+    return fixture
+  }
+
+  it('shows the source in hide mode', async () => {
+    using fixture = setupUnresolvable('hide', '![alt](x.png)')
+    void fixture
+    await expect.element(imageSource).toBeVisible()
+    await expect.element(pmRoot.getByText('![alt](x.png)')).toBeVisible()
+  })
+
+  it('shows the source in focus mode', async () => {
+    using fixture = setupUnresolvable('focus', '![alt](x.png)')
+    void fixture
+    await expect.element(imageSource).toBeVisible()
+    await expect.element(pmRoot.getByText('![alt](x.png)')).toBeVisible()
+  })
+
+  it('shows the source in show mode', async () => {
+    using fixture = setupUnresolvable('show', '![alt](x.png)')
+    void fixture
+    await expect.element(imageSource).toBeVisible()
+    await expect.element(pmRoot.getByText('![alt](x.png)')).toBeVisible()
+  })
+
+  it('shows the selected source when arrowing onto it', async () => {
+    using fixture = setupUnresolvable('hide', 'ABC<a>![alt](x.png)DEF')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC┃![alt](x.png)DEF"`)
+    await userEvent.keyboard('{ArrowRight}')
+    expect(getSelectionSnapshot(fixture.state)).toMatchInlineSnapshot(`"ABC❰![alt](x.png)❱DEF"`)
+    await expect.element(atomSelection).toBeVisible()
+  })
+
+  it('edits the revealed source text', async () => {
+    using fixture = setupUnresolvable('hide', '![alt](x.png)')
+    await userEvent.click(imageSource)
+    await userEvent.keyboard('X')
+    expect(fixture.doc.textContent).toContain('X')
+  })
+
+  it('keeps the source hidden when a preview renders', async () => {
+    using fixture = setup('hide', '![alt](url)')
+    void fixture
+    await expect.element(preview).toBeVisible()
+    await expect.element(imageSource).not.toBeVisible()
   })
 })
 
@@ -333,6 +389,14 @@ describe('image resize', () => {
     // The placeholder is on as soon as the box renders, before the async load
     // fires; it is cleared once the image paints.
     expect(resizable.element()).toHaveAttribute('data-loading', '')
+    await expect.element(resizable).not.toHaveAttribute('data-loading')
+  })
+
+  it('keeps a placeholder when the image fails to load', async () => {
+    using fixture = setupResize('![cat](u)', 'https://example.invalid/missing.png')
+    void fixture
+    pmRoot.getByAltText('cat').element().dispatchEvent(new Event('error'))
+    await expect.element(resizable).toHaveAttribute('data-error', '')
     await expect.element(resizable).not.toHaveAttribute('data-loading')
   })
 })

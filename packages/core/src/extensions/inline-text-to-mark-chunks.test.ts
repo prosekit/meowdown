@@ -784,6 +784,135 @@ describe('wikilink', () => {
   })
 })
 
+describe('degenerate units', () => {
+  it('keeps an empty image literal', () => {
+    expect(parse('![]()')).toMatchInlineSnapshot(`
+      "
+      [0, 5]
+      "
+    `)
+  })
+
+  it('keeps an empty link literal', () => {
+    expect(parse('[]()')).toMatchInlineSnapshot(`
+      "
+      [0, 4]
+      "
+    `)
+  })
+
+  it('keeps a link with an empty label literal', () => {
+    expect(parse('[](https://example.com)')).toMatchInlineSnapshot(`
+      "
+      [0, 23]
+      "
+    `)
+  })
+
+  it('keeps a titled link with an empty label literal', () => {
+    expect(parse('[](https://example.com "title")')).toMatchInlineSnapshot(`
+      "
+      [0, 31]
+      "
+    `)
+  })
+
+  it('keeps a link with a whitespace label literal', () => {
+    expect(parse('[ ](https://example.com)')).toMatchInlineSnapshot(`
+      "
+      [0, 24]
+      "
+    `)
+  })
+
+  it('keeps a link with visible text as a link', () => {
+    expect(parse('[a]()')).toMatchInlineSnapshot(`
+      "
+      [0, 1] mdPack(key=link,data={"href":"","title":""}) + mdMark
+      [1, 2] mdPack(key=link,data={"href":"","title":""})
+      [2, 5] mdPack(key=link,data={"href":"","title":""}) + mdMark
+      "
+    `)
+  })
+
+  it('keeps an image with visible alt text as a link-shaped source', () => {
+    expect(parse('![alt]()')).toMatchInlineSnapshot(`
+      "
+      [0, 2] mdPack(key=link,data={"href":"","title":""}) + mdMark
+      [2, 5] mdPack(key=link,data={"href":"","title":""})
+      [5, 8] mdPack(key=link,data={"href":"","title":""}) + mdMark
+      "
+    `)
+  })
+
+  it('keeps a nested image label visible', () => {
+    expect(parse('[![alt](https://img.test/b.svg)](https://x.test)')).toMatchInlineSnapshot(`
+      "
+      [0, 3]   mdPack(key=link,data={"href":"https://x.test","title":""}) + mdLinkText(href=https://x.test) + mdMark
+      [3, 6]   mdPack(key=link,data={"href":"https://x.test","title":""}) + mdLinkText(href=https://x.test)
+      [6, 8]   mdPack(key=link,data={"href":"https://x.test","title":""}) + mdLinkText(href=https://x.test) + mdMark
+      [8, 30]  mdPack(key=link,data={"href":"https://x.test","title":""}) + mdLinkText(href=https://x.test) + mdLinkText(href=https://img.test/b.svg)
+      [30, 31] mdPack(key=link,data={"href":"https://x.test","title":""}) + mdLinkText(href=https://x.test) + mdMark
+      [31, 33] mdPack(key=link,data={"href":"https://x.test","title":""}) + mdMark
+      [33, 47] mdPack(key=link,data={"href":"https://x.test","title":""}) + mdLinkUri
+      [47, 48] mdPack(key=link,data={"href":"https://x.test","title":""}) + mdMark
+      "
+    `)
+  })
+
+  it('keeps a pipe-only wikilink literal', () => {
+    expect(parse('[[|]]')).toMatchInlineSnapshot(`
+      "
+      [0, 5]
+      "
+    `)
+  })
+
+  it('keeps a spaced pipe-only wikilink literal', () => {
+    expect(parse('[[ | ]]')).toMatchInlineSnapshot(`
+      "
+      [0, 7]
+      "
+    `)
+  })
+
+  it('keeps an empty-target wikilink with an alias literal', () => {
+    expect(parse('[[|alias]]')).toMatchInlineSnapshot(`
+      "
+      [0, 10]
+      "
+    `)
+  })
+
+  it('keeps an empty-alias wikilink with a target as a wikilink', () => {
+    expect(parse('[[x|]]')).toMatchInlineSnapshot(`
+      "
+      [0, 6] mdWikilink(target=x)
+      "
+    `)
+  })
+
+  it('strips angle brackets from image destinations', () => {
+    expect(parse('![a](<https://x.test/a b.png>)')).toMatchInlineSnapshot(`
+      "
+      [0, 30] mdImage(src=https://x.test/a b.png,alt=a)
+      "
+    `)
+  })
+
+  it('strips angle brackets from link destinations', () => {
+    expect(parse('[a](<https://x.test>)')).toMatchInlineSnapshot(`
+      "
+      [0, 1]   mdPack(key=link,data={"href":"https://x.test","title":""}) + mdLinkText(href=https://x.test) + mdMark
+      [1, 2]   mdPack(key=link,data={"href":"https://x.test","title":""}) + mdLinkText(href=https://x.test)
+      [2, 4]   mdPack(key=link,data={"href":"https://x.test","title":""}) + mdMark
+      [4, 20]  mdPack(key=link,data={"href":"https://x.test","title":""}) + mdLinkUri
+      [20, 21] mdPack(key=link,data={"href":"https://x.test","title":""}) + mdMark
+      "
+    `)
+  })
+})
+
 describe('file link', () => {
   const claimAssets: FileLinkResolver = ({ href }) => href.startsWith('assets/')
 
@@ -854,6 +983,15 @@ describe('file link', () => {
       [0, 43] mdFile(href=assets/report.pdf,name=report.pdf,title=Quarterly)
       "
     `)
+  })
+
+  it('strips angle brackets before claiming a file link', () => {
+    expect(parse('[report.pdf](<assets/report.pdf>)', { resolveFileLink: claimAssets }))
+      .toMatchInlineSnapshot(`
+        "
+        [0, 33] mdFile(href=assets/report.pdf,name=report.pdf)
+        "
+      `)
   })
 
   it('claims only what the resolver claims in mixed content', () => {

@@ -4,7 +4,7 @@ import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
-import type { MarkName } from './mark-names.ts'
+import { HIDDEN_SYNTAX_MARK_NAMES, type MarkName } from './mark-names.ts'
 
 /**
  * Controls how markdown syntax characters are rendered and how the
@@ -15,15 +15,6 @@ import type { MarkName } from './mark-names.ts'
  * - 'show':  syntax chars always visible (dim grey); copy keeps them.
  */
 export type MarkMode = 'hide' | 'focus' | 'show'
-
-// Marks whose text is dropped from a clean clipboard copy, so copied markdown
-// omits the rendered syntax. The image/wikilink sources carry only their own
-// mark, so they are kept verbatim (`![alt](url)`, `[[target]]`).
-const CLIPBOARD_STRIP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([
-  'mdMark',
-  'mdLinkUri',
-  'mdLinkTitle',
-])
 
 // Marks whose text survives a clean copy even when a strip mark also covers
 // it. A math dollar carries `mdMark` for hiding, but stripping it would paste
@@ -94,7 +85,7 @@ function cleanCopySerializer(slice: Slice): string {
       if (!textNode.isText || !textNode.text) return true
       const textNodeMarks = textNode.marks.map((mark) => mark.type.name as MarkName)
       const stripped =
-        textNodeMarks.some((markName) => CLIPBOARD_STRIP_MARK_NAMES.has(markName)) &&
+        textNodeMarks.some((markName) => HIDDEN_SYNTAX_MARK_NAMES.has(markName)) &&
         !textNodeMarks.some((markName) => CLIPBOARD_KEEP_MARK_NAMES.has(markName))
       if (!stripped) parts.push(textNode.text)
       return false
