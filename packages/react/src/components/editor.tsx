@@ -210,6 +210,12 @@ export interface EditorProps {
   embedPaste?: boolean
 
   /**
+   * Pasting a URL over selected text wraps the selection as a Markdown link
+   * `[selected text](url)`; one undo restores the plain text. On by default.
+   */
+  linkPaste?: boolean
+
+  /**
    * Pressing Enter at the end of the document's first heading (the title line)
    * starts a fresh empty bullet on the next line instead of a plain paragraph.
    * Off by default.
@@ -286,6 +292,7 @@ export function MeowdownEditor({
   onFileSaveError,
   onImageClick,
   embedPaste = true,
+  linkPaste = true,
   bulletAfterHeading = false,
   frontmatter = false,
   blockHandle = true,
@@ -396,6 +403,7 @@ export function MeowdownEditor({
         onFileSaveError={onFileSaveError}
         onImageClick={onImageClick}
         embedPaste={embedPaste}
+        linkPaste={linkPaste}
         bulletAfterHeading={bulletAfterHeading}
         frontmatter={frontmatter}
         blockHandle={blockHandle}

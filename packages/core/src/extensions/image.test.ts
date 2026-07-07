@@ -151,6 +151,39 @@ describe('image click callback', () => {
     expect(onImageClick.mock.calls[0][0].event).toBeInstanceOf(MouseEvent)
   })
 
+  it('prevents non-mouse pointerdown on clickable previews without swallowing click', async () => {
+    const onImageClick = vi.fn<ImageClickHandler>()
+    using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
+    void fixture
+    await expect.element(preview).toBeInTheDocument()
+
+    const pointerDown = new PointerEvent('pointerdown', {
+      bubbles: true,
+      cancelable: true,
+      pointerType: 'touch',
+    })
+    expect(preview.element().dispatchEvent(pointerDown)).toBe(false)
+    expect(pointerDown.defaultPrevented).toBe(true)
+
+    await userEvent.click(preview)
+    await vi.waitFor(() => expect(onImageClick).toHaveBeenCalledTimes(1))
+  })
+
+  it('leaves mouse pointerdown on clickable previews alone', async () => {
+    const onImageClick = vi.fn<ImageClickHandler>()
+    using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
+    void fixture
+    await expect.element(preview).toBeInTheDocument()
+
+    const pointerDown = new PointerEvent('pointerdown', {
+      bubbles: true,
+      cancelable: true,
+      pointerType: 'mouse',
+    })
+    expect(preview.element().dispatchEvent(pointerDown)).toBe(true)
+    expect(pointerDown.defaultPrevented).toBe(false)
+  })
+
   it('does not fire when plain text is clicked', async () => {
     const onImageClick = vi.fn<ImageClickHandler>()
     using fixture = setupClickable('hello ![cat](https://example.com/cat.png)', onImageClick)

@@ -13,6 +13,10 @@ interface ImageHit {
   alt: string
 }
 
+function getClosestImagePreview(target: EventTarget | null): HTMLElement | false | null {
+  return target instanceof HTMLElement && target.closest('.md-image-view-preview')
+}
+
 function findImageAt(state: EditorState, pos: number): ImageHit | undefined {
   const range = getMarkRangeAt(state, pos, 'mdImage')
   if (!range) return
@@ -41,9 +45,20 @@ export function defineImageClickHandler(onClick: ImageClickHandler): PlainExtens
     new Plugin({
       key: imageClickKey,
       props: {
+        handleDOMEvents: {
+          pointerdown: (view, event) => {
+            if (getClosestImagePreview(event.target) && event.pointerType !== 'mouse') {
+              // Clickable image previews live inside the editor contenteditable. On touch surfaces,
+              // tapping a rendered image can let the browser focus the editor on pointerdown before
+              // the image click handler opens an external surface such as a lightbox. In mobile
+              // WebKit this can briefly raise the software keyboard.
+              event.preventDefault()
+            }
+            return false
+          },
+        },
         handleClick: (view, _pos, event) => {
-          const target = event.target as HTMLElement | null
-          const preview = target?.closest?.('.md-image-view-preview')
+          const preview = getClosestImagePreview(event.target)
           if (!preview) return false
           // Resolve the position from the preview's own content holder, not the
           // click's `pos`: a click on the non-editable preview lands on the run

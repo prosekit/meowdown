@@ -497,7 +497,19 @@ describe('autolink', () => {
   it('non-http scheme', () => {
     expect(parse('a ftp://example.com b')).toMatchInlineSnapshot(`
       "
-      [0, 21]
+      [0, 2]
+      [2, 19]  mdLinkText(href=ftp://example.com)
+      [19, 21]
+      "
+    `)
+  })
+
+  it('custom app scheme', () => {
+    expect(parse('a x-custom-schema://ABCD b')).toMatchInlineSnapshot(`
+      "
+      [0, 2]
+      [2, 24]  mdLinkText(href=x-custom-schema://ABCD)
+      [24, 26]
       "
     `)
   })
