@@ -2,7 +2,7 @@
 
 Ported from https://github.com/remarkablemark/html-react-parser/blob/v6.1.4/src/attributes-to-props.ts
 
-License: MIT
+License: https://github.com/remarkablemark/html-react-parser/blob/v6.1.4/LICENSE
 
 The MIT License
 
