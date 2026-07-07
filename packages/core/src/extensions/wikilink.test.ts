@@ -29,27 +29,37 @@ function setupMode(mode: MarkMode): (text: string) => Fixture {
 const ALL_MODES: MarkMode[] = ['hide', 'focus', 'show']
 const LABEL_MODES: MarkMode[] = ['hide', 'focus']
 
-describe('wikilink rendering', () => {
+describe.each(ALL_MODES)('wikilink rendering in %s mode', (mode) => {
   it('renders the target as the label', async () => {
-    using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    using fixture = setupFixture({ extensionOptions: { markMode: mode } })
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('see [[Note]] here')))
     await expect.element(label).toHaveTextContent('Note')
   })
 
   it('renders the alias as the label', async () => {
-    using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    using fixture = setupFixture({ extensionOptions: { markMode: mode } })
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('see [[Note|My Note]] here')))
     await expect.element(label).toHaveTextContent('My Note')
   })
 
   it('renders the label in show mode', async () => {
-    using fixture = setupFixture({ extensionOptions: { markMode: 'show' } })
+    using fixture = setupFixture({ extensionOptions: { markMode: mode } })
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('see [[Note]] here')))
     await expect.element(label).toBeVisible()
     await expect.element(label).toHaveTextContent('Note')
+  })
+
+  it('renders the preview as a plain inline', async () => {
+    const setup = setupMode(mode)
+    const longTarget = Array.from({ length: 60 }, (_, i) => `word${i}`).join(' ')
+    using fixture = setup(`before [[${longTarget}]]<a>`)
+    await expect.element(label).toBeVisible()
+
+    const preview = fixture.dom.querySelector('.md-wikilink-view-preview')!
+    expect(getComputedStyle(preview).display).toBe('inline')
   })
 })
 
