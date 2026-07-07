@@ -39,7 +39,7 @@ import {
 import { useKaTeX } from '../hooks/use-katex.ts'
 
 import styles from './code-block-view.module.css'
-import { outputSpecAttrs, outputSpecToReact, toReactProps } from './dom-output-spec.tsx'
+import { normalizeDOMOutputSpec, outputSpecToReact } from './dom-output-spec.tsx'
 import { MathRender } from './math-render.tsx'
 
 /** Payload for {@link TaskClickHandler}. */
@@ -418,8 +418,16 @@ function TaskItemView(props: {
   const { node, index, onTaskClick, children } = props
   const attrs = node.attrs as MeowdownListAttrs
   const checked = attrs.checked === true
-  const toDOM = node.type.spec.toDOM
-  const outerProps = toReactProps(toDOM ? outputSpecAttrs(toDOM(node)) : undefined)
+  const domSpec = node.type.spec.toDOM?.(node)
+  const domSpec2 = domSpec && normalizeDOMOutputSpec(domSpec)
+  console.log('domSpec', domSpec)
+  console.log('domSpec2', domSpec2)
+
+  const domSpecAttrs = domSpec2?.[1]
+  // const reactProps = toReactProps(domSpecAttrs)
+
+  // const domSpecAttrs = domSpec && outputSpecAttrs(domSpec)
+  // const outerProps = domSpecAttrs && toReactProps(domSpecAttrs)
   const handleClick = (event: MouseEvent) => {
     event.preventDefault()
     const lead = node.firstChild
@@ -433,7 +441,7 @@ function TaskItemView(props: {
     })
   }
   return (
-    <div {...outerProps}>
+    <div {...reactProps}>
       <div className="list-marker list-marker-click-target" contentEditable={false}>
         <label>
           <input
@@ -484,13 +492,13 @@ function renderBlock(node: ProseMirrorNode, key: number, context: RenderContext)
   node.forEach((child, _offset, index) => {
     children.push(renderBlock(child, index, context))
   })
-  if (isTaskItem) {
-    return (
-      <TaskItemView key={key} node={node} index={taskIndex} onTaskClick={context.onTaskClick}>
-        {children}
-      </TaskItemView>
-    )
-  }
+  // if (isTaskItem) {
+  //   return (
+  //     <TaskItemView key={key} node={node} index={taskIndex} onTaskClick={context.onTaskClick}>
+  //       {children}
+  //     </TaskItemView>
+  //   )
+  // }
   return toDOM ? (
     outputSpecToReact(toDOM(node), children, key)
   ) : (

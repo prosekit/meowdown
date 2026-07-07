@@ -1,5 +1,6 @@
 import type { DOMOutputSpec } from '@prosekit/pm/model'
 import { createElement, Fragment, type ReactNode } from 'react'
+import { attributesToProps } from './attributes-to-props.ts'
 
 // DOM attribute names whose React prop name differs. Covers the node/mark specs
 // the walker renders (tables need colSpan/rowSpan; flat-list markers need the
@@ -14,40 +15,35 @@ const ATTR_NAME_MAP: Record<string, string> = {
   viewbox: 'viewBox',
 }
 
-// The array form of `DOMOutputSpec`, typed precisely so element access does not
-// degrade to `any` (ProseMirror types the tail as `any[]`).
-type SpecChild = DOMOutputSpec | 0 | Record<string, string>
-type SpecArray = readonly [string, ...SpecChild[]]
+// Better type safety than `DOMOutputSpec`
+type TypedDOMOutputSpec =
+  | HTMLElement
+  | { dom: HTMLElement; contentDOM?: HTMLElement }
+  | [string, Record<string, string>, ...TypedDOMOutputSpecChild[]]
+  | [string, ...TypedDOMOutputSpecChild[]]
 
-/**
- * Convert a `DOMOutputSpec` attribute object into React props, mapping the DOM
- * attribute names React spells differently. Exported for renderers that build
- * an element by hand (the static task checkbox) but source their attributes
- * from a node's real `toDOM` — see {@link outputSpecAttrs}.
- */
-export function toReactProps(
-  attrs: Record<string, string> | undefined,
-  key?: number | string,
-): Record<string, string | number> {
-  const props: Record<string, string | number> = key === undefined ? {} : { key }
-  if (!attrs) return props
-  for (const [name, value] of Object.entries(attrs)) {
-    // DOMOutputSpec `style` is a CSS string, which React rejects. Our specs do
-    // not emit inline styles, so dropping it is safe.
-    if (name === 'style') continue
-    props[ATTR_NAME_MAP[name] ?? name] = value
-  }
-  return props
-}
+type TypedDOMOutputSpecChild = TypedDOMOutputSpec | 0 | string
 
-/** The attribute object of an array-form `DOMOutputSpec`, when it carries one. */
-export function outputSpecAttrs(spec: DOMOutputSpec): Record<string, string> | undefined {
-  if (typeof spec === 'string' || !Array.isArray(spec)) return undefined
-  const second = (spec as SpecArray)[1]
+export function normalizeDOMOutputSpec(
+  domSpec: DOMOutputSpec,
+):
+  | [tag: string, attrs: Record<string, string> | undefined, rest: TypedDOMOutputSpecChild[]]
+  | undefined {
+  const spec = domSpec as TypedDOMOutputSpec
+  if (!spec || !Array.isArray(spec)) return
+
+  const tag = spec[0]
+
+  let childStart = 1
+  let attrs: Record<string, string> | undefined
+  const second = spec[1]
   if (second != null && second !== 0 && typeof second === 'object' && !Array.isArray(second)) {
-    return second as Record<string, string>
+    attrs = second as Record<string, string>
+    childStart = 2
   }
-  return undefined
+
+  const rest = spec.slice(childStart)
+  return [tag, attrs, rest as TypedDOMOutputSpecChild[]]
 }
 
 /**
@@ -57,34 +53,18 @@ export function outputSpecAttrs(spec: DOMOutputSpec): Record<string, string> | u
  * `toDOM`, exactly as the editor serializes them.
  */
 export function outputSpecToReact(
-  spec: DOMOutputSpec,
+  spec: DOMOutputSpec | 0 | string,
   content: ReactNode,
   key: number | string = 0,
 ): ReactNode {
   if (typeof spec === 'string') return spec
-  if (!Array.isArray(spec)) return null
+  if (spec === 0) return <Fragment key={key}>{content}</Fragment>
 
-  const array = spec as SpecArray
-  const tag = array[0]
+  const normalized = normalizeDOMOutputSpec(spec as TypedDOMOutputSpec)
+  if (!normalized) return null
 
-  let childStart = 1
-  let attrs: Record<string, string> | undefined
-  const second = array[1]
-  if (second != null && second !== 0 && typeof second === 'object' && !Array.isArray(second)) {
-    attrs = second as Record<string, string>
-    childStart = 2
-  }
-
-  const props = toReactProps(attrs, key)
-  const rest = array.slice(childStart)
-  if (rest.length === 0) return createElement(tag, props)
-
-  const children = rest.map((child, index) =>
-    child === 0 ? (
-      <Fragment key={index}>{content}</Fragment>
-    ) : (
-      outputSpecToReact(child as DOMOutputSpec, content, index)
-    ),
-  )
-  return createElement(tag, props, ...children)
+  const [tag, attrs, rest] = normalized
+  const reactProps = attributesToProps(attrs, tag)
+  const reactChildren = rest.map((child, index) => outputSpecToReact(child, content, index))
+  return createElement(tag, { ...reactProps, key }, ...reactChildren)
 }
