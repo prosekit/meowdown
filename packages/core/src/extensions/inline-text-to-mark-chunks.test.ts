@@ -828,8 +828,8 @@ describe('degenerate units', () => {
   it('keeps a link with visible text as a link', () => {
     expect(parse('[a]()')).toMatchInlineSnapshot(`
       "
-      [0, 1] mdPack(key=link,data={"href":"","title":""}) + mdMark
-      [1, 2] mdPack(key=link,data={"href":"","title":""})
+      [0, 1] mdPack(key=link,data={"href":"","title":""}) + mdLinkText + mdMark
+      [1, 2] mdPack(key=link,data={"href":"","title":""}) + mdLinkText
       [2, 5] mdPack(key=link,data={"href":"","title":""}) + mdMark
       "
     `)

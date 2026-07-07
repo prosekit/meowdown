@@ -53,6 +53,15 @@ describe('LinkMenu', () => {
     expect(Math.abs(popCenter - linkCenter)).toBeLessThan(20)
   })
 
+  it('opens the preview for an empty-destination link in hide mode', async () => {
+    const screen = await render(<MeowdownEditor mode="hide" initialMarkdown="[Docs]()" />)
+    await screen.getByText('Docs').hover()
+    await expect.element(popover.getByTestId('link-popover-read')).toBeVisible()
+    await popover.getByRole('button', { name: 'Edit link' }).click()
+    await expect.element(popover.getByTestId('link-popover-edit')).toBeVisible()
+    await expect.element(popover.getByTestId('link-popover-input')).toHaveValue('')
+  })
+
   it('creates a link from a selection with Mod-k', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Docs" />)

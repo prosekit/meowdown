@@ -216,6 +216,7 @@ interface LinkParts {
   labelTo: number
   urlNode: InlineElement | null
   titleNode: InlineElement | null
+  hasInlineDestination: boolean
 }
 
 /**
@@ -240,7 +241,7 @@ function scanLinkParts(node: InlineElement): LinkParts {
       titleNode = child
     }
   }
-  return { labelFrom, labelTo, urlNode, titleNode }
+  return { labelFrom, labelTo, urlNode, titleNode, hasInlineDestination: bracketCount >= 4 }
 }
 
 /** The last path segment of `href` (query/hash stripped), decoded when possible. */
@@ -320,10 +321,12 @@ function walkLink(
   marks: TypedMarkBuilders,
   out: MarkChunk[],
 ): void {
-  const { labelTo: labelEnd, urlNode, titleNode } = scanLinkParts(node)
+  const { labelTo: labelEnd, urlNode, titleNode, hasInlineDestination } = scanLinkParts(node)
   const href = urlNode ? stripAngleBrackets(text.slice(urlNode.from, urlNode.to)) : ''
   const title = titleNode ? unquoteTitle(text.slice(titleNode.from, titleNode.to)) : ''
-  const linkTextMark = href ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs) : null
+  const isMarkdownLink = node.type === LEZER_NODE_IDS.Link && hasInlineDestination
+  const linkTextMark =
+    href || isMarkdownLink ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs) : null
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd && linkTextMark !== null
 
   const pack = marks.mdPack.create({ key: 'link', data: { href, title } } satisfies MdPackAttrs)
