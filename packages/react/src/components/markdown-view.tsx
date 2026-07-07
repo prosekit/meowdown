@@ -23,9 +23,13 @@ import {
   type NodeName,
   type WikilinkClickHandler,
 } from '@meowdown/core'
+import type { DOMOutputSpec } from '@prosekit/pm/model'
+import { attributesToProps } from './attributes-to-props.ts'
+
 import { Mark, type Node as ProseMirrorNode } from '@prosekit/pm/model'
 import { clsx } from 'clsx/lite'
 import {
+  createElement,
   Fragment,
   useEffect,
   useMemo,
@@ -39,7 +43,7 @@ import {
 import { useKaTeX } from '../hooks/use-katex.ts'
 
 import styles from './code-block-view.module.css'
-import { normalizeDOMOutputSpec, outputSpecToReact } from './dom-output-spec.tsx'
+import { normalizeDOMOutputSpec, type TypedDOMOutputSpec } from './dom-output-spec.tsx'
 import { MathRender } from './math-render.tsx'
 
 /** Payload for {@link TaskClickHandler}. */
@@ -102,6 +106,33 @@ interface RenderContext {
   onTaskClick?: TaskClickHandler
   /** Document-order checkbox counter feeding {@link TaskClickPayload.index}. */
   taskCounter: { value: number }
+  keyCounter: { value: number }
+}
+
+/**
+ * Convert a ProseMirror `DOMOutputSpec` into a React node, substituting `content`
+ * for the spec's content hole (`0`). Reused for every node/mark spec the static
+ * walker does not special-case, so blocks and plain marks render off their real
+ * `toDOM`, exactly as the editor serializes them.
+ */
+export function outputSpecToReact(
+  spec: DOMOutputSpec | 0 | string,
+  content: ReactNode,
+  context: RenderContext,
+): ReactNode {
+  const key = context.keyCounter.value++
+  if (typeof spec === 'string') return spec
+  if (spec === 0) return <Fragment key={key}>{content}</Fragment>
+
+  const normalized = normalizeDOMOutputSpec(spec as TypedDOMOutputSpec)
+  if (!normalized) return null
+
+  const [tag, attrs, rest] = normalized
+  const reactProps = { ...attributesToProps(attrs, tag) }
+  reactProps.key = key
+
+  const reactChildren = rest.map((child) => outputSpecToReact(child, content, context))
+  return createElement(tag, reactProps, ...reactChildren)
 }
 
 function WikilinkChip(props: {
@@ -340,7 +371,7 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
     default: {
       const toDOM = mark.type.spec.toDOM
       if (!toDOM) return children
-      return outputSpecToReact(toDOM(mark, true), children)
+      return outputSpecToReact(toDOM(mark, true), children, context)
     }
   }
 }
@@ -457,7 +488,9 @@ function TaskItemView(props: {
   )
 }
 
-function renderBlock(node: ProseMirrorNode, key: number, context: RenderContext): ReactNode {
+function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
+  const key = context.keyCounter.value++
+
   if (node.type.name === ('codeBlock' satisfies NodeName)) {
     const attrs = node.attrs as CodeBlockAttrs
     const language: string = typeof attrs.language === 'string' ? attrs.language : ''
@@ -471,36 +504,16 @@ function renderBlock(node: ProseMirrorNode, key: number, context: RenderContext)
   if (node.isTextblock) {
     const inline = renderInline(node, context)
     return toDOM ? (
-      outputSpecToReact(toDOM(node), inline, key)
+      outputSpecToReact(toDOM(node), inline, context)
     ) : (
       <Fragment key={key}>{inline}</Fragment>
     )
   }
 
-  // A checkbox task item renders through the interactive special case. Claim
-  // the document-order index before descending so a nested task numbers after
-  // its parent — the order a source-based parse of the same markdown sees.
-  // (When the first child is itself a list the node is a bare wrapper with no
-  // marker of its own, so the generic path applies.)
-  const isTaskItem =
-    node.type.name === ('list' satisfies NodeName) &&
-    (node.attrs as MeowdownListAttrs).kind === 'task' &&
-    node.firstChild?.type !== node.type
-  const taskIndex = isTaskItem ? context.taskCounter.value++ : 0
+  const children: ReactNode[] = node.content.content.map((child) => renderBlock(child, context))
 
-  const children: ReactNode[] = []
-  node.forEach((child, _offset, index) => {
-    children.push(renderBlock(child, index, context))
-  })
-  // if (isTaskItem) {
-  //   return (
-  //     <TaskItemView key={key} node={node} index={taskIndex} onTaskClick={context.onTaskClick}>
-  //       {children}
-  //     </TaskItemView>
-  //   )
-  // }
   return toDOM ? (
-    outputSpecToReact(toDOM(node), children, key)
+    outputSpecToReact(toDOM(node), children, context)
   ) : (
     <Fragment key={key}>{children}</Fragment>
   )
