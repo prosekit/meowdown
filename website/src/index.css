@@ -133,6 +133,31 @@ html {
   transition: color 0.2s ease;
 }
 
+/* Compact segments so all five fit a phone-width toolbar (down to 320px).
+ * Equal `1fr` columns cannot fit there at a readable font size, and a
+ * space-constrained grid resolves them unequally anyway, which breaks the
+ * thumb's `translateX` math. So on phones the columns are content-sized and
+ * the checked label carries the pill itself; the slide stays desktop-only. */
+@media (width < 40rem) {
+  .segmented {
+    grid-auto-columns: auto;
+  }
+
+  .segmented::before {
+    display: none;
+  }
+
+  .segmented label {
+    padding: 0.375rem 0.3125rem;
+    font-size: 0.75rem;
+  }
+
+  .segmented label:has(input:checked) {
+    background: light-dark(var(--color-white), var(--color-stone-950));
+    box-shadow: 0 1px 2px 0 color-mix(in oklab, var(--color-black) 5%, transparent);
+  }
+}
+
 .segmented label:hover {
   color: light-dark(var(--color-stone-800), var(--color-stone-200));
 }
