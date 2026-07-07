@@ -131,6 +131,10 @@ export function outputSpecToReact(
   const reactProps = { ...attributesToProps(attrs, tag) }
   reactProps.key = key
 
+  if (tag === 'input' && attrs?.['type'] === 'checkbox') {
+    reactProps.readOnly = true
+  }
+
   const reactChildren = rest.map((child) => outputSpecToReact(child, content, context))
   return createElement(tag, reactProps, ...reactChildren)
 }
