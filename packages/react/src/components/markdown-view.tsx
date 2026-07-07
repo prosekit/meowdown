@@ -121,6 +121,7 @@ export function outputSpecToReact(
   context: RenderContext,
 ): ReactElement | string | null {
   const key = context.keyCounter.value++
+
   if (typeof spec === 'string') return spec
   if (spec === 0) return <Fragment key={key}>{content}</Fragment>
 
@@ -129,7 +130,7 @@ export function outputSpecToReact(
 
   const [tag, attrs, rest] = normalized
   const reactProps = { ...attributesToProps(attrs, tag) }
-  reactProps.key = key
+  reactProps.key = `${key} ${JSON.stringify(attrs)}`
 
   if (tag === 'input' && attrs?.['type'] === 'checkbox') {
     reactProps.readOnly = true

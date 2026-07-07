@@ -141,7 +141,7 @@ describe('MarkdownView', () => {
     )
   })
 
-  it.only('never flips a clicked checkbox itself', async () => {
+  it('never flips a clicked checkbox itself', async () => {
     const onTaskClick = vi.fn()
     await renderView('+ [ ] open', { onTaskClick })
     const box = view.locate('input[type="checkbox"]')
