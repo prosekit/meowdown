@@ -25,6 +25,11 @@ function destText(href: string, title: string): string {
   return href + quoted
 }
 
+/**
+ * The range a new link would wrap: the current selection when it is a
+ * non-empty text selection inside a single non-code textblock, trimmed of
+ * surrounding whitespace. `undefined` when there is nothing to wrap.
+ */
 function getWrapRange(state: EditorState): undefined | PositionRange {
   const { selection } = state
   const { $from, $to, empty } = selection
@@ -48,19 +53,33 @@ function getWrapRange(state: EditorState): undefined | PositionRange {
   }
 }
 
-export function insertLink(attrs: LinkAttrs = {}): Command {
+export function insertLink({
+  href,
+  title,
+  wrapText = true,
+}: {
+  href?: string
+  title?: string
+  wrapText?: boolean
+} = {}): Command {
   return (state, dispatch) => {
-    const dest = destText(normalizeHref(attrs.href ?? ''), attrs.title ?? '')
     const range = getWrapRange(state)
     if (!range) return false
     if (dispatch) {
       const { from, to } = range
       const tr = state.tr
+      const dest = destText(normalizeHref(href ?? ''), title ?? '')
       const close = `](${dest})`
       tr.insertText(close, to).insertText('[', from)
-      dispatch(
-        tr.setSelection(TextSelection.create(tr.doc, from, to + 1 + close.length)).scrollIntoView(),
+      // The position after the closing `)`
+      const linkTo = to + 1 + close.length
+      tr.setSelection(
+        wrapText
+          ? TextSelection.create(tr.doc, from, linkTo)
+          : TextSelection.create(tr.doc, linkTo),
       )
+      tr.scrollIntoView()
+      dispatch(tr)
     }
     return true
   }

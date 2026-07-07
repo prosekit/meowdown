@@ -10,6 +10,8 @@ import {
 import type { Command } from '@prosekit/pm/state'
 import { Plugin, PluginKey, TextSelection } from '@prosekit/pm/state'
 
+import { executeCommand } from '../utils/execute-command.ts'
+
 import {
   getHiddenRunAfter,
   getHiddenRunAround,
@@ -132,7 +134,7 @@ function createBeforeInputPlugin(): Plugin {
                 ? deleteUnformat
                 : undefined
           if (command == null) return false
-          if (!command(view.state, view.dispatch)) return false
+          if (!executeCommand(view, command)) return false
           event.preventDefault()
           return true
         },
