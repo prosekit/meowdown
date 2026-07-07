@@ -29,6 +29,7 @@ import { attributesToProps } from './attributes-to-props.ts'
 import { Mark, type Node as ProseMirrorNode } from '@prosekit/pm/model'
 import { clsx } from 'clsx/lite'
 import {
+  cloneElement,
   createElement,
   Fragment,
   useEffect,
@@ -119,7 +120,7 @@ export function outputSpecToReact(
   spec: DOMOutputSpec | 0 | string,
   content: ReactNode,
   context: RenderContext,
-): ReactNode {
+): ReactElement | string | null {
   const key = context.keyCounter.value++
   if (typeof spec === 'string') return spec
   if (spec === 0) return <Fragment key={key}>{content}</Fragment>
@@ -430,68 +431,30 @@ function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode 
   return renderRuns(runs, 0, context)
 }
 
-/**
- * A task list item, mirroring `prosemirror-flat-list`'s `listToDOM` DOM shape
- * (which the generic `toDOM` walk would produce) but with a live checkbox: the
- * generic walk hands React `checked: ''` — falsy, so a checked task rendered
- * unchecked — and no way to click. The outer element's attributes still come
- * from the node's real `toDOM`, so extension attributes (`data-list-marker`,
- * `data-list-checked`, …) and their CSS keep working. The input is keyed by its
- * state so a `markdown` change re-seats `defaultChecked`, while `preventDefault`
- * keeps a click from flipping the DOM out from under the source of truth.
- */
-function TaskItemView(props: {
-  node: ProseMirrorNode
-  index: number
-  onTaskClick?: TaskClickHandler
-  children: ReactNode
-}): ReactElement {
-  const { node, index, onTaskClick, children } = props
-  const attrs = node.attrs as MeowdownListAttrs
-  const checked = attrs.checked === true
-  const domSpec = node.type.spec.toDOM?.(node)
-  const domSpec2 = domSpec && normalizeDOMOutputSpec(domSpec)
-  console.log('domSpec', domSpec)
-  console.log('domSpec2', domSpec2)
-
-  const domSpecAttrs = domSpec2?.[1]
-  // const reactProps = toReactProps(domSpecAttrs)
-
-  // const domSpecAttrs = domSpec && outputSpecAttrs(domSpec)
-  // const outerProps = domSpecAttrs && toReactProps(domSpecAttrs)
-  const handleClick = (event: MouseEvent) => {
-    event.preventDefault()
-    const lead = node.firstChild
-    const text = lead?.isTextblock ? (lead.textContent.split('\n', 1)[0] ?? '') : ''
-    onTaskClick?.({
-      index,
-      checked,
-      marker: attrs.marker ?? null,
-      text,
-      event: event.nativeEvent,
-    })
-  }
-  return (
-    <div {...reactProps}>
-      <div className="list-marker list-marker-click-target" contentEditable={false}>
-        <label>
-          <input
-            key={checked ? 'checked' : 'unchecked'}
-            type="checkbox"
-            defaultChecked={checked}
-            onClick={handleClick}
-          />
-        </label>
-      </div>
-      <div className="list-content">{children}</div>
-    </div>
-  )
-}
-
 function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
   const key = context.keyCounter.value++
+  const typeName = node.type.name as NodeName
 
-  if (node.type.name === ('codeBlock' satisfies NodeName)) {
+  let handleTaskClick: ((event: MouseEvent) => void) | undefined
+
+  if (typeName === 'list') {
+    const attrs = node.attrs as MeowdownListAttrs
+    const { onTaskClick } = context
+    if (attrs.kind === 'task' && onTaskClick) {
+      const index = context.taskCounter.value++
+      const checked = attrs.checked === true
+      const marker = attrs.marker ?? null
+      // TODO: the rule to get the text is a bit weird. Re-visit this later.
+      const text = node.firstChild?.isTextblock
+        ? (node.firstChild.textContent.split('\n', 1)[0] ?? '')
+        : ''
+      handleTaskClick = (event) => {
+        onTaskClick({ index, checked, marker, text, event: event.nativeEvent })
+      }
+    }
+  }
+
+  if (typeName === 'codeBlock') {
     const attrs = node.attrs as CodeBlockAttrs
     const language: string = typeof attrs.language === 'string' ? attrs.language : ''
     if (language === 'math') {
@@ -512,11 +475,23 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
 
   const children: ReactNode[] = node.content.content.map((child) => renderBlock(child, context))
 
-  return toDOM ? (
+  const reactNode = toDOM ? (
     outputSpecToReact(toDOM(node), children, context)
   ) : (
     <Fragment key={key}>{children}</Fragment>
   )
+
+  if (
+    typeName === 'list' &&
+    handleTaskClick &&
+    typeof reactNode !== 'string' &&
+    reactNode != null
+  ) {
+    // eslint-disable-next-line @eslint-react/no-clone-element
+    return cloneElement(reactNode, { onClick: handleTaskClick })
+  }
+
+  return reactNode
 }
 
 /**
@@ -550,12 +525,9 @@ export function MarkdownView({
       onImageClick,
       onTaskClick,
       taskCounter: { value: 0 },
+      keyCounter: { value: 0 },
     }
-    const blocks: ReactNode[] = []
-    doc.forEach((node, _offset, index) => {
-      blocks.push(renderBlock(node, index, context))
-    })
-    return blocks
+    return doc.content.content.map((node) => renderBlock(node, context))
   }, [
     markdown,
     frontmatter,
