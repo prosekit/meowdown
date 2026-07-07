@@ -914,9 +914,9 @@
      * phantom blank line under every wrapped wikilink. A plain inline
      * fragments across lines instead, keeping the source box on the last
      * fragment's line. */
-    .md-wikilink-view-preview.md-atom-view-preview {
-      display: inline;
-    }
+    /*.md-wikilink-view-preview.md-atom-view-preview {*/
+    /*display: inline;*/
+    /*}*/
 
     .md-wikilink-view-label {
       overflow: hidden;
@@ -925,8 +925,8 @@
       /* Give each wrapped line fragment its own full padding and rounded
        * background, so a wikilink broken across lines reads as a chip on
        * every line. */
-      -webkit-box-decoration-break: clone;
-      box-decoration-break: clone;
+      /*-webkit-box-decoration-break: clone;*/
+      /*box-decoration-break: clone;*/
 
       background: color-mix(in oklab, var(--meowdown-accent) 10%, transparent);
       color: color-mix(in oklab, var(--meowdown-accent) 80%, var(--meowdown-heading));
