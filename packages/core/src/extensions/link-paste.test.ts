@@ -81,8 +81,8 @@ describe('paste a URL over a selection', () => {
     const { editor, n, view } = fixture
     useLinkPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>my note<b>')))
-    pasteText(view, 'x-cutsom-schema://ABCD-1234')
-    expect(editor.state.doc.textContent).toBe('[my note](x-cutsom-schema://ABCD-1234)')
+    pasteText(view, 'x-custom-schema://ABCD-1234')
+    expect(editor.state.doc.textContent).toBe('[my note](x-custom-schema://ABCD-1234)')
   })
 
   it('wraps only the trimmed selection, keeping edge whitespace as text', () => {

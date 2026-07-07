@@ -13,12 +13,12 @@ function urls(text: string): Array<[number, number, string]> {
 describe('schemeAutolink', () => {
   describe('detects a bare custom-scheme URI', () => {
     it('at the start of the text', () => {
-      expect(urls('x-cutsom-schema://ABCD-1234')).toEqual([[0, 27, 'x-cutsom-schema://ABCD-1234']])
+      expect(urls('x-custom-schema://ABCD-1234')).toEqual([[0, 27, 'x-custom-schema://ABCD-1234']])
     })
 
     it('after whitespace', () => {
-      expect(urls('open x-cutsom-schema://sub?key=value now')).toEqual([
-        [5, 36, 'x-cutsom-schema://sub?key=value'],
+      expect(urls('open x-custom-schema://sub?key=value now')).toEqual([
+        [5, 36, 'x-custom-schema://sub?key=value'],
       ])
     })
 

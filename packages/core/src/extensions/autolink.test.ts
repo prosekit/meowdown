@@ -25,9 +25,9 @@ describe('autolink rendering', () => {
   it('renders a bare custom-scheme URI as a link', async () => {
     using fixture = setupFixture()
     const { n } = fixture
-    fixture.set(n.doc(n.paragraph('see x-cutsom-schema://ABCD here')))
+    fixture.set(n.doc(n.paragraph('see x-custom-schema://ABCD here')))
     await expect
-      .element(pmRoot.getByRole('link', { name: 'x-cutsom-schema://ABCD' }))
+      .element(pmRoot.getByRole('link', { name: 'x-custom-schema://ABCD' }))
       .toBeInTheDocument()
   })
 

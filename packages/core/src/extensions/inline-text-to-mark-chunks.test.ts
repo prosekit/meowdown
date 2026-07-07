@@ -505,10 +505,10 @@ describe('autolink', () => {
   })
 
   it('custom app scheme', () => {
-    expect(parse('a x-cutsom-schema://ABCD b')).toMatchInlineSnapshot(`
+    expect(parse('a x-custom-schema://ABCD b')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 24]  mdLinkText(href=x-cutsom-schema://ABCD)
+      [2, 24]  mdLinkText(href=x-custom-schema://ABCD)
       [24, 26]
       "
     `)
