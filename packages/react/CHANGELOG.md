@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.38.0](https://github.com/prosekit/meowdown/compare/react-v0.37.1...react-v0.38.0) (2026-07-07)
+
+
+### Features
+
+* wrap the selection as a markdown link when pasting a URL ([#254](https://github.com/prosekit/meowdown/issues/254)) ([37d9744](https://github.com/prosekit/meowdown/commit/37d9744ab635fad024f6113bb965ebc7a6cd4437))
+
 ## [0.37.1](https://github.com/prosekit/meowdown/compare/react-v0.37.0...react-v0.37.1) (2026-07-06)
 
 

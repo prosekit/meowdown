@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.38.0](https://github.com/prosekit/meowdown/compare/core-v0.37.1...core-v0.38.0) (2026-07-07)
+
+
+### Features
+
+* autolink bare custom-scheme URIs ([#250](https://github.com/prosekit/meowdown/issues/250)) ([42f6a65](https://github.com/prosekit/meowdown/commit/42f6a65aab0b2ce5b38ea735b7ad6d10df9d67a2))
+* wrap the selection as a markdown link when pasting a URL ([#254](https://github.com/prosekit/meowdown/issues/254)) ([37d9744](https://github.com/prosekit/meowdown/commit/37d9744ab635fad024f6113bb965ebc7a6cd4437))
+
+
+### Bug Fixes
+
+* prevent image preview focus on touch pointerdown ([#253](https://github.com/prosekit/meowdown/issues/253)) ([515d77b](https://github.com/prosekit/meowdown/commit/515d77b7eb85a2b1301f601b333e2fb2db8fde56))
+* render the wikilink preview inline ([#252](https://github.com/prosekit/meowdown/issues/252)) ([53f0dd7](https://github.com/prosekit/meowdown/commit/53f0dd776887848abeaf4e5e974f6f88ae3ce251))
+
 ## [0.37.1](https://github.com/prosekit/meowdown/compare/core-v0.37.0...core-v0.37.1) (2026-07-06)
 
 
