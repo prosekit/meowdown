@@ -115,7 +115,7 @@ interface RenderContext {
  * walker does not special-case, so blocks and plain marks render off their real
  * `toDOM`, exactly as the editor serializes them.
  */
-export function outputSpecToReact(
+function outputSpecToReact(
   spec: DOMOutputSpec | 0 | string,
   content: ReactNode,
   context: RenderContext,
