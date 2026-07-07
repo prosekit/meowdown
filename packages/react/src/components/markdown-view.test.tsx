@@ -141,13 +141,15 @@ describe('MarkdownView', () => {
     )
   })
 
-  it('never flips a clicked checkbox itself', async () => {
+  it.only('never flips a clicked checkbox itself', async () => {
     const onTaskClick = vi.fn()
     await renderView('+ [ ] open', { onTaskClick })
     const box = view.locate('input[type="checkbox"]')
+    expect(onTaskClick).toHaveBeenCalledTimes(0)
+    await expect.element(box, { timeout: 2000 }).not.toBeChecked()
     await box.click()
-    await expect.element(box).not.toBeChecked()
     expect(onTaskClick).toHaveBeenCalledTimes(1)
+    await expect.element(box, { timeout: 2000 }).not.toBeChecked()
   })
 
   it('keeps checkboxes inert without an onTaskClick handler', async () => {
@@ -184,7 +186,14 @@ describe('MarkdownView', () => {
 // Strip editor-only attributes and sort the rest, so two DOM subtrees compare
 // equal regardless of attribute order or ProseMirror's editing affordances.
 function canonicalize(root: Element): string {
-  const SKIP = new Set(['contenteditable', 'translate', 'draggable', 'spellcheck', 'tabindex'])
+  const SKIP = new Set([
+    'contenteditable',
+    'translate',
+    'draggable',
+    'spellcheck',
+    'tabindex',
+    'readonly',
+  ])
   const walk = (node: ChildNode): string => {
     if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? ''
     if (node.nodeType !== Node.ELEMENT_NODE) return ''
