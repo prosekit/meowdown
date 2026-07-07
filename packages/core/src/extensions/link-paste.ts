@@ -1,13 +1,11 @@
 import { definePlugin, Priority, withPriority, type PlainExtension } from '@prosekit/core'
-import { closeHistory } from '@prosekit/pm/history'
-import { Plugin, PluginKey, TextSelection } from '@prosekit/pm/state'
-import type { EditorView } from '@prosekit/pm/view'
+import { Plugin, PluginKey } from '@prosekit/pm/state'
 
 import { getAutolinkHref } from '../lezer/autolink-tld.ts'
-import type { PositionRange } from '../utils/range.ts'
+import { executeCommand } from '../utils/execute-command.ts'
 
-import { getPastedText } from './embed-paste.ts'
-import { getWrapRange } from './link-commands.ts'
+import { insertLink } from './link-commands.ts'
+import { getPastedText } from './paste.ts'
 
 const linkPasteKey = new PluginKey('meowdown-link-paste')
 
@@ -20,15 +18,6 @@ export function detectLinkUrl(text: string): string | undefined {
   const trimmed = text.trim()
   if (!trimmed || /\s/.test(trimmed)) return undefined
   return getAutolinkHref(trimmed)
-}
-
-function wrapSelectionWithLink(view: EditorView, range: PositionRange, href: string): void {
-  const { from, to } = range
-  const close = `](${href})`
-  const tr = view.state.tr.insertText(close, to).insertText('[', from)
-  // Park the caret after the closing `)` so typing continues outside the link.
-  tr.setSelection(TextSelection.create(tr.doc, to + 1 + close.length))
-  view.dispatch(closeHistory(tr).scrollIntoView())
 }
 
 /**
@@ -51,14 +40,11 @@ export function defineLinkPaste(): PlainExtension {
         key: linkPasteKey,
         props: {
           handlePaste: (view, event, slice) => {
-            const range = getWrapRange(view.state)
-            if (!range) return false
             const text = getPastedText(event, slice)
             if (!text) return false
             const href = detectLinkUrl(text)
             if (!href) return false
-            wrapSelectionWithLink(view, range, href)
-            return true
+            return executeCommand(view, insertLink({ href }))
           },
         },
       }),

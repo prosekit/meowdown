@@ -30,7 +30,7 @@ function destText(href: string, title: string): string {
  * non-empty text selection inside a single non-code textblock, trimmed of
  * surrounding whitespace. `undefined` when there is nothing to wrap.
  */
-export function getWrapRange(state: EditorState): undefined | PositionRange {
+function getWrapRange(state: EditorState): undefined | PositionRange {
   const { selection } = state
   const { $from, $to, empty } = selection
   if (empty || !$from.sameParent($to) || !isTextSelection(selection)) {
@@ -55,17 +55,18 @@ export function getWrapRange(state: EditorState): undefined | PositionRange {
 
 export function insertLink(attrs: LinkAttrs = {}): Command {
   return (state, dispatch) => {
-    const dest = destText(normalizeHref(attrs.href ?? ''), attrs.title ?? '')
     const range = getWrapRange(state)
     if (!range) return false
     if (dispatch) {
       const { from, to } = range
       const tr = state.tr
+      const dest = destText(normalizeHref(attrs.href ?? ''), attrs.title ?? '')
       const close = `](${dest})`
       tr.insertText(close, to).insertText('[', from)
-      dispatch(
-        tr.setSelection(TextSelection.create(tr.doc, from, to + 1 + close.length)).scrollIntoView(),
-      )
+      // Park the caret after the closing `)` so typing continues outside the link.
+      tr.setSelection(TextSelection.create(tr.doc, from, to + 1 + close.length))
+      tr.scrollIntoView()
+      dispatch(tr)
     }
     return true
   }

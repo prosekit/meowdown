@@ -1,10 +1,10 @@
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { closeHistory } from '@prosekit/pm/history'
-import type { Slice } from '@prosekit/pm/model'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
 import { matchEmbed } from './embed/index.ts'
+import { getPastedText } from './paste.ts'
 
 const embedPasteKey = new PluginKey('meowdown-embed-paste')
 
@@ -12,17 +12,6 @@ export function detectEmbedUrl(text: string): string | undefined {
   const trimmed = text.trim()
   if (!trimmed || /\s/.test(trimmed)) return undefined
   return matchEmbed(trimmed) ? trimmed : undefined
-}
-
-export function getPastedText(event: ClipboardEvent, slice: Slice): string {
-  const fromClipboard = event.clipboardData?.getData('text/plain')
-  if (fromClipboard) return fromClipboard
-  // Firefox ignores the standard `clipboardData` init member of the ClipboardEvent
-  // constructor (Gecko reads non-standard `data`/`dataType` strings instead), so a
-  // synthetic paste carries no text there; Chrome and WebKit honor it. Fall back to
-  // the slice ProseMirror parsed from the paste, which holds the text on every engine.
-  // See https://github.com/w3c/clipboard-apis/issues/33
-  return slice.content.textBetween(0, slice.content.size, '\n')
 }
 
 function insertEmbedFromPaste(view: EditorView, url: string): void {
