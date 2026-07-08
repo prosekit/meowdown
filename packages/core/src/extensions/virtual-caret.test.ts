@@ -1,5 +1,5 @@
 import { Selection } from '@prosekit/pm/state'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, onTestFinished } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
 import { setupFixture, type Fixture } from '../testing/index.ts'
@@ -214,11 +214,15 @@ describe('virtual caret next to atom marks', () => {
 
 describe('virtual caret viewport reveal', () => {
   // Enough paragraphs to push the last one well past the viewport bottom.
-  function setupLongDoc(lastText: string): Fixture {
-    const fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+  function fillLongDoc(fixture: Fixture, lastText: string): void {
     const { n } = fixture
     const fillers = Array.from({ length: 80 }, (_, index) => n.paragraph(`filler ${index}`))
     fixture.set(n.doc(n.paragraph('first'), ...fillers, n.paragraph(lastText)))
+  }
+
+  function setupLongDoc(lastText: string): Fixture {
+    const fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    fillLongDoc(fixture, lastText)
     return fixture
   }
 
@@ -255,6 +259,48 @@ describe('virtual caret viewport reveal', () => {
     view.dispatch(view.state.tr.setSelection(Selection.atEnd(view.state.doc)))
     await new Promise((resolve) => setTimeout(resolve, 50))
     expect(window.scrollY).toBe(0)
+  })
+
+  it('does not scroll when a doc change merely remaps the selection', async () => {
+    using fixture = setupLongDoc('last<a>')
+    const { view } = fixture
+    view.focus()
+    await expect.poll(caretWithinViewport).toBe(true)
+    window.scrollTo(0, 0)
+    // Insert above the caret without touching the selection: the caret's
+    // position shifts by mapping, which must not count as a placement.
+    view.dispatch(view.state.tr.insertText('x', 1))
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(window.scrollY).toBe(0)
+  })
+
+  it('scrolls a nested scrollable container to reveal the caret', async () => {
+    using fixture = setupFixture({ mount: false, extensionOptions: { markMode: 'hide' } })
+    const { editor } = fixture
+    const scroller = document.createElement('div')
+    scroller.style.height = '300px'
+    scroller.style.overflowY = 'auto'
+    document.body.prepend(scroller)
+    editor.mount(scroller.appendChild(document.createElement('div')))
+    onTestFinished(() => {
+      editor.unmount()
+      scroller.remove()
+    })
+    fillLongDoc(fixture, 'last<a>')
+    window.scrollTo(0, 0)
+    scroller.scrollTop = 0
+    fixture.view.focus()
+    await expect.element(caret).toBeVisible()
+    await expect.poll(() => scroller.scrollTop).toBeGreaterThan(0)
+    // The caret element itself catches up once ProseMirror restores the DOM
+    // selection, a beat after focus.
+    await expect
+      .poll(() => {
+        const caretRect = getCaretElement().getBoundingClientRect()
+        const scrollerRect = scroller.getBoundingClientRect()
+        return caretRect.top >= scrollerRect.top && caretRect.bottom <= scrollerRect.bottom
+      })
+      .toBe(true)
   })
 })
 

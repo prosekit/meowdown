@@ -16,7 +16,14 @@ import {
 } from './hidden-run.ts'
 import { getMarkMode } from './mark-mode.ts'
 
-const key = new PluginKey('meowdown-virtual-caret')
+// Plugin state counts transactions that explicitly set the selection, so the
+// view can tell a deliberate caret placement from a selection that merely got
+// remapped by a doc change elsewhere — only the former may scroll, matching
+// ProseMirror's opt-in `scrollIntoView` convention. A counter rather than the
+// last transaction's `selectionSet` flag: other plugins append transactions
+// after a selection-setting one within a single dispatch, which would
+// otherwise mask it.
+const key = new PluginKey<number>('meowdown-virtual-caret')
 
 const BLINK_ANIMATIONS = ['md-virtual-caret-blink', 'md-virtual-caret-blink2'] as const
 
@@ -136,11 +143,13 @@ class VirtualCaretView implements PluginView {
   #lastRect: CaretRect | undefined
   #lastTail: CaretTail | undefined
   #blinkIndex = 0
-  #scrollPending = false
+  #revealPending = false
   #pointerActive = false
+  #selectionSetsSeen: number
 
   constructor(view: EditorView) {
     this.#view = view
+    this.#selectionSetsSeen = key.getState(view.state) ?? 0
     this.#document = view.dom.ownerDocument
     this.#layer = this.#document.createElement('div')
     this.#layer.className = 'md-virtual-caret-layer'
@@ -161,12 +170,14 @@ class VirtualCaretView implements PluginView {
   }
 
   update(view: EditorView, prevState: EditorState) {
-    if (!view.state.selection.eq(prevState.selection)) {
-      this.#restartBlink()
+    if (!view.state.selection.eq(prevState.selection)) this.#restartBlink()
+    const selectionSets = key.getState(view.state) ?? 0
+    if (selectionSets !== this.#selectionSetsSeen) {
+      this.#selectionSetsSeen = selectionSets
       // A pointer places the caret where the user can already see it, and
       // scrolling between pointerdown and the click's selection dispatch
       // would displace the click.
-      if (view.hasFocus() && !this.#pointerActive) this.#scrollPending = true
+      if (view.hasFocus() && !this.#pointerActive) this.#revealPending = true
     }
     this.#reposition()
   }
@@ -186,7 +197,7 @@ class VirtualCaretView implements PluginView {
   // without scrolling, so a programmatic focus deep in a long document would
   // otherwise leave the caret off-screen.
   readonly #handleFocusIn = (): void => {
-    if (!this.#pointerActive) this.#scrollPending = true
+    if (!this.#pointerActive) this.#revealPending = true
     this.#reposition()
   }
 
@@ -215,7 +226,7 @@ class VirtualCaretView implements PluginView {
     const selection = state.selection
     const showsCaret = isTextSelection(selection) && selection.empty
     const rect = showsCaret ? measureCaretRect(view) : undefined
-    if (!showsCaret) this.#scrollPending = false
+    if (!showsCaret) this.#revealPending = false
     // In hide mode the two doc positions at a hidden run boundary render at
     // one x; the tail (typing affinity) tells them apart.
     const tail =
@@ -260,12 +271,12 @@ class VirtualCaretView implements PluginView {
   // not laid out yet) keeps the flag raised; the ResizeObserver retries once
   // layout settles.
   #revealIfPending(): void {
-    if (!this.#scrollPending) return
+    if (!this.#revealPending) return
     const view = this.#view
     if (!view.hasFocus()) return
     const rect = findCoordsCaretRect(view) ?? findAtomCaretRect(view)
     if (rect == null) return
-    this.#scrollPending = false
+    this.#revealPending = false
     this.#scrollRectIntoView(rect)
   }
 
@@ -298,13 +309,19 @@ class VirtualCaretView implements PluginView {
  *
  * A caret placed off-screen — focus restored at the end of a long document,
  * or a keyboard/programmatic selection move — is revealed by scrolling the
- * nearest scroller the minimum distance. Pointer-driven placement never
- * scrolls: a click already happens inside the viewport.
+ * nearest scroller the minimum distance. Only explicit placements count: a
+ * doc change that merely remaps the selection never scrolls, and neither
+ * does pointer-driven placement (a click already happens inside the
+ * viewport).
  */
 export function defineVirtualCaret(): PlainExtension {
   return definePlugin(
     new Plugin({
       key,
+      state: {
+        init: () => 0,
+        apply: (tr, count) => (tr.selectionSet ? count + 1 : count),
+      },
       view: (view) => new VirtualCaretView(view),
     }),
   )
