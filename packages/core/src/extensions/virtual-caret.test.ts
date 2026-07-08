@@ -328,6 +328,21 @@ describe('virtual caret viewport reveal', () => {
     await expect.poll(() => caretWithin(scroller)).toBe(true)
   })
 
+  it('re-reveals after a stray programmatic scroll right after focus', async () => {
+    using fixture = setupFixture({ mount: false, extensionOptions: { markMode: 'hide' } })
+    const scroller = mountInScroller(fixture)
+    fillLongDoc(fixture, 'last<a>')
+    scroller.scrollTop = 0
+    fixture.view.focus()
+    await expect.poll(() => caretWithin(scroller)).toBe(true)
+    // A host scroll writer (a scroll restore, a jump-to-top) yanks the view
+    // away from the just-placed caret. No pointer or wheel led the scroll,
+    // so it is not the user's and the reveal window corrects it.
+    scroller.scrollTop = 0
+    await expect.poll(() => caretWithin(scroller)).toBe(true)
+    expect(scroller.scrollTop).toBeGreaterThan(0)
+  })
+
   it('stops re-revealing once the user takes over', async () => {
     using fixture = setupFixture({ mount: false, extensionOptions: { markMode: 'hide' } })
     const scroller = mountInScroller(fixture)
