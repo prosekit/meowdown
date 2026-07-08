@@ -169,6 +169,93 @@ describe('image click callback', () => {
     await vi.waitFor(() => expect(onImageClick).toHaveBeenCalledTimes(1))
   })
 
+  // Build the touchstart/touchend pair of a stationary single-finger tap.
+  function buildTap(
+    target: Element,
+    options: { endX?: number; endY?: number } = {},
+  ): { start: TouchEvent; end: TouchEvent } {
+    const rect = target.getBoundingClientRect()
+    const startX = rect.left + rect.width / 2
+    const startY = rect.top + rect.height / 2
+    const touchAt = (clientX: number, clientY: number): Touch =>
+      new Touch({ identifier: 7, target, clientX, clientY })
+    const startTouch = touchAt(startX, startY)
+    const endTouch = touchAt(options.endX ?? startX, options.endY ?? startY)
+    return {
+      start: new TouchEvent('touchstart', {
+        bubbles: true,
+        cancelable: true,
+        touches: [startTouch],
+        targetTouches: [startTouch],
+        changedTouches: [startTouch],
+      }),
+      end: new TouchEvent('touchend', {
+        bubbles: true,
+        cancelable: true,
+        touches: [],
+        targetTouches: [],
+        changedTouches: [endTouch],
+      }),
+    }
+  }
+
+  // iOS WebKit focuses the surrounding contenteditable (raising the software
+  // keyboard) unless the tap's touchend is cancelled, so touch taps fire the
+  // handler from touchend instead of the synthetic click.
+  it('fires on a touch tap and cancels the touchend', async () => {
+    const onImageClick = vi.fn<ImageClickHandler>()
+    using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
+    void fixture
+    await expect.element(preview).toBeInTheDocument()
+
+    const tap = buildTap(preview.element())
+    preview.element().dispatchEvent(tap.start)
+    preview.element().dispatchEvent(tap.end)
+
+    expect(tap.end.defaultPrevented).toBe(true)
+    await vi.waitFor(() => {
+      expect(onImageClick).toHaveBeenCalledWith(
+        expect.objectContaining({ src: 'https://example.com/cat.png', alt: 'cat' }),
+      )
+    })
+    expect(onImageClick).toHaveBeenCalledTimes(1)
+    expect(onImageClick.mock.calls[0][0].event).toBeInstanceOf(TouchEvent)
+  })
+
+  it('ignores a touch that moved too far to be a tap', async () => {
+    const onImageClick = vi.fn<ImageClickHandler>()
+    using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
+    void fixture
+    await expect.element(preview).toBeInTheDocument()
+
+    const rect = preview.element().getBoundingClientRect()
+    const tap = buildTap(preview.element(), {
+      endX: rect.left + rect.width / 2,
+      endY: rect.top + rect.height / 2 + 40,
+    })
+    preview.element().dispatchEvent(tap.start)
+    preview.element().dispatchEvent(tap.end)
+
+    expect(tap.end.defaultPrevented).toBe(false)
+    expect(onImageClick).not.toHaveBeenCalled()
+  })
+
+  it('leaves a touch tap on the resize handle alone', async () => {
+    const onImageClick = vi.fn<ImageClickHandler>()
+    using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
+    void fixture
+    await expect.element(preview).toBeInTheDocument()
+
+    const handle = preview.element().querySelector('.md-image-resize-handle')
+    if (!handle) throw new Error('missing resize handle')
+    const tap = buildTap(handle)
+    handle.dispatchEvent(tap.start)
+    handle.dispatchEvent(tap.end)
+
+    expect(tap.end.defaultPrevented).toBe(false)
+    expect(onImageClick).not.toHaveBeenCalled()
+  })
+
   it('leaves mouse pointerdown on clickable previews alone', async () => {
     const onImageClick = vi.fn<ImageClickHandler>()
     using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
