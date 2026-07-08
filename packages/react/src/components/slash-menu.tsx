@@ -1,4 +1,11 @@
-import { isSelectionInTableCell, type EditorExtension, type TypedEditor } from '@meowdown/core'
+import {
+  buildFileMarkdown,
+  isSelectionInTableCell,
+  type EditorExtension,
+  type FilePasteOptions,
+  type FileSaveErrorHandler,
+  type TypedEditor,
+} from '@meowdown/core'
 import { canUseRegexLookbehind } from '@prosekit/core'
 import { useEditor, useEditorDerivedValue } from '@prosekit/react'
 import {
@@ -8,7 +15,7 @@ import {
   AutocompletePositioner,
   AutocompleteRoot,
 } from '@prosekit/react/autocomplete'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
 
 import { formatNowTime, type TimeFormat } from '../utils/date-format.ts'
 
@@ -17,6 +24,10 @@ import type { SlashMenuItem, SlashMenuSearchHandler } from './types.ts'
 
 // Match inputs like "/", "/table", "/heading 1" etc. Do not match "/ heading".
 const regex = canUseRegexLookbehind() ? /(?<!\S)\/(\S.*)?$/u : /\/(\S.*)?$/u
+
+const defaultOnFileSaveError: FileSaveErrorHandler = (error) => {
+  console.error('[meowdown] failed to save attached file:', error)
+}
 
 interface SlashMenuItemProps {
   label: string
@@ -46,6 +57,12 @@ interface SlashMenuProps {
 
   /** Adds host items after the built-in ones. See `EditorProps.onSlashMenuSearch`. */
   onSlashMenuSearch?: SlashMenuSearchHandler
+
+  /** Persists files selected from the "Attach file" item. See `EditorProps.onFilePaste`. */
+  onFilePaste?: FilePasteOptions['onFilePaste']
+
+  /** Called when an attached file fails to persist. See `EditorProps.onFileSaveError`. */
+  onFileSaveError?: FilePasteOptions['onFileSaveError']
 }
 
 // Hoisted so its identity is stable across renders, as useEditorDerivedValue
@@ -54,11 +71,17 @@ function selectionInTableCell(editor: TypedEditor): boolean {
   return isSelectionInTableCell(editor.state)
 }
 
-export function SlashMenu({ timeFormat = '12', onSlashMenuSearch }: SlashMenuProps) {
+export function SlashMenu({
+  timeFormat = '12',
+  onSlashMenuSearch,
+  onFilePaste,
+  onFileSaveError,
+}: SlashMenuProps) {
   const editor = useEditor<EditorExtension>()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // A table cell holds inline content only, so the block-creating items below
-  // are no-ops there. Hide them and offer only the inline "Now" item.
+  // are no-ops there. Hide them and offer only inline items.
   const inTableCell = useEditorDerivedValue(selectionInTableCell)
 
   const [open, setOpen] = useState(false)
@@ -87,12 +110,51 @@ export function SlashMenu({ timeFormat = '12', onSlashMenuSearch }: SlashMenuPro
     }
   }, [open, query, fetchHostItems])
 
+  const openFilePicker = useCallback(() => {
+    fileInputRef.current?.click()
+  }, [])
+
+  const handleFileInputChange = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
+      const input = event.currentTarget
+      const files = Array.from(input.files ?? [])
+      input.value = ''
+      if (!onFilePaste || files.length === 0) return
+
+      const onSaveError = onFileSaveError ?? defaultOnFileSaveError
+      const markdown: string[] = []
+      for (const file of files) {
+        try {
+          const destination = await onFilePaste(file)
+          if (destination) markdown.push(buildFileMarkdown(file, destination))
+        } catch (error) {
+          onSaveError(error, file)
+        }
+      }
+
+      if (markdown.length === 0) return
+      editor.focus()
+      editor.commands.insertText({ text: markdown.join('\n') })
+    },
+    [editor, onFilePaste, onFileSaveError],
+  )
+
   return (
     <AutocompleteRoot
       regex={regex}
       onOpenChange={(event) => setOpen(event.detail)}
       onQueryChange={(event) => setQuery(event.detail)}
     >
+      {onFilePaste ? (
+        <input
+          ref={fileInputRef}
+          data-testid="slash-menu-file-input"
+          type="file"
+          multiple
+          hidden
+          onChange={handleFileInputChange}
+        />
+      ) : null}
       <AutocompletePositioner className={styles.Positioner}>
         <AutocompletePopup className={styles.Popup} data-testid="slash-menu">
           {!inTableCell && (
@@ -166,6 +228,13 @@ export function SlashMenu({ timeFormat = '12', onSlashMenuSearch }: SlashMenuPro
             label="Now"
             onSelect={() => editor.commands.insertText({ text: formatNowTime(timeFormat) })}
           />
+          {onFilePaste ? (
+            <SlashMenuItem
+              label="Attach file"
+              keywords={['attachment', 'file', 'upload']}
+              onSelect={openFilePicker}
+            />
+          ) : null}
           {hostItems.map((item) => (
             <SlashMenuItem
               key={item.id ?? item.label}
