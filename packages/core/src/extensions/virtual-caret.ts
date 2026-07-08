@@ -24,6 +24,10 @@ const BLINK_ANIMATIONS = ['md-virtual-caret-blink', 'md-virtual-caret-blink2'] a
 // line-height; stand the caret taller around its center.
 const CARET_STRETCH = 1.2
 
+// Breathing room kept between a revealed caret and the viewport edge, so the
+// caret does not sit flush against the boundary after a scroll.
+const SCROLL_MARGIN = 16
+
 interface CaretRect {
   left: number
   top: number
@@ -132,6 +136,8 @@ class VirtualCaretView implements PluginView {
   #lastRect: CaretRect | undefined
   #lastTail: CaretTail | undefined
   #blinkIndex = 0
+  #scrollPending = false
+  #pointerActive = false
 
   constructor(view: EditorView) {
     this.#view = view
@@ -143,6 +149,10 @@ class VirtualCaretView implements PluginView {
     this.#caret.dataset.testid = 'virtual-caret'
     view.dom.insertAdjacentElement('afterend', this.#layer)
     this.#document.addEventListener('selectionchange', this.#reposition)
+    view.dom.addEventListener('focusin', this.#handleFocusIn)
+    view.dom.addEventListener('pointerdown', this.#handlePointerDown)
+    this.#document.addEventListener('pointerup', this.#handlePointerRelease)
+    this.#document.addEventListener('pointercancel', this.#handlePointerRelease)
     if (typeof ResizeObserver !== 'undefined') {
       this.#resizeObserver = new ResizeObserver(this.#reposition)
       this.#resizeObserver.observe(view.dom)
@@ -151,14 +161,46 @@ class VirtualCaretView implements PluginView {
   }
 
   update(view: EditorView, prevState: EditorState) {
-    if (!view.state.selection.eq(prevState.selection)) this.#restartBlink()
+    if (!view.state.selection.eq(prevState.selection)) {
+      this.#restartBlink()
+      // A pointer places the caret where the user can already see it, and
+      // scrolling between pointerdown and the click's selection dispatch
+      // would displace the click.
+      if (view.hasFocus() && !this.#pointerActive) this.#scrollPending = true
+    }
     this.#reposition()
   }
 
   destroy() {
     this.#document.removeEventListener('selectionchange', this.#reposition)
+    this.#view.dom.removeEventListener('focusin', this.#handleFocusIn)
+    this.#view.dom.removeEventListener('pointerdown', this.#handlePointerDown)
+    this.#document.removeEventListener('pointerup', this.#handlePointerRelease)
+    this.#document.removeEventListener('pointercancel', this.#handlePointerRelease)
     this.#resizeObserver?.disconnect()
     this.#layer.remove()
+  }
+
+  // Focus is what makes the caret appear (CSS displays it only under
+  // `.ProseMirror-focused`), and `EditorView.focus` restores the selection
+  // without scrolling, so a programmatic focus deep in a long document would
+  // otherwise leave the caret off-screen.
+  readonly #handleFocusIn = (): void => {
+    if (!this.#pointerActive) this.#scrollPending = true
+    this.#reposition()
+  }
+
+  readonly #handlePointerDown = (): void => {
+    this.#pointerActive = true
+  }
+
+  // ProseMirror dispatches a click's selection from its own document-level
+  // mouseup listener, which can run after this one; clearing in a microtask
+  // keeps the flag raised through that dispatch.
+  readonly #handlePointerRelease = (): void => {
+    queueMicrotask(() => {
+      this.#pointerActive = false
+    })
   }
 
   #restartBlink() {
@@ -171,14 +213,19 @@ class VirtualCaretView implements PluginView {
     if (view.isDestroyed) return
     const state = view.state
     const selection = state.selection
-    const rect = isTextSelection(selection) && selection.empty ? measureCaretRect(view) : undefined
+    const showsCaret = isTextSelection(selection) && selection.empty
+    const rect = showsCaret ? measureCaretRect(view) : undefined
+    if (!showsCaret) this.#scrollPending = false
     // In hide mode the two doc positions at a hidden run boundary render at
     // one x; the tail (typing affinity) tells them apart.
     const tail =
       rect != null && getMarkMode(state) === 'hide'
         ? getCaretTail(state, selection.head)
         : undefined
-    if (sameRect(rect, this.#lastRect) && tail === this.#lastTail) return
+    if (sameRect(rect, this.#lastRect) && tail === this.#lastTail) {
+      this.#revealIfPending()
+      return
+    }
     const wasHidden = this.#lastRect == null
     this.#lastRect = rect
     this.#lastTail = tail
@@ -202,6 +249,44 @@ class VirtualCaretView implements PluginView {
       forceReflow(this.#caret)
       this.#caret.style.transitionProperty = ''
     }
+    this.#revealIfPending()
+  }
+
+  // Consumes a pending reveal by scrolling the caret's destination into view.
+  // The target is measured from the editor state, never the native selection:
+  // right after a focus the browser has parked the DOM selection at the start
+  // of the contenteditable and ProseMirror restores it a beat later, so the
+  // native rect can point at the wrong place. An unmeasurable target (host
+  // not laid out yet) keeps the flag raised; the ResizeObserver retries once
+  // layout settles.
+  #revealIfPending(): void {
+    if (!this.#scrollPending) return
+    const view = this.#view
+    if (!view.hasFocus()) return
+    const rect = findCoordsCaretRect(view) ?? findAtomCaretRect(view)
+    if (rect == null) return
+    this.#scrollPending = false
+    this.#scrollRectIntoView(rect)
+  }
+
+  // Scrolls the minimum distance to bring the caret's destination into view,
+  // via a phantom sibling at that spot: the caret element itself glides there
+  // (left/top transition), so its own box may still be mid-flight, and
+  // `scrollIntoView` on a phantom walks nested scrollers for free. With
+  // `nearest` the call is a no-op when the caret is already visible.
+  #scrollRectIntoView(rect: CaretRect): void {
+    const layerRect = this.#layer.getBoundingClientRect()
+    const phantom = this.#document.createElement('div')
+    const style = phantom.style
+    style.position = 'absolute'
+    style.left = `${rect.left - layerRect.left}px`
+    style.top = `${rect.top - layerRect.top}px`
+    style.width = '2px'
+    style.height = `${rect.height}px`
+    style.setProperty('scroll-margin', `${SCROLL_MARGIN}px`)
+    this.#layer.appendChild(phantom)
+    phantom.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    phantom.remove()
   }
 }
 
@@ -210,6 +295,11 @@ class VirtualCaretView implements PluginView {
  * (`caret-color: transparent`). The native DOM selection stays fully alive,
  * so IME, clicks, and typing keep their native behavior; only the caret pixels
  * are ours. Applies to every mark mode.
+ *
+ * A caret placed off-screen — focus restored at the end of a long document,
+ * or a keyboard/programmatic selection move — is revealed by scrolling the
+ * nearest scroller the minimum distance. Pointer-driven placement never
+ * scrolls: a click already happens inside the viewport.
  */
 export function defineVirtualCaret(): PlainExtension {
   return definePlugin(

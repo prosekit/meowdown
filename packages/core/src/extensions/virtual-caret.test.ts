@@ -1,3 +1,4 @@
+import { Selection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
@@ -208,6 +209,52 @@ describe('virtual caret next to atom marks', () => {
     using fixture = setupFilePill('[report.pdf](assets/report.pdf)<a>')
     void fixture
     await expect.element(caret).toBeVisible()
+  })
+})
+
+describe('virtual caret viewport reveal', () => {
+  // Enough paragraphs to push the last one well past the viewport bottom.
+  function setupLongDoc(lastText: string): Fixture {
+    const fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    const { n } = fixture
+    const fillers = Array.from({ length: 80 }, (_, index) => n.paragraph(`filler ${index}`))
+    fixture.set(n.doc(n.paragraph('first'), ...fillers, n.paragraph(lastText)))
+    return fixture
+  }
+
+  function caretWithinViewport(): boolean {
+    const rect = getCaretElement().getBoundingClientRect()
+    return rect.height > 0 && rect.top >= 0 && rect.bottom <= window.innerHeight
+  }
+
+  it('scrolls an off-screen caret into view when the editor gains focus', async () => {
+    using fixture = setupLongDoc('last<a>')
+    window.scrollTo(0, 0)
+    fixture.view.focus()
+    await expect.element(caret).toBeVisible()
+    await expect.poll(caretWithinViewport).toBe(true)
+    expect(window.scrollY).toBeGreaterThan(0)
+  })
+
+  it('scrolls to the caret after a programmatic selection jump', async () => {
+    using fixture = setupLongDoc('last')
+    const { view } = fixture
+    view.dispatch(view.state.tr.setSelection(Selection.atStart(view.state.doc)))
+    view.focus()
+    await expect.element(caret).toBeVisible()
+    window.scrollTo(0, 0)
+    view.dispatch(view.state.tr.setSelection(Selection.atEnd(view.state.doc)))
+    await expect.poll(caretWithinViewport).toBe(true)
+    expect(window.scrollY).toBeGreaterThan(0)
+  })
+
+  it('leaves the scroll position alone while the editor is blurred', async () => {
+    using fixture = setupLongDoc('last')
+    const { view } = fixture
+    window.scrollTo(0, 0)
+    view.dispatch(view.state.tr.setSelection(Selection.atEnd(view.state.doc)))
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(window.scrollY).toBe(0)
   })
 })
 
