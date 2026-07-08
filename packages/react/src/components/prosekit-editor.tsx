@@ -368,7 +368,12 @@ export function ProseKitEditor({
       {blockHandle && !readOnly && <BlockHandle />}
       {!readOnly && <TableHandle />}
       {blockHandle && !readOnly && <DropIndicator />}
-      <SlashMenu timeFormat={timeFormat} onSlashMenuSearch={onSlashMenuSearch} />
+      <SlashMenu
+        timeFormat={timeFormat}
+        onSlashMenuSearch={onSlashMenuSearch}
+        onFilePaste={onFilePaste}
+        onFileSaveError={onFileSaveError}
+      />
       {!readOnly && <LinkMenu onLinkClick={onLinkClick} onLinkCopy={onLinkCopy} />}
       {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
       {onWikilinkSearch && <WikilinkMenu onWikilinkSearch={onWikilinkSearch} />}

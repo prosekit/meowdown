@@ -111,6 +111,31 @@ describe('SlashMenu', () => {
     expect(ref.current?.getMarkdown()).toMatch(/^\d{2}:\d{2}\n$/)
   })
 
+  it('attaches a selected file through the slash menu', async () => {
+    const ref = createRef<EditorHandle>()
+    const onFilePaste = vi.fn((file: File) => `assets/${file.name}`)
+    await render(<ProseKitEditor ref={ref} onFilePaste={onFilePaste} />)
+
+    const input = page.getByTestId('slash-menu-file-input').element() as HTMLInputElement
+    const inputClick = vi.spyOn(input, 'click').mockImplementation(() => {})
+    await pmRoot.click()
+    await userEvent.keyboard('Hello /attach')
+    await menu.getByText('Attach file', { exact: true }).click()
+
+    expect(inputClick).toHaveBeenCalledOnce()
+    const files = new DataTransfer()
+    files.items.add(new File(['%PDF'], 'report.pdf', { type: 'application/pdf' }))
+    Object.defineProperty(input, 'files', { value: files.files, configurable: true })
+    input.dispatchEvent(new Event('change', { bubbles: true }))
+
+    await vi.waitFor(() => {
+      expect(onFilePaste).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ name: 'report.pdf' }),
+      )
+      expect(ref.current?.getMarkdown()).toBe('Hello [report.pdf](assets/report.pdf)\n')
+    })
+  })
+
   it('shows host items after the built-in ones', async () => {
     const onSlashMenuSearch = (): SlashMenuItem[] => [
       { label: 'Meeting note', detail: 'Template', onSelect: () => {} },
