@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.0](https://github.com/prosekit/meowdown/compare/react-v0.39.0...react-v0.40.0) (2026-07-08)
+
+
+### Features
+
+* **react:** add attach file slash command ([#261](https://github.com/prosekit/meowdown/issues/261)) ([0bb1d73](https://github.com/prosekit/meowdown/commit/0bb1d733673c9201bf49668e5c1b3e842d4a3e6a))
+
 ## [0.39.0](https://github.com/prosekit/meowdown/compare/react-v0.38.0...react-v0.39.0) (2026-07-07)
 
 
