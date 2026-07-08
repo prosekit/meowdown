@@ -35,6 +35,16 @@ const CARET_STRETCH = 1.2
 // caret does not sit flush against the boundary after a scroll.
 const SCROLL_MARGIN = 16
 
+// How long a focus keeps re-revealing the caret through layout churn. The
+// reveal at focus time runs against the pre-keyboard layout: the iOS
+// software keyboard reports its height only once it animates up, and a
+// keyboard-aware host shell then shrinks the editor's scroller by that
+// height — dropping an end-of-note caret below the fold with nothing left
+// to re-scroll it. Long notes also keep growing after focus as images size
+// in. Each disturbance re-arms the window; a pointerdown or wheel anywhere
+// ends it, because the user has taken over.
+const REVEAL_WINDOW_MS = 1500
+
 interface CaretRect {
   left: number
   top: number
@@ -127,6 +137,20 @@ function sameRect(left: CaretRect | undefined, right: CaretRect | undefined): bo
   return left.left === right.left && left.top === right.top && left.height === right.height
 }
 
+// The nearest ancestor that can scroll vertically, or the page scroller.
+function closestScrollable(element: Element): Element | null {
+  for (let node = element.parentElement; node != null; node = node.parentElement) {
+    const { overflowY } = getComputedStyle(node)
+    if (
+      (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') &&
+      node.scrollHeight > node.clientHeight
+    ) {
+      return node
+    }
+  }
+  return element.ownerDocument.scrollingElement
+}
+
 // The caret lives in a zero-height in-flow layer right after `view.dom`, never
 // inside the contenteditable: a `contenteditable=false` element inside the
 // content DOM shifts the browser's insertion point at the document edges
@@ -144,13 +168,17 @@ class VirtualCaretView implements PluginView {
   #lastTail: CaretTail | undefined
   #blinkIndex = 0
   #revealPending = false
+  #revealUntil = 0
   #pointerActive = false
   #selectionSetsSeen: number
+  readonly #revealWindowObserver: ResizeObserver | undefined
+  readonly #visualViewport: VisualViewport | null
 
   constructor(view: EditorView) {
     this.#view = view
     this.#selectionSetsSeen = key.getState(view.state) ?? 0
     this.#document = view.dom.ownerDocument
+    this.#visualViewport = this.#document.defaultView?.visualViewport ?? null
     this.#layer = this.#document.createElement('div')
     this.#layer.className = 'md-virtual-caret-layer'
     this.#caret = this.#layer.appendChild(this.#document.createElement('div'))
@@ -162,9 +190,17 @@ class VirtualCaretView implements PluginView {
     view.dom.addEventListener('pointerdown', this.#handlePointerDown)
     this.#document.addEventListener('pointerup', this.#handlePointerRelease)
     this.#document.addEventListener('pointercancel', this.#handlePointerRelease)
+    this.#document.addEventListener('pointerdown', this.#cancelRevealWindow)
+    this.#document.addEventListener('wheel', this.#cancelRevealWindow, { passive: true })
+    this.#document.addEventListener('scroll', this.#handleLayoutShift, {
+      capture: true,
+      passive: true,
+    })
+    this.#visualViewport?.addEventListener('resize', this.#handleLayoutShift)
     if (typeof ResizeObserver !== 'undefined') {
       this.#resizeObserver = new ResizeObserver(this.#reposition)
       this.#resizeObserver.observe(view.dom)
+      this.#revealWindowObserver = new ResizeObserver(this.#handleLayoutShift)
     }
     this.#reposition()
   }
@@ -188,16 +224,55 @@ class VirtualCaretView implements PluginView {
     this.#view.dom.removeEventListener('pointerdown', this.#handlePointerDown)
     this.#document.removeEventListener('pointerup', this.#handlePointerRelease)
     this.#document.removeEventListener('pointercancel', this.#handlePointerRelease)
+    this.#document.removeEventListener('pointerdown', this.#cancelRevealWindow)
+    this.#document.removeEventListener('wheel', this.#cancelRevealWindow)
+    this.#document.removeEventListener('scroll', this.#handleLayoutShift, { capture: true })
+    this.#visualViewport?.removeEventListener('resize', this.#handleLayoutShift)
     this.#resizeObserver?.disconnect()
+    this.#revealWindowObserver?.disconnect()
     this.#layer.remove()
   }
 
   // Focus is what makes the caret appear (CSS displays it only under
   // `.ProseMirror-focused`), and `EditorView.focus` restores the selection
   // without scrolling, so a programmatic focus deep in a long document would
-  // otherwise leave the caret off-screen.
+  // otherwise leave the caret off-screen. The reveal window arms even for a
+  // pointer-driven focus: the tap's own placement is visible, but the
+  // keyboard it raises can still push the caret off afterwards.
   readonly #handleFocusIn = (): void => {
     if (!this.#pointerActive) this.#revealPending = true
+    this.#armRevealWindow()
+    this.#reposition()
+  }
+
+  #armRevealWindow(): void {
+    this.#revealUntil = performance.now() + REVEAL_WINDOW_MS
+    const observer = this.#revealWindowObserver
+    if (observer == null) return
+    observer.disconnect()
+    // Watch every ancestor: the keyboard-raise shrink lands on whichever
+    // element the host sizes against the keyboard, and a shrinking scroller
+    // fires no scroll event of its own.
+    for (let node = this.#layer.parentElement; node != null; node = node.parentElement) {
+      observer.observe(node)
+    }
+  }
+
+  readonly #cancelRevealWindow = (): void => {
+    this.#revealUntil = 0
+    this.#revealPending = false
+    this.#revealWindowObserver?.disconnect()
+  }
+
+  // A layout disturbance while the reveal window is open — the keyboard
+  // raise shrinking an ancestor, late content growth, the visual viewport
+  // resizing, a stray non-user scroll (iOS WebKit nudging toward the newly
+  // focused element) — re-reveals the caret and re-arms the window. User
+  // scrolls always lead with a pointerdown or a wheel event, which close
+  // the window before their scroll arrives here.
+  readonly #handleLayoutShift = (): void => {
+    if (performance.now() > this.#revealUntil) return
+    this.#revealUntil = performance.now() + REVEAL_WINDOW_MS
     this.#reposition()
   }
 
@@ -263,17 +338,20 @@ class VirtualCaretView implements PluginView {
     this.#revealIfPending()
   }
 
-  // Consumes a pending reveal by scrolling the caret's destination into view.
-  // The target is measured from the editor state, never the native selection:
-  // right after a focus the browser has parked the DOM selection at the start
-  // of the contenteditable and ProseMirror restores it a beat later, so the
-  // native rect can point at the wrong place. An unmeasurable target (host
-  // not laid out yet) keeps the flag raised; the ResizeObserver retries once
+  // Consumes a pending reveal — or re-reveals while the reveal window is
+  // open — by scrolling the caret's destination into view. The target is
+  // measured from the editor state, never the native selection: right after
+  // a focus the browser has parked the DOM selection at the start of the
+  // contenteditable and ProseMirror restores it a beat later, so the native
+  // rect can point at the wrong place. An unmeasurable target (host not
+  // laid out yet) keeps the flag raised; the ResizeObserver retries once
   // layout settles.
   #revealIfPending(): void {
-    if (!this.#revealPending) return
+    if (!this.#revealPending && performance.now() > this.#revealUntil) return
     const view = this.#view
     if (!view.hasFocus()) return
+    const selection = view.state.selection
+    if (!isTextSelection(selection) || !selection.empty) return
     const rect = findCoordsCaretRect(view) ?? findAtomCaretRect(view)
     if (rect == null) return
     this.#revealPending = false
@@ -297,7 +375,23 @@ class VirtualCaretView implements PluginView {
     style.setProperty('scroll-margin', `${SCROLL_MARGIN}px`)
     this.#layer.appendChild(phantom)
     phantom.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    this.#nudgeAboveKeyboard(phantom)
     phantom.remove()
+  }
+
+  // `scrollIntoView` clamps to the layout viewport, but a software keyboard
+  // can overlay it, leaving only the shorter visual viewport actually
+  // visible. (Hosts whose layout tracks the keyboard never hit this — their
+  // scrollers already end at the keyboard's top.) Nudge the nearest
+  // scroller the rest of the way so the caret clears the keyboard.
+  #nudgeAboveKeyboard(phantom: HTMLElement): void {
+    const viewport = this.#visualViewport
+    if (viewport == null) return
+    const visibleBottom = viewport.offsetTop + viewport.height - SCROLL_MARGIN
+    const overflow = phantom.getBoundingClientRect().bottom - visibleBottom
+    if (overflow <= 0) return
+    const scroller = closestScrollable(phantom)
+    if (scroller != null) scroller.scrollTop += overflow
   }
 }
 
@@ -313,6 +407,11 @@ class VirtualCaretView implements PluginView {
  * doc change that merely remaps the selection never scrolls, and neither
  * does pointer-driven placement (a click already happens inside the
  * viewport).
+ *
+ * A focus also opens a reveal window ({@link REVEAL_WINDOW_MS}) that keeps
+ * the caret visible through the layout churn that follows — the software
+ * keyboard raising and shrinking the host shell, images sizing in — until
+ * the layout goes quiet or the user takes over with a pointer or wheel.
  */
 export function defineVirtualCaret(): PlainExtension {
   return definePlugin(

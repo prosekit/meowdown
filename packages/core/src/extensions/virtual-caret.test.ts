@@ -231,6 +231,32 @@ describe('virtual caret viewport reveal', () => {
     return rect.height > 0 && rect.top >= 0 && rect.bottom <= window.innerHeight
   }
 
+  function caretWithin(scroller: Element): boolean {
+    const rect = getCaretElement().getBoundingClientRect()
+    const box = scroller.getBoundingClientRect()
+    return rect.height > 0 && rect.top >= box.top && rect.bottom <= box.bottom
+  }
+
+  // A user takeover leads with a pointerdown, which closes the reveal window.
+  function userTakeover(): void {
+    document.dispatchEvent(new PointerEvent('pointerdown'))
+  }
+
+  // Mounts the fixture's editor inside a fixed-height scrollable container,
+  // the shape of a keyboard-aware mobile shell.
+  function mountInScroller(fixture: Fixture): HTMLElement {
+    const scroller = document.createElement('div')
+    scroller.style.height = '300px'
+    scroller.style.overflowY = 'auto'
+    document.body.prepend(scroller)
+    fixture.editor.mount(scroller.appendChild(document.createElement('div')))
+    onTestFinished(() => {
+      fixture.editor.unmount()
+      scroller.remove()
+    })
+    return scroller
+  }
+
   it('scrolls an off-screen caret into view when the editor gains focus', async () => {
     using fixture = setupLongDoc('last<a>')
     window.scrollTo(0, 0)
@@ -266,6 +292,7 @@ describe('virtual caret viewport reveal', () => {
     const { view } = fixture
     view.focus()
     await expect.poll(caretWithinViewport).toBe(true)
+    userTakeover()
     window.scrollTo(0, 0)
     // Insert above the caret without touching the selection: the caret's
     // position shifts by mapping, which must not count as a placement.
@@ -276,16 +303,7 @@ describe('virtual caret viewport reveal', () => {
 
   it('scrolls a nested scrollable container to reveal the caret', async () => {
     using fixture = setupFixture({ mount: false, extensionOptions: { markMode: 'hide' } })
-    const { editor } = fixture
-    const scroller = document.createElement('div')
-    scroller.style.height = '300px'
-    scroller.style.overflowY = 'auto'
-    document.body.prepend(scroller)
-    editor.mount(scroller.appendChild(document.createElement('div')))
-    onTestFinished(() => {
-      editor.unmount()
-      scroller.remove()
-    })
+    const scroller = mountInScroller(fixture)
     fillLongDoc(fixture, 'last<a>')
     window.scrollTo(0, 0)
     scroller.scrollTop = 0
@@ -294,13 +312,34 @@ describe('virtual caret viewport reveal', () => {
     await expect.poll(() => scroller.scrollTop).toBeGreaterThan(0)
     // The caret element itself catches up once ProseMirror restores the DOM
     // selection, a beat after focus.
-    await expect
-      .poll(() => {
-        const caretRect = getCaretElement().getBoundingClientRect()
-        const scrollerRect = scroller.getBoundingClientRect()
-        return caretRect.top >= scrollerRect.top && caretRect.bottom <= scrollerRect.bottom
-      })
-      .toBe(true)
+    await expect.poll(() => caretWithin(scroller)).toBe(true)
+  })
+
+  it('re-reveals the caret when the scroller shrinks after focus (keyboard raise)', async () => {
+    using fixture = setupFixture({ mount: false, extensionOptions: { markMode: 'hide' } })
+    const scroller = mountInScroller(fixture)
+    fillLongDoc(fixture, 'last<a>')
+    scroller.scrollTop = 0
+    fixture.view.focus()
+    await expect.poll(() => caretWithin(scroller)).toBe(true)
+    // The software keyboard raises after focus and the host shell shrinks
+    // the scroller by its height, pushing the revealed caret below the fold.
+    scroller.style.height = '150px'
+    await expect.poll(() => caretWithin(scroller)).toBe(true)
+  })
+
+  it('stops re-revealing once the user takes over', async () => {
+    using fixture = setupFixture({ mount: false, extensionOptions: { markMode: 'hide' } })
+    const scroller = mountInScroller(fixture)
+    fillLongDoc(fixture, 'last<a>')
+    scroller.scrollTop = 0
+    fixture.view.focus()
+    await expect.poll(() => caretWithin(scroller)).toBe(true)
+    userTakeover()
+    const settled = scroller.scrollTop
+    scroller.style.height = '150px'
+    await new Promise((resolve) => setTimeout(resolve, 120))
+    expect(scroller.scrollTop).toBe(settled)
   })
 })
 
