@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.1](https://github.com/prosekit/meowdown/compare/core-v0.40.0...core-v0.40.1) (2026-07-08)
+
+
+### Bug Fixes
+
+* open image previews from touchend ([89aa7e7](https://github.com/prosekit/meowdown/commit/89aa7e73b9e5f1c69b89cdc62c696772a2c703da))
+
 ## [0.40.0](https://github.com/prosekit/meowdown/compare/core-v0.39.0...core-v0.40.0) (2026-07-08)
 
 
