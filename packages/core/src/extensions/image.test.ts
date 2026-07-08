@@ -1,3 +1,4 @@
+import { isSafari } from '@meowdown/vitest/helpers'
 import { NodeSelection } from '@prosekit/pm/state'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
@@ -199,10 +200,14 @@ describe('image click callback', () => {
     }
   }
 
+  // Desktop WebKit exposes the Touch interface but its constructor throws
+  // ("Illegal constructor"), so the tap tests run in chromium and firefox only.
+  const cannotConstructTouch = isSafari()
+
   // iOS WebKit focuses the surrounding contenteditable (raising the software
   // keyboard) unless the tap's touchend is cancelled, so touch taps fire the
   // handler from touchend instead of the synthetic click.
-  it('fires on a touch tap and cancels the touchend', async () => {
+  it.skipIf(cannotConstructTouch)('fires on a touch tap and cancels the touchend', async () => {
     const onImageClick = vi.fn<ImageClickHandler>()
     using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
     void fixture
@@ -222,7 +227,7 @@ describe('image click callback', () => {
     expect(onImageClick.mock.calls[0][0].event).toBeInstanceOf(TouchEvent)
   })
 
-  it('ignores a touch that moved too far to be a tap', async () => {
+  it.skipIf(cannotConstructTouch)('ignores a touch that moved too far to be a tap', async () => {
     const onImageClick = vi.fn<ImageClickHandler>()
     using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
     void fixture
@@ -240,7 +245,7 @@ describe('image click callback', () => {
     expect(onImageClick).not.toHaveBeenCalled()
   })
 
-  it('leaves a touch tap on the resize handle alone', async () => {
+  it.skipIf(cannotConstructTouch)('leaves a touch tap on the resize handle alone', async () => {
     const onImageClick = vi.fn<ImageClickHandler>()
     using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
     void fixture
