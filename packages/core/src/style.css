@@ -918,7 +918,6 @@
       color: var(--meowdown-accent);
       overflow: hidden;
       padding: 2px 0px;
-      border-radius: 0px;
       /* Give each wrapped line fragment its own full padding and rounded
        * background, so a wikilink broken across lines reads as a chip on
        * every line. */
