@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.41.0](https://github.com/prosekit/meowdown/compare/core-v0.40.1...core-v0.41.0) (2026-07-09)
+
+
+### Features
+
+* simplify wikilink styles ([#266](https://github.com/prosekit/meowdown/issues/266)) ([d5b497b](https://github.com/prosekit/meowdown/commit/d5b497bac624742992674e4970c1bbebb16a65b5))
+
 ## [0.40.1](https://github.com/prosekit/meowdown/compare/core-v0.40.0...core-v0.40.1) (2026-07-08)
 
 
