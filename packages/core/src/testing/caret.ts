@@ -4,6 +4,23 @@ import { getSelectionSnapshot } from './selection-snapshot.ts'
 
 import type { Fixture } from './index.ts'
 
+async function traceSelection(
+  fixture: Fixture,
+  press: () => Promise<void>,
+  times: number,
+): Promise<string[]> {
+  const steps = new Set([getSelectionSnapshot(fixture.state)])
+  const extraTimes = 2 // We press the key more times than requested to address flaky tests.
+  for (let index = 0; index < times + extraTimes; index++) {
+    await press()
+    steps.add(getSelectionSnapshot(fixture.state))
+    if (steps.size > times) {
+      break
+    }
+  }
+  return Array.from(steps)
+}
+
 /**
  * Press `key` `times` times, capturing the selection snapshot before the first
  * press and after each one. The returned array has `times + 1` entries.
@@ -13,16 +30,26 @@ export async function traceKeySelection(
   key: string,
   times: number,
 ): Promise<string[]> {
-  const steps = new Set([getSelectionSnapshot(fixture.state)])
-  const extraTimes = 2 // We press the key more times than requested to address flaky tests.
-  for (let index = 0; index < times + extraTimes; index++) {
-    await userEvent.keyboard(`{${key}}`)
-    steps.add(getSelectionSnapshot(fixture.state))
-    if (steps.size > times) {
-      break
-    }
-  }
-  return Array.from(steps)
+  return await traceSelection(fixture, () => userEvent.keyboard(`{${key}}`), times)
+}
+
+/**
+ * Like {@link traceKeySelection}, but holds Shift through each press.
+ */
+export async function traceShiftKeySelection(
+  fixture: Fixture,
+  key: string,
+  times: number,
+): Promise<string[]> {
+  return await traceSelection(fixture, () => userEvent.keyboard(`{Shift>}{${key}}{/Shift}`), times)
+}
+
+/**
+ * Render trace steps as one readable snapshot: each document state on its own
+ * lines, separated by a dashed rule.
+ */
+export function formatSelectionSteps(steps: string[]): string {
+  return steps.map((step) => '\n' + step + '\n').join('-'.repeat(10))
 }
 
 /**

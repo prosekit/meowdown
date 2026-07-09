@@ -10,7 +10,7 @@ import {
   type PlainExtension,
 } from '@prosekit/core'
 import type { Command, EditorState } from '@prosekit/pm/state'
-import { Plugin, PluginKey, TextSelection } from '@prosekit/pm/state'
+import { Plugin, PluginKey, Selection, TextSelection } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
 import { getMarkRangeAt } from './get-mark-range-at.ts'
@@ -78,8 +78,47 @@ function selectRange(state: EditorState, range: MarkRange): TextSelection {
   return TextSelection.create(state.doc, range.from, range.to)
 }
 
+// The blockwise step out of `pos`'s textblock in `direction`, or undefined when
+// the step is not this keymap's to take. Chromium and WebKit cannot move the
+// native caret across the contenteditable=false preview at a textblock edge,
+// and prosemirror-view's own blockwise handling only covers vertical arrows.
+function findSelectionAcrossBlockBoundary(
+  state: EditorState,
+  pos: number,
+  markNames: MarkName[],
+  direction: -1 | 1,
+): Selection | undefined {
+  const $pos = state.doc.resolve(pos)
+  // Only a caret sitting exactly on the textblock edge can leave the block.
+  const atEdge =
+    direction === -1 ? $pos.parentOffset === 0 : $pos.parentOffset === $pos.parent.content.size
+  if (!atEdge || $pos.depth === 0) return undefined
+  // The unit being left behind: one starting (going left) or ending (going
+  // right) exactly at the caret. Chromium/WebKit cannot walk out past it.
+  const nearUnit =
+    direction === -1 ? getRangeAfter(state, pos, markNames) : getRangeBefore(state, pos, markNames)
+  // The nearest selection past the boundary: the adjacent textblock's near
+  // edge, or a NodeSelection for a selectable block such as a horizontal rule
+  // (the same landing prosemirror-view's moveSelectionBlock would pick).
+  const boundary = direction === -1 ? $pos.before() : $pos.after()
+  const target = Selection.findFrom(state.doc.resolve(boundary), direction)
+  if (!target) return undefined
+  // The unit being entered: one touching the landing position from the far
+  // side. WebKit skips caret stops when walking into such a block.
+  const farUnit = isTextSelection(target)
+    ? direction === -1
+      ? getRangeBefore(state, target.head, markNames)
+      : getRangeAfter(state, target.head, markNames)
+    : undefined
+  // No unit on either side of the boundary: stay out of the browser's way
+  // (native handles bidi/RTL horizontal motion better than we can).
+  if (nearUnit == null && farUnit == null) return undefined
+  return target
+}
+
 // ArrowRight: select the unit to the right, collapse a selected unit to its far
-// edge, or step past a unit to the left (which the browser cannot do).
+// edge, step past a unit to the left (which the browser cannot do), or step
+// blockwise at the textblock end.
 function createArrowRight(marks: AtomMarks): Command {
   return (state, dispatch) => {
     const markNames = activeMarkNames(marks, state)
@@ -92,13 +131,16 @@ function createArrowRight(marks: AtomMarks): Command {
         return true
       }
       const before = getRangeBefore(state, selection.from, markNames)
-      if (before) {
-        const $from = state.doc.resolve(selection.from)
-        if (selection.from >= $from.end()) return false
+      if (before && selection.from < state.doc.resolve(selection.from).end()) {
         dispatch?.(state.tr.setSelection(TextSelection.create(state.doc, selection.from + 1)))
         return true
       }
-      return false
+      // The mirror of ArrowLeft. Not observed broken on desktop, but owning the
+      // step keeps the walk deterministic instead of depending on the browser.
+      const target = findSelectionAcrossBlockBoundary(state, selection.from, markNames, 1)
+      if (!target) return false
+      dispatch?.(state.tr.setSelection(target).scrollIntoView())
+      return true
     }
     const range = getSelectedRange(state, markNames)
     if (!range) return false
@@ -107,8 +149,8 @@ function createArrowRight(marks: AtomMarks): Command {
   }
 }
 
-// ArrowLeft: select the unit to the left, or collapse a selected unit to its
-// near edge.
+// ArrowLeft: select the unit to the left, collapse a selected unit to its near
+// edge, or step blockwise at the textblock start.
 function createArrowLeft(marks: AtomMarks): Command {
   return (state, dispatch) => {
     const markNames = activeMarkNames(marks, state)
@@ -116,13 +158,53 @@ function createArrowLeft(marks: AtomMarks): Command {
     const selection = state.selection
     if (selection.empty) {
       const before = getRangeBefore(state, selection.from, markNames)
-      if (!before) return false
-      dispatch?.(state.tr.setSelection(selectRange(state, before)))
+      if (before) {
+        dispatch?.(state.tr.setSelection(selectRange(state, before)))
+        return true
+      }
+      // At the textblock start, take the blockwise step: Chromium/WebKit's
+      // native caret cannot leave a block that starts with a unit.
+      const target = findSelectionAcrossBlockBoundary(state, selection.from, markNames, -1)
+      if (!target) return false
+      dispatch?.(state.tr.setSelection(target).scrollIntoView())
       return true
     }
     const range = getSelectedRange(state, markNames)
     if (!range) return false
     dispatch?.(state.tr.setSelection(TextSelection.create(state.doc, range.from)))
+    return true
+  }
+}
+
+// Shift-Arrow: the selection head swallows an adjacent unit whole, or takes the
+// blockwise step at a textblock edge. Without this, native extension creeps
+// through the hidden source one invisible character per press.
+function createShiftArrow(marks: AtomMarks, direction: -1 | 1): Command {
+  return (state, dispatch) => {
+    const markNames = activeMarkNames(marks, state)
+    if (markNames.length === 0 || !isTextSelection(state.selection)) return false
+    const { anchor, head } = state.selection
+    // A unit whose edge sits exactly at the head enters (or leaves) the
+    // selection whole; a head inside a revealed source keeps native per-char
+    // behavior (the text is visible there).
+    const unit =
+      direction === -1
+        ? getRangeBefore(state, head, markNames)
+        : getRangeAfter(state, head, markNames)
+    if (unit) {
+      const nextHead = direction === -1 ? unit.from : unit.to
+      dispatch?.(
+        state.tr.setSelection(TextSelection.create(state.doc, anchor, nextHead)).scrollIntoView(),
+      )
+      return true
+    }
+    // At the textblock edge, move the head blockwise; only a textblock landing
+    // can extend a text selection, so a NodeSelection target declines.
+    const target = findSelectionAcrossBlockBoundary(state, head, markNames, direction)
+    if (!target || !isTextSelection(target)) return false
+    dispatch?.(
+      state.tr.setSelection(TextSelection.create(state.doc, anchor, target.head)).scrollIntoView(),
+    )
     return true
   }
 }
@@ -203,8 +285,9 @@ function createSelectionPlugin(marks: AtomMarks): Plugin {
 
 /**
  * Make a text-backed source unit a single caret stop in the listed mark modes:
- * arrowing onto it selects the whole source, and Backspace/Delete remove it as a
- * unit.
+ * arrowing onto it selects the whole source, Shift-arrowing extends over it
+ * whole, arrows cross textblock boundaries it touches (which the browser's
+ * native caret cannot), and Backspace/Delete remove it as a unit.
  */
 export function defineAtomMarkNavigation({ marks }: AtomMarkNavigationOptions): PlainExtension {
   return union(
@@ -212,6 +295,8 @@ export function defineAtomMarkNavigation({ marks }: AtomMarkNavigationOptions): 
       defineKeymap({
         ArrowRight: createArrowRight(marks),
         ArrowLeft: createArrowLeft(marks),
+        'Shift-ArrowRight': createShiftArrow(marks, 1),
+        'Shift-ArrowLeft': createShiftArrow(marks, -1),
         Backspace: createBackspace(marks),
         Delete: createForwardDelete(marks),
       }),
