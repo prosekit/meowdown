@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.42.1](https://github.com/prosekit/meowdown/compare/react-v0.42.0...react-v0.42.1) (2026-07-09)
+
+
+### Bug Fixes
+
+* anchor the link popover on the link's visible text ([#271](https://github.com/prosekit/meowdown/issues/271)) ([9a34c21](https://github.com/prosekit/meowdown/commit/9a34c21e909335dce9e343d4d64fc8097be0a009))
+
 ## [0.42.0](https://github.com/prosekit/meowdown/compare/react-v0.41.0...react-v0.42.0) (2026-07-09)
 
 
