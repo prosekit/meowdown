@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.42.0](https://github.com/prosekit/meowdown/compare/core-v0.41.0...core-v0.42.0) (2026-07-09)
+
+
+### Features
+
+* **core:** add `scrollIntoView` command ([#269](https://github.com/prosekit/meowdown/issues/269)) ([919e050](https://github.com/prosekit/meowdown/commit/919e05073032248fa6d219417a7d8b40874db26a))
+
 ## [0.41.0](https://github.com/prosekit/meowdown/compare/core-v0.40.1...core-v0.41.0) (2026-07-09)
 
 
