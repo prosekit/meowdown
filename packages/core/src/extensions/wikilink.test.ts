@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
 import {
+  formatSelectionSteps,
   getSelectionSnapshot,
   setupFixture,
   traceKeyAt,
@@ -158,8 +159,7 @@ describe('wikilink vertical caret navigation', () => {
       ),
     )
     fixture.view.focus()
-    const steps = await traceKeySelection(fixture, 'ArrowDown', 7)
-    return steps.map((step) => '\n' + step + '\n').join('-'.repeat(10))
+    return formatSelectionSteps(await traceKeySelection(fixture, 'ArrowDown', 7))
   }
 
   it('can ArrowDown from the first paragraph to the last paragraph in hide mode', async () => {
