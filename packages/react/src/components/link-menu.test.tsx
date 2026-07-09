@@ -44,10 +44,51 @@ describe('LinkMenu', () => {
 
     const linkRect = link.element().getBoundingClientRect()
     const popRect = popover.element().getBoundingClientRect()
-    // Just below the link...
-    expect(popRect.top).toBeGreaterThan(linkRect.bottom)
+    // Just below the link: the popover sits `sideOffset` (8px, minus rounding)
+    // under the text box. An anchor measured at the baseline lands closer.
+    expect(popRect.top).toBeGreaterThanOrEqual(linkRect.bottom + 7)
     expect(popRect.top).toBeLessThan(linkRect.bottom + 40)
     // ...and centered on it, not dragged toward the viewport corner.
+    const linkCenter = (linkRect.left + linkRect.right) / 2
+    const popCenter = (popRect.left + popRect.right) / 2
+    expect(Math.abs(popCenter - linkCenter)).toBeLessThan(20)
+  })
+
+  it('anchors the preview to an angle autolink mid-line', async () => {
+    // `<`/`>` are hidden syntax: a whole-unit anchor measures the collapsed
+    // glyphs and sits on the baseline instead of the text box.
+    await render(<MeowdownEditor initialMarkdown="see <https://www.example.com> here" />)
+    const link = pmRoot.getByText('https://www.example.com')
+    await link.hover()
+    await expect.element(popover.getByTestId('link-popover-read')).toBeVisible()
+
+    const linkRect = link.element().getBoundingClientRect()
+    const popRect = popover.element().getBoundingClientRect()
+    expect(popRect.top).toBeGreaterThanOrEqual(linkRect.bottom + 7)
+    expect(popRect.top).toBeLessThan(linkRect.bottom + 40)
+    const linkCenter = (linkRect.left + linkRect.right) / 2
+    const popCenter = (popRect.left + popRect.right) / 2
+    expect(Math.abs(popCenter - linkCenter)).toBeLessThan(20)
+  })
+
+  it('anchors the preview to an angle autolink alone in its block', async () => {
+    // Both unit edges sit at block boundaries next to the hidden `<`/`>`:
+    // WebKit measures zero rects on both sides and used to pin the popover at
+    // the viewport corner. Park the caret in the other paragraph first; the
+    // initial caret at doc start sits inside the autolink and focus mode
+    // reveals the brackets, masking the bug.
+    await render(
+      <MeowdownEditor initialMarkdown={'<https://www.example.com>\n\npark the caret here'} />,
+    )
+    await pmRoot.getByText('park the caret here').click()
+    const link = pmRoot.getByText('https://www.example.com')
+    await link.hover()
+    await expect.element(popover.getByTestId('link-popover-read')).toBeVisible()
+
+    const linkRect = link.element().getBoundingClientRect()
+    const popRect = popover.element().getBoundingClientRect()
+    expect(popRect.top).toBeGreaterThanOrEqual(linkRect.bottom + 7)
+    expect(popRect.top).toBeLessThan(linkRect.bottom + 40)
     const linkCenter = (linkRect.left + linkRect.right) / 2
     const popCenter = (popRect.left + popRect.right) / 2
     expect(Math.abs(popCenter - linkCenter)).toBeLessThan(20)

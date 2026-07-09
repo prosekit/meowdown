@@ -16,6 +16,7 @@ describe('getLinkUnitAt', () => {
     expect(fixture.doc.textBetween(link.unit.from, link.unit.to)).toBe('[docs](http://example.com)')
     expect(fixture.doc.textBetween(link.label!.from, link.label!.to)).toBe('docs')
     expect(fixture.doc.textBetween(link.dest!.from, link.dest!.to)).toBe('http://example.com')
+    expect(link.text).toEqual(link.label)
   })
 
   it('parses and unquotes a title', () => {
@@ -53,6 +54,19 @@ describe('getLinkUnitAt', () => {
     expect(link.href).toBe('https://example.com')
     expect(link.label).toBeUndefined()
     expect(link.dest).toBeUndefined()
+    expect(link.text).toEqual(link.unit)
+  })
+
+  it('exposes the visible interior of an angle autolink as text', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see <https://example.com> here')))
+    const link = getLinkUnitAt(fixture.state, findText(fixture.doc, 'example.com') + 1)!
+    expect(link.href).toBe('https://example.com')
+    expect(link.label).toBeUndefined()
+    expect(link.dest).toBeUndefined()
+    expect(fixture.doc.textBetween(link.unit.from, link.unit.to)).toBe('<https://example.com>')
+    expect(fixture.doc.textBetween(link.text.from, link.text.to)).toBe('https://example.com')
   })
 
   it('handles an empty dest', () => {

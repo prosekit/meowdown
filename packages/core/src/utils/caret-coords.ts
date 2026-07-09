@@ -7,15 +7,21 @@ export interface CaretCoords {
   bottom: number
 }
 
-function isZeroRect(rect: CaretCoords): boolean {
-  return rect.left === 0 && rect.top === 0 && rect.right === 0 && rect.bottom === 0
+/**
+ * A dimensionless point: the fallback measurement of a hidden (font-size: 0)
+ * syntax run. A real caret rect always has line height, and a block-context
+ * line always has width. WebKit reports the point at the origin, Blink and
+ * Gecko at the run's baseline.
+ */
+function isPointRect(rect: CaretCoords): boolean {
+  return rect.left === rect.right && rect.top === rect.bottom
 }
 
 /**
  * `view.coordsAtPos` that returns undefined instead of throwing on an
- * out-of-range position or returning a zero rect. A position whose `side`
+ * out-of-range position or returning a point rect. A position whose `side`
  * neighbor is hidden markdown syntax has no visible box on that side and
- * measures as a bogus zero rect.
+ * measures as a bogus dimensionless point.
  */
 export function tryCoordsAtPos(
   view: EditorView,
@@ -29,5 +35,5 @@ export function tryCoordsAtPos(
   } catch {
     return undefined
   }
-  return isZeroRect(coords) ? undefined : coords
+  return isPointRect(coords) ? undefined : coords
 }
