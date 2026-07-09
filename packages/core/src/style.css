@@ -932,7 +932,7 @@
         cursor: pointer;
         border-radius: 4px;
 
-        &::before {
+        &::after {
           border-radius: 4px;
           background: var(--meowdown-selection);
           content: '';
