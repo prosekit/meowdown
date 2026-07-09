@@ -290,7 +290,7 @@ export function ProseKitEditor({
       editor.focus()
     }
     function scrollIntoView(): void {
-      editor.view.dispatch(editor.state.tr.scrollIntoView())
+      editor.commands.scrollIntoView()
     }
     function getSelectedTextFromState(): string {
       return getSelectedText(editor.state)

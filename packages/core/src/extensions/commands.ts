@@ -81,10 +81,20 @@ function insertTrigger(text: string): Command {
   }
 }
 
+function scrollIntoView(): Command {
+  return (state, dispatch) => {
+    if (dispatch) {
+      dispatch(state.tr.scrollIntoView())
+    }
+    return true
+  }
+}
+
 export function defineEditorCommands() {
   return defineCommands({
     insertMarkdown,
     insertTrigger,
+    scrollIntoView,
     selectText,
     selectTextBetween,
   })
