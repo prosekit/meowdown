@@ -10,6 +10,14 @@ export interface LinkUnit {
   /** Whole `[text](url "title")` (or autolink) range */
   unit: PositionRange
 
+  /**
+   * The visible text of the link: the `[ ]` interior for a full link, the URL
+   * between `< >` for an angle autolink, the whole unit for a bare autolink.
+   * Popovers anchor on it; the unit's edges can sit inside hidden syntax,
+   * whose collapsed glyphs measure at bogus coordinates.
+   */
+  text: PositionRange
+
   /** Interior of `[ ]`. Absent for an autolink. */
   label?: PositionRange
 
@@ -72,10 +80,22 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
   const href = linkTextAttrs?.href ?? ''
 
   // Only a real `[text](dest)` has an editable label/dest.
-  // Autolinks just resolve an href.
+  // Autolinks just resolve an href. A bare autolink is its own visible text;
+  // an angle autolink's visible text is the URL run between the hidden `<`/`>`
+  // (the run lookup misses when `pos` sits on a bracket, so fall back to the
+  // grammar's fixed one-character brackets).
   if (!pack || packAttrs?.key !== 'link') {
+    const unitRange = { from: unit.from, to: unit.to }
+    const text =
+      packAttrs?.key === 'autolink'
+        ? (lastMarkRunIn(state, unitRange, 'mdLinkText') ?? {
+            from: unit.from + 1,
+            to: unit.to - 1,
+          })
+        : unitRange
     return {
-      unit: { from: unit.from, to: unit.to },
+      unit: unitRange,
+      text,
       href,
       title: '',
     }
@@ -87,9 +107,11 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
   const closeBracket = uri ? uri.from - 2 : unit.to - 3
   const destFrom = uri ? uri.from : unit.to - 1
 
+  const label = { from: unit.from + 1, to: closeBracket }
   return {
     unit: { from: unit.from, to: unit.to },
-    label: { from: unit.from + 1, to: closeBracket },
+    text: label,
+    label,
     dest: { from: destFrom, to: unit.to - 1 },
     href: packAttrs.data.href,
     title: packAttrs.data.title,
