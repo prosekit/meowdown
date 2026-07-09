@@ -84,7 +84,7 @@
       oklch(0.693 0.194 46 / 0.1),
       oklch(0.741 0.165 52 / 0.12)
     );
-    --meowdown-selection: yellow;
+    --meowdown-selection: light-dark(oklch(0.693 0.194 46 / 0.22), oklch(0.741 0.165 52 / 0.3));
 
     /* The resting bullet dot color (a collapsed bullet's dot uses the themed
      * `--meowdown-bullet-collapsed` instead). */
@@ -717,11 +717,8 @@
 
     .md-atom-view:has(.md-atom-selected) {
       .md-atom-view-preview {
-        outline-width: 2px;
-        outline-color: var(--meowdown-node-outline);
-        outline-style: solid;
+        outline: 2px solid var(--meowdown-node-outline);
         outline-offset: 2px;
-        background: transparent;
       }
 
       & ::selection {
