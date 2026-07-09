@@ -912,7 +912,6 @@
     /* A plain inline, not the shared inline-block in .md-atom-view-preview */
     .md-wikilink-view-preview.md-atom-view-preview {
       display: inline;
-      border-radius: 4px;
     }
 
     .md-wikilink-view-label {
@@ -931,16 +930,15 @@
     .md-wikilink-view.md-atom-view:has(.md-atom-selected) {
       .md-atom-view-preview {
         outline-offset: 1px;
+        cursor: pointer;
         border-radius: 4px;
-        content: '';
-        pointer-events: none;
 
         &::before {
-          background: var(--meowdown-selection);
           border-radius: 4px;
+          background: var(--meowdown-selection);
           content: '';
           position: absolute;
-          inset: -2px;
+          inset: -1px;
         }
       }
     }
