@@ -84,7 +84,7 @@
       oklch(0.693 0.194 46 / 0.1),
       oklch(0.741 0.165 52 / 0.12)
     );
-    --meowdown-selection: light-dark(oklch(0.693 0.194 46 / 0.22), oklch(0.741 0.165 52 / 0.3));
+    --meowdown-selection: yellow;
 
     /* The resting bullet dot color (a collapsed bullet's dot uses the themed
      * `--meowdown-bullet-collapsed` instead). */
@@ -717,10 +717,11 @@
 
     .md-atom-view:has(.md-atom-selected) {
       .md-atom-view-preview {
-        outline: 2px solid var(--meowdown-node-outline);
+        outline-width: 2px;
+        outline-color: var(--meowdown-node-outline);
+        outline-style: solid;
         outline-offset: 2px;
         background: transparent;
-        position: relative;
       }
 
       & ::selection {
@@ -928,17 +929,12 @@
 
     .md-wikilink-view.md-atom-view:has(.md-atom-selected) {
       .md-atom-view-preview {
-        outline-offset: 1px;
+        padding: 1px;
+        margin: -1px;
+        outline-offset: 0px;
         cursor: pointer;
         border-radius: 4px;
-
-        &::after {
-          border-radius: 4px;
-          background: var(--meowdown-selection);
-          content: '';
-          position: absolute;
-          inset: -1px;
-        }
+        background: var(--meowdown-selection);
       }
     }
   }
