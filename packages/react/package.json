@@ -1,7 +1,7 @@
 {
   "name": "@meowdown/react",
   "type": "module",
-  "version": "0.38.0",
+  "version": "0.40.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -28,7 +28,8 @@
     "@prosekit/pm": "^0.1.19-beta.2",
     "@prosekit/react": "^0.8.0-beta.19",
     "clsx": "^2.1.1",
-    "lucide-react": "^1.21.0"
+    "lucide-react": "^1.21.0",
+    "react-property": "^2.0.2"
   },
   "peerDependencies": {
     "react": "^19.0.0",

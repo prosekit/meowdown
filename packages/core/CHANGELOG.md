@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.40.1](https://github.com/prosekit/meowdown/compare/core-v0.40.0...core-v0.40.1) (2026-07-08)
+
+
+### Bug Fixes
+
+* open image previews from touchend ([89aa7e7](https://github.com/prosekit/meowdown/commit/89aa7e73b9e5f1c69b89cdc62c696772a2c703da))
+
+## [0.40.0](https://github.com/prosekit/meowdown/compare/core-v0.39.0...core-v0.40.0) (2026-07-08)
+
+
+### Miscellaneous Chores
+
+* **core:** Synchronize meowdown versions
+
+## [0.39.0](https://github.com/prosekit/meowdown/compare/core-v0.38.0...core-v0.39.0) (2026-07-07)
+
+
+### Features
+
+* **react:** interactive task checkboxes in `MarkdownView` ([#251](https://github.com/prosekit/meowdown/issues/251)) ([79716a4](https://github.com/prosekit/meowdown/commit/79716a49cd87b0e86a3f974c79d44e8838099fa9))
+
 ## [0.38.0](https://github.com/prosekit/meowdown/compare/core-v0.37.1...core-v0.38.0) (2026-07-07)
 
 

@@ -104,6 +104,73 @@ describe('MarkdownView', () => {
     await expect.element(view).toHaveTextContent('foo')
   })
 
+  it('renders task checkboxes with their checked state', async () => {
+    await renderView('+ [ ] open\n+ [x] done')
+    const boxes = view.locate('input[type="checkbox"]')
+    await expect.element(boxes.first()).not.toBeChecked()
+    await expect.element(boxes.last()).toBeChecked()
+  })
+
+  it('calls onTaskClick with the document-order index and task facts', async () => {
+    const onTaskClick = vi.fn()
+    await renderView('+ [ ] first\n+ [x] **second** [[Note]]\n- [ ] square', { onTaskClick })
+    await view.locate('input[type="checkbox"]').nth(1).click()
+    expect(onTaskClick).toHaveBeenCalledTimes(1)
+    expect(onTaskClick).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 1,
+        checked: true,
+        marker: '+',
+        text: '**second** [[Note]]',
+      }),
+    )
+    await view.locate('input[type="checkbox"]').nth(2).click()
+    expect(onTaskClick).toHaveBeenLastCalledWith(
+      expect.objectContaining({ index: 2, checked: false, marker: '-', text: 'square' }),
+    )
+  })
+
+  it('numbers a nested task after its parent, in document order', async () => {
+    const onTaskClick = vi.fn()
+    await renderView('+ [ ] parent\n  + [ ] child\n+ [ ] after', { onTaskClick })
+    await view.locate('input[type="checkbox"]').nth(1).click()
+    expect(onTaskClick).toHaveBeenCalledWith(expect.objectContaining({ index: 1, text: 'child' }))
+    await view.locate('input[type="checkbox"]').nth(2).click()
+    expect(onTaskClick).toHaveBeenLastCalledWith(
+      expect.objectContaining({ index: 2, text: 'after' }),
+    )
+  })
+
+  it('never flips a clicked checkbox itself', async () => {
+    const onTaskClick = vi.fn()
+    await renderView('+ [ ] open', { onTaskClick })
+    const box = view.locate('input[type="checkbox"]')
+    await expect.element(box, { timeout: 2000 }).not.toBeChecked()
+    expect(onTaskClick).toHaveBeenCalledTimes(0)
+    await box.click()
+    await expect.element(box, { timeout: 2000 }).not.toBeChecked()
+    expect(onTaskClick).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps checkboxes inert without an onTaskClick handler', async () => {
+    await renderView('+ [x] done')
+    const box = view.locate('input[type="checkbox"]')
+    await box.click()
+    await expect.element(box).toBeChecked()
+  })
+
+  it('re-seats checkbox state when the markdown prop changes', async () => {
+    const screen = await renderView('+ [ ] task')
+    const box = view.locate('input[type="checkbox"]')
+    await expect.element(box).not.toBeChecked()
+    await screen.rerender(
+      <div data-testid="markdown-view">
+        <MarkdownView markdown="+ [x] task" />
+      </div>,
+    )
+    await expect.element(box).toBeChecked()
+  })
+
   it('updates when the markdown prop changes', async () => {
     const screen = await renderView('first')
     await expect.element(view).toHaveTextContent('first')
@@ -119,7 +186,14 @@ describe('MarkdownView', () => {
 // Strip editor-only attributes and sort the rest, so two DOM subtrees compare
 // equal regardless of attribute order or ProseMirror's editing affordances.
 function canonicalize(root: Element): string {
-  const SKIP = new Set(['contenteditable', 'translate', 'draggable', 'spellcheck', 'tabindex'])
+  const SKIP = new Set([
+    'contenteditable',
+    'translate',
+    'draggable',
+    'spellcheck',
+    'tabindex',
+    'readonly',
+  ])
   const walk = (node: ChildNode): string => {
     if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? ''
     if (node.nodeType !== Node.ELEMENT_NODE) return ''
@@ -175,6 +249,8 @@ describe('MarkdownView parity with the editor', () => {
     'a #tag here',
     'link [text](https://example.com) end',
     'a [[Note]] and [[target|Alias]] inline',
+    '+ [ ] circle **task**',
+    '- [x] square **done**',
   ])('matches the editor for %s', async (markdown) => {
     await render(
       <div data-testid="parity-editor">

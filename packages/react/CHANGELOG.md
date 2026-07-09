@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.40.1](https://github.com/prosekit/meowdown/compare/react-v0.40.0...react-v0.40.1) (2026-07-08)
+
+
+### Miscellaneous Chores
+
+* **react:** Synchronize meowdown versions
+
+## [0.40.0](https://github.com/prosekit/meowdown/compare/react-v0.39.0...react-v0.40.0) (2026-07-08)
+
+
+### Features
+
+* **react:** add attach file slash command ([#261](https://github.com/prosekit/meowdown/issues/261)) ([0bb1d73](https://github.com/prosekit/meowdown/commit/0bb1d733673c9201bf49668e5c1b3e842d4a3e6a))
+
+## [0.39.0](https://github.com/prosekit/meowdown/compare/react-v0.38.0...react-v0.39.0) (2026-07-07)
+
+
+### Features
+
+* **react:** interactive task checkboxes in `MarkdownView` ([#251](https://github.com/prosekit/meowdown/issues/251)) ([79716a4](https://github.com/prosekit/meowdown/commit/79716a49cd87b0e86a3f974c79d44e8838099fa9))
+
 ## [0.38.0](https://github.com/prosekit/meowdown/compare/react-v0.37.1...react-v0.38.0) (2026-07-07)
 
 
