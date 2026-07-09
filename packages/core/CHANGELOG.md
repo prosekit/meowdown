@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.42.1](https://github.com/prosekit/meowdown/compare/core-v0.42.0...core-v0.42.1) (2026-07-09)
+
+
+### Bug Fixes
+
+* anchor the link popover on the link's visible text ([#271](https://github.com/prosekit/meowdown/issues/271)) ([9a34c21](https://github.com/prosekit/meowdown/commit/9a34c21e909335dce9e343d4d64fc8097be0a009))
+* **core:** stop `ArrowLeft` getting stuck before a leading atom mark ([#272](https://github.com/prosekit/meowdown/issues/272)) ([39ccfe3](https://github.com/prosekit/meowdown/commit/39ccfe3679a22575d5310d27e2fcaf24571ca7bf))
+
 ## [0.42.0](https://github.com/prosekit/meowdown/compare/core-v0.41.0...core-v0.42.0) (2026-07-09)
 
 
