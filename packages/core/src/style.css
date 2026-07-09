@@ -718,7 +718,7 @@
     .md-atom-view:has(.md-atom-selected) {
       .md-atom-view-preview {
         outline: 2px solid var(--meowdown-node-outline);
-        background: var(--meowdown-selection);
+        outline-offset: 2px;
       }
 
       & ::selection {
@@ -913,28 +913,26 @@
     }
 
     .md-wikilink-view-label {
+      color: var(--meowdown-accent);
       overflow: hidden;
-      padding: 2px 5px;
-      border-radius: 6px;
+      padding: 2px 0px;
       /* Give each wrapped line fragment its own full padding and rounded
        * background, so a wikilink broken across lines reads as a chip on
        * every line. */
       -webkit-box-decoration-break: clone;
       box-decoration-break: clone;
-
-      background: color-mix(in oklab, var(--meowdown-accent) 10%, transparent);
-      color: color-mix(in oklab, var(--meowdown-accent) 80%, var(--meowdown-heading));
-
-      text-decoration-line: underline;
-      text-decoration-style: dashed;
-      text-decoration-thickness: 1px;
-      text-underline-offset: 2px;
       cursor: pointer;
     }
 
-    .md-wikilink-view:has(.md-atom-selected) .md-wikilink-view-label {
-      background-color: transparent;
-      outline-color: transparent;
+    .md-wikilink-view.md-atom-view:has(.md-atom-selected) {
+      .md-atom-view-preview {
+        padding: 1px;
+        margin: -1px;
+        outline-offset: 0px;
+        cursor: pointer;
+        border-radius: 4px;
+        background: var(--meowdown-selection);
+      }
     }
   }
 }
