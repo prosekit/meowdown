@@ -198,6 +198,24 @@ describe('inline', () => {
     expect(roundtrip('<div>html</div>')).toBe('<div>html</div>\n')
   })
 
+  it('keeps a multi-line HTML block', () => {
+    expect(roundtrip('<div class="x">\nhello\n</div>')).toBe('<div class="x">\nhello\n</div>\n')
+  })
+
+  it('keeps a blank line inside a type-1 HTML block', () => {
+    expect(roundtrip('<pre>\none\n\ntwo\n</pre>')).toBe('<pre>\none\n\ntwo\n</pre>\n')
+  })
+
+  it('keeps an HTML block inside a blockquote', () => {
+    expect(roundtrip('> <div>\n> hello\n> </div>')).toBe('> <div>\n> hello\n> </div>\n')
+  })
+
+  it('keeps an unclosed type-6 block that swallowed markdown lines', () => {
+    expect(roundtrip('<div>\n# heading\n</div>\n\nafter')).toBe(
+      '<div>\n# heading\n</div>\n\nafter\n',
+    )
+  })
+
   it('keeps an HTML comment', () => {
     expect(roundtrip('<!-- comment -->')).toBe('<!-- comment -->\n')
   })

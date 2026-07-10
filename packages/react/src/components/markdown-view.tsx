@@ -1,6 +1,7 @@
 import {
   defaultResolveImageUrl,
   getCodeTokens,
+  getHTMLBlockKind,
   getMarkBuilders,
   inlineTextToMarkChunks,
   listenForTweetHeight,
@@ -44,6 +45,7 @@ import { useKaTeX } from '../hooks/use-katex.ts'
 import { attributesToProps } from './attributes-to-props.ts'
 import styles from './code-block-view.module.css'
 import { normalizeDOMOutputSpec, type TypedDOMOutputSpec } from './dom-output-spec.tsx'
+import { htmlBlockHasVisiblePreview, HTMLBlockRender } from './html-block-render.tsx'
 import { MathRender } from './math-render.tsx'
 
 /** Payload for {@link TaskClickHandler}. */
@@ -267,7 +269,8 @@ function renderTokens(code: string, tokens: readonly CodeToken[]): ReactNode {
   return out
 }
 
-function CodeBlock({ code, language }: { code: string; language: string }): ReactElement {
+/** Highlight `code` in `language`, loading the grammar on demand. */
+function useHighlightTokens(code: string, language: string): readonly CodeToken[] {
   // Synchronous tokens when the grammar is already loaded (the common path);
   // `null` means a grammar must load, which the effect awaits.
   const syncTokens = useMemo<readonly CodeToken[] | null>(() => {
@@ -288,10 +291,32 @@ function CodeBlock({ code, language }: { code: string; language: string }): Reac
       active = false
     }
   }, [code, language, syncTokens])
-  const tokens = syncTokens ?? asyncTokens ?? []
+  return syncTokens ?? asyncTokens ?? []
+}
+
+function CodeBlock({ code, language }: { code: string; language: string }): ReactElement {
+  const tokens = useHighlightTokens(code, language)
   return (
     <pre data-language={language || undefined}>
       <code>{tokens.length > 0 ? renderTokens(code, tokens) : code}</code>
+    </pre>
+  )
+}
+
+/**
+ * A raw HTML block. An element block that renders something shows its sanitized
+ * preview (the same component the editor uses, so both surfaces agree); a
+ * comment, processing instruction, or metadata block, and an element that
+ * sanitizes to nothing, show highlighted source instead.
+ */
+function HTMLBlock({ source }: { source: string }): ReactElement {
+  const tokens = useHighlightTokens(source, 'html')
+  if (getHTMLBlockKind(source) === 'element' && htmlBlockHasVisiblePreview(source)) {
+    return <HTMLBlockRender source={source} data-testid="html-block-preview" />
+  }
+  return (
+    <pre data-html-block>
+      <code>{tokens.length > 0 ? renderTokens(source, tokens) : source}</code>
     </pre>
   )
 }
@@ -466,6 +491,10 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
       return <MathCodeBlock key={key} code={node.textContent} />
     }
     return <CodeBlock key={key} code={node.textContent} language={language} />
+  }
+
+  if (typeName === 'htmlBlock') {
+    return <HTMLBlock key={key} source={node.textContent} />
   }
 
   const toDOM = node.type.spec.toDOM

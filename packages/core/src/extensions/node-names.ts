@@ -10,7 +10,7 @@ export const NODE_NAMES = [
   'list',
   'codeBlock',
   'horizontalRule',
-  'htmlComment',
+  'htmlBlock',
   'table',
   'tableRow',
   'tableCell',

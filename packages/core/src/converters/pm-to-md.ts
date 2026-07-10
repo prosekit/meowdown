@@ -4,7 +4,6 @@ import type { MeowdownCodeBlockAttrs } from '../extensions/code-block.ts'
 import type { Frontmatter } from '../extensions/frontmatter.ts'
 import type { MeowdownHeadingAttrs } from '../extensions/heading.ts'
 import type { MeowdownHorizontalRuleAttrs } from '../extensions/horizontal-rule.ts'
-import type { MeowdownHTMLCommentAttrs } from '../extensions/html-comment.ts'
 import type { MeowdownListAttrs } from '../extensions/list.ts'
 import type { NodeName } from '../extensions/node-names.ts'
 import type { MeowdownTableCellAttrs, TableColumnAlign } from '../extensions/table-column-align.ts'
@@ -260,12 +259,10 @@ function emit(node: ProseMirrorNode, out: MdOut): void {
       out.closeBlock()
       return
     }
-    case 'htmlComment': {
-      const { content } = node.attrs as MeowdownHTMLCommentAttrs
-      out.write(content)
+    case 'htmlBlock':
+      out.write(node.textContent)
       out.closeBlock()
       return
-    }
     case 'table':
       emitTable(node, out)
       return

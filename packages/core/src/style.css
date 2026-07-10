@@ -504,6 +504,19 @@
   .ProseMirror pre code .tok-link {
     text-decoration: underline;
   }
+  .ProseMirror pre code .tok-tagName {
+    color: light-dark(#116329, #7ee787);
+  }
+  .ProseMirror pre code .tok-attributeName {
+    color: light-dark(#0550ae, #79c0ff);
+  }
+  .ProseMirror pre code .tok-attributeValue {
+    color: light-dark(#0a3069, #a5d6ff);
+  }
+  .ProseMirror pre code .tok-angleBracket,
+  .ProseMirror pre code .tok-punctuation {
+    color: var(--meowdown-muted);
+  }
 
   .ProseMirror hr {
     margin: 1.5em 0;

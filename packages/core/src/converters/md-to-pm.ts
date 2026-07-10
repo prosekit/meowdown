@@ -156,16 +156,11 @@ function convertBlock(
     case LEZER_NODE_IDS.Paragraph:
       return [convertParagraph(nodes, cursor, text)]
     case LEZER_NODE_IDS.CommentBlock:
-      // A comment is not rendered output: map it onto the invisible `htmlComment`
-      // node so it stays in the document (and round-trips) without reading as
-      // body text. Raw HTML / processing-instruction blocks fall through to a
-      // paragraph - they can carry content a reader expects to see.
-      return [convertHTMLComment(nodes, cursor, text)]
     case LEZER_NODE_IDS.HTMLBlock:
     case LEZER_NODE_IDS.ProcessingInstructionBlock:
-      // The schema has no HTML node, so keep the raw block as literal paragraph
-      // text; it survives verbatim through a round-trip.
-      return [convertParagraph(nodes, cursor, text)]
+      // Raw HTML keeps its literal source as an `htmlBlock` node: byte-exact
+      // round trip, and no markdown parsing inside (CommonMark 4.6).
+      return [convertHTMLBlock(nodes, cursor, text)]
     case LEZER_NODE_IDS.Blockquote:
       return [convertBlockquote(nodes, cursor, text)]
     case LEZER_NODE_IDS.BulletList:
@@ -340,48 +335,54 @@ function buildParagraph(
   return nodes.paragraph(dedentContinuation(content, column))
 }
 
+/**
+ * A leaf block's literal source: the block's span, dedented like a paragraph's.
+ * In block-only parsing a leaf block has no inline children, with one
+ * exception: lezer leaves the container `QuoteMark`s of a multi-line block
+ * inside a blockquote (`> l1\n> l2`) embedded in the block's span, so they are
+ * stripped here.
+ */
+function sliceLeafBlockText(cursor: TreeCursor, text: string): string {
+  const from = cursor.from
+  const to = cursor.to
+  const column = measureContentColumn(text, from)
+  if (!cursor.firstChild()) {
+    return dedentContinuation(text.slice(from, to), column)
+  }
+  let content = ''
+  let pos = from
+  do {
+    if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) {
+      content += text.slice(pos, cursor.from)
+      pos = cursor.to
+      if (isSpaceChar(text.charCodeAt(pos))) pos += 1
+    }
+  } while (cursor.nextSibling())
+  cursor.parent()
+  content += text.slice(pos, to)
+  return dedentContinuation(content, column)
+}
+
 function convertParagraph(
   nodes: TypedNodeBuilders,
   cursor: TreeCursor,
   text: string,
 ): ProseMirrorNode {
-  const from = cursor.from
-  const to = cursor.to
-  const column = measureContentColumn(text, from)
-  // In block-only parsing a paragraph has no inline children, with one
-  // exception: lezer leaves the lazy-continuation `QuoteMark`s of a multi-line
-  // blockquote (`> l1\n> l2`) embedded in the paragraph's span.
-  if (cursor.firstChild()) {
-    let content = ''
-    let pos = from
-    do {
-      if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) {
-        content += text.slice(pos, cursor.from)
-        pos = cursor.to
-        if (isSpaceChar(text.charCodeAt(pos))) pos += 1
-      }
-    } while (cursor.nextSibling())
-    cursor.parent()
-    content += text.slice(pos, to)
-    return buildParagraph(nodes, content, column)
-  }
-  return buildParagraph(nodes, text.slice(from, to), column)
+  // An empty string adds no child (the builder skips falsy text), so this also
+  // covers the empty-paragraph case.
+  return nodes.paragraph(sliceLeafBlockText(cursor, text))
 }
 
 /**
- * Build the invisible `htmlComment` node from a `CommentBlock`. The raw comment
- * (delimiters included) is kept verbatim on the node's `content` attribute;
- * continuation lines are dedented like a paragraph's so the serializer's own
- * line prefix re-applies the container indent instead of doubling it.
+ * Build the `htmlBlock` node from a raw HTML block. The literal source becomes
+ * the node's text content, so the round trip is byte-exact.
  */
-function convertHTMLComment(
+function convertHTMLBlock(
   nodes: TypedNodeBuilders,
   cursor: TreeCursor,
   text: string,
 ): ProseMirrorNode {
-  const column = measureContentColumn(text, cursor.from)
-  const content = dedentContinuation(text.slice(cursor.from, cursor.to), column)
-  return nodes.htmlComment({ content })
+  return nodes.htmlBlock(sliceLeafBlockText(cursor, text))
 }
 
 function convertBlockquote(

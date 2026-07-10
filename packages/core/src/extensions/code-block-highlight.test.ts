@@ -34,6 +34,51 @@ describe('defineCodeBlockSyntaxHighlight', () => {
     `)
   })
 
+  it('renders HTML syntax token spans for an html block', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.htmlBlock('<div class="box">hi</div>')))
+    const selector = '.ProseMirror pre[data-html-block] code [class*="tok-"]'
+    const locator = page.locate(selector).first()
+    await expect.element(locator, { timeout: 15000 }).toBeInTheDocument()
+    expect(formatHTML(fixture.dom.innerHTML)).toMatchInlineSnapshot(`
+      "
+      <pre data-html-block>
+        <code>
+          <span class="tok-punctuation">
+            &lt;
+          </span>
+          <span class="tok-typeName">
+            div
+          </span>
+          <span class="tok-propertyName">
+            class
+          </span>
+          <span class="tok-operator">
+            =
+          </span>
+          <span class="tok-string">
+            "box"
+          </span>
+          <span class="tok-punctuation">
+            &gt;
+          </span>
+          hi
+          <span class="tok-punctuation">
+            &lt;/
+          </span>
+          <span class="tok-typeName">
+            div
+          </span>
+          <span class="tok-punctuation">
+            &gt;
+          </span>
+        </code>
+      </pre>
+      "
+    `)
+  })
+
   it('does not crash on an unknown language and leaves the text intact', async () => {
     using fixture = setupFixture()
     const { n } = fixture
