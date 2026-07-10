@@ -49,6 +49,47 @@ describe('SlashMenu', () => {
     await expect.element(menu.getByText('Heading 1')).not.toBeVisible()
   })
 
+  it('inserts a table when Enter selects a normal single-slash command', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} />)
+    await pmRoot.click()
+    await userEvent.keyboard('/table')
+    await expect.element(menu.getByText('Table')).toBeVisible()
+    await userEvent.keyboard('{Enter}')
+
+    await expect.element(menu).not.toBeVisible()
+    await expect.element(page.locate('.ProseMirror table')).toBeInTheDocument()
+    expect(ref.current?.getMarkdown()).not.toContain('/table')
+  })
+
+  it('keeps a double-slash title alias that matches a built-in item as text on Enter', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} />)
+    await pmRoot.click()
+    await userEvent.keyboard('Tim MacCaw /')
+    await expect.element(menu).toBeVisible()
+    await userEvent.keyboard('/ Table')
+    await expect.element(menu).not.toBeVisible()
+    await userEvent.keyboard('{Enter}')
+
+    await expect.element(page.locate('.ProseMirror table')).not.toBeInTheDocument()
+    expect(ref.current?.getMarkdown()).toContain('Tim MacCaw // Table')
+  })
+
+  it('does not select a matching host template from a double-slash title alias', async () => {
+    const ref = createRef<EditorHandle>()
+    const onSelect = vi.fn()
+    const onSlashMenuSearch = (): SlashMenuItem[] => [{ label: 'Meeting note', onSelect }]
+    await render(<ProseKitEditor ref={ref} onSlashMenuSearch={onSlashMenuSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard('Tim MacCaw // Meeting note')
+    await expect.element(menu).not.toBeVisible()
+    await userEvent.keyboard('{Enter}')
+
+    expect(onSelect).not.toHaveBeenCalled()
+    expect(ref.current?.getMarkdown()).toContain('Tim MacCaw // Meeting note')
+  })
+
   it('applies the selected block type and removes the query text', async () => {
     const ref = createRef<EditorHandle>()
     await render(<ProseKitEditor ref={ref} />)

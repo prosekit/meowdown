@@ -20,10 +20,11 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'reac
 import { formatNowTime, type TimeFormat } from '../utils/date-format.ts'
 
 import styles from './autocomplete-menu.module.css'
+import { createSlashMenuRegex } from './slash-menu-regex.ts'
 import type { SlashMenuItem, SlashMenuSearchHandler } from './types.ts'
 
 // Match inputs like "/", "/table", "/heading 1" etc. Do not match "/ heading".
-const regex = canUseRegexLookbehind() ? /(?<!\S)\/(\S.*)?$/u : /\/(\S.*)?$/u
+const regex = createSlashMenuRegex(canUseRegexLookbehind())
 
 const defaultOnFileSaveError: FileSaveErrorHandler = (error) => {
   console.error('[meowdown] failed to save attached file:', error)
