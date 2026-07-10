@@ -35,6 +35,7 @@ import { defineMeowdownParagraph } from './paragraph.ts'
 import { definePendingReplacement } from './pending-replacement.ts'
 import { defineSelectDocBoundary } from './select-doc-boundary.ts'
 import { defineTable } from './table.ts'
+import { defineTypography } from './typography.ts'
 import { defineVirtualCaret } from './virtual-caret.ts'
 import { defineWikilink } from './wikilink.ts'
 
@@ -66,6 +67,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineLinkCommands(),
     defineWikilink(),
     defineMath(),
+    defineTypography(),
     defineMarkMode(options.markMode ?? 'focus'),
     defineVirtualCaret(),
     defineHiddenRunCaret(),
