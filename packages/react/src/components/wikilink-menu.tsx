@@ -12,6 +12,7 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { returnsTrue } from '../utils/returns-true.ts'
 
+import { createWikilinkMenuRegex } from './autocomplete-menu-regex.ts'
 import styles from './autocomplete-menu.module.css'
 import type { WikilinkItem, WikilinkSearchHandler } from './types.ts'
 
@@ -23,9 +24,7 @@ import type { WikilinkItem, WikilinkSearchHandler } from './types.ts'
 //   right after "@" cancels it, so prose like "meet @ 5pm" never opens the
 //   menu. The lookbehind also keeps "@" inside a word (e.g. emails) from
 //   triggering; the fallback drops only that boundary guard.
-const regex = canUseRegexLookbehind()
-  ? /(?:\[\[[^[\]]*|(?<!\S)@(?:[^[\]\s][^[\]]*)?)$/u
-  : /(?:\[\[[^[\]]*|@(?:[^[\]\s][^[\]]*)?)$/u
+const regex = createWikilinkMenuRegex(canUseRegexLookbehind())
 
 function queryFromRegexMatch(match: RegExpExecArray): string {
   return match[0].replace(/^(?:\[\[|@)/, '').trim()

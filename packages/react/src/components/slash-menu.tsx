@@ -19,8 +19,8 @@ import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'reac
 
 import { formatNowTime, type TimeFormat } from '../utils/date-format.ts'
 
+import { createSlashMenuRegex } from './autocomplete-menu-regex.ts'
 import styles from './autocomplete-menu.module.css'
-import { createSlashMenuRegex } from './slash-menu-regex.ts'
 import type { SlashMenuItem, SlashMenuSearchHandler } from './types.ts'
 
 // Match inputs like "/", "/table", "/heading 1" etc. Do not match "/ heading".

@@ -12,12 +12,13 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { returnsTrue } from '../utils/returns-true.ts'
 
+import { createTagMenuRegex } from './autocomplete-menu-regex.ts'
 import styles from './autocomplete-menu.module.css'
 import type { TagItem, TagSearchHandler } from './types.ts'
 
 // Match "#tag" with at least one character, so typing a heading ("# ") never
 // opens the menu. Do not match "abc#def".
-const regex = canUseRegexLookbehind() ? /(?<!\S)#[\da-z]+$/iu : /#[\da-z]+$/iu
+const regex = createTagMenuRegex(canUseRegexLookbehind())
 
 interface TagMenuProps {
   onTagSearch: TagSearchHandler

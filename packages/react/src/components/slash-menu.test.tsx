@@ -62,32 +62,38 @@ describe('SlashMenu', () => {
     expect(ref.current?.getMarkdown()).not.toContain('/table')
   })
 
-  it('keeps a double-slash title alias that matches a built-in item as text on Enter', async () => {
+  it('closes immediately on a double slash and preserves following text on Enter', async () => {
     const ref = createRef<EditorHandle>()
     await render(<ProseKitEditor ref={ref} />)
     await pmRoot.click()
-    await userEvent.keyboard('Tim MacCaw /')
+    await userEvent.keyboard('Name /')
     await expect.element(menu).toBeVisible()
-    await userEvent.keyboard('/ Table')
+    await userEvent.keyboard('/')
+    await expect.element(menu).not.toBeVisible()
+    await userEvent.keyboard(' Table')
     await expect.element(menu).not.toBeVisible()
     await userEvent.keyboard('{Enter}')
 
     await expect.element(page.locate('.ProseMirror table')).not.toBeInTheDocument()
-    expect(ref.current?.getMarkdown()).toContain('Tim MacCaw // Table')
+    expect(ref.current?.getMarkdown()).toBe('Name // Table\n')
   })
 
-  it('does not select a matching host template from a double-slash title alias', async () => {
+  it('does not select a matching host template from double-slash text', async () => {
     const ref = createRef<EditorHandle>()
     const onSelect = vi.fn()
     const onSlashMenuSearch = (): SlashMenuItem[] => [{ label: 'Meeting note', onSelect }]
     await render(<ProseKitEditor ref={ref} onSlashMenuSearch={onSlashMenuSearch} />)
     await pmRoot.click()
-    await userEvent.keyboard('Tim MacCaw // Meeting note')
+    await userEvent.keyboard('Name /')
+    await expect.element(menu).toBeVisible()
+    await userEvent.keyboard('/')
+    await expect.element(menu).not.toBeVisible()
+    await userEvent.keyboard(' Meeting note')
     await expect.element(menu).not.toBeVisible()
     await userEvent.keyboard('{Enter}')
 
     expect(onSelect).not.toHaveBeenCalled()
-    expect(ref.current?.getMarkdown()).toContain('Tim MacCaw // Meeting note')
+    expect(ref.current?.getMarkdown()).toBe('Name // Meeting note\n')
   })
 
   it('applies the selected block type and removes the query text', async () => {
