@@ -1,4 +1,6 @@
+import { isElementLike } from '@ocavue/utils'
 import {
+  defineClipboardSerializer,
   defineCommands,
   defineKeymap,
   defineNodeAttr,
@@ -12,7 +14,6 @@ import {
   defineListCommands,
   defineListDropIndicator,
   defineListKeymap,
-  defineListSerializer,
   defineListSpec,
   toggleList,
   wrapInList,
@@ -25,7 +26,11 @@ import {
   createListRenderingPlugin,
   createSafariInputMethodWorkaroundPlugin,
   createToggleCollapsedCommand,
+  defaultAttributesGetter,
+  findCheckboxInListItem,
   handleListMarkerMouseDown,
+  joinListElements,
+  listToDOM,
   unwrapListSlice,
   wrappingListInputRule,
   type ListClickHandler,
@@ -58,6 +63,22 @@ export interface MeowdownListAttrs extends ListAttrs {
   markerGap?: number
 }
 
+// Each attr persists only its non-canonical values (`.`, `-`, `x`, and a gap
+// of 1 are the defaults the serializer emits anyway); the rest must survive an
+// editor DOM re-parse.
+function serializeListMarker(value: ListMarker | undefined): string | undefined {
+  return value === ')' || value === '*' || value === '+' ? value : undefined
+}
+
+function serializeTaskMarker(value: TaskMarker | undefined): string | undefined {
+  return value === 'X' ? value : undefined
+}
+
+// A gap of 5+ is indented code, a different structure, so it never reaches here.
+function serializeMarkerGap(value: number | null | undefined): string | undefined {
+  return isValidMarkerGap(value) ? String(value) : undefined
+}
+
 type ListMarkerExtension = Extension<{ Nodes: { list: { marker?: ListMarker } } }>
 
 function defineListMarkerAttr(): ListMarkerExtension {
@@ -67,14 +88,9 @@ function defineListMarkerAttr(): ListMarkerExtension {
     default: null,
     // A new item created by pressing Enter keeps the previous item's delimiter.
     splittable: true,
-    // Persist only the non-canonical markers (`.` and `-` are the defaults the
-    // serializer emits anyway); the rest must survive an editor DOM re-parse.
     toDOM: (value) => {
-      if (value === ')' || value === '*' || value === '+') {
-        return ['data-list-marker', value]
-      } else {
-        return null
-      }
+      const serialized = serializeListMarker(value)
+      return serialized == null ? null : ['data-list-marker', serialized]
     },
     parseDOM: (node) => {
       const value = node.getAttribute('data-list-marker')
@@ -96,10 +112,9 @@ function defineListTaskMarkerAttr(): ListTaskMarkerExtension {
     default: null,
     // A new item created by pressing Enter keeps the previous item's casing.
     splittable: true,
-    // Persist only the non-canonical uppercase `X`; lowercase `x` is the
-    // default the serializer emits anyway, and it must survive a DOM re-parse.
     toDOM: (value) => {
-      return value === 'X' ? ['data-list-task-marker', value] : null
+      const serialized = serializeTaskMarker(value)
+      return serialized == null ? null : ['data-list-task-marker', serialized]
     },
     parseDOM: (node) => {
       return node.getAttribute('data-list-task-marker') === 'X' ? 'X' : null
@@ -121,17 +136,108 @@ function defineListMarkerGapAttr(): ListMarkerGapExtension {
     default: 1,
     // A new item created by pressing Enter keeps the previous item's gap.
     splittable: true,
-    // Persist only a non-canonical gap (2-4 spaces); 1 is the default the serializer
-    // emits anyway, and the rest must survive an editor DOM re-parse. A gap of 5+ is
-    // indented code, a different structure, so it never reaches here.
     toDOM: (value) => {
-      return isValidMarkerGap(value) ? ['data-list-marker-gap', String(value)] : null
+      const serialized = serializeMarkerGap(value)
+      return serialized == null ? null : ['data-list-marker-gap', serialized]
     },
     parseDOM: (node) => {
       const value = Number.parseInt(node.getAttribute('data-list-marker-gap') ?? '', 10)
       return isValidMarkerGap(value) ? value : 1
     },
   })
+}
+
+function getListClipboardAttributes(node: ProseMirrorNode): Record<string, string | undefined> {
+  const attrs = node.attrs as MeowdownListAttrs
+  return {
+    ...defaultAttributesGetter(node),
+    'data-list-marker': serializeListMarker(attrs.marker),
+    'data-list-task-marker': serializeTaskMarker(attrs.taskMarker),
+    'data-list-marker-gap': serializeMarkerGap(attrs.markerGap),
+  }
+}
+
+/**
+ * Serialize copied lists as native `<ul>`/`<ol>` elements, mirroring ProseKit's
+ * `defineListSerializer`, but with an attribute getter that keeps meowdown's
+ * marker attrs, which `listToDOM`'s default getter drops. Without them, a round
+ * task `+ [ ]` copied or dragged into another editor turns into a square
+ * `- [ ]`.
+ */
+function defineMeowdownListSerializer(): PlainExtension {
+  return defineClipboardSerializer({
+    serializeFragmentWrapper: (serializeFragment) => {
+      return (...args) => {
+        const dom = serializeFragment(...args)
+        return normalizeElementTree(joinListElements(dom))
+      }
+    },
+    serializeNodeWrapper: (serializeNode) => {
+      return (...args) => {
+        const dom = serializeNode(...args)
+        return isElementLike(dom) ? normalizeElementTree(joinListElements(dom)) : dom
+      }
+    },
+    nodesFromSchemaWrapper: (nodesFromSchema) => {
+      return (...args) => {
+        const nodes = nodesFromSchema(...args)
+        return {
+          ...nodes,
+          list: (node) =>
+            listToDOM({ node, nativeList: true, getAttributes: getListClipboardAttributes }),
+        }
+      }
+    },
+  })
+}
+
+function normalizeElementTree<T extends Element | DocumentFragment>(node: T): T {
+  if (isElementLike(node)) {
+    normalizeTaskList(node)
+  }
+
+  for (const child of node.children) {
+    normalizeElementTree(child)
+  }
+
+  return node
+}
+
+/**
+ * Modifies the DOM tree for task lists to ensure that the output HTML can be
+ * parsed by rehype-remark.
+ */
+function normalizeTaskList(node: Element): void {
+  if (
+    !node.classList.contains('prosemirror-flat-list') ||
+    node.getAttribute('data-list-kind') !== 'task' ||
+    node.children.length !== 2
+  ) {
+    return
+  }
+
+  const marker = node.children.item(0)
+  if (!marker || !marker.classList.contains('list-marker')) {
+    return
+  }
+
+  const checkbox = findCheckboxInListItem(marker)
+  if (!checkbox) {
+    return
+  }
+
+  const content = node.children.item(1)
+  if (!content || !content.classList.contains('list-content')) {
+    return
+  }
+
+  const textBlock = content.children.item(0)
+  if (!textBlock || !['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(textBlock.tagName)) {
+    return
+  }
+
+  node.replaceChildren(...content.children)
+  textBlock.prepend(checkbox)
 }
 
 const listInputRules = [
@@ -318,7 +424,7 @@ export function defineMeowdownList() {
     defineMeowdownListPlugins(),
     defineListKeymap(),
     defineListCommands(),
-    defineListSerializer(),
+    defineMeowdownListSerializer(),
     defineListDropIndicator(),
 
     defineMeowdownListInputRules(),
