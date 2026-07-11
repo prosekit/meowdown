@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.44.0](https://github.com/prosekit/meowdown/compare/core-v0.43.1...core-v0.44.0) (2026-07-11)
+
+
+### Features
+
+* **core:** add checkable list cycle command ([#282](https://github.com/prosekit/meowdown/issues/282)) ([4d7cdf3](https://github.com/prosekit/meowdown/commit/4d7cdf3bb0d54ea7b26a994b61f0ffeb736eb8b4))
+
 ## [0.43.1](https://github.com/prosekit/meowdown/compare/core-v0.43.0...core-v0.43.1) (2026-07-11)
 
 
