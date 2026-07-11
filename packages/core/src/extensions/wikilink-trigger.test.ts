@@ -107,6 +107,28 @@ describe('defineWikilinkTrigger', () => {
     expect(fixture.selectionSnapshot).toBe('Cat [[naps┃')
   })
 
+  it('uses visible text from a formatted selection as the query', async () => {
+    using fixture = setup()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>**Klara and the Sun**<b>')))
+    fixture.view.focus()
+
+    await pressModShiftK()
+
+    expect(fixture.selectionSnapshot).toBe('[[Klara and the Sun┃')
+  })
+
+  it('drops math delimiters from a formatted selection query', async () => {
+    using fixture = setup()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>$E=mc^2$<b>')))
+    fixture.view.focus()
+
+    await pressModShiftK()
+
+    expect(fixture.selectionSnapshot).toBe('[[E=mc^2┃')
+  })
+
   it('keeps autocomplete matched while ArrowRight includes existing text', async () => {
     using fixture = setup()
     const matches = trackWikilinkMatches(fixture)
