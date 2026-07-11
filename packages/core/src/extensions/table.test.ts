@@ -104,6 +104,7 @@ describe('table cell is inline-only', () => {
     commands.wrapInList({ kind: 'ordered' })
     commands.wrapInCircleTask()
     commands.wrapInSquareTask()
+    commands.cycleCheckableList()
     commands.setBlockquote()
     commands.setHeading({ level: 1 })
     commands.setCodeBlock()

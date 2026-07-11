@@ -287,13 +287,6 @@ function wrapInSquareTask(): Command {
   return wrapInList<MeowdownListAttrs>({ kind: 'task', marker: null })
 }
 
-function defineTaskCommands() {
-  return defineCommands({
-    wrapInCircleTask,
-    wrapInSquareTask,
-  })
-}
-
 /** The attributes of the closest list node enclosing the selection, if any. */
 function getListAttrsAtSelection(state: EditorState): MeowdownListAttrs | null {
   const { $from } = state.selection
@@ -304,6 +297,31 @@ function getListAttrsAtSelection(state: EditorState): MeowdownListAttrs | null {
     }
   }
   return null
+}
+
+/**
+ * Cycle the selected block between square and circle checkbox tasks. Non-task
+ * content becomes an unchecked square task; shape changes preserve checked state.
+ */
+function cycleCheckableList(): Command {
+  return (state, dispatch, view) => {
+    const attrs = getListAttrsAtSelection(state)
+    const command =
+      attrs?.kind !== 'task'
+        ? wrapInList<MeowdownListAttrs>({ kind: 'task', marker: null, checked: false })
+        : attrs.marker === '+'
+          ? wrapInSquareTask()
+          : wrapInCircleTask()
+    return command(state, dispatch, view)
+  }
+}
+
+function defineTaskCommands() {
+  return defineCommands({
+    cycleCheckableList,
+    wrapInCircleTask,
+    wrapInSquareTask,
+  })
 }
 
 /**
