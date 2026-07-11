@@ -1,0 +1,15 @@
+.Positioner {
+  z-index: 50;
+  max-width: calc(100vw - 1rem);
+  max-height: calc(100vh - 1rem);
+  pointer-events: none;
+}
+
+.Popup {
+  box-sizing: border-box;
+  width: min(21.875rem, calc(100vw - 1rem));
+  max-height: min(12.5rem, calc(100vh - 1rem));
+  overflow: hidden;
+  outline: none;
+  pointer-events: none;
+}

@@ -11,6 +11,9 @@ export function defineLinkHoverHandler(onHoverChange: LinkHoverHandler): PlainEx
     findPayloadAt: (state, pos): LinkUnit | undefined => {
       return getLinkUnitAt(state, pos)
     },
+    isSamePayload: (previous, next) => {
+      return previous.href === next.href && previous.title === next.title
+    },
     onHoverChange,
   })
 }

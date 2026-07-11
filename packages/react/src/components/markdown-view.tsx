@@ -84,6 +84,18 @@ export interface MarkdownViewProps {
   markMode?: MarkMode
   /** Peel a leading YAML frontmatter block before rendering. Off by default. */
   frontmatter?: boolean
+  /**
+   * Whether rendered links, images, and task checkboxes can be activated.
+   * Defaults to `true`. When `false`, callbacks are ignored and the rendered
+   * tree contains no anchors or focusable task controls.
+   */
+  interactive?: boolean
+  /**
+   * Whether recognized tweet and YouTube image URLs render remote iframes.
+   * Defaults to `true`. When `false`, recognized embeds are omitted before any
+   * image resolver runs.
+   */
+  renderEmbeds?: boolean
   /** Map an image `src` to a displayable URL, or `undefined` to skip it. */
   resolveImageUrl?: (src: string) => string | undefined
   /** Called when a rendered wiki link is clicked. Pass a stable function. */
@@ -99,6 +111,8 @@ export interface MarkdownViewProps {
 }
 
 interface RenderContext {
+  interactive: boolean
+  renderEmbeds: boolean
   resolveImageUrl?: (src: string) => string | undefined
   onWikilinkClick?: WikilinkClickHandler
   onLinkClick?: LinkClickHandler
@@ -134,6 +148,10 @@ function outputSpecToReact(
 
   if (tag === 'input' && attrs?.['type'] === 'checkbox') {
     reactProps.readOnly = true
+    if (!context.interactive) {
+      reactProps.disabled = true
+      reactProps.tabIndex = -1
+    }
   }
 
   const reactChildren = rest.map((child) => outputSpecToReact(child, content, context))
@@ -167,7 +185,13 @@ function WikilinkChip(props: {
   )
 }
 
-function EmbedFrame({ embed }: { embed: EmbedDescriptor }): ReactElement {
+function EmbedFrame({
+  embed,
+  interactive,
+}: {
+  embed: EmbedDescriptor
+  interactive: boolean
+}): ReactElement {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   useEffect(() => {
     if (embed.kind !== 'tweet') return
@@ -176,7 +200,11 @@ function EmbedFrame({ embed }: { embed: EmbedDescriptor }): ReactElement {
     return listenForTweetHeight(iframe)
   }, [embed.kind, embed.key])
   return (
-    <span className="md-image-view-preview md-atom-view-preview" contentEditable={false}>
+    <span
+      className="md-image-view-preview md-atom-view-preview"
+      contentEditable={false}
+      inert={interactive ? undefined : true}
+    >
       <iframe
         ref={iframeRef}
         key={embed.key}
@@ -185,6 +213,7 @@ function EmbedFrame({ embed }: { embed: EmbedDescriptor }): ReactElement {
         className={embed.className}
         data-testid={embed.testid}
         loading="lazy"
+        tabIndex={interactive ? undefined : -1}
         referrerPolicy="strict-origin-when-cross-origin"
         frameBorder="0"
         allow={embed.allow}
@@ -200,10 +229,12 @@ function ImagePreview(props: {
   width: number | null
   resolveImageUrl?: (src: string) => string | undefined
   onImageClick?: ImageClickHandler
+  renderEmbeds: boolean
+  interactive: boolean
 }): ReactElement | null {
-  const { src, alt, width, resolveImageUrl, onImageClick } = props
+  const { src, alt, width, resolveImageUrl, onImageClick, renderEmbeds, interactive } = props
   const embed = matchEmbed(src)
-  if (embed) return <EmbedFrame embed={embed} />
+  if (embed) return renderEmbeds ? <EmbedFrame embed={embed} interactive={interactive} /> : null
 
   const url = (resolveImageUrl ?? defaultResolveImageUrl)(src)
   if (!url) return null
@@ -243,6 +274,8 @@ function ImageView(props: {
         width={width}
         resolveImageUrl={context.resolveImageUrl}
         onImageClick={context.onImageClick}
+        renderEmbeds={context.renderEmbeds}
+        interactive={context.interactive}
       />
       <span className="md-image-view-content md-atom-view-content">{children}</span>
     </span>
@@ -363,6 +396,7 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
     }
     case 'mdLinkText': {
       const attrs = mark.attrs as MdLinkTextAttrs
+      if (!context.interactive) return <span className="md-link">{children}</span>
       const handleClick = context.onLinkClick
         ? (event: MouseEvent) =>
             context.onLinkClick?.({ href: attrs.href, event: event.nativeEvent })
@@ -514,6 +548,8 @@ export function MarkdownView({
   markdown,
   markMode = 'hide',
   frontmatter = false,
+  interactive = true,
+  renderEmbeds = true,
   resolveImageUrl,
   onWikilinkClick,
   onLinkClick,
@@ -524,11 +560,13 @@ export function MarkdownView({
   const content = useMemo(() => {
     const doc = markdownToDoc(markdown, { frontmatter })
     const context: RenderContext = {
+      interactive,
+      renderEmbeds,
       resolveImageUrl,
-      onWikilinkClick,
-      onLinkClick,
-      onImageClick,
-      onTaskClick,
+      onWikilinkClick: interactive ? onWikilinkClick : undefined,
+      onLinkClick: interactive ? onLinkClick : undefined,
+      onImageClick: interactive ? onImageClick : undefined,
+      onTaskClick: interactive ? onTaskClick : undefined,
       taskCounter: { value: 0 },
       keyCounter: { value: 0 },
     }
@@ -536,6 +574,8 @@ export function MarkdownView({
   }, [
     markdown,
     frontmatter,
+    interactive,
+    renderEmbeds,
     resolveImageUrl,
     onWikilinkClick,
     onLinkClick,
