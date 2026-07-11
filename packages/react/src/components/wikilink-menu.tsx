@@ -23,9 +23,12 @@ import type { WikilinkItem, WikilinkSearchHandler } from './types.ts'
 //   right after "@" cancels it, so prose like "meet @ 5pm" never opens the
 //   menu. The lookbehind also keeps "@" inside a word (e.g. emails) from
 //   triggering; the fallback drops only that boundary guard.
-const regex = canUseRegexLookbehind()
-  ? /(?:\[\[[^[\]]*|(?<!\S)@(?:[^[\]\s][^[\]]*)?)$/u
-  : /(?:\[\[[^[\]]*|@(?:[^[\]\s][^[\]]*)?)$/u
+const regex = new RegExp(
+  String.raw`(?:\[\[[^[\]]*|` +
+    (canUseRegexLookbehind() ? String.raw`(?<!\S)` : '') +
+    String.raw`@(?:[^[\]\s][^[\]]*)?)$`,
+  'u',
+)
 
 function queryFromRegexMatch(match: RegExpExecArray): string {
   return match[0].replace(/^(?:\[\[|@)/, '').trim()
