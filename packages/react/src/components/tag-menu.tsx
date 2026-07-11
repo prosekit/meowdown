@@ -17,7 +17,10 @@ import type { TagItem, TagSearchHandler } from './types.ts'
 
 // Match "#tag" with at least one character, so typing a heading ("# ") never
 // opens the menu. Do not match "abc#def".
-const regex = canUseRegexLookbehind() ? /(?<!\S)#[\da-z]+$/iu : /#[\da-z]+$/iu
+const regex = new RegExp(
+  canUseRegexLookbehind() ? String.raw`(?<!\S)#[\da-z]+$` : String.raw`#[\da-z]+$`,
+  'iu',
+)
 
 interface TagMenuProps {
   onTagSearch: TagSearchHandler

@@ -23,7 +23,10 @@ import styles from './autocomplete-menu.module.css'
 import type { SlashMenuItem, SlashMenuSearchHandler } from './types.ts'
 
 // Match inputs like "/", "/table", "/heading 1" etc. Do not match "/ heading".
-const regex = canUseRegexLookbehind() ? /(?<!\S)\/(\S.*)?$/u : /\/(\S.*)?$/u
+const regex = new RegExp(
+  canUseRegexLookbehind() ? String.raw`(?<!\S)\/(\S.*)?$` : String.raw`\/(\S.*)?$`,
+  'u',
+)
 
 const defaultOnFileSaveError: FileSaveErrorHandler = (error) => {
   console.error('[meowdown] failed to save attached file:', error)
