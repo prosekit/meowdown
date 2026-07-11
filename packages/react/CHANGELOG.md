@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.43.0](https://github.com/prosekit/meowdown/compare/react-v0.42.1...react-v0.43.0) (2026-07-11)
+
+
+### Features
+
+* extend wikilink queries with arrow keys ([#277](https://github.com/prosekit/meowdown/issues/277)) ([f0053af](https://github.com/prosekit/meowdown/commit/f0053afef8e4abd42ba6f0b040a9c1ee1fae68e2))
+
 ## [0.42.1](https://github.com/prosekit/meowdown/compare/react-v0.42.0...react-v0.42.1) (2026-07-09)
 
 

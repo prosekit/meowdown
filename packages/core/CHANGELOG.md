@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.43.0](https://github.com/prosekit/meowdown/compare/core-v0.42.1...core-v0.43.0) (2026-07-11)
+
+
+### Features
+
+* extend wikilink queries with arrow keys ([#277](https://github.com/prosekit/meowdown/issues/277)) ([f0053af](https://github.com/prosekit/meowdown/commit/f0053afef8e4abd42ba6f0b040a9c1ee1fae68e2))
+
+
+### Bug Fixes
+
+* **core:** keep list marker attrs in clipboard HTML ([#278](https://github.com/prosekit/meowdown/issues/278)) ([a358e2f](https://github.com/prosekit/meowdown/commit/a358e2f54c3ffdadd245bf028e07a943ec572696))
+
 ## [0.42.1](https://github.com/prosekit/meowdown/compare/core-v0.42.0...core-v0.42.1) (2026-07-09)
 
 
