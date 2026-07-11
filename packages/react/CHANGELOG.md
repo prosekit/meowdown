@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.44.1](https://github.com/prosekit/meowdown/compare/react-v0.44.0...react-v0.44.1) (2026-07-11)
+
+
+### Bug Fixes
+
+* **react:** construct autocomplete trigger regexes with `new RegExp` ([#284](https://github.com/prosekit/meowdown/issues/284)) ([2fcdfad](https://github.com/prosekit/meowdown/commit/2fcdfadadc280c8e545492cdf488294fc18d86e6))
+* **react:** preserve double-slash text in the slash menu ([#286](https://github.com/prosekit/meowdown/issues/286)) ([96c2e46](https://github.com/prosekit/meowdown/commit/96c2e461e1a6e12bc5d641a110d231c6da500928))
+
 ## [0.44.0](https://github.com/prosekit/meowdown/compare/react-v0.43.1...react-v0.44.0) (2026-07-11)
 
 

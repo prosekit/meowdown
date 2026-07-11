@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.44.1](https://github.com/prosekit/meowdown/compare/core-v0.44.0...core-v0.44.1) (2026-07-11)
+
+
+### Miscellaneous Chores
+
+* **core:** Synchronize meowdown versions
+
 ## [0.44.0](https://github.com/prosekit/meowdown/compare/core-v0.43.1...core-v0.44.0) (2026-07-11)
 
 
