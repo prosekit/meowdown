@@ -24,9 +24,9 @@ import type { WikilinkItem, WikilinkSearchHandler } from './types.ts'
 //   menu. The lookbehind also keeps "@" inside a word (e.g. emails) from
 //   triggering; the fallback drops only that boundary guard.
 const regex = new RegExp(
-  canUseRegexLookbehind()
-    ? String.raw`(?:\[\[[^[\]]*|(?<!\S)@(?:[^[\]\s][^[\]]*)?)$`
-    : String.raw`(?:\[\[[^[\]]*|@(?:[^[\]\s][^[\]]*)?)$`,
+  String.raw`(?:\[\[[^[\]]*|` +
+    (canUseRegexLookbehind() ? String.raw`(?<!\S)` : '') +
+    String.raw`@(?:[^[\]\s][^[\]]*)?)$`,
   'u',
 )
 
