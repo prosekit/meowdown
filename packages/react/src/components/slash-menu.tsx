@@ -22,9 +22,10 @@ import { formatNowTime, type TimeFormat } from '../utils/date-format.ts'
 import styles from './autocomplete-menu.module.css'
 import type { SlashMenuItem, SlashMenuSearchHandler } from './types.ts'
 
-// Match inputs like "/", "/table", "/heading 1" etc. Do not match "/ heading".
+// Match inputs like "/", "/table", "/heading 1" etc. Do not match "/ heading"
+// or "//", so double-slash text like "Name // Table" never runs a command.
 const regex = new RegExp(
-  (canUseRegexLookbehind() ? String.raw`(?<!\S)` : '') + String.raw`\/(\S.*)?$`,
+  (canUseRegexLookbehind() ? String.raw`(?<!\S)` : '') + String.raw`\/(?!\/)(\S.*)?$`,
   'u',
 )
 
