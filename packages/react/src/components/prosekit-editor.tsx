@@ -80,7 +80,9 @@ function isFlushableDOMObserver(value: unknown): value is FlushableDOMObserver {
 // turn after blur. Its observer is intentionally not part of EditorView's
 // public type, so keep this guarded compatibility boundary inside Meowdown.
 function flushPendingDOMChanges(editor: TypedEditor): void {
-  if (editor.view.isDestroyed) return
+  // `editor.view` throws while unmounted, and `editor.state` deliberately
+  // survives unmount — keep serialization working there.
+  if (!editor.mounted) return
   const observer: unknown = Reflect.get(editor.view, 'domObserver')
   if (!isFlushableDOMObserver(observer)) return
 

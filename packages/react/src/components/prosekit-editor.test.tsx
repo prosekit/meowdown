@@ -103,6 +103,18 @@ describe('ProseKitEditor', () => {
     expect(ref.current?.getMarkdown()).toBe('# 🧠 Business ideas\n')
   })
 
+  it('serializes from a captured handle after unmount', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<ProseKitEditor ref={ref} initialMarkdown="# Business ideas" />)
+    await expect.element(screen.getByText('Business ideas')).toBeInTheDocument()
+
+    const handle = ref.current
+    if (!handle) throw new Error('expected an editor handle')
+    await screen.unmount()
+
+    expect(handle.getMarkdown()).toBe('# Business ideas\n')
+  })
+
   it('round-trips a node selection through getState and setState', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(<ProseKitEditor ref={ref} initialMarkdown="Hello" />)

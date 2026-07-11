@@ -39,7 +39,10 @@ export interface EditorHandle {
    */
   insertMarkdown: (markdown: string) => void
 
-  /** Returns the current Markdown and selection. */
+  /**
+   * Returns the current Markdown and selection, with the same pending-input
+   * reconciliation (and possible synchronous `onDocChange`) as `getMarkdown`.
+   */
   getState: () => EditorStateSnapshot
 
   /**
