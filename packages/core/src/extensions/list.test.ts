@@ -56,6 +56,70 @@ describe('commands', () => {
     fixture.editor.commands.wrapInSquareTask()
     expect(docToMarkdown(fixture.doc)).toBe('- [x] done\n')
   })
+
+  it('cycleCheckableList cycles plain content through square and circle tasks', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('todo<a>')))
+
+    fixture.editor.commands.cycleCheckableList()
+    expect(docToMarkdown(fixture.doc)).toBe('- [ ] todo\n')
+    fixture.editor.commands.cycleCheckableList()
+    expect(docToMarkdown(fixture.doc)).toBe('+ [ ] todo\n')
+    fixture.editor.commands.cycleCheckableList()
+    expect(docToMarkdown(fixture.doc)).toBe('- [ ] todo\n')
+  })
+
+  it('cycleCheckableList preserves checked state and task-marker casing', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.list(
+          { kind: 'task', marker: '*', checked: true, taskMarker: 'X' },
+          n.paragraph('done<a>'),
+        ),
+      ),
+    )
+
+    fixture.editor.commands.cycleCheckableList()
+    expect(docToMarkdown(fixture.doc)).toBe('+ [X] done\n')
+    fixture.editor.commands.cycleCheckableList()
+    expect(docToMarkdown(fixture.doc)).toBe('- [X] done\n')
+  })
+
+  it('cycleCheckableList clears latent checked state from non-task lists', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet', checked: true }, n.paragraph('todo<a>'))))
+
+    fixture.editor.commands.cycleCheckableList()
+    expect(fixture.doc.child(0).attrs).toMatchObject({
+      kind: 'task',
+      marker: null,
+      checked: false,
+    })
+    expect(docToMarkdown(fixture.doc)).toBe('- [ ] todo\n')
+  })
+
+  it('cycleCheckableList changes only the closest nested list', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.list(
+          { kind: 'task', marker: '+', checked: false },
+          n.paragraph('outer'),
+          n.list({ kind: 'task', checked: false }, n.paragraph('inner<a>')),
+        ),
+      ),
+    )
+
+    fixture.editor.commands.cycleCheckableList()
+    expect(docToMarkdown(fixture.doc)).toBe('+ [ ] outer\n  + [ ] inner\n')
+    fixture.editor.commands.cycleCheckableList()
+    expect(docToMarkdown(fixture.doc)).toBe('+ [ ] outer\n  - [ ] inner\n')
+  })
 })
 
 describe('keymap', () => {
