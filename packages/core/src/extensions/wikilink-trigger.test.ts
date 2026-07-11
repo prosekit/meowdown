@@ -1,3 +1,4 @@
+import { AutocompleteRule, defineAutocomplete } from '@prosekit/extensions/autocomplete'
 import { describe, expect, it } from 'vitest'
 import { userEvent } from 'vitest/browser'
 
@@ -7,12 +8,29 @@ import { defineWikilinkTrigger } from './wikilink-trigger.ts'
 
 // In `userEvent.keyboard` a literal `[` must be escaped by doubling it.
 const pressBracket = () => userEvent.keyboard('[[')
+const pressWikilinkOpen = () => userEvent.keyboard('[[[[')
 const pressModShiftK = () => userEvent.keyboard('{ControlOrMeta>}{Shift>}k{/Shift}{/ControlOrMeta}')
 
 function setup(): Fixture {
   const fixture = setupFixture()
   fixture.editor.use(defineWikilinkTrigger())
   return fixture
+}
+
+function trackWikilinkMatches(fixture: Fixture): string[] {
+  const matches: string[] = []
+  fixture.editor.use(
+    defineAutocomplete(
+      new AutocompleteRule({
+        regex: /\[\[[^[\]]*$/u,
+        followCursor: true,
+        onEnter: ({ match }) => {
+          matches.push(match[0])
+        },
+      }),
+    ),
+  )
+  return matches
 }
 
 describe('defineWikilinkTrigger', () => {
@@ -87,5 +105,37 @@ describe('defineWikilinkTrigger', () => {
     fixture.view.focus()
     await pressModShiftK()
     expect(fixture.selectionSnapshot).toBe('Cat [[naps┃')
+  })
+
+  it('keeps autocomplete matched while ArrowRight includes existing text', async () => {
+    using fixture = setup()
+    const matches = trackWikilinkMatches(fixture)
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>Cat')))
+    fixture.view.focus()
+
+    await pressWikilinkOpen()
+    expect(fixture.selectionSnapshot).toBe('[[┃Cat')
+
+    await userEvent.keyboard('{ArrowRight}')
+    expect(fixture.selectionSnapshot).toBe('[[C┃at')
+    expect(matches.at(-1)).toBe('[[C')
+
+    await userEvent.keyboard('{ArrowLeft}')
+    expect(fixture.selectionSnapshot).toBe('[[┃Cat')
+    expect(matches.at(-1)).toBe('[[')
+  })
+
+  it('does not activate autocomplete while ArrowRight crosses a loaded incomplete wikilink', async () => {
+    using fixture = setup()
+    const matches = trackWikilinkMatches(fixture)
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('[[<a>Cat')))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{ArrowRight}')
+
+    expect(fixture.selectionSnapshot).toBe('[[C┃at')
+    expect(matches).toEqual([])
   })
 })
