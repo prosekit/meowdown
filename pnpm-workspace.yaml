@@ -27,11 +27,11 @@ allowBuilds:
 patchedDependencies:
   prosemirror-view: patches/prosemirror-view.patch
 
-# Enable "blockExoticSubdeps" and "overrides" to install packages from pkg.pr.new
-# blockExoticSubdeps: false
-# overrides:
-#   '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@3a887f44acdb0814111680d013245557ead5ba57
-#   '@prosekit/react': https://pkg.pr.new/@prosekit/react@3a887f44acdb0814111680d013245557ead5ba57
-#   '@prosekit/core': https://pkg.pr.new/@prosekit/core@3a887f44acdb0814111680d013245557ead5ba57
-#   '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@3a887f44acdb0814111680d013245557ead5ba57
-#   '@prosekit/web': https://pkg.pr.new/@prosekit/web@3a887f44acdb0814111680d013245557ead5ba57
+# "blockExoticSubdeps" and "overrides" install packages from pkg.pr.new
+blockExoticSubdeps: false
+overrides:
+  '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@7b1d474b13916ed1a34d54a2c9339a95d0c9be6f
+  '@prosekit/react': https://pkg.pr.new/@prosekit/react@7b1d474b13916ed1a34d54a2c9339a95d0c9be6f
+  '@prosekit/core': https://pkg.pr.new/@prosekit/core@7b1d474b13916ed1a34d54a2c9339a95d0c9be6f
+  '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@7b1d474b13916ed1a34d54a2c9339a95d0c9be6f
+  '@prosekit/web': https://pkg.pr.new/@prosekit/web@7b1d474b13916ed1a34d54a2c9339a95d0c9be6f
