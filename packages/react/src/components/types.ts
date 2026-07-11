@@ -18,8 +18,10 @@ export type EditorStateSnapshot = [markdown: string, selection: SelectionJSON]
 
 export interface EditorHandle {
   /**
-   * Serializes the current document to Markdown. Can be expensive on large
-   * documents; call it on demand (e.g. throttled) instead of on every change.
+   * Reconciles pending native input, then serializes the current document to
+   * Markdown. If reconciliation changes the document, `onDocChange` runs
+   * before this method returns. Can be expensive on large documents; call it
+   * on demand (e.g. throttled) instead of on every change.
    */
   getMarkdown: () => string
 
@@ -37,7 +39,10 @@ export interface EditorHandle {
    */
   insertMarkdown: (markdown: string) => void
 
-  /** Returns the current Markdown and selection. */
+  /**
+   * Returns the current Markdown and selection, with the same pending-input
+   * reconciliation (and possible synchronous `onDocChange`) as `getMarkdown`.
+   */
   getState: () => EditorStateSnapshot
 
   /**

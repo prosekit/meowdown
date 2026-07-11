@@ -10,6 +10,19 @@ import type { EditorHandle } from './types.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 
+function composeAndBlurTitle(title: string): void {
+  const root = pmRoot.element()
+  const heading = root.querySelector('h1')
+  if (!heading) throw new Error('expected a heading')
+
+  root.focus()
+  root.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }))
+  heading.textContent = title
+  root.dispatchEvent(new CompositionEvent('compositionupdate', { bubbles: true, data: title }))
+  root.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: title }))
+  root.blur()
+}
+
 describe('ProseKitEditor', () => {
   it('mounts a ProseMirror editor with the default content', async () => {
     const screen = await render(<ProseKitEditor initialMarkdown="Hello World!" />)
@@ -60,6 +73,46 @@ describe('ProseKitEditor', () => {
     const markdown = ref.current?.getMarkdown() ?? ''
     expect(markdown).toContain('abc')
     expect(markdown.startsWith('# ')).toBe(true)
+  })
+
+  it('serializes a leading emoji composition during the blur turn', async () => {
+    const ref = createRef<EditorHandle>()
+    let callbackMarkdown = ''
+    const onDocChange = vi.fn(() => {
+      callbackMarkdown = ref.current?.getMarkdown() ?? ''
+    })
+    const screen = await render(
+      <ProseKitEditor ref={ref} initialMarkdown="# Business ideas" onDocChange={onDocChange} />,
+    )
+    await expect.element(screen.getByText('Business ideas')).toBeInTheDocument()
+
+    composeAndBlurTitle('🧠 Business ideas')
+
+    expect(ref.current?.getMarkdown()).toBe('# 🧠 Business ideas\n')
+    expect(onDocChange).toHaveBeenCalledOnce()
+    expect(callbackMarkdown).toBe('# 🧠 Business ideas\n')
+  })
+
+  it('serializes composition whitespace after a leading emoji during the blur turn', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<ProseKitEditor ref={ref} initialMarkdown="# 🧠Business ideas" />)
+    await expect.element(screen.getByText('🧠Business ideas')).toBeInTheDocument()
+
+    composeAndBlurTitle('🧠 Business ideas')
+
+    expect(ref.current?.getMarkdown()).toBe('# 🧠 Business ideas\n')
+  })
+
+  it('serializes from a captured handle after unmount', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<ProseKitEditor ref={ref} initialMarkdown="# Business ideas" />)
+    await expect.element(screen.getByText('Business ideas')).toBeInTheDocument()
+
+    const handle = ref.current
+    if (!handle) throw new Error('expected an editor handle')
+    await screen.unmount()
+
+    expect(handle.getMarkdown()).toBe('# Business ideas\n')
   })
 
   it('round-trips a node selection through getState and setState', async () => {

@@ -62,6 +62,37 @@ import type {
 } from './types.ts'
 import { WikilinkMenu } from './wikilink-menu.tsx'
 
+interface FlushableDOMObserver {
+  forceFlush?(): void
+  flush(): void
+}
+
+function isFlushableDOMObserver(value: unknown): value is FlushableDOMObserver {
+  if (typeof value !== 'object' || value === null) return false
+  const forceFlush: unknown = Reflect.get(value, 'forceFlush')
+  return (
+    typeof Reflect.get(value, 'flush') === 'function' &&
+    (forceFlush === undefined || typeof forceFlush === 'function')
+  )
+}
+
+// ProseMirror can leave native contenteditable mutations queued for a timer
+// turn after blur. Its observer is intentionally not part of EditorView's
+// public type, so keep this guarded compatibility boundary inside Meowdown.
+function flushPendingDOMChanges(editor: TypedEditor): void {
+  // `editor.view` throws while unmounted, and `editor.state` deliberately
+  // survives unmount — keep serialization working there.
+  if (!editor.mounted) return
+  const observer: unknown = Reflect.get(editor.view, 'domObserver')
+  if (!isFlushableDOMObserver(observer)) return
+
+  // `flushSoon()` blocks a plain `flush()` until its timer fires, whereas
+  // `stop()` queues blur records behind a separate timer. Both calls are
+  // needed to synchronously drain either path.
+  observer.forceFlush?.()
+  observer.flush()
+}
+
 // Selections coming through `setState` are hints: restore them exactly when
 // possible, otherwise clamp to the nearest valid text selection.
 function resolveSelection(doc: EditorNode, selection: SelectionHint): Selection {
@@ -252,6 +283,7 @@ export function ProseKitEditor({
 
   useImperativeHandle(ref, () => {
     function getMarkdown(): string {
+      flushPendingDOMChanges(editor)
       return docToMarkdown(editor.state.doc, { frontmatter })
     }
     function getSelection(): SelectionJSON {
