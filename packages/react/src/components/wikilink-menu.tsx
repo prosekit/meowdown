@@ -75,6 +75,7 @@ export function WikilinkMenu({ onWikilinkSearch }: WikilinkMenuProps) {
     <AutocompleteRoot
       regex={regex}
       filter={returnsTrue}
+      followCursor
       queryBuilder={queryFromRegexMatch}
       onOpenChange={(event) => setOpen(event.detail)}
       onQueryChange={(event) => setQuery(event.detail)}

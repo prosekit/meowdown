@@ -234,6 +234,94 @@ describe('WikilinkMenu', () => {
     expect(ref.current?.getMarkdown()).not.toContain('[[re')
   })
 
+  it('extends the query over existing text with ArrowRight', async () => {
+    const ref = createRef<EditorHandle>()
+    const onWikilinkSearch = vi.fn(searchNotes)
+    await render(
+      <ProseKitEditor
+        ref={ref}
+        initialMarkdown="See Reading list today"
+        onWikilinkSearch={onWikilinkSearch}
+      />,
+    )
+    ref.current?.setSelection({ type: 'text', anchor: 5, head: 5 })
+    ref.current?.focus()
+
+    await userEvent.keyboard(TWO_BRACKETS)
+    await userEvent.keyboard('{ArrowRight}'.repeat('Reading list'.length))
+
+    await vi.waitFor(() => {
+      expect(onWikilinkSearch).toHaveBeenLastCalledWith('Reading list')
+    })
+    await expect.element(menu.getByText('Reading list')).toBeVisible()
+
+    await menu.getByText('Reading list').click()
+    expect(ref.current?.getMarkdown()).toBe('See [[Reading list]] today\n')
+  })
+
+  it('can create a wikilink from existing text included with ArrowRight', async () => {
+    const ref = createRef<EditorHandle>()
+    const onSelect = vi.fn()
+    const onWikilinkSearch = vi.fn((query: string): WikilinkItem[] => {
+      return query ? [{ target: query, label: `Create "${query}"`, onSelect }] : []
+    })
+    await render(
+      <ProseKitEditor
+        ref={ref}
+        initialMarkdown="See New project later"
+        onWikilinkSearch={onWikilinkSearch}
+      />,
+    )
+    ref.current?.setSelection({ type: 'text', anchor: 5, head: 5 })
+    ref.current?.focus()
+
+    await userEvent.keyboard(TWO_BRACKETS)
+    await userEvent.keyboard('{ArrowRight}'.repeat('New project'.length))
+
+    const createItem = menu.getByText('Create "New project"')
+    await expect.element(createItem).toBeVisible()
+    await createItem.click()
+
+    expect(ref.current?.getMarkdown()).toBe('See [[New project]] later\n')
+    expect(onSelect).toHaveBeenCalledOnce()
+  })
+
+  it('does not reopen a dismissed query when ArrowRight crosses existing text', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(
+      <ProseKitEditor ref={ref} initialMarkdown="See Cat" onWikilinkSearch={searchNotes} />,
+    )
+    ref.current?.setSelection({ type: 'text', anchor: 5, head: 5 })
+    ref.current?.focus()
+
+    await userEvent.keyboard(TWO_BRACKETS)
+    await expect.element(menu).toBeVisible()
+    await userEvent.keyboard('{Escape}')
+    await userEvent.keyboard('{ArrowRight}')
+
+    await expect.element(menu).not.toBeVisible()
+    expect(ref.current?.getSelection()).toMatchObject({ anchor: 8, head: 8 })
+  })
+
+  it('extends instead of closing when the cursor moves programmatically', async () => {
+    const ref = createRef<EditorHandle>()
+    const onWikilinkSearch = vi.fn(searchNotes)
+    await render(
+      <ProseKitEditor ref={ref} initialMarkdown="See Cat" onWikilinkSearch={onWikilinkSearch} />,
+    )
+    ref.current?.setSelection({ type: 'text', anchor: 5, head: 5 })
+    ref.current?.focus()
+
+    await userEvent.keyboard(TWO_BRACKETS)
+    await expect.element(menu).toBeVisible()
+    ref.current?.setSelection({ type: 'text', anchor: 10, head: 10 })
+
+    await vi.waitFor(() => {
+      expect(onWikilinkSearch).toHaveBeenLastCalledWith('Cat')
+    })
+    await expect.element(menu).toBeVisible()
+  })
+
   it('renders no wikilink menu when onWikilinkSearch is not given', async () => {
     await render(<ProseKitEditor />)
     await pmRoot.click()
