@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.43.1](https://github.com/prosekit/meowdown/compare/react-v0.43.0...react-v0.43.1) (2026-07-11)
+
+
+### Bug Fixes
+
+* **react:** reconcile pending input before serialization ([#280](https://github.com/prosekit/meowdown/issues/280)) ([63d4f83](https://github.com/prosekit/meowdown/commit/63d4f834c9e4cb85e7361b0dfacfbbd32236d86b))
+
 ## [0.43.0](https://github.com/prosekit/meowdown/compare/react-v0.42.1...react-v0.43.0) (2026-07-11)
 
 
