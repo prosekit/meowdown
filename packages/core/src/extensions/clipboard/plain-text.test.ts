@@ -90,6 +90,8 @@ describe('plain text copy in hide mode', () => {
     `)
   })
 
+  // REVIEW: let's add more tests for example bullet list, ordered list, tasks list with differernt shapes of checkboxes, nested list,
+
   it('strips link syntax down to the label', () => {
     expect(copyText('hide', 'see [docs](http://x.test)')).toMatchInlineSnapshot(`"see docs"`)
   })
