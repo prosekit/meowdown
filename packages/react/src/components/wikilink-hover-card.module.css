@@ -3,14 +3,16 @@
   max-width: calc(100vw - 1rem);
   max-height: calc(100vh - 1rem);
   pointer-events: none;
+  transition-property: top, left, right, bottom, transform;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  transition-duration: 350ms;
 }
 
 .Popup {
+  display: flex;
   box-sizing: border-box;
-  width: min(21.875rem, calc(100vw - 1rem));
-  max-height: min(12.5rem, calc(100vh - 1rem));
-  padding: 0.5rem 0.75rem;
-  overflow: hidden;
+  width: min(20rem, calc(100vw - 1rem));
+  max-height: min(12rem, calc(100vh - 1rem));
   outline: none;
   pointer-events: none;
   border: 1px solid var(--meowdown-border);
@@ -19,4 +21,35 @@
   box-shadow:
     0 10px 15px -3px rgb(0 0 0 / 0.1),
     0 4px 6px -4px rgb(0 0 0 / 0.1);
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+}
+
+.Popup[data-closed] {
+  transition:
+    opacity 100ms ease,
+    transform 100ms ease;
+}
+
+.Popup[data-starting-style],
+.Popup[data-ending-style] {
+  opacity: 0;
+  transform: scale(0.96);
+}
+
+.Viewport {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: clip;
+  border-radius: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .Positioner,
+  .Popup {
+    transition: none;
+  }
 }

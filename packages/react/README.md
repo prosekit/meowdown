@@ -59,14 +59,14 @@ Slash menu host items can include `keywords` to match hidden terms without chang
 ### Wiki-link hover cards
 
 Mount `WikilinkHoverCard` inside `MeowdownEditor` and render host-owned preview
-content from the wiki-link target. The component handles a 300ms dwell,
-transaction-aware dismissal, direct element anchoring, viewport collisions, and
-focus neutrality. Return `null` for a target with no preview and no card
-renders; when the lookup is asynchronous, render fallback content instead.
+content from the hovered wiki link's `target`. Returning `null` renders no
+card.
 
 ```tsx
 <MeowdownEditor initialMarkdown="See [[Project plan]]">
-  <WikilinkHoverCard>{(target) => <LocalNotePreview target={target} />}</WikilinkHoverCard>
+  <WikilinkHoverCard>
+    {(hit) => <LocalNotePreview key={hit.target} target={hit.target} />}
+  </WikilinkHoverCard>
 </MeowdownEditor>
 ```
 
@@ -82,8 +82,6 @@ resolver that accepts only trusted local image sources.
 ## Styling
 
 Import both stylesheets: `@meowdown/core/style.css` (the editor theme and variables) and `@meowdown/react/style.css` (the component layout). The core theme is documented in [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core).
-
-Math (`$E=mc^2$` inline, `$$` blocks, and ` ```math ` fences) is compiled by KaTeX to native MathML.
 
 ## License
 

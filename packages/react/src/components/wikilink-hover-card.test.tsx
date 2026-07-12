@@ -14,20 +14,20 @@ import { WikilinkHoverCard } from './wikilink-hover-card.tsx'
 const pmRoot = page.locate('.ProseMirror')
 const card = page.getByTestId('wikilink-hover-card')
 
-function PreviewCard() {
+function HostPreviewCard() {
   return (
     <WikilinkHoverCard>
-      {(target) => <div data-testid="hover-body">Preview: {target}</div>}
+      {(hit) => <div data-testid="hover-body">Preview: {hit.target}</div>}
     </WikilinkHoverCard>
   )
 }
 
 describe('WikilinkHoverCard', () => {
-  it('opens after a 300ms dwell and closes immediately on leave', async () => {
+  it('opens after a 300ms dwell and closes on leave', async () => {
     await unhover()
     await render(
       <MeowdownEditor initialMarkdown="see [[Note]] here" blockHandle={false}>
-        <PreviewCard />
+        <HostPreviewCard />
       </MeowdownEditor>,
     )
 
@@ -46,7 +46,7 @@ describe('WikilinkHoverCard', () => {
         initialMarkdown="[[Alpha|A wide alias]][[Beta|Another wide alias]]"
         blockHandle={false}
       >
-        <PreviewCard />
+        <HostPreviewCard />
       </MeowdownEditor>,
     )
     const links = pmRoot.getByTestId('wikilink')
@@ -59,12 +59,28 @@ describe('WikilinkHoverCard', () => {
     await expect.element(card, { timeout: 1000 }).toHaveTextContent('Preview: Beta')
   })
 
+  it('moves the open card to the next hovered link', async () => {
+    await unhover()
+    await render(
+      <MeowdownEditor initialMarkdown="[[Alpha]] and [[Beta]]" blockHandle={false}>
+        <HostPreviewCard />
+      </MeowdownEditor>,
+    )
+    const links = pmRoot.getByTestId('wikilink')
+
+    await hover(links.nth(0))
+    await expect.element(card, { timeout: 1000 }).toHaveTextContent('Preview: Alpha')
+
+    await hover(links.nth(1))
+    await expect.element(card, { timeout: 1000 }).toHaveTextContent('Preview: Beta')
+  })
+
   it('renders no card when the render prop returns null for the target', async () => {
     await unhover()
     await render(
       <MeowdownEditor initialMarkdown="[[Missing]] then [[Known]]" blockHandle={false}>
         <WikilinkHoverCard>
-          {(target) => (target === 'Known' ? <div>Preview: {target}</div> : null)}
+          {(hit) => (hit.target === 'Known' ? <div>Preview: {hit.target}</div> : null)}
         </WikilinkHoverCard>
       </MeowdownEditor>,
     )
@@ -78,6 +94,26 @@ describe('WikilinkHoverCard', () => {
     await expect.element(card, { timeout: 1000 }).toHaveTextContent('Preview: Known')
   })
 
+  it('removes the card when the hovered link is deleted', async () => {
+    await unhover()
+    const handleRef = createRef<EditorHandle>()
+    await render(
+      <MeowdownEditor
+        handleRef={handleRef}
+        initialMarkdown="before [[Note]] after"
+        blockHandle={false}
+      >
+        <HostPreviewCard />
+      </MeowdownEditor>,
+    )
+
+    await hover(pmRoot.getByTestId('wikilink'))
+    await expect.element(card, { timeout: 1000 }).toBeInTheDocument()
+
+    handleRef.current?.setMarkdown('before after')
+    await expect.element(card).not.toBeInTheDocument()
+  })
+
   it('preserves editor focus and selection and makes the popup inert', async () => {
     await unhover()
     const handleRef = createRef<EditorHandle>()
@@ -87,7 +123,7 @@ describe('WikilinkHoverCard', () => {
         initialMarkdown="before [[Note]] after"
         blockHandle={false}
       >
-        <PreviewCard />
+        <HostPreviewCard />
       </MeowdownEditor>,
     )
     handleRef.current?.setSelection({ type: 'text', anchor: 2, head: 2 })
@@ -108,7 +144,7 @@ describe('WikilinkHoverCard', () => {
     await render(
       <div style={{ position: 'fixed', right: 0, bottom: 0, width: 180 }}>
         <MeowdownEditor initialMarkdown="[[Edge]]" blockHandle={false}>
-          <PreviewCard />
+          <HostPreviewCard />
         </MeowdownEditor>
       </div>,
     )
