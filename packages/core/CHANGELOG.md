@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.45.0](https://github.com/prosekit/meowdown/compare/core-v0.44.2...core-v0.45.0) (2026-07-12)
+
+
+### Features
+
+* add wikilink hover cards ([#291](https://github.com/prosekit/meowdown/issues/291)) ([9a0f2a8](https://github.com/prosekit/meowdown/commit/9a0f2a87945879a6198999b5428618067b6e2880))
+
+
+### Bug Fixes
+
+* **core:** strip formatting from selected wikilink queries ([#287](https://github.com/prosekit/meowdown/issues/287)) ([7290a98](https://github.com/prosekit/meowdown/commit/7290a983e19ec78b43431cdd3182647f2ff591b4))
+
 ## [0.44.2](https://github.com/prosekit/meowdown/compare/core-v0.44.1...core-v0.44.2) (2026-07-12)
 
 
