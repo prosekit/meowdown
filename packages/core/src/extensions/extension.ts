@@ -33,6 +33,7 @@ import { defineMath } from './math.ts'
 import { defineMoveBlock } from './move-block.ts'
 import { defineMeowdownParagraph } from './paragraph.ts'
 import { definePendingReplacement } from './pending-replacement.ts'
+import { defineScrollToSelection } from './scroll-to-selection.ts'
 import { defineSelectDocBoundary } from './select-doc-boundary.ts'
 import { defineTable } from './table.ts'
 import { defineVirtualCaret } from './virtual-caret.ts'
@@ -68,6 +69,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineMath(),
     defineMarkMode(options.markMode ?? 'focus'),
     defineVirtualCaret(),
+    defineScrollToSelection(),
     defineHiddenRunCaret(),
     defineAtomMarkNavigation({
       marks: ATOM_SOURCE_MARK_NAMES.map((name) => ({ name, modes: ['hide', 'focus', 'show'] })),
