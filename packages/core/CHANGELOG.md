@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.47.0](https://github.com/prosekit/meowdown/compare/core-v0.46.1...core-v0.47.0) (2026-07-12)
+
+
+### Features
+
+* improve copy-paste behavior ([#301](https://github.com/prosekit/meowdown/issues/301)) ([f36870e](https://github.com/prosekit/meowdown/commit/f36870e73387c3ebf4ea96840e03ae9943cbf93d))
+
 ## [0.46.1](https://github.com/prosekit/meowdown/compare/core-v0.46.0...core-v0.46.1) (2026-07-12)
 
 
