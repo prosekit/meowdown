@@ -60,12 +60,18 @@ Slash menu host items can include `keywords` to match hidden terms without chang
 
 Mount `WikilinkHoverCard` inside `MeowdownEditor` and render host-owned preview
 content from the hovered wiki link's `target`. Returning `null` renders no
-card.
+card. The render function may also return a promise: the card stays closed
+until it resolves, resolving to `null` (or rejecting) renders no card, and a
+result that lands after the pointer moved on is discarded, so a host can look
+up local content without ever flashing an empty card.
 
 ```tsx
 <MeowdownEditor initialMarkdown="See [[Project plan]]">
   <WikilinkHoverCard>
-    {(hit) => <LocalNotePreview key={hit.target} target={hit.target} />}
+    {async (hit) => {
+      const note = await readLocalNote(hit.target)
+      return note == null ? null : <LocalNotePreview note={note} />
+    }}
   </WikilinkHoverCard>
 </MeowdownEditor>
 ```

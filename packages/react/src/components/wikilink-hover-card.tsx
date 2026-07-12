@@ -17,9 +17,13 @@ const CLOSE_DELAY = 200
 export interface WikilinkHoverCardProps {
   /**
    * Render the card body from the hovered wiki link. Returning `null` renders
-   * no card.
+   * no card. A returned promise keeps the card closed until it resolves;
+   * resolving to `null` or rejecting renders no card, and a result that lands
+   * after the pointer moved on is discarded. The function runs once per
+   * hovered link rather than on every render, and a new function identity
+   * re-runs it for the current link.
    */
-  readonly children: (hit: WikilinkHoverHit) => ReactNode
+  readonly children: (hit: WikilinkHoverHit) => ReactNode | Promise<ReactNode>
   /** Optional class applied to the popup, after the default card surface. */
   readonly className?: string
 }
@@ -32,6 +36,7 @@ export function WikilinkHoverCard({ children, className }: WikilinkHoverCardProp
   const lastRectRef = useRef<DOMRect>(null)
   const [displayed, setDisplayed] = useState<WikilinkHoverHit>()
   const [open, setOpen] = useState(false)
+  const [body, setBody] = useState<ReactNode>(null)
 
   const [hoverExtension] = useState(() => {
     return defineWikilinkHoverHandler((nextHit) => setHit(nextHit))
@@ -50,11 +55,41 @@ export function WikilinkHoverCard({ children, className }: WikilinkHoverCardProp
     return { getBoundingClientRect: getRect }
   }, [getRect])
 
+  // Resolve the body for the current request. A superseded request's result
+  // is discarded, and the previous body stays until the new one settles, so
+  // an open card does not flash empty while moving between links.
+  useEffect(() => {
+    let stale = false
+    const resolveBody = async () => {
+      try {
+        const resolved = await (displayed ? children(displayed) : null)
+        if (!stale) setBody(resolved)
+      } catch (error) {
+        if (stale) return
+        console.error('[meowdown] wikilink hover card body rejected:', error)
+        setBody(null)
+      }
+    }
+    void resolveBody()
+    return () => {
+      stale = true
+    }
+  }, [children, displayed])
+
   const hasDisplayed = !!displayed
+  const hasBody = body != null
 
   useEffect(() => {
     if (!hit) {
-      const timer = setTimeout(() => setOpen(false), CLOSE_DELAY)
+      // Without a visible body there is no close animation to preserve; the
+      // request drops right away and the next hover dwells afresh.
+      const timer = setTimeout(
+        () => {
+          setOpen(false)
+          if (!hasBody) setDisplayed(undefined)
+        },
+        hasBody ? CLOSE_DELAY : 0,
+      )
       return () => clearTimeout(timer)
     }
 
@@ -65,9 +100,7 @@ export function WikilinkHoverCard({ children, className }: WikilinkHoverCardProp
       setOpen(true)
     }, openDelay)
     return () => clearTimeout(timer)
-  }, [hit, hasDisplayed])
-
-  const body = displayed ? children(displayed) : null
+  }, [hit, hasDisplayed, hasBody])
 
   return (
     <PreviewCard.Root

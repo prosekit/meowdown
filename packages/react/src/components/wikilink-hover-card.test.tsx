@@ -1,7 +1,7 @@
 import '../testing/index.ts'
 
-import { createRef } from 'react'
-import { describe, expect, it } from 'vitest'
+import { createRef, type ReactNode } from 'react'
+import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 
@@ -92,6 +92,118 @@ describe('WikilinkHoverCard', () => {
 
     await hover(links.nth(1))
     await expect.element(card, { timeout: 1000 }).toHaveTextContent('Preview: Known')
+  })
+
+  it('opens with the resolved body of an async render function', async () => {
+    await unhover()
+    await render(
+      <MeowdownEditor initialMarkdown="see [[Note]] here" blockHandle={false}>
+        <WikilinkHoverCard>
+          {async (hit) => {
+            await new Promise((resolve) => setTimeout(resolve, 50))
+            return <div>Async preview: {hit.target}</div>
+          }}
+        </WikilinkHoverCard>
+      </MeowdownEditor>,
+    )
+
+    await hover(pmRoot.getByTestId('wikilink'))
+    await expect.element(card).not.toBeInTheDocument()
+    await expect.element(card, { timeout: 2000 }).toHaveTextContent('Async preview: Note')
+  })
+
+  it('renders no card when the promise resolves to null', async () => {
+    await unhover()
+    await render(
+      <MeowdownEditor initialMarkdown="see [[Missing]] here" blockHandle={false}>
+        <WikilinkHoverCard>
+          {async () => {
+            await new Promise((resolve) => setTimeout(resolve, 50))
+            return null
+          }}
+        </WikilinkHoverCard>
+      </MeowdownEditor>,
+    )
+
+    await hover(pmRoot.getByTestId('wikilink'))
+    await new Promise((resolve) => setTimeout(resolve, 600))
+    await expect.element(card).not.toBeInTheDocument()
+  })
+
+  it('renders no card when the render promise rejects', async () => {
+    await unhover()
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    await render(
+      <MeowdownEditor initialMarkdown="see [[Broken]] here" blockHandle={false}>
+        <WikilinkHoverCard>
+          {async () => {
+            await new Promise((resolve) => setTimeout(resolve, 50))
+            throw new Error('load failed')
+          }}
+        </WikilinkHoverCard>
+      </MeowdownEditor>,
+    )
+
+    await hover(pmRoot.getByTestId('wikilink'))
+    await new Promise((resolve) => setTimeout(resolve, 600))
+    await expect.element(card).not.toBeInTheDocument()
+    expect(consoleError).toHaveBeenCalledWith(
+      '[meowdown] wikilink hover card body rejected:',
+      expect.any(Error),
+    )
+    consoleError.mockRestore()
+  })
+
+  it('discards a result that resolves after the pointer left', async () => {
+    await unhover()
+    let resolveBody: ((node: ReactNode) => void) | undefined
+    await render(
+      <MeowdownEditor initialMarkdown="see [[Note]] here" blockHandle={false}>
+        <WikilinkHoverCard>
+          {() =>
+            new Promise<ReactNode>((resolve) => {
+              resolveBody = resolve
+            })
+          }
+        </WikilinkHoverCard>
+      </MeowdownEditor>,
+    )
+
+    await hover(pmRoot.getByTestId('wikilink'))
+    await vi.waitFor(() => expect(resolveBody).toBeDefined())
+    await unhover()
+    resolveBody?.(<div>Late preview</div>)
+    await new Promise((resolve) => setTimeout(resolve, 200))
+    await expect.element(card).not.toBeInTheDocument()
+  })
+
+  it('shows only the newest target when an older promise resolves late', async () => {
+    await unhover()
+    const resolvers = new Map<string, (node: ReactNode) => void>()
+    await render(
+      <MeowdownEditor initialMarkdown="[[Alpha]] and [[Beta]]" blockHandle={false}>
+        <WikilinkHoverCard>
+          {(hit) =>
+            new Promise<ReactNode>((resolve) => {
+              resolvers.set(hit.target, resolve)
+            })
+          }
+        </WikilinkHoverCard>
+      </MeowdownEditor>,
+    )
+    const links = pmRoot.getByTestId('wikilink')
+
+    await hover(links.nth(0))
+    await vi.waitFor(() => expect(resolvers.has('Alpha')).toBe(true))
+    await hover(links.nth(1))
+    await vi.waitFor(() => expect(resolvers.has('Beta')).toBe(true))
+
+    resolvers.get('Alpha')?.(<div>Preview: Alpha</div>)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    await expect.element(card).not.toBeInTheDocument()
+
+    resolvers.get('Beta')?.(<div>Preview: Beta</div>)
+    await expect.element(card, { timeout: 1000 }).toHaveTextContent('Preview: Beta')
   })
 
   it('removes the card when the hovered link is deleted', async () => {
