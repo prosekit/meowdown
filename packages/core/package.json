@@ -1,7 +1,7 @@
 {
   "name": "@meowdown/core",
   "type": "module",
-  "version": "0.46.0",
+  "version": "0.46.1",
   "license": "MIT",
   "repository": {
     "type": "git",
