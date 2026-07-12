@@ -1,3 +1,4 @@
+import { isHTMLElement } from '@ocavue/utils'
 import { Fragment } from '@prosekit/pm/model'
 import type { Mark, ProseMirrorNode, TagParseRule } from '@prosekit/pm/model'
 
@@ -8,7 +9,6 @@ import type {
   MdWikilinkAttrs,
 } from '../inline-marks.ts'
 import type { MarkName } from '../mark-names.ts'
-import { isHTMLElement } from '@ocavue/utils'
 
 /** Syntax characters, dropped from the semantic clipboard HTML. */
 const SYNTAX_MARK_NAMES: ReadonlySet<string> = new Set<MarkName>([
