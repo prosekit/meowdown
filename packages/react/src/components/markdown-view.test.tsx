@@ -74,6 +74,50 @@ describe('MarkdownView', () => {
       .toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
   })
 
+  it('omits recognized embeds before resolving images when interactive is false', async () => {
+    const resolveImageUrl = vi.fn((src: string) => src)
+    await renderView('![](https://x.com/jack/status/20)\n\n![](https://youtu.be/dQw4w9WgXcQ)', {
+      interactive: false,
+      resolveImageUrl,
+    })
+
+    expect(view.element().querySelector('iframe')).toBeNull()
+    expect(resolveImageUrl).not.toHaveBeenCalled()
+  })
+
+  it('renders a passive tree when interactive is false', async () => {
+    const onWikilinkClick = vi.fn()
+    const onLinkClick = vi.fn()
+    const onImageClick = vi.fn()
+    const onTaskClick = vi.fn()
+    await renderView(
+      '[[Note]] [Docs](https://example.com) ![cat](https://example.com/cat.png)\n\n![](https://x.com/jack/status/20)\n\n+ [ ] task',
+      {
+        interactive: false,
+        onWikilinkClick,
+        onLinkClick,
+        onImageClick,
+        onTaskClick,
+      },
+    )
+
+    const root = view.element()
+    expect(root.querySelector('a')).toBeNull()
+    expect(root.querySelector('iframe')).toBeNull()
+    expect(
+      root.querySelectorAll(
+        'button, input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])',
+      ),
+    ).toHaveLength(0)
+    await wikilink.click()
+    await view.getByText('Docs').click()
+    await view.getByAltText('cat').click()
+    expect(onWikilinkClick).not.toHaveBeenCalled()
+    expect(onLinkClick).not.toHaveBeenCalled()
+    expect(onImageClick).not.toHaveBeenCalled()
+    expect(onTaskClick).not.toHaveBeenCalled()
+  })
+
   it('highlights a code block with syntax tokens', async () => {
     await renderView('```rust\nfn main() {}\n```')
     await expect

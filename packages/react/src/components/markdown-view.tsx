@@ -84,9 +84,16 @@ export interface MarkdownViewProps {
   markMode?: MarkMode
   /** Peel a leading YAML frontmatter block before rendering. Off by default. */
   frontmatter?: boolean
+  /**
+   * Whether rendered links, images, and task checkboxes can be activated.
+   * Defaults to `true`. When `false`, callbacks are ignored, the rendered tree
+   * contains no anchors or focusable task controls, and recognized tweet and
+   * YouTube embeds are omitted before any image resolver runs.
+   */
+  interactive?: boolean
   /** Map an image `src` to a displayable URL, or `undefined` to skip it. */
   resolveImageUrl?: (src: string) => string | undefined
-  /** Called when a rendered wiki link is clicked. Pass a stable function. */
+  /** Called when a rendered wikilink is clicked. Pass a stable function. */
   onWikilinkClick?: WikilinkClickHandler
   /** Called when a rendered Markdown link is clicked. Pass a stable function. */
   onLinkClick?: LinkClickHandler
@@ -99,6 +106,7 @@ export interface MarkdownViewProps {
 }
 
 interface RenderContext {
+  interactive: boolean
   resolveImageUrl?: (src: string) => string | undefined
   onWikilinkClick?: WikilinkClickHandler
   onLinkClick?: LinkClickHandler
@@ -134,6 +142,10 @@ function outputSpecToReact(
 
   if (tag === 'input' && attrs?.['type'] === 'checkbox') {
     reactProps.readOnly = true
+    if (!context.interactive) {
+      reactProps.disabled = true
+      reactProps.tabIndex = -1
+    }
   }
 
   const reactChildren = rest.map((child) => outputSpecToReact(child, content, context))
@@ -200,10 +212,11 @@ function ImagePreview(props: {
   width: number | null
   resolveImageUrl?: (src: string) => string | undefined
   onImageClick?: ImageClickHandler
+  interactive: boolean
 }): ReactElement | null {
-  const { src, alt, width, resolveImageUrl, onImageClick } = props
+  const { src, alt, width, resolveImageUrl, onImageClick, interactive } = props
   const embed = matchEmbed(src)
-  if (embed) return <EmbedFrame embed={embed} />
+  if (embed) return interactive ? <EmbedFrame embed={embed} /> : null
 
   const url = (resolveImageUrl ?? defaultResolveImageUrl)(src)
   if (!url) return null
@@ -243,6 +256,7 @@ function ImageView(props: {
         width={width}
         resolveImageUrl={context.resolveImageUrl}
         onImageClick={context.onImageClick}
+        interactive={context.interactive}
       />
       <span className="md-image-view-content md-atom-view-content">{children}</span>
     </span>
@@ -363,6 +377,7 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
     }
     case 'mdLinkText': {
       const attrs = mark.attrs as MdLinkTextAttrs
+      if (!context.interactive) return <span className="md-link">{children}</span>
       const handleClick = context.onLinkClick
         ? (event: MouseEvent) =>
             context.onLinkClick?.({ href: attrs.href, event: event.nativeEvent })
@@ -501,7 +516,7 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
 
 /**
  * Render Markdown to a read-only React tree that looks exactly like the editor
- * in `hide` mark mode: inline marks, wiki-link chips, images, tweet/YouTube
+ * in `hide` mark mode: inline marks, wikilink chips, images, tweet/YouTube
  * embeds, and syntax-highlighted code. No editor, no ProseMirror view; just a
  * walk over `markdownToDoc`'s document reusing meowdown's own parse, mark logic,
  * and CSS (the root carries `ProseMirror` + `data-mark-mode` so the existing
@@ -514,6 +529,7 @@ export function MarkdownView({
   markdown,
   markMode = 'hide',
   frontmatter = false,
+  interactive = true,
   resolveImageUrl,
   onWikilinkClick,
   onLinkClick,
@@ -524,11 +540,12 @@ export function MarkdownView({
   const content = useMemo(() => {
     const doc = markdownToDoc(markdown, { frontmatter })
     const context: RenderContext = {
+      interactive,
       resolveImageUrl,
-      onWikilinkClick,
-      onLinkClick,
-      onImageClick,
-      onTaskClick,
+      onWikilinkClick: interactive ? onWikilinkClick : undefined,
+      onLinkClick: interactive ? onLinkClick : undefined,
+      onImageClick: interactive ? onImageClick : undefined,
+      onTaskClick: interactive ? onTaskClick : undefined,
       taskCounter: { value: 0 },
       keyCounter: { value: 0 },
     }
@@ -536,6 +553,7 @@ export function MarkdownView({
   }, [
     markdown,
     frontmatter,
+    interactive,
     resolveImageUrl,
     onWikilinkClick,
     onLinkClick,
