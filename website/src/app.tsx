@@ -310,10 +310,6 @@ function Brand() {
       <span className="text-lg font-semibold tracking-tight text-stone-900 dark:text-white">
         Meowdown
       </span>
-      <span className="hidden items-center gap-1.5 rounded-full border border-amber-300/70 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 sm:inline-flex dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
-        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-        Work in progress
-      </span>
     </div>
   )
 }
