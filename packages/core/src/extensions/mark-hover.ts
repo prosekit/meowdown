@@ -1,6 +1,6 @@
 import { isElementLike } from '@ocavue/utils'
 import { definePlugin, type PlainExtension } from '@prosekit/core'
-import { Plugin, type EditorState } from '@prosekit/pm/state'
+import { Plugin, type EditorState, type PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
 export interface MarkHoverHit<Payload> {
@@ -9,6 +9,7 @@ export interface MarkHoverHit<Payload> {
 }
 
 export interface MarkHoverConfig<Payload> {
+  key: PluginKey
   /** The hovered target must sit inside this selector, tested via `closest`. */
   selector: string
   /** The payload for the mark covering `pos`, or `undefined` on a miss. */
@@ -72,6 +73,7 @@ export function defineMarkHoverHandler<Payload>(config: MarkHoverConfig<Payload>
 
   return definePlugin(
     new Plugin({
+      key: config.key,
       props: {
         handleDOMEvents: {
           mouseover: (view, event) => {

@@ -1,7 +1,10 @@
 import type { PlainExtension } from '@prosekit/core'
+import { PluginKey } from '@prosekit/pm/state'
 
 import { defineMarkHoverHandler } from './mark-hover.ts'
 import { findWikilinkAt, findWikilinkForElement, type WikilinkHit } from './wikilink-click.ts'
+
+const wikilinkHoverKey = new PluginKey('meowdown-wikilink-hover')
 
 /** A wiki link currently under the pointer. */
 export interface WikilinkHoverHit extends WikilinkHit {
@@ -21,6 +24,7 @@ export type WikilinkHoverHandler = (hit: WikilinkHoverHit | undefined) => void
  */
 export function defineWikilinkHoverHandler(onHoverChange: WikilinkHoverHandler): PlainExtension {
   return defineMarkHoverHandler<WikilinkHit>({
+    key: wikilinkHoverKey,
     selector: '.md-wikilink-view-preview',
     findPayloadAt: findWikilinkAt,
     findPayloadForElement: findWikilinkForElement,
