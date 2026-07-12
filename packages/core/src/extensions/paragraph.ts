@@ -11,8 +11,9 @@ import {
   defineParagraphKeymap,
   type ParagraphCommandsExtension,
 } from '@prosekit/extensions/paragraph'
-import type { Attrs } from '@prosekit/pm/model'
+import type { Attrs, ProseMirrorNode, TagParseRule } from '@prosekit/pm/model'
 
+import { semanticTextblockDOM, sourceTextRule } from './clipboard/semantic-inline.ts'
 import type { NodeName } from './node-names.ts'
 
 type ParagraphSpecExtension = Extension<{
@@ -33,6 +34,16 @@ function defineMeowdownParagraphSpec(): ParagraphSpecExtension {
       return ['p', 0]
     },
   })
+}
+
+/** The clipboard DOM of a paragraph: semantic inline content plus `data-md`. */
+export function paragraphClipboardDOM(node: ProseMirrorNode): HTMLElement {
+  return semanticTextblockDOM('p', node)
+}
+
+/** The clipboard parse rules restoring a paragraph's source text from `data-md`. */
+export function paragraphFromDOM(): TagParseRule[] {
+  return [sourceTextRule('p', 'paragraph' satisfies NodeName)]
 }
 
 type MeowdownParagraphExtension = Union<[ParagraphSpecExtension, ParagraphCommandsExtension]>

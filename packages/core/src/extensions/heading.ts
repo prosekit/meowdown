@@ -16,8 +16,10 @@ import {
   defineHeadingSpec,
   type HeadingAttrs,
 } from '@prosekit/extensions/heading'
+import type { ProseMirrorNode, TagParseRule } from '@prosekit/pm/model'
 import type { Command } from '@prosekit/pm/state'
 
+import { semanticTextblockDOM, sourceTextRule } from './clipboard/semantic-inline.ts'
 import type { NodeName } from './node-names.ts'
 
 export interface MeowdownHeadingAttrs extends HeadingAttrs {
@@ -54,6 +56,33 @@ function defineHeadingWhitespace(): HeadingSpecExtension {
   return defineNodeSpec({ name: 'heading' satisfies NodeName, whitespace: 'pre' })
 }
 
+function parsePositiveCount(raw: string | null): number | null {
+  if (raw == null) return null
+  const count = Number.parseInt(raw, 10)
+  return Number.isSafeInteger(count) && count > 0 ? count : null
+}
+
+/** The clipboard DOM of a heading: semantic inline content plus `data-md`. */
+export function headingClipboardDOM(node: ProseMirrorNode): HTMLElement {
+  const attrs = node.attrs as MeowdownHeadingAttrs
+  return semanticTextblockDOM(`h${attrs.level}`, node, {
+    'data-setext-underline':
+      attrs.setextUnderline != null ? String(attrs.setextUnderline) : undefined,
+    'data-closing-hashes': attrs.closingHashes != null ? String(attrs.closingHashes) : undefined,
+  })
+}
+
+/** The clipboard parse rules restoring a heading's source text from `data-md`. */
+export function headingFromDOM(): TagParseRule[] {
+  return [1, 2, 3, 4, 5, 6].map((level) =>
+    sourceTextRule(`h${level}`, 'heading' satisfies NodeName, (dom) => ({
+      level,
+      setextUnderline: parsePositiveCount(dom.getAttribute('data-setext-underline')),
+      closingHashes: parsePositiveCount(dom.getAttribute('data-closing-hashes')),
+    })),
+  )
+}
+
 type SetextUnderlineExtension = Extension<{
   Nodes: { heading: { setextUnderline?: number | null } }
 }>
@@ -66,12 +95,7 @@ function defineSetextUnderlineAttr(): SetextUnderlineExtension {
     // A heading split or created in the editor is ATX; only a parsed setext
     // heading carries a length, which must survive an editor DOM re-parse.
     toDOM: (value) => (value != null ? ['data-setext-underline', String(value)] : null),
-    parseDOM: (node) => {
-      const raw = node.getAttribute('data-setext-underline')
-      if (raw == null) return null
-      const length = Number.parseInt(raw, 10)
-      return Number.isSafeInteger(length) && length > 0 ? length : null
-    },
+    parseDOM: (node) => parsePositiveCount(node.getAttribute('data-setext-underline')),
   })
 }
 
@@ -88,12 +112,7 @@ function defineHeadingClosingHashesAttr(): ClosingHashesExtension {
     // created or edited in the editor has none, and the count must survive a DOM
     // re-parse.
     toDOM: (value) => (value != null ? ['data-closing-hashes', String(value)] : null),
-    parseDOM: (node) => {
-      const raw = node.getAttribute('data-closing-hashes')
-      if (raw == null) return null
-      const length = Number.parseInt(raw, 10)
-      return Number.isSafeInteger(length) && length > 0 ? length : null
-    },
+    parseDOM: (node) => parsePositiveCount(node.getAttribute('data-closing-hashes')),
   })
 }
 
