@@ -6,7 +6,6 @@ import {
   defineFilePaste,
   defineFileView,
   defineFollowLinkHandler,
-  defineHTMLPaste,
   defineImage,
   defineImageClickHandler,
   defineLinkClickHandler,
@@ -174,12 +173,6 @@ export function EditorExtensions({
     useMemo(() => {
       return linkPaste ? defineLinkPaste() : null
     }, [linkPaste]),
-  )
-
-  useExtension(
-    useMemo(() => {
-      return defineHTMLPaste()
-    }, []),
   )
 
   useExtension(

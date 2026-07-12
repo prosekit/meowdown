@@ -12,7 +12,7 @@ import type { NodeName } from '../node-names.ts'
  * lines restores K-1 empty paragraphs (the gap-paragraph model of
  * `md-to-pm.ts`). Leading and trailing newlines are trimmed.
  */
-export function plainTextToSlice(schema: Schema, raw: string): Slice {
+function plainTextToSlice(schema: Schema, raw: string): Slice {
   const text = raw.replaceAll(/\r\n?/g, '\n')
   const trimmed = text.replace(/^\n+/, '').replace(/\n+$/, '')
   if (!trimmed) return Slice.empty

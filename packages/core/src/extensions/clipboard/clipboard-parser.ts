@@ -10,7 +10,7 @@ import { paragraphFromDOM } from '../paragraph.ts'
  * textblock's source text from meowdown's own clipboard HTML. Registered as
  * `clipboardParser` (not in the schema) so static HTML parsing is unaffected.
  */
-export function createClipboardParser(schema: Schema): DOMParser {
+function createClipboardParser(schema: Schema): DOMParser {
   return new DOMParser(schema, [
     ...paragraphFromDOM(),
     ...headingFromDOM(),

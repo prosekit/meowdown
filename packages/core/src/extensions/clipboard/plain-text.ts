@@ -16,7 +16,7 @@ import { groupInlineRuns, hasSyntaxMark } from './semantic-inline.ts'
  * partial-paragraph copy) does not fit `doc`'s `block+` content, so it falls
  * back to the inline source text, which is valid inline markdown already.
  */
-export function sliceToMarkdown(schema: Schema, slice: Slice): string {
+function sliceToMarkdown(schema: Schema, slice: Slice): string {
   const fragment = slice.content
   let doc: ProseMirrorNode | undefined
   try {
@@ -50,7 +50,7 @@ export function definePlainTextSerializer(): PlainExtension {
 }
 
 /** Drop the inline text a hide-mode editor never shows. */
-export function stripHiddenInline(slice: Slice): Slice {
+function stripHiddenInline(slice: Slice): Slice {
   return new Slice(mapFragment(slice.content), slice.openStart, slice.openEnd)
 }
 
