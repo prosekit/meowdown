@@ -90,7 +90,7 @@ export function semanticTextblockDOM(
  * The clipboard parse rule for a textblock: the content comes from the
  * `data-md` source text verbatim, the semantic child elements are ignored.
  * The inline mark plugin re-derives marks after the paste transaction.
- */
+ */ // REVIEW: rename this function from sourceTextRule to createSourceTextRule
 export function sourceTextRule(
   tag: string,
   node: string,
