@@ -7,7 +7,7 @@ import {
   type ResizeEndEvent,
 } from '@prosekit/web/resizable'
 
-import { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './embed/index.ts'
+import { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './embed.ts'
 import { getMarkRangeAt } from './get-mark-range-at.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import { formatMagicComment, parseMagicComment, stripMagicComment } from './magic-comment.ts'

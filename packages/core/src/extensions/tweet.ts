@@ -1,6 +1,6 @@
-import { prefersDarkColorScheme } from '../../utils/prefers-dark-color-scheme.ts'
+import { prefersDarkColorScheme } from '../utils/prefers-dark-color-scheme.ts'
 
-import type { EmbedMatcher } from './types.ts'
+import type { EmbedMatcher } from './embed-types.ts'
 
 const TWEET_HOSTS = /^(?:www\.|mobile\.)?(?:twitter\.com|x\.com)$/i
 const STATUS_ID = /\/status(?:es)?\/(\d+)/

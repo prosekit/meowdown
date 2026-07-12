@@ -1,8 +1,8 @@
+import type { EmbedDescriptor, EmbedMatcher } from './embed-types.ts'
 import { listenForTweetHeight, matchTweet } from './tweet.ts'
-import type { EmbedDescriptor, EmbedMatcher } from './types.ts'
 import { matchYouTube } from './youtube.ts'
 
-export type { EmbedDescriptor } from './types.ts'
+export type { EmbedDescriptor } from './embed-types.ts'
 export { listenForTweetHeight }
 
 const EMBED_MATCHERS: readonly EmbedMatcher[] = [matchYouTube, matchTweet]

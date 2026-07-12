@@ -1,4 +1,4 @@
-import type { EmbedMatcher } from './types.ts'
+import type { EmbedMatcher } from './embed-types.ts'
 
 const YOUTUBE_HOSTS = /^(?:www\.|m\.)?(?:youtube\.com|youtube-nocookie\.com)$/i
 const YOUTU_BE_HOST = /^(?:www\.)?youtu\.be$/i

@@ -22,7 +22,7 @@ export {
 export { codeBlockLanguages, type LanguageItem } from './extensions/code-block-languages.ts'
 export type { CodeBlockFenceStyle, MeowdownCodeBlockAttrs } from './extensions/code-block.ts'
 export { defineEmbedPaste } from './extensions/embed-paste.ts'
-export { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './extensions/embed/index.ts'
+export { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './extensions/embed.ts'
 export {
   defineExitBoundaryHandler,
   type ExitBoundaryHandler,
