@@ -20,12 +20,10 @@ minimumReleaseAgeExclude:
   - '@aria-ui/*'
   - eslint-plugin-unicorn@71.0.0
   - prosemirror-flat-list@0.7.1
+  - prosemirror-view
 
 allowBuilds:
   simple-git-hooks: false
-
-patchedDependencies:
-  prosemirror-view: patches/prosemirror-view.patch
 
 # "blockExoticSubdeps" and "overrides" install packages from pkg.pr.new
 # blockExoticSubdeps: false
