@@ -58,7 +58,8 @@ function defineHeadingWhitespace(): HeadingSpecExtension {
 
 // REVIEW: move this to a shared utils file, since it doesn't depend on headings at all. It's a general parse helper.
 // The input argument should be string|null|undefined. The output return should be number|undefined.
-// There should be a parseSafeInteger and parseSavePositiveInteger two functions
+// There should be a parseSafeInteger and parseSavePositiveInteger two functions.
+// This function can be used in packages/core/src/extensions/code-block.ts too
 function parsePositiveCount(raw: string | null): number | null {
   if (raw == null) return null
   const count = Number.parseInt(raw, 10)
