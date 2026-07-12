@@ -18,14 +18,14 @@ minimumReleaseAgeExclude:
   - '@ocavue/eslint-config'
   - '@prosekit/*'
   - '@aria-ui/*'
-  - eslint-plugin-unicorn@71.0.0
-  - prosemirror-flat-list@0.7.1
+  - prosemirror-view
+  - '@floating-ui/core@1.8.0'
+  - '@floating-ui/dom@1.8.0'
+  - '@floating-ui/utils@0.2.12'
+  - prosemirror-model@1.25.11
 
 allowBuilds:
   simple-git-hooks: false
-
-patchedDependencies:
-  prosemirror-view: patches/prosemirror-view.patch
 
 # "blockExoticSubdeps" and "overrides" install packages from pkg.pr.new
 # blockExoticSubdeps: false
