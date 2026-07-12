@@ -91,8 +91,8 @@ export function semanticTextblockDOM(
  * The clipboard parse rule for a textblock: the content comes from the
  * `data-md` source text verbatim, the semantic child elements are ignored.
  * The inline mark plugin re-derives marks after the paste transaction.
- */ // REVIEW: rename this function from sourceTextRule to createSourceTextRule
-export function sourceTextRule(
+ */
+export function createSourceTextRule(
   tag: string,
   node: string,
   getAttrs?: TagParseRule['getAttrs'],
@@ -103,7 +103,6 @@ export function sourceTextRule(
     priority: 100,
     getAttrs,
     getContent: (dom, schema) => {
-      // REVIEW: I've changed this a bit. I've added `isHTMLElement` runtime check.
       const element = isHTMLElement(dom) ? dom : undefined
       const source = element?.getAttribute('data-md') ?? ''
       return source ? Fragment.from(schema.text(source)) : Fragment.empty
@@ -122,7 +121,7 @@ function serializeSemanticInline(textblock: ProseMirrorNode, out: HTMLElement): 
   for (const run of groupInlineRuns(textblock)) {
     if (run.atom != null) {
       open.length = 0
-      out.append(atomUnitDOM(run.atom, run.text))
+      out.append(atomUnitToDOM(run.atom, run.text))
       continue
     }
     for (const child of run.children) {
@@ -161,9 +160,7 @@ function appendTextWithBreaks(parent: HTMLElement, text: string): void {
   }
 }
 
-// REVIEW: do not use globalThis.Node in the while codebase. Just use Node directly.
-// REVIEW: rename this function to `atomUnitToDOM`
-function atomUnitDOM(atom: Mark, sourceText: string): globalThis.Node {
+function atomUnitToDOM(atom: Mark, sourceText: string): Node {
   switch (atom.type.name as MarkName) {
     case 'mdImage': {
       const attrs = atom.attrs as MdImageAttrs

@@ -6,6 +6,8 @@ import {
 import { defineTextBlockEnterRule } from '@prosekit/extensions/enter-rule'
 import { defineTextBlockInputRule } from '@prosekit/extensions/input-rule'
 
+import { parseInteger } from '../utils/parse-integer.ts'
+
 import type { NodeName } from './node-names.ts'
 
 export type CodeBlockFenceStyle = 'tilde' | 'indented' | 'dollar'
@@ -59,10 +61,8 @@ function defineFenceLengthAttr(): FenceLengthExtension {
     // must survive an editor DOM re-parse.
     toDOM: (value) => (value != null ? ['data-fence-length', String(value)] : null),
     parseDOM: (node) => {
-      const raw = node.getAttribute('data-fence-length')
-      if (raw == null) return null
-      const length = Number.parseInt(raw, 10)
-      return Number.isSafeInteger(length) && length > 3 ? length : null
+      const length = parseInteger(node.getAttribute('data-fence-length'))
+      return length != null && length > 3 ? length : null
     },
   })
 }
