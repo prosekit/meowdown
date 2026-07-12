@@ -404,6 +404,28 @@ describe('Mod-Shift-K shortcut', () => {
     await expect.element(menu.getByText('Reading list')).not.toBeInTheDocument()
   })
 
+  it('seeds the query from the visible text of a formatted selection', async () => {
+    const ref = createRef<EditorHandle>()
+    const onWikilinkSearch = vi.fn(searchNotes)
+    await render(
+      <ProseKitEditor
+        ref={ref}
+        initialMarkdown="**Cat naps**"
+        onWikilinkSearch={onWikilinkSearch}
+      />,
+    )
+    ref.current?.setSelection({ type: 'text', anchor: 1, head: 13 })
+    ref.current?.focus()
+
+    await pressInsertShortcut()
+
+    await vi.waitFor(() => {
+      expect(onWikilinkSearch).toHaveBeenLastCalledWith('Cat naps')
+    })
+    await menu.getByText('Cat naps').click()
+    expect(ref.current?.getMarkdown()).toBe('[[Cat naps]]\n')
+  })
+
   it('inserts the selected note as [[Name]] and removes the query', async () => {
     const ref = createRef<EditorHandle>()
     await render(<ProseKitEditor ref={ref} onWikilinkSearch={searchNotes} />)

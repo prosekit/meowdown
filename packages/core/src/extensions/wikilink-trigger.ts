@@ -2,6 +2,8 @@ import { defineKeymap, isTextSelection, type PlainExtension } from '@prosekit/co
 import { triggerAutocomplete } from '@prosekit/extensions/autocomplete'
 import { TextSelection, type Command } from '@prosekit/pm/state'
 
+import { cleanTextFromSlice } from '../utils/clean-text.ts'
+
 const WIKILINK_OPEN = '[['
 
 interface OpenWikilinkMenuOptions {
@@ -13,10 +15,11 @@ interface OpenWikilinkMenuOptions {
 
 /**
  * Inserts the `[[` wikilink trigger at the cursor and opens the wikilink menu.
- * Any selected text becomes the initial query, so selecting "Cat naps" and
- * running this yields `[[Cat naps` with the menu searching it. A leading `[` in
- * the selection is dropped; a selection that already starts with `[[`, that
- * spans more than one block, or that sits in a code block is left untouched.
+ * Any selected visible text becomes the initial query, so selecting bold
+ * "Cat naps" and running this yields `[[Cat naps` without the hidden `**`
+ * markers. A leading `[` in the selection is dropped; a selection that already
+ * starts with `[[`, that spans more than one block, or that sits in a code block
+ * is left untouched.
  */
 function openWikilinkMenu({ allowEmpty }: OpenWikilinkMenuOptions): Command {
   return (state, dispatch) => {
@@ -35,7 +38,7 @@ function openWikilinkMenu({ allowEmpty }: OpenWikilinkMenuOptions): Command {
       return false
     }
 
-    let query = state.doc.textBetween(selection.from, selection.to)
+    let query = cleanTextFromSlice(selection.content())
     if (query.startsWith(WIKILINK_OPEN)) {
       return false
     }

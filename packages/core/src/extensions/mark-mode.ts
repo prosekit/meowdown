@@ -1,8 +1,9 @@
 import { defineCommands, definePlugin, getMarkRange, getMarkType, union } from '@prosekit/core'
-import type { Slice } from '@prosekit/pm/model'
 import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
+
+import { cleanTextFromSlice } from '../utils/clean-text.ts'
 
 import type { MarkName } from './mark-names.ts'
 
@@ -15,20 +16,6 @@ import type { MarkName } from './mark-names.ts'
  * - 'show':  syntax chars always visible (dim grey); copy keeps them.
  */
 export type MarkMode = 'hide' | 'focus' | 'show'
-
-// Marks whose text is dropped from a clean clipboard copy, so copied markdown
-// omits the rendered syntax. The image/wikilink sources carry only their own
-// mark, so they are kept verbatim (`![alt](url)`, `[[target]]`).
-const CLIPBOARD_STRIP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([
-  'mdMark',
-  'mdLinkUri',
-  'mdLinkTitle',
-])
-
-// Marks whose text survives a clean copy even when a strip mark also covers
-// it. A math dollar carries `mdMark` for hiding, but stripping it would paste
-// bare TeX; `$E=mc^2$` should copy whole, like an image source.
-const CLIPBOARD_KEEP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>(['mdMath'])
 
 const markModeKey = new PluginKey<MarkMode>('mark-mode')
 
@@ -59,7 +46,9 @@ function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
       // the next serializer (`defineMarkdownCopy` in the full editor) and the
       // copied text keeps the syntax.
       clipboardTextSerializer: (slice, view) => {
-        return getCurrentMarkMode(view.state) === 'show' ? '' : cleanCopySerializer(slice)
+        return getCurrentMarkMode(view.state) === 'show'
+          ? ''
+          : cleanTextFromSlice(slice, { preserveMathSource: true })
       },
     },
   })
@@ -84,26 +73,6 @@ export function defineMarkMode(mode: MarkMode) {
  */
 export function getMarkMode(state: EditorState): MarkMode | undefined {
   return markModeKey.getState(state)
-}
-
-function cleanCopySerializer(slice: Slice): string {
-  const blocks: string[] = []
-  slice.content.forEach((blockNode) => {
-    const parts: string[] = []
-    blockNode.descendants((textNode) => {
-      if (!textNode.isText || !textNode.text) return true
-      const textNodeMarks = textNode.marks.map((mark) => mark.type.name as MarkName)
-      const stripped =
-        textNodeMarks.some((markName) => CLIPBOARD_STRIP_MARK_NAMES.has(markName)) &&
-        !textNodeMarks.some((markName) => CLIPBOARD_KEEP_MARK_NAMES.has(markName))
-      if (!stripped) parts.push(textNode.text)
-      return false
-    })
-    blocks.push(parts.join(''))
-  })
-  // Single '\n' between blocks (not '\n\n'): output mirrors "what the user
-  // sees on screen", not the markdown paragraph convention.
-  return blocks.join('\n')
 }
 
 /**
