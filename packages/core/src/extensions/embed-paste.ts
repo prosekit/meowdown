@@ -3,7 +3,7 @@ import { closeHistory } from '@prosekit/pm/history'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
-import { matchEmbed } from './embed/index.ts'
+import { matchEmbed } from './embed.ts'
 import { getPastedText } from './paste.ts'
 
 const embedPasteKey = new PluginKey('meowdown-embed-paste')
