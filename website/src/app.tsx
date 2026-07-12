@@ -1,5 +1,11 @@
 import type { ExitBoundaryHandler } from '@meowdown/core'
-import type { EditorHandle, TagItem, WikilinkItem } from '@meowdown/react'
+import {
+  MarkdownView,
+  WikilinkHoverCard,
+  type EditorHandle,
+  type TagItem,
+  type WikilinkItem,
+} from '@meowdown/react'
 import { getId } from '@ocavue/utils'
 import { clsx } from 'clsx/lite'
 import {
@@ -38,6 +44,54 @@ function handleTagClick({ tag }: { tag: string }): void {
 
 function handleWikilinkClick({ target }: { target: string }): void {
   window.alert(`Clicked wikilink: ${target}`)
+}
+
+// Demo note contents for the wikilink hover cards. `Travel plans` is left out
+// on purpose: a target without content renders no card.
+const NOTE_PREVIEWS: Record<string, string> = {
+  'Cat care basics': `# Cat care basics
+
+Feed twice a day, fresh water always, and never skip **play time**.
+
+- Brush long-haired cats daily
+- Scratching posts save the couch`,
+  'Daily journal': `# Daily journal
+
+Slow morning, good coffee. Sketched the outline for the #meowdown demo and moved [[Project ideas]] forward.
+
++ [x] Morning pages
++ [ ] Publish the changelog`,
+  'Meeting notes': `# Meeting notes
+
+Agreed to ship the hover card demo this week. *Everyone* liked the passive preview approach.`,
+  'Project ideas': `# Project ideas
+
+- A cozy reading nook
+- A cat-shaped bookshelf
+- A tiny herb garden`,
+  'Reading list': `# Reading list
+
+1. *The Mythical Man-Month*
+2. [CommonMark spec](https://commonmark.org)
+3. ~~Working in Public~~ (finished!)`,
+}
+
+// Hover preview for wikilinks: a known note renders as a passive Markdown
+// card, an unknown target renders no card at all.
+function WikilinkPreviewCard() {
+  return (
+    <WikilinkHoverCard>
+      {(target) => {
+        const markdown = NOTE_PREVIEWS[target]
+        if (!markdown) return null
+        return (
+          <div className="meowdown note-preview">
+            <MarkdownView markdown={markdown} interactive={false} />
+          </div>
+        )
+      }}
+    </WikilinkHoverCard>
+  )
 }
 
 // Sizes for the file pills: the demo file in INITIAL_CONTENT, plus every
@@ -81,7 +135,7 @@ Drop a [link](https://github.com/prosekit/meowdown) and keep on writing.
 
 Label your notes with tags like #meow and #markdown. Type \`#\` followed by a letter to see suggestions.
 
-Connect notes with wikilinks like [[Daily journal]] and [[Reading list]]. Type \`[[\` to link another note.
+Connect notes with wikilinks like [[Daily journal]] and [[Reading list]]. Type \`[[\` to link another note, and hover a link to peek inside it.
 
 Select some text and click the sparkle button (or press \`Mod-Shift-J\`) to run a command on it. The result streams into a preview, and nothing changes until you accept it.
 
@@ -359,6 +413,7 @@ export function App() {
                 onExitBoundary={handleExitBoundary}
               >
                 <SelectionMenuShortcut onTrigger={selectionDemo.openMenu} />
+                <WikilinkPreviewCard />
               </DemoEditor>
             </div>
 

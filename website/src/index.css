@@ -35,6 +35,16 @@ html {
   }
 }
 
+/* The wikilink hover card renders a mini document: the editor gutter would
+ * swallow most of the card's width. */
+.note-preview {
+  font-size: 0.875rem;
+
+  .meowdown-content {
+    padding: 0;
+  }
+}
+
 /* The active mode description re-animates whenever the mode changes (keyed
  * remount in app.tsx). */
 @keyframes meowdown-fade-in {
