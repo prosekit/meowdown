@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.46.0](https://github.com/prosekit/meowdown/compare/react-v0.45.1...react-v0.46.0) (2026-07-12)
+
+
+### Features
+
+* **react:** let `WikilinkHoverCard` children return a `Promise<ReactNode>` ([#296](https://github.com/prosekit/meowdown/issues/296)) ([abab64d](https://github.com/prosekit/meowdown/commit/abab64de48e749680670e7e9714d686ee98eeb67))
+
 ## [0.45.1](https://github.com/prosekit/meowdown/compare/react-v0.45.0...react-v0.45.1) (2026-07-12)
 
 
