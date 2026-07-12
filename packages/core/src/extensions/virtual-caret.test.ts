@@ -211,6 +211,48 @@ describe('virtual caret next to atom marks', () => {
   })
 })
 
+describe('virtual caret at a line-wrapped wikilink', () => {
+  const wikilink = page.getByTestId('wikilink')
+  const longTarget = 'a very long note name that keeps going and going '.repeat(6).trim()
+
+  function getWikilinkFragments(): DOMRect[] {
+    return Array.from(wikilink.element().getClientRects())
+  }
+
+  it('keeps the caret one line tall at the start of a paragraph holding only a wrapped wikilink', async () => {
+    using fixture = setupMode('hide', `<a>[[${longTarget}]]`)
+    void fixture
+    await expect.element(caret).toBeVisible()
+    const fragments = getWikilinkFragments()
+    expect(fragments.length).toBeGreaterThanOrEqual(2)
+    const caretHeight = Number.parseFloat(getCaretElement().style.height)
+    expect(caretHeight).toBeLessThan(fragments[0].height * 1.5)
+  })
+
+  it('keeps the caret one line tall at the end of a paragraph holding only a wrapped wikilink', async () => {
+    using fixture = setupMode('hide', `[[${longTarget}]]<a>`)
+    void fixture
+    await expect.element(caret).toBeVisible()
+    const fragments = getWikilinkFragments()
+    expect(fragments.length).toBeGreaterThanOrEqual(2)
+    const lastFragment = fragments[fragments.length - 1]
+    const caretHeight = Number.parseFloat(getCaretElement().style.height)
+    expect(caretHeight).toBeLessThan(lastFragment.height * 1.5)
+  })
+
+  it('draws the end-of-paragraph caret on the last line fragment', async () => {
+    using fixture = setupMode('hide', `[[${longTarget}]]<a>`)
+    void fixture
+    await expect.element(caret).toBeVisible()
+    const fragments = getWikilinkFragments()
+    expect(fragments.length).toBeGreaterThanOrEqual(2)
+    const lastFragment = fragments[fragments.length - 1]
+    const caretRect = getCaretElement().getBoundingClientRect()
+    expect(Math.abs(caretRect.left - lastFragment.right)).toBeLessThanOrEqual(2)
+    expect(caretRect.top).toBeGreaterThanOrEqual(lastFragment.top - 2)
+  })
+})
+
 describe('virtual caret tails (hide mode)', () => {
   it('shows a right tail after a closing run', async () => {
     using fixture = setupMode('hide', 'foo **bold**<a> bar')

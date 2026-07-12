@@ -57,7 +57,9 @@ export function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
 // An atom mark view collapses its source text to a zero-size box
 // (font-size: 0), so no position beside it has a box the other measurements
 // can see. The preview element standing in for the source is the visible
-// geometry; the caret sits flush against its outer edge.
+// geometry; the caret sits flush against its outer edge. A preview wrapped
+// across lines has one client rect per line fragment; the caret hugs the
+// fragment at its own end, never the multi-line union box.
 export function findAtomCaretRect(view: EditorView): CaretRect | undefined {
   const state = view.state
   const head = state.selection.head
@@ -66,10 +68,12 @@ export function findAtomCaretRect(view: EditorView): CaretRect | undefined {
     if (range == null || (range.from !== head && range.to !== head)) continue
     const preview = findAtomPreviewElement(view, range.from + 1)
     if (preview == null) continue
-    const rect = preview.getBoundingClientRect()
-    if (rect.height === 0) continue
-    const left = range.to === head ? rect.right : rect.left
-    return { left, top: rect.top, height: rect.height }
+    const fragments = Array.from(preview.getClientRects()).filter((rect) => rect.height > 0)
+    if (fragments.length === 0) continue
+    const atEnd = range.to === head
+    const fragment = atEnd ? fragments[fragments.length - 1] : fragments[0]
+    const left = atEnd ? fragment.right : fragment.left
+    return { left, top: fragment.top, height: fragment.height }
   }
   return undefined
 }
