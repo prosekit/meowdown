@@ -11,7 +11,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import styles from './wikilink-hover-card.module.css'
 
 const OPEN_DELAY = 300
-const CLOSE_DELAY = 200
+const CLOSE_DELAY = 100
 
 /** Props for {@link WikilinkHoverCard}. */
 export interface WikilinkHoverCardProps {
