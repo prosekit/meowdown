@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.46.1](https://github.com/prosekit/meowdown/compare/react-v0.46.0...react-v0.46.1) (2026-07-12)
+
+
+### Bug Fixes
+
+* **react:** reduce wikilink hover card close delay ([#299](https://github.com/prosekit/meowdown/issues/299)) ([14d508a](https://github.com/prosekit/meowdown/commit/14d508a96c8f3f19d8d5191fbfbebbb6be300f55))
+
 ## [0.46.0](https://github.com/prosekit/meowdown/compare/react-v0.45.1...react-v0.46.0) (2026-07-12)
 
 
