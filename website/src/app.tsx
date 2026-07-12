@@ -85,7 +85,7 @@ function WikilinkPreviewCard() {
         const markdown = NOTE_PREVIEWS[hit.target]
         if (!markdown) return null
         return (
-          <div className="meowdown note-preview">
+          <div className="meowdown px-3 py-2 text-sm [&_.meowdown-content]:p-0!">
             <MarkdownView markdown={markdown} interactive={false} />
           </div>
         )
@@ -136,7 +136,6 @@ Drop a [link](https://github.com/prosekit/meowdown) and keep on writing.
 Label your notes with tags like #meow and #markdown. Type \`#\` followed by a letter to see suggestions.
 
 Connect notes with wikilinks like [[Daily journal]] and [[Reading list]]. Type \`[[\` to link another note, and hover a link to peek inside it.
-
 Select some text and click the sparkle button (or press \`Mod-Shift-J\`) to run a command on it. The result streams into a preview, and nothing changes until you accept it.
 
 Track things two ways. Type \`+ \` for a circle checkbox task, or \`[] \` for a square checkbox task:
