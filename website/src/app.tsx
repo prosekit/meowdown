@@ -213,9 +213,22 @@ async function searchNotes(query: string): Promise<WikilinkItem[]> {
   // Simulate network latency so the wikilink menu's loading state shows up.
   await new Promise((resolve) => setTimeout(resolve, 200))
   const normalizedQuery = query.toLowerCase()
-  return NOTES.filter((note) => note.toLowerCase().includes(normalizedQuery)).map((note) => ({
-    target: note,
-  }))
+  const items: WikilinkItem[] = NOTES.filter((note) =>
+    note.toLowerCase().includes(normalizedQuery),
+  ).map((note) => ({ target: note }))
+  // A trailing create row keeps Enter useful when nothing matches the typed
+  // title exactly, like a real notes app.
+  const title = query.trim()
+  if (title !== '' && !NOTES.some((note) => note.toLowerCase() === title.toLowerCase())) {
+    items.push({
+      target: title,
+      label: `Create “${title}”`,
+      onSelect: () => {
+        NOTES.push(title)
+      },
+    })
+  }
+  return items
 }
 
 const ICON_BUTTON_CLASS =
