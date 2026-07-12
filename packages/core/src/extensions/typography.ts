@@ -12,27 +12,35 @@ import { InputRule } from '@prosekit/pm/inputrules'
 import { Plugin, PluginKey, type EditorState, type Transaction } from '@prosekit/pm/state'
 
 interface TypographyReplacement {
-  input: string
+  regexp: RegExp
   replacement: string
+  shouldSkip?: (textBefore: string) => boolean
 }
 
 const TYPOGRAPHY_REPLACEMENTS: TypographyReplacement[] = [
-  { input: '<-', replacement: '←' },
-  { input: '->', replacement: '→' },
-  { input: '(c)', replacement: '©' },
-  { input: '(r)', replacement: '®' },
-  { input: '1/2', replacement: '½' },
+  { regexp: /<-/, replacement: '←' },
+  {
+    regexp: /->/,
+    replacement: '→',
+    // `-->` is Markdown's HTML comment closing delimiter.
+    shouldSkip: (textBefore) => textBefore.endsWith('-->'),
+  },
+  { regexp: /\(c\)/, replacement: '©' },
+  { regexp: /\(r\)/, replacement: '®' },
+  { regexp: /1\/2/, replacement: '½' },
   // Reflect included an inner `$` here, making its whitespace-wrapped rule impossible to match.
-  { input: '+/-', replacement: '±' },
-  { input: '!=', replacement: '≠' },
-  { input: '<<', replacement: '«' },
-  { input: '>>', replacement: '»' },
-  { input: '--', replacement: '—' },
+  { regexp: /\+\/-/, replacement: '±' },
+  { regexp: /!=/, replacement: '≠' },
+  { regexp: /<</, replacement: '«' },
+  { regexp: />>/, replacement: '»' },
+  {
+    regexp: /--/,
+    replacement: '—',
+    // Keep HTML comment openers and thematic-break markers literal.
+    shouldSkip: (textBefore) =>
+      textBefore.endsWith('<!--') || /^ {0,3}(?:-[ \t]*){3,}$/.test(textBefore),
+  },
 ]
-
-function escapeRegexp(input: string): string {
-  return input.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)
-}
 
 interface TypographyUndoState {
   from: number
@@ -48,14 +56,22 @@ function isInlineCode(state: EditorState, from: number, to: number): boolean {
   return !!type && state.doc.rangeHasMark(from, to, type)
 }
 
+function getTextBefore(state: EditorState, position: number): string {
+  const $position = state.doc.resolve(position)
+  return $position.parent.textBetween(0, $position.parentOffset, null, '\u{FFFC}')
+}
+
 function replaceTypography(
   state: EditorState,
   from: number,
   to: number,
-  replacement: string,
+  rule: TypographyReplacement,
   undoText?: string,
 ): Transaction | null {
   if (isInlineCode(state, from, to)) return null
+  if (rule.shouldSkip?.(getTextBefore(state, to))) return null
+
+  const { replacement } = rule
   const text = undoText == null ? replacement : `${replacement} `
   const tr = state.tr.replaceWith(from, to, state.schema.text(text))
   if (undoText != null) {
@@ -71,11 +87,11 @@ function replaceTypography(
 
 function defineTypographyInputRules(): PlainExtension {
   return union(
-    TYPOGRAPHY_REPLACEMENTS.map(({ input, replacement }) => {
-      const inputRegexp = new RegExp(String.raw`(${escapeRegexp(input)})\s$`)
+    TYPOGRAPHY_REPLACEMENTS.map((rule) => {
+      const inputRegexp = new RegExp(String.raw`(?:${rule.regexp.source})\s$`)
       return defineInputRule(
         new InputRule(inputRegexp, (state, match, start, end) => {
-          return replaceTypography(state, start, end, replacement, match[0])
+          return replaceTypography(state, start, end, rule, match[0])
         }),
       )
     }),
@@ -125,10 +141,10 @@ function defineTypographyUndo(): PlainExtension {
 
 function defineTypographyEnterRules(): PlainExtension {
   return union(
-    TYPOGRAPHY_REPLACEMENTS.map(({ input, replacement }) => {
+    TYPOGRAPHY_REPLACEMENTS.map((rule) => {
       return defineEnterRule({
-        regex: new RegExp(`${escapeRegexp(input)}$`),
-        handler: ({ state, from, to }) => replaceTypography(state, from, to, replacement),
+        regex: new RegExp(`(?:${rule.regexp.source})$`),
+        handler: ({ state, from, to }) => replaceTypography(state, from, to, rule),
       })
     }),
   )

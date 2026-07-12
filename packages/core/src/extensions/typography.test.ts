@@ -101,17 +101,68 @@ describe('typography replacements', () => {
     expect(fixture.doc.textContent).not.toContain('©')
   })
 
-  it.each([
-    { input: '--> ', output: '-→ ' },
-    { input: '->> ', output: '-» ' },
-  ])('uses the matching suffix in `$input`', async ({ input, output }) => {
+  it('uses the matching suffix in `->>`', async () => {
     using fixture = setupFixture()
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('<a>')))
     fixture.view.focus()
 
-    await userEvent.keyboard(input)
-    expect(fixture.doc.textContent).toBe(output)
+    await userEvent.keyboard('->> ')
+    expect(fixture.doc.textContent).toBe('-» ')
+  })
+
+  it.each([
+    {
+      trigger: 'Space',
+      keys: '<!-- x --> ',
+      expected: (n: ReturnType<typeof setupFixture>['n']) => n.doc(n.paragraph('<!-- x --> ')),
+    },
+    {
+      trigger: 'Enter',
+      keys: '<!-- x -->{Enter}',
+      expected: (n: ReturnType<typeof setupFixture>['n']) =>
+        n.doc(n.paragraph('<!-- x -->'), n.paragraph()),
+    },
+  ])('preserves HTML comment delimiters before $trigger', async ({ keys, expected }) => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    fixture.view.focus()
+
+    await userEvent.keyboard(keys)
+    expect(fixture.doc.eq(expected(n))).toBe(true)
+  })
+
+  it.each([
+    {
+      trigger: 'Space',
+      keys: ' ',
+      expected: (n: ReturnType<typeof setupFixture>['n']) => n.doc(n.paragraph('--- ')),
+    },
+    {
+      trigger: 'Enter',
+      keys: '{Enter}',
+      expected: (n: ReturnType<typeof setupFixture>['n']) =>
+        n.doc(n.paragraph('---'), n.paragraph()),
+    },
+  ])('preserves a thematic-break marker before $trigger', async ({ keys, expected }) => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('---<a>')))
+    fixture.view.focus()
+
+    await userEvent.keyboard(keys)
+    expect(fixture.doc.eq(expected(n))).toBe(true)
+  })
+
+  it('keeps the horizontal-rule input rule working', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    fixture.view.focus()
+
+    await userEvent.keyboard('---')
+    expect(fixture.doc.eq(n.doc(n.horizontalRule(), n.paragraph()))).toBe(true)
   })
 
   it('replaces the final dash pair after nonempty text', async () => {
