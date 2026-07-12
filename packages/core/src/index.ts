@@ -130,6 +130,11 @@ export {
   type WikilinkClickHandler,
   type WikilinkClickPayload,
 } from './extensions/wikilink-click.ts'
+export {
+  defineWikilinkHoverHandler,
+  type WikilinkHoverHandler,
+  type WikilinkHoverHit,
+} from './extensions/wikilink-hover.ts'
 export { defineWikilinkTrigger } from './extensions/wikilink-trigger.ts'
 export type { PositionRange } from './utils/range.ts'
 export { getSelectedText } from './utils/selected-text.ts'
