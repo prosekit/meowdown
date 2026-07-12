@@ -5,6 +5,10 @@ export {
   type TaskClickHandler,
   type TaskClickPayload,
 } from './components/markdown-view.tsx'
+export {
+  WikilinkHoverCard,
+  type WikilinkHoverCardProps,
+} from './components/wikilink-hover-card.tsx'
 export type { TimeFormat } from './utils/date-format.ts'
 export type {
   EditorHandle,

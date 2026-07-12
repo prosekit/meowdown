@@ -56,6 +56,29 @@ See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Freac
 
 Slash menu host items can include `keywords` to match hidden terms without changing the displayed label.
 
+### Wiki-link hover cards
+
+Mount `WikilinkHoverCard` inside `MeowdownEditor` and render host-owned preview
+content from the wiki-link target. The component handles a 300ms dwell,
+transaction-aware dismissal, direct element anchoring, viewport collisions, and
+focus neutrality. Return `null` for a target with no preview and no card
+renders; when the lookup is asynchronous, render fallback content instead.
+
+```tsx
+<MeowdownEditor initialMarkdown="See [[Project plan]]">
+  <WikilinkHoverCard>{(target) => <LocalNotePreview target={target} />}</WikilinkHoverCard>
+</MeowdownEditor>
+```
+
+For local-only passive preview content, render Markdown with interaction
+disabled: the tree contains no anchors or focusable controls, and recognized
+tweet and YouTube embeds are omitted before any image resolver runs. Supply a
+resolver that accepts only trusted local image sources.
+
+```tsx
+<MarkdownView markdown={markdown} interactive={false} resolveImageUrl={resolveLocalImageUrl} />
+```
+
 ## Styling
 
 Import both stylesheets: `@meowdown/core/style.css` (the editor theme and variables) and `@meowdown/react/style.css` (the component layout). The core theme is documented in [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core).

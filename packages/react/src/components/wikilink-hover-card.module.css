@@ -1,0 +1,22 @@
+.Positioner {
+  z-index: 50;
+  max-width: calc(100vw - 1rem);
+  max-height: calc(100vh - 1rem);
+  pointer-events: none;
+}
+
+.Popup {
+  box-sizing: border-box;
+  width: min(21.875rem, calc(100vw - 1rem));
+  max-height: min(12.5rem, calc(100vh - 1rem));
+  padding: 0.5rem 0.75rem;
+  overflow: hidden;
+  outline: none;
+  pointer-events: none;
+  border: 1px solid var(--meowdown-border);
+  border-radius: 0.75rem;
+  background: var(--meowdown-popover-bg);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
