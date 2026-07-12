@@ -81,8 +81,8 @@ Agreed to ship the hover card demo this week. *Everyone* liked the passive previ
 function WikilinkPreviewCard() {
   return (
     <WikilinkHoverCard>
-      {(target) => {
-        const markdown = NOTE_PREVIEWS[target]
+      {(hit) => {
+        const markdown = NOTE_PREVIEWS[hit.target]
         if (!markdown) return null
         return (
           <div className="meowdown note-preview">
