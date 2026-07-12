@@ -97,10 +97,18 @@ describe('wikilink click callback', () => {
     expect(onWikilinkClick).not.toHaveBeenCalled()
   })
 
-  // Known limitation: clicking the non-editable label resolves the document
-  // position from the click coordinates, so a wide alias label can overshoot the
-  // source boundary and adjacent `[[a]][[b]]` labels resolve to the neighbor.
-  // `findWikilinkAt` itself resolves the right range per position (see the unit
-  // test above); a follow-up should resolve label clicks from the mark view's
-  // content holder via `posAtDOM`, the way `defineImageClickHandler` does.
+  it('resolves adjacent wide aliases from their own hidden content holders', async () => {
+    const onWikilinkClick = vi.fn<WikilinkClickHandler>()
+    using fixture = setupFixture()
+    applyClickable(
+      fixture,
+      '[[Alpha|An alias much wider than its source]][[Beta|Another very wide alias]]',
+      onWikilinkClick,
+    )
+    const links = pmRoot.getByTestId('wikilink')
+    await expect.element(links.nth(0)).toBeInTheDocument()
+    await userEvent.click(links.nth(0))
+    await userEvent.click(links.nth(1))
+    expect(onWikilinkClick.mock.calls.map(([payload]) => payload.target)).toEqual(['Alpha', 'Beta'])
+  })
 })
