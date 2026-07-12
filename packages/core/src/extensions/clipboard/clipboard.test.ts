@@ -179,7 +179,13 @@ describe('clipboard round trip', () => {
     `)
   })
 
-  // REVIEW: Add a ordered list test case here .
+  it('round-trips an ordered list', () => {
+    expect(roundTrip('1. first\n2. second')).toMatchInlineSnapshot(`
+      "1. first
+      2. second
+      "
+    `)
+  })
 
   it('round-trips a thematic break with a non-canonical marker', () => {
     expect(roundTrip('before\n\n* * *\n\nafter')).toMatchInlineSnapshot(`

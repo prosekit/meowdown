@@ -90,7 +90,38 @@ describe('plain text copy in hide mode', () => {
     `)
   })
 
-  // REVIEW: let's add more tests for example bullet list, ordered list, tasks list with differernt shapes of checkboxes, nested list,
+  it('keeps bullet list markers', () => {
+    expect(copyText('hide', '- one **b**\n- two')).toMatchInlineSnapshot(`
+      "- one b
+      - two"
+    `)
+  })
+
+  it('keeps ordered list markers', () => {
+    expect(copyText('hide', '1. first *x*\n2. second')).toMatchInlineSnapshot(`
+      "1. first x
+      2. second"
+    `)
+  })
+
+  it('keeps task checkboxes in all shapes', () => {
+    expect(copyText('hide', '- [ ] open\n- [x] done\n+ [ ] round open\n+ [x] round done'))
+      .toMatchInlineSnapshot(`
+      "- [ ] open
+      - [x] done
+      + [ ] round open
+      + [x] round done"
+    `)
+  })
+
+  it('keeps a nested list shape', () => {
+    expect(copyText('hide', '- parent *x*\n  1. one\n  2. two\n- tail')).toMatchInlineSnapshot(`
+      "- parent x
+        1. one
+        2. two
+      - tail"
+    `)
+  })
 
   it('strips link syntax down to the label', () => {
     expect(copyText('hide', 'see [docs](http://x.test)')).toMatchInlineSnapshot(`"see docs"`)
