@@ -13,6 +13,7 @@ import { defineText } from '@prosekit/extensions/text'
 import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { ATOM_SOURCE_MARK_NAMES, defineAtomMarkNavigation } from './atom-mark-navigation.ts'
+import { defineClipboard } from './clipboard/clipboard.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineCodeBlock } from './code-block.ts'
 import { defineEditorCommands } from './commands.ts'
@@ -68,6 +69,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineWikilink(),
     defineMath(),
     defineMarkMode(options.markMode ?? 'focus'),
+    defineClipboard(),
     defineVirtualCaret(),
     defineScrollToSelection(),
     defineHiddenRunCaret(),

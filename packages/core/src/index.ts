@@ -55,7 +55,6 @@ export {
 export { defineFollowLinkHandler, type FollowLinkHandlers } from './extensions/follow-link.ts'
 export { getLinkUnitAt, type LinkUnit } from './extensions/get-link-unit-at.ts'
 export { defineHTMLComment, type MeowdownHTMLCommentAttrs } from './extensions/html-comment.ts'
-export { defineHTMLPaste } from './extensions/html-paste.ts'
 export {
   defineImageClickHandler,
   type ImageClickHandler,
@@ -100,7 +99,6 @@ export { defineLinkPaste } from './extensions/link-paste.ts'
 export type { MarkChunk } from './extensions/mark-chunk.ts'
 export type { MarkMode } from './extensions/mark-mode.ts'
 export type { MarkName } from './extensions/mark-names.ts'
-export { defineMarkdownCopy } from './extensions/markdown-copy.ts'
 export type { NodeName } from './extensions/node-names.ts'
 export {
   definePendingReplacementHandler,

@@ -19,17 +19,6 @@ function renderHTML(mode: MarkMode, text: string): string {
   return fixture.htmlSnapshot
 }
 
-/** Mount one paragraph in `mode` and assert what a full-document copy yields. */
-function expectClipboard(mode: MarkMode, text: string, expected: string): void {
-  using fixture = setupFixture({ extensionOptions: { markMode: mode } })
-  const { n } = fixture
-  fixture.set(n.doc(n.paragraph(text)))
-  const serialize = fixture.view.someProp('clipboardTextSerializer')
-  const { doc } = fixture
-  const actual = serialize ? serialize(doc.slice(0, doc.content.size), fixture.view) : null
-  expect(actual).toBe(expected)
-}
-
 describe('focus mode', () => {
   it("sets data-mark-mode attribute to 'focus'", async () => {
     using fixture = setupFixture()
@@ -845,10 +834,6 @@ describe('focus mode', () => {
     `)
   })
 
-  it('strips syntax from the copied text just like hide mode', () => {
-    expectClipboard('focus', 'Hello **bold** end', 'Hello bold end')
-  })
-
   it.skipIf(
     // TODO: this test fails in Firefox.
     // Firefox's native backspace splits the paragraph next to a zero-size
@@ -930,38 +915,6 @@ describe('hide mode', () => {
     `)
   })
 
-  it('strips ** from the copied text', () => {
-    expectClipboard('hide', 'Hello **bold** end', 'Hello bold end')
-  })
-
-  it('strips link [..](..) syntax from the copied text', () => {
-    expectClipboard('hide', 'see [docs](http://x.test)', 'see docs')
-  })
-
-  it('keeps a bare autolink in the copied text', () => {
-    expectClipboard('hide', 'visit https://example.com now', 'visit https://example.com now')
-  })
-
-  it('keeps the whole image source so a copied image stays markdown', () => {
-    expectClipboard(
-      'hide',
-      'see ![cat](https://example.com/cat.png) end',
-      'see ![cat](https://example.com/cat.png) end',
-    )
-  })
-
-  it('keeps the whole [[ ]] source in the copied text', () => {
-    expectClipboard('hide', 'see [[note]] end', 'see [[note]] end')
-  })
-
-  it('keeps the whole $math$ source so a copied formula stays markdown', () => {
-    expectClipboard('hide', 'see $E=mc^2$ end', 'see $E=mc^2$ end')
-  })
-
-  it('keeps #tag verbatim in the copied text', () => {
-    expectClipboard('hide', 'Hello #meow end', 'Hello #meow end')
-  })
-
   it('handles backspace correctly around bold', async () => {
     using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
     const { n } = fixture
@@ -1010,10 +963,6 @@ describe('show mode', () => {
       </p>
       "
     `)
-  })
-
-  it('yields no clipboard text of its own, so copy falls through and keeps the ** syntax', () => {
-    expectClipboard('show', 'Hello **bold** end', '')
   })
 })
 
