@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.44.2](https://github.com/prosekit/meowdown/compare/react-v0.44.1...react-v0.44.2) (2026-07-12)
+
+
+### Bug Fixes
+
+* **core:** scroll to the caret when it sits on an atom mark boundary ([#289](https://github.com/prosekit/meowdown/issues/289)) ([4886f27](https://github.com/prosekit/meowdown/commit/4886f270742f6e27a3875ed9dcebdfaeb2647301))
+
 ## [0.44.1](https://github.com/prosekit/meowdown/compare/react-v0.44.0...react-v0.44.1) (2026-07-11)
 
 
