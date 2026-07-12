@@ -15,7 +15,7 @@ function applyHoverable(markdown: string, onHoverChange: WikilinkHoverHandler) {
   return fixture
 }
 
-describe('wiki-link hover callback', () => {
+describe('wikilink hover callback', () => {
   it('emits one enter while moving among one link label and its children', async () => {
     const onHoverChange = vi.fn<WikilinkHoverHandler>()
     using fixture = applyHoverable('see [[Note|Wide alias]] here', onHoverChange)

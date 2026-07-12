@@ -93,7 +93,7 @@ export interface MarkdownViewProps {
   interactive?: boolean
   /** Map an image `src` to a displayable URL, or `undefined` to skip it. */
   resolveImageUrl?: (src: string) => string | undefined
-  /** Called when a rendered wiki link is clicked. Pass a stable function. */
+  /** Called when a rendered wikilink is clicked. Pass a stable function. */
   onWikilinkClick?: WikilinkClickHandler
   /** Called when a rendered Markdown link is clicked. Pass a stable function. */
   onLinkClick?: LinkClickHandler
@@ -516,7 +516,7 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
 
 /**
  * Render Markdown to a read-only React tree that looks exactly like the editor
- * in `hide` mark mode: inline marks, wiki-link chips, images, tweet/YouTube
+ * in `hide` mark mode: inline marks, wikilink chips, images, tweet/YouTube
  * embeds, and syntax-highlighted code. No editor, no ProseMirror view; just a
  * walk over `markdownToDoc`'s document reusing meowdown's own parse, mark logic,
  * and CSS (the root carries `ProseMirror` + `data-mark-mode` so the existing
