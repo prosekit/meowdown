@@ -8,6 +8,7 @@ import type {
   MdWikilinkAttrs,
 } from '../inline-marks.ts'
 import type { MarkName } from '../mark-names.ts'
+import { isHTMLElement } from '@ocavue/utils'
 
 /** Syntax characters, dropped from the semantic clipboard HTML. */
 const SYNTAX_MARK_NAMES: ReadonlySet<string> = new Set<MarkName>([
@@ -102,7 +103,9 @@ export function sourceTextRule(
     priority: 100,
     getAttrs,
     getContent: (dom, schema) => {
-      const source = (dom as HTMLElement).getAttribute('data-md') ?? ''
+      // REVIEW: I've changed this a bit. I've added `isHTMLElement` runtime check.
+      const element = isHTMLElement(dom) ? dom : undefined
+      const source = element?.getAttribute('data-md') ?? ''
       return source ? Fragment.from(schema.text(source)) : Fragment.empty
     },
   }
