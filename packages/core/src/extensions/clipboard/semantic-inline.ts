@@ -161,6 +161,7 @@ function appendTextWithBreaks(parent: HTMLElement, text: string): void {
   }
 }
 
+// REVIEW: do not use globalThis.Node in the while codebase. Just use Node directly.
 function atomUnitDOM(atom: Mark, sourceText: string): globalThis.Node {
   switch (atom.type.name as MarkName) {
     case 'mdImage': {
