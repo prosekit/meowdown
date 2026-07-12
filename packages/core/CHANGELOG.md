@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.45.1](https://github.com/prosekit/meowdown/compare/core-v0.45.0...core-v0.45.1) (2026-07-12)
+
+
+### Bug Fixes
+
+* **core:** keep the virtual caret one line tall beside a wrapped wikilink ([#293](https://github.com/prosekit/meowdown/issues/293)) ([08362a1](https://github.com/prosekit/meowdown/commit/08362a1db23a40ec312d1119c972cfc87b7fb5c7))
+
 ## [0.45.0](https://github.com/prosekit/meowdown/compare/core-v0.44.2...core-v0.45.0) (2026-07-12)
 
 
