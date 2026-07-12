@@ -11,7 +11,6 @@ import {
   defineImageClickHandler,
   defineLinkClickHandler,
   defineLinkPaste,
-  defineMarkdownCopy,
   definePlaceholder,
   defineReadonly,
   defineSpellCheckPlugin,
@@ -180,12 +179,6 @@ export function EditorExtensions({
   useExtension(
     useMemo(() => {
       return defineHTMLPaste()
-    }, []),
-  )
-
-  useExtension(
-    useMemo(() => {
-      return defineMarkdownCopy()
     }, []),
   )
 

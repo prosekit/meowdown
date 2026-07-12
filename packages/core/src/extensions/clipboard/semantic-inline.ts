@@ -33,7 +33,7 @@ const SEMANTIC_TAGS: Partial<Record<MarkName, string>> = {
   mdLinkText: 'a',
 }
 
-export function findAtomMark(marks: readonly Mark[]): Mark | undefined {
+function findAtomMark(marks: readonly Mark[]): Mark | undefined {
   return marks.find((mark) => ATOM_MARK_NAMES.has(mark.type.name))
 }
 

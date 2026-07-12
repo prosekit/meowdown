@@ -3,16 +3,14 @@ import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
-import { cleanTextFromSlice } from '../utils/clean-text.ts'
-
 import type { MarkName } from './mark-names.ts'
 
 /**
- * Controls how markdown syntax characters are rendered and how the
- * editor serializes content to the clipboard.
+ * Controls how markdown syntax characters are rendered and how the clipboard's
+ * `text/plain` treats the inline layer (see `definePlainTextSerializer`).
  *
- * - 'hide':  syntax chars never visible; copy strips them.
- * - 'focus': syntax chars hidden by default; revealed near cursor; copy strips them.
+ * - 'hide':  syntax chars never visible; copy strips the inline syntax.
+ * - 'focus': syntax chars hidden by default; revealed near cursor; copy keeps them.
  * - 'show':  syntax chars always visible (dim grey); copy keeps them.
  */
 export type MarkMode = 'hide' | 'focus' | 'show'
@@ -41,14 +39,6 @@ function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
         // content too, so without a reveal it could not be edited in place.
         if (mode === 'hide') return computeMathRevealDecorations(state)
         return
-      },
-      // In show mode the empty string is falsy, so `someProp` falls through to
-      // the next serializer (`defineMarkdownCopy` in the full editor) and the
-      // copied text keeps the syntax.
-      clipboardTextSerializer: (slice, view) => {
-        return getCurrentMarkMode(view.state) === 'show'
-          ? ''
-          : cleanTextFromSlice(slice, { preserveMathSource: true })
       },
     },
   })
