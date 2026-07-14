@@ -28,6 +28,7 @@ import type { EditorNode, Mark } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit } from '@prosekit/react'
 import { clsx } from 'clsx/lite'
+import GithubSlugger from 'github-slugger'
 import {
   useCallback,
   useImperativeHandle,
@@ -161,15 +162,21 @@ function headingDisplayText(heading: EditorNode): string {
 }
 
 function findHeadingPosition(doc: EditorNode, fragment: string): number | undefined {
-  const target = headingLookupKey(decodeHeadingFragment(fragment))
+  const decodedTarget = decodeHeadingFragment(fragment)
+  const target = headingLookupKey(decodedTarget)
   if (!target) return
+  const slugTarget = decodedTarget.normalize('NFKC').toLowerCase()
+  const slugger = new GithubSlugger()
   let match: number | undefined
   doc.descendants((node, pos) => {
     if (match != null) return false
+    if (node.type.name !== 'heading') return true
+    const displayText = headingDisplayText(node)
+    const slug = slugger.slug(displayText)
     if (
-      node.type.name === 'heading' &&
-      (headingLookupKey(node.textContent) === target ||
-        headingLookupKey(headingDisplayText(node)) === target)
+      headingLookupKey(node.textContent) === target ||
+      headingLookupKey(displayText) === target ||
+      slug === slugTarget
     ) {
       match = pos + 1
       return false
