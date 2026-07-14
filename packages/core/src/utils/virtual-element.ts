@@ -2,11 +2,27 @@ import type { VirtualElement } from '@floating-ui/dom'
 import type { EditorView } from '@prosekit/pm/view'
 
 import { findAtomEdgeRect } from '../extensions/caret-rect.ts'
+import { getHiddenRunAfter, getHiddenRunBefore } from '../extensions/hidden-run.ts'
 
-import { tryCoordsAtPos } from './caret-coords.ts'
+import { tryCoordsAtPos, type CaretCoords } from './caret-coords.ts'
 import type { PositionRange } from './range.ts'
 
 export type { VirtualElement }
+
+// A range edge against a hidden syntax run has no glyph of its own; the
+// nearest visible glyph past the run's far end carries the line geometry.
+function tryHiddenRunCoords(
+  view: EditorView,
+  pos: number,
+  edge: 'start' | 'end',
+): CaretCoords | undefined {
+  if (edge === 'start') {
+    const run = getHiddenRunAfter(view.state, pos)
+    return run == null ? undefined : tryCoordsAtPos(view, run.to, 1)
+  }
+  const run = getHiddenRunBefore(view.state, pos)
+  return run == null ? undefined : tryCoordsAtPos(view, run.from, -1)
+}
 
 /**
  * Returns a Floating-UI virtual element tracking a document range.
@@ -24,14 +40,17 @@ export function getVirtualElementFromRange(view: EditorView, range: PositionRang
     // at a block boundary has no visible neighbor and yields a bogus
     // zero rect, anchoring the popover at the viewport corner. An edge
     // touching an atom unit (image, wikilink, file) has no measurable glyph on
-    // either side; its preview element is the visible geometry.
+    // either side; its preview element is the visible geometry. An edge
+    // against plain hidden syntax anchors on the visible glyph past the run.
     const start =
       tryCoordsAtPos(view, range.from, 1) ??
       findAtomEdgeRect(view, range.from, 'start') ??
+      tryHiddenRunCoords(view, range.from, 'start') ??
       tryCoordsAtPos(view, range.from, -1)
     const end =
       tryCoordsAtPos(view, range.to, -1) ??
       findAtomEdgeRect(view, range.to, 'end') ??
+      tryHiddenRunCoords(view, range.to, 'end') ??
       tryCoordsAtPos(view, range.to, 1)
     if (start == null || end == null) return lastRect
     const left = Math.min(start.left, end.left)
