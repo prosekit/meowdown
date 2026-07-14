@@ -1,4 +1,4 @@
-import type { EditorExtension } from '@meowdown/core'
+import type { EditorExtension, TypedEditor } from '@meowdown/core'
 import { canUseRegexLookbehind } from '@prosekit/core'
 import { useEditor } from '@prosekit/react'
 import {
@@ -36,6 +36,36 @@ function queryFromRegexMatch(match: RegExpExecArray): string {
 
 interface WikilinkMenuProps {
   onWikilinkSearch: WikilinkSearchHandler
+}
+
+let nextTargetResolutionId = 0
+
+function resolveItemTarget(
+  editor: TypedEditor,
+  item: WikilinkItem,
+  from: number,
+  to: number,
+): void {
+  if (!item.resolveTarget) return
+  const id = `wikilink-target-${++nextTargetResolutionId}`
+  const source = `[[${item.target}]]`
+  if (!editor.commands.trackWikilinkTargetResolution({ id, from, to, source })) return
+
+  let target: string | null | Promise<string | null>
+  try {
+    target = item.resolveTarget(item.target)
+  } catch {
+    editor.commands.discardWikilinkTargetResolution(id)
+    return
+  }
+  void Promise.resolve(target).then(
+    (resolvedTarget) => {
+      editor.commands.settleWikilinkTargetResolution({ id, target: resolvedTarget })
+    },
+    () => {
+      editor.commands.discardWikilinkTargetResolution(id)
+    },
+  )
 }
 
 // Deliberately not shared with TagMenu: the two menus are expected to
@@ -90,7 +120,9 @@ export function WikilinkMenu({ onWikilinkSearch }: WikilinkMenuProps) {
               key={item.target}
               className={styles.Item}
               onSelect={() => {
+                const from = editor.state.selection.from
                 editor.commands.insertText({ text: `[[${item.target}]]` })
+                resolveItemTarget(editor, item, from, editor.state.selection.from)
                 item.onSelect?.()
               }}
             >

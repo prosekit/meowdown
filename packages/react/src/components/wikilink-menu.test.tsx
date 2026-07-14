@@ -200,6 +200,167 @@ describe('WikilinkMenu', () => {
     expect(onSelect).toHaveBeenCalled()
   })
 
+  it('maps an asynchronously resolved target through an edit before the link', async () => {
+    const ref = createRef<EditorHandle>()
+    let resolveTarget!: (target: string | null) => void
+    const richSearch = (): WikilinkItem[] => [
+      {
+        target: 'Jane Smith',
+        resolveTarget: () =>
+          new Promise((resolve) => {
+            resolveTarget = resolve
+          }),
+      },
+    ]
+    await render(<ProseKitEditor ref={ref} onWikilinkSearch={richSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard('Hello @jane')
+    await menu.getByText('Jane Smith').click()
+
+    expect(ref.current?.getMarkdown()).toContain('Hello [[Jane Smith]]')
+    ref.current?.setSelection('start')
+    ref.current?.insertMarkdown('!')
+    resolveTarget('Jane Doe')
+
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toContain('!Hello [[Jane Doe]]')
+    })
+  })
+
+  it('maps other pending links when an earlier target settles first', async () => {
+    const ref = createRef<EditorHandle>()
+    const resolvers = new Map<string, (target: string | null) => void>()
+    const richSearch = (query: string): WikilinkItem[] => {
+      const target = query.toLowerCase().startsWith('jane') ? 'Jane Smith' : 'Ada Lovelace'
+      return [
+        {
+          target,
+          resolveTarget: () =>
+            new Promise((resolve) => {
+              resolvers.set(target, resolve)
+            }),
+        },
+      ]
+    }
+    await render(<ProseKitEditor ref={ref} onWikilinkSearch={richSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard('@jane')
+    await menu.getByText('Jane Smith').click()
+    await userEvent.keyboard(' and @ada')
+    await menu.getByText('Ada Lovelace').click()
+
+    resolvers.get('Jane Smith')?.('Jane Alexandra Doe')
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toContain('[[Jane Alexandra Doe]] and [[Ada Lovelace]]')
+    })
+    resolvers.get('Ada Lovelace')?.('Ada Byron')
+
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toContain('[[Jane Alexandra Doe]] and [[Ada Byron]]')
+    })
+  })
+
+  it('removes only the provisional link when target resolution returns null', async () => {
+    const ref = createRef<EditorHandle>()
+    let resolveTarget!: (target: string | null) => void
+    const richSearch = (): WikilinkItem[] => [
+      {
+        target: 'Jane Smith',
+        resolveTarget: () =>
+          new Promise((resolve) => {
+            resolveTarget = resolve
+          }),
+      },
+    ]
+    await render(<ProseKitEditor ref={ref} onWikilinkSearch={richSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard('Hello @jane')
+    await menu.getByText('Jane Smith').click()
+    ref.current?.insertMarkdown('!')
+
+    resolveTarget(null)
+
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toContain('Hello !')
+      expect(ref.current?.getMarkdown()).not.toContain('Jane Smith')
+    })
+  })
+
+  it('does not overwrite the document after the provisional link is edited away', async () => {
+    const ref = createRef<EditorHandle>()
+    let resolveTarget!: (target: string | null) => void
+    const richSearch = (): WikilinkItem[] => [
+      {
+        target: 'Jane Smith',
+        resolveTarget: () =>
+          new Promise((resolve) => {
+            resolveTarget = resolve
+          }),
+      },
+    ]
+    await render(<ProseKitEditor ref={ref} onWikilinkSearch={richSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard('@jane')
+    await menu.getByText('Jane Smith').click()
+
+    ref.current?.setMarkdown('User edit')
+    resolveTarget('Jane Doe')
+    await new Promise<void>((resolve) => queueMicrotask(resolve))
+
+    expect(ref.current?.getMarkdown()).toBe('User edit\n')
+  })
+
+  it('keeps the provisional link when target resolution rejects', async () => {
+    const ref = createRef<EditorHandle>()
+    let rejectTarget!: (reason: Error) => void
+    const richSearch = (): WikilinkItem[] => [
+      {
+        target: 'Jane Smith',
+        resolveTarget: () =>
+          new Promise((_resolve, reject) => {
+            rejectTarget = reject
+          }),
+      },
+    ]
+    await render(<ProseKitEditor ref={ref} onWikilinkSearch={richSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard('@jane')
+    await menu.getByText('Jane Smith').click()
+
+    rejectTarget(new Error('lookup failed'))
+    await new Promise<void>((resolve) => queueMicrotask(resolve))
+
+    expect(ref.current?.getMarkdown()).toContain('[[Jane Smith]]')
+  })
+
+  it('keeps asynchronous target correction out of undo history', async () => {
+    const ref = createRef<EditorHandle>()
+    let resolveTarget!: (target: string | null) => void
+    const richSearch = (): WikilinkItem[] => [
+      {
+        target: 'Jane Smith',
+        resolveTarget: () =>
+          new Promise((resolve) => {
+            resolveTarget = resolve
+          }),
+      },
+    ]
+    await render(<ProseKitEditor ref={ref} onWikilinkSearch={richSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard('@jane')
+    await menu.getByText('Jane Smith').click()
+    await new Promise<void>((resolve) => setTimeout(resolve, 600))
+
+    resolveTarget('Jane Doe')
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toContain('[[Jane Doe]]')
+    })
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}')
+
+    expect(ref.current?.getMarkdown()).not.toContain('Jane Doe')
+    expect(ref.current?.getMarkdown()).not.toContain('Jane Smith')
+  })
+
   it('keeps long rows within the menu width', async () => {
     const longTitle = 'A very long note title '.repeat(12)
     const richSearch = (): WikilinkItem[] => [

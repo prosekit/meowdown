@@ -145,6 +145,10 @@ export {
   type WikilinkHoverHandler,
   type WikilinkHoverHit,
 } from './extensions/wikilink-hover.ts'
+export type {
+  SettleWikilinkTargetResolutionOptions,
+  TrackWikilinkTargetResolutionOptions,
+} from './extensions/wikilink-target-resolution.ts'
 export { defineWikilinkTrigger } from './extensions/wikilink-trigger.ts'
 export type { PositionRange } from './utils/range.ts'
 export { getSelectedText } from './utils/selected-text.ts'

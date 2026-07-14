@@ -167,6 +167,13 @@ export interface WikilinkItem {
   label?: string
   /** Secondary text shown beside the label. */
   detail?: string
+  /**
+   * Resolves the final target after the provisional link is inserted. A
+   * different target replaces only that mapped link; null removes it. If the
+   * resolver rejects or the user edits the provisional link first, its text
+   * is left unchanged.
+   */
+  resolveTarget?: (target: string) => string | null | Promise<string | null>
   /** Side effect run after the link is inserted (e.g. create the note). */
   onSelect?: () => void
 }

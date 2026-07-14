@@ -38,6 +38,7 @@ import { defineScrollToSelection } from './scroll-to-selection.ts'
 import { defineSelectDocBoundary } from './select-doc-boundary.ts'
 import { defineTable } from './table.ts'
 import { defineVirtualCaret } from './virtual-caret.ts'
+import { defineWikilinkTargetResolution } from './wikilink-target-resolution.ts'
 import { defineWikilink } from './wikilink.ts'
 
 function defineEditorExtensionImpl(options: EditorExtensionOptions) {
@@ -86,6 +87,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineModClickPrevention(),
     defineEditorCommands(),
     definePendingReplacement(),
+    defineWikilinkTargetResolution(),
   )
 }
 
