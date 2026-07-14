@@ -126,7 +126,13 @@ describe('wikilink inline parser', () => {
   })
 
   it('parses ![[embed]] as a WikiEmbed, not a Wikilink', () => {
-    expect(formatTree('![[embed]]')).toMatchInlineSnapshot()
+    expect(formatTree('![[embed]]')).toMatchInlineSnapshot(`
+      """
+      WikiEmbed [0, 10] "![[embed]]"
+        WikiEmbedMark [0, 3] "![["
+        WikiEmbedMark [8, 10] "]]"
+      """
+    `)
   })
 
   it('is never produced by gfmBlockOnlyParser', () => {

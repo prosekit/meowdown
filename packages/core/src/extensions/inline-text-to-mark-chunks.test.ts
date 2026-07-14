@@ -907,33 +907,48 @@ describe('file link', () => {
   })
 
   it('names an empty label after the href basename', () => {
-    expect(
-      parse('[](assets/q3%20report.pdf)', { resolveFileLink: claimAssets }),
-    ).toMatchInlineSnapshot()
+    expect(parse('[](assets/q3%20report.pdf)', { resolveFileLink: claimAssets }))
+      .toMatchInlineSnapshot(`
+      "
+      [0, 26] mdFile(href=assets/q3%20report.pdf,name=q3 report.pdf)
+      "
+    `)
   })
 
   it('strips query and hash from the basename', () => {
-    expect(
-      parse('[](assets/report.pdf?v=2#page)', { resolveFileLink: claimAssets }),
-    ).toMatchInlineSnapshot()
+    expect(parse('[](assets/report.pdf?v=2#page)', { resolveFileLink: claimAssets }))
+      .toMatchInlineSnapshot(`
+      "
+      [0, 30] mdFile(href=assets/report.pdf?v=2#page,name=report.pdf)
+      "
+    `)
   })
 
   it('keeps the raw segment when decoding fails', () => {
-    expect(
-      parse('[](assets/%E0%A4%A.pdf)', { resolveFileLink: claimAssets }),
-    ).toMatchInlineSnapshot()
+    expect(parse('[](assets/%E0%A4%A.pdf)', { resolveFileLink: claimAssets }))
+      .toMatchInlineSnapshot(`
+      "
+      [0, 23] mdFile(href=assets/%E0%A4%A.pdf,name=%E0%A4%A.pdf)
+      "
+    `)
   })
 
   it('keeps a nested label as its raw slice', () => {
-    expect(
-      parse('[**final** report.pdf](assets/report.pdf)', { resolveFileLink: claimAssets }),
-    ).toMatchInlineSnapshot()
+    expect(parse('[**final** report.pdf](assets/report.pdf)', { resolveFileLink: claimAssets }))
+      .toMatchInlineSnapshot(`
+      "
+      [0, 41] mdFile(href=assets/report.pdf,name=**final** report.pdf)
+      "
+    `)
   })
 
   it('passes the title through', () => {
-    expect(
-      parse('[report.pdf](assets/report.pdf "Quarterly")', { resolveFileLink: claimAssets }),
-    ).toMatchInlineSnapshot()
+    expect(parse('[report.pdf](assets/report.pdf "Quarterly")', { resolveFileLink: claimAssets }))
+      .toMatchInlineSnapshot(`
+      "
+      [0, 43] mdFile(href=assets/report.pdf,name=report.pdf,title=Quarterly)
+      "
+    `)
   })
 
   it('claims only what the resolver claims in mixed content', () => {
@@ -956,9 +971,14 @@ describe('file link', () => {
   })
 
   it('keeps parent marks inside emphasis', () => {
-    expect(
-      parse('*[report.pdf](assets/report.pdf)*', { resolveFileLink: claimAssets }),
-    ).toMatchInlineSnapshot()
+    expect(parse('*[report.pdf](assets/report.pdf)*', { resolveFileLink: claimAssets }))
+      .toMatchInlineSnapshot(`
+      "
+      [0, 1]   mdPack(key=italic) + mdEm + mdMark
+      [1, 32]  mdPack(key=italic) + mdEm + mdFile(href=assets/report.pdf,name=report.pdf)
+      [32, 33] mdPack(key=italic) + mdEm + mdMark
+      "
+    `)
   })
 
   it('never consults the resolver for images, autolinks, or linkless shapes', () => {
