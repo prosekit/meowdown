@@ -62,7 +62,8 @@ const FILE_KIND_BY_EXTENSION: ReadonlyMap<string, string> = new Map([
   ['md', 'text'],
 ])
 
-function fileKind(href: string): string {
+/** Classify a file destination for the pill's `data-file-kind` attribute. */
+export function getFileKind(href: string): string {
   const path = href.split(/[?#]/, 1)[0]
   const dot = path.lastIndexOf('.')
   if (dot < 0) return 'generic'
@@ -113,7 +114,7 @@ class FileMarkView implements MarkView {
     this.#preview.className = 'md-file-view-preview md-atom-view-preview'
     this.#preview.contentEditable = 'false'
     this.#preview.dataset.testid = 'file-pill'
-    this.#preview.dataset.fileKind = fileKind(this.#attrs.href)
+    this.#preview.dataset.fileKind = getFileKind(this.#attrs.href)
     // Tooltip fallback for a name the pill truncates with an ellipsis.
     this.#preview.title = this.#attrs.name
     this.#dom.appendChild(this.#preview)
@@ -190,8 +191,8 @@ class FileMarkView implements MarkView {
 }
 
 /**
- * Render a claimed file link (the `mdFile` mark, see `resolveFileLink`) as an
- * inline pill: a file-kind icon, the file name, and the size once
+ * Render a claimed file link or wiki embed (the `mdFile` mark) as an inline
+ * pill: a file-kind icon, the file name, and the size once
  * `resolveFileInfo` supplies it. The pill never loads the file's content;
  * clicks are reported through `defineFileClickHandler`.
  */

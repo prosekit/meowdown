@@ -53,6 +53,13 @@ export interface EditorHandle {
    */
   setState: (markdown?: string, selection?: SelectionHint) => void
 
+  /**
+   * Reparse the current Markdown with the editor's creation-time resolvers,
+   * preserving the selection without adding an undo-history entry. Hosts use
+   * this when data consulted by a stable resolver changes out of band.
+   */
+  refreshMarkdownRendering: () => void
+
   /** Returns the current selection. */
   getSelection: () => SelectionJSON
 
@@ -64,6 +71,13 @@ export interface EditorHandle {
 
   /** Scrolls the selection into view. */
   scrollIntoView: () => void
+
+  /**
+   * Moves the selection to the first heading matching a decoded `#fragment`
+   * (case-insensitive, with whitespace collapsed) and scrolls it into view.
+   * Returns `false` when no heading matches.
+   */
+  revealHeading: (fragment: string) => boolean
 
   /**
    * The current selection as Markdown: block structure (list markers,

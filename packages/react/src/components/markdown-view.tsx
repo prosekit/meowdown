@@ -1,5 +1,7 @@
 import {
   defaultResolveImageUrl,
+  formatFileSize,
+  getFileKind,
   getCodeTokens,
   getMarkBuilders,
   inlineTextToMarkChunks,
@@ -9,6 +11,9 @@ import {
   type CodeBlockAttrs,
   type CodeToken,
   type EmbedDescriptor,
+  type FileClickHandler,
+  type FileInfoResolver,
+  type FileLinkResolver,
   type ImageClickHandler,
   type LinkClickHandler,
   type ListMarker,
@@ -16,11 +21,13 @@ import {
   type MarkMode,
   type MarkName,
   type MdImageAttrs,
+  type MdFileAttrs,
   type MdLinkTextAttrs,
   type MdMathAttrs,
   type MdWikilinkAttrs,
   type MeowdownListAttrs,
   type NodeName,
+  type WikiEmbedResolver,
   type WikilinkClickHandler,
 } from '@meowdown/core'
 import type { DOMOutputSpec } from '@prosekit/pm/model'
@@ -85,7 +92,7 @@ export interface MarkdownViewProps {
   /** Peel a leading YAML frontmatter block before rendering. Off by default. */
   frontmatter?: boolean
   /**
-   * Whether rendered links, images, and task checkboxes can be activated.
+   * Whether rendered links, images, file pills, and task checkboxes can be activated.
    * Defaults to `true`. When `false`, callbacks are ignored, the rendered tree
    * contains no anchors or focusable task controls, and recognized tweet and
    * YouTube embeds are omitted before any image resolver runs.
@@ -93,12 +100,23 @@ export interface MarkdownViewProps {
   interactive?: boolean
   /** Map an image `src` to a displayable URL, or `undefined` to skip it. */
   resolveImageUrl?: (src: string) => string | undefined
+  /**
+   * Claim a `[label](url)` link as a file pill instead of a regular link.
+   * Must be pure; return `false` for links that should render normally.
+   */
+  resolveFileLink?: FileLinkResolver
+  /** Classify `![[target]]` as an image, file, or note; unresolved source stays literal. */
+  resolveWikiEmbed?: WikiEmbedResolver
+  /** Resolve metadata shown on a file pill. */
+  resolveFileInfo?: FileInfoResolver
   /** Called when a rendered wikilink is clicked. Pass a stable function. */
   onWikilinkClick?: WikilinkClickHandler
   /** Called when a rendered Markdown link is clicked. Pass a stable function. */
   onLinkClick?: LinkClickHandler
   /** Called when a rendered image is clicked. Pass a stable function. */
   onImageClick?: ImageClickHandler
+  /** Called when a rendered file pill is clicked. Pass a stable function. */
+  onFileClick?: FileClickHandler
   /** Called when a rendered task checkbox is clicked. Pass a stable function. */
   onTaskClick?: TaskClickHandler
   /** Extra class on the content root (alongside `ProseMirror meowdown-content`). */
@@ -108,9 +126,13 @@ export interface MarkdownViewProps {
 interface RenderContext {
   interactive: boolean
   resolveImageUrl?: (src: string) => string | undefined
+  resolveFileLink?: FileLinkResolver
+  resolveWikiEmbed?: WikiEmbedResolver
+  resolveFileInfo?: FileInfoResolver
   onWikilinkClick?: WikilinkClickHandler
   onLinkClick?: LinkClickHandler
   onImageClick?: ImageClickHandler
+  onFileClick?: FileClickHandler
   onTaskClick?: TaskClickHandler
   /** Document-order checkbox counter feeding {@link TaskClickPayload.index}. */
   taskCounter: { value: number }
@@ -263,6 +285,78 @@ function ImageView(props: {
   )
 }
 
+function FileView(props: {
+  href: string
+  name: string
+  context: RenderContext
+  children: ReactNode
+}): ReactElement {
+  const { href, name, context, children } = props
+  const resolveFileInfo = context.resolveFileInfo
+  const [resolvedSize, setResolvedSize] = useState<{
+    href: string
+    resolver: FileInfoResolver
+    text: string
+  }>()
+  useEffect(() => {
+    if (!resolveFileInfo) return
+    let active = true
+    const load = async (): Promise<void> => {
+      try {
+        const info = await resolveFileInfo(href)
+        if (!active || info?.size == null || !Number.isFinite(info.size) || info.size < 0) return
+        setResolvedSize({ href, resolver: resolveFileInfo, text: formatFileSize(info.size) })
+      } catch (error) {
+        console.error('[meowdown] resolveFileInfo failed:', error)
+      }
+    }
+    void load()
+    return () => {
+      active = false
+    }
+  }, [resolveFileInfo, href])
+
+  const size =
+    resolvedSize?.href === href && resolvedSize.resolver === resolveFileInfo
+      ? resolvedSize.text
+      : ''
+
+  const handleClick = context.onFileClick
+    ? (event: MouseEvent) => context.onFileClick?.({ href, name, event: event.nativeEvent })
+    : undefined
+  return (
+    <span className="md-file-view md-atom-view">
+      <span
+        className="md-file-view-preview md-atom-view-preview"
+        data-testid="file-pill"
+        data-file-kind={getFileKind(href)}
+        contentEditable={false}
+        title={name}
+        onClick={handleClick}
+      >
+        <svg
+          className="md-file-view-icon"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+          <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+        </svg>
+        <span className="md-file-view-name">{name}</span>
+        <span className="md-file-view-size" data-testid="file-pill-size">
+          {size}
+        </span>
+      </span>
+      <span className="md-file-view-content md-atom-view-content">{children}</span>
+    </span>
+  )
+}
+
 function renderTokens(code: string, tokens: readonly CodeToken[]): ReactNode {
   const out: ReactNode[] = []
   let pos = 0
@@ -371,6 +465,14 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
         </ImageView>
       )
     }
+    case 'mdFile': {
+      const attrs = mark.attrs as MdFileAttrs
+      return (
+        <FileView href={attrs.href} name={attrs.name} context={context}>
+          {children}
+        </FileView>
+      )
+    }
     case 'mdMath': {
       const attrs = mark.attrs as MdMathAttrs
       return <MathView formula={attrs.formula}>{children}</MathView>
@@ -438,7 +540,10 @@ function renderRuns(
 function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode {
   const text = node.textContent
   if (!text) return null
-  const chunks: readonly MarkChunk[] = inlineTextToMarkChunks(getMarkBuilders(), text)
+  const chunks: readonly MarkChunk[] = inlineTextToMarkChunks(getMarkBuilders(), text, {
+    resolveFileLink: context.resolveFileLink,
+    resolveWikiEmbed: context.resolveWikiEmbed,
+  })
   // Sort each chunk's marks into ProseMirror's canonical order so the grouping
   // and nesting match the editor.
   const runs = chunks.map(
@@ -522,7 +627,7 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
  * and CSS (the root carries `ProseMirror` + `data-mark-mode` so the existing
  * stylesheet applies). Requires a DOM environment.
  *
- * Callbacks (`onWikilinkClick`, etc.) should be stable; pass them via
+ * Callbacks (`onWikilinkClick`, etc.) and resolvers should be stable; pass them via
  * `useCallback` to avoid re-rendering the whole tree.
  */
 export function MarkdownView({
@@ -531,9 +636,13 @@ export function MarkdownView({
   frontmatter = false,
   interactive = true,
   resolveImageUrl,
+  resolveFileLink,
+  resolveWikiEmbed,
+  resolveFileInfo,
   onWikilinkClick,
   onLinkClick,
   onImageClick,
+  onFileClick,
   onTaskClick,
   className,
 }: MarkdownViewProps): ReactElement {
@@ -542,9 +651,13 @@ export function MarkdownView({
     const context: RenderContext = {
       interactive,
       resolveImageUrl,
+      resolveFileLink,
+      resolveWikiEmbed,
+      resolveFileInfo,
       onWikilinkClick: interactive ? onWikilinkClick : undefined,
       onLinkClick: interactive ? onLinkClick : undefined,
       onImageClick: interactive ? onImageClick : undefined,
+      onFileClick: interactive ? onFileClick : undefined,
       onTaskClick: interactive ? onTaskClick : undefined,
       taskCounter: { value: 0 },
       keyCounter: { value: 0 },
@@ -555,9 +668,13 @@ export function MarkdownView({
     frontmatter,
     interactive,
     resolveImageUrl,
+    resolveFileLink,
+    resolveWikiEmbed,
+    resolveFileInfo,
     onWikilinkClick,
     onLinkClick,
     onImageClick,
+    onFileClick,
     onTaskClick,
   ])
 

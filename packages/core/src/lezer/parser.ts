@@ -5,6 +5,7 @@ import { hashtag } from './hashtag.ts'
 import { highlight } from './highlight.ts'
 import { math } from './math.ts'
 import { schemeAutolink } from './scheme-autolink.ts'
+import { wikiEmbed } from './wiki-embed.ts'
 import { wikilink } from './wikilink.ts'
 
 /**
@@ -28,6 +29,7 @@ function consumeAllInline(cx: InlineContext): number {
 export const gfmParser = defaultParser.configure([
   GFM,
   hashtag,
+  wikiEmbed,
   wikilink,
   bareAutolink,
   schemeAutolink,

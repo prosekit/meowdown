@@ -12,6 +12,7 @@ import { getMarkRangeAt } from './get-mark-range-at.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import { formatMagicComment, parseMagicComment, stripMagicComment } from './magic-comment.ts'
 import type { MarkName } from './mark-names.ts'
+import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
 
 type ImageUrlResolver = (src: string) => string | undefined
 
@@ -95,6 +96,15 @@ function commitImageSize(
   const range = getMarkRangeAt(view.state, pos, 'mdImage')
   if (!range) return
   const current = view.state.doc.textBetween(range.from, range.to)
+  const attrs = range.mark.attrs as MdImageAttrs
+
+  if (attrs.syntax === 'wikiEmbed') {
+    const target = attrs.wikiTarget || parseWikiEmbed(current).target
+    if (!target) return
+    const next = formatSizedWikiEmbed(target, rawWidth, rawHeight)
+    if (next !== current) view.dispatch(view.state.tr.insertText(next, range.from, range.to))
+    return
+  }
 
   // Split the range into the `![alt](url)` source and its optional comment;
   // positions in a textblock are 1:1 with characters, so `from + base.length` is

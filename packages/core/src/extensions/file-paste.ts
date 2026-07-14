@@ -5,29 +5,37 @@ import type { EditorView } from '@prosekit/pm/view'
 export type FilePasteHandler = (file: File) => string | undefined | Promise<string | undefined>
 export type FileSaveErrorHandler = (error: unknown, file: File) => void
 
+const IMAGE_FILE_EXTENSIONS = new Set(['avif', 'bmp', 'gif', 'jpeg', 'jpg', 'png', 'svg', 'webp'])
+
 /** Options for {@link defineFilePaste}. */
 export interface FilePasteOptions {
   /**
    * Persist a pasted/dropped file and return its markdown destination, or
    * `undefined` to decline (nothing is inserted, but the event is consumed).
-   * An image (`image/*` MIME type) inserts `![](src)`; any other file inserts
-   * a `[name](src)` link.
+   * An image (`image/*` MIME type or a recognized image filename extension)
+   * inserts `![](src)`; any other file inserts a `[name](src)` link.
    */
   onFilePaste?: FilePasteHandler
   /** Called when persisting a pasted/dropped file throws. Defaults to `console.error`. */
   onFileSaveError?: FileSaveErrorHandler
 }
 
-function isImageFile(file: { type?: string }): boolean {
-  return !!file.type?.startsWith('image/')
+function isImageFile(file: { name: string; type?: string }): boolean {
+  if (file.type?.startsWith('image/')) return true
+
+  const extensionSeparator = file.name.lastIndexOf('.')
+  if (extensionSeparator === -1) return false
+
+  const extension = file.name.slice(extensionSeparator + 1).toLowerCase()
+  return IMAGE_FILE_EXTENSIONS.has(extension)
 }
 
 /**
  * The markdown a saved file becomes: `![](destination)` for an image (a
- * `type` starting with `image/`), a `[name](destination)` link otherwise,
- * with `\`, `[`, and `]` escaped in the name. Exported so a host command that
- * inserts file links itself (e.g. an attach-file picker) produces markdown
- * byte-identical to a paste/drop.
+ * `type` starting with `image/` or a recognized image filename extension), a
+ * `[name](destination)` link otherwise, with `\`, `[`, and `]` escaped in the
+ * name. Exported so a host command that inserts file links itself (e.g. an
+ * attach-file picker) produces markdown byte-identical to a paste/drop.
  */
 export function buildFileMarkdown(
   file: { name: string; type?: string },

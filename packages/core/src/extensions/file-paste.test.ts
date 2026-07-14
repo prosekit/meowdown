@@ -23,6 +23,10 @@ function png(name: string): File {
   return new File(['png'], name, { type: 'image/png' })
 }
 
+function fileWithoutMime(name: string): File {
+  return new File(['file'], name)
+}
+
 describe('file paste', () => {
   it('inserts a [name](src) link for a pasted non-image file', async () => {
     const onFilePaste = vi.fn((file: File) => `saved://${file.name}`)
@@ -91,6 +95,14 @@ describe('file paste', () => {
       expect.objectContaining({ name: 'cat.png' }),
     )
   })
+
+  it('inserts image syntax for a pasted AVIF with no MIME type', async () => {
+    using fixture = setup({ onFilePaste: (file) => `saved://${file.name}` })
+    pasteFiles(fixture.view, [fileWithoutMime('photo.avif')])
+    await vi.waitFor(() => {
+      expect(fixture.doc.textContent).toBe('![](saved://photo.avif)')
+    })
+  })
 })
 
 describe('file drop', () => {
@@ -137,6 +149,15 @@ describe('file drop', () => {
     // The links round-trip to markdown one per line.
     expect(docToMarkdown(fixture.doc)).toBe(expected + '\n')
   })
+
+  it('inserts image syntax for a dropped SVG with an incorrect MIME type', async () => {
+    using fixture = setup({ onFilePaste: (file) => `saved://${file.name}` })
+    const svg = new File(['<svg/>'], 'diagram.svg', { type: 'application/octet-stream' })
+    dropFiles(fixture.view, [svg], 1)
+    await vi.waitFor(() => {
+      expect(fixture.doc.textContent).toBe('![](saved://diagram.svg)')
+    })
+  })
 })
 
 describe('buildFileMarkdown', () => {
@@ -146,11 +167,26 @@ describe('buildFileMarkdown', () => {
     )
   })
 
+  it('falls back to recognized image extensions case-insensitively', () => {
+    expect(buildFileMarkdown({ name: 'photo.AVIF' }, 'assets/photo.AVIF')).toBe(
+      '![](assets/photo.AVIF)',
+    )
+    expect(
+      buildFileMarkdown(
+        { name: 'diagram.svg', type: 'application/octet-stream' },
+        'assets/diagram.svg',
+      ),
+    ).toBe('![](assets/diagram.svg)')
+  })
+
   it('builds a link for any other file, with or without a type', () => {
     expect(buildFileMarkdown({ name: 'a.pdf', type: 'application/pdf' }, 'assets/a.pdf')).toBe(
       '[a.pdf](assets/a.pdf)',
     )
     expect(buildFileMarkdown({ name: 'a.pdf' }, 'assets/a.pdf')).toBe('[a.pdf](assets/a.pdf)')
+    expect(buildFileMarkdown({ name: 'image.tiff' }, 'assets/image.tiff')).toBe(
+      '[image.tiff](assets/image.tiff)',
+    )
   })
 
   it('escapes backslashes and brackets in the name', () => {

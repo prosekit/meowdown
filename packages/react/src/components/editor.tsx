@@ -13,6 +13,7 @@ import type {
   PlaceholderOptions,
   StartPendingReplacementOptions,
   TagClickHandler,
+  WikiEmbedResolver,
   WikilinkClickHandler,
 } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
@@ -170,6 +171,13 @@ export interface EditorProps {
   resolveFileLink?: FileLinkResolver
 
   /**
+   * Classifies `![[target]]` as an image, file, or note atom. Return
+   * `undefined` for missing or ambiguous targets to leave the source literal
+   * and editable. Must be pure and is read once when the editor is created.
+   */
+  resolveWikiEmbed?: WikiEmbedResolver
+
+  /**
    * Resolves the metadata (file size in bytes) shown on a file pill, directly
    * or as a promise; the pill renders immediately and fills the size in when
    * the promise settles. May be called repeatedly for the same `href`, so
@@ -292,6 +300,7 @@ export function MeowdownEditor({
   onExitBoundary,
   resolveImageUrl,
   resolveFileLink,
+  resolveWikiEmbed,
   resolveFileInfo,
   onFileClick,
   onFilePaste,
@@ -331,6 +340,9 @@ export function MeowdownEditor({
     function setState(markdown?: string, selection?: SelectionHint): void {
       childRef.current?.setState(markdown, selection)
     }
+    function refreshMarkdownRendering(): void {
+      childRef.current?.refreshMarkdownRendering()
+    }
     function getSelection(): SelectionJSON {
       return childRef.current?.getSelection() ?? { type: 'text', anchor: 0, head: 0 }
     }
@@ -342,6 +354,9 @@ export function MeowdownEditor({
     }
     function scrollIntoView(): void {
       childRef.current?.scrollIntoView()
+    }
+    function revealHeading(fragment: string): boolean {
+      return childRef.current?.revealHeading(fragment) ?? false
     }
     function getSelectedText(): string {
       return childRef.current?.getSelectedText() ?? ''
@@ -367,10 +382,12 @@ export function MeowdownEditor({
       insertMarkdown,
       getState,
       setState,
+      refreshMarkdownRendering,
       getSelection,
       setSelection,
       focus,
       scrollIntoView,
+      revealHeading,
       getSelectedText,
       openSelectionMenu,
       startPendingReplacement,
@@ -404,6 +421,7 @@ export function MeowdownEditor({
         onExitBoundary={onExitBoundary}
         resolveImageUrl={resolveImageUrl}
         resolveFileLink={resolveFileLink}
+        resolveWikiEmbed={resolveWikiEmbed}
         resolveFileInfo={resolveFileInfo}
         onFileClick={onFileClick}
         onFilePaste={onFilePaste}

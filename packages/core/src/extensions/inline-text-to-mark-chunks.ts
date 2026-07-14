@@ -17,6 +17,7 @@ import type { MarkChunk } from './mark-chunk.ts'
 import type { MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
 import type { TypedMarkBuilders } from './schema.ts'
+import { parseWikiEmbed, wikiEmbedBasename, type WikiEmbedOptions } from './wiki-embed.ts'
 import { parseWikilink } from './wikilink.ts'
 
 /**
@@ -70,6 +71,9 @@ export interface FileLinkOptions {
   resolveFileLink?: FileLinkResolver
 }
 
+/** Host options that influence source-backed inline atom parsing. */
+export type InlineMarkOptions = FileLinkOptions & WikiEmbedOptions
+
 /**
  * Walk a textblock's inline content and produce a list of mark chunks
  * with positions relative to the start of `text` (i.e. zero-based).
@@ -81,7 +85,7 @@ export function inlineTextToMarkChunks(
   /** The raw inline text of one textblock (no block prefix). */
   text: string,
   /** Host options; omit for the default parse. */
-  options?: FileLinkOptions,
+  options?: InlineMarkOptions,
 ): MarkChunk[] {
   const elements = parseInline(text)
   const out: MarkChunk[] = []
@@ -102,7 +106,7 @@ function walk(
   text: string,
   marks: TypedMarkBuilders,
   out: MarkChunk[],
-  options: FileLinkOptions | undefined,
+  options: InlineMarkOptions | undefined,
 ): void {
   let pos = rangeStart
   for (let index = 0; index < nodes.length; index++) {
@@ -116,7 +120,7 @@ function walk(
       if (fileMarks) {
         emit(out, node.from, node.to, fileMarks)
       } else {
-        walkLink(node, parentMarks, text, marks, out)
+        walkLink(node, parentMarks, text, marks, out, options)
       }
     } else if (type === LEZER_NODE_IDS.Image) {
       const trailing = takeMagicComment(node, nodes[index + 1], text)
@@ -126,6 +130,8 @@ function walk(
       continue
     } else if (type === LEZER_NODE_IDS.Wikilink) {
       walkWikilink(node, parentMarks, text, marks, out)
+    } else if (type === LEZER_NODE_IDS.WikiEmbed) {
+      walkWikiEmbed(node, parentMarks, text, marks, out, options)
     } else if (type === LEZER_NODE_IDS.InlineMath) {
       walkMath(node, parentMarks, text, marks, out)
     } else if (type === LEZER_NODE_IDS.URL) {
@@ -228,7 +234,7 @@ function claimFileLink(
   parentMarks: readonly Mark[],
   text: string,
   marks: TypedMarkBuilders,
-  options: FileLinkOptions | undefined,
+  options: InlineMarkOptions | undefined,
 ): readonly Mark[] | undefined {
   const resolveFileLink = options?.resolveFileLink
   if (!resolveFileLink) return undefined
@@ -266,6 +272,7 @@ function walkLink(
   text: string,
   marks: TypedMarkBuilders,
   out: MarkChunk[],
+  options: InlineMarkOptions | undefined,
 ): void {
   const { labelTo: labelEnd, urlNode, titleNode } = scanLinkParts(node)
   const href = urlNode ? text.slice(urlNode.from, urlNode.to) : ''
@@ -290,6 +297,11 @@ function walkLink(
       pos = child.to
       continue
     }
+    if (child.type === LEZER_NODE_IDS.WikiEmbed) {
+      walkWikiEmbed(child, baseForChild, text, marks, out, options)
+      pos = child.to
+      continue
+    }
     const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(child.type)
     const childMarks = maybeMarkName
       ? [...baseForChild, marks[maybeMarkName].create()]
@@ -297,8 +309,9 @@ function walkLink(
     if (child.children.length === 0) {
       emit(out, child.from, child.to, childMarks)
     } else {
-      // No options: a link label cannot contain another `[label](url)` link.
-      walk(child.children, childMarks, child.from, child.to, text, marks, out, undefined)
+      // A link label cannot contain another `[label](url)` link, but custom
+      // atom syntax inside the label still uses the host resolvers.
+      walk(child.children, childMarks, child.from, child.to, text, marks, out, options)
     }
     pos = child.to
   }
@@ -343,7 +356,7 @@ function walkImage(
   if (!urlNode) {
     // A reference image `![alt][id]` has no `URL` child; fall back to the link
     // walk, which renders nothing yet.
-    walkLink(node, parentMarks, text, marks, out)
+    walkLink(node, parentMarks, text, marks, out, undefined)
     return
   }
 
@@ -360,7 +373,15 @@ function walkImage(
 
   emit(out, node.from, to, [
     ...parentMarks,
-    marks.mdImage.create({ src, alt, title, width, height }),
+    marks.mdImage.create({
+      src,
+      alt,
+      title,
+      width,
+      height,
+      syntax: null,
+      wikiTarget: null,
+    }),
   ])
 }
 
@@ -407,6 +428,59 @@ function walkWikilink(
 ): void {
   const { target, display } = parseWikilink(text.slice(node.from, node.to))
 
+  emit(out, node.from, node.to, [...parentMarks, marks.mdWikilink.create({ target, display })])
+}
+
+/**
+ * Resolve `![[target]]` into one of Meowdown's existing source-backed atoms.
+ * An absent resolver, ambiguity, or any other unresolved target deliberately
+ * emits plain source text so the embed remains literal and editable.
+ */
+function walkWikiEmbed(
+  node: InlineElement,
+  parentMarks: readonly Mark[],
+  text: string,
+  marks: TypedMarkBuilders,
+  out: MarkChunk[],
+  options: WikiEmbedOptions | undefined,
+): void {
+  const embed = parseWikiEmbed(text.slice(node.from, node.to))
+  const resolution = options?.resolveWikiEmbed?.(embed)
+  if (!resolution) {
+    emit(out, node.from, node.to, parentMarks)
+    return
+  }
+
+  if (resolution.kind === 'image') {
+    const src = resolution.src ?? embed.target
+    const alt = (resolution.alt ?? embed.display) || wikiEmbedBasename(embed.target)
+    emit(out, node.from, node.to, [
+      ...parentMarks,
+      marks.mdImage.create({
+        src,
+        alt,
+        title: '',
+        width: embed.width,
+        height: embed.height,
+        syntax: 'wikiEmbed',
+        wikiTarget: embed.target,
+      }),
+    ])
+    return
+  }
+
+  if (resolution.kind === 'file') {
+    const href = resolution.href ?? embed.target
+    const name = (resolution.name ?? embed.display) || wikiEmbedBasename(embed.target)
+    emit(out, node.from, node.to, [
+      ...parentMarks,
+      marks.mdFile.create({ href, name, title: resolution.title ?? '' }),
+    ])
+    return
+  }
+
+  const target = resolution.target ?? embed.target
+  const display = resolution.display ?? embed.display
   emit(out, node.from, node.to, [...parentMarks, marks.mdWikilink.create({ target, display })])
 }
 

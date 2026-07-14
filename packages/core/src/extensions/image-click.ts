@@ -38,7 +38,7 @@ function findImageForPreview(view: EditorView, preview: HTMLElement): ImageHit |
 
 /** Payload for {@link ImageClickHandler}. */
 export interface ImageClickPayload {
-  /** The markdown `src`, exactly as written in `![alt](src)`. */
+  /** The resolved source from `![alt](src)` or a claimed `![[target]]`. */
   src: string
   /** The image alt text. */
   alt: string
