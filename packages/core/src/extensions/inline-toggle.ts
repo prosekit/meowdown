@@ -162,7 +162,7 @@ function addEdits(
   to: number,
   spec: ToggleSpec,
 ): TextEdit[] {
-  for (let width = 0; width !== to - from; ) {
+  for (let width = 0; width !== to - from;) {
     width = to - from
     ;[from, to] = expandForWrap(tree, from, to)
     for (const span of spans) {

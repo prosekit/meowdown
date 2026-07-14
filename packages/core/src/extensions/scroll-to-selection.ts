@@ -79,7 +79,7 @@ function scrollRectIntoView(view: EditorView, rect: Rect, startDOM: Node): void 
   const scrollThreshold: Sides = view.someProp('scrollThreshold') ?? 0
   const scrollMargin: Sides = view.someProp('scrollMargin') ?? 5
   const doc = view.dom.ownerDocument
-  for (let parent: Node | null = startDOM; parent; ) {
+  for (let parent: Node | null = startDOM; parent;) {
     if (parent.nodeType !== 1) {
       parent = parentNode(parent)
       continue
