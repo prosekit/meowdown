@@ -107,7 +107,6 @@ describe('LinkMenu', () => {
     await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
     await expect.element(popover.getByTestId('link-popover-edit')).toBeVisible()
 
-    // The popover is positioned asynchronously; poll until it settles.
     await vi.waitFor(() => {
       const linkRect = wikilink.element().getBoundingClientRect()
       const popRect = popover.element().getBoundingClientRect()

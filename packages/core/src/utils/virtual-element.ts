@@ -11,12 +11,9 @@ export type { VirtualElement }
 
 // A range edge against a hidden syntax run has no glyph of its own; the
 // nearest visible glyph past the run's far end carries the line geometry.
-function tryHiddenRunCoords(
-  view: EditorView,
-  pos: number,
-  edge: 'start' | 'end',
-): CaretCoords | undefined {
-  if (edge === 'start') {
+// `side` points into the range, like `coordsAtPos`.
+function tryHiddenRunCoords(view: EditorView, pos: number, side: -1 | 1): CaretCoords | undefined {
+  if (side === 1) {
     const run = getHiddenRunAfter(view.state, pos)
     return run == null ? undefined : tryCoordsAtPos(view, run.to, 1)
   }
@@ -29,7 +26,7 @@ function tryHiddenRunCoords(
  *
  * Positioning libraries re-measure asynchronously (resize observers, animation
  * frames), so a measurement can fire after the view is destroyed or the range
- * no longer resolves — those return the last known rect instead of throwing.
+ * no longer resolves; those return the last known rect instead of throwing.
  */
 export function getVirtualElementFromRange(view: EditorView, range: PositionRange): VirtualElement {
   let lastRect = new DOMRect(0, 0, 0, 0)
@@ -44,15 +41,16 @@ export function getVirtualElementFromRange(view: EditorView, range: PositionRang
     // against plain hidden syntax anchors on the visible glyph past the run.
     const start =
       tryCoordsAtPos(view, range.from, 1) ??
-      findAtomEdgeRect(view, range.from, 'start') ??
-      tryHiddenRunCoords(view, range.from, 'start') ??
+      findAtomEdgeRect(view, range.from, 1) ??
+      tryHiddenRunCoords(view, range.from, 1) ??
       tryCoordsAtPos(view, range.from, -1)
+    if (start == null) return lastRect
     const end =
       tryCoordsAtPos(view, range.to, -1) ??
-      findAtomEdgeRect(view, range.to, 'end') ??
-      tryHiddenRunCoords(view, range.to, 'end') ??
+      findAtomEdgeRect(view, range.to, -1) ??
+      tryHiddenRunCoords(view, range.to, -1) ??
       tryCoordsAtPos(view, range.to, 1)
-    if (start == null || end == null) return lastRect
+    if (end == null) return lastRect
     const left = Math.min(start.left, end.left)
     const right = Math.max(start.right, end.right)
     const top = Math.min(start.top, end.top)

@@ -81,12 +81,13 @@ export function findAtomCaretRect(view: EditorView): CaretRect | undefined {
 /**
  * The preview fragment rect for a range edge touching an atom unit: the
  * visible geometry standing in for source text that measures as nothing.
- * `edge` picks the line fragment the range extends from.
+ * `side` points into the range, like `coordsAtPos`: `1` for a start edge
+ * (first line fragment), `-1` for an end edge (last line fragment).
  */
 export function findAtomEdgeRect(
   view: EditorView,
   pos: number,
-  edge: 'start' | 'end',
+  side: -1 | 1,
 ): CaretCoords | undefined {
   const state = view.state
   for (const markName of ATOM_SOURCE_MARK_NAMES) {
@@ -96,7 +97,7 @@ export function findAtomEdgeRect(
     if (preview == null) continue
     const fragments = Array.from(preview.getClientRects()).filter((rect) => rect.height > 0)
     if (fragments.length === 0) continue
-    return edge === 'start' ? fragments[0] : fragments[fragments.length - 1]
+    return side === 1 ? fragments[0] : fragments[fragments.length - 1]
   }
   return undefined
 }
