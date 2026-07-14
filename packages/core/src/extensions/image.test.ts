@@ -429,6 +429,47 @@ describe('image resize', () => {
   })
 })
 
+describe('wiki image resize', () => {
+  const resizable = pmRoot.getByTestId('image-resizable')
+
+  function setupWikiResize(markdown: string): Fixture {
+    const fixture = setupFixture({
+      extensionOptions: {
+        markMode: 'hide',
+        resolveWikiEmbed: () => ({ kind: 'image' }),
+      },
+    })
+    const { editor, n } = fixture
+    editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(20, 10) }))
+    fixture.set(n.doc(n.paragraph(markdown)))
+    return fixture
+  }
+
+  it('applies width-only and width-by-height syntax', async () => {
+    using fixture = setupWikiResize('![[photo.png|200]] ![[other.png|160x90]]')
+    void fixture
+    const roots = Array.from(fixture.dom.querySelectorAll('[data-testid="image-resizable"]'))
+    expect(roots).toHaveLength(2)
+    await vi.waitFor(() => {
+      expect(roots[0]).toHaveAttribute('data-width', '200')
+      expect(roots[0]).toHaveAttribute('data-height', '100')
+      expect(roots[1]).toHaveAttribute('data-width', '160')
+      expect(roots[1]).toHaveAttribute('data-height', '90')
+    })
+  })
+
+  it('rewrites only the wiki size suffix when resized', async () => {
+    using fixture = setupWikiResize('![[nested/photo.png|120]]')
+    await expect.element(resizable).toHaveAttribute('data-width', '120')
+    resizable
+      .element()
+      .dispatchEvent(new CustomEvent('resizeEnd', { detail: { width: 320, height: 180 } }))
+    await vi.waitFor(() => {
+      expect(fixture.doc.textContent).toBe('![[nested/photo.png|320x180]]')
+    })
+  })
+})
+
 describe('typing after an inline image', () => {
   it('types the next character after the image, not before it', async () => {
     using fixture = setup('hide', 'A![img](url)<a>')

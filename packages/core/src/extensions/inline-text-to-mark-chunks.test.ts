@@ -5,8 +5,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { defineEditorExtension, type EditorExtension } from './extension.ts'
 import {
   inlineTextToMarkChunks,
-  type FileLinkOptions,
   type FileLinkResolver,
+  type InlineMarkOptions,
 } from './inline-text-to-mark-chunks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
 import type { TypedMarkBuilders } from './schema.ts'
@@ -38,7 +38,7 @@ const getMarkBuilders = once((): TypedMarkBuilders => {
   return createMarkBuilders<EditorExtension>(schema)
 })
 
-function parse(text: string, options?: FileLinkOptions): string {
+function parse(text: string, options?: InlineMarkOptions): string {
   const markBuilders = getMarkBuilders()
   const chunks = inlineTextToMarkChunks(markBuilders, text, options)
   const formatted = chunks.map(formatMarkChunk)
@@ -428,6 +428,101 @@ describe('image', () => {
       "
       [0, 7]  mdImage(src=u,alt=a)
       [7, 20]
+      "
+    `)
+  })
+})
+
+describe('wiki embed', () => {
+  it('stays literal without a host resolver', () => {
+    expect(parse('before ![[image.png]] after')).toMatchInlineSnapshot(`
+      "
+      [0, 27]
+      "
+    `)
+  })
+
+  it('stays literal when the resolver cannot prove a target', () => {
+    expect(parse('![[duplicate.png]]', { resolveWikiEmbed: () => undefined }))
+      .toMatchInlineSnapshot(`
+      "
+      [0, 18]
+      "
+    `)
+  })
+
+  it('passes the parsed alias and dimensions to the resolver', () => {
+    const resolveWikiEmbed = vi.fn(() => undefined)
+    parse('![[assets/photo.png|320x180]]', { resolveWikiEmbed })
+    expect(resolveWikiEmbed).toHaveBeenCalledWith({
+      target: 'assets/photo.png',
+      display: '',
+      width: 320,
+      height: 180,
+    })
+  })
+
+  it('renders a resolved image with width-only sizing', () => {
+    expect(
+      parse('![[assets/photo.png|320]]', {
+        resolveWikiEmbed: () => ({ kind: 'image' }),
+      }),
+    ).toMatchInlineSnapshot(`
+      "
+      [0, 25] mdImage(src=assets/photo.png,alt=photo.png,width=320,syntax=wikiEmbed,wikiTarget=assets/photo.png)
+      "
+    `)
+  })
+
+  it('renders a resolved image with width and height', () => {
+    expect(
+      parse('![[assets/photo.png|320x180]]', {
+        resolveWikiEmbed: () => ({ kind: 'image', src: 'asset://photo', alt: 'Photo' }),
+      }),
+    ).toMatchInlineSnapshot(`
+      "
+      [0, 29] mdImage(src=asset://photo,alt=Photo,width=320,height=180,syntax=wikiEmbed,wikiTarget=assets/photo.png)
+      "
+    `)
+  })
+
+  it('renders a resolved file through the file atom', () => {
+    expect(
+      parse('![[docs/report.pdf|Quarterly]]', {
+        resolveWikiEmbed: () => ({ kind: 'file' }),
+      }),
+    ).toMatchInlineSnapshot(`
+      "
+      [0, 30] mdFile(href=docs/report.pdf,name=Quarterly)
+      "
+    `)
+  })
+
+  it('renders a resolved note through the wikilink atom', () => {
+    expect(
+      parse('![[Projects/Plan|Launch plan]]', {
+        resolveWikiEmbed: () => ({ kind: 'note' }),
+      }),
+    ).toMatchInlineSnapshot(`
+      "
+      [0, 30] mdWikilink(target=Projects/Plan,display=Launch plan)
+      "
+    `)
+  })
+
+  it('uses resolution overrides for file and note fallbacks', () => {
+    expect(
+      parse('![[missing]] ![[other]]', {
+        resolveWikiEmbed: ({ target }) =>
+          target === 'missing'
+            ? { kind: 'file', href: 'vault/file.pdf', name: 'File' }
+            : { kind: 'note', target: 'notes/other', display: 'Other note' },
+      }),
+    ).toMatchInlineSnapshot(`
+      "
+      [0, 12]  mdFile(href=vault/file.pdf,name=File)
+      [12, 13]
+      [13, 23] mdWikilink(target=notes/other,display=Other note)
       "
     `)
   })

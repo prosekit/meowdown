@@ -66,6 +66,13 @@ export interface EditorHandle {
   scrollIntoView: () => void
 
   /**
+   * Moves the selection to the first heading matching a decoded `#fragment`
+   * (case-insensitive, with whitespace collapsed) and scrolls it into view.
+   * Returns `false` when no heading matches.
+   */
+  revealHeading: (fragment: string) => boolean
+
+  /**
    * The current selection as Markdown: block structure (list markers,
    * headings) is serialized, and inline syntax is already literal text. A
    * selection inside one textblock comes back as its bare text.

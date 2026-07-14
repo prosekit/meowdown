@@ -48,6 +48,7 @@ export {
 } from './extensions/file-click.ts'
 export {
   defineFileView,
+  getFileKind,
   type FileInfo,
   type FileInfoResolver,
   type FileViewOptions,
@@ -76,6 +77,7 @@ export {
   type FileLinkOptions,
   type FileLinkPayload,
   type FileLinkResolver,
+  type InlineMarkOptions,
 } from './extensions/inline-text-to-mark-chunks.ts'
 export { EDITOR_KEY_BINDINGS } from './extensions/key-bindings.ts'
 export {
@@ -131,6 +133,15 @@ export {
   type WikilinkClickPayload,
 } from './extensions/wikilink-click.ts'
 export {
+  formatSizedWikiEmbed,
+  parseWikiEmbed,
+  wikiEmbedBasename,
+  type ParsedWikiEmbed,
+  type WikiEmbedOptions,
+  type WikiEmbedResolution,
+  type WikiEmbedResolver,
+} from './extensions/wiki-embed.ts'
+export {
   defineWikilinkHoverHandler,
   type WikilinkHoverHandler,
   type WikilinkHoverHit,
@@ -140,3 +151,4 @@ export type { PositionRange } from './utils/range.ts'
 export { getSelectedText } from './utils/selected-text.ts'
 export { getVirtualElementFromRange, type VirtualElement } from './utils/virtual-element.ts'
 export { defineSpellCheckPlugin } from './extensions/spell-check.ts'
+export { formatFileSize } from './utils/format-file-size.ts'

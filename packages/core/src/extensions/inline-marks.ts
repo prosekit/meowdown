@@ -3,9 +3,8 @@ import { defineMarkSpec, union } from '@prosekit/core'
 import type { MarkName } from './mark-names.ts'
 
 /**
- * Attributes of the `mdImage` mark, derived from the image source
- * `![alt](src "title")` and its optional trailing size comment
- * `<!-- {"width":N,"height":M} -->`.
+ * Attributes of the `mdImage` mark, derived from either `![alt](src "title")`
+ * (plus an optional trailing size comment) or a resolved wiki image embed.
  */
 export interface MdImageAttrs {
   /** The image destination, exactly as written in the source. */
@@ -18,6 +17,10 @@ export interface MdImageAttrs {
   width: number | null
   /** Display height in CSS pixels from the trailing comment, or `null`. */
   height: number | null
+  /** `wikiEmbed` when the source is `![[target]]`; otherwise `null`. */
+  syntax: 'wikiEmbed' | null
+  /** Original wiki-embed target used when persisting a resized image, or `null`. */
+  wikiTarget: string | null
 }
 
 function defineMdImage() {
@@ -30,6 +33,8 @@ function defineMdImage() {
       title: { default: '' },
       width: { default: null },
       height: { default: null },
+      syntax: { default: null },
+      wikiTarget: { default: null },
     },
     toDOM: () => ['span', { class: 'md-image' }, 0],
     parseDOM: [{ tag: 'span.md-image' }],

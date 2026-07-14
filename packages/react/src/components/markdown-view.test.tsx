@@ -53,6 +53,52 @@ describe('MarkdownView', () => {
     await expect.element(img).toHaveAttribute('alt', 'cat')
   })
 
+  it('renders a resolved wiki image with its alias and width', async () => {
+    await renderView('![[assets/cat.png|120]]', {
+      resolveWikiEmbed: () => ({ kind: 'image' }),
+      resolveImageUrl: (src: string) => `asset://${src}`,
+    })
+    const img = view.getByTestId('image-preview').locate('img')
+    await expect.element(img).toHaveAttribute('src', 'asset://assets/cat.png')
+    await expect.element(img).toHaveAttribute('alt', 'cat.png')
+    await expect.element(img).toHaveStyle({ width: '120px' })
+  })
+
+  it('renders a resolved wiki file as a pill and reports clicks', async () => {
+    const onFileClick = vi.fn()
+    await renderView('![[docs/report.pdf|Quarterly]]', {
+      resolveWikiEmbed: () => ({ kind: 'file' }),
+      resolveFileInfo: () => ({ size: 1_400_000 }),
+      onFileClick,
+    })
+    const pill = view.getByTestId('file-pill')
+    await expect.element(pill).toHaveTextContent('Quarterly')
+    await expect.element(view.getByTestId('file-pill-size')).toHaveTextContent('1.4 MB')
+    await pill.click()
+    expect(onFileClick).toHaveBeenCalledWith(
+      expect.objectContaining({ href: 'docs/report.pdf', name: 'Quarterly' }),
+    )
+  })
+
+  it('renders a resolved wiki note through the wikilink hook', async () => {
+    const onWikilinkClick = vi.fn()
+    await renderView('![[Projects/Plan|Launch plan]]', {
+      resolveWikiEmbed: () => ({ kind: 'note' }),
+      onWikilinkClick,
+    })
+    await expect.element(wikilink).toHaveTextContent('Launch plan')
+    await wikilink.click()
+    expect(onWikilinkClick).toHaveBeenCalledWith(
+      expect.objectContaining({ target: 'Projects/Plan' }),
+    )
+  })
+
+  it('leaves an unresolved wiki embed literal', async () => {
+    await renderView('![[ambiguous.png]]', { resolveWikiEmbed: () => undefined })
+    await expect.element(view).toHaveTextContent('![[ambiguous.png]]')
+    expect(view.element().querySelector('.md-atom-view')).toBeNull()
+  })
+
   it('renders a tweet embed', async () => {
     await renderView('![](https://x.com/jack/status/20)')
     const iframe = view.getByTestId('tweet-embed')
@@ -89,14 +135,17 @@ describe('MarkdownView', () => {
     const onWikilinkClick = vi.fn()
     const onLinkClick = vi.fn()
     const onImageClick = vi.fn()
+    const onFileClick = vi.fn()
     const onTaskClick = vi.fn()
     await renderView(
-      '[[Note]] [Docs](https://example.com) ![cat](https://example.com/cat.png)\n\n![](https://x.com/jack/status/20)\n\n+ [ ] task',
+      '[[Note]] [Docs](https://example.com) ![cat](https://example.com/cat.png) ![[report.pdf]]\n\n![](https://x.com/jack/status/20)\n\n+ [ ] task',
       {
         interactive: false,
+        resolveWikiEmbed: () => ({ kind: 'file' }),
         onWikilinkClick,
         onLinkClick,
         onImageClick,
+        onFileClick,
         onTaskClick,
       },
     )
@@ -112,9 +161,11 @@ describe('MarkdownView', () => {
     await wikilink.click()
     await view.getByText('Docs').click()
     await view.getByAltText('cat').click()
+    await view.getByTestId('file-pill').click()
     expect(onWikilinkClick).not.toHaveBeenCalled()
     expect(onLinkClick).not.toHaveBeenCalled()
     expect(onImageClick).not.toHaveBeenCalled()
+    expect(onFileClick).not.toHaveBeenCalled()
     expect(onTaskClick).not.toHaveBeenCalled()
   })
 

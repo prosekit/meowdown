@@ -69,6 +69,8 @@ export const LEZER_NODE_NAMES = [
 
   // Custom inline (meowdown extensions)
   'Hashtag',
+  'WikiEmbed',
+  'WikiEmbedMark',
   'Wikilink',
   'WikilinkMark',
   'Highlight',

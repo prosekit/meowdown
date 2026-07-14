@@ -19,11 +19,12 @@ import {
   type StartPendingReplacementOptions,
   type TagClickHandler,
   type TypedEditor,
+  type WikiEmbedResolver,
   type WikilinkClickHandler,
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
 import { createEditor, union, type SelectionJSON } from '@prosekit/core'
-import type { EditorNode } from '@prosekit/pm/model'
+import type { EditorNode, Mark } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit } from '@prosekit/react'
 import { clsx } from 'clsx/lite'
@@ -109,6 +110,75 @@ function resolveSelection(doc: EditorNode, selection: SelectionHint): Selection 
   }
 }
 
+function decodeHeadingFragment(fragment: string): string {
+  const source = fragment.startsWith('#') ? fragment.slice(1) : fragment
+  try {
+    return decodeURIComponent(source)
+  } catch {
+    return source
+  }
+}
+
+function headingLookupKey(value: string): string {
+  return value.normalize('NFKC').trim().replaceAll(/\s+/g, ' ').toLowerCase()
+}
+
+const HEADING_HIDDEN_MARKS = new Set(['mdMark', 'mdLinkUri', 'mdLinkTitle'])
+const HEADING_ATOM_MARKS = new Set(['mdWikilink', 'mdImage', 'mdFile', 'mdMath'])
+
+function headingAtomText(mark: Mark): string {
+  const attrs = mark.attrs as Readonly<Record<string, unknown>>
+  const stringAttr = (name: string): string => {
+    const value = attrs[name]
+    return typeof value === 'string' ? value : ''
+  }
+  if (mark.type.name === 'mdWikilink') {
+    return stringAttr('display') || stringAttr('target')
+  }
+  if (mark.type.name === 'mdImage') return stringAttr('alt')
+  if (mark.type.name === 'mdFile') return stringAttr('name')
+  if (mark.type.name === 'mdMath') return stringAttr('formula')
+  return ''
+}
+
+/** The heading as its live-preview marks display it, with syntax runs omitted. */
+function headingDisplayText(heading: EditorNode): string {
+  let output = ''
+  let previousAtom: Mark | undefined
+  heading.forEach((child) => {
+    if (!child.isText || !child.text) return
+    const atom = child.marks.find((mark) => HEADING_ATOM_MARKS.has(mark.type.name))
+    if (atom) {
+      if (!previousAtom?.eq(atom)) output += headingAtomText(atom)
+      previousAtom = atom
+      return
+    }
+    previousAtom = undefined
+    if (child.marks.some((mark) => HEADING_HIDDEN_MARKS.has(mark.type.name))) return
+    output += child.text
+  })
+  return output
+}
+
+function findHeadingPosition(doc: EditorNode, fragment: string): number | undefined {
+  const target = headingLookupKey(decodeHeadingFragment(fragment))
+  if (!target) return
+  let match: number | undefined
+  doc.descendants((node, pos) => {
+    if (match != null) return false
+    if (
+      node.type.name === 'heading' &&
+      (headingLookupKey(node.textContent) === target ||
+        headingLookupKey(headingDisplayText(node)) === target)
+    ) {
+      match = pos + 1
+      return false
+    }
+    return true
+  })
+  return match
+}
+
 export interface ProseKitEditorProps {
   markMode?: MarkMode
 
@@ -162,6 +232,9 @@ export interface ProseKitEditorProps {
 
   /** Claims links as file pills. Read once on mount; see `EditorProps.resolveFileLink`. */
   resolveFileLink?: FileLinkResolver
+
+  /** Classifies wiki embeds. Read once on mount; see `EditorProps.resolveWikiEmbed`. */
+  resolveWikiEmbed?: WikiEmbedResolver
 
   /** Resolves the size shown on a file pill. See `EditorProps.resolveFileInfo`. */
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
@@ -233,6 +306,7 @@ export function ProseKitEditor({
   onExitBoundary,
   resolveImageUrl,
   resolveFileLink,
+  resolveWikiEmbed,
   resolveFileInfo,
   onFileClick,
   onFilePaste,
@@ -252,7 +326,11 @@ export function ProseKitEditor({
   children,
 }: ProseKitEditorProps) {
   const [editor] = useState((): TypedEditor => {
-    const baseExtension: EditorExtension = defineEditorExtension({ resolveFileLink, markMode })
+    const baseExtension: EditorExtension = defineEditorExtension({
+      resolveFileLink,
+      resolveWikiEmbed,
+      markMode,
+    })
     const extension = union(baseExtension, defineCodeBlockView())
     const editor: TypedEditor = createEditor({ extension })
     if (initialMarkdown) {
@@ -324,6 +402,13 @@ export function ProseKitEditor({
     function scrollIntoView(): void {
       editor.commands.scrollIntoView()
     }
+    function revealHeading(fragment: string): boolean {
+      const position = findHeadingPosition(editor.state.doc, fragment)
+      if (position == null) return false
+      const selection = TextSelection.near(editor.state.doc.resolve(position))
+      editor.view.dispatch(editor.state.tr.setSelection(selection).scrollIntoView())
+      return true
+    }
     function getSelectedTextFromState(): string {
       return getSelectedText(editor.state)
     }
@@ -353,6 +438,7 @@ export function ProseKitEditor({
       setSelection,
       focus,
       scrollIntoView,
+      revealHeading,
       getSelectedText: getSelectedTextFromState,
       openSelectionMenu: openSelectionMenuFromHandle,
       startPendingReplacement,
