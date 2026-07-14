@@ -187,6 +187,9 @@ export interface ProseKitEditorProps {
   /** Starts a bullet on Enter after a heading. See `EditorProps.bulletAfterHeading`. */
   bulletAfterHeading?: boolean
 
+  /** Replaces typed sequences like `->` with `→`. See `EditorProps.substitution`. */
+  substitution?: boolean
+
   /** Handles a leading YAML frontmatter block. See `EditorProps.frontmatter`. */
   frontmatter?: boolean
 
@@ -241,6 +244,7 @@ export function ProseKitEditor({
   embedPaste,
   linkPaste,
   bulletAfterHeading,
+  substitution = true,
   frontmatter = false,
   blockHandle = true,
   placeholder,
@@ -392,6 +396,7 @@ export function ProseKitEditor({
         embedPaste={embedPaste}
         linkPaste={linkPaste}
         bulletAfterHeading={bulletAfterHeading}
+        substitution={substitution}
         placeholder={placeholder}
         readOnly={readOnly}
         wikilinkEnabled={!!onWikilinkSearch}

@@ -13,6 +13,7 @@ import {
   definePlaceholder,
   defineReadonly,
   defineSpellCheckPlugin,
+  defineSubstitution,
   defineTagClickHandler,
   defineWikilinkClickHandler,
   defineWikilinkTrigger,
@@ -49,6 +50,7 @@ export interface EditorExtensionsProps {
   embedPaste?: boolean
   linkPaste?: boolean
   bulletAfterHeading?: boolean
+  substitution?: boolean
   placeholder?: PlaceholderOptions['placeholder']
   readOnly?: boolean
   wikilinkEnabled?: boolean
@@ -74,6 +76,7 @@ export function EditorExtensions({
   embedPaste,
   linkPaste,
   bulletAfterHeading,
+  substitution,
   placeholder,
   readOnly,
   wikilinkEnabled,
@@ -179,6 +182,12 @@ export function EditorExtensions({
     useMemo(() => {
       return bulletAfterHeading ? defineBulletAfterHeading() : null
     }, [bulletAfterHeading]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return substitution ? defineSubstitution() : null
+    }, [substitution]),
   )
 
   useExtension(

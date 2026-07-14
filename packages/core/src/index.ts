@@ -112,6 +112,7 @@ export {
   type StartPendingReplacementOptions,
 } from './extensions/pending-replacement.ts'
 export { getMarkBuilders, type TypedMarkBuilders } from './extensions/schema.ts'
+export { defineSubstitution } from './extensions/substitution.ts'
 export { isSelectionInTableCell } from './extensions/table.ts'
 export {
   getTableColumnAlign,

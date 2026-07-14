@@ -222,6 +222,12 @@ export interface EditorProps {
    */
   bulletAfterHeading?: boolean
 
+  /**
+   * Replaces typed character sequences with their typographic equivalents,
+   * e.g. `->` with `→` and `(c)` with `©`. On by default.
+   */
+  substitution?: boolean
+
   /** Handles a leading `---` frontmatter block (off by default). */
   frontmatter?: boolean
 
@@ -294,6 +300,7 @@ export function MeowdownEditor({
   embedPaste = true,
   linkPaste = true,
   bulletAfterHeading = false,
+  substitution = true,
   frontmatter = false,
   blockHandle = true,
   placeholder,
@@ -405,6 +412,7 @@ export function MeowdownEditor({
         embedPaste={embedPaste}
         linkPaste={linkPaste}
         bulletAfterHeading={bulletAfterHeading}
+        substitution={substitution}
         frontmatter={frontmatter}
         blockHandle={blockHandle}
         placeholder={placeholder}
