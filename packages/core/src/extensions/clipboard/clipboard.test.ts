@@ -117,135 +117,167 @@ describe('clipboard HTML', () => {
 describe('clipboard round trip', () => {
   it('round-trips a heading with inline marks', () => {
     expect(roundTrip('### a **b** `c`')).toMatchInlineSnapshot(`
-      "### a **b** \`c\`
-      "
+      """
+      ### a **b** \`c\`
+
+      """
     `)
   })
 
   it('round-trips a setext heading', () => {
     expect(roundTrip('title\n=====')).toMatchInlineSnapshot(`
-      "title
+      """
+      title
       =====
-      "
+
+      """
     `)
   })
 
   it('round-trips a heading with closing hashes', () => {
     expect(roundTrip('## title ##')).toMatchInlineSnapshot(`
-      "## title ##
-      "
+      """
+      ## title ##
+
+      """
     `)
   })
 
   it('round-trips a nested list', () => {
     expect(roundTrip('- parent\n  - child')).toMatchInlineSnapshot(`
-      "- parent
+      """
+      - parent
         - child
-      "
+
+      """
     `)
   })
 
   it('round-trips a round task', () => {
     expect(roundTrip('+ [ ] Task')).toMatchInlineSnapshot(`
-      "+ [ ] Task
-      "
+      """
+      + [ ] Task
+
+      """
     `)
   })
 
   it('round-trips a blockquote with two paragraphs', () => {
     expect(roundTrip('> one\n>\n> two')).toMatchInlineSnapshot(`
-      "> one
+      """
+      > one
       >
       > two
-      "
+
+      """
     `)
   })
 
   it('round-trips a fenced code block', () => {
     expect(roundTrip('~~~~js\nconst x = 1\n~~~~')).toMatchInlineSnapshot(`
-      "~~~~js
+      """
+      ~~~~js
       const x = 1
       ~~~~
-      "
+
+      """
     `)
   })
 
   it('round-trips a table', () => {
     expect(roundTrip('| a | b |\n| :-: | - |\n| 1 | 2 |')).toMatchInlineSnapshot(`
-      "| a | b |
+      """
+      | a | b |
       | :-: | --- |
       | 1 | 2 |
-      "
+
+      """
     `)
   })
 
   it('round-trips an ordered list', () => {
     expect(roundTrip('1. first\n2. second')).toMatchInlineSnapshot(`
-      "1. first
+      """
+      1. first
       2. second
-      "
+
+      """
     `)
   })
 
   it('round-trips a thematic break with a non-canonical marker', () => {
     expect(roundTrip('before\n\n* * *\n\nafter')).toMatchInlineSnapshot(`
-      "before
+      """
+      before
 
       * * *
 
       after
-      "
+
+      """
     `)
   })
 
   it('round-trips an html comment', () => {
     expect(roundTrip('before\n\n<!-- note -->\n\nafter')).toMatchInlineSnapshot(`
-      "before
+      """
+      before
 
       <!-- note -->
 
       after
-      "
+
+      """
     `)
   })
 
   it('round-trips gap paragraphs', () => {
     expect(roundTrip('aaa\n\n\n\nbbb')).toMatchInlineSnapshot(`
-      "aaa
+      """
+      aaa
 
 
 
       bbb
-      "
+
+      """
     `)
   })
 
   it('round-trips a wikilink with a display alias', () => {
     expect(roundTrip('see [[note|alias]] end')).toMatchInlineSnapshot(`
-      "see [[note|alias]] end
-      "
+      """
+      see [[note|alias]] end
+
+      """
     `)
   })
 
   it('round-trips an inline image', () => {
     expect(roundTrip('see ![cat](https://example.com/cat.png) end')).toMatchInlineSnapshot(`
-      "see ![cat](https://example.com/cat.png) end
-      "
+      """
+      see ![cat](https://example.com/cat.png) end
+
+      """
     `)
   })
 
   it('round-trips inline math', () => {
     expect(roundTrip('see $E=mc^2$ end')).toMatchInlineSnapshot(`
-      "see $E=mc^2$ end
-      "
+      """
+      see $E=mc^2$ end
+
+      """
     `)
   })
 
   it('round-trips a soft break inside a paragraph', () => {
     expect(roundTrip('line1\nline2')).toMatchInlineSnapshot(`
-      "line1
+      """
+      line1
       line2
-      "
+
+      """
     `)
   })
 })
@@ -261,17 +293,21 @@ describe('selection copy', () => {
       `"<p data-md="Task" data-meowdown="" data-pm-slice="1 1 []">Task</p>"`,
     )
     expect(pasteIntoEmptyDoc(html)).toMatchInlineSnapshot(`
-      "Task
-      "
+      """
+      Task
+
+      """
     `)
   })
 
   it('keeps sibling items as a list', () => {
     using source = setupFixture()
     expect(pasteIntoEmptyDoc(captureSelectionHTML(source, '- one\n- two'))).toMatchInlineSnapshot(`
-      "- one
+      """
+      - one
       - two
-      "
+
+      """
     `)
   })
 
@@ -287,8 +323,10 @@ describe('selection copy', () => {
       `"<p data-md="lain **bold** " data-meowdown="" data-pm-slice="1 1 []">lain <strong>bold</strong> </p>"`,
     )
     expect(pasteIntoEmptyDoc(html)).toMatchInlineSnapshot(`
-      "lain **bold**
-      "
+      """
+      lain **bold**
+
+      """
     `)
   })
 })

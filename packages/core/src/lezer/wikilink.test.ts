@@ -117,20 +117,24 @@ describe('wikilink inline parser', () => {
 
   it('produces a Wikilink with two WikilinkMark children', () => {
     expect(formatTree('a [[note]] b')).toMatchInlineSnapshot(`
-      "Wikilink [2, 10] "[[note]]"
+      """
+      Wikilink [2, 10] "[[note]]"
         WikilinkMark [2, 4] "[["
-        WikilinkMark [8, 10] "]]""
+        WikilinkMark [8, 10] "]]"
+      """
     `)
   })
 
   it('parses ![[embed]] as an Image, not a Wikilink', () => {
     expect(formatTree('![[embed]]')).toMatchInlineSnapshot(`
-      "Image [0, 10] "![[embed]]"
+      """
+      Image [0, 10] "![[embed]]"
         LinkMark [0, 2] "!["
         Link [2, 9] "[embed]"
           LinkMark [2, 3] "["
           LinkMark [8, 9] "]"
-        LinkMark [9, 10] "]""
+        LinkMark [9, 10] "]"
+      """
     `)
   })
 

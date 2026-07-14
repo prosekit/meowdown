@@ -49,7 +49,8 @@ export async function traceShiftKeySelection(
  * lines, separated by a dashed rule.
  */
 export function formatSelectionSteps(steps: string[]): string {
-  return steps.map((step) => '\n' + step + '\n').join('-'.repeat(10))
+  const separater = '\n' + '-'.repeat(10) + '\n'
+  return steps.join(separater)
 }
 
 /**

@@ -187,9 +187,11 @@ describe('hide mode Enter relocation', () => {
     fixture.view.focus()
     await userEvent.keyboard('{Enter}')
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "-
+      """
+      -
       - **foo**
-      "
+
+      """
     `)
   })
 
