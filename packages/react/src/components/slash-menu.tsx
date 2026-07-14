@@ -164,6 +164,11 @@ export function SlashMenu({
           {!inTableCell && (
             <>
               <SlashMenuItem
+                label="Text"
+                keywords={['paragraph', 'plain']}
+                onSelect={() => editor.commands.turnIntoText()}
+              />
+              <SlashMenuItem
                 label="Heading 1"
                 kbd="#"
                 onSelect={() => editor.commands.setHeading({ level: 1 })}
