@@ -896,14 +896,14 @@ describe('file link', () => {
   it('leaves a declined link as a regular link', () => {
     expect(parse('[report.pdf](assets/report.pdf)', { resolveFileLink: () => false }))
       .toMatchInlineSnapshot(`
-      "
-      [0, 1]   mdPack(key=link,data={"href":"assets/report.pdf","title":""}) + mdLinkText(href=assets/report.pdf) + mdMark
-      [1, 11]  mdPack(key=link,data={"href":"assets/report.pdf","title":""}) + mdLinkText(href=assets/report.pdf)
-      [11, 13] mdPack(key=link,data={"href":"assets/report.pdf","title":""}) + mdMark
-      [13, 30] mdPack(key=link,data={"href":"assets/report.pdf","title":""}) + mdLinkUri
-      [30, 31] mdPack(key=link,data={"href":"assets/report.pdf","title":""}) + mdMark
-      "
-    `)
+        "
+        [0, 1]   mdPack(key=link,data={"href":"assets/report.pdf","title":""}) + mdLinkText(href=assets/report.pdf) + mdMark
+        [1, 11]  mdPack(key=link,data={"href":"assets/report.pdf","title":""}) + mdLinkText(href=assets/report.pdf)
+        [11, 13] mdPack(key=link,data={"href":"assets/report.pdf","title":""}) + mdMark
+        [13, 30] mdPack(key=link,data={"href":"assets/report.pdf","title":""}) + mdLinkUri
+        [30, 31] mdPack(key=link,data={"href":"assets/report.pdf","title":""}) + mdMark
+        "
+      `)
   })
 
   it('names an empty label after the href basename', () => {

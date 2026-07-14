@@ -1,3 +1,5 @@
+import '../testing/index.ts'
+
 import { Schema } from '@prosekit/pm/model'
 import { EditorState } from '@prosekit/pm/state'
 import { EditorView } from '@prosekit/pm/view'

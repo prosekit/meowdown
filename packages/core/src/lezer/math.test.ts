@@ -118,17 +118,21 @@ describe('math inline parser', () => {
 
   it('produces an InlineMath with two InlineMathMark children', () => {
     expect(formatTree('a $x+y$ b')).toMatchInlineSnapshot(`
-      "InlineMath [2, 7] "$x+y$"
+      """
+      InlineMath [2, 7] "$x+y$"
         InlineMathMark [2, 3] "$"
-        InlineMathMark [6, 7] "$""
+        InlineMathMark [6, 7] "$"
+      """
     `)
   })
 
   it('produces double-dollar marks covering both dollars', () => {
     expect(formatTree('$$x$$')).toMatchInlineSnapshot(`
-      "InlineMath [0, 5] "$$x$$"
+      """
+      InlineMath [0, 5] "$$x$$"
         InlineMathMark [0, 2] "$$"
-        InlineMathMark [3, 5] "$$""
+        InlineMathMark [3, 5] "$$"
+      """
     `)
   })
 
@@ -182,81 +186,95 @@ function findBlockMath(text: string): string[] {
 describe('math block parser', () => {
   it('parses a dollar fence with marks and code text', () => {
     expect(formatBlockTree('$$\nE=mc^2\n$$')).toMatchInlineSnapshot(`
-      "Document [0, 12] "$$\\nE=mc^2\\n$$"
+      """
+      Document [0, 12] "$$\\nE=mc^2\\n$$"
         BlockMath [0, 12] "$$\\nE=mc^2\\n$$"
           BlockMathMark [0, 2] "$$"
           CodeText [3, 9] "E=mc^2"
-          BlockMathMark [10, 12] "$$""
+          BlockMathMark [10, 12] "$$"
+      """
     `)
   })
 
   it('parses a multi-line formula with an interior blank line', () => {
     expect(formatBlockTree('$$\na\n\nb\n$$')).toMatchInlineSnapshot(`
-      "Document [0, 10] "$$\\na\\n\\nb\\n$$"
+      """
+      Document [0, 10] "$$\\na\\n\\nb\\n$$"
         BlockMath [0, 10] "$$\\na\\n\\nb\\n$$"
           BlockMathMark [0, 2] "$$"
           CodeText [3, 4] "a"
           CodeText [4, 5] "\\n"
           CodeText [5, 6] "\\n"
           CodeText [6, 7] "b"
-          BlockMathMark [8, 10] "$$""
+          BlockMathMark [8, 10] "$$"
+      """
     `)
   })
 
   it('runs to the end of input when unclosed', () => {
     expect(formatBlockTree('$$\nE=mc^2')).toMatchInlineSnapshot(`
-      "Document [0, 9] "$$\\nE=mc^2"
+      """
+      Document [0, 9] "$$\\nE=mc^2"
         BlockMath [0, 9] "$$\\nE=mc^2"
           BlockMathMark [0, 2] "$$"
-          CodeText [3, 9] "E=mc^2""
+          CodeText [3, 9] "E=mc^2"
+      """
     `)
   })
 
   it('interrupts a paragraph', () => {
     expect(formatBlockTree('para\n$$\nx\n$$')).toMatchInlineSnapshot(`
-      "Document [0, 12] "para\\n$$\\nx\\n$$"
+      """
+      Document [0, 12] "para\\n$$\\nx\\n$$"
         Paragraph [0, 4] "para"
         BlockMath [5, 12] "$$\\nx\\n$$"
           BlockMathMark [5, 7] "$$"
           CodeText [8, 9] "x"
-          BlockMathMark [10, 12] "$$""
+          BlockMathMark [10, 12] "$$"
+      """
     `)
   })
 
   it('parses inside a blockquote', () => {
     expect(formatBlockTree('> $$\n> x\n> $$')).toMatchInlineSnapshot(`
-      "Document [0, 13] "> $$\\n> x\\n> $$"
+      """
+      Document [0, 13] "> $$\\n> x\\n> $$"
         Blockquote [0, 13] "> $$\\n> x\\n> $$"
           QuoteMark [0, 1] ">"
           BlockMath [2, 13] "$$\\n> x\\n> $$"
             BlockMathMark [2, 4] "$$"
             CodeText [7, 8] "x"
-            BlockMathMark [11, 13] "$$""
+            BlockMathMark [11, 13] "$$"
+      """
     `)
   })
 
   it('parses inside a list item', () => {
     expect(formatBlockTree('- $$\n  x\n  $$')).toMatchInlineSnapshot(`
-      "Document [0, 13] "- $$\\n  x\\n  $$"
+      """
+      Document [0, 13] "- $$\\n  x\\n  $$"
         BulletList [0, 13] "- $$\\n  x\\n  $$"
           ListItem [0, 13] "- $$\\n  x\\n  $$"
             ListMark [0, 1] "-"
             BlockMath [2, 13] "$$\\n  x\\n  $$"
               BlockMathMark [2, 4] "$$"
               CodeText [7, 8] "x"
-              BlockMathMark [11, 13] "$$""
+              BlockMathMark [11, 13] "$$"
+      """
     `)
   })
 
   it('does not swallow content after an unterminated block leaves its blockquote', () => {
     expect(formatBlockTree('> $$\n> x\n\nafter')).toMatchInlineSnapshot(`
-      "Document [0, 15] "> $$\\n> x\\n\\nafter"
+      """
+      Document [0, 15] "> $$\\n> x\\n\\nafter"
         Blockquote [0, 8] "> $$\\n> x"
           QuoteMark [0, 1] ">"
           BlockMath [2, 8] "$$\\n> x"
             BlockMathMark [2, 4] "$$"
             CodeText [7, 8] "x"
-        Paragraph [10, 15] "after""
+        Paragraph [10, 15] "after"
+      """
     `)
   })
 

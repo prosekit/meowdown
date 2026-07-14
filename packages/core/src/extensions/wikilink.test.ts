@@ -164,7 +164,7 @@ describe('wikilink vertical caret navigation', () => {
 
   it('can ArrowDown from the first paragraph to the last paragraph in hide mode', async () => {
     expect(await run('hide')).toMatchInlineSnapshot(`
-      "
+      """
       paragraph ┃1
       paragraph 2 [[WIKILINK]] text
       paragraph 3 [[WIKILINK]]
@@ -189,12 +189,12 @@ describe('wikilink vertical caret navigation', () => {
       paragraph 2 [[WIKILINK]] text
       paragraph 3 [[WIKILINK]]
       paragraph 4┃
-      "
+      """
     `)
   })
   it('can ArrowDown from the first paragraph to the last paragraph in show mode', async () => {
     expect(await run('show')).toMatchInlineSnapshot(`
-      "
+      """
       paragraph ┃1
       paragraph 2 [[WIKILINK]] text
       paragraph 3 [[WIKILINK]]
@@ -219,12 +219,12 @@ describe('wikilink vertical caret navigation', () => {
       paragraph 2 [[WIKILINK]] text
       paragraph 3 [[WIKILINK]]
       paragraph 4┃
-      "
+      """
     `)
   })
   it('can ArrowDown from the first paragraph to the last paragraph in focus mode', async () => {
     expect(await run('focus')).toMatchInlineSnapshot(`
-      "
+      """
       paragraph ┃1
       paragraph 2 [[WIKILINK]] text
       paragraph 3 [[WIKILINK]]
@@ -249,7 +249,7 @@ describe('wikilink vertical caret navigation', () => {
       paragraph 2 [[WIKILINK]] text
       paragraph 3 [[WIKILINK]]
       paragraph 4┃
-      "
+      """
     `)
   })
 })

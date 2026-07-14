@@ -62,7 +62,8 @@ paragraph line2
 describe('gfmParser', () => {
   it('parses block and inline structure', () => {
     expect(parse(gfmParser, sample)).toMatchInlineSnapshot(`
-      "Document [0, 187] "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\nparagraph line1\\nparagraph line2\\n\\n> blockquote line1\\n> blockquote line2\\n"
+      """
+      Document [0, 187] "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\nparagraph line1\\nparagraph line2\\n\\n> blockquote line1\\n> blockquote line2\\n"
         Paragraph [1, 20] "A *emph* paragraph."
           Emphasis [3, 9] "*emph*"
             EmphasisMark [3, 4] "*"
@@ -89,7 +90,8 @@ describe('gfmParser', () => {
         Blockquote [149, 186] "> blockquote line1\\n> blockquote line2"
           QuoteMark [149, 150] ">"
           Paragraph [151, 186] "blockquote line1\\n> blockquote line2"
-            QuoteMark [168, 169] ">""
+            QuoteMark [168, 169] ">"
+      """
     `)
   })
 })
@@ -97,7 +99,8 @@ describe('gfmParser', () => {
 describe('gfmBlockOnlyParser', () => {
   it('parses block structure but never emits inline nodes', () => {
     expect(parse(gfmBlockOnlyParser, sample)).toMatchInlineSnapshot(`
-      "Document [0, 187] "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\nparagraph line1\\nparagraph line2\\n\\n> blockquote line1\\n> blockquote line2\\n"
+      """
+      Document [0, 187] "\\nA *emph* paragraph.\\n\\n| table header |\\n| ------------ |\\n| table cell   |\\n\\n- bullet list item\\n\\n- [x] task list item\\n\\nparagraph line1\\nparagraph line2\\n\\n> blockquote line1\\n> blockquote line2\\n"
         Paragraph [1, 20] "A *emph* paragraph."
         Table [22, 72] "| table header |\\n| ------------ |\\n| table cell   |"
           TableHeader [22, 38] "| table header |"
@@ -121,7 +124,8 @@ describe('gfmBlockOnlyParser', () => {
         Blockquote [149, 186] "> blockquote line1\\n> blockquote line2"
           QuoteMark [149, 150] ">"
           Paragraph [151, 186] "blockquote line1\\n> blockquote line2"
-            QuoteMark [168, 169] ">""
+            QuoteMark [168, 169] ">"
+      """
     `)
   })
 
@@ -131,12 +135,14 @@ describe('gfmBlockOnlyParser', () => {
     // stays inside the node's [from, to) span (see the `\n  line two` in `text`).
     const input = '- x\n\n  line one\n  line two\n'
     expect(parse(gfmBlockOnlyParser, input)).toMatchInlineSnapshot(`
-      "Document [0, 27] "- x\\n\\n  line one\\n  line two\\n"
+      """
+      Document [0, 27] "- x\\n\\n  line one\\n  line two\\n"
         BulletList [0, 26] "- x\\n\\n  line one\\n  line two"
           ListItem [0, 26] "- x\\n\\n  line one\\n  line two"
             ListMark [0, 1] "-"
             Paragraph [2, 3] "x"
-            Paragraph [7, 26] "line one\\n  line two""
+            Paragraph [7, 26] "line one\\n  line two"
+      """
     `)
   })
 
@@ -157,7 +163,8 @@ describe('gfmBlockOnlyParser', () => {
       '  ```',
     ].join('\n')
     expect(parse(gfmBlockOnlyParser, input)).toMatchInlineSnapshot(`
-      "Document [0, 40] "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`"
+      """
+      Document [0, 40] "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`"
         BulletList [0, 40] "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`"
           ListItem [0, 40] "- x\\n\\n  \`\`\`\\n  line1\\n  line2\\n  line3\\n  \`\`\`"
             ListMark [0, 1] "-"
@@ -167,32 +174,41 @@ describe('gfmBlockOnlyParser', () => {
               CodeText [13, 19] "line1\\n"
               CodeText [21, 27] "line2\\n"
               CodeText [29, 34] "line3"
-              CodeMark [37, 40] "\`\`\`""
+              CodeMark [37, 40] "\`\`\`"
+      """
     `)
   })
 
   it('tokenizes the opening and closing marks of an ATX heading', () => {
     expect(parse(gfmBlockOnlyParser, '# title')).toMatchInlineSnapshot(`
-      "Document [0, 7] "# title"
+      """
+      Document [0, 7] "# title"
         ATXHeading1 [0, 7] "# title"
-          HeaderMark [0, 1] "#""
+          HeaderMark [0, 1] "#"
+      """
     `)
     expect(parse(gfmBlockOnlyParser, '##  title')).toMatchInlineSnapshot(`
-      "Document [0, 9] "##  title"
+      """
+      Document [0, 9] "##  title"
         ATXHeading2 [0, 9] "##  title"
-          HeaderMark [0, 2] "##""
+          HeaderMark [0, 2] "##"
+      """
     `)
     expect(parse(gfmBlockOnlyParser, '# title #')).toMatchInlineSnapshot(`
-      "Document [0, 9] "# title #"
+      """
+      Document [0, 9] "# title #"
         ATXHeading1 [0, 9] "# title #"
           HeaderMark [0, 1] "#"
-          HeaderMark [8, 9] "#""
+          HeaderMark [8, 9] "#"
+      """
     `)
     expect(parse(gfmBlockOnlyParser, '## title #######')).toMatchInlineSnapshot(`
-      "Document [0, 16] "## title #######"
+      """
+      Document [0, 16] "## title #######"
         ATXHeading2 [0, 16] "## title #######"
           HeaderMark [0, 2] "##"
-          HeaderMark [9, 16] "#######""
+          HeaderMark [9, 16] "#######"
+      """
     `)
   })
 })

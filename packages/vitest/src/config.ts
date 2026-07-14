@@ -33,6 +33,7 @@ export function defineSharedConfig() {
         : undefined,
     test: {
       setupFiles,
+      snapshotSerializers: ['@meowdown/vitest/custom-string-serializer'],
       retry: IS_BOT ? 3 : 0,
       fileParallelism: false,
       browser: {

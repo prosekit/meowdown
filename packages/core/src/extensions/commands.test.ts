@@ -9,15 +9,19 @@ describe('insertMarkdown', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello <a>world')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello world
-      "
+      """
+      Hello world
+
+      """
     `)
 
     expect(editor.commands.insertMarkdown('brave **new** ')).toBe(true)
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello brave **new** world
-      "
+      """
+      Hello brave **new** world
+
+      """
     `)
   })
 
@@ -26,15 +30,19 @@ describe('insertMarkdown', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('<a>Hello<b> world')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello world
-      "
+      """
+      Hello world
+
+      """
     `)
 
     editor.commands.insertMarkdown('Goodbye ')
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Goodbye Hello world
-      "
+      """
+      Goodbye Hello world
+
+      """
     `)
   })
 
@@ -43,24 +51,28 @@ describe('insertMarkdown', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello<a>'), n.paragraph('World')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello
+      """
+      Hello
 
       World
-      "
+
+      """
     `)
 
     editor.commands.insertMarkdown('# Title\n\n- item')
     editor.commands.insertText({ text: '!' })
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello
+      """
+      Hello
 
       # Title
 
       - item!
 
       World
-      "
+
+      """
     `)
   })
 
@@ -69,24 +81,30 @@ describe('insertMarkdown', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello<a>')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello
-      "
+      """
+      Hello
+
+      """
     `)
 
     editor.commands.insertMarkdown('# Title\n\n- item')
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello
+      """
+      Hello
 
       # Title
 
       - item
-      "
+
+      """
     `)
 
     editor.commands.undo()
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello
-      "
+      """
+      Hello
+
+      """
     `)
   })
 
@@ -95,16 +113,20 @@ describe('insertMarkdown', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello<a>')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello
-      "
+      """
+      Hello
+
+      """
     `)
 
     expect(editor.commands.insertMarkdown('')).toBe(false)
     expect(editor.commands.insertMarkdown('  \n\t ')).toBe(false)
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello
-      "
+      """
+      Hello
+
+      """
     `)
   })
 })
@@ -115,15 +137,19 @@ describe('insertTrigger', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello <a>')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello
-      "
+      """
+      Hello
+
+      """
     `)
 
     expect(editor.commands.insertTrigger('/')).toBe(true)
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello /
-      "
+      """
+      Hello /
+
+      """
     `)
   })
 
@@ -132,15 +158,19 @@ describe('insertTrigger', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello<a>')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello
-      "
+      """
+      Hello
+
+      """
     `)
 
     editor.commands.insertTrigger('[[')
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello [[
-      "
+      """
+      Hello [[
+
+      """
     `)
   })
 
@@ -149,19 +179,23 @@ describe('insertTrigger', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.codeBlock('const a<a>')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "\`\`\`
+      """
+      \`\`\`
       const a
       \`\`\`
-      "
+
+      """
     `)
 
     expect(editor.commands.insertTrigger('/')).toBe(false)
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "\`\`\`
+      """
+      \`\`\`
       const a
       \`\`\`
-      "
+
+      """
     `)
   })
 
@@ -170,15 +204,19 @@ describe('insertTrigger', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello<a>')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello
-      "
+      """
+      Hello
+
+      """
     `)
 
     expect(editor.commands.insertTrigger('')).toBe(false)
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello
-      "
+      """
+      Hello
+
+      """
     `)
   })
 })
@@ -189,15 +227,19 @@ describe('turnIntoText', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.heading({ level: 1 }, 'He<a>llo')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "# Hello
-      "
+      """
+      # Hello
+
+      """
     `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello
-      "
+      """
+      Hello
+
+      """
     `)
   })
 
@@ -206,15 +248,19 @@ describe('turnIntoText', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('He<a>llo')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello
-      "
+      """
+      Hello
+
+      """
     `)
 
     expect(editor.commands.turnIntoText()).toBe(false)
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "Hello
-      "
+      """
+      Hello
+
+      """
     `)
   })
 
@@ -223,15 +269,19 @@ describe('turnIntoText', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('a<a>'))))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "- a
-      "
+      """
+      - a
+
+      """
     `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "a
-      "
+      """
+      a
+
+      """
     `)
   })
 
@@ -246,21 +296,25 @@ describe('turnIntoText', () => {
       ),
     )
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "- a
+      """
+      - a
       - b
       - c
-      "
+
+      """
     `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "- a
+      """
+      - a
 
       b
 
       - c
-      "
+
+      """
     `)
   })
 
@@ -269,15 +323,19 @@ describe('turnIntoText', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.list({ kind: 'task', checked: true }, n.paragraph('a<a>'))))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "- [x] a
-      "
+      """
+      - [x] a
+
+      """
     `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "a
-      "
+      """
+      a
+
+      """
     `)
   })
 
@@ -294,18 +352,22 @@ describe('turnIntoText', () => {
       ),
     )
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "- a
+      """
+      - a
         - b
-      "
+
+      """
     `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "- a
+      """
+      - a
 
         b
-      "
+
+      """
     `)
   })
 
@@ -314,15 +376,19 @@ describe('turnIntoText', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.blockquote(n.paragraph('q<a>uote'))))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "> quote
-      "
+      """
+      > quote
+
+      """
     `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "quote
-      "
+      """
+      quote
+
+      """
     `)
   })
 
@@ -333,23 +399,27 @@ describe('turnIntoText', () => {
       n.doc(n.blockquote(n.paragraph('one'), n.paragraph('t<a>wo'), n.paragraph('three'))),
     )
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "> one
+      """
+      > one
       >
       > two
       >
       > three
-      "
+
+      """
     `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "> one
+      """
+      > one
 
       two
 
       > three
-      "
+
+      """
     `)
   })
 
@@ -358,20 +428,26 @@ describe('turnIntoText', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.list({ kind: 'bullet' }, n.heading({ level: 1 }, 'foo<a>'))))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "- # foo
-      "
+      """
+      - # foo
+
+      """
     `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "- foo
-      "
+      """
+      - foo
+
+      """
     `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "foo
-      "
+      """
+      foo
+
+      """
     `)
   })
 
@@ -380,20 +456,26 @@ describe('turnIntoText', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.blockquote(n.list({ kind: 'bullet' }, n.paragraph('a<a>')))))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "> - a
-      "
+      """
+      > - a
+
+      """
     `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "> a
-      "
+      """
+      > a
+
+      """
     `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "a
-      "
+      """
+      a
+
+      """
     `)
   })
 
@@ -402,16 +484,20 @@ describe('turnIntoText', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.heading({ level: 1 }, 'He<a>llo')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "# Hello
-      "
+      """
+      # Hello
+
+      """
     `)
 
     editor.commands.turnIntoText()
     editor.commands.insertText({ text: 'X' })
 
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      "HeXllo
-      "
+      """
+      HeXllo
+
+      """
     `)
   })
 })
