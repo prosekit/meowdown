@@ -101,6 +101,22 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
     }
   }
 
+  if (packAttrs.data.reference === true) {
+    // The parser's mdLinkText run includes the opening `[` but ends before
+    // the label's closing `]`; trim that one source character for the visible
+    // anchor range. Clicks normally originate inside this run.
+    const text =
+      linkText === undefined
+        ? { from: unit.from, to: unit.to }
+        : { from: linkText.from + 1, to: linkText.to }
+    return {
+      unit: { from: unit.from, to: unit.to },
+      text,
+      href: packAttrs.data.href,
+      title: packAttrs.data.title,
+    }
+  }
+
   // `[` at unit.from, `)` at unit.to - 1. With a url, `]` sits two chars before
   // the url start (`](`); with an empty `()`, `]` is two chars before the `)`.
   const uri = lastMarkRunIn(state, unit, 'mdLinkUri')

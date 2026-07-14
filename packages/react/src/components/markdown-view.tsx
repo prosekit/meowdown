@@ -1,5 +1,6 @@
 import {
   defaultResolveImageUrl,
+  collectReferenceDefinitions,
   formatFileSize,
   getFileKind,
   getCodeTokens,
@@ -27,6 +28,7 @@ import {
   type MdWikilinkAttrs,
   type MeowdownListAttrs,
   type NodeName,
+  type ReferenceDefinitions,
   type WikiEmbedResolver,
   type WikilinkClickHandler,
 } from '@meowdown/core'
@@ -129,6 +131,7 @@ interface RenderContext {
   resolveFileLink?: FileLinkResolver
   resolveWikiEmbed?: WikiEmbedResolver
   resolveFileInfo?: FileInfoResolver
+  referenceDefinitions: ReferenceDefinitions
   onWikilinkClick?: WikilinkClickHandler
   onLinkClick?: LinkClickHandler
   onImageClick?: ImageClickHandler
@@ -540,10 +543,17 @@ function renderRuns(
 function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode {
   const text = node.textContent
   if (!text) return null
-  const chunks: readonly MarkChunk[] = inlineTextToMarkChunks(getMarkBuilders(), text, {
-    resolveFileLink: context.resolveFileLink,
-    resolveWikiEmbed: context.resolveWikiEmbed,
-  })
+  const chunks: readonly MarkChunk[] = inlineTextToMarkChunks(
+    getMarkBuilders(),
+    text,
+    {
+      resolveFileLink: context.resolveFileLink,
+      resolveWikiEmbed: context.resolveWikiEmbed,
+    },
+    {
+      referenceDefinitions: context.referenceDefinitions,
+    },
+  )
   // Sort each chunk's marks into ProseMirror's canonical order so the grouping
   // and nesting match the editor.
   const runs = chunks.map(
@@ -648,12 +658,14 @@ export function MarkdownView({
 }: MarkdownViewProps): ReactElement {
   const content = useMemo(() => {
     const doc = markdownToDoc(markdown, { frontmatter })
+    const { definitions: referenceDefinitions } = collectReferenceDefinitions(doc)
     const context: RenderContext = {
       interactive,
       resolveImageUrl,
       resolveFileLink,
       resolveWikiEmbed,
       resolveFileInfo,
+      referenceDefinitions,
       onWikilinkClick: interactive ? onWikilinkClick : undefined,
       onLinkClick: interactive ? onLinkClick : undefined,
       onImageClick: interactive ? onImageClick : undefined,

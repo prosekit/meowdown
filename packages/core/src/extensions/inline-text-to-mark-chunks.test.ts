@@ -9,6 +9,11 @@ import {
   type InlineMarkOptions,
 } from './inline-text-to-mark-chunks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
+import {
+  normalizeReferenceLabel,
+  type ReferenceDefinition,
+  type ReferenceDefinitions,
+} from './reference-links.ts'
 import type { TypedMarkBuilders } from './schema.ts'
 
 function formatMarkChunk([from, to, marks]: MarkChunk): [string, string] {
@@ -38,15 +43,30 @@ const getMarkBuilders = once((): TypedMarkBuilders => {
   return createMarkBuilders<EditorExtension>(schema)
 })
 
-function parse(text: string, options?: InlineMarkOptions): string {
+function parse(
+  text: string,
+  options?: InlineMarkOptions,
+  referenceDefinitions?: ReferenceDefinitions,
+): string {
   const markBuilders = getMarkBuilders()
-  const chunks = inlineTextToMarkChunks(markBuilders, text, options)
+  const chunks = inlineTextToMarkChunks(markBuilders, text, options, { referenceDefinitions })
   const formatted = chunks.map(formatMarkChunk)
   const headLength = Math.max(...formatted.map(([head]) => head.length))
   const lines = formatted.map(([head, body]) => {
     return (head.padEnd(headLength, ' ') + ' ' + body).trim()
   })
   return '\n' + lines.join('\n') + '\n'
+}
+
+function references(
+  ...values: ReadonlyArray<readonly [label: string, href: string, title?: string]>
+): ReferenceDefinitions {
+  const definitions = new Map<string, ReferenceDefinition>()
+  for (const [label, href, title = ''] of values) {
+    const key = normalizeReferenceLabel(label)
+    definitions.set(key, { key, href, title })
+  }
+  return definitions
 }
 
 describe('plain text', () => {
@@ -386,14 +406,21 @@ describe('image', () => {
   it('reference', () => {
     expect(parse('a ![b][id] c')).toMatchInlineSnapshot(`
       "
-      [0, 2]
-      [2, 4]   mdPack(key=link,data={"href":"","title":""}) + mdMark
-      [4, 5]   mdPack(key=link,data={"href":"","title":""})
-      [5, 6]   mdPack(key=link,data={"href":"","title":""}) + mdMark
-      [6, 10]  mdPack(key=link,data={"href":"","title":""})
-      [10, 12]
+      [0, 12]
       "
     `)
+  })
+
+  it.each([
+    ['full', '![preview][asset]'],
+    ['collapsed', '![asset][]'],
+    ['shortcut', '![asset]'],
+  ])('resolves a %s reference image', (_kind, source) => {
+    expect(parse(source, undefined, references(['asset', 'assets/preview.png', 'Preview']))).toBe(
+      `\n[0, ${source.length}] mdImage(src=assets/preview.png,alt=${
+        source.includes('preview') ? 'preview' : 'asset'
+      },title=Preview)\n`,
+    )
   })
 
   it('folds a trailing width comment into the image mark', () => {
@@ -867,13 +894,10 @@ describe('wikilink', () => {
   })
 
   it('unclosed', () => {
-    // The inner `[a]` becomes a shortcut reference link (lezer behavior).
+    // The inner `[a]` is an unresolved shortcut reference, so it stays literal.
     expect(parse('[[a]')).toMatchInlineSnapshot(`
       "
-      [0, 1]
-      [1, 2] mdPack(key=link,data={"href":"","title":""}) + mdMark
-      [2, 3] mdPack(key=link,data={"href":"","title":""})
-      [3, 4] mdPack(key=link,data={"href":"","title":""}) + mdMark
+      [0, 4]
       "
     `)
   })
@@ -988,5 +1012,45 @@ describe('file link', () => {
     parse('[shortcut]', { resolveFileLink })
     parse('[empty]()', { resolveFileLink })
     expect(resolveFileLink).not.toHaveBeenCalled()
+  })
+
+  it('passes a resolved reference destination to the file resolver', () => {
+    const resolveFileLink = vi.fn(() => true)
+    expect(
+      parse(
+        '[Quarterly][report]',
+        { resolveFileLink },
+        references(['report', 'docs/report.pdf', 'Q3']),
+      ),
+    ).toBe('\n[0, 19] mdFile(href=docs/report.pdf,name=Quarterly,title=Q3)\n')
+    expect(resolveFileLink).toHaveBeenCalledWith({
+      href: 'docs/report.pdf',
+      label: 'Quarterly',
+      title: 'Q3',
+    })
+  })
+})
+
+describe('reference link', () => {
+  const definitions = references(['Doc', 'docs/plan.md#scope', 'Plan'])
+
+  it.each([
+    ['full', '[Read it][doc]'],
+    ['collapsed', '[Doc][]'],
+    ['shortcut', '[DOC]'],
+  ])('resolves a %s form', (_kind, source) => {
+    const output = parse(source, undefined, definitions)
+    expect(output).toContain('mdLinkText(href=docs/plan.md#scope)')
+    expect(output).toContain(
+      'mdPack(key=link,data={"href":"docs/plan.md#scope","title":"Plan","reference":true})',
+    )
+  })
+
+  it('leaves an unresolved shortcut literal', () => {
+    expect(parse('[missing]', undefined, definitions)).toBe('\n[0, 9]\n')
+  })
+
+  it('does not resolve reference-looking text inside its definition', () => {
+    expect(parse('[Doc]: docs/plan.md', undefined, definitions)).toBe('\n[0, 19]\n')
   })
 })

@@ -76,8 +76,17 @@ export {
   type FileLinkOptions,
   type FileLinkPayload,
   type FileLinkResolver,
+  type InlineMarkContext,
   type InlineMarkOptions,
 } from './extensions/inline-text-to-mark-chunks.ts'
+export {
+  collectReferenceDefinitions,
+  normalizeReferenceLabel,
+  parseReferenceDefinition,
+  type ReferenceDefinition,
+  type ReferenceDefinitionIndex,
+  type ReferenceDefinitions,
+} from './extensions/reference-links.ts'
 export { EDITOR_KEY_BINDINGS } from './extensions/key-bindings.ts'
 export {
   defineLinkClickHandler,

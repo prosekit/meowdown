@@ -54,6 +54,49 @@ describe('MarkdownView', () => {
     await expect.element(img).toHaveAttribute('alt', 'cat')
   })
 
+  it('resolves and activates full, collapsed, and shortcut reference links', async () => {
+    const onLinkClick = vi.fn()
+    await renderView('[Full][doc], [doc][], [DOC].\n\n[doc]: docs/plan.md "Plan title"', {
+      onLinkClick,
+    })
+
+    const links = view.locate('a')
+    expect(view.element().querySelectorAll('a')).toHaveLength(3)
+    await expect.element(links.first()).toHaveAttribute('href', 'docs/plan.md')
+    view.element().addEventListener('click', (event) => event.preventDefault(), {
+      capture: true,
+      once: true,
+    })
+    await links.first().click()
+    expect(onLinkClick).toHaveBeenCalledWith(expect.objectContaining({ href: 'docs/plan.md' }))
+  })
+
+  it('renders a reference image using its definition destination', async () => {
+    const resolveImageUrl = vi.fn((src: string) => `asset://${src}`)
+    await renderView('![Preview][asset]\n\n[asset]: assets/preview.png "Preview image"', {
+      resolveImageUrl,
+    })
+
+    const image = view.getByTestId('image-preview').locate('img')
+    await expect.element(image).toHaveAttribute('src', 'asset://assets/preview.png')
+    await expect.element(image).toHaveAttribute('alt', 'Preview')
+    expect(resolveImageUrl).toHaveBeenCalledWith('assets/preview.png')
+  })
+
+  it('passes a resolved reference href to the file resolver', async () => {
+    const resolveFileLink = vi.fn(() => true)
+    await renderView('[Quarterly][report]\n\n[report]: docs/report.pdf "Q3"', {
+      resolveFileLink,
+    })
+
+    await expect.element(view.getByTestId('file-pill')).toHaveTextContent('Quarterly')
+    expect(resolveFileLink).toHaveBeenCalledWith({
+      href: 'docs/report.pdf',
+      label: 'Quarterly',
+      title: 'Q3',
+    })
+  })
+
   it('renders a resolved wiki image with its alias and width', async () => {
     await renderView('![[assets/cat.png|120]]', {
       resolveWikiEmbed: () => ({ kind: 'image' }),

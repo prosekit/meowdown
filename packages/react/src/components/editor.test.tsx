@@ -367,6 +367,48 @@ describe('MeowdownEditor', () => {
     })
   })
 
+  it('round-trips and activates a resolved reference link', async () => {
+    const onLinkClick = vi.fn()
+    const ref = createRef<EditorHandle>()
+    const markdown = '[Plan][doc], [doc][], and [doc].\n\n[doc]: docs/plan.md "Plan title"'
+    await render(
+      <MeowdownEditor
+        handleRef={ref}
+        mode="hide"
+        initialMarkdown={markdown}
+        onLinkClick={onLinkClick}
+      />,
+    )
+
+    expect(ref.current?.getMarkdown()).toBe(`${markdown}\n`)
+    const links = pmRoot.getByRole('link')
+    await expect.element(links.first()).toHaveAttribute('href', 'docs/plan.md')
+    await links.first().click()
+    await vi.waitFor(() => {
+      expect(onLinkClick).toHaveBeenCalledWith(expect.objectContaining({ href: 'docs/plan.md' }))
+    })
+  })
+
+  it('renders a reference image from its resolved definition destination', async () => {
+    const onImageClick = vi.fn()
+    const markdown = '![Preview][asset]\n\n[asset]: assets/preview.png "Preview image"'
+    await render(
+      <MeowdownEditor
+        mode="hide"
+        initialMarkdown={markdown}
+        resolveImageUrl={(src) => `asset://${src}`}
+        onImageClick={onImageClick}
+      />,
+    )
+
+    const image = page.getByAltText('Preview')
+    await expect.element(image).toHaveAttribute('src', 'asset://assets/preview.png')
+    await image.click()
+    expect(onImageClick).toHaveBeenCalledWith(
+      expect.objectContaining({ src: 'assets/preview.png', alt: 'Preview' }),
+    )
+  })
+
   it('calls onTagClick when a rendered tag is clicked', async () => {
     const onTagClick = vi.fn()
     const screen = await render(

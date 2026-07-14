@@ -314,12 +314,36 @@ describe('inlineMarkPlugin', () => {
     const pos = findText(fixture.doc, 'note')
     expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilink'])
     // Delete one ']': "see [[note] end" is no longer a wikilink. The inner
-    // `[note]` becomes a shortcut reference link, so it loses mdWikilink
-    // but gains the link pack wrapper.
+    // `[note]` becomes an unresolved shortcut reference, so it stays literal.
     const firstBracket = findText(fixture.doc, ']')
     fixture.view.dispatch(fixture.state.tr.delete(firstBracket + 1, firstBracket + 2))
     const after = findText(fixture.doc, 'note')
-    expect(marksAt(fixture.doc, after + 1)).toEqual(['mdPack'])
+    expect(marksAt(fixture.doc, after + 1)).toEqual([])
+  })
+
+  it('resolves references document-wide and refreshes when a definition changes', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('Read [Plan][doc].'), n.paragraph('[doc]: docs/old.md "Old"')))
+
+    const label = findText(fixture.doc, 'Plan')
+    const before = fixture.doc
+      .resolve(label + 1)
+      .marks()
+      .find((mark) => mark.type.name === 'mdLinkText')
+    expect(before?.attrs.href).toBe('docs/old.md')
+
+    const destination = findText(fixture.doc, 'docs/old.md')
+    fixture.view.dispatch(
+      fixture.state.tr.insertText('docs/new.md', destination, destination + 'docs/old.md'.length),
+    )
+
+    const after = fixture.doc
+      .resolve(label + 1)
+      .marks()
+      .find((mark) => mark.type.name === 'mdLinkText')
+    expect(after?.attrs.href).toBe('docs/new.md')
+    expect(marksAt(fixture.doc, findText(fixture.doc, '[doc]:') + 2)).toEqual([])
   })
 
   it('removes mdTag when text is glued in front of the #', () => {

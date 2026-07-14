@@ -23,6 +23,7 @@ import type { PositionRange } from '../utils/range.ts'
 import { BatchSetMarkStep } from './batch-set-mark-step.ts'
 import { inlineTextToMarkChunks, type InlineMarkOptions } from './inline-text-to-mark-chunks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
+import { collectReferenceDefinitions, type ReferenceDefinitionIndex } from './reference-links.ts'
 import { getMarkBuildersForSchema } from './schema.ts'
 
 const META_KEY = 'inline-marks-applied'
@@ -86,20 +87,37 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
    * the doc (a paragraph below it was inserted or deleted). Scoped to the
    * plugin instance because the chunks depend on this editor's `options`.
    */
-  const chunkCache = new WeakMap<EditorNode, readonly MarkChunk[]>()
+  interface CachedChunks {
+    readonly referenceSignature: string
+    readonly chunks: readonly MarkChunk[]
+  }
+
+  const chunkCache = new WeakMap<EditorNode, CachedChunks>()
+  let lastReferenceSignature: string | undefined
 
   function chunksForTextblock(
     node: EditorNode,
     baseOffset: number,
     schema: Schema,
+    references: ReferenceDefinitionIndex,
   ): readonly MarkChunk[] {
-    let relative = chunkCache.get(node)
-    if (relative) {
+    const cached = chunkCache.get(node)
+    let relative: readonly MarkChunk[]
+    if (cached?.referenceSignature === references.signature) {
       chunkCacheHits++
+      relative = cached.chunks
     } else {
       chunkCacheParses++
-      relative = inlineTextToMarkChunks(getMarkBuildersForSchema(schema), node.textContent, options)
-      chunkCache.set(node, relative)
+      relative = inlineTextToMarkChunks(
+        getMarkBuildersForSchema(schema),
+        node.textContent,
+        options,
+        { referenceDefinitions: references.definitions },
+      )
+      chunkCache.set(node, {
+        referenceSignature: references.signature,
+        chunks: relative,
+      })
     }
     if (baseOffset === 0) return relative
     const shifted: MarkChunk[] = []
@@ -117,13 +135,17 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
    * containers (blockquote, list, tableCell), so it picks up nested
    * textblocks without each container needing to be listed explicitly.
    */
-  function collectChunksForRange(state: EditorState, range: PositionRange): MarkChunk[] {
+  function collectChunksForRange(
+    state: EditorState,
+    range: PositionRange,
+    references: ReferenceDefinitionIndex,
+  ): MarkChunk[] {
     const chunks: MarkChunk[] = []
     state.doc.nodesBetween(range.from, range.to, (node, pos) => {
       if (node.type.spec.code) return false
       if (!node.isTextblock) return true
       if (node.childCount === 0) return false
-      const nodeChunks = chunksForTextblock(node, pos + 1, state.schema)
+      const nodeChunks = chunksForTextblock(node, pos + 1, state.schema, references)
       if (nodeChunks.length > 0) chunks.push(...nodeChunks)
       return false
     })
@@ -137,8 +159,13 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
       for (const tr of transactions) {
         if (tr.getMeta(META_KEY)) return null
       }
-      const range = computeAffectedRange(transactions, newState)
-      const chunks = collectChunksForRange(newState, range)
+      const references = collectReferenceDefinitions(newState.doc)
+      const definitionsChanged = lastReferenceSignature !== references.signature
+      lastReferenceSignature = references.signature
+      const range = definitionsChanged
+        ? { from: 0, to: newState.doc.content.size }
+        : computeAffectedRange(transactions, newState)
+      const chunks = collectChunksForRange(newState, range, references)
       if (chunks.length === 0) return null
       const tr = newState.tr.step(new BatchSetMarkStep(chunks))
       tr.setMeta(META_KEY, true)

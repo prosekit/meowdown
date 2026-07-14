@@ -29,6 +29,21 @@ describe('getLinkUnitAt', () => {
     expect(fixture.doc.textBetween(link.dest!.from, link.dest!.to)).toBe('http://x "the title"')
   })
 
+  it('returns a resolved reference href without editable inline ranges', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(n.paragraph('Read [the plan][doc].'), n.paragraph('[doc]: docs/plan.md "Plan"')),
+    )
+    const link = getLinkUnitAt(fixture.state, findText(fixture.doc, 'the plan') + 1)!
+    expect(link.href).toBe('docs/plan.md')
+    expect(link.title).toBe('Plan')
+    expect(link.label).toBeUndefined()
+    expect(link.dest).toBeUndefined()
+    expect(fixture.doc.textBetween(link.unit.from, link.unit.to)).toBe('[the plan][doc]')
+    expect(fixture.doc.textBetween(link.text.from, link.text.to)).toBe('the plan')
+  })
+
   it('resolves href when the position is on the url run, not the label', () => {
     using fixture = setupFixture()
     const { n } = fixture
