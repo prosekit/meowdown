@@ -132,6 +132,7 @@ interface RenderContext {
   resolveWikiEmbed?: WikiEmbedResolver
   resolveFileInfo?: FileInfoResolver
   referenceDefinitions: ReferenceDefinitions
+  referenceDefinitionNodes: ReadonlySet<ProseMirrorNode>
   onWikilinkClick?: WikilinkClickHandler
   onLinkClick?: LinkClickHandler
   onImageClick?: ImageClickHandler
@@ -543,17 +544,12 @@ function renderRuns(
 function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode {
   const text = node.textContent
   if (!text) return null
-  const chunks: readonly MarkChunk[] = inlineTextToMarkChunks(
-    getMarkBuilders(),
-    text,
-    {
-      resolveFileLink: context.resolveFileLink,
-      resolveWikiEmbed: context.resolveWikiEmbed,
-    },
-    {
-      referenceDefinitions: context.referenceDefinitions,
-    },
-  )
+  const chunks: readonly MarkChunk[] = inlineTextToMarkChunks(getMarkBuilders(), text, {
+    resolveFileLink: context.resolveFileLink,
+    resolveWikiEmbed: context.resolveWikiEmbed,
+    referenceDefinitions: context.referenceDefinitions,
+    isReferenceDefinition: context.referenceDefinitionNodes.has(node),
+  })
   // Sort each chunk's marks into ProseMirror's canonical order so the grouping
   // and nesting match the editor.
   const runs = chunks.map(
@@ -597,6 +593,8 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
     }
     return <CodeBlock key={key} code={node.textContent} language={language} />
   }
+
+  if (context.referenceDefinitionNodes.has(node)) return null
 
   const toDOM = node.type.spec.toDOM
   if (node.isTextblock) {
@@ -658,7 +656,8 @@ export function MarkdownView({
 }: MarkdownViewProps): ReactElement {
   const content = useMemo(() => {
     const doc = markdownToDoc(markdown, { frontmatter })
-    const { definitions: referenceDefinitions } = collectReferenceDefinitions(doc)
+    const referenceIndex = collectReferenceDefinitions(doc)
+    const referenceDefinitions = referenceIndex.definitions
     const context: RenderContext = {
       interactive,
       resolveImageUrl,
@@ -666,6 +665,7 @@ export function MarkdownView({
       resolveWikiEmbed,
       resolveFileInfo,
       referenceDefinitions,
+      referenceDefinitionNodes: referenceIndex.nodes,
       onWikilinkClick: interactive ? onWikilinkClick : undefined,
       onLinkClick: interactive ? onLinkClick : undefined,
       onImageClick: interactive ? onImageClick : undefined,

@@ -86,8 +86,8 @@ function LinkInfoContent({
   href: string
   onLinkClick?: LinkClickHandler
   onLinkCopy?: LinkCopyHandler
-  onEdit: () => void
-  onRemove: () => void
+  onEdit?: () => void
+  onRemove?: () => void
 }) {
   return (
     <div className={styles.Row} data-testid="link-popover-read">
@@ -111,24 +111,28 @@ function LinkInfoContent({
         className={styles.Button}
         onCopy={() => onLinkCopy?.({ href })}
       />
-      <button
-        type="button"
-        className={styles.Button}
-        title="Edit link"
-        aria-label="Edit link"
-        onClick={onEdit}
-      >
-        <PencilIcon />
-      </button>
-      <button
-        type="button"
-        className={styles.Button}
-        title="Remove link"
-        aria-label="Remove link"
-        onClick={onRemove}
-      >
-        <UnlinkIcon />
-      </button>
+      {onEdit && (
+        <button
+          type="button"
+          className={styles.Button}
+          title="Edit link"
+          aria-label="Edit link"
+          onClick={onEdit}
+        >
+          <PencilIcon />
+        </button>
+      )}
+      {onRemove && (
+        <button
+          type="button"
+          className={styles.Button}
+          title="Remove link"
+          aria-label="Remove link"
+          onClick={onRemove}
+        >
+          <UnlinkIcon />
+        </button>
+      )}
     </div>
   )
 }
@@ -285,16 +289,24 @@ export function LinkMenu({ onLinkClick, onLinkCopy }: LinkMenuProps) {
           href={link.href}
           onLinkClick={onLinkClick}
           onLinkCopy={onLinkCopy}
-          onEdit={() => {
-            selectLinkUnit(editor, link)
-            setEdit({ from: link.unit.from, to: link.unit.to, link })
-            closeHover()
-          }}
-          onRemove={() => {
-            selectLinkUnit(editor, link)
-            editor.commands.removeLink()
-            closeHover()
-          }}
+          onEdit={
+            link.label && link.dest
+              ? () => {
+                  selectLinkUnit(editor, link)
+                  setEdit({ from: link.unit.from, to: link.unit.to, link })
+                  closeHover()
+                }
+              : undefined
+          }
+          onRemove={
+            link.label && link.dest
+              ? () => {
+                  selectLinkUnit(editor, link)
+                  editor.commands.removeLink()
+                  closeHover()
+                }
+              : undefined
+          }
         />
       </LinkPopover>
     )

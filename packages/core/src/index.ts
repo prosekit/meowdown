@@ -76,7 +76,6 @@ export {
   type FileLinkOptions,
   type FileLinkPayload,
   type FileLinkResolver,
-  type InlineMarkContext,
   type InlineMarkOptions,
 } from './extensions/inline-text-to-mark-chunks.ts'
 export {
@@ -84,6 +83,7 @@ export {
   normalizeReferenceLabel,
   parseReferenceDefinition,
   type ReferenceDefinition,
+  type ReferenceDefinitionEntry,
   type ReferenceDefinitionIndex,
   type ReferenceDefinitions,
 } from './extensions/reference-links.ts'

@@ -5,6 +5,10 @@ import { setupFixture } from '../testing/index.ts'
 import { marksAt } from '../testing/marks-at.ts'
 
 import { getCacheStats, resetCacheStats } from './inline-mark-plugin.ts'
+import {
+  getReferenceDefinitionParseCount,
+  resetReferenceDefinitionParseCount,
+} from './reference-links.ts'
 
 describe('inlineMarkPlugin', () => {
   it('applies mdStrong inside **bold**', () => {
@@ -344,6 +348,133 @@ describe('inlineMarkPlugin', () => {
       .find((mark) => mark.type.name === 'mdLinkText')
     expect(after?.attrs.href).toBe('docs/new.md')
     expect(marksAt(fixture.doc, findText(fixture.doc, '[doc]:') + 2)).toEqual([])
+  })
+
+  it('discovers a definition created after the editor mounts', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('Read [Plan][doc].'), n.paragraph('[doc] /old')))
+
+    const definition = fixture.doc.child(0).nodeSize + 1
+    fixture.view.dispatch(fixture.state.tr.insertText(':', definition + '[doc]'.length))
+
+    const label = findText(fixture.doc, 'Plan')
+    const link = fixture.doc
+      .resolve(label + 1)
+      .marks()
+      .find((mark) => mark.type.name === 'mdLinkText')
+    expect(link?.attrs.href).toBe('/old')
+  })
+
+  it('promotes the next duplicate when the first definition is deleted', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.paragraph('Read [Plan][doc].'),
+        n.paragraph('[doc]: /first'),
+        n.paragraph('[DOC]: /second'),
+      ),
+    )
+
+    const firstDefinitionPosition = fixture.doc.child(0).nodeSize
+    const firstDefinitionSize = fixture.doc.child(1).nodeSize
+    fixture.view.dispatch(
+      fixture.state.tr.delete(
+        firstDefinitionPosition,
+        firstDefinitionPosition + firstDefinitionSize,
+      ),
+    )
+
+    const label = findText(fixture.doc, 'Plan')
+    const link = fixture.doc
+      .resolve(label + 1)
+      .marks()
+      .find((mark) => mark.type.name === 'mdLinkText')
+    expect(link?.attrs.href).toBe('/second')
+  })
+
+  it('keeps a newly created definition after its stale inline marks are removed', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.paragraph('[doc] /new'),
+        n.paragraph('Read [Plan][doc].'),
+        n.paragraph('[doc]: /old'),
+        n.paragraph('ordinary'),
+      ),
+    )
+
+    const firstLabel = 1
+    fixture.view.dispatch(fixture.state.tr.insertText(':', firstLabel + '[doc]'.length))
+
+    const firstUpdateLabel = findText(fixture.doc, 'Plan')
+    const firstUpdateLink = fixture.doc
+      .resolve(firstUpdateLabel + 1)
+      .marks()
+      .find((mark) => mark.type.name === 'mdLinkText')
+    expect(firstUpdateLink?.attrs.href).toBe('/new')
+
+    const ordinary = findText(fixture.doc, 'ordinary')
+    fixture.view.dispatch(fixture.state.tr.insertText('X', ordinary, ordinary + 1))
+
+    const label = findText(fixture.doc, 'Plan')
+    const link = fixture.doc
+      .resolve(label + 1)
+      .marks()
+      .find((mark) => mark.type.name === 'mdLinkText')
+    expect(link?.attrs.href).toBe('/new')
+  })
+
+  it('does not rescan a large document when an unrelated paragraph changes', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const ordinary = Array.from({ length: 1_000 }, (_, index) => n.paragraph(`line ${index}`))
+    fixture.set(n.doc(n.paragraph('[doc]: /docs'), ...ordinary))
+
+    resetReferenceDefinitionParseCount()
+    const lastLine = findText(fixture.doc, 'line 999')
+    fixture.view.dispatch(fixture.state.tr.insertText('X', lastLine, lastLine + 1))
+    expect(getReferenceDefinitionParseCount()).toBe(0)
+  })
+
+  it('resolves definition-shaped text in a heading against a real definition', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('[doc]: /real'), n.heading({ level: 1 }, '[doc]: /other')))
+
+    const heading = fixture.doc.child(1)
+    const link = heading
+      .resolve(2)
+      .marks()
+      .find((mark) => mark.type.name === 'mdLinkText')
+    expect(link?.attrs.href).toBe('/real')
+  })
+
+  it('invalidates cached chunks when unchanged text changes definition context', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(n.paragraph('[doc]: /real'), n.list({ kind: 'bullet' }, n.paragraph('[doc]: /other'))),
+    )
+
+    const listPosition = fixture.doc.child(0).nodeSize
+    const list = fixture.doc.nodeAt(listPosition)!
+    fixture.view.dispatch(
+      fixture.state.tr.setNodeMarkup(listPosition, undefined, {
+        ...list.attrs,
+        kind: 'task',
+        checked: false,
+      }),
+    )
+
+    const labelPosition = listPosition + 3
+    const link = fixture.doc
+      .resolve(labelPosition)
+      .marks()
+      .find((mark) => mark.type.name === 'mdLinkText')
+    expect(link?.attrs.href).toBe('/real')
   })
 
   it('removes mdTag when text is glued in front of the #', () => {

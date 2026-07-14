@@ -133,4 +133,16 @@ describe('LinkMenu', () => {
     await expect.element(pmRoot.getByText('https://new.test')).toBeInTheDocument()
     expect(ref.current?.getMarkdown()).toContain('[Docs](https://new.test)')
   })
+
+  it('does not offer destructive edits for reference links', async () => {
+    const screen = await render(
+      <MeowdownEditor initialMarkdown={'[Docs][doc]\n\n[doc]: https://example.com'} />,
+    )
+    await screen.getByText('Docs').hover()
+    await expect.element(popover.getByTestId('link-popover-read')).toBeVisible()
+    await expect.element(popover.getByRole('button', { name: 'Edit link' })).not.toBeInTheDocument()
+    await expect
+      .element(popover.getByRole('button', { name: 'Remove link' }))
+      .not.toBeInTheDocument()
+  })
 })

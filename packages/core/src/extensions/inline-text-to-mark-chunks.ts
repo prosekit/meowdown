@@ -18,7 +18,6 @@ import type { MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
 import {
   normalizeReferenceLabel,
-  parseReferenceDefinition,
   type ReferenceDefinition,
   type ReferenceDefinitions,
 } from './reference-links.ts'
@@ -77,13 +76,14 @@ export interface FileLinkOptions {
   resolveFileLink?: FileLinkResolver
 }
 
-/** Host options that influence source-backed inline atom parsing. */
-export type InlineMarkOptions = FileLinkOptions & WikiEmbedOptions
-
-/** Document-level context needed to resolve CommonMark reference links. */
-export interface InlineMarkContext {
-  referenceDefinitions?: ReferenceDefinitions
-}
+/** Host options and document context that influence inline parsing. */
+export type InlineMarkOptions = FileLinkOptions &
+  WikiEmbedOptions & {
+    /** Document-level definitions used to resolve CommonMark reference links. */
+    referenceDefinitions?: ReferenceDefinitions
+    /** This textblock is itself a source-backed reference definition. */
+    isReferenceDefinition?: boolean
+  }
 
 /**
  * Walk a textblock's inline content and produce a list of mark chunks
@@ -97,15 +97,11 @@ export function inlineTextToMarkChunks(
   text: string,
   /** Host options; omit for the default parse. */
   options?: InlineMarkOptions,
-  /** Document-level parse context; definitions never alter the source text. */
-  context?: InlineMarkContext,
 ): MarkChunk[] {
   const elements = parseInline(text)
   const out: MarkChunk[] = []
   const referenceDefinitions =
-    context?.referenceDefinitions !== undefined && parseReferenceDefinition(text) === null
-      ? context.referenceDefinitions
-      : undefined
+    options?.isReferenceDefinition === true ? undefined : options?.referenceDefinitions
   walk(elements, [], 0, text.length, text, marks, out, options, referenceDefinitions)
   return out
 }

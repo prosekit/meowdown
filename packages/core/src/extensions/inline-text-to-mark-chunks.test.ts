@@ -49,7 +49,10 @@ function parse(
   referenceDefinitions?: ReferenceDefinitions,
 ): string {
   const markBuilders = getMarkBuilders()
-  const chunks = inlineTextToMarkChunks(markBuilders, text, options, { referenceDefinitions })
+  const chunks = inlineTextToMarkChunks(markBuilders, text, {
+    ...options,
+    referenceDefinitions,
+  })
   const formatted = chunks.map(formatMarkChunk)
   const headLength = Math.max(...formatted.map(([head]) => head.length))
   const lines = formatted.map(([head, body]) => {
@@ -1051,6 +1054,19 @@ describe('reference link', () => {
   })
 
   it('does not resolve reference-looking text inside its definition', () => {
-    expect(parse('[Doc]: docs/plan.md', undefined, definitions)).toBe('\n[0, 19]\n')
+    expect(parse('[Doc]: docs/plan.md', { isReferenceDefinition: true }, definitions)).toBe(
+      '\n[0, 19]\n',
+    )
+  })
+
+  it('does not equate an authored escape with unescaped punctuation', () => {
+    const escaped = references([String.raw`foo\!`, '/escaped'])
+    expect(parse('[foo!]', undefined, escaped)).toBe('\n[0, 6]\n')
+    expect(parse(String.raw`[foo\!]`, undefined, escaped)).toContain('mdLinkText(href=/escaped)')
+  })
+
+  it('uses CommonMark Unicode case folding', () => {
+    const unicode = references(['Straße', '/unicode'])
+    expect(parse('[STRASSE]', undefined, unicode)).toContain('mdLinkText(href=/unicode)')
   })
 })

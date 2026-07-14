@@ -69,6 +69,42 @@ describe('MarkdownView', () => {
     })
     await links.first().click()
     expect(onLinkClick).toHaveBeenCalledWith(expect.objectContaining({ href: 'docs/plan.md' }))
+    await expect.element(view).not.toHaveTextContent('[doc]:')
+    await expect.element(view).not.toHaveTextContent('Plan title')
+  })
+
+  it('hides nested reference definitions but keeps their rendered links', async () => {
+    await renderView('> Read [Docs][doc].\n>\n> [doc]: /docs\n\n- [item]: /item\n\n[Item][item]')
+
+    expect(view.element().querySelectorAll('a')).toHaveLength(2)
+    await expect.element(view).not.toHaveTextContent('[doc]:')
+    await expect.element(view).not.toHaveTextContent('[item]:')
+  })
+
+  it('does not collect definition-shaped headings, table cells, or tasks', async () => {
+    await renderView(
+      '# [heading]: /heading\n\n| Cell |\n| --- |\n| [table]: /table |\n\n- [ ] [task]: /task\n\n[heading] [table] [task]',
+    )
+
+    expect(view.element().querySelectorAll('a')).toHaveLength(0)
+    await expect.element(view).toHaveTextContent('[heading]: /heading')
+    await expect.element(view).toHaveTextContent('[table]: /table')
+    await expect.element(view).toHaveTextContent('[task]: /task')
+  })
+
+  it('accepts and hides a definition after a task item body', async () => {
+    await renderView('- [ ] task body\n\n  [nested]: /nested\n\n[Docs][nested]')
+
+    expect(view.element().querySelectorAll('a')).toHaveLength(1)
+    await expect.element(view).not.toHaveTextContent('[nested]:')
+  })
+
+  it('links definition-shaped heading text through a real definition', async () => {
+    await renderView('[doc]: /real\n\n# [doc]: /other')
+
+    const link = view.locate('h1 a')
+    await expect.element(link).toHaveAttribute('href', '/real')
+    await expect.element(view).not.toHaveTextContent('[doc]: /real')
   })
 
   it('renders a reference image using its definition destination', async () => {

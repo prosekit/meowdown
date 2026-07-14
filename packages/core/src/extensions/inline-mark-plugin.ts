@@ -23,7 +23,12 @@ import type { PositionRange } from '../utils/range.ts'
 import { BatchSetMarkStep } from './batch-set-mark-step.ts'
 import { inlineTextToMarkChunks, type InlineMarkOptions } from './inline-text-to-mark-chunks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
-import { collectReferenceDefinitions, type ReferenceDefinitionIndex } from './reference-links.ts'
+import {
+  collectReferenceDefinitions,
+  rebindReferenceDefinitionNodes,
+  type ReferenceDefinitionIndex,
+  updateReferenceDefinitions,
+} from './reference-links.ts'
 import { getMarkBuildersForSchema } from './schema.ts'
 
 const META_KEY = 'inline-marks-applied'
@@ -79,6 +84,11 @@ function computeAffectedRange(
 }
 
 function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin {
+  interface InlineMarkPluginState {
+    readonly references: ReferenceDefinitionIndex
+  }
+
+  const pluginKey = new PluginKey<InlineMarkPluginState>('inline-mark')
   /**
    * Cache of chunks per textblock node, keyed by the immutable
    * `ProseMirrorNode` instance. Stored chunks are baseOffset-relative
@@ -89,11 +99,11 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
    */
   interface CachedChunks {
     readonly referenceSignature: string
+    readonly isReferenceDefinition: boolean
     readonly chunks: readonly MarkChunk[]
   }
 
   const chunkCache = new WeakMap<EditorNode, CachedChunks>()
-  let lastReferenceSignature: string | undefined
 
   function chunksForTextblock(
     node: EditorNode,
@@ -102,20 +112,24 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
     references: ReferenceDefinitionIndex,
   ): readonly MarkChunk[] {
     const cached = chunkCache.get(node)
+    const isReferenceDefinition = references.nodes.has(node)
     let relative: readonly MarkChunk[]
-    if (cached?.referenceSignature === references.signature) {
+    if (
+      cached?.referenceSignature === references.signature &&
+      cached.isReferenceDefinition === isReferenceDefinition
+    ) {
       chunkCacheHits++
       relative = cached.chunks
     } else {
       chunkCacheParses++
-      relative = inlineTextToMarkChunks(
-        getMarkBuildersForSchema(schema),
-        node.textContent,
-        options,
-        { referenceDefinitions: references.definitions },
-      )
+      relative = inlineTextToMarkChunks(getMarkBuildersForSchema(schema), node.textContent, {
+        ...options,
+        referenceDefinitions: references.definitions,
+        isReferenceDefinition,
+      })
       chunkCache.set(node, {
         referenceSignature: references.signature,
+        isReferenceDefinition,
         chunks: relative,
       })
     }
@@ -152,16 +166,30 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
     return chunks
   }
 
-  return new Plugin({
-    key: new PluginKey('inline-mark'),
-    appendTransaction(transactions, _oldState, newState) {
+  return new Plugin<InlineMarkPluginState>({
+    key: pluginKey,
+    state: {
+      init(_config, state) {
+        return { references: collectReferenceDefinitions(state.doc) }
+      },
+      apply(transaction, value, _oldState, newState) {
+        if (transaction.getMeta(META_KEY)) {
+          return { references: rebindReferenceDefinitionNodes(value.references, newState.doc) }
+        }
+        return {
+          references: updateReferenceDefinitions(value.references, transaction, newState.doc),
+        }
+      },
+    },
+    appendTransaction(transactions, oldState, newState) {
       // Drop transactions we appended ourselves to avoid recursing.
       for (const tr of transactions) {
         if (tr.getMeta(META_KEY)) return null
       }
-      const references = collectReferenceDefinitions(newState.doc)
-      const definitionsChanged = lastReferenceSignature !== references.signature
-      lastReferenceSignature = references.signature
+      const references = pluginKey.getState(newState)?.references
+      if (references === undefined) return null
+      const previousReferences = pluginKey.getState(oldState)?.references
+      const definitionsChanged = previousReferences?.signature !== references.signature
       const range = definitionsChanged
         ? { from: 0, to: newState.doc.content.size }
         : computeAffectedRange(transactions, newState)
