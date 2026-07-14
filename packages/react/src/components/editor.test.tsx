@@ -434,6 +434,29 @@ describe('MeowdownEditor', () => {
     expect(ref.current?.revealHeading('#Missing')).toBe(false)
     expect(ref.current?.getSelection()).toEqual(before)
   })
+
+  it('refreshes creation-time resolver output without changing Markdown or selection', async () => {
+    const ref = createRef<EditorHandle>()
+    let resolved = false
+    await render(
+      <MeowdownEditor
+        handleRef={ref}
+        initialMarkdown="before ![[photo.png]] after"
+        resolveWikiEmbed={() => (resolved ? { kind: 'image' } : undefined)}
+        resolveImageUrl={(src) => `https://cdn.example/${src}`}
+      />,
+    )
+    ref.current?.setSelection({ type: 'text', anchor: 3, head: 3 })
+    const before = ref.current?.getState()
+    const image = page.getByAltText('photo.png')
+    await expect.element(image).not.toBeInTheDocument()
+
+    resolved = true
+    ref.current?.refreshMarkdownRendering()
+
+    await expect.element(image).toBeInTheDocument()
+    expect(ref.current?.getState()).toEqual(before)
+  })
 })
 
 describe('file pill props', () => {

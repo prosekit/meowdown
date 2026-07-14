@@ -333,6 +333,9 @@ export function MeowdownEditor({
     function setState(markdown?: string, selection?: SelectionHint): void {
       childRef.current?.setState(markdown, selection)
     }
+    function refreshMarkdownRendering(): void {
+      childRef.current?.refreshMarkdownRendering()
+    }
     function getSelection(): SelectionJSON {
       return childRef.current?.getSelection() ?? { type: 'text', anchor: 0, head: 0 }
     }
@@ -372,6 +375,7 @@ export function MeowdownEditor({
       insertMarkdown,
       getState,
       setState,
+      refreshMarkdownRendering,
       getSelection,
       setSelection,
       focus,

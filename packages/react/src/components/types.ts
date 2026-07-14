@@ -53,6 +53,13 @@ export interface EditorHandle {
    */
   setState: (markdown?: string, selection?: SelectionHint) => void
 
+  /**
+   * Reparse the current Markdown with the editor's creation-time resolvers,
+   * preserving the selection without adding an undo-history entry. Hosts use
+   * this when data consulted by a stable resolver changes out of band.
+   */
+  refreshMarkdownRendering: () => void
+
   /** Returns the current selection. */
   getSelection: () => SelectionJSON
 

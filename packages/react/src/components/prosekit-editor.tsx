@@ -370,7 +370,7 @@ export function ProseKitEditor({
     function getState(): EditorStateSnapshot {
       return [getMarkdown(), getSelection()]
     }
-    function setState(markdown?: string, selection?: SelectionHint): void {
+    function replaceState(markdown?: string, selection?: SelectionHint, addToHistory = true): void {
       if (markdown == null && !selection) return
       const transaction = editor.state.tr
       if (markdown != null) {
@@ -380,6 +380,9 @@ export function ProseKitEditor({
       if (selection) {
         transaction.setSelection(resolveSelection(transaction.doc, selection)).scrollIntoView()
       }
+      if (!addToHistory) {
+        transaction.setMeta('addToHistory', false)
+      }
       suppressDocChangeRef.current = true
       try {
         editor.view.dispatch(transaction)
@@ -387,8 +390,15 @@ export function ProseKitEditor({
         suppressDocChangeRef.current = false
       }
     }
+    function setState(markdown?: string, selection?: SelectionHint): void {
+      replaceState(markdown, selection)
+    }
     function setMarkdown(markdown: string): void {
       setState(markdown)
+    }
+    function refreshMarkdownRendering(): void {
+      const [markdown, selection] = getState()
+      replaceState(markdown, selection, false)
     }
     function insertMarkdown(markdown: string): void {
       editor.commands.insertMarkdown(markdown)
@@ -434,6 +444,7 @@ export function ProseKitEditor({
       insertMarkdown,
       getState,
       setState,
+      refreshMarkdownRendering,
       getSelection,
       setSelection,
       focus,
