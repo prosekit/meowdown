@@ -81,8 +81,8 @@ export function findAtomCaretRect(view: EditorView): CaretRect | undefined {
 /**
  * The preview fragment rect for a range edge touching an atom unit: the
  * visible geometry standing in for source text that measures as nothing.
- * `side` points into the range, like `coordsAtPos`: `1` for a start edge
- * (first line fragment), `-1` for an end edge (last line fragment).
+ * `side` points into the range: `1` for a start edge (first line fragment),
+ * `-1` for an end edge (last line fragment).
  */
 export function findAtomEdgeRect(
   view: EditorView,

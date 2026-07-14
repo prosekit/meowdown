@@ -11,7 +11,7 @@ export type { VirtualElement }
 
 // A range edge against a hidden syntax run has no glyph of its own; the
 // nearest visible glyph past the run's far end carries the line geometry.
-// `side` points into the range, like `coordsAtPos`.
+// `side` points into the range.
 function tryHiddenRunCoords(view: EditorView, pos: number, side: -1 | 1): CaretCoords | undefined {
   if (side === 1) {
     const run = getHiddenRunAfter(view.state, pos)
