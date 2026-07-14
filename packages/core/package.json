@@ -21,12 +21,12 @@
     "build": "tsdown"
   },
   "dependencies": {
-    "@codemirror/language": "^6.12.3",
+    "@codemirror/language": "^6.12.4",
     "@codemirror/language-data": "^6.5.2",
     "@floating-ui/dom": "^1.8.0",
     "@lezer/common": "^1.5.2",
     "@lezer/highlight": "^1.2.3",
-    "@lezer/markdown": "^1.6.4",
+    "@lezer/markdown": "^1.7.1",
     "@ocavue/utils": "^1.7.0",
     "@prosekit/core": "^0.13.0-beta.6",
     "@prosekit/extensions": "^0.18.0-beta.16",
@@ -44,15 +44,15 @@
   "devDependencies": {
     "@meowdown/vitest": "workspace:*",
     "@ocavue/tsconfig": "^0.7.1",
-    "@tsdown/css": "^0.22.3",
+    "@tsdown/css": "^0.22.7",
     "@types/mdast": "^4.0.4",
-    "@vitest/browser-playwright": "^4.1.9",
+    "@vitest/browser-playwright": "^4.1.10",
     "dedent": "^1.7.2",
     "diffable-html-snapshot": "^0.3.0",
     "hast-util-to-mdast": "^10.1.2",
     "mdast-util-to-markdown": "^2.1.2",
-    "tsdown": "^0.22.3",
-    "vitest": "^4.1.9"
+    "tsdown": "^0.22.7",
+    "vitest": "^4.1.10"
   },
   "publishConfig": {
     "exports": {
