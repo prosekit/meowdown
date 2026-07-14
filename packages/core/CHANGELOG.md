@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.48.0](https://github.com/prosekit/meowdown/compare/core-v0.47.0...core-v0.48.0) (2026-07-14)
+
+
+### Features
+
+* support substitutions ([#305](https://github.com/prosekit/meowdown/issues/305)) ([ff11c8a](https://github.com/prosekit/meowdown/commit/ff11c8a21582ea56c7de207fbe04dc780202bb5a))
+
 ## [0.47.0](https://github.com/prosekit/meowdown/compare/core-v0.46.1...core-v0.47.0) (2026-07-12)
 
 
