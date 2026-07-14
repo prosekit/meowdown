@@ -469,6 +469,24 @@ describe('MeowdownEditor', () => {
     expect(editor.state.selection.$from.parent.textContent).toBe('**Target Heading**')
   })
 
+  it('reveals GitHub-style heading slugs, including duplicate suffixes', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(
+      <MeowdownEditor
+        handleRef={ref}
+        initialMarkdown={'## Target Heading!\n\nBody\n\n## Target Heading!'}
+      />,
+    )
+
+    expect(ref.current?.revealHeading('#target-heading-1')).toBe(true)
+    const editor = ref.current?.editor
+    if (!editor) throw new Error('editor not mounted')
+    expect(editor.state.selection.$from.parent.type.name).toBe('heading')
+    expect(editor.state.selection.$from.before()).toBe(
+      editor.state.doc.child(0).nodeSize + editor.state.doc.child(1).nodeSize,
+    )
+  })
+
   it('reports a missing heading without moving the selection', async () => {
     const ref = createRef<EditorHandle>()
     await render(<MeowdownEditor handleRef={ref} initialMarkdown={'# First\n\nBody'} />)
