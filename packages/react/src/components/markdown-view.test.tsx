@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import type { FileClickHandler } from '@meowdown/core'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
@@ -78,6 +79,66 @@ describe('MarkdownView', () => {
     expect(onFileClick).toHaveBeenCalledWith(
       expect.objectContaining({ href: 'docs/report.pdf', name: 'Quarterly' }),
     )
+  })
+
+  it('renders a claimed standard Markdown file link as a pill', async () => {
+    const resolveFileLink = vi.fn(({ href }: { href: string }) => href.startsWith('docs/'))
+    await renderView('[Quarterly](docs/report.pdf "Report")', { resolveFileLink })
+
+    await expect.element(view.getByTestId('file-pill')).toHaveTextContent('Quarterly')
+    expect(view.element().querySelector('a')).toBeNull()
+    expect(resolveFileLink).toHaveBeenCalledWith({
+      href: 'docs/report.pdf',
+      label: 'Quarterly',
+      title: 'Report',
+    })
+  })
+
+  it('leaves an unclaimed standard Markdown link as a link', async () => {
+    await renderView('[Website](https://example.com)', { resolveFileLink: () => false })
+
+    await expect.element(view.locate('a')).toHaveAttribute('href', 'https://example.com')
+    expect(view.element().querySelector('[data-testid="file-pill"]')).toBeNull()
+  })
+
+  it('resolves metadata for a claimed standard Markdown file link', async () => {
+    const resolveFileInfo = vi.fn(() => ({ size: 1_400_000 }))
+    await renderView('[Quarterly](docs/report.pdf)', {
+      resolveFileLink: () => true,
+      resolveFileInfo,
+    })
+
+    await expect.element(view.getByTestId('file-pill-size')).toHaveTextContent('1.4 MB')
+    expect(resolveFileInfo).toHaveBeenCalledExactlyOnceWith('docs/report.pdf')
+  })
+
+  it('reports clicks on a claimed standard Markdown file link', async () => {
+    const onFileClick = vi.fn<FileClickHandler>()
+    await renderView('[Quarterly](docs/report.pdf)', {
+      resolveFileLink: () => true,
+      onFileClick,
+    })
+
+    await view.getByTestId('file-pill').click()
+    expect(onFileClick).toHaveBeenCalledWith(
+      expect.objectContaining({ href: 'docs/report.pdf', name: 'Quarterly' }),
+    )
+    expect(onFileClick.mock.calls[0][0].event).toBeInstanceOf(MouseEvent)
+  })
+
+  it('keeps a claimed standard file pill passive when interactive is false', async () => {
+    const onFileClick = vi.fn()
+    await renderView('[Quarterly](docs/report.pdf)', {
+      interactive: false,
+      resolveFileLink: () => true,
+      onFileClick,
+    })
+
+    const pill = view.getByTestId('file-pill')
+    await expect.element(pill).toHaveTextContent('Quarterly')
+    expect(view.element().querySelector('a')).toBeNull()
+    await pill.click()
+    expect(onFileClick).not.toHaveBeenCalled()
   })
 
   it('renders a resolved wiki note through the wikilink hook', async () => {

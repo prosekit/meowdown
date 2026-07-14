@@ -76,6 +76,20 @@ hook; return `undefined` for missing or ambiguous targets.
 Use `EditorHandle.revealHeading('#Section%20name')` to move the selection to a
 matching heading and scroll it into view after following a heading link.
 
+Both `MeowdownEditor` and the read-only `MarkdownView` accept
+`resolveFileLink`. Return `true` to render a standard `[label](path)` Markdown
+link with the same file pill, metadata resolver, and click hook used by wiki
+file embeds; return `false` to keep it as a normal link.
+
+```tsx
+<MarkdownView
+  markdown="[Quarterly report](docs/report.pdf)"
+  resolveFileLink={({ href }) => href.startsWith('docs/')}
+  resolveFileInfo={resolveLocalFileInfo}
+  onFileClick={openLocalFile}
+/>
+```
+
 ### Wiki-link hover cards
 
 Mount `WikilinkHoverCard` inside `MeowdownEditor` and render host-owned preview

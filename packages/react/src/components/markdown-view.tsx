@@ -13,6 +13,7 @@ import {
   type EmbedDescriptor,
   type FileClickHandler,
   type FileInfoResolver,
+  type FileLinkResolver,
   type ImageClickHandler,
   type LinkClickHandler,
   type ListMarker,
@@ -99,9 +100,14 @@ export interface MarkdownViewProps {
   interactive?: boolean
   /** Map an image `src` to a displayable URL, or `undefined` to skip it. */
   resolveImageUrl?: (src: string) => string | undefined
+  /**
+   * Claim a `[label](url)` link as a file pill instead of a regular link.
+   * Must be pure; return `false` for links that should render normally.
+   */
+  resolveFileLink?: FileLinkResolver
   /** Classify `![[target]]` as an image, file, or note; unresolved source stays literal. */
   resolveWikiEmbed?: WikiEmbedResolver
-  /** Resolve metadata shown on a wiki file-embed pill. */
+  /** Resolve metadata shown on a file pill. */
   resolveFileInfo?: FileInfoResolver
   /** Called when a rendered wikilink is clicked. Pass a stable function. */
   onWikilinkClick?: WikilinkClickHandler
@@ -109,7 +115,7 @@ export interface MarkdownViewProps {
   onLinkClick?: LinkClickHandler
   /** Called when a rendered image is clicked. Pass a stable function. */
   onImageClick?: ImageClickHandler
-  /** Called when a rendered wiki file-embed pill is clicked. Pass a stable function. */
+  /** Called when a rendered file pill is clicked. Pass a stable function. */
   onFileClick?: FileClickHandler
   /** Called when a rendered task checkbox is clicked. Pass a stable function. */
   onTaskClick?: TaskClickHandler
@@ -120,6 +126,7 @@ export interface MarkdownViewProps {
 interface RenderContext {
   interactive: boolean
   resolveImageUrl?: (src: string) => string | undefined
+  resolveFileLink?: FileLinkResolver
   resolveWikiEmbed?: WikiEmbedResolver
   resolveFileInfo?: FileInfoResolver
   onWikilinkClick?: WikilinkClickHandler
@@ -534,6 +541,7 @@ function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode 
   const text = node.textContent
   if (!text) return null
   const chunks: readonly MarkChunk[] = inlineTextToMarkChunks(getMarkBuilders(), text, {
+    resolveFileLink: context.resolveFileLink,
     resolveWikiEmbed: context.resolveWikiEmbed,
   })
   // Sort each chunk's marks into ProseMirror's canonical order so the grouping
@@ -628,6 +636,7 @@ export function MarkdownView({
   frontmatter = false,
   interactive = true,
   resolveImageUrl,
+  resolveFileLink,
   resolveWikiEmbed,
   resolveFileInfo,
   onWikilinkClick,
@@ -642,6 +651,7 @@ export function MarkdownView({
     const context: RenderContext = {
       interactive,
       resolveImageUrl,
+      resolveFileLink,
       resolveWikiEmbed,
       resolveFileInfo,
       onWikilinkClick: interactive ? onWikilinkClick : undefined,
@@ -658,6 +668,7 @@ export function MarkdownView({
     frontmatter,
     interactive,
     resolveImageUrl,
+    resolveFileLink,
     resolveWikiEmbed,
     resolveFileInfo,
     onWikilinkClick,
