@@ -14,6 +14,7 @@ const pmRoot = page.locate('.ProseMirror')
 const menu = page.getByTestId('slash-menu')
 
 const LABELS = [
+  'Text',
   'Heading 1',
   'Heading 2',
   'Heading 3',
@@ -106,6 +107,38 @@ describe('SlashMenu', () => {
     await expect.element(pmRoot.locate('h1')).toBeInTheDocument()
     await userEvent.keyboard('Hello')
     expect(ref.current?.getMarkdown()).toBe('# Hello\n')
+  })
+
+  it('turns a heading back into a paragraph', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} />)
+    await pmRoot.click()
+    await userEvent.keyboard('/head')
+    await menu.getByText('Heading 1').click()
+    await userEvent.keyboard('Hello /text')
+    await expect.element(pmRoot.locate('h1')).toBeInTheDocument()
+    await menu.getByText('Text', { exact: true }).click()
+
+    await expect.element(pmRoot.locate('h1')).not.toBeInTheDocument()
+    expect(ref.current?.getMarkdown()).toMatchInlineSnapshot(`
+      "Hello
+      "
+    `)
+  })
+
+  it('removes the bullet when Text is selected in a list item', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} />)
+    await pmRoot.click()
+    await userEvent.keyboard('- Buy milk /text')
+    await expect.element(pmRoot.locate('.prosemirror-flat-list')).toBeInTheDocument()
+    await menu.getByText('Text', { exact: true }).click()
+
+    await expect.element(pmRoot.locate('.prosemirror-flat-list')).not.toBeInTheDocument()
+    expect(ref.current?.getMarkdown()).toMatchInlineSnapshot(`
+      "Buy milk
+      "
+    `)
   })
 
   it('wraps the current block in a circle checkbox task', async () => {
@@ -322,7 +355,15 @@ describe('SlashMenu', () => {
     await userEvent.keyboard('/')
     await expect.element(menu).toBeVisible()
     await expect.element(menu.getByText('Now')).toBeVisible()
-    for (const label of ['Heading 1', 'Blockquote', 'Bullet list', 'Code block', 'Math', 'Table']) {
+    for (const label of [
+      'Text',
+      'Heading 1',
+      'Blockquote',
+      'Bullet list',
+      'Code block',
+      'Math',
+      'Table',
+    ]) {
       await expect.element(menu.getByText(label)).not.toBeInTheDocument()
     }
   })
