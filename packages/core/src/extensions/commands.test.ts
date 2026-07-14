@@ -105,30 +105,51 @@ describe('turnIntoText', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.heading({ level: 1 }, 'He<a>llo')))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "# Hello
+      "
+    `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
 
-    expect(docToMarkdown(fixture.doc)).toBe('Hello\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello
+      "
+    `)
   })
 
   it('returns false on a plain top-level paragraph', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('He<a>llo')))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello
+      "
+    `)
 
     expect(editor.commands.turnIntoText()).toBe(false)
 
-    expect(docToMarkdown(fixture.doc)).toBe('Hello\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello
+      "
+    `)
   })
 
   it('unwraps a bullet list item', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('a<a>'))))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "- a
+      "
+    `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
 
-    expect(docToMarkdown(fixture.doc)).toBe('a\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "a
+      "
+    `)
   })
 
   it('unwraps only the middle item of three', () => {
@@ -141,20 +162,40 @@ describe('turnIntoText', () => {
         n.list({ kind: 'bullet' }, n.paragraph('c')),
       ),
     )
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "- a
+      - b
+      - c
+      "
+    `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
 
-    expect(docToMarkdown(fixture.doc)).toBe('- a\n\nb\n\n- c\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "- a
+
+      b
+
+      - c
+      "
+    `)
   })
 
   it('unwraps a checked task item, dropping the checkbox', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.list({ kind: 'task', checked: true }, n.paragraph('a<a>'))))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "- [x] a
+      "
+    `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
 
-    expect(docToMarkdown(fixture.doc)).toBe('a\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "a
+      "
+    `)
   })
 
   it('turns a nested item into a continuation paragraph of its parent', () => {
@@ -169,20 +210,37 @@ describe('turnIntoText', () => {
         ),
       ),
     )
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "- a
+        - b
+      "
+    `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
 
-    expect(docToMarkdown(fixture.doc)).toBe('- a\n\n  b\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "- a
+
+        b
+      "
+    `)
   })
 
   it('lifts a paragraph out of a blockquote', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.blockquote(n.paragraph('q<a>uote'))))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "> quote
+      "
+    `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
 
-    expect(docToMarkdown(fixture.doc)).toBe('quote\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "quote
+      "
+    `)
   })
 
   it('splits the quote when lifting its middle paragraph', () => {
@@ -191,44 +249,86 @@ describe('turnIntoText', () => {
     fixture.set(
       n.doc(n.blockquote(n.paragraph('one'), n.paragraph('t<a>wo'), n.paragraph('three'))),
     )
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "> one
+      >
+      > two
+      >
+      > three
+      "
+    `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
 
-    expect(docToMarkdown(fixture.doc)).toBe('> one\n\ntwo\n\n> three\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "> one
+
+      two
+
+      > three
+      "
+    `)
   })
 
   it('peels a heading inside a list item one layer per call', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.list({ kind: 'bullet' }, n.heading({ level: 1 }, 'foo<a>'))))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "- # foo
+      "
+    `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
-    expect(docToMarkdown(fixture.doc)).toBe('- foo\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "- foo
+      "
+    `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
-    expect(docToMarkdown(fixture.doc)).toBe('foo\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "foo
+      "
+    `)
   })
 
   it('peels a list inside a blockquote one layer per call', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.blockquote(n.list({ kind: 'bullet' }, n.paragraph('a<a>')))))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "> - a
+      "
+    `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
-    expect(docToMarkdown(fixture.doc)).toBe('> a\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "> a
+      "
+    `)
 
     expect(editor.commands.turnIntoText()).toBe(true)
-    expect(docToMarkdown(fixture.doc)).toBe('a\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "a
+      "
+    `)
   })
 
   it('keeps the caret in the text', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.heading({ level: 1 }, 'He<a>llo')))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "# Hello
+      "
+    `)
 
     editor.commands.turnIntoText()
     editor.commands.insertText({ text: 'X' })
 
-    expect(docToMarkdown(fixture.doc)).toBe('HeXllo\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "HeXllo
+      "
+    `)
   })
 })
