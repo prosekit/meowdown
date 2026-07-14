@@ -13,8 +13,13 @@ export type { VirtualElement }
 // nearest visible glyph past the run's far end carries the line geometry.
 // `side` points into the range, like `coordsAtPos`.
 function tryHiddenRunCoords(view: EditorView, pos: number, side: -1 | 1): CaretCoords | undefined {
-  const run = side === 1 ? getHiddenRunAfter(view.state, pos) : getHiddenRunBefore(view.state, pos)
-  return run == null ? undefined : tryCoordsAtPos(view, run.to, side)
+  if (side === 1) {
+    const run = getHiddenRunAfter(view.state, pos)
+    return run && tryCoordsAtPos(view, run.to, side)
+  } else {
+    const run = getHiddenRunBefore(view.state, pos)
+    return run && tryCoordsAtPos(view, run.from, -1)
+  }
 }
 
 /**
