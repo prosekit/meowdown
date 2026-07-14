@@ -1,5 +1,7 @@
-import { defineCommands, isTextSelection } from '@prosekit/core'
+import { defineCommands, isTextSelection, setBlockType } from '@prosekit/core'
 import { triggerAutocomplete } from '@prosekit/extensions/autocomplete'
+import { unwrapList } from '@prosekit/extensions/list'
+import { chainCommands, lift } from '@prosekit/pm/commands'
 import { Slice, type ResolvedPos } from '@prosekit/pm/model'
 import { TextSelection, type Command } from '@prosekit/pm/state'
 
@@ -81,6 +83,15 @@ function insertTrigger(text: string): Command {
   }
 }
 
+/**
+ * Turns the current block into plain text, peeling one layer per call: a
+ * non-paragraph textblock becomes a paragraph, then a paragraph in a list
+ * loses its marker, then a paragraph in a blockquote lifts out of it.
+ */
+function turnIntoText(): Command {
+  return chainCommands(setBlockType({ type: 'paragraph' satisfies NodeName }), unwrapList(), lift)
+}
+
 function scrollIntoView(): Command {
   return (state, dispatch) => {
     if (dispatch) {
@@ -97,5 +108,6 @@ export function defineEditorCommands() {
     scrollIntoView,
     selectText,
     selectTextBetween,
+    turnIntoText,
   })
 }

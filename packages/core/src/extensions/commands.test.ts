@@ -99,3 +99,136 @@ describe('insertTrigger', () => {
     expect(docToMarkdown(fixture.doc)).toBe('Hello\n')
   })
 })
+
+describe('turnIntoText', () => {
+  it('turns a heading into a paragraph', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.heading({ level: 1 }, 'He<a>llo')))
+
+    expect(editor.commands.turnIntoText()).toBe(true)
+
+    expect(docToMarkdown(fixture.doc)).toBe('Hello\n')
+  })
+
+  it('returns false on a plain top-level paragraph', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('He<a>llo')))
+
+    expect(editor.commands.turnIntoText()).toBe(false)
+
+    expect(docToMarkdown(fixture.doc)).toBe('Hello\n')
+  })
+
+  it('unwraps a bullet list item', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('a<a>'))))
+
+    expect(editor.commands.turnIntoText()).toBe(true)
+
+    expect(docToMarkdown(fixture.doc)).toBe('a\n')
+  })
+
+  it('unwraps only the middle item of three', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(
+      n.doc(
+        n.list({ kind: 'bullet' }, n.paragraph('a')),
+        n.list({ kind: 'bullet' }, n.paragraph('b<a>')),
+        n.list({ kind: 'bullet' }, n.paragraph('c')),
+      ),
+    )
+
+    expect(editor.commands.turnIntoText()).toBe(true)
+
+    expect(docToMarkdown(fixture.doc)).toBe('- a\n\nb\n\n- c\n')
+  })
+
+  it('unwraps a checked task item, dropping the checkbox', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'task', checked: true }, n.paragraph('a<a>'))))
+
+    expect(editor.commands.turnIntoText()).toBe(true)
+
+    expect(docToMarkdown(fixture.doc)).toBe('a\n')
+  })
+
+  it('turns a nested item into a continuation paragraph of its parent', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(
+      n.doc(
+        n.list(
+          { kind: 'bullet' },
+          n.paragraph('a'),
+          n.list({ kind: 'bullet' }, n.paragraph('b<a>')),
+        ),
+      ),
+    )
+
+    expect(editor.commands.turnIntoText()).toBe(true)
+
+    expect(docToMarkdown(fixture.doc)).toBe('- a\n\n  b\n')
+  })
+
+  it('lifts a paragraph out of a blockquote', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.blockquote(n.paragraph('q<a>uote'))))
+
+    expect(editor.commands.turnIntoText()).toBe(true)
+
+    expect(docToMarkdown(fixture.doc)).toBe('quote\n')
+  })
+
+  it('splits the quote when lifting its middle paragraph', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(
+      n.doc(n.blockquote(n.paragraph('one'), n.paragraph('t<a>wo'), n.paragraph('three'))),
+    )
+
+    expect(editor.commands.turnIntoText()).toBe(true)
+
+    expect(docToMarkdown(fixture.doc)).toBe('> one\n\ntwo\n\n> three\n')
+  })
+
+  it('peels a heading inside a list item one layer per call', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet' }, n.heading({ level: 1 }, 'foo<a>'))))
+
+    expect(editor.commands.turnIntoText()).toBe(true)
+    expect(docToMarkdown(fixture.doc)).toBe('- foo\n')
+
+    expect(editor.commands.turnIntoText()).toBe(true)
+    expect(docToMarkdown(fixture.doc)).toBe('foo\n')
+  })
+
+  it('peels a list inside a blockquote one layer per call', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.blockquote(n.list({ kind: 'bullet' }, n.paragraph('a<a>')))))
+
+    expect(editor.commands.turnIntoText()).toBe(true)
+    expect(docToMarkdown(fixture.doc)).toBe('> a\n')
+
+    expect(editor.commands.turnIntoText()).toBe(true)
+    expect(docToMarkdown(fixture.doc)).toBe('a\n')
+  })
+
+  it('keeps the caret in the text', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.heading({ level: 1 }, 'He<a>llo')))
+
+    editor.commands.turnIntoText()
+    editor.commands.insertText({ text: 'X' })
+
+    expect(docToMarkdown(fixture.doc)).toBe('HeXllo\n')
+  })
+})
