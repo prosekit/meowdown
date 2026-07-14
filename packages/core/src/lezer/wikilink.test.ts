@@ -82,7 +82,7 @@ describe('wikilink inline parser', () => {
       '`[[code]]`', // InlineCode claims the span
       '<a title="[[x]]">', // HTMLTag claims the span
       'http://x.test/[[y]]', // Autolink swallows the whole URL
-      '![[embed]]', // `![` claims first; becomes Image
+      '![[embed]]', // Claimed by the dedicated WikiEmbed parser.
     ]
     for (const input of cases) {
       it(JSON.stringify(input), () => {
@@ -125,17 +125,8 @@ describe('wikilink inline parser', () => {
     `)
   })
 
-  it('parses ![[embed]] as an Image, not a Wikilink', () => {
-    expect(formatTree('![[embed]]')).toMatchInlineSnapshot(`
-      """
-      Image [0, 10] "![[embed]]"
-        LinkMark [0, 2] "!["
-        Link [2, 9] "[embed]"
-          LinkMark [2, 3] "["
-          LinkMark [8, 9] "]"
-        LinkMark [9, 10] "]"
-      """
-    `)
+  it('parses ![[embed]] as a WikiEmbed, not a Wikilink', () => {
+    expect(formatTree('![[embed]]')).toMatchInlineSnapshot()
   })
 
   it('is never produced by gfmBlockOnlyParser', () => {

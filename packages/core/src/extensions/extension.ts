@@ -25,7 +25,7 @@ import { defineMeowdownHorizontalRule } from './horizontal-rule.ts'
 import { defineHTMLComment } from './html-comment.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
-import type { FileLinkOptions } from './inline-text-to-mark-chunks.ts'
+import type { InlineMarkOptions } from './inline-text-to-mark-chunks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
 import { defineLinkCommands } from './link-commands.ts'
 import { defineMeowdownList } from './list.ts'
@@ -93,10 +93,11 @@ export type EditorExtension = ReturnType<typeof defineEditorExtensionImpl>
 
 /**
  * Options for {@link defineEditorExtension}. Creation-time configuration:
- * `resolveFileLink` is baked into the editor's parse pipeline, so changing it
- * requires rebuilding the editor; `markMode` is only the initial value.
+ * `resolveFileLink` and `resolveWikiEmbed` are baked into the editor's parse
+ * pipeline, so changing them requires rebuilding the editor; `markMode` is
+ * only the initial value.
  */
-export type EditorExtensionOptions = FileLinkOptions & {
+export type EditorExtensionOptions = InlineMarkOptions & {
   /**
    * The initial mark mode, applied from the first paint. Defaults to
    * `'focus'`. Switch later with the `setMarkMode` command.

@@ -22,10 +22,10 @@ export interface HiddenRun {
 // Marks of the character occupying [pos, pos + 1), or undefined when that slot
 // is not a text character (block boundary, inline atom node, end of block).
 function getCharMarks(state: EditorState, pos: number): readonly Mark[] | undefined {
-  if (pos < 0 || pos + 1 > state.doc.content.size) return undefined
+  if (pos < 0 || pos + 1 > state.doc.content.size) return
   const $pos = state.doc.resolve(pos)
   const child = $pos.parent.maybeChild($pos.index())
-  if (child == null || !child.isText) return undefined
+  if (child == null || !child.isText) return
   return child.marks
 }
 
@@ -43,7 +43,7 @@ function isInsideNonCodeTextblock(state: EditorState, pos: number): boolean {
 
 /** The maximal contiguous hidden run ending exactly at `pos`, or undefined. */
 export function getHiddenRunBefore(state: EditorState, pos: number): HiddenRun | undefined {
-  if (!isInsideNonCodeTextblock(state, pos)) return undefined
+  if (!isInsideNonCodeTextblock(state, pos)) return
   const blockStart = state.doc.resolve(pos).start()
   let from = pos
   while (from > blockStart && isHiddenChar(state, from - 1)) from--
@@ -52,7 +52,7 @@ export function getHiddenRunBefore(state: EditorState, pos: number): HiddenRun |
 
 /** The maximal contiguous hidden run starting exactly at `pos`, or undefined. */
 export function getHiddenRunAfter(state: EditorState, pos: number): HiddenRun | undefined {
-  if (!isInsideNonCodeTextblock(state, pos)) return undefined
+  if (!isInsideNonCodeTextblock(state, pos)) return
   const blockEnd = state.doc.resolve(pos).end()
   let to = pos
   while (to < blockEnd && isHiddenChar(state, to)) to++
@@ -67,10 +67,11 @@ export function isHiddenRunInterior(state: EditorState, pos: number): boolean {
 
 /** The full run around an interior position, or undefined for rest positions. */
 export function getHiddenRunAround(state: EditorState, pos: number): HiddenRun | undefined {
-  if (!isHiddenRunInterior(state, pos)) return undefined
+  if (!isHiddenRunInterior(state, pos)) return
   const before = getHiddenRunBefore(state, pos)
+  if (!before) return
   const after = getHiddenRunAfter(state, pos)
-  if (before == null || after == null) return undefined
+  if (!after) return
   return { from: before.from, to: after.to }
 }
 
@@ -87,10 +88,10 @@ export function getInnermostPackRangeAt(
   charPos: number,
 ): HiddenRun | undefined {
   const marks = getCharMarks(state, charPos)
-  if (marks == null) return undefined
+  if (marks == null) return
   const packType = getMarkType(state.schema, 'mdPack' satisfies MarkName)
   const packs = marks.filter((mark) => mark.type === packType)
-  if (packs.length === 0) return undefined
+  if (packs.length === 0) return
   const $pos = state.doc.resolve(charPos)
   const blockStart = $pos.start()
   const blockEnd = $pos.end()
@@ -154,10 +155,10 @@ export type CaretTail = 'left' | 'right'
 // Typing affinity: the tail points to the side whose formatting a typed
 // character would adopt, which is the opposite side of the hidden run.
 export function getCaretTail(state: EditorState, pos: number): CaretTail | undefined {
-  if (!isInsideNonCodeTextblock(state, pos)) return undefined
+  if (!isInsideNonCodeTextblock(state, pos)) return
   const hiddenBefore = isHiddenChar(state, pos - 1)
   const hiddenAfter = isHiddenChar(state, pos)
-  if (hiddenBefore === hiddenAfter) return undefined
+  if (hiddenBefore === hiddenAfter) return
   return hiddenAfter ? 'left' : 'right'
 }
 

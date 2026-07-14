@@ -56,6 +56,40 @@ See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Freac
 
 Slash menu host items can include `keywords` to match hidden terms without changing the displayed label.
 
+### Wiki embeds
+
+Obsidian-style wiki embeds (`![[path]]`, with optional `|width` or
+`|widthxheight`) stay literal and editable unless the host classifies them.
+`resolveWikiEmbed` is a pure, creation-time resolver: return an image, file, or
+note result to reuse the corresponding Meowdown atom and its existing click
+hook; return `undefined` for missing or ambiguous targets.
+
+```tsx
+<MeowdownEditor
+  initialMarkdown="![[assets/photo.png|320]]"
+  resolveWikiEmbed={({ target }) => (target.endsWith('.png') ? { kind: 'image' } : undefined)}
+  resolveImageUrl={resolveLocalImageUrl}
+  onImageClick={openLightbox}
+/>
+```
+
+Use `EditorHandle.revealHeading('#Section%20name')` to move the selection to a
+matching heading and scroll it into view after following a heading link.
+
+Both `MeowdownEditor` and the read-only `MarkdownView` accept
+`resolveFileLink`. Return `true` to render a standard `[label](path)` Markdown
+link with the same file pill, metadata resolver, and click hook used by wiki
+file embeds; return `false` to keep it as a normal link.
+
+```tsx
+<MarkdownView
+  markdown="[Quarterly report](docs/report.pdf)"
+  resolveFileLink={({ href }) => href.startsWith('docs/')}
+  resolveFileInfo={resolveLocalFileInfo}
+  onFileClick={openLocalFile}
+/>
+```
+
 ### Wiki-link hover cards
 
 Mount `WikilinkHoverCard` inside `MeowdownEditor` and render host-owned preview

@@ -106,6 +106,13 @@ describe('inline', () => {
     )
   })
 
+  it.each(['![[image.png]]', '![[image.png|320]]', '![[image.png|320x180]]', '![[Note|Alias]]'])(
+    'keeps a wiki embed: %s',
+    (source) => {
+      expect(roundtrip(source)).toBe(`${source}\n`)
+    },
+  )
+
   it('keeps an angle autolink', () => {
     expect(roundtrip('<https://auto.com>')).toBe('<https://auto.com>\n')
   })

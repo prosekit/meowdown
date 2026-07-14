@@ -20,7 +20,7 @@ export function findFileAt(state: EditorState, pos: number): FileHit | undefined
 
 /** Payload for {@link FileClickHandler}. */
 export interface FileClickPayload {
-  /** The link destination, exactly as written in `[name](href)`. */
+  /** The resolved destination from `[name](href)` or a claimed `![[target]]`. */
   href: string
   /** The file name shown on the pill. */
   name: string

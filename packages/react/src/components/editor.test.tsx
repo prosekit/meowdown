@@ -184,6 +184,20 @@ describe('MeowdownEditor', () => {
     await expect.element(page.getByAltText('pic')).not.toBeInTheDocument()
   })
 
+  it('renders a resolved wiki image and leaves an unresolved one literal', async () => {
+    const resolveWikiEmbed = ({ target }: { target: string }) =>
+      target === 'photo.png' ? ({ kind: 'image' } as const) : undefined
+    await render(
+      <MeowdownEditor
+        initialMarkdown={'![[photo.png|Photo]] ![[ambiguous.png]]'}
+        resolveWikiEmbed={resolveWikiEmbed}
+        resolveImageUrl={(src) => `https://cdn/${src}`}
+      />,
+    )
+    await expect.element(page.getByAltText('Photo')).toHaveAttribute('src', 'https://cdn/photo.png')
+    await expect.element(pmRoot).toHaveTextContent('![[ambiguous.png]]')
+  })
+
   it('embeds a pasted YouTube link by default', async () => {
     const ref = createRef<EditorHandle>()
     await render(<MeowdownEditor handleRef={ref} resolveImageUrl={(src) => src} />)
@@ -395,6 +409,53 @@ describe('MeowdownEditor', () => {
     ref.current?.scrollIntoView()
     await userEvent.keyboard('!')
     await expect.element(screen.getByText('!Hi')).toBeInTheDocument()
+  })
+
+  it('reveals a URL-decoded heading through the handle', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(
+      <MeowdownEditor
+        handleRef={ref}
+        initialMarkdown={'# First\n\nBody\n\n## **Target Heading**\n\nTail'}
+      />,
+    )
+
+    expect(ref.current?.revealHeading('#target%20heading')).toBe(true)
+    const editor = ref.current?.editor
+    if (!editor) throw new Error('editor not mounted')
+    expect(editor.state.selection.$from.parent.type.name).toBe('heading')
+    expect(editor.state.selection.$from.parent.textContent).toBe('**Target Heading**')
+  })
+
+  it('reports a missing heading without moving the selection', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<MeowdownEditor handleRef={ref} initialMarkdown={'# First\n\nBody'} />)
+    const before = ref.current?.getSelection()
+    expect(ref.current?.revealHeading('#Missing')).toBe(false)
+    expect(ref.current?.getSelection()).toEqual(before)
+  })
+
+  it('refreshes creation-time resolver output without changing Markdown or selection', async () => {
+    const ref = createRef<EditorHandle>()
+    let resolved = false
+    await render(
+      <MeowdownEditor
+        handleRef={ref}
+        initialMarkdown="before ![[photo.png]] after"
+        resolveWikiEmbed={() => (resolved ? { kind: 'image' } : undefined)}
+        resolveImageUrl={(src) => `https://cdn.example/${src}`}
+      />,
+    )
+    ref.current?.setSelection({ type: 'text', anchor: 3, head: 3 })
+    const before = ref.current?.getState()
+    const image = page.getByAltText('photo.png')
+    await expect.element(image).not.toBeInTheDocument()
+
+    resolved = true
+    ref.current?.refreshMarkdownRendering()
+
+    await expect.element(image).toBeInTheDocument()
+    expect(ref.current?.getState()).toEqual(before)
   })
 })
 

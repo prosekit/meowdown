@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import type { FileClickHandler } from '@meowdown/core'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
@@ -53,6 +54,112 @@ describe('MarkdownView', () => {
     await expect.element(img).toHaveAttribute('alt', 'cat')
   })
 
+  it('renders a resolved wiki image with its alias and width', async () => {
+    await renderView('![[assets/cat.png|120]]', {
+      resolveWikiEmbed: () => ({ kind: 'image' }),
+      resolveImageUrl: (src: string) => `asset://${src}`,
+    })
+    const img = view.getByTestId('image-preview').locate('img')
+    await expect.element(img).toHaveAttribute('src', 'asset://assets/cat.png')
+    await expect.element(img).toHaveAttribute('alt', 'cat.png')
+    await expect.element(img).toHaveStyle({ width: '120px' })
+  })
+
+  it('renders a resolved wiki file as a pill and reports clicks', async () => {
+    const onFileClick = vi.fn()
+    await renderView('![[docs/report.pdf|Quarterly]]', {
+      resolveWikiEmbed: () => ({ kind: 'file' }),
+      resolveFileInfo: () => ({ size: 1_400_000 }),
+      onFileClick,
+    })
+    const pill = view.getByTestId('file-pill')
+    await expect.element(pill).toHaveTextContent('Quarterly')
+    await expect.element(view.getByTestId('file-pill-size')).toHaveTextContent('1.4 MB')
+    await pill.click()
+    expect(onFileClick).toHaveBeenCalledWith(
+      expect.objectContaining({ href: 'docs/report.pdf', name: 'Quarterly' }),
+    )
+  })
+
+  it('renders a claimed standard Markdown file link as a pill', async () => {
+    const resolveFileLink = vi.fn(({ href }: { href: string }) => href.startsWith('docs/'))
+    await renderView('[Quarterly](docs/report.pdf "Report")', { resolveFileLink })
+
+    await expect.element(view.getByTestId('file-pill')).toHaveTextContent('Quarterly')
+    expect(view.element().querySelector('a')).toBeNull()
+    expect(resolveFileLink).toHaveBeenCalledWith({
+      href: 'docs/report.pdf',
+      label: 'Quarterly',
+      title: 'Report',
+    })
+  })
+
+  it('leaves an unclaimed standard Markdown link as a link', async () => {
+    await renderView('[Website](https://example.com)', { resolveFileLink: () => false })
+
+    await expect.element(view.locate('a')).toHaveAttribute('href', 'https://example.com')
+    expect(view.element().querySelector('[data-testid="file-pill"]')).toBeNull()
+  })
+
+  it('resolves metadata for a claimed standard Markdown file link', async () => {
+    const resolveFileInfo = vi.fn(() => ({ size: 1_400_000 }))
+    await renderView('[Quarterly](docs/report.pdf)', {
+      resolveFileLink: () => true,
+      resolveFileInfo,
+    })
+
+    await expect.element(view.getByTestId('file-pill-size')).toHaveTextContent('1.4 MB')
+    expect(resolveFileInfo).toHaveBeenCalledExactlyOnceWith('docs/report.pdf')
+  })
+
+  it('reports clicks on a claimed standard Markdown file link', async () => {
+    const onFileClick = vi.fn<FileClickHandler>()
+    await renderView('[Quarterly](docs/report.pdf)', {
+      resolveFileLink: () => true,
+      onFileClick,
+    })
+
+    await view.getByTestId('file-pill').click()
+    expect(onFileClick).toHaveBeenCalledWith(
+      expect.objectContaining({ href: 'docs/report.pdf', name: 'Quarterly' }),
+    )
+    expect(onFileClick.mock.calls[0][0].event).toBeInstanceOf(MouseEvent)
+  })
+
+  it('keeps a claimed standard file pill passive when interactive is false', async () => {
+    const onFileClick = vi.fn()
+    await renderView('[Quarterly](docs/report.pdf)', {
+      interactive: false,
+      resolveFileLink: () => true,
+      onFileClick,
+    })
+
+    const pill = view.getByTestId('file-pill')
+    await expect.element(pill).toHaveTextContent('Quarterly')
+    expect(view.element().querySelector('a')).toBeNull()
+    await pill.click()
+    expect(onFileClick).not.toHaveBeenCalled()
+  })
+
+  it('renders a resolved wiki note through the wikilink hook', async () => {
+    const onWikilinkClick = vi.fn()
+    await renderView('![[Projects/Plan|Launch plan]]', {
+      resolveWikiEmbed: () => ({ kind: 'note' }),
+      onWikilinkClick,
+    })
+    await expect.element(wikilink).toHaveTextContent('Launch plan')
+    await wikilink.click()
+    expect(onWikilinkClick).toHaveBeenCalledWith(
+      expect.objectContaining({ target: 'Projects/Plan' }),
+    )
+  })
+
+  it('leaves an unresolved wiki embed literal', async () => {
+    await renderView('![[ambiguous.png]]', { resolveWikiEmbed: () => undefined })
+    await expect.element(view).toHaveTextContent('![[ambiguous.png]]')
+    expect(view.element().querySelector('.md-atom-view')).toBeNull()
+  })
+
   it('renders a tweet embed', async () => {
     await renderView('![](https://x.com/jack/status/20)')
     const iframe = view.getByTestId('tweet-embed')
@@ -89,14 +196,17 @@ describe('MarkdownView', () => {
     const onWikilinkClick = vi.fn()
     const onLinkClick = vi.fn()
     const onImageClick = vi.fn()
+    const onFileClick = vi.fn()
     const onTaskClick = vi.fn()
     await renderView(
-      '[[Note]] [Docs](https://example.com) ![cat](https://example.com/cat.png)\n\n![](https://x.com/jack/status/20)\n\n+ [ ] task',
+      '[[Note]] [Docs](https://example.com) ![cat](https://example.com/cat.png) ![[report.pdf]]\n\n![](https://x.com/jack/status/20)\n\n+ [ ] task',
       {
         interactive: false,
+        resolveWikiEmbed: () => ({ kind: 'file' }),
         onWikilinkClick,
         onLinkClick,
         onImageClick,
+        onFileClick,
         onTaskClick,
       },
     )
@@ -112,9 +222,11 @@ describe('MarkdownView', () => {
     await wikilink.click()
     await view.getByText('Docs').click()
     await view.getByAltText('cat').click()
+    await view.getByTestId('file-pill').click()
     expect(onWikilinkClick).not.toHaveBeenCalled()
     expect(onLinkClick).not.toHaveBeenCalled()
     expect(onImageClick).not.toHaveBeenCalled()
+    expect(onFileClick).not.toHaveBeenCalled()
     expect(onTaskClick).not.toHaveBeenCalled()
   })
 
