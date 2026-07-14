@@ -1,6 +1,6 @@
 import type { EditorView } from '@prosekit/pm/view'
 
-import { tryCoordsAtPos } from '../utils/caret-coords.ts'
+import { tryCoordsAtPos, type CaretCoords } from '../utils/caret-coords.ts'
 
 import { ATOM_SOURCE_MARK_NAMES } from './atom-mark-navigation.ts'
 import { getMarkRangeAt } from './get-mark-range-at.ts'
@@ -74,6 +74,29 @@ export function findAtomCaretRect(view: EditorView): CaretRect | undefined {
     const fragment = atEnd ? fragments[fragments.length - 1] : fragments[0]
     const left = atEnd ? fragment.right : fragment.left
     return { left, top: fragment.top, height: fragment.height }
+  }
+  return undefined
+}
+
+/**
+ * The preview fragment rect for a range edge touching an atom unit: the
+ * visible geometry standing in for source text that measures as nothing.
+ * `edge` picks the line fragment the range extends from.
+ */
+export function findAtomEdgeRect(
+  view: EditorView,
+  pos: number,
+  edge: 'start' | 'end',
+): CaretCoords | undefined {
+  const state = view.state
+  for (const markName of ATOM_SOURCE_MARK_NAMES) {
+    const range = getMarkRangeAt(state, pos, markName)
+    if (range == null) continue
+    const preview = findAtomPreviewElement(view, range.from + 1)
+    if (preview == null) continue
+    const fragments = Array.from(preview.getClientRects()).filter((rect) => rect.height > 0)
+    if (fragments.length === 0) continue
+    return edge === 'start' ? fragments[0] : fragments[fragments.length - 1]
   }
   return undefined
 }
