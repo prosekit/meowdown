@@ -69,8 +69,9 @@ export function isHiddenRunInterior(state: EditorState, pos: number): boolean {
 export function getHiddenRunAround(state: EditorState, pos: number): HiddenRun | undefined {
   if (!isHiddenRunInterior(state, pos)) return undefined
   const before = getHiddenRunBefore(state, pos)
+  if (before == null) return undefined
   const after = getHiddenRunAfter(state, pos)
-  if (before == null || after == null) return undefined
+  if (after == null) return undefined
   return { from: before.from, to: after.to }
 }
 
