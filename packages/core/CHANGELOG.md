@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.49.0](https://github.com/prosekit/meowdown/compare/core-v0.48.0...core-v0.49.0) (2026-07-14)
+
+
+### Features
+
+* support Obsidian-style wiki embeds ([#307](https://github.com/prosekit/meowdown/issues/307)) ([3142c34](https://github.com/prosekit/meowdown/commit/3142c341e3a53114bf23abbe2c087bda83b12473))
+
 ## [0.48.0](https://github.com/prosekit/meowdown/compare/core-v0.47.0...core-v0.48.0) (2026-07-14)
 
 
