@@ -8,53 +8,104 @@ describe('insertMarkdown', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello <a>world')))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello world
+      "
+    `)
 
     expect(editor.commands.insertMarkdown('brave **new** ')).toBe(true)
 
-    expect(docToMarkdown(fixture.doc)).toBe('Hello brave **new** world\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello brave **new** world
+      "
+    `)
   })
 
   it('collapses an active selection instead of deleting it', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('<a>Hello<b> world')))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello world
+      "
+    `)
 
     editor.commands.insertMarkdown('Goodbye ')
 
-    expect(docToMarkdown(fixture.doc)).toBe('Goodbye Hello world\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Goodbye Hello world
+      "
+    `)
   })
 
   it('inserts a multi-block fragment as blocks with the cursor at its end', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello<a>'), n.paragraph('World')))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello
+
+      World
+      "
+    `)
 
     editor.commands.insertMarkdown('# Title\n\n- item')
     editor.commands.insertText({ text: '!' })
 
-    expect(docToMarkdown(fixture.doc)).toBe('Hello\n\n# Title\n\n- item!\n\nWorld\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello
+
+      # Title
+
+      - item!
+
+      World
+      "
+    `)
   })
 
   it('undoes an inserted fragment as a single history entry', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello<a>')))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello
+      "
+    `)
 
     editor.commands.insertMarkdown('# Title\n\n- item')
-    editor.commands.undo()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello
 
-    expect(docToMarkdown(fixture.doc)).toBe('Hello\n')
+      # Title
+
+      - item
+      "
+    `)
+
+    editor.commands.undo()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello
+      "
+    `)
   })
 
   it('ignores an empty or whitespace-only fragment', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello<a>')))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello
+      "
+    `)
 
     expect(editor.commands.insertMarkdown('')).toBe(false)
     expect(editor.commands.insertMarkdown('  \n\t ')).toBe(false)
 
-    expect(docToMarkdown(fixture.doc)).toBe('Hello\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello
+      "
+    `)
   })
 })
 
@@ -63,40 +114,72 @@ describe('insertTrigger', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello <a>')))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello
+      "
+    `)
 
     expect(editor.commands.insertTrigger('/')).toBe(true)
 
-    expect(docToMarkdown(fixture.doc)).toBe('Hello /\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello /
+      "
+    `)
   })
 
   it('prefixes a space after a non-space character', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello<a>')))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello
+      "
+    `)
 
     editor.commands.insertTrigger('[[')
 
-    expect(docToMarkdown(fixture.doc)).toBe('Hello [[\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello [[
+      "
+    `)
   })
 
   it('does nothing in a code block', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.codeBlock('const a<a>')))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "\`\`\`
+      const a
+      \`\`\`
+      "
+    `)
 
     expect(editor.commands.insertTrigger('/')).toBe(false)
 
-    expect(docToMarkdown(fixture.doc)).toBe('```\nconst a\n```\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "\`\`\`
+      const a
+      \`\`\`
+      "
+    `)
   })
 
   it('ignores empty trigger text', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello<a>')))
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello
+      "
+    `)
 
     expect(editor.commands.insertTrigger('')).toBe(false)
 
-    expect(docToMarkdown(fixture.doc)).toBe('Hello\n')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      "Hello
+      "
+    `)
   })
 })
 
