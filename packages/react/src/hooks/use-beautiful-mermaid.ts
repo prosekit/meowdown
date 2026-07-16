@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+
 import type { BeautifulMermaidRender } from './beautiful-mermaid-chunk.ts'
 
 export { type BeautifulMermaidRender }
