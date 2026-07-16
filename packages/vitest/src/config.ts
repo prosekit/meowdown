@@ -5,7 +5,13 @@ import { defineProject } from 'vitest/config'
 const IS_BOT = !!(process.env.AI_AGENT || process.env.CI)
 const IS_DEBUG = !!process.env.DEBUG
 
-export function defineSharedConfig() {
+export function defineSharedConfig({
+  groupOrder,
+  env,
+}: {
+  groupOrder: number
+  env: 'browser' | 'node'
+}) {
   const browserName = (() => {
     if (process.env.MEOWDOWN_TEST_BROWSER === 'webkit') {
       return 'webkit'
@@ -20,24 +26,27 @@ export function defineSharedConfig() {
   })()
 
   const setupFiles = ['@meowdown/vitest/setup-console']
-  if (browserName === 'webkit') {
+  if (env === 'browser' && browserName === 'webkit') {
     setupFiles.push('@meowdown/vitest/setup-webkit')
   }
 
   return defineProject({
     plugins: [playwrightCommands()],
     oxc:
-      browserName === 'webkit'
+      env === 'browser' && browserName === 'webkit'
         ? // WebKit's JavaScriptCore can't parse `using` declarations; lower them
           { target: 'es2025' }
         : undefined,
     test: {
       setupFiles,
       snapshotSerializers: ['@meowdown/vitest/custom-string-serializer'],
+      sequence: {
+        groupOrder,
+      },
       retry: IS_BOT ? 3 : 0,
       fileParallelism: false,
       browser: {
-        enabled: true,
+        enabled: env === 'browser',
         viewport: {
           width: 900,
           height: 600,

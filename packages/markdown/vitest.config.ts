@@ -1,9 +1,6 @@
-import { defineProject } from 'vitest/config'
+import { defineSharedConfig } from '@meowdown/vitest/config'
 
-export default defineProject({
-  test: {
-    environment: 'node',
-    setupFiles: ['@meowdown/vitest/setup-console'],
-    snapshotSerializers: ['@meowdown/vitest/custom-string-serializer'],
-  },
+export default defineSharedConfig({
+  env: 'node',
+  groupOrder: 500,
 })
