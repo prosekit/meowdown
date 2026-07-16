@@ -1,4 +1,5 @@
-import { GFM, type InlineContext, MarkdownParser, parser as defaultParser } from '@lezer/markdown'
+import type { MarkdownParser} from '@lezer/markdown';
+import { GFM, type InlineContext, parser as defaultParser } from '@lezer/markdown'
 
 import { bareAutolink } from './bare-autolink.ts'
 import { hashtag } from './hashtag.ts'
