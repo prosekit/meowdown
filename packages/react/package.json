@@ -66,6 +66,8 @@
       ".": "./dist/index.js",
       "./style.css": "./dist/style.css"
     },
+    "scripts": {},
+    "devDependencies": {},
     "access": "public"
   }
 }
