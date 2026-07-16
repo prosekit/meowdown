@@ -151,6 +151,9 @@ importers:
       tsdown:
         specifier: ^0.22.8
         version: 0.22.8(@tsdown/css@0.22.8)(oxc-resolver@11.21.3)(typescript@6.0.3)
+      unicode-by-name:
+        specifier: ^0.2.0
+        version: 0.2.0
       vitest:
         specifier: ^4.1.10
         version: 4.1.10(@types/node@24.13.3)(@vitest/browser-playwright@4.1.10)(@vitest/coverage-v8@4.1.10)(vite@8.1.4)
@@ -3516,6 +3519,9 @@ packages:
 
   undici-types@7.18.2:
     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
+
+  unicode-by-name@0.2.0:
+    resolution: {integrity: sha512-aM5tvjLgtm6tgTLlGN0U6wU0ep44stCVcbE9GEar7+zNNA69izfT8V1BmlUdrFtDnDIgSDidN2v+RrmqRGvf1Q==}
 
   unified@11.0.5:
     resolution: {integrity: sha512-xKvGhPWw3k84Qjh8bI3ZeJjqnyadK+GEFtazSfZv/rKeTkTjOJho6mFqh2SM96iIcZokxiOpg78GazTSg8+KHA==}
@@ -7447,6 +7453,8 @@ snapshots:
       unconfig-core: 7.5.0
 
   undici-types@7.18.2: {}
+
+  unicode-by-name@0.2.0: {}
 
   unified@11.0.5:
     dependencies:
