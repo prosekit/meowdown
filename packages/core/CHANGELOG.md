@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.53.0](https://github.com/prosekit/meowdown/compare/core-v0.52.2...core-v0.53.0) (2026-07-16)
+
+
+### Features
+
+* split the lezer layer into `@meowdown/markdown` ([#331](https://github.com/prosekit/meowdown/issues/331)) ([9e70b8a](https://github.com/prosekit/meowdown/commit/9e70b8a587a2d3f7d7b737052c1ecbd0139b8ea8))
+
 ## [0.52.2](https://github.com/prosekit/meowdown/compare/core-v0.52.1...core-v0.52.2) (2026-07-16)
 
 
