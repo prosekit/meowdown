@@ -52,6 +52,7 @@
     "hast-util-to-mdast": "^10.1.2",
     "mdast-util-to-markdown": "^2.1.2",
     "tsdown": "^0.22.8",
+    "unicode-by-name": "^0.2.0",
     "vitest": "^4.1.10"
   },
   "publishConfig": {
