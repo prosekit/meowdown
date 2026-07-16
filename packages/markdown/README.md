@@ -2,8 +2,6 @@
 
 The [`@lezer/markdown`](https://github.com/lezer-parser/markdown) grammar layer behind [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core): GFM plus meowdown's inline syntax (wiki links, wiki embeds, hashtags, `==highlight==`, `$math$`, bare autolinks).
 
-It only depends on `@lezer/markdown`, so hosts (such as indexers) can parse the exact same Markdown dialect as the editor without pulling in any editor code.
-
 ```sh
 npm install @meowdown/markdown
 ```
@@ -13,5 +11,3 @@ import { gfmParser } from '@meowdown/markdown'
 
 const tree = gfmParser.parse('Meeting with [[Ada Lovelace|Ada]]')
 ```
-
-Any change to parse semantics is a breaking change.
