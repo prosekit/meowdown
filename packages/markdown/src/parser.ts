@@ -8,7 +8,7 @@ import { schemeAutolink } from './scheme-autolink.ts'
 import { wikiEmbed } from './wiki-embed.ts'
 import { wikilink } from './wikilink.ts'
 
-export type {MarkdownParser}
+export type { MarkdownParser }
 
 /**
  * Inline-parser entry that immediately claims the entire inline
