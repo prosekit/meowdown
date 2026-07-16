@@ -8,22 +8,7 @@ import type {
   MdLinkTextAttrs,
   MdWikilinkAttrs,
 } from '../inline-marks.ts'
-import type { MarkName } from '../mark-names.ts'
-
-/** Syntax characters, dropped from the semantic clipboard HTML. */
-const SYNTAX_MARK_NAMES: ReadonlySet<string> = new Set<MarkName>([
-  'mdMark',
-  'mdLinkUri',
-  'mdLinkTitle',
-])
-
-/** Marks covering a whole source unit, emitted as one replacement per unit. */
-const ATOM_MARK_NAMES: ReadonlySet<string> = new Set<MarkName>([
-  'mdImage',
-  'mdWikilink',
-  'mdMath',
-  'mdFile',
-])
+import { ATOM_MARK_NAMES, SYNTAX_MARK_NAMES, type MarkName } from '../mark-names.ts'
 
 const SEMANTIC_TAGS: Partial<Record<MarkName, string>> = {
   mdStrong: 'strong',
