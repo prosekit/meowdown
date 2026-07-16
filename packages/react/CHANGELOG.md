@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.51.0](https://github.com/prosekit/meowdown/compare/react-v0.50.0...react-v0.51.0) (2026-07-16)
+
+
+### Features
+
+* **core:** add `getTextblockDisplayText` ([#320](https://github.com/prosekit/meowdown/issues/320)) ([d69dc24](https://github.com/prosekit/meowdown/commit/d69dc24d862fd8ce330bf7013808252091ecaaae))
+
+
+### Bug Fixes
+
+* resolve Markdown heading slugs ([#318](https://github.com/prosekit/meowdown/issues/318)) ([fd21c05](https://github.com/prosekit/meowdown/commit/fd21c05fdfcdd09ffdad512b4e65652283d56940))
+
 ## [0.50.0](https://github.com/prosekit/meowdown/compare/react-v0.49.0...react-v0.50.0) (2026-07-14)
 
 

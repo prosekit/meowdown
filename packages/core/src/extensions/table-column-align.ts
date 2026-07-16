@@ -17,7 +17,7 @@ import {
   type Transaction,
 } from '@prosekit/pm/state'
 
-import type { NodeName } from './node-names.ts'
+import { isNodeOfType, type NodeName } from './node-names.ts'
 
 /**
  * Column alignment of a GFM table, encoded by the delimiter row: `:--` for
@@ -75,7 +75,7 @@ function findAlignmentRowIndex(table: ProseMirrorNode): number {
   for (let rowIndex = 0; rowIndex < table.childCount; rowIndex++) {
     const row = table.child(rowIndex)
     for (let column = 0; column < row.childCount; column++) {
-      if (row.child(column).type.name === ('tableHeaderCell' satisfies NodeName)) return rowIndex
+      if (isNodeOfType(row.child(column), 'tableHeaderCell')) return rowIndex
     }
   }
   return 0
@@ -157,7 +157,7 @@ function createTableAlignSyncPlugin(): Plugin {
       const to = Math.max(from, Math.min(range.to, doc.content.size))
       let tr: Transaction | undefined
       doc.nodesBetween(from, to, (node, pos) => {
-        if (node.type.name !== ('table' satisfies NodeName)) return true
+        if (!isNodeOfType(node, 'table')) return true
         tr ??= newState.tr
         syncTableAligns(node, pos, tr)
         return false

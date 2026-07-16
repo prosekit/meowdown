@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.51.0](https://github.com/prosekit/meowdown/compare/core-v0.50.0...core-v0.51.0) (2026-07-16)
+
+
+### Features
+
+* **core:** add `getTextblockDisplayText` ([#320](https://github.com/prosekit/meowdown/issues/320)) ([d69dc24](https://github.com/prosekit/meowdown/commit/d69dc24d862fd8ce330bf7013808252091ecaaae))
+
 ## [0.50.0](https://github.com/prosekit/meowdown/compare/core-v0.49.0...core-v0.50.0) (2026-07-14)
 
 

@@ -56,6 +56,8 @@ See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Freac
 
 Slash menu host items can include `keywords` to match hidden terms without changing the displayed label.
 
+The caret glides between positions by default; pass `caretGlide={false}` to move it instantly (hosts can also tune the duration via the `--meowdown-caret-glide` CSS variable).
+
 ### Wiki embeds
 
 Obsidian-style wiki embeds (`![[path]]`, with optional `|width` or

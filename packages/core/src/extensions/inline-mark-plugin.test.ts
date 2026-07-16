@@ -5,6 +5,7 @@ import { setupFixture } from '../testing/index.ts'
 import { marksAt } from '../testing/marks-at.ts'
 
 import { getCacheStats, resetCacheStats } from './inline-mark-plugin.ts'
+import { isMarkOfType } from './mark-names.ts'
 
 describe('inlineMarkPlugin', () => {
   it('applies mdStrong inside **bold**', () => {
@@ -101,7 +102,7 @@ describe('inlineMarkPlugin', () => {
 
     const pos = findText(fixture.doc, 'docs')
     const $pos = fixture.doc.resolve(pos + 1)
-    const linkText = $pos.marks().find((m) => m.type.name === 'mdLinkText')
+    const linkText = $pos.marks().find((m) => isMarkOfType(m, 'mdLinkText'))
     expect(linkText).toBeTruthy()
     expect(linkText!.attrs.href).toBe('http://x.test')
   })
@@ -114,7 +115,7 @@ describe('inlineMarkPlugin', () => {
 
     const pos = findText(fixture.doc, 'https://example.com')
     const $pos = fixture.doc.resolve(pos + 1)
-    const linkText = $pos.marks().find((m) => m.type.name === 'mdLinkText')
+    const linkText = $pos.marks().find((m) => isMarkOfType(m, 'mdLinkText'))
     expect(linkText).toBeTruthy()
     expect(linkText!.attrs.href).toBe('https://example.com')
   })
@@ -127,7 +128,7 @@ describe('inlineMarkPlugin', () => {
 
     const pos = findText(fixture.doc, 'google.com')
     const $pos = fixture.doc.resolve(pos + 1)
-    const linkText = $pos.marks().find((m) => m.type.name === 'mdLinkText')
+    const linkText = $pos.marks().find((m) => isMarkOfType(m, 'mdLinkText'))
     expect(linkText).toBeTruthy()
     expect(linkText!.attrs.href).toBe('https://google.com')
   })

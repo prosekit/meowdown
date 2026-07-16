@@ -18,7 +18,7 @@ import type {
 } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
 import { clsx } from 'clsx/lite'
-import { useImperativeHandle, useRef, type ReactNode, type Ref } from 'react'
+import { useImperativeHandle, useRef, type CSSProperties, type ReactNode, type Ref } from 'react'
 
 import type { TimeFormat } from '../utils/date-format.ts'
 
@@ -35,6 +35,8 @@ import type {
 } from './types.ts'
 
 export type EditorMode = MarkMode
+
+const CARET_GLIDE_OFF = { '--meowdown-caret-glide': '0ms' } as CSSProperties
 
 export interface EditorProps {
   /**
@@ -249,6 +251,13 @@ export interface EditorProps {
   blockHandle?: boolean
 
   /**
+   * Glides the caret between positions instead of jumping instantly. On by
+   * default. Set to `false` to disable the movement animation; equivalent to
+   * setting the `--meowdown-caret-glide` CSS variable to `0ms`.
+   */
+  caretGlide?: boolean
+
+  /**
    * Placeholder text shown when the whole document is empty. A function
    * receives the editor state. Pass a stable function.
    */
@@ -312,6 +321,7 @@ export function MeowdownEditor({
   substitution = true,
   frontmatter = false,
   blockHandle = true,
+  caretGlide = true,
   placeholder,
   readOnly,
   spellCheck,
@@ -401,7 +411,10 @@ export function MeowdownEditor({
   }, [])
 
   return (
-    <div className={clsx('meowdown', wrapperClassName)}>
+    <div
+      className={clsx('meowdown', wrapperClassName)}
+      style={caretGlide ? undefined : CARET_GLIDE_OFF}
+    >
       <ProseKitEditor
         ref={childRef}
         markMode={mode}

@@ -2,6 +2,8 @@ import {
   defineEditorExtension,
   docToMarkdown,
   getSelectedText,
+  getTextblockDisplayText,
+  isNodeOfType,
   markdownToDoc,
   type AcceptPendingReplacementOptions,
   type EditorExtension,
@@ -24,7 +26,7 @@ import {
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
 import { createEditor, union, type SelectionJSON } from '@prosekit/core'
-import type { EditorNode, Mark } from '@prosekit/pm/model'
+import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit } from '@prosekit/react'
 import { clsx } from 'clsx/lite'
@@ -124,43 +126,6 @@ function headingLookupKey(value: string): string {
   return value.normalize('NFKC').trim().replaceAll(/\s+/g, ' ').toLowerCase()
 }
 
-const HEADING_HIDDEN_MARKS = new Set(['mdMark', 'mdLinkUri', 'mdLinkTitle'])
-const HEADING_ATOM_MARKS = new Set(['mdWikilink', 'mdImage', 'mdFile', 'mdMath'])
-
-function headingAtomText(mark: Mark): string {
-  const attrs = mark.attrs as Readonly<Record<string, unknown>>
-  const stringAttr = (name: string): string => {
-    const value = attrs[name]
-    return typeof value === 'string' ? value : ''
-  }
-  if (mark.type.name === 'mdWikilink') {
-    return stringAttr('display') || stringAttr('target')
-  }
-  if (mark.type.name === 'mdImage') return stringAttr('alt')
-  if (mark.type.name === 'mdFile') return stringAttr('name')
-  if (mark.type.name === 'mdMath') return stringAttr('formula')
-  return ''
-}
-
-/** The heading as its live-preview marks display it, with syntax runs omitted. */
-function headingDisplayText(heading: EditorNode): string {
-  let output = ''
-  let previousAtom: Mark | undefined
-  heading.forEach((child) => {
-    if (!child.isText || !child.text) return
-    const atom = child.marks.find((mark) => HEADING_ATOM_MARKS.has(mark.type.name))
-    if (atom) {
-      if (!previousAtom?.eq(atom)) output += headingAtomText(atom)
-      previousAtom = atom
-      return
-    }
-    previousAtom = undefined
-    if (child.marks.some((mark) => HEADING_HIDDEN_MARKS.has(mark.type.name))) return
-    output += child.text
-  })
-  return output
-}
-
 function findHeadingPosition(doc: EditorNode, fragment: string): number | undefined {
   const decodedTarget = decodeHeadingFragment(fragment)
   const target = headingLookupKey(decodedTarget)
@@ -170,8 +135,8 @@ function findHeadingPosition(doc: EditorNode, fragment: string): number | undefi
   let match: number | undefined
   doc.descendants((node, pos) => {
     if (match != null) return false
-    if (node.type.name !== 'heading') return true
-    const displayText = headingDisplayText(node)
+    if (!isNodeOfType(node, 'heading')) return true
+    const displayText = getTextblockDisplayText(node)
     const slug = slugger.slug(displayText)
     if (
       headingLookupKey(node.textContent) === target ||

@@ -5,10 +5,9 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 
 import { docToMarkdown } from '../../converters/pm-to-md.ts'
 import type { MdWikilinkAttrs } from '../inline-marks.ts'
+import { groupInlineRuns, hasSyntaxMark } from '../inline-runs.ts'
 import { getMarkMode } from '../mark-mode.ts'
-import type { MarkName } from '../mark-names.ts'
-
-import { groupInlineRuns, hasSyntaxMark } from './semantic-inline.ts'
+import { isMarkOfType } from '../mark-names.ts'
 
 /**
  * Serialize a slice to Markdown. The copied fragment is wrapped in a `doc` so
@@ -77,7 +76,7 @@ function filterTextblock(textblock: ProseMirrorNode): ProseMirrorNode {
   for (const run of groupInlineRuns(textblock)) {
     const atom = run.atom
     if (atom != null) {
-      if (atom.type.name === ('mdWikilink' satisfies MarkName)) {
+      if (isMarkOfType(atom, 'mdWikilink')) {
         const attrs = atom.attrs as MdWikilinkAttrs
         const visible = attrs.display || attrs.target
         if (visible) parts.push(schema.text(visible))

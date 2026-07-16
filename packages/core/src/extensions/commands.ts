@@ -7,7 +7,7 @@ import { TextSelection, type Command } from '@prosekit/pm/state'
 
 import { markdownToDoc } from '../converters/md-to-pm.ts'
 
-import type { NodeName } from './node-names.ts'
+import { isNodeOfType, type NodeName } from './node-names.ts'
 import { getNodeBuildersForSchema } from './schema.ts'
 
 function selectText(anchor: number, head?: number): Command {
@@ -39,7 +39,7 @@ function insertMarkdown(markdown: string): Command {
     const content = markdownToDoc(markdown, { nodes }).content
     if (content.childCount === 0) return false
     const isSingleParagraph =
-      content.childCount === 1 && content.child(0).type.name === ('paragraph' satisfies NodeName)
+      content.childCount === 1 && isNodeOfType(content.child(0), 'paragraph')
     const slice = isSingleParagraph
       ? new Slice(content, 1, 1)
       : new Slice(content, 0, Slice.maxOpen(content).openEnd)

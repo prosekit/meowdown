@@ -100,8 +100,8 @@ export type { ListMarker, MeowdownListAttrs } from './extensions/list.ts'
 export { defineLinkPaste } from './extensions/link-paste.ts'
 export type { MarkChunk } from './extensions/mark-chunk.ts'
 export type { MarkMode } from './extensions/mark-mode.ts'
-export type { MarkName } from './extensions/mark-names.ts'
-export type { NodeName } from './extensions/node-names.ts'
+export { isMarkOfType, type MarkName } from './extensions/mark-names.ts'
+export { isNodeOfType, type NodeName } from './extensions/node-names.ts'
 export {
   definePendingReplacementHandler,
   getPendingReplacement,
@@ -147,6 +147,7 @@ export {
 } from './extensions/wikilink-hover.ts'
 export { defineWikilinkTrigger } from './extensions/wikilink-trigger.ts'
 export type { PositionRange } from './utils/range.ts'
+export { getTextblockDisplayText } from './utils/display-text.ts'
 export { getSelectedText } from './utils/selected-text.ts'
 export { getVirtualElementFromRange, type VirtualElement } from './utils/virtual-element.ts'
 export { defineSpellCheckPlugin } from './extensions/spell-check.ts'

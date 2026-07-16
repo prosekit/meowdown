@@ -26,6 +26,7 @@
     "postinstall": "simple-git-hooks"
   },
   "devDependencies": {
+    "@meowdown/eslint-rules": "workspace:*",
     "@ocavue/eslint-config": "^4.12.1",
     "@ocavue/tsconfig": "^0.7.1",
     "@types/node": "^24.0.0",

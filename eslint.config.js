@@ -1,3 +1,4 @@
+import { meowdownConfig } from '@meowdown/eslint-rules'
 import { defineESLintConfig } from '@ocavue/eslint-config'
 
 export default defineESLintConfig(
@@ -12,4 +13,5 @@ export default defineESLintConfig(
   {
     ignores: ['**/*.module.d.css.ts'],
   },
+  meowdownConfig,
 )

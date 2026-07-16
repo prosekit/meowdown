@@ -1,12 +1,6 @@
 import type { Slice } from '@prosekit/pm/model'
 
-import type { MarkName } from '../extensions/mark-names.ts'
-
-const CLEAN_TEXT_STRIP_MARK_NAMES: ReadonlySet<MarkName> = new Set<MarkName>([
-  'mdMark',
-  'mdLinkUri',
-  'mdLinkTitle',
-])
+import { SYNTAX_MARK_NAMES, type MarkName } from '../extensions/mark-names.ts'
 
 interface CleanTextOptions {
   /** Keep math delimiters so the projected text remains valid Markdown. */
@@ -26,7 +20,7 @@ export function cleanTextFromSlice(slice: Slice, options: CleanTextOptions = {})
       if (!textNode.isText || !textNode.text) return true
       const textNodeMarks = textNode.marks.map((mark) => mark.type.name as MarkName)
       const stripped =
-        textNodeMarks.some((markName) => CLEAN_TEXT_STRIP_MARK_NAMES.has(markName)) &&
+        textNodeMarks.some((markName) => SYNTAX_MARK_NAMES.has(markName)) &&
         !(options.preserveMathSource && textNodeMarks.includes('mdMath'))
       if (!stripped) parts.push(textNode.text)
       return false

@@ -8,22 +8,8 @@ import type {
   MdLinkTextAttrs,
   MdWikilinkAttrs,
 } from '../inline-marks.ts'
-import type { MarkName } from '../mark-names.ts'
-
-/** Syntax characters, dropped from the semantic clipboard HTML. */
-const SYNTAX_MARK_NAMES: ReadonlySet<string> = new Set<MarkName>([
-  'mdMark',
-  'mdLinkUri',
-  'mdLinkTitle',
-])
-
-/** Marks covering a whole source unit, emitted as one replacement per unit. */
-const ATOM_MARK_NAMES: ReadonlySet<string> = new Set<MarkName>([
-  'mdImage',
-  'mdWikilink',
-  'mdMath',
-  'mdFile',
-])
+import { groupInlineRuns, hasSyntaxMark } from '../inline-runs.ts'
+import { isMarkOfType, type MarkName } from '../mark-names.ts'
 
 const SEMANTIC_TAGS: Partial<Record<MarkName, string>> = {
   mdStrong: 'strong',
@@ -32,41 +18,6 @@ const SEMANTIC_TAGS: Partial<Record<MarkName, string>> = {
   mdDel: 'del',
   mdHighlight: 'mark',
   mdLinkText: 'a',
-}
-
-function findAtomMark(marks: readonly Mark[]): Mark | undefined {
-  return marks.find((mark) => ATOM_MARK_NAMES.has(mark.type.name))
-}
-
-export function hasSyntaxMark(marks: readonly Mark[]): boolean {
-  return marks.some((mark) => SYNTAX_MARK_NAMES.has(mark.type.name))
-}
-
-export interface InlineRun {
-  atom: Mark | undefined
-  text: string
-  children: ProseMirrorNode[]
-}
-
-/**
- * Group a textblock's text nodes into atom units and plain runs. A unit's
- * text nodes share one mark instance (the inline parser creates each unit
- * mark once), so instance identity splits adjacent same-attrs units.
- */
-export function groupInlineRuns(textblock: ProseMirrorNode): InlineRun[] {
-  const runs: InlineRun[] = []
-  textblock.forEach((child) => {
-    if (!child.isText || !child.text) return
-    const atom = findAtomMark(child.marks)
-    const last = runs.at(-1)
-    if (atom != null && last != null && last.atom === atom) {
-      last.text += child.text
-      last.children.push(child)
-      return
-    }
-    runs.push({ atom, text: child.text, children: [child] })
-  })
-  return runs
 }
 
 /**
@@ -143,7 +94,7 @@ function syncOpenWrappers(open: OpenWrapper[], next: readonly Mark[], out: HTMLE
   for (let index = common; index < next.length; index++) {
     const mark = next[index]
     const element = document.createElement(SEMANTIC_TAGS[mark.type.name as MarkName] ?? 'span')
-    if (mark.type.name === ('mdLinkText' satisfies MarkName)) {
+    if (isMarkOfType(mark, 'mdLinkText')) {
       element.setAttribute('href', (mark.attrs as MdLinkTextAttrs).href)
     }
     ;(open.at(-1)?.element ?? out).append(element)

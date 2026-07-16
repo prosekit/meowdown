@@ -22,7 +22,7 @@ import type { Command } from '@prosekit/pm/state'
 import { parsePositiveInteger } from '../utils/parse-integer.ts'
 
 import { createSourceTextRule, semanticTextblockDOM } from './clipboard/semantic-inline.ts'
-import type { NodeName } from './node-names.ts'
+import { isNodeOfType, type NodeName } from './node-names.ts'
 
 export interface MeowdownHeadingAttrs extends HeadingAttrs {
   /**
@@ -118,7 +118,7 @@ function toggleHeading(level: number): Command {
 
 const backspaceUnsetHeading: Command = (state, dispatch, view) => {
   const $pos = isAtBlockStart(state, view)
-  if ($pos?.parent.type.name === ('heading' satisfies NodeName)) {
+  if ($pos != null && isNodeOfType($pos.parent, 'heading')) {
     return unsetBlockType()(state, dispatch, view)
   }
   return false

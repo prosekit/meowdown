@@ -6,7 +6,7 @@ import type { MeowdownHeadingAttrs } from '../extensions/heading.ts'
 import type { MeowdownHorizontalRuleAttrs } from '../extensions/horizontal-rule.ts'
 import type { MeowdownHTMLCommentAttrs } from '../extensions/html-comment.ts'
 import type { MeowdownListAttrs } from '../extensions/list.ts'
-import type { NodeName } from '../extensions/node-names.ts'
+import { isNodeOfType, type NodeName } from '../extensions/node-names.ts'
 import type { MeowdownTableCellAttrs, TableColumnAlign } from '../extensions/table-column-align.ts'
 import { CHAR_BACKTICK, CHAR_TILDE } from '../unicode.ts'
 import { longestCharRun } from '../utils/backticks.ts'
@@ -289,14 +289,14 @@ function emitBlockChildren(node: ProseMirrorNode, out: MdOut, tightItem = false)
   let index = 0
   while (index < count) {
     const child = node.child(index)
-    if (child.type.name !== ('list' satisfies NodeName)) {
+    if (!isNodeOfType(child, 'list')) {
       if (tightItem && index > 0) out.suppressBlank()
       emit(child, out)
       index++
       continue
     }
     let runEnd = index + 1
-    while (runEnd < count && node.child(runEnd).type.name === ('list' satisfies NodeName)) runEnd++
+    while (runEnd < count && isNodeOfType(node.child(runEnd), 'list')) runEnd++
     const tightRun = isTightRun(node, index, runEnd)
     for (let item = index; item < runEnd; item++) {
       const isRunStart = item === index
@@ -472,7 +472,7 @@ function emitTable(node: ProseMirrorNode, out: MdOut): void {
     let isHeaderRow = false
     for (let c = 0; c < row.childCount; c++) {
       const cell = row.child(c)
-      if (cell.type.name === ('tableHeaderCell' satisfies NodeName)) isHeaderRow = true
+      if (isNodeOfType(cell, 'tableHeaderCell')) isHeaderRow = true
       cells.push(extractCellText(cell))
     }
     if (isHeaderRow && headerIdx < 0) headerIdx = r
