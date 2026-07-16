@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture } from '../testing/index.ts'
 
+import { isNodeOfType } from './node-names.ts'
 import {
   getTableColumnAlign,
   type MeowdownTableCellAttrs,
@@ -41,7 +42,7 @@ function alignedTable(n: Builders): EditorNode {
 function getCellAligns(doc: EditorNode): Array<Array<TableColumnAlign | null>> {
   const rows: Array<Array<TableColumnAlign | null>> = []
   doc.descendants((node) => {
-    if (node.type.name !== 'tableRow') return true
+    if (!isNodeOfType(node, 'tableRow')) return true
     const cells: Array<TableColumnAlign | null> = []
     node.forEach((cell) => {
       cells.push((cell.attrs as MeowdownTableCellAttrs).align ?? null)
@@ -56,7 +57,7 @@ function getFirstDataCellPos(doc: EditorNode): number {
   let found = -1
   doc.descendants((node, pos) => {
     if (found >= 0) return false
-    if (node.type.name === 'tableCell') {
+    if (isNodeOfType(node, 'tableCell')) {
       found = pos
       return false
     }
@@ -68,7 +69,7 @@ function getFirstDataCellPos(doc: EditorNode): number {
 function getCellHitPositions(doc: EditorNode): number[] {
   const positions: number[] = []
   doc.descendants((node, pos) => {
-    if (node.type.name === 'tableCell' || node.type.name === 'tableHeaderCell') {
+    if (isNodeOfType(node, 'tableCell') || isNodeOfType(node, 'tableHeaderCell')) {
       positions.push(pos + 1)
       return false
     }

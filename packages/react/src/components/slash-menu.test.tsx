@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import { isNodeOfType } from '@meowdown/core'
 import type { EditorNode } from '@prosekit/pm/model'
 import { TextSelection } from '@prosekit/pm/state'
 import { createRef } from 'react'
@@ -377,7 +378,7 @@ describe('SlashMenu', () => {
 function firstBodyCellCaret(doc: EditorNode): number {
   let caret = -1
   doc.descendants((node, pos) => {
-    if (caret < 0 && node.type.name === 'tableCell') caret = pos + 2
+    if (caret < 0 && isNodeOfType(node, 'tableCell')) caret = pos + 2
     return caret < 0
   })
   if (caret < 0) throw new Error('no body cell found')

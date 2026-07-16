@@ -9,7 +9,7 @@ import type {
   MdWikilinkAttrs,
 } from '../inline-marks.ts'
 import { groupInlineRuns, hasSyntaxMark } from '../inline-runs.ts'
-import type { MarkName } from '../mark-names.ts'
+import { isMarkOfType, type MarkName } from '../mark-names.ts'
 
 const SEMANTIC_TAGS: Partial<Record<MarkName, string>> = {
   mdStrong: 'strong',
@@ -94,7 +94,7 @@ function syncOpenWrappers(open: OpenWrapper[], next: readonly Mark[], out: HTMLE
   for (let index = common; index < next.length; index++) {
     const mark = next[index]
     const element = document.createElement(SEMANTIC_TAGS[mark.type.name as MarkName] ?? 'span')
-    if (mark.type.name === ('mdLinkText' satisfies MarkName)) {
+    if (isMarkOfType(mark, 'mdLinkText')) {
       element.setAttribute('href', (mark.attrs as MdLinkTextAttrs).href)
     }
     ;(open.at(-1)?.element ?? out).append(element)

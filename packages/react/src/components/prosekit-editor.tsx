@@ -3,6 +3,7 @@ import {
   docToMarkdown,
   getSelectedText,
   getTextblockDisplayText,
+  isNodeOfType,
   markdownToDoc,
   type AcceptPendingReplacementOptions,
   type EditorExtension,
@@ -134,7 +135,7 @@ function findHeadingPosition(doc: EditorNode, fragment: string): number | undefi
   let match: number | undefined
   doc.descendants((node, pos) => {
     if (match != null) return false
-    if (node.type.name !== 'heading') return true
+    if (!isNodeOfType(node, 'heading')) return true
     const displayText = getTextblockDisplayText(node)
     const slug = slugger.slug(displayText)
     if (

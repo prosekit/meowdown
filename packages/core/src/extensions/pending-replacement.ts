@@ -18,6 +18,7 @@ import { Decoration, DecorationSet } from '@prosekit/pm/view'
 import { markdownToDoc } from '../converters/md-to-pm.ts'
 import type { PositionRange } from '../utils/range.ts'
 
+import { isNodeOfType } from './node-names.ts'
 import { getNodeBuildersForSchema } from './schema.ts'
 
 /** Where an accepted replacement lands relative to the source range. */
@@ -193,7 +194,8 @@ function acceptPendingReplacement(options: AcceptPendingReplacementOptions = {})
         const $to = state.doc.resolve(pending.to)
         const paragraph = parsed.childCount === 1 ? parsed.firstChild : null
         if (
-          paragraph?.type.name === 'paragraph' &&
+          paragraph != null &&
+          isNodeOfType(paragraph, 'paragraph') &&
           $from.sameParent($to) &&
           $from.parent.isTextblock
         ) {

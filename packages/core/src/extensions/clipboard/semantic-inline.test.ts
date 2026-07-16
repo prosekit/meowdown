@@ -4,16 +4,16 @@ import { describe, expect, it } from 'vitest'
 import { markdownToDoc } from '../../converters/md-to-pm.ts'
 import { setupFixture, type Fixture } from '../../testing/index.ts'
 import { headingClipboardDOM } from '../heading.ts'
+import { isNodeOfType } from '../node-names.ts'
 import { paragraphClipboardDOM } from '../paragraph.ts'
 
 function firstTextblockDOM(fixture: Fixture, markdown: string): string {
   const { editor, view } = fixture
   fixture.set(markdownToDoc(markdown, { nodes: editor.nodes }))
   const textblock = view.state.doc.child(0)
-  const element =
-    textblock.type.name === 'heading'
-      ? headingClipboardDOM(textblock)
-      : paragraphClipboardDOM(textblock)
+  const element = isNodeOfType(textblock, 'heading')
+    ? headingClipboardDOM(textblock)
+    : paragraphClipboardDOM(textblock)
   return formatHTML(element.outerHTML)
 }
 

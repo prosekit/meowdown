@@ -6,6 +6,8 @@ import { userEvent } from 'vitest/browser'
 
 import { setupFixture } from '../testing/index.ts'
 
+import { isNodeOfType, type NodeName } from './node-names.ts'
+
 describe('table', () => {
   it('deletes the whole selected table when Backspace', async () => {
     using fixture = setupFixture()
@@ -187,14 +189,14 @@ function cellCaretTable(n: ReturnType<typeof setupFixture>['n']): EditorNode {
   )
 }
 
-function hasNodeType(doc: EditorNode, name: string): boolean {
+function hasNodeType(doc: EditorNode, name: NodeName): boolean {
   return countNodeType(doc, name) > 0
 }
 
-function countNodeType(doc: EditorNode, name: string): number {
+function countNodeType(doc: EditorNode, name: NodeName): number {
   let count = 0
   doc.descendants((node) => {
-    if (node.type.name === name) count++
+    if (isNodeOfType(node, name)) count++
     return true
   })
   return count
@@ -203,7 +205,7 @@ function countNodeType(doc: EditorNode, name: string): number {
 function cellChildTypeNames(doc: EditorNode): string[] {
   const names = new Set<string>()
   doc.descendants((node) => {
-    if (node.type.name === 'tableCell' || node.type.name === 'tableHeaderCell') {
+    if (isNodeOfType(node, 'tableCell') || isNodeOfType(node, 'tableHeaderCell')) {
       node.forEach((child) => names.add(child.type.name))
       return false
     }
@@ -215,7 +217,7 @@ function cellChildTypeNames(doc: EditorNode): string[] {
 function maxCellChildCount(doc: EditorNode): number {
   let max = 0
   doc.descendants((node) => {
-    if (node.type.name === 'tableCell' || node.type.name === 'tableHeaderCell') {
+    if (isNodeOfType(node, 'tableCell') || isNodeOfType(node, 'tableHeaderCell')) {
       max = Math.max(max, node.childCount)
       return false
     }
@@ -227,7 +229,7 @@ function maxCellChildCount(doc: EditorNode): number {
 function getCellTexts(doc: EditorNode): string[] {
   const texts: string[] = []
   doc.descendants((node) => {
-    if (node.type.name === 'tableCell' || node.type.name === 'tableHeaderCell') {
+    if (isNodeOfType(node, 'tableCell') || isNodeOfType(node, 'tableHeaderCell')) {
       texts.push(node.textContent)
       return false
     }
@@ -239,7 +241,7 @@ function getCellTexts(doc: EditorNode): string[] {
 function getCellHitPositions(doc: EditorNode): number[] {
   const positions: number[] = []
   doc.descendants((node, pos) => {
-    if (node.type.name === 'tableCell' || node.type.name === 'tableHeaderCell') {
+    if (isNodeOfType(node, 'tableCell') || isNodeOfType(node, 'tableHeaderCell')) {
       positions.push(pos + 1)
       return false
     }
@@ -255,7 +257,7 @@ function hasTable(doc: EditorNode): boolean {
 function getTablePos(doc: EditorNode): number {
   let tablePos = -1
   doc.forEach((node, offset) => {
-    if (node.type.name === 'table') tablePos = offset
+    if (isNodeOfType(node, 'table')) tablePos = offset
   })
   return tablePos
 }

@@ -4,7 +4,7 @@ import type { PositionRange } from '../utils/range.ts'
 
 import { getMarkRangeAt } from './get-mark-range-at.ts'
 import type { MdLinkTextAttrs, MdPackAttrs } from './inline-marks.ts'
-import type { MarkName } from './mark-names.ts'
+import { isMarkOfType, type MarkName } from './mark-names.ts'
 
 export interface LinkUnit {
   /** Whole `[text](url "title")` (or autolink) range */
@@ -42,7 +42,7 @@ function lastMarkRunIn(
 ): PositionRange | undefined {
   let found: PositionRange | undefined
   state.doc.nodesBetween(range.from, range.to, (node, nodePos) => {
-    if (node.isText && node.marks.some((mark) => mark.type.name === markName)) {
+    if (node.isText && node.marks.some((mark) => isMarkOfType(mark, markName))) {
       found = {
         from: Math.max(nodePos, range.from),
         to: Math.min(nodePos + node.nodeSize, range.to),
