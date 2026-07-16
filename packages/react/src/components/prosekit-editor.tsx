@@ -15,6 +15,7 @@ import {
   type LinkClickHandler,
   type LinkCopyHandler,
   type MarkMode,
+  type NodeName,
   type PlaceholderOptions,
   type StartPendingReplacementOptions,
   type TagClickHandler,
@@ -170,7 +171,7 @@ function findHeadingPosition(doc: EditorNode, fragment: string): number | undefi
   let match: number | undefined
   doc.descendants((node, pos) => {
     if (match != null) return false
-    if (node.type.name !== 'heading') return true
+    if (node.type.name !== ('heading' satisfies NodeName)) return true
     const displayText = headingDisplayText(node)
     const slug = slugger.slug(displayText)
     if (
