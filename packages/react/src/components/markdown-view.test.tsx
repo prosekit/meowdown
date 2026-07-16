@@ -392,6 +392,44 @@ describe('MarkdownView math', () => {
   })
 })
 
+describe('MarkdownView Mermaid', () => {
+  const mermaidPreview = view.getByTestId('code-block-mermaid-preview')
+
+  it('renders a Flowchart as SVG', async () => {
+    await renderView('```mermaid\nflowchart LR\n  A[Start] --> B[End]\n```')
+
+    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+    await expect.element(mermaidPreview).toHaveTextContent('Start')
+    await expect.element(mermaidPreview).toHaveTextContent('End')
+  })
+
+  it('renders a Sequence diagram as SVG', async () => {
+    await renderView('```mermaid\nsequenceDiagram\n  Alice->>Bob: Hello Bob\n```')
+
+    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+    await expect.element(mermaidPreview).toHaveTextContent('Hello Bob')
+  })
+
+  it('renders unsupported syntax as an error', async () => {
+    await renderView('```mermaid\npie\n  "Dogs" : 10\n```')
+
+    await expect.element(mermaidPreview, { timeout: 15000 }).toHaveAttribute('data-error')
+    await expect.element(mermaidPreview).toHaveTextContent(/Invalid|Unsupported/i)
+  })
+
+  it('renders passive SVG when interaction is disabled', async () => {
+    await renderView('```mermaid\nflowchart LR\n  A --> B\n```', { interactive: false })
+
+    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+    await expect
+      .element(mermaidPreview.locate('a, button, input, select, textarea, [tabindex], [href]'))
+      .not.toBeInTheDocument()
+    await expect
+      .element(mermaidPreview.locate('[onclick], [onmouseover], [onerror], [onload]'))
+      .not.toBeInTheDocument()
+  })
+})
+
 describe('MarkdownView parity with the editor', () => {
   const editorHost = page.getByTestId('parity-editor')
   const staticHost = page.getByTestId('parity-static')
@@ -445,5 +483,25 @@ describe('MarkdownView parity with the editor', () => {
     const editorRoot = editorHost.locate('.ProseMirror').element()
     const staticRoot = staticHost.locate('.ProseMirror').element()
     expect(canonicalize(staticRoot)).toBe(canonicalize(editorRoot))
+  })
+
+  it('matches the editor for a Mermaid diagram', async () => {
+    const markdown = 'before\n\n```mermaid\nflowchart LR\n  A[Start] --> B[End]\n```'
+    await render(
+      <div data-testid="parity-editor">
+        <ProseKitEditor initialMarkdown={markdown} markMode="hide" readOnly />
+      </div>,
+    )
+    await render(
+      <div data-testid="parity-static">
+        <MarkdownView markdown={markdown} />
+      </div>,
+    )
+    const editorPreview = editorHost.getByTestId('code-block-mermaid-preview')
+    const staticPreview = staticHost.getByTestId('code-block-mermaid-preview')
+    await expect.element(editorPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+    await expect.element(staticPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+
+    expect(canonicalize(staticPreview.element())).toBe(canonicalize(editorPreview.element()))
   })
 })
