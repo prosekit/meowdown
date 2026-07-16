@@ -607,6 +607,11 @@ describe('code blocks', () => {
     expect(roundtrip('```js\nconst x=1\n```')).toBe('```js\nconst x=1\n```\n')
   })
 
+  it('keeps a Mermaid fence', () => {
+    const markdown = '```mermaid\nflowchart LR\n  A --> B\n```'
+    expect(roundtrip(markdown)).toBe(`${markdown}\n`)
+  })
+
   it('keeps multi-line fenced code', () => {
     expect(roundtrip('```\nl1\nl2\n```')).toBe('```\nl1\nl2\n```\n')
   })

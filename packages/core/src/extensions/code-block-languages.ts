@@ -32,6 +32,7 @@ const excludeLanguages = new Set([
 const extraLanguages = [
   { label: 'Plain text', value: '' },
   { label: 'Math', value: 'math' },
+  { label: 'Mermaid', value: 'mermaid' },
 ]
 
 /**
