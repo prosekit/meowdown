@@ -5,6 +5,9 @@
       "path": "./packages/core/tsconfig.json"
     },
     {
+      "path": "./packages/eslint-rules/tsconfig.json"
+    },
+    {
       "path": "./packages/react/tsconfig.json"
     },
     {
