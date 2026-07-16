@@ -5,7 +5,7 @@ export type BeautifulMermaidRender = typeof renderMermaidSVG
 
 let beautifulMermaidPromise: Promise<BeautifulMermaidRender> | undefined
 
-export function loadBeautifulMermaid(): Promise<BeautifulMermaidRender> {
+function loadBeautifulMermaid(): Promise<BeautifulMermaidRender> {
   beautifulMermaidPromise ??= import('beautiful-mermaid')
     .then((module) => module.renderMermaidSVG)
     .catch((error) => {
