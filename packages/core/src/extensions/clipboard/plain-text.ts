@@ -5,10 +5,9 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 
 import { docToMarkdown } from '../../converters/pm-to-md.ts'
 import type { MdWikilinkAttrs } from '../inline-marks.ts'
+import { groupInlineRuns, hasSyntaxMark } from '../inline-runs.ts'
 import { getMarkMode } from '../mark-mode.ts'
 import type { MarkName } from '../mark-names.ts'
-
-import { groupInlineRuns, hasSyntaxMark } from './semantic-inline.ts'
 
 /**
  * Serialize a slice to Markdown. The copied fragment is wrapped in a `doc` so
