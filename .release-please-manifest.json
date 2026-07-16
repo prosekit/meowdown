@@ -1,5 +1,5 @@
 {
-  "packages/core": "0.52.2",
-  "packages/markdown": "0.52.2",
-  "packages/react": "0.52.2"
+  "packages/core": "0.53.0",
+  "packages/markdown": "0.53.0",
+  "packages/react": "0.53.0"
 }
