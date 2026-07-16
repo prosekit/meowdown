@@ -10,28 +10,33 @@ import type { ReactNodeViewProps } from '@prosekit/react'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
 import { useMemo, useState, type MouseEvent } from 'react'
 
+import { useBeautifulMermaid } from '../hooks/use-beautiful-mermaid.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
 
 import styles from './code-block-view.module.css'
 import { CopyButton } from './copy-button.tsx'
 import { MathRender } from './math-render.tsx'
+import { MermaidRender } from './mermaid-render.tsx'
 
 export function CodeBlockView(props: ReactNodeViewProps) {
   const attrs = props.node.attrs as CodeBlockAttrs
   const language = attrs.language || ''
   const isMath = language === 'math'
+  const isMermaid = language === 'mermaid'
   const code = props.node.textContent
 
   const caretInside = props.decorations.some(isCodeBlockPreviewHiddenDecoration)
 
   const katex = useKaTeX(isMath)
+  const mermaid = useBeautifulMermaid(isMermaid)
   const showMathPreview = isMath && katex != null
+  const showMermaidPreview = isMermaid && mermaid != null
 
   // The preview replaces the source only when the caret is elsewhere; with the
   // caret inside, the source stays on top and the preview updates live below.
   // An empty or not-yet-rendered block keeps its source, so it never turns
   // invisible and unclickable.
-  const previewOnly = showMathPreview && !caretInside && code.trim() !== ''
+  const previewOnly = (showMathPreview || showMermaidPreview) && !caretInside && code.trim() !== ''
 
   const focusSource = (event: MouseEvent) => {
     event.preventDefault()
@@ -137,6 +142,15 @@ export function CodeBlockView(props: ReactNodeViewProps) {
           displayMode
           className={styles.Preview}
           data-testid="code-block-math-preview"
+          onMouseDown={focusSource}
+        />
+      )}
+      {showMermaidPreview && (
+        <MermaidRender
+          renderer={mermaid}
+          source={code}
+          className={`${styles.Preview} ${styles.MermaidPreview}`}
+          data-testid="code-block-mermaid-preview"
           onMouseDown={focusSource}
         />
       )}

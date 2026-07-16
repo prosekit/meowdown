@@ -46,12 +46,14 @@ import {
   type ReactNode,
 } from 'react'
 
+import { useBeautifulMermaid } from '../hooks/use-beautiful-mermaid.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
 
 import { attributesToProps } from './attributes-to-props.ts'
 import styles from './code-block-view.module.css'
 import { normalizeDOMOutputSpec, type TypedDOMOutputSpec } from './dom-output-spec.tsx'
 import { MathRender } from './math-render.tsx'
+import { MermaidRender } from './mermaid-render.tsx'
 
 /** Payload for {@link TaskClickHandler}. */
 export interface TaskClickPayload {
@@ -441,6 +443,19 @@ function MathCodeBlock({ code }: { code: string }): ReactElement {
   )
 }
 
+function MermaidCodeBlock({ code }: { code: string }): ReactElement {
+  const renderer = useBeautifulMermaid(true)
+  if (!renderer || code.trim() === '') return <CodeBlock code={code} language="mermaid" />
+  return (
+    <MermaidRender
+      renderer={renderer}
+      source={code}
+      className={`${styles.Preview} ${styles.MermaidPreview}`}
+      data-testid="code-block-mermaid-preview"
+    />
+  )
+}
+
 /** Wrap inline `children` in one mark, special-casing the view/link marks. */
 function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): ReactNode {
   const name = mark.type.name as MarkName
@@ -584,6 +599,9 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
     const language: string = typeof attrs.language === 'string' ? attrs.language : ''
     if (language === 'math') {
       return <MathCodeBlock key={key} code={node.textContent} />
+    }
+    if (language === 'mermaid') {
+      return <MermaidCodeBlock key={key} code={node.textContent} />
     }
     return <CodeBlock key={key} code={node.textContent} language={language} />
   }

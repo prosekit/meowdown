@@ -2,7 +2,7 @@
   position: relative;
 }
 
-/* Preview-only state: the caret is outside a math block, so the source and
+/* Preview-only state: the caret is outside a rendered block, so the source and
  * its toolbar give way to the rendered formula. The caret can never sit in
  * the hidden source (entering it flips the state back), so the missing box
  * does not disturb caret geometry. */
@@ -23,6 +23,23 @@
 
   -webkit-user-select: none;
   user-select: none;
+}
+
+.MermaidPreview {
+  text-align: initial;
+
+  &[data-error] {
+    color: var(--meowdown-mermaid-error);
+    font-family: var(--meowdown-font-mono);
+    white-space: pre-wrap;
+  }
+
+  svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-inline: auto;
+  }
 }
 
 .Toolbar {

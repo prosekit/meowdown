@@ -1,6 +1,6 @@
-import type { render } from 'katex'
+import type { KaTeXRender } from './katex-chunk.ts'
 
-export type KaTeXRender = typeof render
+export type { KaTeXRender }
 
 let katexRenderPromise: Promise<KaTeXRender> | undefined
 
@@ -9,7 +9,7 @@ let katexRenderPromise: Promise<KaTeXRender> | undefined
  * contain no math, so the library stays out of the initial bundle.
  */
 export function loadKaTeX(): Promise<KaTeXRender> {
-  katexRenderPromise ??= import('katex').then((module) => module.render)
+  katexRenderPromise ??= import('./katex-chunk.ts').then((module) => module.render)
   return katexRenderPromise
 }
 

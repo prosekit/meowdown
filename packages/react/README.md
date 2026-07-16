@@ -121,6 +121,18 @@ resolver that accepts only trusted local image sources.
 <MarkdownView markdown={markdown} interactive={false} resolveImageUrl={resolveLocalImageUrl} />
 ```
 
+### Mermaid code blocks
+
+Fenced `mermaid` code blocks render as diagrams in both `MeowdownEditor` and
+`MarkdownView`. The editor shows only the preview while the caret is outside
+the block, then shows source and a live preview while editing it.
+
+Rendering uses `beautiful-mermaid`, which currently supports Flowchart, State,
+Sequence, Class, ER, and XY Chart diagrams. Unsupported syntax renders an error
+instead of an empty preview. Override `--meowdown-mermaid-bg`,
+`--meowdown-mermaid-fg`, or `--meowdown-mermaid-error` to customize the
+diagram surface.
+
 ## Styling
 
 Import both stylesheets: `@meowdown/core/style.css` (the editor theme and variables) and `@meowdown/react/style.css` (the component layout). The core theme is documented in [`@meowdown/core`](https://www.npmjs.com/package/@meowdown/core).

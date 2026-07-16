@@ -239,6 +239,10 @@ describe('codeBlockLanguages', () => {
           "value": "mbox",
         },
         {
+          "label": "Mermaid",
+          "value": "mermaid",
+        },
+        {
           "label": "Modelica",
           "value": "modelica",
         },

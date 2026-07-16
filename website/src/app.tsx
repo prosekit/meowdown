@@ -185,6 +185,13 @@ function greet(name: string): string {
 }
 \`\`\`
 
+Mermaid diagrams render live too:
+
+\`\`\`mermaid
+flowchart LR
+  Markdown --> Diagram
+\`\`\`
+
 | table | syntax | is | supported |
 | ----- | ------ | -- | --------- |
 | even  | **in** | *tables* too! | :D |
