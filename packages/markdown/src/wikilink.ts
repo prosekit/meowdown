@@ -6,7 +6,7 @@ import {
   CHAR_RIGHT_SQUARE_BRACKET,
   CHAR_SPACE,
   CHAR_TAB,
-} from '../unicode.ts'
+} from './unicode.ts'
 
 /**
  * Inline parser for `[[target]]`: any chars except `[`, `]` and

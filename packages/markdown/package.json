@@ -1,0 +1,40 @@
+{
+  "name": "@meowdown/markdown",
+  "type": "module",
+  "version": "0.52.2",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prosekit/meowdown",
+    "directory": "packages/markdown"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "./dist/**/*.js",
+    "./dist/**/*.d.ts"
+  ],
+  "scripts": {
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@lezer/markdown": "^1.7.1"
+  },
+  "devDependencies": {
+    "@meowdown/vitest": "workspace:*",
+    "@ocavue/tsconfig": "^0.7.1",
+    "dedent": "^1.7.2",
+    "tsdown": "^0.22.8",
+    "vitest": "^4.1.10"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.js"
+    },
+    "scripts": {},
+    "devDependencies": {},
+    "access": "public"
+  }
+}

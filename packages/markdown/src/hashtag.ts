@@ -11,7 +11,7 @@ import {
   CHAR_UNDERSCORE,
   CHAR_UPPERCASE_A,
   CHAR_UPPERCASE_Z,
-} from '../unicode.ts'
+} from './unicode.ts'
 
 /**
  * Letters, digits, `-`, `_`. Non-ASCII falls back to a Unicode test;

@@ -1,8 +1,8 @@
+import { getAutolinkHref } from '@meowdown/markdown'
 import { defineCommands, defineKeymap, isTextSelection, type PlainExtension } from '@prosekit/core'
 import type { Command, EditorState } from '@prosekit/pm/state'
 import { TextSelection } from '@prosekit/pm/state'
 
-import { getAutolinkHref } from '../lezer/autolink-tld.ts'
 import type { PositionRange } from '../utils/range.ts'
 
 import { getLinkUnitAt, type LinkUnit } from './get-link-unit-at.ts'

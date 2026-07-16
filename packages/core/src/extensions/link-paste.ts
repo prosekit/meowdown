@@ -1,7 +1,7 @@
+import { getAutolinkHref } from '@meowdown/markdown'
 import { definePlugin, Priority, withPriority, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 
-import { getAutolinkHref } from '../lezer/autolink-tld.ts'
 import { executeCommand } from '../utils/execute-command.ts'
 
 import { insertLink } from './link-commands.ts'

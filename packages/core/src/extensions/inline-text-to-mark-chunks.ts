@@ -1,9 +1,10 @@
+import {
+  getAutolinkHref,
+  type InlineElement,
+  LEZER_NODE_IDS,
+  parseInline,
+} from '@meowdown/markdown'
 import type { Mark } from '@prosekit/pm/model'
-
-import { getAutolinkHref } from '../lezer/autolink-tld.ts'
-import type { InlineElement } from '../lezer/inline.ts'
-import { parseInline } from '../lezer/inline.ts'
-import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
 
 import type {
   MdFileAttrs,

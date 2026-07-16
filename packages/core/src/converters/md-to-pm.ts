@@ -1,12 +1,4 @@
 import type { TreeCursor } from '@lezer/common'
-import type { ProseMirrorNode } from '@prosekit/pm/model'
-
-import type { CodeBlockFenceStyle } from '../extensions/code-block.ts'
-import type { ListMarker, MeowdownListAttrs, TaskMarker } from '../extensions/list.ts'
-import { getNodeBuilders, type TypedNodeBuilders } from '../extensions/schema.ts'
-import type { TableColumnAlign } from '../extensions/table-column-align.ts'
-import { LEZER_NODE_IDS } from '../lezer/node-ids.ts'
-import { gfmBlockOnlyParser } from '../lezer/parser.ts'
 import {
   CHAR_ASTERISK,
   CHAR_DOT,
@@ -21,8 +13,16 @@ import {
   CHAR_TAB,
   CHAR_TILDE,
   CHAR_UPPERCASE_X,
+  gfmBlockOnlyParser,
   isSpaceChar,
-} from '../unicode.ts'
+  LEZER_NODE_IDS,
+} from '@meowdown/markdown'
+import type { ProseMirrorNode } from '@prosekit/pm/model'
+
+import type { CodeBlockFenceStyle } from '../extensions/code-block.ts'
+import type { ListMarker, MeowdownListAttrs, TaskMarker } from '../extensions/list.ts'
+import { getNodeBuilders, type TypedNodeBuilders } from '../extensions/schema.ts'
+import type { TableColumnAlign } from '../extensions/table-column-align.ts'
 
 /** Options for {@link markdownToDoc}. */
 export interface MarkdownToDocOptions {

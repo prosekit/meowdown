@@ -78,9 +78,9 @@ importers:
       '@lezer/highlight':
         specifier: ^1.2.3
         version: 1.2.3
-      '@lezer/markdown':
-        specifier: ^1.7.1
-        version: 1.7.1
+      '@meowdown/markdown':
+        specifier: workspace:^
+        version: link:../markdown
       '@ocavue/utils':
         specifier: ^1.7.0
         version: 1.7.0
@@ -173,6 +173,28 @@ importers:
       eslint:
         specifier: ^10.7.0
         version: 10.7.0(jiti@2.7.0)
+      vitest:
+        specifier: ^4.1.10
+        version: 4.1.10(@types/node@24.13.3)(@vitest/browser-playwright@4.1.10)(@vitest/coverage-v8@4.1.10)(vite@8.1.4)
+
+  packages/markdown:
+    dependencies:
+      '@lezer/markdown':
+        specifier: ^1.7.1
+        version: 1.7.1
+    devDependencies:
+      '@meowdown/vitest':
+        specifier: workspace:*
+        version: link:../vitest
+      '@ocavue/tsconfig':
+        specifier: ^0.7.1
+        version: 0.7.1
+      dedent:
+        specifier: ^1.7.2
+        version: 1.7.2
+      tsdown:
+        specifier: ^0.22.8
+        version: 0.22.8(@tsdown/css@0.22.8)(oxc-resolver@11.21.3)(typescript@6.0.3)
       vitest:
         specifier: ^4.1.10
         version: 4.1.10(@types/node@24.13.3)(@vitest/browser-playwright@4.1.10)(@vitest/coverage-v8@4.1.10)(vite@8.1.4)

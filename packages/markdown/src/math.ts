@@ -7,7 +7,7 @@ import {
   CHAR_DOLLAR,
   CHAR_LINE_FEED,
   isSpaceChar,
-} from '../unicode.ts'
+} from './unicode.ts'
 
 function isDigit(code: number): boolean {
   return code >= CHAR_0 && code <= CHAR_9

@@ -1,3 +1,4 @@
+import { CHAR_BACKTICK, CHAR_TILDE } from '@meowdown/markdown'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
 import type { MeowdownCodeBlockAttrs } from '../extensions/code-block.ts'
@@ -8,7 +9,6 @@ import type { MeowdownHTMLCommentAttrs } from '../extensions/html-comment.ts'
 import type { MeowdownListAttrs } from '../extensions/list.ts'
 import { isNodeOfType, type NodeName } from '../extensions/node-names.ts'
 import type { MeowdownTableCellAttrs, TableColumnAlign } from '../extensions/table-column-align.ts'
-import { CHAR_BACKTICK, CHAR_TILDE } from '../unicode.ts'
 import { longestCharRun } from '../utils/backticks.ts'
 
 /** Options for {@link docToMarkdown}. */
