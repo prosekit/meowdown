@@ -1,4 +1,4 @@
-import { CHAR_BACKTICK } from '@meowdown/markdown'
+import { CHAR_BACKTICK } from '../unicode.ts'
 
 /** Length of the longest run of `charCode` in `text`, at least `min`. */
 export function longestCharRun(text: string, charCode: number, min = 0): number {
