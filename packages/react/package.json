@@ -3,14 +3,14 @@
   "type": "module",
   "version": "0.52.2",
   "license": "MIT",
-  "sideEffects": [
-    "**/*.css"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/prosekit/meowdown",
     "directory": "packages/react"
   },
+  "sideEffects": [
+    "**/*.css"
+  ],
   "exports": {
     ".": "./src/index.ts",
     "./style.css": "./src/style.css"
