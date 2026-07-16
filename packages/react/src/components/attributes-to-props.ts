@@ -89,9 +89,9 @@ export function attributesToProps(
 
       // convert attribute to uncontrolled component prop (e.g., `value` to `defaultValue`)
       if (
+        !isInputValueOnly &&
         UNCONTROLLED_COMPONENT_ATTRIBUTES.includes(propName as UncontrolledComponentAttributes) &&
-        UNCONTROLLED_COMPONENT_NAMES.includes(nodeName as UncontrolledComponentNames) &&
-        !isInputValueOnly
+        UNCONTROLLED_COMPONENT_NAMES.includes(nodeName as UncontrolledComponentNames)
       ) {
         propName = getPropName('default' + attributeNameLowerCased)
       }

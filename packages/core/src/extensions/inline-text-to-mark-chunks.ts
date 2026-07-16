@@ -199,13 +199,14 @@ function scanLinkParts(node: InlineElement): LinkParts {
   let titleNode: InlineElement | null = null
   let bracketCount = 0
   for (const child of node.children) {
-    if (child.type === LEZER_NODE_IDS.LinkMark) {
+    const childType = child.type
+    if (childType === LEZER_NODE_IDS.LinkMark) {
       bracketCount++
       if (bracketCount === 1) labelFrom = child.to
       if (bracketCount === 2) labelTo = child.from
-    } else if (child.type === LEZER_NODE_IDS.URL && urlNode === null) {
+    } else if (urlNode == null && childType === LEZER_NODE_IDS.URL) {
       urlNode = child
-    } else if (child.type === LEZER_NODE_IDS.LinkTitle && titleNode === null) {
+    } else if (titleNode == null && childType === LEZER_NODE_IDS.LinkTitle) {
       titleNode = child
     }
   }

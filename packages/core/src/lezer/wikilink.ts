@@ -29,7 +29,7 @@ export const wikilink: MarkdownConfig = {
         for (let i = pos + 2; i < cx.end - 1; i++) {
           const code = cx.char(i)
           if (code === CHAR_RIGHT_SQUARE_BRACKET) {
-            if (cx.char(i + 1) !== CHAR_RIGHT_SQUARE_BRACKET || !hasContent) return -1
+            if (!hasContent || cx.char(i + 1) !== CHAR_RIGHT_SQUARE_BRACKET) return -1
             const end = i + 2
             return cx.addElement(
               cx.elt('Wikilink', pos, end, [

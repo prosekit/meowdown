@@ -19,10 +19,8 @@ minimumReleaseAgeExclude:
   - '@prosekit/*'
   - '@aria-ui/*'
   - prosemirror-view
-  - '@floating-ui/core@1.8.0'
-  - '@floating-ui/dom@1.8.0'
-  - '@floating-ui/utils@0.2.12'
-  - prosemirror-model@1.25.11
+  - '@tsdown/css@0.22.8'
+  - tsdown@0.22.8
 
 allowBuilds:
   simple-git-hooks: false
