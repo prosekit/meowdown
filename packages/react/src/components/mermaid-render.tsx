@@ -14,6 +14,11 @@ interface MermaidRenderProps {
 const MERMAID_OPTIONS = {
   bg: 'var(--meowdown-mermaid-bg)',
   fg: 'var(--meowdown-mermaid-fg)',
+  line: 'var(--meowdown-mermaid-line)',
+  accent: 'var(--meowdown-mermaid-accent)',
+  muted: 'var(--meowdown-mermaid-muted)',
+  surface: 'var(--meowdown-mermaid-surface)',
+  border: 'var(--meowdown-mermaid-border)',
   transparent: true,
   interactive: false,
 } satisfies RenderOptions
