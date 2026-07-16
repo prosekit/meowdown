@@ -3,21 +3,16 @@
   "bump-minor-pre-major": true,
   "always-update": true,
   "packages": {
-    "packages/core": {
-      "component": "core"
-    },
-    "packages/markdown": {
-      "component": "markdown"
-    },
-    "packages/react": {
-      "component": "react"
+    ".": {
+      "release-type": "node",
+      "include-component-in-tag": false,
+      "pull-request-title-pattern": "chore: release ${version}",
+      "exclude-paths": ["website", "packages/vitest", "packages/eslint-rules", ".github"],
+      "extra-files": [
+        { "type": "json", "path": "packages/core/package.json", "jsonpath": "$.version" },
+        { "type": "json", "path": "packages/markdown/package.json", "jsonpath": "$.version" },
+        { "type": "json", "path": "packages/react/package.json", "jsonpath": "$.version" }
+      ]
     }
-  },
-  "plugins": [
-    {
-      "type": "linked-versions",
-      "groupName": "meowdown",
-      "components": ["core", "markdown", "react"]
-    }
-  ]
+  }
 }
