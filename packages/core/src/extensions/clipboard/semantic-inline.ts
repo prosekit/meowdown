@@ -8,7 +8,8 @@ import type {
   MdLinkTextAttrs,
   MdWikilinkAttrs,
 } from '../inline-marks.ts'
-import { ATOM_MARK_NAMES, SYNTAX_MARK_NAMES, type MarkName } from '../mark-names.ts'
+import { groupInlineRuns, hasSyntaxMark } from '../inline-runs.ts'
+import type { MarkName } from '../mark-names.ts'
 
 const SEMANTIC_TAGS: Partial<Record<MarkName, string>> = {
   mdStrong: 'strong',
@@ -17,41 +18,6 @@ const SEMANTIC_TAGS: Partial<Record<MarkName, string>> = {
   mdDel: 'del',
   mdHighlight: 'mark',
   mdLinkText: 'a',
-}
-
-function findAtomMark(marks: readonly Mark[]): Mark | undefined {
-  return marks.find((mark) => ATOM_MARK_NAMES.has(mark.type.name))
-}
-
-export function hasSyntaxMark(marks: readonly Mark[]): boolean {
-  return marks.some((mark) => SYNTAX_MARK_NAMES.has(mark.type.name))
-}
-
-export interface InlineRun {
-  atom: Mark | undefined
-  text: string
-  children: ProseMirrorNode[]
-}
-
-/**
- * Group a textblock's text nodes into atom units and plain runs. A unit's
- * text nodes share one mark instance (the inline parser creates each unit
- * mark once), so instance identity splits adjacent same-attrs units.
- */
-export function groupInlineRuns(textblock: ProseMirrorNode): InlineRun[] {
-  const runs: InlineRun[] = []
-  textblock.forEach((child) => {
-    if (!child.isText || !child.text) return
-    const atom = findAtomMark(child.marks)
-    const last = runs.at(-1)
-    if (atom != null && last != null && last.atom === atom) {
-      last.text += child.text
-      last.children.push(child)
-      return
-    }
-    runs.push({ atom, text: child.text, children: [child] })
-  })
-  return runs
 }
 
 /**
