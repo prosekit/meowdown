@@ -1,5 +1,5 @@
 import type { TreeCursor } from '@lezer/common'
-import { gfmBlockOnlyParser, LEZER_NODE_IDS } from '@meowdown/markdown'
+import { gfmBlockOnlyParser, isSpaceChar, LEZER_NODE_IDS } from '@meowdown/markdown'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
 import type { CodeBlockFenceStyle } from '../extensions/code-block.ts'
@@ -20,7 +20,6 @@ import {
   CHAR_TAB,
   CHAR_TILDE,
   CHAR_UPPERCASE_X,
-  isSpaceChar,
 } from '../unicode.ts'
 
 /** Options for {@link markdownToDoc}. */

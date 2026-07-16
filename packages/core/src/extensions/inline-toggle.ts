@@ -1,11 +1,11 @@
 import {
   collectInlineElements,
   type InlineElement,
+  isSpaceChar,
   LEZER_NODE_IDS,
   parseInline,
 } from '@meowdown/markdown'
 
-import { isSpaceChar } from '../unicode.ts'
 import { longestBacktickRun } from '../utils/backticks.ts'
 
 /** A text replacement relative to the start of one textblock's text. */
