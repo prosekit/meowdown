@@ -3,4 +3,5 @@ export { collectInlineElements, parseInline, type InlineElement } from './inline
 export { LEZER_NODE_IDS } from './node-ids.ts'
 export { gfmBlockOnlyParser, gfmParser } from './parser.ts'
 export { isSpaceChar } from './unicode.ts'
+export type { SyntaxNode, Tree, TreeCursor } from '@lezer/common'
 export type { MarkdownParser } from './parser.ts'

@@ -72,9 +72,6 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.8.0
         version: 1.8.0
-      '@lezer/common':
-        specifier: ^1.5.2
-        version: 1.5.2
       '@lezer/highlight':
         specifier: ^1.2.3
         version: 1.2.3
@@ -179,6 +176,9 @@ importers:
 
   packages/markdown:
     dependencies:
+      '@lezer/common':
+        specifier: ^1.5.2
+        version: 1.5.2
       '@lezer/markdown':
         specifier: ^1.7.1
         version: 1.7.1
