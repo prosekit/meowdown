@@ -33,7 +33,7 @@ export const wikiEmbed: MarkdownConfig = {
         for (let index = pos + 3; index < cx.end - 1; index++) {
           const code = cx.char(index)
           if (code === CHAR_RIGHT_SQUARE_BRACKET) {
-            if (cx.char(index + 1) !== CHAR_RIGHT_SQUARE_BRACKET || !hasContent) return -1
+            if (!hasContent || cx.char(index + 1) !== CHAR_RIGHT_SQUARE_BRACKET) return -1
             const end = index + 2
             return cx.addElement(
               cx.elt('WikiEmbed', pos, end, [

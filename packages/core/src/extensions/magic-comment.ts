@@ -1,3 +1,5 @@
+import { isObject } from '@ocavue/utils'
+
 /** Metadata meowdown stores in a sidecar `<!-- {...} -->` comment. */
 export interface MagicComment {
   /** Rendered width in CSS pixels. */
@@ -22,10 +24,12 @@ export function parseMagicComment(comment: string): MagicComment | undefined {
   try {
     data = JSON.parse(match[1])
   } catch {
-    return undefined
+    return
   }
-  if (data == null || typeof data !== 'object') return undefined
-  const magic = readMagicComment(data as Record<string, unknown>)
+  if (!isObject(data)) {
+    return
+  }
+  const magic = readMagicComment(data)
   // Not a magic comment unless it carries at least one recognized field.
   return Object.keys(magic).length > 0 ? magic : undefined
 }
