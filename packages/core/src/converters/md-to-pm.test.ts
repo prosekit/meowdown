@@ -1,6 +1,7 @@
 import dedent from 'dedent'
 import { describe, expect, it } from 'vitest'
 
+import { isNodeOfType } from '../extensions/node-names.ts'
 import type { MeowdownTableCellAttrs, TableColumnAlign } from '../extensions/table-column-align.ts'
 
 import { dedentContinuation, markdownToDoc, measureContentColumn, sliceColumn } from './md-to-pm.ts'
@@ -397,7 +398,7 @@ describe('markdownToDoc', () => {
     `
     const table = markdownToDoc(md).child(0)
     table.descendants((node) => {
-      if (node.type.name !== 'tableCell' && node.type.name !== 'tableHeaderCell') return true
+      if (!isNodeOfType(node, 'tableCell') && !isNodeOfType(node, 'tableHeaderCell')) return true
       expect(node.childCount).toBe(1)
       expect(node.child(0).type.name).toBe('paragraph')
       return false

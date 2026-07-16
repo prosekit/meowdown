@@ -1,0 +1,18 @@
+{
+  "name": "@meowdown/eslint-rules",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@typescript-eslint/utils": "^8.64.0"
+  },
+  "devDependencies": {
+    "@ocavue/tsconfig": "^0.7.1",
+    "@typescript-eslint/rule-tester": "^8.64.0",
+    "eslint": "^10.7.0",
+    "vitest": "^4.1.10"
+  }
+}

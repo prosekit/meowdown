@@ -36,7 +36,7 @@ import {
   type ListClickHandler,
 } from 'prosemirror-flat-list'
 
-import type { NodeName } from './node-names.ts'
+import { isNodeOfType, type NodeName } from './node-names.ts'
 
 /**
  * The marker for a list item.
@@ -292,7 +292,7 @@ function getListAttrsAtSelection(state: EditorState): MeowdownListAttrs | null {
   const { $from } = state.selection
   for (let depth = $from.depth; depth > 0; depth--) {
     const node = $from.node(depth)
-    if (node.type.name === ('list' satisfies NodeName)) {
+    if (isNodeOfType(node, 'list')) {
       return node.attrs
     }
   }
@@ -371,7 +371,7 @@ function rotateCircleTask(): Command {
  */
 function isCollapsibleBullet(node: ProseMirrorNode): boolean {
   return (
-    node.type.name === ('list' satisfies NodeName) &&
+    isNodeOfType(node, 'list') &&
     node.attrs.kind === 'bullet' &&
     node.childCount >= 2 &&
     node.firstChild?.type !== node.type

@@ -1,3 +1,5 @@
+import type { Mark } from '@prosekit/pm/model'
+
 export const MARK_NAMES = [
   'mdWikilink',
   'mdImage',
@@ -17,6 +19,10 @@ export const MARK_NAMES = [
 ] as const
 
 export type MarkName = (typeof MARK_NAMES)[number]
+
+export function isMarkOfType(mark: Mark, name: MarkName): boolean {
+  return mark.type.name === name
+}
 
 // Marks whose text is Markdown syntax rather than content. Hide mode renders
 // these runs at font-size 0 (mirroring the CSS rules in style.css), and text

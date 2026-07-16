@@ -6,9 +6,10 @@ import { userEvent } from 'vitest/browser'
 import { setupFixture } from '../testing/index.ts'
 
 import { defineBulletAfterHeading } from './bullet-after-heading.ts'
+import { isNodeOfType } from './node-names.ts'
 
 function isBulletList(node: ProseMirrorNode): boolean {
-  return node.type.name === 'list' && node.attrs.kind === 'bullet'
+  return isNodeOfType(node, 'list') && node.attrs.kind === 'bullet'
 }
 
 describe('defineBulletAfterHeading', () => {
