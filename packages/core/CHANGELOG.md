@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.52.1](https://github.com/prosekit/meowdown/compare/core-v0.52.0...core-v0.52.1) (2026-07-16)
+
+
+### Bug Fixes
+
+* **core:** treat table pipe layout as normalizing in `checkRoundTrip` ([#325](https://github.com/prosekit/meowdown/issues/325)) ([6251cb6](https://github.com/prosekit/meowdown/commit/6251cb64a23df8cee49796c9e9b36e05a78674fb))
+
 ## [0.52.0](https://github.com/prosekit/meowdown/compare/core-v0.51.0...core-v0.52.0) (2026-07-16)
 
 
