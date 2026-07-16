@@ -1,12 +1,12 @@
-import type { renderMermaidSVG } from 'beautiful-mermaid'
 import { useEffect, useState } from 'react'
+import type { BeautifulMermaidRender } from './beautiful-mermaid-chunk.ts'
 
-export type BeautifulMermaidRender = typeof renderMermaidSVG
+export { type BeautifulMermaidRender }
 
 let beautifulMermaidPromise: Promise<BeautifulMermaidRender> | undefined
 
 function loadBeautifulMermaid(): Promise<BeautifulMermaidRender> {
-  beautifulMermaidPromise ??= import('beautiful-mermaid')
+  beautifulMermaidPromise ??= import('./beautiful-mermaid-chunk.ts')
     .then((module) => module.renderMermaidSVG)
     .catch((error) => {
       console.error('[meowdown] Failed to load beautiful-mermaid.', error)
