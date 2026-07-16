@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.52.2](https://github.com/prosekit/meowdown/compare/core-v0.52.1...core-v0.52.2) (2026-07-16)
+
+
+### Bug Fixes
+
+* **react:** keep Mermaid diagrams legible with host themes ([#327](https://github.com/prosekit/meowdown/issues/327)) ([f75a11f](https://github.com/prosekit/meowdown/commit/f75a11f6f711b2348b29a500ef7333608cc2aabe))
+
 ## [0.52.1](https://github.com/prosekit/meowdown/compare/core-v0.52.0...core-v0.52.1) (2026-07-16)
 
 
