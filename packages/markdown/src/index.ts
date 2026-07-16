@@ -1,6 +1,7 @@
 export { getAutolinkHref } from './autolink-tld.ts'
 export { collectInlineElements, parseInline, type InlineElement } from './inline.ts'
 export { LEZER_NODE_IDS } from './node-ids.ts'
+export type { LezerNodeName } from './node-names.ts'
 export { gfmBlockOnlyParser, gfmParser } from './parser.ts'
 export { isSpaceChar } from './unicode.ts'
 export type { SyntaxNode, Tree, TreeCursor } from '@lezer/common'
