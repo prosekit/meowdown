@@ -6,7 +6,8 @@ import { docToMarkdown } from './pm-to-md.ts'
  * - `exact`: byte-identical (modulo the trailing newline).
  * - `normalizing`: bytes differ, but only as layout the parser collapses back -
  *   no non-blank line content is lost and re-parsing the output yields the same
- *   doc (e.g. a lazy continuation re-indented to its canonical column).
+ *   doc (e.g. a lazy continuation re-indented to its canonical column, or a
+ *   table delimiter row rewritten to canonical dashes).
  * - `lossy`: content changed - a non-blank line differs, or the re-parsed doc does.
  */
 export type RoundTripFidelity = 'exact' | 'normalizing' | 'lossy'
@@ -35,6 +36,42 @@ function collapseWhitespace(line: string): string {
   return line.trim().replaceAll(/\s+/gu, ' ')
 }
 
+// A GFM delimiter cell is optional colons around a run of dashes. The dash
+// count is layout; only the colon positions carry content (column alignment).
+const DELIMITER_CELL_RE = /^:?-+:?$/u
+
+function canonicalizeDelimiterCell(cell: string): string {
+  const alignsLeft = cell.startsWith(':')
+  const alignsRight = cell.endsWith(':')
+  if (alignsLeft && alignsRight) return ':-:'
+  if (alignsLeft) return ':--'
+  if (alignsRight) return '--:'
+  return '---'
+}
+
+// Rebuild a pipe-bearing line into the serializer's `| a | b |` form. Outer
+// pipes, spacing around pipes, and delimiter dash counts are table layout the
+// parser reads through, so two rows that differ only there carry the same
+// content. Lines the serializer never restructures (a paragraph or code line
+// holding pipes) canonicalize the same way on both sides, so equal lines stay
+// equal; the leading `[\s>]*` prefix is kept so rows inside a blockquote
+// compare within their blockquote.
+function canonicalizeTableRow(line: string): string | undefined {
+  if (!line.includes('|')) return undefined
+  const prefix = /^[\s>]*/u.exec(line)?.[0] ?? ''
+  const row = line.slice(prefix.length).trim()
+  const inner = row.replace(/^\|/u, '').replace(/\|$/u, '')
+  const cells = inner.split('|').map((cell) => collapseWhitespace(cell))
+  const rendered = cells.every((cell) => DELIMITER_CELL_RE.test(cell))
+    ? cells.map(canonicalizeDelimiterCell)
+    : cells
+  return collapseWhitespace(`${prefix} | ${rendered.join(' | ')} |`)
+}
+
+function normalizeLine(line: string): string {
+  return canonicalizeTableRow(line) ?? collapseWhitespace(line)
+}
+
 /** Options for {@link checkRoundTrip}. */
 export interface CheckRoundTripOptions {
   /** Whether to handle a leading `---` frontmatter block. Off by default. */
@@ -54,7 +91,7 @@ export function checkRoundTrip(
   const after = nonBlankLines(serialized)
   const textMatches =
     before.length === after.length &&
-    before.every((line, i) => collapseWhitespace(line) === collapseWhitespace(after[i]))
+    before.every((line, i) => normalizeLine(line) === normalizeLine(after[i]))
 
   return textMatches ? 'normalizing' : 'lossy'
 }

@@ -77,12 +77,20 @@ describe('checkRoundTrip', () => {
     '- [ ] todo\neen voorlopig idee', // a lazy continuation gains the canonical item indent
     '- item\nlazy line', // same, on a plain bullet
     '#  Journal', // a double space after the ATX marker collapses to one
+    '| a | b |\n| --- | ----------- |\n| c | d |', // delimiter dash counts are layout
+    '| a | b |\n| - | - |\n| c | d |', // same, shorter than canonical
+    '| a |\n| :---: |\n| b |', // alignment colons survive; only the dash count normalizes
+    '| a | b |\n| :--- | ---: |\n| c | d |', // same, for left / right alignment
+    '|a|b|\n|---|---|\n|c|d|', // spacing around pipes is layout
+    '| a    | b  |\n| ---- | -- |\n| c    | d  |', // pretty-printed cell padding is layout
+    'a | b\n--- | ---\nc | d', // outer pipes are layout
+    '> a | b\n> --- | ---', // same, inside a blockquote
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })
 
   it.each([
-    '| a |\n| :---: |\n| b |', // table column alignment is dropped: same line count, content differs
+    '| a |\n| --- |\n| b | c |', // a cell beyond the delimiter's column count is dropped
   ])('reports lossy for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('lossy')
   })
