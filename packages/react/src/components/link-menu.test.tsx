@@ -94,6 +94,57 @@ describe('LinkMenu', () => {
     expect(Math.abs(popCenter - linkCenter)).toBeLessThan(20)
   })
 
+  it('anchors the edit form to a selected wikilink alone in its block', async () => {
+    // The wikilink source is hidden atom text (`font-size: 0`) and both
+    // selection edges sit at block boundaries, so a raw-selection anchor has
+    // no visible glyph to measure on either side.
+    // Wide enough for the popup to center on the pill without being pushed
+    // aside by the viewport edge.
+    await render(<MeowdownEditor initialMarkdown="[[A rather long note title for the anchor]]" />)
+    const wikilink = pmRoot.getByTestId('wikilink')
+    await wikilink.click()
+    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}')
+    await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
+    await expect.element(popover.getByTestId('link-popover-edit')).toBeVisible()
+
+    await vi.waitFor(() => {
+      const linkRect = wikilink.element().getBoundingClientRect()
+      const popRect = popover.element().getBoundingClientRect()
+      expect(popRect.top).toBeGreaterThanOrEqual(linkRect.bottom + 7)
+      expect(popRect.top).toBeLessThan(linkRect.bottom + 40)
+      const linkCenter = (linkRect.left + linkRect.right) / 2
+      const popCenter = (popRect.left + popRect.right) / 2
+      expect(Math.abs(popCenter - linkCenter)).toBeLessThan(20)
+    })
+  })
+
+  it('anchors the edit form to a selection ending in hidden link syntax', async () => {
+    // Select-all reaches the block end behind the hidden `](url)` run, so the
+    // raw-selection end edge has no visible glyph on either side; the anchor
+    // must fall back to the last visible glyph before the run.
+    await render(
+      <MeowdownEditor initialMarkdown="read the [long linked documentation](https://example.com)" />,
+    )
+    const label = pmRoot.getByText('long linked documentation')
+    await label.click()
+    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}')
+    await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
+    await expect.element(popover.getByTestId('link-popover-edit')).toBeVisible()
+
+    await vi.waitFor(() => {
+      const labelRect = label.element().getBoundingClientRect()
+      const popRect = popover.element().getBoundingClientRect()
+      expect(popRect.top).toBeGreaterThanOrEqual(labelRect.bottom + 7)
+      expect(popRect.top).toBeLessThan(labelRect.bottom + 40)
+      // The anchor spans the visible text: from the paragraph's first glyph to
+      // the end of the label, skipping the hidden trailing syntax.
+      const paragraphRect = pmRoot.getByText('read the').element().getBoundingClientRect()
+      const anchorCenter = (paragraphRect.left + labelRect.right) / 2
+      const popCenter = (popRect.left + popRect.right) / 2
+      expect(Math.abs(popCenter - anchorCenter)).toBeLessThan(20)
+    })
+  })
+
   it('creates a link from a selection with Mod-k', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Docs" />)

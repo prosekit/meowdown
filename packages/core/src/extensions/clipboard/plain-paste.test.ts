@@ -37,42 +37,52 @@ describe('plain text paste', () => {
     fixture.set(n.doc(n.paragraph('before <a>after')))
     firePlainPaste(view, 'pasted')
     expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
-      "before pastedafter
-      "
+      """
+      before pastedafter
+
+      """
     `)
   })
 
   it('keeps a single newline as a soft break', () => {
     expect(pastePlainText('aaa\nbbb')).toMatchInlineSnapshot(`
-      "aaa
+      """
+      aaa
       bbb
-      "
+
+      """
     `)
   })
 
   it('does not insert an empty paragraph for one blank line', () => {
     expect(pastePlainText('aaa\n\nbbb')).toMatchInlineSnapshot(`
-      "aaa
+      """
+      aaa
 
       bbb
-      "
+
+      """
     `)
   })
 
   it('restores one gap paragraph for two blank lines', () => {
     expect(pastePlainText('aaa\n\n\nbbb')).toMatchInlineSnapshot(`
-      "aaa
+      """
+      aaa
 
 
       bbb
-      "
+
+      """
     `)
   })
 
   it('trims leading and trailing newlines', () => {
     expect(pastePlainText('\n\naaa\n\n')).toMatchInlineSnapshot(`
-      "aaa
-      "
+      """
+      aaa
+
+      """
     `)
   })
 
@@ -85,18 +95,22 @@ describe('plain text paste', () => {
 
   it('normalizes CRLF', () => {
     expect(pastePlainText('aaa\r\n\r\nbbb\r\nccc')).toMatchInlineSnapshot(`
-      "aaa
+      """
+      aaa
 
       bbb
       ccc
-      "
+
+      """
     `)
   })
 
   it('keeps tabs and spaces', () => {
     expect(pastePlainText('a\t b')).toMatchInlineSnapshot(`
-      "a	 b
-      "
+      """
+      a	 b
+
+      """
     `)
   })
 
@@ -106,8 +120,10 @@ describe('plain text paste', () => {
     fixture.set(n.doc(n.paragraph()))
     firePlainPaste(view, 'a **b** c')
     expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
-      "a **b** c
-      "
+      """
+      a **b** c
+
+      """
     `)
     expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
       "
@@ -135,9 +151,11 @@ describe('plain text paste', () => {
 
   it('keeps block markdown syntax as literal text', () => {
     expect(pastePlainText('# title\ntext')).toMatchInlineSnapshot(`
-      "# title
+      """
+      # title
       text
-      "
+
+      """
     `)
   })
 })
@@ -151,12 +169,14 @@ describe('plain text paste with shift', () => {
     fixture.set(n.doc(n.paragraph()))
     pasteText(view, 'aaa\nbbb\n\nccc')
     expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
-      "aaa
+      """
+      aaa
 
       bbb
 
       ccc
-      "
+
+      """
     `)
   })
 })

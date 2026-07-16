@@ -11,6 +11,7 @@ export default defineConfig({
       reporter: ['text-summary', 'text', 'html', 'json', 'json-summary'],
       include: ['packages/*/src/**'],
     },
+    slowTestThreshold: 10_000,
     projects: ['./packages/*'],
   },
 })

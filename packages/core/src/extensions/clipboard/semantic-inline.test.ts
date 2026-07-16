@@ -105,17 +105,17 @@ describe('paragraphClipboardDOM', () => {
     using fixture = setupFixture()
     expect(firstTextblockDOM(fixture, 'see ![cat](https://example.com/cat.png) end'))
       .toMatchInlineSnapshot(`
-      "
-      <p data-md="see ![cat](https://example.com/cat.png) end">
-        see
-        <img
-          alt="cat"
-          src="https://example.com/cat.png"
-        >
-        end
-      </p>
-      "
-    `)
+        "
+        <p data-md="see ![cat](https://example.com/cat.png) end">
+          see
+          <img
+            alt="cat"
+            src="https://example.com/cat.png"
+          >
+          end
+        </p>
+        "
+      `)
   })
 
   it('renders wikilink display text', () => {

@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.50.0](https://github.com/prosekit/meowdown/compare/react-v0.49.0...react-v0.50.0) (2026-07-14)
+
+
+### Features
+
+* add `/text` slash menu item ([#311](https://github.com/prosekit/meowdown/issues/311)) ([428cf6e](https://github.com/prosekit/meowdown/commit/428cf6e6cb0871c5611ca3798dd4461b603b545d))
+
+
+### Bug Fixes
+
+* anchor popovers on the atom preview ([#312](https://github.com/prosekit/meowdown/issues/312)) ([ca8a05c](https://github.com/prosekit/meowdown/commit/ca8a05ce622c0ce6957933bfb73c20f974640e50))
+
 ## [0.49.0](https://github.com/prosekit/meowdown/compare/react-v0.48.0...react-v0.49.0) (2026-07-14)
 
 

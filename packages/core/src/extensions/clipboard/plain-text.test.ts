@@ -40,20 +40,24 @@ describe('plain text copy in show and focus mode', () => {
 
   it('emits block markers for a heading and a list', () => {
     expect(copyText('show', '### title\n\n- one\n  - two')).toMatchInlineSnapshot(`
-      "### title
+      """
+      ### title
 
       - one
-        - two"
+        - two
+      """
     `)
   })
 
   it('emits blockquote and fence markers', () => {
     expect(copyText('show', '> quote\n\n```js\ncode\n```')).toMatchInlineSnapshot(`
-      "> quote
+      """
+      > quote
 
       \`\`\`js
       code
-      \`\`\`"
+      \`\`\`
+      """
     `)
   })
 
@@ -68,58 +72,72 @@ describe('plain text copy in show and focus mode', () => {
 describe('plain text copy in hide mode', () => {
   it('strips emphasis syntax but keeps block markers', () => {
     expect(copyText('hide', '### a **b**\n\n- item *x*')).toMatchInlineSnapshot(`
-      "### a b
+      """
+      ### a b
 
-      - item x"
+      - item x
+      """
     `)
   })
 
   it('keeps blockquote structure with stripped inline syntax', () => {
     expect(copyText('hide', '> x **y**\n>\n> z')).toMatchInlineSnapshot(`
-      "> x y
+      """
+      > x y
       >
-      > z"
+      > z
+      """
     `)
   })
 
   it('keeps table structure with stripped inline syntax', () => {
     expect(copyText('hide', '| a | b |\n| - | - |\n| **1** | 2 |')).toMatchInlineSnapshot(`
-      "| a | b |
+      """
+      | a | b |
       | --- | --- |
-      | 1 | 2 |"
+      | 1 | 2 |
+      """
     `)
   })
 
   it('keeps bullet list markers', () => {
     expect(copyText('hide', '- one **b**\n- two')).toMatchInlineSnapshot(`
-      "- one b
-      - two"
+      """
+      - one b
+      - two
+      """
     `)
   })
 
   it('keeps ordered list markers', () => {
     expect(copyText('hide', '1. first *x*\n2. second')).toMatchInlineSnapshot(`
-      "1. first x
-      2. second"
+      """
+      1. first x
+      2. second
+      """
     `)
   })
 
   it('keeps task checkboxes in all shapes', () => {
     expect(copyText('hide', '- [ ] open\n- [x] done\n+ [ ] round open\n+ [x] round done'))
       .toMatchInlineSnapshot(`
-      "- [ ] open
-      - [x] done
-      + [ ] round open
-      + [x] round done"
-    `)
+        """
+        - [ ] open
+        - [x] done
+        + [ ] round open
+        + [x] round done
+        """
+      `)
   })
 
   it('keeps a nested list shape', () => {
     expect(copyText('hide', '- parent *x*\n  1. one\n  2. two\n- tail')).toMatchInlineSnapshot(`
-      "- parent x
+      """
+      - parent x
         1. one
         2. two
-      - tail"
+      - tail
+      """
     `)
   })
 
@@ -163,9 +181,11 @@ describe('plain text copy in hide mode', () => {
 
   it('keeps code block content verbatim', () => {
     expect(copyText('hide', '```js\nconst asterisks = "**"\n```')).toMatchInlineSnapshot(`
-      "\`\`\`js
+      """
+      \`\`\`js
       const asterisks = "**"
-      \`\`\`"
+      \`\`\`
+      """
     `)
   })
 })
@@ -173,26 +193,32 @@ describe('plain text copy in hide mode', () => {
 describe('plain text copy block layout', () => {
   it('separates paragraphs with a blank line', () => {
     expect(copyText('show', 'aaa\n\nbbb')).toMatchInlineSnapshot(`
-      "aaa
+      """
+      aaa
 
-      bbb"
+      bbb
+      """
     `)
   })
 
   it('keeps gap paragraphs as extra blank lines', () => {
     expect(copyText('show', 'aaa\n\n\n\nbbb')).toMatchInlineSnapshot(`
-      "aaa
+      """
+      aaa
 
 
 
-      bbb"
+      bbb
+      """
     `)
   })
 
   it('keeps a soft break inside a paragraph', () => {
     expect(copyText('show', 'line1\nline2')).toMatchInlineSnapshot(`
-      "line1
-      line2"
+      """
+      line1
+      line2
+      """
     `)
   })
 })

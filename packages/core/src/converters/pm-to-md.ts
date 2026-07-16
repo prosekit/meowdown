@@ -325,8 +325,9 @@ function isTightItem(item: ProseMirrorNode): boolean {
   const count = item.childCount
   for (let i = 0; i < count; i++) {
     const child = item.child(i)
-    if (child.type.name === ('list' satisfies NodeName)) continue
-    if (child.type.name === ('paragraph' satisfies NodeName) && i === 0) continue
+    const typeName = child.type.name
+    if (typeName === ('list' satisfies NodeName)) continue
+    if (typeName === ('paragraph' satisfies NodeName) && i === 0) continue
     return false
   }
   return true
