@@ -147,6 +147,7 @@ export {
 } from './extensions/wikilink-hover.ts'
 export { defineWikilinkTrigger } from './extensions/wikilink-trigger.ts'
 export type { PositionRange } from './utils/range.ts'
+export { getTextblockDisplayText } from './utils/display-text.ts'
 export { getSelectedText } from './utils/selected-text.ts'
 export { getVirtualElementFromRange, type VirtualElement } from './utils/virtual-element.ts'
 export { defineSpellCheckPlugin } from './extensions/spell-check.ts'
