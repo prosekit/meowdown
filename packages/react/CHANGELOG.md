@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.52.0](https://github.com/prosekit/meowdown/compare/react-v0.51.0...react-v0.52.0) (2026-07-16)
+
+
+### Features
+
+* **react:** add `caretGlide` prop ([#321](https://github.com/prosekit/meowdown/issues/321)) ([ceefa52](https://github.com/prosekit/meowdown/commit/ceefa52d93b5dda32cb6beeb061e947e418b3e5b))
+* render Mermaid code blocks ([#324](https://github.com/prosekit/meowdown/issues/324)) ([5a460e7](https://github.com/prosekit/meowdown/commit/5a460e77d7ad77ef703138e8fe6c85ac35558f17))
+
 ## [0.51.0](https://github.com/prosekit/meowdown/compare/react-v0.50.0...react-v0.51.0) (2026-07-16)
 
 
