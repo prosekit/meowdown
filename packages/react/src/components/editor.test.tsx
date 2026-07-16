@@ -314,6 +314,22 @@ describe('MeowdownEditor', () => {
     await expect.element(page.locate('.test-wrap')).toBeInTheDocument()
   })
 
+  // The test browser forces `prefers-reduced-motion: reduce`, which zeroes the
+  // caret transition outright, so assert the `--meowdown-caret-glide` variable
+  // the transition reads instead of the transition itself.
+  it('disables the caret glide with caretGlide={false}', async () => {
+    const screen = await render(<MeowdownEditor initialMarkdown="Hi" />)
+    await pmRoot.click()
+    const caret = page.getByTestId('virtual-caret')
+    await expect.element(caret).toBeVisible()
+    const caretGlideValue = () =>
+      getComputedStyle(caret.element()).getPropertyValue('--meowdown-caret-glide')
+    expect(caretGlideValue()).toBe('80ms')
+
+    await screen.rerender(<MeowdownEditor initialMarkdown="Hi" caretGlide={false} />)
+    expect(caretGlideValue()).toBe('0ms')
+  })
+
   it('renders children inside the ProseKit context in rich modes', async () => {
     await render(
       <MeowdownEditor initialMarkdown="Hi">
