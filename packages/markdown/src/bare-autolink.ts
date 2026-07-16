@@ -1,5 +1,6 @@
 import type { MarkdownConfig } from '@lezer/markdown'
 
+import { hostFromUrl, isLinkableBareHost } from './autolink-tld.ts'
 import {
   CHAR_0,
   CHAR_9,
@@ -8,9 +9,7 @@ import {
   CHAR_LOWERCASE_Z,
   CHAR_UPPERCASE_A,
   CHAR_UPPERCASE_Z,
-} from '../unicode.ts'
-
-import { hostFromUrl, isLinkableBareHost } from './autolink-tld.ts'
+} from './unicode.ts'
 
 // A domain (one or more labels, at least one dot) plus an optional path.
 const DOMAIN_RE = /^[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s<]*)?/i

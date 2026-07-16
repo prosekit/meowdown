@@ -6,6 +6,9 @@
     "packages/core": {
       "component": "core"
     },
+    "packages/markdown": {
+      "component": "markdown"
+    },
     "packages/react": {
       "component": "react"
     }
@@ -14,7 +17,7 @@
     {
       "type": "linked-versions",
       "groupName": "meowdown",
-      "components": ["core", "react"]
+      "components": ["core", "markdown", "react"]
     }
   ]
 }

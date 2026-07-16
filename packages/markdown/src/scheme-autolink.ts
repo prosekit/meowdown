@@ -1,13 +1,12 @@
 import type { MarkdownConfig } from '@lezer/markdown'
 
+import { BOUNDARY_BEFORE_RE, trimAutolinkEnd } from './bare-autolink.ts'
 import {
   CHAR_LOWERCASE_A,
   CHAR_LOWERCASE_Z,
   CHAR_UPPERCASE_A,
   CHAR_UPPERCASE_Z,
-} from '../unicode.ts'
-
-import { BOUNDARY_BEFORE_RE, trimAutolinkEnd } from './bare-autolink.ts'
+} from './unicode.ts'
 
 // `scheme://` plus a non-space tail. The scheme follows RFC 3986 (a letter,
 // then letters, digits, `+`, `.`, `-`); requiring the `//` and a non-empty

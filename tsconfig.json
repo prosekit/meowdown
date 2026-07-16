@@ -8,6 +8,9 @@
       "path": "./packages/eslint-rules/tsconfig.json"
     },
     {
+      "path": "./packages/markdown/tsconfig.json"
+    },
+    {
       "path": "./packages/react/tsconfig.json"
     },
     {

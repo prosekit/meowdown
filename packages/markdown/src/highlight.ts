@@ -1,6 +1,6 @@
 import type { MarkdownConfig } from '@lezer/markdown'
 
-import { CHAR_EQUAL } from '../unicode.ts'
+import { CHAR_EQUAL } from './unicode.ts'
 
 const HighlightDelim = { resolve: 'Highlight', mark: 'HighlightMark' }
 

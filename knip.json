@@ -1,5 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignoreDependencies": ["@iconify-json/.*"],
-  "ignore": ["packages/core/src/unicode.ts", "packages/react/src/components/*.module.d.css.ts"]
+  "ignore": ["packages/react/src/components/*.module.d.css.ts"]
 }

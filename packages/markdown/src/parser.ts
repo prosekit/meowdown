@@ -1,3 +1,4 @@
+import type { MarkdownParser } from '@lezer/markdown'
 import { GFM, type InlineContext, parser as defaultParser } from '@lezer/markdown'
 
 import { bareAutolink } from './bare-autolink.ts'
@@ -7,6 +8,8 @@ import { math } from './math.ts'
 import { schemeAutolink } from './scheme-autolink.ts'
 import { wikiEmbed } from './wiki-embed.ts'
 import { wikilink } from './wikilink.ts'
+
+export type { MarkdownParser }
 
 /**
  * Inline-parser entry that immediately claims the entire inline
@@ -26,7 +29,7 @@ function consumeAllInline(cx: InlineContext): number {
  * `$math$` inline syntax. Use when both block and inline structure must
  * be recognized.
  */
-export const gfmParser = defaultParser.configure([
+export const gfmParser: MarkdownParser = defaultParser.configure([
   GFM,
   hashtag,
   wikiEmbed,
