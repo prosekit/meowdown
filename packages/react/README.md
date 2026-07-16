@@ -130,8 +130,10 @@ the block, then shows source and a live preview while editing it.
 Rendering uses `beautiful-mermaid`, which currently supports Flowchart, State,
 Sequence, Class, ER, and XY Chart diagrams. Unsupported syntax renders an error
 instead of an empty preview. Override `--meowdown-mermaid-bg`,
-`--meowdown-mermaid-fg`, or `--meowdown-mermaid-error` to customize the
-diagram surface.
+`--meowdown-mermaid-fg`, `--meowdown-mermaid-line`,
+`--meowdown-mermaid-accent`, `--meowdown-mermaid-muted`,
+`--meowdown-mermaid-surface`, `--meowdown-mermaid-border`, or
+`--meowdown-mermaid-error` to customize the diagram palette.
 
 ## Styling
 
