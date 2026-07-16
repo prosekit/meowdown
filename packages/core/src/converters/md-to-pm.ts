@@ -1,5 +1,9 @@
-import type { TreeCursor } from '@lezer/common'
-import { gfmBlockOnlyParser, isSpaceChar, LEZER_NODE_IDS } from '@meowdown/markdown'
+import {
+  gfmBlockOnlyParser,
+  isSpaceChar,
+  LEZER_NODE_IDS,
+  type TreeCursor,
+} from '@meowdown/markdown'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
 import type { CodeBlockFenceStyle } from '../extensions/code-block.ts'

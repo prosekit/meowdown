@@ -27,7 +27,6 @@
     "@codemirror/language": "^6.12.4",
     "@codemirror/language-data": "^6.5.2",
     "@floating-ui/dom": "^1.8.0",
-    "@lezer/common": "^1.5.2",
     "@lezer/highlight": "^1.2.3",
     "@meowdown/markdown": "workspace:^",
     "@ocavue/utils": "^1.7.0",
