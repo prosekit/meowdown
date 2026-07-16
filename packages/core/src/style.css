@@ -46,6 +46,11 @@
     /* inline and block code background */
     --meowdown-code-bg: light-dark(oklch(0.967 0 0), oklch(0.21 0.006 286));
 
+    /* Mermaid diagram background, foreground, and errors */
+    --meowdown-mermaid-bg: var(--meowdown-code-bg);
+    --meowdown-mermaid-fg: var(--meowdown-text);
+    --meowdown-mermaid-error: var(--meowdown-danger);
+
     /* placeholder fill while an image loads */
     --meowdown-image-loading-bg: light-dark(oklch(0.967 0 0), oklch(0.274 0.005 286));
 

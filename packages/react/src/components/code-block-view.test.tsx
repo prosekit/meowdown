@@ -160,3 +160,101 @@ describe('code block math preview', () => {
     })
   })
 })
+
+const mermaidPreview = page.getByTestId('code-block-mermaid-preview')
+const mermaidSource = page.locate('.ProseMirror pre[data-language="mermaid"]')
+
+const MERMAID_BLOCK_MD = 'before\n\n```mermaid\nflowchart LR\n  A[Start] --> B[End]\n```'
+
+describe('code block Mermaid preview', () => {
+  it('shows only a Flowchart preview when the caret is outside', async () => {
+    await render(<ProseKitEditor initialMarkdown={MERMAID_BLOCK_MD} />)
+
+    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+    await expect.element(mermaidPreview).toHaveTextContent('Start')
+    await expect.element(mermaidSource).not.toBeVisible()
+  })
+
+  it('shows the source above the preview once the caret enters', async () => {
+    await render(<ProseKitEditor initialMarkdown={MERMAID_BLOCK_MD} />)
+    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+
+    await mermaidPreview.click()
+
+    await expect.element(mermaidSource).toBeVisible()
+    await expect.element(mermaidPreview).toBeVisible()
+    const source = mermaidSource.element()
+    const preview = mermaidPreview.element()
+    const position = source.compareDocumentPosition(preview)
+    expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('updates the Flowchart preview live while typing', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} initialMarkdown={MERMAID_BLOCK_MD} />)
+    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+    await mermaidPreview.click()
+    ref.current?.setSelection('end')
+    ref.current?.focus()
+    await userEvent.keyboard('{Enter}')
+    await userEvent.keyboard('  B --> Done')
+
+    await expect.element(mermaidPreview).toHaveTextContent('Done')
+  })
+
+  it('renders a Sequence diagram', async () => {
+    const markdown =
+      'before\n\n```mermaid\nsequenceDiagram\n  Alice->>Bob: Hello Bob\n  Bob-->>Alice: Hello Alice\n```'
+    await render(<ProseKitEditor initialMarkdown={markdown} />)
+
+    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+    await expect.element(mermaidPreview).toHaveTextContent('Hello Bob')
+    await expect.element(mermaidPreview).toHaveTextContent('Hello Alice')
+  })
+
+  it('keeps the source visible for an empty Mermaid block', async () => {
+    await render(<ProseKitEditor initialMarkdown={'before\n\n```mermaid\n```'} />)
+
+    await expect.element(mermaidSource).toBeVisible()
+  })
+
+  it('shows an editable error for unsupported syntax', async () => {
+    await render(
+      <ProseKitEditor initialMarkdown={'before\n\n```mermaid\npie\n  "Dogs" : 10\n```'} />,
+    )
+    await expect.element(mermaidPreview, { timeout: 15000 }).toHaveAttribute('data-error')
+    await expect.element(mermaidSource).not.toBeVisible()
+
+    await mermaidPreview.click()
+
+    await expect.element(mermaidSource).toBeVisible()
+  })
+
+  it('drops the preview when the language changes', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} initialMarkdown={MERMAID_BLOCK_MD} />)
+    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+    await mermaidPreview.click()
+
+    await selector.click()
+    await page.getByRole('option', { name: 'TypeScript', exact: true }).click()
+
+    await expect.element(mermaidPreview).not.toBeInTheDocument()
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toContain(
+        '```typescript\nflowchart LR\n  A[Start] --> B[End]\n```',
+      )
+    })
+  })
+
+  it('keeps hostile labels passive', async () => {
+    const markdown =
+      'before\n\n```mermaid\nflowchart LR\n  A[<script>alert(1)</script><img src=x onerror=alert(1)> & safe] --> B\n```'
+    await render(<ProseKitEditor initialMarkdown={markdown} />)
+
+    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+    await expect.element(mermaidPreview.locate('script')).not.toBeInTheDocument()
+    await expect.element(mermaidPreview.locate('img')).not.toBeInTheDocument()
+    await expect.element(mermaidPreview.locate('[onerror]')).not.toBeInTheDocument()
+  })
+})
