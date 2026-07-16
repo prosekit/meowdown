@@ -37,8 +37,13 @@
     /* `==highlight==` background */
     --meowdown-highlight: light-dark(oklch(0.945 0.124 102), oklch(0.476 0.103 62));
 
-    /* rules, table cell borders, popover borders */
+    /* table cell borders, popover borders */
     --meowdown-border: light-dark(oklch(0.92 0.004 286), oklch(0.37 0.012 286));
+
+    /* The horizontal rule line. Derived from the prose palette, not
+     * `--meowdown-border`: a thematic break is content, so it stays visible
+     * and proportional to the text when a host quiets its chrome borders. */
+    --meowdown-hr: color-mix(in oklab, var(--meowdown-muted) 30%, transparent);
 
     /* blockquote left bar */
     --meowdown-blockquote-border: color-mix(in oklab, var(--meowdown-accent) 35%, transparent);
@@ -536,7 +541,7 @@
   .ProseMirror hr {
     margin: 1.5em 0;
     border: none;
-    border-top: 1px solid var(--meowdown-border);
+    border-top: 1px solid var(--meowdown-hr);
   }
 
   /* ---------------------------------------------------------------------------
