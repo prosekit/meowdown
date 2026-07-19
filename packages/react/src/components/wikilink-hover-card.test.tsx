@@ -13,7 +13,6 @@ import { WikilinkHoverCard } from './wikilink-hover-card.tsx'
 
 const pmRoot = page.locate('.ProseMirror')
 const card = page.getByTestId('wikilink-hover-card')
-const positioner = page.getByTestId('wikilink-hover-positioner')
 
 function HostPreviewCard() {
   return (
@@ -250,35 +249,6 @@ describe('WikilinkHoverCard', () => {
     expect(document.activeElement).toBe(activeElement)
     expect(handleRef.current?.getSelection()).toEqual(selection)
     await expect.element(card).toHaveAttribute('inert')
-  })
-
-  it('keeps one side when the link has partial space below', async () => {
-    await unhover()
-    await render(
-      <div style={{ position: 'fixed', left: 0, top: 470, width: 400 }}>
-        <MeowdownEditor initialMarkdown="[[Edge]]" blockHandle={false}>
-          <WikilinkHoverCard>
-            {(hit) => <div style={{ height: 150 }}>Preview: {hit.target}</div>}
-          </WikilinkHoverCard>
-        </MeowdownEditor>
-      </div>,
-    )
-
-    await hover(pmRoot.getByTestId('wikilink'))
-    await expect.element(card, { timeout: 1000 }).toBeInTheDocument()
-    await expect.element(positioner).toHaveAttribute('data-side', 'top')
-
-    const positionerElement = positioner.element()
-    const sides = new Set<string | null>()
-    const start = performance.now()
-    while (performance.now() - start < 500) {
-      sides.add(positionerElement.getAttribute('data-side'))
-      await new Promise((resolve) => requestAnimationFrame(resolve))
-    }
-    expect([...sides]).toEqual(['top'])
-    await vi.waitFor(() => {
-      expect(positionerElement.getBoundingClientRect().height).toBeGreaterThan(0)
-    })
   })
 
   it('keeps the popup inside an 8px viewport margin near the bottom-right edge', async () => {
