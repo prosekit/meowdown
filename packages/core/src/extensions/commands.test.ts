@@ -221,6 +221,55 @@ describe('insertTrigger', () => {
   })
 })
 
+describe('pastePlainText', () => {
+  it('pastes text with Shift-paste semantics: every newline is a paragraph break', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('a<a>b')))
+
+    expect(editor.commands.pastePlainText('xxx\nyyy')).toBe(true)
+
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      axxx
+
+      yyyb
+
+      """
+    `)
+  })
+
+  it('keeps pasted markdown syntax as literal text', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+
+    expect(editor.commands.pastePlainText('**bold** and <b>html</b>')).toBe(true)
+
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      **bold** and <b>html</b>
+
+      """
+    `)
+  })
+
+  it('ignores empty text', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('Hello<a>')))
+
+    expect(editor.commands.pastePlainText('')).toBe(false)
+
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      Hello
+
+      """
+    `)
+  })
+})
+
 describe('turnIntoText', () => {
   it('turns a heading into a paragraph', () => {
     using fixture = setupFixture()

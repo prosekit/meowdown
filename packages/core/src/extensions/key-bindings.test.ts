@@ -25,6 +25,7 @@ describe('EDITOR_KEY_BINDINGS', () => {
         "Mod-Shift-Enter": "Cycle a circle checkbox task",
         "Mod-Shift-h": "Highlight",
         "Mod-Shift-k": "Insert a wikilink",
+        "Mod-Shift-v": "Paste without formatting",
         "Mod-Shift-x": "Strikethrough",
         "Mod-b": "Bold",
         "Mod-e": "Inline code",

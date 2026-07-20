@@ -7,6 +7,7 @@ export const EDITOR_KEY_BINDINGS = {
   'Mod-Shift-h': 'Highlight',
   'Mod-k': 'Link',
   'Mod-Shift-k': 'Insert a wikilink',
+  'Mod-Shift-v': 'Paste without formatting',
   'Mod-1': 'Heading 1',
   'Mod-2': 'Heading 2',
   'Mod-3': 'Heading 3',

@@ -84,6 +84,22 @@ function insertTrigger(text: string): Command {
 }
 
 /**
+ * Pastes `text` as plain text, through the exact code path of a Shift-paste
+ * ("paste without formatting"): every newline run becomes a paragraph break,
+ * and the paste-handling plugins (link paste, embeds) still get a look. Made
+ * for host apps whose shell owns the Mod-Shift-V shortcut — a desktop menu
+ * accelerator swallows the keystroke before the webview sees it, so the shell
+ * must read the clipboard itself and hand the text to this command.
+ */
+function pastePlainText(text: string): Command {
+  return (state, dispatch, view) => {
+    if (!text || !view) return false
+    if (!dispatch) return true
+    return view.pasteText(text)
+  }
+}
+
+/**
  * Turns the current block into plain text, peeling one layer per call: a
  * non-paragraph textblock becomes a paragraph, then a paragraph in a list
  * loses its marker, then a paragraph in a blockquote lifts out of it.
@@ -105,6 +121,7 @@ export function defineEditorCommands() {
   return defineCommands({
     insertMarkdown,
     insertTrigger,
+    pastePlainText,
     scrollIntoView,
     selectText,
     selectTextBetween,

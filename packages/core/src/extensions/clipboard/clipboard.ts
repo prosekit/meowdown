@@ -4,6 +4,7 @@ import { defineHTMLPaste } from '../html-paste.ts'
 
 import { defineClipboardParser } from './clipboard-parser.ts'
 import { defineSemanticClipboardSerializer } from './clipboard-serializer.ts'
+import { definePlainPasteFallback } from './plain-paste-fallback.ts'
 import { definePlainTextPaste } from './plain-paste.ts'
 import { definePlainTextSerializer } from './plain-text.ts'
 
@@ -20,5 +21,6 @@ export function defineClipboard(): PlainExtension {
     defineClipboardParser(),
     defineHTMLPaste(),
     definePlainTextPaste(),
+    definePlainPasteFallback(),
   )
 }
