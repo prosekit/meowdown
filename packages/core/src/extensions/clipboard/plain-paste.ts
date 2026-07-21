@@ -1,39 +1,27 @@
-import { definePlugin, getNodeType, type PlainExtension } from '@prosekit/core'
-import { DOMParser, DOMSerializer, Fragment, Slice } from '@prosekit/pm/model'
-import type { ProseMirrorNode, ResolvedPos, Schema } from '@prosekit/pm/model'
+import { definePlugin, type PlainExtension } from '@prosekit/core'
+import { DOMParser, DOMSerializer, Slice } from '@prosekit/pm/model'
+import type { ResolvedPos, Schema } from '@prosekit/pm/model'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 
-import type { NodeName } from '../node-names.ts'
+import { markdownToDoc } from '../../converters/md-to-pm.ts'
+import { getNodeBuildersForSchema } from '../schema.ts'
 
 /**
- * Turn pasted plain text into blocks with markdown newline semantics: a blank
- * line separates paragraphs (`aaa\n\nbbb` inserts no empty paragraph), a
- * single `\n` stays a soft break inside one paragraph, and a run of K blank
- * lines restores K-1 empty paragraphs (the gap-paragraph model of
- * `md-to-pm.ts`). Leading and trailing newlines are trimmed.
+ * Parse pasted plain text as markdown: `- [ ] task`, `# heading`, fenced code
+ * and the other block constructs become real nodes, while inline syntax stays
+ * literal source text that the inline-mark plugin renders. Newline semantics
+ * follow `md-to-pm.ts`: a blank line separates paragraphs, a single `\n` stays
+ * a soft break inside one paragraph, and a run of K blank lines restores K-1
+ * empty gap paragraphs. Leading and trailing newlines are trimmed.
  */
 function plainTextToSlice(schema: Schema, raw: string): Slice {
   const text = raw.replaceAll(/\r\n?/g, '\n')
   const trimmed = text.replace(/^\n+/, '').replace(/\n+$/, '')
   if (!trimmed) return Slice.empty
 
-  const paragraph = getNodeType(schema, 'paragraph' satisfies NodeName)
-  const blocks: ProseMirrorNode[] = []
-  // Splitting with a captured separator keeps the blank-line runs: even
-  // indexes are block texts, odd indexes are the `\n{2,}` runs between them.
-  const parts = trimmed.split(/(\n{2,})/)
-  for (let index = 0; index < parts.length; index++) {
-    const part = parts[index]
-    if (index % 2 === 0) {
-      blocks.push(paragraph.create(null, part ? schema.text(part) : undefined))
-    } else {
-      const blankLines = part.length - 1
-      for (let gap = 1; gap < blankLines; gap++) {
-        blocks.push(paragraph.create())
-      }
-    }
-  }
-  return Slice.maxOpen(Fragment.from(blocks))
+  const nodes = getNodeBuildersForSchema(schema)
+  const doc = markdownToDoc(trimmed, { nodes })
+  return Slice.maxOpen(doc.content)
 }
 
 /**

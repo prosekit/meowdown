@@ -149,11 +149,39 @@ describe('plain text paste', () => {
     `)
   })
 
-  it('keeps block markdown syntax as literal text', () => {
+  it('parses block markdown syntax into blocks', () => {
     expect(pastePlainText('# title\ntext')).toMatchInlineSnapshot(`
       """
       # title
+
       text
+
+      """
+    `)
+  })
+
+  it('parses pasted task lists', () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph()))
+    firePlainPaste(view, '- [ ] one\n- [x] two')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      - [ ] one
+      - [x] two
+
+      """
+    `)
+    expect(view.state.doc.firstChild?.type.name).toBe('list')
+    expect(view.state.doc.firstChild?.attrs.kind).toBe('task')
+  })
+
+  it('parses pasted fenced code blocks', () => {
+    expect(pastePlainText('```js\nconst a = 1\n```')).toMatchInlineSnapshot(`
+      """
+      \`\`\`js
+      const a = 1
+      \`\`\`
 
       """
     `)
