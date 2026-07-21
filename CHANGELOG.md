@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.56.0](https://github.com/prosekit/meowdown/compare/v0.55.1...v0.56.0) (2026-07-21)
+
+
+### Features
+
+* **react:** add `expandCollapsed` prop to `MarkdownView` ([#347](https://github.com/prosekit/meowdown/issues/347)) ([4ca8991](https://github.com/prosekit/meowdown/commit/4ca89915967529810d48fd2a255be4210424a4bd))
+
+
+### Bug Fixes
+
+* **core:** render `[text]` and `[text][label]` as plain text ([#344](https://github.com/prosekit/meowdown/issues/344)) ([fd23c6e](https://github.com/prosekit/meowdown/commit/fd23c6e261ac47e9f77800a0821d5492b4b17613))
+
 ## [0.55.1](https://github.com/prosekit/meowdown/compare/v0.55.0...v0.55.1) (2026-07-19)
 
 
