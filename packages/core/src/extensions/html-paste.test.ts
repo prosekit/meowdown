@@ -79,3 +79,43 @@ describe('paste rich-text HTML', () => {
     expect(docToMarkdown(editor.state.doc).trim()).toBe('x **b** y')
   })
 })
+
+describe('paste styled plain text', () => {
+  it('pastes code-editor line divs as markdown source', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    // VS Code wraps each copied source line in a styled div/span; the text is
+    // markdown source and must not be escaped by the HTML conversion.
+    pasteHTML(
+      view,
+      '<meta charset="utf-8"><div style="color:#abb2bf"><span>- [ ] one</span></div><div><span>- [x] two</span></div>',
+    )
+    expect(docToMarkdown(editor.state.doc).trim()).toBe('- [ ] one\n- [x] two')
+    expect(editor.state.doc.firstChild?.attrs.kind).toBe('task')
+  })
+
+  it('keeps markdown punctuation in styled prose unescaped', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    pasteHTML(view, '<p>[foo] and ~5 items and `code`</p>')
+    expect(docToMarkdown(editor.state.doc).trim()).toBe('[foo] and ~5 items and `code`')
+  })
+
+  it('keeps blank-line structure from line divs', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    pasteHTML(view, '<div>aaa</div><div><br></div><div>bbb</div>')
+    expect(docToMarkdown(editor.state.doc)).toBe('aaa\n\nbbb\n')
+  })
+
+  it('separates paragraphs from p tags', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    pasteHTML(view, '<p>aaa</p><p>bbb</p>')
+    expect(docToMarkdown(editor.state.doc)).toBe('aaa\n\nbbb\n')
+  })
+})

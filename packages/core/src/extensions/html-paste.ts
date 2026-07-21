@@ -22,6 +22,79 @@ function isMeowdownClipboardHTML(html: string): boolean {
 }
 
 /**
+ * Tags that carry no markdown-representable structure beyond line breaks.
+ * Clipboard HTML made of only these is styled plain text: code editors (VS
+ * Code and friends) wrap each copied source line in colored `div`/`span`s,
+ * and browsers wrap prose in `p`s.
+ */
+const STYLE_ONLY_TAGS = new Set([
+  'html',
+  'head',
+  'body',
+  'meta',
+  'style',
+  'title',
+  'div',
+  'span',
+  'p',
+  'br',
+  'font',
+  'wbr',
+])
+
+/**
+ * When `html` is styled plain text, return the text it holds with the line
+ * structure restored (one line per `div`, a blank line between `p`s, `<br>`
+ * as a newline); return `undefined` when the HTML carries real structure
+ * (lists, headings, links, emphasis, …).
+ *
+ * The extracted text is then pasted as markdown *source* instead of being
+ * round-tripped through the HTML-to-markdown converter, whose escaping would
+ * turn pasted markdown into `\[ ] task`-style noise.
+ */
+function extractStyledPlainText(html: string): string | undefined {
+  const dom = new window.DOMParser().parseFromString(html, 'text/html')
+  for (const element of dom.querySelectorAll('*')) {
+    if (!STYLE_ONLY_TAGS.has(element.tagName.toLowerCase())) return undefined
+  }
+  const acc = { text: '' }
+  appendNodeText(dom.body, acc)
+  // Non-breaking spaces are a styling artifact (indentation, spacing) and
+  // would defeat markdown's own indentation rules.
+  return acc.text.replaceAll('\u{A0}', ' ')
+}
+
+/**
+ * Pad `acc` so it ends with at least `count` newlines, unless it holds no
+ * content yet (leading separators would just be trimmed again).
+ */
+function ensureTrailingNewlines(acc: { text: string }, count: number): void {
+  const trailing = /\n*$/.exec(acc.text)![0].length
+  if (acc.text.length === trailing) return
+  if (trailing < count) acc.text += '\n'.repeat(count - trailing)
+}
+
+/** Recursive worker of {@link extractStyledPlainText}. */
+function appendNodeText(node: Node, acc: { text: string }): void {
+  if (node.nodeType === Node.TEXT_NODE) {
+    acc.text += node.nodeValue ?? ''
+    return
+  }
+  if (node.nodeType !== Node.ELEMENT_NODE) return
+  const tag = (node as Element).tagName
+  if (tag === 'BR') {
+    acc.text += '\n'
+    return
+  }
+  if (tag === 'STYLE' || tag === 'TITLE') return
+  // A `div` starts a line of its own, a `p` a paragraph of its own.
+  const separator = tag === 'DIV' ? 1 : tag === 'P' ? 2 : 0
+  if (separator) ensureTrailingNewlines(acc, separator)
+  for (const child of node.childNodes) appendNodeText(child, acc)
+  if (separator) ensureTrailingNewlines(acc, separator)
+}
+
+/**
  * Paste foreign rich-text HTML as meowdown Markdown. Rewrites the clipboard's
  * `text/html` through `transformPastedHTML`: foreign HTML is converted to a
  * Markdown string, reparsed into meowdown nodes (literal source text, no marks),
@@ -41,7 +114,10 @@ export function defineHTMLPaste(): PlainExtension {
           const parent = view.state.selection.$from.parent
           if (!parent.inlineContent || parent.type.spec.code) return html
 
-          const markdown = htmlToMarkdown(html)
+          // Styled plain text (VS Code line divs, browser prose `p`s) already
+          // *is* markdown source; converting it from HTML would escape its
+          // punctuation, so paste the extracted text as markdown directly.
+          const markdown = extractStyledPlainText(html) ?? htmlToMarkdown(html)
           if (!markdown.trim()) return html
 
           const nodes = getNodeBuildersForSchema(view.state.schema)
