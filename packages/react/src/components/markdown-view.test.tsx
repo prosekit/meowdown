@@ -255,6 +255,31 @@ describe('MarkdownView', () => {
     await expect.element(view.locate('blockquote')).toHaveTextContent('quote')
   })
 
+  it('folds a collapsed bullet, like the editor', async () => {
+    await renderView('+ parent\n  - child')
+    await expect.element(view.locate('[data-list-collapsed]')).toHaveTextContent('parent')
+    await expect.element(view.getByText('child')).not.toBeVisible()
+  })
+
+  it('renders a collapsed bullet expanded with expandCollapsed', async () => {
+    await renderView('+ parent\n  - child', { expandCollapsed: true })
+    await expect.element(view.getByText('child')).toBeVisible()
+    await expect.element(view.locate('[data-list-collapsed]')).not.toBeInTheDocument()
+  })
+
+  it('expands collapsed bullets at every depth', async () => {
+    await renderView('+ parent\n  + middle\n    - leaf', { expandCollapsed: true })
+    await expect.element(view.getByText('leaf')).toBeVisible()
+    await expect.element(view.locate('[data-list-collapsed]')).not.toBeInTheDocument()
+  })
+
+  it('keeps a circle task round under expandCollapsed', async () => {
+    await renderView('+ [ ] task\n  - child', { expandCollapsed: true })
+    const circleTask = view.locate('[data-list-marker="+"]')
+    await expect.element(circleTask.locate('input[type="checkbox"]')).toBeInTheDocument()
+    await expect.element(view.getByText('child')).toBeVisible()
+  })
+
   it('renders truncated markdown without throwing', async () => {
     await renderView('foo [[Bar and a **bold')
     await expect.element(view).toHaveTextContent('foo')
