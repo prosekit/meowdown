@@ -76,4 +76,34 @@ describe('htmlToMarkdown', () => {
       '<ul><li data-task-list-item="" data-checked=""><p>done</p></li><li data-task-list-item=""><p>open</p></li></ul>'
     expect(htmlToMarkdown(html).trim()).toBe('- [x] done\n- [ ] open')
   })
+
+  it('does not escape characters that are inert in meowdown', () => {
+    // A lone `[` or `~` can never change meaning (no reference links or
+    // definitions, no single-tilde strikethrough), so escaping them would only
+    // leave literal backslash noise in the pasted source.
+    expect(htmlToMarkdown('<p>[foo] and ~5 items</p>').trim()).toBe('[foo] and ~5 items')
+    expect(htmlToMarkdown('<p>see [[my note]] ok</p>').trim()).toBe('see [[my note]] ok')
+    expect(htmlToMarkdown('<p>[foo]: bar</p>').trim()).toBe('[foo]: bar')
+    expect(htmlToMarkdown('<p>x ~ y</p>').trim()).toBe('x ~ y')
+    expect(htmlToMarkdown('<p>a ~d~ b</p>').trim()).toBe('a ~d~ b')
+  })
+
+  it('lets a literal ~~pair~~ become strikethrough', () => {
+    expect(htmlToMarkdown('<p>a ~~pair~~ b</p>').trim()).toBe('a ~~pair~~ b')
+  })
+
+  it('still escapes a line-leading tilde run', () => {
+    // A bare `~~~` at the start of a line would open a code fence that
+    // swallows the following content on reparse.
+    expect(htmlToMarkdown('<p>~~~ maybe fence</p>').trim()).toBe(String.raw`\~~~ maybe fence`)
+  })
+
+  it('still escapes brackets inside a link label', () => {
+    expect(htmlToMarkdown('<p><a href="u">a ]b</a></p>').trim()).toBe(String.raw`[a \]b](u)`)
+    expect(htmlToMarkdown('<p><a href="u">a [b</a></p>').trim()).toBe(String.raw`[a \[b](u)`)
+  })
+
+  it('still escapes syntax that meowdown would render', () => {
+    expect(htmlToMarkdown('<p>a `tick` and *star*</p>').trim()).toBe('a \\`tick\\` and \\*star\\*')
+  })
 })

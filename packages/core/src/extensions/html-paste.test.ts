@@ -93,4 +93,22 @@ describe('paste rich-text HTML', () => {
     expect(docToMarkdown(editor.state.doc).trim()).toBe('- [ ] one\n- [x] two')
     expect(editor.state.doc.firstChild?.attrs.kind).toBe('task')
   })
+
+  it('keeps markdown punctuation in pasted prose unescaped', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    pasteHTML(view, '<p><em>x</em> then [foo] and ~5 items</p>')
+    expect(docToMarkdown(editor.state.doc).trim()).toBe('*x* then [foo] and ~5 items')
+  })
+
+  it('does not lose a pasted line that starts with tildes', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    // The tilde run must stay escaped: bare `~~~` at the start of a line
+    // would open a code fence that swallows the rest of the paste.
+    pasteHTML(view, '<p><em>x</em></p><p>~~~ keep me</p>')
+    expect(docToMarkdown(editor.state.doc)).toContain('keep me')
+  })
 })
