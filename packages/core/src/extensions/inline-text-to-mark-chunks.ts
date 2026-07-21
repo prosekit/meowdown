@@ -117,11 +117,22 @@ function walk(
     }
     const type: number = node.type
     if (type === LEZER_NODE_IDS.Link) {
-      const fileMarks = claimFileLink(node, parentMarks, text, marks, options)
-      if (fileMarks) {
-        emit(out, node.from, node.to, fileMarks)
+      if (!hasInlineDestination(node)) {
+        // Lezer also parses reference-style links (`[text]`, `[text][label]`),
+        // but meowdown has no link reference definitions, so those stay plain
+        // text: skip the bracket marks and walk any nested syntax as usual.
+        const children = node.children.filter(
+          (child) =>
+            child.type !== LEZER_NODE_IDS.LinkMark && child.type !== LEZER_NODE_IDS.LinkLabel,
+        )
+        walk(children, parentMarks, node.from, node.to, text, marks, out, options)
       } else {
-        walkLink(node, parentMarks, text, marks, out, options)
+        const fileMarks = claimFileLink(node, parentMarks, text, marks, options)
+        if (fileMarks) {
+          emit(out, node.from, node.to, fileMarks)
+        } else {
+          walkLink(node, parentMarks, text, marks, out, options)
+        }
       }
     } else if (type === LEZER_NODE_IDS.Image) {
       const trailing = takeMagicComment(node, nodes[index + 1], text)
@@ -186,6 +197,19 @@ interface LinkParts {
   labelTo: number
   urlNode: InlineElement | null
   titleNode: InlineElement | null
+}
+
+/**
+ * Whether a `Link` node is an inline link with an explicit `(...)` destination.
+ * Inline links carry at least three `LinkMark` children (`[`, `]`, `(`);
+ * shortcut and reference links (`[text]`, `[text][label]`) stop at two.
+ */
+function hasInlineDestination(node: InlineElement): boolean {
+  let linkMarkCount = 0
+  for (const child of node.children) {
+    if (child.type === LEZER_NODE_IDS.LinkMark) linkMarkCount++
+  }
+  return linkMarkCount >= 3
 }
 
 /**
