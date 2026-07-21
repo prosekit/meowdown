@@ -93,6 +93,9 @@ importers:
       '@prosekit/web':
         specifier: ^0.9.0-beta.21
         version: 0.9.0-beta.21(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.3.1)(@types/hast@3.0.5)(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.42.1)
+      hast-util-to-mdast:
+        specifier: ^10.1.2
+        version: 10.1.2
       katex:
         specifier: ^0.17.0
         version: 0.17.0
@@ -127,6 +130,9 @@ importers:
       '@tsdown/css':
         specifier: ^0.22.8
         version: 0.22.8(jiti@2.7.0)(postcss@8.5.16)(tsdown@0.22.8)(yaml@2.9.0)
+      '@types/hast':
+        specifier: ^3.0.5
+        version: 3.0.5
       '@types/mdast':
         specifier: ^4.0.4
         version: 4.0.4
@@ -139,9 +145,6 @@ importers:
       diffable-html-snapshot:
         specifier: ^0.3.0
         version: 0.3.0
-      hast-util-to-mdast:
-        specifier: ^10.1.2
-        version: 10.1.2
       mdast-util-to-markdown:
         specifier: ^2.1.2
         version: 2.1.2
