@@ -585,7 +585,7 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
   let handleTaskClick: ((event: MouseEvent) => void) | undefined
 
   if (typeName === 'list') {
-    const attrs = { ...node.attrs as MeowdownListAttrs }
+    const attrs = { ...(node.attrs as MeowdownListAttrs) }
 
     if (context.expandCollapsed && attrs.collapsed) {
       attrs.collapsed = false
