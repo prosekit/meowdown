@@ -587,7 +587,8 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
   if (typeName === 'list') {
     let attrs = node.attrs as MeowdownListAttrs
     if (context.expandCollapsed && attrs.collapsed) {
-      attrs = {...attrs, collapsed: false}
+      attrs = { ...attrs, collapsed: false }
+      node = node.type.create(attrs, node.content, node.marks)
     }
 
     const { onTaskClick } = context
