@@ -582,20 +582,15 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
   const key = context.keyCounter.value++
   const typeName = node.type.name as NodeName
 
-  // The fold is CSS keyed on the `data-list-collapsed` attribute this node's
-  // `toDOM` would emit; a node without the attr renders expanded.
-  if (
-    typeName === 'list' &&
-    context.expandCollapsed &&
-    (node.attrs as MeowdownListAttrs).collapsed
-  ) {
-    node = node.type.create({ ...node.attrs, collapsed: false }, node.content, node.marks)
-  }
-
   let handleTaskClick: ((event: MouseEvent) => void) | undefined
 
   if (typeName === 'list') {
-    const attrs = node.attrs as MeowdownListAttrs
+    const attrs = { ...node.attrs as MeowdownListAttrs }
+
+    if (context.expandCollapsed && attrs.collapsed) {
+      attrs.collapsed = false
+    }
+
     const { onTaskClick } = context
     if (attrs.kind === 'task' && onTaskClick) {
       const index = context.taskCounter.value++
