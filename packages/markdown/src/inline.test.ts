@@ -80,6 +80,99 @@ describe('link', () => {
       "
     `)
   })
+
+  // Reference-shaped links have no inline `(...)` destination. Their shared
+  // signature in the tree: only two LinkMark children (`[` and `]`); a
+  // reference label, when present, is a single LinkLabel node, never more
+  // LinkMarks. Inline links carry at least three LinkMarks (`[`, `]`, `(`).
+  // `hasInlineDestination` in `inline-text-to-mark-chunks.ts` relies on this.
+
+  it('parses a shortcut reference link with two LinkMarks', () => {
+    expect(parse('[foo]')).toMatchInlineSnapshot(`
+      "
+      Link [0, 5] "[foo]"
+        LinkMark [0, 1] "["
+        LinkMark [4, 5] "]"
+      "
+    `)
+  })
+
+  it('parses a full reference link with a LinkLabel', () => {
+    expect(parse('[foo][bar]')).toMatchInlineSnapshot(`
+      "
+      Link [0, 10] "[foo][bar]"
+        LinkMark [0, 1] "["
+        LinkMark [4, 5] "]"
+        LinkLabel [5, 10] "[bar]"
+      "
+    `)
+  })
+
+  it('parses a collapsed reference link with an empty LinkLabel', () => {
+    expect(parse('[foo][]')).toMatchInlineSnapshot(`
+      "
+      Link [0, 7] "[foo][]"
+        LinkMark [0, 1] "["
+        LinkMark [4, 5] "]"
+        LinkLabel [5, 7] "[]"
+      "
+    `)
+  })
+
+  it('parses an empty inline destination with four LinkMarks', () => {
+    expect(parse('[a]()')).toMatchInlineSnapshot(`
+      "
+      Link [0, 5] "[a]()"
+        LinkMark [0, 1] "["
+        LinkMark [2, 3] "]"
+        LinkMark [3, 4] "("
+        LinkMark [4, 5] ")"
+      "
+    `)
+  })
+
+  it('does not attach a space-separated paren as a destination', () => {
+    expect(parse('[foo] (bar)')).toMatchInlineSnapshot(`
+      "
+      Link [0, 5] "[foo]"
+        LinkMark [0, 1] "["
+        LinkMark [4, 5] "]"
+      "
+    `)
+  })
+
+  it('parses nested syntax inside a shortcut reference', () => {
+    expect(parse('[*em*]')).toMatchInlineSnapshot(`
+      "
+      Link [0, 6] "[*em*]"
+        LinkMark [0, 1] "["
+        Emphasis [1, 5] "*em*"
+          EmphasisMark [1, 2] "*"
+          EmphasisMark [4, 5] "*"
+        LinkMark [5, 6] "]"
+      "
+    `)
+  })
+
+  it('parses only the inner brackets of nested bracket pairs', () => {
+    expect(parse('[a [b] c]')).toMatchInlineSnapshot(`
+      "
+      Link [3, 6] "[b]"
+        LinkMark [3, 4] "["
+        LinkMark [5, 6] "]"
+      "
+    `)
+  })
+
+  it('parses the inner brackets of an unclosed wikilink as a link', () => {
+    expect(parse('[[a]')).toMatchInlineSnapshot(`
+      "
+      Link [1, 4] "[a]"
+        LinkMark [1, 2] "["
+        LinkMark [3, 4] "]"
+      "
+    `)
+  })
 })
 
 describe('image', () => {
@@ -106,6 +199,17 @@ describe('image', () => {
         URL [7, 10] "url"
         LinkTitle [11, 18] "\\"title\\""
         LinkMark [18, 19] ")"
+      "
+    `)
+  })
+
+  it('parses a reference-style image as an Image with a LinkLabel', () => {
+    expect(parse('![img][ref]')).toMatchInlineSnapshot(`
+      "
+      Image [0, 11] "![img][ref]"
+        LinkMark [0, 2] "!["
+        LinkMark [5, 6] "]"
+        LinkLabel [6, 11] "[ref]"
       "
     `)
   })

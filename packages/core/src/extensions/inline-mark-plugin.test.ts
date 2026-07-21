@@ -314,13 +314,13 @@ describe('inlineMarkPlugin', () => {
 
     const pos = findText(fixture.doc, 'note')
     expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilink'])
-    // Delete one ']': "see [[note] end" is no longer a wikilink. The inner
-    // `[note]` becomes a shortcut reference link, so it loses mdWikilink
-    // but gains the link pack wrapper.
+    // Delete one ']': "see [[note] end" is no longer a wikilink. Lezer parses
+    // the inner `[note]` as a shortcut reference link, which meowdown renders
+    // as plain text, so all marks disappear.
     const firstBracket = findText(fixture.doc, ']')
     fixture.view.dispatch(fixture.state.tr.delete(firstBracket + 1, firstBracket + 2))
     const after = findText(fixture.doc, 'note')
-    expect(marksAt(fixture.doc, after + 1)).toEqual(['mdPack'])
+    expect(marksAt(fixture.doc, after + 1)).toEqual([])
   })
 
   it('removes mdTag when text is glued in front of the #', () => {
