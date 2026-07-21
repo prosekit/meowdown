@@ -586,7 +586,6 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
 
   if (typeName === 'list') {
     let attrs = node.attrs as MeowdownListAttrs
-
     if (context.expandCollapsed && attrs.collapsed) {
       attrs = {...attrs, collapsed: false}
     }
