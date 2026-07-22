@@ -52,4 +52,28 @@ describe('htmlToMarkdown', () => {
       '<table><thead><tr><th>a</th><th>b</th></tr></thead><tbody><tr><td>1</td><td>2</td></tr></tbody></table>'
     expect(htmlToMarkdown(html).trim()).toBe('| a | b |\n| - | - |\n| 1 | 2 |')
   })
+
+  it('converts a GFM task list', () => {
+    const html =
+      '<ul><li><input type="checkbox" disabled> one</li><li><input type="checkbox" checked disabled> two</li></ul>'
+    expect(htmlToMarkdown(html).trim()).toBe('- [ ] one\n- [x] two')
+  })
+
+  it('converts a tiptap-style task list', () => {
+    // Tiptap nests the checkbox in a <label> and the body in a <div>, a shape
+    // the stock `li` handler misses (the item would lose its checkbox).
+    const html =
+      '<ul data-type="taskList">' +
+      '<li data-checked="false" data-type="taskItem"><label><input type="checkbox"><span></span></label><div><p>one</p></div></li>' +
+      '<li data-checked="true" data-type="taskItem"><label><input type="checkbox" checked><span></span></label><div><p>two</p></div></li>' +
+      '</ul>'
+    expect(htmlToMarkdown(html).trim()).toBe('- [ ] one\n- [x] two')
+  })
+
+  it('converts a remirror-style task list', () => {
+    // Remirror marks checked items with a bare data-checked attribute.
+    const html =
+      '<ul><li data-task-list-item="" data-checked=""><p>done</p></li><li data-task-list-item=""><p>open</p></li></ul>'
+    expect(htmlToMarkdown(html).trim()).toBe('- [x] done\n- [ ] open')
+  })
 })
