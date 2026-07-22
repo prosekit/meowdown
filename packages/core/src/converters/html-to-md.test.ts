@@ -136,21 +136,689 @@ function captureStockUnsafe(): Unsafe[] {
 
 describe('toMeowdownUnsafe', () => {
   it('narrows the stock escaping rules', () => {
-    const format = (rules: Unsafe[]): unknown => {
-      let text = ""
-      try {
-        text = JSON.stringify(rules.map(x => ({...x, _compiled: undefined })), null, 2)
-      } catch (e) {
-        text = ``
-      }
-      console.log("text",text)
-      const result = text && JSON.parse(text)
-      console.log("result", result)
-      return  result
-    }
-
+    // `_compiled` is a lazily attached regex cache on shared rule objects;
+    // stripping it keeps the snapshot independent of test order.
+    const strip = (rules: Unsafe[]) => rules.map(({ _compiled, ...rule }) => rule)
     const stock = captureStockUnsafe()
-    expect(format(stock)).toMatchInlineSnapshot()
-    expect(format(toMeowdownUnsafe(stock))).toMatchInlineSnapshot( )
+    expect(strip(stock)).toMatchInlineSnapshot(`
+      [
+        {
+          "after": "[\\r\\n]",
+          "character": "	",
+          "inConstruct": "phrasing",
+        },
+        {
+          "before": "[\\r\\n]",
+          "character": "	",
+          "inConstruct": "phrasing",
+        },
+        {
+          "character": "	",
+          "inConstruct": [
+            "codeFencedLangGraveAccent",
+            "codeFencedLangTilde",
+          ],
+        },
+        {
+          "character": "
+      ",
+          "inConstruct": [
+            "codeFencedLangGraveAccent",
+            "codeFencedLangTilde",
+            "codeFencedMetaGraveAccent",
+            "codeFencedMetaTilde",
+            "destinationLiteral",
+            "headingAtx",
+          ],
+        },
+        {
+          "character": "
+      ",
+          "inConstruct": [
+            "codeFencedLangGraveAccent",
+            "codeFencedLangTilde",
+            "codeFencedMetaGraveAccent",
+            "codeFencedMetaTilde",
+            "destinationLiteral",
+            "headingAtx",
+          ],
+        },
+        {
+          "after": "[\\r\\n]",
+          "character": " ",
+          "inConstruct": "phrasing",
+        },
+        {
+          "before": "[\\r\\n]",
+          "character": " ",
+          "inConstruct": "phrasing",
+        },
+        {
+          "character": " ",
+          "inConstruct": [
+            "codeFencedLangGraveAccent",
+            "codeFencedLangTilde",
+          ],
+        },
+        {
+          "after": "\\[",
+          "character": "!",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "destinationLiteral",
+            "destinationRaw",
+            "reference",
+            "titleQuote",
+            "titleApostrophe",
+          ],
+        },
+        {
+          "character": """,
+          "inConstruct": "titleQuote",
+        },
+        {
+          "atBreak": true,
+          "character": "#",
+        },
+        {
+          "after": "(?:[\\r\\n]|$)",
+          "character": "#",
+          "inConstruct": "headingAtx",
+        },
+        {
+          "after": "[#A-Za-z]",
+          "character": "&",
+          "inConstruct": "phrasing",
+        },
+        {
+          "character": "'",
+          "inConstruct": "titleApostrophe",
+        },
+        {
+          "character": "(",
+          "inConstruct": "destinationRaw",
+        },
+        {
+          "before": "\\]",
+          "character": "(",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "destinationLiteral",
+            "destinationRaw",
+            "reference",
+            "titleQuote",
+            "titleApostrophe",
+          ],
+        },
+        {
+          "atBreak": true,
+          "before": "\\d+",
+          "character": ")",
+        },
+        {
+          "character": ")",
+          "inConstruct": "destinationRaw",
+        },
+        {
+          "after": "(?:[ \\t\\r\\n*])",
+          "atBreak": true,
+          "character": "*",
+        },
+        {
+          "character": "*",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "destinationLiteral",
+            "destinationRaw",
+            "reference",
+            "titleQuote",
+            "titleApostrophe",
+          ],
+        },
+        {
+          "after": "(?:[ \\t\\r\\n])",
+          "atBreak": true,
+          "character": "+",
+        },
+        {
+          "after": "(?:[ \\t\\r\\n-])",
+          "atBreak": true,
+          "character": "-",
+        },
+        {
+          "after": "(?:[ \\t\\r\\n]|$)",
+          "atBreak": true,
+          "before": "\\d+",
+          "character": ".",
+        },
+        {
+          "after": "[!/?A-Za-z]",
+          "atBreak": true,
+          "character": "<",
+        },
+        {
+          "after": "[!/?A-Za-z]",
+          "character": "<",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "destinationLiteral",
+            "destinationRaw",
+            "reference",
+            "titleQuote",
+            "titleApostrophe",
+          ],
+        },
+        {
+          "character": "<",
+          "inConstruct": "destinationLiteral",
+        },
+        {
+          "atBreak": true,
+          "character": "=",
+        },
+        {
+          "atBreak": true,
+          "character": ">",
+        },
+        {
+          "character": ">",
+          "inConstruct": "destinationLiteral",
+        },
+        {
+          "atBreak": true,
+          "character": "[",
+        },
+        {
+          "character": "[",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "destinationLiteral",
+            "destinationRaw",
+            "reference",
+            "titleQuote",
+            "titleApostrophe",
+          ],
+        },
+        {
+          "character": "[",
+          "inConstruct": [
+            "label",
+            "reference",
+          ],
+        },
+        {
+          "after": "[\\r\\n]",
+          "character": "\\",
+          "inConstruct": "phrasing",
+        },
+        {
+          "character": "]",
+          "inConstruct": [
+            "label",
+            "reference",
+          ],
+        },
+        {
+          "atBreak": true,
+          "character": "_",
+        },
+        {
+          "character": "_",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "destinationLiteral",
+            "destinationRaw",
+            "reference",
+            "titleQuote",
+            "titleApostrophe",
+          ],
+        },
+        {
+          "atBreak": true,
+          "character": "\`",
+        },
+        {
+          "character": "\`",
+          "inConstruct": [
+            "codeFencedLangGraveAccent",
+            "codeFencedMetaGraveAccent",
+          ],
+        },
+        {
+          "character": "\`",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "destinationLiteral",
+            "destinationRaw",
+            "reference",
+            "titleQuote",
+            "titleApostrophe",
+          ],
+        },
+        {
+          "atBreak": true,
+          "character": "~",
+        },
+        {
+          "after": "[\\-.\\w]",
+          "before": "[+\\-.\\w]",
+          "character": "@",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "link",
+            "image",
+            "label",
+          ],
+        },
+        {
+          "after": "[\\-.\\w]",
+          "before": "[Ww]",
+          "character": ".",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "link",
+            "image",
+            "label",
+          ],
+        },
+        {
+          "after": "\\/",
+          "before": "[ps]",
+          "character": ":",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "link",
+            "image",
+            "label",
+          ],
+        },
+        {
+          "character": "[",
+          "inConstruct": [
+            "label",
+            "phrasing",
+            "reference",
+          ],
+        },
+        {
+          "character": "~",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "destinationLiteral",
+            "destinationRaw",
+            "reference",
+            "titleQuote",
+            "titleApostrophe",
+          ],
+        },
+        {
+          "character": "
+      ",
+          "inConstruct": "tableCell",
+        },
+        {
+          "character": "
+      ",
+          "inConstruct": "tableCell",
+        },
+        {
+          "after": "[	 :-]",
+          "atBreak": true,
+          "character": "|",
+        },
+        {
+          "character": "|",
+          "inConstruct": "tableCell",
+        },
+        {
+          "after": "-",
+          "atBreak": true,
+          "character": ":",
+        },
+        {
+          "after": "[:|-]",
+          "atBreak": true,
+          "character": "-",
+        },
+        {
+          "after": "[:|-]",
+          "atBreak": true,
+          "character": "-",
+        },
+      ]
+    `)
+    expect(strip(toMeowdownUnsafe(stock))).toMatchInlineSnapshot(`
+      [
+        {
+          "after": "[\\r\\n]",
+          "character": "	",
+          "inConstruct": "phrasing",
+        },
+        {
+          "before": "[\\r\\n]",
+          "character": "	",
+          "inConstruct": "phrasing",
+        },
+        {
+          "character": "	",
+          "inConstruct": [
+            "codeFencedLangGraveAccent",
+            "codeFencedLangTilde",
+          ],
+        },
+        {
+          "character": "
+      ",
+          "inConstruct": [
+            "codeFencedLangGraveAccent",
+            "codeFencedLangTilde",
+            "codeFencedMetaGraveAccent",
+            "codeFencedMetaTilde",
+            "destinationLiteral",
+            "headingAtx",
+          ],
+        },
+        {
+          "character": "
+      ",
+          "inConstruct": [
+            "codeFencedLangGraveAccent",
+            "codeFencedLangTilde",
+            "codeFencedMetaGraveAccent",
+            "codeFencedMetaTilde",
+            "destinationLiteral",
+            "headingAtx",
+          ],
+        },
+        {
+          "after": "[\\r\\n]",
+          "character": " ",
+          "inConstruct": "phrasing",
+        },
+        {
+          "before": "[\\r\\n]",
+          "character": " ",
+          "inConstruct": "phrasing",
+        },
+        {
+          "character": " ",
+          "inConstruct": [
+            "codeFencedLangGraveAccent",
+            "codeFencedLangTilde",
+          ],
+        },
+        {
+          "after": "\\[",
+          "character": "!",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "destinationLiteral",
+            "destinationRaw",
+            "reference",
+            "titleQuote",
+            "titleApostrophe",
+          ],
+        },
+        {
+          "character": """,
+          "inConstruct": "titleQuote",
+        },
+        {
+          "atBreak": true,
+          "character": "#",
+        },
+        {
+          "after": "(?:[\\r\\n]|$)",
+          "character": "#",
+          "inConstruct": "headingAtx",
+        },
+        {
+          "after": "[#A-Za-z]",
+          "character": "&",
+          "inConstruct": "phrasing",
+        },
+        {
+          "character": "'",
+          "inConstruct": "titleApostrophe",
+        },
+        {
+          "character": "(",
+          "inConstruct": "destinationRaw",
+        },
+        {
+          "before": "\\]",
+          "character": "(",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "destinationLiteral",
+            "destinationRaw",
+            "reference",
+            "titleQuote",
+            "titleApostrophe",
+          ],
+        },
+        {
+          "atBreak": true,
+          "before": "\\d+",
+          "character": ")",
+        },
+        {
+          "character": ")",
+          "inConstruct": "destinationRaw",
+        },
+        {
+          "after": "(?:[ \\t\\r\\n*])",
+          "atBreak": true,
+          "character": "*",
+        },
+        {
+          "character": "*",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "destinationLiteral",
+            "destinationRaw",
+            "reference",
+            "titleQuote",
+            "titleApostrophe",
+          ],
+        },
+        {
+          "after": "(?:[ \\t\\r\\n])",
+          "atBreak": true,
+          "character": "+",
+        },
+        {
+          "after": "(?:[ \\t\\r\\n-])",
+          "atBreak": true,
+          "character": "-",
+        },
+        {
+          "after": "(?:[ \\t\\r\\n]|$)",
+          "atBreak": true,
+          "before": "\\d+",
+          "character": ".",
+        },
+        {
+          "after": "[!/?A-Za-z]",
+          "atBreak": true,
+          "character": "<",
+        },
+        {
+          "after": "[!/?A-Za-z]",
+          "character": "<",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "destinationLiteral",
+            "destinationRaw",
+            "reference",
+            "titleQuote",
+            "titleApostrophe",
+          ],
+        },
+        {
+          "character": "<",
+          "inConstruct": "destinationLiteral",
+        },
+        {
+          "atBreak": true,
+          "character": "=",
+        },
+        {
+          "atBreak": true,
+          "character": ">",
+        },
+        {
+          "character": ">",
+          "inConstruct": "destinationLiteral",
+        },
+        {
+          "character": "[",
+          "inConstruct": [
+            "label",
+            "reference",
+          ],
+        },
+        {
+          "after": "[\\r\\n]",
+          "character": "\\",
+          "inConstruct": "phrasing",
+        },
+        {
+          "character": "]",
+          "inConstruct": [
+            "label",
+            "reference",
+          ],
+        },
+        {
+          "atBreak": true,
+          "character": "_",
+        },
+        {
+          "character": "_",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "destinationLiteral",
+            "destinationRaw",
+            "reference",
+            "titleQuote",
+            "titleApostrophe",
+          ],
+        },
+        {
+          "atBreak": true,
+          "character": "\`",
+        },
+        {
+          "character": "\`",
+          "inConstruct": [
+            "codeFencedLangGraveAccent",
+            "codeFencedMetaGraveAccent",
+          ],
+        },
+        {
+          "character": "\`",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "destinationLiteral",
+            "destinationRaw",
+            "reference",
+            "titleQuote",
+            "titleApostrophe",
+          ],
+        },
+        {
+          "atBreak": true,
+          "character": "~",
+        },
+        {
+          "after": "[\\-.\\w]",
+          "before": "[+\\-.\\w]",
+          "character": "@",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "link",
+            "image",
+            "label",
+          ],
+        },
+        {
+          "after": "[\\-.\\w]",
+          "before": "[Ww]",
+          "character": ".",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "link",
+            "image",
+            "label",
+          ],
+        },
+        {
+          "after": "\\/",
+          "before": "[ps]",
+          "character": ":",
+          "inConstruct": "phrasing",
+          "notInConstruct": [
+            "autolink",
+            "link",
+            "image",
+            "label",
+          ],
+        },
+        {
+          "character": "
+      ",
+          "inConstruct": "tableCell",
+        },
+        {
+          "character": "
+      ",
+          "inConstruct": "tableCell",
+        },
+        {
+          "after": "[	 :-]",
+          "atBreak": true,
+          "character": "|",
+        },
+        {
+          "character": "|",
+          "inConstruct": "tableCell",
+        },
+        {
+          "after": "-",
+          "atBreak": true,
+          "character": ":",
+        },
+        {
+          "after": "[:|-]",
+          "atBreak": true,
+          "character": "-",
+        },
+        {
+          "after": "[:|-]",
+          "atBreak": true,
+          "character": "-",
+        },
+      ]
+    `)
   })
 })
