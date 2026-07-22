@@ -136,11 +136,13 @@ function captureStockUnsafe(): Unsafe[] {
 
 describe('toMeowdownUnsafe', () => {
   it('narrows the stock escaping rules', () => {
-    // `_compiled` is a lazily attached regex cache on shared rule objects;
-    // stripping it keeps the snapshot independent of test order.
-    const strip = (rules: Unsafe[]) => rules.map(({ _compiled, ...rule }) => rule)
+    const format = (rules: Unsafe[]): unknown => {
+      const text = JSON.stringify(rules)
+      return JSON.parse(text)
+    }
+
     const stock = captureStockUnsafe()
-    expect(JSON.stringify(strip(stock), null, 2)).toMatchInlineSnapshot(`
+    expect(format(stock)).toMatchInlineSnapshot(`
       """
       [
         {
@@ -496,7 +498,7 @@ describe('toMeowdownUnsafe', () => {
       ]
       """
     `)
-    expect(JSON.stringify(strip(toMeowdownUnsafe(stock)), null, 2)).toMatchInlineSnapshot(`
+    expect(format(toMeowdownUnsafe(stock))).toMatchInlineSnapshot(`
       """
       [
         {
