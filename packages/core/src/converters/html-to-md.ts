@@ -135,7 +135,7 @@ const taskAwareListItem: HastToMdastHandle = (state, element) => {
  * labels and the line-leading `~` fence guard (a bare `~~~` would open a
  * code fence that swallows the following content on reparse).
  */
-function toMeowdownUnsafe(unsafe: Unsafe[]): Unsafe[] {
+export function toMeowdownUnsafe(unsafe: Unsafe[]): Unsafe[] {
   return unsafe.filter((pattern) => {
     if (pattern.character !== '[' && pattern.character !== '~') return true
     if (pattern.atBreak) return pattern.character === '~'

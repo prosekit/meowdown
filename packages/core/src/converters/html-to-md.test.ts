@@ -1,6 +1,11 @@
+import type { Root, Text } from 'mdast'
+import type { State, Unsafe } from 'mdast-util-to-markdown'
+import remarkGfm from 'remark-gfm'
+import remarkStringify from 'remark-stringify'
+import { unified } from 'unified'
 import { describe, expect, it } from 'vitest'
 
-import { htmlToMarkdown } from './html-to-md.ts'
+import { htmlToMarkdown, toMeowdownUnsafe } from './html-to-md.ts'
 
 describe('htmlToMarkdown', () => {
   it('converts strong and em to meowdown dialect', () => {
@@ -105,5 +110,163 @@ describe('htmlToMarkdown', () => {
 
   it('still escapes syntax that meowdown would render', () => {
     expect(htmlToMarkdown('<p>a `tick` and *star*</p>').trim()).toBe('a \\`tick\\` and \\*star\\*')
+  })
+})
+
+/** The runtime `state.unsafe` that `remark-gfm` + `remark-stringify` assemble. */
+function captureStockUnsafe(): Unsafe[] {
+  let unsafe: Unsafe[] = []
+  const root: Root = {
+    type: 'root',
+    children: [{ type: 'paragraph', children: [{ type: 'text', value: 'x' }] }],
+  }
+  unified()
+    .use(remarkGfm)
+    .use(remarkStringify, {
+      handlers: {
+        text: (node: Text, _parent: unknown, state: State) => {
+          unsafe = state.unsafe
+          return node.value
+        },
+      },
+    })
+    .stringify(root)
+  return unsafe
+}
+
+function formatUnsafe(rules: Unsafe[]): string {
+  return rules
+    .map((rule) => {
+      let line = JSON.stringify(rule.character)
+      if (rule.atBreak) line += ' atBreak'
+      if (rule.before) line += ` before:${rule.before}`
+      if (rule.after) line += ` after:${rule.after}`
+      if (rule.inConstruct) line += ` in:${[rule.inConstruct].flat().join('|')}`
+      return line
+    })
+    .join('\n')
+}
+
+describe('toMeowdownUnsafe', () => {
+  it('narrows the stock escaping rules', () => {
+    const stock = captureStockUnsafe()
+    expect(formatUnsafe(stock)).toMatchInlineSnapshot(`
+      """
+      "\\t" after:[\\r\\n] in:phrasing
+      "\\t" before:[\\r\\n] in:phrasing
+      "\\t" in:codeFencedLangGraveAccent|codeFencedLangTilde
+      "\\r" in:codeFencedLangGraveAccent|codeFencedLangTilde|codeFencedMetaGraveAccent|codeFencedMetaTilde|destinationLiteral|headingAtx
+      "\\n" in:codeFencedLangGraveAccent|codeFencedLangTilde|codeFencedMetaGraveAccent|codeFencedMetaTilde|destinationLiteral|headingAtx
+      " " after:[\\r\\n] in:phrasing
+      " " before:[\\r\\n] in:phrasing
+      " " in:codeFencedLangGraveAccent|codeFencedLangTilde
+      "!" after:\\[ in:phrasing
+      "\\"" in:titleQuote
+      "#" atBreak
+      "#" after:(?:[
+      ]|$) in:headingAtx
+      "&" after:[#A-Za-z] in:phrasing
+      "'" in:titleApostrophe
+      "(" in:destinationRaw
+      "(" before:\\] in:phrasing
+      ")" atBreak before:\\d+
+      ")" in:destinationRaw
+      "*" atBreak after:(?:[ 	
+      *])
+      "*" in:phrasing
+      "+" atBreak after:(?:[ 	
+      ])
+      "-" atBreak after:(?:[ 	
+      -])
+      "." atBreak before:\\d+ after:(?:[ 	
+      ]|$)
+      "<" atBreak after:[!/?A-Za-z]
+      "<" after:[!/?A-Za-z] in:phrasing
+      "<" in:destinationLiteral
+      "=" atBreak
+      ">" atBreak
+      ">" in:destinationLiteral
+      "[" atBreak
+      "[" in:phrasing
+      "[" in:label|reference
+      "\\\\" after:[\\r\\n] in:phrasing
+      "]" in:label|reference
+      "_" atBreak
+      "_" in:phrasing
+      "\`" atBreak
+      "\`" in:codeFencedLangGraveAccent|codeFencedMetaGraveAccent
+      "\`" in:phrasing
+      "~" atBreak
+      "@" before:[+\\-.\\w] after:[\\-.\\w] in:phrasing
+      "." before:[Ww] after:[\\-.\\w] in:phrasing
+      ":" before:[ps] after:\\/ in:phrasing
+      "[" in:label|phrasing|reference
+      "~" in:phrasing
+      "\\r" in:tableCell
+      "\\n" in:tableCell
+      "|" atBreak after:[	 :-]
+      "|" in:tableCell
+      ":" atBreak after:-
+      "-" atBreak after:[:|-]
+      "-" atBreak after:[:|-]
+      """
+    `)
+    expect(formatUnsafe(toMeowdownUnsafe(stock))).toMatchInlineSnapshot(`
+      """
+      "\\t" after:[\\r\\n] in:phrasing
+      "\\t" before:[\\r\\n] in:phrasing
+      "\\t" in:codeFencedLangGraveAccent|codeFencedLangTilde
+      "\\r" in:codeFencedLangGraveAccent|codeFencedLangTilde|codeFencedMetaGraveAccent|codeFencedMetaTilde|destinationLiteral|headingAtx
+      "\\n" in:codeFencedLangGraveAccent|codeFencedLangTilde|codeFencedMetaGraveAccent|codeFencedMetaTilde|destinationLiteral|headingAtx
+      " " after:[\\r\\n] in:phrasing
+      " " before:[\\r\\n] in:phrasing
+      " " in:codeFencedLangGraveAccent|codeFencedLangTilde
+      "!" after:\\[ in:phrasing
+      "\\"" in:titleQuote
+      "#" atBreak
+      "#" after:(?:[
+      ]|$) in:headingAtx
+      "&" after:[#A-Za-z] in:phrasing
+      "'" in:titleApostrophe
+      "(" in:destinationRaw
+      "(" before:\\] in:phrasing
+      ")" atBreak before:\\d+
+      ")" in:destinationRaw
+      "*" atBreak after:(?:[ 	
+      *])
+      "*" in:phrasing
+      "+" atBreak after:(?:[ 	
+      ])
+      "-" atBreak after:(?:[ 	
+      -])
+      "." atBreak before:\\d+ after:(?:[ 	
+      ]|$)
+      "<" atBreak after:[!/?A-Za-z]
+      "<" after:[!/?A-Za-z] in:phrasing
+      "<" in:destinationLiteral
+      "=" atBreak
+      ">" atBreak
+      ">" in:destinationLiteral
+      "[" in:label|reference
+      "\\\\" after:[\\r\\n] in:phrasing
+      "]" in:label|reference
+      "_" atBreak
+      "_" in:phrasing
+      "\`" atBreak
+      "\`" in:codeFencedLangGraveAccent|codeFencedMetaGraveAccent
+      "\`" in:phrasing
+      "~" atBreak
+      "@" before:[+\\-.\\w] after:[\\-.\\w] in:phrasing
+      "." before:[Ww] after:[\\-.\\w] in:phrasing
+      ":" before:[ps] after:\\/ in:phrasing
+      "\\r" in:tableCell
+      "\\n" in:tableCell
+      "|" atBreak after:[	 :-]
+      "|" in:tableCell
+      ":" atBreak after:-
+      "-" atBreak after:[:|-]
+      "-" atBreak after:[:|-]
+      """
+    `)
   })
 })
