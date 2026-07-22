@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import { readClipboard } from '@meowdown/vitest/clipboard'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -28,6 +29,7 @@ describe('LinkMenu', () => {
     await vi.waitFor(() => {
       expect(onLinkCopy).toHaveBeenCalledWith({ href: 'https://example.com' })
     })
+    expect((await readClipboard()).text).toBe('https://example.com')
   })
 
   it('anchors the preview to the link when hidden syntax ends the block', async () => {
