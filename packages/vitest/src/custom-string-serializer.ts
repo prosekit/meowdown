@@ -12,7 +12,10 @@ const customStringSerializer: SnapshotSerializer = {
   test(val) {
     return (
       typeof val === 'string' &&
-      val.includes('\n') && !(val.startsWith('\n') && val.endsWith('\n')) && !val.startsWith('"""') && !val.endsWith('"""')
+      val.includes('\n') &&
+      !(val.startsWith('\n') && val.endsWith('\n')) &&
+      !val.startsWith('"""') &&
+      !val.endsWith('"""')
     )
   },
 }
