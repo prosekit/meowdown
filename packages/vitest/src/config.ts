@@ -56,9 +56,11 @@ export function defineSharedConfig({
           contextOptions: {
             reducedMotion: 'reduce',
             hasTouch: true,
-            // A list of permissions to grant to all pages in this context. See https://playwright.dev/docs/api/class-browsercontext#browser-context-grant-permissions
-            permissions:
-              browserName === 'chromium' ? ['clipboard-read', 'clipboard-write'] : undefined,
+            // Chromium rejects `navigator.clipboard.writeText` without this
+            // grant, even inside a real click. Tests read the clipboard back
+            // through a native paste (`@meowdown/vitest/clipboard`), so no
+            // browser needs a read grant. See https://playwright.dev/docs/api/class-browsercontext#browser-context-grant-permissions
+            permissions: browserName === 'chromium' ? ['clipboard-write'] : undefined,
           },
         }),
         headless: IS_DEBUG ? false : true,
