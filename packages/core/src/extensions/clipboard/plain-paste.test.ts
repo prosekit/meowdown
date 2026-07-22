@@ -6,11 +6,6 @@ import { userEvent } from 'vitest/browser'
 import { docToMarkdown } from '../../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../../testing/index.ts'
 
-/**
- * Put `text` on the real clipboard and press the native paste shortcut.
- * Unlike the `pasteText` helper (which forces ProseMirror's plain-text flag,
- * i.e. a Shift-paste), this exercises the regular paste path.
- */
 async function pastePlain(fixture: Fixture, text: string): Promise<void> {
   await writeClipboard({ 'text/plain': text })
   fixture.view.focus()

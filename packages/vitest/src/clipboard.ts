@@ -1,13 +1,6 @@
 import { sleep } from '@ocavue/utils'
 import { userEvent } from 'vitest/browser'
 
-/**
- * Read the real clipboard by focusing a dummy contenteditable element and
- * pressing the native paste shortcut. The paste event's `clipboardData` is
- * readable during the event in every browser without any permission, unlike
- * `navigator.clipboard.readText()`, which WebKit rejects outside a user
- * gesture no matter which permissions are granted.
- */
 export async function readClipboard(): Promise<{ html: string; text: string }> {
   const dummy = document.createElement('div')
   dummy.contentEditable = 'true'
@@ -36,12 +29,6 @@ export async function readClipboard(): Promise<{ html: string; text: string }> {
   }
 }
 
-/**
- * Put arbitrary flavors on the real clipboard: select a dummy element and let
- * a copy listener replace the data during the native copy shortcut. No
- * permission needed in any browser. The copy event only fires on a DOM
- * selection, hence the selected placeholder text.
- */
 export async function writeClipboard(flavors: Record<string, string>): Promise<void> {
   const dummy = document.createElement('div')
   dummy.textContent = 'placeholder'
@@ -59,6 +46,7 @@ export async function writeClipboard(flavors: Record<string, string>): Promise<v
         resolve()
       })
     })
+    // A copy event only fires on a DOM selection.
     selection?.selectAllChildren(dummy)
     await userEvent.copy()
     await Promise.race([done, sleep(2000)])
