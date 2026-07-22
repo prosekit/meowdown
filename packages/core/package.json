@@ -36,6 +36,7 @@
     "@prosekit/web": "^0.9.0-beta.22",
     "hast-util-to-mdast": "^10.1.2",
     "katex": "^0.18.1",
+    "mdast-util-to-markdown": "^2.1.2",
     "prosemirror-flat-list": "^0.7.1",
     "prosemirror-highlight": "^0.15.3",
     "rehype-parse": "^9.0.1",
@@ -53,7 +54,6 @@
     "@vitest/browser-playwright": "^4.1.10",
     "dedent": "^1.7.2",
     "diffable-html-snapshot": "^0.3.0",
-    "mdast-util-to-markdown": "^2.1.2",
     "tsdown": "^0.22.8",
     "unicode-by-name": "^0.2.0",
     "vitest": "^4.1.10"

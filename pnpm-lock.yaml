@@ -99,6 +99,9 @@ importers:
       katex:
         specifier: ^0.18.1
         version: 0.18.1
+      mdast-util-to-markdown:
+        specifier: ^2.1.2
+        version: 2.1.2
       prosemirror-flat-list:
         specifier: ^0.7.1
         version: 0.7.1
@@ -145,9 +148,6 @@ importers:
       diffable-html-snapshot:
         specifier: ^0.3.0
         version: 0.3.0
-      mdast-util-to-markdown:
-        specifier: ^2.1.2
-        version: 2.1.2
       tsdown:
         specifier: ^0.22.8
         version: 0.22.8(@tsdown/css@0.22.8)(oxc-resolver@11.21.3)(typescript@6.0.3)

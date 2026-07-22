@@ -1,8 +1,12 @@
 import { once } from '@ocavue/utils'
 import type { Element } from 'hast'
 import { defaultHandlers, type Handle as HastToMdastHandle } from 'hast-util-to-mdast'
-import type { Parent, PhrasingContent } from 'mdast'
-import type { Handle as MdastToMarkdownHandle } from 'mdast-util-to-markdown'
+import type { Parent, PhrasingContent, Text } from 'mdast'
+import {
+  defaultHandlers as mdastDefaultHandlers,
+  type Handle as MdastToMarkdownHandle,
+  type Unsafe,
+} from 'mdast-util-to-markdown'
 import rehypeParse from 'rehype-parse'
 import rehypeRemark from 'rehype-remark'
 import remarkGfm from 'remark-gfm'
@@ -125,6 +129,40 @@ const taskAwareListItem: HastToMdastHandle = (state, element) => {
   return defaultHandlers.li(state, normalizeTaskItem(element) ?? element)
 }
 
+/**
+ * Narrow the stock escaping rules to meowdown's dialect: drop the blanket
+ * "escape every `[` and `~`" rules, keep the `[`/`]` rules scoped to link
+ * labels and the line-leading `~` fence guard (a bare `~~~` would open a
+ * code fence that swallows the following content on reparse).
+ */
+export function toMeowdownUnsafe(unsafe: Unsafe[]): Unsafe[] {
+  return unsafe.filter((pattern) => {
+    if (pattern.character !== '[' && pattern.character !== '~') return true
+    if (pattern.atBreak) return pattern.character === '~'
+    const constructs = Array.isArray(pattern.inConstruct)
+      ? pattern.inConstruct
+      : pattern.inConstruct
+        ? [pattern.inConstruct]
+        : []
+    return !constructs.includes('phrasing')
+  })
+}
+
+/**
+ * Serialize a text node with the narrowed escaping rules. The default `text`
+ * handler reads `state.safe` off the state it is given, so passing a clone
+ * with a filtered `unsafe` scopes the narrowing to text nodes without
+ * mutating the shared serializer state.
+ */
+const textToMarkdown: MdastToMarkdownHandle = (node, parent, state, info) => {
+  return mdastDefaultHandlers.text(
+    node as Text,
+    parent,
+    { ...state, unsafe: toMeowdownUnsafe(state.unsafe) },
+    info,
+  )
+}
+
 function createProcessor() {
   return unified()
     .use(rehypeParse)
@@ -139,7 +177,7 @@ function createProcessor() {
       rule: '-',
       ruleRepetition: 3,
       listItemIndent: 'one',
-      handlers: { highlight: highlightToMarkdown },
+      handlers: { highlight: highlightToMarkdown, text: textToMarkdown },
     })
     .freeze()
 }
