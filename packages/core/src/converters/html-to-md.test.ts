@@ -137,12 +137,20 @@ function captureStockUnsafe(): Unsafe[] {
 describe('toMeowdownUnsafe', () => {
   it('narrows the stock escaping rules', () => {
     const format = (rules: Unsafe[]): unknown => {
-      const text = JSON.stringify(rules)
-      return JSON.parse(text)
+      let text = ""
+      try {
+        text = JSON.stringify(rules.map(x => ({...x, _compiled: undefined })), null, 2)
+      } catch (e) {
+        text = ``
+      }
+      console.log("text",text)
+      const result = text && JSON.parse(text)
+      console.log("result", result)
+      return  result
     }
 
     const stock = captureStockUnsafe()
-    expect(format(stock)).toMatchInlineSnapshot( )
+    expect(format(stock)).toMatchInlineSnapshot()
     expect(format(toMeowdownUnsafe(stock))).toMatchInlineSnapshot( )
   })
 })
