@@ -5,7 +5,10 @@ import type { EditorView } from '@prosekit/pm/view'
  * `@prosekit/core/test`, but working in every browser: Firefox discards the
  * DataTransfer passed to the ClipboardEvent constructor (`event.clipboardData`
  * comes back as a different, empty DataTransfer), so when the files did not
- * survive, shadow the getter with the real object.
+ * survive, shadow the getter with the real object. A real-clipboard route
+ * does not exist for files: every browser silently ignores `items.add(file)`
+ * inside a copy listener, so a synthetic event is the only way to test file
+ * pastes.
  */
 export function pasteFiles(view: EditorView, files: File[]): void {
   const clipboardData = new DataTransfer()

@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
+    "./clipboard": "./src/clipboard.ts",
     "./config": "./src/config.ts",
     "./custom-string-serializer": "./src/custom-string-serializer.ts",
     "./file-events": "./src/file-events.ts",
