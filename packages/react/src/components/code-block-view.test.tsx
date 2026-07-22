@@ -1,6 +1,6 @@
 import '../testing/index.ts'
 
-import { isSafari } from '@meowdown/vitest/helpers'
+import { readClipboard } from '@meowdown/vitest/clipboard'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -70,10 +70,7 @@ describe('code block language selector', () => {
     })
   })
 
-  it.skipIf(
-    // Safari doesn't support `navigator.clipboard.readText()`
-    isSafari(),
-  )('copies the code block contents to the clipboard', async () => {
+  it('copies the code block contents to the clipboard', async () => {
     await render(<ProseKitEditor initialMarkdown={CODE_BLOCK_MD} />)
     await expect.element(copyButton).toBeInTheDocument()
 
@@ -81,7 +78,7 @@ describe('code block language selector', () => {
 
     await expect.element(copyButton).toHaveAttribute('data-copied')
 
-    expect(await navigator.clipboard.readText()).toBe('fn main() {}')
+    expect((await readClipboard()).text).toBe('fn main() {}')
   })
 })
 
