@@ -346,12 +346,27 @@ export function ProseKitEditor({
     function getState(): EditorStateSnapshot {
       return [getMarkdown(), getSelection()]
     }
-    function replaceState(markdown?: string, selection?: SelectionHint, addToHistory = true): void {
+    function replaceState(
+      markdown?: string,
+      selection?: SelectionHint,
+      addToHistory = true,
+      forceMarkdown = false,
+    ): void {
       if (markdown == null && !selection) return
       const transaction = editor.state.tr
       if (markdown != null) {
         const doc = markdownToDoc(markdown, { nodes: editor.nodes, frontmatter })
-        transaction.replaceWith(0, transaction.doc.content.size, doc.content)
+        const currentMarkdown = docToMarkdown(transaction.doc, { frontmatter })
+        const nextMarkdown = docToMarkdown(doc, { frontmatter })
+        // Edge-only blank blocks intentionally normalize away in Markdown. An
+        // equivalent host echo must not replace the document and erase that
+        // transient editor structure; refreshMarkdownRendering forces the
+        // replacement when a caller explicitly needs one.
+        if (forceMarkdown || currentMarkdown !== nextMarkdown) {
+          transaction.replaceWith(0, transaction.doc.content.size, doc.content)
+        } else if (!selection) {
+          return
+        }
       }
       if (selection) {
         transaction.setSelection(resolveSelection(transaction.doc, selection)).scrollIntoView()
@@ -374,7 +389,7 @@ export function ProseKitEditor({
     }
     function refreshMarkdownRendering(): void {
       const [markdown, selection] = getState()
-      replaceState(markdown, selection, false)
+      replaceState(markdown, selection, false, true)
     }
     function insertMarkdown(markdown: string): void {
       editor.commands.insertMarkdown(markdown)
