@@ -10,7 +10,9 @@ import { setupFixture } from '../../testing/index.ts'
  * `pasteText` helper (which forces ProseMirror's plain-text flag, i.e. a
  * Shift-paste), this exercises the regular paste path. Firefox discards the
  * DataTransfer passed to the ClipboardEvent constructor, so when the text did
- * not survive, shadow the getter with the real object.
+ * not survive, shadow the getter with the real object. The native-shortcut
+ * version of this path is covered once in `native-clipboard.test.ts`; this
+ * table stays synthetic to keep its many cases fast.
  */
 function firePlainPaste(view: EditorView, text: string): void {
   const clipboardData = new DataTransfer()
