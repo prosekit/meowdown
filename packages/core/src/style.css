@@ -44,7 +44,7 @@
     --meowdown-hr: var(--meowdown-border);
 
     /* table cell border color */
-    --meowdown-table-border: var(--meowdown-accent);
+    --meowdown-table-border: var(--meowdown-border);
 
     /* blockquote left bar */
     --meowdown-blockquote-border: color-mix(in oklab, var(--meowdown-accent) 35%, transparent);
