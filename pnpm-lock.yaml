@@ -286,6 +286,9 @@ importers:
       '@ocavue/tsconfig':
         specifier: ^0.7.1
         version: 0.7.1
+      '@ocavue/utils':
+        specifier: ^1.7.0
+        version: 1.7.0
       '@prosekit/pm':
         specifier: ^0.1.19-beta.3
         version: 0.1.19-beta.3

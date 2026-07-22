@@ -1,13 +1,5 @@
+import { sleep } from '@ocavue/utils'
 import { userEvent } from 'vitest/browser'
-
-export interface ClipboardFlavors {
-  html: string
-  text: string
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
 
 /**
  * Read the real clipboard by focusing a dummy contenteditable element and
@@ -16,12 +8,12 @@ function sleep(ms: number): Promise<void> {
  * `navigator.clipboard.readText()`, which WebKit rejects outside a user
  * gesture no matter which permissions are granted.
  */
-export async function readClipboard(): Promise<ClipboardFlavors> {
+export async function readClipboard(): Promise<{ html: string; text: string }> {
   const dummy = document.createElement('div')
   dummy.contentEditable = 'true'
   document.body.append(dummy)
   try {
-    const result: ClipboardFlavors = { html: '', text: '' }
+    const result = { html: '', text: '' }
     let fired = false
     const done = new Promise<void>((resolve) => {
       dummy.addEventListener('paste', (event) => {
