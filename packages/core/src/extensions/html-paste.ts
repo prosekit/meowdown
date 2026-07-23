@@ -4,6 +4,7 @@ import { NO_BREAK_SPACE } from 'unicode-by-name'
 
 import { htmlToMarkdown } from '../converters/html-to-md.ts'
 import { markdownToDoc } from '../converters/md-to-pm.ts'
+import { CHAR_LINE_FEED } from '../unicode.ts'
 
 import { getSemanticDOMSerializer } from './clipboard/clipboard-serializer.ts'
 import { getNodeBuildersForSchema } from './schema.ts'
@@ -86,7 +87,9 @@ function appendText(output: TextOutput, text: string): void {
   output.chunks.push(text)
 
   let index = text.length
-  while (index > 0 && text.charCodeAt(index - 1) === 10) index--
+  while (index > 0 && text.charCodeAt(index - 1) === CHAR_LINE_FEED) {
+    index--
+  }
   if (index === 0) {
     output.trailingNewlines += text.length
   } else {
