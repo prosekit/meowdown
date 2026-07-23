@@ -151,6 +151,38 @@ describe('ProseKitEditor', () => {
     await expect.element(screen.getByText('Hello')).toBeInTheDocument()
   })
 
+  it('keeps a leading empty block when the host echoes unchanged Markdown', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(
+      <ProseKitEditor ref={ref} markMode="hide" initialMarkdown={'**Links**\n\n- aiforui.dev'} />,
+    )
+
+    const handle = ref.current
+    const editor = handle?.editor
+    if (!handle || !editor) throw new Error('editor not mounted')
+    handle.setSelection('start')
+    handle.focus()
+    await userEvent.keyboard('{Enter}')
+    expect(editor.state.doc.child(0).type.name).toBe('paragraph')
+    expect(editor.state.doc.child(0).content.size).toBe(0)
+    expect(editor.state.doc.child(1).textContent).toBe('**Links**')
+    expect(editor.state.selection.$from.parent).toBe(editor.state.doc.child(1))
+    expect(editor.state.selection.$from.parentOffset).toBe(0)
+
+    // A controlled host commonly persists getMarkdown() and echoes it through
+    // setMarkdown(). Edge-only blank blocks have no Markdown representation,
+    // so replacing the whole document here would drop the block and map its
+    // caret to the end of the note.
+    const markdown = handle.getMarkdown().trimEnd()
+    handle.setMarkdown(markdown)
+
+    expect(editor.state.doc.child(0).type.name).toBe('paragraph')
+    expect(editor.state.doc.child(0).content.size).toBe(0)
+    expect(editor.state.doc.child(1).textContent).toBe('**Links**')
+    expect(editor.state.selection.$from.parent).toBe(editor.state.doc.child(1))
+    expect(editor.state.selection.$from.parentOffset).toBe(0)
+  })
+
   it('fires onDocChange for insertMarkdown, unlike setMarkdown', async () => {
     const onDocChange = vi.fn()
     const ref = createRef<EditorHandle>()

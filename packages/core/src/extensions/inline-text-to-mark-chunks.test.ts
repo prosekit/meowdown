@@ -338,6 +338,46 @@ describe('link', () => {
       "
     `)
   })
+
+  it('single brackets stay plain text', () => {
+    // meowdown has no link reference definitions, so lezer's shortcut
+    // reference link `[text]` must not render as a link.
+    expect(parse('see [foo] end')).toMatchInlineSnapshot(`
+      "
+      [0, 13]
+      "
+    `)
+  })
+
+  it('full reference stays plain text', () => {
+    expect(parse('[foo][bar]')).toMatchInlineSnapshot(`
+      "
+      [0, 10]
+      "
+    `)
+  })
+
+  it('nested syntax inside plain brackets still renders', () => {
+    expect(parse('[*em*]')).toMatchInlineSnapshot(`
+      "
+      [0, 1]
+      [1, 2] mdPack(key=italic) + mdEm + mdMark
+      [2, 4] mdPack(key=italic) + mdEm
+      [4, 5] mdPack(key=italic) + mdEm + mdMark
+      [5, 6]
+      "
+    `)
+  })
+
+  it('explicit empty destination keeps the link pack', () => {
+    expect(parse('[a]()')).toMatchInlineSnapshot(`
+      "
+      [0, 1] mdPack(key=link,data={"href":"","title":""}) + mdMark
+      [1, 2] mdPack(key=link,data={"href":"","title":""})
+      [2, 5] mdPack(key=link,data={"href":"","title":""}) + mdMark
+      "
+    `)
+  })
 })
 
 describe('image', () => {
@@ -867,13 +907,11 @@ describe('wikilink', () => {
   })
 
   it('unclosed', () => {
-    // The inner `[a]` becomes a shortcut reference link (lezer behavior).
+    // Lezer parses the inner `[a]` as a shortcut reference link, which
+    // meowdown renders as plain text.
     expect(parse('[[a]')).toMatchInlineSnapshot(`
       "
-      [0, 1]
-      [1, 2] mdPack(key=link,data={"href":"","title":""}) + mdMark
-      [2, 3] mdPack(key=link,data={"href":"","title":""})
-      [3, 4] mdPack(key=link,data={"href":"","title":""}) + mdMark
+      [0, 4]
       "
     `)
   })

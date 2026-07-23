@@ -58,6 +58,8 @@ Slash menu host items can include `keywords` to match hidden terms without chang
 
 The caret glides between positions by default; pass `caretGlide={false}` to move it instantly (hosts can also tune the duration via the `--meowdown-caret-glide` CSS variable).
 
+`MarkdownView` folds collapsed (`+`) bullets like the editor; pass `expandCollapsed` to render them expanded at every depth, for views that show slices of a note (e.g. a backlinks panel) where the source's fold state must not hide the content the view exists to show.
+
 ### Wiki embeds
 
 Obsidian-style wiki embeds (`![[path]]`, with optional `|width` or

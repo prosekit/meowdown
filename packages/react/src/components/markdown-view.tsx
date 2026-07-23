@@ -100,6 +100,13 @@ export interface MarkdownViewProps {
    * YouTube embeds are omitted before any image resolver runs.
    */
   interactive?: boolean
+  /**
+   * Render collapsed (`+`) bullets expanded, ignoring their fold state at any
+   * depth. Off by default. For views that show slices of a note (e.g. a
+   * backlinks panel), where the source's fold state must not hide the content
+   * the view exists to show.
+   */
+  expandCollapsed?: boolean
   /** Map an image `src` to a displayable URL, or `undefined` to skip it. */
   resolveImageUrl?: (src: string) => string | undefined
   /**
@@ -127,6 +134,7 @@ export interface MarkdownViewProps {
 
 interface RenderContext {
   interactive: boolean
+  expandCollapsed: boolean
   resolveImageUrl?: (src: string) => string | undefined
   resolveFileLink?: FileLinkResolver
   resolveWikiEmbed?: WikiEmbedResolver
@@ -577,7 +585,12 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
   let handleTaskClick: ((event: MouseEvent) => void) | undefined
 
   if (typeName === 'list') {
-    const attrs = node.attrs as MeowdownListAttrs
+    let attrs = node.attrs as MeowdownListAttrs
+    if (context.expandCollapsed && attrs.collapsed) {
+      attrs = { ...attrs, collapsed: false }
+      node = node.type.create(attrs, node.content, node.marks)
+    }
+
     const { onTaskClick } = context
     if (attrs.kind === 'task' && onTaskClick) {
       const index = context.taskCounter.value++
@@ -653,6 +666,7 @@ export function MarkdownView({
   markMode = 'hide',
   frontmatter = false,
   interactive = true,
+  expandCollapsed = false,
   resolveImageUrl,
   resolveFileLink,
   resolveWikiEmbed,
@@ -668,6 +682,7 @@ export function MarkdownView({
     const doc = markdownToDoc(markdown, { frontmatter })
     const context: RenderContext = {
       interactive,
+      expandCollapsed,
       resolveImageUrl,
       resolveFileLink,
       resolveWikiEmbed,
@@ -685,6 +700,7 @@ export function MarkdownView({
     markdown,
     frontmatter,
     interactive,
+    expandCollapsed,
     resolveImageUrl,
     resolveFileLink,
     resolveWikiEmbed,

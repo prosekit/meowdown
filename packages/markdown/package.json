@@ -1,7 +1,7 @@
 {
   "name": "@meowdown/markdown",
   "type": "module",
-  "version": "0.55.1",
+  "version": "0.57.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@lezer/common": "^1.5.2",
-    "@lezer/markdown": "^1.7.1"
+    "@lezer/markdown": "^1.7.2"
   },
   "devDependencies": {
     "@meowdown/vitest": "workspace:*",
