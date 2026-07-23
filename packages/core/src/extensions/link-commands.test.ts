@@ -54,6 +54,17 @@ describe('updateLink', () => {
     editor.commands.selectText(findText(fixture.doc, 'example.com') + 1)
     expect(editor.commands.updateLink({ href: 'http://x' })).toBe(false)
   })
+
+  it('does not rewrite a reference', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('[Docs][doc]'), n.paragraph('[doc]: /old')))
+    editor.commands.selectText(findText(fixture.doc, 'Docs') + 1)
+
+    expect(editor.commands.updateLink({ href: '/new' })).toBe(false)
+    expect(fixture.doc.textContent).toContain('[Docs][doc]')
+    expect(fixture.doc.textContent).toContain('[doc]: /old')
+  })
 })
 
 describe('removeLink', () => {
@@ -72,5 +83,15 @@ describe('removeLink', () => {
     fixture.set(n.doc(n.paragraph('see https://example.com now')))
     editor.commands.selectText(findText(fixture.doc, 'example.com') + 1)
     expect(editor.commands.removeLink()).toBe(false)
+  })
+
+  it('does not unwrap a reference', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('[Docs][doc]'), n.paragraph('[doc]: /old')))
+    editor.commands.selectText(findText(fixture.doc, 'Docs') + 1)
+
+    expect(editor.commands.removeLink()).toBe(false)
+    expect(fixture.doc.textContent).toContain('[Docs][doc]')
   })
 })
