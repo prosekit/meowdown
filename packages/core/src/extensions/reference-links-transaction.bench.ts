@@ -11,30 +11,30 @@
  * restyle meta transaction, without waiting for the 200 ms UI debounce.
  *
  * Baseline recorded 2026-07-23 with Vitest 4.1.10, Chromium, and commit
- * de927682. Values are mean milliseconds per sample:
+ * 71d05a3. Values are mean milliseconds per sample:
  *
  *   ordinary edit
- *     1000 blocks /   20 definitions: 0.0634 ms
- *     1000 blocks /  100 definitions: 0.0651 ms
- *     1000 blocks /  400 definitions: 0.0797 ms
- *     1000 blocks / 1000 definitions: 0.1088 ms
- *     4000 blocks /   20 definitions: 0.2102 ms
- *    16000 blocks / 1000 definitions: 0.8616 ms
+ *     1000 blocks /   20 definitions: 0.0696 ms
+ *     1000 blocks /  100 definitions: 0.0731 ms
+ *     1000 blocks /  400 definitions: 0.0906 ms
+ *     1000 blocks / 1000 definitions: 0.1266 ms
+ *     4000 blocks /   20 definitions: 0.2372 ms
+ *    16000 blocks / 1000 definitions: 0.9839 ms
  *
  *   definition keystroke
- *     1000 blocks /  100 dependents: 0.1258 ms
- *     4000 blocks /  400 dependents: 0.4755 ms
- *     1000 blocks / 1000 dependents: 0.1646 ms
+ *     1000 blocks /  100 dependents: 0.1499 ms
+ *     4000 blocks /  400 dependents: 0.5453 ms
+ *     1000 blocks / 1000 dependents: 0.1988 ms
  *
  *   definition edit and flush
- *     1000 blocks /  100 dependents: 0.8089 ms
- *     4000 blocks /  400 dependents: 4.1303 ms
- *     1000 blocks / 1000 dependents: 9.6923 ms
+ *     1000 blocks /  100 dependents: 0.8460 ms
+ *     4000 blocks /  400 dependents: 3.7955 ms
+ *     1000 blocks / 1000 dependents: 11.0587 ms
  *
  *   warm reference index scan
- *     1000 blocks /   20 definitions: 0.0240 ms
- *     1000 blocks / 1000 definitions: 0.0933 ms
- *     4000 blocks /   20 definitions: 0.0914 ms
+ *     1000 blocks /   20 definitions: 0.0265 ms
+ *     1000 blocks / 1000 definitions: 0.0985 ms
+ *     4000 blocks /   20 definitions: 0.1024 ms
  *
  * Benchmark timings depend on hardware and system load. Compare repeated runs
  * on the same machine rather than treating these values as universal limits.
