@@ -1,6 +1,6 @@
 import { pasteHTML } from '@prosekit/core/test'
-import { describe, expect, it } from 'vitest'
 import { NO_BREAK_SPACE } from 'unicode-by-name'
+import { describe, expect, it } from 'vitest'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture } from '../testing/index.ts'
