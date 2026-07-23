@@ -5,10 +5,14 @@ import { describe, expect, it } from 'vitest'
 import { findText } from '../testing/find-text.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
+import { flushPendingRestyle } from './inline-mark-plugin.ts'
+import type { MdImageAttrs, MdLinkTextAttrs } from './inline-marks.ts'
+import { isMarkOfType } from './mark-names.ts'
+
 function hrefAt(doc: EditorNode, needle: string): string | undefined {
   const node = doc.nodeAt(findText(doc, needle))
-  const mark = node?.marks.find((candidate) => candidate.type.name === 'mdLinkText')
-  return mark?.attrs.href
+  const mark = node?.marks.find((candidate) => isMarkOfType(candidate, 'mdLinkText'))
+  return (mark?.attrs as MdLinkTextAttrs | undefined)?.href
 }
 
 describe('reference links', () => {
@@ -74,15 +78,18 @@ describe('reference links', () => {
   it('renders a reference image', () => {
     using fixture = setupDoc('See ![moon pic][moon].', '[moon]: https://img.test/moon.jpg')
     const imageNode = fixture.doc.nodeAt(findText(fixture.doc, 'moon pic'))
-    const imageMark = imageNode?.marks.find((mark) => mark.type.name === 'mdImage')
-    expect(imageMark?.attrs.src).toBe('https://img.test/moon.jpg')
+    const imageMark = imageNode?.marks.find((mark) => isMarkOfType(mark, 'mdImage'))
+    expect((imageMark?.attrs as MdImageAttrs | undefined)?.src).toBe('https://img.test/moon.jpg')
   })
 
   it('ignores a definition inside a blockquote', () => {
     using fixture = setupFixture()
     const { n } = fixture
     fixture.set(
-      n.doc(n.paragraph('Read [alpha].'), n.blockquote(n.paragraph('[alpha]: https://quoted.test'))),
+      n.doc(
+        n.paragraph('Read [alpha].'),
+        n.blockquote(n.paragraph('[alpha]: https://quoted.test')),
+      ),
     )
     expect(hrefAt(fixture.doc, 'alpha')).toBeUndefined()
   })
@@ -92,6 +99,7 @@ describe('reference links', () => {
     const { editor } = fixture
     const urlEnd = findText(fixture.doc, 'https://a.test') + 'https://a.test'.length
     editor.view.dispatch(editor.state.tr.insertText('x', urlEnd))
+    flushPendingRestyle(editor.view)
     expect(hrefAt(fixture.doc, 'alpha')).toBe('https://a.testx')
   })
 
@@ -101,6 +109,7 @@ describe('reference links', () => {
     const definition = fixture.doc.child(fixture.doc.childCount - 1)
     const definitionStart = fixture.doc.content.size - definition.nodeSize
     editor.view.dispatch(editor.state.tr.delete(definitionStart, fixture.doc.content.size))
+    flushPendingRestyle(editor.view)
     expect(hrefAt(fixture.doc, 'alpha')).toBeUndefined()
   })
 
@@ -110,6 +119,7 @@ describe('reference links', () => {
     expect(hrefAt(fixture.doc, 'alpha')).toBeUndefined()
     const definition = n.paragraph('[alpha]: https://late.test')
     editor.view.dispatch(editor.state.tr.insert(editor.state.doc.content.size, definition))
+    flushPendingRestyle(editor.view)
     expect(hrefAt(fixture.doc, 'alpha')).toBe('https://late.test')
   })
 

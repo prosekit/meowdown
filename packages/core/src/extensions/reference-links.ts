@@ -4,6 +4,8 @@ import type { Transaction } from '@prosekit/pm/state'
 import { decodeString } from 'micromark-util-decode-string'
 import { normalizeIdentifier } from 'micromark-util-normalize-identifier'
 
+import { isNodeOfType } from './node-names.ts'
+
 /** One CommonMark link-reference definition resolved for rendering. */
 export interface ReferenceDefinition {
   /** Normalized label key used by full, collapsed, and shortcut references. */
@@ -122,7 +124,7 @@ export function buildReferenceIndex(
 ): ReferenceIndex {
   let definitions: Map<string, ReferenceDefinition> | undefined
   doc.forEach((child) => {
-    if (child.type.name !== 'paragraph' || child.childCount === 0) return
+    if (!isNodeOfType(child, 'paragraph') || child.childCount === 0) return
     const definition = cachedDefinitionParse(child, cache)
     if (definition === null) return
     definitions ??= new Map()
@@ -144,7 +146,7 @@ function rangeHasDefinitionShapedBlock(
   let found = false
   doc.nodesBetween(Math.max(0, from - 1), Math.min(docSize, to + 1), (node, _pos, parent) => {
     if (found || parent !== doc) return false
-    if (node.type.name === 'paragraph') {
+    if (isNodeOfType(node, 'paragraph')) {
       const cached = cache.get(node)
       if (cached !== undefined ? cached !== null : isDefinitionShaped(node.textContent)) {
         found = true
