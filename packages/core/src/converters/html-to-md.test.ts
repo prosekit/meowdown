@@ -64,6 +64,11 @@ describe('htmlToMarkdown', () => {
     expect(htmlToMarkdown(html).trim()).toBe('- [ ] one\n- [x] two')
   })
 
+  it('does not promote a parent of a nested task item', () => {
+    const html = '<ul><li>parent<ul><li><input type="checkbox" checked> child</li></ul></li></ul>'
+    expect(htmlToMarkdown(html).trim()).toBe('- parent\n  - [x] child')
+  })
+
   it('converts a tiptap-style task list', () => {
     // Tiptap nests the checkbox in a <label> and the body in a <div>, a shape
     // the stock `li` handler misses (the item would lose its checkbox).
