@@ -120,6 +120,9 @@ importers:
       remark-stringify:
         specifier: ^11.0.0
         version: 11.0.0
+      unicode-by-name:
+        specifier: ^0.2.0
+        version: 0.2.0
       unified:
         specifier: ^11.0.5
         version: 11.0.5
@@ -151,9 +154,6 @@ importers:
       tsdown:
         specifier: ^0.22.8
         version: 0.22.8(@tsdown/css@0.22.8)(oxc-resolver@11.21.3)(typescript@6.0.3)
-      unicode-by-name:
-        specifier: ^0.2.0
-        version: 0.2.0
       vitest:
         specifier: ^4.1.10
         version: 4.1.10(@types/node@24.13.3)(@vitest/browser-playwright@4.1.10)(@vitest/coverage-v8@4.1.10)(vite@8.1.5)

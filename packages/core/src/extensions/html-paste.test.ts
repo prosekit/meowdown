@@ -1,5 +1,6 @@
 import { pasteHTML } from '@prosekit/core/test'
 import { describe, expect, it } from 'vitest'
+import { NO_BREAK_SPACE } from 'unicode-by-name'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture } from '../testing/index.ts'
@@ -128,27 +129,51 @@ describe('paste styled plain text', () => {
     expect(editor.state.doc.firstChild?.attrs.kind).toBe('task')
   })
 
-  it('keeps markdown punctuation in styled prose unescaped', () => {
+  it('keeps active markdown syntax literal in plain HTML prose', () => {
     using fixture = setupFixture()
     const { editor, n, view } = fixture
     fixture.set(n.doc(n.paragraph('<a>')))
-    pasteHTML(view, '<p>[foo] and ~5 items and `code`</p>')
-    expect(docToMarkdown(editor.state.doc).trim()).toBe('[foo] and ~5 items and `code`')
+    pasteHTML(view, '<p>**bold** and `code`</p>')
+    expect(docToMarkdown(editor.state.doc)).toBe('\\*\\*bold\\*\\* and \\`code\\`\n')
+  })
+
+  it('keeps active markdown syntax literal in unstyled line divs', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    pasteHTML(view, '<div>- literal item</div>')
+    expect(docToMarkdown(editor.state.doc)).toBe('\\- literal item\n')
+  })
+
+  it('ignores styles outside line divs', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    pasteHTML(view, '<style>body { color: red }</style><div>- literal item</div>')
+    expect(docToMarkdown(editor.state.doc)).toBe('\\- literal item\n')
   })
 
   it('keeps blank-line structure from line divs', () => {
     using fixture = setupFixture()
     const { editor, n, view } = fixture
     fixture.set(n.doc(n.paragraph('<a>')))
-    pasteHTML(view, '<div>aaa</div><div><br></div><div>bbb</div>')
+    pasteHTML(view, '<div style="color:red">aaa</div><div><br></div><div>bbb</div>')
     expect(docToMarkdown(editor.state.doc)).toBe('aaa\n\nbbb\n')
   })
 
-  it('separates paragraphs from p tags', () => {
+  it('separates plain HTML paragraphs', () => {
     using fixture = setupFixture()
     const { editor, n, view } = fixture
     fixture.set(n.doc(n.paragraph('<a>')))
     pasteHTML(view, '<p>aaa</p><p>bbb</p>')
     expect(docToMarkdown(editor.state.doc)).toBe('aaa\n\nbbb\n')
+  })
+
+  it('keeps non-breaking spaces in plain HTML prose', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    pasteHTML(view, '<p>10&nbsp;kg</p>')
+    expect(docToMarkdown(editor.state.doc)).toBe(`10${NO_BREAK_SPACE}kg\n`)
   })
 })
