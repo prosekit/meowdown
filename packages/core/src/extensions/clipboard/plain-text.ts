@@ -94,10 +94,10 @@ function flattenToParagraph(schema: Schema, node: ProseMirrorNode): ProseMirrorN
 }
 
 /**
- * The `text/plain` flavor is Markdown: complete blocks keep their markers,
- * while incomplete selection edges contain only the selected text. The mark
- * mode decides the inline layer: hide strips syntax characters, while focus
- * and show keep the full source.
+ * The `text/plain` flavor is Markdown. Opening markers are kept when the
+ * selection includes their content start; fenced code blocks and tables keep
+ * structure only when selected completely. The mark mode decides the inline
+ * layer: hide strips syntax characters, while focus and show keep the source.
  */
 export function definePlainTextSerializer(): PlainExtension {
   return definePlugin(
