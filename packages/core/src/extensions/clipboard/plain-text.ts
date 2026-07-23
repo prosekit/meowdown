@@ -1,9 +1,13 @@
 import { definePlugin, getNodeType, isTextSelection, type PlainExtension } from '@prosekit/core'
 import { Fragment, Slice } from '@prosekit/pm/model'
-import type { ProseMirrorNode, ResolvedPos, Schema } from '@prosekit/pm/model'
+import type { ProseMirrorNode, Schema } from '@prosekit/pm/model'
 import { Plugin, PluginKey, type Selection } from '@prosekit/pm/state'
 
 import { docToMarkdown } from '../../converters/pm-to-md.ts'
+import {
+  isAtTopLevelBlockEnd,
+  isAtTopLevelBlockStart,
+} from '../../utils/top-level-block-boundary.ts'
 import type { MdWikilinkAttrs } from '../inline-marks.ts'
 import { groupInlineRuns, hasSyntaxMark } from '../inline-runs.ts'
 import { getMarkMode } from '../mark-mode.ts'
@@ -49,24 +53,6 @@ function flattenToParagraph(schema: Schema, node: ProseMirrorNode): ProseMirrorN
   const paragraphType = getNodeType(schema, 'paragraph' satisfies NodeName)
   const text = node.textBetween(0, node.content.size, '\n', '\n')
   return paragraphType.create(undefined, text ? schema.text(text) : undefined)
-}
-
-function isAtTopLevelBlockStart($pos: ResolvedPos): boolean {
-  if ($pos.depth === 0) return true
-  if ($pos.parentOffset !== 0) return false
-  for (let depth = 1; depth < $pos.depth; depth++) {
-    if ($pos.index(depth) !== 0) return false
-  }
-  return true
-}
-
-function isAtTopLevelBlockEnd($pos: ResolvedPos): boolean {
-  if ($pos.depth === 0) return true
-  if ($pos.parentOffset !== $pos.parent.content.size) return false
-  for (let depth = 1; depth < $pos.depth; depth++) {
-    if ($pos.indexAfter(depth) !== $pos.node(depth).childCount) return false
-  }
-  return true
 }
 
 /**
