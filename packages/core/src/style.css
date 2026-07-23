@@ -153,8 +153,8 @@
     -webkit-font-smoothing: antialiased;
 
     &[data-meowdown-virtual-caret] {
-        /* The virtual caret (`.md-virtual-caret`) replaces the native caret. */
-        caret-color: transparent;
+      /* The virtual caret (`.md-virtual-caret`) replaces the native caret. */
+      caret-color: transparent;
     }
   }
 
