@@ -157,6 +157,8 @@ function convertBlock(
       return [convertHeading(nodes, cursor, text, 2, true)]
     case LEZER_NODE_IDS.Paragraph:
       return [convertParagraph(nodes, cursor, text)]
+    case LEZER_NODE_IDS.LinkReference:
+      return [convertParagraph(nodes, cursor, text)]
     case LEZER_NODE_IDS.CommentBlock:
       // A comment is not rendered output: map it onto the invisible `htmlComment`
       // node so it stays in the document (and round-trips) without reading as

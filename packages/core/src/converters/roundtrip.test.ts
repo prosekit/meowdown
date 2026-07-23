@@ -225,8 +225,13 @@ describe('inline', () => {
     expect(roundtrip('<?php echo 1; ?>')).toBe('<?php echo 1; ?>\n')
   })
 
-  it.fails('keeps a link reference definition', () => {
+  it('keeps a link reference definition', () => {
     expect(roundtrip('[foo]: /url')).toBe('[foo]: /url\n')
+  })
+
+  it('normalizes nested multiline link reference indentation', () => {
+    const markdown = '> [foo]: /url\n>   "A title"\n'
+    expect(roundtrip(markdown)).toBe('> [foo]: /url\n> "A title"\n')
   })
 })
 
