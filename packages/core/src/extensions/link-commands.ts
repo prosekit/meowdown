@@ -131,6 +131,7 @@ function openLinkEdit(onLinkEdit: LinkEditHandler): Command {
     const link = getLinkUnitAt(state, state.selection.from)
 
     if (link) {
+      if (link.label == null || link.dest == null) return false
       if (dispatch && view) {
         const {
           unit: { from, to },

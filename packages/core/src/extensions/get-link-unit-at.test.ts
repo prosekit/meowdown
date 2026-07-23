@@ -105,4 +105,58 @@ describe('getLinkUnitAt', () => {
     expect(fixture.doc.textBetween(link.label!.from, link.label!.to)).toBe('a')
     expect(fixture.doc.textBetween(link.dest!.from, link.dest!.to)).toBe('http://x.test')
   })
+
+  it('returns a reference href without editable inline ranges', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(n.paragraph('Read [the plan][doc].'), n.paragraph('[doc]: docs/plan.md "Plan"')),
+    )
+
+    const link = getLinkUnitAt(fixture.state, findText(fixture.doc, 'the plan') + 1)
+    if (link == null) throw new Error('Reference link not found')
+
+    expect(link.href).toBe('docs/plan.md')
+    expect(link.title).toBe('Plan')
+    expect(link.label).toBeUndefined()
+    expect(link.dest).toBeUndefined()
+    expect(fixture.doc.textBetween(link.unit.from, link.unit.to)).toBe('[the plan][doc]')
+    expect(fixture.doc.textBetween(link.text.from, link.text.to)).toBe('the plan')
+  })
+
+  it('returns the visible range for a collapsed reference', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('[doc][]'), n.paragraph('[doc]: /docs')))
+
+    const link = getLinkUnitAt(fixture.state, findText(fixture.doc, 'doc') + 1)
+    if (link == null) throw new Error('Collapsed reference link not found')
+    expect(link.href).toBe('/docs')
+    expect(fixture.doc.textBetween(link.unit.from, link.unit.to)).toBe('[doc][]')
+    expect(fixture.doc.textBetween(link.text.from, link.text.to)).toBe('doc')
+  })
+
+  it('returns the visible range for a shortcut reference', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('[doc]'), n.paragraph('[doc]: /docs')))
+
+    const link = getLinkUnitAt(fixture.state, findText(fixture.doc, 'doc') + 1)
+    if (link == null) throw new Error('Shortcut reference link not found')
+    expect(link.href).toBe('/docs')
+    expect(fixture.doc.textBetween(link.unit.from, link.unit.to)).toBe('[doc]')
+    expect(fixture.doc.textBetween(link.text.from, link.text.to)).toBe('doc')
+  })
+
+  it('returns a resolved reference with an empty destination', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('[empty]'), n.paragraph('[empty]: <>')))
+
+    const link = getLinkUnitAt(fixture.state, findText(fixture.doc, 'empty') + 1)
+    if (link == null) throw new Error('Empty reference link not found')
+    expect(link.href).toBe('')
+    expect(link.label).toBeUndefined()
+    expect(link.dest).toBeUndefined()
+  })
 })
