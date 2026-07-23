@@ -150,9 +150,12 @@
     font-size: 1.0625rem;
     line-height: 1.7;
     color: var(--meowdown-text);
-    /* The virtual caret (`.md-virtual-caret`) replaces the native caret. */
-    caret-color: transparent;
     -webkit-font-smoothing: antialiased;
+
+    &[data-meowdown-virtual-caret] {
+      /* The virtual caret (`.md-virtual-caret`) replaces the native caret. */
+      caret-color: transparent;
+    }
   }
 
   /* ---------------------------------------------------------------------------
