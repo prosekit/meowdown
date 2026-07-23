@@ -160,7 +160,8 @@ function transactionTouchesDefinitions(transaction: Transaction): boolean {
   // `- [doc]: /url`, while its paragraph text remains `[doc]: /url` because the
   // checkbox lives on the list attrs. AttrStep exposes StepMap.empty, so no
   // mapped range reports that the paragraph became a definition.
-  if (transaction.steps.some((step) => step instanceof AttrStep)) return true
+  if (transaction.steps.some((step) => step instanceof AttrStep && step.attr === 'kind'))
+    return true
 
   for (const [index, map] of transaction.mapping.maps.entries()) {
     const before = transaction.docs[index]

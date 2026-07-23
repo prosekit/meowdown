@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
 import { markdownToDoc } from '../converters/md-to-pm.ts'
+import { setupFixture } from '../testing/index.ts'
 
 import {
   collectReferenceDefinitions,
   normalizeReferenceLabel,
   parseReferenceDefinition,
+  updateReferenceDefinitions,
 } from './reference-links.ts'
 
 describe('normalizeReferenceLabel', () => {
@@ -131,5 +133,33 @@ describe('collectReferenceDefinitions', () => {
     const first = collectReferenceDefinitions(doc).definitions.get('DOC')
     const second = collectReferenceDefinitions(doc).definitions.get('DOC')
     expect(second).toBe(first)
+  })
+})
+
+describe('updateReferenceDefinitions', () => {
+  it('rebuilds after a list kind AttrStep changes definition eligibility', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'task' }, n.paragraph('[doc]: /docs'))))
+    const previous = collectReferenceDefinitions(fixture.doc)
+    expect(previous.definitions.has('DOC')).toBe(false)
+
+    const transaction = fixture.state.tr.setNodeAttribute(0, 'kind', 'bullet')
+    const current = updateReferenceDefinitions(previous, transaction, transaction.doc)
+
+    expect(current).not.toBe(previous)
+    expect(current.definitions.get('DOC')?.href).toBe('/docs')
+  })
+
+  it('reuses the index after an unrelated list AttrStep', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('[doc]: /docs'))))
+    const previous = collectReferenceDefinitions(fixture.doc)
+
+    const transaction = fixture.state.tr.setNodeAttribute(0, 'checked', true)
+    const current = updateReferenceDefinitions(previous, transaction, transaction.doc)
+
+    expect(current).toBe(previous)
   })
 })
