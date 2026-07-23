@@ -37,6 +37,8 @@
     "hast-util-to-mdast": "^10.1.2",
     "katex": "^0.18.1",
     "mdast-util-to-markdown": "^2.1.2",
+    "micromark-util-decode-string": "^2.0.1",
+    "micromark-util-normalize-identifier": "^2.0.1",
     "prosemirror-flat-list": "^0.7.1",
     "prosemirror-highlight": "^0.15.3",
     "rehype-parse": "^9.0.1",

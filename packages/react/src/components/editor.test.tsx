@@ -167,6 +167,24 @@ describe('MeowdownEditor', () => {
     expect(ref.current?.getState()).toEqual(state)
   })
 
+  it('renders and round-trips reference links and images as source', async () => {
+    const markdown =
+      '[doc]: https://example.com/docs "Plan"\n\nRead [the plan][doc] and ![diagram][asset].\n\n[asset]: https://example.com/diagram.png'
+    const ref = createRef<EditorHandle>()
+    await render(
+      <MeowdownEditor handleRef={ref} initialMarkdown={markdown} resolveImageUrl={(src) => src} />,
+    )
+
+    await expect
+      .element(pmRoot.getByText('the plan'))
+      .toHaveAttribute('href', 'https://example.com/docs')
+    await expect
+      .element(page.getByAltText('diagram'))
+      .toHaveAttribute('src', 'https://example.com/diagram.png')
+    await expect.element(pmRoot).toHaveTextContent('[doc]: https://example.com/docs "Plan"')
+    expect(ref.current?.getMarkdown()).toBe(markdown + '\n')
+  })
+
   it('renders an image when resolveImageUrl returns a url', async () => {
     await render(
       <MeowdownEditor

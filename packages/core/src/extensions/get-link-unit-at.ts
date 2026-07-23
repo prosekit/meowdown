@@ -7,7 +7,7 @@ import type { MdLinkTextAttrs, MdPackAttrs } from './inline-marks.ts'
 import { isMarkOfType, type MarkName } from './mark-names.ts'
 
 export interface LinkUnit {
-  /** Whole `[text](url "title")` (or autolink) range */
+  /** Whole inline link, reference link, or autolink range. */
   unit: PositionRange
 
   /**
@@ -98,6 +98,19 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
       text,
       href,
       title: '',
+    }
+  }
+
+  if (packAttrs.data.reference === true) {
+    const text =
+      linkText == null
+        ? { from: unit.from, to: unit.to }
+        : { from: linkText.from + 1, to: linkText.to }
+    return {
+      unit: { from: unit.from, to: unit.to },
+      text,
+      href: packAttrs.data.href,
+      title: packAttrs.data.title,
     }
   }
 

@@ -101,6 +101,50 @@ describe('MarkdownView', () => {
     expect(view.element().querySelector('[data-testid="file-pill"]')).toBeNull()
   })
 
+  it('renders full, collapsed, and shortcut reference links', async () => {
+    await renderView(
+      '[Full][docs], [docs][], and [docs].\n\n[docs]: https://example.com "Documentation"',
+    )
+
+    const links = view.locate('a[href="https://example.com"]')
+    await expect.element(links).toHaveLength(3)
+    await expect.element(view).not.toHaveTextContent('[docs]:')
+  })
+
+  it('uses the first normalized reference definition', async () => {
+    await renderView(
+      '[Plan][ DOCS ]\n\n[docs]: https://first.example\n\n[DOCS]: https://second.example',
+    )
+
+    await expect.element(view.getByText('Plan')).toHaveAttribute('href', 'https://first.example')
+    await expect.element(view).not.toHaveTextContent('https://second.example')
+  })
+
+  it('renders a reference image and omits its definition', async () => {
+    await renderView('![Diagram][asset]\n\n[asset]: https://example.com/diagram.png "System"')
+
+    const image = view.getByAltText('Diagram')
+    await expect.element(image).toHaveAttribute('src', 'https://example.com/diagram.png')
+    await expect.element(view).not.toHaveTextContent('[asset]:')
+  })
+
+  it('resolves a definition inside a blockquote', async () => {
+    await renderView('> [docs]: https://example.com\n\nRead [Docs].')
+
+    await expect.element(view.getByText('Docs')).toHaveAttribute('href', 'https://example.com')
+    await expect.element(view).not.toHaveTextContent('[docs]:')
+  })
+
+  it('reports clicks from a reference link', async () => {
+    const onLinkClick = vi.fn()
+    await renderView('[Docs][docs]\n\n[docs]: https://example.com', { onLinkClick })
+
+    await view.locate('a[href="https://example.com"]').click()
+    expect(onLinkClick).toHaveBeenCalledWith(
+      expect.objectContaining({ href: 'https://example.com' }),
+    )
+  })
+
   it('resolves metadata for a claimed standard Markdown file link', async () => {
     const resolveFileInfo = vi.fn(() => ({ size: 1_400_000 }))
     await renderView('[Quarterly](docs/report.pdf)', {
