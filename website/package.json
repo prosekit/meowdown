@@ -17,8 +17,8 @@
     "@meowdown/core": "workspace:*",
     "@meowdown/react": "workspace:*",
     "@ocavue/utils": "^1.7.0",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@egoist/tailwindcss-icons": "^1.9.2",
@@ -27,7 +27,7 @@
     "@tailwindcss/vite": "^4.3.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.3",
+    "@vitejs/plugin-react": "^6.0.4",
     "tailwindcss": "^4.3.2",
     "vite": "^8.1.5"
   }
