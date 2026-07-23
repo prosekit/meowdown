@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.57.2](https://github.com/prosekit/meowdown/compare/v0.57.1...v0.57.2) (2026-07-23)
+
+
+### Bug Fixes
+
+* **core:** omit block markers from partial clipboard selections ([#357](https://github.com/prosekit/meowdown/issues/357)) ([e173246](https://github.com/prosekit/meowdown/commit/e1732461f04727fa2186cc39d2aab25097a76a51))
+
 ## [0.57.1](https://github.com/prosekit/meowdown/compare/v0.57.0...v0.57.1) (2026-07-23)
 
 
