@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.57.0](https://github.com/prosekit/meowdown/compare/v0.56.0...v0.57.0) (2026-07-22)
+
+
+### Features
+
+* **core:** add `--meowdown-hr` and `--meowdown-table-border` theme variables ([#339](https://github.com/prosekit/meowdown/issues/339)) ([12c2414](https://github.com/prosekit/meowdown/commit/12c24142fb5f58c85df8393899ecb4b1a9ce9b02))
+
+
+### Bug Fixes
+
+* **core:** convert tiptap and remirror task items ([#346](https://github.com/prosekit/meowdown/issues/346)) ([65c5a5d](https://github.com/prosekit/meowdown/commit/65c5a5df5ec77a8d10a7fd47030639c66e5ee8eb))
+* **core:** narrow markdown escaping ([#350](https://github.com/prosekit/meowdown/issues/350)) ([fb41f71](https://github.com/prosekit/meowdown/commit/fb41f7158f485b300d5abca79779ccd5faed7d13))
+* **react:** preserve edge blocks on markdown echo ([#351](https://github.com/prosekit/meowdown/issues/351)) ([9b24bdb](https://github.com/prosekit/meowdown/commit/9b24bdb311687b31cc19bd79a7bdea3feb0859d4))
+
 ## [0.56.0](https://github.com/prosekit/meowdown/compare/v0.55.1...v0.56.0) (2026-07-21)
 
 
