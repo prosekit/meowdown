@@ -17,6 +17,11 @@ interface BatchSetMarkStepJSON {
 
 const SPARSE_CHUNK_LIMIT = 32
 
+/**
+ * Apply a small batch by visiting each chunk's narrow range independently.
+ * This avoids rebuilding a shared ancestor when an ordinary edit produces only
+ * a handful of distant mark changes.
+ */
 function applySparseChunks(doc: EditorNode, chunks: readonly MarkChunk[]): StepResult {
   const docSize = doc.content.size
   let transform: Transform | undefined
@@ -35,6 +40,7 @@ function applySparseChunks(doc: EditorNode, chunks: readonly MarkChunk[]): StepR
       const nodeTo = Math.min(safeTo, position + node.nodeSize)
       if (nodeFrom >= nodeTo || marksEqual(node.marks, expected)) return false
 
+      // Delay allocation until at least one text node actually differs.
       transform ??= new Transform(doc)
       for (const mark of node.marks) transform.removeMark(nodeFrom, nodeTo, mark)
       for (const mark of expected) transform.addMark(nodeFrom, nodeTo, mark)
@@ -45,14 +51,22 @@ function applySparseChunks(doc: EditorNode, chunks: readonly MarkChunk[]): StepR
   return StepResult.ok(transform?.doc ?? doc)
 }
 
+/**
+ * Apply a dense batch in one ordered tree walk. Reference-link restyles can
+ * produce hundreds of chunks, where running nodesBetween once per chunk would
+ * repeatedly descend through the same document branches.
+ */
 function applySequentialChunks(doc: EditorNode, chunks: readonly MarkChunk[]): StepResult {
   const docSize = doc.content.size
+  // Production chunks are already ordered, but sorting keeps the walk monotonic
+  // for deserialized or independently constructed steps.
   const sorted = [...chunks]
     .filter(([from, to]) => from < to && from < docSize)
     .sort((left, right) => left[0] - right[0])
   if (sorted.length === 0) return StepResult.ok(doc)
 
   const expectedSets = sorted.map(([, , marks]) => Mark.setFrom(marks))
+  // Restrict recursion to the smallest document span containing every chunk.
   const first = Math.max(0, sorted[0][0])
   let last = 0
   for (const [, to] of sorted) {
@@ -63,8 +77,14 @@ function applySequentialChunks(doc: EditorNode, chunks: readonly MarkChunk[]): S
 
   let chunkIndex = 0
 
+  /**
+   * Split one text node at chunk boundaries. A piece with undefined marks keeps
+   * the source node's marks; a concrete set replaces them.
+   */
   function rewriteText(node: EditorNode, nodeFrom: number): EditorNode[] | undefined {
     const nodeTo = nodeFrom + node.nodeSize
+    // Text nodes are visited in document order, so completed chunks never need
+    // to be considered again.
     while (chunkIndex < sorted.length && sorted[chunkIndex][1] <= nodeFrom) chunkIndex++
     interface Piece {
       from: number
@@ -87,6 +107,7 @@ function applySequentialChunks(doc: EditorNode, chunks: readonly MarkChunk[]): S
       pieces.push({ from, to, marks: differs ? expected : undefined })
       cursor = to
     }
+    // Preserve the original text node and all ancestor identities on a no-op.
     if (!changed) return
     if (cursor < nodeTo) pieces.push({ from: cursor, to: nodeTo, marks: undefined })
     return pieces.map((piece) => {
@@ -95,6 +116,10 @@ function applySequentialChunks(doc: EditorNode, chunks: readonly MarkChunk[]): S
     })
   }
 
+  /**
+   * Rebuild only ancestors containing changed text. Children outside the dense
+   * batch's overall span retain their original node identities.
+   */
   function rewriteContent(node: EditorNode, contentFrom: number): Fragment | undefined {
     let rebuilt: EditorNode[] | undefined
     let childFrom = contentFrom
@@ -110,6 +135,8 @@ function applySequentialChunks(doc: EditorNode, chunks: readonly MarkChunk[]): S
           if (content != null) replacement = child.copy(content)
         }
       }
+      // Allocate the replacement array only when the first changed child is
+      // found, then copy the untouched prefix once.
       if (replacement !== child && rebuilt == null) {
         rebuilt = []
         for (let seen = 0; seen < index; seen++) rebuilt.push(node.child(seen))
@@ -144,6 +171,8 @@ export class BatchSetMarkStep extends Step {
 
   apply(doc: EditorNode): StepResult {
     if (this.chunks.length === 0) return StepResult.ok(doc)
+    // Sparse edits favor independent narrow traversals. Dense reference
+    // restyles favor one range-pruned sequential traversal.
     if (this.chunks.length <= SPARSE_CHUNK_LIMIT) {
       return applySparseChunks(doc, this.chunks)
     }

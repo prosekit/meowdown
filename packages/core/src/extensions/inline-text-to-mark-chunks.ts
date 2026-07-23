@@ -81,8 +81,11 @@ export interface FileLinkOptions {
 export type InlineMarkOptions = FileLinkOptions & WikiEmbedOptions
 
 export interface InlineMarkContext {
+  /** Effective document-wide definitions, keyed by normalized reference label. */
   referenceDefinitions?: ReferenceDefinitions
+  /** Prevent this definition block's own label from resolving as a shortcut reference. */
   isReferenceDefinition?: boolean
+  /** Receives every normalized key read by this block, including unresolved references. */
   referencedKeys?: Set<string>
 }
 

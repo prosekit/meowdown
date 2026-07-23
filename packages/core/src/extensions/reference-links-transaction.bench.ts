@@ -1,3 +1,44 @@
+/**
+ * Run from the repository root:
+ *
+ *   pnpm exec vitest bench \
+ *     packages/core/src/extensions/reference-links-transaction.bench.ts \
+ *     --run
+ *
+ * The scenarios reuse a warmed editor and toggle one character per sample.
+ * "definition keystroke" measures the immediate source transaction without the
+ * deferred dependent restyle. "definition edit and flush" also dispatches the
+ * restyle meta transaction, without waiting for the 200 ms UI debounce.
+ *
+ * Baseline recorded 2026-07-23 with Vitest 4.1.10, Chromium, and commit
+ * de927682. Values are mean milliseconds per sample:
+ *
+ *   ordinary edit
+ *     1000 blocks /   20 definitions: 0.0634 ms
+ *     1000 blocks /  100 definitions: 0.0651 ms
+ *     1000 blocks /  400 definitions: 0.0797 ms
+ *     1000 blocks / 1000 definitions: 0.1088 ms
+ *     4000 blocks /   20 definitions: 0.2102 ms
+ *    16000 blocks / 1000 definitions: 0.8616 ms
+ *
+ *   definition keystroke
+ *     1000 blocks /  100 dependents: 0.1258 ms
+ *     4000 blocks /  400 dependents: 0.4755 ms
+ *     1000 blocks / 1000 dependents: 0.1646 ms
+ *
+ *   definition edit and flush
+ *     1000 blocks /  100 dependents: 0.8089 ms
+ *     4000 blocks /  400 dependents: 4.1303 ms
+ *     1000 blocks / 1000 dependents: 9.6923 ms
+ *
+ *   warm reference index scan
+ *     1000 blocks /   20 definitions: 0.0240 ms
+ *     1000 blocks / 1000 definitions: 0.0933 ms
+ *     4000 blocks /   20 definitions: 0.0914 ms
+ *
+ * Benchmark timings depend on hardware and system load. Compare repeated runs
+ * on the same machine rather than treating these values as universal limits.
+ */
 import { createTestEditor, type TestEditor } from '@prosekit/core/test'
 import type { EditorNode } from '@prosekit/pm/model'
 import type { Transaction } from '@prosekit/pm/state'

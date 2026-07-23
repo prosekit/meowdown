@@ -153,6 +153,9 @@ function rangeHasDefinitionCandidate(doc: EditorNode, from: number, to: number):
 }
 
 function transactionTouchesDefinitions(transaction: Transaction): boolean {
+  // AttrStep changes node attributes but exposes StepMap.empty. A list kind
+  // change can make its first paragraph eligible or ineligible as a definition,
+  // so there is no mapped range to inspect and the index must be rebuilt.
   if (transaction.steps.some((step) => step instanceof AttrStep)) return true
 
   for (const [index, map] of transaction.mapping.maps.entries()) {
