@@ -230,7 +230,7 @@ export type MdPackSimpleKey =
 export type MdPackAttrs =
   | {
       key: 'link'
-      data: { href: string; title: string }
+      data: { href: string; title: string; reference?: true }
     }
   | {
       key: 'image'

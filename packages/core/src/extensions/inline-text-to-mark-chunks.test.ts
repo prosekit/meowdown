@@ -5,10 +5,16 @@ import { describe, expect, it, vi } from 'vitest'
 import { defineEditorExtension, type EditorExtension } from './extension.ts'
 import {
   inlineTextToMarkChunks,
+  inlineTextToMarkChunksWithContext,
   type FileLinkResolver,
   type InlineMarkOptions,
 } from './inline-text-to-mark-chunks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
+import {
+  normalizeReferenceLabel,
+  type ReferenceDefinition,
+  type ReferenceDefinitions,
+} from './reference-links.ts'
 import type { TypedMarkBuilders } from './schema.ts'
 
 function formatMarkChunk([from, to, marks]: MarkChunk): [string, string] {
@@ -38,15 +44,33 @@ const getMarkBuilders = once((): TypedMarkBuilders => {
   return createMarkBuilders<EditorExtension>(schema)
 })
 
-function parse(text: string, options?: InlineMarkOptions): string {
+function parse(
+  text: string,
+  options?: InlineMarkOptions,
+  referenceDefinitions?: ReferenceDefinitions,
+): string {
   const markBuilders = getMarkBuilders()
-  const chunks = inlineTextToMarkChunks(markBuilders, text, options)
+  const chunks =
+    referenceDefinitions == null
+      ? inlineTextToMarkChunks(markBuilders, text, options)
+      : inlineTextToMarkChunksWithContext(markBuilders, text, options, { referenceDefinitions })
   const formatted = chunks.map(formatMarkChunk)
   const headLength = Math.max(...formatted.map(([head]) => head.length))
   const lines = formatted.map(([head, body]) => {
     return (head.padEnd(headLength, ' ') + ' ' + body).trim()
   })
   return '\n' + lines.join('\n') + '\n'
+}
+
+function references(
+  definitions: Readonly<Record<string, Omit<ReferenceDefinition, 'key'>>>,
+): ReferenceDefinitions {
+  return new Map(
+    Object.entries(definitions).map(([label, definition]) => {
+      const key = normalizeReferenceLabel(label)
+      return [key, { key, ...definition }]
+    }),
+  )
 }
 
 describe('plain text', () => {
@@ -372,11 +396,90 @@ describe('link', () => {
   it('explicit empty destination keeps the link pack', () => {
     expect(parse('[a]()')).toMatchInlineSnapshot(`
       "
-      [0, 1] mdPack(key=link,data={"href":"","title":""}) + mdMark
-      [1, 2] mdPack(key=link,data={"href":"","title":""})
+      [0, 1] mdPack(key=link,data={"href":"","title":""}) + mdLinkText + mdMark
+      [1, 2] mdPack(key=link,data={"href":"","title":""}) + mdLinkText
       [2, 5] mdPack(key=link,data={"href":"","title":""}) + mdMark
       "
     `)
+  })
+})
+
+describe('reference link', () => {
+  const definitions = references({
+    documentation: { href: 'https://example.com/docs', title: 'Documentation' },
+    café: { href: '/cafe', title: '' },
+    empty: { href: '', title: '' },
+  })
+
+  it('resolves a full reference link', () => {
+    expect(parse('[read this][documentation]', undefined, definitions)).toContain(
+      'mdLinkText(href=https://example.com/docs)',
+    )
+    expect(parse('[read this][documentation]', undefined, definitions)).toContain(
+      'data={"href":"https://example.com/docs","title":"Documentation","reference":true}',
+    )
+  })
+
+  it('resolves a collapsed reference link', () => {
+    expect(parse('[documentation][]', undefined, definitions)).toContain(
+      'mdLinkText(href=https://example.com/docs)',
+    )
+  })
+
+  it('resolves a shortcut reference link', () => {
+    expect(parse('[documentation]', undefined, definitions)).toContain(
+      'mdLinkText(href=https://example.com/docs)',
+    )
+  })
+
+  it('normalizes case, whitespace, and Unicode labels', () => {
+    expect(parse('[x][  CAFÉ  ]', undefined, definitions)).toContain('mdLinkText(href=/cafe)')
+  })
+
+  it('keeps an empty resolved destination as a link', () => {
+    const output = parse('[empty]', undefined, definitions)
+    expect(output).toContain('mdPack(key=link,data={"href":"","title":"","reference":true})')
+    expect(output).toContain('mdLinkText')
+  })
+
+  it('keeps unresolved syntax plain while preserving nested marks', () => {
+    expect(parse('[*missing*]')).toMatchInlineSnapshot(`
+      "
+      [0, 1]
+      [1, 2]   mdPack(key=italic) + mdEm + mdMark
+      [2, 9]   mdPack(key=italic) + mdEm
+      [9, 10]  mdPack(key=italic) + mdEm + mdMark
+      [10, 11]
+      "
+    `)
+  })
+
+  it('records an unresolved normalized key for invalidation', () => {
+    const referencedKeys = new Set<string>()
+    inlineTextToMarkChunksWithContext(getMarkBuilders(), '[Missing Label]', undefined, {
+      referenceDefinitions: definitions,
+      referencedKeys,
+    })
+    expect(referencedKeys).toEqual(new Set([normalizeReferenceLabel('Missing Label')]))
+  })
+
+  it('keeps definition source entirely plain', () => {
+    const chunks = inlineTextToMarkChunksWithContext(
+      getMarkBuilders(),
+      '[plan]: /url "*Plan*"',
+      undefined,
+      { referenceDefinitions: definitions, isReferenceDefinition: true },
+    )
+    expect(chunks.map(formatMarkChunk)).toEqual([['[0, 21]', '']])
+  })
+
+  it('distinguishes escaped labels during normalization', () => {
+    const escapedLabel = String.raw`a\*b`
+    const escaped = references({
+      [escapedLabel]: { href: '/escaped', title: '' },
+    })
+    expect(parse(String.raw`[x][a\*b]`, undefined, escaped)).toContain('mdLinkText(href=/escaped)')
+    expect(parse('[x][a*b]', undefined, escaped)).not.toContain('mdLinkText')
   })
 })
 
@@ -426,14 +529,41 @@ describe('image', () => {
   it('reference', () => {
     expect(parse('a ![b][id] c')).toMatchInlineSnapshot(`
       "
-      [0, 2]
-      [2, 4]   mdPack(key=link,data={"href":"","title":""}) + mdMark
-      [4, 5]   mdPack(key=link,data={"href":"","title":""})
-      [5, 6]   mdPack(key=link,data={"href":"","title":""}) + mdMark
-      [6, 10]  mdPack(key=link,data={"href":"","title":""})
-      [10, 12]
+      [0, 12]
       "
     `)
+  })
+
+  it('resolves a full reference image', () => {
+    expect(
+      parse(
+        'a ![diagram][asset] b',
+        undefined,
+        references({ asset: { href: '/diagram.png', title: 'Architecture' } }),
+      ),
+    ).toContain('mdImage(src=/diagram.png,alt=diagram,title=Architecture)')
+  })
+
+  it('resolves a collapsed reference image', () => {
+    expect(
+      parse('![asset][]', undefined, references({ asset: { href: '/diagram.png', title: '' } })),
+    ).toContain('mdImage(src=/diagram.png,alt=asset)')
+  })
+
+  it('resolves a shortcut reference image', () => {
+    expect(
+      parse('![asset]', undefined, references({ asset: { href: '/diagram.png', title: '' } })),
+    ).toContain('mdImage(src=/diagram.png,alt=asset)')
+  })
+
+  it('resolves a reference image nested inside an inline link', () => {
+    const output = parse(
+      '[![asset]](/target)',
+      undefined,
+      references({ asset: { href: '/diagram.png', title: '' } }),
+    )
+    expect(output).toContain('mdImage(src=/diagram.png,alt=asset)')
+    expect(output).toContain('mdLinkText(href=/target)')
   })
 
   it('folds a trailing width comment into the image mark', () => {
@@ -1026,5 +1156,15 @@ describe('file link', () => {
     parse('[shortcut]', { resolveFileLink })
     parse('[empty]()', { resolveFileLink })
     expect(resolveFileLink).not.toHaveBeenCalled()
+  })
+
+  it('can claim a resolved reference link', () => {
+    expect(
+      parse(
+        '[report][asset]',
+        { resolveFileLink: claimAssets },
+        references({ asset: { href: 'assets/report.pdf', title: 'Quarterly' } }),
+      ),
+    ).toContain('mdFile(href=assets/report.pdf,name=report,title=Quarterly)')
   })
 })

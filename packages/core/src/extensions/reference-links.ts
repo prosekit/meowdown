@@ -11,7 +11,7 @@ export interface ReferenceDefinition {
   title: string
 }
 
-type ReferenceDefinitions = ReadonlyMap<string, ReferenceDefinition>
+export type ReferenceDefinitions = ReadonlyMap<string, ReferenceDefinition>
 
 export interface ReferenceDefinitionIndex {
   definitions: ReferenceDefinitions
