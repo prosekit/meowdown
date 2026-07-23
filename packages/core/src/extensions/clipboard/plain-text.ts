@@ -8,16 +8,19 @@ import {
   isAtTopLevelBlockEnd,
   isAtTopLevelBlockStart,
 } from '../../utils/top-level-block-boundary.ts'
+import type { MeowdownHeadingAttrs } from '../heading.ts'
 import type { MdWikilinkAttrs } from '../inline-marks.ts'
 import { groupInlineRuns, hasSyntaxMark } from '../inline-runs.ts'
 import { getMarkMode } from '../mark-mode.ts'
 import { isMarkOfType } from '../mark-names.ts'
-import type { NodeName } from '../node-names.ts'
+import { isNodeOfType, type NodeName } from '../node-names.ts'
 
 /**
- * Serialize a slice to Markdown. Incomplete top-level edge blocks are flattened
- * to paragraphs so their unselected markers are not synthesized. Complete edge
- * blocks and every middle block keep their Markdown structure.
+ * Serialize a slice to Markdown. A block whose content start is not selected is
+ * flattened so its opening markers are not synthesized. Incomplete fenced code
+ * blocks and tables are also flattened because their markers describe the
+ * entire block. Other intact blocks keep opening markers when their content
+ * start is selected.
  */
 function sliceToMarkdown(schema: Schema, slice: Slice, selection: Selection): string {
   const fragment = normalizeOpenEdges(schema, slice, selection)
@@ -44,9 +47,44 @@ function normalizeOpenEdges(schema: Schema, slice: Slice, selection: Selection):
   content.forEach((node, _offset, index) => {
     const incompleteStart = index === 0 && openStart > 0 && !includesFirstBlockStart
     const incompleteEnd = index === lastIndex && openEnd > 0 && !includesLastBlockEnd
-    nodes.push(incompleteStart || incompleteEnd ? flattenToParagraph(schema, node) : node)
+    if (incompleteStart) {
+      nodes.push(flattenToParagraph(schema, node))
+    } else if (incompleteEnd) {
+      nodes.push(normalizeIncompleteEnd(schema, node, openEnd))
+    } else {
+      nodes.push(node)
+    }
   })
   return Fragment.from(nodes)
+}
+
+/**
+ * Follow the open end path and flatten a fenced code block or table found
+ * there, retaining any selected container prefixes around it. ATX heading and
+ * blockquote markers are opening structure, so a partial content end does not
+ * remove them.
+ */
+function normalizeIncompleteEnd(
+  schema: Schema,
+  node: ProseMirrorNode,
+  openDepth: number,
+): ProseMirrorNode {
+  if (isNodeOfType(node, 'codeBlock') || isNodeOfType(node, 'table')) {
+    return flattenToParagraph(schema, node)
+  }
+  if (isNodeOfType(node, 'heading')) {
+    const attrs = node.attrs as MeowdownHeadingAttrs
+    if (attrs.setextUnderline != null) return flattenToParagraph(schema, node)
+    if (attrs.closingHashes != null) {
+      return node.type.create({ ...attrs, closingHashes: null }, node.content, node.marks)
+    }
+  }
+  if (openDepth <= 1 || node.childCount === 0) return node
+
+  const lastIndex = node.childCount - 1
+  const child = node.child(lastIndex)
+  const normalized = normalizeIncompleteEnd(schema, child, openDepth - 1)
+  return normalized === child ? node : node.copy(node.content.replaceChild(lastIndex, normalized))
 }
 
 function flattenToParagraph(schema: Schema, node: ProseMirrorNode): ProseMirrorNode {

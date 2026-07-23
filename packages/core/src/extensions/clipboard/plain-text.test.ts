@@ -104,7 +104,23 @@ describe('plain text copy in show and focus mode', () => {
     ).toBe('one\nline')
   })
 
-  it('keeps the first marker when only the last heading is partial', () => {
+  it('drops fences when a code block selection starts at its content start', () => {
+    expect(
+      copySelectionText('focus', (n) =>
+        n.doc(n.codeBlock({ language: 'typescript' }, '<a>const value<b> = 1')),
+      ),
+    ).toBe('const value')
+  })
+
+  it('drops fences when a code block selection ends at its content end', () => {
+    expect(
+      copySelectionText('focus', (n) =>
+        n.doc(n.codeBlock({ language: 'typescript' }, 'const <a>value = 1<b>')),
+      ),
+    ).toBe('value = 1')
+  })
+
+  it('keeps both heading prefixes when only the last heading ends partially', () => {
     expect(
       copySelectionText('focus', (n) =>
         n.doc(
@@ -113,10 +129,10 @@ describe('plain text copy in show and focus mode', () => {
           n.heading({ level: 2 }, 'Heading<b> C'),
         ),
       ),
-    ).toBe('# Heading A\n\nParagraph B\n\nHeading')
+    ).toBe('# Heading A\n\nParagraph B\n\n## Heading')
   })
 
-  it('drops both markers when both edge headings are partial', () => {
+  it('drops only the heading prefix whose content start is not selected', () => {
     expect(
       copySelectionText('focus', (n) =>
         n.doc(
@@ -125,7 +141,7 @@ describe('plain text copy in show and focus mode', () => {
           n.heading({ level: 2 }, 'Heading<b> C'),
         ),
       ),
-    ).toBe('A\n\nParagraph B\n\nHeading')
+    ).toBe('A\n\nParagraph B\n\n## Heading')
   })
 
   it('keeps both markers when both edge headings are complete', () => {
@@ -144,6 +160,22 @@ describe('plain text copy in show and focus mode', () => {
     expect(
       copySelectionText('focus', (n) => n.doc(n.heading({ level: 1 }, '<a>alpha beta<b>'))),
     ).toBe('# alpha beta')
+  })
+
+  it('does not synthesize a setext underline after a partial heading end', () => {
+    expect(
+      copySelectionText('focus', (n) =>
+        n.doc(n.heading({ level: 1, setextUnderline: 3 }, '<a>Head<b>ing')),
+      ),
+    ).toBe('Head')
+  })
+
+  it('does not synthesize closing hashes after a partial heading end', () => {
+    expect(
+      copySelectionText('focus', (n) =>
+        n.doc(n.heading({ level: 1, closingHashes: 3 }, '<a>Head<b>ing')),
+      ),
+    ).toBe('# Head')
   })
 })
 
@@ -328,6 +360,12 @@ describe('plain text copy block layout', () => {
         n.doc(n.blockquote(n.paragraph('<a>first'), n.paragraph('second<b>'))),
       ),
     ).toBe('> first\n>\n> second')
+  })
+
+  it('keeps a blockquote marker when its content start is selected', () => {
+    expect(copySelectionText('focus', (n) => n.doc(n.blockquote(n.paragraph('<a>fir<b>st'))))).toBe(
+      '> fir',
+    )
   })
 
   it('does not build a table around one fully selected cell', () => {
