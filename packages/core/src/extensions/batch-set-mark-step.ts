@@ -1,4 +1,4 @@
-import { Mark, type EditorNode, type Schema } from '@prosekit/pm/model'
+import { Fragment, Mark, type EditorNode, type Schema } from '@prosekit/pm/model'
 import type { Mappable } from '@prosekit/pm/transform'
 import { ReplaceStep, Step, StepResult, Transform } from '@prosekit/pm/transform'
 
@@ -15,6 +15,108 @@ interface BatchSetMarkStepJSON {
   chunks: MarkChunkJSON[]
 }
 
+const SPARSE_CHUNK_LIMIT = 32
+
+function applySparseChunks(doc: EditorNode, chunks: readonly MarkChunk[]): StepResult {
+  const docSize = doc.content.size
+  let transform: Transform | undefined
+
+  for (const [from, to, unsortedMarks] of chunks) {
+    if (from >= to) continue
+    const safeFrom = Math.max(0, Math.min(from, docSize))
+    const safeTo = Math.max(safeFrom, Math.min(to, docSize))
+    if (safeFrom >= safeTo) continue
+
+    const expected = Mark.setFrom(unsortedMarks)
+    doc.nodesBetween(safeFrom, safeTo, (node, position) => {
+      if (!node.isText) return true
+
+      const nodeFrom = Math.max(safeFrom, position)
+      const nodeTo = Math.min(safeTo, position + node.nodeSize)
+      if (nodeFrom >= nodeTo || marksEqual(node.marks, expected)) return false
+
+      transform ??= new Transform(doc)
+      for (const mark of node.marks) transform.removeMark(nodeFrom, nodeTo, mark)
+      for (const mark of expected) transform.addMark(nodeFrom, nodeTo, mark)
+      return false
+    })
+  }
+
+  return StepResult.ok(transform?.doc ?? doc)
+}
+
+function applySequentialChunks(doc: EditorNode, chunks: readonly MarkChunk[]): StepResult {
+  const docSize = doc.content.size
+  let chunkIndex = 0
+
+  function rewriteText(node: EditorNode, position: number): readonly EditorNode[] {
+    const nodeEnd = position + node.nodeSize
+    while (chunkIndex < chunks.length && chunks[chunkIndex][1] <= position) {
+      chunkIndex++
+    }
+
+    let index = chunkIndex
+    let offset = 0
+    let changed = false
+    const pieces: EditorNode[] = []
+
+    while (index < chunks.length) {
+      const [from, to, unsortedMarks] = chunks[index]
+      const safeFrom = Math.max(0, Math.min(from, docSize))
+      const safeTo = Math.max(safeFrom, Math.min(to, docSize))
+      if (safeFrom >= nodeEnd) break
+      if (safeTo <= position || safeFrom >= safeTo) {
+        index++
+        continue
+      }
+
+      const localFrom = Math.max(offset, safeFrom - position)
+      const localTo = Math.min(node.nodeSize, safeTo - position)
+      if (localFrom > offset) pieces.push(node.cut(offset, localFrom))
+
+      const expected = Mark.setFrom(unsortedMarks)
+      const piece = node.cut(localFrom, localTo)
+      if (marksEqual(piece.marks, expected)) {
+        pieces.push(piece)
+      } else {
+        pieces.push(piece.mark(expected))
+        changed = true
+      }
+
+      offset = localTo
+      if (safeTo <= nodeEnd) index++
+      else break
+    }
+
+    if (!changed) return [node]
+    if (offset < node.nodeSize) pieces.push(node.cut(offset))
+    chunkIndex = index
+    return pieces
+  }
+
+  function rewriteNode(node: EditorNode, contentStart: number): EditorNode {
+    let changed = false
+    const children: EditorNode[] = []
+
+    node.forEach((child, offset) => {
+      const position = contentStart + offset
+      if (child.isText) {
+        const rewritten = rewriteText(child, position)
+        if (rewritten.length !== 1 || rewritten[0] !== child) changed = true
+        children.push(...rewritten)
+      } else {
+        const rewritten = rewriteNode(child, position + 1)
+        if (rewritten !== child) changed = true
+        children.push(rewritten)
+      }
+    })
+
+    return changed ? node.copy(Fragment.fromArray(children)) : node
+  }
+
+  return StepResult.ok(rewriteNode(doc, 0))
+}
+
 /**
  * One ProseMirror Step that applies a batch of `MarkChunk`s in a single
  * undo entry.
@@ -29,41 +131,10 @@ export class BatchSetMarkStep extends Step {
 
   apply(doc: EditorNode): StepResult {
     if (this.chunks.length === 0) return StepResult.ok(doc)
-    const docSize = doc.content.size
-
-    let tr: Transform | undefined
-    for (const [from, to, expectedUnsorted] of this.chunks) {
-      if (from >= to) continue
-
-      const safeFrom = Math.max(0, Math.min(from, docSize))
-      const safeTo = Math.max(safeFrom, Math.min(to, docSize))
-      if (safeFrom >= safeTo) continue
-
-      // Rank-sorted like a node's own mark set; equal-rank marks (nested
-      // mdPack) keep the parser's outer-first emit order, so rewriting a node
-      // whose set merely differs in order keeps same-type marks canonical.
-      const expected = Mark.setFrom(expectedUnsorted)
-
-      doc.nodesBetween(safeFrom, safeTo, (node, pos) => {
-        if (!node.isText) return true
-        const nodeFrom = Math.max(safeFrom, pos)
-        const nodeTo = Math.min(safeTo, pos + node.nodeSize)
-        if (nodeFrom >= nodeTo) return false
-        const current = node.marks
-        if (marksEqual(current, expected)) return false
-
-        tr ??= new Transform(doc)
-        for (const mark of current) {
-          tr.removeMark(nodeFrom, nodeTo, mark)
-        }
-        for (const mark of expected) {
-          tr.addMark(nodeFrom, nodeTo, mark)
-        }
-        return false
-      })
+    if (this.chunks.length <= SPARSE_CHUNK_LIMIT) {
+      return applySparseChunks(doc, this.chunks)
     }
-
-    return StepResult.ok(tr ? tr.doc : doc)
+    return applySequentialChunks(doc, this.chunks)
   }
 
   invert(doc: EditorNode): Step {
