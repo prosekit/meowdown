@@ -60,6 +60,13 @@ The caret glides between positions by default; pass `caretGlide={false}` to move
 
 `MarkdownView` folds collapsed (`+`) bullets like the editor; pass `expandCollapsed` to render them expanded at every depth, for views that show slices of a note (e.g. a backlinks panel) where the source's fold state must not hide the content the view exists to show.
 
+Both `MeowdownEditor` and `MarkdownView` resolve CommonMark full, collapsed,
+and shortcut reference links and images. The editor keeps reference definitions
+visible as editable source and preserves them through `getMarkdown()`.
+`MarkdownView` uses the same first-definition-wins resolution but omits
+definition paragraphs from its rendered output. Reference links are read-only
+in the editor's link menu; edit their definition source to change the target.
+
 ### Wiki embeds
 
 Obsidian-style wiki embeds (`![[path]]`, with optional `|width` or
