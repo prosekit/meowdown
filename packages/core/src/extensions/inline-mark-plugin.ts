@@ -17,6 +17,7 @@ import { definePlugin } from '@prosekit/core'
 import type { EditorNode, Schema } from '@prosekit/pm/model'
 import type { EditorState, Transaction } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
+import type { EditorView } from '@prosekit/pm/view'
 
 import type { PositionRange } from '../utils/range.ts'
 
@@ -28,6 +29,7 @@ import {
 import type { MarkChunk } from './mark-chunk.ts'
 import {
   collectReferenceDefinitions,
+  isReferenceDefinitionNode,
   updateReferenceDefinitions,
   type ReferenceDefinition,
   type ReferenceDefinitionIndex,
@@ -37,12 +39,23 @@ import { getMarkBuildersForSchema } from './schema.ts'
 
 const META_KEY = 'inline-marks-applied'
 const TRIGGER_KEY = 'inline-marks-trigger'
+const RESTYLE_KEY = 'inline-marks-restyle'
+const RESTYLE_DEBOUNCE_MS = 200
 
 interface InlineMarkPluginState {
   readonly references: ReferenceDefinitionIndex
+  readonly pendingReferenceKeys: ReadonlySet<string>
 }
 
 const pluginKey = new PluginKey<InlineMarkPluginState>('inline-mark')
+const emptyReferenceKeys: ReadonlySet<string> = new Set()
+
+/** @internal only for test */
+export function flushPendingRestyle(view: EditorView): void {
+  if ((pluginKey.getState(view.state)?.pendingReferenceKeys.size ?? 0) > 0) {
+    view.dispatch(view.state.tr.setMeta(RESTYLE_KEY, true))
+  }
+}
 
 /**
  * Test instrumentation: `chunkCacheParses` / `chunkCacheHits` count
@@ -132,9 +145,9 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
     schema: Schema,
     references: ReferenceDefinitionIndex,
     changedKeys: ReadonlySet<string>,
+    isReferenceDefinition: boolean,
   ): readonly MarkChunk[] {
     const cached = chunkCache.get(node)
-    const isReferenceDefinition = references.nodes.has(node)
     let relative: readonly MarkChunk[]
 
     if (
@@ -181,7 +194,12 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
   } {
     const chunks: MarkChunk[] = []
     const processed: { position: number; cached: CachedChunks }[] = []
-    const visit = (node: EditorNode, pos: number): boolean => {
+    const visit = (
+      node: EditorNode,
+      pos: number,
+      parent: EditorNode | null,
+      index: number,
+    ): boolean => {
       if (node.type.spec.code) return false
       if (!node.isTextblock) return true
       if (node.childCount === 0) return false
@@ -191,7 +209,14 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
       const dependsOnChange = cached == null || setsIntersect(cached.referencedKeys, changedKeys)
       if (!touchesRange && !dependsOnChange) return false
 
-      const nodeChunks = chunksForTextblock(node, pos + 1, state.schema, references, changedKeys)
+      const nodeChunks = chunksForTextblock(
+        node,
+        pos + 1,
+        state.schema,
+        references,
+        changedKeys,
+        isReferenceDefinitionNode(node, parent, index),
+      )
       if (nodeChunks.length > 0) chunks.push(...nodeChunks)
       const updated = chunkCache.get(node)
       if (updated != null) processed.push({ position: pos, cached: updated })
@@ -220,12 +245,30 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
     key: pluginKey,
     state: {
       init(_config, state) {
-        return { references: collectReferenceDefinitions(state.doc) }
+        return {
+          references: collectReferenceDefinitions(state.doc),
+          pendingReferenceKeys: emptyReferenceKeys,
+        }
       },
       apply(transaction, value, _oldState, newState) {
+        if (transaction.getMeta(RESTYLE_KEY) === true) {
+          return value.pendingReferenceKeys.size === 0
+            ? value
+            : { references: value.references, pendingReferenceKeys: emptyReferenceKeys }
+        }
         if (transaction.getMeta(META_KEY)) return value
+        const references = updateReferenceDefinitions(value.references, transaction, newState.doc)
+        if (references === value.references) return value
+        const changedKeys = getChangedReferenceKeys(
+          value.references.definitions,
+          references.definitions,
+        )
+        if (changedKeys.size === 0) {
+          return { references, pendingReferenceKeys: value.pendingReferenceKeys }
+        }
         return {
-          references: updateReferenceDefinitions(value.references, transaction, newState.doc),
+          references,
+          pendingReferenceKeys: mergeReferenceKeys(value.pendingReferenceKeys, changedKeys),
         }
       },
     },
@@ -235,16 +278,20 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
         if (tr.getMeta(META_KEY)) return null
       }
 
-      const shouldProcess = transactions.some((transaction) => {
-        return transaction.docChanged || transaction.getMeta(TRIGGER_KEY)
-      })
+      const restyle = transactions.some((transaction) => transaction.getMeta(RESTYLE_KEY))
+      const shouldProcess =
+        restyle ||
+        transactions.some((transaction) => {
+          return transaction.docChanged || transaction.getMeta(TRIGGER_KEY)
+        })
       if (!shouldProcess) return null
 
       const references = pluginKey.getState(newState)?.references
       if (references == null) return null
-      const previous = pluginKey.getState(oldState)?.references.definitions
-      const changedKeys = getChangedReferenceKeys(previous, references.definitions)
-      const range = computeAffectedRange(transactions, newState)
+      const changedKeys = restyle
+        ? (pluginKey.getState(oldState)?.pendingReferenceKeys ?? emptyReferenceKeys)
+        : emptyReferenceKeys
+      const range = restyle ? { from: 0, to: 0 } : computeAffectedRange(transactions, newState)
       const { chunks, processed } = collectChunks(newState, range, references, changedKeys)
       if (chunks.length === 0) return null
       const tr = newState.tr.step(new BatchSetMarkStep(chunks))
@@ -258,7 +305,33 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
       // initial document never gets processed via the normal path. Dispatch
       // a no-op tr on mount to wake the plugin up.
       view.dispatch(triggerInlineMarks(view.state))
-      return {}
+
+      let timer: ReturnType<typeof setTimeout> | undefined
+
+      const flush = (currentView: EditorView): void => {
+        timer = undefined
+        if (currentView.isDestroyed) return
+        if ((pluginKey.getState(currentView.state)?.pendingReferenceKeys.size ?? 0) === 0) return
+        currentView.dispatch(currentView.state.tr.setMeta(RESTYLE_KEY, true))
+      }
+
+      return {
+        update(currentView, previousState) {
+          const current = pluginKey.getState(currentView.state)
+          if ((current?.pendingReferenceKeys.size ?? 0) === 0) {
+            if (timer != null) clearTimeout(timer)
+            timer = undefined
+            return
+          }
+          if (timer == null || pluginKey.getState(previousState) !== current) {
+            if (timer != null) clearTimeout(timer)
+            timer = setTimeout(() => flush(currentView), RESTYLE_DEBOUNCE_MS)
+          }
+        },
+        destroy() {
+          if (timer != null) clearTimeout(timer)
+        },
+      }
     },
   })
 }
@@ -288,6 +361,16 @@ function getChangedReferenceKeys(
     if (!definitionsEqual(definition, previous.get(key))) changed.add(key)
   }
   return changed
+}
+
+function mergeReferenceKeys(
+  previous: ReadonlySet<string>,
+  current: ReadonlySet<string>,
+): ReadonlySet<string> {
+  if (previous.size === 0) return current
+  const merged = new Set(previous)
+  for (const key of current) merged.add(key)
+  return merged
 }
 
 export function defineInlineMarkPlugin(options?: InlineMarkOptions) {

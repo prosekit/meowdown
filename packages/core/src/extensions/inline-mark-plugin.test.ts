@@ -5,7 +5,7 @@ import { findText } from '../testing/find-text.ts'
 import { setupFixture } from '../testing/index.ts'
 import { marksAt } from '../testing/marks-at.ts'
 
-import { getCacheStats, resetCacheStats } from './inline-mark-plugin.ts'
+import { flushPendingRestyle, getCacheStats, resetCacheStats } from './inline-mark-plugin.ts'
 import { isMarkOfType } from './mark-names.ts'
 
 function getLinkHref(doc: EditorNode, label: string): string | undefined {
@@ -115,6 +115,15 @@ describe('inlineMarkPlugin', () => {
     const linkText = $pos.marks().find((m) => isMarkOfType(m, 'mdLinkText'))
     expect(linkText).toBeTruthy()
     expect(linkText!.attrs.href).toBe('http://x.test')
+  })
+
+  it('keeps a definition label literal while autolinking its URL', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('[doc]: https://example.com')))
+
+    expect(getLinkHref(fixture.doc, 'doc')).toBeUndefined()
+    expect(getLinkHref(fixture.doc, 'https://example.com')).toBe('https://example.com')
   })
 
   it('applies mdLinkText with a derived href on a bare autolink', () => {
@@ -364,6 +373,7 @@ describe('inlineMarkPlugin', () => {
     fixture.view.dispatch(
       fixture.state.tr.insertText('/new-alpha', destination, destination + '/old-alpha'.length),
     )
+    flushPendingRestyle(fixture.view)
 
     expect(getLinkHref(fixture.doc, 'Alpha')).toBe('/new-alpha')
     expect(getLinkHref(fixture.doc, 'Beta')).toBe('/old-beta')
@@ -379,6 +389,7 @@ describe('inlineMarkPlugin', () => {
 
     const definition = findText(fixture.doc, '[doc] /new')
     fixture.view.dispatch(fixture.state.tr.insertText(':', definition + '[doc]'.length))
+    flushPendingRestyle(fixture.view)
 
     expect(getLinkHref(fixture.doc, 'Plan')).toBe('/new')
   })
@@ -390,6 +401,7 @@ describe('inlineMarkPlugin', () => {
 
     const colon = findText(fixture.doc, ':')
     fixture.view.dispatch(fixture.state.tr.delete(colon, colon + 1))
+    flushPendingRestyle(fixture.view)
 
     expect(getLinkHref(fixture.doc, 'Plan')).toBeUndefined()
     expect(marksAt(fixture.doc, findText(fixture.doc, 'Plan') + 1)).toEqual([])
@@ -409,6 +421,7 @@ describe('inlineMarkPlugin', () => {
     const from = fixture.doc.child(0).nodeSize
     const to = from + fixture.doc.child(1).nodeSize
     fixture.view.dispatch(fixture.state.tr.delete(from, to))
+    flushPendingRestyle(fixture.view)
     expect(getLinkHref(fixture.doc, 'Plan')).toBe('/second')
   })
 
@@ -458,6 +471,7 @@ describe('inlineMarkPlugin', () => {
     )
 
     fixture.view.dispatch(fixture.state.tr.setNodeAttribute(0, 'kind', 'bullet'))
+    flushPendingRestyle(fixture.view)
     expect(getLinkHref(fixture.doc, 'Doc')).toBe('/new')
   })
 
@@ -493,9 +507,11 @@ describe('inlineMarkPlugin', () => {
     expect(getLinkHref(fixture.doc, 'Doc')).toBe('/docs')
 
     fixture.view.dispatch(fixture.state.tr.setNodeAttribute(0, 'kind', 'task'))
+    flushPendingRestyle(fixture.view)
     expect(getLinkHref(fixture.doc, 'Doc')).toBeUndefined()
 
     fixture.view.dispatch(fixture.state.tr.setNodeAttribute(0, 'kind', 'bullet'))
+    flushPendingRestyle(fixture.view)
     expect(getLinkHref(fixture.doc, 'Doc')).toBe('/docs')
   })
 })

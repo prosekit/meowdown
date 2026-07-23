@@ -108,9 +108,6 @@ export function inlineTextToMarkChunksWithContext(
   options?: InlineMarkOptions,
   context?: InlineMarkContext,
 ): MarkChunk[] {
-  if (context?.isReferenceDefinition === true) {
-    return text === '' ? [] : [[0, text.length, []]]
-  }
   const elements = parseInline(text)
   const out: MarkChunk[] = []
   walk(elements, [], 0, text.length, text, marks, out, options, context)
@@ -281,6 +278,7 @@ function resolveLink(
   }
 
   if (parts.labelFrom < 0 || parts.labelTo < 0) return
+  if (context?.isReferenceDefinition === true) return
   const visibleLabel = text.slice(parts.labelFrom, parts.labelTo)
   const explicitLabel =
     parts.referenceLabelNode == null

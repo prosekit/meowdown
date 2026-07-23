@@ -72,6 +72,11 @@ describe('parseReferenceDefinition', () => {
     const label = 'a'.repeat(1_000)
     expect(parseReferenceDefinition(`[${label}]: /docs`)).toBeUndefined()
   })
+
+  it('skips definition-shaped blocks longer than the parser budget', () => {
+    const destination = 'a'.repeat(1_024)
+    expect(parseReferenceDefinition(`[doc]: /${destination}`)).toBeUndefined()
+  })
 })
 
 describe('collectReferenceDefinitions', () => {

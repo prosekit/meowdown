@@ -47,74 +47,87 @@ function applySparseChunks(doc: EditorNode, chunks: readonly MarkChunk[]): StepR
 
 function applySequentialChunks(doc: EditorNode, chunks: readonly MarkChunk[]): StepResult {
   const docSize = doc.content.size
+  const sorted = [...chunks]
+    .filter(([from, to]) => from < to && from < docSize)
+    .sort((left, right) => left[0] - right[0])
+  if (sorted.length === 0) return StepResult.ok(doc)
+
+  const expectedSets = sorted.map(([, , marks]) => Mark.setFrom(marks))
+  const first = Math.max(0, sorted[0][0])
+  let last = 0
+  for (const [, to] of sorted) {
+    if (to > last) last = to
+  }
+  last = Math.min(last, docSize)
+  if (first >= last) return StepResult.ok(doc)
+
   let chunkIndex = 0
 
-  function rewriteText(node: EditorNode, position: number): readonly EditorNode[] {
-    const nodeEnd = position + node.nodeSize
-    while (chunkIndex < chunks.length && chunks[chunkIndex][1] <= position) {
-      chunkIndex++
+  function rewriteText(node: EditorNode, nodeFrom: number): EditorNode[] | undefined {
+    const nodeTo = nodeFrom + node.nodeSize
+    while (chunkIndex < sorted.length && sorted[chunkIndex][1] <= nodeFrom) chunkIndex++
+    interface Piece {
+      from: number
+      to: number
+      marks: readonly Mark[] | undefined
     }
-
-    let index = chunkIndex
-    let offset = 0
+    const pieces: Piece[] = []
+    let cursor = nodeFrom
     let changed = false
-    const pieces: EditorNode[] = []
-
-    while (index < chunks.length) {
-      const [from, to, unsortedMarks] = chunks[index]
-      const safeFrom = Math.max(0, Math.min(from, docSize))
-      const safeTo = Math.max(safeFrom, Math.min(to, docSize))
-      if (safeFrom >= nodeEnd) break
-      if (safeTo <= position || safeFrom >= safeTo) {
-        index++
-        continue
-      }
-
-      const localFrom = Math.max(offset, safeFrom - position)
-      const localTo = Math.min(node.nodeSize, safeTo - position)
-      if (localFrom > offset) pieces.push(node.cut(offset, localFrom))
-
-      const expected = Mark.setFrom(unsortedMarks)
-      const piece = node.cut(localFrom, localTo)
-      if (marksEqual(piece.marks, expected)) {
-        pieces.push(piece)
-      } else {
-        pieces.push(piece.mark(expected))
-        changed = true
-      }
-
-      offset = localTo
-      if (safeTo <= nodeEnd) index++
-      else break
+    for (let index = chunkIndex; index < sorted.length; index++) {
+      const [chunkFrom, chunkTo] = sorted[index]
+      if (chunkFrom >= nodeTo) break
+      const from = Math.max(chunkFrom, cursor)
+      const to = Math.min(chunkTo, nodeTo)
+      if (from >= to) continue
+      if (from > cursor) pieces.push({ from: cursor, to: from, marks: undefined })
+      const expected = expectedSets[index]
+      const differs = !marksEqual(node.marks, expected)
+      if (differs) changed = true
+      pieces.push({ from, to, marks: differs ? expected : undefined })
+      cursor = to
     }
-
-    if (!changed) return [node]
-    if (offset < node.nodeSize) pieces.push(node.cut(offset))
-    chunkIndex = index
-    return pieces
-  }
-
-  function rewriteNode(node: EditorNode, contentStart: number): EditorNode {
-    let changed = false
-    const children: EditorNode[] = []
-
-    node.forEach((child, offset) => {
-      const position = contentStart + offset
-      if (child.isText) {
-        const rewritten = rewriteText(child, position)
-        if (rewritten.length !== 1 || rewritten[0] !== child) changed = true
-        children.push(...rewritten)
-      } else {
-        const rewritten = rewriteNode(child, position + 1)
-        if (rewritten !== child) changed = true
-        children.push(rewritten)
-      }
+    if (!changed) return
+    if (cursor < nodeTo) pieces.push({ from: cursor, to: nodeTo, marks: undefined })
+    return pieces.map((piece) => {
+      const cut = node.cut(piece.from - nodeFrom, piece.to - nodeFrom)
+      return piece.marks == null ? cut : cut.mark(piece.marks)
     })
-
-    return changed ? node.copy(Fragment.fromArray(children)) : node
   }
 
-  return StepResult.ok(rewriteNode(doc, 0))
+  function rewriteContent(node: EditorNode, contentFrom: number): Fragment | undefined {
+    let rebuilt: EditorNode[] | undefined
+    let childFrom = contentFrom
+    for (let index = 0; index < node.childCount; index++) {
+      const child = node.child(index)
+      const childTo = childFrom + child.nodeSize
+      let replacement: EditorNode | EditorNode[] = child
+      if (childTo > first && childFrom < last) {
+        if (child.isText) {
+          replacement = rewriteText(child, childFrom) ?? child
+        } else if (child.childCount > 0) {
+          const content = rewriteContent(child, childFrom + 1)
+          if (content != null) replacement = child.copy(content)
+        }
+      }
+      if (replacement !== child && rebuilt == null) {
+        rebuilt = []
+        for (let seen = 0; seen < index; seen++) rebuilt.push(node.child(seen))
+      }
+      if (rebuilt != null) {
+        if (Array.isArray(replacement)) {
+          rebuilt.push(...replacement)
+        } else {
+          rebuilt.push(replacement)
+        }
+      }
+      childFrom = childTo
+    }
+    return rebuilt == null ? undefined : Fragment.fromArray(rebuilt)
+  }
+
+  const content = rewriteContent(doc, 0)
+  return StepResult.ok(content == null ? doc : doc.copy(content))
 }
 
 /**

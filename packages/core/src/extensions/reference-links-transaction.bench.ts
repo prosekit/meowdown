@@ -66,7 +66,11 @@ function createDefinitionEditScenario(
   return { editor, position: findText(editor.state.doc, '/destination/0/x') + 15, next: 'y' }
 }
 
-function registerScenario(name: string, createScenario: () => Scenario): void {
+function registerScenario(
+  name: string,
+  createScenario: () => Scenario,
+  flushRestyle = false,
+): void {
   const scenario = createScenario()
   bench(name, () => {
     const transaction = scenario.editor.state.tr.insertText(
@@ -75,6 +79,9 @@ function registerScenario(name: string, createScenario: () => Scenario): void {
       scenario.position + 1,
     )
     dispatch(scenario.editor, transaction)
+    if (flushRestyle) {
+      dispatch(scenario.editor, scenario.editor.state.tr.setMeta('inline-marks-restyle', true))
+    }
     scenario.next = scenario.next === 'x' ? 'y' : 'x'
   })
 }
@@ -84,14 +91,39 @@ describe('ordinary edit', () => {
   registerScenario('1000 blocks, 100 definitions', () => createOrdinaryEditScenario(1_000, 100))
   registerScenario('1000 blocks, 400 definitions', () => createOrdinaryEditScenario(1_000, 400))
   registerScenario('1000 blocks, 1000 definitions', () => createOrdinaryEditScenario(1_000, 1_000))
+  registerScenario('4000 blocks, 20 definitions', () => createOrdinaryEditScenario(4_000, 20))
+  registerScenario('16000 blocks, 1000 definitions', () =>
+    createOrdinaryEditScenario(16_000, 1_000),
+  )
 })
 
-describe('definition edit', () => {
+describe('definition keystroke', () => {
   registerScenario('1000 blocks, 100 dependents, 20 definitions', () =>
     createDefinitionEditScenario(1_000, 100, 20),
   )
   registerScenario('4000 blocks, 400 dependents, 20 definitions', () =>
     createDefinitionEditScenario(4_000, 400, 20),
+  )
+  registerScenario('1000 blocks, 1000 dependents, 20 definitions', () =>
+    createDefinitionEditScenario(1_000, 1_000, 20),
+  )
+})
+
+describe('definition edit and flush', () => {
+  registerScenario(
+    '1000 blocks, 100 dependents, 20 definitions',
+    () => createDefinitionEditScenario(1_000, 100, 20),
+    true,
+  )
+  registerScenario(
+    '4000 blocks, 400 dependents, 20 definitions',
+    () => createDefinitionEditScenario(4_000, 400, 20),
+    true,
+  )
+  registerScenario(
+    '1000 blocks, 1000 dependents, 20 definitions',
+    () => createDefinitionEditScenario(1_000, 1_000, 20),
+    true,
   )
 })
 

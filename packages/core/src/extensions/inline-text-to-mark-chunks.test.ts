@@ -463,14 +463,31 @@ describe('reference link', () => {
     expect(referencedKeys).toEqual(new Set([normalizeReferenceLabel('Missing Label')]))
   })
 
-  it('keeps definition source entirely plain', () => {
+  it('keeps the definition label unresolved while parsing other inline syntax', () => {
     const chunks = inlineTextToMarkChunksWithContext(
       getMarkBuilders(),
       '[plan]: /url "*Plan*"',
       undefined,
       { referenceDefinitions: definitions, isReferenceDefinition: true },
     )
-    expect(chunks.map(formatMarkChunk)).toEqual([['[0, 21]', '']])
+    const formatted = chunks.map(formatMarkChunk)
+    expect(formatted.some(([_range, marks]) => marks.includes('mdLinkText'))).toBe(false)
+    expect(formatted.some(([_range, marks]) => marks.includes('mdEm'))).toBe(true)
+  })
+
+  it('autolinks a URL inside definition source', () => {
+    const chunks = inlineTextToMarkChunksWithContext(
+      getMarkBuilders(),
+      '[plan]: https://example.com',
+      undefined,
+      { referenceDefinitions: definitions, isReferenceDefinition: true },
+    )
+    const formatted = chunks.map(formatMarkChunk)
+    expect(
+      formatted.some(([_range, marks]) => {
+        return marks.includes('mdLinkText(href=https://example.com)')
+      }),
+    ).toBe(true)
   })
 
   it('distinguishes escaped labels during normalization', () => {

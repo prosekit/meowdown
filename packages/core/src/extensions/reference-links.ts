@@ -1,6 +1,7 @@
 import { gfmParser, LEZER_NODE_IDS, type SyntaxNode } from '@meowdown/markdown'
 import type { EditorNode } from '@prosekit/pm/model'
 import type { Transaction } from '@prosekit/pm/state'
+import { AttrStep } from '@prosekit/pm/transform'
 import { decodeString } from 'micromark-util-decode-string'
 import { normalizeIdentifier } from 'micromark-util-normalize-identifier'
 
@@ -19,11 +20,14 @@ export interface ReferenceDefinitionIndex {
   nodes: ReadonlySet<EditorNode>
 }
 
+const MAX_DEFINITION_LENGTH = 1_024
+
 export function normalizeReferenceLabel(label: string): string {
   return normalizeIdentifier(label)
 }
 
 function mayBeReferenceDefinition(text: string): boolean {
+  if (text.length > MAX_DEFINITION_LENGTH) return false
   const first = text.search(/\S/)
   if (first < 0 || text.charCodeAt(first) !== 91) return false
   return text.includes(']:', first + 1)
@@ -96,6 +100,14 @@ function getDefinition(
   return definition
 }
 
+export function isReferenceDefinitionNode(
+  node: EditorNode,
+  parent: EditorNode | null,
+  index: number,
+): boolean {
+  return getDefinition(node, parent, index) != null
+}
+
 export function collectReferenceDefinitions(doc: EditorNode): ReferenceDefinitionIndex {
   const definitions = new Map<string, ReferenceDefinition>()
   const nodes = new Set<EditorNode>()
@@ -117,10 +129,53 @@ export function collectReferenceDefinitions(doc: EditorNode): ReferenceDefinitio
   return { definitions, nodes }
 }
 
+function rangeHasDefinitionCandidate(doc: EditorNode, from: number, to: number): boolean {
+  const docSize = doc.content.size
+  let found = false
+  doc.nodesBetween(
+    Math.max(0, from - 1),
+    Math.min(docSize, to + 1),
+    (node, _position, parent, index) => {
+      if (found || node.type.spec.code) return false
+      if (!node.isTextblock) return true
+      if (
+        isDefinitionTextblock(node, parent, index) &&
+        (definitionCache.has(node)
+          ? definitionCache.get(node) != null
+          : mayBeReferenceDefinition(node.textContent))
+      ) {
+        found = true
+      }
+      return false
+    },
+  )
+  return found
+}
+
+function transactionTouchesDefinitions(transaction: Transaction): boolean {
+  if (transaction.steps.some((step) => step instanceof AttrStep)) return true
+
+  for (const [index, map] of transaction.mapping.maps.entries()) {
+    const before = transaction.docs[index]
+    const after =
+      index + 1 < transaction.docs.length ? transaction.docs[index + 1] : transaction.doc
+    let touched = false
+    map.forEach((oldStart, oldEnd, newStart, newEnd) => {
+      if (touched) return
+      touched =
+        rangeHasDefinitionCandidate(before, oldStart, oldEnd) ||
+        rangeHasDefinitionCandidate(after, newStart, newEnd)
+    })
+    if (touched) return true
+  }
+  return false
+}
+
 export function updateReferenceDefinitions(
   previous: ReferenceDefinitionIndex,
   transaction: Transaction,
   doc: EditorNode,
 ): ReferenceDefinitionIndex {
-  return transaction.docChanged ? collectReferenceDefinitions(doc) : previous
+  if (!transaction.docChanged || !transactionTouchesDefinitions(transaction)) return previous
+  return collectReferenceDefinitions(doc)
 }
