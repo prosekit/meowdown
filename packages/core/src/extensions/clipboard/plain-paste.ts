@@ -1,9 +1,10 @@
-import { definePlugin, type PlainExtension } from '@prosekit/core'
+import { definePlugin, getNodeType, type PlainExtension } from '@prosekit/core'
 import { DOMParser, DOMSerializer, Slice } from '@prosekit/pm/model'
 import type { ResolvedPos, Schema } from '@prosekit/pm/model'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 
 import { markdownToDoc } from '../../converters/md-to-pm.ts'
+import type { NodeName } from '../node-names.ts'
 import { getNodeBuildersForSchema } from '../schema.ts'
 
 /**
@@ -21,7 +22,11 @@ function plainTextToSlice(schema: Schema, raw: string): Slice {
 
   const nodes = getNodeBuildersForSchema(schema)
   const doc = markdownToDoc(trimmed, { nodes })
-  return Slice.maxOpen(doc.content)
+  const paragraph = getNodeType(schema, 'paragraph' satisfies NodeName)
+  const openStart = doc.childCount > 0 && doc.child(0).type === paragraph ? 1 : 0
+  const openEnd =
+    doc.childCount > 0 && doc.child(doc.childCount - 1).type === paragraph ? 1 : 0
+  return new Slice(doc.content, openStart, openEnd)
 }
 
 /**
@@ -46,6 +51,7 @@ function defaultTextSlice(schema: Schema, text: string, $context: ResolvedPos): 
 }
 
 export function definePlainTextPaste(): PlainExtension {
+  let parsedTextSlice: Slice | undefined
   return definePlugin(
     new Plugin({
       key: new PluginKey('meowdown-plain-paste'),
@@ -53,7 +59,13 @@ export function definePlainTextPaste(): PlainExtension {
         clipboardTextParser: (text, $context, plain, view) => {
           const { schema } = view.state
           if (plain) return defaultTextSlice(schema, text, $context)
-          return plainTextToSlice(schema, text)
+          return (parsedTextSlice = plainTextToSlice(schema, text))
+        },
+        transformPasted: (slice) => {
+          if (parsedTextSlice == null) return slice
+          const result = parsedTextSlice
+          parsedTextSlice = undefined
+          return result
         },
       },
     }),

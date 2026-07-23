@@ -176,6 +176,93 @@ describe('plain text paste', () => {
       """
     `)
   })
+
+  it('keeps a pasted heading closed inside paragraph text', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph('before<a>after')))
+    await pastePlain(fixture, '# heading')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      before
+
+      # heading
+
+      after
+
+      """
+    `)
+  })
+
+  it('keeps a pasted list closed inside paragraph text', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph('before<a>after')))
+    await pastePlain(fixture, '- one\n- two')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      before
+
+      - one
+      - two
+
+      after
+
+      """
+    `)
+  })
+
+  it('keeps a pasted list closed inside a list item', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('before<a>after'))))
+    await pastePlain(fixture, '- one\n- two')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      - before
+
+        - one
+        - two
+
+        after
+
+      """
+    `)
+  })
+
+  it('opens a trailing paragraph after a pasted heading', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph('before<a>after')))
+    await pastePlain(fixture, '# heading\n\nparagraph')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      before
+
+      # heading
+
+      paragraphafter
+
+      """
+    `)
+  })
+
+  it('opens a leading paragraph before a pasted heading', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph('before<a>after')))
+    await pastePlain(fixture, 'paragraph\n\n# heading')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      beforeparagraph
+
+      # heading
+
+      after
+
+      """
+    `)
+  })
 })
 
 describe('plain text paste with shift', () => {
