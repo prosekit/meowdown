@@ -57,41 +57,65 @@ function extractStyledPlainText(html: string): string | undefined {
   for (const element of dom.querySelectorAll('*')) {
     if (!STYLE_ONLY_TAGS.has(element.tagName.toLowerCase())) return undefined
   }
-  const acc = { text: '' }
-  appendNodeText(dom.body, acc)
+  const output: TextOutput = {
+    chunks: [],
+    hasContent: false,
+    trailingNewlines: 0,
+  }
+  appendNodeText(dom.body, output)
   // Non-breaking spaces are a styling artifact (indentation, spacing) and
   // would defeat markdown's own indentation rules.
-  return acc.text.replaceAll('\u{A0}', ' ')
+  return output.chunks.join('').replaceAll('\u{A0}', ' ')
+}
+
+interface TextOutput {
+  chunks: string[]
+  hasContent: boolean
+  trailingNewlines: number
 }
 
 /**
- * Pad `acc` so it ends with at least `count` newlines, unless it holds no
+ * Pad `output` so it ends with at least `count` newlines, unless it holds no
  * content yet (leading separators would just be trimmed again).
  */
-function ensureTrailingNewlines(acc: { text: string }, count: number): void {
-  const trailing = /\n*$/.exec(acc.text)![0].length
-  if (acc.text.length === trailing) return
-  if (trailing < count) acc.text += '\n'.repeat(count - trailing)
+function ensureTrailingNewlines(output: TextOutput, count: number): void {
+  if (!output.hasContent || output.trailingNewlines >= count) return
+  appendText(output, '\n'.repeat(count - output.trailingNewlines))
+}
+
+function appendText(output: TextOutput, text: string): void {
+  if (!text) return
+  output.chunks.push(text)
+
+  let index = text.length
+  while (index > 0 && text.charCodeAt(index - 1) === 10) index--
+  if (index === 0) {
+    output.trailingNewlines += text.length
+  } else {
+    output.hasContent = true
+    output.trailingNewlines = text.length - index
+  }
 }
 
 /** Recursive worker of {@link extractStyledPlainText}. */
-function appendNodeText(node: Node, acc: { text: string }): void {
+function appendNodeText(node: Node, output: TextOutput): void {
   if (node.nodeType === Node.TEXT_NODE) {
-    acc.text += node.nodeValue ?? ''
+    appendText(output, node.nodeValue ?? '')
     return
   }
   if (node.nodeType !== Node.ELEMENT_NODE) return
+
   const tag = (node as Element).tagName
   if (tag === 'BR') {
-    acc.text += '\n'
+    appendText(output, '\n')
     return
   }
   if (tag === 'STYLE' || tag === 'TITLE') return
   // A `div` starts a line of its own, a `p` a paragraph of its own.
   const separator = tag === 'DIV' ? 1 : tag === 'P' ? 2 : 0
-  if (separator) ensureTrailingNewlines(acc, separator)
-  for (const child of node.childNodes) appendNodeText(child, acc)
-  if (separator) ensureTrailingNewlines(acc, separator)
+  if (separator) ensureTrailingNewlines(output, separator)
+  for (const child of node.childNodes) appendNodeText(child, output)
+  if (separator) ensureTrailingNewlines(output, separator)
 }
 
 /**
