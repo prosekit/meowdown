@@ -1,4 +1,5 @@
 import { pasteHTML } from '@prosekit/core/test'
+import { NO_BREAK_SPACE } from 'unicode-by-name'
 import { describe, expect, it } from 'vitest'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
@@ -110,5 +111,69 @@ describe('paste rich-text HTML', () => {
     // would open a code fence that swallows the rest of the paste.
     pasteHTML(view, '<p><em>x</em></p><p>~~~ keep me</p>')
     expect(docToMarkdown(editor.state.doc)).toContain('keep me')
+  })
+})
+
+describe('paste styled plain text', () => {
+  it('pastes code-editor line divs as markdown source', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    // VS Code wraps each copied source line in a styled div/span; the text is
+    // markdown source and must not be escaped by the HTML conversion.
+    pasteHTML(
+      view,
+      '<meta charset="utf-8"><div style="color:#abb2bf"><span>- [ ] one</span></div><div><span>- [x] two</span></div>',
+    )
+    expect(docToMarkdown(editor.state.doc).trim()).toBe('- [ ] one\n- [x] two')
+    expect(editor.state.doc.firstChild?.attrs.kind).toBe('task')
+  })
+
+  it('keeps active markdown syntax literal in plain HTML prose', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    pasteHTML(view, '<p>**bold** and `code`</p>')
+    expect(docToMarkdown(editor.state.doc)).toBe('\\*\\*bold\\*\\* and \\`code\\`\n')
+  })
+
+  it('keeps active markdown syntax literal in unstyled line divs', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    pasteHTML(view, '<div>- literal item</div>')
+    expect(docToMarkdown(editor.state.doc)).toBe('\\- literal item\n')
+  })
+
+  it('ignores styles outside line divs', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    pasteHTML(view, '<style>body { color: red }</style><div>- literal item</div>')
+    expect(docToMarkdown(editor.state.doc)).toBe('\\- literal item\n')
+  })
+
+  it('keeps blank-line structure from line divs', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    pasteHTML(view, '<div style="color:red">aaa</div><div><br></div><div>bbb</div>')
+    expect(docToMarkdown(editor.state.doc)).toBe('aaa\n\nbbb\n')
+  })
+
+  it('separates plain HTML paragraphs', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    pasteHTML(view, '<p>aaa</p><p>bbb</p>')
+    expect(docToMarkdown(editor.state.doc)).toBe('aaa\n\nbbb\n')
+  })
+
+  it('keeps non-breaking spaces in plain HTML prose', () => {
+    using fixture = setupFixture()
+    const { editor, n, view } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    pasteHTML(view, '<p>10&nbsp;kg</p>')
+    expect(docToMarkdown(editor.state.doc)).toBe(`10${NO_BREAK_SPACE}kg\n`)
   })
 })

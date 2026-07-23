@@ -1,8 +1,10 @@
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
+import { NO_BREAK_SPACE } from 'unicode-by-name'
 
 import { htmlToMarkdown } from '../converters/html-to-md.ts'
 import { markdownToDoc } from '../converters/md-to-pm.ts'
+import { CHAR_LINE_FEED } from '../unicode.ts'
 
 import { getSemanticDOMSerializer } from './clipboard/clipboard-serializer.ts'
 import { getNodeBuildersForSchema } from './schema.ts'
@@ -19,6 +21,109 @@ const htmlPasteKey = new PluginKey('meowdown-html-paste')
 function isMeowdownClipboardHTML(html: string): boolean {
   if (html.includes('data-meowdown')) return true
   return html.includes('data-pm-slice') && html.includes('md-mark')
+}
+
+/**
+ * Tags that carry no markdown-representable structure beyond line breaks.
+ * Code editors wrap copied source lines in styled `div` and `span` elements.
+ */
+const STYLE_ONLY_TAGS = new Set([
+  'html',
+  'head',
+  'body',
+  'meta',
+  'style',
+  'title',
+  'div',
+  'span',
+  'p',
+  'br',
+  'font',
+  'wbr',
+])
+
+/**
+ * When `html` contains styled line wrappers, return its text with the line
+ * structure restored (one line per `div`, a blank line between `p`s, `<br>`
+ * as a newline); return `undefined` for ordinary prose or semantic HTML.
+ *
+ * The extracted text is then pasted as markdown *source* instead of being
+ * round-tripped through the HTML-to-markdown converter, whose escaping would
+ * turn pasted markdown into `\[ ] task`-style noise.
+ */
+function extractStyledPlainText(html: string): string | undefined {
+  const dom = new window.DOMParser().parseFromString(html, 'text/html')
+  const output: TextOutput = {
+    chunks: [],
+    hasContent: false,
+    trailingNewlines: 0,
+    hasStyledLine: false,
+  }
+  if (!appendNodeText(dom.documentElement, output, false)) return undefined
+  if (!output.hasStyledLine) return undefined
+  // Non-breaking spaces are a styling artifact (indentation, spacing) and
+  // would defeat markdown's own indentation rules.
+  return output.chunks.join('').replaceAll(NO_BREAK_SPACE, ' ')
+}
+
+interface TextOutput {
+  chunks: string[]
+  hasContent: boolean
+  trailingNewlines: number
+  hasStyledLine: boolean
+}
+
+/**
+ * Pad `output` so it ends with at least `count` newlines, unless it holds no
+ * content yet (leading separators would just be trimmed again).
+ */
+function ensureTrailingNewlines(output: TextOutput, count: number): void {
+  if (!output.hasContent || output.trailingNewlines >= count) return
+  appendText(output, '\n'.repeat(count - output.trailingNewlines))
+}
+
+function appendText(output: TextOutput, text: string): void {
+  if (!text) return
+  output.chunks.push(text)
+
+  let index = text.length
+  while (index > 0 && text.charCodeAt(index - 1) === CHAR_LINE_FEED) {
+    index--
+  }
+  if (index === 0) {
+    output.trailingNewlines += text.length
+  } else {
+    output.hasContent = true
+    output.trailingNewlines = text.length - index
+  }
+}
+
+/** Recursive worker of {@link extractStyledPlainText}. */
+function appendNodeText(node: Node, output: TextOutput, insideLine: boolean): boolean {
+  if (node.nodeType === Node.TEXT_NODE) {
+    appendText(output, node.nodeValue ?? '')
+    return true
+  }
+  if (node.nodeType !== Node.ELEMENT_NODE) return true
+
+  const element = node as Element
+  const tag = element.tagName
+  if (!STYLE_ONLY_TAGS.has(tag.toLowerCase())) return false
+  insideLine ||= tag === 'DIV'
+  if (insideLine && element.getAttribute('style')?.trim()) output.hasStyledLine = true
+  if (tag === 'BR') {
+    appendText(output, '\n')
+    return true
+  }
+  if (tag === 'STYLE' || tag === 'TITLE') return true
+  // A `div` starts a line of its own, a `p` a paragraph of its own.
+  const separator = tag === 'DIV' ? 1 : tag === 'P' ? 2 : 0
+  if (separator) ensureTrailingNewlines(output, separator)
+  for (const child of node.childNodes) {
+    if (!appendNodeText(child, output, insideLine)) return false
+  }
+  if (separator) ensureTrailingNewlines(output, separator)
+  return true
 }
 
 /**
@@ -41,7 +146,8 @@ export function defineHTMLPaste(): PlainExtension {
           const parent = view.state.selection.$from.parent
           if (!parent.inlineContent || parent.type.spec.code) return html
 
-          const markdown = htmlToMarkdown(html)
+          // Styled source lines already contain markdown punctuation.
+          const markdown = extractStyledPlainText(html) ?? htmlToMarkdown(html)
           if (!markdown.trim()) return html
 
           const nodes = getNodeBuildersForSchema(view.state.schema)

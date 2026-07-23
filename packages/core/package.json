@@ -43,6 +43,7 @@
     "rehype-remark": "^10.0.1",
     "remark-gfm": "^4.0.1",
     "remark-stringify": "^11.0.0",
+    "unicode-by-name": "^0.2.0",
     "unified": "^11.0.5"
   },
   "devDependencies": {
@@ -55,7 +56,6 @@
     "dedent": "^1.7.2",
     "diffable-html-snapshot": "^0.3.0",
     "tsdown": "^0.22.8",
-    "unicode-by-name": "^0.2.0",
     "vitest": "^4.1.10"
   },
   "publishConfig": {

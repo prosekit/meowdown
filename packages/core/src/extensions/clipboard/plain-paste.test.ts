@@ -139,11 +139,126 @@ describe('plain text paste', () => {
     `)
   })
 
-  it('keeps block markdown syntax as literal text', async () => {
+  it('parses block markdown syntax into blocks', async () => {
     expect(await pastePlainText('# title\ntext')).toMatchInlineSnapshot(`
       """
       # title
+
       text
+
+      """
+    `)
+  })
+
+  it('parses pasted task lists', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph()))
+    await pastePlain(fixture, '- [ ] one\n- [x] two')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      - [ ] one
+      - [x] two
+
+      """
+    `)
+    expect(view.state.doc.firstChild?.type.name).toBe('list')
+    expect(view.state.doc.firstChild?.attrs.kind).toBe('task')
+  })
+
+  it('parses pasted fenced code blocks', async () => {
+    expect(await pastePlainText('```js\nconst a = 1\n```')).toMatchInlineSnapshot(`
+      """
+      \`\`\`js
+      const a = 1
+      \`\`\`
+
+      """
+    `)
+  })
+
+  it('keeps a pasted heading closed inside paragraph text', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph('before<a>after')))
+    await pastePlain(fixture, '# heading')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      before
+
+      # heading
+
+      after
+
+      """
+    `)
+  })
+
+  it('keeps a pasted list closed inside paragraph text', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph('before<a>after')))
+    await pastePlain(fixture, '- one\n- two')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      before
+
+      - one
+      - two
+
+      after
+
+      """
+    `)
+  })
+
+  it('keeps a pasted list closed inside a list item', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('before<a>after'))))
+    await pastePlain(fixture, '- one\n- two')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      - before
+
+        - one
+        - two
+
+        after
+
+      """
+    `)
+  })
+
+  it('opens a trailing paragraph after a pasted heading', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph('before<a>after')))
+    await pastePlain(fixture, '# heading\n\nparagraph')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      before
+
+      # heading
+
+      paragraphafter
+
+      """
+    `)
+  })
+
+  it('opens a leading paragraph before a pasted heading', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph('before<a>after')))
+    await pastePlain(fixture, 'paragraph\n\n# heading')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      beforeparagraph
+
+      # heading
+
+      after
 
       """
     `)
