@@ -66,11 +66,12 @@ function isCheckboxInput(node: Element): boolean {
   return node.tagName === 'input' && node.properties.type === 'checkbox'
 }
 
-/** The first checkbox `<input>` in `node`'s subtree, if any. */
+/** The first checkbox `<input>` before any nested list, if any. */
 function findCheckbox(node: Element): Element | undefined {
   for (const child of node.children) {
     if (child.type !== 'element') continue
     if (isCheckboxInput(child)) return child
+    if (child.tagName === 'ul' || child.tagName === 'ol') continue
     const nested = findCheckbox(child)
     if (nested) return nested
   }
