@@ -74,6 +74,9 @@ export function parseReferenceDefinition(text: string): ReferenceDefinition | un
 function isDefinitionContainer(parent: EditorNode | null, index: number): boolean {
   if (parent == null) return true
   if (isNodeOfType(parent, 'tableCell') || isNodeOfType(parent, 'tableHeaderCell')) return false
+  // A task checkbox precedes the first paragraph in Markdown source but lives
+  // on the parent list attrs in ProseMirror. The paragraph text `[doc]: /url`
+  // therefore comes from `- [ ] [doc]: /url` and is not a definition.
   return !isNodeOfType(parent, 'list') || parent.attrs.kind !== 'task' || index > 0
 }
 
@@ -153,9 +156,10 @@ function rangeHasDefinitionCandidate(doc: EditorNode, from: number, to: number):
 }
 
 function transactionTouchesDefinitions(transaction: Transaction): boolean {
-  // AttrStep changes node attributes but exposes StepMap.empty. A list kind
-  // change can make its first paragraph eligible or ineligible as a definition,
-  // so there is no mapped range to inspect and the index must be rebuilt.
+  // Changing a list from task to bullet turns `- [ ] [doc]: /url` into
+  // `- [doc]: /url`, while its paragraph text remains `[doc]: /url` because the
+  // checkbox lives on the list attrs. AttrStep exposes StepMap.empty, so no
+  // mapped range reports that the paragraph became a definition.
   if (transaction.steps.some((step) => step instanceof AttrStep)) return true
 
   for (const [index, map] of transaction.mapping.maps.entries()) {
