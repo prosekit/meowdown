@@ -1,9 +1,11 @@
 import {
+  collectReferenceDefinitions,
   defaultResolveImageUrl,
   formatFileSize,
   getFileKind,
   getCodeTokens,
   getMarkBuilders,
+  inlineTextToMarkChunksWithContext,
   listenForTweetHeight,
   markdownToDoc,
   matchEmbed,
@@ -26,14 +28,10 @@ import {
   type MdWikilinkAttrs,
   type MeowdownListAttrs,
   type NodeName,
+  type ReferenceDefinitions,
   type WikiEmbedResolver,
   type WikilinkClickHandler,
 } from '@meowdown/core'
-import {
-  collectReferenceDefinitions,
-  inlineTextToMarkChunksWithContext,
-  type ReferenceDefinitions,
-} from '@meowdown/core/internal'
 import type { DOMOutputSpec } from '@prosekit/pm/model'
 import { Mark, type Node as ProseMirrorNode } from '@prosekit/pm/model'
 import { clsx } from 'clsx/lite'
