@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.58.0](https://github.com/prosekit/meowdown/compare/v0.57.2...v0.58.0) (2026-07-23)
+
+
+### Features
+
+* support Markdown reference links ([#361](https://github.com/prosekit/meowdown/issues/361)) ([7608fac](https://github.com/prosekit/meowdown/commit/7608facc62ca583d5959757ab337b46fa970323f))
+
 ## [0.57.2](https://github.com/prosekit/meowdown/compare/v0.57.1...v0.57.2) (2026-07-23)
 
 
