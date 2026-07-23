@@ -24,8 +24,7 @@ function plainTextToSlice(schema: Schema, raw: string): Slice {
   const doc = markdownToDoc(trimmed, { nodes })
   const paragraph = getNodeType(schema, 'paragraph' satisfies NodeName)
   const openStart = doc.childCount > 0 && doc.child(0).type === paragraph ? 1 : 0
-  const openEnd =
-    doc.childCount > 0 && doc.child(doc.childCount - 1).type === paragraph ? 1 : 0
+  const openEnd = doc.childCount > 0 && doc.child(doc.childCount - 1).type === paragraph ? 1 : 0
   return new Slice(doc.content, openStart, openEnd)
 }
 
