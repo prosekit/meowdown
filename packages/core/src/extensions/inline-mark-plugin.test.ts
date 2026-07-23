@@ -1,3 +1,4 @@
+import type { EditorNode } from '@prosekit/pm/model'
 import { describe, expect, it } from 'vitest'
 
 import { findText } from '../testing/find-text.ts'
@@ -6,6 +7,15 @@ import { marksAt } from '../testing/marks-at.ts'
 
 import { getCacheStats, resetCacheStats } from './inline-mark-plugin.ts'
 import { isMarkOfType } from './mark-names.ts'
+
+function getLinkHref(doc: EditorNode, label: string): string | undefined {
+  const position = findText(doc, label)
+  const link = doc
+    .resolve(position + 1)
+    .marks()
+    .find((mark) => isMarkOfType(mark, 'mdLinkText'))
+  return typeof link?.attrs.href === 'string' ? link.attrs.href : undefined
+}
 
 describe('inlineMarkPlugin', () => {
   it('applies mdStrong inside **bold**', () => {
@@ -201,10 +211,10 @@ describe('inlineMarkPlugin', () => {
     )
     fixture.set(doc)
     // Warm the cache for the current (already-marked) node instances.
-    fixture.view.dispatch(fixture.state.tr)
+    fixture.view.dispatch(fixture.state.tr.setMeta('inline-marks-trigger', true))
     resetCacheStats()
     // Same node instances: every textblock cache-hits.
-    fixture.view.dispatch(fixture.state.tr)
+    fixture.view.dispatch(fixture.state.tr.setMeta('inline-marks-trigger', true))
     const stats = getCacheStats()
     expect(stats.hits).toBeGreaterThanOrEqual(3)
     expect(stats.parses).toBe(0)
@@ -335,5 +345,157 @@ describe('inlineMarkPlugin', () => {
     fixture.view.dispatch(fixture.state.tr.delete(pos - 1, pos))
     const glued = findText(fixture.doc, '#tag')
     expect(marksAt(fixture.doc, glued + 1)).toEqual([])
+  })
+
+  it('updates only references that use the changed definition key', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.paragraph('[Alpha][alpha]'),
+        n.paragraph('[Beta][beta]'),
+        n.paragraph('[alpha]: /old-alpha'),
+        n.paragraph('[beta]: /old-beta'),
+      ),
+    )
+
+    resetCacheStats()
+    const destination = findText(fixture.doc, '/old-alpha')
+    fixture.view.dispatch(
+      fixture.state.tr.insertText('/new-alpha', destination, destination + '/old-alpha'.length),
+    )
+
+    expect(getLinkHref(fixture.doc, 'Alpha')).toBe('/new-alpha')
+    expect(getLinkHref(fixture.doc, 'Beta')).toBe('/old-beta')
+    expect(getCacheStats().parses).toBe(2)
+  })
+
+  it('resolves an existing unresolved reference when its definition appears', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('Read [Plan][doc].'), n.paragraph('[doc] /new')))
+
+    expect(getLinkHref(fixture.doc, 'Plan')).toBeUndefined()
+
+    const definition = findText(fixture.doc, '[doc] /new')
+    fixture.view.dispatch(fixture.state.tr.insertText(':', definition + '[doc]'.length))
+
+    expect(getLinkHref(fixture.doc, 'Plan')).toBe('/new')
+  })
+
+  it('removes reference marks when its definition disappears', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('Read [Plan][doc].'), n.paragraph('[doc]: /docs')))
+
+    const colon = findText(fixture.doc, ':')
+    fixture.view.dispatch(fixture.state.tr.delete(colon, colon + 1))
+
+    expect(getLinkHref(fixture.doc, 'Plan')).toBeUndefined()
+    expect(marksAt(fixture.doc, findText(fixture.doc, 'Plan') + 1)).toEqual([])
+  })
+
+  it('promotes the next duplicate after deleting the first definition', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.paragraph('[Plan][doc]'),
+        n.paragraph('[doc]: /first'),
+        n.paragraph('[DOC]: /second'),
+      ),
+    )
+
+    const from = fixture.doc.child(0).nodeSize
+    const to = from + fixture.doc.child(1).nodeSize
+    fixture.view.dispatch(fixture.state.tr.delete(from, to))
+    expect(getLinkHref(fixture.doc, 'Plan')).toBe('/second')
+  })
+
+  it('does not invalidate dependents when a shadowed duplicate changes', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.paragraph('[Plan][doc]'),
+        n.paragraph('[doc]: /first'),
+        n.paragraph('[DOC]: /second'),
+      ),
+    )
+
+    resetCacheStats()
+    const destination = findText(fixture.doc, '/second')
+    fixture.view.dispatch(
+      fixture.state.tr.insertText('/ignored', destination, destination + '/second'.length),
+    )
+
+    expect(getLinkHref(fixture.doc, 'Plan')).toBe('/first')
+    expect(getCacheStats().parses).toBe(1)
+  })
+
+  it('retains a definition across an external AddMarkStep', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('[doc]: /real'), n.paragraph('Read [Doc].')))
+
+    const definition = findText(fixture.doc, '[doc]:')
+    fixture.view.dispatch(
+      fixture.state.tr.addMark(
+        definition,
+        definition + '[doc]'.length,
+        fixture.schema.marks.mdEm.create(),
+      ),
+    )
+
+    expect(getLinkHref(fixture.doc, 'Doc')).toBe('/real')
+  })
+
+  it('discovers a definition after AttrStep changes its list kind', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(n.list({ kind: 'task' }, n.paragraph('[doc]: /new')), n.paragraph('Read [Doc].')),
+    )
+
+    fixture.view.dispatch(fixture.state.tr.setNodeAttribute(0, 'kind', 'bullet'))
+    expect(getLinkHref(fixture.doc, 'Doc')).toBe('/new')
+  })
+
+  it('does not reparse unchanged definitions on an unrelated edit', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const ordinary = Array.from({ length: 1_000 }, (_, index) => n.paragraph(`line ${index}`))
+    fixture.set(n.doc(n.paragraph('[doc]: /docs'), ...ordinary))
+
+    resetCacheStats()
+    const last = findText(fixture.doc, 'line 999')
+    fixture.view.dispatch(fixture.state.tr.insertText('X', last, last + 1))
+
+    expect(getCacheStats().parses).toBe(1)
+  })
+
+  it('does no inline parsing for a selection-only transaction', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('first'), n.paragraph('second')))
+
+    resetCacheStats()
+    editor.commands.selectText(2)
+    expect(getCacheStats()).toEqual({ parses: 0, hits: 0 })
+  })
+
+  it('invalidates cached definition context when a list kind changes', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(n.list({ kind: 'bullet' }, n.paragraph('[doc]: /docs')), n.paragraph('Read [Doc].')),
+    )
+    expect(getLinkHref(fixture.doc, 'Doc')).toBe('/docs')
+
+    fixture.view.dispatch(fixture.state.tr.setNodeAttribute(0, 'kind', 'task'))
+    expect(getLinkHref(fixture.doc, 'Doc')).toBeUndefined()
+
+    fixture.view.dispatch(fixture.state.tr.setNodeAttribute(0, 'kind', 'bullet'))
+    expect(getLinkHref(fixture.doc, 'Doc')).toBe('/docs')
   })
 })

@@ -1,5 +1,6 @@
 import { gfmParser, LEZER_NODE_IDS, type SyntaxNode } from '@meowdown/markdown'
 import type { EditorNode } from '@prosekit/pm/model'
+import type { Transaction } from '@prosekit/pm/state'
 import { decodeString } from 'micromark-util-decode-string'
 import { normalizeIdentifier } from 'micromark-util-normalize-identifier'
 
@@ -114,4 +115,12 @@ export function collectReferenceDefinitions(doc: EditorNode): ReferenceDefinitio
   })
 
   return { definitions, nodes }
+}
+
+export function updateReferenceDefinitions(
+  previous: ReferenceDefinitionIndex,
+  transaction: Transaction,
+  doc: EditorNode,
+): ReferenceDefinitionIndex {
+  return transaction.docChanged ? collectReferenceDefinitions(doc) : previous
 }
