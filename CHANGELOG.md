@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.57.1](https://github.com/prosekit/meowdown/compare/v0.57.0...v0.57.1) (2026-07-23)
+
+
+### Bug Fixes
+
+* **core:** preserve Markdown when pasting styled HTML ([#345](https://github.com/prosekit/meowdown/issues/345)) ([ff15f62](https://github.com/prosekit/meowdown/commit/ff15f62dc3053f73cd1668e439335e31141036e8))
+* **core:** preserve parent list item type when parsing HTML ([#355](https://github.com/prosekit/meowdown/issues/355)) ([3bc5c59](https://github.com/prosekit/meowdown/commit/3bc5c59ad81be50f8e1a12dd82b0039420a6d884))
+* show iOS text selection grab points ([#356](https://github.com/prosekit/meowdown/issues/356)) ([4ef8a32](https://github.com/prosekit/meowdown/commit/4ef8a32c6df727862a2988f6df1afeefc2ec8547))
+
 ## [0.57.0](https://github.com/prosekit/meowdown/compare/v0.56.0...v0.57.0) (2026-07-22)
 
 
