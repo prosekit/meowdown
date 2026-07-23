@@ -1,7 +1,7 @@
 {
   "name": "@meowdown/markdown",
   "type": "module",
-  "version": "0.57.1",
+  "version": "0.57.2",
   "license": "MIT",
   "repository": {
     "type": "git",
