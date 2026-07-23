@@ -225,7 +225,7 @@ describe('inline', () => {
     expect(roundtrip('<?php echo 1; ?>')).toBe('<?php echo 1; ?>\n')
   })
 
-  it.fails('keeps a link reference definition', () => {
+  it('keeps a link reference definition', () => {
     expect(roundtrip('[foo]: /url')).toBe('[foo]: /url\n')
   })
 })

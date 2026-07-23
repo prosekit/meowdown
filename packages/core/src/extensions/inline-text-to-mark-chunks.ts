@@ -17,6 +17,11 @@ import { parseMagicComment, type MagicComment } from './magic-comment.ts'
 import type { MarkChunk } from './mark-chunk.ts'
 import type { MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
+import {
+  normalizeReferenceLabel,
+  type ReferenceDefinition,
+  type ReferenceDefinitions,
+} from './reference-links.ts'
 import type { TypedMarkBuilders } from './schema.ts'
 import { parseWikiEmbed, wikiEmbedBasename, type WikiEmbedOptions } from './wiki-embed.ts'
 import { parseWikilink } from './wikilink.ts'
@@ -72,8 +77,19 @@ export interface FileLinkOptions {
   resolveFileLink?: FileLinkResolver
 }
 
-/** Host options that influence source-backed inline atom parsing. */
-export type InlineMarkOptions = FileLinkOptions & WikiEmbedOptions
+/** Host options and document context that influence inline parsing. */
+export type InlineMarkOptions = FileLinkOptions &
+  WikiEmbedOptions & {
+    /** Document-wide definitions used to resolve reference links. */
+    referenceDefinitions?: ReferenceDefinitions
+    /** This textblock is itself a reference definition; disables resolution. */
+    isReferenceDefinition?: boolean
+    /**
+     * Collector for every reference key this block looked up, resolved or
+     * not, so callers can invalidate cached results when a key changes.
+     */
+    usedReferences?: Map<string, ReferenceDefinition | null>
+  }
 
 /**
  * Walk a textblock's inline content and produce a list of mark chunks
@@ -118,14 +134,18 @@ function walk(
     const type: number = node.type
     if (type === LEZER_NODE_IDS.Link) {
       if (!hasInlineDestination(node)) {
-        // Lezer also parses reference-style links (`[text]`, `[text][label]`),
-        // but meowdown has no link reference definitions, so those stay plain
-        // text: skip the bracket marks and walk any nested syntax as usual.
-        const children = node.children.filter(
-          (child) =>
-            child.type !== LEZER_NODE_IDS.LinkMark && child.type !== LEZER_NODE_IDS.LinkLabel,
-        )
-        walk(children, parentMarks, node.from, node.to, text, marks, out, options)
+        const definition = resolveReference(node, text, options)
+        if (definition) {
+          walkLink(node, parentMarks, text, marks, out, options, definition)
+        } else {
+          // An unresolved reference shape (`[text]`, `[text][label]`) stays
+          // plain text: skip the bracket marks and walk any nested syntax.
+          const children = node.children.filter(
+            (child) =>
+              child.type !== LEZER_NODE_IDS.LinkMark && child.type !== LEZER_NODE_IDS.LinkLabel,
+          )
+          walk(children, parentMarks, node.from, node.to, text, marks, out, options)
+        }
       } else {
         const fileMarks = claimFileLink(node, parentMarks, text, marks, options)
         if (fileMarks) {
@@ -136,7 +156,7 @@ function walk(
       }
     } else if (type === LEZER_NODE_IDS.Image) {
       const trailing = takeMagicComment(node, nodes[index + 1], text)
-      walkImage(node, parentMarks, text, marks, out, trailing)
+      walkImage(node, parentMarks, text, marks, out, options, trailing)
       if (trailing) index++ // skip the folded comment
       pos = trailing ? trailing.to : node.to
       continue
@@ -197,6 +217,8 @@ interface LinkParts {
   labelTo: number
   urlNode: InlineElement | null
   titleNode: InlineElement | null
+  /** The `[label]` of a full reference, brackets included, or null. */
+  referenceLabelNode: InlineElement | null
 }
 
 /**
@@ -222,6 +244,7 @@ function scanLinkParts(node: InlineElement): LinkParts {
   let labelTo = -1
   let urlNode: InlineElement | null = null
   let titleNode: InlineElement | null = null
+  let referenceLabelNode: InlineElement | null = null
   let bracketCount = 0
   for (const child of node.children) {
     const childType = child.type
@@ -233,9 +256,45 @@ function scanLinkParts(node: InlineElement): LinkParts {
       urlNode = child
     } else if (titleNode == null && childType === LEZER_NODE_IDS.LinkTitle) {
       titleNode = child
+    } else if (referenceLabelNode == null && childType === LEZER_NODE_IDS.LinkLabel) {
+      referenceLabelNode = child
     }
   }
-  return { labelFrom, labelTo, urlNode, titleNode }
+  return { labelFrom, labelTo, urlNode, titleNode, referenceLabelNode }
+}
+
+/**
+ * The normalized reference key of a `[text]` / `[text][label]` / `[text][]`
+ * shape, or undefined when the label never closes or normalizes to nothing.
+ */
+function referenceKeyOf(node: InlineElement, text: string): string | undefined {
+  const { labelFrom, labelTo, referenceLabelNode } = scanLinkParts(node)
+  if (labelFrom < 0 || labelTo < 0) return undefined
+  const label = text.slice(labelFrom, labelTo)
+  const authored = referenceLabelNode
+    ? text.slice(referenceLabelNode.from + 1, referenceLabelNode.to - 1) || label
+    : label
+  const key = normalizeReferenceLabel(authored)
+  return key === '' ? undefined : key
+}
+
+/**
+ * Resolve a reference-shaped `Link` / `Image` against the document's
+ * definitions, recording the lookup (hit or miss) in `usedReferences`.
+ */
+function resolveReference(
+  node: InlineElement,
+  text: string,
+  options: InlineMarkOptions | undefined,
+): ReferenceDefinition | undefined {
+  if (options?.referenceDefinitions === undefined || options.isReferenceDefinition === true) {
+    return undefined
+  }
+  const key = referenceKeyOf(node, text)
+  if (key === undefined) return undefined
+  const definition = options.referenceDefinitions.get(key) ?? null
+  options.usedReferences?.set(key, definition)
+  return definition ?? undefined
 }
 
 /** The last path segment of `href` (query/hash stripped), decoded when possible. */
@@ -299,11 +358,17 @@ function walkLink(
   marks: TypedMarkBuilders,
   out: MarkChunk[],
   options: InlineMarkOptions | undefined,
+  reference?: ReferenceDefinition,
 ): void {
   const { labelTo: labelEnd, urlNode, titleNode } = scanLinkParts(node)
-  const href = urlNode ? text.slice(urlNode.from, urlNode.to) : ''
-  const title = titleNode ? unquoteTitle(text.slice(titleNode.from, titleNode.to)) : ''
-  const linkTextMark = href ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs) : null
+  const href = reference ? reference.href : urlNode ? text.slice(urlNode.from, urlNode.to) : ''
+  const title = reference
+    ? reference.title
+    : titleNode
+      ? unquoteTitle(text.slice(titleNode.from, titleNode.to))
+      : ''
+  const linkTextMark =
+    href || reference ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs) : null
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd && linkTextMark !== null
 
   const pack = marks.mdPack.create({ key: 'link', data: { href, title } } satisfies MdPackAttrs)
@@ -328,7 +393,10 @@ function walkLink(
       pos = child.to
       continue
     }
-    const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(child.type)
+    const maybeMarkName =
+      reference && child.type === LEZER_NODE_IDS.LinkLabel
+        ? 'mdMark'
+        : MARK_NAME_BY_TYPE_ID.get(child.type)
     const childMarks = maybeMarkName
       ? [...baseForChild, marks[maybeMarkName].create()]
       : baseForChild
@@ -376,12 +444,14 @@ function walkImage(
   text: string,
   marks: TypedMarkBuilders,
   out: MarkChunk[],
+  options: InlineMarkOptions | undefined,
   trailing?: AdjacentMagicComment,
 ): void {
   const urlNode = node.children.find((child) => child.type === LEZER_NODE_IDS.URL)
-  if (!urlNode) {
-    // A reference image `![alt][id]` has no `URL` child; fall back to the link
-    // walk, which renders nothing yet.
+  const reference = urlNode ? undefined : resolveReference(node, text, options)
+  if (!urlNode && !reference) {
+    // An unresolved reference image `![alt][id]` has no `URL` child; fall back
+    // to the link walk, which renders nothing yet.
     walkLink(node, parentMarks, text, marks, out, undefined)
     return
   }
@@ -389,10 +459,18 @@ function walkImage(
   const bracketNodes = node.children.filter((child) => child.type === LEZER_NODE_IDS.LinkMark)
   const titleNode = node.children.find((child) => child.type === LEZER_NODE_IDS.LinkTitle)
 
-  const src: string = text.slice(urlNode.from, urlNode.to)
+  const src: string = reference
+    ? reference.href
+    : urlNode
+      ? text.slice(urlNode.from, urlNode.to)
+      : ''
   const alt: string =
     bracketNodes.length >= 2 ? text.slice(bracketNodes[0].to, bracketNodes[1].from) : ''
-  const title: string = titleNode ? unquoteTitle(text.slice(titleNode.from, titleNode.to)) : ''
+  const title: string = reference
+    ? reference.title
+    : titleNode
+      ? unquoteTitle(text.slice(titleNode.from, titleNode.to))
+      : ''
   const width = trailing?.magic.width ?? null
   const height = trailing?.magic.height ?? null
   const to = trailing?.to ?? node.to

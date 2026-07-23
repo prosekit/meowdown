@@ -23,6 +23,15 @@ import type { PositionRange } from '../utils/range.ts'
 import { BatchSetMarkStep } from './batch-set-mark-step.ts'
 import { inlineTextToMarkChunks, type InlineMarkOptions } from './inline-text-to-mark-chunks.ts'
 import type { MarkChunk } from './mark-chunk.ts'
+import {
+  buildReferenceIndex,
+  cachedDefinitionParse,
+  EMPTY_REFERENCE_INDEX,
+  transactionTouchesDefinitions,
+  type ReferenceDefinition,
+  type ReferenceDefinitionCache,
+  type ReferenceIndex,
+} from './reference-links.ts'
 import { getMarkBuildersForSchema } from './schema.ts'
 
 const META_KEY = 'inline-marks-applied'
@@ -78,6 +87,15 @@ function computeAffectedRange(
 }
 
 function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin {
+  interface InlineMarkPluginState {
+    readonly references: ReferenceIndex
+  }
+
+  const pluginKey = new PluginKey<InlineMarkPluginState>('inline-mark')
+
+  /** Definition parse results per paragraph node identity. */
+  const definitionCache: ReferenceDefinitionCache = new WeakMap()
+
   /**
    * Cache of chunks per textblock node, keyed by the immutable
    * `ProseMirrorNode` instance. Stored chunks are baseOffset-relative
@@ -86,20 +104,63 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
    * the doc (a paragraph below it was inserted or deleted). Scoped to the
    * plugin instance because the chunks depend on this editor's `options`.
    */
-  const chunkCache = new WeakMap<EditorNode, readonly MarkChunk[]>()
+  interface CachedChunks {
+    readonly chunks: readonly MarkChunk[]
+    /** Reference keys this block looked up and what each resolved to. */
+    readonly resolved: ReadonlyMap<string, ReferenceDefinition | null> | undefined
+    readonly isDefinition: boolean
+  }
+
+  const chunkCache = new WeakMap<EditorNode, CachedChunks>()
+
+  function cacheValid(
+    entry: CachedChunks,
+    references: ReferenceIndex,
+    isDefinition: boolean,
+  ): boolean {
+    if (entry.isDefinition !== isDefinition) return false
+    if (entry.resolved === undefined) return true
+    for (const [key, definition] of entry.resolved) {
+      const current = references.definitions.get(key) ?? null
+      if (current === definition) continue
+      if (
+        current === null ||
+        definition === null ||
+        current.href !== definition.href ||
+        current.title !== definition.title
+      ) {
+        return false
+      }
+    }
+    return true
+  }
 
   function chunksForTextblock(
     node: EditorNode,
     baseOffset: number,
     schema: Schema,
+    references: ReferenceIndex,
+    isDefinition: boolean,
   ): readonly MarkChunk[] {
-    let relative = chunkCache.get(node)
-    if (relative) {
+    const cached = chunkCache.get(node)
+    let relative: readonly MarkChunk[]
+    if (cached !== undefined && cacheValid(cached, references, isDefinition)) {
       chunkCacheHits++
+      relative = cached.chunks
     } else {
       chunkCacheParses++
-      relative = inlineTextToMarkChunks(getMarkBuildersForSchema(schema), node.textContent, options)
-      chunkCache.set(node, relative)
+      const usedReferences = new Map<string, ReferenceDefinition | null>()
+      relative = inlineTextToMarkChunks(getMarkBuildersForSchema(schema), node.textContent, {
+        ...options,
+        referenceDefinitions: references.definitions,
+        isReferenceDefinition: isDefinition,
+        usedReferences,
+      })
+      chunkCache.set(node, {
+        chunks: relative,
+        resolved: usedReferences.size > 0 ? usedReferences : undefined,
+        isDefinition,
+      })
     }
     if (baseOffset === 0) return relative
     const shifted: MarkChunk[] = []
@@ -116,29 +177,64 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
    * The walker uses `nodesBetween` which naturally recurses into
    * containers (blockquote, list, tableCell), so it picks up nested
    * textblocks without each container needing to be listed explicitly.
+   *
+   * When the definition set changed, the walk covers the whole document,
+   * but blocks outside the edited `range` whose cached chunks do not
+   * depend on a changed key are skipped without re-parsing or emitting.
    */
-  function collectChunksForRange(state: EditorState, range: PositionRange): MarkChunk[] {
+  function collectChunksForRange(
+    state: EditorState,
+    range: PositionRange,
+    references: ReferenceIndex,
+    definitionsChanged: boolean,
+  ): MarkChunk[] {
     const chunks: MarkChunk[] = []
-    state.doc.nodesBetween(range.from, range.to, (node, pos) => {
+    const doc = state.doc
+    const scanFrom = definitionsChanged ? 0 : range.from
+    const scanTo = definitionsChanged ? doc.content.size : range.to
+    doc.nodesBetween(scanFrom, scanTo, (node, pos, parent) => {
       if (node.type.spec.code) return false
       if (!node.isTextblock) return true
       if (node.childCount === 0) return false
-      const nodeChunks = chunksForTextblock(node, pos + 1, state.schema)
+      const isDefinition =
+        parent === doc &&
+        node.type.name === 'paragraph' &&
+        cachedDefinitionParse(node, definitionCache) !== null
+      if (definitionsChanged && (pos + node.nodeSize <= range.from || pos + 1 > range.to)) {
+        const cached = chunkCache.get(node)
+        if (cached !== undefined && cacheValid(cached, references, isDefinition)) return false
+      }
+      const nodeChunks = chunksForTextblock(node, pos + 1, state.schema, references, isDefinition)
       if (nodeChunks.length > 0) chunks.push(...nodeChunks)
       return false
     })
     return chunks
   }
 
-  return new Plugin({
-    key: new PluginKey('inline-mark'),
-    appendTransaction(transactions, _oldState, newState) {
+  return new Plugin<InlineMarkPluginState>({
+    key: pluginKey,
+    state: {
+      init(_config, state) {
+        return { references: buildReferenceIndex(state.doc, definitionCache) }
+      },
+      apply(transaction, value) {
+        // Our own appended step only rewrites marks, never block text.
+        if (!transaction.docChanged || transaction.getMeta(META_KEY)) return value
+        if (!transactionTouchesDefinitions(transaction, definitionCache)) return value
+        const next = buildReferenceIndex(transaction.doc, definitionCache, value.references)
+        return next === value.references ? value : { references: next }
+      },
+    },
+    appendTransaction(transactions, oldState, newState) {
       // Drop transactions we appended ourselves to avoid recursing.
       for (const tr of transactions) {
         if (tr.getMeta(META_KEY)) return null
       }
+      const references = pluginKey.getState(newState)?.references ?? EMPTY_REFERENCE_INDEX
+      const oldReferences = pluginKey.getState(oldState)?.references ?? references
+      const definitionsChanged = references !== oldReferences
       const range = computeAffectedRange(transactions, newState)
-      const chunks = collectChunksForRange(newState, range)
+      const chunks = collectChunksForRange(newState, range, references, definitionsChanged)
       if (chunks.length === 0) return null
       const tr = newState.tr.step(new BatchSetMarkStep(chunks))
       tr.setMeta(META_KEY, true)

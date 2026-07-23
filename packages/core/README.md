@@ -38,6 +38,7 @@ const markdown = docToMarkdown(editor.state.doc)
   - Thematic breaks (`---`, `***`, `___`)
   - Bold (`**bold**`), italic (`*italic*`), and inline code
   - Links (`[text](url)`), images (`![alt](src)`), and autolinks (`<https://example.com>`)
+  - Reference links (`[text]`, `[text][label]`, `[text][]`) resolved against top-level `[label]: url` definitions
   - Hard line breaks
 - GitHub Flavored Markdown (GFM)
   - Tables, including column alignment (`:--`, `:-:`, `--:`)

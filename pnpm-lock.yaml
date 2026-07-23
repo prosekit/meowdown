@@ -102,6 +102,12 @@ importers:
       mdast-util-to-markdown:
         specifier: ^2.1.2
         version: 2.1.2
+      micromark-util-decode-string:
+        specifier: ^2.0.1
+        version: 2.0.1
+      micromark-util-normalize-identifier:
+        specifier: ^2.0.1
+        version: 2.0.1
       prosemirror-flat-list:
         specifier: ^0.7.1
         version: 0.7.1
