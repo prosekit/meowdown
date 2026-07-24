@@ -31,7 +31,6 @@ export function CodeBlockView(props: ReactNodeViewProps) {
   useEffect(() => {
     codeRef.current = code
   }, [code])
-
   const getCode = useCallback(() => codeRef.current, [])
 
   const caretInside = decorations.some(isCodeBlockPreviewHiddenDecoration)
