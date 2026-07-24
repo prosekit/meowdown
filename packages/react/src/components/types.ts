@@ -16,6 +16,11 @@ export type SelectionHint = SelectionJSON | 'start' | 'end'
  */
 export type EditorStateSnapshot = [markdown: string, selection: SelectionJSON]
 
+/**
+ * The imperative API of a mounted editor: read and write the document,
+ * move the selection, and drive the selection menu and pending replacements
+ * from outside React.
+ */
 export interface EditorHandle {
   /**
    * Reconciles pending native input, then serializes the current document to
