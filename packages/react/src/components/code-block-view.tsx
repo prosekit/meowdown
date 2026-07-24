@@ -3,14 +3,12 @@ import {
   codeBlockLanguages,
   isCodeBlockPreviewHiddenDecoration,
   type CodeBlockAttrs,
-  type KaTeXRender,
   type LanguageItem,
 } from '@meowdown/core'
 import { TextSelection } from '@prosekit/pm/state'
 import type { ReactNodeViewProps } from '@prosekit/react'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
 import {
-  memo,
   useCallback,
   useDeferredValue,
   useEffect,
@@ -20,7 +18,7 @@ import {
   type MouseEvent,
 } from 'react'
 
-import { useBeautifulMermaid, type BeautifulMermaidRender } from '../hooks/use-beautiful-mermaid.ts'
+import { useBeautifulMermaid } from '../hooks/use-beautiful-mermaid.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
 
 import styles from './code-block-view.module.css'
@@ -79,56 +77,6 @@ export function CodeBlockView(props: ReactNodeViewProps) {
 
   return (
     <div className={styles.Root} data-preview={previewOnly || undefined}>
-      <CodeBlockComponentMemo
-        previewOnly={previewOnly}
-        selected={selected}
-        contentRef={contentRef}
-        language={language}
-        setLanguage={setLanguage}
-        getCode={getCode}
-        showMathPreview={showMathPreview}
-        showMermaidPreview={showMermaidPreview}
-        katex={katex}
-        mermaid={mermaid}
-        previewCode={previewCode}
-        focusSource={focusSource}
-      />
-    </div>
-  )
-}
-
-interface CodeBlockComponentProps {
-  previewOnly: boolean
-  selected: boolean
-  contentRef: ReactNodeViewProps['contentRef']
-  language: string
-  setLanguage: (language: string) => void
-  getCode: () => string
-  showMathPreview: boolean
-  showMermaidPreview: boolean
-  katex: KaTeXRender | undefined
-  mermaid: BeautifulMermaidRender | undefined
-  previewCode: string
-  focusSource: (event: MouseEvent) => void
-}
-
-function CodeBlockComponent({
-  previewOnly,
-  selected,
-  contentRef,
-  language,
-  setLanguage,
-  getCode,
-  showMathPreview,
-  showMermaidPreview,
-  katex,
-  mermaid,
-  previewCode,
-  focusSource,
-}: CodeBlockComponentProps) {
-  console.log('RENDER')
-  return (
-    <div className={styles.Root} data-preview={previewOnly || undefined}>
       {
         /* Skip rendering the toolbar during dragging to improve the performance of rendering the drag preview image in Safari */
         selected ? null : (
@@ -158,8 +106,6 @@ function CodeBlockComponent({
     </div>
   )
 }
-
-const CodeBlockComponentMemo = memo(CodeBlockComponent)
 
 interface CodeBlockToolbarProps {
   language: string
