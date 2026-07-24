@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.58.1](https://github.com/prosekit/meowdown/compare/v0.58.0...v0.58.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* keep the typed text over the full code text in a code block ([#369](https://github.com/prosekit/meowdown/issues/369)) ([431bddf](https://github.com/prosekit/meowdown/commit/431bddf4fbf207e7596030bb4ffe1a226fefd600))
+* place virtual caret after code-block newline ([#365](https://github.com/prosekit/meowdown/issues/365)) ([f325b78](https://github.com/prosekit/meowdown/commit/f325b78896bb8c443f16447e40699d6acaa41dff))
+
 ## [0.58.0](https://github.com/prosekit/meowdown/compare/v0.57.2...v0.58.0) (2026-07-23)
 
 
