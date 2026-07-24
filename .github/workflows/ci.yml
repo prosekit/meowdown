@@ -47,6 +47,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        shard: ['1/3', '2/3', '3/3']
         include:
           - os: linux
             runner: ubuntu-latest
@@ -80,7 +81,7 @@ jobs:
         run: pnpm run test:install:${{ matrix.browser }}
 
       - name: Test
-        run: pnpm run test
+        run: pnpm run test --shard=${{ matrix.shard }}
         env:
           MEOWDOWN_TEST_BROWSER: ${{ matrix.browser }}
           MEOWDOWN_TEST_COVERAGE: ${{ matrix.coverage && 'true' || '' }}
