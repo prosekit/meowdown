@@ -2,8 +2,8 @@ import { renderMathInto, type KaTeXRender } from '@meowdown/core'
 import { useLayoutEffect, useRef, type MouseEventHandler, type ReactElement } from 'react'
 
 interface MathRenderProps {
-  /** The KaTeX render function, or `undefined` while it loads (renders empty). */
-  katex: KaTeXRender | undefined
+  /** The KaTeX render function */
+  katex: KaTeXRender
   formula: string
   displayMode: boolean
   className?: string
@@ -21,7 +21,7 @@ export function MathRender(props: MathRenderProps): ReactElement {
   const ref = useRef<HTMLSpanElement>(null)
   useLayoutEffect(() => {
     const element = ref.current
-    if (!element || !katex) return
+    if (!element) return
     renderMathInto(katex, element, formula, displayMode)
   }, [katex, formula, displayMode])
   return (
