@@ -70,13 +70,13 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
 
   return (
     <div className={styles.Root} data-preview={previewOnly || undefined}>
+      <pre ref={contentRef} data-language={language}></pre>
       {
         /* Skip rendering the toolbar during dragging to improve the performance of rendering the drag preview image in Safari */
         selected ? null : (
           <CodeBlockToolbar code={code} language={language} setLanguage={setLanguage} />
         )
       }
-      <pre ref={contentRef} data-language={language}></pre>
       {showMathPreview && (
         <MathRender
           katex={katex}

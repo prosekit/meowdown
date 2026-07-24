@@ -5,6 +5,10 @@ settings:
   dedupePeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@prosemirror-adapter/core': 0.5.5
+  '@prosemirror-adapter/react': 0.5.5
+
 importers:
 
   .:
@@ -1266,11 +1270,11 @@ packages:
   '@prosekit/web@0.9.0-beta.23':
     resolution: {integrity: sha512-uAmlm/5g94KoLLUZ9YCF2QyDnnIZG4TTDSCid9LG/2rWsUNiu9Ea3VjgzXS5suL1DrOw3KpF4RhscQq2j6i/Dg==}
 
-  '@prosemirror-adapter/core@0.5.4':
-    resolution: {integrity: sha512-hpBB+RvwQA5KdORtd88sW2OxZvDaXadn/AFa3qcDxDSotUwPDB9J+c8aI4tpGv7VT+F9rJ1iwDNoTBfk57Jpxg==}
+  '@prosemirror-adapter/core@0.5.5':
+    resolution: {integrity: sha512-R1BV/up0qApb0mtZt81I4TCBmalclqb43ecCQXiVHD5LpoarYHMMBzEoZFanSFg+8YxB1CmvbJwN+DLqbXJwsg==}
 
-  '@prosemirror-adapter/react@0.5.4':
-    resolution: {integrity: sha512-GhjJXAbQOoiv3OeXZqPvvXOWrqYyuupwHtV/FUFBGvqdUlAh+blx1EhFCtG5hr98nPkBNIpiN6Pc2QTQFmj1Xw==}
+  '@prosemirror-adapter/react@0.5.5':
+    resolution: {integrity: sha512-bU6YakJ7wk6K1N+HfiJ8vKkMRl53nzAouazXdtEtzftFJNQ50c9gZPmoMOJM+EsOV1J9T7jnFh3v0TuwL4QnTA==}
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -5026,8 +5030,8 @@ snapshots:
       '@prosekit/core': 0.13.0-beta.7(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
       '@prosekit/pm': 0.1.19-beta.4
       '@prosekit/web': 0.9.0-beta.23(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.3.1)(@types/hast@3.0.5)(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)(prosemirror-view@1.42.2)
-      '@prosemirror-adapter/core': 0.5.4
-      '@prosemirror-adapter/react': 0.5.4(react-dom@19.2.8)(react@19.2.8)
+      '@prosemirror-adapter/core': 0.5.5
+      '@prosemirror-adapter/react': 0.5.5(react-dom@19.2.8)(react@19.2.8)
     optionalDependencies:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
@@ -5078,16 +5082,16 @@ snapshots:
       - y-prosemirror
       - yjs
 
-  '@prosemirror-adapter/core@0.5.4':
+  '@prosemirror-adapter/core@0.5.5':
     dependencies:
       '@ocavue/utils': 1.7.0
       prosemirror-model: 1.25.11
       prosemirror-state: 1.4.4
       prosemirror-view: 1.42.2
 
-  '@prosemirror-adapter/react@0.5.4(react-dom@19.2.8)(react@19.2.8)':
+  '@prosemirror-adapter/react@0.5.5(react-dom@19.2.8)(react@19.2.8)':
     dependencies:
-      '@prosemirror-adapter/core': 0.5.4
+      '@prosemirror-adapter/core': 0.5.5
       prosemirror-model: 1.25.11
       prosemirror-state: 1.4.4
       prosemirror-view: 1.42.2
