@@ -309,10 +309,7 @@ describe('typing over code block selections', () => {
     })
   })
 
-  it.skipIf(
-    // Firefox edits the text node in place and is not affected.
-    isFirefox(),
-  ).fails('notifies onDocChange when typing over the full code text', async () => {
+  it('notifies onDocChange when typing over the full code text', async () => {
     const onDocChange = vi.fn()
     const { view, codeStart, codeEnd } = await setupHighlightedCodeBlock(onDocChange)
     selectCodeRange(view, codeStart, codeEnd)
