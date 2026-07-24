@@ -68,6 +68,53 @@ export function CodeBlockView(props: ReactNodeViewProps) {
   )
 
   return (
+    <CodeBlockComponent
+      previewOnly={previewOnly}
+      selected={selected}
+      contentRef={contentRef}
+      language={language}
+      setLanguage={setLanguage}
+      getCode={getCode}
+      showMathPreview={showMathPreview}
+      showMermaidPreview={showMermaidPreview}
+      katex={katex}
+      mermaid={mermaid}
+      previewCode={previewCode}
+      focusSource={focusSource}
+    />
+  )
+}
+
+interface CodeBlockComponentProps {
+  previewOnly: boolean
+  selected: boolean
+  contentRef: ReactNodeViewProps['contentRef']
+  language: string
+  setLanguage: (language: string) => void
+  getCode: () => string
+  showMathPreview: boolean
+  showMermaidPreview: boolean
+  katex: ReturnType<typeof useKaTeX>
+  mermaid: ReturnType<typeof useBeautifulMermaid>
+  previewCode: string
+  focusSource: (event: MouseEvent) => void
+}
+
+function CodeBlockComponent({
+  previewOnly,
+  selected,
+  contentRef,
+  language,
+  setLanguage,
+  getCode,
+  showMathPreview,
+  showMermaidPreview,
+  katex,
+  mermaid,
+  previewCode,
+  focusSource,
+}: CodeBlockComponentProps) {
+  return (
     <div className={styles.Root} data-preview={previewOnly || undefined}>
       {
         /* Skip rendering the toolbar during dragging to improve the performance of rendering the drag preview image in Safari */
