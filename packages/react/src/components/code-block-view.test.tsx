@@ -1,6 +1,9 @@
 import '../testing/index.ts'
 
 import { readClipboard } from '@meowdown/vitest/clipboard'
+import { isFirefox } from '@meowdown/vitest/helpers'
+import { TextSelection } from '@prosekit/pm/state'
+import type { EditorView } from '@prosekit/pm/view'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -253,5 +256,66 @@ describe('code block Mermaid preview', () => {
     await expect.element(mermaidPreview.locate('script')).not.toBeInTheDocument()
     await expect.element(mermaidPreview.locate('img')).not.toBeInTheDocument()
     await expect.element(mermaidPreview.locate('[onerror]')).not.toBeInTheDocument()
+  })
+})
+
+describe('typing over code block selections', () => {
+  async function setupHighlightedCodeBlock(onDocChange?: VoidFunction) {
+    const ref = createRef<EditorHandle>()
+    await render(
+      <ProseKitEditor ref={ref} initialMarkdown={CODE_BLOCK_MD} onDocChange={onDocChange} />,
+    )
+    // The bug only triggers once highlight token spans wrap the code text.
+    await expect.element(tokens.first(), { timeout: 15000 }).toBeInTheDocument()
+    const view = ref.current?.editor?.view
+    if (!view) throw new Error('editor not mounted')
+    const codeStart = 1
+    const codeEnd = codeStart + view.state.doc.child(0).content.size
+    return { ref, view, codeStart, codeEnd }
+  }
+
+  function selectCodeRange(view: EditorView, anchor: number, head: number) {
+    view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, anchor, head)))
+    view.focus()
+  }
+
+  it('updates the markdown when typing at a caret', async () => {
+    const { ref, view, codeEnd } = await setupHighlightedCodeBlock()
+    selectCodeRange(view, codeEnd, codeEnd)
+    await userEvent.keyboard('X')
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toContain('fn main() {}X')
+    })
+  })
+
+  it('updates the markdown when typing over a partial selection', async () => {
+    const { ref, view, codeStart, codeEnd } = await setupHighlightedCodeBlock()
+    selectCodeRange(view, codeStart, codeEnd - 1)
+    await userEvent.keyboard('X')
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toContain('```rust\nX}\n```')
+    })
+  })
+
+  it.skipIf(
+    // Firefox edits the text node in place and is not affected.
+    isFirefox(),
+  ).fails('updates the markdown when typing over the full code text', async () => {
+    const { ref, view, codeStart, codeEnd } = await setupHighlightedCodeBlock()
+    selectCodeRange(view, codeStart, codeEnd)
+    await userEvent.keyboard('X')
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toContain('```rust\nX\n```')
+    })
+  })
+
+  it('notifies onDocChange when typing over the full code text', async () => {
+    const onDocChange = vi.fn()
+    const { view, codeStart, codeEnd } = await setupHighlightedCodeBlock(onDocChange)
+    selectCodeRange(view, codeStart, codeEnd)
+    await userEvent.keyboard('X')
+    await vi.waitFor(() => {
+      expect(onDocChange).toHaveBeenCalled()
+    })
   })
 })
