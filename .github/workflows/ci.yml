@@ -92,7 +92,7 @@ jobs:
           include-hidden-files: true
           retention-days: 1
 
-  coverage:
+  test-coverage:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [test]
