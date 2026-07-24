@@ -1,4 +1,4 @@
-export { MeowdownEditor, type EditorProps } from './components/editor.tsx'
+export { MeowdownEditor, type EditorMode, type EditorProps } from './components/editor.tsx'
 export {
   MarkdownView,
   type MarkdownViewProps,
@@ -26,6 +26,5 @@ export type {
   WikilinkSearchHandler,
 } from './components/types.ts'
 
-export type { MarkMode } from '@meowdown/core'
 export type { SelectionJSON } from '@prosekit/core'
 export { useEditor, useExtension, useKeymap } from '@prosekit/react'

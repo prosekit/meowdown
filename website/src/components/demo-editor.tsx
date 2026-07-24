@@ -1,8 +1,8 @@
 import {
   MeowdownEditor,
   type EditorHandle,
+  type EditorMode,
   type EditorProps,
-  type MarkMode,
   type TaskClickHandler,
 } from '@meowdown/react'
 import { useCallback, useRef, type RefObject } from 'react'
@@ -15,7 +15,7 @@ import { ReadonlyView } from './readonly-view.tsx'
  * The five demo modes: the three rich modes, the CodeMirror source mode, and
  * the read-only `MarkdownView` mode.
  */
-export type DemoMode = MarkMode | 'source' | 'readonly'
+export type DemoMode = EditorMode | 'source' | 'readonly'
 
 export interface DemoEditorProps extends Omit<EditorProps, 'mode' | 'handleRef'> {
   /**
