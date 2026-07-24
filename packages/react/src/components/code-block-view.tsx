@@ -8,7 +8,7 @@ import {
 import { TextSelection } from '@prosekit/pm/state'
 import type { ReactNodeViewProps } from '@prosekit/react'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
-import { useMemo, useState, type MouseEvent } from 'react'
+import { useCallback, useEffect, useMemo, useState, type MouseEvent } from 'react'
 
 import { useBeautifulMermaid } from '../hooks/use-beautiful-mermaid.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
@@ -18,14 +18,38 @@ import { CopyButton } from './copy-button.tsx'
 import { MathRender } from './math-render.tsx'
 import { MermaidRender } from './mermaid-render.tsx'
 
-export function CodeBlockView(props: ReactNodeViewProps) {
-  const attrs = props.node.attrs as CodeBlockAttrs
+export function CodeBlockView(props2: ReactNodeViewProps) {
+  const { node, view, getPos, decorations, selected, setAttrs, contentRef } = props2
+
+  useEffect(() => {
+    console.log('node changed')
+  }, [node])
+  useEffect(() => {
+    console.log('view changed')
+  }, [view])
+  useEffect(() => {
+    console.log('getPos changed')
+  }, [getPos])
+  useEffect(() => {
+    console.log('decorations changed')
+  }, [decorations])
+  useEffect(() => {
+    console.log('selected changed')
+  }, [selected])
+  useEffect(() => {
+    console.log('setAttrs changed')
+  }, [setAttrs])
+  useEffect(() => {
+    console.log('contentRef changed')
+  }, [contentRef])
+
+  const attrs = node.attrs as CodeBlockAttrs
   const language = attrs.language || ''
   const isMath = language === 'math'
   const isMermaid = language === 'mermaid'
-  const code = props.node.textContent
+  const code = node.textContent
 
-  const caretInside = props.decorations.some(isCodeBlockPreviewHiddenDecoration)
+  const caretInside = decorations.some(isCodeBlockPreviewHiddenDecoration)
 
   const katex = useKaTeX(isMath)
   const mermaid = useBeautifulMermaid(isMermaid)
@@ -38,24 +62,31 @@ export function CodeBlockView(props: ReactNodeViewProps) {
   // invisible and unclickable.
   const previewOnly = (showMathPreview || showMermaidPreview) && !caretInside && code.trim() !== ''
 
-  const focusSource = (event: MouseEvent) => {
-    event.preventDefault()
-    const pos = props.getPos()
-    if (pos == null) return
-    const { view } = props
-    const selection = TextSelection.near(view.state.doc.resolve(pos + 1), 1)
-    view.dispatch(view.state.tr.setSelection(selection))
-    view.focus()
-  }
+  const focusSource = useCallback(
+    (event: MouseEvent) => {
+      event.preventDefault()
+      const pos = getPos()
+      if (pos == null) return
+      const selection = TextSelection.near(view.state.doc.resolve(pos + 1), 1)
+      view.dispatch(view.state.tr.setSelection(selection))
+      view.focus()
+    },
+    [view, getPos],
+  )
+
+  const setLanguage = useCallback(
+    (language: string) => {
+      setAttrs({ language } satisfies CodeBlockAttrs)
+    },
+    [setAttrs],
+  )
 
   return (
     <div className={styles.Root} data-preview={previewOnly || undefined}>
-      <CodeBlockToolbar
-        language={language}
-        setLanguage={(value) => props.setAttrs({ language: value } satisfies CodeBlockAttrs)}
-        getText={() => props.node.textContent}
-      />
-      <pre ref={props.contentRef} data-language={language}></pre>
+      {selected ? null : (
+        <CodeBlockToolbar language={language} setLanguage={setLanguage} getText={() => code} />
+      )}
+      <pre ref={contentRef} data-language={language}></pre>
       {showMathPreview && (
         <MathRender
           katex={katex}
