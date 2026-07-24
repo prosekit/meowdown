@@ -34,8 +34,6 @@
     "exports": {
       ".": "./dist/index.js"
     },
-    "scripts": {},
-    "devDependencies": {},
     "access": "public"
   }
 }
