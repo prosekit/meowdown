@@ -124,7 +124,7 @@ function CodeBlockComponent({
         )
       }
       <pre ref={contentRef} data-language={language}></pre>
-      {showMathPreview && (
+      {showMathPreview && katex != null && (
         <MathRender
           katex={katex}
           formula={previewCode}
