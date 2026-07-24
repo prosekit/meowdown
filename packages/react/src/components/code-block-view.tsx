@@ -9,7 +9,16 @@ import {
 import { TextSelection } from '@prosekit/pm/state'
 import type { ReactNodeViewProps } from '@prosekit/react'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
+import {
+  memo,
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+} from 'react'
 
 import { useBeautifulMermaid, type BeautifulMermaidRender } from '../hooks/use-beautiful-mermaid.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
@@ -41,7 +50,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
   const showMathPreview = isMath && katex != null
   const showMermaidPreview = isMermaid && mermaid != null
   const showPreview = showMathPreview || showMermaidPreview
-  const previewCode = showPreview ? code : ''
+  const previewCode = useDeferredValue(showPreview ? code : '')
 
   // The preview replaces the source only when the caret is elsewhere; with the
   // caret inside, the source stays on top and the preview updates live below.
@@ -69,20 +78,22 @@ export function CodeBlockView(props: ReactNodeViewProps) {
   )
 
   return (
-    <CodeBlockComponent
-      previewOnly={previewOnly}
-      selected={selected}
-      contentRef={contentRef}
-      language={language}
-      setLanguage={setLanguage}
-      getCode={getCode}
-      showMathPreview={showMathPreview}
-      showMermaidPreview={showMermaidPreview}
-      katex={katex}
-      mermaid={mermaid}
-      previewCode={previewCode}
-      focusSource={focusSource}
-    />
+    <div className={styles.Root} data-preview={previewOnly || undefined}>
+      <CodeBlockComponentMemo
+        previewOnly={previewOnly}
+        selected={selected}
+        contentRef={contentRef}
+        language={language}
+        setLanguage={setLanguage}
+        getCode={getCode}
+        showMathPreview={showMathPreview}
+        showMermaidPreview={showMermaidPreview}
+        katex={katex}
+        mermaid={mermaid}
+        previewCode={previewCode}
+        focusSource={focusSource}
+      />
+    </div>
   )
 }
 
@@ -115,6 +126,7 @@ function CodeBlockComponent({
   previewCode,
   focusSource,
 }: CodeBlockComponentProps) {
+  console.log('RENDER')
   return (
     <div className={styles.Root} data-preview={previewOnly || undefined}>
       {
@@ -146,6 +158,8 @@ function CodeBlockComponent({
     </div>
   )
 }
+
+const CodeBlockComponentMemo = memo(CodeBlockComponent)
 
 interface CodeBlockToolbarProps {
   language: string
