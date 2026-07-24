@@ -70,7 +70,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
         )
       }
       <pre ref={contentRef} data-language={language}></pre>
-      {showMathPreview && katex != null && (
+      {showMathPreview && (
         <MathRender
           katex={katex}
           formula={previewCode}
@@ -80,7 +80,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
           onMouseDown={focusSource}
         />
       )}
-      {showMermaidPreview && mermaid != null && (
+      {showMermaidPreview && (
         <MermaidRender
           renderer={mermaid}
           source={previewCode}
