@@ -1,7 +1,7 @@
 {
   "name": "@meowdown/react",
   "type": "module",
-  "version": "0.56.0",
+  "version": "0.58.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -57,8 +57,8 @@
     "@types/react-dom": "^19.2.3",
     "@vitest/browser-playwright": "^4.1.10",
     "dedent": "^1.7.2",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "tsdown": "^0.22.8",
     "vitest": "^4.1.10",
     "vitest-browser-commands": "^0.2.1",
@@ -69,8 +69,6 @@
       ".": "./dist/index.js",
       "./style.css": "./dist/style.css"
     },
-    "scripts": {},
-    "devDependencies": {},
     "access": "public"
   }
 }

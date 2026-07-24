@@ -18,6 +18,8 @@ const key = new PluginKey('meowdown-virtual-caret')
 
 const BLINK_ANIMATIONS = ['md-virtual-caret-blink', 'md-virtual-caret-blink2'] as const
 
+const DATA_ATTRIBUTE = 'data-meowdown-virtual-caret'
+
 // The measured rect is the glyph box, which reads short against the airy
 // line-height; stand the caret taller around its center.
 const CARET_STRETCH = 1.2
@@ -111,6 +113,7 @@ class VirtualCaretView implements PluginView {
     }
     if (rect == null) {
       this.#caret.style.visibility = 'hidden'
+      view.dom.removeAttribute(DATA_ATTRIBUTE)
       return
     }
     const layerRect = this.#layer.getBoundingClientRect()
@@ -120,6 +123,7 @@ class VirtualCaretView implements PluginView {
     this.#caret.style.left = `${rect.left - layerRect.left}px`
     this.#caret.style.top = `${rect.top - layerRect.top}px`
     this.#caret.style.height = `${rect.height}px`
+    view.dom.setAttribute(DATA_ATTRIBUTE, '')
     if (wasHidden) {
       forceReflow(this.#caret)
       this.#caret.style.transitionProperty = ''

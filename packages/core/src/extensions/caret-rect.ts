@@ -36,7 +36,11 @@ export function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   const head = state.selection.head
   const runBefore = getHiddenRunBefore(state, head)
   const runAfter = getHiddenRunAfter(state, head)
-  const preferredBeforeSide: boolean = runBefore == null
+  const $head = state.doc.resolve(head)
+  const afterLineBreak =
+    $head.parentOffset > 0 &&
+    $head.parent.textBetween($head.parentOffset - 1, $head.parentOffset) === '\n'
+  const preferredBeforeSide: boolean = runBefore == null && !afterLineBreak
   // `side` picks which neighbor to measure: -1 the character before the
   // position, 1 the character after it.
   const probes: [pos: number, beforeSide: boolean][] = [

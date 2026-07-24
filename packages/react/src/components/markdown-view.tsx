@@ -1,10 +1,11 @@
 import {
+  collectReferenceDefinitions,
   defaultResolveImageUrl,
   formatFileSize,
   getFileKind,
   getCodeTokens,
   getMarkBuilders,
-  inlineTextToMarkChunks,
+  inlineTextToMarkChunksWithContext,
   listenForTweetHeight,
   markdownToDoc,
   matchEmbed,
@@ -27,6 +28,7 @@ import {
   type MdWikilinkAttrs,
   type MeowdownListAttrs,
   type NodeName,
+  type ReferenceDefinitions,
   type WikiEmbedResolver,
   type WikilinkClickHandler,
 } from '@meowdown/core'
@@ -144,6 +146,8 @@ interface RenderContext {
   onImageClick?: ImageClickHandler
   onFileClick?: FileClickHandler
   onTaskClick?: TaskClickHandler
+  referenceDefinitions: ReferenceDefinitions
+  referenceDefinitionNodes: ReadonlySet<ProseMirrorNode>
   /** Document-order checkbox counter feeding {@link TaskClickPayload.index}. */
   taskCounter: { value: number }
   keyCounter: { value: number }
@@ -504,8 +508,10 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
       const attrs = mark.attrs as MdLinkTextAttrs
       if (!context.interactive) return <span className="md-link">{children}</span>
       const handleClick = context.onLinkClick
-        ? (event: MouseEvent) =>
+        ? (event: MouseEvent) => {
+            event.preventDefault()
             context.onLinkClick?.({ href: attrs.href, event: event.nativeEvent })
+          }
         : undefined
       return (
         <a className="md-link" href={attrs.href} onClick={handleClick}>
@@ -563,10 +569,18 @@ function renderRuns(
 function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode {
   const text = node.textContent
   if (!text) return null
-  const chunks: readonly MarkChunk[] = inlineTextToMarkChunks(getMarkBuilders(), text, {
-    resolveFileLink: context.resolveFileLink,
-    resolveWikiEmbed: context.resolveWikiEmbed,
-  })
+  const chunks: readonly MarkChunk[] = inlineTextToMarkChunksWithContext(
+    getMarkBuilders(),
+    text,
+    {
+      resolveFileLink: context.resolveFileLink,
+      resolveWikiEmbed: context.resolveWikiEmbed,
+    },
+    {
+      referenceDefinitions: context.referenceDefinitions,
+      isReferenceDefinition: context.referenceDefinitionNodes.has(node),
+    },
+  )
   // Sort each chunk's marks into ProseMirror's canonical order so the grouping
   // and nesting match the editor.
   const runs = chunks.map(
@@ -579,6 +593,8 @@ function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode 
 }
 
 function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
+  if (context.referenceDefinitionNodes.has(node)) return null
+
   const key = context.keyCounter.value++
   const typeName = node.type.name as NodeName
 
@@ -680,6 +696,7 @@ export function MarkdownView({
 }: MarkdownViewProps): ReactElement {
   const content = useMemo(() => {
     const doc = markdownToDoc(markdown, { frontmatter })
+    const referenceIndex = collectReferenceDefinitions(doc)
     const context: RenderContext = {
       interactive,
       expandCollapsed,
@@ -692,6 +709,8 @@ export function MarkdownView({
       onImageClick: interactive ? onImageClick : undefined,
       onFileClick: interactive ? onFileClick : undefined,
       onTaskClick: interactive ? onTaskClick : undefined,
+      referenceDefinitions: referenceIndex.definitions,
+      referenceDefinitionNodes: referenceIndex.nodes,
       taskCounter: { value: 0 },
       keyCounter: { value: 0 },
     }

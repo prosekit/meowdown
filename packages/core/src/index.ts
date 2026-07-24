@@ -72,10 +72,12 @@ export type {
   MdWikilinkAttrs,
 } from './extensions/inline-marks.ts'
 export {
+  inlineTextToMarkChunksWithContext,
   inlineTextToMarkChunks,
   type FileLinkOptions,
   type FileLinkPayload,
   type FileLinkResolver,
+  type InlineMarkContext,
   type InlineMarkOptions,
 } from './extensions/inline-text-to-mark-chunks.ts'
 export { EDITOR_KEY_BINDINGS } from './extensions/key-bindings.ts'
@@ -102,6 +104,12 @@ export type { MarkChunk } from './extensions/mark-chunk.ts'
 export type { MarkMode } from './extensions/mark-mode.ts'
 export { isMarkOfType, type MarkName } from './extensions/mark-names.ts'
 export { isNodeOfType, type NodeName } from './extensions/node-names.ts'
+export {
+  collectReferenceDefinitions,
+  type ReferenceDefinition,
+  type ReferenceDefinitionIndex,
+  type ReferenceDefinitions,
+} from './extensions/reference-links.ts'
 export {
   definePendingReplacementHandler,
   getPendingReplacement,

@@ -1,5 +1,5 @@
-import { Schema } from '@prosekit/pm/model'
-import { ReplaceStep, Step } from '@prosekit/pm/transform'
+import { Schema, type EditorNode } from '@prosekit/pm/model'
+import { ReplaceStep, Step, type StepResult } from '@prosekit/pm/transform'
 import { describe, expect, it } from 'vitest'
 
 import { marksAt } from '../testing/marks-at.ts'
@@ -10,6 +10,7 @@ import type { MarkChunk } from './mark-chunk.ts'
 const schema = new Schema({
   nodes: {
     doc: { content: 'block+' },
+    blockquote: { group: 'block', content: 'block+' },
     paragraph: { group: 'block', content: 'text*' },
     text: { group: 'inline' },
   },
@@ -27,6 +28,28 @@ const m3 = (url: string) => schema.marks.mark3.create({ url })
 /** Build a paragraph doc from raw text (no marks). */
 function makeDoc(text: string) {
   return schema.node('doc', null, [schema.node('paragraph', null, [schema.text(text)])])
+}
+
+function getResultDoc(result: StepResult): EditorNode {
+  if (result.failed != null || result.doc == null) {
+    throw new Error(result.failed ?? 'Step returned no document')
+  }
+  return result.doc
+}
+
+function makeParagraphDoc(count: number): EditorNode {
+  return schema.node(
+    'doc',
+    null,
+    Array.from({ length: count }, () => schema.node('paragraph', null, schema.text('x'))),
+  )
+}
+
+function paragraphChunks(count: number): MarkChunk[] {
+  return Array.from({ length: count }, (_, index) => {
+    const position = 1 + index * 3
+    return [position, position + 1, [index % 2 === 0 ? m1() : m2()]]
+  })
 }
 
 describe('BatchSetMarkStep', () => {
@@ -139,5 +162,98 @@ describe('BatchSetMarkStep', () => {
     const json = step.toJSON() as { stepType: string }
     const reborn = Step.fromJSON(schema, json)
     expect(reborn).toBeInstanceOf(BatchSetMarkStep)
+  })
+
+  it('applies 32 chunks through the sparse boundary', () => {
+    const doc = makeParagraphDoc(40)
+    const result = getResultDoc(new BatchSetMarkStep(paragraphChunks(32)).apply(doc))
+    expect(marksAt(result, 2)).toEqual(['mark1'])
+    expect(marksAt(result, 32 * 3 - 1)).not.toEqual([])
+  })
+
+  it('applies 33 chunks through the sequential boundary', () => {
+    const doc = makeParagraphDoc(40)
+    const result = getResultDoc(new BatchSetMarkStep(paragraphChunks(33)).apply(doc))
+    expect(marksAt(result, 2)).toEqual(['mark1'])
+    expect(marksAt(result, 33 * 3 - 1)).not.toEqual([])
+  })
+
+  it('preserves untouched node identities on the sequential path', () => {
+    const doc = makeParagraphDoc(40)
+    const result = getResultDoc(new BatchSetMarkStep(paragraphChunks(33)).apply(doc))
+
+    expect(result.child(0)).not.toBe(doc.child(0))
+    expect(result.child(39)).toBe(doc.child(39))
+  })
+
+  it('rewrites more than 32 chunks inside a nested blockquote', () => {
+    const paragraphs = Array.from({ length: 40 }, () =>
+      schema.node('paragraph', null, schema.text('x')),
+    )
+    const quote = schema.node('blockquote', null, paragraphs)
+    const doc = schema.node('doc', null, quote)
+    const chunks = paragraphs.map((_paragraph, index): MarkChunk => {
+      const position = 2 + index * 3
+      return [position, position + 1, [m1()]]
+    })
+
+    const result = getResultDoc(new BatchSetMarkStep(chunks).apply(doc))
+    expect(marksAt(result, 3)).toEqual(['mark1'])
+    expect(marksAt(result, 3 + 39 * 3)).toEqual(['mark1'])
+  })
+
+  it('returns the original document when 33 chunks already match', () => {
+    const paragraphs = Array.from({ length: 40 }, (_value, index) => {
+      const mark = index % 2 === 0 ? m1() : m2()
+      return schema.node('paragraph', null, schema.text('x', [mark]))
+    })
+    const doc = schema.node('doc', null, paragraphs)
+    const result = getResultDoc(new BatchSetMarkStep(paragraphChunks(33)).apply(doc))
+    expect(result).toBe(doc)
+  })
+
+  it('rewrites a chunk spanning existing text mark splits', () => {
+    const first = schema.node('paragraph', null, [
+      schema.text('a', [m1()]),
+      schema.text('b', [m2()]),
+    ])
+    const remaining = Array.from({ length: 32 }, () =>
+      schema.node('paragraph', null, schema.text('x')),
+    )
+    const doc = schema.node('doc', null, [first, ...remaining])
+    const chunks: MarkChunk[] = [[1, 3, [m3('/target')]]]
+    for (let index = 0; index < remaining.length; index++) {
+      const position = 5 + index * 3
+      chunks.push([position, position + 1, [m1()]])
+    }
+
+    const result = getResultDoc(new BatchSetMarkStep(chunks).apply(doc))
+    expect(marksAt(result, 2)).toEqual(['mark3'])
+    expect(marksAt(result, 3)).toEqual(['mark3'])
+  })
+
+  it('clips sequential chunks to the document', () => {
+    const doc = makeParagraphDoc(40)
+    const chunks = paragraphChunks(33)
+    chunks[0] = [-10, 2, [m1()]]
+    chunks[32] = [97, 10_000, [m2()]]
+    const result = getResultDoc(new BatchSetMarkStep(chunks).apply(doc))
+    expect(marksAt(result, 2)).toEqual(['mark1'])
+    expect(marksAt(result, 98)).toEqual(['mark2'])
+  })
+
+  it('inverts a sequential application back to the original document', () => {
+    const doc = makeParagraphDoc(40)
+    const step = new BatchSetMarkStep(paragraphChunks(33))
+    const applied = getResultDoc(step.apply(doc))
+    const restored = getResultDoc(step.invert(doc).apply(applied))
+    expect(restored.toJSON()).toEqual(doc.toJSON())
+  })
+
+  it('round-trips more than 32 chunks through JSON', () => {
+    const step = new BatchSetMarkStep(paragraphChunks(33))
+    const restored = BatchSetMarkStep.fromJSON(schema, step.toJSON())
+    expect(restored.chunks).toHaveLength(33)
+    expect(restored.toJSON()).toEqual(step.toJSON())
   })
 })

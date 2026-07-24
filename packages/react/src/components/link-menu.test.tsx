@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import { readClipboard } from '@meowdown/vitest/clipboard'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -28,6 +29,7 @@ describe('LinkMenu', () => {
     await vi.waitFor(() => {
       expect(onLinkCopy).toHaveBeenCalledWith({ href: 'https://example.com' })
     })
+    expect((await readClipboard()).text).toBe('https://example.com')
   })
 
   it('anchors the preview to the link when hidden syntax ends the block', async () => {
@@ -183,5 +185,25 @@ describe('LinkMenu', () => {
     await userEvent.keyboard('{Enter}')
     await expect.element(pmRoot.getByText('https://new.test')).toBeInTheDocument()
     expect(ref.current?.getMarkdown()).toContain('[Docs](https://new.test)')
+  })
+
+  it('keeps reference links read-only in the preview and Mod-k flow', async () => {
+    const ref = createRef<EditorHandle>()
+    const markdown = '[Docs][doc]\n\n[doc]: https://example.com'
+    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown={markdown} />)
+    const label = screen.getByText('Docs')
+
+    await label.hover()
+    await expect.element(popover.getByTestId('link-popover-read')).toBeVisible()
+    await expect.element(popover.locate('a')).toHaveAttribute('href', 'https://example.com')
+    await expect.element(popover.getByRole('button', { name: 'Edit link' })).not.toBeInTheDocument()
+    await expect
+      .element(popover.getByRole('button', { name: 'Remove link' }))
+      .not.toBeInTheDocument()
+
+    await label.click()
+    await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
+    await expect.element(popover.getByTestId('link-popover-edit')).not.toBeInTheDocument()
+    expect(ref.current?.getMarkdown()).toBe(markdown + '\n')
   })
 })

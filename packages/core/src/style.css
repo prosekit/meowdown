@@ -37,8 +37,14 @@
     /* `==highlight==` background */
     --meowdown-highlight: light-dark(oklch(0.945 0.124 102), oklch(0.476 0.103 62));
 
-    /* rules, table cell borders, popover borders */
+    /* border color */
     --meowdown-border: light-dark(oklch(0.92 0.004 286), oklch(0.37 0.012 286));
+
+    /* horizontal rule line color */
+    --meowdown-hr: var(--meowdown-border);
+
+    /* table cell border color */
+    --meowdown-table-border: var(--meowdown-border);
 
     /* blockquote left bar */
     --meowdown-blockquote-border: color-mix(in oklab, var(--meowdown-accent) 35%, transparent);
@@ -144,9 +150,12 @@
     font-size: 1.0625rem;
     line-height: 1.7;
     color: var(--meowdown-text);
-    /* The virtual caret (`.md-virtual-caret`) replaces the native caret. */
-    caret-color: transparent;
     -webkit-font-smoothing: antialiased;
+
+    &[data-meowdown-virtual-caret] {
+      /* The virtual caret (`.md-virtual-caret`) replaces the native caret. */
+      caret-color: transparent;
+    }
   }
 
   /* ---------------------------------------------------------------------------
@@ -536,7 +545,7 @@
   .ProseMirror hr {
     margin: 1.5em 0;
     border: none;
-    border-top: 1px solid var(--meowdown-border);
+    border-top: 1px solid var(--meowdown-hr);
   }
 
   /* ---------------------------------------------------------------------------
@@ -553,7 +562,7 @@
   .ProseMirror th {
     box-sizing: border-box;
     padding: 0.4rem 0.75rem;
-    border: 1px solid var(--meowdown-border);
+    border: 1px solid var(--meowdown-table-border);
     vertical-align: top;
     text-align: left;
   }

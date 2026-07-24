@@ -1,41 +1,31 @@
+import { writeClipboard } from '@meowdown/vitest/clipboard'
 import { pasteText } from '@prosekit/core/test'
-import type { EditorView } from '@prosekit/pm/view'
 import { describe, expect, it } from 'vitest'
+import { userEvent } from 'vitest/browser'
 
 import { docToMarkdown } from '../../converters/pm-to-md.ts'
-import { setupFixture } from '../../testing/index.ts'
+import { setupFixture, type Fixture } from '../../testing/index.ts'
 
-/**
- * Dispatch a real paste event carrying only `text/plain`. Unlike the
- * `pasteText` helper (which forces ProseMirror's plain-text flag, i.e. a
- * Shift-paste), this exercises the regular paste path. Firefox discards the
- * DataTransfer passed to the ClipboardEvent constructor, so when the text did
- * not survive, shadow the getter with the real object.
- */
-function firePlainPaste(view: EditorView, text: string): void {
-  const clipboardData = new DataTransfer()
-  clipboardData.setData('text/plain', text)
-  const event = new ClipboardEvent('paste', { clipboardData, cancelable: true })
-  if (event.clipboardData?.getData('text/plain') !== text) {
-    Object.defineProperty(event, 'clipboardData', { value: clipboardData })
-  }
-  view.dom.dispatchEvent(event)
+async function pastePlain(fixture: Fixture, text: string): Promise<void> {
+  await writeClipboard({ 'text/plain': text })
+  fixture.view.focus()
+  await userEvent.paste()
 }
 
-function pastePlainText(text: string): string {
+async function pastePlainText(text: string): Promise<string> {
   using fixture = setupFixture()
   const { n, view } = fixture
   fixture.set(n.doc(n.paragraph()))
-  firePlainPaste(view, text)
+  await pastePlain(fixture, text)
   return docToMarkdown(view.state.doc)
 }
 
 describe('plain text paste', () => {
-  it('inserts a single line inline', () => {
+  it('inserts a single line inline', async () => {
     using fixture = setupFixture()
     const { n, view } = fixture
     fixture.set(n.doc(n.paragraph('before <a>after')))
-    firePlainPaste(view, 'pasted')
+    await pastePlain(fixture, 'pasted')
     expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
       """
       before pastedafter
@@ -44,8 +34,8 @@ describe('plain text paste', () => {
     `)
   })
 
-  it('keeps a single newline as a soft break', () => {
-    expect(pastePlainText('aaa\nbbb')).toMatchInlineSnapshot(`
+  it('keeps a single newline as a soft break', async () => {
+    expect(await pastePlainText('aaa\nbbb')).toMatchInlineSnapshot(`
       """
       aaa
       bbb
@@ -54,8 +44,8 @@ describe('plain text paste', () => {
     `)
   })
 
-  it('does not insert an empty paragraph for one blank line', () => {
-    expect(pastePlainText('aaa\n\nbbb')).toMatchInlineSnapshot(`
+  it('does not insert an empty paragraph for one blank line', async () => {
+    expect(await pastePlainText('aaa\n\nbbb')).toMatchInlineSnapshot(`
       """
       aaa
 
@@ -65,8 +55,8 @@ describe('plain text paste', () => {
     `)
   })
 
-  it('restores one gap paragraph for two blank lines', () => {
-    expect(pastePlainText('aaa\n\n\nbbb')).toMatchInlineSnapshot(`
+  it('restores one gap paragraph for two blank lines', async () => {
+    expect(await pastePlainText('aaa\n\n\nbbb')).toMatchInlineSnapshot(`
       """
       aaa
 
@@ -77,8 +67,8 @@ describe('plain text paste', () => {
     `)
   })
 
-  it('trims leading and trailing newlines', () => {
-    expect(pastePlainText('\n\naaa\n\n')).toMatchInlineSnapshot(`
+  it('trims leading and trailing newlines', async () => {
+    expect(await pastePlainText('\n\naaa\n\n')).toMatchInlineSnapshot(`
       """
       aaa
 
@@ -86,15 +76,15 @@ describe('plain text paste', () => {
     `)
   })
 
-  it('inserts nothing for whitespace-only newlines', () => {
-    expect(pastePlainText('\n\n\n')).toMatchInlineSnapshot(`
+  it('inserts nothing for whitespace-only newlines', async () => {
+    expect(await pastePlainText('\n\n\n')).toMatchInlineSnapshot(`
       "
       "
     `)
   })
 
-  it('normalizes CRLF', () => {
-    expect(pastePlainText('aaa\r\n\r\nbbb\r\nccc')).toMatchInlineSnapshot(`
+  it('normalizes CRLF', async () => {
+    expect(await pastePlainText('aaa\r\n\r\nbbb\r\nccc')).toMatchInlineSnapshot(`
       """
       aaa
 
@@ -105,8 +95,8 @@ describe('plain text paste', () => {
     `)
   })
 
-  it('keeps tabs and spaces', () => {
-    expect(pastePlainText('a\t b')).toMatchInlineSnapshot(`
+  it('keeps tabs and spaces', async () => {
+    expect(await pastePlainText('a\t b')).toMatchInlineSnapshot(`
       """
       a	 b
 
@@ -114,11 +104,11 @@ describe('plain text paste', () => {
     `)
   })
 
-  it('renders pasted inline markdown source immediately', () => {
+  it('renders pasted inline markdown source immediately', async () => {
     using fixture = setupFixture()
     const { n, view } = fixture
     fixture.set(n.doc(n.paragraph()))
-    firePlainPaste(view, 'a **b** c')
+    await pastePlain(fixture, 'a **b** c')
     expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
       """
       a **b** c
@@ -149,11 +139,126 @@ describe('plain text paste', () => {
     `)
   })
 
-  it('keeps block markdown syntax as literal text', () => {
-    expect(pastePlainText('# title\ntext')).toMatchInlineSnapshot(`
+  it('parses block markdown syntax into blocks', async () => {
+    expect(await pastePlainText('# title\ntext')).toMatchInlineSnapshot(`
       """
       # title
+
       text
+
+      """
+    `)
+  })
+
+  it('parses pasted task lists', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph()))
+    await pastePlain(fixture, '- [ ] one\n- [x] two')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      - [ ] one
+      - [x] two
+
+      """
+    `)
+    expect(view.state.doc.firstChild?.type.name).toBe('list')
+    expect(view.state.doc.firstChild?.attrs.kind).toBe('task')
+  })
+
+  it('parses pasted fenced code blocks', async () => {
+    expect(await pastePlainText('```js\nconst a = 1\n```')).toMatchInlineSnapshot(`
+      """
+      \`\`\`js
+      const a = 1
+      \`\`\`
+
+      """
+    `)
+  })
+
+  it('keeps a pasted heading closed inside paragraph text', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph('before<a>after')))
+    await pastePlain(fixture, '# heading')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      before
+
+      # heading
+
+      after
+
+      """
+    `)
+  })
+
+  it('keeps a pasted list closed inside paragraph text', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph('before<a>after')))
+    await pastePlain(fixture, '- one\n- two')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      before
+
+      - one
+      - two
+
+      after
+
+      """
+    `)
+  })
+
+  it('keeps a pasted list closed inside a list item', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('before<a>after'))))
+    await pastePlain(fixture, '- one\n- two')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      - before
+
+        - one
+        - two
+
+        after
+
+      """
+    `)
+  })
+
+  it('opens a trailing paragraph after a pasted heading', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph('before<a>after')))
+    await pastePlain(fixture, '# heading\n\nparagraph')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      before
+
+      # heading
+
+      paragraphafter
+
+      """
+    `)
+  })
+
+  it('opens a leading paragraph before a pasted heading', async () => {
+    using fixture = setupFixture()
+    const { n, view } = fixture
+    fixture.set(n.doc(n.paragraph('before<a>after')))
+    await pastePlain(fixture, 'paragraph\n\n# heading')
+    expect(docToMarkdown(view.state.doc)).toMatchInlineSnapshot(`
+      """
+      beforeparagraph
+
+      # heading
+
+      after
 
       """
     `)

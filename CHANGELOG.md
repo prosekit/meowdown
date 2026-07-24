@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.58.0](https://github.com/prosekit/meowdown/compare/v0.57.2...v0.58.0) (2026-07-23)
+
+
+### Features
+
+* support Markdown reference links ([#361](https://github.com/prosekit/meowdown/issues/361)) ([7608fac](https://github.com/prosekit/meowdown/commit/7608facc62ca583d5959757ab337b46fa970323f))
+
+## [0.57.2](https://github.com/prosekit/meowdown/compare/v0.57.1...v0.57.2) (2026-07-23)
+
+
+### Bug Fixes
+
+* **core:** omit block markers from partial clipboard selections ([#357](https://github.com/prosekit/meowdown/issues/357)) ([e173246](https://github.com/prosekit/meowdown/commit/e1732461f04727fa2186cc39d2aab25097a76a51))
+
+## [0.57.1](https://github.com/prosekit/meowdown/compare/v0.57.0...v0.57.1) (2026-07-23)
+
+
+### Bug Fixes
+
+* **core:** preserve Markdown when pasting styled HTML ([#345](https://github.com/prosekit/meowdown/issues/345)) ([ff15f62](https://github.com/prosekit/meowdown/commit/ff15f62dc3053f73cd1668e439335e31141036e8))
+* **core:** preserve parent list item type when parsing HTML ([#355](https://github.com/prosekit/meowdown/issues/355)) ([3bc5c59](https://github.com/prosekit/meowdown/commit/3bc5c59ad81be50f8e1a12dd82b0039420a6d884))
+* show iOS text selection grab points ([#356](https://github.com/prosekit/meowdown/issues/356)) ([4ef8a32](https://github.com/prosekit/meowdown/commit/4ef8a32c6df727862a2988f6df1afeefc2ec8547))
+
+## [0.57.0](https://github.com/prosekit/meowdown/compare/v0.56.0...v0.57.0) (2026-07-22)
+
+
+### Features
+
+* **core:** add `--meowdown-hr` and `--meowdown-table-border` theme variables ([#339](https://github.com/prosekit/meowdown/issues/339)) ([12c2414](https://github.com/prosekit/meowdown/commit/12c24142fb5f58c85df8393899ecb4b1a9ce9b02))
+
+
+### Bug Fixes
+
+* **core:** convert tiptap and remirror task items ([#346](https://github.com/prosekit/meowdown/issues/346)) ([65c5a5d](https://github.com/prosekit/meowdown/commit/65c5a5df5ec77a8d10a7fd47030639c66e5ee8eb))
+* **core:** narrow markdown escaping ([#350](https://github.com/prosekit/meowdown/issues/350)) ([fb41f71](https://github.com/prosekit/meowdown/commit/fb41f7158f485b300d5abca79779ccd5faed7d13))
+* **react:** preserve edge blocks on markdown echo ([#351](https://github.com/prosekit/meowdown/issues/351)) ([9b24bdb](https://github.com/prosekit/meowdown/commit/9b24bdb311687b31cc19bd79a7bdea3feb0859d4))
+
 ## [0.56.0](https://github.com/prosekit/meowdown/compare/v0.55.1...v0.56.0) (2026-07-21)
 
 
