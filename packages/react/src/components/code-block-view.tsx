@@ -64,7 +64,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
       {
         /* Skip rendering the toolbar during dragging to improve the performance of rendering the drag preview image in Safari */
         selected ? null : (
-          <CodeBlockToolbar language={language} setLanguage={setLanguage} getText={() => code} />
+          <CodeBlockToolbar code={code} language={language} setLanguage={setLanguage} />
         )
       }
       <pre ref={contentRef} data-language={language}></pre>
@@ -92,12 +92,12 @@ export function CodeBlockView(props: ReactNodeViewProps) {
 }
 
 interface CodeBlockToolbarProps {
+  code: string
   language: string
   setLanguage: (language: string) => void
-  getText: () => string
 }
 
-function CodeBlockToolbar({ language, setLanguage, getText }: CodeBlockToolbarProps) {
+function CodeBlockToolbar({ code, language, setLanguage }: CodeBlockToolbarProps) {
   // Fall back to the raw value so an alias or unknown language still shows in
   // the trigger instead of looking empty.
   const selected = useMemo<LanguageItem>(() => {
@@ -173,7 +173,7 @@ function CodeBlockToolbar({ language, setLanguage, getText }: CodeBlockToolbarPr
         </Combobox.Portal>
       </Combobox.Root>
       <CopyButton
-        getText={getText}
+        getText={() => code}
         label="Copy code"
         className={styles.CopyButton}
         data-testid="code-block-copy"
