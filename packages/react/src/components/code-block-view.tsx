@@ -3,6 +3,7 @@ import {
   codeBlockLanguages,
   isCodeBlockPreviewHiddenDecoration,
   type CodeBlockAttrs,
+  type KaTeXRender,
   type LanguageItem,
 } from '@meowdown/core'
 import { TextSelection } from '@prosekit/pm/state'
@@ -10,7 +11,7 @@ import type { ReactNodeViewProps } from '@prosekit/react'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
 
-import { useBeautifulMermaid } from '../hooks/use-beautiful-mermaid.ts'
+import { useBeautifulMermaid, type BeautifulMermaidRender } from '../hooks/use-beautiful-mermaid.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
 
 import styles from './code-block-view.module.css'
@@ -94,8 +95,8 @@ interface CodeBlockComponentProps {
   getCode: () => string
   showMathPreview: boolean
   showMermaidPreview: boolean
-  katex: ReturnType<typeof useKaTeX>
-  mermaid: ReturnType<typeof useBeautifulMermaid>
+  katex: KaTeXRender | undefined
+  mermaid: BeautifulMermaidRender | undefined
   previewCode: string
   focusSource: (event: MouseEvent) => void
 }
@@ -133,7 +134,7 @@ function CodeBlockComponent({
           onMouseDown={focusSource}
         />
       )}
-      {showMermaidPreview && (
+      {showMermaidPreview && mermaid != null && (
         <MermaidRender
           renderer={mermaid}
           source={previewCode}
