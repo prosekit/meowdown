@@ -8,7 +8,7 @@ import {
 import { TextSelection } from '@prosekit/pm/state'
 import type { ReactNodeViewProps } from '@prosekit/react'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState, type MouseEvent } from 'react'
+import { useCallback, useMemo, useState, type MouseEvent } from 'react'
 
 import { useBeautifulMermaid } from '../hooks/use-beautiful-mermaid.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
@@ -20,28 +20,6 @@ import { MermaidRender } from './mermaid-render.tsx'
 
 export function CodeBlockView(props2: ReactNodeViewProps) {
   const { node, view, getPos, decorations, selected, setAttrs, contentRef } = props2
-
-  useEffect(() => {
-    console.log('node changed')
-  }, [node])
-  useEffect(() => {
-    console.log('view changed')
-  }, [view])
-  useEffect(() => {
-    console.log('getPos changed')
-  }, [getPos])
-  useEffect(() => {
-    console.log('decorations changed')
-  }, [decorations])
-  useEffect(() => {
-    console.log('selected changed')
-  }, [selected])
-  useEffect(() => {
-    console.log('setAttrs changed')
-  }, [setAttrs])
-  useEffect(() => {
-    console.log('contentRef changed')
-  }, [contentRef])
 
   const attrs = node.attrs as CodeBlockAttrs
   const language = attrs.language || ''
