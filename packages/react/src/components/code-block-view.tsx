@@ -61,7 +61,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
 
   return (
     <div className={styles.Root} data-preview={previewOnly || undefined}>
-      {/* Skip rendering the toolbar during dragging to improve the performance of printing drag preview image in Safari */}
+      {/* Skip rendering the toolbar during dragging to improve the performance of painting the drag preview image in Safari */}
       {selected ? null : (
         <CodeBlockToolbar language={language} setLanguage={setLanguage} getText={() => code} />
       )}
@@ -109,7 +109,7 @@ function CodeBlockToolbar({ language, setLanguage, getText }: CodeBlockToolbarPr
 
   const [query, setQuery] = useState('')
 
-  // Keep the toolbar shown until the popup finishes closing animation
+  // Keep the toolbar shown until the popup finishes its closing animation
   const [comboboxOpen, setComboboxOpen] = useState(false)
 
   // Offer the typed value as an option when it doesn't match a known one.
