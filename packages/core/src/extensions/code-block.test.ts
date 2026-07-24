@@ -1,6 +1,7 @@
+import { isFirefox } from '@meowdown/vitest/helpers'
 import { DOMParser, DOMSerializer } from '@prosekit/pm/model'
-import { describe, expect, it } from 'vitest'
-import { userEvent } from 'vitest/browser'
+import { describe, expect, it, vi } from 'vitest'
+import { page, userEvent } from 'vitest/browser'
 
 import { setupFixture } from '../testing/index.ts'
 
@@ -93,5 +94,40 @@ describe('dollar fence rules', () => {
     fixture.view.focus()
     await userEvent.keyboard('{Enter}')
     expect(fixture.doc.child(0).type.name).toBe('paragraph')
+  })
+})
+
+const codeTokens = page.locate('.ProseMirror pre code [class*="tok-"]')
+
+describe('typing over code block selections', () => {
+  it('keeps the typed text over a partial selection', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.codeBlock({ language: 'js' }, '<a>const answer = 4<b>2')))
+    // The bug only triggers once highlight token spans wrap the code text.
+    await expect.element(codeTokens.first(), { timeout: 15000 }).toBeInTheDocument()
+    fixture.view.focus()
+    await userEvent.keyboard('X')
+    const expected = n.doc(n.codeBlock({ language: 'js' }, 'X2'))
+    await vi.waitFor(() => {
+      expect(fixture.doc.eq(expected)).toBe(true)
+    })
+  })
+
+  it.skipIf(
+    // Firefox edits the text node in place and is not affected.
+    isFirefox(),
+  ).fails('keeps the typed text over the full code text', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.codeBlock({ language: 'js' }, '<a>const answer = 42<b>')))
+    // The bug only triggers once highlight token spans wrap the code text.
+    await expect.element(codeTokens.first(), { timeout: 15000 }).toBeInTheDocument()
+    fixture.view.focus()
+    await userEvent.keyboard('X')
+    const expected = n.doc(n.codeBlock({ language: 'js' }, 'X'))
+    await vi.waitFor(() => {
+      expect(fixture.doc.eq(expected)).toBe(true)
+    })
   })
 })
