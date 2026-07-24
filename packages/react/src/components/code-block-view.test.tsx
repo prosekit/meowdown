@@ -1,9 +1,9 @@
 import '../testing/index.ts'
 
-import { isFirefox, isSafari } from '@meowdown/vitest/helpers'
+import { readClipboard } from '@meowdown/vitest/clipboard'
+import { isFirefox } from '@meowdown/vitest/helpers'
 import { TextSelection } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
-import { readClipboard } from '@meowdown/vitest/clipboard'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
