@@ -8,15 +8,7 @@ import {
 import { TextSelection } from '@prosekit/pm/state'
 import type { ReactNodeViewProps } from '@prosekit/react'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
-import {
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type MouseEvent,
-} from 'react'
+import { useCallback, useDeferredValue, useMemo, useState, type MouseEvent } from 'react'
 
 import { useBeautifulMermaid } from '../hooks/use-beautiful-mermaid.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
@@ -34,12 +26,6 @@ export function CodeBlockView(props: ReactNodeViewProps) {
   const isMath = language === 'math'
   const isMermaid = language === 'mermaid'
   const code = node.textContent
-  const codeRef = useRef(code)
-
-  useEffect(() => {
-    codeRef.current = code
-  }, [code])
-  const getCode = useCallback(() => codeRef.current, [])
 
   const caretInside = decorations.some(isCodeBlockPreviewHiddenDecoration)
 
@@ -80,7 +66,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
       {
         /* Skip rendering the toolbar during dragging to improve the performance of rendering the drag preview image in Safari */
         selected ? null : (
-          <CodeBlockToolbar getCode={getCode} language={language} setLanguage={setLanguage} />
+          <CodeBlockToolbar code={code} language={language} setLanguage={setLanguage} />
         )
       }
       <pre ref={contentRef} data-language={language}></pre>
@@ -108,12 +94,12 @@ export function CodeBlockView(props: ReactNodeViewProps) {
 }
 
 interface CodeBlockToolbarProps {
+  code: string
   language: string
   setLanguage: (language: string) => void
-  getCode: () => string
 }
 
-function CodeBlockToolbar({ language, setLanguage, getCode }: CodeBlockToolbarProps) {
+function CodeBlockToolbar({ code, language, setLanguage }: CodeBlockToolbarProps) {
   // Fall back to the raw value so an alias or unknown language still shows in
   // the trigger instead of looking empty.
   const selected = useMemo<LanguageItem>(() => {
@@ -189,7 +175,7 @@ function CodeBlockToolbar({ language, setLanguage, getCode }: CodeBlockToolbarPr
         </Combobox.Portal>
       </Combobox.Root>
       <CopyButton
-        getText={getCode}
+        getText={() => code}
         label="Copy code"
         className={styles.CopyButton}
         data-testid="code-block-copy"
