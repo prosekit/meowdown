@@ -11,4 +11,5 @@ node_modules
 temp
 .eslintcache
 .vitest-attachments
+.vitest-reports
 __screenshots__

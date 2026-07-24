@@ -4,7 +4,7 @@ const coverageEnabled = !!process.env.MEOWDOWN_TEST_COVERAGE
 
 export default defineConfig({
   test: {
-    reporters: process.env.GITHUB_ACTIONS ? ['github-actions', 'verbose'] : ['default'],
+    reporters: process.env.GITHUB_ACTIONS ? ['github-actions', 'verbose', 'blob'] : ['default'],
     retry: process.env.CI ? 3 : 0,
     coverage: {
       enabled: coverageEnabled,

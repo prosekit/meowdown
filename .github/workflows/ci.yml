@@ -40,14 +40,14 @@ jobs:
         run: pnpm run build
 
   test:
-    runs-on: ${{ matrix.runner }}
-    name: test-${{ matrix.os }}-${{ matrix.browser }}
+    runs-on: ${{ matrix.config.runner }}
+    name: test-${{ matrix.config.os }}-${{ matrix.config.browser }} (${{ matrix.shard_index }}/${{ matrix.shard_total }})
     timeout-minutes: 15
 
     strategy:
       fail-fast: false
       matrix:
-        include:
+        config:
           - os: linux
             runner: ubuntu-latest
             browser: chromium
@@ -64,6 +64,38 @@ jobs:
           - os: windows
             runner: windows-latest
             browser: chromium
+        shard_index: [1, 2]
+        shard_total: [2]
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+
+      - name: Install
+        run: pnpm run test:install:${{ matrix.config.browser }}
+
+      - name: Test
+        run: pnpm run test --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }}
+        env:
+          MEOWDOWN_TEST_BROWSER: ${{ matrix.config.browser }}
+          MEOWDOWN_TEST_COVERAGE: ${{ matrix.config.coverage && 'true' || '' }}
+
+      - name: Upload blob report to GitHub Actions Artifacts
+        if: ${{ !cancelled() && matrix.config.coverage }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: blob-report-${{ matrix.config.os }}-${{ matrix.config.browser }}-${{ matrix.shard_index }}
+          path: .vitest-reports/*
+          include-hidden-files: true
+          retention-days: 1
+
+  test-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [test]
 
     permissions:
       contents: read
@@ -76,17 +108,17 @@ jobs:
 
       - uses: ./.github/actions/setup
 
-      - name: Install
-        run: pnpm run test:install:${{ matrix.browser }}
+      - name: Download blob reports from GitHub Actions Artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: blob-report-*
+          path: .vitest-reports
+          merge-multiple: true
 
-      - name: Test
-        run: pnpm run test
-        env:
-          MEOWDOWN_TEST_BROWSER: ${{ matrix.browser }}
-          MEOWDOWN_TEST_COVERAGE: ${{ matrix.coverage && 'true' || '' }}
+      - name: Merge blob reports
+        run: pnpm run test:merge-coverage
 
       - name: Report Coverage
-        if: ${{ matrix.coverage }}
         uses: davelosert/vitest-coverage-report-action@8b157684c6a6b259b97d45e72b44242865c0f6a5 # v2.12.2
 
   publish-snapshot:
