@@ -41,8 +41,6 @@ import type {
   WikilinkSearchHandler,
 } from './types.ts'
 
-export type EditorMode = MarkMode
-
 const CARET_GLIDE_OFF = { '--meowdown-caret-glide': '0ms' } as CSSProperties
 
 export interface EditorProps {
@@ -50,7 +48,7 @@ export interface EditorProps {
    * The editor mode ('focus', 'show', 'hide'), controlling how much Markdown
    * syntax stays in view. Defaults to 'focus'.
    */
-  mode?: EditorMode
+  mode?: MarkMode
 
   /**
    * The initial Markdown text of the editor. Only the value provided on the
