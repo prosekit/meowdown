@@ -40,15 +40,16 @@ jobs:
         run: pnpm run build
 
   test:
-    runs-on: ${{ matrix.runner }}
-    name: test-${{ matrix.os }}-${{ matrix.browser }}(${{ matrix.shard }})
+    runs-on: ${{ matrix.config.runner }}
+    name: test-${{ matrix.config.os }}-${{ matrix.config.browser }}(${{ matrix.shard }})
     timeout-minutes: 15
 
     strategy:
       fail-fast: false
       matrix:
-        shard: ['1/3', '2/3', '3/3']
-        include:
+        shard_index: [1, 2, 3]
+        shard_total: [3]
+        config:
           - os: linux
             runner: ubuntu-latest
             browser: chromium
@@ -78,16 +79,45 @@ jobs:
       - uses: ./.github/actions/setup
 
       - name: Install
-        run: pnpm run test:install:${{ matrix.browser }}
+        run: pnpm run test:install:${{ matrix.config.browser }}
 
       - name: Test
-        run: pnpm run test --shard=${{ matrix.shard }}
+        run: pnpm run test --shard=${{ matrix.shard_index }}/${{ matrix.shard_total }}
         env:
-          MEOWDOWN_TEST_BROWSER: ${{ matrix.browser }}
-          MEOWDOWN_TEST_COVERAGE: ${{ matrix.coverage && 'true' || '' }}
+          MEOWDOWN_TEST_BROWSER: ${{ matrix.config.browser }}
+          MEOWDOWN_TEST_COVERAGE: ${{ matrix.config.coverage && 'true' || '' }}
+
+      - name: Upload blob report to GitHub Actions Artifacts
+        if: ${{ !cancelled() && matrix.config.coverage }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.config.os }}-${{ matrix.config.browser }}-${{ matrix.shard_index }}
+          path: .vitest-reports/*
+          include-hidden-files: true
+          retention-days: 1
+
+  coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [test]
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+
+      - name: Download blob reports from GitHub Actions Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: blob-report-*
+
+      - name: Merge blob reports
+        run: pnpm run test:merge-coverage
 
       - name: Report Coverage
-        if: ${{ matrix.coverage }}
+        if: ${{ matrix.config.coverage }}
         uses: davelosert/vitest-coverage-report-action@8b157684c6a6b259b97d45e72b44242865c0f6a5 # v2.12.2
 
   publish-snapshot:
