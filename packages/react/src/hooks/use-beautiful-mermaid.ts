@@ -21,11 +21,9 @@ export function useBeautifulMermaid(enabled: boolean): BeautifulMermaidRender | 
   useEffect(() => {
     if (!enabled || renderer) return
     let cancelled = false
-    void loadBeautifulMermaid()
-      .then((loadedRenderer) => {
-        if (!cancelled) setRenderer(() => loadedRenderer)
-      })
-      .catch(() => {})
+    void loadBeautifulMermaid().then((loadedRenderer) => {
+      if (!cancelled) setRenderer(() => loadedRenderer)
+    })
     return () => {
       cancelled = true
     }
