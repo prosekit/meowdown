@@ -5,10 +5,11 @@ import {
   BlockHandleRoot,
 } from '@prosekit/react/block-handle'
 import { GripVerticalIcon } from 'lucide-react'
+import type { ReactElement } from 'react'
 
 import styles from './block-handle.module.css'
 
-export function BlockHandle() {
+export function BlockHandle(): ReactElement {
   return (
     <BlockHandleRoot>
       <BlockHandlePositioner className={styles.Positioner}>

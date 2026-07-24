@@ -13,7 +13,7 @@
  *                                  .setMeta(META_KEY, true)
  */
 
-import { definePlugin } from '@prosekit/core'
+import { definePlugin, type PlainExtension } from '@prosekit/core'
 import type { EditorNode, Schema } from '@prosekit/pm/model'
 import type { EditorState, Transaction } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
@@ -373,6 +373,6 @@ function mergeReferenceKeys(
   return merged
 }
 
-export function defineInlineMarkPlugin(options?: InlineMarkOptions) {
+export function defineInlineMarkPlugin(options?: InlineMarkOptions): PlainExtension {
   return definePlugin(createInlineMarkPlugin(options))
 }

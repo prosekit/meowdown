@@ -8,7 +8,14 @@ import {
 import { defineUpdateHandler, isTextSelection } from '@prosekit/core'
 import { useEditor, useExtension } from '@prosekit/react'
 import { SparklesIcon } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState, type KeyboardEvent } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react'
 
 import { useDelayedFlag } from '../hooks/use-delayed-flag.ts'
 
@@ -50,7 +57,7 @@ export function SelectionMenu({
   onOpen,
   onClose,
   affordance = true,
-}: SelectionMenuProps) {
+}: SelectionMenuProps): ReactNode {
   const editor = useEditor<EditorExtension>()
   const [selection, setSelection] = useState<SelectionSnapshot>()
 

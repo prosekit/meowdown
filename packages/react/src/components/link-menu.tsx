@@ -193,7 +193,7 @@ function LinkEditContent({
  * - `Mod-k` (or the preview's edit button) opens an edit form that stays until
  *   it is submitted, dismissed with Escape, or pressed outside.
  */
-export function LinkMenu({ onLinkClick, onLinkCopy }: LinkMenuProps) {
+export function LinkMenu({ onLinkClick, onLinkCopy }: LinkMenuProps): ReactNode {
   const editor: TypedEditor = useEditor<EditorExtension>()
 
   // `hover` is the sticky preview content; `onLink`/`overPopup` drive whether it

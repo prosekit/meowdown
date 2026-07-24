@@ -47,6 +47,6 @@ export const gfmParser: MarkdownParser = defaultParser.configure([
  * QuoteMark, CodeMark, CodeText, …), but no Emphasis / Link /
  * InlineCode etc. nodes are ever created.
  */
-export const gfmBlockOnlyParser = gfmParser.configure({
+export const gfmBlockOnlyParser: MarkdownParser = gfmParser.configure({
   parseInline: [{ name: 'SkipInline', before: 'Escape', parse: consumeAllInline }],
 })

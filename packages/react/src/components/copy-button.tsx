@@ -1,5 +1,5 @@
 import { CheckIcon, CopyIcon } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useRef, useState, type ReactElement } from 'react'
 
 const COPIED_RESET_MS = 1500
 
@@ -18,7 +18,13 @@ interface CopyButtonProps {
  * A copy-to-clipboard button with "copied" feedback. Shared by the code block
  * toolbar and the link popover.
  */
-export function CopyButton({ getText, label, onCopy, className, ...rest }: CopyButtonProps) {
+export function CopyButton({
+  getText,
+  label,
+  onCopy,
+  className,
+  ...rest
+}: CopyButtonProps): ReactElement {
   const [copied, setCopied] = useState(false)
   const resetTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 

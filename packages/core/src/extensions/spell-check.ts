@@ -1,4 +1,4 @@
-import { definePlugin } from '@prosekit/core'
+import { definePlugin, type PlainExtension } from '@prosekit/core'
 import type { Transaction } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
@@ -117,6 +117,6 @@ function createSpellCheckPlugin(spellCheck: boolean) {
   })
 }
 
-export function defineSpellCheckPlugin(spellCheck: boolean) {
+export function defineSpellCheckPlugin(spellCheck: boolean): PlainExtension {
   return definePlugin(createSpellCheckPlugin(spellCheck))
 }

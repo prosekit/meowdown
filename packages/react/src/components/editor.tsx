@@ -18,7 +18,14 @@ import type {
 } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
 import { clsx } from 'clsx/lite'
-import { useImperativeHandle, useRef, type CSSProperties, type ReactNode, type Ref } from 'react'
+import {
+  useImperativeHandle,
+  useRef,
+  type CSSProperties,
+  type ReactElement,
+  type ReactNode,
+  type Ref,
+} from 'react'
 
 import type { TimeFormat } from '../utils/date-format.ts'
 
@@ -291,6 +298,12 @@ export interface EditorProps {
   children?: ReactNode
 }
 
+/**
+ * A hybrid live-preview Markdown editor: the document stays Markdown text,
+ * rendered in place as rich content.
+ *
+ * Callbacks and resolvers should be stable; pass them via `useCallback`.
+ */
 export function MeowdownEditor({
   mode = 'focus',
   initialMarkdown,
@@ -330,7 +343,7 @@ export function MeowdownEditor({
   wrapperClassName,
   handleRef,
   children,
-}: EditorProps) {
+}: EditorProps): ReactElement {
   // Handle of the mounted editor.
   const childRef = useRef<EditorHandle>(null)
 
