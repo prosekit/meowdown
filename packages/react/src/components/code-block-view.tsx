@@ -61,6 +61,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
 
   return (
     <div className={styles.Root} data-preview={previewOnly || undefined}>
+      {/* Skip rendering the toolbar during dragging to improve the performance of printing drag preview image in Safari */}
       {selected ? null : (
         <CodeBlockToolbar language={language} setLanguage={setLanguage} getText={() => code} />
       )}
