@@ -2,8 +2,8 @@ import {
   collectReferenceDefinitions,
   defaultResolveImageUrl,
   formatFileSize,
-  getFileKind,
   getCodeTokens,
+  getFileKind,
   getMarkBuilders,
   inlineTextToMarkChunksWithContext,
   listenForTweetHeight,
@@ -21,8 +21,8 @@ import {
   type MarkChunk,
   type MarkMode,
   type MarkName,
-  type MdImageAttrs,
   type MdFileAttrs,
+  type MdImageAttrs,
   type MdLinkTextAttrs,
   type MdMathAttrs,
   type MdWikilinkAttrs,
@@ -426,6 +426,7 @@ function CodeBlock({ code, language }: { code: string; language: string }): Reac
 function MathView(props: { formula: string; children: ReactNode }): ReactElement {
   const { formula, children } = props
   const katex = useKaTeX(true)
+  if (!katex) return <span>{formula}</span>
   return (
     <span className="md-math-view">
       <MathRender
