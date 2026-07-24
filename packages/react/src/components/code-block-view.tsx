@@ -94,12 +94,12 @@ export function CodeBlockView(props: ReactNodeViewProps) {
 }
 
 interface CodeBlockToolbarProps {
-  code: string
   language: string
   setLanguage: (language: string) => void
+  getCode: () => string
 }
 
-function CodeBlockToolbar({ code, language, setLanguage }: CodeBlockToolbarProps) {
+function CodeBlockToolbar({ language, setLanguage, getCode }: CodeBlockToolbarProps) {
   // Fall back to the raw value so an alias or unknown language still shows in
   // the trigger instead of looking empty.
   const selected = useMemo<LanguageItem>(() => {
@@ -175,7 +175,7 @@ function CodeBlockToolbar({ code, language, setLanguage }: CodeBlockToolbarProps
         </Combobox.Portal>
       </Combobox.Root>
       <CopyButton
-        getText={() => code}
+        getText={getCode}
         label="Copy code"
         className={styles.CopyButton}
         data-testid="code-block-copy"
