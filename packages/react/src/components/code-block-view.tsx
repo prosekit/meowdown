@@ -80,19 +80,11 @@ export function CodeBlockView(props: ReactNodeViewProps) {
 }
 
 interface CodeBlockToolbarProps {
-  /** The current code block language, e.g. "typescript" or "" for plain text. */
   language: string
-  /** Persists the chosen language back to the node's attrs. */
   setLanguage: (language: string) => void
-  /** Returns the code text written to the clipboard, evaluated at copy time. */
   getText: () => string
 }
 
-/**
- * The hover toolbar for a code block: a language picker combobox and a copy
- * button. Shares the code-block-view CSS module so its `.Toolbar` visibility
- * selectors stay scoped to the surrounding `.Root`.
- */
 function CodeBlockToolbar({ language, setLanguage, getText }: CodeBlockToolbarProps) {
   // Fall back to the raw value so an alias or unknown language still shows in
   // the trigger instead of looking empty.
