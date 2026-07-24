@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
 import { setupFixture, type Fixture } from '../testing/index.ts'
@@ -86,6 +86,26 @@ describe('virtual caret rendering', () => {
     using fixture = setupMode('hide', 'hello <a>world')
     await userEvent.keyboard('x')
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"hello x┃world"`)
+  })
+
+  it('moves to the new code-block line immediately after Enter', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.codeBlock('foo<a>')))
+    fixture.view.focus()
+    await expect.element(caret).toBeVisible()
+
+    expect(fixture.selectionSnapshot).toBe('foo┃')
+    await userEvent.keyboard('{Enter}')
+    expect(fixture.selectionSnapshot).toBe('\nfoo\n┃\n')
+    const afterEnterTop = getCaretElement().getBoundingClientRect().top
+
+    await userEvent.keyboard('A')
+    expect(fixture.selectionSnapshot).toBe('\nfoo\nA┃\n')
+    await vi.waitFor(() => {
+      const afterTypingTop = getCaretElement().getBoundingClientRect().top
+      expect(Math.abs(afterEnterTop - afterTypingTop)).toBeLessThanOrEqual(3)
+    })
   })
 })
 
