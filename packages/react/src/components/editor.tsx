@@ -300,12 +300,9 @@ export interface EditorProps {
 
 /**
  * A hybrid live-preview Markdown editor: the document stays Markdown text,
- * rendered in place as rich content. `mode` chooses how much of the syntax
- * stays in view, `initialMarkdown` seeds the document, and `handleRef` exposes
- * an `EditorHandle` for reading and writing it afterwards.
+ * rendered in place as rich content.
  *
- * Callbacks and resolvers should be stable; pass them via `useCallback`, since
- * a new identity rebuilds the matching extension.
+ * Callbacks and resolvers should be stable; pass them via `useCallback`.
  */
 export function MeowdownEditor({
   mode = 'focus',
