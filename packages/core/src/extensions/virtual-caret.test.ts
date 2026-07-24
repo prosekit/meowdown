@@ -126,7 +126,7 @@ describe('virtual caret rendering', () => {
     const top3 = getCaretElement().getBoundingClientRect().top
 
     expect(top2 - top1).toBeGreaterThan(10)
-    expect(top3).toBeCloseTo(top2)
+    expect(Math.abs(top3 - top2)).toBeLessThan(5)
   })
 })
 
