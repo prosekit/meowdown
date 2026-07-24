@@ -1,4 +1,3 @@
-import { isFirefox } from '@meowdown/vitest/helpers'
 import { DOMParser, DOMSerializer } from '@prosekit/pm/model'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
@@ -114,10 +113,7 @@ describe('typing over code block selections', () => {
     })
   })
 
-  it.skipIf(
-    // Firefox edits the text node in place and is not affected.
-    isFirefox(),
-  ).fails('keeps the typed text over the full code text', async () => {
+  it('keeps the typed text over the full code text', async () => {
     using fixture = setupFixture()
     const { n } = fixture
     fixture.set(n.doc(n.codeBlock({ language: 'js' }, '<a>const answer = 42<b>')))
