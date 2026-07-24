@@ -41,7 +41,7 @@ jobs:
 
   test:
     runs-on: ${{ matrix.runner }}
-    name: test-${{ matrix.os }}-${{ matrix.browser }}
+    name: test-${{ matrix.os }}-${{ matrix.browser }}(${{ matrix.shard }})
     timeout-minutes: 15
 
     strategy:
