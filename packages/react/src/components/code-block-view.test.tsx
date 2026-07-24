@@ -1,7 +1,6 @@
 import '../testing/index.ts'
 
 import { readClipboard } from '@meowdown/vitest/clipboard'
-import { isFirefox } from '@meowdown/vitest/helpers'
 import { TextSelection } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 import { createRef } from 'react'
@@ -297,10 +296,7 @@ describe('typing over code block selections', () => {
     })
   })
 
-  it.skipIf(
-    // Firefox edits the text node in place and is not affected.
-    isFirefox(),
-  ).fails('updates the markdown when typing over the full code text', async () => {
+  it('updates the markdown when typing over the full code text', async () => {
     const { ref, view, codeStart, codeEnd } = await setupHighlightedCodeBlock()
     selectCodeRange(view, codeStart, codeEnd)
     await userEvent.keyboard('X')

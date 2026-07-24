@@ -18,6 +18,7 @@ minimumReleaseAgeExclude:
   - '@ocavue/eslint-config'
   - '@prosekit/*'
   - '@aria-ui/*'
+  - '@prosemirror-adapter/*'
   - prosemirror-view
 
 allowBuilds:
@@ -31,3 +32,7 @@ allowBuilds:
 #   '@prosekit/core': https://pkg.pr.new/@prosekit/core@7b1d474b13916ed1a34d54a2c9339a95d0c9be6f
 #   '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@7b1d474b13916ed1a34d54a2c9339a95d0c9be6f
 #   '@prosekit/web': https://pkg.pr.new/@prosekit/web@7b1d474b13916ed1a34d54a2c9339a95d0c9be6f
+
+overrides:
+  '@prosemirror-adapter/core': '0.5.5'
+  '@prosemirror-adapter/react': '0.5.5'
