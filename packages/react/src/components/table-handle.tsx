@@ -16,6 +16,7 @@ import {
   TableHandleRowPositioner,
 } from '@prosekit/react/table-handle'
 import { CheckIcon, GripHorizontalIcon, GripVerticalIcon } from 'lucide-react'
+import type { ReactElement } from 'react'
 
 import styles from './table-handle.module.css'
 
@@ -94,7 +95,7 @@ function ColumnAlignMenuItem({
   )
 }
 
-export function TableHandle() {
+export function TableHandle(): ReactElement {
   const state = useEditorDerivedValue(getTableHandleState)
 
   return (

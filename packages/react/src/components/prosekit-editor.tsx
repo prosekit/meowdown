@@ -37,6 +37,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ReactElement,
   type ReactNode,
   type Ref,
 } from 'react'
@@ -300,7 +301,7 @@ export function ProseKitEditor({
   editorClassName,
   ref,
   children,
-}: ProseKitEditorProps) {
+}: ProseKitEditorProps): ReactElement {
   const [editor] = useState((): TypedEditor => {
     const baseExtension: EditorExtension = defineEditorExtension({
       resolveFileLink,

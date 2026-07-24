@@ -15,7 +15,14 @@ import {
   AutocompletePositioner,
   AutocompleteRoot,
 } from '@prosekit/react/autocomplete'
-import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type ReactElement,
+} from 'react'
 
 import { formatNowTime, type TimeFormat } from '../utils/date-format.ts'
 
@@ -80,7 +87,7 @@ export function SlashMenu({
   onSlashMenuSearch,
   onFilePaste,
   onFileSaveError,
-}: SlashMenuProps) {
+}: SlashMenuProps): ReactElement {
   const editor = useEditor<EditorExtension>()
   const fileInputRef = useRef<HTMLInputElement>(null)
 

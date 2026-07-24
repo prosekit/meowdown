@@ -51,7 +51,10 @@ interface PendingReplacementPreviewProps {
  * Dismissing the popover (Escape or an outside press) discards the stage; the
  * document is only touched on accept.
  */
-export function PendingReplacementPreview({ actions, onResolve }: PendingReplacementPreviewProps) {
+export function PendingReplacementPreview({
+  actions,
+  onResolve,
+}: PendingReplacementPreviewProps): ReactNode {
   const editor = useEditor<EditorExtension>()
   const [pending, setPending] = useState<PendingReplacement | null>(null)
 

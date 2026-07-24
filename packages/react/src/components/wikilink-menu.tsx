@@ -8,7 +8,7 @@ import {
   AutocompletePositioner,
   AutocompleteRoot,
 } from '@prosekit/react/autocomplete'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type ReactElement } from 'react'
 
 import { returnsTrue } from '../utils/returns-true.ts'
 
@@ -41,7 +41,7 @@ interface WikilinkMenuProps {
 // Deliberately not shared with TagMenu: the two menus are expected to
 // diverge, so the duplication is kept until the differences are clear.
 
-export function WikilinkMenu({ onWikilinkSearch }: WikilinkMenuProps) {
+export function WikilinkMenu({ onWikilinkSearch }: WikilinkMenuProps): ReactElement {
   const editor = useEditor<EditorExtension>()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')

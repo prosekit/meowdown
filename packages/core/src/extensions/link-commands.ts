@@ -1,5 +1,11 @@
 import { getAutolinkHref } from '@meowdown/markdown'
-import { defineCommands, defineKeymap, isTextSelection, type PlainExtension } from '@prosekit/core'
+import {
+  defineCommands,
+  defineKeymap,
+  isTextSelection,
+  type Extension,
+  type PlainExtension,
+} from '@prosekit/core'
 import type { Command, EditorState } from '@prosekit/pm/state'
 import { TextSelection } from '@prosekit/pm/state'
 
@@ -53,15 +59,13 @@ function getWrapRange(state: EditorState): undefined | PositionRange {
   }
 }
 
-export function insertLink({
-  href,
-  title,
-  wrapText = true,
-}: {
+export interface InsertLinkOptions {
   href?: string
   title?: string
   wrapText?: boolean
-} = {}): Command {
+}
+
+export function insertLink({ href, title, wrapText = true }: InsertLinkOptions = {}): Command {
   return (state, dispatch) => {
     const range = getWrapRange(state)
     if (!range) return false
@@ -114,7 +118,13 @@ export function removeLink(): Command {
   }
 }
 
-export function defineLinkCommands() {
+export function defineLinkCommands(): Extension<{
+  Commands: {
+    insertLink: [options?: InsertLinkOptions]
+    updateLink: [attrs: LinkAttrs]
+    removeLink: []
+  }
+}> {
   return defineCommands({ insertLink, updateLink, removeLink })
 }
 
