@@ -18,8 +18,8 @@ import { CopyButton } from './copy-button.tsx'
 import { MathRender } from './math-render.tsx'
 import { MermaidRender } from './mermaid-render.tsx'
 
-export function CodeBlockView(props2: ReactNodeViewProps) {
-  const { node, view, getPos, decorations, selected, setAttrs, contentRef } = props2
+export function CodeBlockView(props: ReactNodeViewProps) {
+  const { node, view, getPos, decorations, selected, setAttrs, contentRef } = props
 
   const attrs = node.attrs as CodeBlockAttrs
   const language = attrs.language || ''
