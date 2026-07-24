@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.58.2](https://github.com/prosekit/meowdown/compare/v0.58.1...v0.58.2) (2026-07-24)
+
+
+### Bug Fixes
+
+* keep the typed text when typing over a fully selected code block ([#373](https://github.com/prosekit/meowdown/issues/373)) ([8405e97](https://github.com/prosekit/meowdown/commit/8405e97cefbe980e3efb6f8b696b11e83af3591d))
+* stop Safari freezing when dragging a code block ([#370](https://github.com/prosekit/meowdown/issues/370)) ([b4fcf2a](https://github.com/prosekit/meowdown/commit/b4fcf2ae90cba3549df9df3a09048dc90de5da49))
+
 ## [0.58.1](https://github.com/prosekit/meowdown/compare/v0.58.0...v0.58.1) (2026-07-24)
 
 
