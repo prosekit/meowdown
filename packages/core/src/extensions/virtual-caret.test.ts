@@ -87,6 +87,47 @@ describe('virtual caret rendering', () => {
     await userEvent.keyboard('x')
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"hello x┃world"`)
   })
+
+  it('moves to the new code-block line immediately after Enter', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.view.focus()
+
+    fixture.set(n.doc(n.codeBlock('line1\nline2<a>')))
+    await expect.element(caret).toBeVisible()
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`
+      "
+      line1
+      line2┃
+      "
+    `)
+    const top1 = getCaretElement().getBoundingClientRect().top
+
+    await userEvent.keyboard('{Enter}')
+    await expect.element(caret).toBeVisible()
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`
+      "
+      line1
+      line2
+      ┃
+      "
+    `)
+    const top2 = getCaretElement().getBoundingClientRect().top
+
+    await userEvent.keyboard('a')
+    await expect.element(caret).toBeVisible()
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`
+      "
+      line1
+      line2
+      a┃
+      "
+    `)
+    const top3 = getCaretElement().getBoundingClientRect().top
+
+    expect(top2 - top1).toBeGreaterThan(10)
+    expect(Math.abs(top3 - top2)).toBeLessThan(5)
+  })
 })
 
 describe('virtual caret geometry next to hidden runs (hide mode)', () => {
