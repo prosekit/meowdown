@@ -33,12 +33,14 @@ export function CodeBlockView(props: ReactNodeViewProps) {
   const mermaid = useBeautifulMermaid(isMermaid)
   const showMathPreview = isMath && katex != null
   const showMermaidPreview = isMermaid && mermaid != null
+  const showPreview = showMathPreview || showMermaidPreview
+  const previewCode = showPreview ? code : ''
 
   // The preview replaces the source only when the caret is elsewhere; with the
   // caret inside, the source stays on top and the preview updates live below.
   // An empty or not-yet-rendered block keeps its source, so it never turns
   // invisible and unclickable.
-  const previewOnly = (showMathPreview || showMermaidPreview) && !caretInside && code.trim() !== ''
+  const previewOnly = showPreview && !caretInside && code.trim() !== ''
 
   const focusSource = useCallback(
     (event: MouseEvent) => {
@@ -71,7 +73,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
       {showMathPreview && (
         <MathRender
           katex={katex}
-          formula={code}
+          formula={previewCode}
           displayMode
           className={styles.Preview}
           data-testid="code-block-math-preview"
@@ -81,7 +83,7 @@ export function CodeBlockView(props: ReactNodeViewProps) {
       {showMermaidPreview && (
         <MermaidRender
           renderer={mermaid}
-          source={code}
+          source={previewCode}
           className={`${styles.Preview} ${styles.MermaidPreview}`}
           data-testid="code-block-mermaid-preview"
           onMouseDown={focusSource}
