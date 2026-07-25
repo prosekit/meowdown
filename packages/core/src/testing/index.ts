@@ -23,15 +23,21 @@ export interface SetupFixtureOptions {
   mount?: boolean
   /** Creation-time options for `defineEditorExtension` (e.g. `resolveFileLink`). */
   extensionOptions?: EditorExtensionOptions
+  /** The container's DOM id. Two fixtures need two ids to stay mounted at once. */
+  containerId?: string
 }
 
-export function setupFixture({ mount = true, extensionOptions }: SetupFixtureOptions = {}) {
+export function setupFixture({
+  mount = true,
+  extensionOptions,
+  containerId = 'test-container',
+}: SetupFixtureOptions = {}) {
   const extension = defineEditorExtension(extensionOptions)
   const editor = createTestEditor({ extension })
   const n = editor.nodes
   const m = editor.marks
 
-  const div = getTestContainer()
+  const div = getTestContainer(containerId)
 
   if (mount) {
     editor.mount(div)
@@ -41,6 +47,7 @@ export function setupFixture({ mount = true, extensionOptions }: SetupFixtureOpt
     if (mount) {
       editor.unmount()
     }
+    div.remove()
   }
 
   return {
@@ -90,8 +97,7 @@ export function setupFixture({ mount = true, extensionOptions }: SetupFixtureOpt
 
 export type Fixture = ReturnType<typeof setupFixture>
 
-function getTestContainer(): HTMLDivElement {
-  const id = 'test-container'
+function getTestContainer(id: string): HTMLDivElement {
   const existing = document.getElementById(id)
   if (existing) existing.remove()
   const div = document.createElement('div')
