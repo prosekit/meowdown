@@ -29,7 +29,6 @@ import { createEditor, union, type SelectionJSON } from '@prosekit/core'
 import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit } from '@prosekit/react'
-import { clsx } from 'clsx/lite'
 import GithubSlugger from 'github-slugger'
 import {
   useCallback,
@@ -464,7 +463,7 @@ export function ProseKitEditor({
 
   return (
     <ProseKit editor={editor}>
-      <div ref={editor.mount} className={clsx('meowdown-content', editorClassName)}></div>
+      <div ref={editor.mount}></div>
       <EditorExtensions
         markMode={markMode}
         onDocChange={handleDocChange}
@@ -486,6 +485,7 @@ export function ProseKitEditor({
         readOnly={readOnly}
         wikilinkEnabled={!!onWikilinkSearch}
         spellCheck={spellCheck}
+        editorClassName={editorClassName}
       />
       {blockHandle && !readOnly && <BlockHandle />}
       {!readOnly && <TableHandle />}

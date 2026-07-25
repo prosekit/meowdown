@@ -15,6 +15,7 @@ import {
   defineSpellCheckPlugin,
   defineSubstitution,
   defineTagClickHandler,
+  defineViewAttributes,
   defineWikilinkClickHandler,
   defineWikilinkTrigger,
   type EditorExtension,
@@ -55,6 +56,7 @@ export interface EditorExtensionsProps {
   readOnly?: boolean
   wikilinkEnabled?: boolean
   spellCheck?: boolean
+  editorClassName?: string
 }
 
 // A leaf that renders nothing and holds every reactive `useExtension` call (each
@@ -81,6 +83,7 @@ export function EditorExtensions({
   readOnly,
   wikilinkEnabled,
   spellCheck,
+  editorClassName,
 }: EditorExtensionsProps): null {
   // The mark-mode plugin ships in the creation extension so the first paint
   // already hides the syntax; here only later `markMode` changes are applied.
@@ -208,6 +211,12 @@ export function EditorExtensions({
     useMemo(() => {
       return spellCheck == null ? null : defineSpellCheckPlugin(spellCheck)
     }, [spellCheck]),
+  )
+
+  useExtension(
+    useMemo(() => {
+      return editorClassName ? defineViewAttributes({ class: editorClassName }) : null
+    }, [editorClassName]),
   )
 
   return null

@@ -37,6 +37,7 @@ import { definePendingReplacement } from './pending-replacement.ts'
 import { defineScrollToSelection } from './scroll-to-selection.ts'
 import { defineSelectDocBoundary } from './select-doc-boundary.ts'
 import { defineTable } from './table.ts'
+import { defineViewAttributes } from './view-attributes.ts'
 import { defineVirtualCaret } from './virtual-caret.ts'
 import { defineWikilink } from './wikilink.ts'
 
@@ -59,6 +60,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineInlineMarks(),
 
     // plugins
+    defineViewAttributes({ class: 'meowdown-content' }),
     defineCodeBlockSyntaxHighlight(),
     defineEscapeCollapse(),
     defineMoveBlock(),

@@ -35,17 +35,17 @@ export {
   type TypedEditor,
 } from './extensions/extension.ts'
 export {
+  defineFileClickHandler,
+  type FileClickHandler,
+  type FileClickPayload,
+} from './extensions/file-click.ts'
+export {
   buildFileMarkdown,
   defineFilePaste,
   type FilePasteHandler,
   type FilePasteOptions,
   type FileSaveErrorHandler,
 } from './extensions/file-paste.ts'
-export {
-  defineFileClickHandler,
-  type FileClickHandler,
-  type FileClickPayload,
-} from './extensions/file-click.ts'
 export {
   defineFileView,
   getFileKind,
@@ -62,8 +62,6 @@ export {
   type ImageClickPayload,
 } from './extensions/image-click.ts'
 export { defaultResolveImageUrl, defineImage, type ImageOptions } from './extensions/image.ts'
-export { defineMath } from './extensions/math.ts'
-export { loadKaTeX, renderMathInto, type KaTeXRender } from './utils/katex.ts'
 export type {
   MdFileAttrs,
   MdImageAttrs,
@@ -72,8 +70,8 @@ export type {
   MdWikilinkAttrs,
 } from './extensions/inline-marks.ts'
 export {
-  inlineTextToMarkChunksWithContext,
   inlineTextToMarkChunks,
+  inlineTextToMarkChunksWithContext,
   type FileLinkOptions,
   type FileLinkPayload,
   type FileLinkResolver,
@@ -98,18 +96,13 @@ export {
 } from './extensions/link-commands.ts'
 export type { LinkEditHandler, LinkEditOptions } from './extensions/link-commands.ts'
 export { defineLinkHoverHandler, type LinkHoverHandler } from './extensions/link-hover.ts'
-export type { ListMarker, MeowdownListAttrs } from './extensions/list.ts'
 export { defineLinkPaste } from './extensions/link-paste.ts'
+export type { ListMarker, MeowdownListAttrs } from './extensions/list.ts'
 export type { MarkChunk } from './extensions/mark-chunk.ts'
 export type { MarkMode } from './extensions/mark-mode.ts'
 export { isMarkOfType, type MarkName } from './extensions/mark-names.ts'
+export { defineMath } from './extensions/math.ts'
 export { isNodeOfType, type NodeName } from './extensions/node-names.ts'
-export {
-  collectReferenceDefinitions,
-  type ReferenceDefinition,
-  type ReferenceDefinitionIndex,
-  type ReferenceDefinitions,
-} from './extensions/reference-links.ts'
 export {
   definePendingReplacementHandler,
   getPendingReplacement,
@@ -121,24 +114,27 @@ export {
   type PendingReplacementOutcome,
   type StartPendingReplacementOptions,
 } from './extensions/pending-replacement.ts'
+export {
+  collectReferenceDefinitions,
+  type ReferenceDefinition,
+  type ReferenceDefinitionIndex,
+  type ReferenceDefinitions,
+} from './extensions/reference-links.ts'
 export { getMarkBuilders, type TypedMarkBuilders } from './extensions/schema.ts'
+export { defineSpellCheckPlugin } from './extensions/spell-check.ts'
 export { defineSubstitution } from './extensions/substitution.ts'
-export { isSelectionInTableCell } from './extensions/table.ts'
 export {
   getTableColumnAlign,
   type MeowdownTableCellAttrs,
   type TableColumnAlign,
 } from './extensions/table-column-align.ts'
+export { isSelectionInTableCell } from './extensions/table.ts'
 export {
   defineTagClickHandler,
   type TagClickHandler,
   type TagClickPayload,
 } from './extensions/tag-click.ts'
-export {
-  defineWikilinkClickHandler,
-  type WikilinkClickHandler,
-  type WikilinkClickPayload,
-} from './extensions/wikilink-click.ts'
+export { defineViewAttributes } from './extensions/view-attributes.ts'
 export {
   formatSizedWikiEmbed,
   parseWikiEmbed,
@@ -149,14 +145,19 @@ export {
   type WikiEmbedResolver,
 } from './extensions/wiki-embed.ts'
 export {
+  defineWikilinkClickHandler,
+  type WikilinkClickHandler,
+  type WikilinkClickPayload,
+} from './extensions/wikilink-click.ts'
+export {
   defineWikilinkHoverHandler,
   type WikilinkHoverHandler,
   type WikilinkHoverHit,
 } from './extensions/wikilink-hover.ts'
 export { defineWikilinkTrigger } from './extensions/wikilink-trigger.ts'
-export type { PositionRange } from './utils/range.ts'
 export { getTextblockDisplayText } from './utils/display-text.ts'
+export { formatFileSize } from './utils/format-file-size.ts'
+export { loadKaTeX, renderMathInto, type KaTeXRender } from './utils/katex.ts'
+export type { PositionRange } from './utils/range.ts'
 export { getSelectedText } from './utils/selected-text.ts'
 export { getVirtualElementFromRange, type VirtualElement } from './utils/virtual-element.ts'
-export { defineSpellCheckPlugin } from './extensions/spell-check.ts'
-export { formatFileSize } from './utils/format-file-size.ts'
