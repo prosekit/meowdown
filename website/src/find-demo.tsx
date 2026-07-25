@@ -13,7 +13,7 @@ import {
 const NO_MATCHES: SearchStatus = { total: 0, active: 0 }
 
 const FIND_BUTTON_CLASS =
-  'flex size-6 cursor-pointer items-center justify-center rounded text-sm text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100'
+  'flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900 disabled:pointer-events-none disabled:opacity-35 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100'
 
 export interface FindDemoValue {
   /** Goes to the editor as `searchQuery`; empty while the bar is closed. */
@@ -62,39 +62,52 @@ export function useFindDemo(handleRef: RefObject<EditorHandle | null>): FindDemo
     [close, handleRef],
   )
 
+  const hasQuery = text.length > 0
+  const canNavigate = status.total > 0
+
   const bar = open ? (
-    <div className="absolute top-3 right-4 z-20 flex items-center gap-0.5 rounded-lg border border-stone-200 bg-white px-2 py-1 shadow-lg dark:border-stone-700 dark:bg-stone-900">
+    <div className="absolute top-3 right-4 z-20 flex items-center gap-1 rounded-full border border-stone-200/80 bg-white/95 py-1 pr-1 pl-3 shadow-lg shadow-stone-900/5 backdrop-blur dark:border-stone-700/70 dark:bg-stone-900/95">
+      <span className="i-lucide-search size-3.5 shrink-0 text-stone-400" aria-hidden="true" />
       <input
         ref={inputRef}
         autoFocus
         aria-label="Find in document"
-        className="w-44 bg-transparent text-sm text-stone-700 outline-none placeholder:text-stone-400 dark:text-stone-200"
+        className="w-36 bg-transparent text-sm text-stone-700 outline-none placeholder:text-stone-400 dark:text-stone-200"
         placeholder="Find"
         spellCheck={false}
         value={text}
         onChange={(event) => setText(event.target.value)}
         onKeyDown={handleKeyDown}
       />
-      <span className="mr-1 min-w-12 text-center text-xs tabular-nums text-stone-400">
-        {status.active} / {status.total}
-      </span>
+      {hasQuery && (
+        <span
+          role="status"
+          aria-live="polite"
+          className="shrink-0 text-xs tabular-nums text-stone-400"
+        >
+          {status.active}/{status.total}
+        </span>
+      )}
+      <span aria-hidden="true" className="mx-1 h-4 w-px shrink-0 bg-stone-200 dark:bg-stone-700" />
       <button
         type="button"
         aria-label="Previous match"
         title="Previous match (Shift Enter)"
         className={FIND_BUTTON_CLASS}
+        disabled={!canNavigate}
         onClick={() => handleRef.current?.findPrevious()}
       >
-        ↑
+        <span className="i-lucide-chevron-up size-4" aria-hidden="true" />
       </button>
       <button
         type="button"
         aria-label="Next match"
         title="Next match (Enter)"
         className={FIND_BUTTON_CLASS}
+        disabled={!canNavigate}
         onClick={() => handleRef.current?.findNext()}
       >
-        ↓
+        <span className="i-lucide-chevron-down size-4" aria-hidden="true" />
       </button>
       <button
         type="button"
@@ -103,7 +116,7 @@ export function useFindDemo(handleRef: RefObject<EditorHandle | null>): FindDemo
         className={FIND_BUTTON_CLASS}
         onClick={close}
       >
-        ✕
+        <span className="i-lucide-x size-4" aria-hidden="true" />
       </button>
     </div>
   ) : null
