@@ -38,8 +38,7 @@ function setSearchQuery(query: string): Command {
     if (getSearchState(state)?.query.eq(searchQuery)) return false
     if (dispatch) {
       const transaction = setSearchState(state.tr, searchQuery)
-      const match =
-        searchQuery.findNext(state, state.selection.from) ?? searchQuery.findNext(state)
+      const match = searchQuery.findNext(state, state.selection.from) ?? searchQuery.findNext(state)
       if (match) {
         transaction
           .setSelection(TextSelection.create(transaction.doc, match.from, match.to))
