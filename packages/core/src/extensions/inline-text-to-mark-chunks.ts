@@ -214,6 +214,7 @@ function walkGenericNode(
   options: InlineMarkOptions | undefined,
   context: InlineMarkContext | undefined,
 ): void {
+  // REVIEW: 既然你已经拆分了 walkGenericNode，那么 packKey 这里还是走以前的 if else 的写法吧，更可读一些，没有必要单独拆出来一个 getPackKey 函数
   const packKey = getPackKey(node.type)
   const base = packKey
     ? [...parentMarks, marks.mdPack.create({ key: packKey } satisfies MdPackAttrs)]

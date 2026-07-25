@@ -425,6 +425,98 @@ function convertList(
   return items
 }
 
+/** The marker style at `cursor`, plus the start number of an ordered item. */
+function readListMark(
+  cursor: TreeCursor,
+  text: string,
+  kind: 'bullet' | 'ordered',
+): { marker: ListMarker | undefined; order: number | undefined } {
+  if (kind === 'ordered') {
+    // An ordered list marker is a sequence of 1–9 arabic digits `(0-9)`, followed by either a `.` character or a `)` character.
+    // https://spec.commonmark.org/0.31.2/#ordered-list-marker
+    const delimiterCode = text.charCodeAt(cursor.to - 1)
+    let marker: ListMarker | undefined
+    if (delimiterCode === CHAR_RIGHT_PARENTHESIS) {
+      marker = ')'
+    } else if (delimiterCode === CHAR_DOT) {
+      marker = '.'
+    }
+    const number = Number.parseInt(text.slice(cursor.from, cursor.to), 10)
+    return { marker, order: Number.isFinite(number) ? number : 1 }
+  }
+  // A bullet list marker is one of `-`, `+`, or `*`.
+  // https://spec.commonmark.org/0.31.2/#bullet-list-marker
+  const code = text.charCodeAt(cursor.from)
+  const marker: ListMarker = code === CHAR_ASTERISK ? '*' : code === CHAR_PLUS ? '+' : '-'
+  return { marker, order: undefined }
+}
+
+/**
+ * A GFM `Task` leaf (`[ ] text` / `[x] text`, after the list mark). The checkbox
+ * becomes the item's own attributes; the text after it becomes its paragraph.
+ */
+function convertTaskItem(
+  nodes: TypedNodeBuilders,
+  cursor: TreeCursor,
+  text: string,
+): { checked: boolean; taskMarker: TaskMarker | undefined; paragraph: ProseMirrorNode } {
+  let taskStart = cursor.from
+  const taskEnd = cursor.to
+  let checked = false
+  let taskMarker: TaskMarker | undefined
+  if (cursor.firstChild()) {
+    if (cursor.type.id === LEZER_NODE_IDS.TaskMarker) {
+      const taskMarkerCode = text.charCodeAt(cursor.from + 1)
+      if (taskMarkerCode === CHAR_LOWERCASE_X) {
+        checked = true
+        taskMarker = 'x'
+      } else if (taskMarkerCode === CHAR_UPPERCASE_X) {
+        checked = true
+        taskMarker = 'X'
+      }
+      taskStart = cursor.to
+    }
+    cursor.parent()
+  }
+  // Skip the single separating whitespace after `[ ]` / `[x]`
+  if (isSpaceChar(text.charCodeAt(taskStart))) taskStart += 1
+  const taskText = text.slice(taskStart, taskEnd)
+  const paragraph = buildParagraph(nodes, taskText, measureContentColumn(text, taskStart))
+  return { checked, taskMarker, paragraph }
+}
+
+function buildListAttrs(parts: {
+  kind: 'bullet' | 'ordered'
+  marker: ListMarker | undefined
+  order: number | undefined
+  taskChecked: boolean | undefined
+  taskMarker: TaskMarker | undefined
+  markEndColumn: number | undefined
+  firstContentColumn: number | undefined
+}): MeowdownListAttrs {
+  const { kind, marker, order, taskChecked, taskMarker, markEndColumn, firstContentColumn } = parts
+  // The gap between the marker and the content. A gap of 5+ is indented code (a
+  // different node, so `firstContentColumn` would be the code block's), and 1 is the
+  // canonical default; only a 2-4 space gap is a faithful, content-preserving variation.
+  const gap =
+    firstContentColumn != null && markEndColumn != null ? firstContentColumn - markEndColumn : 1
+  // A bullet whose marker is `+` is a collapsed item (`-`/`*` are expanded). The
+  // marker is normalized to null so an expanded item later serializes as `-`. A
+  // `+ [ ]` is still a circle task, so collapse only applies when there is no
+  // checkbox.
+  const isTask = taskChecked != null
+  const collapsed = !isTask && kind === 'bullet' && marker === '+'
+  return {
+    kind: isTask ? 'task' : kind,
+    order: kind === 'ordered' ? (order ?? 1) : null,
+    checked: taskChecked ?? false,
+    collapsed,
+    marker: collapsed ? null : marker,
+    taskMarker,
+    markerGap: gap >= 2 && gap <= 4 ? gap : 1,
+  }
+}
+
 function convertListItem(
   nodes: TypedNodeBuilders,
   cursor: TreeCursor,
@@ -444,78 +536,33 @@ function convertListItem(
         firstContentColumn = measureContentColumn(text, cursor.from)
       }
       if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
-        if (kind === 'ordered') {
-          // An ordered list marker is a sequence of 1–9 arabic digits `(0-9)`, followed by either a `.` character or a `)` character.
-          // https://spec.commonmark.org/0.31.2/#ordered-list-marker
-          const delimiterCode = text.charCodeAt(cursor.to - 1)
-          if (delimiterCode === CHAR_RIGHT_PARENTHESIS) {
-            marker = ')'
-          } else if (delimiterCode === CHAR_DOT) {
-            marker = '.'
-          }
-          const number = Number.parseInt(text.slice(cursor.from, cursor.to), 10)
-          order = Number.isFinite(number) ? number : 1
-        } else {
-          // A bullet list marker is one of `-`, `+`, or `*`.
-          // https://spec.commonmark.org/0.31.2/#bullet-list-marker
-          const code = text.charCodeAt(cursor.from)
-          marker = code === CHAR_ASTERISK ? '*' : code === CHAR_PLUS ? '+' : '-'
-        }
+        const listMark = readListMark(cursor, text, kind)
+        marker = listMark.marker
+        order = listMark.order
         markEndColumn = measureContentColumn(text, cursor.to)
         continue
       }
       if (kind === 'bullet' && cursor.type.id === LEZER_NODE_IDS.Task) {
-        // A GFM `Task` leaf (`[ ] text` / `[x] text`, after the list mark).
-        let taskStart = cursor.from
-        const taskEnd = cursor.to
-        taskChecked = false
-        if (cursor.firstChild()) {
-          if (cursor.type.id === LEZER_NODE_IDS.TaskMarker) {
-            const taskMarkerCode = text.charCodeAt(cursor.from + 1)
-            if (taskMarkerCode === CHAR_LOWERCASE_X) {
-              taskChecked = true
-              taskMarker = 'x'
-            } else if (taskMarkerCode === CHAR_UPPERCASE_X) {
-              taskChecked = true
-              taskMarker = 'X'
-            }
-            taskStart = cursor.to
-          }
-          cursor.parent()
-        }
-        // Skip the single separating whitespace after `[ ]` / `[x]`
-        if (isSpaceChar(text.charCodeAt(taskStart))) taskStart += 1
-        const taskText = text.slice(taskStart, taskEnd)
-        content.push(buildParagraph(nodes, taskText, measureContentColumn(text, taskStart)))
+        const task = convertTaskItem(nodes, cursor, text)
+        taskChecked = task.checked
+        taskMarker = task.taskMarker
+        content.push(task.paragraph)
         continue
       }
       content.push(...convertBlock(nodes, cursor, text))
     } while (cursor.nextSibling())
     cursor.parent()
   }
-  // The gap between the marker and the content. A gap of 5+ is indented code (a
-  // different node, so `firstContentColumn` would be the code block's), and 1 is the
-  // canonical default; only a 2-4 space gap is a faithful, content-preserving variation.
-  const gap =
-    firstContentColumn != null && markEndColumn != null ? firstContentColumn - markEndColumn : 1
-  // A bullet whose marker is `+` is a collapsed item (`-`/`*` are expanded). The
-  // marker is normalized to null so an expanded item later serializes as `-`. A
-  // `+ [ ]` is still a circle task, so collapse only applies when there is no
-  // checkbox.
-  const isTask = taskChecked != null
-  const collapsed = !isTask && kind === 'bullet' && marker === '+'
-  return nodes.list(
-    {
-      kind: isTask ? 'task' : kind,
-      order: kind === 'ordered' ? (order ?? 1) : null,
-      checked: taskChecked ?? false,
-      collapsed,
-      marker: collapsed ? null : marker,
-      taskMarker,
-      markerGap: gap >= 2 && gap <= 4 ? gap : 1,
-    } satisfies MeowdownListAttrs,
-    content,
-  )
+  const attrs = buildListAttrs({
+    kind,
+    marker,
+    order,
+    taskChecked,
+    taskMarker,
+    markEndColumn,
+    firstContentColumn,
+  })
+  return nodes.list(attrs, content)
 }
 
 function convertCodeBlock(
