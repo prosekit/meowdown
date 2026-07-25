@@ -25,11 +25,10 @@ import {
   type WikilinkClickHandler,
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
-import { createEditor, union, type SelectionJSON } from '@prosekit/core'
+import { clsx, createEditor, union, type SelectionJSON } from '@prosekit/core'
 import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit } from '@prosekit/react'
-import { clsx } from 'clsx/lite'
 import GithubSlugger from 'github-slugger'
 import {
   useCallback,
@@ -43,7 +42,6 @@ import {
 } from 'react'
 
 import { defineCodeBlockView } from '../extensions/code-block-view.ts'
-import { useEditorClassName } from '../hooks/use-editor-class-name.ts'
 import type { TimeFormat } from '../utils/date-format.ts'
 
 import { BlockHandle } from './block-handle.tsx'
@@ -453,21 +451,6 @@ export function ProseKitEditor({
     }
   }, [editor, frontmatter, hasSelectionMenu, openSelectionMenu])
 
-  // The editable root's classes are applied imperatively rather than through
-  // React's `className`, which would clobber the ones ProseMirror adds itself.
-  const applyEditorClassName = useEditorClassName(clsx('meowdown-content', editorClassName))
-  const mount = useCallback(
-    (element: HTMLDivElement | null): VoidFunction => {
-      applyEditorClassName(element)
-      const unmount = editor.mount(element)
-      return () => {
-        applyEditorClassName(null)
-        unmount?.()
-      }
-    },
-    [editor, applyEditorClassName],
-  )
-
   // Guard the host callback so programmatic setState/setMarkdown stays silent.
   // Stable per `onDocChange` identity, so the extension is not rebuilt every render.
   const handleDocChange = useMemo(() => {
@@ -480,7 +463,7 @@ export function ProseKitEditor({
 
   return (
     <ProseKit editor={editor}>
-      <div ref={mount}></div>
+      <div ref={editor.mount}></div>
       <EditorExtensions
         markMode={markMode}
         onDocChange={handleDocChange}
@@ -502,6 +485,7 @@ export function ProseKitEditor({
         readOnly={readOnly}
         wikilinkEnabled={!!onWikilinkSearch}
         spellCheck={spellCheck}
+        className={clsx('meowdown-content', editorClassName)}
       />
       {blockHandle && !readOnly && <BlockHandle />}
       {!readOnly && <TableHandle />}
