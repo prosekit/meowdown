@@ -593,10 +593,10 @@ function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode 
   return renderRuns(runs, 0, context)
 }
 
-/** A collapsed list renders as an expanded one when `expandCollapsed` is on. */
-function expandCollapsedList(node: ProseMirrorNode, context: RenderContext): ProseMirrorNode {
+/** A collapsed list renders as an expanded one */
+function expandCollapsedList(node: ProseMirrorNode): ProseMirrorNode {
   const attrs = node.attrs as MeowdownListAttrs
-  if (!context.expandCollapsed || !attrs.collapsed) return node
+  if (!attrs.collapsed) return node
   return node.type.create({ ...attrs, collapsed: false }, node.content, node.marks)
 }
 
@@ -642,7 +642,9 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
   let handleTaskClick: ((event: MouseEvent) => void) | undefined
 
   if (typeName === 'list') {
-    node = expandCollapsedList(node, context)
+    if (context.expandCollapsed) {
+      node = expandCollapsedList(node)
+  }
     handleTaskClick = createTaskClickHandler(node, context)
   }
 
