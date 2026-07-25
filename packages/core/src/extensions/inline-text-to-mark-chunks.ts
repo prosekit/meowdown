@@ -181,26 +181,6 @@ function walkNode(
   }
 }
 
-/** The `mdPack` key of the inline unit `type` opens, or undefined when it opens none. */
-function getPackKey(type: number): MdPackSimpleKey | undefined {
-  switch (type) {
-    case LEZER_NODE_IDS.Emphasis:
-      return 'italic'
-    case LEZER_NODE_IDS.StrongEmphasis:
-      return 'bold'
-    case LEZER_NODE_IDS.InlineCode:
-      return 'code'
-    case LEZER_NODE_IDS.Strikethrough:
-      return 'strike'
-    case LEZER_NODE_IDS.Highlight:
-      return 'highlight'
-    case LEZER_NODE_IDS.Autolink:
-      return 'autolink'
-    default:
-      return undefined
-  }
-}
-
 /**
  * A node with no source-backed atom of its own: it contributes its `mdPack` and
  * syntax marks, then recurses into its children.
@@ -214,12 +194,27 @@ function walkGenericNode(
   options: InlineMarkOptions | undefined,
   context: InlineMarkContext | undefined,
 ): void {
-  // REVIEW: 既然你已经拆分了 walkGenericNode，那么 packKey 这里还是走以前的 if else 的写法吧，更可读一些，没有必要单独拆出来一个 getPackKey 函数
-  const packKey = getPackKey(node.type)
+  const type: number = node.type
+  let packKey: MdPackSimpleKey | undefined
+
+  if (type === LEZER_NODE_IDS.Emphasis) {
+    packKey = 'italic'
+  } else if (type === LEZER_NODE_IDS.StrongEmphasis) {
+    packKey = 'bold'
+  } else if (type === LEZER_NODE_IDS.InlineCode) {
+    packKey = 'code'
+  } else if (type === LEZER_NODE_IDS.Strikethrough) {
+    packKey = 'strike'
+  } else if (type === LEZER_NODE_IDS.Highlight) {
+    packKey = 'highlight'
+  } else if (type === LEZER_NODE_IDS.Autolink) {
+    packKey = 'autolink'
+  }
+
   const base = packKey
     ? [...parentMarks, marks.mdPack.create({ key: packKey } satisfies MdPackAttrs)]
     : parentMarks
-  const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(node.type)
+  const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(type)
   const childMarks = maybeMarkName ? [...base, marks[maybeMarkName].create()] : base
   if (node.children.length === 0) {
     emit(out, node.from, node.to, childMarks)
