@@ -593,63 +593,80 @@ function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode 
   return renderRuns(runs, 0, context)
 }
 
+/** A collapsed list renders as an expanded one when `expandCollapsed` is on. */
+function expandCollapsedList(node: ProseMirrorNode, context: RenderContext): ProseMirrorNode {
+  const attrs = node.attrs as MeowdownListAttrs
+  if (!context.expandCollapsed || !attrs.collapsed) return node
+  return node.type.create({ ...attrs, collapsed: false }, node.content, node.marks)
+}
+
+function createTaskClickHandler(
+  node: ProseMirrorNode,
+  context: RenderContext,
+): ((event: MouseEvent) => void) | undefined {
+  const attrs = node.attrs as MeowdownListAttrs
+  const { onTaskClick } = context
+  if (attrs.kind !== 'task' || !onTaskClick) return undefined
+
+  const index = context.taskCounter.value++
+  const checked = attrs.checked === true
+  const marker = attrs.marker ?? null
+  // TODO: the rule to get the text is a bit weird. Re-visit this later.
+  const text = node.firstChild?.isTextblock
+    ? (node.firstChild.textContent.split('\n', 1)[0] ?? '')
+    : ''
+  return (event) => {
+    event.preventDefault()
+    onTaskClick({ index, checked, marker, text, event: event.nativeEvent })
+  }
+}
+
+function renderCodeBlock(node: ProseMirrorNode, key: number): ReactNode {
+  const attrs = node.attrs as CodeBlockAttrs
+  const language: string = typeof attrs.language === 'string' ? attrs.language : ''
+  if (language === 'math') {
+    return <MathCodeBlock key={key} code={node.textContent} />
+  }
+  if (language === 'mermaid') {
+    return <MermaidCodeBlock key={key} code={node.textContent} />
+  }
+  return <CodeBlock key={key} code={node.textContent} language={language} />
+}
+
 function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
   if (context.referenceDefinitionNodes.has(node)) return null
 
   const key = context.keyCounter.value++
   const typeName = node.type.name as NodeName
 
+  let blockNode = node
   let handleTaskClick: ((event: MouseEvent) => void) | undefined
 
   if (typeName === 'list') {
-    let attrs = node.attrs as MeowdownListAttrs
-    if (context.expandCollapsed && attrs.collapsed) {
-      attrs = { ...attrs, collapsed: false }
-      node = node.type.create(attrs, node.content, node.marks)
-    }
-
-    const { onTaskClick } = context
-    if (attrs.kind === 'task' && onTaskClick) {
-      const index = context.taskCounter.value++
-      const checked = attrs.checked === true
-      const marker = attrs.marker ?? null
-      // TODO: the rule to get the text is a bit weird. Re-visit this later.
-      const text = node.firstChild?.isTextblock
-        ? (node.firstChild.textContent.split('\n', 1)[0] ?? '')
-        : ''
-      handleTaskClick = (event) => {
-        event.preventDefault()
-        onTaskClick({ index, checked, marker, text, event: event.nativeEvent })
-      }
-    }
+    blockNode = expandCollapsedList(node, context)
+    handleTaskClick = createTaskClickHandler(blockNode, context)
   }
 
   if (typeName === 'codeBlock') {
-    const attrs = node.attrs as CodeBlockAttrs
-    const language: string = typeof attrs.language === 'string' ? attrs.language : ''
-    if (language === 'math') {
-      return <MathCodeBlock key={key} code={node.textContent} />
-    }
-    if (language === 'mermaid') {
-      return <MermaidCodeBlock key={key} code={node.textContent} />
-    }
-    return <CodeBlock key={key} code={node.textContent} language={language} />
+    return renderCodeBlock(blockNode, key)
   }
 
-  const toDOM = node.type.spec.toDOM
-  if (node.isTextblock) {
-    const inline = renderInline(node, context)
+  const toDOM = blockNode.type.spec.toDOM
+  if (blockNode.isTextblock) {
+    const inline = renderInline(blockNode, context)
     return toDOM ? (
-      outputSpecToReact(toDOM(node), inline, context)
+      outputSpecToReact(toDOM(blockNode), inline, context)
     ) : (
       <Fragment key={key}>{inline}</Fragment>
     )
   }
 
-  const children: ReactNode[] = node.content.content.map((child) => renderBlock(child, context))
+  const children: ReactNode[] = blockNode.content.content.map((child) =>
+    renderBlock(child, context),
+  )
 
   const reactNode = toDOM ? (
-    outputSpecToReact(toDOM(node), children, context)
+    outputSpecToReact(toDOM(blockNode), children, context)
   ) : (
     <Fragment key={key}>{children}</Fragment>
   )
