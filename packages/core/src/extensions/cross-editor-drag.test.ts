@@ -91,6 +91,21 @@ describe('cross editor drag', () => {
     expect(docToMarkdown(target.doc)).toBe('Charlie\n')
   })
 
+  it('leaves the source alone when its doc changed during the drag', async () => {
+    using source = setupSource()
+    using target = setupTarget()
+
+    const dataTransfer = startBlockDrag(source.view, 0)
+    // Editing the dragged block makes the dragstart-time positions stale.
+    source.view.dispatch(source.view.state.tr.insertText('Zulu ', 1))
+    dropAt(target.view, dataTransfer, endOfDoc(target))
+
+    await vi.waitFor(() => {
+      expect(docToMarkdown(target.doc)).toBe('Charlie\n\nAlpha\n')
+    })
+    expect(docToMarkdown(source.doc)).toBe('Zulu Alpha\n\nBravo\n')
+  })
+
   it('ignores a drop that did not start in another meowdown editor', async () => {
     using source = setupSource()
     using target = setupTarget()
