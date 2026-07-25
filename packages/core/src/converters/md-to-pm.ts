@@ -485,38 +485,6 @@ function convertTaskItem(
   return { checked, taskMarker, paragraph }
 }
 
-function buildListAttrs(parts: {
-  kind: 'bullet' | 'ordered'
-  marker: ListMarker | undefined
-  order: number | undefined
-  taskChecked: boolean | undefined
-  taskMarker: TaskMarker | undefined
-  markEndColumn: number | undefined
-  firstContentColumn: number | undefined
-}): MeowdownListAttrs {
-  const { kind, marker, order, taskChecked, taskMarker, markEndColumn, firstContentColumn } = parts
-  // The gap between the marker and the content. A gap of 5+ is indented code (a
-  // different node, so `firstContentColumn` would be the code block's), and 1 is the
-  // canonical default; only a 2-4 space gap is a faithful, content-preserving variation.
-  const gap =
-    firstContentColumn != null && markEndColumn != null ? firstContentColumn - markEndColumn : 1
-  // A bullet whose marker is `+` is a collapsed item (`-`/`*` are expanded). The
-  // marker is normalized to null so an expanded item later serializes as `-`. A
-  // `+ [ ]` is still a circle task, so collapse only applies when there is no
-  // checkbox.
-  const isTask = taskChecked != null
-  const collapsed = !isTask && kind === 'bullet' && marker === '+'
-  return {
-    kind: isTask ? 'task' : kind,
-    order: kind === 'ordered' ? (order ?? 1) : null,
-    checked: taskChecked ?? false,
-    collapsed,
-    marker: collapsed ? null : marker,
-    taskMarker,
-    markerGap: gap >= 2 && gap <= 4 ? gap : 1,
-  }
-}
-
 function convertListItem(
   nodes: TypedNodeBuilders,
   cursor: TreeCursor,
@@ -524,12 +492,14 @@ function convertListItem(
   kind: 'bullet' | 'ordered',
 ): ProseMirrorNode {
   const content: ProseMirrorNode[] = []
+  
   let taskChecked: boolean | undefined
   let taskMarker: TaskMarker | undefined
   let order: number | undefined
   let marker: ListMarker | undefined
   let markEndColumn: number | undefined
   let firstContentColumn: number | undefined
+  
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id !== LEZER_NODE_IDS.ListMark && firstContentColumn == null) {
@@ -553,15 +523,27 @@ function convertListItem(
     } while (cursor.nextSibling())
     cursor.parent()
   }
-  const attrs = buildListAttrs({
-    kind,
-    marker,
-    order,
-    taskChecked,
+ 
+  // The gap between the marker and the content. A gap of 5+ is indented code (a
+  // different node, so `firstContentColumn` would be the code block's), and 1 is the
+  // canonical default; only a 2-4 space gap is a faithful, content-preserving variation.
+  const gap =
+    firstContentColumn != null && markEndColumn != null ? firstContentColumn - markEndColumn : 1
+  // A bullet whose marker is `+` is a collapsed item (`-`/`*` are expanded). The
+  // marker is normalized to null so an expanded item later serializes as `-`. A
+  // `+ [ ]` is still a circle task, so collapse only applies when there is no
+  // checkbox.
+  const isTask = taskChecked != null
+  const collapsed = !isTask && kind === 'bullet' && marker === '+'
+  const attrs: MeowdownListAttrs = {
+    kind: isTask ? 'task' : kind,
+    order: kind === 'ordered' ? (order ?? 1) : null,
+    checked: taskChecked ?? false,
+    collapsed,
+    marker: collapsed ? null : marker,
     taskMarker,
-    markEndColumn,
-    firstContentColumn,
-  })
+    markerGap: gap >= 2 && gap <= 4 ? gap : 1,
+  }
   return nodes.list(attrs, content)
 }
 
