@@ -120,6 +120,10 @@
     );
     --meowdown-selection: light-dark(oklch(0.693 0.194 46 / 0.22), oklch(0.741 0.165 52 / 0.3));
 
+    /* Find match colors: every match, and the one the selection sits on. */
+    --meowdown-find-match: light-dark(oklch(0.905 0.09 96 / 0.55), oklch(0.55 0.09 96 / 0.45));
+    --meowdown-find-match-active: light-dark(oklch(0.86 0.15 84), oklch(0.68 0.14 80));
+
     /* The resting bullet dot color (a collapsed bullet's dot uses the themed
      * `--meowdown-bullet-collapsed` instead). */
     --meowdown-bullet: var(--meowdown-muted);
@@ -771,6 +775,34 @@
       font-size: 0;
       letter-spacing: 0;
       opacity: 0;
+    }
+  }
+
+  /* Find paints the rendered document and never its layout: no padding and no
+   * border, so an active query cannot change where lines wrap. An atom's source
+   * hides behind its preview, so `:has` mirrors the range decoration onto the
+   * preview beside it. A match inside an ordinary hidden run (a link
+   * destination, a link title, math source) instead reveals itself while it is
+   * active, through the same `.show` class focus mode uses. */
+  .ProseMirror {
+    .ProseMirror-search-match {
+      border-radius: 2px;
+      background: var(--meowdown-find-match);
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+
+    .ProseMirror-active-search-match {
+      background: var(--meowdown-find-match-active);
+    }
+
+    .md-atom-view:has(.ProseMirror-search-match) > .md-atom-view-preview {
+      border-radius: 2px;
+      box-shadow: 0 0 0 2px var(--meowdown-find-match);
+    }
+
+    .md-atom-view:has(.ProseMirror-active-search-match) > .md-atom-view-preview {
+      box-shadow: 0 0 0 2px var(--meowdown-find-match-active);
     }
   }
 

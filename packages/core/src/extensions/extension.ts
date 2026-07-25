@@ -18,6 +18,7 @@ import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineCodeBlock } from './code-block.ts'
 import { defineEditorCommands } from './commands.ts'
 import { defineEscapeCollapse } from './escape-collapse.ts'
+import { defineFind } from './find.ts'
 import { defineDocFrontmatterAttr } from './frontmatter.ts'
 import { defineHeading } from './heading.ts'
 import { defineHiddenRunCaret } from './hidden-run-caret.ts'
@@ -88,6 +89,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineModClickPrevention(),
     defineEditorCommands(),
     definePendingReplacement(),
+    defineFind(),
   )
 }
 
