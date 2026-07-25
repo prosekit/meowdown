@@ -593,6 +593,46 @@ function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode 
   return renderRuns(runs, 0, context)
 }
 
+/** A collapsed list renders as an expanded one */
+function expandCollapsedList(node: ProseMirrorNode): ProseMirrorNode {
+  const attrs = node.attrs as MeowdownListAttrs
+  if (!attrs.collapsed) return node
+  return node.type.create({ ...attrs, collapsed: false }, node.content, node.marks)
+}
+
+function createTaskClickHandler(
+  node: ProseMirrorNode,
+  context: RenderContext,
+): ((event: MouseEvent) => void) | undefined {
+  const attrs = node.attrs as MeowdownListAttrs
+  const { onTaskClick } = context
+  if (attrs.kind !== 'task' || !onTaskClick) return undefined
+
+  const index = context.taskCounter.value++
+  const checked = attrs.checked === true
+  const marker = attrs.marker ?? null
+  // TODO: the rule to get the text is a bit weird. Re-visit this later.
+  const text = node.firstChild?.isTextblock
+    ? (node.firstChild.textContent.split('\n', 1)[0] ?? '')
+    : ''
+  return (event) => {
+    event.preventDefault()
+    onTaskClick({ index, checked, marker, text, event: event.nativeEvent })
+  }
+}
+
+function renderCodeBlock(node: ProseMirrorNode, key: number): ReactNode {
+  const attrs = node.attrs as CodeBlockAttrs
+  const language: string = typeof attrs.language === 'string' ? attrs.language : ''
+  if (language === 'math') {
+    return <MathCodeBlock key={key} code={node.textContent} />
+  }
+  if (language === 'mermaid') {
+    return <MermaidCodeBlock key={key} code={node.textContent} />
+  }
+  return <CodeBlock key={key} code={node.textContent} language={language} />
+}
+
 function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
   if (context.referenceDefinitionNodes.has(node)) return null
 
@@ -602,38 +642,14 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
   let handleTaskClick: ((event: MouseEvent) => void) | undefined
 
   if (typeName === 'list') {
-    let attrs = node.attrs as MeowdownListAttrs
-    if (context.expandCollapsed && attrs.collapsed) {
-      attrs = { ...attrs, collapsed: false }
-      node = node.type.create(attrs, node.content, node.marks)
+    if (context.expandCollapsed) {
+      node = expandCollapsedList(node)
     }
-
-    const { onTaskClick } = context
-    if (attrs.kind === 'task' && onTaskClick) {
-      const index = context.taskCounter.value++
-      const checked = attrs.checked === true
-      const marker = attrs.marker ?? null
-      // TODO: the rule to get the text is a bit weird. Re-visit this later.
-      const text = node.firstChild?.isTextblock
-        ? (node.firstChild.textContent.split('\n', 1)[0] ?? '')
-        : ''
-      handleTaskClick = (event) => {
-        event.preventDefault()
-        onTaskClick({ index, checked, marker, text, event: event.nativeEvent })
-      }
-    }
+    handleTaskClick = createTaskClickHandler(node, context)
   }
 
   if (typeName === 'codeBlock') {
-    const attrs = node.attrs as CodeBlockAttrs
-    const language: string = typeof attrs.language === 'string' ? attrs.language : ''
-    if (language === 'math') {
-      return <MathCodeBlock key={key} code={node.textContent} />
-    }
-    if (language === 'mermaid') {
-      return <MermaidCodeBlock key={key} code={node.textContent} />
-    }
-    return <CodeBlock key={key} code={node.textContent} language={language} />
+    return renderCodeBlock(node, key)
   }
 
   const toDOM = node.type.spec.toDOM

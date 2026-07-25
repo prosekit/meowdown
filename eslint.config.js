@@ -13,5 +13,15 @@ export default defineESLintConfig(
   {
     ignores: ['**/*.module.d.css.ts'],
   },
+  {
+    files: ['**/*.ts', '**/*.tsx'],
+    ignores: ['**/*.test.*', '**/*.spec.*'],
+    rules: {
+      complexity: ['error', { max: 20, variant: 'modified' }],
+      'max-nested-callbacks': ['error', { max: 3 }],
+      'max-depth': ['error', { max: 5 }],
+      'max-statements': ['error', { max: 40 }],
+    },
+  },
   meowdownConfig,
 )
