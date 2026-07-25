@@ -18,6 +18,7 @@ import {
 } from 'react'
 
 import { DemoEditor } from './components/demo-editor.tsx'
+import { FindShortcut, useFindDemo } from './find-demo.tsx'
 import { SelectionMenuShortcut, useSelectionDemo } from './selection-demo.tsx'
 import { uploadFile } from './upload-file.ts'
 import { MODES, useEditorMode } from './use-editor-mode.ts'
@@ -326,6 +327,7 @@ export function App() {
 
   const editorRef = useRef<EditorHandle>(null)
   const selectionDemo = useSelectionDemo(editorRef)
+  const findDemo = useFindDemo(editorRef)
 
   const [spellCheck, setSpellCheck] = useState<boolean | undefined>(undefined)
 
@@ -410,6 +412,8 @@ export function App() {
               <DemoEditor
                 mode={mode}
                 spellCheck={spellCheck}
+                searchQuery={findDemo.query}
+                onSearchChange={findDemo.onSearchChange}
                 initialMarkdown={INITIAL_CONTENT}
                 handleRef={editorRef}
                 onTagSearch={searchTags}
@@ -428,9 +432,12 @@ export function App() {
                 onExitBoundary={handleExitBoundary}
               >
                 <SelectionMenuShortcut onTrigger={selectionDemo.openMenu} />
+                <FindShortcut onTrigger={findDemo.openBar} />
                 <WikilinkPreviewCard />
               </DemoEditor>
             </div>
+
+            {findDemo.bar}
 
             {edgeFlash && (
               <div
@@ -454,6 +461,9 @@ export function App() {
               </span>
               <span className="text-stone-300 dark:text-stone-600">·</span>
               <span className="text-stone-500 dark:text-stone-400">{activeMode.description}</span>
+            </span>
+            <span className="ml-auto hidden shrink-0 text-xs text-stone-400 sm:block dark:text-stone-500">
+              Press ⌘F to find in the document
             </span>
           </div>
         </section>
