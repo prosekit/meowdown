@@ -492,14 +492,14 @@ function convertListItem(
   kind: 'bullet' | 'ordered',
 ): ProseMirrorNode {
   const content: ProseMirrorNode[] = []
-  
+
   let taskChecked: boolean | undefined
   let taskMarker: TaskMarker | undefined
   let order: number | undefined
   let marker: ListMarker | undefined
   let markEndColumn: number | undefined
   let firstContentColumn: number | undefined
-  
+
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id !== LEZER_NODE_IDS.ListMark && firstContentColumn == null) {
@@ -523,7 +523,7 @@ function convertListItem(
     } while (cursor.nextSibling())
     cursor.parent()
   }
- 
+
   // The gap between the marker and the content. A gap of 5+ is indented code (a
   // different node, so `firstContentColumn` would be the code block's), and 1 is the
   // canonical default; only a 2-4 space gap is a faithful, content-preserving variation.
