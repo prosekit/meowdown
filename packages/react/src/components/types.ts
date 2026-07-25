@@ -117,6 +117,12 @@ export interface EditorHandle {
   /** Clears the staged replacement without touching the document. */
   discardPendingReplacement: () => void
 
+  /** Selects the next match of the current search query, wrapping at the document end. */
+  findNext: () => void
+
+  /** Selects the previous match of the current search query, wrapping at the document start. */
+  findPrevious: () => void
+
   /**
    * Escape hatch: the underlying ProseKit editor, or `undefined` when the
    * handle does not wrap one.

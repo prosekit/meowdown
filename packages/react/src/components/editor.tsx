@@ -11,6 +11,7 @@ import type {
   LinkCopyHandler,
   MarkMode,
   PlaceholderOptions,
+  SearchStatusHandler,
   StartPendingReplacementOptions,
   TagClickHandler,
   WikiEmbedResolver,
@@ -280,6 +281,20 @@ export interface EditorProps {
   spellCheck?: boolean
 
   /**
+   * The search query. Every match is highlighted, and the first match at or
+   * after the caret is selected whenever the query changes. An empty string
+   * (the default) clears the highlights and leaves the selection alone. A match
+   * that the current mode hides reveals itself while it is the selected one.
+   */
+  searchQuery?: string
+
+  /**
+   * Called when the number of matches or the selected match changes. Pass a
+   * stable function (e.g. from `useCallback`).
+   */
+  onSearchChange?: SearchStatusHandler
+
+  /**
    * Clock format the `/now` slash command inserts: '12' for "3:45pm" or '24'
    * for "15:45". Defaults to '12'.
    */
@@ -338,6 +353,8 @@ export function MeowdownEditor({
   placeholder,
   readOnly,
   spellCheck,
+  searchQuery,
+  onSearchChange,
   timeFormat,
   editorClassName,
   wrapperClassName,
@@ -399,6 +416,12 @@ export function MeowdownEditor({
     function discardPendingReplacement(): void {
       childRef.current?.discardPendingReplacement()
     }
+    function findNext(): void {
+      childRef.current?.findNext()
+    }
+    function findPrevious(): void {
+      childRef.current?.findPrevious()
+    }
     return {
       getMarkdown,
       setMarkdown,
@@ -417,6 +440,8 @@ export function MeowdownEditor({
       appendPendingReplacementText,
       acceptPendingReplacement,
       discardPendingReplacement,
+      findNext,
+      findPrevious,
       get editor() {
         return childRef.current?.editor
       },
@@ -462,6 +487,8 @@ export function MeowdownEditor({
         placeholder={placeholder}
         readOnly={readOnly}
         spellCheck={spellCheck}
+        searchQuery={searchQuery}
+        onSearchChange={onSearchChange}
         timeFormat={timeFormat}
         editorClassName={editorClassName}
       >

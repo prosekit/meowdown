@@ -12,6 +12,7 @@ import {
   defineLinkPaste,
   definePlaceholder,
   defineReadonly,
+  defineSearchStatusHandler,
   defineSpellCheckPlugin,
   defineSubstitution,
   defineTagClickHandler,
@@ -28,12 +29,13 @@ import {
   type LinkClickHandler,
   type MarkMode,
   type PlaceholderOptions,
+  type SearchStatusHandler,
   type TagClickHandler,
   type WikilinkClickHandler,
 } from '@meowdown/core'
 import { defineDocChangeHandler } from '@prosekit/core'
 import { useEditor, useExtension } from '@prosekit/react'
-import { useEffect, useMemo } from 'react'
+import { useDeferredValue, useEffect, useMemo } from 'react'
 
 export interface EditorExtensionsProps {
   markMode: MarkMode
@@ -56,6 +58,8 @@ export interface EditorExtensionsProps {
   readOnly?: boolean
   wikilinkEnabled?: boolean
   spellCheck?: boolean
+  searchQuery: string
+  onSearchChange?: SearchStatusHandler
   editorClassName?: string
 }
 
@@ -83,6 +87,8 @@ export function EditorExtensions({
   readOnly,
   wikilinkEnabled,
   spellCheck,
+  searchQuery,
+  onSearchChange,
   editorClassName,
 }: EditorExtensionsProps): null {
   // The mark-mode plugin ships in the creation extension so the first paint
@@ -92,6 +98,20 @@ export function EditorExtensions({
   useEffect(() => {
     editor.commands.setMarkMode(markMode)
   }, [editor, markMode])
+
+  // Search has no latency requirement, so a slow device may skip the
+  // intermediate values of a fast typist entirely.
+  const deferredSearchQuery = useDeferredValue(searchQuery)
+  useEffect(() => {
+    editor.commands.setSearchQuery(deferredSearchQuery)
+  }, [editor, deferredSearchQuery])
+
+  useExtension(
+    useMemo(
+      () => (onSearchChange ? defineSearchStatusHandler(onSearchChange) : null),
+      [onSearchChange],
+    ),
+  )
 
   useExtension(
     useMemo(() => {
