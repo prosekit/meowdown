@@ -639,34 +639,31 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
   const key = context.keyCounter.value++
   const typeName = node.type.name as NodeName
 
-  let blockNode = node
   let handleTaskClick: ((event: MouseEvent) => void) | undefined
 
   if (typeName === 'list') {
-    blockNode = expandCollapsedList(node, context)
-    handleTaskClick = createTaskClickHandler(blockNode, context)
+    node = expandCollapsedList(node, context)
+    handleTaskClick = createTaskClickHandler(node, context)
   }
 
   if (typeName === 'codeBlock') {
-    return renderCodeBlock(blockNode, key)
+    return renderCodeBlock(node, key)
   }
 
-  const toDOM = blockNode.type.spec.toDOM
-  if (blockNode.isTextblock) {
-    const inline = renderInline(blockNode, context)
+  const toDOM = node.type.spec.toDOM
+  if (node.isTextblock) {
+    const inline = renderInline(node, context)
     return toDOM ? (
-      outputSpecToReact(toDOM(blockNode), inline, context)
+      outputSpecToReact(toDOM(node), inline, context)
     ) : (
       <Fragment key={key}>{inline}</Fragment>
     )
   }
 
-  const children: ReactNode[] = blockNode.content.content.map((child) =>
-    renderBlock(child, context),
-  )
+  const children: ReactNode[] = node.content.content.map((child) => renderBlock(child, context))
 
   const reactNode = toDOM ? (
-    outputSpecToReact(toDOM(blockNode), children, context)
+    outputSpecToReact(toDOM(node), children, context)
   ) : (
     <Fragment key={key}>{children}</Fragment>
   )
