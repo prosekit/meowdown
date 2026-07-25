@@ -33,6 +33,10 @@ function findDragSource(target: EditorView): EditorView | undefined {
 function deleteDraggedContent(view: EditorView, dragging: ViewDragging): void {
   const tr = view.state.tr
   if (dragging.node) {
+    // `dragging.node` holds dragstart-time positions. If the doc changed
+    // during the drag, deleting there would hit the wrong range; keep the
+    // block and let the drop degrade to a copy.
+    if (view.state.doc.nodeAt(dragging.node.from) !== dragging.node.node) return
     dragging.node.replace(tr)
   } else {
     // A text selection drag carries no `node`; the source selection is still
