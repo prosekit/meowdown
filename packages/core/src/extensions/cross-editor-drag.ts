@@ -23,7 +23,7 @@ function dragCopies(view: EditorView, event: DragEvent): boolean {
 
 function findDragSource(target: EditorView): EditorView | undefined {
   for (const view of mountedViews) {
-    if (view !== target && !view.isDestroyed && view.editable && view.dragging) {
+    if (view !== target && view.editable && view.dragging) {
       return view
     }
   }
