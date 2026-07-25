@@ -1,8 +1,8 @@
 import {
   getAutolinkHref,
-  type InlineElement,
   LEZER_NODE_IDS,
   parseInline,
+  type InlineElement,
 } from '@meowdown/markdown'
 import type { Mark } from '@prosekit/pm/model'
 
