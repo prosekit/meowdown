@@ -55,7 +55,7 @@ function handleCrossEditorDrop(
 
   const source = findDragSource(target)
   if (!source) return false
-  const dragging = source.dragging as ViewDragging | null
+  const dragging = source.dragging
   if (!dragging) return false
   if (dragCopies(target, event)) return false
 
