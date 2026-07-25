@@ -41,6 +41,7 @@
     "micromark-util-normalize-identifier": "^2.0.1",
     "prosemirror-flat-list": "^0.7.1",
     "prosemirror-highlight": "^0.15.3",
+    "prosemirror-search": "^1.1.1",
     "rehype-parse": "^9.0.1",
     "rehype-remark": "^10.0.1",
     "remark-gfm": "^4.0.1",

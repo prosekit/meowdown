@@ -101,6 +101,31 @@ file embeds; return `false` to keep it as a normal link.
 />
 ```
 
+### Find in document
+
+`searchQuery` highlights every match and selects the first one at or after the
+caret; changing it re-anchors from wherever the selection is, so refining a
+query keeps the match the user is looking at. An empty string (the default)
+clears the highlights and leaves the selection alone. `onSearchChange` reports
+`{ total, active }` for a match counter (`active` is one-based; `0` means the
+selection is not on a match), and `EditorHandle.findNext()` /
+`EditorHandle.findPrevious()` walk the matches and wrap at the document edges.
+The query is applied through `useDeferredValue`, so fast typing may skip
+intermediate values on a slow device.
+
+```tsx
+const [query, setQuery] = useState('')
+const [status, setStatus] = useState({ total: 0, active: 0 })
+
+<input value={query} onChange={(event) => setQuery(event.target.value)} />
+<span>{status.active} / {status.total}</span>
+<MeowdownEditor
+  handleRef={editorRef}
+  searchQuery={query}
+  onSearchChange={setStatus}
+/>
+```
+
 ### Wiki-link hover cards
 
 Mount `WikilinkHoverCard` inside `MeowdownEditor` and render host-owned preview

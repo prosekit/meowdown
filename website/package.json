@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@egoist/tailwindcss-icons": "^1.9.2",
+    "@iconify-json/lucide": "^1.2.72",
     "@iconify-json/simple-icons": "^1.2.90",
     "@ocavue/tsconfig": "^0.7.1",
     "@tailwindcss/vite": "^4.3.2",

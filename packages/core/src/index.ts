@@ -35,6 +35,12 @@ export {
   type TypedEditor,
 } from './extensions/extension.ts'
 export {
+  defineSearchStatusHandler,
+  getSearchStatus,
+  type SearchStatus,
+  type SearchStatusHandler,
+} from './extensions/find.ts'
+export {
   defineFileClickHandler,
   type FileClickHandler,
   type FileClickPayload,

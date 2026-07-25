@@ -18,6 +18,7 @@ import {
   type LinkCopyHandler,
   type MarkMode,
   type PlaceholderOptions,
+  type SearchStatusHandler,
   type StartPendingReplacementOptions,
   type TagClickHandler,
   type TypedEditor,
@@ -250,6 +251,12 @@ export interface ProseKitEditorProps {
   /** Enables or disables spell checking in the editor. */
   spellCheck?: boolean
 
+  /** The search query. See `EditorProps.searchQuery`. */
+  searchQuery?: string
+
+  /** Called when the search status changes. See `EditorProps.onSearchChange`. */
+  onSearchChange?: SearchStatusHandler
+
   /** Clock format the `/now` slash command inserts. See `EditorProps.timeFormat`. */
   timeFormat?: TimeFormat
 
@@ -296,6 +303,8 @@ export function ProseKitEditor({
   placeholder,
   readOnly,
   spellCheck,
+  searchQuery = '',
+  onSearchChange,
   timeFormat,
   editorClassName,
   ref,
@@ -429,6 +438,12 @@ export function ProseKitEditor({
     function discardPendingReplacement(): void {
       editor.commands.discardPendingReplacement()
     }
+    function findNext(): void {
+      editor.commands.findNext()
+    }
+    function findPrevious(): void {
+      editor.commands.findPrev()
+    }
     return {
       getMarkdown,
       setMarkdown,
@@ -447,6 +462,8 @@ export function ProseKitEditor({
       appendPendingReplacementText,
       acceptPendingReplacement,
       discardPendingReplacement,
+      findNext,
+      findPrevious,
       editor,
     }
   }, [editor, frontmatter, hasSelectionMenu, openSelectionMenu])
@@ -485,6 +502,8 @@ export function ProseKitEditor({
         readOnly={readOnly}
         wikilinkEnabled={!!onWikilinkSearch}
         spellCheck={spellCheck}
+        searchQuery={searchQuery}
+        onSearchChange={onSearchChange}
         editorClassName={editorClassName}
       />
       {blockHandle && !readOnly && <BlockHandle />}
