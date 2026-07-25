@@ -43,6 +43,7 @@ import {
 } from 'react'
 
 import { defineCodeBlockView } from '../extensions/code-block-view.ts'
+import { useEditorClassName } from '../hooks/use-editor-class-name.ts'
 import type { TimeFormat } from '../utils/date-format.ts'
 
 import { BlockHandle } from './block-handle.tsx'
@@ -452,6 +453,21 @@ export function ProseKitEditor({
     }
   }, [editor, frontmatter, hasSelectionMenu, openSelectionMenu])
 
+  // The editable root's classes are applied imperatively rather than through
+  // React's `className`, which would clobber the ones ProseMirror adds itself.
+  const applyEditorClassName = useEditorClassName(clsx('meowdown-content', editorClassName))
+  const mount = useCallback(
+    (element: HTMLDivElement | null): VoidFunction => {
+      applyEditorClassName(element)
+      const unmount = editor.mount(element)
+      return () => {
+        applyEditorClassName(null)
+        unmount?.()
+      }
+    },
+    [editor, applyEditorClassName],
+  )
+
   // Guard the host callback so programmatic setState/setMarkdown stays silent.
   // Stable per `onDocChange` identity, so the extension is not rebuilt every render.
   const handleDocChange = useMemo(() => {
@@ -464,7 +480,7 @@ export function ProseKitEditor({
 
   return (
     <ProseKit editor={editor}>
-      <div ref={editor.mount} className={clsx('meowdown-content', editorClassName)}></div>
+      <div ref={mount}></div>
       <EditorExtensions
         markMode={markMode}
         onDocChange={handleDocChange}

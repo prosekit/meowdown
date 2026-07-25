@@ -332,6 +332,39 @@ describe('MeowdownEditor', () => {
     await expect.element(page.locate('.test-wrap')).toBeInTheDocument()
   })
 
+  // React's `className` is a whole-attribute write, so letting it own the
+  // editable root would drop the `ProseMirror` class ProseMirror adds itself —
+  // silently unstyling the whole editor until it remounts.
+  it('keeps the ProseMirror class when editorClassName changes', async () => {
+    const screen = await render(
+      <MeowdownEditor initialMarkdown="A [[link]]" editorClassName="first" />,
+    )
+    await expect.element(pmRoot).toHaveClass('meowdown-content')
+    await expect.element(pmRoot).toHaveClass('first')
+
+    await screen.rerender(<MeowdownEditor initialMarkdown="A [[link]]" editorClassName="second" />)
+
+    await expect.element(pmRoot).toHaveClass('ProseMirror')
+    await expect.element(pmRoot).toHaveClass('meowdown-content')
+    await expect.element(pmRoot).toHaveClass('second')
+    await expect.element(pmRoot).not.toHaveClass('first')
+  })
+
+  // The regression the class loss caused: `.ProseMirror .md-atom-view-content`
+  // is the only thing hiding a wikilink's raw `[[…]]` source.
+  it('keeps wikilink source hidden across an editorClassName change', async () => {
+    const source = page.locate('.md-atom-view-content')
+    const screen = await render(
+      <MeowdownEditor initialMarkdown="A [[link]]" mode="hide" editorClassName="first" />,
+    )
+    await expect.element(source).toHaveStyle({ fontSize: '0px' })
+
+    await screen.rerender(
+      <MeowdownEditor initialMarkdown="A [[link]]" mode="hide" editorClassName="second" />,
+    )
+    await expect.element(source).toHaveStyle({ fontSize: '0px' })
+  })
+
   // The test browser forces `prefers-reduced-motion: reduce`, which zeroes the
   // caret transition outright, so assert the `--meowdown-caret-glide` variable
   // the transition reads instead of the transition itself.
