@@ -56,7 +56,7 @@ export interface EditorExtensionsProps {
   readOnly?: boolean
   wikilinkEnabled?: boolean
   spellCheck?: boolean
-  className?: string
+  editorClassName?: string
 }
 
 // A leaf that renders nothing and holds every reactive `useExtension` call (each
@@ -83,7 +83,7 @@ export function EditorExtensions({
   readOnly,
   wikilinkEnabled,
   spellCheck,
-  className,
+  editorClassName,
 }: EditorExtensionsProps): null {
   // The mark-mode plugin ships in the creation extension so the first paint
   // already hides the syntax; here only later `markMode` changes are applied.
@@ -215,8 +215,8 @@ export function EditorExtensions({
 
   useExtension(
     useMemo(() => {
-      return className ? defineViewAttributes({ class: className }) : null
-    }, [className]),
+      return editorClassName ? defineViewAttributes({ class: editorClassName }) : null
+    }, [editorClassName]),
   )
 
   return null

@@ -111,7 +111,7 @@ meowdown's CSS is wrapped in a cascade layer, `@layer meowdown` (with sub-layers
 @import '@meowdown/core/style.css';
 ```
 
-Two things the variable list cannot show: `--meowdown-gutter` is the horizontal editor padding, applied to the editable root's `.meowdown-content` class (set by `@meowdown/react`), not `.ProseMirror`, so the block handle's drag preview stays unpadded; floating UI such as the block handle lives inside it, so keep it at least `3.5rem`. A headless mount (like the quick start above) has no `.meowdown-content`, so add that class to the mount element (or your own padding) yourself. The selection variables (`--meowdown-selection`, `--meowdown-node-outline`, `--meowdown-node-selection`) are standalone, not derived from `--meowdown-accent`, so selection can be restyled independently.
+Two things the variable list cannot show: `--meowdown-gutter` is the horizontal editor padding, applied to the editable root's `.meowdown-content` class, not `.ProseMirror`, so the block handle's drag preview stays unpadded; floating UI such as the block handle lives inside it, so keep it at least `3.5rem`. `defineEditorExtension` puts `.meowdown-content` on the editable root itself, so every mount (the headless quick start above included) is padded from the first paint. The selection variables (`--meowdown-selection`, `--meowdown-node-outline`, `--meowdown-node-selection`) are standalone, not derived from `--meowdown-accent`, so selection can be restyled independently.
 
 Tags (`#tag`) render as pills via the `.md-tag` class, tinted from `--meowdown-accent`. Wire click handling with `defineTagClickHandler(({ tag, event }) => ...)` (or `@meowdown/react`'s `onTagClick` prop); `tag` is read from the rendered text without the leading `#`.
 

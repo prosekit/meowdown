@@ -25,7 +25,7 @@ import {
   type WikilinkClickHandler,
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
-import { clsx, createEditor, union, type SelectionJSON } from '@prosekit/core'
+import { createEditor, union, type SelectionJSON } from '@prosekit/core'
 import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
 import { ProseKit } from '@prosekit/react'
@@ -485,7 +485,7 @@ export function ProseKitEditor({
         readOnly={readOnly}
         wikilinkEnabled={!!onWikilinkSearch}
         spellCheck={spellCheck}
-        className={clsx('meowdown-content', editorClassName)}
+        editorClassName={editorClassName}
       />
       {blockHandle && !readOnly && <BlockHandle />}
       {!readOnly && <TableHandle />}
