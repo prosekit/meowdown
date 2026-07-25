@@ -36,6 +36,7 @@ export {
 } from './extensions/extension.ts'
 export {
   defineSearchStatusHandler,
+  getSearchStatus,
   type SearchStatus,
   type SearchStatusHandler,
 } from './extensions/find.ts'

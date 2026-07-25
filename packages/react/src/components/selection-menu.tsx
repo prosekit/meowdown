@@ -1,6 +1,7 @@
 import { Popover } from '@base-ui/react/popover'
 import {
   getPendingReplacement,
+  getSearchStatus,
   getVirtualElementFromRange,
   type EditorExtension,
   type VirtualElement,
@@ -61,14 +62,18 @@ export function SelectionMenu({
   const editor = useEditor<EditorExtension>()
   const [selection, setSelection] = useState<SelectionSnapshot>()
 
-  // Tracks the live selection for the affordance. A pending replacement or a
-  // non-text selection (e.g. a selected image) never shows the button.
+  // Tracks the live selection for the affordance. A pending replacement, a
+  // non-text selection (e.g. a selected image), or a find match sitting under
+  // the selection never shows the button.
   useExtension(
     useMemo(() => {
       return defineUpdateHandler((view) => {
         const { from, to, empty } = view.state.selection
         const anchorable =
-          !empty && isTextSelection(view.state.selection) && !getPendingReplacement(view.state)
+          !empty &&
+          isTextSelection(view.state.selection) &&
+          !getPendingReplacement(view.state) &&
+          getSearchStatus(view.state).active === 0
         setSelection((previous) => {
           if (
             previous?.from === from &&
