@@ -17,6 +17,7 @@ import { defineClipboard } from './clipboard/clipboard.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineCodeBlock } from './code-block.ts'
 import { defineEditorCommands } from './commands.ts'
+import { defineCrossEditorDrag } from './cross-editor-drag.ts'
 import { defineEscapeCollapse } from './escape-collapse.ts'
 import { defineFind } from './find.ts'
 import { defineDocFrontmatterAttr } from './frontmatter.ts'
@@ -63,6 +64,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     // plugins
     defineViewAttributes({ class: 'meowdown-content' }),
     defineCodeBlockSyntaxHighlight(),
+    defineCrossEditorDrag(),
     defineEscapeCollapse(),
     defineMoveBlock(),
     defineSelectDocBoundary(),

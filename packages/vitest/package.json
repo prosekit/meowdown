@@ -7,6 +7,7 @@
     "./clipboard": "./src/clipboard.ts",
     "./config": "./src/config.ts",
     "./custom-string-serializer": "./src/custom-string-serializer.ts",
+    "./drag-events": "./src/drag-events.ts",
     "./file-events": "./src/file-events.ts",
     "./helpers": "./src/helpers.ts",
     "./setup-console": "./src/setup-console.ts",
