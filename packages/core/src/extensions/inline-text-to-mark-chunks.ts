@@ -32,7 +32,7 @@ import { parseWikilink } from './wikilink.ts'
  * Notable absences:
  * - `Link` / `Image` / `Autolink` are wrapper nodes; their syntax
  *   characters are emitted by inner `LinkMark` / `URL` children and
- *   handled here. Link text gets `mdLinkText` via `walkLink`.
+ *   handled here. Link text gets `mdLinkText` via `walkResolvedLink`.
  * - `Escape` / `Entity` / `HardBreak` / `HTMLTag` / `LinkLabel` /
  *   `Comment` etc. produce no mark for now - they render as plain text.
  */
@@ -139,74 +139,134 @@ function walk(
     if (node.from > pos) {
       emit(out, pos, node.from, parentMarks)
     }
-    const type: number = node.type
-    if (type === LEZER_NODE_IDS.Link) {
-      const parts = scanLinkParts(node)
-      const resolution = resolveLink(parts, text, context)
-      if (resolution == null) {
-        walkUnresolvedLink(node, parentMarks, text, marks, out, options, context)
-      } else {
-        const fileMarks = claimFileLink(parts, resolution, parentMarks, text, marks, options)
-        if (fileMarks) {
-          emit(out, node.from, node.to, fileMarks)
-        } else {
-          walkLink(node, parts, resolution, parentMarks, text, marks, out, options, context)
-        }
-      }
-    } else if (type === LEZER_NODE_IDS.Image) {
+    // An image may fold the next sibling into its own range, so it is the one
+    // node type the loop resolves itself.
+    if (node.type === LEZER_NODE_IDS.Image) {
       const trailing = takeMagicComment(node, nodes[index + 1], text)
       walkImage(node, parentMarks, text, marks, out, options, context, trailing)
       if (trailing) index++ // skip the folded comment
       pos = trailing ? trailing.to : node.to
       continue
-    } else if (type === LEZER_NODE_IDS.Wikilink) {
-      walkWikilink(node, parentMarks, text, marks, out)
-    } else if (type === LEZER_NODE_IDS.WikiEmbed) {
-      walkWikiEmbed(node, parentMarks, text, marks, out, options)
-    } else if (type === LEZER_NODE_IDS.InlineMath) {
-      walkMath(node, parentMarks, text, marks, out)
-    } else if (type === LEZER_NODE_IDS.URL) {
-      // A standalone `URL` node is a GFM autolink (the address part of a real
-      // `[text](url)` is handled inside `walkLink`, not here). Linkify the
-      // shapes we recognize; anything else keeps the muted `mdLinkUri`.
-      const href = getAutolinkHref(text.slice(node.from, node.to))
-      const mark: Mark = href
-        ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs)
-        : marks.mdLinkUri.create()
-      emit(out, node.from, node.to, [...parentMarks, mark])
-    } else {
-      let packKey: MdPackSimpleKey | undefined
-
-      if (type === LEZER_NODE_IDS.Emphasis) {
-        packKey = 'italic'
-      } else if (type === LEZER_NODE_IDS.StrongEmphasis) {
-        packKey = 'bold'
-      } else if (type === LEZER_NODE_IDS.InlineCode) {
-        packKey = 'code'
-      } else if (type === LEZER_NODE_IDS.Strikethrough) {
-        packKey = 'strike'
-      } else if (type === LEZER_NODE_IDS.Highlight) {
-        packKey = 'highlight'
-      } else if (type === LEZER_NODE_IDS.Autolink) {
-        packKey = 'autolink'
-      }
-
-      const base = packKey
-        ? [...parentMarks, marks.mdPack.create({ key: packKey } satisfies MdPackAttrs)]
-        : parentMarks
-      const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(type)
-      const childMarks = maybeMarkName ? [...base, marks[maybeMarkName].create()] : base
-      if (node.children.length === 0) {
-        emit(out, node.from, node.to, childMarks)
-      } else {
-        walk(node.children, childMarks, node.from, node.to, text, marks, out, options, context)
-      }
     }
+    walkNode(node, parentMarks, text, marks, out, options, context)
     pos = node.to
   }
   if (pos < rangeEnd) {
     emit(out, pos, rangeEnd, parentMarks)
   }
+}
+
+function walkNode(
+  node: InlineElement,
+  parentMarks: readonly Mark[],
+  text: string,
+  marks: TypedMarkBuilders,
+  out: MarkChunk[],
+  options: InlineMarkOptions | undefined,
+  context: InlineMarkContext | undefined,
+): void {
+  switch (node.type) {
+    case LEZER_NODE_IDS.Link:
+      return walkLink(node, parentMarks, text, marks, out, options, context)
+    case LEZER_NODE_IDS.Wikilink:
+      return walkWikilink(node, parentMarks, text, marks, out)
+    case LEZER_NODE_IDS.WikiEmbed:
+      return walkWikiEmbed(node, parentMarks, text, marks, out, options)
+    case LEZER_NODE_IDS.InlineMath:
+      return walkMath(node, parentMarks, text, marks, out)
+    case LEZER_NODE_IDS.URL:
+      return walkURL(node, parentMarks, text, marks, out)
+    default:
+      return walkGenericNode(node, parentMarks, text, marks, out, options, context)
+  }
+}
+
+/** The `mdPack` key of the inline unit `type` opens, or undefined when it opens none. */
+function getPackKey(type: number): MdPackSimpleKey | undefined {
+  switch (type) {
+    case LEZER_NODE_IDS.Emphasis:
+      return 'italic'
+    case LEZER_NODE_IDS.StrongEmphasis:
+      return 'bold'
+    case LEZER_NODE_IDS.InlineCode:
+      return 'code'
+    case LEZER_NODE_IDS.Strikethrough:
+      return 'strike'
+    case LEZER_NODE_IDS.Highlight:
+      return 'highlight'
+    case LEZER_NODE_IDS.Autolink:
+      return 'autolink'
+    default:
+      return undefined
+  }
+}
+
+/**
+ * A node with no source-backed atom of its own: it contributes its `mdPack` and
+ * syntax marks, then recurses into its children.
+ */
+function walkGenericNode(
+  node: InlineElement,
+  parentMarks: readonly Mark[],
+  text: string,
+  marks: TypedMarkBuilders,
+  out: MarkChunk[],
+  options: InlineMarkOptions | undefined,
+  context: InlineMarkContext | undefined,
+): void {
+  const packKey = getPackKey(node.type)
+  const base = packKey
+    ? [...parentMarks, marks.mdPack.create({ key: packKey } satisfies MdPackAttrs)]
+    : parentMarks
+  const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(node.type)
+  const childMarks = maybeMarkName ? [...base, marks[maybeMarkName].create()] : base
+  if (node.children.length === 0) {
+    emit(out, node.from, node.to, childMarks)
+  } else {
+    walk(node.children, childMarks, node.from, node.to, text, marks, out, options, context)
+  }
+}
+
+/**
+ * A standalone `URL` node is a GFM autolink (the address part of a real
+ * `[text](url)` is handled inside `walkResolvedLink`, not here). Linkify the
+ * shapes we recognize; anything else keeps the muted `mdLinkUri`.
+ */
+function walkURL(
+  node: InlineElement,
+  parentMarks: readonly Mark[],
+  text: string,
+  marks: TypedMarkBuilders,
+  out: MarkChunk[],
+): void {
+  const href = getAutolinkHref(text.slice(node.from, node.to))
+  const mark: Mark = href
+    ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs)
+    : marks.mdLinkUri.create()
+  emit(out, node.from, node.to, [...parentMarks, mark])
+}
+
+function walkLink(
+  node: InlineElement,
+  parentMarks: readonly Mark[],
+  text: string,
+  marks: TypedMarkBuilders,
+  out: MarkChunk[],
+  options: InlineMarkOptions | undefined,
+  context: InlineMarkContext | undefined,
+): void {
+  const parts = scanLinkParts(node)
+  const resolution = resolveLink(parts, text, context)
+  if (resolution == null) {
+    walkUnresolvedLink(node, parentMarks, text, marks, out, options, context)
+    return
+  }
+  const fileMarks = claimFileLink(parts, resolution, parentMarks, text, marks, options)
+  if (fileMarks) {
+    emit(out, node.from, node.to, fileMarks)
+    return
+  }
+  walkResolvedLink(node, parts, resolution, parentMarks, text, marks, out, options, context)
 }
 
 interface LinkParts {
@@ -366,7 +426,7 @@ function claimFileLink(
  * and the link-text logic stays inert - the walker still emits the
  * outer syntax marks correctly.
  */
-function walkLink(
+function walkResolvedLink(
   node: InlineElement,
   parts: LinkParts,
   resolution: ResolvedLink,
