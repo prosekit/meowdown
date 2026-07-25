@@ -644,7 +644,7 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
   if (typeName === 'list') {
     if (context.expandCollapsed) {
       node = expandCollapsedList(node)
-  }
+    }
     handleTaskClick = createTaskClickHandler(node, context)
   }
 
