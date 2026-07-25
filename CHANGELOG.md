@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.59.0](https://github.com/prosekit/meowdown/compare/v0.58.3...v0.59.0) (2026-07-25)
+
+
+### Features
+
+* find in document ([#377](https://github.com/prosekit/meowdown/issues/377)) ([1cadbe7](https://github.com/prosekit/meowdown/commit/1cadbe751ad661ea4bdacec8bb0cdb3b942d7ebb))
+
+
+### Bug Fixes
+
+* move a block between editors instead of duplicating it ([#378](https://github.com/prosekit/meowdown/issues/378)) ([35f72c3](https://github.com/prosekit/meowdown/commit/35f72c30ff2b1482ba4f70e7fda700de3e3d6877))
+
 ## [0.58.3](https://github.com/prosekit/meowdown/compare/v0.58.2...v0.58.3) (2026-07-25)
 
 
