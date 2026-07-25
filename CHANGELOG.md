@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.58.3](https://github.com/prosekit/meowdown/compare/v0.58.2...v0.58.3) (2026-07-25)
+
+
+### Bug Fixes
+
+* keep the editor styled when `editorClassName` prop changes ([#374](https://github.com/prosekit/meowdown/issues/374)) ([b3b63b4](https://github.com/prosekit/meowdown/commit/b3b63b435ebe92ad16cac692b28f2083e97094f7))
+
 ## [0.58.2](https://github.com/prosekit/meowdown/compare/v0.58.1...v0.58.2) (2026-07-24)
 
 
