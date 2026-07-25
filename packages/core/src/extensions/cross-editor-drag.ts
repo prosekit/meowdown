@@ -9,25 +9,12 @@ import type { EditorView } from '@prosekit/pm/view'
 // own move handling only ever covers a single view.
 const mountedViews = new Set<EditorView>()
 
-// Mirrors prosemirror-view's `dragMoves`: once any view prop defines
-// `dragCopies`, it replaces the modifier key instead of adding to it.
-// https://code.haverbeke.berlin/prosemirror/prosemirror-view/src/tag/1.42.2/src/input.ts#L729
-function dragCopies(view: EditorView, event: DragEvent): boolean {
-  let copy: boolean | undefined
-  view.someProp('dragCopies', (test) => {
-    copy = copy || test(event)
-  })
-  if (copy != null) return copy
-  return isApple ? event.altKey : event.ctrlKey
-}
-
 function findDragSource(target: EditorView): EditorView | undefined {
   for (const view of mountedViews) {
-    if (view !== target && view.editable && view.dragging) {
+    if (view !== target && !view.isDestroyed && view.editable && view.dragging) {
       return view
     }
   }
-  return undefined
 }
 
 function deleteDraggedContent(view: EditorView, dragging: ViewDragging): void {
@@ -59,9 +46,12 @@ function handleCrossEditorDrop(
 
   const source = findDragSource(target)
   if (!source) return false
+
   const dragging = source.dragging
   if (!dragging) return false
-  if (dragCopies(target, event)) return false
+
+  const shouldCopy = isApple ? event.altKey : event.ctrlKey
+  if (shouldCopy) return false
 
   // Claim the drag, so a second drop cannot delete the same block twice.
   source.dragging = null
