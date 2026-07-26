@@ -100,10 +100,12 @@ export function EditorExtensions({
   }, [editor, markMode])
 
   // Search has no latency requirement, so a slow device may skip the
-  // intermediate values of a fast typist entirely.
+  // intermediate values of a fast typist entirely. `literal` turns off
+  // prosemirror-search's escape-sequence handling: a find bar takes text, so a
+  // typed `\n` is a backslash and an `n`.
   const deferredSearchQuery = useDeferredValue(searchQuery)
   useEffect(() => {
-    editor.commands.setSearchQuery(deferredSearchQuery)
+    editor.commands.setSearchQuery({ search: deferredSearchQuery, literal: true })
   }, [editor, deferredSearchQuery])
 
   useExtension(
