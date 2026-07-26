@@ -139,7 +139,6 @@ The clipboard pipeline ships inside `defineEditorExtension`. Copying writes two 
 
 Enter at the end of the document's first heading (the title line) can start a fresh empty bullet instead of a plain paragraph: [`defineBulletAfterHeading`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineBulletAfterHeading) (`@meowdown/react`'s `bulletAfterHeading` prop). Not part of `defineEditorExtension`.
 
-
 An arrow press that can move the caret no further can notify the host, so it can move focus elsewhere (a previous/next note or page): [`defineExitBoundaryHandler`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineExitBoundaryHandler) (`@meowdown/react`'s `onExitBoundary` prop). Not part of `defineEditorExtension`.
 
 ## API
