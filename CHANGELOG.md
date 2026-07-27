@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.59.1](https://github.com/prosekit/meowdown/compare/v0.59.0...v0.59.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* **react:** set editor class name before repaint ([#383](https://github.com/prosekit/meowdown/issues/383)) ([ca3c454](https://github.com/prosekit/meowdown/commit/ca3c4542b5e458545bf4d46f9214a074f48db140))
+
 ## [0.59.0](https://github.com/prosekit/meowdown/compare/v0.58.3...v0.59.0) (2026-07-25)
 
 
