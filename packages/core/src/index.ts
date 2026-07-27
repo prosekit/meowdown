@@ -39,7 +39,7 @@ export {
   getSearchStatus,
   type SearchStatus,
   type SearchStatusHandler,
-} from './extensions/find.ts'
+} from '@prosekit/extensions/search'
 export {
   defineFileClickHandler,
   type FileClickHandler,
