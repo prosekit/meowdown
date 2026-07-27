@@ -1,7 +1,7 @@
 {
   "name": "@meowdown/core",
   "type": "module",
-  "version": "0.58.3",
+  "version": "0.59.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -31,9 +31,9 @@
     "@meowdown/markdown": "workspace:^",
     "@ocavue/utils": "^1.7.0",
     "@prosekit/core": "^0.13.0-beta.7",
-    "@prosekit/extensions": "^0.18.0-beta.18",
+    "@prosekit/extensions": "^0.18.0-beta.19",
     "@prosekit/pm": "^0.1.19-beta.4",
-    "@prosekit/web": "^0.9.0-beta.23",
+    "@prosekit/web": "^0.9.0-beta.24",
     "hast-util-to-mdast": "^10.1.2",
     "katex": "^0.18.1",
     "mdast-util-to-markdown": "^2.1.2",
@@ -41,7 +41,6 @@
     "micromark-util-normalize-identifier": "^2.0.1",
     "prosemirror-flat-list": "^0.7.1",
     "prosemirror-highlight": "^0.15.3",
-    "prosemirror-search": "^1.1.1",
     "rehype-parse": "^9.0.1",
     "rehype-remark": "^10.0.1",
     "remark-gfm": "^4.0.1",
