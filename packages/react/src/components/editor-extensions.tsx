@@ -35,7 +35,7 @@ import {
 } from '@meowdown/core'
 import { defineDocChangeHandler } from '@prosekit/core'
 import { useEditor, useExtension } from '@prosekit/react'
-import { useDeferredValue, useEffect, useMemo } from 'react'
+import { useDeferredValue, useEffect, useLayoutEffect, useMemo } from 'react'
 
 export interface EditorExtensionsProps {
   markMode: MarkMode
@@ -95,9 +95,16 @@ export function EditorExtensions({
   // already hides the syntax; here only later `markMode` changes are applied.
   // The command no-ops when the state already has that mode.
   const editor = useEditor<EditorExtension>()
-  useEffect(() => {
+  useLayoutEffect(() => {
     editor.commands.setMarkMode(markMode)
   }, [editor, markMode])
+
+  // Set extra editor class name.
+  useLayoutEffect(() => {
+    if (!editorClassName) return
+    const extension = defineViewAttributes({ class: editorClassName })
+    return editor.use(extension)
+  }, [editor, editorClassName])
 
   // Search has no latency requirement, so a slow device may skip the
   // intermediate values of a fast typist entirely. `literal` turns off
@@ -233,12 +240,6 @@ export function EditorExtensions({
     useMemo(() => {
       return spellCheck == null ? null : defineSpellCheckPlugin(spellCheck)
     }, [spellCheck]),
-  )
-
-  useExtension(
-    useMemo(() => {
-      return editorClassName ? defineViewAttributes({ class: editorClassName }) : null
-    }, [editorClassName]),
   )
 
   return null
