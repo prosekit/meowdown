@@ -21,6 +21,8 @@ if (typeof window !== 'undefined') {
   )
 }
 
+// Whether the user is currently composing text via an IME (Input Method Editor).
+//
 // Workaround for WebKit firing compositionend before the keydown that commits an
 // IME composition, which makes that keydown report `isComposing` as false.
 // https://bugs.webkit.org/show_bug.cgi?id=165004
