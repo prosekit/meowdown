@@ -12,6 +12,7 @@ import { Plugin, PluginKey, TextSelection } from '@prosekit/pm/state'
 
 import { executeCommand } from '../utils/execute-command.ts'
 
+import { getIsComposing } from '../utils/composition.ts'
 import {
   getHiddenRunAfter,
   getHiddenRunAround,
@@ -30,23 +31,10 @@ const beforeInputKey = new PluginKey('meowdown-hidden-run-beforeinput')
 // direction; a pointer caret snaps to the unit's outer edge; a range selection
 // expands outward so it never cuts a run in half.
 function createSnapPlugin(): Plugin {
-  let composing = false
   return new Plugin({
     key: snapKey,
-    props: {
-      handleDOMEvents: {
-        compositionstart: () => {
-          composing = true
-          return false
-        },
-        compositionend: () => {
-          composing = false
-          return false
-        },
-      },
-    },
     appendTransaction: (transactions, oldState, newState) => {
-      if (composing) return null
+      if (getIsComposing()) return null
       if (getMarkMode(newState) !== 'hide') return null
       const selection = newState.selection
       if (!isTextSelection(selection)) return null

@@ -1,4 +1,4 @@
-import type { SearchStatus } from '@meowdown/core'
+import { getIsComposing, type SearchStatus } from '@meowdown/core'
 import { useKeymap, type EditorHandle } from '@meowdown/react'
 import {
   useCallback,
@@ -47,7 +47,7 @@ export function useFindDemo(handleRef: RefObject<EditorHandle | null>): FindDemo
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
-      if (event.nativeEvent.isComposing) return
+      if (getIsComposing()) return
       if (event.key === 'Escape') {
         event.preventDefault()
         close()
