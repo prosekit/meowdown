@@ -92,6 +92,17 @@ describe('docToMarkdown', () => {
     expect(markdown).toBe('- one\n- two\n')
   })
 
+  it('keeps a heading item in a tight bullet list', () => {
+    const doc = n.doc(
+      n.list({ kind: 'bullet' }, n.paragraph('one')),
+      n.list({ kind: 'bullet' }, n.heading({ level: 2 }, 'Section')),
+      n.list({ kind: 'bullet' }, n.paragraph('two')),
+    )
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('- one\n- ## Section\n- two\n')
+    expect(docToMarkdown(markdownToDoc(markdown))).toBe(markdown)
+  })
+
   it('keeps an ordered start number', () => {
     const doc = n.doc(
       n.list({ kind: 'ordered', order: 5 }, n.paragraph('five')),

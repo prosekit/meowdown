@@ -309,7 +309,7 @@ function emitBlockChildren(node: ProseMirrorNode, out: MdOut, tightItem = false)
 
 /**
  * A run of sibling `list` nodes serializes tight iff every item is "simple":
- * at most one leading paragraph, then only nested lists. Any other shape
+ * at most one leading paragraph or heading, then only nested lists. Any other shape
  * (multiple paragraphs, a blockquote, a code block, …) needs blank-line
  * separation inside the item, which per CommonMark makes the whole list
  * loose.
@@ -327,7 +327,12 @@ function isTightItem(item: ProseMirrorNode): boolean {
     const child = item.child(i)
     const typeName = child.type.name
     if (typeName === ('list' satisfies NodeName)) continue
-    if (typeName === ('paragraph' satisfies NodeName) && i === 0) continue
+    if (
+      i === 0 &&
+      (typeName === ('paragraph' satisfies NodeName) || typeName === ('heading' satisfies NodeName))
+    ) {
+      continue
+    }
     return false
   }
   return true
