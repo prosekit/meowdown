@@ -4,6 +4,8 @@ import { page, userEvent } from 'vitest/browser'
 
 import { setupFixture } from '../testing/index.ts'
 
+import { isNodeOfType } from './node-names.ts'
+
 describe('codeBlock attrs', () => {
   it('keeps `fenceStyle` and `fenceLength` through a DOM round-trip', () => {
     using fixture = setupFixture()
@@ -125,5 +127,56 @@ describe('typing over code block selections', () => {
     await vi.waitFor(() => {
       expect(fixture.doc.eq(expected)).toBe(true)
     })
+  })
+})
+
+describe('backspace in an empty code block', () => {
+  it('removes an empty top-level code block', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('before'), n.codeBlock({ language: '' }, '<a>')))
+    fixture.view.focus()
+    await userEvent.keyboard('{Backspace}')
+    const expected = n.doc(n.paragraph('before'), n.paragraph())
+    expect(fixture.doc.eq(expected)).toBe(true)
+  })
+
+  it('removes an empty code block inside a list item instead of lifting it', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.list({ kind: 'bullet' }, n.paragraph('item'), n.codeBlock({ language: '' }, '<a>')),
+        n.list({ kind: 'bullet' }, n.paragraph('next')),
+      ),
+    )
+    fixture.view.focus()
+    await userEvent.keyboard('{Backspace}')
+    const expected = n.doc(
+      n.list({ kind: 'bullet' }, n.paragraph('item'), n.paragraph()),
+      n.list({ kind: 'bullet' }, n.paragraph('next')),
+    )
+    expect(fixture.doc.eq(expected)).toBe(true)
+  })
+
+  it('leaves a non-empty code block alone at its start', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.list({ kind: 'bullet' }, n.paragraph('item'), n.codeBlock({ language: '' }, '<a>ab')),
+      ),
+    )
+    fixture.view.focus()
+    await userEvent.keyboard('{Backspace}')
+    // The block survives as a code block; the key falls through to the
+    // existing chain (the list lift), which must not be affected.
+    let codeBlocks = 0
+    fixture.doc.descendants((node) => {
+      if (isNodeOfType(node, 'codeBlock')) codeBlocks += 1
+      return true
+    })
+    expect(codeBlocks).toBe(1)
+    expect(fixture.doc.textContent).toContain('ab')
   })
 })

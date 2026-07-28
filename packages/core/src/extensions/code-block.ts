@@ -1,14 +1,25 @@
-import { defineNodeAttr, union, type Extension, type PlainExtension } from '@prosekit/core'
+import {
+  defineKeymap,
+  defineNodeAttr,
+  isAtBlockStart,
+  Priority,
+  union,
+  unsetBlockType,
+  withPriority,
+  type Extension,
+  type PlainExtension,
+} from '@prosekit/core'
 import {
   defineCodeBlock as defineBaseCodeBlock,
   type CodeBlockAttrs,
 } from '@prosekit/extensions/code-block'
 import { defineTextBlockEnterRule } from '@prosekit/extensions/enter-rule'
 import { defineTextBlockInputRule } from '@prosekit/extensions/input-rule'
+import type { Command } from '@prosekit/pm/state'
 
 import { parseInteger } from '../utils/parse-integer.ts'
 
-import type { NodeName } from './node-names.ts'
+import { isNodeOfType, type NodeName } from './node-names.ts'
 
 export type CodeBlockFenceStyle = 'tilde' | 'indented' | 'dollar'
 
@@ -95,6 +106,23 @@ function defineDollarFenceEnterRule(): PlainExtension {
   })
 }
 
+// Backspace in an empty code block removes the block, like Backspace at the
+// start of a heading. Registered above the list keymap: its `joinListUp`
+// would otherwise consume the key to lift the block out of its list item — a
+// visually undetectable change that costs an extra keypress to delete the
+// block and rebuilds the node view for nothing.
+const backspaceUnsetEmptyCodeBlock: Command = (state, dispatch, view) => {
+  const $pos = isAtBlockStart(state, view)
+  if ($pos == null) return false
+  if (!isNodeOfType($pos.parent, 'codeBlock')) return false
+  if ($pos.parent.content.size > 0) return false
+  return unsetBlockType()(state, dispatch, view)
+}
+
+function defineCodeBlockKeymap(): PlainExtension {
+  return withPriority(defineKeymap({ Backspace: backspaceUnsetEmptyCodeBlock }), Priority.high)
+}
+
 export function defineCodeBlock() {
   return union(
     defineBaseCodeBlock(),
@@ -103,5 +131,6 @@ export function defineCodeBlock() {
     defineTildeFenceInputRule(),
     defineTildeFenceEnterRule(),
     defineDollarFenceEnterRule(),
+    defineCodeBlockKeymap(),
   )
 }
