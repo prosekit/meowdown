@@ -1,7 +1,7 @@
 {
   "name": "meowdown-monorepo",
   "type": "module",
-  "version": "0.59.1",
+  "version": "0.60.0",
   "private": true,
   "packageManager": "pnpm@11.17.0",
   "scripts": {

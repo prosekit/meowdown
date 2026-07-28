@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.60.0](https://github.com/prosekit/meowdown/compare/v0.59.1...v0.60.0) (2026-07-28)
+
+
+### Features
+
+* **core:** add `getIsComposing` ([#387](https://github.com/prosekit/meowdown/issues/387)) ([80247d9](https://github.com/prosekit/meowdown/commit/80247d9b1468089f689263217e82f6dd0fb4258f))
+
+
+### Reverts
+
+* remove pending-input reconciliation ([#388](https://github.com/prosekit/meowdown/issues/388)) ([c4de8c5](https://github.com/prosekit/meowdown/commit/c4de8c5ebfd277ad1d6a1483908483e9ce6a1887))
+
 ## [0.59.1](https://github.com/prosekit/meowdown/compare/v0.59.0...v0.59.1) (2026-07-27)
 
 
