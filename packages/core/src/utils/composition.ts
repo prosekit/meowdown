@@ -1,16 +1,12 @@
-const COMPOSITION_TAIL_MS = 40
+const COMPOSITION_TAIL_MS = 50
 
-let timer: ReturnType<typeof setTimeout> | undefined
+let compositionEndedAt = -1
 let isComposing = false
 
 if (typeof window !== 'undefined') {
   window.addEventListener(
     'compositionstart',
     () => {
-      if (timer) {
-        clearTimeout(timer)
-        timer = undefined
-      }
       isComposing = true
     },
     { capture: true, passive: true },
@@ -18,13 +14,8 @@ if (typeof window !== 'undefined') {
   window.addEventListener(
     'compositionend',
     () => {
-      if (!isComposing) return
-      if (timer) {
-        clearTimeout(timer)
-      }
-      timer = setTimeout(() => {
-        isComposing = false
-      }, COMPOSITION_TAIL_MS)
+      isComposing = false
+      compositionEndedAt = Date.now()
     },
     { capture: true, passive: true },
   )
@@ -35,5 +26,8 @@ if (typeof window !== 'undefined') {
 // https://bugs.webkit.org/show_bug.cgi?id=165004
 // https://bugs.webkit.org/show_bug.cgi?id=311717
 export function getIsComposing(): boolean {
-  return isComposing
+  return (
+    isComposing ||
+    (compositionEndedAt > 0 && Date.now() - compositionEndedAt <= COMPOSITION_TAIL_MS)
+  )
 }
