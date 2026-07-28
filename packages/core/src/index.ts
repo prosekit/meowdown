@@ -7,6 +7,12 @@ export {
 export { definePlaceholder, type PlaceholderOptions } from '@prosekit/extensions/placeholder'
 export { defineReadonly } from '@prosekit/extensions/readonly'
 export {
+  defineSearchStatusHandler,
+  getSearchStatus,
+  type SearchStatus,
+  type SearchStatusHandler,
+} from '@prosekit/extensions/search'
+export {
   checkRoundTrip,
   type CheckRoundTripOptions,
   type RoundTripFidelity,
@@ -34,12 +40,6 @@ export {
   type EditorExtensionOptions,
   type TypedEditor,
 } from './extensions/extension.ts'
-export {
-  defineSearchStatusHandler,
-  getSearchStatus,
-  type SearchStatus,
-  type SearchStatusHandler,
-} from '@prosekit/extensions/search'
 export {
   defineFileClickHandler,
   type FileClickHandler,
@@ -161,6 +161,7 @@ export {
   type WikilinkHoverHit,
 } from './extensions/wikilink-hover.ts'
 export { defineWikilinkTrigger } from './extensions/wikilink-trigger.ts'
+export { getIsComposing } from './utils/composition.ts'
 export { getTextblockDisplayText } from './utils/display-text.ts'
 export { formatFileSize } from './utils/format-file-size.ts'
 export { loadKaTeX, renderMathInto, type KaTeXRender } from './utils/katex.ts'
