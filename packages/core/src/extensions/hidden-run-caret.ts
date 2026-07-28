@@ -10,9 +10,9 @@ import {
 import type { Command } from '@prosekit/pm/state'
 import { Plugin, PluginKey, TextSelection } from '@prosekit/pm/state'
 
+import { getIsComposing } from '../utils/composition.ts'
 import { executeCommand } from '../utils/execute-command.ts'
 
-import { getIsComposing } from '../utils/composition.ts'
 import {
   getHiddenRunAfter,
   getHiddenRunAround,
