@@ -49,7 +49,11 @@ export function listenForTweetHeight(iframe: HTMLIFrameElement): () => void {
       }
       const message = event.data as TweetResizeMessage | null
       const height = message?.['twttr.embed']?.params?.[0]?.height
-      if (typeof height === 'number') iframe.style.height = `${height}px`
+      if (typeof height === 'number') {
+        iframe.style.height = `${height}px`
+        // `data-sized` releases the unknown-height placeholder (`min-height`).
+        iframe.dataset.sized = ''
+      }
     } catch (error) {
       console.warn('[meowdown] failed to parse tweet resize message:', error)
     }

@@ -669,6 +669,13 @@
     border: 0;
   }
 
+  /* Reserve space for a tweet whose height is unknown (no persisted size and no
+   * height report yet), so the loaded tweet shifts layout less. Released once a
+   * height is applied (`data-sized`). */
+  .ProseMirror .md-embed-tweet:not([data-sized]) {
+    min-height: 250px;
+  }
+
   /* A YouTube embed wrapped in the resizable root: the root owns the size (its
    * inline `aspect-ratio` derives the height from the persisted or dragged
    * width; block-level `width: auto` keeps the default width when nothing is

@@ -35,8 +35,26 @@ export function defaultResolveImageUrl(src: string): string | undefined {
  */
 const MAX_DISPLAY_HEIGHT = 500
 
-/** Build the iframe DOM for an embed descriptor and start its height listener. */
-function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
+/**
+ * Size a tweet iframe: the persisted or reported height, or neither yet
+ * (`null`), which restores the unknown-height placeholder.
+ */
+function applyTweetHeight(iframe: HTMLIFrameElement, height: number | null): void {
+  if (height == null) {
+    iframe.style.removeProperty('height')
+    delete iframe.dataset.sized
+    return
+  }
+  iframe.style.height = `${height}px`
+  iframe.dataset.sized = ''
+}
+
+/**
+ * Build the iframe DOM for an embed descriptor and start its height listener.
+ * A persisted tweet height seeds the iframe before `Tweet.html` reports the
+ * real one, so a revisited tweet keeps its space instead of shifting layout.
+ */
+function buildEmbedIframe(embed: EmbedDescriptor, height: number | null): HTMLIFrameElement {
   const iframe = document.createElement('iframe')
   iframe.src = embed.src
   iframe.title = embed.title
@@ -47,7 +65,10 @@ function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
   iframe.setAttribute('frameborder', '0')
   if (embed.allow) iframe.allow = embed.allow
   if (embed.allowFullscreen) iframe.allowFullscreen = true
-  if (embed.kind === 'tweet') listenForTweetHeight(iframe)
+  if (embed.kind === 'tweet') {
+    if (height != null) applyTweetHeight(iframe, height)
+    listenForTweetHeight(iframe)
+  }
   return iframe
 }
 
@@ -136,6 +157,7 @@ class ImageMarkView implements MarkView {
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
+  #tweetIframe: HTMLIFrameElement | undefined
 
   constructor(mark: Mark, view: EditorView, options: ImageOptions) {
     this.#attrs = mark.attrs as MdImageAttrs
@@ -181,6 +203,9 @@ class ImageMarkView implements MarkView {
         applySize(this.#resizableRoot, next.width, next.height)
       }
     }
+    if (this.#tweetIframe && next.height !== previous.height) {
+      applyTweetHeight(this.#tweetIframe, next.height)
+    }
     return true
   }
 
@@ -195,7 +220,8 @@ class ImageMarkView implements MarkView {
     if (embed) {
       const wrapper = document.createElement('span')
       wrapper.className = 'md-image-view-preview md-atom-view-preview'
-      const iframe = buildEmbedIframe(embed)
+      const iframe = buildEmbedIframe(embed, this.#attrs.height)
+      if (embed.kind === 'tweet') this.#tweetIframe = iframe
       wrapper.appendChild(embed.kind === 'youtube' ? this.#buildResizableEmbed(iframe) : iframe)
       return wrapper
     }

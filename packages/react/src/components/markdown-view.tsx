@@ -215,8 +215,12 @@ function WikilinkChip(props: {
   )
 }
 
-function EmbedFrame(props: { embed: EmbedDescriptor; width: number | null }): ReactElement {
-  const { embed, width } = props
+function EmbedFrame(props: {
+  embed: EmbedDescriptor
+  width: number | null
+  height: number | null
+}): ReactElement {
+  const { embed, width, height } = props
   const iframeRef = useRef<HTMLIFrameElement>(null)
   useEffect(() => {
     if (embed.kind !== 'tweet') return
@@ -225,8 +229,10 @@ function EmbedFrame(props: { embed: EmbedDescriptor; width: number | null }): Re
     return listenForTweetHeight(iframe)
   }, [embed.kind, embed.key])
   // A persisted width narrows the player; the `aspect-ratio` CSS on
-  // `.md-embed-youtube` derives the height. Tweets stay fluid-width.
+  // `.md-embed-youtube` derives the height. Tweets stay fluid-width and seed
+  // their persisted height instead.
   const youtubeWidth = embed.kind === 'youtube' ? width : null
+  const tweetHeight = embed.kind === 'tweet' ? height : null
   return (
     <span className="md-image-view-preview md-atom-view-preview" contentEditable={false}>
       <iframe
@@ -241,7 +247,14 @@ function EmbedFrame(props: { embed: EmbedDescriptor; width: number | null }): Re
         frameBorder="0"
         allow={embed.allow}
         allowFullScreen={embed.allowFullscreen}
-        style={youtubeWidth == null ? undefined : { width: youtubeWidth }}
+        style={
+          youtubeWidth != null
+            ? { width: youtubeWidth }
+            : tweetHeight != null
+              ? { height: tweetHeight }
+              : undefined
+        }
+        data-sized={tweetHeight == null ? undefined : ''}
       />
     </span>
   )
@@ -251,13 +264,14 @@ function ImagePreview(props: {
   src: string
   alt: string
   width: number | null
+  height: number | null
   resolveImageUrl?: (src: string) => string | undefined
   onImageClick?: ImageClickHandler
   interactive: boolean
 }): ReactElement | null {
-  const { src, alt, width, resolveImageUrl, onImageClick, interactive } = props
+  const { src, alt, width, height, resolveImageUrl, onImageClick, interactive } = props
   const embed = matchEmbed(src)
-  if (embed) return interactive ? <EmbedFrame embed={embed} width={width} /> : null
+  if (embed) return interactive ? <EmbedFrame embed={embed} width={width} height={height} /> : null
 
   const url = (resolveImageUrl ?? defaultResolveImageUrl)(src)
   if (!url) return null
@@ -285,16 +299,18 @@ function ImageView(props: {
   src: string
   alt: string
   width: number | null
+  height: number | null
   context: RenderContext
   children: ReactNode
 }): ReactElement {
-  const { src, alt, width, context, children } = props
+  const { src, alt, width, height, context, children } = props
   return (
     <span className="md-image-view md-atom-view">
       <ImagePreview
         src={src}
         alt={alt}
         width={width}
+        height={height}
         resolveImageUrl={context.resolveImageUrl}
         onImageClick={context.onImageClick}
         interactive={context.interactive}
@@ -493,7 +509,13 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
     case 'mdImage': {
       const attrs = mark.attrs as MdImageAttrs
       return (
-        <ImageView src={attrs.src} alt={attrs.alt} width={attrs.width} context={context}>
+        <ImageView
+          src={attrs.src}
+          alt={attrs.alt}
+          width={attrs.width}
+          height={attrs.height}
+          context={context}
+        >
           {children}
         </ImageView>
       )
