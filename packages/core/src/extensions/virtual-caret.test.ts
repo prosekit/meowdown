@@ -297,12 +297,12 @@ describe('virtual caret at a line-wrapped wikilink', () => {
 describe('virtual caret when the editor reflows', () => {
   function caretToSelectionDistance(): number {
     const selection = document.getSelection()
-    if (selection == null || selection.rangeCount === 0) return Number.POSITIVE_INFINITY
+    if (selection == null || selection.rangeCount === 0) return Infinity
     const range = selection.getRangeAt(0).cloneRange()
     range.collapse(true)
     const rects = Array.from(range.getClientRects()).filter((rect) => rect.height > 0)
     const selectionRect = rects[rects.length - 1]
-    if (selectionRect == null) return Number.POSITIVE_INFINITY
+    if (selectionRect == null) return Infinity
     // The caret bar is centered on the measured x and stretched around the
     // measured rect's vertical center.
     const caretRect = getCaretElement().getBoundingClientRect()
