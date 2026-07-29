@@ -95,7 +95,17 @@ class VirtualCaretView implements PluginView {
     if (view.isDestroyed) return
     const state = view.state
     const selection = state.selection
-    const rect = isTextSelection(selection) && selection.empty ? measureCaretRect(view) : undefined
+    const viewportRect =
+      isTextSelection(selection) && selection.empty ? measureCaretRect(view) : undefined
+    let rect: CaretRect | undefined
+    if (viewportRect != null) {
+      const layerRect = this.#layer.getBoundingClientRect()
+      rect = {
+        left: viewportRect.left - layerRect.left,
+        top: viewportRect.top - layerRect.top,
+        height: viewportRect.height,
+      }
+    }
     // In hide mode the two doc positions at a hidden run boundary render at
     // one x; the tail (typing affinity) tells them apart.
     const tail =
@@ -116,12 +126,11 @@ class VirtualCaretView implements PluginView {
       view.dom.removeAttribute(DATA_ATTRIBUTE)
       return
     }
-    const layerRect = this.#layer.getBoundingClientRect()
     // A reappearing caret must not glide in from its stale position.
     if (wasHidden) this.#caret.style.transitionProperty = 'none'
     this.#caret.style.visibility = ''
-    this.#caret.style.left = `${rect.left - layerRect.left}px`
-    this.#caret.style.top = `${rect.top - layerRect.top}px`
+    this.#caret.style.left = `${rect.left}px`
+    this.#caret.style.top = `${rect.top}px`
     this.#caret.style.height = `${rect.height}px`
     view.dom.setAttribute(DATA_ATTRIBUTE, '')
     if (wasHidden) {
