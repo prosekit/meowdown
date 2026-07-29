@@ -120,6 +120,52 @@ describe('commands', () => {
     fixture.editor.commands.cycleCheckableList()
     expect(docToMarkdown(fixture.doc)).toBe('+ [ ] outer\n  - [ ] inner\n')
   })
+
+  it('cyclePlainList cycles plain content through bullet, ordered, and text', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('todo<a>')))
+
+    fixture.editor.commands.cyclePlainList()
+    expect(docToMarkdown(fixture.doc)).toBe('- todo\n')
+    fixture.editor.commands.cyclePlainList()
+    expect(docToMarkdown(fixture.doc)).toBe('1. todo\n')
+    fixture.editor.commands.cyclePlainList()
+    expect(docToMarkdown(fixture.doc)).toBe('todo\n')
+  })
+
+  it('cyclePlainList converts a task to a plain bullet first', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'task', marker: '+', checked: true }, n.paragraph('done<a>'))))
+
+    fixture.editor.commands.cyclePlainList()
+
+    expect(fixture.doc.child(0).attrs).toMatchObject({
+      kind: 'bullet',
+      checked: false,
+    })
+    expect(docToMarkdown(fixture.doc)).toBe('- done\n')
+  })
+
+  it('cyclePlainList changes only the closest nested list', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.list(
+          { kind: 'bullet' },
+          n.paragraph('outer'),
+          n.list({ kind: 'bullet' }, n.paragraph('inner<a>')),
+        ),
+      ),
+    )
+
+    fixture.editor.commands.cyclePlainList()
+    expect(docToMarkdown(fixture.doc)).toBe('- outer\n  1. inner\n')
+    fixture.editor.commands.cyclePlainList()
+    expect(docToMarkdown(fixture.doc)).toBe('- outer\n\n  inner\n')
+  })
 })
 
 describe('keymap', () => {

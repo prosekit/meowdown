@@ -316,9 +316,25 @@ function cycleCheckableList(): Command {
   }
 }
 
+/**
+ * Cycle the selected block between plain list states. Non-plain-list content
+ * becomes a bullet; bullets become ordered lists; ordered lists unwrap.
+ */
+function cyclePlainList(): Command {
+  return (state, dispatch, view) => {
+    const attrs = getListAttrsAtSelection(state)
+    const next: MeowdownListAttrs =
+      attrs?.kind === 'bullet' || attrs?.kind === 'ordered'
+        ? { kind: 'ordered', marker: null, checked: false, collapsed: false }
+        : { kind: 'bullet', marker: null, checked: false, collapsed: false }
+    return toggleList<MeowdownListAttrs>(next)(state, dispatch, view)
+  }
+}
+
 function defineTaskCommands() {
   return defineCommands({
     cycleCheckableList,
+    cyclePlainList,
     wrapInCircleTask,
     wrapInSquareTask,
   })
