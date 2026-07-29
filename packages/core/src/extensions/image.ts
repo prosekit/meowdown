@@ -52,15 +52,11 @@ function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
 }
 
 /**
- * Write a persisted display size onto a resizable embed root. The root's fixed
- * `data-aspect-ratio` derives the height whenever a width is present, so
- * missing dimensions simply fall back to the CSS default (full width).
+ * Write a persisted display size onto a resizable resizable root.
  */
-function applyEmbedSize(root: HTMLElement, width: number | null, height: number | null): void {
-  if (width != null) root.setAttribute('data-width', String(width))
-  else root.removeAttribute('data-width')
-  if (height != null) root.setAttribute('data-height', String(height))
-  else root.removeAttribute('data-height')
+function applySize(root: HTMLElement, width: number | null, height: number | null): void {
+  if (width != null) root.setAttribute('data-width', String(Math.ceil(width)))
+  if (height != null) root.setAttribute('data-height', String(Math.ceil(height)))
 }
 
 /**
@@ -69,28 +65,25 @@ function applyEmbedSize(root: HTMLElement, width: number | null, height: number 
  * MAX_DISPLAY_HEIGHT, never upscaling). Before the image has loaded, only the
  * persisted dimensions are seeded; the load listener fills in the rest.
  */
-function applyDisplaySize(
+function applyImageDisplaySize(
   root: HTMLElement,
   image: HTMLImageElement,
   width: number | null,
   height: number | null,
 ): void {
   if (width != null && height != null) {
-    root.setAttribute('data-width', String(width))
-    root.setAttribute('data-height', String(height))
+    applySize(root, width, height)
     return
   }
   const ratio = image.naturalWidth / image.naturalHeight
   if (!Number.isFinite(ratio) || ratio <= 0) {
-    if (width != null) root.setAttribute('data-width', String(width))
-    if (height != null) root.setAttribute('data-height', String(height))
+    applySize(root, width, height)
     return
   }
   const displayHeight =
     width == null ? Math.min(image.naturalHeight, MAX_DISPLAY_HEIGHT) : width / ratio
   const displayWidth = width ?? displayHeight * ratio
-  root.setAttribute('data-width', String(Math.round(displayWidth)))
-  root.setAttribute('data-height', String(Math.round(displayHeight)))
+  applySize(root, displayWidth, displayHeight)
 }
 
 /**
@@ -126,7 +119,7 @@ function commitImageSize(
   const currentComment = current.slice(base.length)
 
   const nextComment = formatMagicComment({
-    ...(parseMagicComment(currentComment) ?? {}),
+    ...parseMagicComment(currentComment),
     width: Math.round(rawWidth),
     height: Math.round(rawHeight),
   })
@@ -183,9 +176,9 @@ class ImageMarkView implements MarkView {
     }
     if (this.#resizableRoot && (next.width !== previous.width || next.height !== previous.height)) {
       if (this.#image) {
-        applyDisplaySize(this.#resizableRoot, this.#image, next.width, next.height)
+        applyImageDisplaySize(this.#resizableRoot, this.#image, next.width, next.height)
       } else {
-        applyEmbedSize(this.#resizableRoot, next.width, next.height)
+        applySize(this.#resizableRoot, next.width, next.height)
       }
     }
     return true
@@ -231,7 +224,7 @@ class ImageMarkView implements MarkView {
     root.className = 'md-embed-resizable'
     root.dataset.testid = 'embed-resizable'
     root.setAttribute('data-aspect-ratio', String(16 / 9))
-    applyEmbedSize(root, this.#attrs.width, this.#attrs.height)
+    applySize(root, this.#attrs.width, this.#attrs.height)
     root.appendChild(iframe)
 
     const handle = document.createElement('prosekit-resizable-handle')
@@ -275,14 +268,14 @@ class ImageMarkView implements MarkView {
     // A persisted size is known up front, so seed both dimensions before the
     // image loads. This gives the box its final dimensions immediately, with no
     // layout shift when the natural size arrives.
-    applyDisplaySize(root, image, this.#attrs.width, this.#attrs.height)
+    applyImageDisplaySize(root, image, this.#attrs.width, this.#attrs.height)
     image.addEventListener('load', () => {
       root.removeAttribute('data-loading')
       const ratio = image.naturalWidth / image.naturalHeight
       if (!Number.isFinite(ratio) || ratio <= 0) return
       root.setAttribute('data-aspect-ratio', String(ratio))
       // Reread the attrs: an update() may have landed while the image was loading.
-      applyDisplaySize(root, image, this.#attrs.width, this.#attrs.height)
+      applyImageDisplaySize(root, image, this.#attrs.width, this.#attrs.height)
     })
     image.addEventListener('error', () => {
       root.removeAttribute('data-loading')
