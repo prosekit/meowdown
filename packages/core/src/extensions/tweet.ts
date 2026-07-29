@@ -40,7 +40,7 @@ export const matchTweet: EmbedMatcher = (src) => {
  */
 export function listenForTweetHeight(
   iframe: HTMLIFrameElement,
-  onHeight: (height: number) => void,
+  onHeight?: (height: number) => void,
 ): () => void {
   const onMessage = (event: MessageEvent) => {
     if (event.source !== iframe.contentWindow) return
@@ -56,7 +56,8 @@ export function listenForTweetHeight(
       // `Tweet.html` posts a transient `0` before it renders (and nothing else
       // when the tweet is unavailable); only a positive height is a real size.
       if (typeof height === 'number' && height > 0) {
-        onHeight(height)
+        applyTweetHeight(iframe, height)
+        onHeight?.(height)
       }
     } catch (error) {
       console.warn('[meowdown] failed to parse tweet resize message:', error)
@@ -76,4 +77,14 @@ export function listenForTweetHeight(
   })
   observer.observe(document.body, { childList: true, subtree: true })
   return cleanup
+}
+
+/**
+ * Size a tweet iframe.
+ */
+export function applyTweetHeight(iframe: HTMLIFrameElement, height: number | null): void {
+  if (height && height > 0) {
+    iframe.style.height = `${height}px`
+    iframe.dataset.sized = ''
+  }
 }

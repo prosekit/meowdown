@@ -17,6 +17,7 @@ import {
   type MagicComment,
 } from './magic-comment.ts'
 import type { MarkName } from './mark-names.ts'
+import { applyTweetHeight } from './tweet.ts'
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
 
 type ImageUrlResolver = (src: string) => string | undefined
@@ -48,20 +49,6 @@ export function defaultResolveImageUrl(src: string): string | undefined {
 const MAX_DISPLAY_HEIGHT = 500
 
 /**
- * Size a tweet iframe: the persisted or reported height, or neither yet
- * (`null`), which restores the unknown-height placeholder.
- */
-function applyTweetHeight(iframe: HTMLIFrameElement, height: number | null): void {
-  if (height == null) {
-    iframe.style.removeProperty('height')
-    delete iframe.dataset.sized
-    return
-  }
-  iframe.style.height = `${height}px`
-  iframe.dataset.sized = ''
-}
-
-/**
  * Build the iframe DOM for an embed descriptor and start its height listener.
  * A persisted tweet height seeds the iframe before `Tweet.html` reports the
  * real one, so a revisited tweet keeps its space instead of shifting layout.
@@ -69,7 +56,7 @@ function applyTweetHeight(iframe: HTMLIFrameElement, height: number | null): voi
 function buildEmbedIframe(
   embed: EmbedDescriptor,
   height: number | null,
-  onHeight: (height: number) => void,
+  onHeight?: (height: number) => void,
 ): HTMLIFrameElement {
   const iframe = document.createElement('iframe')
   iframe.src = embed.src
@@ -82,7 +69,7 @@ function buildEmbedIframe(
   if (embed.allow) iframe.allow = embed.allow
   if (embed.allowFullscreen) iframe.allowFullscreen = true
   if (embed.kind === 'tweet') {
-    if (height != null) applyTweetHeight(iframe, height)
+    applyTweetHeight(iframe, height)
     listenForTweetHeight(iframe, onHeight)
   }
   return iframe
@@ -279,12 +266,11 @@ class ImageMarkView implements MarkView {
     if (embed) {
       const wrapper = document.createElement('span')
       wrapper.className = 'md-image-view-preview md-atom-view-preview'
-      const onHeight = (height: number) => {
-        applyTweetHeight(iframe, height)
-        if (this.#persistTweetHeight) {
-          commitTweetHeight(this.#view, this.#contentDOM, height)
-        }
-      }
+      const onHeight = this.#persistTweetHeight
+        ? (height: number) => {
+            commitTweetHeight(this.#view, this.#contentDOM, height)
+          }
+        : undefined
       const iframe = buildEmbedIframe(embed, this.#attrs.height, onHeight)
       if (embed.kind === 'tweet') this.#tweetIframe = iframe
       wrapper.appendChild(embed.kind === 'youtube' ? this.#buildResizableEmbed(iframe) : iframe)
