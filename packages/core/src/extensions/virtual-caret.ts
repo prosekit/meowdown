@@ -40,13 +40,13 @@ function sameRect(left: CaretRect | undefined, right: CaretRect | undefined): bo
   return left.left === right.left && left.top === right.top && left.height === right.height
 }
 
-// The caret lives in a zero-height in-flow layer right after `view.dom`, never
-// inside the contenteditable: a `contenteditable=false` element inside the
-// content DOM shifts the browser's insertion point at the document edges
-// (Chrome inserts typed text before the element instead of into the first
-// textblock). The layer moves with the content when the host scrolls, and the
-// caret's coordinates are re-derived from the layer's own measured rect, so no
-// positioned ancestor is required.
+// The caret draws into a host-owned zero-size in-flow layer, never inside the
+// contenteditable: a `contenteditable=false` element inside the content DOM
+// shifts the browser's insertion point at the document edges (Chrome inserts
+// typed text before the element instead of into the first textblock). The
+// layer must live outside `view.dom` and scroll together with the content;
+// the caret's coordinates are re-derived from the layer's own measured rect,
+// so its exact placement is free and no positioned ancestor is required.
 class VirtualCaretView implements PluginView {
   readonly #view: EditorView
   readonly #layer: HTMLElement
@@ -57,20 +57,22 @@ class VirtualCaretView implements PluginView {
   #lastTail: CaretTail | undefined
   #blinkIndex = 0
 
-  constructor(view: EditorView) {
+  constructor(view: EditorView, layer: HTMLElement) {
     this.#view = view
     this.#document = view.dom.ownerDocument
-    this.#layer = this.#document.createElement('div')
-    this.#layer.className = 'md-virtual-caret-layer'
+    this.#layer = layer
+    this.#layer.classList.add('md-virtual-caret-layer')
     this.#caret = this.#layer.appendChild(this.#document.createElement('div'))
     this.#caret.className = 'md-virtual-caret'
     this.#caret.dataset.testid = 'virtual-caret'
-    view.dom.insertAdjacentElement('afterend', this.#layer)
     this.#document.addEventListener('selectionchange', this.#reposition)
+    view.dom.addEventListener('focus', this.#handleFocus)
+    view.dom.addEventListener('blur', this.#handleBlur)
     if (typeof ResizeObserver !== 'undefined') {
       this.#resizeObserver = new ResizeObserver(this.#reposition)
       this.#resizeObserver.observe(view.dom)
     }
+    if (view.hasFocus()) this.#handleFocus()
     this.#reposition()
   }
 
@@ -81,8 +83,21 @@ class VirtualCaretView implements PluginView {
 
   destroy() {
     this.#document.removeEventListener('selectionchange', this.#reposition)
+    this.#view.dom.removeEventListener('focus', this.#handleFocus)
+    this.#view.dom.removeEventListener('blur', this.#handleBlur)
     this.#resizeObserver?.disconnect()
-    this.#layer.remove()
+    this.#caret.remove()
+    this.#layer.classList.remove('md-virtual-caret-layer')
+    delete this.#layer.dataset.focused
+    this.#view.dom.removeAttribute(DATA_ATTRIBUTE)
+  }
+
+  readonly #handleFocus = (): void => {
+    this.#layer.dataset.focused = ''
+  }
+
+  readonly #handleBlur = (): void => {
+    delete this.#layer.dataset.focused
   }
 
   #restartBlink() {
@@ -145,12 +160,16 @@ class VirtualCaretView implements PluginView {
  * (`caret-color: transparent`). The native DOM selection stays fully alive,
  * so IME, clicks, and typing keep their native behavior; only the caret pixels
  * are ours. Applies to every mark mode.
+ *
+ * `layer` is the element the caret draws into. The host owns its placement:
+ * it must live outside the contenteditable and scroll together with the
+ * content.
  */
-export function defineVirtualCaret(): PlainExtension {
+export function defineVirtualCaret(layer: HTMLElement): PlainExtension {
   return definePlugin(
     new Plugin({
       key,
-      view: (view) => new VirtualCaretView(view),
+      view: (view) => new VirtualCaretView(view, layer),
     }),
   )
 }

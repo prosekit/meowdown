@@ -65,6 +65,7 @@ import type {
   TagSearchHandler,
   WikilinkSearchHandler,
 } from './types.ts'
+import { VirtualCaret } from './virtual-caret.tsx'
 import { WikilinkMenu } from './wikilink-menu.tsx'
 
 // Selections coming through `setState` are hints: restore them exactly when
@@ -448,6 +449,9 @@ export function ProseKitEditor({
 
   return (
     <ProseKit editor={editor}>
+      {/* Before the editor element, so a document height change below the
+          caret cannot move the layer. */}
+      <VirtualCaret />
       <div ref={editor.mount}></div>
       <EditorExtensions
         markMode={markMode}

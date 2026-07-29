@@ -7,6 +7,7 @@ import type { EditorNode } from '@prosekit/pm/model'
 import { formatHTML } from 'diffable-html-snapshot'
 
 import { defineEditorExtension, type EditorExtensionOptions } from '../extensions/extension.ts'
+import { defineVirtualCaret } from '../extensions/virtual-caret.ts'
 
 import { getSelectionSnapshot } from './selection-snapshot.ts'
 
@@ -40,7 +41,10 @@ export function setupFixture({
   const div = getTestContainer(containerId)
 
   if (mount) {
+    // Mirror the react host: the caret layer sits before the editor element.
+    const caretLayer = div.appendChild(document.createElement('div'))
     editor.mount(div)
+    editor.use(defineVirtualCaret(caretLayer))
   }
 
   const dispose = () => {
