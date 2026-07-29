@@ -53,7 +53,9 @@ export function listenForTweetHeight(
       }
       const message = event.data as TweetResizeMessage | null
       const height = message?.['twttr.embed']?.params?.[0]?.height
-      if (typeof height === 'number') {
+      // `Tweet.html` posts a transient `0` before it renders (and nothing else
+      // when the tweet is unavailable); only a positive height is a real size.
+      if (typeof height === 'number' && height > 0) {
         iframe.style.height = `${height}px`
         // `data-sized` releases the unknown-height placeholder (`min-height`).
         iframe.dataset.sized = ''
