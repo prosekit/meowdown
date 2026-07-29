@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.61.0](https://github.com/prosekit/meowdown/compare/v0.60.0...v0.61.0) (2026-07-29)
+
+
+### Features
+
+* persist tweet embed height to avoid layout shift ([#391](https://github.com/prosekit/meowdown/issues/391)) ([f70cb48](https://github.com/prosekit/meowdown/commit/f70cb4867d3ad6706ec6d9d7ff63301daf992b0f))
+* resizable YouTube embed with persisted size ([#392](https://github.com/prosekit/meowdown/issues/392)) ([f81cf56](https://github.com/prosekit/meowdown/commit/f81cf5692ef6bdd27ec8d088bb3d20814fa7caa0))
+
 ## [0.60.0](https://github.com/prosekit/meowdown/compare/v0.59.1...v0.60.0) (2026-07-28)
 
 
