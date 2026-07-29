@@ -294,6 +294,39 @@ describe('virtual caret at a line-wrapped wikilink', () => {
   })
 })
 
+describe('virtual caret when the editor reflows', () => {
+  function caretToSelectionDistance(): number {
+    const selection = document.getSelection()
+    if (selection == null || selection.rangeCount === 0) return Infinity
+    const range = selection.getRangeAt(0).cloneRange()
+    range.collapse(true)
+    const rects = Array.from(range.getClientRects()).filter((rect) => rect.height > 0)
+    const selectionRect = rects[rects.length - 1]
+    if (selectionRect == null) return Infinity
+    // The caret bar is centered on the measured x and stretched around the
+    // measured rect's vertical center.
+    const caretRect = getCaretElement().getBoundingClientRect()
+    const horizontalDistance = Math.abs(caretRect.left + caretRect.width / 2 - selectionRect.left)
+    const verticalDistance = Math.abs(
+      caretRect.top + caretRect.height / 2 - (selectionRect.top + selectionRect.height / 2),
+    )
+    return Math.max(horizontalDistance, verticalDistance)
+  }
+
+  it('repositions when text below the caret rewraps without moving the caret line', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.dom.style.width = '380px'
+    fixture.set(n.doc(n.paragraph('short<a>'), n.paragraph('wrap and wrap '.repeat(30).trim())))
+    fixture.view.focus()
+    await expect.element(caret).toBeVisible()
+    await expect.poll(caretToSelectionDistance).toBeLessThanOrEqual(2)
+
+    fixture.dom.style.width = '220px'
+    await expect.poll(caretToSelectionDistance).toBeLessThanOrEqual(2)
+  })
+})
+
 describe('virtual caret tails (hide mode)', () => {
   it('shows a right tail after a closing run', async () => {
     using fixture = setupMode('hide', 'foo **bold**<a> bar')

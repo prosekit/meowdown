@@ -165,9 +165,11 @@
   /* ---------------------------------------------------------------------------
    * Virtual caret
    *
-   * A zero-height in-flow layer right after `.ProseMirror` (outside the
+   * A host-owned zero-size in-flow layer near `.ProseMirror` (outside the
    * contenteditable), so it scrolls with the content and never disturbs the
-   * browser's editing behavior. The caret is positioned against the layer.
+   * browser's editing behavior. The caret is positioned against the layer;
+   * the extension stamps `data-focused` on the layer while the editor has
+   * focus.
    * ------------------------------------------------------------------------- */
   .md-virtual-caret-layer {
     position: relative;
@@ -202,7 +204,7 @@
     }
   }
 
-  .ProseMirror.ProseMirror-focused ~ .md-virtual-caret-layer .md-virtual-caret {
+  .md-virtual-caret-layer[data-focused] .md-virtual-caret {
     display: block;
     animation: md-virtual-caret-blink 1.2s ease-in-out infinite;
   }

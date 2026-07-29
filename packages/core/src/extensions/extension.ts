@@ -40,7 +40,6 @@ import { defineScrollToSelection } from './scroll-to-selection.ts'
 import { defineSelectDocBoundary } from './select-doc-boundary.ts'
 import { defineTable } from './table.ts'
 import { defineViewAttributes } from './view-attributes.ts'
-import { defineVirtualCaret } from './virtual-caret.ts'
 import { defineWikilink } from './wikilink.ts'
 
 function defineEditorExtensionImpl(options: EditorExtensionOptions) {
@@ -75,7 +74,6 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineMath(),
     defineMarkMode(options.markMode ?? 'focus'),
     defineClipboard(),
-    defineVirtualCaret(),
     defineScrollToSelection(),
     defineHiddenRunCaret(),
     defineAtomMarkNavigation({

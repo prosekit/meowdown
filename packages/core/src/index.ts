@@ -141,6 +141,7 @@ export {
   type TagClickPayload,
 } from './extensions/tag-click.ts'
 export { defineViewAttributes } from './extensions/view-attributes.ts'
+export { defineVirtualCaret } from './extensions/virtual-caret.ts'
 export {
   formatSizedWikiEmbed,
   parseWikiEmbed,
