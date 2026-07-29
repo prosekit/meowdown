@@ -141,8 +141,6 @@ Enter at the end of the document's first heading (the title line) can start a fr
 
 An arrow press that can move the caret no further can notify the host, so it can move focus elsewhere (a previous/next note or page): [`defineExitBoundaryHandler`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineExitBoundaryHandler) (`@meowdown/react`'s `onExitBoundary` prop). Not part of `defineEditorExtension`.
 
-The caret is drawn by the editor itself (the native one is hidden via `caret-color: transparent`), so it can glide between positions and stay visible beside zero-width hidden syntax: [`defineVirtualCaret(layer)`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineVirtualCaret), where `layer` is a host-supplied element the caret draws into; place it outside the contenteditable, scrolling together with the content. `@meowdown/react` wires this up automatically. Not part of `defineEditorExtension`.
-
 ## API
 
 See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Fcore/).
