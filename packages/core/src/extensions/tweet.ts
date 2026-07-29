@@ -33,11 +33,15 @@ export const matchTweet: EmbedMatcher = (src) => {
 
 /**
  * `Tweet.html` reports its rendered height via `postMessage`; size the iframe to
- * fit. Returns a cleanup that removes the listener. The cleanup also runs once
- * the iframe leaves the DOM, so the editor's DOM mark view (which has no destroy
- * hook) is covered, while a React caller can call it on unmount.
+ * fit and pass each reported height to `onHeight`. Returns a cleanup that
+ * removes the listener. The cleanup also runs once the iframe leaves the DOM, so
+ * the editor's DOM mark view (which has no destroy hook) is covered, while a
+ * React caller can call it on unmount.
  */
-export function listenForTweetHeight(iframe: HTMLIFrameElement): () => void {
+export function listenForTweetHeight(
+  iframe: HTMLIFrameElement,
+  onHeight?: (height: number) => void,
+): () => void {
   const onMessage = (event: MessageEvent) => {
     if (event.source !== iframe.contentWindow) return
     try {
@@ -49,7 +53,12 @@ export function listenForTweetHeight(iframe: HTMLIFrameElement): () => void {
       }
       const message = event.data as TweetResizeMessage | null
       const height = message?.['twttr.embed']?.params?.[0]?.height
-      if (typeof height === 'number') iframe.style.height = `${height}px`
+      // `Tweet.html` posts a transient `0` before it renders (and nothing else
+      // when the tweet is unavailable); only a positive height is a real size.
+      if (typeof height === 'number' && height > 0) {
+        applyTweetHeight(iframe, height)
+        onHeight?.(height)
+      }
     } catch (error) {
       console.warn('[meowdown] failed to parse tweet resize message:', error)
     }
@@ -68,4 +77,14 @@ export function listenForTweetHeight(iframe: HTMLIFrameElement): () => void {
   })
   observer.observe(document.body, { childList: true, subtree: true })
   return cleanup
+}
+
+/**
+ * Size a tweet iframe.
+ */
+export function applyTweetHeight(iframe: HTMLIFrameElement, height: number | null): void {
+  if (height && height > 0) {
+    iframe.style.height = `${height}px`
+    iframe.dataset.sized = ''
+  }
 }

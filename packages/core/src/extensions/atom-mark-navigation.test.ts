@@ -26,7 +26,9 @@ function getSVGImageURL(width: number, height: number): string {
 function setup(mode: MarkMode, paragraphs: string[]): Fixture {
   const fixture = setupFixture({ extensionOptions: { markMode: mode } })
   const { editor, n } = fixture
-  editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(24, 24) }))
+  editor.use(
+    defineImage({ resolveImageUrl: () => getSVGImageURL(24, 24), persistTweetHeight: false }),
+  )
   fixture.set(n.doc(...paragraphs.map((text) => n.paragraph(text))))
   fixture.view.focus()
   return fixture

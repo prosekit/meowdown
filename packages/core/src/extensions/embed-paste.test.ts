@@ -17,7 +17,7 @@ const EMBED = `![](${YT})`
 
 function useEmbedPaste(fixture: Fixture): void {
   const { editor } = fixture
-  editor.use(defineImage({ resolveImageUrl: (src) => src }))
+  editor.use(defineImage({ resolveImageUrl: (src) => src, persistTweetHeight: false }))
   editor.use(defineEmbedPaste())
 }
 

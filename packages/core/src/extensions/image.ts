@@ -10,8 +10,14 @@ import {
 import { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './embed.ts'
 import { getMarkRangeAt } from './get-mark-range-at.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
-import { formatMagicComment, parseMagicComment, stripMagicComment } from './magic-comment.ts'
+import {
+  formatMagicComment,
+  parseMagicComment,
+  stripMagicComment,
+  type MagicComment,
+} from './magic-comment.ts'
 import type { MarkName } from './mark-names.ts'
+import { applyTweetHeight } from './tweet.ts'
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
 
 type ImageUrlResolver = (src: string) => string | undefined
@@ -23,6 +29,13 @@ export interface ImageOptions {
    * that image. Defaults to `defaultResolveImageUrl`.
    */
   resolveImageUrl?: ImageUrlResolver
+  /**
+   * Whether to write the height a tweet embed reports back into the trailing
+   * size comment, so the next load can seed the iframe at its final height.
+   * Defaults to `true`; disable when the document must never change without a
+   * user edit (e.g. deterministic tests).
+   */
+  persistTweetHeight?: boolean
 }
 
 /** Show an `src` as-is when it is an http(s) URL, otherwise skip rendering it. */
@@ -35,8 +48,16 @@ export function defaultResolveImageUrl(src: string): string | undefined {
  */
 const MAX_DISPLAY_HEIGHT = 500
 
-/** Build the iframe DOM for an embed descriptor and start its height listener. */
-function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
+/**
+ * Build the iframe DOM for an embed descriptor and start its height listener.
+ * A persisted tweet height seeds the iframe before `Tweet.html` reports the
+ * real one, so a revisited tweet keeps its space instead of shifting layout.
+ */
+function buildEmbedIframe(
+  embed: EmbedDescriptor,
+  height: number | null,
+  onHeight?: (height: number) => void,
+): HTMLIFrameElement {
   const iframe = document.createElement('iframe')
   iframe.src = embed.src
   iframe.title = embed.title
@@ -47,7 +68,10 @@ function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
   iframe.setAttribute('frameborder', '0')
   if (embed.allow) iframe.allow = embed.allow
   if (embed.allowFullscreen) iframe.allowFullscreen = true
-  if (embed.kind === 'tweet') listenForTweetHeight(iframe)
+  if (embed.kind === 'tweet') {
+    applyTweetHeight(iframe, height)
+    listenForTweetHeight(iframe, onHeight)
+  }
   return iframe
 }
 
@@ -87,29 +111,18 @@ function applyImageDisplaySize(
 }
 
 /**
- * Persist a resized width and height by rewriting only the trailing magic
- * comment, leaving the `![alt](url)` source untouched. The inline-mark plugin
- * re-derives the `width`/`height` attributes from the new text.
+ * Rewrite only the trailing magic comment of the image source at `range`,
+ * merging `patch` into the existing metadata and leaving the `![alt](url)`
+ * source untouched. The inline-mark plugin re-derives the `width`/`height`
+ * attributes from the new text.
  */
-function commitImageSize(
+function rewriteMagicComment(
   view: EditorView,
-  content: HTMLElement,
-  rawWidth: number,
-  rawHeight: number,
+  range: { from: number; to: number },
+  patch: MagicComment,
+  addToHistory: boolean,
 ): void {
-  const pos = view.posAtDOM(content, 0)
-  const range = getMarkRangeAt(view.state, pos, 'mdImage')
-  if (!range) return
   const current = view.state.doc.textBetween(range.from, range.to)
-  const attrs = range.mark.attrs as MdImageAttrs
-
-  if (attrs.syntax === 'wikiEmbed') {
-    const target = attrs.wikiTarget || parseWikiEmbed(current).target
-    if (!target) return
-    const next = formatSizedWikiEmbed(target, rawWidth, rawHeight)
-    if (next !== current) view.dispatch(view.state.tr.insertText(next, range.from, range.to))
-    return
-  }
 
   // Split the range into the `![alt](url)` source and its optional comment;
   // positions in a textblock are 1:1 with characters, so `from + base.length` is
@@ -120,27 +133,82 @@ function commitImageSize(
 
   const nextComment = formatMagicComment({
     ...parseMagicComment(currentComment),
-    width: Math.round(rawWidth),
-    height: Math.round(rawHeight),
+    ...patch,
   })
   if (nextComment === currentComment) return
 
-  view.dispatch(view.state.tr.insertText(nextComment, commentFrom, range.to))
+  const transaction = view.state.tr.insertText(nextComment, commentFrom, range.to)
+  if (!addToHistory) transaction.setMeta('addToHistory', false)
+  view.dispatch(transaction)
+}
+
+/** Persist a resized width and height into the trailing magic comment. */
+function commitImageSize(
+  view: EditorView,
+  content: HTMLElement,
+  rawWidth: number,
+  rawHeight: number,
+): void {
+  const pos = view.posAtDOM(content, 0)
+  const range = getMarkRangeAt(view.state, pos, 'mdImage')
+  if (!range) return
+  const attrs = range.mark.attrs as MdImageAttrs
+
+  if (attrs.syntax === 'wikiEmbed') {
+    const current = view.state.doc.textBetween(range.from, range.to)
+    const target = attrs.wikiTarget || parseWikiEmbed(current).target
+    if (!target) return
+    const next = formatSizedWikiEmbed(target, rawWidth, rawHeight)
+    if (next !== current) view.dispatch(view.state.tr.insertText(next, range.from, range.to))
+    return
+  }
+
+  rewriteMagicComment(
+    view,
+    range,
+    { width: Math.round(rawWidth), height: Math.round(rawHeight) },
+    true,
+  )
+}
+
+/**
+ * Ignore reported tweet heights this close to the persisted one. Fonts, theme,
+ * and container width nudge the rendered height by a few pixels per device;
+ * writing those back would churn the document on every open.
+ */
+const TWEET_HEIGHT_TOLERANCE = 8
+
+/**
+ * Persist the height a tweet embed reported, so the next load can seed the
+ * iframe before the tweet renders. A passive metadata write: outside undo
+ * history, skipped in read-only views, and skipped inside the tolerance.
+ */
+function commitTweetHeight(view: EditorView, content: HTMLElement, height: number): void {
+  if (!view.editable || !content.isConnected) return
+  const pos = view.posAtDOM(content, 0)
+  const range = getMarkRangeAt(view.state, pos, 'mdImage')
+  if (!range) return
+  const attrs = range.mark.attrs as MdImageAttrs
+  if (attrs.height != null && Math.abs(height - attrs.height) <= TWEET_HEIGHT_TOLERANCE) return
+  rewriteMagicComment(view, range, { height: Math.round(height) }, false)
 }
 
 class ImageMarkView implements MarkView {
   readonly #dom: HTMLElement
   readonly #contentDOM: HTMLElement
-  readonly #options: ImageOptions
   readonly #view: EditorView
+  readonly #resolveImageUrl: ImageUrlResolver | undefined
+  readonly #persistTweetHeight: boolean
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
+  #tweetIframe: HTMLIFrameElement | undefined
 
   constructor(mark: Mark, view: EditorView, options: ImageOptions) {
     this.#attrs = mark.attrs as MdImageAttrs
-    this.#options = options
     this.#view = view
+    this.#resolveImageUrl = options.resolveImageUrl
+    this.#persistTweetHeight = options.persistTweetHeight ?? true
 
     this.#dom = document.createElement('span')
     this.#dom.className = 'md-image-view md-atom-view'
@@ -181,6 +249,9 @@ class ImageMarkView implements MarkView {
         applySize(this.#resizableRoot, next.width, next.height)
       }
     }
+    if (this.#tweetIframe && next.height !== previous.height) {
+      applyTweetHeight(this.#tweetIframe, next.height)
+    }
     return true
   }
 
@@ -195,12 +266,18 @@ class ImageMarkView implements MarkView {
     if (embed) {
       const wrapper = document.createElement('span')
       wrapper.className = 'md-image-view-preview md-atom-view-preview'
-      const iframe = buildEmbedIframe(embed)
+      const onHeight = this.#persistTweetHeight
+        ? (height: number) => {
+            commitTweetHeight(this.#view, this.#contentDOM, height)
+          }
+        : undefined
+      const iframe = buildEmbedIframe(embed, this.#attrs.height, onHeight)
+      if (embed.kind === 'tweet') this.#tweetIframe = iframe
       wrapper.appendChild(embed.kind === 'youtube' ? this.#buildResizableEmbed(iframe) : iframe)
       return wrapper
     }
 
-    const url = (this.#options.resolveImageUrl ?? defaultResolveImageUrl)(src)
+    const url = (this.#resolveImageUrl ?? defaultResolveImageUrl)(src)
     if (!url) return undefined
 
     const wrapper = document.createElement('span')

@@ -19,32 +19,29 @@ const TRAILING_MAGIC_COMMENT_RE = /<!--\s*\{[^}]*\}\s*-->$/
  */
 export function parseMagicComment(comment: string): MagicComment | undefined {
   const match = MAGIC_COMMENT_RE.exec(comment.trim())
-  if (!match) return undefined
+  if (!match) return
+
   let data: unknown
   try {
     data = JSON.parse(match[1])
   } catch {
     return
   }
-  if (!isObject(data)) {
-    return
-  }
-  const magic = readMagicComment(data)
+  if (!isObject(data)) return
+
+  const width = toPositiveNumber(data.width)
+  const height = toPositiveNumber(data.height)
+
   // Not a magic comment unless it carries at least one recognized field.
-  return Object.keys(magic).length > 0 ? magic : undefined
+  if (!width && !height) return
+
+  return { width, height }
 }
 
-// Pick + validate the known fields. The single place new metadata fields are added.
-function readMagicComment(data: Record<string, unknown>): MagicComment {
-  const magic: MagicComment = {}
-  const { width, height } = data
-  if (typeof width === 'number' && Number.isFinite(width) && width > 0) {
-    magic.width = Math.round(width)
+function toPositiveNumber(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+    return Math.round(value)
   }
-  if (typeof height === 'number' && Number.isFinite(height) && height > 0) {
-    magic.height = Math.round(height)
-  }
-  return magic
 }
 
 /** The canonical comment meowdown writes for the metadata. */
