@@ -52,33 +52,38 @@ function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
 }
 
 /**
+ * Write a persisted display size onto a resizable resizable root.
+ */
+function applySize(root: HTMLElement, width: number | null, height: number | null): void {
+  if (width != null) root.setAttribute('data-width', String(Math.ceil(width)))
+  if (height != null) root.setAttribute('data-height', String(Math.ceil(height)))
+}
+
+/**
  * Write the display size onto the resizable root. Persisted dimensions win;
  * missing ones derive from the image's natural size (capping the height at
  * MAX_DISPLAY_HEIGHT, never upscaling). Before the image has loaded, only the
  * persisted dimensions are seeded; the load listener fills in the rest.
  */
-function applyDisplaySize(
+function applyImageDisplaySize(
   root: HTMLElement,
   image: HTMLImageElement,
   width: number | null,
   height: number | null,
 ): void {
   if (width != null && height != null) {
-    root.setAttribute('data-width', String(width))
-    root.setAttribute('data-height', String(height))
+    applySize(root, width, height)
     return
   }
   const ratio = image.naturalWidth / image.naturalHeight
   if (!Number.isFinite(ratio) || ratio <= 0) {
-    if (width != null) root.setAttribute('data-width', String(width))
-    if (height != null) root.setAttribute('data-height', String(height))
+    applySize(root, width, height)
     return
   }
   const displayHeight =
     width == null ? Math.min(image.naturalHeight, MAX_DISPLAY_HEIGHT) : width / ratio
   const displayWidth = width ?? displayHeight * ratio
-  root.setAttribute('data-width', String(Math.round(displayWidth)))
-  root.setAttribute('data-height', String(Math.round(displayHeight)))
+  applySize(root, displayWidth, displayHeight)
 }
 
 /**
@@ -114,7 +119,7 @@ function commitImageSize(
   const currentComment = current.slice(base.length)
 
   const nextComment = formatMagicComment({
-    ...(parseMagicComment(currentComment) ?? {}),
+    ...parseMagicComment(currentComment),
     width: Math.round(rawWidth),
     height: Math.round(rawHeight),
   })
@@ -169,12 +174,12 @@ class ImageMarkView implements MarkView {
     if (this.#image && next.alt !== previous.alt) {
       this.#image.alt = next.alt
     }
-    if (
-      this.#resizableRoot &&
-      this.#image &&
-      (next.width !== previous.width || next.height !== previous.height)
-    ) {
-      applyDisplaySize(this.#resizableRoot, this.#image, next.width, next.height)
+    if (this.#resizableRoot && (next.width !== previous.width || next.height !== previous.height)) {
+      if (this.#image) {
+        applyImageDisplaySize(this.#resizableRoot, this.#image, next.width, next.height)
+      } else {
+        applySize(this.#resizableRoot, next.width, next.height)
+      }
     }
     return true
   }
@@ -190,7 +195,8 @@ class ImageMarkView implements MarkView {
     if (embed) {
       const wrapper = document.createElement('span')
       wrapper.className = 'md-image-view-preview md-atom-view-preview'
-      wrapper.appendChild(buildEmbedIframe(embed))
+      const iframe = buildEmbedIframe(embed)
+      wrapper.appendChild(embed.kind === 'youtube' ? this.#buildResizableEmbed(iframe) : iframe)
       return wrapper
     }
 
@@ -202,6 +208,39 @@ class ImageMarkView implements MarkView {
     wrapper.dataset.testid = 'image-preview'
     wrapper.appendChild(this.#buildResizableImage(url))
     return wrapper
+  }
+
+  /**
+   * A resizable YouTube embed: the same resizable web component as images, with
+   * the player's fixed 16:9 ratio, so a drag only ever picks a width. Releasing
+   * a drag writes the size into the markdown source as a
+   * `<!-- {"width":N,"height":M} -->` comment, exactly like an image.
+   */
+  #buildResizableEmbed(iframe: HTMLIFrameElement): HTMLElement {
+    registerResizableRootElement()
+    registerResizableHandleElement()
+
+    const root = document.createElement('prosekit-resizable-root')
+    root.className = 'md-embed-resizable'
+    root.dataset.testid = 'embed-resizable'
+    root.setAttribute('data-aspect-ratio', String(16 / 9))
+    applySize(root, this.#attrs.width, this.#attrs.height)
+    root.appendChild(iframe)
+
+    const handle = document.createElement('prosekit-resizable-handle')
+    handle.className = 'md-image-resize-handle'
+    handle.setAttribute('position', 'bottom-right')
+    // A click (no drag) on the handle must not bubble to the image-click handler.
+    handle.addEventListener('click', (event) => event.stopPropagation())
+    root.appendChild(handle)
+
+    root.addEventListener('resizeEnd', (event) => {
+      const { width: nextWidth, height: nextHeight } = (event as ResizeEndEvent).detail
+      commitImageSize(this.#view, this.#contentDOM, nextWidth, nextHeight)
+    })
+
+    this.#resizableRoot = root
+    return root
   }
 
   /**
@@ -229,14 +268,14 @@ class ImageMarkView implements MarkView {
     // A persisted size is known up front, so seed both dimensions before the
     // image loads. This gives the box its final dimensions immediately, with no
     // layout shift when the natural size arrives.
-    applyDisplaySize(root, image, this.#attrs.width, this.#attrs.height)
+    applyImageDisplaySize(root, image, this.#attrs.width, this.#attrs.height)
     image.addEventListener('load', () => {
       root.removeAttribute('data-loading')
       const ratio = image.naturalWidth / image.naturalHeight
       if (!Number.isFinite(ratio) || ratio <= 0) return
       root.setAttribute('data-aspect-ratio', String(ratio))
       // Reread the attrs: an update() may have landed while the image was loading.
-      applyDisplaySize(root, image, this.#attrs.width, this.#attrs.height)
+      applyImageDisplaySize(root, image, this.#attrs.width, this.#attrs.height)
     })
     image.addEventListener('error', () => {
       root.removeAttribute('data-loading')
