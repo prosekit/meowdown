@@ -69,7 +69,7 @@ function applyTweetHeight(iframe: HTMLIFrameElement, height: number | null): voi
 function buildEmbedIframe(
   embed: EmbedDescriptor,
   height: number | null,
-  onHeight: ((height: number) => void) | undefined,
+  onHeight: (height: number) => void,
 ): HTMLIFrameElement {
   const iframe = document.createElement('iframe')
   iframe.src = embed.src
@@ -209,8 +209,9 @@ function commitTweetHeight(view: EditorView, content: HTMLElement, height: numbe
 class ImageMarkView implements MarkView {
   readonly #dom: HTMLElement
   readonly #contentDOM: HTMLElement
-  readonly #options: ImageOptions
   readonly #view: EditorView
+  readonly #resolveImageUrl: ImageUrlResolver | undefined
+  readonly #persistTweetHeight: boolean
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
@@ -218,8 +219,9 @@ class ImageMarkView implements MarkView {
 
   constructor(mark: Mark, view: EditorView, options: ImageOptions) {
     this.#attrs = mark.attrs as MdImageAttrs
-    this.#options = options
     this.#view = view
+    this.#resolveImageUrl = options.resolveImageUrl
+    this.#persistTweetHeight = options.persistTweetHeight ?? true
 
     this.#dom = document.createElement('span')
     this.#dom.className = 'md-image-view md-atom-view'
@@ -277,17 +279,19 @@ class ImageMarkView implements MarkView {
     if (embed) {
       const wrapper = document.createElement('span')
       wrapper.className = 'md-image-view-preview md-atom-view-preview'
-      const onHeight =
-        (this.#options.persistTweetHeight ?? true)
-          ? (height: number) => commitTweetHeight(this.#view, this.#contentDOM, height)
-          : undefined
+      const onHeight = (height: number) => {
+        applyTweetHeight(iframe, height)
+        if (this.#persistTweetHeight) {
+          commitTweetHeight(this.#view, this.#contentDOM, height)
+        }
+      }
       const iframe = buildEmbedIframe(embed, this.#attrs.height, onHeight)
       if (embed.kind === 'tweet') this.#tweetIframe = iframe
       wrapper.appendChild(embed.kind === 'youtube' ? this.#buildResizableEmbed(iframe) : iframe)
       return wrapper
     }
 
-    const url = (this.#options.resolveImageUrl ?? defaultResolveImageUrl)(src)
+    const url = (this.#resolveImageUrl ?? defaultResolveImageUrl)(src)
     if (!url) return undefined
 
     const wrapper = document.createElement('span')
