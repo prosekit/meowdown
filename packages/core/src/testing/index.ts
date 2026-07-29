@@ -40,10 +40,13 @@ export function setupFixture({
 
   const div = getTestContainer(containerId)
 
+  // Mirror the react host: the caret layer sits right before the editor
+  // element (`mount` turns `div` itself into the editable root).
+  const caretLayer = document.createElement('div')
+
   if (mount) {
-    // Mirror the react host: the caret layer sits before the editor element.
-    const caretLayer = div.appendChild(document.createElement('div'))
     editor.mount(div)
+    div.insertAdjacentElement('beforebegin', caretLayer)
     editor.use(defineVirtualCaret(caretLayer))
   }
 
@@ -51,6 +54,7 @@ export function setupFixture({
     if (mount) {
       editor.unmount()
     }
+    caretLayer.remove()
     div.remove()
   }
 
