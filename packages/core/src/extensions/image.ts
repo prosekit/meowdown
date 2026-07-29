@@ -28,6 +28,13 @@ export interface ImageOptions {
    * that image. Defaults to `defaultResolveImageUrl`.
    */
   resolveImageUrl?: ImageUrlResolver
+  /**
+   * Whether to write the height a tweet embed reports back into the trailing
+   * size comment, so the next load can seed the iframe at its final height.
+   * Defaults to `true`; disable when the document must never change without a
+   * user edit (e.g. deterministic tests).
+   */
+  persistTweetHeight?: boolean
 }
 
 /** Show an `src` as-is when it is an http(s) URL, otherwise skip rendering it. */
@@ -62,7 +69,7 @@ function applyTweetHeight(iframe: HTMLIFrameElement, height: number | null): voi
 function buildEmbedIframe(
   embed: EmbedDescriptor,
   height: number | null,
-  onHeight: (height: number) => void,
+  onHeight: ((height: number) => void) | undefined,
 ): HTMLIFrameElement {
   const iframe = document.createElement('iframe')
   iframe.src = embed.src
@@ -270,9 +277,11 @@ class ImageMarkView implements MarkView {
     if (embed) {
       const wrapper = document.createElement('span')
       wrapper.className = 'md-image-view-preview md-atom-view-preview'
-      const iframe = buildEmbedIframe(embed, this.#attrs.height, (height) =>
-        commitTweetHeight(this.#view, this.#contentDOM, height),
-      )
+      const onHeight =
+        (this.#options.persistTweetHeight ?? true)
+          ? (height: number) => commitTweetHeight(this.#view, this.#contentDOM, height)
+          : undefined
+      const iframe = buildEmbedIframe(embed, this.#attrs.height, onHeight)
       if (embed.kind === 'tweet') this.#tweetIframe = iframe
       wrapper.appendChild(embed.kind === 'youtube' ? this.#buildResizableEmbed(iframe) : iframe)
       return wrapper
