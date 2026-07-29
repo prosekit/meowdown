@@ -215,7 +215,8 @@ function WikilinkChip(props: {
   )
 }
 
-function EmbedFrame({ embed }: { embed: EmbedDescriptor }): ReactElement {
+function EmbedFrame(props: { embed: EmbedDescriptor; width: number | null }): ReactElement {
+  const { embed, width } = props
   const iframeRef = useRef<HTMLIFrameElement>(null)
   useEffect(() => {
     if (embed.kind !== 'tweet') return
@@ -223,6 +224,9 @@ function EmbedFrame({ embed }: { embed: EmbedDescriptor }): ReactElement {
     if (!iframe) return
     return listenForTweetHeight(iframe)
   }, [embed.kind, embed.key])
+  // A persisted width narrows the player; the `aspect-ratio` CSS on
+  // `.md-embed-youtube` derives the height. Tweets stay fluid-width.
+  const youtubeWidth = embed.kind === 'youtube' ? width : null
   return (
     <span className="md-image-view-preview md-atom-view-preview" contentEditable={false}>
       <iframe
@@ -237,6 +241,7 @@ function EmbedFrame({ embed }: { embed: EmbedDescriptor }): ReactElement {
         frameBorder="0"
         allow={embed.allow}
         allowFullScreen={embed.allowFullscreen}
+        style={youtubeWidth == null ? undefined : { width: youtubeWidth }}
       />
     </span>
   )
@@ -252,7 +257,7 @@ function ImagePreview(props: {
 }): ReactElement | null {
   const { src, alt, width, resolveImageUrl, onImageClick, interactive } = props
   const embed = matchEmbed(src)
-  if (embed) return interactive ? <EmbedFrame embed={embed} /> : null
+  if (embed) return interactive ? <EmbedFrame embed={embed} width={width} /> : null
 
   const url = (resolveImageUrl ?? defaultResolveImageUrl)(src)
   if (!url) return null

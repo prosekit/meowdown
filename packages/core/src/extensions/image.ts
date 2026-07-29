@@ -52,6 +52,18 @@ function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
 }
 
 /**
+ * Write a persisted display size onto a resizable embed root. The root's fixed
+ * `data-aspect-ratio` derives the height whenever a width is present, so
+ * missing dimensions simply fall back to the CSS default (full width).
+ */
+function applyEmbedSize(root: HTMLElement, width: number | null, height: number | null): void {
+  if (width != null) root.setAttribute('data-width', String(width))
+  else root.removeAttribute('data-width')
+  if (height != null) root.setAttribute('data-height', String(height))
+  else root.removeAttribute('data-height')
+}
+
+/**
  * Write the display size onto the resizable root. Persisted dimensions win;
  * missing ones derive from the image's natural size (capping the height at
  * MAX_DISPLAY_HEIGHT, never upscaling). Before the image has loaded, only the
@@ -169,12 +181,12 @@ class ImageMarkView implements MarkView {
     if (this.#image && next.alt !== previous.alt) {
       this.#image.alt = next.alt
     }
-    if (
-      this.#resizableRoot &&
-      this.#image &&
-      (next.width !== previous.width || next.height !== previous.height)
-    ) {
-      applyDisplaySize(this.#resizableRoot, this.#image, next.width, next.height)
+    if (this.#resizableRoot && (next.width !== previous.width || next.height !== previous.height)) {
+      if (this.#image) {
+        applyDisplaySize(this.#resizableRoot, this.#image, next.width, next.height)
+      } else {
+        applyEmbedSize(this.#resizableRoot, next.width, next.height)
+      }
     }
     return true
   }
@@ -190,7 +202,8 @@ class ImageMarkView implements MarkView {
     if (embed) {
       const wrapper = document.createElement('span')
       wrapper.className = 'md-image-view-preview md-atom-view-preview'
-      wrapper.appendChild(buildEmbedIframe(embed))
+      const iframe = buildEmbedIframe(embed)
+      wrapper.appendChild(embed.kind === 'youtube' ? this.#buildResizableEmbed(iframe) : iframe)
       return wrapper
     }
 
@@ -202,6 +215,39 @@ class ImageMarkView implements MarkView {
     wrapper.dataset.testid = 'image-preview'
     wrapper.appendChild(this.#buildResizableImage(url))
     return wrapper
+  }
+
+  /**
+   * A resizable YouTube embed: the same resizable web component as images, with
+   * the player's fixed 16:9 ratio, so a drag only ever picks a width. Releasing
+   * a drag writes the size into the markdown source as a
+   * `<!-- {"width":N,"height":M} -->` comment, exactly like an image.
+   */
+  #buildResizableEmbed(iframe: HTMLIFrameElement): HTMLElement {
+    registerResizableRootElement()
+    registerResizableHandleElement()
+
+    const root = document.createElement('prosekit-resizable-root')
+    root.className = 'md-embed-resizable'
+    root.dataset.testid = 'embed-resizable'
+    root.setAttribute('data-aspect-ratio', String(16 / 9))
+    applyEmbedSize(root, this.#attrs.width, this.#attrs.height)
+    root.appendChild(iframe)
+
+    const handle = document.createElement('prosekit-resizable-handle')
+    handle.className = 'md-image-resize-handle'
+    handle.setAttribute('position', 'bottom-right')
+    // A click (no drag) on the handle must not bubble to the image-click handler.
+    handle.addEventListener('click', (event) => event.stopPropagation())
+    root.appendChild(handle)
+
+    root.addEventListener('resizeEnd', (event) => {
+      const { width: nextWidth, height: nextHeight } = (event as ResizeEndEvent).detail
+      commitImageSize(this.#view, this.#contentDOM, nextWidth, nextHeight)
+    })
+
+    this.#resizableRoot = root
+    return root
   }
 
   /**
