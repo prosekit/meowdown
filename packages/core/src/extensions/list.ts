@@ -20,8 +20,8 @@ import {
   type ListAttrs,
 } from '@prosekit/extensions/list'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
-import { Plugin } from '@prosekit/pm/state'
 import type { Command, EditorState } from '@prosekit/pm/state'
+import { Plugin } from '@prosekit/pm/state'
 import {
   createListRenderingPlugin,
   createSafariInputMethodWorkaroundPlugin,
@@ -300,7 +300,11 @@ function getListAttrsAtSelection(state: EditorState): MeowdownListAttrs | null {
 }
 
 /**
- * Cycle the selected block between square and circle checkbox tasks. Non-task
+ * Cycle the selected block between square and circle checkbox tasks.
+ *
+ * - A square task becomes a circle task;
+ * - A circle task becomes a square task;
+ * - Other content becomes a square task.
  * content becomes an unchecked square task; shape changes preserve checked state.
  */
 function cycleCheckableList(): Command {
@@ -317,10 +321,13 @@ function cycleCheckableList(): Command {
 }
 
 /**
- * Cycle the selected block between plain list states. Non-plain-list content
- * becomes a bullet; bullets become ordered lists; ordered lists unwrap.
+ * Cycle the selected block between bullet and ordered list.
+ *
+ * - A bullet list become a ordered list;
+ * - An ordered list unwrap;
+ * - Other content becomes a bullet list;
  */
-function cyclePlainList(): Command {
+function cycleOrderedList(): Command {
   return (state, dispatch, view) => {
     const attrs = getListAttrsAtSelection(state)
     const next: MeowdownListAttrs =
@@ -334,7 +341,7 @@ function cyclePlainList(): Command {
 function defineTaskCommands() {
   return defineCommands({
     cycleCheckableList,
-    cyclePlainList,
+    cycleOrderedList,
     wrapInCircleTask,
     wrapInSquareTask,
   })
