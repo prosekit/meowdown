@@ -126,12 +126,15 @@ describe('commands', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('todo<a>')))
 
+    expect(docToMarkdown(fixture.doc).trim()).toMatchInlineSnapshot(`"todo"`)
     fixture.editor.commands.cyclePlainList()
-    expect(docToMarkdown(fixture.doc)).toBe('- todo\n')
+    expect(docToMarkdown(fixture.doc).trim()).toMatchInlineSnapshot(`"- todo"`)
     fixture.editor.commands.cyclePlainList()
-    expect(docToMarkdown(fixture.doc)).toBe('1. todo\n')
+    expect(docToMarkdown(fixture.doc).trim()).toMatchInlineSnapshot(`"1. todo"`)
     fixture.editor.commands.cyclePlainList()
-    expect(docToMarkdown(fixture.doc)).toBe('todo\n')
+    expect(docToMarkdown(fixture.doc).trim()).toMatchInlineSnapshot(`"todo"`)
+    fixture.editor.commands.cyclePlainList()
+    expect(docToMarkdown(fixture.doc).trim()).toMatchInlineSnapshot(`"- todo"`)
   })
 
   it('cyclePlainList converts a task to a plain bullet first', () => {
