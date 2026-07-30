@@ -338,12 +338,17 @@ function cycleOrderedList(): Command {
   }
 }
 
-function defineTaskCommands() {
+function toggleListCollapsed(): Command {
+  return createToggleCollapsedCommand({ isToggleable: isCollapsibleBullet })
+}
+
+function defineMeowdownListCommands() {
   return defineCommands({
     cycleCheckableList,
     cycleOrderedList,
     wrapInCircleTask,
     wrapInSquareTask,
+    toggleListCollapsed,
   })
 }
 
@@ -436,12 +441,6 @@ function defineMeowdownListPlugins(): PlainExtension {
   ])
 }
 
-function defineCollapseCommands() {
-  return defineCommands({
-    toggleListCollapsed: () => createToggleCollapsedCommand({ isToggleable: isCollapsibleBullet }),
-  })
-}
-
 function defineMeowdownListKeymap(): PlainExtension {
   return defineKeymap({
     'Mod-Enter': rotateSquareTask(),
@@ -473,7 +472,6 @@ export function defineMeowdownList() {
     defineListMarkerAttr(),
     defineListTaskMarkerAttr(),
     defineListMarkerGapAttr(),
-    defineTaskCommands(),
-    defineCollapseCommands(),
+    defineMeowdownListCommands(),
   )
 }
