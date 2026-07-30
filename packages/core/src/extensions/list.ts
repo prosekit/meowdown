@@ -20,8 +20,8 @@ import {
   type ListAttrs,
 } from '@prosekit/extensions/list'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
-import { Plugin } from '@prosekit/pm/state'
 import type { Command, EditorState } from '@prosekit/pm/state'
+import { Plugin } from '@prosekit/pm/state'
 import {
   createListRenderingPlugin,
   createSafariInputMethodWorkaroundPlugin,
@@ -300,8 +300,11 @@ function getListAttrsAtSelection(state: EditorState): MeowdownListAttrs | null {
 }
 
 /**
- * Cycle the selected block between square and circle checkbox tasks. Non-task
- * content becomes an unchecked square task; shape changes preserve checked state.
+ * Cycle the selected block between square and circle checkbox tasks.
+ *
+ * - A square task becomes a circle task, keeping its checked state;
+ * - A circle task becomes a square task, keeping its checked state;
+ * - Other content becomes an unchecked square task.
  */
 function cycleCheckableList(): Command {
   return (state, dispatch, view) => {
@@ -316,11 +319,35 @@ function cycleCheckableList(): Command {
   }
 }
 
-function defineTaskCommands() {
+/**
+ * Cycle the selected block between a bullet list, an ordered list, and no list.
+ *
+ * - A bullet list becomes an ordered list;
+ * - An ordered list unwraps;
+ * - Other content, including a task, becomes a bullet list.
+ */
+function cycleOrderedList(): Command {
+  return (state, dispatch, view) => {
+    const attrs = getListAttrsAtSelection(state)
+    const next: MeowdownListAttrs =
+      attrs?.kind === 'bullet' || attrs?.kind === 'ordered'
+        ? { kind: 'ordered', marker: null, checked: false, collapsed: false }
+        : { kind: 'bullet', marker: null, checked: false, collapsed: false }
+    return toggleList<MeowdownListAttrs>(next)(state, dispatch, view)
+  }
+}
+
+function toggleListCollapsed(): Command {
+  return createToggleCollapsedCommand({ isToggleable: isCollapsibleBullet })
+}
+
+function defineMeowdownListCommands() {
   return defineCommands({
     cycleCheckableList,
+    cycleOrderedList,
     wrapInCircleTask,
     wrapInSquareTask,
+    toggleListCollapsed,
   })
 }
 
@@ -413,12 +440,6 @@ function defineMeowdownListPlugins(): PlainExtension {
   ])
 }
 
-function defineCollapseCommands() {
-  return defineCommands({
-    toggleListCollapsed: () => createToggleCollapsedCommand({ isToggleable: isCollapsibleBullet }),
-  })
-}
-
 function defineMeowdownListKeymap(): PlainExtension {
   return defineKeymap({
     'Mod-Enter': rotateSquareTask(),
@@ -450,7 +471,6 @@ export function defineMeowdownList() {
     defineListMarkerAttr(),
     defineListTaskMarkerAttr(),
     defineListMarkerGapAttr(),
-    defineTaskCommands(),
-    defineCollapseCommands(),
+    defineMeowdownListCommands(),
   )
 }
