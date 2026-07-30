@@ -326,7 +326,7 @@ function cycleCheckableList(): Command {
  * - An ordered list unwraps;
  * - Other content, including a task, becomes a bullet list.
  */
-function cycleOrderedList(): Command {
+function cycleBulletOrderedList(): Command {
   return (state, dispatch, view) => {
     const attrs = getListAttrsAtSelection(state)
     const next: MeowdownListAttrs =
@@ -344,7 +344,7 @@ function toggleListCollapsed(): Command {
 function defineMeowdownListCommands() {
   return defineCommands({
     cycleCheckableList,
-    cycleOrderedList,
+    cycleBulletOrderedList,
     wrapInCircleTask,
     wrapInSquareTask,
     toggleListCollapsed,

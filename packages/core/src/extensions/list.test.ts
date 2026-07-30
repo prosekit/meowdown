@@ -121,28 +121,28 @@ describe('commands', () => {
     expect(docToMarkdown(fixture.doc)).toBe('+ [ ] outer\n  - [ ] inner\n')
   })
 
-  it('cycleOrderedList cycles plain content through bullet, ordered, and text', () => {
+  it('cycleBulletOrderedList cycles plain content through bullet, ordered, and text', () => {
     using fixture = setupFixture()
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('todo<a>')))
 
     expect(docToMarkdown(fixture.doc).trim()).toMatchInlineSnapshot(`"todo"`)
-    fixture.editor.commands.cycleOrderedList()
+    fixture.editor.commands.cycleBulletOrderedList()
     expect(docToMarkdown(fixture.doc).trim()).toMatchInlineSnapshot(`"- todo"`)
-    fixture.editor.commands.cycleOrderedList()
+    fixture.editor.commands.cycleBulletOrderedList()
     expect(docToMarkdown(fixture.doc).trim()).toMatchInlineSnapshot(`"1. todo"`)
-    fixture.editor.commands.cycleOrderedList()
+    fixture.editor.commands.cycleBulletOrderedList()
     expect(docToMarkdown(fixture.doc).trim()).toMatchInlineSnapshot(`"todo"`)
-    fixture.editor.commands.cycleOrderedList()
+    fixture.editor.commands.cycleBulletOrderedList()
     expect(docToMarkdown(fixture.doc).trim()).toMatchInlineSnapshot(`"- todo"`)
   })
 
-  it('cycleOrderedList converts a task to a plain bullet first', () => {
+  it('cycleBulletOrderedList converts a task to a plain bullet first', () => {
     using fixture = setupFixture()
     const { n } = fixture
     fixture.set(n.doc(n.list({ kind: 'task', marker: '+', checked: true }, n.paragraph('done<a>'))))
 
-    fixture.editor.commands.cycleOrderedList()
+    fixture.editor.commands.cycleBulletOrderedList()
 
     expect(fixture.doc.child(0).attrs).toMatchObject({
       kind: 'bullet',
@@ -151,7 +151,7 @@ describe('commands', () => {
     expect(docToMarkdown(fixture.doc)).toBe('- done\n')
   })
 
-  it('cycleOrderedList changes only the closest nested list', () => {
+  it('cycleBulletOrderedList changes only the closest nested list', () => {
     using fixture = setupFixture()
     const { n } = fixture
     fixture.set(
@@ -164,9 +164,9 @@ describe('commands', () => {
       ),
     )
 
-    fixture.editor.commands.cycleOrderedList()
+    fixture.editor.commands.cycleBulletOrderedList()
     expect(docToMarkdown(fixture.doc)).toBe('- outer\n  1. inner\n')
-    fixture.editor.commands.cycleOrderedList()
+    fixture.editor.commands.cycleBulletOrderedList()
     expect(docToMarkdown(fixture.doc)).toBe('- outer\n\n  inner\n')
   })
 })
