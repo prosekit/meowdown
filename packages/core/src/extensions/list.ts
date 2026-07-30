@@ -302,10 +302,9 @@ function getListAttrsAtSelection(state: EditorState): MeowdownListAttrs | null {
 /**
  * Cycle the selected block between square and circle checkbox tasks.
  *
- * - A square task becomes a circle task;
- * - A circle task becomes a square task;
- * - Other content becomes a square task.
- * content becomes an unchecked square task; shape changes preserve checked state.
+ * - A square task becomes a circle task, keeping its checked state;
+ * - A circle task becomes a square task, keeping its checked state;
+ * - Other content becomes an unchecked square task.
  */
 function cycleCheckableList(): Command {
   return (state, dispatch, view) => {
@@ -321,11 +320,11 @@ function cycleCheckableList(): Command {
 }
 
 /**
- * Cycle the selected block between bullet and ordered list.
+ * Cycle the selected block between a bullet list, an ordered list, and no list.
  *
- * - A bullet list become a ordered list;
- * - An ordered list unwrap;
- * - Other content becomes a bullet list;
+ * - A bullet list becomes an ordered list;
+ * - An ordered list unwraps;
+ * - Other content, including a task, becomes a bullet list.
  */
 function cycleOrderedList(): Command {
   return (state, dispatch, view) => {
