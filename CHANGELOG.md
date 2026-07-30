@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.62.0](https://github.com/prosekit/meowdown/compare/v0.61.0...v0.62.0) (2026-07-30)
+
+
+### Features
+
+* add ordered list cycle command ([#396](https://github.com/prosekit/meowdown/issues/396)) ([d5c2f3a](https://github.com/prosekit/meowdown/commit/d5c2f3a39cc18113502c85b38a423577698e7138))
+
+
+### Bug Fixes
+
+* stop the virtual caret drifting after a window resize ([#394](https://github.com/prosekit/meowdown/issues/394)) ([f342dfe](https://github.com/prosekit/meowdown/commit/f342dfebcb77fb80bd26dcb5be7829559db970b4))
+
 ## [0.61.0](https://github.com/prosekit/meowdown/compare/v0.60.0...v0.61.0) (2026-07-29)
 
 
