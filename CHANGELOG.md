@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.63.0](https://github.com/prosekit/meowdown/compare/v0.62.0...v0.63.0) (2026-07-30)
+
+
+### Features
+
+* rename command `cycleOrderedList` to `cycleBulletOrderedList` ([#398](https://github.com/prosekit/meowdown/issues/398)) ([0f56b4f](https://github.com/prosekit/meowdown/commit/0f56b4fb2d13b806f6472f52d6bdaf9824457fda))
+
 ## [0.62.0](https://github.com/prosekit/meowdown/compare/v0.61.0...v0.62.0) (2026-07-30)
 
 
