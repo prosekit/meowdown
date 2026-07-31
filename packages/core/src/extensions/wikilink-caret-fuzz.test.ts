@@ -13,6 +13,7 @@ const FUZZ_TIMEOUT = 300_000
 
 // Block separator inside a snapshot row, so one caret position stays one line.
 const BLOCK_BREAK = '⏎'
+// REVIEW: we do not need "one caret position stays one line". We can just use a multi-line snapshot format. Make the output snapshot clear and pretty and easy to read.
 
 function flatten(text: string): string {
   return text.replaceAll('\n', BLOCK_BREAK)
