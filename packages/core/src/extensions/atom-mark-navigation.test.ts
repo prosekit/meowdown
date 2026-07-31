@@ -318,3 +318,22 @@ describe('shift selection across atom-only paragraphs', () => {
     `)
   })
 })
+
+describe('caret navigation between adjacent inline units', () => {
+  it('focus: ArrowLeft between two adjacent wikilinks', async () => {
+    using fixture = setup('focus', ['see [[Aaa]][[Bbb]]<a> here'])
+    expect(await walkKey(fixture, 'ArrowLeft', 4)).toMatchInlineSnapshot(`
+      """
+      see [[Aaa]][[Bbb]]┃ here
+      ----------
+      see [[Aaa]]❰[[Bbb]]❱ here
+      ----------
+      see [[Aaa]]┃[[Bbb]] here
+      ----------
+      see [[Aaa]┃][[Bbb]] here
+      ----------
+      see [[Aaa┃]][[Bbb]] here
+      """
+    `)
+  })
+})
