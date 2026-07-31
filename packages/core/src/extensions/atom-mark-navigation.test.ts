@@ -320,6 +320,23 @@ describe('shift selection across atom-only paragraphs', () => {
 })
 
 describe('caret navigation between adjacent inline units', () => {
+  it('focus: ArrowRight between an image and a following wikilink', async () => {
+    using fixture = setup('focus', ['see <a>![pic](https://example.com/a.png)[[Aaa]] here'])
+    expect(await walkKey(fixture, 'ArrowRight', 4)).toMatchInlineSnapshot(`
+      """
+      see ┃![pic](https://example.com/a.png)[[Aaa]] here
+      ----------
+      see ❰![pic](https://example.com/a.png)❱[[Aaa]] here
+      ----------
+      see ![pic](https://example.com/a.png)┃[[Aaa]] here
+      ----------
+      see ![pic](https://example.com/a.png)[┃[Aaa]] here
+      ----------
+      see ![pic](https://example.com/a.png)[[┃Aaa]] here
+      """
+    `)
+  })
+
   it('focus: ArrowLeft between two adjacent wikilinks', async () => {
     using fixture = setup('focus', ['see [[Aaa]][[Bbb]]<a> here'])
     expect(await walkKey(fixture, 'ArrowLeft', 4)).toMatchInlineSnapshot(`
