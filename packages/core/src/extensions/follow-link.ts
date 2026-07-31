@@ -1,6 +1,7 @@
 import { definePlugin, isApple, Priority, withPriority, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 
+import { getSelectedAtomRange } from './atom-mark-navigation.ts'
 import { findFileAt } from './file-click.ts'
 import type { FileClickHandler } from './file-click.ts'
 import { getLinkUnitAt } from './get-link-unit-at.ts'
@@ -37,7 +38,11 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
         }
 
         const { state } = view
-        const pos = state.selection.head
+        const selectedAtom = getSelectedAtomRange(state)
+        // Resolve inside the selected unit, not at its edge: either edge may
+        // also touch an adjacent unit, and edge positions prefer the
+        // neighbour to the right.
+        const pos = selectedAtom ? selectedAtom.from + 1 : state.selection.head
 
         const wikilink = handlers.onWikilinkClick && findWikilinkAt(state, pos)
         if (wikilink) {

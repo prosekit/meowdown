@@ -74,6 +74,15 @@ function getSelectedRange(state: EditorState, markNames: MarkName[]): MarkRange 
   return range && range.from === from && range.to === to ? range : undefined
 }
 
+/**
+ * The atom source unit the selection exactly spans, or undefined. Inert (like
+ * the rest of atom navigation) in a state built without a mark mode.
+ */
+export function getSelectedAtomRange(state: EditorState): MarkRange | undefined {
+  if (!getMarkMode(state)) return undefined
+  return getSelectedRange(state, [...ATOM_SOURCE_MARK_NAMES])
+}
+
 function selectRange(state: EditorState, range: MarkRange): TextSelection {
   return TextSelection.create(state.doc, range.from, range.to)
 }

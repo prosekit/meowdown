@@ -134,7 +134,7 @@ describe('defineFollowLinkHandler', () => {
     await pressModEnter()
     expect(onWikilinkClick.mock.calls.map((call) => call[0].target)).toMatchInlineSnapshot(`
       [
-        "Bbb",
+        "Aaa",
       ]
     `)
   })
