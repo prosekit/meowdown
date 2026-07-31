@@ -244,7 +244,7 @@ function getUnitEdge(range: MarkRange, oldPos: number, newPos: number, isPointer
   return newPos >= oldPos ? range.to : range.from
 }
 
-// Keep the caret out of a unit's hidden source, whatever put it there: a
+// Keep the selection out of a unit's hidden source, whatever put it there: a
 // pointer, a programmatic setSelection, a position remapped by undo or paste.
 // Every write from inside dissolves the unit, and the keymap commands that
 // would prevent it only cover the keys they bind.
@@ -256,10 +256,23 @@ function createCaretSnapPlugin(marks: AtomMarks): Plugin {
       const markNames = getActiveMarkNames(marks, newState)
       if (markNames.length === 0) return null
       const selection = newState.selection
-      if (!isTextSelection(selection) || !selection.empty) return null
+      if (!isTextSelection(selection)) return null
+      const isPointer = hasPointerSelectionTransaction(transactions)
+      if (!selection.empty) {
+        // Only a dragged range grows to whole units. Find deliberately selects
+        // text inside a unit's source so it can highlight and replace it.
+        if (!isPointer) return null
+        const from =
+          getMarkRangeStrictlyAround(newState, selection.from, markNames)?.from ?? selection.from
+        const to =
+          getMarkRangeStrictlyAround(newState, selection.to, markNames)?.to ?? selection.to
+        if (from === selection.from && to === selection.to) return null
+        const anchor = selection.anchor === selection.from ? from : to
+        const head = selection.head === selection.from ? from : to
+        return newState.tr.setSelection(TextSelection.create(newState.doc, anchor, head))
+      }
       const range = getMarkRangeStrictlyAround(newState, selection.head, markNames)
       if (!range) return null
-      const isPointer = hasPointerSelectionTransaction(transactions)
       const head = getUnitEdge(range, oldState.selection.head, selection.head, isPointer)
       return newState.tr.setSelection(TextSelection.create(newState.doc, head))
     },
