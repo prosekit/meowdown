@@ -12,12 +12,12 @@ permissions:
 concurrency:
   group: >-
     ${{ github.workflow }}-${{
-      github.event_name == 'push' && 'master' ||
-      (github.event.pull_request.stack != null &&
-        format('stack-{0}', github.event.pull_request.stack.number)) ||
-      format('pr-{0}', github.event.pull_request.number)
+      (github.event_name == 'push' && 'push') ||
+      (github.event.pull_request.stack == null && github.event.pull_request.number) ||
+      (github.event.pull_request.stack != null && github.event.pull_request.stack.number)
     }}
 
+  # Only cancel in-progress jobs for stacked PRs that are not the lowest unmerged PR or the top PR.
   # The lowest unmerged PR is the one whose base matches the stack base.
   # The top PR is the one whose position matches the stack size.
   # See: https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/optimizing-ci-for-stacked-pull-requests
