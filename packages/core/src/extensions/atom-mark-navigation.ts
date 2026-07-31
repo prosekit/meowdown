@@ -13,6 +13,8 @@ import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey, Selection, TextSelection } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
+import { getIsComposing } from '../utils/composition.ts'
+
 import { getMarkRangeAt } from './get-mark-range-at.ts'
 import { getMarkMode, type MarkMode } from './mark-mode.ts'
 import type { MarkName } from './mark-names.ts'
@@ -64,6 +66,20 @@ function getRangeAfter(
   for (const name of markNames) {
     const range = getMarkRangeAt(state, pos, name)
     if (range && range.from === pos) return range
+  }
+  return
+}
+
+// The unit range strictly containing `pos`: the caret sits between two
+// characters of one hidden source, where every write splits the unit.
+function getRangeAround(
+  state: EditorState,
+  pos: number,
+  markNames: MarkName[],
+): MarkRange | undefined {
+  for (const name of markNames) {
+    const range = getMarkRangeAt(state, pos, name)
+    if (range && range.from < pos && pos < range.to) return range
   }
   return
 }
@@ -261,6 +277,39 @@ function createForwardDelete(marks: AtomMarks): Command {
   }
 }
 
+// The edge a caret found inside `range` belongs on. Keyboard motion and
+// programmatic jumps leave in the travel direction; a pointer takes the edge it
+// landed nearest, the same split `getRestPosition` makes for hidden runs.
+function getUnitEdge(range: MarkRange, oldPos: number, newPos: number, isPointer: boolean): number {
+  if (isPointer) return newPos - range.from <= range.to - newPos ? range.from : range.to
+  return newPos >= oldPos ? range.to : range.from
+}
+
+// Keep the caret out of a unit's hidden source, whatever put it there: a
+// pointer, a programmatic setSelection, a position remapped by undo or paste.
+// Every write from inside dissolves the unit, and the keymap commands that
+// would prevent it only cover the keys they bind.
+function createCaretSnapPlugin(marks: AtomMarks): Plugin {
+  return new Plugin({
+    key: new PluginKey('atom-mark-caret-snap'),
+    appendTransaction: (transactions, oldState, newState) => {
+      if (getIsComposing()) return null
+      const markNames = activeMarkNames(marks, newState)
+      if (markNames.length === 0) return null
+      const selection = newState.selection
+      if (!isTextSelection(selection) || !selection.empty) return null
+      const range = getRangeAround(newState, selection.head, markNames)
+      if (!range) return null
+      // prosemirror-view tags pointer-originated selections with this meta in
+      // `updateSelection`. Not a documented contract, so pinned to the source:
+      // https://code.haverbeke.berlin/prosemirror/prosemirror-view/src/tag/1.42.0/src/input.ts#L191
+      const isPointer = transactions.some((tr) => tr.getMeta('pointer') != null)
+      const head = getUnitEdge(range, oldState.selection.head, selection.head, isPointer)
+      return newState.tr.setSelection(TextSelection.create(newState.doc, head))
+    },
+  })
+}
+
 const SELECTED_CLASS = 'md-atom-selected'
 
 // Decorate each selected atom's source range with `md-atom-selected`, so its
@@ -301,7 +350,8 @@ function createSelectionPlugin(marks: AtomMarks): Plugin {
  * Make a text-backed source unit a single caret stop in the listed mark modes:
  * arrowing onto it selects the whole source, Shift-arrowing extends over it
  * whole, arrows cross textblock boundaries it touches (which the browser's
- * native caret cannot), and Backspace/Delete remove it as a unit.
+ * native caret cannot), Backspace/Delete remove it as a unit, and a caret that
+ * lands inside the source moves back out to a unit edge.
  */
 export function defineAtomMarkNavigation({ marks }: AtomMarkNavigationOptions): PlainExtension {
   return union(
@@ -316,6 +366,7 @@ export function defineAtomMarkNavigation({ marks }: AtomMarkNavigationOptions): 
       }),
       Priority.high,
     ),
+    definePlugin(createCaretSnapPlugin(marks)),
     definePlugin(createSelectionPlugin(marks)),
   )
 }
