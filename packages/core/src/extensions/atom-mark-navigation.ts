@@ -50,7 +50,7 @@ function getRangeBefore(
     const range = getMarkRangeAt(state, pos - 1, name)
     if (range && range.to === pos) return range
   }
-  return undefined
+  return
 }
 
 // The unit whose range starts exactly at `pos` (immediately right of the caret).
@@ -65,7 +65,7 @@ function getRangeAfter(
     const range = getMarkRangeAt(state, pos, name)
     if (range && range.from === pos) return range
   }
-  return undefined
+  return
 }
 
 // The unit range a non-empty selection exactly spans, or undefined.
@@ -76,7 +76,7 @@ function getSelectedRange(state: EditorState, markNames: MarkName[]): MarkRange 
     const range = getMarkRangeAt(state, from, name)
     if (range && range.from === from && range.to === to) return range
   }
-  return undefined
+  return
 }
 
 /**
@@ -84,7 +84,7 @@ function getSelectedRange(state: EditorState, markNames: MarkName[]): MarkRange 
  * the rest of atom navigation) in a state built without a mark mode.
  */
 export function getSelectedAtomRange(state: EditorState): MarkRange | undefined {
-  if (!getMarkMode(state)) return undefined
+  if (!getMarkMode(state)) return
   return getSelectedRange(state, [...ATOM_SOURCE_MARK_NAMES])
 }
 
@@ -106,7 +106,7 @@ function findSelectionAcrossBlockBoundary(
   // Only a caret sitting exactly on the textblock edge can leave the block.
   const atEdge =
     direction === -1 ? $pos.parentOffset === 0 : $pos.parentOffset === $pos.parent.content.size
-  if (!atEdge || $pos.depth === 0) return undefined
+  if (!atEdge || $pos.depth === 0) return
   // The unit being left behind: one starting (going left) or ending (going
   // right) exactly at the caret. Chromium/WebKit cannot walk out past it.
   const nearUnit =
@@ -116,7 +116,7 @@ function findSelectionAcrossBlockBoundary(
   // (the same landing prosemirror-view's moveSelectionBlock would pick).
   const boundary = direction === -1 ? $pos.before() : $pos.after()
   const target = Selection.findFrom(state.doc.resolve(boundary), direction)
-  if (!target) return undefined
+  if (!target) return
   // The unit being entered: one touching the landing position from the far
   // side. WebKit skips caret stops when walking into such a block.
   const farUnit = isTextSelection(target)
@@ -126,7 +126,7 @@ function findSelectionAcrossBlockBoundary(
     : undefined
   // No unit on either side of the boundary: stay out of the browser's way
   // (native handles bidi/RTL horizontal motion better than we can).
-  if (nearUnit == null && farUnit == null) return undefined
+  if (nearUnit == null && farUnit == null) return
   return target
 }
 
