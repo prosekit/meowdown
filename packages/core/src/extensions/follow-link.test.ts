@@ -149,12 +149,14 @@ describe('defineFollowLinkHandler', () => {
 
     await userEvent.keyboard('{ArrowLeft}')
     await userEvent.keyboard('{Enter}')
-    expect(onWikilinkClick.mock.calls.map((call) => call[0].target)).toMatchInlineSnapshot(`[]`)
+    expect(onWikilinkClick.mock.calls.map((call) => call[0].target)).toMatchInlineSnapshot(`
+      [
+        "Note",
+      ]
+    `)
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
       """
-      see 
-
-       here
+      see [[Note]] here
 
       """
     `)

@@ -29,7 +29,7 @@ export interface TagClickPayload {
   /** The tag name, without the leading `#`. */
   tag: string
   /**
-   * The originating click, or the `Mod-Enter` key press that followed the tag.
+   * The originating click, or the `Enter`/`Mod-Enter` key press that followed the tag.
    * Read modifier keys or position a popover from it.
    */
   event: MouseEvent | KeyboardEvent
