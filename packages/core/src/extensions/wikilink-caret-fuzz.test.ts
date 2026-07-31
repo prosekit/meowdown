@@ -40,7 +40,7 @@ function revealTrailingSpaces(text: string): string {
 // the selection before and after the press, then the markdown the document
 // serializes to, which is where a lost list level or a dissolved wikilink shows
 // up.
-async function fuzzKey(mode: MarkMode, markdown: string, key: string): Promise<string> {
+async function run(mode: MarkMode, markdown: string, key: string): Promise<string> {
   const cases: string[] = []
   for (const pos of findCaretPositions(markdownToDoc(markdown))) {
     using fixture = setupFixture({ extensionOptions: { markMode: mode } })
@@ -110,7 +110,7 @@ const ADJACENT_MARKDOWN = `[[foo]][[bar]]`
 
 describe('caret fuzz over a wikilink outline in focus mode', () => {
   it('records Backspace at every caret position', async () => {
-    expect(await fuzzKey('focus', OUTLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
+    expect(await run('focus', OUTLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
         """
         ===== pos: 2 ===============
         ----- markdown before ------
@@ -501,7 +501,7 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
   })
 
   it('records Space at every caret position', async () => {
-    expect(await fuzzKey('focus', OUTLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
+    expect(await run('focus', OUTLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
         ===== pos: 2 ===============
         ----- markdown before ------
@@ -887,7 +887,7 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
   })
 
   it('records Enter at every caret position', async () => {
-    expect(await fuzzKey('focus', OUTLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
+    expect(await run('focus', OUTLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
         """
         ===== pos: 2 ===============
         ----- markdown before ------
@@ -1315,7 +1315,7 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
 
 describe('caret fuzz over a wikilink outline in hide mode', () => {
   it('records Backspace at every caret position', async () => {
-    expect(await fuzzKey('hide', OUTLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
+    expect(await run('hide', OUTLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
         """
         ===== pos: 2 ===============
         ----- markdown before ------
@@ -1706,7 +1706,7 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
   })
 
   it('records Space at every caret position', async () => {
-    expect(await fuzzKey('hide', OUTLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
+    expect(await run('hide', OUTLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
         ===== pos: 2 ===============
         ----- markdown before ------
@@ -2092,7 +2092,7 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
   })
 
   it('records Enter at every caret position', async () => {
-    expect(await fuzzKey('hide', OUTLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
+    expect(await run('hide', OUTLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
         """
         ===== pos: 2 ===============
         ----- markdown before ------
@@ -2520,7 +2520,7 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
 
 describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
   it('records Backspace at every caret position', async () => {
-    expect(await fuzzKey('focus', INLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
+    expect(await run('focus', INLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
         """
         ===== pos: 1 ===============
         ----- markdown before ------
@@ -2658,7 +2658,7 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
   })
 
   it('records Space at every caret position', async () => {
-    expect(await fuzzKey('focus', INLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
+    expect(await run('focus', INLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
         ===== pos: 1 ===============
         ----- markdown before ------
@@ -2796,179 +2796,179 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
   })
 
   it('records Enter at every caret position', async () => {
-    expect(await fuzzKey('focus', INLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
-        """
-        ===== pos: 1 ===============
-        ----- markdown before ------
-        a [[foo]] b
-        ----- markdown after -------
-        a [[foo]] b
-        ----- selection before -----
-        ┃a [[foo]] b
-        ----- selection after ------
+    expect(await run('focus', INLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
+      """
+      ===== pos: 1 ===============
+      ----- markdown before ------
+      a [[foo]] b
+      ----- markdown after -------
+      a [[foo]] b
+      ----- selection before -----
+      ┃a [[foo]] b
+      ----- selection after ------
 
-        ┃a [[foo]] b
-        ----------------------------
+      ┃a [[foo]] b
+      ----------------------------
 
-        ===== pos: 2 ===============
-        ----- markdown before ------
-        a [[foo]] b
-        ----- markdown after -------
-        a
+      ===== pos: 2 ===============
+      ----- markdown before ------
+      a [[foo]] b
+      ----- markdown after -------
+      a
 
-         [[foo]] b
-        ----- selection before -----
-        a┃ [[foo]] b
-        ----- selection after ------
-        a
-        ┃ [[foo]] b
-        ----------------------------
+       [[foo]] b
+      ----- selection before -----
+      a┃ [[foo]] b
+      ----- selection after ------
+      a
+      ┃ [[foo]] b
+      ----------------------------
 
-        ===== pos: 3 ===============
-        ----- markdown before ------
-        a [[foo]] b
-        ----- markdown after -------
-        a·
+      ===== pos: 3 ===============
+      ----- markdown before ------
+      a [[foo]] b
+      ----- markdown after -------
+      a·
 
-        [[foo]] b
-        ----- selection before -----
-        a ┃[[foo]] b
-        ----- selection after ------
-        a 
-        ┃[[foo]] b
-        ----------------------------
+      [[foo]] b
+      ----- selection before -----
+      a ┃[[foo]] b
+      ----- selection after ------
+      a 
+      ┃[[foo]] b
+      ----------------------------
 
-        ===== pos: 4 ===============
-        ----- markdown before ------
-        a [[foo]] b
-        ----- markdown after -------
-        a [
+      ===== pos: 4 ===============
+      ----- markdown before ------
+      a [[foo]] b
+      ----- markdown after -------
+      a [
 
-        [foo]] b
-        ----- selection before -----
-        a [┃[foo]] b
-        ----- selection after ------
-        a [
-        ┃[foo]] b
-        ----------------------------
+      [foo]] b
+      ----- selection before -----
+      a [┃[foo]] b
+      ----- selection after ------
+      a [
+      ┃[foo]] b
+      ----------------------------
 
-        ===== pos: 5 ===============
-        ----- markdown before ------
-        a [[foo]] b
-        ----- markdown after -------
-        a [[
+      ===== pos: 5 ===============
+      ----- markdown before ------
+      a [[foo]] b
+      ----- markdown after -------
+      a [[
 
-        foo]] b
-        ----- selection before -----
-        a [[┃foo]] b
-        ----- selection after ------
-        a [[
-        ┃foo]] b
-        ----------------------------
+      foo]] b
+      ----- selection before -----
+      a [[┃foo]] b
+      ----- selection after ------
+      a [[
+      ┃foo]] b
+      ----------------------------
 
-        ===== pos: 6 ===============
-        ----- markdown before ------
-        a [[foo]] b
-        ----- markdown after -------
-        a [[f
+      ===== pos: 6 ===============
+      ----- markdown before ------
+      a [[foo]] b
+      ----- markdown after -------
+      a [[f
 
-        oo]] b
-        ----- selection before -----
-        a [[f┃oo]] b
-        ----- selection after ------
-        a [[f
-        ┃oo]] b
-        ----------------------------
+      oo]] b
+      ----- selection before -----
+      a [[f┃oo]] b
+      ----- selection after ------
+      a [[f
+      ┃oo]] b
+      ----------------------------
 
-        ===== pos: 7 ===============
-        ----- markdown before ------
-        a [[foo]] b
-        ----- markdown after -------
-        a [[fo
+      ===== pos: 7 ===============
+      ----- markdown before ------
+      a [[foo]] b
+      ----- markdown after -------
+      a [[fo
 
-        o]] b
-        ----- selection before -----
-        a [[fo┃o]] b
-        ----- selection after ------
-        a [[fo
-        ┃o]] b
-        ----------------------------
+      o]] b
+      ----- selection before -----
+      a [[fo┃o]] b
+      ----- selection after ------
+      a [[fo
+      ┃o]] b
+      ----------------------------
 
-        ===== pos: 8 ===============
-        ----- markdown before ------
-        a [[foo]] b
-        ----- markdown after -------
-        a [[foo
+      ===== pos: 8 ===============
+      ----- markdown before ------
+      a [[foo]] b
+      ----- markdown after -------
+      a [[foo
 
-        ]] b
-        ----- selection before -----
-        a [[foo┃]] b
-        ----- selection after ------
-        a [[foo
-        ┃]] b
-        ----------------------------
+      ]] b
+      ----- selection before -----
+      a [[foo┃]] b
+      ----- selection after ------
+      a [[foo
+      ┃]] b
+      ----------------------------
 
-        ===== pos: 9 ===============
-        ----- markdown before ------
-        a [[foo]] b
-        ----- markdown after -------
-        a [[foo]
+      ===== pos: 9 ===============
+      ----- markdown before ------
+      a [[foo]] b
+      ----- markdown after -------
+      a [[foo]
 
-        ] b
-        ----- selection before -----
-        a [[foo]┃] b
-        ----- selection after ------
-        a [[foo]
-        ┃] b
-        ----------------------------
+      ] b
+      ----- selection before -----
+      a [[foo]┃] b
+      ----- selection after ------
+      a [[foo]
+      ┃] b
+      ----------------------------
 
-        ===== pos: 10 ==============
-        ----- markdown before ------
-        a [[foo]] b
-        ----- markdown after -------
-        a [[foo]]
+      ===== pos: 10 ==============
+      ----- markdown before ------
+      a [[foo]] b
+      ----- markdown after -------
+      a [[foo]]
 
-         b
-        ----- selection before -----
-        a [[foo]]┃ b
-        ----- selection after ------
-        a [[foo]]
-        ┃ b
-        ----------------------------
+       b
+      ----- selection before -----
+      a [[foo]]┃ b
+      ----- selection after ------
+      a [[foo]]
+      ┃ b
+      ----------------------------
 
-        ===== pos: 11 ==============
-        ----- markdown before ------
-        a [[foo]] b
-        ----- markdown after -------
-        a [[foo]]·
+      ===== pos: 11 ==============
+      ----- markdown before ------
+      a [[foo]] b
+      ----- markdown after -------
+      a [[foo]]·
 
-        b
-        ----- selection before -----
-        a [[foo]] ┃b
-        ----- selection after ------
-        a [[foo]] 
-        ┃b
-        ----------------------------
+      b
+      ----- selection before -----
+      a [[foo]] ┃b
+      ----- selection after ------
+      a [[foo]] 
+      ┃b
+      ----------------------------
 
-        ===== pos: 12 ==============
-        ----- markdown before ------
-        a [[foo]] b
-        ----- markdown after -------
-        a [[foo]] b
-        ----- selection before -----
-        a [[foo]] b┃
-        ----- selection after ------
-        a [[foo]] b
-        ┃
-        ----------------------------
-        """
-      `)
+      ===== pos: 12 ==============
+      ----- markdown before ------
+      a [[foo]] b
+      ----- markdown after -------
+      a [[foo]] b
+      ----- selection before -----
+      a [[foo]] b┃
+      ----- selection after ------
+      a [[foo]] b
+      ┃
+      ----------------------------
+      """
+    `)
   })
 })
 
 describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
   it('records Backspace at every caret position', async () => {
-    expect(await fuzzKey('focus', ADJACENT_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
+    expect(await run('focus', ADJACENT_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
         """
         ===== pos: 1 ===============
         ----- markdown before ------
@@ -3139,7 +3139,7 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
   })
 
   it('records Space at every caret position', async () => {
-    expect(await fuzzKey('focus', ADJACENT_MARKDOWN, ' ')).toMatchInlineSnapshot(`
+    expect(await run('focus', ADJACENT_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
         ===== pos: 1 ===============
         ----- markdown before ------
@@ -3310,7 +3310,7 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
   })
 
   it('records Enter at every caret position', async () => {
-    expect(await fuzzKey('focus', ADJACENT_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
+    expect(await run('focus', ADJACENT_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
         """
         ===== pos: 1 ===============
         ----- markdown before ------
