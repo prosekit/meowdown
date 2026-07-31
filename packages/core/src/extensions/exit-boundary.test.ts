@@ -162,6 +162,6 @@ describe('defineExitBoundaryHandler', () => {
     fixture.view.focus()
     await userEvent.keyboard('{ArrowUp}')
     await userEvent.keyboard('{ArrowDown}')
-    expect(onExitBoundary.mock.calls.map((call) => call[0].direction)).toEqual(['up', 'down'])
+    expect(onExitBoundary.mock.calls.map(([payload]) => payload.direction)).toEqual(['up', 'down'])
   })
 })

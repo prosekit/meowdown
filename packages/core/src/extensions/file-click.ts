@@ -25,7 +25,7 @@ export interface FileClickPayload {
   /** The file name shown on the pill. */
   name: string
   /**
-   * The originating click, or the `Mod-Enter` key press that followed the
+   * The originating click, or the `Enter`/`Mod-Enter` key press that followed the
    * pill. Read modifier keys or position a popover from it.
    */
   event: MouseEvent | KeyboardEvent

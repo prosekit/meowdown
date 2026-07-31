@@ -123,6 +123,7 @@ describe('defineFollowLinkHandler', () => {
     expect(onTagClick).not.toHaveBeenCalled()
     expect(docToMarkdown(fixture.doc)).toBe('- [ ] see [[Note]] here\n')
   })
+
   it('Mod-Enter on a selected wikilink next to another wikilink', async () => {
     const onWikilinkClick = vi.fn<WikilinkClickHandler>()
     using fixture = setup({ onWikilinkClick })
@@ -130,14 +131,77 @@ describe('defineFollowLinkHandler', () => {
     fixture.set(n.doc(n.paragraph('see <a>[[Aaa]][[Bbb]] here')))
     fixture.view.focus()
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ┃[[Aaa]][[Bbb]] here"`)
+
     await userEvent.keyboard('{ArrowRight}')
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Aaa]]❱[[Bbb]] here"`)
+
     await pressModEnter()
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Aaa]]❱[[Bbb]] here"`)
-    expect(onWikilinkClick.mock.calls.map((call) => call[0].target)).toMatchInlineSnapshot(`
+
+    expect(onWikilinkClick.mock.calls.map(([payload]) => payload.target)).toMatchInlineSnapshot(`
       [
         "Aaa",
       ]
+    `)
+  })
+  it('Enter on a selected wikilink', async () => {
+    const onWikilinkClick = vi.fn<WikilinkClickHandler>()
+    using fixture = setup({ onWikilinkClick })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see [[Note]]<a> here')))
+    fixture.view.focus()
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Note]]┃ here"`)
+
+    await userEvent.keyboard('{ArrowLeft}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Note]]❱ here"`)
+
+    await userEvent.keyboard('{Enter}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Note]]❱ here"`)
+
+    expect(onWikilinkClick.mock.calls.map(([payload]) => payload.target)).toMatchInlineSnapshot(`
+      [
+        "Note",
+      ]
+    `)
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      see [[Note]] here
+
+      """
+    `)
+  })
+  it('Enter on a selected image with no matching handler is a no-op', async () => {
+    using fixture = setup({})
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see ![pic](https://example.com/a.png)<a> here')))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{ArrowLeft}')
+    await userEvent.keyboard('{Enter}')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      see 
+
+       here
+
+      """
+    `)
+  })
+
+  it('Enter on a selected wikilink inside a list item does not split the item', async () => {
+    using fixture = setup({})
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('see [[Note]]<a> here'))))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{ArrowLeft}')
+    await userEvent.keyboard('{Enter}')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - see 
+      -  here
+
+      """
     `)
   })
 })

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
+import { userEvent } from 'vitest/browser'
 
+import { docToMarkdown } from '../converters/pm-to-md.ts'
 import {
   formatSelectionSteps,
   setupFixture,
@@ -314,6 +316,107 @@ describe('shift selection across atom-only paragraphs', () => {
       ----------
       hell❰o
       ![](https://twitter.com/jack/status/20)❱
+      """
+    `)
+  })
+})
+
+describe('caret navigation between adjacent inline units', () => {
+  it('focus: ArrowRight between an image and a following wikilink', async () => {
+    using fixture = setup('focus', ['see <a>![pic](https://example.com/a.png)[[Aaa]] here'])
+    expect(await walkKey(fixture, 'ArrowRight', 4)).toMatchInlineSnapshot(`
+      """
+      see ┃![pic](https://example.com/a.png)[[Aaa]] here
+      ----------
+      see ❰![pic](https://example.com/a.png)❱[[Aaa]] here
+      ----------
+      see ![pic](https://example.com/a.png)┃[[Aaa]] here
+      ----------
+      see ![pic](https://example.com/a.png)❰[[Aaa]]❱ here
+      ----------
+      see ![pic](https://example.com/a.png)[[Aaa]]┃ here
+      """
+    `)
+  })
+
+  it('focus: Backspace between two adjacent wikilinks removes the whole left one', async () => {
+    using fixture = setup('focus', ['see [[Aaa]][[Bbb]]<a> here'])
+    await userEvent.keyboard('{ArrowLeft}{ArrowLeft}')
+    await userEvent.keyboard('{Backspace}')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      see [[Bbb]] here
+
+      """
+    `)
+  })
+
+  it('focus: Delete between an image and a following wikilink removes the whole wikilink', async () => {
+    using fixture = setup('focus', ['see <a>![pic](https://example.com/a.png)[[Aaa]] here'])
+    await userEvent.keyboard('{ArrowRight}{ArrowRight}')
+    await userEvent.keyboard('{Delete}')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      see ![pic](https://example.com/a.png) here
+
+      """
+    `)
+  })
+
+  it('focus: Shift-ArrowLeft from between two adjacent wikilinks swallows the left one whole', async () => {
+    using fixture = setup('focus', ['see [[Aaa]][[Bbb]]<a> here'])
+    await userEvent.keyboard('{ArrowLeft}{ArrowLeft}')
+    await userEvent.keyboard('{Shift>}{ArrowLeft}{/Shift}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Aaa]]❱[[Bbb]] here"`)
+  })
+
+  it('focus: ArrowLeft walks over a wikilink followed by an image as two units', async () => {
+    using fixture = setup('focus', ['see [[Aaa]]![pic](https://example.com/a.png)<a> here'])
+    expect(await walkKey(fixture, 'ArrowLeft', 4)).toMatchInlineSnapshot(`
+      """
+      see [[Aaa]]![pic](https://example.com/a.png)┃ here
+      ----------
+      see [[Aaa]]❰![pic](https://example.com/a.png)❱ here
+      ----------
+      see [[Aaa]]┃![pic](https://example.com/a.png) here
+      ----------
+      see ❰[[Aaa]]❱![pic](https://example.com/a.png) here
+      ----------
+      see ┃[[Aaa]]![pic](https://example.com/a.png) here
+      """
+    `)
+  })
+
+  it('hide: ArrowLeft walks over two adjacent wikilinks as two units', async () => {
+    using fixture = setup('hide', ['see [[Aaa]][[Bbb]]<a> here'])
+    expect(await walkKey(fixture, 'ArrowLeft', 4)).toMatchInlineSnapshot(`
+      """
+      see [[Aaa]][[Bbb]]┃ here
+      ----------
+      see [[Aaa]]❰[[Bbb]]❱ here
+      ----------
+      see [[Aaa]]┃[[Bbb]] here
+      ----------
+      see ❰[[Aaa]]❱[[Bbb]] here
+      ----------
+      see ┃[[Aaa]][[Bbb]] here
+      """
+    `)
+  })
+
+  it('focus: ArrowLeft between two adjacent wikilinks', async () => {
+    using fixture = setup('focus', ['see [[Aaa]][[Bbb]]<a> here'])
+    expect(await walkKey(fixture, 'ArrowLeft', 4)).toMatchInlineSnapshot(`
+      """
+      see [[Aaa]][[Bbb]]┃ here
+      ----------
+      see [[Aaa]]❰[[Bbb]]❱ here
+      ----------
+      see [[Aaa]]┃[[Bbb]] here
+      ----------
+      see ❰[[Aaa]]❱[[Bbb]] here
+      ----------
+      see ┃[[Aaa]][[Bbb]] here
       """
     `)
   })

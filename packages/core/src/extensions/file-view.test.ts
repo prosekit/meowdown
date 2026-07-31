@@ -268,10 +268,10 @@ describe('file pill click callback', () => {
     await userEvent.click(pmRoot.getByTitle('a.pdf'))
     await userEvent.click(pmRoot.getByTitle('b.zip'))
     await vi.waitFor(() => expect(onFileClick).toHaveBeenCalledTimes(2))
-    expect(onFileClick.mock.calls.map((call) => call[0].href)).toEqual([
+    expect(onFileClick.mock.calls.map(([payload]) => payload.href)).toEqual([
       'assets/a.pdf',
       'assets/b.zip',
     ])
-    expect(onFileClick.mock.calls.map((call) => call[0].name)).toEqual(['a.pdf', 'b.zip'])
+    expect(onFileClick.mock.calls.map(([payload]) => payload.name)).toEqual(['a.pdf', 'b.zip'])
   })
 })

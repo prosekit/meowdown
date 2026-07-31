@@ -37,41 +37,46 @@ function activeMarkNames(marks: AtomMarks, state: EditorState): MarkName[] {
   return marks.flatMap((mark) => (mark.modes.includes(mode) ? [mark.name] : []))
 }
 
-// The contiguous run of a single source mark that touches `pos`, or undefined.
-function getRangeAt(state: EditorState, pos: number, markNames: MarkName[]): MarkRange | undefined {
-  for (const name of markNames) {
-    const range = getMarkRangeAt(state, pos, name)
-    if (range) return range
-  }
-  return undefined
-}
-
 // The unit whose range ends exactly at `pos` (immediately left of the caret).
+// Probes from inside the left neighbour (`pos - 1`): probing `pos` itself
+// cannot see the unit when another atom run starts exactly at `pos`, because
+// `getMarkRange` prefers the child to the right.
 function getRangeBefore(
   state: EditorState,
   pos: number,
   markNames: MarkName[],
 ): MarkRange | undefined {
-  const range = getRangeAt(state, pos, markNames)
-  return range && range.to === pos ? range : undefined
+  for (const name of markNames) {
+    const range = getMarkRangeAt(state, pos - 1, name)
+    if (range && range.to === pos) return range
+  }
+  return
 }
 
 // The unit whose range starts exactly at `pos` (immediately right of the caret).
+// Checks the edge per mark name: the first name to return any range may be a
+// unit of another type ending at `pos`, shadowing the one that starts there.
 function getRangeAfter(
   state: EditorState,
   pos: number,
   markNames: MarkName[],
 ): MarkRange | undefined {
-  const range = getRangeAt(state, pos, markNames)
-  return range && range.from === pos ? range : undefined
+  for (const name of markNames) {
+    const range = getMarkRangeAt(state, pos, name)
+    if (range && range.from === pos) return range
+  }
+  return
 }
 
 // The unit range a non-empty selection exactly spans, or undefined.
 function getSelectedRange(state: EditorState, markNames: MarkName[]): MarkRange | undefined {
   const { from, to, empty } = state.selection
   if (empty) return
-  const range = getRangeAt(state, from, markNames)
-  return range && range.from === from && range.to === to ? range : undefined
+  for (const name of markNames) {
+    const range = getMarkRangeAt(state, from, name)
+    if (range && range.from === from && range.to === to) return range
+  }
+  return
 }
 
 /**
@@ -79,7 +84,7 @@ function getSelectedRange(state: EditorState, markNames: MarkName[]): MarkRange 
  * the rest of atom navigation) in a state built without a mark mode.
  */
 export function getSelectedAtomRange(state: EditorState): MarkRange | undefined {
-  if (!getMarkMode(state)) return undefined
+  if (!getMarkMode(state)) return
   return getSelectedRange(state, [...ATOM_SOURCE_MARK_NAMES])
 }
 
@@ -101,7 +106,7 @@ function findSelectionAcrossBlockBoundary(
   // Only a caret sitting exactly on the textblock edge can leave the block.
   const atEdge =
     direction === -1 ? $pos.parentOffset === 0 : $pos.parentOffset === $pos.parent.content.size
-  if (!atEdge || $pos.depth === 0) return undefined
+  if (!atEdge || $pos.depth === 0) return
   // The unit being left behind: one starting (going left) or ending (going
   // right) exactly at the caret. Chromium/WebKit cannot walk out past it.
   const nearUnit =
@@ -111,7 +116,7 @@ function findSelectionAcrossBlockBoundary(
   // (the same landing prosemirror-view's moveSelectionBlock would pick).
   const boundary = direction === -1 ? $pos.before() : $pos.after()
   const target = Selection.findFrom(state.doc.resolve(boundary), direction)
-  if (!target) return undefined
+  if (!target) return
   // The unit being entered: one touching the landing position from the far
   // side. WebKit skips caret stops when walking into such a block.
   const farUnit = isTextSelection(target)
@@ -121,7 +126,7 @@ function findSelectionAcrossBlockBoundary(
     : undefined
   // No unit on either side of the boundary: stay out of the browser's way
   // (native handles bidi/RTL horizontal motion better than we can).
-  if (nearUnit == null && farUnit == null) return undefined
+  if (nearUnit == null && farUnit == null) return
   return target
 }
 
