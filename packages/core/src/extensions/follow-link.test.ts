@@ -136,7 +136,7 @@ describe('defineFollowLinkHandler', () => {
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Aaa]]❱[[Bbb]] here"`)
     expect(onWikilinkClick.mock.calls.map((call) => call[0].target)).toMatchInlineSnapshot(`
       [
-        "Bbb",
+        "Aaa",
       ]
     `)
   })
