@@ -1,6 +1,6 @@
 import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
 import { markdownToDoc } from '../converters/md-to-pm.ts'
@@ -11,7 +11,7 @@ import type { MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 
-const FUZZ_TIMEOUT = 300_000
+vi.setConfig({ testTimeout: 300_000 })
 
 // A position is a caret stop when `Selection.near` settles exactly on it and
 // stays an empty text selection. Positions inside a wikilink's hidden `[[` /
@@ -316,7 +316,7 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
           """
         `)
     },
-    FUZZ_TIMEOUT,
+
   )
 
   it(
@@ -546,7 +546,7 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
         """
       `)
     },
-    FUZZ_TIMEOUT,
+
   )
 
   it(
@@ -816,7 +816,7 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
         """
       `)
     },
-    FUZZ_TIMEOUT,
+
   )
 })
 
@@ -1053,7 +1053,7 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
           """
         `)
     },
-    FUZZ_TIMEOUT,
+
   )
 
   it(
@@ -1283,7 +1283,7 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
         """
       `)
     },
-    FUZZ_TIMEOUT,
+
   )
 
   it(
@@ -1553,7 +1553,7 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
         """
       `)
     },
-    FUZZ_TIMEOUT,
+
   )
 })
 
@@ -1625,7 +1625,7 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
         """
       `)
     },
-    FUZZ_TIMEOUT,
+
   )
 
   it(
@@ -1695,7 +1695,7 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
         """
       `)
     },
-    FUZZ_TIMEOUT,
+
   )
 
   it(
@@ -1797,7 +1797,7 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
         """
       `)
     },
-    FUZZ_TIMEOUT,
+
   )
 })
 
@@ -1884,7 +1884,7 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
           """
         `)
     },
-    FUZZ_TIMEOUT,
+
   )
 
   it(
@@ -1969,7 +1969,7 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
         """
       `)
     },
-    FUZZ_TIMEOUT,
+
   )
 
   it(
@@ -2095,6 +2095,6 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
         """
       `)
     },
-    FUZZ_TIMEOUT,
+
   )
 })
