@@ -49,14 +49,12 @@ async function run(mode: MarkMode, markdown: string, key: string): Promise<strin
     fixture.view.focus()
     await expect.element(pmRoot).toBeVisible()
 
-    const markdownBefore = revealTrailingSpaces(docToMarkdown(fixture.doc) )
+    const markdownBefore = revealTrailingSpaces(docToMarkdown(fixture.doc))
     const selectionbefore = revealTrailingSpaces(getSelectionSnapshot(fixture.state))
 
     await userEvent.keyboard(key)
 
-    const markdownAfter = revealTrailingSpaces(
-      docToMarkdown(fixture.doc)
-    )
+    const markdownAfter = revealTrailingSpaces(docToMarkdown(fixture.doc))
     const selectionAfter = revealTrailingSpaces(getSelectionSnapshot(fixture.state))
 
     cases.push(
