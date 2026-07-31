@@ -1,7 +1,6 @@
 @import 'tailwindcss';
 @import '@meowdown/core/style.css';
 @import '@meowdown/react/style.css';
-@plugin '@egoist/tailwindcss-icons';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -10,171 +9,39 @@
 }
 
 html {
-  background-color: light-dark(var(--color-orange-50), var(--color-stone-950));
-}
-
-/* The source mode renders a CodeMirror editor. */
-.meowdown [data-editor='codemirror'] {
-  display: flex;
-  flex: 1 0 auto;
-
-  .cm-editor {
-    flex: 1;
-    font-size: 0.95rem;
-
-    &.cm-focused {
-      outline: none;
-    }
-  }
-
-  .cm-content {
-    /* Same gutter as .ProseMirror so switching modes does not shift text. */
-    padding: 1.25rem var(--meowdown-gutter) 1.75rem;
-    font-family: var(--meowdown-font-mono);
-    caret-color: var(--meowdown-accent);
-  }
-}
-
-/* The active mode description re-animates whenever the mode changes (keyed
- * remount in app.tsx). */
-@keyframes meowdown-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(3px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.mode-desc {
-  animation: meowdown-fade-in 0.25s ease;
-}
-
-/* a top/bottom border briefly fades in inside the
- * editor box when the caret leaves the document boundary */
-@keyframes edge-border {
-  0% {
-    opacity: 0;
-  }
-  20% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-.edge-border {
-  animation: edge-border 0.5s ease forwards;
+  background-color: light-dark(var(--color-white), var(--color-stone-950));
 }
 
 /* ---------------------------------------------------------------------------
- * Segmented control
+ * Caret rendering switches
  *
- * Native radios drive a single sliding thumb (`::before`) with zero JS:
- * `:has(:checked)` picks the active option and the thumb transitions to it.
- * Equal `1fr` columns collapse to the widest label, so a `100%` step per
- * option lands the thumb exactly on each segment.
+ * Core ships `caret-color: transparent` on
+ * `.ProseMirror[data-meowdown-virtual-caret]`, so every override here has to
+ * outrank it. These classes are the point of the caret-drag page: they isolate
+ * which of the drawn caret and the suppressed native caret is responsible for
+ * the missing iOS magnifier.
  * ------------------------------------------------------------------------- */
-.segmented {
-  position: relative;
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  padding: 0.25rem;
-  border-radius: 9999px;
-  background: light-dark(
-    var(--color-stone-100),
-    color-mix(in oklab, var(--color-stone-800) 80%, transparent)
-  );
+
+/* `virtual` is the shipped behavior and needs no rule. */
+
+.probe-caret-native .md-virtual-caret {
+  visibility: hidden !important;
 }
 
-.segmented::before {
-  content: '';
-  position: absolute;
-  top: 0.25rem;
-  bottom: 0.25rem;
-  left: 0.25rem;
-  width: calc((100% - 0.5rem) / var(--seg-count, 3));
-  border-radius: 9999px;
-  background: light-dark(var(--color-white), var(--color-stone-950));
-  box-shadow: 0 1px 2px 0 color-mix(in oklab, var(--color-black) 5%, transparent);
-  transition: transform 0.2s ease;
-  pointer-events: none;
+.probe-caret-native .ProseMirror[data-meowdown-virtual-caret],
+.probe-caret-both .ProseMirror[data-meowdown-virtual-caret] {
+  caret-color: auto !important;
 }
 
-/* Slide the thumb onto the checked option (supports up to 5 segments). */
-.segmented:has(> label:nth-child(2) input:checked)::before {
-  transform: translateX(100%);
-}
-.segmented:has(> label:nth-child(3) input:checked)::before {
-  transform: translateX(200%);
-}
-.segmented:has(> label:nth-child(4) input:checked)::before {
-  transform: translateX(300%);
-}
-.segmented:has(> label:nth-child(5) input:checked)::before {
-  transform: translateX(400%);
+/* Almost invisible, but not the `transparent` keyword. If iOS restores the
+ * magnifier here and not under `transparent`, the suppression keys off the
+ * keyword rather than off alpha, and we can keep both. */
+.probe-caret-faint .ProseMirror[data-meowdown-virtual-caret] {
+  caret-color: rgb(0 0 0 / 1%) !important;
 }
 
-.segmented label {
-  position: relative;
-  z-index: 1;
-  cursor: pointer;
-  border-radius: 9999px;
-  padding: 0.375rem 0.875rem;
-  text-align: center;
-  font-size: 0.875rem;
-  font-weight: 500;
-  white-space: nowrap;
-  color: light-dark(var(--color-stone-500), var(--color-stone-400));
-  transition: color 0.2s ease;
-}
-
-/* Compact segments so all five fit a phone-width toolbar (down to 320px).
- * Equal `1fr` columns cannot fit there at a readable font size, and a
- * space-constrained grid resolves them unequally anyway, which breaks the
- * thumb's `translateX` math. So on phones the columns are content-sized and
- * the checked label carries the pill itself; the slide stays desktop-only. */
-@media (width < 40rem) {
-  .segmented {
-    grid-auto-columns: auto;
-  }
-
-  .segmented::before {
-    display: none;
-  }
-
-  .segmented label {
-    padding: 0.375rem 0.3125rem;
-    font-size: 0.75rem;
-  }
-
-  .segmented label:has(input:checked) {
-    background: light-dark(var(--color-white), var(--color-stone-950));
-    box-shadow: 0 1px 2px 0 color-mix(in oklab, var(--color-black) 5%, transparent);
-  }
-}
-
-.segmented label:hover {
-  color: light-dark(var(--color-stone-800), var(--color-stone-200));
-}
-
-.segmented label:has(input:checked) {
-  color: light-dark(var(--color-stone-900), var(--color-white));
-}
-
-.segmented label:has(input:focus-visible) {
-  outline: 2px solid var(--color-orange-500);
-  outline-offset: 2px;
-}
-
-.segmented input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
+/* The editor sits inside a bordered card, so it does not need the wide gutter
+ * the real site uses for its block handle. */
+[class^='probe-caret-'] .meowdown {
+  --meowdown-gutter: 1rem;
 }
