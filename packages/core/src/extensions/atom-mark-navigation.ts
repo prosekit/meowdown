@@ -47,13 +47,19 @@ function getRangeAt(state: EditorState, pos: number, markNames: MarkName[]): Mar
 }
 
 // The unit whose range ends exactly at `pos` (immediately left of the caret).
+// Probes from inside the left neighbour (`pos - 1`): probing `pos` itself
+// cannot see the unit when another atom run starts exactly at `pos`, because
+// `getMarkRange` prefers the child to the right.
 function getRangeBefore(
   state: EditorState,
   pos: number,
   markNames: MarkName[],
 ): MarkRange | undefined {
-  const range = getRangeAt(state, pos, markNames)
-  return range && range.to === pos ? range : undefined
+  for (const name of markNames) {
+    const range = getMarkRangeAt(state, pos - 1, name)
+    if (range && range.to === pos) return range
+  }
+  return undefined
 }
 
 // The unit whose range starts exactly at `pos` (immediately right of the caret).

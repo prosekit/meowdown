@@ -330,9 +330,9 @@ describe('caret navigation between adjacent inline units', () => {
       ----------
       see [[Aaa]]┃[[Bbb]] here
       ----------
-      see [[Aaa]┃][[Bbb]] here
+      see ❰[[Aaa]]❱[[Bbb]] here
       ----------
-      see [[Aaa┃]][[Bbb]] here
+      see ┃[[Aaa]][[Bbb]] here
       """
     `)
   })
