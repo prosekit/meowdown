@@ -138,4 +138,23 @@ describe('defineFollowLinkHandler', () => {
       ]
     `)
   })
+  it('Enter on a selected wikilink', async () => {
+    const onWikilinkClick = vi.fn<WikilinkClickHandler>()
+    using fixture = setup({ onWikilinkClick })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see [[Note]]<a> here')))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{ArrowLeft}')
+    await userEvent.keyboard('{Enter}')
+    expect(onWikilinkClick.mock.calls.map((call) => call[0].target)).toMatchInlineSnapshot(`[]`)
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      see 
+
+       here
+
+      """
+    `)
+  })
 })
