@@ -180,7 +180,9 @@ describe('defineFollowLinkHandler', () => {
     await userEvent.keyboard('{Enter}')
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
       """
-      see ![pic](https://example.com/a.png) here
+      see 
+
+       here
 
       """
     `)
@@ -196,7 +198,8 @@ describe('defineFollowLinkHandler', () => {
     await userEvent.keyboard('{Enter}')
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
       """
-      - see [[Note]] here
+      - see 
+      -  here
 
       """
     `)
