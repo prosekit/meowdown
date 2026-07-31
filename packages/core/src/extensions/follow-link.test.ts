@@ -129,9 +129,11 @@ describe('defineFollowLinkHandler', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('see <a>[[Aaa]][[Bbb]] here')))
     fixture.view.focus()
-
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot()
     await userEvent.keyboard('{ArrowRight}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot()
     await pressModEnter()
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot()
     expect(onWikilinkClick.mock.calls.map((call) => call[0].target)).toMatchInlineSnapshot(`
       [
         "Bbb",
