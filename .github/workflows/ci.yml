@@ -121,6 +121,20 @@ jobs:
       - name: Report Coverage
         uses: davelosert/vitest-coverage-report-action@8b157684c6a6b259b97d45e72b44242865c0f6a5 # v2.12.2
 
+  ci-ok:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    if: always()
+    needs: [lint, build, test]
+
+    steps:
+      - name: Verify that all jobs succeeded
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}
+        run: |
+          echo 'Some jobs did not succeed: ${{ toJSON(needs) }}'
+          exit 1
+
   publish-snapshot:
     runs-on: ubuntu-latest
     timeout-minutes: 15
