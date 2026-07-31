@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.63.1](https://github.com/prosekit/meowdown/compare/v0.63.0...v0.63.1) (2026-07-31)
+
+
+### Bug Fixes
+
+* follow a selected atom unit on `Enter` ([#402](https://github.com/prosekit/meowdown/issues/402)) ([2df92f0](https://github.com/prosekit/meowdown/commit/2df92f0225dc612aba5c1bcadf22e8b823afd23d))
+* resolve the follow target from inside the selected atom unit ([#404](https://github.com/prosekit/meowdown/issues/404)) ([c76d2e6](https://github.com/prosekit/meowdown/commit/c76d2e69fa8309103d4c872298a120ade618c16a))
+
 ## [0.63.0](https://github.com/prosekit/meowdown/compare/v0.62.0...v0.63.0) (2026-07-30)
 
 
