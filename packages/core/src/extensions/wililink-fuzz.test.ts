@@ -3103,7 +3103,7 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
   })
 
   it('records Space at every caret position', async () => {
-    expect(await run('focus', ADJACENT_MARKDOWN, ' ')).toMatchInlineSnapshot(`
+    expect(await run('focus', ADJACENT_MARKDOWN, '{Space}')).toMatchInlineSnapshot(`
       """
       ===== pos: 1 =====================
       ----- markdown before ------------
