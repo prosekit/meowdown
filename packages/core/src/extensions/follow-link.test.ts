@@ -159,4 +159,35 @@ describe('defineFollowLinkHandler', () => {
       """
     `)
   })
+  it('Enter on a selected image with no matching handler is a no-op', async () => {
+    using fixture = setup({})
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see ![pic](https://example.com/a.png)<a> here')))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{ArrowLeft}')
+    await userEvent.keyboard('{Enter}')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      see ![pic](https://example.com/a.png) here
+
+      """
+    `)
+  })
+
+  it('Enter on a selected wikilink inside a list item does not split the item', async () => {
+    using fixture = setup({})
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('see [[Note]]<a> here'))))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{ArrowLeft}')
+    await userEvent.keyboard('{Enter}')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - see [[Note]] here
+
+      """
+    `)
+  })
 })
