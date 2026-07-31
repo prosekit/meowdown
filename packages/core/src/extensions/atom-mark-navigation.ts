@@ -37,15 +37,6 @@ function activeMarkNames(marks: AtomMarks, state: EditorState): MarkName[] {
   return marks.flatMap((mark) => (mark.modes.includes(mode) ? [mark.name] : []))
 }
 
-// The contiguous run of a single source mark that touches `pos`, or undefined.
-function getRangeAt(state: EditorState, pos: number, markNames: MarkName[]): MarkRange | undefined {
-  for (const name of markNames) {
-    const range = getMarkRangeAt(state, pos, name)
-    if (range) return range
-  }
-  return undefined
-}
-
 // The unit whose range ends exactly at `pos` (immediately left of the caret).
 // Probes from inside the left neighbour (`pos - 1`): probing `pos` itself
 // cannot see the unit when another atom run starts exactly at `pos`, because
@@ -63,21 +54,29 @@ function getRangeBefore(
 }
 
 // The unit whose range starts exactly at `pos` (immediately right of the caret).
+// Checks the edge per mark name: the first name to return any range may be a
+// unit of another type ending at `pos`, shadowing the one that starts there.
 function getRangeAfter(
   state: EditorState,
   pos: number,
   markNames: MarkName[],
 ): MarkRange | undefined {
-  const range = getRangeAt(state, pos, markNames)
-  return range && range.from === pos ? range : undefined
+  for (const name of markNames) {
+    const range = getMarkRangeAt(state, pos, name)
+    if (range && range.from === pos) return range
+  }
+  return undefined
 }
 
 // The unit range a non-empty selection exactly spans, or undefined.
 function getSelectedRange(state: EditorState, markNames: MarkName[]): MarkRange | undefined {
   const { from, to, empty } = state.selection
   if (empty) return
-  const range = getRangeAt(state, from, markNames)
-  return range && range.from === from && range.to === to ? range : undefined
+  for (const name of markNames) {
+    const range = getMarkRangeAt(state, from, name)
+    if (range && range.from === from && range.to === to) return range
+  }
+  return undefined
 }
 
 /**
