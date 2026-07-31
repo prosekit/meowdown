@@ -1,485 +1,95 @@
-import type { ExitBoundaryHandler } from '@meowdown/core'
-import {
-  MarkdownView,
-  WikilinkHoverCard,
-  type EditorHandle,
-  type TagItem,
-  type WikilinkItem,
-} from '@meowdown/react'
-import { getId } from '@ocavue/utils'
-import { clsx } from 'clsx/lite'
-import {
-  type CSSProperties,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react'
+import { useEffect, useState, type ReactElement } from 'react'
 
-import { DemoEditor } from './components/demo-editor.tsx'
-import { FindShortcut, useFindDemo } from './find-demo.tsx'
-import { SelectionMenuShortcut, useSelectionDemo } from './selection-demo.tsx'
-import { uploadFile } from './upload-file.ts'
-import { MODES, useEditorMode } from './use-editor-mode.ts'
+import { snapshotEnv, watchEnv } from './probe/env.ts'
+import { PROBE_PAGES } from './probe/pages.tsx'
+import { LogPanel } from './probe/panel.tsx'
+import { beaconSave, flushMirroredRun, sessionId, setPage } from './probe/recorder.ts'
 
-// Confirm, then open the target in a new tab. Shared by the link and image
-// click handlers below.
-function confirmAndOpen(label: string, url: string): void {
-  if (window.confirm(`Open ${label} in a new tab?\n${url}`)) {
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }
+function useHash(): string {
+  const [hash, setHash] = useState(() => window.location.hash || '#/')
+  useEffect(() => {
+    const onHashChange = () => setHash(window.location.hash || '#/')
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
+  return hash
 }
 
-function handleLinkClick({ href }: { href: string }): void {
-  confirmAndOpen('this link', href)
-}
-
-function handleImageClick({ src }: { src: string }): void {
-  confirmAndOpen('this image', src)
-}
-
-function handleTagClick({ tag }: { tag: string }): void {
-  window.alert(`Clicked tag: #${tag}`)
-}
-
-function handleWikilinkClick({ target }: { target: string }): void {
-  window.alert(`Clicked wikilink: ${target}`)
-}
-
-// Demo note contents for the wikilink hover cards. `Travel plans` is left out
-// on purpose: a target without content renders no card.
-const NOTE_PREVIEWS: Record<string, string> = {
-  'Cat care basics': `# Cat care basics
-
-Feed twice a day, fresh water always, and never skip **play time**.
-
-- Brush long-haired cats daily
-- Scratching posts save the couch`,
-  'Daily journal': `# Daily journal
-
-Slow morning, good coffee. Sketched the outline for the #meowdown demo and moved [[Project ideas]] forward.
-
-+ [x] Morning pages
-+ [ ] Publish the changelog`,
-  'Meeting notes': `# Meeting notes
-
-Agreed to ship the hover card demo this week. *Everyone* liked the passive preview approach.`,
-  'Project ideas': `# Project ideas
-
-- A cozy reading nook
-- A cat-shaped bookshelf
-- A tiny herb garden`,
-  'Reading list': `# Reading list
-
-1. *The Mythical Man-Month*
-2. [CommonMark spec](https://commonmark.org)
-3. ~~Working in Public~~ (finished!)`,
-}
-
-// Hover preview for wikilinks: a known note renders as a passive Markdown
-// card, an unknown target renders no card at all.
-function WikilinkPreviewCard() {
+function EnvTable(): ReactElement {
+  const env = snapshotEnv()
+  const media = env.media as Record<string, boolean>
+  const viewport = env.viewport as Record<string, unknown>
   return (
-    <WikilinkHoverCard>
-      {(hit) => {
-        const markdown = NOTE_PREVIEWS[hit.target]
-        if (!markdown) return null
-        return (
-          <div className="meowdown px-3 py-2 text-sm [&_.meowdown-content]:p-0!">
-            <MarkdownView markdown={markdown} interactive={false} />
-          </div>
-        )
-      }}
-    </WikilinkHoverCard>
+    <section className="flex flex-col gap-2 rounded-xl border border-stone-300 p-3 text-xs dark:border-stone-700">
+      <h2 className="text-xs font-semibold tracking-wide uppercase opacity-60">环境</h2>
+      <p className="font-mono break-all opacity-70">{String(env.userAgent)}</p>
+      <p className="font-mono opacity-70">
+        maxTouchPoints={String(env.maxTouchPoints)} dpr={String(viewport.devicePixelRatio)} inner=
+        {String(viewport.innerWidth)}×{String(viewport.innerHeight)} visual=
+        {String(viewport.visualWidth)}×{String(viewport.visualHeight)}
+      </p>
+      <ul className="grid grid-cols-2 gap-x-3 font-mono opacity-70">
+        {Object.entries(media).map(([query, matches]) => (
+          <li key={query}>
+            {matches ? '✅' : '⬜️'} {query}
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
 
-// Sizes for the file pills: the demo file in INITIAL_CONTENT, plus every
-// upload recorded by `uploadAndTrackFile`. Stands in for the stat lookup a
-// real host would do.
-const FILE_SIZE_BY_HREF = new Map<string, number>([['files/meowdown-press-kit.zip', 3_481_294]])
-
-function resolveFileLink({ href }: { href: string }): boolean {
-  return href.startsWith('files/') || href.includes('tmpfiles.org/dl/')
-}
-
-async function resolveFileInfo(href: string): Promise<{ size: number } | undefined> {
-  // Simulate a stat round-trip so the size visibly fills in after the pill.
-  await new Promise((resolve) => setTimeout(resolve, 300))
-  const size = FILE_SIZE_BY_HREF.get(href)
-  return size == null ? undefined : { size }
-}
-
-async function uploadAndTrackFile(file: File): Promise<string> {
-  const url = await uploadFile(file)
-  FILE_SIZE_BY_HREF.set(url, file.size)
-  return url
-}
-
-function handleFileClick({ name, href }: { name: string; href: string }): void {
-  if (/^https?:\/\//i.test(href)) {
-    confirmAndOpen(`the file "${name}"`, href)
-  } else {
-    window.alert(`Clicked file: ${name} (${href})`)
-  }
-}
-
-const INITIAL_CONTENT = `
-# Welcome to Meowdown
-
-A hybrid Markdown editor that renders as you type, so you never break your flow.
-
-Weave in **bold**, *italic*, \`inline code\`, or ~~strikethrough~~ without reaching for a toolbar.
-
-Drop a [link](https://github.com/prosekit/meowdown) and keep on writing.
-
-Label your notes with tags like #meow and #markdown. Type \`#\` followed by a letter to see suggestions.
-
-Connect notes with wikilinks like [[Daily journal]] and [[Reading list]]. Type \`[[\` to link another note.
-Select some text and click the sparkle button (or press \`Mod-Shift-J\`) to run a command on it. The result streams into a preview, and nothing changes until you accept it.
-
-Track things two ways. Type \`+ \` for a circle checkbox task, or \`[] \` for a square checkbox task:
-
-+ [ ] Ship the circle task
-+ [x] Read the research doc
-- [ ] Buy cat food
-- [x] Water the plants
-
-Outline your thoughts with nested bullets. Hover a bullet that has children and click it (or press \`Mod-.\`) to fold. A folded bullet is saved with a \`+\` marker, so it stays folded next time:
-
-- Project ideas
-  - A cozy reading nook
-  - A cat-shaped bookshelf
-- Groceries
-  - Cat food
-  - Houseplants
-+ This one is already folded (click to expand)
-  - Hidden child one
-  - Hidden child two
-
-Drop in an image and it renders right where you wrote it. Paste or drag one in to upload your own:
-
-Small images flow inline ![](https://static.photos/yellow/16x16/3) with the surrounding text.
-
-Paste a YouTube or tweet link and it embeds itself. Undo once to get the plain link back:
-
-![](https://www.youtube.com/watch?v=aqz-KE-bpKQ)
-
-![](https://twitter.com/jack/status/20)
-
-A link to a file renders as a tidy pill, with its size filled in by the host. Paste or drop any non-image file to add your own, and click a pill to open it:
-
-[Meowdown press kit.zip](files/meowdown-press-kit.zip)
-
-Write math with dollars: an inline formula like $E=mc^2$ renders in place, and a \`$$\` block becomes a display equation with a live preview while you edit:
-
-$$
-\\int_{-\\infty}^{\\infty} e^{-x^2} \\, dx = \\sqrt{\\pi}
-$$
-
-Drop in a fenced code block and pick its language from the selector:
-
-\`\`\`typescript
-function greet(name: string): string {
-  return \`Hello, \${name}!\`
-}
-\`\`\`
-
-Mermaid diagrams render live too:
-
-\`\`\`mermaid
-flowchart LR
-  Markdown --> Diagram
-\`\`\`
-
-| table | syntax | is | supported |
-| ----- | ------ | -- | --------- |
-| even  | **in** | *tables* too! | :D |
-
-> Switch modes above to choose how much Markdown syntax stays in view.
-`
-
-const TAGS = ['cats', 'editor', 'ideas', 'markdown', 'meow', 'notes', 'react', 'todo', 'work']
-
-async function searchTags(query: string): Promise<TagItem[]> {
-  // Simulate network latency so the tag menu's loading state shows up.
-  await new Promise((resolve) => setTimeout(resolve, 200))
-  return TAGS.filter((tag) => tag.includes(query)).map((tag) => ({ tag }))
-}
-
-const NOTES = [
-  'Cat care basics',
-  'Daily journal',
-  'Meeting notes',
-  'Project ideas',
-  'Reading list',
-  'Travel plans',
-]
-
-async function searchNotes(query: string): Promise<WikilinkItem[]> {
-  // Simulate network latency so the wikilink menu's loading state shows up.
-  await new Promise((resolve) => setTimeout(resolve, 200))
-  const normalizedQuery = query.toLowerCase()
-  const items: WikilinkItem[] = NOTES.filter((note) =>
-    note.toLowerCase().includes(normalizedQuery),
-  ).map((note) => ({ target: note }))
-  // A trailing create row keeps Enter useful when nothing matches the typed
-  // title exactly, like a real notes app.
-  const title = query.trim()
-  if (title !== '' && !NOTES.some((note) => note.toLowerCase() === title.toLowerCase())) {
-    items.push({
-      target: title,
-      label: `Create “${title}”`,
-      onSelect: () => {
-        NOTES.push(title)
-      },
-    })
-  }
-  return items
-}
-
-const ICON_BUTTON_CLASS =
-  'flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/70 text-stone-500 shadow-sm backdrop-blur transition-colors hover:bg-white hover:text-stone-900 dark:border-stone-700/70 dark:bg-stone-900/70 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100'
-
-interface SegmentedControlProps<T extends string> {
-  options: ReadonlyArray<{ value: T; label: string }>
-  value: T
-  onChange: (value: T) => void
-  ariaLabel?: string
-  /** Shared radio group name; required when several controls coexist. */
-  name?: string
-}
-
-function SegmentedControl<T extends string>({
-  options,
-  value,
-  onChange,
-  ariaLabel,
-  name = 'segmented-control',
-}: SegmentedControlProps<T>) {
+function HomePage(): ReactElement {
   return (
-    <div
-      role="radiogroup"
-      aria-label={ariaLabel}
-      className="segmented"
-      style={{ '--seg-count': options.length } as CSSProperties}
-    >
-      {options.map((option) => (
-        <label key={option.value}>
-          <input
-            type="radio"
-            name={name}
-            value={option.value}
-            checked={option.value === value}
-            onChange={() => onChange(option.value)}
-          />
-          {option.label}
-        </label>
-      ))}
+    <div className="flex flex-col gap-4 p-4 pb-24">
+      <header className="flex flex-col gap-1">
+        <h1 className="text-xl font-bold">Meowdown iPhone caret 探针</h1>
+        <p className="text-sm opacity-70">
+          按顺序做完 P1 到 P8，每页做完都点一次「保存日志」。session {sessionId}
+        </p>
+      </header>
+
+      <EnvTable />
+
+      <nav className="flex flex-col gap-2">
+        {PROBE_PAGES.map((page) => (
+          <a
+            key={page.path}
+            href={page.path}
+            className="rounded-xl border border-stone-300 p-3 dark:border-stone-700"
+          >
+            <div className="font-semibold">{page.title}</div>
+            <div className="text-sm opacity-70">{page.blurb}</div>
+          </a>
+        ))}
+      </nav>
+
+      <LogPanel />
     </div>
   )
 }
 
-type Theme = 'light' | 'dark'
-
-function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>(() =>
-    window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
-  )
-
-  // `dark` class drives Tailwind's `dark:` variant; `color-scheme` drives the
-  // `light-dark()` colors in the stylesheets.
-  useLayoutEffect(() => {
-    const root = document.documentElement
-    root.classList.toggle('dark', theme === 'dark')
-    root.style.colorScheme = theme
-  }, [theme])
-
-  return (
-    <button
-      type="button"
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      aria-label="Toggle color theme"
-      title="Toggle color theme"
-      className={ICON_BUTTON_CLASS}
-    >
-      {theme === 'dark' ? '🌙' : '☀️'}
-    </button>
-  )
-}
-
-function Brand() {
-  return (
-    <div className="flex items-center gap-2.5">
-      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-yellow-100 text-lg shadow-sm shadow-amber-500/30">
-        🐱
-      </span>
-      <span className="text-lg font-semibold tracking-tight text-stone-900 dark:text-white">
-        Meowdown
-      </span>
-    </div>
-  )
-}
-
-export function App() {
-  const { mode, setMode, activeMode } = useEditorMode()
-
-  const editorRef = useRef<EditorHandle>(null)
-  const selectionDemo = useSelectionDemo(editorRef)
-  const findDemo = useFindDemo(editorRef)
-
-  const [spellCheck, setSpellCheck] = useState<boolean | undefined>(undefined)
+export function App(): ReactElement {
+  const hash = useHash()
+  const page = PROBE_PAGES.find((candidate) => candidate.path === hash)
 
   useEffect(() => {
-    const id = setTimeout(() => {
-      const urlParams = new URLSearchParams(window.location.search)
-      const value = urlParams.get('spellcheck') || urlParams.get('spellCheck')
+    setPage(hash)
+  }, [hash])
 
-      if (value === 'true') {
-        setSpellCheck(true)
-        console.log('[meowdown] Spellcheck enabled')
-      } else if (value === 'false') {
-        setSpellCheck(false)
-        console.log('[meowdown] Spellcheck disabled')
-      } else if (value) {
-        console.warn(
-          `[meowdown] Invalid spellcheck value in URL query: ${value}. Expected "true" or "false".`,
-        )
-      }
-    }, 0)
-
+  useEffect(() => {
+    flushMirroredRun()
+    const stopWatching = watchEnv()
+    const onPageHide = () => beaconSave()
+    window.addEventListener('pagehide', onPageHide)
     return () => {
-      clearTimeout(id)
+      window.removeEventListener('pagehide', onPageHide)
+      stopWatching()
     }
   }, [])
 
-  // When the caret leaves the document boundary (onExitBoundary), briefly flash
-  // a top or bottom border inside the editor box. A bumped id remounts the
-  // overlay so its one-shot fade restarts on every press.
-  const [edgeFlash, setEdgeFlash] = useState<{ id: number; direction: 'up' | 'down' }>()
-  const handleExitBoundary: ExitBoundaryHandler = useCallback(({ direction }) => {
-    setEdgeFlash({ id: getId(), direction })
-  }, [])
-
-  return (
-    <main className="relative min-h-dvh overflow-hidden text-stone-600 dark:bg-stone-950">
-      <div className="relative mx-auto flex h-dvh max-w-5xl flex-col px-4 py-5 sm:px-6 sm:py-7">
-        <nav className="flex shrink-0 items-center justify-between">
-          <Brand />
-          <div className="flex items-center gap-2">
-            <a
-              href="https://github.com/prosekit/meowdown"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="View source on GitHub"
-              title="View source on GitHub"
-              className={ICON_BUTTON_CLASS}
-            >
-              <span className="i-simple-icons-github size-4" aria-hidden="true" />
-            </a>
-            <ThemeToggle />
-          </div>
-        </nav>
-
-        <header className="shrink-0 py-5 text-center sm:py-6">
-          <h1 className="text-3xl font-semibold tracking-tight text-balance text-stone-900 sm:text-4xl dark:text-white">
-            Markdown that{' '}
-            <span className="text-amber-500 dark:text-amber-400">renders as you type</span>
-          </h1>
-        </header>
-
-        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-2xl shadow-orange-500/20 ring-1 ring-black/5 dark:border-stone-800 dark:bg-stone-900 dark:shadow-black/40 dark:ring-white/5">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200/80 bg-stone-50/60 px-4 py-2.5 sm:px-5 dark:border-stone-800 dark:bg-stone-950/30">
-            <div className="flex items-center gap-2.5 text-sm font-medium text-stone-500 dark:text-stone-400">
-              <span className="flex gap-1.5">
-                <span className="h-3 w-3 rounded-full bg-red-400 ring-1 ring-black/10 ring-inset" />
-                <span className="h-3 w-3 rounded-full bg-amber-400 ring-1 ring-black/10 ring-inset" />
-                <span className="h-3 w-3 rounded-full bg-green-400 ring-1 ring-black/10 ring-inset" />
-              </span>
-              <span>untitled.md</span>
-            </div>
-            <SegmentedControl
-              ariaLabel="Markdown syntax visibility"
-              options={MODES}
-              value={mode}
-              onChange={setMode}
-            />
-          </div>
-
-          <div className="relative flex min-h-0 flex-1 flex-col">
-            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-              <DemoEditor
-                mode={mode}
-                spellCheck={spellCheck}
-                searchQuery={findDemo.query}
-                onSearchChange={findDemo.onSearchChange}
-                initialMarkdown={INITIAL_CONTENT}
-                handleRef={editorRef}
-                onTagSearch={searchTags}
-                onWikilinkSearch={searchNotes}
-                onSelectionMenuSearch={selectionDemo.onSelectionMenuSearch}
-                pendingReplacementActions={selectionDemo.pendingReplacementActions}
-                onPendingReplacementResolve={selectionDemo.onPendingReplacementResolve}
-                onFilePaste={uploadAndTrackFile}
-                resolveFileLink={resolveFileLink}
-                resolveFileInfo={resolveFileInfo}
-                onFileClick={handleFileClick}
-                onImageClick={handleImageClick}
-                onLinkClick={handleLinkClick}
-                onTagClick={handleTagClick}
-                onWikilinkClick={handleWikilinkClick}
-                onExitBoundary={handleExitBoundary}
-              >
-                <SelectionMenuShortcut onTrigger={selectionDemo.openMenu} />
-                <FindShortcut onTrigger={findDemo.openBar} />
-                <WikilinkPreviewCard />
-              </DemoEditor>
-            </div>
-
-            {findDemo.bar}
-
-            {edgeFlash && (
-              <div
-                key={edgeFlash.id}
-                onAnimationEnd={() => setEdgeFlash(undefined)}
-                aria-hidden
-                className={clsx(
-                  'edge-border',
-                  'border-0 pointer-events-none absolute inset-0 z-10',
-                  'border-(--meowdown-accent)',
-                  edgeFlash.direction === 'up' ? 'border-t-2' : 'border-b-2',
-                )}
-              />
-            )}
-          </div>
-
-          <div className="flex items-center gap-2 border-t border-stone-200/80 bg-stone-50/60 px-4 py-3 text-sm sm:px-5 dark:border-stone-800 dark:bg-stone-950/30">
-            <span key={mode} className="mode-desc flex flex-wrap items-center gap-x-2 gap-y-0.5">
-              <span className="font-semibold text-stone-700 dark:text-stone-200">
-                {activeMode.label}
-              </span>
-              <span className="text-stone-300 dark:text-stone-600">·</span>
-              <span className="text-stone-500 dark:text-stone-400">{activeMode.description}</span>
-            </span>
-            <span className="ml-auto hidden shrink-0 text-xs text-stone-400 sm:block dark:text-stone-500">
-              Press ⌘F to find in the document
-            </span>
-          </div>
-        </section>
-
-        <footer className="shrink-0 pt-4 text-center text-xs text-stone-400 dark:text-stone-600">
-          Built with{' '}
-          <a
-            href="https://prosekit.dev"
-            target="_blank"
-            rel="noreferrer"
-            className="font-medium text-stone-500 underline-offset-2 transition-colors hover:text-stone-700 hover:underline dark:text-stone-500 dark:hover:text-stone-300"
-          >
-            ProseKit
-          </a>
-        </footer>
-      </div>
-    </main>
-  )
+  if (page == null) return <HomePage />
+  // Keying on the path tears down the previous page's probe before the next one
+  // attaches, so no run ever records another page's events.
+  return <div key={page.path}>{page.render()}</div>
 }
