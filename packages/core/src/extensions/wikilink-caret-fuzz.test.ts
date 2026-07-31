@@ -57,27 +57,32 @@ async function fuzzKey(mode: MarkMode, markdown: string, key: string): Promise<s
 
     cases.push(
       [
-        getSplitline(`=`, `pos ${pos}`),
+        getSplitline(`=`, `position  ${pos}`),
 
-        getSplitline('-', "before markdown"),
+
+
+        getSplitline('-', "markdown  before"),
         beforeMarkdown,
-        getSplitline('-', "before selection"),
+        getSplitline('-', "selection before"),
         beforeSelection,
 
-        getSplitline('-', "after markdown"),
+
+        getSplitline('-', "markdown  after"),
         afterMarkdown,
-        getSplitline('-', "after selection"),
+        getSplitline('-', "selection after"),
         afterSelection,
+
+
       ].join('\n'),
     )
   }
   return cases.join('\n\n')
 }
 
-function getSplitline(char: string, label: string = "", labelLength: number = 10, prefixLength = 10): string {
+function getSplitline(char: string, label: string = "", labelLength: number = 18, prefixLength = 5): string {
 
   if (label) {
-    return char.repeat(prefixLength) + (" " + label + " ").padEnd(labelLength, char) + char.repeat(prefixLength)
+    return char.repeat(prefixLength) + (" " + label + " ").padEnd(labelLength, char ) + char.repeat(prefixLength)
   } else {
     return char.repeat(prefixLength + labelLength + prefixLength)
   }
@@ -102,367 +107,367 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
     async () => {
       expect(await fuzzKey('focus', OUTLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
         """
-        ========== pos 2 =============
-        ---------- before markdown ----------
+        ===== position  2 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         ┃top
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         top
 
         - [[foo]]
         - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         ┃top
         [[foo]]
         [[bar]]
 
-        ========== pos 3 =============
-        ---------- before markdown ----------
+        ===== position  3 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         t┃op
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - op
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         ┃op
         [[foo]]
         [[bar]]
 
-        ========== pos 4 =============
-        ---------- before markdown ----------
+        ===== position  4 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         to┃p
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - tp
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         t┃p
         [[foo]]
         [[bar]]
 
-        ========== pos 5 =============
-        ---------- before markdown ----------
+        ===== position  5 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top┃
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - to
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         to┃
         [[foo]]
         [[bar]]
 
-        ========== pos 8 =============
-        ---------- before markdown ----------
+        ===== position  8 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         ┃[[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
 
           [[foo]]
 
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         ┃[[foo]]
         [[bar]]
 
-        ========== pos 9 =============
-        ---------- before markdown ----------
+        ===== position  9 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [┃[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         ┃[foo]]
         [[bar]]
 
-        ========== pos 10 ============
-        ---------- before markdown ----------
+        ===== position  10 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[┃foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [┃foo]]
         [[bar]]
 
-        ========== pos 11 ============
-        ---------- before markdown ----------
+        ===== position  11 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[f┃oo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[oo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[┃oo]]
         [[bar]]
 
-        ========== pos 12 ============
-        ---------- before markdown ----------
+        ===== position  12 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[fo┃o]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[fo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[f┃o]]
         [[bar]]
 
-        ========== pos 13 ============
-        ---------- before markdown ----------
+        ===== position  13 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo┃]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[fo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[fo┃]]
         [[bar]]
 
-        ========== pos 14 ============
-        ---------- before markdown ----------
+        ===== position  14 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]┃]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo┃]
         [[bar]]
 
-        ========== pos 15 ============
-        ---------- before markdown ----------
+        ===== position  15 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]┃
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           -
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         ┃
         [[bar]]
 
-        ========== pos 19 ============
-        ---------- before markdown ----------
+        ===== position  19 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         ┃[[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
 
           - [[foo]]
 
           [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         ┃[[bar]]
 
-        ========== pos 20 ============
-        ---------- before markdown ----------
+        ===== position  20 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [┃[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         ┃[bar]]
 
-        ========== pos 21 ============
-        ---------- before markdown ----------
+        ===== position  21 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[┃bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [┃bar]]
 
-        ========== pos 22 ============
-        ---------- before markdown ----------
+        ===== position  22 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[b┃ar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[ar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[┃ar]]
 
-        ========== pos 23 ============
-        ---------- before markdown ----------
+        ===== position  23 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[ba┃r]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[br]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[b┃r]]
 
-        ========== pos 24 ============
-        ---------- before markdown ----------
+        ===== position  24 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar┃]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[ba]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[ba┃]]
 
-        ========== pos 25 ============
-        ---------- before markdown ----------
+        ===== position  25 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar]┃]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[bar]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[bar┃]
 
-        ========== pos 26 ============
-        ---------- before markdown ----------
+        ===== position  26 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar]]┃
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           -
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         ┃
@@ -477,362 +482,362 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
     async () => {
       expect(await fuzzKey('focus', OUTLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
-        ========== pos 2 =============
-        ---------- before markdown ----------
+        ===== position  2 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         ┃top
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         -  top
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
          ┃top
         [[foo]]
         [[bar]]
 
-        ========== pos 3 =============
-        ---------- before markdown ----------
+        ===== position  3 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         t┃op
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - t op
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         t ┃op
         [[foo]]
         [[bar]]
 
-        ========== pos 4 =============
-        ---------- before markdown ----------
+        ===== position  4 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         to┃p
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - to p
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         to ┃p
         [[foo]]
         [[bar]]
 
-        ========== pos 5 =============
-        ---------- before markdown ----------
+        ===== position  5 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top┃
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top·
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top ┃
         [[foo]]
         [[bar]]
 
-        ========== pos 8 =============
-        ---------- before markdown ----------
+        ===== position  8 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         ┃[[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           -  [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
          ┃[[foo]]
         [[bar]]
 
-        ========== pos 9 =============
-        ---------- before markdown ----------
+        ===== position  9 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [┃[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [ [foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [ ┃[foo]]
         [[bar]]
 
-        ========== pos 10 ============
-        ---------- before markdown ----------
+        ===== position  10 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[┃foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[ foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[ ┃foo]]
         [[bar]]
 
-        ========== pos 11 ============
-        ---------- before markdown ----------
+        ===== position  11 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[f┃oo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[f oo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[f ┃oo]]
         [[bar]]
 
-        ========== pos 12 ============
-        ---------- before markdown ----------
+        ===== position  12 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[fo┃o]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[fo o]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[fo ┃o]]
         [[bar]]
 
-        ========== pos 13 ============
-        ---------- before markdown ----------
+        ===== position  13 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo┃]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo ]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo ┃]]
         [[bar]]
 
-        ========== pos 14 ============
-        ---------- before markdown ----------
+        ===== position  14 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]┃]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo] ]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo] ┃]
         [[bar]]
 
-        ========== pos 15 ============
-        ---------- before markdown ----------
+        ===== position  15 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]┃
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]·
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]] ┃
         [[bar]]
 
-        ========== pos 19 ============
-        ---------- before markdown ----------
+        ===== position  19 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         ┃[[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           -  [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
          ┃[[bar]]
 
-        ========== pos 20 ============
-        ---------- before markdown ----------
+        ===== position  20 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [┃[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [ [bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [ ┃[bar]]
 
-        ========== pos 21 ============
-        ---------- before markdown ----------
+        ===== position  21 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[┃bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[ bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[ ┃bar]]
 
-        ========== pos 22 ============
-        ---------- before markdown ----------
+        ===== position  22 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[b┃ar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[b ar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[b ┃ar]]
 
-        ========== pos 23 ============
-        ---------- before markdown ----------
+        ===== position  23 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[ba┃r]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[ba r]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[ba ┃r]]
 
-        ========== pos 24 ============
-        ---------- before markdown ----------
+        ===== position  24 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar┃]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[bar ]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[bar ┃]]
 
-        ========== pos 25 ============
-        ---------- before markdown ----------
+        ===== position  25 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar]┃]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[bar] ]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[bar] ┃]
 
-        ========== pos 26 ============
-        ---------- before markdown ----------
+        ===== position  26 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar]]┃
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[bar]] ┃
@@ -847,401 +852,401 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
     async () => {
       expect(await fuzzKey('focus', OUTLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
         """
-        ========== pos 2 =============
-        ---------- before markdown ----------
+        ===== position  2 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         ┃top
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         -
         - top
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
 
         ┃top
         [[foo]]
         [[bar]]
 
-        ========== pos 3 =============
-        ---------- before markdown ----------
+        ===== position  3 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         t┃op
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - t
         - op
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         t
         ┃op
         [[foo]]
         [[bar]]
 
-        ========== pos 4 =============
-        ---------- before markdown ----------
+        ===== position  4 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         to┃p
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - to
         - p
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         to
         ┃p
         [[foo]]
         [[bar]]
 
-        ========== pos 5 =============
-        ---------- before markdown ----------
+        ===== position  5 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top┃
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
         -
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         ┃
         [[foo]]
         [[bar]]
 
-        ========== pos 8 =============
-        ---------- before markdown ----------
+        ===== position  8 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         ┃[[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           -
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
 
         ┃[[foo]]
         [[bar]]
 
-        ========== pos 9 =============
-        ---------- before markdown ----------
+        ===== position  9 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [┃[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [
           - [foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [
         ┃[foo]]
         [[bar]]
 
-        ========== pos 10 ============
-        ---------- before markdown ----------
+        ===== position  10 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[┃foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[
           - foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[
         ┃foo]]
         [[bar]]
 
-        ========== pos 11 ============
-        ---------- before markdown ----------
+        ===== position  11 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[f┃oo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[f
           - oo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[f
         ┃oo]]
         [[bar]]
 
-        ========== pos 12 ============
-        ---------- before markdown ----------
+        ===== position  12 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[fo┃o]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[fo
           - o]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[fo
         ┃o]]
         [[bar]]
 
-        ========== pos 13 ============
-        ---------- before markdown ----------
+        ===== position  13 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo┃]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo
           - ]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo
         ┃]]
         [[bar]]
 
-        ========== pos 14 ============
-        ---------- before markdown ----------
+        ===== position  14 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]┃]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]
           - ]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]
         ┃]
         [[bar]]
 
-        ========== pos 15 ============
-        ---------- before markdown ----------
+        ===== position  15 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]┃
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           -
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         ┃
         [[bar]]
 
-        ========== pos 19 ============
-        ---------- before markdown ----------
+        ===== position  19 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         ┃[[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           -
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
 
         ┃[[bar]]
 
-        ========== pos 20 ============
-        ---------- before markdown ----------
+        ===== position  20 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [┃[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [
           - [bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [
         ┃[bar]]
 
-        ========== pos 21 ============
-        ---------- before markdown ----------
+        ===== position  21 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[┃bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[
           - bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[
         ┃bar]]
 
-        ========== pos 22 ============
-        ---------- before markdown ----------
+        ===== position  22 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[b┃ar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[b
           - ar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[b
         ┃ar]]
 
-        ========== pos 23 ============
-        ---------- before markdown ----------
+        ===== position  23 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[ba┃r]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[ba
           - r]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[ba
         ┃r]]
 
-        ========== pos 24 ============
-        ---------- before markdown ----------
+        ===== position  24 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar┃]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[bar
           - ]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[bar
         ┃]]
 
-        ========== pos 25 ============
-        ---------- before markdown ----------
+        ===== position  25 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar]┃]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[bar]
           - ]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[bar]
         ┃]
 
-        ========== pos 26 ============
-        ---------- before markdown ----------
+        ===== position  26 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar]]┃
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[bar]]
           -
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[bar]]
@@ -1259,367 +1264,367 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
     async () => {
       expect(await fuzzKey('hide', OUTLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
         """
-        ========== pos 2 =============
-        ---------- before markdown ----------
+        ===== position  2 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         ┃top
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         top
 
         - [[foo]]
         - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         ┃top
         [[foo]]
         [[bar]]
 
-        ========== pos 3 =============
-        ---------- before markdown ----------
+        ===== position  3 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         t┃op
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - op
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         ┃op
         [[foo]]
         [[bar]]
 
-        ========== pos 4 =============
-        ---------- before markdown ----------
+        ===== position  4 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         to┃p
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - tp
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         t┃p
         [[foo]]
         [[bar]]
 
-        ========== pos 5 =============
-        ---------- before markdown ----------
+        ===== position  5 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top┃
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - to
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         to┃
         [[foo]]
         [[bar]]
 
-        ========== pos 8 =============
-        ---------- before markdown ----------
+        ===== position  8 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         ┃[[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
 
           [[foo]]
 
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         ┃[[foo]]
         [[bar]]
 
-        ========== pos 9 =============
-        ---------- before markdown ----------
+        ===== position  9 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [┃[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         ┃[foo]]
         [[bar]]
 
-        ========== pos 10 ============
-        ---------- before markdown ----------
+        ===== position  10 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[┃foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [┃foo]]
         [[bar]]
 
-        ========== pos 11 ============
-        ---------- before markdown ----------
+        ===== position  11 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[f┃oo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[oo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[┃oo]]
         [[bar]]
 
-        ========== pos 12 ============
-        ---------- before markdown ----------
+        ===== position  12 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[fo┃o]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[fo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[f┃o]]
         [[bar]]
 
-        ========== pos 13 ============
-        ---------- before markdown ----------
+        ===== position  13 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo┃]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[fo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[fo┃]]
         [[bar]]
 
-        ========== pos 14 ============
-        ---------- before markdown ----------
+        ===== position  14 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]┃]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo┃]
         [[bar]]
 
-        ========== pos 15 ============
-        ---------- before markdown ----------
+        ===== position  15 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]┃
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           -
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         ┃
         [[bar]]
 
-        ========== pos 19 ============
-        ---------- before markdown ----------
+        ===== position  19 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         ┃[[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
 
           - [[foo]]
 
           [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         ┃[[bar]]
 
-        ========== pos 20 ============
-        ---------- before markdown ----------
+        ===== position  20 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [┃[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         ┃[bar]]
 
-        ========== pos 21 ============
-        ---------- before markdown ----------
+        ===== position  21 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[┃bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [┃bar]]
 
-        ========== pos 22 ============
-        ---------- before markdown ----------
+        ===== position  22 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[b┃ar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[ar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[┃ar]]
 
-        ========== pos 23 ============
-        ---------- before markdown ----------
+        ===== position  23 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[ba┃r]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[br]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[b┃r]]
 
-        ========== pos 24 ============
-        ---------- before markdown ----------
+        ===== position  24 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar┃]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[ba]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[ba┃]]
 
-        ========== pos 25 ============
-        ---------- before markdown ----------
+        ===== position  25 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar]┃]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[bar]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[bar┃]
 
-        ========== pos 26 ============
-        ---------- before markdown ----------
+        ===== position  26 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar]]┃
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           -
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         ┃
@@ -1634,362 +1639,362 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
     async () => {
       expect(await fuzzKey('hide', OUTLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
-        ========== pos 2 =============
-        ---------- before markdown ----------
+        ===== position  2 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         ┃top
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         -  top
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
          ┃top
         [[foo]]
         [[bar]]
 
-        ========== pos 3 =============
-        ---------- before markdown ----------
+        ===== position  3 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         t┃op
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - t op
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         t ┃op
         [[foo]]
         [[bar]]
 
-        ========== pos 4 =============
-        ---------- before markdown ----------
+        ===== position  4 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         to┃p
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - to p
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         to ┃p
         [[foo]]
         [[bar]]
 
-        ========== pos 5 =============
-        ---------- before markdown ----------
+        ===== position  5 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top┃
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top·
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top ┃
         [[foo]]
         [[bar]]
 
-        ========== pos 8 =============
-        ---------- before markdown ----------
+        ===== position  8 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         ┃[[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           -  [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
          ┃[[foo]]
         [[bar]]
 
-        ========== pos 9 =============
-        ---------- before markdown ----------
+        ===== position  9 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [┃[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [ [foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [ ┃[foo]]
         [[bar]]
 
-        ========== pos 10 ============
-        ---------- before markdown ----------
+        ===== position  10 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[┃foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[ foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[ ┃foo]]
         [[bar]]
 
-        ========== pos 11 ============
-        ---------- before markdown ----------
+        ===== position  11 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[f┃oo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[f oo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[f ┃oo]]
         [[bar]]
 
-        ========== pos 12 ============
-        ---------- before markdown ----------
+        ===== position  12 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[fo┃o]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[fo o]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[fo ┃o]]
         [[bar]]
 
-        ========== pos 13 ============
-        ---------- before markdown ----------
+        ===== position  13 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo┃]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo ]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo ┃]]
         [[bar]]
 
-        ========== pos 14 ============
-        ---------- before markdown ----------
+        ===== position  14 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]┃]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo] ]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo] ┃]
         [[bar]]
 
-        ========== pos 15 ============
-        ---------- before markdown ----------
+        ===== position  15 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]┃
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]·
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]] ┃
         [[bar]]
 
-        ========== pos 19 ============
-        ---------- before markdown ----------
+        ===== position  19 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         ┃[[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           -  [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
          ┃[[bar]]
 
-        ========== pos 20 ============
-        ---------- before markdown ----------
+        ===== position  20 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [┃[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [ [bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [ ┃[bar]]
 
-        ========== pos 21 ============
-        ---------- before markdown ----------
+        ===== position  21 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[┃bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[ bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[ ┃bar]]
 
-        ========== pos 22 ============
-        ---------- before markdown ----------
+        ===== position  22 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[b┃ar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[b ar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[b ┃ar]]
 
-        ========== pos 23 ============
-        ---------- before markdown ----------
+        ===== position  23 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[ba┃r]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[ba r]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[ba ┃r]]
 
-        ========== pos 24 ============
-        ---------- before markdown ----------
+        ===== position  24 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar┃]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[bar ]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[bar ┃]]
 
-        ========== pos 25 ============
-        ---------- before markdown ----------
+        ===== position  25 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar]┃]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[bar] ]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[bar] ┃]
 
-        ========== pos 26 ============
-        ---------- before markdown ----------
+        ===== position  26 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar]]┃
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[bar]] ┃
@@ -2004,401 +2009,401 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
     async () => {
       expect(await fuzzKey('hide', OUTLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
         """
-        ========== pos 2 =============
-        ---------- before markdown ----------
+        ===== position  2 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         ┃top
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         -
         - top
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
 
         ┃top
         [[foo]]
         [[bar]]
 
-        ========== pos 3 =============
-        ---------- before markdown ----------
+        ===== position  3 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         t┃op
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - t
         - op
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         t
         ┃op
         [[foo]]
         [[bar]]
 
-        ========== pos 4 =============
-        ---------- before markdown ----------
+        ===== position  4 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         to┃p
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - to
         - p
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         to
         ┃p
         [[foo]]
         [[bar]]
 
-        ========== pos 5 =============
-        ---------- before markdown ----------
+        ===== position  5 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top┃
         [[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
         -
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         ┃
         [[foo]]
         [[bar]]
 
-        ========== pos 8 =============
-        ---------- before markdown ----------
+        ===== position  8 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         ┃[[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           -
           - [[foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
 
         ┃[[foo]]
         [[bar]]
 
-        ========== pos 9 =============
-        ---------- before markdown ----------
+        ===== position  9 ==========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [┃[foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [
           - [foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [
         ┃[foo]]
         [[bar]]
 
-        ========== pos 10 ============
-        ---------- before markdown ----------
+        ===== position  10 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[┃foo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[
           - foo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[
         ┃foo]]
         [[bar]]
 
-        ========== pos 11 ============
-        ---------- before markdown ----------
+        ===== position  11 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[f┃oo]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[f
           - oo]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[f
         ┃oo]]
         [[bar]]
 
-        ========== pos 12 ============
-        ---------- before markdown ----------
+        ===== position  12 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[fo┃o]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[fo
           - o]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[fo
         ┃o]]
         [[bar]]
 
-        ========== pos 13 ============
-        ---------- before markdown ----------
+        ===== position  13 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo┃]]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo
           - ]]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo
         ┃]]
         [[bar]]
 
-        ========== pos 14 ============
-        ---------- before markdown ----------
+        ===== position  14 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]┃]
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]
           - ]
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]
         ┃]
         [[bar]]
 
-        ========== pos 15 ============
-        ---------- before markdown ----------
+        ===== position  15 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]┃
         [[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           -
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         ┃
         [[bar]]
 
-        ========== pos 19 ============
-        ---------- before markdown ----------
+        ===== position  19 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         ┃[[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           -
           - [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
 
         ┃[[bar]]
 
-        ========== pos 20 ============
-        ---------- before markdown ----------
+        ===== position  20 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [┃[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [
           - [bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [
         ┃[bar]]
 
-        ========== pos 21 ============
-        ---------- before markdown ----------
+        ===== position  21 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[┃bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[
           - bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[
         ┃bar]]
 
-        ========== pos 22 ============
-        ---------- before markdown ----------
+        ===== position  22 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[b┃ar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[b
           - ar]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[b
         ┃ar]]
 
-        ========== pos 23 ============
-        ---------- before markdown ----------
+        ===== position  23 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[ba┃r]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[ba
           - r]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[ba
         ┃r]]
 
-        ========== pos 24 ============
-        ---------- before markdown ----------
+        ===== position  24 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar┃]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[bar
           - ]]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[bar
         ┃]]
 
-        ========== pos 25 ============
-        ---------- before markdown ----------
+        ===== position  25 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar]┃]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[bar]
           - ]
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[bar]
         ┃]
 
-        ========== pos 26 ============
-        ---------- before markdown ----------
+        ===== position  26 =========
+        ----- markdown  before -----
         - top
           - [[foo]]
           - [[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         top
         [[foo]]
         [[bar]]┃
-        ---------- after markdown ----------
+        ----- markdown  after ------
         - top
           - [[foo]]
           - [[bar]]
           -
-        ---------- after selection ----------
+        ----- selection after ------
         top
         [[foo]]
         [[bar]]
@@ -2416,124 +2421,124 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
     async () => {
       expect(await fuzzKey('focus', INLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
         """
-        ========== pos 1 =============
-        ---------- before markdown ----------
+        ===== position  1 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         ┃a [[foo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         ┃a [[foo]] b
 
-        ========== pos 2 =============
-        ---------- before markdown ----------
+        ===== position  2 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a┃ [[foo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
          [[foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         ┃ [[foo]] b
 
-        ========== pos 3 =============
-        ---------- before markdown ----------
+        ===== position  3 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a ┃[[foo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a[[foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a┃[[foo]] b
 
-        ========== pos 4 =============
-        ---------- before markdown ----------
+        ===== position  4 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [┃[foo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a ┃[foo]] b
 
-        ========== pos 5 =============
-        ---------- before markdown ----------
+        ===== position  5 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[┃foo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [┃foo]] b
 
-        ========== pos 6 =============
-        ---------- before markdown ----------
+        ===== position  6 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[f┃oo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[oo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[┃oo]] b
 
-        ========== pos 7 =============
-        ---------- before markdown ----------
+        ===== position  7 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[fo┃o]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[fo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[f┃o]] b
 
-        ========== pos 8 =============
-        ---------- before markdown ----------
+        ===== position  8 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[foo┃]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[fo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[fo┃]] b
 
-        ========== pos 9 =============
-        ---------- before markdown ----------
+        ===== position  9 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[foo]┃] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[foo] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[foo┃] b
 
-        ========== pos 10 ============
-        ---------- before markdown ----------
+        ===== position  10 =========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[foo]]┃ b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a  b
-        ---------- after selection ----------
+        ----- selection after ------
         a ┃ b
 
-        ========== pos 11 ============
-        ---------- before markdown ----------
+        ===== position  11 =========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[foo]] ┃b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[foo]]b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[foo]]┃b
 
-        ========== pos 12 ============
-        ---------- before markdown ----------
+        ===== position  12 =========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[foo]] b┃
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[foo]]
-        ---------- after selection ----------
+        ----- selection after ------
         a [[foo]] ┃
         """
       `)
@@ -2546,124 +2551,124 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
     async () => {
       expect(await fuzzKey('focus', INLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
-        ========== pos 1 =============
-        ---------- before markdown ----------
+        ===== position  1 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         ┃a [[foo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
          a [[foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
          ┃a [[foo]] b
 
-        ========== pos 2 =============
-        ---------- before markdown ----------
+        ===== position  2 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a┃ [[foo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a  [[foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a ┃ [[foo]] b
 
-        ========== pos 3 =============
-        ---------- before markdown ----------
+        ===== position  3 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a ┃[[foo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a  [[foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a  ┃[[foo]] b
 
-        ========== pos 4 =============
-        ---------- before markdown ----------
+        ===== position  4 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [┃[foo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [ [foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [ ┃[foo]] b
 
-        ========== pos 5 =============
-        ---------- before markdown ----------
+        ===== position  5 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[┃foo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[ foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[ ┃foo]] b
 
-        ========== pos 6 =============
-        ---------- before markdown ----------
+        ===== position  6 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[f┃oo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[f oo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[f ┃oo]] b
 
-        ========== pos 7 =============
-        ---------- before markdown ----------
+        ===== position  7 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[fo┃o]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[fo o]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[fo ┃o]] b
 
-        ========== pos 8 =============
-        ---------- before markdown ----------
+        ===== position  8 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[foo┃]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[foo ]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[foo ┃]] b
 
-        ========== pos 9 =============
-        ---------- before markdown ----------
+        ===== position  9 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[foo]┃] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[foo] ] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[foo] ┃] b
 
-        ========== pos 10 ============
-        ---------- before markdown ----------
+        ===== position  10 =========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[foo]]┃ b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[foo]]  b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[foo]] ┃ b
 
-        ========== pos 11 ============
-        ---------- before markdown ----------
+        ===== position  11 =========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[foo]] ┃b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[foo]]  b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[foo]]  ┃b
 
-        ========== pos 12 ============
-        ---------- before markdown ----------
+        ===== position  12 =========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[foo]] b┃
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[foo]] b ┃
         """
       `)
@@ -2676,155 +2681,155 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
     async () => {
       expect(await fuzzKey('focus', INLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
         """
-        ========== pos 1 =============
-        ---------- before markdown ----------
+        ===== position  1 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         ┃a [[foo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
 
         ┃a [[foo]] b
 
-        ========== pos 2 =============
-        ---------- before markdown ----------
+        ===== position  2 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a┃ [[foo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a
 
          [[foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a
         ┃ [[foo]] b
 
-        ========== pos 3 =============
-        ---------- before markdown ----------
+        ===== position  3 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a ┃[[foo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a·
 
         [[foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a 
         ┃[[foo]] b
 
-        ========== pos 4 =============
-        ---------- before markdown ----------
+        ===== position  4 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [┃[foo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [
 
         [foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [
         ┃[foo]] b
 
-        ========== pos 5 =============
-        ---------- before markdown ----------
+        ===== position  5 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[┃foo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[
 
         foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[
         ┃foo]] b
 
-        ========== pos 6 =============
-        ---------- before markdown ----------
+        ===== position  6 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[f┃oo]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[f
 
         oo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[f
         ┃oo]] b
 
-        ========== pos 7 =============
-        ---------- before markdown ----------
+        ===== position  7 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[fo┃o]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[fo
 
         o]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[fo
         ┃o]] b
 
-        ========== pos 8 =============
-        ---------- before markdown ----------
+        ===== position  8 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[foo┃]] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[foo
 
         ]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[foo
         ┃]] b
 
-        ========== pos 9 =============
-        ---------- before markdown ----------
+        ===== position  9 ==========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[foo]┃] b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[foo]
 
         ] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[foo]
         ┃] b
 
-        ========== pos 10 ============
-        ---------- before markdown ----------
+        ===== position  10 =========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[foo]]┃ b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[foo]]
 
          b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[foo]]
         ┃ b
 
-        ========== pos 11 ============
-        ---------- before markdown ----------
+        ===== position  11 =========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[foo]] ┃b
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[foo]]·
 
         b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[foo]] 
         ┃b
 
-        ========== pos 12 ============
-        ---------- before markdown ----------
+        ===== position  12 =========
+        ----- markdown  before -----
         a [[foo]] b
-        ---------- before selection ----------
+        ----- selection before -----
         a [[foo]] b┃
-        ---------- after markdown ----------
+        ----- markdown  after ------
         a [[foo]] b
-        ---------- after selection ----------
+        ----- selection after ------
         a [[foo]] b
         ┃
         """
@@ -2840,154 +2845,154 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
     async () => {
       expect(await fuzzKey('focus', ADJACENT_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
         """
-        ========== pos 1 =============
-        ---------- before markdown ----------
+        ===== position  1 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         ┃[[foo]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         ┃[[foo]][[bar]]
 
-        ========== pos 2 =============
-        ---------- before markdown ----------
+        ===== position  2 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [┃[foo]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [foo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         ┃[foo]][[bar]]
 
-        ========== pos 3 =============
-        ---------- before markdown ----------
+        ===== position  3 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[┃foo]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [foo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [┃foo]][[bar]]
 
-        ========== pos 4 =============
-        ---------- before markdown ----------
+        ===== position  4 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[f┃oo]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[oo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[┃oo]][[bar]]
 
-        ========== pos 5 =============
-        ---------- before markdown ----------
+        ===== position  5 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[fo┃o]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[fo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[f┃o]][[bar]]
 
-        ========== pos 6 =============
-        ---------- before markdown ----------
+        ===== position  6 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo┃]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[fo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[fo┃]][[bar]]
 
-        ========== pos 7 =============
-        ---------- before markdown ----------
+        ===== position  7 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]┃][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo┃][[bar]]
 
-        ========== pos 8 =============
-        ---------- before markdown ----------
+        ===== position  8 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]]┃[[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         ┃[[bar]]
 
-        ========== pos 9 =============
-        ---------- before markdown ----------
+        ===== position  9 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][┃[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]]┃[bar]]
 
-        ========== pos 10 ============
-        ---------- before markdown ----------
+        ===== position  10 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[┃bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][┃bar]]
 
-        ========== pos 11 ============
-        ---------- before markdown ----------
+        ===== position  11 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[b┃ar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[ar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[┃ar]]
 
-        ========== pos 12 ============
-        ---------- before markdown ----------
+        ===== position  12 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[ba┃r]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[br]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[b┃r]]
 
-        ========== pos 13 ============
-        ---------- before markdown ----------
+        ===== position  13 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[bar┃]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[ba]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[ba┃]]
 
-        ========== pos 14 ============
-        ---------- before markdown ----------
+        ===== position  14 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[bar]┃]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[bar]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[bar┃]
 
-        ========== pos 15 ============
-        ---------- before markdown ----------
+        ===== position  15 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[bar]]┃
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]]┃
         """
       `)
@@ -3000,154 +3005,154 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
     async () => {
       expect(await fuzzKey('focus', ADJACENT_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
-        ========== pos 1 =============
-        ---------- before markdown ----------
+        ===== position  1 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         ┃[[foo]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
          [[foo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
          ┃[[foo]][[bar]]
 
-        ========== pos 2 =============
-        ---------- before markdown ----------
+        ===== position  2 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [┃[foo]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [ [foo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [ ┃[foo]][[bar]]
 
-        ========== pos 3 =============
-        ---------- before markdown ----------
+        ===== position  3 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[┃foo]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[ foo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[ ┃foo]][[bar]]
 
-        ========== pos 4 =============
-        ---------- before markdown ----------
+        ===== position  4 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[f┃oo]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[f oo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[f ┃oo]][[bar]]
 
-        ========== pos 5 =============
-        ---------- before markdown ----------
+        ===== position  5 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[fo┃o]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[fo o]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[fo ┃o]][[bar]]
 
-        ========== pos 6 =============
-        ---------- before markdown ----------
+        ===== position  6 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo┃]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo ]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo ┃]][[bar]]
 
-        ========== pos 7 =============
-        ---------- before markdown ----------
+        ===== position  7 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]┃][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo] ][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo] ┃][[bar]]
 
-        ========== pos 8 =============
-        ---------- before markdown ----------
+        ===== position  8 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]]┃[[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]] [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]] ┃[[bar]]
 
-        ========== pos 9 =============
-        ---------- before markdown ----------
+        ===== position  9 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][┃[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][ [bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][ ┃[bar]]
 
-        ========== pos 10 ============
-        ---------- before markdown ----------
+        ===== position  10 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[┃bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[ bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[ ┃bar]]
 
-        ========== pos 11 ============
-        ---------- before markdown ----------
+        ===== position  11 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[b┃ar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[b ar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[b ┃ar]]
 
-        ========== pos 12 ============
-        ---------- before markdown ----------
+        ===== position  12 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[ba┃r]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[ba r]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[ba ┃r]]
 
-        ========== pos 13 ============
-        ---------- before markdown ----------
+        ===== position  13 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[bar┃]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[bar ]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[bar ┃]]
 
-        ========== pos 14 ============
-        ---------- before markdown ----------
+        ===== position  14 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[bar]┃]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[bar] ]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[bar] ┃]
 
-        ========== pos 15 ============
-        ---------- before markdown ----------
+        ===== position  15 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[bar]]┃
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[bar]] ┃
         """
       `)
@@ -3160,194 +3165,194 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
     async () => {
       expect(await fuzzKey('focus', ADJACENT_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
         """
-        ========== pos 1 =============
-        ---------- before markdown ----------
+        ===== position  1 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         ┃[[foo]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
 
         ┃[[foo]][[bar]]
 
-        ========== pos 2 =============
-        ---------- before markdown ----------
+        ===== position  2 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [┃[foo]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [
 
         [foo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [
         ┃[foo]][[bar]]
 
-        ========== pos 3 =============
-        ---------- before markdown ----------
+        ===== position  3 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[┃foo]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[
 
         foo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[
         ┃foo]][[bar]]
 
-        ========== pos 4 =============
-        ---------- before markdown ----------
+        ===== position  4 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[f┃oo]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[f
 
         oo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[f
         ┃oo]][[bar]]
 
-        ========== pos 5 =============
-        ---------- before markdown ----------
+        ===== position  5 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[fo┃o]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[fo
 
         o]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[fo
         ┃o]][[bar]]
 
-        ========== pos 6 =============
-        ---------- before markdown ----------
+        ===== position  6 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo┃]][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo
 
         ]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo
         ┃]][[bar]]
 
-        ========== pos 7 =============
-        ---------- before markdown ----------
+        ===== position  7 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]┃][[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]
 
         ][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]
         ┃][[bar]]
 
-        ========== pos 8 =============
-        ---------- before markdown ----------
+        ===== position  8 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]]┃[[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]]
 
         [[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]]
         ┃[[bar]]
 
-        ========== pos 9 =============
-        ---------- before markdown ----------
+        ===== position  9 ==========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][┃[bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][
 
         [bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][
         ┃[bar]]
 
-        ========== pos 10 ============
-        ---------- before markdown ----------
+        ===== position  10 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[┃bar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[
 
         bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[
         ┃bar]]
 
-        ========== pos 11 ============
-        ---------- before markdown ----------
+        ===== position  11 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[b┃ar]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[b
 
         ar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[b
         ┃ar]]
 
-        ========== pos 12 ============
-        ---------- before markdown ----------
+        ===== position  12 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[ba┃r]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[ba
 
         r]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[ba
         ┃r]]
 
-        ========== pos 13 ============
-        ---------- before markdown ----------
+        ===== position  13 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[bar┃]]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[bar
 
         ]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[bar
         ┃]]
 
-        ========== pos 14 ============
-        ---------- before markdown ----------
+        ===== position  14 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[bar]┃]
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[bar]
 
         ]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[bar]
         ┃]
 
-        ========== pos 15 ============
-        ---------- before markdown ----------
+        ===== position  15 =========
+        ----- markdown  before -----
         [[foo]][[bar]]
-        ---------- before selection ----------
+        ----- selection before -----
         [[foo]][[bar]]┃
-        ---------- after markdown ----------
+        ----- markdown  after ------
         [[foo]][[bar]]
-        ---------- after selection ----------
+        ----- selection after ------
         [[foo]][[bar]]
         ┃
         """
