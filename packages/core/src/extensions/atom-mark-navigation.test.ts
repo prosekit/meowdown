@@ -1,6 +1,6 @@
 import { TextSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
-import { userEvent } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { findText } from '../testing/find-text.ts'
@@ -14,6 +14,8 @@ import {
 
 import { defineImage } from './image.ts'
 import type { MarkMode } from './mark-mode.ts'
+
+const pmRoot = page.locate('.ProseMirror')
 
 const YOUTUBE = '![](https://www.youtube.com/watch?v=aqz-KE-bpKQ)'
 const TWEET = '![](https://twitter.com/jack/status/20)'
@@ -542,6 +544,72 @@ describe('caret snapping out of hidden atom source', () => {
     // `[[` is the escape for a literal `[` in userEvent's keyboard syntax.
     await userEvent.keyboard('[[[[Aaa]]')
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]┃"`)
+  })
+})
+
+describe('clicking an atom preview', () => {
+  // A real click at `ratio` across the preview's width, so the caret goes
+  // through the browser's own hit testing first.
+  async function clickPreview(fixture: Fixture, testId: string, ratio: number): Promise<void> {
+    const preview = pmRoot.getByTestId(testId)
+    const rect = preview.element().getBoundingClientRect()
+    await userEvent.click(preview, {
+      position: { x: Math.round(rect.width * ratio), y: Math.round(rect.height / 2) },
+    })
+  }
+
+  it('focus: a click on the left half puts the caret before the unit', async () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    await clickPreview(fixture, 'wikilink', 0.1)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ┃[[Aaa]] here"`)
+  })
+
+  it('focus: a click on the right half puts the caret after the unit', async () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    await clickPreview(fixture, 'wikilink', 0.9)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]┃ here"`)
+  })
+
+  it('focus: typing after such a click lands outside the unit', async () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    await clickPreview(fixture, 'wikilink', 0.9)
+    await userEvent.keyboard('X')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]X┃ here"`)
+  })
+
+  it('focus: a click picks the nearest edge of the second of two units', async () => {
+    using fixture = setup('focus', ['see [[Aaa]][[Bbb]] here'])
+    const previews = pmRoot.getByTestId('wikilink')
+    const rect = previews.nth(1).element().getBoundingClientRect()
+    await userEvent.click(previews.nth(1), {
+      position: { x: Math.round(rect.width * 0.1), y: Math.round(rect.height / 2) },
+    })
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]┃[[Bbb]] here"`)
+  })
+
+  it('hide: a click on the left half puts the caret before the unit', async () => {
+    using fixture = setup('hide', ['see [[Aaa]] here'])
+    await clickPreview(fixture, 'wikilink', 0.1)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ┃[[Aaa]] here"`)
+  })
+
+  it('focus: a click on an image preview puts the caret on a unit edge', async () => {
+    using fixture = setup('focus', ['see ![a](one.png) here'])
+    await clickPreview(fixture, 'image-preview', 0.9)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ![a](one.png)┃ here"`)
+  })
+
+  it('focus: a click on plain text is left to the browser', async () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    const coords = fixture.view.coordsAtPos(findText(fixture.doc, 'here') + 4, -1)
+    const editorRect = fixture.view.dom.getBoundingClientRect()
+    await userEvent.click(pmRoot, {
+      position: {
+        x: Math.round(coords.right - editorRect.left - 1),
+        y: Math.round((coords.top + coords.bottom) / 2 - editorRect.top),
+      },
+    })
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]] here┃"`)
   })
 })
 

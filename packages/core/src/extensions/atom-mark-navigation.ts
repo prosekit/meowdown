@@ -278,6 +278,35 @@ function createCaretSnapPlugin(marks: AtomMarks): Plugin {
   })
 }
 
+// A click on the contenteditable=false preview: the browser resolves it to the
+// start of the textblock, because the source beside the preview has no visible
+// box of its own. Put the caret on the unit edge the click fell nearest
+// instead. The unit comes from the source holder next to the preview, not from
+// the click position, which is the same resolution the click handlers make.
+function createPointerPlugin(marks: AtomMarks): Plugin {
+  return new Plugin({
+    key: new PluginKey('atom-mark-pointer'),
+    props: {
+      handleClick: (view, _pos, event) => {
+        const markNames = activeMarkNames(marks, view.state)
+        if (markNames.length === 0) return false
+        const target = event.target as HTMLElement | null
+        const preview = target?.closest?.<HTMLElement>('.md-atom-view-preview')
+        const content = preview?.closest('.md-atom-view')?.querySelector('.md-atom-view-content')
+        if (!preview || !content) return false
+        const range = getRangeAfter(view.state, view.posAtDOM(content, 0), markNames)
+        if (!range) return false
+        const rect = preview.getBoundingClientRect()
+        const edge = event.clientX < rect.left + rect.width / 2 ? range.from : range.to
+        view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, edge)))
+        // Declining lets a host's click handler (wikilink navigation, image and
+        // file clicks) run on the same click.
+        return false
+      },
+    },
+  })
+}
+
 const SELECTED_CLASS = 'md-atom-selected'
 
 // Decorate each selected atom's source range with `md-atom-selected`, so its
@@ -335,6 +364,7 @@ export function defineAtomMarkNavigation({ marks }: AtomMarkNavigationOptions): 
       Priority.high,
     ),
     definePlugin(createCaretSnapPlugin(marks)),
+    definePlugin(createPointerPlugin(marks)),
     definePlugin(createSelectionPlugin(marks)),
   )
 }
