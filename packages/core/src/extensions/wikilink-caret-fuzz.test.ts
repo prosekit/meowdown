@@ -103,6 +103,7 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
     'records Backspace at every caret position',
     async () => {
       const table = await fuzzKey(setupFocusOutline, OUTLINE_LINES, '{Backspace}')
+      // REVIEW: Since all three browsers have the same behavior, we can remove the browser-specific snapshots and just have one snapshot for all browsers. This reduces the text snapshot size in this file.
       if (isSafari()) {
         expect(table).toMatchInlineSnapshot(`
           """
