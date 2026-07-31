@@ -123,4 +123,21 @@ describe('defineFollowLinkHandler', () => {
     expect(onTagClick).not.toHaveBeenCalled()
     expect(docToMarkdown(fixture.doc)).toBe('- [ ] see [[Note]] here\n')
   })
+  it('Mod-Enter on a selected wikilink next to another wikilink', async () => {
+    const onWikilinkClick = vi.fn<WikilinkClickHandler>()
+    using fixture = setup({ onWikilinkClick })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see <a>[[Aaa]][[Bbb]] here')))
+    fixture.view.focus()
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ┃[[Aaa]][[Bbb]] here"`)
+    await userEvent.keyboard('{ArrowRight}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Aaa]]❱[[Bbb]] here"`)
+    await pressModEnter()
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Aaa]]❱[[Bbb]] here"`)
+    expect(onWikilinkClick.mock.calls.map((call) => call[0].target)).toMatchInlineSnapshot(`
+      [
+        "Bbb",
+      ]
+    `)
+  })
 })
