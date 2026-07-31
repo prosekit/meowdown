@@ -70,6 +70,7 @@ async function fuzzKey(setup: SetupDoc, lines: readonly string[], key: string): 
 // The reported document: one bullet with two nested wikilink bullets.
 const OUTLINE_LINES = ['Links', '[[wikilink 1]]', '[[wikilink 2]]']
 
+// REVIEW: I feel this function is too complex. just write some plain multi-lines markdown text.
 function setupOutline(mode: MarkMode, lines: readonly string[]): Fixture {
   const fixture = setupFixture({ extensionOptions: { markMode: mode } })
   const { n } = fixture
