@@ -47,6 +47,7 @@ async function run(mode: MarkMode, markdown: string, key: string): Promise<strin
     fixture.set(markdownToDoc(markdown, { nodes: fixture.editor.nodes }))
     fixture.view.dispatch(fixture.state.tr.setSelection(TextSelection.create(fixture.doc, pos)))
     fixture.view.focus()
+
     await expect.element(pmRoot).toBeVisible()
 
     const markdownBefore = revealTrailingSpaces(docToMarkdown(fixture.doc))
