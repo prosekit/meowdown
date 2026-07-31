@@ -685,6 +685,35 @@ describe('caret navigation between adjacent inline units', () => {
     `)
   })
 
+  it('focus: ArrowLeft walks two identical adjacent wikilinks as two units', async () => {
+    using fixture = setup('focus', ['see [[Aaa]][[Aaa]]<a> here'])
+    expect(await walkKey(fixture, 'ArrowLeft', 4)).toMatchInlineSnapshot(`
+      """
+      see [[Aaa]][[Aaa]]┃ here
+      ----------
+      see [[Aaa]]❰[[Aaa]]❱ here
+      ----------
+      see [[Aaa]]┃[[Aaa]] here
+      ----------
+      see ❰[[Aaa]]❱[[Aaa]] here
+      ----------
+      see ┃[[Aaa]][[Aaa]] here
+      """
+    `)
+  })
+
+  it('focus: Backspace between two identical adjacent wikilinks removes only the left one', async () => {
+    using fixture = setup('focus', ['see [[Aaa]][[Aaa]]<a> here'])
+    await userEvent.keyboard('{ArrowLeft}{ArrowLeft}')
+    await userEvent.keyboard('{Backspace}')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      see [[Aaa]] here
+
+      """
+    `)
+  })
+
   it('focus: ArrowLeft between two adjacent wikilinks', async () => {
     using fixture = setup('focus', ['see [[Aaa]][[Bbb]]<a> here'])
     expect(await walkKey(fixture, 'ArrowLeft', 4)).toMatchInlineSnapshot(`

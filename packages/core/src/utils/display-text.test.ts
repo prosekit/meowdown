@@ -33,12 +33,10 @@ describe('getTextblockDisplayText', () => {
     expect(getTextblockDisplayText(fixture.doc.child(0))).toBe('read report.pdf')
   })
 
-  it('cannot split adjacent identical atoms', () => {
+  it('replaces both of two adjacent identical atoms', () => {
     using fixture = setupFixture()
     const { n } = fixture
-    // Adjacent same-attrs units merge into one text node carrying one mark
-    // instance, so the document cannot tell the two units apart.
     fixture.set(n.doc(n.heading({ level: 1 }, '[[a]][[a]]')))
-    expect(getTextblockDisplayText(fixture.doc.child(0))).toBe('a')
+    expect(getTextblockDisplayText(fixture.doc.child(0))).toBe('aa')
   })
 })

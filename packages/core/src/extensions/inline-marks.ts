@@ -3,10 +3,23 @@ import { defineMarkSpec, union } from '@prosekit/core'
 import type { MarkName } from './mark-names.ts'
 
 /**
+ * Attribute every unit mark carries so two adjacent units with otherwise equal
+ * attributes (`[[foo]][[foo]]`) stay two text nodes, and each keeps its own
+ * mark view instead of merging into one preview. The parser alternates it
+ * between such neighbours; it carries no meaning on its own and is `null`
+ * everywhere else.
+ */
+export interface MdUnitSlotAttrs {
+  slot?: number | null
+}
+
+const unitSlotAttr = { slot: { default: null } }
+
+/**
  * Attributes of the `mdImage` mark, derived from either `![alt](src "title")`
  * (plus an optional trailing size comment) or a resolved wiki image embed.
  */
-export interface MdImageAttrs {
+export interface MdImageAttrs extends MdUnitSlotAttrs {
   /** The image destination, exactly as written in the source. */
   src: string
   /** The image alt text. */
@@ -35,6 +48,7 @@ function defineMdImage() {
       height: { default: null },
       syntax: { default: null },
       wikiTarget: { default: null },
+      ...unitSlotAttr,
     },
     toDOM: () => ['span', { class: 'md-image' }, 0],
     parseDOM: [{ tag: 'span.md-image' }],
@@ -151,13 +165,13 @@ function defineMdWikilink() {
   return defineMarkSpec<'mdWikilink', MdWikilinkAttrs>({
     name: 'mdWikilink' satisfies MarkName,
     inclusive: false,
-    attrs: { target: { default: '' }, display: { default: '' } },
+    attrs: { target: { default: '' }, display: { default: '' }, ...unitSlotAttr },
     toDOM: () => ['span', { class: 'md-wikilink' }, 0],
     parseDOM: [{ tag: 'span.md-wikilink' }],
   })
 }
 
-export interface MdWikilinkAttrs {
+export interface MdWikilinkAttrs extends MdUnitSlotAttrs {
   target: string
   display: string
 }
@@ -166,7 +180,7 @@ export interface MdWikilinkAttrs {
  * Attributes of the `mdFile` mark: a whole `[label](url)` link that the host's
  * `resolveFileLink` claimed as a file attachment, rendered as a file pill.
  */
-export interface MdFileAttrs {
+export interface MdFileAttrs extends MdUnitSlotAttrs {
   /** The link destination, exactly as written in the source. */
   href: string
   /** The display name: the raw label slice, or the `href` basename when the label is empty. */
@@ -183,6 +197,7 @@ function defineMdFile() {
       href: { default: '' },
       name: { default: '' },
       title: { default: '' },
+      ...unitSlotAttr,
     },
     toDOM: () => ['span', { class: 'md-file' }, 0],
     parseDOM: [{ tag: 'span.md-file' }],
@@ -193,7 +208,7 @@ function defineMdFile() {
  * Attributes of the `mdMath` mark: a whole `$formula$` / `$$formula$$` inline
  * math expression, rendered by `MathMarkView`.
  */
-export interface MdMathAttrs {
+export interface MdMathAttrs extends MdUnitSlotAttrs {
   /** The TeX source between the dollar delimiters. */
   formula: string
 }
@@ -203,7 +218,7 @@ function defineMdMath() {
   return defineMarkSpec<'mdMath', MdMathAttrs>({
     name: 'mdMath' satisfies MarkName,
     inclusive: false,
-    attrs: { formula: { default: '' } },
+    attrs: { formula: { default: '' }, ...unitSlotAttr },
     toDOM: () => ['span', { class: 'md-math' }, 0],
     parseDOM: [{ tag: 'span.md-math' }],
   })

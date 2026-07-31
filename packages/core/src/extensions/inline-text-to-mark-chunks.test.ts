@@ -509,6 +509,15 @@ describe('image', () => {
     `)
   })
 
+  it('adjacent and identical', () => {
+    expect(parse('![a](x.png)![a](x.png)')).toMatchInlineSnapshot(`
+      "
+      [0, 11]  mdImage(src=x.png,alt=a)
+      [11, 22] mdImage(src=x.png,alt=a,slot=1)
+      "
+    `)
+  })
+
   it('only URL', () => {
     expect(parse('![](image.png)')).toMatchInlineSnapshot(`
       "
@@ -1016,6 +1025,35 @@ describe('wikilink', () => {
       "
       [0, 5]  mdWikilink(target=a)
       [5, 10] mdWikilink(target=b)
+      "
+    `)
+  })
+
+  it('adjacent and identical', () => {
+    expect(parse('[[a]][[a]]')).toMatchInlineSnapshot(`
+      "
+      [0, 5]  mdWikilink(target=a)
+      [5, 10] mdWikilink(target=a,slot=1)
+      "
+    `)
+  })
+
+  it('three adjacent and identical', () => {
+    expect(parse('[[a]][[a]][[a]]')).toMatchInlineSnapshot(`
+      "
+      [0, 5]   mdWikilink(target=a)
+      [5, 10]  mdWikilink(target=a,slot=1)
+      [10, 15] mdWikilink(target=a)
+      "
+    `)
+  })
+
+  it('identical but separated by text', () => {
+    expect(parse('[[a]] [[a]]')).toMatchInlineSnapshot(`
+      "
+      [0, 5]  mdWikilink(target=a)
+      [5, 6]
+      [6, 11] mdWikilink(target=a)
       "
     `)
   })

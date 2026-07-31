@@ -15,7 +15,7 @@ import type {
 } from './inline-marks.ts'
 import { parseMagicComment, type MagicComment } from './magic-comment.ts'
 import type { MarkChunk } from './mark-chunk.ts'
-import type { MarkName } from './mark-names.ts'
+import { ATOM_MARK_NAMES, type MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
 import {
   normalizeReferenceLabel,
@@ -114,6 +114,7 @@ export function inlineTextToMarkChunksWithContext(
   const elements = parseInline(text)
   const out: MarkChunk[] = []
   walk(elements, [], 0, text.length, text, marks, out, options, context)
+  separateAdjacentUnits(out)
   return out
 }
 
@@ -655,6 +656,48 @@ function walkWikiEmbed(
   emit(out, node.from, node.to, [...parentMarks, marks.mdWikilink.create({ target, display })])
 }
 
+// The unit mark of a mark set (a wikilink, image, file pill or math run), or
+// undefined for ordinary text. Every chunk of one unit carries the very same
+// mark instance, which is what tells two neighbours apart from one unit split
+// across chunks (math emits its dollar runs separately).
+function getUnitMark(marks: readonly Mark[]): Mark | undefined {
+  return marks.find((mark) => ATOM_MARK_NAMES.has(mark.type.name))
+}
+
+/**
+ * Alternate `slot` on a unit whose mark equals the one on the unit ending
+ * exactly where it starts. `[[foo]][[foo]]` gives both units an equal
+ * `mdWikilink` mark, so ProseMirror merges them into one text node and one mark
+ * view renders one preview for both; unequal marks keep them apart.
+ */
+function separateAdjacentUnits(chunks: MarkChunk[]): void {
+  let previousMark: Mark | undefined
+  let previousEnd = -1
+  let index = 0
+  while (index < chunks.length) {
+    const mark = getUnitMark(chunks[index][2])
+    if (!mark) {
+      index++
+      continue
+    }
+    let end = index
+    while (end < chunks.length && getUnitMark(chunks[end][2]) === mark) end++
+    const merges = previousMark != null && previousEnd === chunks[index][0] && previousMark.eq(mark)
+    const unitMark = merges
+      ? mark.type.create({ ...mark.attrs, slot: mark.attrs.slot == null ? 1 : null })
+      : mark
+    if (unitMark !== mark) {
+      for (let i = index; i < end; i++) {
+        const [from, to, marks] = chunks[i]
+        chunks[i] = [from, to, marks.map((other) => (other === mark ? unitMark : other))]
+      }
+    }
+    previousMark = unitMark
+    previousEnd = chunks[end - 1][1]
+    index = end
+  }
+}
+
 /**
  * Push `[from, to, marks]` to `out`, coalescing with the previous chunk
  * when both share the same mark set. Coalescing keeps the chunk list
@@ -668,8 +711,14 @@ function emit(out: MarkChunk[], from: number, to: number, marks: readonly Mark[]
 
   const last = out.at(-1)
   if (last && last[1] === from && marksEqual(last[2], marks)) {
-    out[out.length - 1] = [last[0], to, last[2]]
-    return
+    // Two units of the same kind with equal attributes must stay two chunks,
+    // even though their mark sets match: `separateAdjacentUnits` tells them
+    // apart by mark instance and then makes the marks differ.
+    const unit = getUnitMark(marks)
+    if (unit == null || getUnitMark(last[2]) === unit) {
+      out[out.length - 1] = [last[0], to, last[2]]
+      return
+    }
   }
   out.push([from, to, marks])
 }
