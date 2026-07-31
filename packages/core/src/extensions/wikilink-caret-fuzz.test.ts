@@ -28,11 +28,11 @@ function findCaretPositions(doc: EditorNode): number[] {
   return positions
 }
 
-
 // A space typed at the end of a block is content, so trailing spaces are drawn as `·` rather than left to vanish into the snapshot.
 function revealTrailingSpaces(text: string): string {
   return text
-    .split('\n').map((line) => line.replace(/ +$/, (spaces) => '·'.repeat(spaces.length)))
+    .split('\n')
+    .map((line) => line.replace(/ +$/, (spaces) => '·'.repeat(spaces.length)))
     .join('\n')
 }
 
@@ -52,13 +52,14 @@ async function fuzzKey(mode: MarkMode, markdown: string, key: string): Promise<s
     const markdownBefore = revealTrailingSpaces(docToMarkdown(fixture.doc).replace(/\n+$/, ''))
     const selectionbefore = revealTrailingSpaces(getSelectionSnapshot(fixture.state))
     await userEvent.keyboard(key)
-    const markdownAfter = revealTrailingSpaces(revealTrailingSpaces(docToMarkdown(fixture.doc).replace(/\n+$/, '')))
+    const markdownAfter = revealTrailingSpaces(
+      revealTrailingSpaces(docToMarkdown(fixture.doc).replace(/\n+$/, '')),
+    )
     const selectionAfter = getSelectionSnapshot(fixture.state)
 
     cases.push(
       [
         getSplitline(`=`, `pos: ${pos}`),
-
 
         getSplitline(`-`, `markdown before`),
         markdownBefore,
@@ -70,19 +71,25 @@ async function fuzzKey(mode: MarkMode, markdown: string, key: string): Promise<s
         getSplitline(`-`, `selection after`),
         selectionAfter,
 
-        getSplitline('-')
-
-
+        getSplitline('-'),
       ].join('\n'),
     )
   }
   return cases.join('\n\n')
 }
 
-function getSplitline(char: string, label: string = "", labelLength: number = 18, prefixLength = 5): string {
-
+function getSplitline(
+  char: string,
+  label: string = '',
+  labelLength: number = 18,
+  prefixLength = 5,
+): string {
   if (label) {
-    return char.repeat(prefixLength) + (" " + label + " ").padEnd(labelLength, char ) + char.repeat(prefixLength)
+    return (
+      char.repeat(prefixLength) +
+      (' ' + label + ' ').padEnd(labelLength, char) +
+      char.repeat(prefixLength)
+    )
   } else {
     return char.repeat(prefixLength + labelLength + prefixLength)
   }
@@ -102,10 +109,8 @@ const INLINE_MARKDOWN = `a [[foo]] b`
 const ADJACENT_MARKDOWN = `[[foo]][[bar]]`
 
 describe('caret fuzz over a wikilink outline in focus mode', () => {
-  it(
-    'records Backspace at every caret position',
-    async () => {
-      expect(await fuzzKey('focus', OUTLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
+  it('records Backspace at every caret position', async () => {
+    expect(await fuzzKey('focus', OUTLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
         """
         ===== pos: 2 ===============
         ----- markdown before ------
@@ -493,14 +498,10 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
         ----------------------------
         """
       `)
-    },
+  })
 
-  )
-
-  it(
-    'records Space at every caret position',
-    async () => {
-      expect(await fuzzKey('focus', OUTLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
+  it('records Space at every caret position', async () => {
+    expect(await fuzzKey('focus', OUTLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
         ===== pos: 2 ===============
         ----- markdown before ------
@@ -883,14 +884,10 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
         ----------------------------
         """
       `)
-    },
+  })
 
-  )
-
-  it(
-    'records Enter at every caret position',
-    async () => {
-      expect(await fuzzKey('focus', OUTLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
+  it('records Enter at every caret position', async () => {
+    expect(await fuzzKey('focus', OUTLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
         """
         ===== pos: 2 ===============
         ----- markdown before ------
@@ -1313,16 +1310,12 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
         ----------------------------
         """
       `)
-    },
-
-  )
+  })
 })
 
 describe('caret fuzz over a wikilink outline in hide mode', () => {
-  it(
-    'records Backspace at every caret position',
-    async () => {
-      expect(await fuzzKey('hide', OUTLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
+  it('records Backspace at every caret position', async () => {
+    expect(await fuzzKey('hide', OUTLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
         """
         ===== pos: 2 ===============
         ----- markdown before ------
@@ -1710,14 +1703,10 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
         ----------------------------
         """
       `)
-    },
+  })
 
-  )
-
-  it(
-    'records Space at every caret position',
-    async () => {
-      expect(await fuzzKey('hide', OUTLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
+  it('records Space at every caret position', async () => {
+    expect(await fuzzKey('hide', OUTLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
         ===== pos: 2 ===============
         ----- markdown before ------
@@ -2100,14 +2089,10 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
         ----------------------------
         """
       `)
-    },
+  })
 
-  )
-
-  it(
-    'records Enter at every caret position',
-    async () => {
-      expect(await fuzzKey('hide', OUTLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
+  it('records Enter at every caret position', async () => {
+    expect(await fuzzKey('hide', OUTLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
         """
         ===== pos: 2 ===============
         ----- markdown before ------
@@ -2530,16 +2515,12 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
         ----------------------------
         """
       `)
-    },
-
-  )
+  })
 })
 
 describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
-  it(
-    'records Backspace at every caret position',
-    async () => {
-      expect(await fuzzKey('focus', INLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
+  it('records Backspace at every caret position', async () => {
+    expect(await fuzzKey('focus', INLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
         """
         ===== pos: 1 ===============
         ----- markdown before ------
@@ -2674,14 +2655,10 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
         ----------------------------
         """
       `)
-    },
+  })
 
-  )
-
-  it(
-    'records Space at every caret position',
-    async () => {
-      expect(await fuzzKey('focus', INLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
+  it('records Space at every caret position', async () => {
+    expect(await fuzzKey('focus', INLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
         ===== pos: 1 ===============
         ----- markdown before ------
@@ -2816,14 +2793,10 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
         ----------------------------
         """
       `)
-    },
+  })
 
-  )
-
-  it(
-    'records Enter at every caret position',
-    async () => {
-      expect(await fuzzKey('focus', INLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
+  it('records Enter at every caret position', async () => {
+    expect(await fuzzKey('focus', INLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
         """
         ===== pos: 1 ===============
         ----- markdown before ------
@@ -2990,16 +2963,12 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
         ----------------------------
         """
       `)
-    },
-
-  )
+  })
 })
 
 describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
-  it(
-    'records Backspace at every caret position',
-    async () => {
-      expect(await fuzzKey('focus', ADJACENT_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
+  it('records Backspace at every caret position', async () => {
+    expect(await fuzzKey('focus', ADJACENT_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
         """
         ===== pos: 1 ===============
         ----- markdown before ------
@@ -3167,14 +3136,10 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
         ----------------------------
         """
       `)
-    },
+  })
 
-  )
-
-  it(
-    'records Space at every caret position',
-    async () => {
-      expect(await fuzzKey('focus', ADJACENT_MARKDOWN, ' ')).toMatchInlineSnapshot(`
+  it('records Space at every caret position', async () => {
+    expect(await fuzzKey('focus', ADJACENT_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
         ===== pos: 1 ===============
         ----- markdown before ------
@@ -3342,14 +3307,10 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
         ----------------------------
         """
       `)
-    },
+  })
 
-  )
-
-  it(
-    'records Enter at every caret position',
-    async () => {
-      expect(await fuzzKey('focus', ADJACENT_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
+  it('records Enter at every caret position', async () => {
+    expect(await fuzzKey('focus', ADJACENT_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
         """
         ===== pos: 1 ===============
         ----- markdown before ------
@@ -3558,7 +3519,5 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
         ----------------------------
         """
       `)
-    },
-
-  )
+  })
 })
