@@ -5,7 +5,7 @@ import { page, userEvent } from 'vitest/browser'
 
 import { markdownToDoc } from '../converters/md-to-pm.ts'
 import { docToMarkdown } from '../converters/pm-to-md.ts'
-import { getSelectionSnapshot, setupFixture, type Fixture } from '../testing/index.ts'
+import { getSelectionSnapshot, setupFixture } from '../testing/index.ts'
 
 import type { MarkMode } from './mark-mode.ts'
 
@@ -29,26 +29,28 @@ function findCaretPositions(doc: EditorNode): number[] {
 }
 
 // Continuation lines line up under the first one, so a multi-block document
-// reads as a block instead of a run-on line.
+// reads as a block instead of a run-on line. A space typed at the end of a
+// block is content, so trailing spaces are drawn as `·` rather than left to
+// vanish into the snapshot.
 function renderLabelled(label: string, text: string): string {
   const gutter = `  ${label.padEnd(6)}  `
   const indent = ' '.repeat(gutter.length)
   return text
     .split('\n')
+    .map((line) => line.replace(/ +$/, (spaces) => '·'.repeat(spaces.length)))
     .map((line, index) => `${index === 0 ? gutter : indent}${line}`.trimEnd())
     .join('\n')
 }
-
-type SetupDoc = (markdown: string) => Fixture
 
 // Press `key` once at every caret position of `markdown`. Each position records
 // the selection before and after the press, then the markdown the document
 // serializes to, which is where a lost list level or a dissolved wikilink shows
 // up.
-async function fuzzKey(setup: SetupDoc, markdown: string, key: string): Promise<string> {
+async function fuzzKey(mode: MarkMode, markdown: string, key: string): Promise<string> {
   const cases: string[] = []
   for (const pos of findCaretPositions(markdownToDoc(markdown))) {
-    using fixture = setup(markdown)
+    using fixture = setupFixture({ extensionOptions: { markMode: mode } })
+    fixture.set(markdownToDoc(markdown, { nodes: fixture.editor.nodes }))
     fixture.view.dispatch(fixture.state.tr.setSelection(TextSelection.create(fixture.doc, pos)))
     fixture.view.focus()
     await expect.element(pmRoot).toBeVisible()
@@ -61,21 +63,12 @@ async function fuzzKey(setup: SetupDoc, markdown: string, key: string): Promise<
         `pos ${pos}`,
         renderLabelled('before', before),
         renderLabelled('after', getSelectionSnapshot(fixture.state)),
-        renderLabelled('md', docToMarkdown(fixture.doc).trimEnd()),
+        renderLabelled('md', docToMarkdown(fixture.doc).replace(/\n+$/, '')),
       ].join('\n'),
     )
   }
   return cases.join('\n\n')
 }
-
-function setupEditor(mode: MarkMode, markdown: string): Fixture {
-  const fixture = setupFixture({ extensionOptions: { markMode: mode } })
-  fixture.set(markdownToDoc(markdown, { nodes: fixture.editor.nodes }))
-  return fixture
-}
-
-const setupFocusEditor: SetupDoc = (markdown) => setupEditor('focus', markdown)
-const setupHideEditor: SetupDoc = (markdown) => setupEditor('hide', markdown)
 
 // The reported document: one bullet with two nested wikilink bullets.
 const OUTLINE_MARKDOWN = `- top
@@ -94,8 +87,7 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
   it(
     'records Backspace at every caret position',
     async () => {
-      expect(await fuzzKey(setupFocusEditor, OUTLINE_MARKDOWN, '{Backspace}'))
-        .toMatchInlineSnapshot(`
+      expect(await fuzzKey('focus', OUTLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
           """
           pos 2
             before  ┃top
@@ -330,7 +322,7 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
   it(
     'records Space at every caret position',
     async () => {
-      expect(await fuzzKey(setupFocusEditor, OUTLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
+      expect(await fuzzKey('focus', OUTLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
         pos 2
           before  ┃top
@@ -372,7 +364,7 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
           after   top ┃
                   [[foo]]
                   [[bar]]
-          md      - top
+          md      - top·
                     - [[foo]]
                     - [[bar]]
 
@@ -461,7 +453,7 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
                   [[foo]] ┃
                   [[bar]]
           md      - top
-                    - [[foo]]
+                    - [[foo]]·
                     - [[bar]]
 
         pos 19
@@ -560,7 +552,7 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
   it(
     'records Enter at every caret position',
     async () => {
-      expect(await fuzzKey(setupFocusEditor, OUTLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
+      expect(await fuzzKey('focus', OUTLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
         """
         pos 2
           before  ┃top
@@ -832,8 +824,7 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
   it(
     'records Backspace at every caret position',
     async () => {
-      expect(await fuzzKey(setupHideEditor, OUTLINE_MARKDOWN, '{Backspace}'))
-        .toMatchInlineSnapshot(`
+      expect(await fuzzKey('hide', OUTLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
           """
           pos 2
             before  ┃top
@@ -1068,7 +1059,7 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
   it(
     'records Space at every caret position',
     async () => {
-      expect(await fuzzKey(setupHideEditor, OUTLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
+      expect(await fuzzKey('hide', OUTLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
         pos 2
           before  ┃top
@@ -1110,7 +1101,7 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
           after   top ┃
                   [[foo]]
                   [[bar]]
-          md      - top
+          md      - top·
                     - [[foo]]
                     - [[bar]]
 
@@ -1199,7 +1190,7 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
                   [[foo]] ┃
                   [[bar]]
           md      - top
-                    - [[foo]]
+                    - [[foo]]·
                     - [[bar]]
 
         pos 19
@@ -1298,7 +1289,7 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
   it(
     'records Enter at every caret position',
     async () => {
-      expect(await fuzzKey(setupHideEditor, OUTLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
+      expect(await fuzzKey('hide', OUTLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
         """
         pos 2
           before  ┃top
@@ -1570,8 +1561,7 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
   it(
     'records Backspace at every caret position',
     async () => {
-      expect(await fuzzKey(setupFocusEditor, INLINE_MARKDOWN, '{Backspace}'))
-        .toMatchInlineSnapshot(`
+      expect(await fuzzKey('focus', INLINE_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
         """
         pos 1
           before  ┃a [[foo]] b
@@ -1641,7 +1631,7 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
   it(
     'records Space at every caret position',
     async () => {
-      expect(await fuzzKey(setupFocusEditor, INLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
+      expect(await fuzzKey('focus', INLINE_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
         pos 1
           before  ┃a [[foo]] b
@@ -1711,7 +1701,7 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
   it(
     'records Enter at every caret position',
     async () => {
-      expect(await fuzzKey(setupFocusEditor, INLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
+      expect(await fuzzKey('focus', INLINE_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
         """
         pos 1
           before  ┃a [[foo]] b
@@ -1729,9 +1719,9 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
 
         pos 3
           before  a ┃[[foo]] b
-          after   a
+          after   a·
                   ┃[[foo]] b
-          md      a
+          md      a·
 
                   [[foo]] b
 
@@ -1793,9 +1783,9 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
 
         pos 11
           before  a [[foo]] ┃b
-          after   a [[foo]]
+          after   a [[foo]]·
                   ┃b
-          md      a [[foo]]
+          md      a [[foo]]·
 
                   b
 
@@ -1815,8 +1805,7 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
   it(
     'records Backspace at every caret position',
     async () => {
-      expect(await fuzzKey(setupFocusEditor, ADJACENT_MARKDOWN, '{Backspace}'))
-        .toMatchInlineSnapshot(`
+      expect(await fuzzKey('focus', ADJACENT_MARKDOWN, '{Backspace}')).toMatchInlineSnapshot(`
           """
           pos 1
             before  ┃[[foo]][[bar]]
@@ -1901,7 +1890,7 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
   it(
     'records Space at every caret position',
     async () => {
-      expect(await fuzzKey(setupFocusEditor, ADJACENT_MARKDOWN, ' ')).toMatchInlineSnapshot(`
+      expect(await fuzzKey('focus', ADJACENT_MARKDOWN, ' ')).toMatchInlineSnapshot(`
         """
         pos 1
           before  ┃[[foo]][[bar]]
@@ -1986,7 +1975,7 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
   it(
     'records Enter at every caret position',
     async () => {
-      expect(await fuzzKey(setupFocusEditor, ADJACENT_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
+      expect(await fuzzKey('focus', ADJACENT_MARKDOWN, '{Enter}')).toMatchInlineSnapshot(`
         """
         pos 1
           before  ┃[[foo]][[bar]]
