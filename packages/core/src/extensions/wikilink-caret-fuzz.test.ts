@@ -57,12 +57,13 @@ async function fuzzKey(mode: MarkMode, markdown: string, key: string): Promise<s
 
     const before = getSelectionSnapshot(fixture.state)
     await userEvent.keyboard(key)
+    const after = getSelectionSnapshot(fixture.state)
 
     cases.push(
       [
         `pos ${pos}`,
         renderLabelled('before', before),
-        renderLabelled('after', getSelectionSnapshot(fixture.state)),
+        renderLabelled('after', after),
         renderLabelled('md', docToMarkdown(fixture.doc).replace(/\n+$/, '')),
       ].join('\n'),
     )
