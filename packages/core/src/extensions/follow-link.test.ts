@@ -123,6 +123,7 @@ describe('defineFollowLinkHandler', () => {
     expect(onTagClick).not.toHaveBeenCalled()
     expect(docToMarkdown(fixture.doc)).toBe('- [ ] see [[Note]] here\n')
   })
+
   it('Mod-Enter on a selected wikilink next to another wikilink', async () => {
     const onWikilinkClick = vi.fn<WikilinkClickHandler>()
     using fixture = setup({ onWikilinkClick })
@@ -137,7 +138,7 @@ describe('defineFollowLinkHandler', () => {
     await pressModEnter()
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Aaa]]❱[[Bbb]] here"`)
 
-    expect(onWikilinkClick.mock.calls.map((call) => call[0].target)).toMatchInlineSnapshot(`
+    expect(onWikilinkClick.mock.calls.map(([payload]) => payload.target)).toMatchInlineSnapshot(`
       [
         "Aaa",
       ]
@@ -157,7 +158,7 @@ describe('defineFollowLinkHandler', () => {
     await userEvent.keyboard('{Enter}')
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Note]]❱ here"`)
 
-    expect(onWikilinkClick.mock.calls.map((call) => call[0].target)).toMatchInlineSnapshot(`
+    expect(onWikilinkClick.mock.calls.map(([payload]) => payload.target)).toMatchInlineSnapshot(`
       [
         "Note",
       ]

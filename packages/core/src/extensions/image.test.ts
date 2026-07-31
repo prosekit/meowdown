@@ -296,11 +296,11 @@ describe('image click callback', () => {
     await userEvent.click(pmRoot.getByAltText('one'))
     await userEvent.click(pmRoot.getByAltText('two'))
     await vi.waitFor(() => expect(onImageClick).toHaveBeenCalledTimes(2))
-    expect(onImageClick.mock.calls.map((call) => call[0].src)).toEqual([
+    expect(onImageClick.mock.calls.map(([payload]) => payload.src)).toEqual([
       'https://example.com/1.png',
       'https://example.com/2.png',
     ])
-    expect(onImageClick.mock.calls.map((call) => call[0].alt)).toEqual(['one', 'two'])
+    expect(onImageClick.mock.calls.map(([payload]) => payload.alt)).toEqual(['one', 'two'])
   })
 })
 
