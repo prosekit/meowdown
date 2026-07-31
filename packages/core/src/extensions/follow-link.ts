@@ -2,6 +2,7 @@ import { definePlugin, isApple, Priority, withPriority, type PlainExtension } fr
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 
 import { getIsComposing } from '../utils/composition.ts'
+
 import { getSelectedAtomRange } from './atom-mark-navigation.ts'
 import type { FileClickHandler } from './file-click.ts'
 import { findFileAt } from './file-click.ts'
