@@ -50,6 +50,7 @@ type SetupDoc = (lines: readonly string[]) => Fixture
 // document serializes to, which is where a lost list level or a dissolved
 // wikilink shows up.
 async function fuzzKey(setup: SetupDoc, lines: readonly string[], key: string): Promise<string> {
+  // REVIEW: in this file, let's do not pass `lines: string[]`. Let's just pass `markdown: string`. This makes the code more simple. Also we do not need to have so many information in the label (i.e. "line index" and "line offset"), just keep it simpler.
   const rows: string[] = []
   for (const caretCase of buildCaretCases(lines)) {
     using fixture = setup(caretCase.lines)
