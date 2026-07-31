@@ -42,6 +42,14 @@ function renderLabelled(label: string, text: string): string {
     .join('\n')
 }
 
+
+// A space typed at the end of a block is content, so trailing spaces are drawn as `·` rather than left to vanish into the snapshot.
+function revealTrailingSpaces(text: string): string {
+  return text
+    .split('\n').map((line) => line.replace(/ +$/, (spaces) => '·'.repeat(spaces.length)))
+    .join('\n')
+}
+
 // Press `key` once at every caret position of `markdown`. Each position records
 // the selection before and after the press, then the markdown the document
 // serializes to, which is where a lost list level or a dissolved wikilink shows
@@ -55,20 +63,42 @@ async function fuzzKey(mode: MarkMode, markdown: string, key: string): Promise<s
     fixture.view.focus()
     await expect.element(pmRoot).toBeVisible()
 
-    const before = getSelectionSnapshot(fixture.state)
+    const beforeMarkdown = revealTrailingSpaces(docToMarkdown(fixture.doc).replace(/\n+$/, ''))
+    const beforeSelection = revealTrailingSpaces(getSelectionSnapshot(fixture.state))
     await userEvent.keyboard(key)
-    const after = getSelectionSnapshot(fixture.state)
+    const afterMarkdown = revealTrailingSpaces(revealTrailingSpaces(docToMarkdown(fixture.doc).replace(/\n+$/, '')))
+    const afterSelection = getSelectionSnapshot(fixture.state)
 
     cases.push(
       [
-        `pos ${pos}`,
-        renderLabelled('before', before),
-        renderLabelled('after', after),
-        renderLabelled('md', docToMarkdown(fixture.doc).replace(/\n+$/, '')),
+        getSplitline(`=`, `pos ${pos}`),
+
+        getSplitline('-', "before markdown"),
+        beforeMarkdown,
+        getSplitline('-', "before selection"),
+        beforeSelection,
+
+        getSplitline('-', "after markdown"),
+        afterMarkdown,
+        getSplitline('-', "after selection"),
+        afterSelection,
       ].join('\n'),
     )
   }
   return cases.join('\n\n')
+}
+
+function getSplitline(char: string, label: string = "", labelLength: number = 10): string {
+  let result = char.repeat(10)
+  if (label) {
+    result += " "
+    result += label.padEnd(labelLength)
+    result += " "
+  } else {
+    result += char.repeat(labelLength + 2)
+  }
+  result += char.repeat(10)
+  return result
 }
 
 // The reported document: one bullet with two nested wikilink bullets.
