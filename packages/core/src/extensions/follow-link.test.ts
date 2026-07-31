@@ -130,10 +130,13 @@ describe('defineFollowLinkHandler', () => {
     fixture.set(n.doc(n.paragraph('see <a>[[Aaa]][[Bbb]] here')))
     fixture.view.focus()
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ┃[[Aaa]][[Bbb]] here"`)
+
     await userEvent.keyboard('{ArrowRight}')
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Aaa]]❱[[Bbb]] here"`)
+
     await pressModEnter()
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Aaa]]❱[[Bbb]] here"`)
+
     expect(onWikilinkClick.mock.calls.map((call) => call[0].target)).toMatchInlineSnapshot(`
       [
         "Aaa",
@@ -146,9 +149,14 @@ describe('defineFollowLinkHandler', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('see [[Note]]<a> here')))
     fixture.view.focus()
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Note]]┃ here"`)
 
     await userEvent.keyboard('{ArrowLeft}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Note]]❱ here"`)
+
     await userEvent.keyboard('{Enter}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Note]]❱ here"`)
+
     expect(onWikilinkClick.mock.calls.map((call) => call[0].target)).toMatchInlineSnapshot(`
       [
         "Note",
