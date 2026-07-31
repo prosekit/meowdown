@@ -40,6 +40,7 @@ function buildCaretCases(lines: readonly string[]): CaretCase[] {
     }
   }
   return cases
+  // REVIEW: do not use <a> in the test source, because it's not super reliable to parse and serialize. Use a more low-level API. use prosemirror's API to directly set the text selection. for every position `pos`, use `Selection.near($pos)` to get a selection, and if (a) the output selection is `TextSelection` (e.g. not AllSelection not NodeSelection etc), and (b) the output selection is empty and its `selection.from` equals `pos`, then that position is a valid caret position. We pick all valid caret positions and run the fuzz test on them. This way we don't have to worry about the `<a>` tag being in a weird place, and we can be sure that the caret is actually in a valid position.
 }
 
 type SetupDoc = (lines: readonly string[]) => Fixture
