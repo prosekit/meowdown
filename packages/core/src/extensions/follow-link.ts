@@ -2,8 +2,8 @@ import { definePlugin, isApple, Priority, withPriority, type PlainExtension } fr
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 
 import { getSelectedAtomRange } from './atom-mark-navigation.ts'
-import { findFileAt } from './file-click.ts'
 import type { FileClickHandler } from './file-click.ts'
+import { findFileAt } from './file-click.ts'
 import { getLinkUnitAt } from './get-link-unit-at.ts'
 import type { LinkClickHandler } from './link-click.ts'
 import type { TagClickHandler } from './tag-click.ts'
