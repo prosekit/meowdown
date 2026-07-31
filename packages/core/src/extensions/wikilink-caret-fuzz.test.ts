@@ -1967,8 +1967,8 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
                 md: [[Aa]][[Bbb]]⏎
           0:06  [[Aaa]┃][[Bbb]]  ->  [[Aaa┃][[Bbb]]
                 md: [[Aaa][[Bbb]]⏎
-          0:07  [[Aaa]]┃[[Bbb]]  ->  [[Aaa]┃[[Bbb]]
-                md: [[Aaa][[Bbb]]⏎
+          0:07  [[Aaa]]┃[[Bbb]]  ->  ┃[[Bbb]]
+                md: [[Bbb]]⏎
           0:08  [[Aaa]][┃[Bbb]]  ->  [[Aaa]]┃[Bbb]]
                 md: [[Aaa]][Bbb]]⏎
           0:09  [[Aaa]][[┃Bbb]]  ->  [[Aaa]][┃Bbb]]
@@ -2002,8 +2002,8 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
                 md: [[Aa]][[Bbb]]⏎
           0:06  [[Aaa]┃][[Bbb]]  ->  [[Aaa┃][[Bbb]]
                 md: [[Aaa][[Bbb]]⏎
-          0:07  [[Aaa]]┃[[Bbb]]  ->  [[Aaa]┃[[Bbb]]
-                md: [[Aaa][[Bbb]]⏎
+          0:07  [[Aaa]]┃[[Bbb]]  ->  ┃[[Bbb]]
+                md: [[Bbb]]⏎
           0:08  [[Aaa]][┃[Bbb]]  ->  [[Aaa]]┃[Bbb]]
                 md: [[Aaa]][Bbb]]⏎
           0:09  [[Aaa]][[┃Bbb]]  ->  [[Aaa]][┃Bbb]]
@@ -2037,8 +2037,8 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
                 md: [[Aa]][[Bbb]]⏎
           0:06  [[Aaa]┃][[Bbb]]  ->  [[Aaa┃][[Bbb]]
                 md: [[Aaa][[Bbb]]⏎
-          0:07  [[Aaa]]┃[[Bbb]]  ->  [[Aaa]┃[[Bbb]]
-                md: [[Aaa][[Bbb]]⏎
+          0:07  [[Aaa]]┃[[Bbb]]  ->  ┃[[Bbb]]
+                md: [[Bbb]]⏎
           0:08  [[Aaa]][┃[Bbb]]  ->  [[Aaa]]┃[Bbb]]
                 md: [[Aaa]][Bbb]]⏎
           0:09  [[Aaa]][[┃Bbb]]  ->  [[Aaa]][┃Bbb]]
