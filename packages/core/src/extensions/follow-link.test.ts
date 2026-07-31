@@ -129,11 +129,11 @@ describe('defineFollowLinkHandler', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('see <a>[[Aaa]][[Bbb]] here')))
     fixture.view.focus()
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot()
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ┃[[Aaa]][[Bbb]] here"`)
     await userEvent.keyboard('{ArrowRight}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot()
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Aaa]]❱[[Bbb]] here"`)
     await pressModEnter()
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot()
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Aaa]]❱[[Bbb]] here"`)
     expect(onWikilinkClick.mock.calls.map((call) => call[0].target)).toMatchInlineSnapshot(`
       [
         "Bbb",
