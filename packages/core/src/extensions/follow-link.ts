@@ -28,17 +28,29 @@ function isModEnter(event: KeyboardEvent): boolean {
   return isApple ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey
 }
 
+/** Whether the event is Enter with no modifier held. */
+function isPlainEnter(event: KeyboardEvent): boolean {
+  return (
+    event.key === 'Enter' && !event.shiftKey && !event.altKey && !event.ctrlKey && !event.metaKey
+  )
+}
+
 function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
   return new Plugin({
     key: followLinkKey,
     props: {
       handleKeyDown: (view, event) => {
-        if (!isModEnter(event)) {
+        const plainEnter = isPlainEnter(event)
+        if (!plainEnter && !isModEnter(event)) {
           return false
         }
 
         const { state } = view
         const selectedAtom = getSelectedAtomRange(state)
+        // Off a selected atom unit, plain Enter stays a regular split.
+        if (plainEnter && !selectedAtom) {
+          return false
+        }
         // Resolve inside the selected unit, not at its edge: either edge may
         // also touch an adjacent unit, and edge positions prefer the
         // neighbour to the right.
@@ -70,7 +82,9 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
           return true
         }
 
-        return false
+        // A selected atom consumes plain Enter even when no handler claims
+        // it: falling through would delete the unit and split the block.
+        return plainEnter
       },
     },
   })
@@ -78,9 +92,11 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
 
 /**
  * Binds `Mod-Enter` to follow the wikilink, tag, file pill, or Markdown link
- * under the caret, firing the same handlers a click does. Off a link the key
- * falls through, so the list keymap keeps cycling checkbox tasks. High
- * priority puts this ahead of every keymap binding.
+ * under the caret, and plain `Enter` to follow a selected atom unit, firing
+ * the same handlers a click does. Off a link, `Mod-Enter` falls through so
+ * the list keymap keeps cycling checkbox tasks; off a selected unit, `Enter`
+ * falls through to the regular split. High priority puts this ahead of every
+ * keymap binding.
  */
 export function defineFollowLinkHandler(handlers: FollowLinkHandlers): PlainExtension {
   return withPriority(definePlugin(createFollowLinkPlugin(handlers)), Priority.high)

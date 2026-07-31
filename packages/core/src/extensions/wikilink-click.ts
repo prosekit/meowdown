@@ -42,7 +42,7 @@ export function findWikilinkForElement(
 
 export interface WikilinkClickPayload {
   target: string
-  /** The originating click, or the `Mod-Enter` key press that followed the link. */
+  /** The originating click, or the `Enter`/`Mod-Enter` key press that followed the link. */
   event: MouseEvent | KeyboardEvent
 }
 
