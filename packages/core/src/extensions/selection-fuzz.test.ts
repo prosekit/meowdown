@@ -51,7 +51,7 @@ async function run(mode: MarkMode, markdown: string, key: string): Promise<strin
     await expect.element(pmRoot).toBeVisible()
 
     const markdownBefore = revealTrailingSpaces(docToMarkdown(fixture.doc))
-    const selectionbefore = revealTrailingSpaces(getSelectionSnapshot(fixture.state))
+    const selectionBefore = revealTrailingSpaces(getSelectionSnapshot(fixture.state))
 
     await userEvent.keyboard(key)
 
@@ -60,20 +60,26 @@ async function run(mode: MarkMode, markdown: string, key: string): Promise<strin
 
     cases.push(
       [
-        getSplitline(`=`, `pos: ${pos}`),
+        markdownBefore === markdownAfter
+          ? [getSplitline(`-`, `markdown before/after`), markdownBefore]
+          : [
+              getSplitline(`-`, `markdown before`),
+              markdownBefore,
+              getSplitline(`-`, `markdown after`),
+              markdownAfter,
+            ],
 
-        getSplitline(`-`, `markdown before`),
-        markdownBefore,
-        getSplitline(`-`, `markdown after`),
-        markdownAfter,
-
-        getSplitline(`-`, `selection before`),
-        selectionbefore,
-        getSplitline(`-`, `selection after`),
-        selectionAfter,
-
-        getSplitline('-'),
-      ].join('\n'),
+        selectionBefore === selectionAfter
+          ? [getSplitline('-', 'selection before/after'), selectionBefore]
+          : [
+              getSplitline(`-`, `selection before`),
+              selectionBefore,
+              getSplitline(`-`, `selection after`),
+              selectionAfter,
+            ],
+      ]
+        .flat()
+        .join('\n'),
     )
   }
   return cases.join('\n\n')
@@ -82,7 +88,7 @@ async function run(mode: MarkMode, markdown: string, key: string): Promise<strin
 function getSplitline(
   char: string,
   label: string = '',
-  labelLength: number = 18,
+  labelLength: number = 24,
   prefixLength = 5,
 ): string {
   if (label) {
