@@ -51,9 +51,11 @@ async function run(mode: MarkMode, markdown: string, key: string): Promise<strin
 
     const markdownBefore = revealTrailingSpaces(docToMarkdown(fixture.doc).replace(/\n+$/, ''))
     const selectionbefore = revealTrailingSpaces(getSelectionSnapshot(fixture.state))
+
     await userEvent.keyboard(key)
+
     const markdownAfter = revealTrailingSpaces(
-      revealTrailingSpaces(docToMarkdown(fixture.doc).replace(/\n+$/, '')),
+      docToMarkdown(fixture.doc).replace(/\n+$/, '')
     )
     const selectionAfter = getSelectionSnapshot(fixture.state)
 
@@ -2834,7 +2836,7 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
       ----- selection before -----
       a ┃[[foo]] b
       ----- selection after ------
-      a 
+      a
       ┃[[foo]] b
       ----------------------------
 
@@ -2946,7 +2948,7 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
       ----- selection before -----
       a [[foo]] ┃b
       ----- selection after ------
-      a [[foo]] 
+      a [[foo]]
       ┃b
       ----------------------------
 
