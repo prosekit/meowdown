@@ -46,6 +46,13 @@ function dropCaret(fixture: Fixture, pos: number, isPointer = false): void {
   fixture.view.dispatch(isPointer ? tr.setMeta('pointer', true) : tr)
 }
 
+// Drop a range selection the same way, from `anchor` to `head`. A drag arrives
+// exactly like this, `pointer` meta included.
+function dropRange(fixture: Fixture, anchor: number, head: number, isPointer = false): void {
+  const tr = fixture.state.tr.setSelection(TextSelection.create(fixture.doc, anchor, head))
+  fixture.view.dispatch(isPointer ? tr.setMeta('pointer', true) : tr)
+}
+
 async function walkKey(fixture: Fixture, key: string, times: number): Promise<string> {
   return formatSelectionSteps(await traceKeySelection(fixture, key, times))
 }
@@ -535,6 +542,63 @@ describe('caret snapping out of hidden atom source', () => {
     // `[[` is the escape for a literal `[` in userEvent's keyboard syntax.
     await userEvent.keyboard('[[[[Aaa]]')
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]┃"`)
+  })
+})
+
+describe('dragged selections growing to whole atom units', () => {
+  it('focus: a drag ending inside the source swallows the unit whole', () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    dropRange(fixture, 1, findText(fixture.doc, '[[Aaa]]') + 4, true)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"❰see [[Aaa]]❱ here"`)
+  })
+
+  it('focus: a drag starting inside the source swallows the unit whole', () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    dropRange(
+      fixture,
+      findText(fixture.doc, '[[Aaa]]') + 4,
+      findText(fixture.doc, ' here') + 5,
+      true,
+    )
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Aaa]] here❱"`)
+  })
+
+  it('focus: a backwards drag keeps its direction while growing', () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    const head = findText(fixture.doc, '[[Aaa]]') + 4
+    dropRange(fixture, findText(fixture.doc, ' here') + 5, head, true)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Aaa]] here❱"`)
+    expect(fixture.state.selection.head).toBe(findText(fixture.doc, '[[Aaa]]'))
+  })
+
+  it('focus: typing over a drag that cut the source keeps the unit whole', async () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    dropRange(fixture, 1, findText(fixture.doc, '[[Aaa]]') + 4, true)
+    await userEvent.keyboard('X')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      X here
+
+      """
+    `)
+  })
+
+  it('focus: a drag inside plain text is left alone', () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    dropRange(fixture, 1, 3, true)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"❰se❱e [[Aaa]] here"`)
+  })
+
+  it('focus: a selection that is not from a pointer keeps its endpoints', () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    dropRange(fixture, 1, findText(fixture.doc, '[[Aaa]]') + 4)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"❰see [[Aa❱a]] here"`)
+  })
+
+  it('focus: a drag ending inside an image source swallows the image whole', () => {
+    using fixture = setup('focus', ['see ![a](one.png) here'])
+    dropRange(fixture, 1, findText(fixture.doc, '![a](one.png)') + 5, true)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"❰see ![a](one.png)❱ here"`)
   })
 })
 
