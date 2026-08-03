@@ -1,3 +1,4 @@
+import { NodeSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
 import { userEvent } from 'vitest/browser'
 
@@ -151,7 +152,7 @@ describe('commands', () => {
     expect(docToMarkdown(fixture.doc)).toBe('- done\n')
   })
 
-  it('cycleBulletOrderedList changes only the closest nested list', () => {
+  it('cycleBulletOrderedList cycles the closest nested list through ordered, plain, and bullet', () => {
     using fixture = setupFixture()
     const { n } = fixture
     fixture.set(
@@ -168,6 +169,45 @@ describe('commands', () => {
     expect(docToMarkdown(fixture.doc)).toBe('- outer\n  1. inner\n')
     fixture.editor.commands.cycleBulletOrderedList()
     expect(docToMarkdown(fixture.doc)).toBe('- outer\n\n  inner\n')
+    fixture.editor.commands.cycleBulletOrderedList()
+    expect(docToMarkdown(fixture.doc)).toBe('- outer\n  - inner\n')
+    fixture.editor.commands.cycleBulletOrderedList()
+    expect(docToMarkdown(fixture.doc)).toBe('- outer\n  1. inner\n')
+  })
+
+  it('cycleBulletOrderedList wraps a continuation paragraph into a bullet', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('outer'), n.paragraph('inner<a>'))))
+
+    fixture.editor.commands.cycleBulletOrderedList()
+    expect(docToMarkdown(fixture.doc)).toBe('- outer\n  - inner\n')
+  })
+
+  it('cycleBulletOrderedList cycles a node-selected list through ordered and plain', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('todo'))))
+    const { view } = fixture
+    view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, 0)))
+
+    fixture.editor.commands.cycleBulletOrderedList()
+    expect(docToMarkdown(fixture.doc)).toBe('1. todo\n')
+    fixture.editor.commands.cycleBulletOrderedList()
+    expect(docToMarkdown(fixture.doc)).toBe('todo\n')
+  })
+
+  it('cycleCheckableList wraps a continuation paragraph into a square task', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.list({ kind: 'task', checked: false }, n.paragraph('outer'), n.paragraph('inner<a>')),
+      ),
+    )
+
+    fixture.editor.commands.cycleCheckableList()
+    expect(docToMarkdown(fixture.doc)).toBe('- [ ] outer\n  - [ ] inner\n')
   })
 })
 
