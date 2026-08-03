@@ -24,8 +24,6 @@ export function App() {
 }
 ```
 
-WIP wip
-
 ## Usage
 
 ```tsx
