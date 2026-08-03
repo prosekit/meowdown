@@ -125,7 +125,7 @@ class VirtualCaretView implements PluginView {
     this.#repositionRequested = false
 
     const view = this.#view
-    if (view.isDestroyed) return
+    if (view.isDestroyed || !view.hasFocus()) return
 
     const state = view.state
     const selection = state.selection
