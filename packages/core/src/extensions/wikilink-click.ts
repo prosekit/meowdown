@@ -2,7 +2,7 @@ import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
-import { getMarkRangeAt } from './get-mark-range-at.ts'
+import { getMarkRangeAt } from './mark-range.ts'
 import type { MdWikilinkAttrs } from './inline-marks.ts'
 import { defineMarkClickHandler } from './mark-click.ts'
 
