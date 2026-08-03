@@ -288,13 +288,13 @@ function createPointerPlugin(marks: AtomMarks): Plugin {
     key: new PluginKey('atom-mark-pointer'),
     props: {
       handleClick: (view, _pos, event) => {
-        const markNames = activeMarkNames(marks, view.state)
+        const markNames = getActiveMarkNames(marks, view.state)
         if (markNames.length === 0) return false
         const target = event.target as HTMLElement | null
         const preview = target?.closest?.<HTMLElement>('.md-atom-view-preview')
         const content = preview?.closest('.md-atom-view')?.querySelector('.md-atom-view-content')
         if (!preview || !content) return false
-        const range = getRangeAfter(view.state, view.posAtDOM(content, 0), markNames)
+        const range = getMarkRangeAfter(view.state, view.posAtDOM(content, 0), markNames)
         if (!range) return false
         const rect = preview.getBoundingClientRect()
         const edge = event.clientX < rect.left + rect.width / 2 ? range.from : range.to
