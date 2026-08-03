@@ -26,7 +26,10 @@ function setIsTouchInput(isTouchInput: boolean): void {
 }
 
 function handlePointerDown(event: PointerEvent): void {
-  if (event.pointerType === 'touch' || event.pointerType === 'pen') {
+  const pointerType = event.pointerType
+  if (pointerType === 'mouse') {
+    setIsTouchInput(false)
+  } else if (pointerType === 'touch' || pointerType === 'pen') {
     setIsTouchInput(true)
   }
 }
