@@ -4,7 +4,7 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
 import { forceReflow } from '../utils/force-reflow.ts'
-import { getInputModality, onInputModalityChange } from '../utils/input-modality.ts'
+import { getIsTouchInput, onIsTouchInputChange } from '../utils/input-modality.ts'
 
 import {
   findAtomCaretRect,
@@ -72,7 +72,7 @@ class VirtualCaretView implements PluginView {
     this.#caret.className = 'md-virtual-caret'
     this.#caret.dataset.testid = 'virtual-caret'
     this.#document.addEventListener('selectionchange', this.#requestReposition)
-    this.#unsubscribeModality = onInputModalityChange(this.#requestReposition)
+    this.#unsubscribeModality = onIsTouchInputChange(this.#requestReposition)
     view.dom.addEventListener('focus', this.#handleFocus)
     view.dom.addEventListener('blur', this.#handleBlur)
     if (typeof ResizeObserver !== 'undefined') {
@@ -141,7 +141,7 @@ class VirtualCaretView implements PluginView {
 
     // Use the native rect if it exists and the last input modality was touch.
     // This ensures that we can render the drag magnifier on touch devices.
-    if (nativeRect && getInputModality() === 'touch') {
+    if (nativeRect && getIsTouchInput()) {
       this.#renderTail()
       this.#renderCaret()
       return
@@ -160,7 +160,7 @@ class VirtualCaretView implements PluginView {
     // In hide mode the two doc positions at a hidden run boundary render at
     // one x; the tail (typing affinity) tells them apart.
     const tail =
-      rect != null && getMarkMode(state) === 'hide' && getInputModality() !== 'touch'
+      rect != null && getMarkMode(state) === 'hide' && !getIsTouchInput()
         ? getCaretTail(state, selection.head)
         : undefined
     this.#renderTail(tail)
@@ -211,7 +211,7 @@ class VirtualCaretView implements PluginView {
  * are ours. Applies to every mark mode.
  *
  * On a touch screen, while the last input was a finger or pen
- * ({@link getInputModality}), the roles flip: the native caret stays visible
+ * ({@link getIsTouchInput}), the roles flip: the native caret stays visible
  * (it carries the system touch affordances: the drag magnifier, the caret-drag
  * long-press mode) and the virtual caret draws only at positions where the
  * native caret has no geometry, such as beside hidden Markdown syntax.

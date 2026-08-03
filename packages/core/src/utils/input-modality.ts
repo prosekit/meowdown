@@ -1,7 +1,5 @@
 import { getIsComposing } from './composition.ts'
 
-export type InputModality = 'touch' | 'keyboard'
-
 // Keys a software keyboard does not have. Only these flip the modality to
 // keyboard: they are exactly the motions where the keyboard caret behaviors
 // matter, while letter keys stay ambiguous (an iOS software keyboard sends
@@ -17,19 +15,19 @@ const KEYBOARD_MODALITY_KEYS = new Set([
   'PageDown',
 ])
 
-let lastModality: InputModality | undefined
+let lastIsTouchInput = false
 
 const listeners = new Set<() => void>()
 
-function setModality(modality: InputModality): void {
-  if (modality === lastModality) return
-  lastModality = modality
+function setIsTouchInput(isTouchInput: boolean): void {
+  if (isTouchInput === lastIsTouchInput) return
+  lastIsTouchInput = isTouchInput
   for (const listener of listeners) listener()
 }
 
 function handlePointerDown(event: PointerEvent): void {
   if (event.pointerType === 'touch' || event.pointerType === 'pen') {
-    setModality('touch')
+    setIsTouchInput(true)
   }
 }
 
@@ -38,7 +36,7 @@ function handleKeyDown(event: KeyboardEvent): void {
     return
   }
   if (KEYBOARD_MODALITY_KEYS.has(event.key) || event.metaKey || event.ctrlKey) {
-    setModality('keyboard')
+    setIsTouchInput(false)
   }
 }
 
@@ -47,30 +45,24 @@ if (typeof window !== 'undefined') {
   window.addEventListener('keydown', handleKeyDown, { capture: true, passive: true })
 }
 
-/** Whether the device has a touch screen. */
-function hasTouchScreen(): boolean {
-  return typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0
-}
-
 /**
- * How the user last drove the selection: a finger (or pen) on the screen, or
- * precise input (hardware keyboard navigation, a mouse or trackpad).
+ * Whether the user last drove the selection with a finger (or pen) on the
+ * screen, as opposed to precise input (hardware keyboard navigation).
  *
- * On a touch screen this starts as `'touch'` and follows the events. Only
- * navigation keys and modifier combos count as keyboard input: letter keys are
- * ignored because a software keyboard sends them too, and the software
- * keyboard's own caret gestures (a spacebar long-press drag) reach the page as
- * bare `selectionchange` events with no key or touch events at all, so staying
- * on the previous modality is the correct reading for them. Without a touch
- * screen this is always `'keyboard'`.
+ * Starts as `false` and follows the events; a touch device flips it on the
+ * first tap, which necessarily precedes any caret. Only navigation keys and
+ * modifier combos flip it back: letter keys are ignored because a software
+ * keyboard sends them too, and the software keyboard's own caret gestures (a
+ * spacebar long-press drag) reach the page as bare `selectionchange` events
+ * with no key or touch events at all, so staying on the previous value is the
+ * correct reading for them.
  */
-export function getInputModality(): InputModality {
-  if (!hasTouchScreen()) return 'keyboard'
-  return lastModality ?? 'touch'
+export function getIsTouchInput(): boolean {
+  return lastIsTouchInput
 }
 
-/** Calls `listener` whenever {@link getInputModality} may report a new value. */
-export function onInputModalityChange(listener: () => void): () => void {
+/** Calls `listener` whenever {@link getIsTouchInput} may report a new value. */
+export function onIsTouchInputChange(listener: () => void): () => void {
   listeners.add(listener)
   return () => {
     listeners.delete(listener)
@@ -78,6 +70,6 @@ export function onInputModalityChange(listener: () => void): () => void {
 }
 
 /** @internal Restores the initial no-events-yet state between tests. */
-export function resetInputModalityForTest(): void {
-  lastModality = undefined
+export function resetIsTouchInputForTest(): void {
+  lastIsTouchInput = false
 }
