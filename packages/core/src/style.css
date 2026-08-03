@@ -170,9 +170,15 @@
    * browser's editing behavior. The caret is positioned against the layer;
    * the extension stamps `data-focused` on the layer while the editor has
    * focus.
+   *
+   * A positive z-index paints the layer above the positioned `.ProseMirror`
+   * (prosemirror-view sets `position: relative`); at stack level 0 the editor
+   * would win on DOM order and its opaque code backgrounds would cover the
+   * caret.
    * ------------------------------------------------------------------------- */
   .md-virtual-caret-layer {
     position: relative;
+    z-index: 1;
     width: 0;
     height: 0;
     overflow: visible;
