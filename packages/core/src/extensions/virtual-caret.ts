@@ -4,6 +4,7 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
 import { forceReflow } from '../utils/force-reflow.ts'
+import { getInputModality, hasTouchScreen, onInputModalityChange } from '../utils/input-modality.ts'
 
 import {
   findAtomCaretRect,
@@ -29,8 +30,11 @@ function stretchCaretRect(rect: CaretRect): CaretRect {
   return { left: rect.left, top: rect.top - extra / 2, height: rect.height + extra }
 }
 
-function measureCaretRect(view: EditorView): CaretRect | undefined {
-  const rect = findNativeCaretRect(view) ?? findCoordsCaretRect(view)
+function measureCaretRect(
+  view: EditorView,
+  nativeRect: CaretRect | undefined,
+): CaretRect | undefined {
+  const rect = nativeRect ?? findCoordsCaretRect(view)
   if (rect != null) return stretchCaretRect(rect)
   return findAtomCaretRect(view)
 }
@@ -53,6 +57,7 @@ class VirtualCaretView implements PluginView {
   readonly #caret: HTMLElement
   readonly #document: Document
   readonly #resizeObserver: ResizeObserver | undefined
+  readonly #unsubscribeModality: () => void
   #lastRect: CaretRect | undefined
   #lastTail: CaretTail | undefined
   #blinkIndex = 0
@@ -66,6 +71,7 @@ class VirtualCaretView implements PluginView {
     this.#caret.className = 'md-virtual-caret'
     this.#caret.dataset.testid = 'virtual-caret'
     this.#document.addEventListener('selectionchange', this.#reposition)
+    this.#unsubscribeModality = onInputModalityChange(this.#reposition)
     view.dom.addEventListener('focus', this.#handleFocus)
     view.dom.addEventListener('blur', this.#handleBlur)
     if (typeof ResizeObserver !== 'undefined') {
@@ -83,6 +89,7 @@ class VirtualCaretView implements PluginView {
 
   destroy() {
     this.#document.removeEventListener('selectionchange', this.#reposition)
+    this.#unsubscribeModality()
     this.#view.dom.removeEventListener('focus', this.#handleFocus)
     this.#view.dom.removeEventListener('blur', this.#handleBlur)
     this.#resizeObserver?.disconnect()
@@ -110,8 +117,23 @@ class VirtualCaretView implements PluginView {
     if (view.isDestroyed) return
     const state = view.state
     const selection = state.selection
-    const viewportRect =
-      isTextSelection(selection) && selection.empty ? measureCaretRect(view) : undefined
+    const drawable = isTextSelection(selection) && selection.empty
+    const nativeRect = drawable ? findNativeCaretRect(view) : undefined
+    // A finger needs the system's own caret: iOS shows the drag magnifier
+    // only over a visibly painted native caret, and long-press degrades from
+    // caret-drag to word-select without one. So under touch input the native
+    // caret stays visible, and the virtual caret steps in only where the
+    // native one has no geometry (beside hidden syntax, where the collapsed
+    // range measures as nothing).
+    if (hasTouchScreen() && getInputModality() === 'touch' && (!drawable || nativeRect != null)) {
+      this.#lastRect = undefined
+      this.#lastTail = undefined
+      delete this.#caret.dataset.tail
+      this.#caret.style.visibility = 'hidden'
+      view.dom.removeAttribute(DATA_ATTRIBUTE)
+      return
+    }
+    const viewportRect = drawable ? measureCaretRect(view, nativeRect) : undefined
     let rect: CaretRect | undefined
     if (viewportRect != null) {
       const layerRect = this.#layer.getBoundingClientRect()
@@ -160,6 +182,12 @@ class VirtualCaretView implements PluginView {
  * (`caret-color: transparent`). The native DOM selection stays fully alive,
  * so IME, clicks, and typing keep their native behavior; only the caret pixels
  * are ours. Applies to every mark mode.
+ *
+ * On a touch screen, while the last input was a finger or pen
+ * ({@link getInputModality}), the roles flip: the native caret stays visible
+ * (it carries the system touch affordances: the drag magnifier, the caret-drag
+ * long-press mode) and the virtual caret draws only at positions where the
+ * native caret has no geometry, such as beside hidden Markdown syntax.
  *
  * `layer` is the element the caret draws into. The host owns its placement:
  * it must live outside the contenteditable and scroll together with the
