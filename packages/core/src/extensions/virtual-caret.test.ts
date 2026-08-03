@@ -1,12 +1,14 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
 import { setupFixture, type Fixture } from '../testing/index.ts'
+import { resetIsTouchInputForTest } from '../utils/input-modality.ts'
 
 import { defineFileView } from './file-view.ts'
 import type { MarkMode } from './mark-mode.ts'
 
 const caret = page.getByTestId('virtual-caret')
+const pmRoot = page.locate('.ProseMirror')
 
 function setupMode(mode: MarkMode, text: string): Fixture {
   const fixture = setupFixture({ extensionOptions: { markMode: mode } })
@@ -374,5 +376,69 @@ describe('virtual caret tails (hide mode)', () => {
     await expect.element(caret).toHaveAttribute('data-tail', 'right')
     await userEvent.keyboard('{ArrowLeft}')
     await expect.element(caret).toHaveAttribute('data-tail', 'left')
+  })
+})
+
+// Touch modality starts on the first touch pointerdown (the vitest browser
+// context has `hasTouch`, so constructing one is allowed). Under touch input
+// the native caret takes over (it carries the iOS drag magnifier);
+// `data-meowdown-virtual-caret` on the editor element is the observable
+// switch, since it gates the `caret-color: transparent` rule.
+describe('virtual caret under touch input', () => {
+  function touchTheScreen(): void {
+    window.dispatchEvent(new PointerEvent('pointerdown', { pointerType: 'touch' }))
+  }
+
+  beforeEach(() => {
+    resetIsTouchInputForTest()
+  })
+
+  afterEach(() => {
+    resetIsTouchInputForTest()
+  })
+
+  it('keeps the virtual caret before any touch arrives', async () => {
+    using fixture = setupMode('hide', 'hello <a>world')
+    void fixture
+    await expect.element(caret).toBeVisible()
+    await expect.element(pmRoot).toHaveAttribute('data-meowdown-virtual-caret')
+  })
+
+  it('hands a visible text position to the native caret', async () => {
+    using fixture = setupMode('hide', 'hello <a>world')
+    void fixture
+    touchTheScreen()
+    await expect.element(caret).not.toBeVisible()
+    await expect.element(pmRoot).not.toHaveAttribute('data-meowdown-virtual-caret')
+  })
+
+  it('falls back to the virtual caret beside hidden syntax', async () => {
+    using fixture = setupMode('hide', 'foo **bold**<a> bar')
+    void fixture
+    touchTheScreen()
+    await expect.element(caret).toBeVisible()
+    await expect.element(pmRoot).toHaveAttribute('data-meowdown-virtual-caret')
+  })
+
+  it('returns to the virtual caret on keyboard navigation', async () => {
+    using fixture = setupMode('hide', 'hello <a>world')
+    void fixture
+    touchTheScreen()
+    await expect.element(caret).not.toBeVisible()
+    await userEvent.keyboard('{ArrowRight}')
+    await expect.element(caret).toBeVisible()
+    await expect.element(pmRoot).toHaveAttribute('data-meowdown-virtual-caret')
+    touchTheScreen()
+    await expect.element(caret).not.toBeVisible()
+    await expect.element(pmRoot).not.toHaveAttribute('data-meowdown-virtual-caret')
+  })
+
+  it('leaves a range selection fully native', async () => {
+    using fixture = setupMode('hide', 'hello world')
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('he<a>llo wor<b>ld')))
+    touchTheScreen()
+    await expect.element(caret).not.toBeVisible()
+    await expect.element(pmRoot).not.toHaveAttribute('data-meowdown-virtual-caret')
   })
 })

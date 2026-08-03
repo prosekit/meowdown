@@ -4,6 +4,7 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
 import { forceReflow } from '../utils/force-reflow.ts'
+import { getIsTouchInput, onIsTouchInputChange } from '../utils/input-modality.ts'
 
 import {
   findAtomCaretRect,
@@ -29,15 +30,18 @@ function stretchCaretRect(rect: CaretRect): CaretRect {
   return { left: rect.left, top: rect.top - extra / 2, height: rect.height + extra }
 }
 
-function measureCaretRect(view: EditorView): CaretRect | undefined {
-  const rect = findNativeCaretRect(view) ?? findCoordsCaretRect(view)
+function measureCaretRect(
+  view: EditorView,
+  nativeRect: CaretRect | undefined,
+): CaretRect | undefined {
+  const rect = nativeRect ?? findCoordsCaretRect(view)
   if (rect != null) return stretchCaretRect(rect)
   return findAtomCaretRect(view)
 }
 
-function sameRect(left: CaretRect | undefined, right: CaretRect | undefined): boolean {
-  if (left == null || right == null) return left === right
-  return left.left === right.left && left.top === right.top && left.height === right.height
+function sameRect(a: CaretRect | undefined, b: CaretRect | undefined): boolean {
+  if (a == null || b == null) return a === b
+  return a.left === b.left && a.top === b.top && a.height === b.height
 }
 
 // The caret draws into a host-owned zero-size in-flow layer, never inside the
@@ -53,9 +57,11 @@ class VirtualCaretView implements PluginView {
   readonly #caret: HTMLElement
   readonly #document: Document
   readonly #resizeObserver: ResizeObserver | undefined
+  readonly #unsubscribeModality: () => void
   #lastRect: CaretRect | undefined
   #lastTail: CaretTail | undefined
   #blinkIndex = 0
+  #repositionRequested = false
 
   constructor(view: EditorView, layer: HTMLElement) {
     this.#view = view
@@ -65,24 +71,26 @@ class VirtualCaretView implements PluginView {
     this.#caret = this.#layer.appendChild(this.#document.createElement('div'))
     this.#caret.className = 'md-virtual-caret'
     this.#caret.dataset.testid = 'virtual-caret'
-    this.#document.addEventListener('selectionchange', this.#reposition)
+    this.#document.addEventListener('selectionchange', this.#requestReposition)
+    this.#unsubscribeModality = onIsTouchInputChange(this.#requestReposition)
     view.dom.addEventListener('focus', this.#handleFocus)
     view.dom.addEventListener('blur', this.#handleBlur)
     if (typeof ResizeObserver !== 'undefined') {
-      this.#resizeObserver = new ResizeObserver(this.#reposition)
+      this.#resizeObserver = new ResizeObserver(this.#requestReposition)
       this.#resizeObserver.observe(view.dom)
     }
     if (view.hasFocus()) this.#handleFocus()
-    this.#reposition()
+    this.#requestReposition()
   }
 
   update(view: EditorView, prevState: EditorState) {
     if (!view.state.selection.eq(prevState.selection)) this.#restartBlink()
-    this.#reposition()
+    this.#requestReposition()
   }
 
   destroy() {
-    this.#document.removeEventListener('selectionchange', this.#reposition)
+    this.#document.removeEventListener('selectionchange', this.#requestReposition)
+    this.#unsubscribeModality()
     this.#view.dom.removeEventListener('focus', this.#handleFocus)
     this.#view.dom.removeEventListener('blur', this.#handleBlur)
     this.#resizeObserver?.disconnect()
@@ -105,13 +113,41 @@ class VirtualCaretView implements PluginView {
     this.#caret.style.animationName = BLINK_ANIMATIONS[this.#blinkIndex]
   }
 
-  readonly #reposition = (): void => {
+  readonly #requestReposition = (): void => {
+    if (this.#repositionRequested === true) return
+    this.#repositionRequested = true
+
+    queueMicrotask(this.#reposition)
+  }
+
+  readonly #reposition = () => {
+    if (this.#repositionRequested === false) return
+    this.#repositionRequested = false
+
     const view = this.#view
-    if (view.isDestroyed) return
+    if (view.isDestroyed || !view.hasFocus()) return
+
     const state = view.state
     const selection = state.selection
-    const viewportRect =
-      isTextSelection(selection) && selection.empty ? measureCaretRect(view) : undefined
+    const drawable = isTextSelection(selection) && selection.empty
+
+    if (!drawable) {
+      this.#renderTail()
+      this.#renderCaret()
+      return
+    }
+
+    const nativeRect = findNativeCaretRect(view)
+
+    // Use the native rect if it exists and the last input modality was touch.
+    // This ensures that we can render the drag magnifier on touch devices.
+    if (nativeRect && getIsTouchInput()) {
+      this.#renderTail()
+      this.#renderCaret()
+      return
+    }
+
+    const viewportRect = measureCaretRect(view, nativeRect)
     let rect: CaretRect | undefined
     if (viewportRect != null) {
       const layerRect = this.#layer.getBoundingClientRect()
@@ -124,23 +160,36 @@ class VirtualCaretView implements PluginView {
     // In hide mode the two doc positions at a hidden run boundary render at
     // one x; the tail (typing affinity) tells them apart.
     const tail =
-      rect != null && getMarkMode(state) === 'hide'
+      rect != null && getMarkMode(state) === 'hide' && !getIsTouchInput()
         ? getCaretTail(state, selection.head)
         : undefined
-    if (sameRect(rect, this.#lastRect) && tail === this.#lastTail) return
-    const wasHidden = this.#lastRect == null
-    this.#lastRect = rect
+    this.#renderTail(tail)
+    this.#renderCaret(rect)
+  }
+
+  #renderTail(tail?: CaretTail) {
+    if (tail === this.#lastTail) return
     this.#lastTail = tail
+
     if (tail == null) {
       delete this.#caret.dataset.tail
     } else {
       this.#caret.dataset.tail = tail
     }
+  }
+
+  #renderCaret(rect?: CaretRect) {
+    if (sameRect(rect, this.#lastRect)) return
+    const wasHidden = !this.#lastRect
+    this.#lastRect = rect
+    const view = this.#view
+
     if (rect == null) {
       this.#caret.style.visibility = 'hidden'
       view.dom.removeAttribute(DATA_ATTRIBUTE)
       return
     }
+
     // A reappearing caret must not glide in from its stale position.
     if (wasHidden) this.#caret.style.transitionProperty = 'none'
     this.#caret.style.visibility = ''
@@ -160,6 +209,12 @@ class VirtualCaretView implements PluginView {
  * (`caret-color: transparent`). The native DOM selection stays fully alive,
  * so IME, clicks, and typing keep their native behavior; only the caret pixels
  * are ours. Applies to every mark mode.
+ *
+ * On a touch screen, while the last input was a finger or pen
+ * ({@link getIsTouchInput}), the roles flip: the native caret stays visible
+ * (it carries the system touch affordances: the drag magnifier, the caret-drag
+ * long-press mode) and the virtual caret draws only at positions where the
+ * native caret has no geometry, such as beside hidden Markdown syntax.
  *
  * `layer` is the element the caret draws into. The host owns its placement:
  * it must live outside the contenteditable and scroll together with the
