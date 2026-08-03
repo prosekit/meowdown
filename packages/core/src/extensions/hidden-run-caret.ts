@@ -7,6 +7,7 @@ import {
   withPriority,
   type PlainExtension,
 } from '@prosekit/core'
+import { getSearchStatus } from '@prosekit/extensions/search'
 import type { Command } from '@prosekit/pm/state'
 import { Plugin, PluginKey, TextSelection } from '@prosekit/pm/state'
 
@@ -29,7 +30,7 @@ const beforeInputKey = new PluginKey('meowdown-hidden-run-beforeinput')
 // clicks, vertical motion, Home/End, shift-extension, or programmatic
 // setSelection. Keyboard motion continues through a run interior in the travel
 // direction; a pointer caret snaps to the unit's outer edge; a range selection
-// expands outward so it never cuts a run in half.
+// expands outward so it never cuts a run in half, unless it is a search match.
 function createSnapPlugin(): Plugin {
   return new Plugin({
     key: snapKey,
@@ -50,6 +51,10 @@ function createSnapPlugin(): Plugin {
       const from = getHiddenRunAround(newState, selection.from)?.from ?? selection.from
       const to = getHiddenRunAround(newState, selection.to)?.to ?? selection.to
       if (from === selection.from && to === selection.to) return null
+      // A search match is the one range that may cut a run in half:
+      // prosemirror-search replaces a match only while the selection covers it
+      // exactly, so growing it would turn every Replace into a no-op.
+      if (getSearchStatus(newState).active > 0) return null
       const anchor = selection.anchor === selection.from ? from : to
       const head = selection.head === selection.from ? from : to
       return newState.tr.setSelection(TextSelection.create(newState.doc, anchor, head))
