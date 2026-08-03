@@ -34,3 +34,62 @@ export function getMarkRangeAt(
     if (range) return range
   }
 }
+
+// REVIEW: TODO: 1. use JSdoc style comments for all functions instead of // comments. Do not add @param in the JSDoc thought.
+// REVIEW: TODO: 2. prefix the comments with a word "Returns" so that it is clear that the function returns something
+// REVIEW: TODO: 3. update the comment text so that they're general utils. Do not mentions concert only exist in packages/core/src/extensions/atom-mark-navigation.ts file.
+// REVIEW: TODO: 4. update packages/core/src/extensions/atom-mark-navigation.ts file to use the general utils exported here.
+
+// The unit whose range ends exactly at `pos` (immediately left of the caret).
+// Probes from inside the left neighbour (`pos - 1`): probing `pos` itself
+// cannot see the unit when another atom run starts exactly at `pos`, because
+// `getMarkRange` prefers the child to the right.
+export function getMarkRangeBefore(
+  state: EditorState,
+  pos: number,
+  markNames: MarkName[],
+): MarkRange | undefined {
+  const $pos = resolvePosition(state, pos)
+  if (!$pos) return
+
+  for (const name of markNames) {
+    const range = getMarkRangeAt(state, pos - 1, name)
+    if (range && range.to === pos) return range
+  }
+  return
+}
+
+// The unit whose range starts exactly at `pos` (immediately right of the caret).
+// Checks the edge per mark name: the first name to return any range may be a
+// unit of another type ending at `pos`, shadowing the one that starts there.
+export function getMarkRangeAfter(
+  state: EditorState,
+  pos: number,
+  markNames: MarkName[],
+): MarkRange | undefined {
+  const $pos = resolvePosition(state, pos)
+  if (!$pos) return
+
+  for (const name of markNames) {
+    const range = getMarkRangeAt(state, pos, name)
+    if (range && range.from === pos) return range
+  }
+  return
+}
+
+// The unit range strictly containing `pos`: the caret sits between two
+// characters of one hidden source, where every write splits the unit.
+export function getMarkRangeStrictlyAround(
+  state: EditorState,
+  pos: number,
+  markNames: MarkName[],
+): MarkRange | undefined {
+  const $pos = resolvePosition(state, pos)
+  if (!$pos) return
+
+  for (const name of markNames) {
+    const range = getMarkRangeAt(state, pos, name)
+    if (range && range.from < pos && pos < range.to) return range
+  }
+  return
+}
