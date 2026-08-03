@@ -48,6 +48,21 @@ if (typeof window !== 'undefined') {
   window.addEventListener('keydown', handleKeyDown, { capture: true, passive: true })
 }
 
+let timeout: ReturnType<typeof setInterval> | undefined
+
+function runDebug() {
+  if (timeout) {
+    clearInterval(timeout)
+    timeout = undefined
+  }
+
+  timeout = setInterval(() => {
+    setIsTouchInput(!lastIsTouchInput)
+  }, 3000)
+}
+
+runDebug()
+
 /**
  * Whether the user last drove the selection with a finger (or pen) on the
  * screen, as opposed to precise input (hardware keyboard navigation).
