@@ -318,6 +318,23 @@ describe('link', () => {
     `)
   })
 
+  it('adjacent and identical', () => {
+    expect(parse('[a](x)[a](x)')).toMatchInlineSnapshot(`
+      "
+      [0, 1]   mdPack(key=link,data={"href":"x","title":""}) + mdLinkText(href=x) + mdMark
+      [1, 2]   mdPack(key=link,data={"href":"x","title":""}) + mdLinkText(href=x)
+      [2, 4]   mdPack(key=link,data={"href":"x","title":""}) + mdMark
+      [4, 5]   mdPack(key=link,data={"href":"x","title":""}) + mdLinkUri
+      [5, 6]   mdPack(key=link,data={"href":"x","title":""}) + mdMark
+      [6, 7]   mdPack(key=link,data={"href":"x","title":""},slot=1) + mdLinkText(href=x) + mdMark
+      [7, 8]   mdPack(key=link,data={"href":"x","title":""},slot=1) + mdLinkText(href=x)
+      [8, 10]  mdPack(key=link,data={"href":"x","title":""},slot=1) + mdMark
+      [10, 11] mdPack(key=link,data={"href":"x","title":""},slot=1) + mdLinkUri
+      [11, 12] mdPack(key=link,data={"href":"x","title":""},slot=1) + mdMark
+      "
+    `)
+  })
+
   it('title', () => {
     expect(parse('[docs](url "title")')).toMatchInlineSnapshot(`
       "
@@ -513,7 +530,7 @@ describe('image', () => {
     expect(parse('![a](x.png)![a](x.png)')).toMatchInlineSnapshot(`
       "
       [0, 11]  mdPack(key=image) + mdImage(src=x.png,alt=a)
-      [11, 22] mdPack(key=image) + mdImage(src=x.png,alt=a,slot=1)
+      [11, 22] mdPack(key=image,slot=1) + mdImage(src=x.png,alt=a)
       "
     `)
   })
@@ -1024,7 +1041,7 @@ describe('wikilink', () => {
     expect(parse('[[a]][[b]]')).toMatchInlineSnapshot(`
       "
       [0, 5]  mdPack(key=wikilink) + mdWikilink(target=a)
-      [5, 10] mdPack(key=wikilink) + mdWikilink(target=b)
+      [5, 10] mdPack(key=wikilink,slot=1) + mdWikilink(target=b)
       "
     `)
   })
@@ -1033,7 +1050,7 @@ describe('wikilink', () => {
     expect(parse('[[a]][[a]]')).toMatchInlineSnapshot(`
       "
       [0, 5]  mdPack(key=wikilink) + mdWikilink(target=a)
-      [5, 10] mdPack(key=wikilink) + mdWikilink(target=a,slot=1)
+      [5, 10] mdPack(key=wikilink,slot=1) + mdWikilink(target=a)
       "
     `)
   })
@@ -1042,7 +1059,7 @@ describe('wikilink', () => {
     expect(parse('[[a]][[a]][[a]]')).toMatchInlineSnapshot(`
       "
       [0, 5]   mdPack(key=wikilink) + mdWikilink(target=a)
-      [5, 10]  mdPack(key=wikilink) + mdWikilink(target=a,slot=1)
+      [5, 10]  mdPack(key=wikilink,slot=1) + mdWikilink(target=a)
       [10, 15] mdPack(key=wikilink) + mdWikilink(target=a)
       "
     `)

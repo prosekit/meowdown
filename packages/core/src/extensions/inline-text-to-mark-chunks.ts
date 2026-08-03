@@ -15,7 +15,7 @@ import type {
 } from './inline-marks.ts'
 import { parseMagicComment, type MagicComment } from './magic-comment.ts'
 import type { MarkChunk } from './mark-chunk.ts'
-import { ATOM_MARK_NAMES, type MarkName } from './mark-names.ts'
+import type { MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
 import {
   normalizeReferenceLabel,
@@ -114,8 +114,30 @@ export function inlineTextToMarkChunksWithContext(
   const elements = parseInline(text)
   const out: MarkChunk[] = []
   walk(elements, [], 0, text.length, text, marks, out, options, context)
-  separateAdjacentUnits(out)
   return out
+}
+
+/**
+ * The pack of one unit starting at `from`. When the chunk ending exactly there
+ * closes a unit whose pack equals this one, create it with `slot: 1` instead:
+ * equal packs would let ProseMirror merge the two units into one text node,
+ * one mark run and one mark view. The neighbour's own pack sits at the same
+ * depth, right after `parentMarks`; at any other depth that position holds a
+ * different mark (or nothing) and never compares equal.
+ */
+function createUnitPack(
+  marks: TypedMarkBuilders,
+  out: readonly MarkChunk[],
+  parentMarks: readonly Mark[],
+  from: number,
+  attrs: MdPackAttrs,
+): Mark {
+  const pack = marks.mdPack.create(attrs)
+  const previous = out.at(-1)
+  if (previous == null || previous[1] !== from) return pack
+  const neighbourPack = previous[2][parentMarks.length]
+  if (neighbourPack == null || !neighbourPack.eq(pack)) return pack
+  return marks.mdPack.create({ ...attrs, slot: 1 })
 }
 
 /** Drop the surrounding `"" '' ()` delimiters of a `LinkTitle` slice and unescape. */
@@ -213,7 +235,7 @@ function walkGenericNode(
   }
 
   const base = packKey
-    ? [...parentMarks, marks.mdPack.create({ key: packKey } satisfies MdPackAttrs)]
+    ? [...parentMarks, createUnitPack(marks, out, parentMarks, node.from, { key: packKey })]
     : parentMarks
   const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(type)
   const childMarks = maybeMarkName ? [...base, marks[maybeMarkName].create()] : base
@@ -262,7 +284,7 @@ function walkLink(
   if (fileMark) {
     emit(out, node.from, node.to, [
       ...parentMarks,
-      marks.mdPack.create({ key: 'file' } satisfies MdPackAttrs),
+      createUnitPack(marks, out, parentMarks, node.from, { key: 'file' }),
       fileMark,
     ])
     return
@@ -444,7 +466,7 @@ function walkResolvedLink(
   } satisfies MdLinkTextAttrs)
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd
   const data = isReference ? { href, title, reference: true as const } : { href, title }
-  const pack = marks.mdPack.create({ key: 'link', data } satisfies MdPackAttrs)
+  const pack = createUnitPack(marks, out, parentMarks, node.from, { key: 'link', data })
   const base = [...parentMarks, pack]
 
   let pos = node.from
@@ -548,7 +570,7 @@ function walkImage(
 
   emit(out, node.from, to, [
     ...parentMarks,
-    marks.mdPack.create({ key: 'image' } satisfies MdPackAttrs),
+    createUnitPack(marks, out, parentMarks, node.from, { key: 'image' }),
     marks.mdImage.create({
       src,
       alt,
@@ -584,7 +606,7 @@ function walkMath(
   const formula = text.slice(markNodes[0].to, markNodes[1].from)
   const base = [
     ...parentMarks,
-    marks.mdPack.create({ key: 'math' } satisfies MdPackAttrs),
+    createUnitPack(marks, out, parentMarks, node.from, { key: 'math' }),
     marks.mdMath.create({ formula } satisfies MdMathAttrs),
   ]
   emit(out, node.from, markNodes[0].to, [...base, marks.mdMark.create()])
@@ -606,7 +628,7 @@ function walkWikilink(
 
   emit(out, node.from, node.to, [
     ...parentMarks,
-    marks.mdPack.create({ key: 'wikilink' } satisfies MdPackAttrs),
+    createUnitPack(marks, out, parentMarks, node.from, { key: 'wikilink' }),
     marks.mdWikilink.create({ target, display }),
   ])
 }
@@ -636,7 +658,7 @@ function walkWikiEmbed(
     const alt = (resolution.alt ?? embed.display) || wikiEmbedBasename(embed.target)
     emit(out, node.from, node.to, [
       ...parentMarks,
-      marks.mdPack.create({ key: 'image' } satisfies MdPackAttrs),
+      createUnitPack(marks, out, parentMarks, node.from, { key: 'image' }),
       marks.mdImage.create({
         src,
         alt,
@@ -655,7 +677,7 @@ function walkWikiEmbed(
     const name = (resolution.name ?? embed.display) || wikiEmbedBasename(embed.target)
     emit(out, node.from, node.to, [
       ...parentMarks,
-      marks.mdPack.create({ key: 'file' } satisfies MdPackAttrs),
+      createUnitPack(marks, out, parentMarks, node.from, { key: 'file' }),
       marks.mdFile.create({ href, name, title: resolution.title ?? '' }),
     ])
     return
@@ -665,51 +687,9 @@ function walkWikiEmbed(
   const display = resolution.display ?? embed.display
   emit(out, node.from, node.to, [
     ...parentMarks,
-    marks.mdPack.create({ key: 'wikilink' } satisfies MdPackAttrs),
+    createUnitPack(marks, out, parentMarks, node.from, { key: 'wikilink' }),
     marks.mdWikilink.create({ target, display }),
   ])
-}
-
-// The unit mark of a mark set (a wikilink, image, file pill or math run), or
-// undefined for ordinary text. Every chunk of one unit carries the very same
-// mark instance, which is what tells two neighbours apart from one unit split
-// across chunks (math emits its dollar runs separately).
-function getUnitMark(marks: readonly Mark[]): Mark | undefined {
-  return marks.find((mark) => ATOM_MARK_NAMES.has(mark.type.name))
-}
-
-/**
- * Alternate `slot` on a unit whose mark equals the one on the unit ending
- * exactly where it starts. `[[foo]][[foo]]` gives both units an equal
- * `mdWikilink` mark, so ProseMirror merges them into one text node and one mark
- * view renders one preview for both; unequal marks keep them apart.
- */
-function separateAdjacentUnits(chunks: MarkChunk[]): void {
-  let previousMark: Mark | undefined
-  let previousEnd = -1
-  let index = 0
-  while (index < chunks.length) {
-    const mark = getUnitMark(chunks[index][2])
-    if (!mark) {
-      index++
-      continue
-    }
-    let end = index
-    while (end < chunks.length && getUnitMark(chunks[end][2]) === mark) end++
-    const merges = previousMark != null && previousEnd === chunks[index][0] && previousMark.eq(mark)
-    const unitMark = merges
-      ? mark.type.create({ ...mark.attrs, slot: mark.attrs.slot == null ? 1 : null })
-      : mark
-    if (unitMark !== mark) {
-      for (let i = index; i < end; i++) {
-        const [from, to, marks] = chunks[i]
-        chunks[i] = [from, to, marks.map((other) => (other === mark ? unitMark : other))]
-      }
-    }
-    previousMark = unitMark
-    previousEnd = chunks[end - 1][1]
-    index = end
-  }
 }
 
 /**
@@ -725,14 +705,8 @@ function emit(out: MarkChunk[], from: number, to: number, marks: readonly Mark[]
 
   const last = out.at(-1)
   if (last && last[1] === from && marksEqual(last[2], marks)) {
-    // Two units of the same kind with equal attributes must stay two chunks,
-    // even though their mark sets match: `separateAdjacentUnits` tells them
-    // apart by mark instance and then makes the marks differ.
-    const unit = getUnitMark(marks)
-    if (unit == null || getUnitMark(last[2]) === unit) {
-      out[out.length - 1] = [last[0], to, last[2]]
-      return
-    }
+    out[out.length - 1] = [last[0], to, last[2]]
+    return
   }
   out.push([from, to, marks])
 }

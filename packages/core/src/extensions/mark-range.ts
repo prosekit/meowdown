@@ -1,8 +1,9 @@
 import { getMarkRange, type MarkRange } from '@prosekit/core'
-import type { Attrs } from '@prosekit/pm/model'
+import type { Attrs, ResolvedPos } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
 
-import type { MarkName } from './mark-names.ts'
+import { getInnermostPackRangeAt } from './hidden-run.ts'
+import { ATOM_MARK_NAMES, type MarkName } from './mark-names.ts'
 
 /**
  * Returns the resolved position, or `undefined` when it falls outside the
@@ -35,7 +36,31 @@ export function getMarkRangeAt(
   const markNames = Array.isArray(markName) ? markName : [markName]
   for (const name of markNames) {
     const range = getMarkRange($pos, name, attrs)
-    if (range) return range
+    if (range) return ATOM_MARK_NAMES.has(name) ? clampToUnitRange(state, $pos, range) : range
+  }
+}
+
+/**
+ * Two identical adjacent units carry equal atom marks (only their packs differ,
+ * by `slot`), so `getMarkRange`'s eq-based expansion runs across both. Clamp
+ * the range to the matched child's own unit: the innermost pack covering its
+ * first character. A child without a pack (a document not produced by the
+ * inline parser) keeps the unclamped range.
+ */
+function clampToUnitRange(state: EditorState, $pos: ResolvedPos, range: MarkRange): MarkRange {
+  const parent = $pos.parent
+  const after = parent.childAfter($pos.parentOffset)
+  const matched =
+    after.node && range.mark.isInSet(after.node.marks)
+      ? after
+      : parent.childBefore($pos.parentOffset)
+  if (!matched.node) return range
+  const pack = getInnermostPackRangeAt(state, $pos.start() + matched.offset)
+  if (!pack) return range
+  return {
+    from: Math.max(range.from, pack.from),
+    to: Math.min(range.to, pack.to),
+    mark: range.mark,
   }
 }
 

@@ -3,23 +3,10 @@ import { defineMarkSpec, union } from '@prosekit/core'
 import type { MarkName } from './mark-names.ts'
 
 /**
- * Attribute every unit mark carries so two adjacent units with otherwise equal
- * attributes (`[[foo]][[foo]]`) stay two text nodes, and each keeps its own
- * mark view instead of merging into one preview. The parser alternates it
- * between such neighbours; it carries no meaning on its own and is `null`
- * everywhere else.
- */
-interface MdUnitSlotAttrs {
-  slot?: number | null
-}
-
-const unitSlotAttr = { slot: { default: null } }
-
-/**
  * Attributes of the `mdImage` mark, derived from either `![alt](src "title")`
  * (plus an optional trailing size comment) or a resolved wiki image embed.
  */
-export interface MdImageAttrs extends MdUnitSlotAttrs {
+export interface MdImageAttrs {
   /** The image destination, exactly as written in the source. */
   src: string
   /** The image alt text. */
@@ -48,7 +35,6 @@ function defineMdImage() {
       height: { default: null },
       syntax: { default: null },
       wikiTarget: { default: null },
-      ...unitSlotAttr,
     },
     toDOM: () => ['span', { class: 'md-image' }, 0],
     parseDOM: [{ tag: 'span.md-image' }],
@@ -165,13 +151,13 @@ function defineMdWikilink() {
   return defineMarkSpec<'mdWikilink', MdWikilinkAttrs>({
     name: 'mdWikilink' satisfies MarkName,
     inclusive: false,
-    attrs: { target: { default: '' }, display: { default: '' }, ...unitSlotAttr },
+    attrs: { target: { default: '' }, display: { default: '' } },
     toDOM: () => ['span', { class: 'md-wikilink' }, 0],
     parseDOM: [{ tag: 'span.md-wikilink' }],
   })
 }
 
-export interface MdWikilinkAttrs extends MdUnitSlotAttrs {
+export interface MdWikilinkAttrs {
   target: string
   display: string
 }
@@ -180,7 +166,7 @@ export interface MdWikilinkAttrs extends MdUnitSlotAttrs {
  * Attributes of the `mdFile` mark: a whole `[label](url)` link that the host's
  * `resolveFileLink` claimed as a file attachment, rendered as a file pill.
  */
-export interface MdFileAttrs extends MdUnitSlotAttrs {
+export interface MdFileAttrs {
   /** The link destination, exactly as written in the source. */
   href: string
   /** The display name: the raw label slice, or the `href` basename when the label is empty. */
@@ -197,7 +183,6 @@ function defineMdFile() {
       href: { default: '' },
       name: { default: '' },
       title: { default: '' },
-      ...unitSlotAttr,
     },
     toDOM: () => ['span', { class: 'md-file' }, 0],
     parseDOM: [{ tag: 'span.md-file' }],
@@ -208,7 +193,7 @@ function defineMdFile() {
  * Attributes of the `mdMath` mark: a whole `$formula$` / `$$formula$$` inline
  * math expression, rendered by `MathMarkView`.
  */
-export interface MdMathAttrs extends MdUnitSlotAttrs {
+export interface MdMathAttrs {
   /** The TeX source between the dollar delimiters. */
   formula: string
 }
@@ -218,7 +203,7 @@ function defineMdMath() {
   return defineMarkSpec<'mdMath', MdMathAttrs>({
     name: 'mdMath' satisfies MarkName,
     inclusive: false,
-    attrs: { formula: { default: '' }, ...unitSlotAttr },
+    attrs: { formula: { default: '' } },
     toDOM: () => ['span', { class: 'md-math' }, 0],
     parseDOM: [{ tag: 'span.md-math' }],
   })
@@ -243,9 +228,11 @@ export type MdPackSimpleKey =
  * it stays stable when unrelated text in the block is edited, so editing one
  * unit never re-marks the others. `data` carries the unit's parsed payload (a
  * link's `href`/`title`) so callers read it off the mark instead of re-parsing
- * the text.
+ * the text. The parser sets `slot: 1` on a unit whose pack would otherwise
+ * equal the pack of the unit ending exactly where it starts; equal packs would
+ * merge the two units into one mark run and one mark view.
  */
-export type MdPackAttrs =
+export type MdPackAttrs = (
   | {
       key: 'link'
       data: { href: string; title: string; reference?: true }
@@ -254,6 +241,9 @@ export type MdPackAttrs =
       key: MdPackSimpleKey
       data?: null
     }
+) & {
+  slot?: 1 | null
+}
 
 /**
  * Wraps a whole inline unit. For a revealable unit (emphasis, strong, code,
@@ -267,7 +257,7 @@ function defineMdPack() {
     name: 'mdPack' satisfies MarkName,
     excludes: '',
     inclusive: false,
-    attrs: { key: {}, data: { default: null } },
+    attrs: { key: {}, data: { default: null }, slot: { default: null } },
     toDOM: (mark) => {
       const attrs = mark.attrs as MdPackAttrs
       return ['span', { class: 'md-pack', 'data-key': attrs.key }, 0]

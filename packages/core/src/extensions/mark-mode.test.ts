@@ -512,6 +512,122 @@ describe('focus mode', () => {
     `)
   })
 
+  it('reveals a bold unit whose closing ** touches a wikilink', () => {
+    expect(renderHTML('focus', '**b**<a>[[n]]')).toMatchInlineSnapshot(`
+      "
+      <p>
+        <span
+          class="md-pack"
+          data-key="bold"
+        >
+          <strong>
+            <span class="md-mark">
+              <span class="show">
+                **
+              </span>
+            </span>
+            <span class="show">
+              b
+            </span>
+            <span class="md-mark">
+              <span class="show">
+                **
+              </span>
+            </span>
+          </strong>
+        </span>
+        <span
+          class="md-pack"
+          data-key="wikilink"
+        >
+          <span class="md-wikilink-view md-atom-view">
+            <span
+              class="md-wikilink-view-preview md-atom-view-preview"
+              contenteditable="false"
+              data-testid="wikilink"
+            >
+              <span
+                class="md-wikilink-view-label"
+                contenteditable="false"
+              >
+                n
+              </span>
+            </span>
+            <span class="md-wikilink-view-content md-atom-view-content">
+              [[n]]
+            </span>
+          </span>
+        </span>
+      </p>
+      "
+    `)
+  })
+
+  it('reveals only the first of two identical adjacent links', () => {
+    expect(renderHTML('focus', '[a<a>](x)[a](x)')).toMatchInlineSnapshot(`
+      "
+      <p>
+        <span
+          class="md-pack"
+          data-key="link"
+        >
+          <a
+            class="md-link"
+            href="x"
+          >
+            <span class="md-mark">
+              <span class="show">
+                [
+              </span>
+            </span>
+            <span class="show">
+              a
+            </span>
+          </a>
+          <span class="md-mark">
+            <span class="show">
+              ](
+            </span>
+          </span>
+          <span class="md-link-uri">
+            <span class="show">
+              x
+            </span>
+          </span>
+          <span class="md-mark">
+            <span class="show">
+              )
+            </span>
+          </span>
+        </span>
+        <span
+          class="md-pack"
+          data-key="link"
+        >
+          <a
+            class="md-link"
+            href="x"
+          >
+            <span class="md-mark">
+              [
+            </span>
+            a
+          </a>
+          <span class="md-mark">
+            ](
+          </span>
+          <span class="md-link-uri">
+            x
+          </span>
+          <span class="md-mark">
+            )
+          </span>
+        </span>
+      </p>
+      "
+    `)
+  })
+
   it('reveals nothing inside a #tag (tags have no syntax to reveal)', () => {
     expect(renderHTML('focus', 'Hello #me<a>ow end')).toMatchInlineSnapshot(`
       "

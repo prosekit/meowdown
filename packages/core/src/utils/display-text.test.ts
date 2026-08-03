@@ -39,4 +39,14 @@ describe('getTextblockDisplayText', () => {
     fixture.set(n.doc(n.heading({ level: 1 }, '[[a]][[a]]')))
     expect(getTextblockDisplayText(fixture.doc.child(0))).toBe('aa')
   })
+
+  it('splits adjacent identical atoms after a JSON round trip', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.heading({ level: 1 }, '[[a]][[a]] and $x$')))
+    // A round trip loses mark instance identity, leaving pack equality as the
+    // only unit boundary.
+    const doc = fixture.editor.schema.nodeFromJSON(fixture.doc.toJSON())
+    expect(getTextblockDisplayText(doc.child(0))).toBe('aa and x')
+  })
 })
