@@ -9,7 +9,7 @@ import type { MarkName } from './mark-names.ts'
  * between such neighbours; it carries no meaning on its own and is `null`
  * everywhere else.
  */
-export interface MdUnitSlotAttrs {
+interface MdUnitSlotAttrs {
   slot?: number | null
 }
 
