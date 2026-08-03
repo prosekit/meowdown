@@ -122,7 +122,8 @@ const bareAutolink = { parseInline: [{
 		if (!match) return -1;
 		const length = trimAutolinkEnd(match[0]);
 		if (length === 0) return -1;
-		if (!isLinkableBareHost(hostFromUrl(match[0].slice(0, length)))) return -1;
+		const text = match[0].slice(0, length);
+		if (!isLinkableBareHost(hostFromUrl(text))) return -1;
 		return cx.addElement(cx.elt("URL", pos, pos + length));
 	}
 }] };

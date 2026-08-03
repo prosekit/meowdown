@@ -658,17 +658,19 @@ function LinkMenu({ onLinkClick, onLinkCopy }) {
 	const [overPopup, setOverPopup] = useState(false);
 	const [edit, setEdit] = useState();
 	const hoverOpen = useDelayedFlag(onLink || overPopup);
-	useExtension$1(useMemo(() => {
+	const linkHoverExtension = useMemo(() => {
 		return defineLinkHoverHandler((hit) => {
 			setOnLink(!!hit);
 			if (hit) setHover(hit.payload);
 		});
-	}, []));
-	useExtension$1(useMemo(() => {
+	}, []);
+	useExtension$1(linkHoverExtension);
+	const linkEditExtension = useMemo(() => {
 		return defineLinkEditKeymap((options) => {
 			setEdit(options);
 		});
-	}, []));
+	}, []);
+	useExtension$1(linkEditExtension);
 	const closeHover = useCallback(() => {
 		setOnLink(false);
 		setOverPopup(false);
@@ -1689,11 +1691,13 @@ function findHeadingPosition(doc, fragment) {
 }
 function ProseKitEditor({ markMode = "focus", initialMarkdown, onDocChange, onSlashMenuSearch, onTagSearch, onWikilinkSearch, onSelectionMenuSearch, selectionMenuAffordance = true, pendingReplacementActions, onPendingReplacementResolve, onWikilinkClick, onLinkClick, onLinkCopy, onTagClick, onExitBoundary, resolveImageUrl, resolveFileLink, resolveWikiEmbed, resolveFileInfo, onFileClick, onFilePaste, onFileSaveError, onImageClick, embedPaste, linkPaste, bulletAfterHeading, substitution = true, frontmatter = false, blockHandle = true, placeholder, readOnly, spellCheck, searchQuery = "", onSearchChange, timeFormat, editorClassName, ref, children }) {
 	const [editor] = useState(() => {
-		const editor = createEditor({ extension: union(defineEditorExtension({
+		const baseExtension = defineEditorExtension({
 			resolveFileLink,
 			resolveWikiEmbed,
 			markMode
-		}), defineCodeBlockView()) });
+		});
+		const extension = union(baseExtension, defineCodeBlockView());
+		const editor = createEditor({ extension });
 		if (initialMarkdown) editor.setContent(markdownToDoc(initialMarkdown, {
 			nodes: editor.nodes,
 			frontmatter
@@ -2082,9 +2086,7 @@ function attributesToProps(attributes = {}, nodeName) {
 				case BOOLEAN:
 					props[propName] = true;
 					break;
-				case OVERLOADED_BOOLEAN:
-					if (attributeValue === "") props[propName] = true;
-					break;
+				case OVERLOADED_BOOLEAN: if (attributeValue === "") props[propName] = true;
 			}
 			continue;
 		}
@@ -2147,7 +2149,8 @@ function outputSpecToReact(spec, content, context) {
 			reactProps.tabIndex = -1;
 		}
 	}
-	return createElement(tag, reactProps, ...rest.map((child) => outputSpecToReact(child, content, context)));
+	const reactChildren = rest.map((child) => outputSpecToReact(child, content, context));
+	return createElement(tag, reactProps, ...reactChildren);
 }
 function WikilinkChip(props) {
 	const { target, display, onWikilinkClick, children } = props;

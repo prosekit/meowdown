@@ -902,7 +902,8 @@ function defineHTMLPaste() {
 			if (!parent.inlineContent || parent.type.spec.code) return html;
 			const markdown = extractStyledPlainText(html) ?? htmlToMarkdown(html);
 			if (!markdown.trim()) return html;
-			const doc = markdownToDoc(markdown, { nodes: getNodeBuildersForSchema(view.state.schema) });
+			const nodes = getNodeBuildersForSchema(view.state.schema);
+			const doc = markdownToDoc(markdown, { nodes });
 			const serializer = getSemanticDOMSerializer(view.state.schema);
 			const container = document.createElement("div");
 			container.append(serializer.serializeFragment(doc.content));
@@ -948,7 +949,8 @@ function defineClipboardParser() {
 function plainTextToSlice(schema, raw) {
 	const trimmed = raw.replaceAll(/\r\n?/g, "\n").replace(/^\n+/, "").replace(/\n+$/, "");
 	if (!trimmed) return Slice.empty;
-	const doc = markdownToDoc(trimmed, { nodes: getNodeBuildersForSchema(schema) });
+	const nodes = getNodeBuildersForSchema(schema);
+	const doc = markdownToDoc(trimmed, { nodes });
 	const paragraph = getNodeType(schema, "paragraph");
 	const openStart = doc.childCount > 0 && doc.child(0).type === paragraph ? 1 : 0;
 	const openEnd = doc.childCount > 0 && doc.child(doc.childCount - 1).type === paragraph ? 1 : 0;
@@ -1718,7 +1720,8 @@ function selectTextBetween($anchor, $head, bias) {
 function insertMarkdown(markdown) {
 	return (state, dispatch) => {
 		if (!markdown.trim()) return false;
-		const content = markdownToDoc(markdown, { nodes: getNodeBuildersForSchema(state.schema) }).content;
+		const nodes = getNodeBuildersForSchema(state.schema);
+		const content = markdownToDoc(markdown, { nodes }).content;
 		if (content.childCount === 0) return false;
 		const slice = content.childCount === 1 && isNodeOfType(content.child(0), "paragraph") ? new Slice(content, 1, 1) : new Slice(content, 0, Slice.maxOpen(content).openEnd);
 		if (dispatch) {
@@ -2093,7 +2096,8 @@ function createUnformatCommand(direction) {
 		if (!$head.parent.isTextblock || $head.parent.type.spec.code) return false;
 		const run = direction === -1 ? getHiddenRunBefore(state, selection.head) : getHiddenRunAfter(state, selection.head);
 		if (run == null) return false;
-		const markerRuns = getUnitMarkerRuns(state, direction === -1 ? run.to - 1 : run.from);
+		const markerChar = direction === -1 ? run.to - 1 : run.from;
+		const markerRuns = getUnitMarkerRuns(state, markerChar);
 		const tr = state.tr;
 		if (markerRuns.length === 0) tr.delete(run.from, run.to);
 		else for (const markerRun of markerRuns) tr.delete(markerRun.from, markerRun.to);
@@ -2351,7 +2355,8 @@ var BatchSetMarkStep = class BatchSetMarkStep extends Step {
 		const docSize = doc.content.size;
 		const safeFrom = Math.max(0, Math.min(overallFrom, docSize));
 		const safeTo = Math.max(safeFrom, Math.min(overallTo, docSize));
-		return new ReplaceStep(safeFrom, safeTo, doc.slice(safeFrom, safeTo), false);
+		const slice = doc.slice(safeFrom, safeTo);
+		return new ReplaceStep(safeFrom, safeTo, slice, false);
 	}
 	/**
 	* Returns `null`: in a collaborative-editing rebase the chunk
@@ -2435,7 +2440,8 @@ function getReferenceNode(text) {
 	return reference;
 }
 function decodeDestination(raw) {
-	return decodeString(raw.startsWith("<") && raw.endsWith(">") ? raw.slice(1, -1) : raw);
+	const value = raw.startsWith("<") && raw.endsWith(">") ? raw.slice(1, -1) : raw;
+	return decodeString(value);
 }
 function decodeTitle(raw) {
 	return raw.length < 2 ? "" : decodeString(raw.slice(1, -1));
@@ -2796,7 +2802,8 @@ function resolveLink(parts, text, context) {
 	if (parts.labelFrom < 0 || parts.labelTo < 0) return;
 	if (context?.isReferenceDefinition === true) return;
 	const visibleLabel = text.slice(parts.labelFrom, parts.labelTo);
-	const key = normalizeReferenceLabel(parts.referenceLabelNode == null ? visibleLabel : text.slice(parts.referenceLabelNode.from + 1, parts.referenceLabelNode.to - 1) || visibleLabel);
+	const explicitLabel = parts.referenceLabelNode == null ? visibleLabel : text.slice(parts.referenceLabelNode.from + 1, parts.referenceLabelNode.to - 1) || visibleLabel;
+	const key = normalizeReferenceLabel(explicitLabel);
 	if (key === "") return;
 	context?.referencedKeys?.add(key);
 	const definition = context?.referenceDefinitions?.get(key);
@@ -3594,7 +3601,8 @@ function trimRange(text, from, to) {
 * `**a** **b**` and `***foo***` read as fully strong when selected.
 */
 function isInlineActive(text, from, to, spec) {
-	const covered = collectInlineElements(parseInline(text), (node) => node.type === spec.node || MARKER_IDS.has(node.type));
+	const tree = parseInline(text);
+	const covered = collectInlineElements(tree, (node) => node.type === spec.node || MARKER_IDS.has(node.type));
 	for (let pos = from; pos < to; pos++) {
 		if (isSpaceChar(text.charCodeAt(pos))) continue;
 		if (covered.every((span) => !(span.from <= pos && pos < span.to))) return false;
@@ -4114,7 +4122,8 @@ function defineMeowdownListSerializer() {
 	return defineClipboardSerializer({
 		serializeFragmentWrapper: (serializeFragment) => {
 			return (...args) => {
-				return normalizeElementTree(joinListElements(serializeFragment(...args)));
+				const dom = serializeFragment(...args);
+				return normalizeElementTree(joinListElements(dom));
 			};
 		},
 		serializeNodeWrapper: (serializeNode) => {
@@ -4248,7 +4257,7 @@ function cycleCheckableList() {
 function cycleBulletOrderedList() {
 	return (state, dispatch, view) => {
 		const attrs = getListAttrsAtSelection(state);
-		return toggleList(attrs?.kind === "bullet" || attrs?.kind === "ordered" ? {
+		const next = attrs?.kind === "bullet" || attrs?.kind === "ordered" ? {
 			kind: "ordered",
 			marker: null,
 			checked: false,
@@ -4258,7 +4267,8 @@ function cycleBulletOrderedList() {
 			marker: null,
 			checked: false,
 			collapsed: false
-		})(state, dispatch, view);
+		};
+		return toggleList(next)(state, dispatch, view);
 	};
 }
 function toggleListCollapsed() {
@@ -5653,9 +5663,7 @@ function convertCodeBlock(nodes, cursor, text) {
 				case LEZER_NODE_IDS.CodeInfo:
 					language = text.slice(cursor.from, cursor.to);
 					break;
-				case LEZER_NODE_IDS.CodeText:
-					code += text.slice(cursor.from, cursor.to);
-					break;
+				case LEZER_NODE_IDS.CodeText: code += text.slice(cursor.from, cursor.to);
 			}
 		while (cursor.nextSibling());
 		cursor.parent();
@@ -5770,7 +5778,8 @@ function normalizeLine(line) {
 }
 /** Classify how `markdown` survives the editor's parse-then-serialize round trip. */
 function checkRoundTrip(markdown, options = {}) {
-	const serialized = docToMarkdown(markdownToDoc(markdown, { frontmatter: options.frontmatter }), { frontmatter: options.frontmatter });
+	const doc = markdownToDoc(markdown, { frontmatter: options.frontmatter });
+	const serialized = docToMarkdown(doc, { frontmatter: options.frontmatter });
 	if (trimTrailingNewlines(serialized) === trimTrailingNewlines(markdown)) return "exact";
 	const before = nonBlankLines(markdown);
 	const after = nonBlankLines(serialized);
@@ -7232,7 +7241,8 @@ function applySubstitution(state, from, to, rule, undoText) {
 }
 function defineSubstitutionInputRules() {
 	return union(SUBSTITUTION_RULES.map((rule) => {
-		return defineInputRule(new InputRule(new RegExp(String.raw`(?:${rule[0].source})\s$`), (state, match, start, end) => {
+		const inputRegexp = new RegExp(String.raw`(?:${rule[0].source})\s$`);
+		return defineInputRule(new InputRule(inputRegexp, (state, match, start, end) => {
 			return applySubstitution(state, start, end, rule, match[0]);
 		}));
 	}));
@@ -7292,9 +7302,8 @@ function forceReflow(element) {
 const key = new PluginKey("meowdown-virtual-caret");
 const BLINK_ANIMATIONS = ["md-virtual-caret-blink", "md-virtual-caret-blink2"];
 const DATA_ATTRIBUTE = "data-meowdown-virtual-caret";
-const CARET_STRETCH = 1.2;
 function stretchCaretRect(rect) {
-	const extra = rect.height * (CARET_STRETCH - 1);
+	const extra = rect.height * .19999999999999996;
 	return {
 		left: rect.left,
 		top: rect.top - extra / 2,
@@ -7551,7 +7560,8 @@ function getSelectedText(state) {
 	if (selection.empty) return "";
 	const fragment = selection.content().content;
 	try {
-		return docToMarkdown(schema.topNodeType.create(null, fragment)).replace(/\n+$/, "");
+		const doc = schema.topNodeType.create(null, fragment);
+		return docToMarkdown(doc).replace(/\n+$/, "");
 	} catch {
 		return state.doc.textBetween(selection.from, selection.to, "\n\n");
 	}
