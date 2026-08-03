@@ -42,3 +42,8 @@ export const ATOM_MARK_NAMES: ReadonlySet<string> = new Set<MarkName>([
   'mdFile',
   'mdMath',
 ])
+
+// Pack keys of the units whose source hides behind a rendered preview. The
+// focus reveal skips these packs: revealing them shows nothing, and matching
+// one would shadow a revealable neighbour on the other side of the caret.
+export const ATOM_PACK_KEYS: ReadonlySet<string> = new Set(['wikilink', 'image', 'file'])

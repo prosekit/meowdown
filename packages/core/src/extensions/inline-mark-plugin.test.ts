@@ -300,8 +300,8 @@ describe('inlineMarkPlugin', () => {
     const open = findText(fixture.doc, '[[')
     const target = findText(fixture.doc, 'note')
     expect(open).toBeGreaterThan(0)
-    expect(marksAt(fixture.doc, open + 1)).toEqual(['mdWikilink'])
-    expect(marksAt(fixture.doc, target + 1)).toEqual(['mdWikilink'])
+    expect(marksAt(fixture.doc, open + 1)).toEqual(['mdPack', 'mdWikilink'])
+    expect(marksAt(fixture.doc, target + 1)).toEqual(['mdPack', 'mdWikilink'])
     expect(marksAt(fixture.doc, open)).toEqual([]) // the space before
   })
 
@@ -312,7 +312,7 @@ describe('inlineMarkPlugin', () => {
     fixture.set(doc)
 
     const pos = findText(fixture.doc, 'note')
-    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilink'])
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdPack', 'mdWikilink'])
   })
 
   it('does not mark [[note]] inside code blocks', () => {
@@ -332,7 +332,7 @@ describe('inlineMarkPlugin', () => {
     fixture.set(doc)
 
     const pos = findText(fixture.doc, 'note')
-    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdWikilink'])
+    expect(marksAt(fixture.doc, pos + 1)).toEqual(['mdPack', 'mdWikilink'])
     // Delete one ']': "see [[note] end" is no longer a wikilink. Lezer parses
     // the inner `[note]` as a shortcut reference link, which meowdown renders
     // as plain text, so all marks disappear.

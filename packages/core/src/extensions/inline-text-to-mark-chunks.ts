@@ -258,9 +258,13 @@ function walkLink(
     walkUnresolvedLink(node, parentMarks, text, marks, out, options, context)
     return
   }
-  const fileMarks = claimFileLink(parts, resolution, parentMarks, text, marks, options)
-  if (fileMarks) {
-    emit(out, node.from, node.to, fileMarks)
+  const fileMark = claimFileLink(parts, resolution, text, marks, options)
+  if (fileMark) {
+    emit(out, node.from, node.to, [
+      ...parentMarks,
+      marks.mdPack.create({ key: 'file' } satisfies MdPackAttrs),
+      fileMark,
+    ])
     return
   }
   walkResolvedLink(node, parts, resolution, parentMarks, text, marks, out, options, context)
@@ -381,19 +385,18 @@ function hrefBasename(href: string): string {
 }
 
 /**
- * The marks for a whole inline or resolved reference link that the host's `resolveFileLink`
- * claimed as a file, or `undefined` when the link stays a regular link. The
- * resolver is never consulted for a link without a closed label or a non-empty
- * destination.
+ * The `mdFile` mark for a whole inline or resolved reference link that the
+ * host's `resolveFileLink` claimed as a file, or `undefined` when the link
+ * stays a regular link. The resolver is never consulted for a link without a
+ * closed label or a non-empty destination.
  */
 function claimFileLink(
   parts: LinkParts,
   resolution: ResolvedLink,
-  parentMarks: readonly Mark[],
   text: string,
   marks: TypedMarkBuilders,
   options: InlineMarkOptions | undefined,
-): readonly Mark[] | undefined {
+): Mark | undefined {
   const resolveFileLink = options?.resolveFileLink
   if (!resolveFileLink) return undefined
   const { labelFrom, labelTo } = parts
@@ -403,7 +406,7 @@ function claimFileLink(
   const label = text.slice(labelFrom, labelTo)
   if (!resolveFileLink({ href, label, title })) return undefined
   const name = label || hrefBasename(href)
-  return [...parentMarks, marks.mdFile.create({ href, name, title } satisfies MdFileAttrs)]
+  return marks.mdFile.create({ href, name, title } satisfies MdFileAttrs)
 }
 
 /**
@@ -545,6 +548,7 @@ function walkImage(
 
   emit(out, node.from, to, [
     ...parentMarks,
+    marks.mdPack.create({ key: 'image' } satisfies MdPackAttrs),
     marks.mdImage.create({
       src,
       alt,
@@ -600,7 +604,11 @@ function walkWikilink(
 ): void {
   const { target, display } = parseWikilink(text.slice(node.from, node.to))
 
-  emit(out, node.from, node.to, [...parentMarks, marks.mdWikilink.create({ target, display })])
+  emit(out, node.from, node.to, [
+    ...parentMarks,
+    marks.mdPack.create({ key: 'wikilink' } satisfies MdPackAttrs),
+    marks.mdWikilink.create({ target, display }),
+  ])
 }
 
 /**
@@ -628,6 +636,7 @@ function walkWikiEmbed(
     const alt = (resolution.alt ?? embed.display) || wikiEmbedBasename(embed.target)
     emit(out, node.from, node.to, [
       ...parentMarks,
+      marks.mdPack.create({ key: 'image' } satisfies MdPackAttrs),
       marks.mdImage.create({
         src,
         alt,
@@ -646,6 +655,7 @@ function walkWikiEmbed(
     const name = (resolution.name ?? embed.display) || wikiEmbedBasename(embed.target)
     emit(out, node.from, node.to, [
       ...parentMarks,
+      marks.mdPack.create({ key: 'file' } satisfies MdPackAttrs),
       marks.mdFile.create({ href, name, title: resolution.title ?? '' }),
     ])
     return
@@ -653,7 +663,11 @@ function walkWikiEmbed(
 
   const target = resolution.target ?? embed.target
   const display = resolution.display ?? embed.display
-  emit(out, node.from, node.to, [...parentMarks, marks.mdWikilink.create({ target, display })])
+  emit(out, node.from, node.to, [
+    ...parentMarks,
+    marks.mdPack.create({ key: 'wikilink' } satisfies MdPackAttrs),
+    marks.mdWikilink.create({ target, display }),
+  ])
 }
 
 // The unit mark of a mark set (a wikilink, image, file pill or math run), or

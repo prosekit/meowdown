@@ -1,9 +1,10 @@
-import { defineCommands, definePlugin, getMarkRange, getMarkType, union } from '@prosekit/core'
+import { defineCommands, definePlugin, getMarkType, union } from '@prosekit/core'
+import type { Mark, MarkType, ResolvedPos } from '@prosekit/pm/model'
 import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
-import type { MarkName } from './mark-names.ts'
+import { ATOM_PACK_KEYS, type MarkName } from './mark-names.ts'
 
 /**
  * Controls how markdown syntax characters are rendered and how the clipboard's
@@ -73,8 +74,8 @@ export function getMarkMode(state: EditorState): MarkMode | undefined {
  * `getMarkRange` finds the unit, returning the outermost when units nest. One
  * decoration over its range flips the hidden punctuation/url/source visible via
  * the `.show` CSS rule. Because the range covers the whole unit, a caret at
- * either edge (e.g. right after a link's `)`) still reveals it. Wikilink and
- * `#tag` carry no `mdPack`, so they never reveal.
+ * either edge (e.g. right after a link's `)`) still reveals it. Atom packs
+ * (`ATOM_PACK_KEYS`) and `#tag` never reveal.
  */
 function computeFocusDecorations(state: EditorState): DecorationSet {
   return computeRevealDecorations(state, undefined)
@@ -101,7 +102,7 @@ function computeRevealDecorations(
   const { parent } = $pos
   if (!parent.isTextblock || parent.type.spec.code) return DecorationSet.empty
 
-  const range = getMarkRange(
+  const range = getRevealablePackRange(
     $pos,
     getMarkType(state.schema, 'mdPack' satisfies MarkName),
     packAttrs,
@@ -111,4 +112,47 @@ function computeRevealDecorations(
   return DecorationSet.create(state.doc, [
     Decoration.inline(range.from, range.to, { class: 'show' }),
   ])
+}
+
+// The outermost revealable pack touching `$pos`, preferring the child to the
+// right like `getMarkRange`. An atom pack hides its source behind a preview
+// and never reveals, so it must not shadow a revealable neighbour on the
+// other side of the caret.
+function getRevealablePackRange(
+  $pos: ResolvedPos,
+  packType: MarkType,
+  packAttrs: Record<string, unknown> | undefined,
+): { from: number; to: number } | undefined {
+  const matchesPack = (mark: Mark): boolean =>
+    mark.type === packType &&
+    !ATOM_PACK_KEYS.has(mark.attrs.key as string) &&
+    (packAttrs == null ||
+      Object.entries(packAttrs).every(([name, value]) => mark.attrs[name] === value))
+
+  const parent = $pos.parent
+  const after = parent.childAfter($pos.parentOffset)
+  const before = parent.childBefore($pos.parentOffset)
+  let index: number
+  let offset: number
+  let mark: Mark | undefined
+  if (after.node && (mark = after.node.marks.find(matchesPack))) {
+    index = after.index
+    offset = after.offset
+  } else if (before.node && (mark = before.node.marks.find(matchesPack))) {
+    index = before.index
+    offset = before.offset
+  } else {
+    return
+  }
+
+  const start = $pos.start()
+  let from = start + offset
+  let to = from + parent.child(index).nodeSize
+  for (let i = index - 1; i >= 0 && mark.isInSet(parent.child(i).marks); i--) {
+    from -= parent.child(i).nodeSize
+  }
+  for (let i = index + 1; i < parent.childCount && mark.isInSet(parent.child(i).marks); i++) {
+    to += parent.child(i).nodeSize
+  }
+  return { from, to }
 }
