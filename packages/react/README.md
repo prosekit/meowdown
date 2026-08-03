@@ -27,9 +27,6 @@ export function App() {
 ## Usage
 
 ```tsx
-import '@meowdown/core/style.css'
-import '@meowdown/react/style.css'
-
 import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import { useRef, useCallback } from 'react'
 
@@ -50,125 +47,27 @@ export function App() {
 }
 ```
 
-## API
+## Components
 
-See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Freact/).
+| Component | Description |
+| --- | --- |
+| `MeowdownEditor` | The editor. Callbacks and resolvers must be stable; pass them via `useCallback`. |
+| `MarkdownView` | Read-only Markdown renderer. `interactive={false}` renders passive content for previews. |
+| `WikilinkHoverCard` | Mount inside `MeowdownEditor`; renders host content for the hovered wiki link's `target`. Return `null` to render no card. |
 
-Slash menu host items can include `keywords` to match hidden terms without changing the displayed label.
+Common `MeowdownEditor` props:
 
-The caret glides between positions by default; pass `caretGlide={false}` to move it instantly (hosts can also tune the duration via the `--meowdown-caret-glide` CSS variable).
+| Prop | What it does |
+| --- | --- |
+| `mode` | `'focus'` (default), `'show'`, or `'hide'`: how much Markdown syntax stays in view |
+| `searchQuery` / `onSearchChange` | Find in document, with `EditorHandle.findNext()` / `findPrevious()` |
+| `onWikilinkClick` / `onLinkClick` / `onTagClick` / `onImageClick` / `onFileClick` | Click handling for the rendered atoms |
+| `resolveImageUrl` / `resolveWikiEmbed` / `resolveFileLink` / `resolveFileInfo` | Resolve and classify local content |
+| `onFilePaste` | Persist pasted or dropped files |
+| `onSlashMenuSearch` / `onTagSearch` / `onWikilinkSearch` / `onSelectionMenuSearch` | Search menus for `/`, `#`, `[[`, and selection commands |
+| `readOnly` / `placeholder` / `blockHandle` / `caretGlide` / `embedPaste` / `linkPaste` / `bulletAfterHeading` | Behavior toggles |
 
-`MarkdownView` folds collapsed (`+`) bullets like the editor; pass `expandCollapsed` to render them expanded at every depth, for views that show slices of a note (e.g. a backlinks panel) where the source's fold state must not hide the content the view exists to show.
-
-Both `MeowdownEditor` and `MarkdownView` resolve CommonMark full, collapsed,
-and shortcut reference links and images. The editor keeps reference definitions
-visible as editable source and preserves them through `getMarkdown()`.
-`MarkdownView` uses the same first-definition-wins resolution but omits
-definition paragraphs from its rendered output. Reference links are read-only
-in the editor's link menu; edit their definition source to change the target.
-
-### Wiki embeds
-
-Obsidian-style wiki embeds (`![[path]]`, with optional `|width` or
-`|widthxheight`) stay literal and editable unless the host classifies them.
-`resolveWikiEmbed` is a pure, creation-time resolver: return an image, file, or
-note result to reuse the corresponding Meowdown atom and its existing click
-hook; return `undefined` for missing or ambiguous targets.
-
-```tsx
-<MeowdownEditor
-  initialMarkdown="![[assets/photo.png|320]]"
-  resolveWikiEmbed={({ target }) => (target.endsWith('.png') ? { kind: 'image' } : undefined)}
-  resolveImageUrl={resolveLocalImageUrl}
-  onImageClick={openLightbox}
-/>
-```
-
-Use `EditorHandle.revealHeading('#Section%20name')` to move the selection to a
-matching heading and scroll it into view after following a heading link.
-
-Both `MeowdownEditor` and the read-only `MarkdownView` accept
-`resolveFileLink`. Return `true` to render a standard `[label](path)` Markdown
-link with the same file pill, metadata resolver, and click hook used by wiki
-file embeds; return `false` to keep it as a normal link.
-
-```tsx
-<MarkdownView
-  markdown="[Quarterly report](docs/report.pdf)"
-  resolveFileLink={({ href }) => href.startsWith('docs/')}
-  resolveFileInfo={resolveLocalFileInfo}
-  onFileClick={openLocalFile}
-/>
-```
-
-### Find in document
-
-`searchQuery` highlights every match and selects the first one at or after the
-caret; changing it re-anchors from wherever the selection is, so refining a
-query keeps the match the user is looking at. A query that matches nothing
-collapses the previous match selection to a caret, and an empty string (the
-default) clears the highlights and leaves the selection alone. `onSearchChange` reports
-`{ total, active }` for a match counter (`active` is one-based; `0` means the
-selection is not on a match), and `EditorHandle.findNext()` /
-`EditorHandle.findPrevious()` walk the matches and wrap at the document edges.
-The query is applied through `useDeferredValue`, so fast typing may skip
-intermediate values on a slow device.
-
-```tsx
-const [query, setQuery] = useState('')
-const [status, setStatus] = useState({ total: 0, active: 0 })
-
-<input value={query} onChange={(event) => setQuery(event.target.value)} />
-<span>{status.active} / {status.total}</span>
-<MeowdownEditor
-  handleRef={editorRef}
-  searchQuery={query}
-  onSearchChange={setStatus}
-/>
-```
-
-### Wiki-link hover cards
-
-Mount `WikilinkHoverCard` inside `MeowdownEditor` and render host-owned preview
-content from the hovered wiki link's `target`. Returning `null` renders no
-card. The render function may also return a promise: the card stays closed
-until it resolves, resolving to `null` (or rejecting) renders no card, and a
-result that lands after the pointer moved on is discarded, so a host can look
-up local content without ever flashing an empty card.
-
-```tsx
-<MeowdownEditor initialMarkdown="See [[Project plan]]">
-  <WikilinkHoverCard>
-    {async (hit) => {
-      const note = await readLocalNote(hit.target)
-      return note == null ? null : <LocalNotePreview note={note} />
-    }}
-  </WikilinkHoverCard>
-</MeowdownEditor>
-```
-
-For local-only passive preview content, render Markdown with interaction
-disabled: the tree contains no anchors or focusable controls, and recognized
-tweet and YouTube embeds are omitted before any image resolver runs. Supply a
-resolver that accepts only trusted local image sources.
-
-```tsx
-<MarkdownView markdown={markdown} interactive={false} resolveImageUrl={resolveLocalImageUrl} />
-```
-
-### Mermaid code blocks
-
-Fenced `mermaid` code blocks render as diagrams in both `MeowdownEditor` and
-`MarkdownView`. The editor shows only the preview while the caret is outside
-the block, then shows source and a live preview while editing it.
-
-Rendering uses `beautiful-mermaid`, which currently supports Flowchart, State,
-Sequence, Class, ER, and XY Chart diagrams. Unsupported syntax renders an error
-instead of an empty preview. Override `--meowdown-mermaid-bg`,
-`--meowdown-mermaid-fg`, `--meowdown-mermaid-line`,
-`--meowdown-mermaid-accent`, `--meowdown-mermaid-muted`,
-`--meowdown-mermaid-surface`, `--meowdown-mermaid-border`, or
-`--meowdown-mermaid-error` to customize the diagram palette.
+Every prop, callback, and `EditorHandle` method is documented in the [API reference](https://npmx.dev/package-docs/@meowdown%2Freact/).
 
 ## Styling
 
