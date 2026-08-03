@@ -12,8 +12,8 @@ import { Plugin, PluginKey, TextSelection } from '@prosekit/pm/state'
 
 import { getIsComposing } from '../utils/composition.ts'
 import { executeCommand } from '../utils/execute-command.ts'
-
 import { hasPointerSelectionTransaction } from '../utils/transaction.ts'
+
 import {
   getHiddenRunAfter,
   getHiddenRunAround,

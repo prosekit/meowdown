@@ -14,8 +14,8 @@ import { Plugin, PluginKey, Selection, TextSelection } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
 import { getIsComposing } from '../utils/composition.ts'
-
 import { hasPointerSelectionTransaction } from '../utils/transaction.ts'
+
 import { getMarkMode, type MarkMode } from './mark-mode.ts'
 import type { MarkName } from './mark-names.ts'
 import { getMarkRangeAt } from './mark-range.ts'
