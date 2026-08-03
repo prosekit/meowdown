@@ -34,6 +34,7 @@ export interface AtomMarkNavigationOptions {
 
 // The source marks that act as one atom in `state`'s current mark mode (empty
 // when no mode is applied, which keeps the whole feature inert).
+// TODO: REVIEW: rename to `getActiveMarkNames`
 function activeMarkNames(marks: AtomMarks, state: EditorState): MarkName[] {
   const mode = getMarkMode(state)
   if (!mode) return []
