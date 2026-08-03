@@ -264,8 +264,7 @@ function createCaretSnapPlugin(marks: AtomMarks): Plugin {
         if (!isPointer) return null
         const from =
           getMarkRangeStrictlyAround(newState, selection.from, markNames)?.from ?? selection.from
-        const to =
-          getMarkRangeStrictlyAround(newState, selection.to, markNames)?.to ?? selection.to
+        const to = getMarkRangeStrictlyAround(newState, selection.to, markNames)?.to ?? selection.to
         if (from === selection.from && to === selection.to) return null
         const anchor = selection.anchor === selection.from ? from : to
         const head = selection.head === selection.from ? from : to
