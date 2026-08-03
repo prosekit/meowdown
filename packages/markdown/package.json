@@ -27,7 +27,7 @@
     "@meowdown/vitest": "workspace:*",
     "@ocavue/tsconfig": "^0.7.1",
     "dedent": "^1.7.2",
-    "tsdown": "^0.22.14",
+    "tsdown": "^0.23.0-beta.2",
     "vitest": "^4.1.10"
   },
   "publishConfig": {
