@@ -5,7 +5,7 @@ import type { Transaction } from '@prosekit/pm/state'
  *
  * See https://code.haverbeke.berlin/prosemirror/prosemirror-view/src/tag/1.42.2/src/input.ts#L191
  */
-export function isPointerSelectionTransaction(tr: Transaction): boolean {
+function isPointerSelectionTransaction(tr: Transaction): boolean {
   return !!tr.getMeta('pointer')
 }
 
