@@ -15,6 +15,7 @@ import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
 import { getIsComposing } from '../utils/composition.ts'
 
+import { hasPointerSelectionTransaction } from '../utils/transaction.ts'
 import { getMarkRangeAt } from './get-mark-range-at.ts'
 import { getMarkMode, type MarkMode } from './mark-mode.ts'
 import type { MarkName } from './mark-names.ts'
@@ -300,10 +301,7 @@ function createCaretSnapPlugin(marks: AtomMarks): Plugin {
       if (!isTextSelection(selection) || !selection.empty) return null
       const range = getRangeAround(newState, selection.head, markNames)
       if (!range) return null
-      // prosemirror-view tags pointer-originated selections with this meta in
-      // `updateSelection`. Not a documented contract, so pinned to the source:
-      // https://code.haverbeke.berlin/prosemirror/prosemirror-view/src/tag/1.42.0/src/input.ts#L191
-      const isPointer = transactions.some((tr) => tr.getMeta('pointer') != null)
+      const isPointer = hasPointerSelectionTransaction(transactions)
       const head = getUnitEdge(range, oldState.selection.head, selection.head, isPointer)
       return newState.tr.setSelection(TextSelection.create(newState.doc, head))
     },
