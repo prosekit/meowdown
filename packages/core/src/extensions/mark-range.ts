@@ -14,12 +14,17 @@ import type { MarkName } from './mark-names.ts'
 export function getMarkRangeAt(
   state: EditorState,
   pos: number,
-  markName: MarkName,
+  markName: MarkName | Array<MarkName>,
   attrs?: Attrs,
 ): MarkRange | undefined {
   const size = state.doc.content.size
   if (pos < 0 || pos > size) return
   const $pos = state.doc.resolve(pos)
   if (!$pos.parent.isTextblock || $pos.parent.type.spec.code) return
-  return getMarkRange($pos, markName, attrs)
+
+  const markNames = Array.isArray(markName) ? markName : [markName]
+  for (const name of markNames) {
+    const range = getMarkRange($pos, name, attrs)
+    if (range) return range
+  }
 }
