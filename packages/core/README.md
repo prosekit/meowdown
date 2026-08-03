@@ -141,6 +141,8 @@ Enter at the end of the document's first heading (the title line) can start a fr
 
 An arrow press that can move the caret no further can notify the host, so it can move focus elsewhere (a previous/next note or page): [`defineExitBoundaryHandler`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-defineExitBoundaryHandler) (`@meowdown/react`'s `onExitBoundary` prop). Not part of `defineEditorExtension`.
 
+[`getInputModality`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-getInputModality) reports how the user last drove the selection on a touch-screen device: `'touch'` (a finger or pen, and the default before any input) or `'keyboard'` (hardware keyboard navigation keys, modifier combos, or a mouse). Letter keys never flip it, since a software keyboard sends those too. [`hasTouchScreen`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-hasTouchScreen) exposes the capability check and [`onInputModalityChange`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-onInputModalityChange) subscribes to flips.
+
 ## API
 
 See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Fcore/).

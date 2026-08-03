@@ -165,6 +165,12 @@ export { defineWikilinkTrigger } from './extensions/wikilink-trigger.ts'
 export { getIsComposing } from './utils/composition.ts'
 export { getTextblockDisplayText } from './utils/display-text.ts'
 export { formatFileSize } from './utils/format-file-size.ts'
+export {
+  getInputModality,
+  hasTouchScreen,
+  onInputModalityChange,
+  type InputModality,
+} from './utils/input-modality.ts'
 export { loadKaTeX, renderMathInto, type KaTeXRender } from './utils/katex.ts'
 export type { PositionRange } from './utils/range.ts'
 export { getSelectedText } from './utils/selected-text.ts'
