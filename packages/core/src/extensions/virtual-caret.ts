@@ -142,12 +142,8 @@ class VirtualCaretView implements PluginView {
     // native one has no geometry (beside hidden syntax, where the collapsed
     // range measures as nothing).
     if (getInputModality() === 'touch' && (!drawable || nativeRect)) {
-      this.#lastRect = undefined
-      this.#lastTail = undefined
-      delete this.#caret.dataset.tail
-      this.#caret.style.visibility = 'hidden'
-      view.dom.removeAttribute(DATA_ATTRIBUTE)
-      return
+      this.#renderTail(undefined)
+      this.#renderCaret(undefined)
     }
     const viewportRect = drawable ? measureCaretRect(view, nativeRect) : undefined
     let rect: CaretRect | undefined
@@ -165,46 +161,44 @@ class VirtualCaretView implements PluginView {
       rect != null && getMarkMode(state) === 'hide'
         ? getCaretTail(state, selection.head)
         : undefined
-    this.#renderCaret(rect, tail)
+    this.#renderTail(tail)
+    this.#renderCaret(rect)
   }
 
-  #renderCaret(rect: CaretRect | undefined, tail: CaretTail | undefined) {
-    let rectChanged = !sameRect(rect, this.#lastRect)
-    let tailChanged = tail !== this.#lastTail
+  #renderTail(tail: CaretTail | undefined) {
+    if (tail === this.#lastTail) return
+    this.#lastTail = tail
 
-  if (!rectChanged && !tailChanged) return
-  const view = this.#view
-
-  const wasHidden = this.#lastRect == null
-  this.#lastRect = rect
-  this.#lastTail = tail
-
-    if (tailChanged) {
-  if (tail == null) {
-    delete this.#caret.dataset.tail
-  } else {
-    this.#caret.dataset.tail = tail
+    if (tail == null) {
+      delete this.#caret.dataset.tail
+    } else {
+      this.#caret.dataset.tail = tail
+    }
   }
+
+  #renderCaret(rect: CaretRect | undefined) {
+    if (sameRect(rect, this.#lastRect)) return
+    const wasHidden = !this.#lastRect
+    this.#lastRect = rect
+    const view = this.#view
+
+    if (rect == null) {
+      this.#caret.style.visibility = 'hidden'
+      view.dom.removeAttribute(DATA_ATTRIBUTE)
+      return
     }
 
-  if (rect == null) {
-    if (rectChanged) {
-    this.#caret.style.visibility = 'hidden'
-    view.dom.removeAttribute(DATA_ATTRIBUTE)
-      }
-    return
+    // A reappearing caret must not glide in from its stale position.
+    if (wasHidden) this.#caret.style.transitionProperty = 'none'
+    this.#caret.style.visibility = ''
+    this.#caret.style.left = `${rect.left}px`
+    this.#caret.style.top = `${rect.top}px`
+    this.#caret.style.height = `${rect.height}px`
+    view.dom.setAttribute(DATA_ATTRIBUTE, '')
+    if (wasHidden) {
+      forceReflow(this.#caret)
+      this.#caret.style.transitionProperty = ''
     }
-
-  // A reappearing caret must not glide in from its stale position.
-  if (wasHidden) this.#caret.style.transitionProperty = 'none'
-  this.#caret.style.visibility = ''
-  this.#caret.style.left = `${rect.left}px`
-  this.#caret.style.top = `${rect.top}px`
-  this.#caret.style.height = `${rect.height}px`
-  view.dom.setAttribute(DATA_ATTRIBUTE, '')
-  if (wasHidden) {
-    forceReflow(this.#caret)
-    this.#caret.style.transitionProperty = ''
   }
 }
 
