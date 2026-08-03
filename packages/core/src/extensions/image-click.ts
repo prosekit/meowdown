@@ -2,8 +2,8 @@ import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
-import { getMarkRangeAt } from './get-mark-range-at.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
+import { getMarkRangeAt } from './mark-range.ts'
 
 const imageClickKey = new PluginKey('meowdown-image-click')
 

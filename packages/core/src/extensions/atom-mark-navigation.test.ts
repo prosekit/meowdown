@@ -1,7 +1,9 @@
+import { TextSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
 import { userEvent } from 'vitest/browser'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
+import { findText } from '../testing/find-text.ts'
 import {
   formatSelectionSteps,
   setupFixture,
@@ -34,6 +36,14 @@ function setup(mode: MarkMode, paragraphs: string[]): Fixture {
   fixture.set(n.doc(...paragraphs.map((text) => n.paragraph(text))))
   fixture.view.focus()
   return fixture
+}
+
+// Drop the caret at `pos` through a dispatched transaction: what a host
+// command, an undo remap or (with `isPointer`) the browser's own hit testing
+// does. `pointer` is the meta prosemirror-view puts on pointer selections.
+function dropCaret(fixture: Fixture, pos: number, isPointer = false): void {
+  const tr = fixture.state.tr.setSelection(TextSelection.create(fixture.doc, pos))
+  fixture.view.dispatch(isPointer ? tr.setMeta('pointer', true) : tr)
 }
 
 async function walkKey(fixture: Fixture, key: string, times: number): Promise<string> {
@@ -318,6 +328,213 @@ describe('shift selection across atom-only paragraphs', () => {
       ![](https://twitter.com/jack/status/20)❱
       """
     `)
+  })
+})
+
+// Editing beside a unit is the editor's own transaction, never the browser's
+// native edit: Gecko's forward delete next to the zero-width source takes the
+// rest of the textblock with it. The caret snap cannot undo that, since the
+// write and the snap live in the same transaction, so these keys are the whole
+// defense and must stay covered.
+describe('editing next to an atom unit', () => {
+  it('focus: Backspace removes the space before a unit', async () => {
+    using fixture = setup('focus', ['see <a>[[Aaa]] here'])
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see┃[[Aaa]] here"`)
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      see[[Aaa]] here
+
+      """
+    `)
+  })
+
+  it('focus: Backspace removes the letter before a unit', async () => {
+    using fixture = setup('focus', ['a<a>[[Aaa]] b'])
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"┃[[Aaa]] b"`)
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      [[Aaa]] b
+
+      """
+    `)
+  })
+
+  it('focus: Backspace at the block start before a unit changes nothing', async () => {
+    using fixture = setup('focus', ['<a>[[Aaa]] b'])
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"┃[[Aaa]] b"`)
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      [[Aaa]] b
+
+      """
+    `)
+  })
+
+  it('focus: Delete removes the space after a unit', async () => {
+    using fixture = setup('focus', ['see [[Aaa]]<a> here'])
+    await userEvent.keyboard('{Delete}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]┃here"`)
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      see [[Aaa]]here
+
+      """
+    `)
+  })
+
+  it('focus: Delete removes the letter after a unit, not the rest of the block', async () => {
+    using fixture = setup('focus', ['a [[Aaa]]<a>b c'])
+    await userEvent.keyboard('{Delete}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"a [[Aaa]]┃ c"`)
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      a [[Aaa]] c
+
+      """
+    `)
+  })
+
+  it('focus: Delete at the block end after a unit changes nothing', async () => {
+    using fixture = setup('focus', ['a [[Aaa]]<a>'])
+    await userEvent.keyboard('{Delete}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"a [[Aaa]]┃"`)
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      a [[Aaa]]
+
+      """
+    `)
+  })
+
+  it('focus: ArrowRight past a unit steps one character into the text after it', async () => {
+    using fixture = setup('focus', ['see [[Aaa]]<a> here'])
+    await userEvent.keyboard('{ArrowRight}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]] ┃here"`)
+  })
+
+  it('focus: ArrowRight after a unit at the block end stays put', async () => {
+    using fixture = setup('focus', ['see [[Aaa]]<a>'])
+    await userEvent.keyboard('{ArrowRight}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]┃"`)
+  })
+})
+
+describe('caret snapping out of hidden atom source', () => {
+  it('focus: a caret dropped inside the source leaves through the end it travelled towards', () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 3)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]┃ here"`)
+  })
+
+  it('focus: a caret dropped inside the source leaves through the start when it came from the right', () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 8)
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 3)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ┃[[Aaa]] here"`)
+  })
+
+  it('focus: a pointer caret inside the source takes the edge it landed nearest', () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 1, true)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ┃[[Aaa]] here"`)
+
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 6, true)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]┃ here"`)
+  })
+
+  it('focus: a caret already on a unit edge stays put', () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]'))
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ┃[[Aaa]] here"`)
+
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 7)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]┃ here"`)
+  })
+
+  it('focus: Backspace from inside the source removes the whole unit', async () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 3)
+    await userEvent.keyboard('{Backspace}')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      see  here
+
+      """
+    `)
+  })
+
+  it('focus: Delete from inside the source removes the whole unit', async () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 8)
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 3)
+    await userEvent.keyboard('{Delete}')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      see  here
+
+      """
+    `)
+  })
+
+  it('focus: a typed character from inside the source lands outside the unit', async () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 3)
+    await userEvent.keyboard('X')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]X┃ here"`)
+  })
+
+  it('focus: Space from inside the source lands outside the unit', async () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 3)
+    await userEvent.keyboard(' ')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      see [[Aaa]]  here
+
+      """
+    `)
+  })
+
+  it('focus: Enter from inside the source splits at the unit edge', async () => {
+    using fixture = setup('focus', ['see [[Aaa]] here'])
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 3)
+    await userEvent.keyboard('{Enter}')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      see [[Aaa]]
+
+       here
+
+      """
+    `)
+  })
+
+  it('focus: a caret dropped inside an image source leaves the unit too', () => {
+    using fixture = setup('focus', ['see ![a](one.png) here'])
+    dropCaret(fixture, findText(fixture.doc, '![a](one.png)') + 5)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ![a](one.png)┃ here"`)
+  })
+
+  it('hide: a caret dropped inside the source leaves the unit', () => {
+    using fixture = setup('hide', ['see [[Aaa]] here'])
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 3)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]┃ here"`)
+  })
+
+  it('show: a caret dropped inside the source leaves the unit', () => {
+    using fixture = setup('show', ['see [[Aaa]] here'])
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 3)
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]┃ here"`)
+  })
+
+  it('focus: typing a wikilink by hand still ends up outside the finished unit', async () => {
+    using fixture = setup('focus', ['see <a>'])
+    // `[[` is the escape for a literal `[` in userEvent's keyboard syntax.
+    await userEvent.keyboard('[[[[Aaa]]')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]┃"`)
   })
 })
 

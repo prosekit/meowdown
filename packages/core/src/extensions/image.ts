@@ -8,7 +8,6 @@ import {
 } from '@prosekit/web/resizable'
 
 import { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './embed.ts'
-import { getMarkRangeAt } from './get-mark-range-at.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import {
   formatMagicComment,
@@ -17,6 +16,7 @@ import {
   type MagicComment,
 } from './magic-comment.ts'
 import type { MarkName } from './mark-names.ts'
+import { getMarkRangeAt } from './mark-range.ts'
 import { applyTweetHeight } from './tweet.ts'
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
 
