@@ -24,7 +24,7 @@ export function App() {
 }
 ```
 
-WIP
+WIP wip
 
 ## Usage
 
