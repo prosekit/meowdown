@@ -4,6 +4,14 @@ import type { EditorState } from '@prosekit/pm/state'
 
 import type { MarkName } from './mark-names.ts'
 
+function resolvePosition(state: EditorState, pos: number) {
+  const size = state.doc.content.size
+  if (pos < 0 || pos > size) return
+  const $pos = state.doc.resolve(pos)
+  if (!$pos.parent.isTextblock || $pos.parent.type.spec.code) return
+  return $pos
+}
+
 /**
  * The `markName` run covering `pos`, or `undefined` when `pos` is not inside a
  * non-code textblock. Centralizes the guard the click finders share: marks only
@@ -17,10 +25,8 @@ export function getMarkRangeAt(
   markName: MarkName | Array<MarkName>,
   attrs?: Attrs,
 ): MarkRange | undefined {
-  const size = state.doc.content.size
-  if (pos < 0 || pos > size) return
-  const $pos = state.doc.resolve(pos)
-  if (!$pos.parent.isTextblock || $pos.parent.type.spec.code) return
+  const $pos = resolvePosition(state, pos)
+  if (!$pos) return
 
   const markNames = Array.isArray(markName) ? markName : [markName]
   for (const name of markNames) {
