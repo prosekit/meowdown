@@ -30,18 +30,13 @@ function setModality(modality: InputModality): void {
 function handlePointerDown(event: PointerEvent): void {
   if (event.pointerType === 'touch' || event.pointerType === 'pen') {
     setModality('touch')
-  } else if (event.pointerType === 'mouse') {
-    // Safe against iOS's synthetic mouse events: those fire after a tap
-    // without a pointerdown of their own, so a mouse pointerdown is a real
-    // pointing device.
-    setModality('keyboard')
   }
 }
 
 function handleKeyDown(event: KeyboardEvent): void {
-  // An IME sequence, whatever key it claims to carry.
-  // eslint-disable-next-line unicorn/prefer-keyboard-event-key
-  if (getIsComposing() || event.isComposing || event.keyCode === 229) return
+  if (getIsComposing() || event.isComposing) {
+    return
+  }
   if (KEYBOARD_MODALITY_KEYS.has(event.key) || event.metaKey || event.ctrlKey) {
     setModality('keyboard')
   }

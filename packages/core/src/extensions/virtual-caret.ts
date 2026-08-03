@@ -4,7 +4,7 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
 import { forceReflow } from '../utils/force-reflow.ts'
-import { getInputModality, hasTouchScreen, onInputModalityChange } from '../utils/input-modality.ts'
+import { getInputModality, onInputModalityChange } from '../utils/input-modality.ts'
 
 import {
   findAtomCaretRect,
@@ -125,7 +125,7 @@ class VirtualCaretView implements PluginView {
     // caret stays visible, and the virtual caret steps in only where the
     // native one has no geometry (beside hidden syntax, where the collapsed
     // range measures as nothing).
-    if (hasTouchScreen() && getInputModality() === 'touch' && (!drawable || nativeRect != null)) {
+    if (getInputModality() === 'touch' && (!drawable || nativeRect)) {
       this.#lastRect = undefined
       this.#lastTail = undefined
       delete this.#caret.dataset.tail
