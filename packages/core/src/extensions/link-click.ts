@@ -20,6 +20,11 @@ export interface LinkCopyPayload {
 
 export type LinkCopyHandler = (payload: LinkCopyPayload) => void
 
+/**
+ * Call `onClick` when the user clicks a rendered Markdown link
+ * (`[text](url)`), or presses `Mod-Enter` with the caret on one. The `event`
+ * is the originating `MouseEvent` or `KeyboardEvent`.
+ */
 export function defineLinkClickHandler(onClick: LinkClickHandler): PlainExtension {
   return defineMarkClickHandler<string>({
     key: linkClickKey,

@@ -74,6 +74,10 @@ export type FileLinkResolver = (link: FileLinkPayload) => boolean
 
 /** Host options that influence inline parsing. */
 export interface FileLinkOptions {
+  /**
+   * Claim `[label](url)` links as file attachments; see {@link FileLinkResolver}.
+   * Read once when the editor is created.
+   */
   resolveFileLink?: FileLinkResolver
 }
 
