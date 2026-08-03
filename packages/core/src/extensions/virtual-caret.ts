@@ -20,7 +20,6 @@ const key = new PluginKey('meowdown-virtual-caret')
 const BLINK_ANIMATIONS = ['md-virtual-caret-blink', 'md-virtual-caret-blink2'] as const
 
 const DATA_ATTRIBUTE = 'data-meowdown-virtual-caret'
-const DATA_TAIL_ATTRIBUTE = 'data-tail'
 
 // The measured rect is the glyph box, which reads short against the airy
 // line-height; stand the caret taller around its center.
@@ -133,19 +132,23 @@ class VirtualCaretView implements PluginView {
     const selection = state.selection
     const drawable = isTextSelection(selection) && selection.empty
 
-    const nativeRect = drawable ? findNativeCaretRect(view) : undefined
-
-    // A finger needs the system's own caret: iOS shows the drag magnifier
-    // only over a visibly painted native caret, and long-press degrades from
-    // caret-drag to word-select without one. So under touch input the native
-    // caret stays visible, and the virtual caret steps in only where the
-    // native one has no geometry (beside hidden syntax, where the collapsed
-    // range measures as nothing).
-    if (getInputModality() === 'touch' && (!drawable || nativeRect)) {
-      this.#renderTail(undefined)
-      this.#renderCaret(undefined)
+    if (!drawable) {
+      this.#renderTail()
+      this.#renderCaret()
+      return
     }
-    const viewportRect = drawable ? measureCaretRect(view, nativeRect) : undefined
+
+    const nativeRect = findNativeCaretRect(view)
+
+    // Use the native rect if it exists and the last input modality was touch.
+    // This ensures that we can render the drag magnifier on touch devices.
+    if (nativeRect && getInputModality() === 'touch') {
+      this.#renderTail()
+      this.#renderCaret()
+      return
+    }
+
+    const viewportRect = measureCaretRect(view, nativeRect)
     let rect: CaretRect | undefined
     if (viewportRect != null) {
       const layerRect = this.#layer.getBoundingClientRect()
@@ -165,7 +168,7 @@ class VirtualCaretView implements PluginView {
     this.#renderCaret(rect)
   }
 
-  #renderTail(tail: CaretTail | undefined) {
+  #renderTail(tail?: CaretTail) {
     if (tail === this.#lastTail) return
     this.#lastTail = tail
 
@@ -176,7 +179,7 @@ class VirtualCaretView implements PluginView {
     }
   }
 
-  #renderCaret(rect: CaretRect | undefined) {
+  #renderCaret(rect?: CaretRect) {
     if (sameRect(rect, this.#lastRect)) return
     const wasHidden = !this.#lastRect
     this.#lastRect = rect
