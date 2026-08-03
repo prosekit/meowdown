@@ -160,7 +160,7 @@ class VirtualCaretView implements PluginView {
     // In hide mode the two doc positions at a hidden run boundary render at
     // one x; the tail (typing affinity) tells them apart.
     const tail =
-      rect != null && getMarkMode(state) === 'hide'
+      rect != null && getMarkMode(state) === 'hide' && getInputModality() !== 'touch'
         ? getCaretTail(state, selection.head)
         : undefined
     this.#renderTail(tail)
