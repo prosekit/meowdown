@@ -20,6 +20,7 @@ const key = new PluginKey('meowdown-virtual-caret')
 const BLINK_ANIMATIONS = ['md-virtual-caret-blink', 'md-virtual-caret-blink2'] as const
 
 const DATA_ATTRIBUTE = 'data-meowdown-virtual-caret'
+const DATA_TAIL_ATTRIBUTE = 'data-tail'
 
 // The measured rect is the glyph box, which reads short against the airy
 // line-height; stand the caret taller around its center.
@@ -167,24 +168,32 @@ class VirtualCaretView implements PluginView {
     this.#renderCaret(rect, tail)
   }
 
-#renderCaret(rect: CaretRect | undefined, tail: CaretTail | undefined) {
-  if (sameRect(rect, this.#lastRect) && tail === this.#lastTail) return
+  #renderCaret(rect: CaretRect | undefined, tail: CaretTail | undefined) {
+    let rectChanged = !sameRect(rect, this.#lastRect)
+    let tailChanged = tail !== this.#lastTail
+
+  if (!rectChanged && !tailChanged) return
   const view = this.#view
 
   const wasHidden = this.#lastRect == null
   this.#lastRect = rect
   this.#lastTail = tail
 
+    if (tailChanged) {
   if (tail == null) {
     delete this.#caret.dataset.tail
   } else {
     this.#caret.dataset.tail = tail
   }
+    }
+
   if (rect == null) {
+    if (rectChanged) {
     this.#caret.style.visibility = 'hidden'
     view.dom.removeAttribute(DATA_ATTRIBUTE)
+      }
     return
-  }
+    }
 
   // A reappearing caret must not glide in from its stale position.
   if (wasHidden) this.#caret.style.transitionProperty = 'none'
