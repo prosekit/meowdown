@@ -327,6 +327,39 @@ describe('virtual caret when the editor reflows', () => {
   })
 })
 
+describe('virtual caret paints above code backgrounds', () => {
+  function topmostAtCaretCenter(): Element | undefined {
+    const caretElement = getCaretElement()
+    const rect = caretElement.getBoundingClientRect()
+    // `elementsFromPoint` skips `pointer-events: none` elements.
+    caretElement.style.pointerEvents = 'auto'
+    const top = document.elementsFromPoint(
+      rect.left + rect.width / 2,
+      rect.top + rect.height / 2,
+    )[0]
+    caretElement.style.pointerEvents = ''
+    return top
+  }
+
+  it('stays visible inside a code block', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.codeBlock('line1\nline2<a>')))
+    fixture.view.focus()
+    await expect.element(caret).toBeVisible()
+    await expect.poll(() => topmostAtCaretCenter() === caret.element()).toBe(true)
+  })
+
+  it('stays visible inside inline code', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('a `b<a>c` d')))
+    fixture.view.focus()
+    await expect.element(caret).toBeVisible()
+    await expect.poll(() => topmostAtCaretCenter() === caret.element()).toBe(true)
+  })
+})
+
 describe('virtual caret tails (hide mode)', () => {
   it('shows a right tail after a closing run', async () => {
     using fixture = setupMode('hide', 'foo **bold**<a> bar')
