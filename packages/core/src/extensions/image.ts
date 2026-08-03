@@ -377,7 +377,13 @@ class ImageMarkView implements MarkView {
   }
 }
 
-/** Inline image/embed rendering: a mark view on the `mdImage` mark. */
+/**
+ * Inline image/embed rendering: a mark view on the `mdImage` mark. Images
+ * render in place from their literal Markdown source. Drag a rendered image's
+ * corner handle to write the size back into the source as a trailing comment,
+ * `![alt](src)<!-- {"width":320,"height":240} -->`, which round-trips as
+ * plain Markdown.
+ */
 export function defineImage(options: ImageOptions = {}): PlainExtension {
   return defineMarkView({
     name: 'mdImage' satisfies MarkName,

@@ -37,6 +37,11 @@ export interface TagClickPayload {
 
 export type TagClickHandler = (payload: TagClickPayload) => void
 
+/**
+ * Call `onClick` when the user clicks a rendered `#tag`, or presses
+ * `Mod-Enter` with the caret on one. The `tag` is read from the rendered text
+ * without the leading `#`.
+ */
 export function defineTagClickHandler(onClick: TagClickHandler): PlainExtension {
   return defineMarkClickHandler<string>({
     key: tagClickKey,

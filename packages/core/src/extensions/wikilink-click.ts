@@ -48,6 +48,11 @@ export interface WikilinkClickPayload {
 
 export type WikilinkClickHandler = (payload: WikilinkClickPayload) => void
 
+/**
+ * Call `onClick` when the user clicks a rendered wikilink label, or presses
+ * `Mod-Enter` with the caret on one. The `event` is the originating
+ * `MouseEvent` or `KeyboardEvent`.
+ */
 export function defineWikilinkClickHandler(onClick: WikilinkClickHandler): PlainExtension {
   return defineMarkClickHandler<string>({
     key: wikilinkClickKey,
