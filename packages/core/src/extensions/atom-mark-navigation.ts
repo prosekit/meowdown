@@ -105,6 +105,7 @@ export function getSelectedAtomRange(state: EditorState): MarkRange | undefined 
   return getSelectedRange(state, [...ATOM_SOURCE_MARK_NAMES])
 }
 
+// TODO: REVIEW: do not add a "selectRange" function here. Just use "TextSelection.create" directly in the code.
 function selectRange(state: EditorState, range: MarkRange): TextSelection {
   return TextSelection.create(state.doc, range.from, range.to)
 }
