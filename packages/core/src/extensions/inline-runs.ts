@@ -25,9 +25,7 @@ export interface InlineRun {
 /**
  * Group a textblock's text nodes into atom units and plain runs. A unit's
  * text nodes carry equal packs, while an identical neighbour's pack differs
- * by `slot`, so pack equality splits adjacent same-attrs units. A document
- * without packs (not produced by the inline parser) falls back to mark
- * instance identity.
+ * by `slot`, so pack equality splits adjacent same-attrs units.
  */
 export function groupInlineRuns(textblock: ProseMirrorNode): InlineRun[] {
   const runs: InlineRun[] = []
@@ -43,9 +41,9 @@ export function groupInlineRuns(textblock: ProseMirrorNode): InlineRun[] {
     const continuesUnit =
       atom != null &&
       last?.atom != null &&
-      (pack != null && previousPack != null
-        ? atom.eq(last.atom) && pack.eq(previousPack)
-        : last.atom === atom)
+      pack != null &&
+      previousPack != null &&
+      pack.eq(previousPack)
     previousPack = pack
     if (continuesUnit && last != null) {
       last.text += child.text
