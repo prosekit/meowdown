@@ -114,17 +114,15 @@ class VirtualCaretView implements PluginView {
   }
 
   readonly #requestReposition = (): void => {
-    if (this.#repositionRequested) return
+    if (this.#repositionRequested === true) return
     this.#repositionRequested = true
-    queueMicrotask(() => {
-      if (this.#repositionRequested) {
-        this.#repositionRequested = false
-        this.#reposition()
-      }
-    })
+    queueMicrotask(this.#reposition)
   }
 
-  #reposition() {
+  readonly #reposition = () => {
+    if (this.#repositionRequested === false) return
+    this.#repositionRequested = false
+
     const view = this.#view
     if (view.isDestroyed) return
 
