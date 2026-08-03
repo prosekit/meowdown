@@ -4,6 +4,11 @@ import type { EditorState } from '@prosekit/pm/state'
 
 import type { MarkName } from './mark-names.ts'
 
+/**
+ * Returns the resolved position, or `undefined` when it falls outside the
+ * document or in a place that carries no inline marks: marks describe inline
+ * syntax in regular textblocks, never in code blocks.
+ */
 function resolvePosition(state: EditorState, pos: number) {
   const size = state.doc.content.size
   if (pos < 0 || pos > size) return
@@ -13,11 +18,10 @@ function resolvePosition(state: EditorState, pos: number) {
 }
 
 /**
- * The `markName` run covering `pos`, or `undefined` when `pos` is not inside a
- * non-code textblock. Centralizes the guard the click finders share: marks only
- * carry inline syntax in regular textblocks, never in code blocks. `attrs`
- * narrows the match to marks whose attrs contain it, which is how callers pick
- * one `mdPack` level out of a nested unit's stack.
+ * Returns the run of the first listed mark covering `pos`, or `undefined` when
+ * none covers it. `attrs` narrows the match to marks whose attributes contain
+ * it, which is how a caller picks one level out of a nested stack of the same
+ * mark.
  */
 export function getMarkRangeAt(
   state: EditorState,
@@ -35,15 +39,12 @@ export function getMarkRangeAt(
   }
 }
 
-// REVIEW: TODO: 1. use JSdoc style comments for all functions instead of // comments. Do not add @param in the JSDoc thought.
-// REVIEW: TODO: 2. prefix the comments with a word "Returns" so that it is clear that the function returns something
-// REVIEW: TODO: 3. update the comment text so that they're general utils. Do not mentions concert only exist in packages/core/src/extensions/atom-mark-navigation.ts file.
-// REVIEW: TODO: 4. update packages/core/src/extensions/atom-mark-navigation.ts file to use the general utils exported here.
-
-// The unit whose range ends exactly at `pos` (immediately left of the caret).
-// Probes from inside the left neighbour (`pos - 1`): probing `pos` itself
-// cannot see the unit when another atom run starts exactly at `pos`, because
-// `getMarkRange` prefers the child to the right.
+/**
+ * Returns the run ending exactly at `pos`, the one immediately to its left.
+ * Probes from inside the left neighbour (`pos - 1`): probing `pos` itself
+ * cannot see that run when another run starts exactly there, because
+ * `getMarkRange` prefers the child to the right.
+ */
 export function getMarkRangeBefore(
   state: EditorState,
   pos: number,
@@ -59,9 +60,11 @@ export function getMarkRangeBefore(
   return
 }
 
-// The unit whose range starts exactly at `pos` (immediately right of the caret).
-// Checks the edge per mark name: the first name to return any range may be a
-// unit of another type ending at `pos`, shadowing the one that starts there.
+/**
+ * Returns the run starting exactly at `pos`, the one immediately to its right.
+ * Checks the edge once per mark name: the first name to return any run may be
+ * a mark of another name ending at `pos`, shadowing the one that starts there.
+ */
 export function getMarkRangeAfter(
   state: EditorState,
   pos: number,
@@ -77,8 +80,11 @@ export function getMarkRangeAfter(
   return
 }
 
-// The unit range strictly containing `pos`: the caret sits between two
-// characters of one hidden source, where every write splits the unit.
+/**
+ * Returns the run strictly containing `pos`, so the characters on both sides
+ * of `pos` carry the mark. A run that only touches `pos` with one of its edges
+ * does not count.
+ */
 export function getMarkRangeStrictlyAround(
   state: EditorState,
   pos: number,

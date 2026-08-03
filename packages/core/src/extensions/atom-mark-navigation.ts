@@ -18,7 +18,12 @@ import { hasPointerSelectionTransaction } from '../utils/transaction.ts'
 
 import { getMarkMode, type MarkMode } from './mark-mode.ts'
 import type { MarkName } from './mark-names.ts'
-import { getMarkRangeAt } from './mark-range.ts'
+import {
+  getMarkRangeAfter,
+  getMarkRangeAt,
+  getMarkRangeBefore,
+  getMarkRangeStrictlyAround,
+} from './mark-range.ts'
 
 /**
  * The source marks whose mark views hide the raw text behind a rendered
@@ -34,56 +39,10 @@ export interface AtomMarkNavigationOptions {
 
 // The source marks that act as one atom in `state`'s current mark mode (empty
 // when no mode is applied, which keeps the whole feature inert).
-// TODO: REVIEW: rename to `getActiveMarkNames`
-function activeMarkNames(marks: AtomMarks, state: EditorState): MarkName[] {
+function getActiveMarkNames(marks: AtomMarks, state: EditorState): MarkName[] {
   const mode = getMarkMode(state)
   if (!mode) return []
   return marks.flatMap((mark) => (mark.modes.includes(mode) ? [mark.name] : []))
-}
-
-// The unit whose range ends exactly at `pos` (immediately left of the caret).
-// Probes from inside the left neighbour (`pos - 1`): probing `pos` itself
-// cannot see the unit when another atom run starts exactly at `pos`, because
-// `getMarkRange` prefers the child to the right.
-function getRangeBefore(
-  state: EditorState,
-  pos: number,
-  markNames: MarkName[],
-): MarkRange | undefined {
-  for (const name of markNames) {
-    const range = getMarkRangeAt(state, pos - 1, name)
-    if (range && range.to === pos) return range
-  }
-  return
-}
-
-// The unit whose range starts exactly at `pos` (immediately right of the caret).
-// Checks the edge per mark name: the first name to return any range may be a
-// unit of another type ending at `pos`, shadowing the one that starts there.
-function getRangeAfter(
-  state: EditorState,
-  pos: number,
-  markNames: MarkName[],
-): MarkRange | undefined {
-  for (const name of markNames) {
-    const range = getMarkRangeAt(state, pos, name)
-    if (range && range.from === pos) return range
-  }
-  return
-}
-
-// The unit range strictly containing `pos`: the caret sits between two
-// characters of one hidden source, where every write splits the unit.
-function getRangeAround(
-  state: EditorState,
-  pos: number,
-  markNames: MarkName[],
-): MarkRange | undefined {
-  for (const name of markNames) {
-    const range = getMarkRangeAt(state, pos, name)
-    if (range && range.from < pos && pos < range.to) return range
-  }
-  return
 }
 
 // The unit range a non-empty selection exactly spans, or undefined.
@@ -106,11 +65,6 @@ export function getSelectedAtomRange(state: EditorState): MarkRange | undefined 
   return getSelectedRange(state, [...ATOM_SOURCE_MARK_NAMES])
 }
 
-// TODO: REVIEW: do not add a "selectRange" function here. Just use "TextSelection.create" directly in the code.
-function selectRange(state: EditorState, range: MarkRange): TextSelection {
-  return TextSelection.create(state.doc, range.from, range.to)
-}
-
 // The blockwise step out of `pos`'s textblock in `direction`, or undefined when
 // the step is not this keymap's to take. Chromium and WebKit cannot move the
 // native caret across the contenteditable=false preview at a textblock edge,
@@ -129,7 +83,9 @@ function findSelectionAcrossBlockBoundary(
   // The unit being left behind: one starting (going left) or ending (going
   // right) exactly at the caret. Chromium/WebKit cannot walk out past it.
   const nearUnit =
-    direction === -1 ? getRangeAfter(state, pos, markNames) : getRangeBefore(state, pos, markNames)
+    direction === -1
+      ? getMarkRangeAfter(state, pos, markNames)
+      : getMarkRangeBefore(state, pos, markNames)
   // The nearest selection past the boundary: the adjacent textblock's near
   // edge, or a NodeSelection for a selectable block such as a horizontal rule
   // (the same landing prosemirror-view's moveSelectionBlock would pick).
@@ -140,8 +96,8 @@ function findSelectionAcrossBlockBoundary(
   // side. WebKit skips caret stops when walking into such a block.
   const farUnit = isTextSelection(target)
     ? direction === -1
-      ? getRangeBefore(state, target.head, markNames)
-      : getRangeAfter(state, target.head, markNames)
+      ? getMarkRangeBefore(state, target.head, markNames)
+      : getMarkRangeAfter(state, target.head, markNames)
     : undefined
   // No unit on either side of the boundary: stay out of the browser's way
   // (native handles bidi/RTL horizontal motion better than we can).
@@ -154,16 +110,16 @@ function findSelectionAcrossBlockBoundary(
 // blockwise at the textblock end.
 function createArrowRight(marks: AtomMarks): Command {
   return (state, dispatch) => {
-    const markNames = activeMarkNames(marks, state)
+    const markNames = getActiveMarkNames(marks, state)
     if (markNames.length === 0 || !isTextSelection(state.selection)) return false
     const selection = state.selection
     if (selection.empty) {
-      const after = getRangeAfter(state, selection.from, markNames)
+      const after = getMarkRangeAfter(state, selection.from, markNames)
       if (after) {
-        dispatch?.(state.tr.setSelection(selectRange(state, after)))
+        dispatch?.(state.tr.setSelection(TextSelection.create(state.doc, after.from, after.to)))
         return true
       }
-      const before = getRangeBefore(state, selection.from, markNames)
+      const before = getMarkRangeBefore(state, selection.from, markNames)
       if (before && selection.from < state.doc.resolve(selection.from).end()) {
         dispatch?.(state.tr.setSelection(TextSelection.create(state.doc, selection.from + 1)))
         return true
@@ -186,13 +142,13 @@ function createArrowRight(marks: AtomMarks): Command {
 // edge, or step blockwise at the textblock start.
 function createArrowLeft(marks: AtomMarks): Command {
   return (state, dispatch) => {
-    const markNames = activeMarkNames(marks, state)
+    const markNames = getActiveMarkNames(marks, state)
     if (markNames.length === 0 || !isTextSelection(state.selection)) return false
     const selection = state.selection
     if (selection.empty) {
-      const before = getRangeBefore(state, selection.from, markNames)
+      const before = getMarkRangeBefore(state, selection.from, markNames)
       if (before) {
-        dispatch?.(state.tr.setSelection(selectRange(state, before)))
+        dispatch?.(state.tr.setSelection(TextSelection.create(state.doc, before.from, before.to)))
         return true
       }
       // At the textblock start, take the blockwise step: Chromium/WebKit's
@@ -214,7 +170,7 @@ function createArrowLeft(marks: AtomMarks): Command {
 // through the hidden source one invisible character per press.
 function createShiftArrow(marks: AtomMarks, direction: -1 | 1): Command {
   return (state, dispatch) => {
-    const markNames = activeMarkNames(marks, state)
+    const markNames = getActiveMarkNames(marks, state)
     if (markNames.length === 0 || !isTextSelection(state.selection)) return false
     const { anchor, head } = state.selection
     // A unit whose edge sits exactly at the head enters (or leaves) the
@@ -222,8 +178,8 @@ function createShiftArrow(marks: AtomMarks, direction: -1 | 1): Command {
     // behavior (the text is visible there).
     const unit =
       direction === -1
-        ? getRangeBefore(state, head, markNames)
-        : getRangeAfter(state, head, markNames)
+        ? getMarkRangeBefore(state, head, markNames)
+        : getMarkRangeAfter(state, head, markNames)
     if (unit) {
       const nextHead = direction === -1 ? unit.from : unit.to
       dispatch?.(
@@ -247,15 +203,15 @@ function createShiftArrow(marks: AtomMarks, direction: -1 | 1): Command {
 // source). A selected unit falls through to the base `deleteSelection`.
 function createBackspace(marks: AtomMarks): Command {
   return (state, dispatch) => {
-    const markNames = activeMarkNames(marks, state)
+    const markNames = getActiveMarkNames(marks, state)
     if (markNames.length === 0 || !state.selection.empty) return false
     const pos = state.selection.from
-    const before = getRangeBefore(state, pos, markNames)
+    const before = getMarkRangeBefore(state, pos, markNames)
     if (before) {
       dispatch?.(state.tr.delete(before.from, before.to))
       return true
     }
-    if (!getRangeAfter(state, pos, markNames)) return false
+    if (!getMarkRangeAfter(state, pos, markNames)) return false
     if (pos <= state.doc.resolve(pos).start()) return false
     dispatch?.(state.tr.delete(pos - 1, pos))
     return true
@@ -265,15 +221,15 @@ function createBackspace(marks: AtomMarks): Command {
 // Delete: the forward mirror of `backspace`.
 function createForwardDelete(marks: AtomMarks): Command {
   return (state, dispatch) => {
-    const markNames = activeMarkNames(marks, state)
+    const markNames = getActiveMarkNames(marks, state)
     if (markNames.length === 0 || !state.selection.empty) return false
     const pos = state.selection.from
-    const after = getRangeAfter(state, pos, markNames)
+    const after = getMarkRangeAfter(state, pos, markNames)
     if (after) {
       dispatch?.(state.tr.delete(after.from, after.to))
       return true
     }
-    if (!getRangeBefore(state, pos, markNames)) return false
+    if (!getMarkRangeBefore(state, pos, markNames)) return false
     if (pos >= state.doc.resolve(pos).end()) return false
     dispatch?.(state.tr.delete(pos, pos + 1))
     return true
@@ -297,11 +253,11 @@ function createCaretSnapPlugin(marks: AtomMarks): Plugin {
     key: new PluginKey('atom-mark-caret-snap'),
     appendTransaction: (transactions, oldState, newState) => {
       if (getIsComposing()) return null
-      const markNames = activeMarkNames(marks, newState)
+      const markNames = getActiveMarkNames(marks, newState)
       if (markNames.length === 0) return null
       const selection = newState.selection
       if (!isTextSelection(selection) || !selection.empty) return null
-      const range = getRangeAround(newState, selection.head, markNames)
+      const range = getMarkRangeStrictlyAround(newState, selection.head, markNames)
       if (!range) return null
       const isPointer = hasPointerSelectionTransaction(transactions)
       const head = getUnitEdge(range, oldState.selection.head, selection.head, isPointer)
@@ -319,7 +275,7 @@ function createSelectionPlugin(marks: AtomMarks): Plugin {
     key: new PluginKey('atom-mark-selection'),
     props: {
       decorations: (state) => {
-        const markNames = activeMarkNames(marks, state)
+        const markNames = getActiveMarkNames(marks, state)
         if (markNames.length === 0) return
         // A node selection already outlines the whole block; atom rings inside
         // it would read as a second, nested selection.
