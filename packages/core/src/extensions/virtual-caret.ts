@@ -61,6 +61,7 @@ class VirtualCaretView implements PluginView {
   #lastRect: CaretRect | undefined
   #lastTail: CaretTail | undefined
   #blinkIndex = 0
+  #repositionRequested = false
 
   constructor(view: EditorView, layer: HTMLElement) {
     this.#view = view
@@ -70,25 +71,25 @@ class VirtualCaretView implements PluginView {
     this.#caret = this.#layer.appendChild(this.#document.createElement('div'))
     this.#caret.className = 'md-virtual-caret'
     this.#caret.dataset.testid = 'virtual-caret'
-    this.#document.addEventListener('selectionchange', this.#reposition)
-    this.#unsubscribeModality = onInputModalityChange(this.#reposition)
+    this.#document.addEventListener('selectionchange', this.#requestReposition)
+    this.#unsubscribeModality = onInputModalityChange(this.#requestReposition)
     view.dom.addEventListener('focus', this.#handleFocus)
     view.dom.addEventListener('blur', this.#handleBlur)
     if (typeof ResizeObserver !== 'undefined') {
-      this.#resizeObserver = new ResizeObserver(this.#reposition)
+      this.#resizeObserver = new ResizeObserver(this.#requestReposition)
       this.#resizeObserver.observe(view.dom)
     }
     if (view.hasFocus()) this.#handleFocus()
-    this.#reposition()
+    this.#requestReposition()
   }
 
   update(view: EditorView, prevState: EditorState) {
     if (!view.state.selection.eq(prevState.selection)) this.#restartBlink()
-    this.#reposition()
+    this.#requestReposition()
   }
 
   destroy() {
-    this.#document.removeEventListener('selectionchange', this.#reposition)
+    this.#document.removeEventListener('selectionchange', this.#requestReposition)
     this.#unsubscribeModality()
     this.#view.dom.removeEventListener('focus', this.#handleFocus)
     this.#view.dom.removeEventListener('blur', this.#handleBlur)
@@ -112,7 +113,18 @@ class VirtualCaretView implements PluginView {
     this.#caret.style.animationName = BLINK_ANIMATIONS[this.#blinkIndex]
   }
 
-  readonly #reposition = (): void => {
+  readonly #requestReposition = (): void => {
+    if (this.#repositionRequested) return
+    this.#repositionRequested = true
+    queueMicrotask(() => {
+      if (this.#repositionRequested) {
+        this.#repositionRequested = false
+        this.#reposition()
+      }
+    })
+  }
+
+  #reposition() {
     const view = this.#view
     if (view.isDestroyed) return
     const state = view.state
