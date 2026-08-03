@@ -29,7 +29,7 @@ const markdown = docToMarkdown(editor.state.doc)
 
 ## Markdown features
 
-CommonMark and GFM, plus:
+[CommonMark](https://commonmark.org/) and [GFM](https://github.github.com/gfm/), plus:
 
 - Wikilinks (`[[target]]`, `[[target|alias]]`)
 - Wiki embeds (`![[path]]`)
