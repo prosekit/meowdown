@@ -48,7 +48,7 @@ if (typeof window !== 'undefined') {
 }
 
 /** Whether the device has a touch screen. */
-export function hasTouchScreen(): boolean {
+function hasTouchScreen(): boolean {
   return typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0
 }
 
