@@ -39,9 +39,9 @@ function measureCaretRect(
   return findAtomCaretRect(view)
 }
 
-function sameRect(left: CaretRect | undefined, right: CaretRect | undefined): boolean {
-  if (left == null || right == null) return left === right
-  return left.left === right.left && left.top === right.top && left.height === right.height
+function sameRect(a: CaretRect | undefined, b: CaretRect | undefined): boolean {
+  if (a == null || b == null) return a === b
+  return a.left === b.left && a.top === b.top && a.height === b.height
 }
 
 // The caret draws into a host-owned zero-size in-flow layer, never inside the
@@ -127,10 +127,13 @@ class VirtualCaretView implements PluginView {
   #reposition() {
     const view = this.#view
     if (view.isDestroyed) return
+
     const state = view.state
     const selection = state.selection
     const drawable = isTextSelection(selection) && selection.empty
+
     const nativeRect = drawable ? findNativeCaretRect(view) : undefined
+
     // A finger needs the system's own caret: iOS shows the drag magnifier
     // only over a visibly painted native caret, and long-press degrades from
     // caret-drag to word-select without one. So under touch input the native
@@ -161,31 +164,38 @@ class VirtualCaretView implements PluginView {
       rect != null && getMarkMode(state) === 'hide'
         ? getCaretTail(state, selection.head)
         : undefined
-    if (sameRect(rect, this.#lastRect) && tail === this.#lastTail) return
-    const wasHidden = this.#lastRect == null
-    this.#lastRect = rect
-    this.#lastTail = tail
-    if (tail == null) {
-      delete this.#caret.dataset.tail
-    } else {
-      this.#caret.dataset.tail = tail
-    }
-    if (rect == null) {
-      this.#caret.style.visibility = 'hidden'
-      view.dom.removeAttribute(DATA_ATTRIBUTE)
-      return
-    }
-    // A reappearing caret must not glide in from its stale position.
-    if (wasHidden) this.#caret.style.transitionProperty = 'none'
-    this.#caret.style.visibility = ''
-    this.#caret.style.left = `${rect.left}px`
-    this.#caret.style.top = `${rect.top}px`
-    this.#caret.style.height = `${rect.height}px`
-    view.dom.setAttribute(DATA_ATTRIBUTE, '')
-    if (wasHidden) {
-      forceReflow(this.#caret)
-      this.#caret.style.transitionProperty = ''
-    }
+    this.#renderCaret(rect, tail)
+  }
+
+#renderCaret(rect: CaretRect | undefined, tail: CaretTail | undefined) {
+  if (sameRect(rect, this.#lastRect) && tail === this.#lastTail) return
+  const view = this.#view
+
+  const wasHidden = this.#lastRect == null
+  this.#lastRect = rect
+  this.#lastTail = tail
+
+  if (tail == null) {
+    delete this.#caret.dataset.tail
+  } else {
+    this.#caret.dataset.tail = tail
+  }
+  if (rect == null) {
+    this.#caret.style.visibility = 'hidden'
+    view.dom.removeAttribute(DATA_ATTRIBUTE)
+    return
+  }
+
+  // A reappearing caret must not glide in from its stale position.
+  if (wasHidden) this.#caret.style.transitionProperty = 'none'
+  this.#caret.style.visibility = ''
+  this.#caret.style.left = `${rect.left}px`
+  this.#caret.style.top = `${rect.top}px`
+  this.#caret.style.height = `${rect.height}px`
+  view.dom.setAttribute(DATA_ATTRIBUTE, '')
+  if (wasHidden) {
+    forceReflow(this.#caret)
+    this.#caret.style.transitionProperty = ''
   }
 }
 
