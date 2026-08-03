@@ -1,8 +1,8 @@
 import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 
-import { getMarkRangeAt } from './get-mark-range-at.ts'
 import { defineMarkClickHandler } from './mark-click.ts'
+import { getMarkRangeAt } from './mark-range.ts'
 
 const tagClickKey = new PluginKey('meowdown-tag-click')
 

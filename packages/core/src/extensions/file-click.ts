@@ -1,8 +1,8 @@
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
-import { getMarkRangeAt } from './get-mark-range-at.ts'
 import type { MdFileAttrs } from './inline-marks.ts'
+import { getMarkRangeAt } from './mark-range.ts'
 
 const fileClickKey = new PluginKey('meowdown-file-click')
 

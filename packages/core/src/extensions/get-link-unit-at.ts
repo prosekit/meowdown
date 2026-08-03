@@ -2,9 +2,9 @@ import type { EditorState } from '@prosekit/pm/state'
 
 import type { PositionRange } from '../utils/range.ts'
 
-import { getMarkRangeAt } from './get-mark-range-at.ts'
 import type { MdLinkTextAttrs, MdPackAttrs } from './inline-marks.ts'
 import { isMarkOfType, type MarkName } from './mark-names.ts'
+import { getMarkRangeAt } from './mark-range.ts'
 
 export interface LinkUnit {
   /** Whole inline link, reference link, or autolink range. */

@@ -12,6 +12,7 @@ import { Plugin, PluginKey, TextSelection } from '@prosekit/pm/state'
 
 import { getIsComposing } from '../utils/composition.ts'
 import { executeCommand } from '../utils/execute-command.ts'
+import { hasPointerSelectionTransaction } from '../utils/transaction.ts'
 
 import {
   getHiddenRunAfter,
@@ -38,10 +39,7 @@ function createSnapPlugin(): Plugin {
       if (getMarkMode(newState) !== 'hide') return null
       const selection = newState.selection
       if (!isTextSelection(selection)) return null
-      // prosemirror-view tags pointer-originated selections with this meta in
-      // `updateSelection`. Not a documented contract, so pinned to the source:
-      // https://code.haverbeke.berlin/prosemirror/prosemirror-view/src/tag/1.42.0/src/input.ts#L191
-      const isPointer = transactions.some((tr) => tr.getMeta('pointer') != null)
+      const isPointer = hasPointerSelectionTransaction(transactions)
       if (selection.empty) {
         const next = getRestPosition(newState, oldState.selection.head, selection.head, isPointer)
         if (next === selection.head) return null
