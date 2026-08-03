@@ -331,6 +331,97 @@ describe('shift selection across atom-only paragraphs', () => {
   })
 })
 
+// Editing beside a unit is the editor's own transaction, never the browser's
+// native edit: Gecko's forward delete next to the zero-width source takes the
+// rest of the textblock with it. The caret snap cannot undo that, since the
+// write and the snap live in the same transaction, so these keys are the whole
+// defense and must stay covered.
+describe('editing next to an atom unit', () => {
+  it('focus: Backspace removes the space before a unit', async () => {
+    using fixture = setup('focus', ['see <a>[[Aaa]] here'])
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see┃[[Aaa]] here"`)
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      see[[Aaa]] here
+
+      """
+    `)
+  })
+
+  it('focus: Backspace removes the letter before a unit', async () => {
+    using fixture = setup('focus', ['a<a>[[Aaa]] b'])
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"┃[[Aaa]] b"`)
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      [[Aaa]] b
+
+      """
+    `)
+  })
+
+  it('focus: Backspace at the block start before a unit changes nothing', async () => {
+    using fixture = setup('focus', ['<a>[[Aaa]] b'])
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"┃[[Aaa]] b"`)
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      [[Aaa]] b
+
+      """
+    `)
+  })
+
+  it('focus: Delete removes the space after a unit', async () => {
+    using fixture = setup('focus', ['see [[Aaa]]<a> here'])
+    await userEvent.keyboard('{Delete}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]┃here"`)
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      see [[Aaa]]here
+
+      """
+    `)
+  })
+
+  it('focus: Delete removes the letter after a unit, not the rest of the block', async () => {
+    using fixture = setup('focus', ['a [[Aaa]]<a>b c'])
+    await userEvent.keyboard('{Delete}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"a [[Aaa]]┃ c"`)
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      a [[Aaa]] c
+
+      """
+    `)
+  })
+
+  it('focus: Delete at the block end after a unit changes nothing', async () => {
+    using fixture = setup('focus', ['a [[Aaa]]<a>'])
+    await userEvent.keyboard('{Delete}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"a [[Aaa]]┃"`)
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      a [[Aaa]]
+
+      """
+    `)
+  })
+
+  it('focus: ArrowRight past a unit steps one character into the text after it', async () => {
+    using fixture = setup('focus', ['see [[Aaa]]<a> here'])
+    await userEvent.keyboard('{ArrowRight}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]] ┃here"`)
+  })
+
+  it('focus: ArrowRight after a unit at the block end stays put', async () => {
+    using fixture = setup('focus', ['see [[Aaa]]<a>'])
+    await userEvent.keyboard('{ArrowRight}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]┃"`)
+  })
+})
+
 describe('caret snapping out of hidden atom source', () => {
   it('focus: a caret dropped inside the source leaves through the end it travelled towards', () => {
     using fixture = setup('focus', ['see [[Aaa]] here'])
