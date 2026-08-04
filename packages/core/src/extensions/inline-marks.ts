@@ -1,6 +1,6 @@
 import { defineMarkSpec, union } from '@prosekit/core'
 
-import type { MarkName } from './mark-names.ts'
+import type { MarkName, UnitKindKey } from './mark-names.ts'
 
 /**
  * Attributes of the `mdImage` mark, derived from either `![alt](src "title")`
@@ -238,17 +238,7 @@ function defineMdMath() {
 /**
  * mdPack keys for units that store no extra data; their own marks carry it.
  */
-export type MdPackSimpleKey =
-  | 'bold'
-  | 'italic'
-  | 'code'
-  | 'strike'
-  | 'highlight'
-  | 'autolink'
-  | 'math'
-  | 'wikilink'
-  | 'image'
-  | 'file'
+export type MdPackSimpleKey = Exclude<UnitKindKey, 'link'>
 
 /**
  * Content-derived identity of one inline syntax unit. Adjacent units of the

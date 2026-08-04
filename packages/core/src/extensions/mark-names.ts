@@ -33,17 +33,53 @@ export const SYNTAX_MARK_NAMES: ReadonlySet<string> = new Set<MarkName>([
   'mdLinkTitle',
 ])
 
+interface UnitKind {
+  /**
+   * The mark covering the unit's whole source, carrying its payload.
+   */
+  sourceMark?: MarkName
+  /**
+   * The mark view hides the source behind a rendered preview.
+   */
+  preview?: true
+}
+
+/**
+ * Every inline unit kind that carries an `mdPack`, keyed by the pack's `key` attr.
+ */
+export const UNIT_KINDS = {
+  italic: {},
+  bold: {},
+  code: {},
+  strike: {},
+  highlight: {},
+  autolink: {},
+  link: {},
+  math: { sourceMark: 'mdMath' },
+  wikilink: { sourceMark: 'mdWikilink', preview: true },
+  image: { sourceMark: 'mdImage', preview: true },
+  file: { sourceMark: 'mdFile', preview: true },
+} as const satisfies Record<string, UnitKind>
+
+export type UnitKindKey = keyof typeof UNIT_KINDS
+
+const kindEntries = Object.entries(UNIT_KINDS) as Array<[UnitKindKey, UnitKind]>
+
 // Marks covering a whole source unit, emitted as one replacement per unit by
-// text projections. The subset whose mark views hide the raw source behind a
-// preview lives in ATOM_SOURCE_MARK_NAMES in atom-mark-navigation.ts.
-export const ATOM_MARK_NAMES: ReadonlySet<string> = new Set<MarkName>([
-  'mdWikilink',
-  'mdImage',
-  'mdFile',
-  'mdMath',
-])
+// text projections.
+export const ATOM_MARK_NAMES: ReadonlySet<string> = new Set(
+  kindEntries.flatMap(([, kind]) => (kind.sourceMark ? [kind.sourceMark] : [])),
+)
 
 // Pack keys of the units whose source hides behind a rendered preview. The
 // focus reveal skips these packs: revealing them shows nothing, and matching
 // one would shadow a revealable neighbour on the other side of the caret.
-export const ATOM_PACK_KEYS: ReadonlySet<string> = new Set(['wikilink', 'image', 'file'])
+export const ATOM_PACK_KEYS: ReadonlySet<string> = new Set(
+  kindEntries.flatMap(([key, kind]) => (kind.preview ? [key] : [])),
+)
+
+// The source marks whose mark views hide the raw text behind a rendered
+// preview (`.md-atom-view-preview`) and act as one caret stop.
+export const ATOM_SOURCE_MARK_NAMES: readonly MarkName[] = kindEntries.flatMap(([, kind]) =>
+  kind.preview && kind.sourceMark ? [kind.sourceMark] : [],
+)
