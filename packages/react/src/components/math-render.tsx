@@ -2,7 +2,9 @@ import { renderMathInto, type KaTeXRender } from '@meowdown/core'
 import { useLayoutEffect, useRef, type MouseEventHandler, type ReactElement } from 'react'
 
 interface MathRenderProps {
-  /** The KaTeX render function */
+  /**
+   * The KaTeX render function
+   */
   katex: KaTeXRender
   formula: string
   displayMode: boolean

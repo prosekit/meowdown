@@ -146,7 +146,9 @@ function defineSubstitutionEnterRules(): PlainExtension {
   )
 }
 
-/** Apply the editor's automatic plain-text substitutions. */
+/**
+ * Apply the editor's automatic plain-text substitutions.
+ */
 export function defineSubstitution(): PlainExtension {
   return union(
     defineSubstitutionInputRules(),

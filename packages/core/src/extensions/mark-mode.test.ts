@@ -11,7 +11,9 @@ import type { MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 
-/** Mount one paragraph in `mode` (caret at `<a>`) and freeze the rendered HTML. */
+/**
+ * Mount one paragraph in `mode` (caret at `<a>`) and freeze the rendered HTML.
+ */
 function renderHTML(mode: MarkMode, text: string): string {
   using fixture = setupFixture({ extensionOptions: { markMode: mode } })
   const { n } = fixture

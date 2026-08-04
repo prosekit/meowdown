@@ -26,12 +26,18 @@ import {
   CHAR_UPPERCASE_X,
 } from '../unicode.ts'
 
-/** Options for {@link markdownToDoc}. */
+/**
+ * Options for {@link markdownToDoc}.
+ */
 export interface MarkdownToDocOptions {
-  /** Node builders to build the document with. Defaults to the shared schema's builders. */
+  /**
+   * Node builders to build the document with. Defaults to the shared schema's builders.
+   */
   nodes?: TypedNodeBuilders
 
-  /** Whether to peel a leading `---` frontmatter block onto the doc's `frontmatter` attribute. Off by default. */
+  /**
+   * Whether to peel a leading `---` frontmatter block onto the doc's `frontmatter` attribute. Off by default.
+   */
   frontmatter?: boolean
 }
 
@@ -260,7 +266,9 @@ function convertHeading(
   return nodes.heading({ level, setextUnderline, closingHashes }, content)
 }
 
-/** Count the `=` / `-` characters in a setext underline run. */
+/**
+ * Count the `=` / `-` characters in a setext underline run.
+ */
 function countUnderlineChars(text: string, from: number, to: number): number {
   if (from < 0) return 0
   let count = 0
@@ -271,7 +279,9 @@ function countUnderlineChars(text: string, from: number, to: number): number {
   return count
 }
 
-/** Count the `#` characters between `from` and `to`. */
+/**
+ * Count the `#` characters between `from` and `to`.
+ */
 function countHashChars(text: string, from: number, to: number): number {
   if (from < 0) return 0
   let count = 0
@@ -295,7 +305,9 @@ export function measureContentColumn(text: string, from: number): number {
   return col
 }
 
-/** Drop a line's leading whitespace up to `column`, counting a tab as `4 - col % 4` columns. */
+/**
+ * Drop a line's leading whitespace up to `column`, counting a tab as `4 - col % 4` columns.
+ */
 export function sliceColumn(line: string, column: number): string {
   let col = 0
   let index = 0
@@ -425,7 +437,9 @@ function convertList(
   return items
 }
 
-/** The marker style at `cursor`, plus the start number of an ordered item. */
+/**
+ * The marker style at `cursor`, plus the start number of an ordered item.
+ */
 function readListMark(
   cursor: TreeCursor,
   text: string,

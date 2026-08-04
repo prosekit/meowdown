@@ -72,13 +72,19 @@ function normalizeLine(line: string): string {
   return canonicalizeTableRow(line) ?? collapseWhitespace(line)
 }
 
-/** Options for {@link checkRoundTrip}. */
+/**
+ * Options for {@link checkRoundTrip}.
+ */
 export interface CheckRoundTripOptions {
-  /** Whether to handle a leading `---` frontmatter block. Off by default. */
+  /**
+   * Whether to handle a leading `---` frontmatter block. Off by default.
+   */
   frontmatter?: boolean
 }
 
-/** Classify how `markdown` survives the editor's parse-then-serialize round trip. */
+/**
+ * Classify how `markdown` survives the editor's parse-then-serialize round trip.
+ */
 export function checkRoundTrip(
   markdown: string,
   options: CheckRoundTripOptions = {},

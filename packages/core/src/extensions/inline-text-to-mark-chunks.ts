@@ -53,13 +53,21 @@ const MARK_NAME_BY_TYPE_ID: ReadonlyMap<number, MarkName> = new Map([
   [LEZER_NODE_IDS.WikilinkMark, 'mdMark'],
 ])
 
-/** What {@link FileLinkResolver} sees for one `[label](url)` link. */
+/**
+ * What {@link FileLinkResolver} sees for one `[label](url)` link.
+ */
 export interface FileLinkPayload {
-  /** The link destination, exactly as written in the source. */
+  /**
+   * The link destination, exactly as written in the source.
+   */
   href: string
-  /** The raw label slice between the brackets; may be empty or contain nested syntax. */
+  /**
+   * The raw label slice between the brackets; may be empty or contain nested syntax.
+   */
   label: string
-  /** The link title, or `''` when the source has none. */
+  /**
+   * The link title, or `''` when the source has none.
+   */
   title: string
 }
 
@@ -72,20 +80,34 @@ export interface FileLinkPayload {
  */
 export type FileLinkResolver = (link: FileLinkPayload) => boolean
 
-/** Host options that influence inline parsing. */
+/**
+ * Host options that influence inline parsing.
+ */
 export interface FileLinkOptions {
+  /**
+   * Claim `[label](url)` links as file attachments; see {@link FileLinkResolver}.
+   * Read once when the editor is created.
+   */
   resolveFileLink?: FileLinkResolver
 }
 
-/** Host options that influence source-backed inline atom parsing. */
+/**
+ * Host options that influence source-backed inline atom parsing.
+ */
 export type InlineMarkOptions = FileLinkOptions & WikiEmbedOptions
 
 export interface InlineMarkContext {
-  /** Effective document-wide definitions, keyed by normalized reference label. */
+  /**
+   * Effective document-wide definitions, keyed by normalized reference label.
+   */
   referenceDefinitions?: ReferenceDefinitions
-  /** Prevent this definition block's own label from resolving as a shortcut reference. */
+  /**
+   * Prevent this definition block's own label from resolving as a shortcut reference.
+   */
   isReferenceDefinition?: boolean
-  /** Receives every normalized key read by this block, including unresolved references. */
+  /**
+   * Receives every normalized key read by this block, including unresolved references.
+   */
   referencedKeys?: Set<string>
 }
 
@@ -95,11 +117,17 @@ export interface InlineMarkContext {
  * Callers shift the chunks into the document's coordinate space.
  */
 export function inlineTextToMarkChunks(
-  /** Typed mark builders bound to the target schema. */
+  /**
+   * Typed mark builders bound to the target schema.
+   */
   marks: TypedMarkBuilders,
-  /** The raw inline text of one textblock (no block prefix). */
+  /**
+   * The raw inline text of one textblock (no block prefix).
+   */
   text: string,
-  /** Host options; omit for the default parse. */
+  /**
+   * Host options; omit for the default parse.
+   */
   options?: InlineMarkOptions,
 ): MarkChunk[] {
   return inlineTextToMarkChunksWithContext(marks, text, options)
@@ -293,9 +321,13 @@ function walkLink(
 }
 
 interface LinkParts {
-  /** End of the `[` that opens the label, or -1 when there is no label. */
+  /**
+   * End of the `[` that opens the label, or -1 when there is no label.
+   */
   labelFrom: number
-  /** Start of the `]` that closes the label, or -1 when the label never closes. */
+  /**
+   * Start of the `]` that closes the label, or -1 when the label never closes.
+   */
   labelTo: number
   urlNode: InlineElement | null
   titleNode: InlineElement | null
@@ -395,7 +427,9 @@ function walkUnresolvedLink(
   walk(children, parentMarks, node.from, node.to, text, marks, out, options, context)
 }
 
-/** The last path segment of `href` (query/hash stripped), decoded when possible. */
+/**
+ * The last path segment of `href` (query/hash stripped), decoded when possible.
+ */
 function hrefBasename(href: string): string {
   const path = href.split(/[?#]/, 1)[0]
   const segment = path.split(/[/\\]/).findLast(Boolean) ?? path

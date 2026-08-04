@@ -82,7 +82,9 @@ class MathMarkView implements MarkView {
   }
 }
 
-/** Inline math rendering: a KaTeX preview on the `mdMath` mark. */
+/**
+ * Inline math rendering: a KaTeX preview on the `mdMath` mark.
+ */
 export function defineMath(): PlainExtension {
   return defineMarkView({
     name: 'mdMath' satisfies MarkName,

@@ -18,11 +18,17 @@ export function findFileAt(state: EditorState, pos: number): FileHit | undefined
   return { href, name }
 }
 
-/** Payload for {@link FileClickHandler}. */
+/**
+ * Payload for {@link FileClickHandler}.
+ */
 export interface FileClickPayload {
-  /** The resolved destination from `[name](href)` or a claimed `![[target]]`. */
+  /**
+   * The resolved destination from `[name](href)` or a claimed `![[target]]`.
+   */
   href: string
-  /** The file name shown on the pill. */
+  /**
+   * The file name shown on the pill.
+   */
   name: string
   /**
    * The originating click, or the `Enter`/`Mod-Enter` key press that followed the

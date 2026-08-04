@@ -155,6 +155,7 @@
     line-height: 1.7;
     color: var(--meowdown-text);
     -webkit-font-smoothing: antialiased;
+    caret-color: var(--meowdown-caret);
 
     &[data-meowdown-virtual-caret] {
       /* The virtual caret (`.md-virtual-caret`) replaces the native caret. */

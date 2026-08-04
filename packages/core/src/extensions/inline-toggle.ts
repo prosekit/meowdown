@@ -8,18 +8,26 @@ import {
 
 import { longestBacktickRun } from '../utils/backticks.ts'
 
-/** A text replacement relative to the start of one textblock's text. */
+/**
+ * A text replacement relative to the start of one textblock's text.
+ */
 export interface TextEdit {
   from: number
   to: number
   insert: string
 }
 
-/** One toggleable inline construct. */
+/**
+ * One toggleable inline construct.
+ */
 export interface ToggleSpec {
-  /** Lezer node id of the construct. */
+  /**
+   * Lezer node id of the construct.
+   */
   node: number
-  /** Delimiter used when creating new spans. */
+  /**
+   * Delimiter used when creating new spans.
+   */
   delim: string
 }
 
@@ -41,7 +49,9 @@ const MARKER_IDS: ReadonlySet<number> = new Set([
   LEZER_NODE_IDS.HighlightMark,
 ])
 
-/** The opening and closing delimiter tokens of a toggleable node. */
+/**
+ * The opening and closing delimiter tokens of a toggleable node.
+ */
 function delimiters(node: InlineElement): [InlineElement, InlineElement] {
   return [node.children[0], node.children.at(-1)!]
 }
@@ -110,7 +120,9 @@ function engulf(nodes: readonly InlineElement[], from: number, to: number): [num
   return [from, to]
 }
 
-/** Shrink [from, to] so it starts and ends on non-whitespace. */
+/**
+ * Shrink [from, to] so it starts and ends on non-whitespace.
+ */
 export function trimRange(text: string, from: number, to: number): [number, number] {
   while (from < to && isSpaceChar(text.charCodeAt(from))) from++
   while (to > from && isSpaceChar(text.charCodeAt(to - 1))) to--
@@ -249,7 +261,9 @@ function removeEdits(
   return edits
 }
 
-/** What a caret (empty selection) toggle should do. */
+/**
+ * What a caret (empty selection) toggle should do.
+ */
 export type CaretPlan =
   | { kind: 'unwrap'; from: number; to: number }
   | { kind: 'move'; pos: number }
@@ -294,7 +308,9 @@ export function caretPlan(text: string, pos: number, spec: ToggleSpec): CaretPla
   return { kind: 'insert', pos }
 }
 
-/** Whether `pos` sits where inserted syntax could not parse: inside an atom or inside another span's delimiters. */
+/**
+ * Whether `pos` sits where inserted syntax could not parse: inside an atom or inside another span's delimiters.
+ */
 function insideAtom(nodes: readonly InlineElement[], pos: number): boolean {
   for (const node of nodes) {
     if (node.from < pos && pos < node.to) {

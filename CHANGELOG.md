@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.64.0](https://github.com/prosekit/meowdown/compare/v0.63.1...v0.64.0) (2026-08-03)
+
+
+### Features
+
+* **core:** prefer the native caret for touch input ([#426](https://github.com/prosekit/meowdown/issues/426)) ([75df74d](https://github.com/prosekit/meowdown/commit/75df74d06af58ca818bb1a2f8a42c44a453c5407))
+
+
+### Bug Fixes
+
+* grow a dragged selection to whole atom units ([#414](https://github.com/prosekit/meowdown/issues/414)) ([9c2afde](https://github.com/prosekit/meowdown/commit/9c2afde3cb40804e7de087de83263fac92baf97f))
+* keep the caret out of an atom unit's hidden source ([#413](https://github.com/prosekit/meowdown/issues/413)) ([684d0e3](https://github.com/prosekit/meowdown/commit/684d0e35fbd46f940161d3d82afbc40631b27fc4))
+* paint the virtual caret above code backgrounds ([#427](https://github.com/prosekit/meowdown/issues/427)) ([dd14211](https://github.com/prosekit/meowdown/commit/dd14211fa39e0c73caa26dba39203fc79703c738))
+* set input modality correctly after a mouse press ([#429](https://github.com/prosekit/meowdown/issues/429)) ([111c708](https://github.com/prosekit/meowdown/commit/111c70811856cc7f0f7d2daf2aad80c9779b88c9))
+* tweak virtual caret styles ([#428](https://github.com/prosekit/meowdown/issues/428)) ([7c87691](https://github.com/prosekit/meowdown/commit/7c876917d43873e06a0e6857cb38bb7451d981a6))
+
 ## [0.63.1](https://github.com/prosekit/meowdown/compare/v0.63.0...v0.63.1) (2026-07-31)
 
 

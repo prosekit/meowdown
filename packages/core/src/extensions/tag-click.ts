@@ -26,7 +26,9 @@ export function findTagAt(state: EditorState, pos: number): TagHit | undefined {
 }
 
 export interface TagClickPayload {
-  /** The tag name, without the leading `#`. */
+  /**
+   * The tag name, without the leading `#`.
+   */
   tag: string
   /**
    * The originating click, or the `Enter`/`Mod-Enter` key press that followed the tag.
@@ -37,6 +39,11 @@ export interface TagClickPayload {
 
 export type TagClickHandler = (payload: TagClickPayload) => void
 
+/**
+ * Call `onClick` when the user clicks a rendered `#tag`, or presses
+ * `Mod-Enter` with the caret on one. The `tag` is read from the rendered text
+ * without the leading `#`.
+ */
 export function defineTagClickHandler(onClick: TagClickHandler): PlainExtension {
   return defineMarkClickHandler<string>({
     key: tagClickKey,

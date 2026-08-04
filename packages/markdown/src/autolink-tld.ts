@@ -20,7 +20,9 @@ const BARE_AUTOLINK_TLDS: ReadonlySet<string> = new Set([
 // A single DNS label: alphanumeric, hyphens allowed inside but not at the edges.
 const DNS_LABEL_RE = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i
 
-/** The host portion of a bare candidate: everything before the first `/`. */
+/**
+ * The host portion of a bare candidate: everything before the first `/`.
+ */
 export function hostFromUrl(text: string): string {
   const slash = text.indexOf('/')
   return slash === -1 ? text : text.slice(0, slash)

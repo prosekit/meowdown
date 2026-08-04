@@ -5,6 +5,7 @@ import {
   defineKeymap,
   defineNodeAttr,
   definePlugin,
+  isNodeSelection,
   union,
   type Extension,
   type PlainExtension,
@@ -277,23 +278,38 @@ function defineMeowdownListInputRules(): PlainExtension {
   return union(listInputRules.map(defineInputRule))
 }
 
-/** Circle checkbox task: a `task` list item with a `+` marker. */
+/**
+ * Circle checkbox task: a `task` list item with a `+` marker.
+ */
 function wrapInCircleTask(): Command {
   return wrapInList<MeowdownListAttrs>({ kind: 'task', marker: '+' })
 }
 
-/** Square checkbox task: a `task` list item with the canonical `-` marker. */
+/**
+ * Square checkbox task: a `task` list item with the canonical `-` marker.
+ */
 function wrapInSquareTask(): Command {
   return wrapInList<MeowdownListAttrs>({ kind: 'task', marker: null })
 }
 
-/** The attributes of the closest list node enclosing the selection, if any. */
+/**
+ * The attributes of the list item whose own content holds the selection, if
+ * any. A continuation block deeper inside an item (a paragraph after the
+ * item's first block) is not the item's content, so it reports no list: the
+ * cycle commands then wrap it into a new nested list instead of reading the
+ * ancestor's kind.
+ */
 function getListAttrsAtSelection(state: EditorState): MeowdownListAttrs | null {
-  const { $from } = state.selection
+  const { selection } = state
+
+  if (isNodeSelection(selection) && isNodeOfType(selection.node, 'list')) {
+    return selection.node.attrs
+  }
+  const { $from } = selection
   for (let depth = $from.depth; depth > 0; depth--) {
     const node = $from.node(depth)
     if (isNodeOfType(node, 'list')) {
-      return node.attrs
+      return $from.index(depth) === 0 ? node.attrs : null
     }
   }
   return null
@@ -329,11 +345,22 @@ function cycleCheckableList(): Command {
 function cycleBulletOrderedList(): Command {
   return (state, dispatch, view) => {
     const attrs = getListAttrsAtSelection(state)
-    const next: MeowdownListAttrs =
-      attrs?.kind === 'bullet' || attrs?.kind === 'ordered'
-        ? { kind: 'ordered', marker: null, checked: false, collapsed: false }
-        : { kind: 'bullet', marker: null, checked: false, collapsed: false }
-    return toggleList<MeowdownListAttrs>(next)(state, dispatch, view)
+    if (attrs?.kind === 'bullet' || attrs?.kind === 'ordered') {
+      return toggleList<MeowdownListAttrs>({
+        kind: 'ordered',
+        marker: null,
+        checked: false,
+        collapsed: false,
+      })(state, dispatch, view)
+    }
+    // Not `toggleList`: its unwrap branch would lift the whole enclosing item
+    // when a continuation block sits inside a same-kind list.
+    return wrapInList<MeowdownListAttrs>({
+      kind: 'bullet',
+      marker: null,
+      checked: false,
+      collapsed: false,
+    })(state, dispatch, view)
   }
 }
 

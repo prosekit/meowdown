@@ -7,7 +7,9 @@ import { isMarkOfType, type MarkName } from './mark-names.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 
 export interface LinkUnit {
-  /** Whole inline link, reference link, or autolink range. */
+  /**
+   * Whole inline link, reference link, or autolink range.
+   */
   unit: PositionRange
 
   /**
@@ -18,16 +20,24 @@ export interface LinkUnit {
    */
   text: PositionRange
 
-  /** Interior of `[ ]`. Absent for an autolink. */
+  /**
+   * Interior of `[ ]`. Absent for an autolink.
+   */
   label?: PositionRange
 
-  /** Interior of `( )`. What `updateLink` rewrites. Absent for an autolink. */
+  /**
+   * Interior of `( )`. What `updateLink` rewrites. Absent for an autolink.
+   */
   dest?: PositionRange
 
-  /** The link URL. Could be an empty string. */
+  /**
+   * The link URL. Could be an empty string.
+   */
   href: string
 
-  /** The link title, unquoted. Could be an empty string. */
+  /**
+   * The link title, unquoted. Could be an empty string.
+   */
   title: string
 }
 

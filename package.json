@@ -1,7 +1,7 @@
 {
   "name": "meowdown-monorepo",
   "type": "module",
-  "version": "0.63.1",
+  "version": "0.64.0",
   "private": true,
   "packageManager": "pnpm@11.18.0",
   "scripts": {
@@ -18,7 +18,7 @@
     "fix:eslint": "eslint --cache --max-warnings 0 --fix",
     "fix:tsconfig": "monorepo-typescript-references fix",
     "test": "vitest",
-    "test:install:chromium": "playwright install chromium",
+    "test:install:chromium": "playwright install chromium --no-shell",
     "test:install:webkit": "playwright install webkit",
     "test:install:firefox": "playwright install firefox",
     "bench": "vitest bench",
@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@meowdown/eslint-rules": "workspace:*",
-    "@ocavue/eslint-config": "^4.12.1",
+    "@ocavue/eslint-config": "^4.13.0",
     "@ocavue/tsconfig": "^0.7.1",
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^4.1.10",

@@ -30,7 +30,9 @@ function applyEdits(text: string, edits: TextEdit[]): string {
   return text
 }
 
-/** Toggle `name` over the `<a>`...`<b>` selection, mirroring the command's per-segment flow. */
+/**
+ * Toggle `name` over the `<a>`...`<b>` selection, mirroring the command's per-segment flow.
+ */
 function toggle(name: ToggleName, input: string): string {
   const spec = TOGGLE_SPECS[name]
   const sel = parseSelection(input)

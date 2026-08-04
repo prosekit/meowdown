@@ -4,7 +4,9 @@ import { useImperativeHandle, type Ref } from 'react'
 import type { MarkdownSource } from './markdown-source.ts'
 
 export interface ReadonlyViewProps extends MarkdownViewProps {
-  /** Reports the rendered Markdown text back to the mode-flip seeding. */
+  /**
+   * Reports the rendered Markdown text back to the mode-flip seeding.
+   */
   ref?: Ref<MarkdownSource>
 }
 

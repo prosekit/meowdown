@@ -102,7 +102,9 @@ function syncOpenWrappers(open: OpenWrapper[], next: readonly Mark[], out: HTMLE
   }
 }
 
-/** A soft break (a literal `\n` in the source) renders as `<br>`. */
+/**
+ * A soft break (a literal `\n` in the source) renders as `<br>`.
+ */
 function appendTextWithBreaks(parent: HTMLElement, text: string): void {
   const lines = text.split('\n')
   for (const [index, line] of lines.entries()) {

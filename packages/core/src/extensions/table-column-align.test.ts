@@ -13,7 +13,9 @@ import {
 
 type Builders = ReturnType<typeof setupFixture>['n']
 
-/** An unaligned table with the caret in the first data cell. */
+/**
+ * An unaligned table with the caret in the first data cell.
+ */
 function plainTable(n: Builders): EditorNode {
   return n.doc(
     n.table(
@@ -23,7 +25,9 @@ function plainTable(n: Builders): EditorNode {
   )
 }
 
-/** A table whose first column is centered, with the caret in the first data cell. */
+/**
+ * A table whose first column is centered, with the caret in the first data cell.
+ */
 function alignedTable(n: Builders): EditorNode {
   return n.doc(
     n.table(

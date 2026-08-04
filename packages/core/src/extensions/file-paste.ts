@@ -7,7 +7,9 @@ export type FileSaveErrorHandler = (error: unknown, file: File) => void
 
 const IMAGE_FILE_EXTENSIONS = new Set(['avif', 'bmp', 'gif', 'jpeg', 'jpg', 'png', 'svg', 'webp'])
 
-/** Options for {@link defineFilePaste}. */
+/**
+ * Options for {@link defineFilePaste}.
+ */
 export interface FilePasteOptions {
   /**
    * Persist a pasted/dropped file and return its markdown destination, or
@@ -16,7 +18,9 @@ export interface FilePasteOptions {
    * inserts `![](src)`; any other file inserts a `[name](src)` link.
    */
   onFilePaste?: FilePasteHandler
-  /** Called when persisting a pasted/dropped file throws. Defaults to `console.error`. */
+  /**
+   * Called when persisting a pasted/dropped file throws. Defaults to `console.error`.
+   */
   onFileSaveError?: FileSaveErrorHandler
 }
 
@@ -60,7 +64,9 @@ const defaultOnFileSaveError: FileSaveErrorHandler = (error) => {
   console.error('[meowdown] failed to save pasted file:', error)
 }
 
-/** Escape `\`, `[`, and `]` so a filename stays inside its `[text]` label. */
+/**
+ * Escape `\`, `[`, and `]` so a filename stays inside its `[text]` label.
+ */
 function escapeLinkText(name: string): string {
   return name.replaceAll(/[\\[\]]/g, String.raw`\$&`)
 }

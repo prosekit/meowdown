@@ -66,7 +66,9 @@ function isCheckboxInput(node: Element): boolean {
   return node.tagName === 'input' && node.properties.type === 'checkbox'
 }
 
-/** The first checkbox `<input>` before any nested list, if any. */
+/**
+ * The first checkbox `<input>` before any nested list, if any.
+ */
 function findCheckbox(node: Element): Element | undefined {
   for (const child of node.children) {
     if (child.type !== 'element') continue
@@ -125,7 +127,9 @@ function normalizeTaskItem(node: Element): Element | undefined {
   return { ...node, children: [input, ...content] }
 }
 
-/** `li` handler that recognizes ProseMirror-style task items, then delegates. */
+/**
+ * `li` handler that recognizes ProseMirror-style task items, then delegates.
+ */
 const taskAwareListItem: HastToMdastHandle = (state, element) => {
   return defaultHandlers.li(state, normalizeTaskItem(element) ?? element)
 }
@@ -185,7 +189,9 @@ function createProcessor() {
 
 const getProcessor = once(createProcessor)
 
-/** Convert HTML into Markdown text. */
+/**
+ * Convert HTML into Markdown text.
+ */
 export function htmlToMarkdown(html: string): string {
   return String(getProcessor().processSync(html))
 }

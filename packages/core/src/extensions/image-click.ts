@@ -36,11 +36,17 @@ function findImageForPreview(view: EditorView, preview: HTMLElement): ImageHit |
   return findImageAt(view.state, view.posAtDOM(content, 0))
 }
 
-/** Payload for {@link ImageClickHandler}. */
+/**
+ * Payload for {@link ImageClickHandler}.
+ */
 export interface ImageClickPayload {
-  /** The resolved source from `![alt](src)` or a claimed `![[target]]`. */
+  /**
+   * The resolved source from `![alt](src)` or a claimed `![[target]]`.
+   */
   src: string
-  /** The image alt text. */
+  /**
+   * The image alt text.
+   */
   alt: string
   /**
    * The originating click or touch tap. Read the target or position a popover
@@ -51,14 +57,18 @@ export interface ImageClickPayload {
 
 export type ImageClickHandler = (payload: ImageClickPayload) => void
 
-/** A touch that might become a tap on an image preview. */
+/**
+ * A touch that might become a tap on an image preview.
+ */
 interface PendingTap {
   identifier: number
   clientX: number
   clientY: number
 }
 
-/** Fingers wander a little during a tap; past this it is a scroll or a drag. */
+/**
+ * Fingers wander a little during a tap; past this it is a scroll or a drag.
+ */
 const TAP_MOVE_TOLERANCE = 10
 
 function findTouch(touches: TouchList, identifier: number): Touch | undefined {
