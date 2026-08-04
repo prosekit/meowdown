@@ -12,7 +12,12 @@ describe('input rule', () => {
     fixture.set(n.doc(n.paragraph('<a>todo')))
     fixture.view.focus()
     await userEvent.keyboard('+ ')
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [ ] todo
+
+      """
+    `)
   })
 
   it('wraps a block into a plain bullet on `- ` (not a checkbox task)', async () => {
@@ -21,7 +26,12 @@ describe('input rule', () => {
     fixture.set(n.doc(n.paragraph('<a>todo')))
     fixture.view.focus()
     await userEvent.keyboard('- ')
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - todo
+
+      """
+    `)
   })
 })
 
@@ -31,7 +41,12 @@ describe('commands', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('todo<a>')))
     fixture.editor.commands.wrapInCircleTask()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [ ] todo
+
+      """
+    `)
   })
 
   it('wrapInSquareTask makes a square checkbox task', () => {
@@ -39,7 +54,12 @@ describe('commands', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('todo<a>')))
     fixture.editor.commands.wrapInSquareTask()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - [ ] todo
+
+      """
+    `)
   })
 
   it('converts a square checkbox task to a circle checkbox task, keeping checked', () => {
@@ -47,7 +67,12 @@ describe('commands', () => {
     const { n } = fixture
     fixture.set(n.doc(n.list({ kind: 'task', checked: true }, n.paragraph('done<a>'))))
     fixture.editor.commands.wrapInCircleTask()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [x] done
+
+      """
+    `)
   })
 
   it('converts a circle checkbox task back to a square checkbox task, keeping checked', () => {
@@ -55,7 +80,12 @@ describe('commands', () => {
     const { n } = fixture
     fixture.set(n.doc(n.list({ kind: 'task', marker: '+', checked: true }, n.paragraph('done<a>'))))
     fixture.editor.commands.wrapInSquareTask()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - [x] done
+
+      """
+    `)
   })
 
   it('cycleCheckableList cycles plain content through square and circle tasks', () => {
@@ -64,11 +94,26 @@ describe('commands', () => {
     fixture.set(n.doc(n.paragraph('todo<a>')))
 
     fixture.editor.commands.cycleCheckableList()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - [ ] todo
+
+      """
+    `)
     fixture.editor.commands.cycleCheckableList()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [ ] todo
+
+      """
+    `)
     fixture.editor.commands.cycleCheckableList()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - [ ] todo
+
+      """
+    `)
   })
 
   it('cycleCheckableList preserves checked state and task-marker casing', () => {
@@ -84,9 +129,19 @@ describe('commands', () => {
     )
 
     fixture.editor.commands.cycleCheckableList()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [X] done
+
+      """
+    `)
     fixture.editor.commands.cycleCheckableList()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - [X] done
+
+      """
+    `)
   })
 
   it('cycleCheckableList clears latent checked state from non-task lists', () => {
@@ -100,7 +155,12 @@ describe('commands', () => {
       marker: null,
       checked: false,
     })
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - [ ] todo
+
+      """
+    `)
   })
 
   it('cycleCheckableList changes only the closest nested list', () => {
@@ -117,9 +177,21 @@ describe('commands', () => {
     )
 
     fixture.editor.commands.cycleCheckableList()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [ ] outer
+        + [ ] inner
+
+      """
+    `)
     fixture.editor.commands.cycleCheckableList()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [ ] outer
+        - [ ] inner
+
+      """
+    `)
   })
 
   it('cycleBulletOrderedList cycles plain content through bullet, ordered, and text', () => {
@@ -149,7 +221,12 @@ describe('commands', () => {
       kind: 'bullet',
       checked: false,
     })
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - done
+
+      """
+    `)
   })
 
   it('cycleBulletOrderedList cycles the closest nested list through ordered, plain, and bullet', () => {
@@ -166,13 +243,38 @@ describe('commands', () => {
     )
 
     fixture.editor.commands.cycleBulletOrderedList()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - outer
+        1. inner
+
+      """
+    `)
     fixture.editor.commands.cycleBulletOrderedList()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - outer
+
+        inner
+
+      """
+    `)
     fixture.editor.commands.cycleBulletOrderedList()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - outer
+        - inner
+
+      """
+    `)
     fixture.editor.commands.cycleBulletOrderedList()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - outer
+        1. inner
+
+      """
+    `)
   })
 
   it('cycleBulletOrderedList wraps a continuation paragraph into a bullet', () => {
@@ -181,7 +283,13 @@ describe('commands', () => {
     fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('outer'), n.paragraph('inner<a>'))))
 
     fixture.editor.commands.cycleBulletOrderedList()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - outer
+        - inner
+
+      """
+    `)
   })
 
   it('cycleBulletOrderedList cycles a node-selected list through ordered and plain', () => {
@@ -192,9 +300,19 @@ describe('commands', () => {
     view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, 0)))
 
     fixture.editor.commands.cycleBulletOrderedList()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      1. todo
+
+      """
+    `)
     fixture.editor.commands.cycleBulletOrderedList()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      todo
+
+      """
+    `)
   })
 
   it('cycleCheckableList wraps a continuation paragraph into a square task', () => {
@@ -207,7 +325,13 @@ describe('commands', () => {
     )
 
     fixture.editor.commands.cycleCheckableList()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - [ ] outer
+        - [ ] inner
+
+      """
+    `)
   })
 })
 
@@ -223,11 +347,26 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await pressModEnter()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - [ ] todo
+
+      """
+    `)
     await pressModEnter()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - [x] todo
+
+      """
+    `)
     await pressModEnter()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - todo
+
+      """
+    `)
   })
 
   it('Mod-Shift-Enter cycles a circle checkbox task: unchecked -> checked -> bullet', async () => {
@@ -237,11 +376,26 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await pressModShiftEnter()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [ ] todo
+
+      """
+    `)
     await pressModShiftEnter()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [x] todo
+
+      """
+    `)
     await pressModShiftEnter()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - todo
+
+      """
+    `)
   })
 
   it('Mod-Enter converts a circle checkbox task into a square checkbox task', async () => {
@@ -253,7 +407,12 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await pressModEnter()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - [ ] todo
+
+      """
+    `)
   })
 
   it('Mod-Shift-Enter converts a square checkbox task into a circle checkbox task', async () => {
@@ -263,7 +422,12 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await pressModShiftEnter()
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [ ] todo
+
+      """
+    `)
   })
 
   it('Enter continues a circle checkbox task with another circle checkbox task', async () => {
@@ -275,7 +439,13 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await userEvent.keyboard('{Enter}next')
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [ ] todo
+      + [ ] next
+
+      """
+    `)
   })
 
   it('Enter on a checked circle checkbox task continues with an unchecked one', async () => {
@@ -285,7 +455,13 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await userEvent.keyboard('{Enter}next')
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [x] done
+      + [ ] next
+
+      """
+    `)
   })
 
   it('Enter in the middle of a circle checkbox task keeps the circle on both halves', async () => {
@@ -297,7 +473,13 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await userEvent.keyboard('{Enter}')
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [ ] to
+      + [ ] do
+
+      """
+    `)
   })
 
   it('Enter at the start of a circle checkbox task inserts an empty circle task above', async () => {
@@ -321,7 +503,13 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await userEvent.keyboard('{Enter}next')
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - [ ] todo
+      - [ ] next
+
+      """
+    `)
   })
 
   it('Enter continues a `*` bullet with a `*` bullet', async () => {
@@ -331,7 +519,13 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await userEvent.keyboard('{Enter}next')
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      * todo
+      * next
+
+      """
+    `)
   })
 
   it('Enter on an empty circle checkbox task still unwraps it', async () => {
@@ -341,7 +535,7 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await userEvent.keyboard('{Enter}')
-    expect(fixture.doc.child(0).type.name).toMatchInlineSnapshot()
+    expect(fixture.doc.child(0).type.name).toMatchInlineSnapshot(`"paragraph"`)
   })
 
   it('Enter at the end of a collapsed bullet adds the next item below its hidden children', async () => {
@@ -359,7 +553,14 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await userEvent.keyboard('{Enter}next')
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + parent
+        - child
+      * next
+
+      """
+    `)
   })
 
   it('Enter keeps the marker gap on the next item', async () => {
@@ -369,7 +570,13 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await userEvent.keyboard('{Enter}next')
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      -   todo
+      -   next
+
+      """
+    `)
   })
 
   // The physical digit keys, so the shifted character ('&', '*', '(' on a US
@@ -384,9 +591,19 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await pressModShiftDigit(8)
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - todo
+
+      """
+    `)
     await pressModShiftDigit(8)
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      todo
+
+      """
+    `)
   })
 
   it('Mod-Shift-7 wraps a paragraph into an ordered list and unwraps it again', async () => {
@@ -396,9 +613,19 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await pressModShiftDigit(7)
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      1. todo
+
+      """
+    `)
     await pressModShiftDigit(7)
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      todo
+
+      """
+    `)
   })
 
   it('Mod-Shift-9 wraps a paragraph into a square checkbox task and unwraps it again', async () => {
@@ -408,9 +635,19 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await pressModShiftDigit(9)
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      - [ ] todo
+
+      """
+    `)
     await pressModShiftDigit(9)
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      todo
+
+      """
+    `)
   })
 
   it('Mod-Shift-7 converts a bullet into an ordered list in place', async () => {
@@ -420,6 +657,11 @@ describe('keymap', () => {
     fixture.view.focus()
 
     await pressModShiftDigit(7)
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot()
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      1. todo
+
+      """
+    `)
   })
 })
