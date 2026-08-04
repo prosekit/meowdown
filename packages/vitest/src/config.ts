@@ -53,7 +53,7 @@ export function defineSharedConfig({
         },
         provider: playwright({
           launchOptions: {
-            channel: 'chromium',
+            channel: browserName === 'chromium' ? 'chrome' : undefined,
           },
           contextOptions: {
             reducedMotion: 'reduce',
