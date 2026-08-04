@@ -211,7 +211,9 @@ export interface EditorProps {
    */
   onFilePaste?: FilePasteOptions['onFilePaste']
 
-  /** Called when persisting a pasted/dropped file throws. */
+  /**
+   * Called when persisting a pasted/dropped file throws.
+   */
   onFileSaveError?: FilePasteOptions['onFileSaveError']
 
   /**
@@ -246,7 +248,9 @@ export interface EditorProps {
    */
   substitution?: boolean
 
-  /** Handles a leading `---` frontmatter block (off by default). */
+  /**
+   * Handles a leading `---` frontmatter block (off by default).
+   */
   frontmatter?: boolean
 
   /**
@@ -271,7 +275,9 @@ export interface EditorProps {
    */
   placeholder?: PlaceholderOptions['placeholder']
 
-  /** Makes the editor read-only. */
+  /**
+   * Makes the editor read-only.
+   */
   readOnly?: boolean
 
   /**
@@ -300,16 +306,24 @@ export interface EditorProps {
    */
   timeFormat?: TimeFormat
 
-  /** Class on the editable root (the contenteditable). */
+  /**
+   * Class on the editable root (the contenteditable).
+   */
   editorClassName?: string
 
-  /** Class on the outer `.meowdown` wrapper div. */
+  /**
+   * Class on the outer `.meowdown` wrapper div.
+   */
   wrapperClassName?: string
 
-  /** Imperative handle for the editor. */
+  /**
+   * Imperative handle for the editor.
+   */
   handleRef?: Ref<EditorHandle>
 
-  /** Nodes rendered inside the editor's ProseKit context. */
+  /**
+   * Nodes rendered inside the editor's ProseKit context.
+   */
   children?: ReactNode
 }
 

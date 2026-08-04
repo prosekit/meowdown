@@ -118,7 +118,9 @@ describe('htmlToMarkdown', () => {
   })
 })
 
-/** The runtime `state.unsafe` that `remark-gfm` + `remark-stringify` assemble. */
+/**
+ * The runtime `state.unsafe` that `remark-gfm` + `remark-stringify` assemble.
+ */
 function captureStockUnsafe(): Unsafe[] {
   let unsafe: Unsafe[] = []
   const root: Root = {

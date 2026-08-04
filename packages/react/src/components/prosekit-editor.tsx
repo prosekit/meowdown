@@ -131,112 +131,184 @@ export interface ProseKitEditorProps {
    */
   initialMarkdown?: string
 
-  /** Called on every user-driven document change, not on programmatic setState. */
+  /**
+   * Called on every user-driven document change, not on programmatic setState.
+   */
   onDocChange?: VoidFunction
 
-  /** Adds host items to the slash menu. See `EditorProps.onSlashMenuSearch`. */
+  /**
+   * Adds host items to the slash menu. See `EditorProps.onSlashMenuSearch`.
+   */
   onSlashMenuSearch?: SlashMenuSearchHandler
 
-  /** Enables the tag menu. See `EditorProps.onTagSearch`. */
+  /**
+   * Enables the tag menu. See `EditorProps.onTagSearch`.
+   */
   onTagSearch?: TagSearchHandler
 
-  /** Enables the wikilink menu. See `EditorProps.onWikilinkSearch`. */
+  /**
+   * Enables the wikilink menu. See `EditorProps.onWikilinkSearch`.
+   */
   onWikilinkSearch?: WikilinkSearchHandler
 
-  /** Enables the selection menu. See `EditorProps.onSelectionMenuSearch`. */
+  /**
+   * Enables the selection menu. See `EditorProps.onSelectionMenuSearch`.
+   */
   onSelectionMenuSearch?: SelectionMenuSearchHandler
 
-  /** Shows the selection affordance. See `EditorProps.selectionMenuAffordance`. */
+  /**
+   * Shows the selection affordance. See `EditorProps.selectionMenuAffordance`.
+   */
   selectionMenuAffordance?: boolean
 
-  /** Extra pending-replacement controls. See `EditorProps.pendingReplacementActions`. */
+  /**
+   * Extra pending-replacement controls. See `EditorProps.pendingReplacementActions`.
+   */
   pendingReplacementActions?: ReactNode
 
-  /** Called when a pending replacement ends. See `EditorProps.onPendingReplacementResolve`. */
+  /**
+   * Called when a pending replacement ends. See `EditorProps.onPendingReplacementResolve`.
+   */
   onPendingReplacementResolve?: PendingReplacementResolveHandler
 
-  /** Called on click or Mod-Enter of a rendered wiki link. See `EditorProps.onWikilinkClick`. */
+  /**
+   * Called on click or Mod-Enter of a rendered wiki link. See `EditorProps.onWikilinkClick`.
+   */
   onWikilinkClick?: WikilinkClickHandler
 
-  /** Called on click or Mod-Enter of a rendered Markdown link. See `EditorProps.onLinkClick`. */
+  /**
+   * Called on click or Mod-Enter of a rendered Markdown link. See `EditorProps.onLinkClick`.
+   */
   onLinkClick?: LinkClickHandler
 
-  /** Called after a link is copied from the link menu. See `EditorProps.onLinkCopy`. */
+  /**
+   * Called after a link is copied from the link menu. See `EditorProps.onLinkCopy`.
+   */
   onLinkCopy?: LinkCopyHandler
 
-  /** Called on click or Mod-Enter of a rendered tag. See `EditorProps.onTagClick`. */
+  /**
+   * Called on click or Mod-Enter of a rendered tag. See `EditorProps.onTagClick`.
+   */
   onTagClick?: TagClickHandler
 
-  /** Called when an arrow press leaves the document boundary. See `EditorProps.onExitBoundary`. */
+  /**
+   * Called when an arrow press leaves the document boundary. See `EditorProps.onExitBoundary`.
+   */
   onExitBoundary?: ExitBoundaryHandler
 
-  /** Resolves an image `src` to a URL. See `EditorProps.resolveImageUrl`. */
+  /**
+   * Resolves an image `src` to a URL. See `EditorProps.resolveImageUrl`.
+   */
   resolveImageUrl?: ImageOptions['resolveImageUrl']
 
-  /** Claims links as file pills. Read once on mount; see `EditorProps.resolveFileLink`. */
+  /**
+   * Claims links as file pills. Read once on mount; see `EditorProps.resolveFileLink`.
+   */
   resolveFileLink?: FileLinkResolver
 
-  /** Classifies wiki embeds. Read once on mount; see `EditorProps.resolveWikiEmbed`. */
+  /**
+   * Classifies wiki embeds. Read once on mount; see `EditorProps.resolveWikiEmbed`.
+   */
   resolveWikiEmbed?: WikiEmbedResolver
 
-  /** Resolves the size shown on a file pill. See `EditorProps.resolveFileInfo`. */
+  /**
+   * Resolves the size shown on a file pill. See `EditorProps.resolveFileInfo`.
+   */
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
 
-  /** Called on click or Mod-Enter of a rendered file pill. See `EditorProps.onFileClick`. */
+  /**
+   * Called on click or Mod-Enter of a rendered file pill. See `EditorProps.onFileClick`.
+   */
   onFileClick?: FileClickHandler
 
-  /** Persists a pasted/dropped file. See `EditorProps.onFilePaste`. */
+  /**
+   * Persists a pasted/dropped file. See `EditorProps.onFilePaste`.
+   */
   onFilePaste?: FilePasteOptions['onFilePaste']
 
-  /** Called when a pasted/dropped file fails to persist. See `EditorProps.onFileSaveError`. */
+  /**
+   * Called when a pasted/dropped file fails to persist. See `EditorProps.onFileSaveError`.
+   */
   onFileSaveError?: FilePasteOptions['onFileSaveError']
 
-  /** Called on click of a rendered image. See `EditorProps.onImageClick`. */
+  /**
+   * Called on click of a rendered image. See `EditorProps.onImageClick`.
+   */
   onImageClick?: ImageClickHandler
 
-  /** Auto-embeds a pasted tweet/YouTube link. See `EditorProps.embedPaste`. */
+  /**
+   * Auto-embeds a pasted tweet/YouTube link. See `EditorProps.embedPaste`.
+   */
   embedPaste?: boolean
 
-  /** Wraps the selection as a link on URL paste. See `EditorProps.linkPaste`. */
+  /**
+   * Wraps the selection as a link on URL paste. See `EditorProps.linkPaste`.
+   */
   linkPaste?: boolean
 
-  /** Starts a bullet on Enter after a heading. See `EditorProps.bulletAfterHeading`. */
+  /**
+   * Starts a bullet on Enter after a heading. See `EditorProps.bulletAfterHeading`.
+   */
   bulletAfterHeading?: boolean
 
-  /** Replaces typed sequences like `->` with `→`. See `EditorProps.substitution`. */
+  /**
+   * Replaces typed sequences like `->` with `→`. See `EditorProps.substitution`.
+   */
   substitution?: boolean
 
-  /** Handles a leading YAML frontmatter block. See `EditorProps.frontmatter`. */
+  /**
+   * Handles a leading YAML frontmatter block. See `EditorProps.frontmatter`.
+   */
   frontmatter?: boolean
 
-  /** Shows the per-block gutter handle. See `EditorProps.blockHandle`. */
+  /**
+   * Shows the per-block gutter handle. See `EditorProps.blockHandle`.
+   */
   blockHandle?: boolean
 
-  /** Placeholder text for empty blocks. See `EditorProps.placeholder`. */
+  /**
+   * Placeholder text for empty blocks. See `EditorProps.placeholder`.
+   */
   placeholder?: PlaceholderOptions['placeholder']
 
-  /** Makes the editor read-only. See `EditorProps.readOnly`. */
+  /**
+   * Makes the editor read-only. See `EditorProps.readOnly`.
+   */
   readOnly?: boolean
 
-  /** Enables or disables spell checking in the editor. */
+  /**
+   * Enables or disables spell checking in the editor.
+   */
   spellCheck?: boolean
 
-  /** The search query. See `EditorProps.searchQuery`. */
+  /**
+   * The search query. See `EditorProps.searchQuery`.
+   */
   searchQuery?: string
 
-  /** Called when the search status changes. See `EditorProps.onSearchChange`. */
+  /**
+   * Called when the search status changes. See `EditorProps.onSearchChange`.
+   */
   onSearchChange?: SearchStatusHandler
 
-  /** Clock format the `/now` slash command inserts. See `EditorProps.timeFormat`. */
+  /**
+   * Clock format the `/now` slash command inserts. See `EditorProps.timeFormat`.
+   */
   timeFormat?: TimeFormat
 
-  /** Class on the editable root. See `EditorProps.editorClassName`. */
+  /**
+   * Class on the editable root. See `EditorProps.editorClassName`.
+   */
   editorClassName?: string
 
-  /** Imperative handle for the editor. */
+  /**
+   * Imperative handle for the editor.
+   */
   ref?: Ref<EditorHandle>
 
-  /** Nodes rendered inside the ProseKit context. See `EditorProps.children`. */
+  /**
+   * Nodes rendered inside the ProseKit context. See `EditorProps.children`.
+   */
   children?: ReactNode
 }
 

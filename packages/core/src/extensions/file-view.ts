@@ -7,9 +7,13 @@ import { formatFileSize } from '../utils/format-file-size.ts'
 import type { MdFileAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
 
-/** Metadata a host resolves for one file link, shown on its pill. */
+/**
+ * Metadata a host resolves for one file link, shown on its pill.
+ */
 export interface FileInfo {
-  /** File size in bytes, shown as a human-readable suffix (e.g. `1.4 MB`). */
+  /**
+   * File size in bytes, shown as a human-readable suffix (e.g. `1.4 MB`).
+   */
   size?: number
 }
 
@@ -24,13 +28,19 @@ export type FileInfoResolver = (
   href: string,
 ) => FileInfo | undefined | Promise<FileInfo | undefined>
 
-/** Options for {@link defineFileView}. */
+/**
+ * Options for {@link defineFileView}.
+ */
 export interface FileViewOptions {
-  /** Resolve the metadata (file size) shown on a pill. Omit to show none. */
+  /**
+   * Resolve the metadata (file size) shown on a pill. Omit to show none.
+   */
   resolveFileInfo?: FileInfoResolver
 }
 
-/** `data-file-kind` values by file extension, for host CSS theming. */
+/**
+ * `data-file-kind` values by file extension, for host CSS theming.
+ */
 const FILE_KIND_BY_EXTENSION: ReadonlyMap<string, string> = new Map([
   ['pdf', 'pdf'],
   ['zip', 'archive'],
@@ -62,7 +72,9 @@ const FILE_KIND_BY_EXTENSION: ReadonlyMap<string, string> = new Map([
   ['md', 'text'],
 ])
 
-/** Classify a file destination for the pill's `data-file-kind` attribute. */
+/**
+ * Classify a file destination for the pill's `data-file-kind` attribute.
+ */
 export function getFileKind(href: string): string {
   const path = href.split(/[?#]/, 1)[0]
   const dot = path.lastIndexOf('.')
@@ -73,7 +85,9 @@ export function getFileKind(href: string): string {
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
 
-/** A minimal document-outline icon, drawn in `currentColor`. */
+/**
+ * A minimal document-outline icon, drawn in `currentColor`.
+ */
 function buildFileIcon(): SVGSVGElement {
   const svg = document.createElementNS(SVG_NS, 'svg')
   svg.setAttribute('class', 'md-file-view-icon')

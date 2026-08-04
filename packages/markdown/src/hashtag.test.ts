@@ -5,7 +5,9 @@ import { type InlineElement, parseInline } from './inline.ts'
 import { LEZER_NODE_IDS } from './node-ids.ts'
 import { gfmBlockOnlyParser } from './parser.ts'
 
-/** Every `#tag` slice in the inline element tree, in document order. */
+/**
+ * Every `#tag` slice in the inline element tree, in document order.
+ */
 function findTags(text: string): string[] {
   const tags: string[] = []
   const walk = (elements: readonly InlineElement[]): void => {

@@ -1,38 +1,64 @@
-/** The parsed source payload of an Obsidian-style `![[target]]` embed. */
+/**
+ * The parsed source payload of an Obsidian-style `![[target]]` embed.
+ */
 export interface ParsedWikiEmbed {
-  /** Target before an optional alias or size suffix. */
+  /**
+   * Target before an optional alias or size suffix.
+   */
   target: string
-  /** Non-size suffix after `|`, or `''` when absent. */
+  /**
+   * Non-size suffix after `|`, or `''` when absent.
+   */
   display: string
-  /** Requested display width in CSS pixels, or `null`. */
+  /**
+   * Requested display width in CSS pixels, or `null`.
+   */
   width: number | null
-  /** Requested display height in CSS pixels, or `null`. */
+  /**
+   * Requested display height in CSS pixels, or `null`.
+   */
   height: number | null
 }
 
-/** A resolved wiki embed rendered through Meowdown's existing atom views. */
+/**
+ * A resolved wiki embed rendered through Meowdown's existing atom views.
+ */
 export type WikiEmbedResolution =
   | {
       kind: 'image'
-      /** Source passed to `resolveImageUrl` and image click handlers. Defaults to `target`. */
+      /**
+       * Source passed to `resolveImageUrl` and image click handlers. Defaults to `target`.
+       */
       src?: string
-      /** Image alt text. Defaults to the alias or target basename. */
+      /**
+       * Image alt text. Defaults to the alias or target basename.
+       */
       alt?: string
     }
   | {
       kind: 'file'
-      /** Destination passed to file metadata and click handlers. Defaults to `target`. */
+      /**
+       * Destination passed to file metadata and click handlers. Defaults to `target`.
+       */
       href?: string
-      /** File pill label. Defaults to the alias or target basename. */
+      /**
+       * File pill label. Defaults to the alias or target basename.
+       */
       name?: string
-      /** Optional file title. */
+      /**
+       * Optional file title.
+       */
       title?: string
     }
   | {
       kind: 'note'
-      /** Target passed to wikilink click handlers. Defaults to the source target. */
+      /**
+       * Target passed to wikilink click handlers. Defaults to the source target.
+       */
       target?: string
-      /** Chip label. Defaults to the source alias or resolved target. */
+      /**
+       * Chip label. Defaults to the source alias or resolved target.
+       */
       display?: string
     }
 
@@ -43,7 +69,9 @@ export type WikiEmbedResolution =
  */
 export type WikiEmbedResolver = (embed: ParsedWikiEmbed) => WikiEmbedResolution | undefined
 
-/** Host options for wiki-embed parsing. */
+/**
+ * Host options for wiki-embed parsing.
+ */
 export interface WikiEmbedOptions {
   resolveWikiEmbed?: WikiEmbedResolver
 }
@@ -56,7 +84,9 @@ function positiveInteger(value: string | undefined): number | null {
   return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null
 }
 
-/** Parse `![[target]]`, `![[target|alias]]`, `![[target|width]]`, or `![[target|widthxheight]]`. */
+/**
+ * Parse `![[target]]`, `![[target|alias]]`, `![[target|width]]`, or `![[target|widthxheight]]`.
+ */
 export function parseWikiEmbed(source: string): ParsedWikiEmbed {
   const inner = source.replace(/^!\[\[/, '').replace(/\]\]$/, '')
   const pipe = inner.lastIndexOf('|')
@@ -77,12 +107,16 @@ export function parseWikiEmbed(source: string): ParsedWikiEmbed {
   return { target, display: '', width, height }
 }
 
-/** Rewrite a wiki image embed with a persisted display size. */
+/**
+ * Rewrite a wiki image embed with a persisted display size.
+ */
 export function formatSizedWikiEmbed(target: string, width: number, height: number): string {
   return `![[${target}|${Math.round(width)}x${Math.round(height)}]]`
 }
 
-/** Last path component of a target, with a note heading/block fragment removed. */
+/**
+ * Last path component of a target, with a note heading/block fragment removed.
+ */
 export function wikiEmbedBasename(target: string): string {
   const path = target.split(/[?#]/, 1)[0]
   const segment = path.split(/[/\\]/).findLast(Boolean) ?? path

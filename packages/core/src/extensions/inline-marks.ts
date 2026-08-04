@@ -7,19 +7,33 @@ import type { MarkName } from './mark-names.ts'
  * (plus an optional trailing size comment) or a resolved wiki image embed.
  */
 export interface MdImageAttrs {
-  /** The image destination, exactly as written in the source. */
+  /**
+   * The image destination, exactly as written in the source.
+   */
   src: string
-  /** The image alt text. */
+  /**
+   * The image alt text.
+   */
   alt: string
-  /** The image title, or `''` when the source has none. */
+  /**
+   * The image title, or `''` when the source has none.
+   */
   title: string
-  /** Display width in CSS pixels from the trailing comment, or `null`. */
+  /**
+   * Display width in CSS pixels from the trailing comment, or `null`.
+   */
   width: number | null
-  /** Display height in CSS pixels from the trailing comment, or `null`. */
+  /**
+   * Display height in CSS pixels from the trailing comment, or `null`.
+   */
   height: number | null
-  /** `wikiEmbed` when the source is `![[target]]`; otherwise `null`. */
+  /**
+   * `wikiEmbed` when the source is `![[target]]`; otherwise `null`.
+   */
   syntax: 'wikiEmbed' | null
-  /** Original wiki-embed target used when persisting a resized image, or `null`. */
+  /**
+   * Original wiki-embed target used when persisting a resized image, or `null`.
+   */
   wikiTarget: string | null
 }
 
@@ -146,7 +160,9 @@ function defineMdTag() {
   })
 }
 
-/** Covers the whole `[[target]]`/`[[target|alias]]` source. */
+/**
+ * Covers the whole `[[target]]`/`[[target|alias]]` source.
+ */
 function defineMdWikilink() {
   return defineMarkSpec<'mdWikilink', MdWikilinkAttrs>({
     name: 'mdWikilink' satisfies MarkName,
@@ -167,11 +183,17 @@ export interface MdWikilinkAttrs {
  * `resolveFileLink` claimed as a file attachment, rendered as a file pill.
  */
 export interface MdFileAttrs {
-  /** The link destination, exactly as written in the source. */
+  /**
+   * The link destination, exactly as written in the source.
+   */
   href: string
-  /** The display name: the raw label slice, or the `href` basename when the label is empty. */
+  /**
+   * The display name: the raw label slice, or the `href` basename when the label is empty.
+   */
   name: string
-  /** The link title, or `''` when the source has none. */
+  /**
+   * The link title, or `''` when the source has none.
+   */
   title: string
 }
 
@@ -194,11 +216,15 @@ function defineMdFile() {
  * math expression, rendered by `MathMarkView`.
  */
 export interface MdMathAttrs {
-  /** The TeX source between the dollar delimiters. */
+  /**
+   * The TeX source between the dollar delimiters.
+   */
   formula: string
 }
 
-/** Covers the whole `$formula$` source, dollars included. */
+/**
+ * Covers the whole `$formula$` source, dollars included.
+ */
 function defineMdMath() {
   return defineMarkSpec<'mdMath', MdMathAttrs>({
     name: 'mdMath' satisfies MarkName,
@@ -209,7 +235,9 @@ function defineMdMath() {
   })
 }
 
-/** mdPack keys for units that store no extra data; the syntax marks carry it. */
+/**
+ * mdPack keys for units that store no extra data; the syntax marks carry it.
+ */
 export type MdPackSimpleKey =
   | 'bold'
   | 'italic'

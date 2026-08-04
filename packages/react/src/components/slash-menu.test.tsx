@@ -374,7 +374,9 @@ describe('SlashMenu', () => {
   })
 })
 
-/** A caret position inside the first body cell's paragraph. */
+/**
+ * A caret position inside the first body cell's paragraph.
+ */
 function firstBodyCellCaret(doc: EditorNode): number {
   let caret = -1
   doc.descendants((node, pos) => {

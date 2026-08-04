@@ -1,4 +1,6 @@
-/** Human-readable descriptions of the editor's formatting and heading shortcuts. */
+/**
+ * Human-readable descriptions of the editor's formatting and heading shortcuts.
+ */
 export const EDITOR_KEY_BINDINGS = {
   'Mod-b': 'Bold',
   'Mod-i': 'Italic',

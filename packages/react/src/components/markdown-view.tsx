@@ -57,7 +57,9 @@ import { normalizeDOMOutputSpec, type TypedDOMOutputSpec } from './dom-output-sp
 import { MathRender } from './math-render.tsx'
 import { MermaidRender } from './mermaid-render.tsx'
 
-/** Payload for {@link TaskClickHandler}. */
+/**
+ * Payload for {@link TaskClickHandler}.
+ */
 export interface TaskClickPayload {
   /**
    * Zero-based position of the clicked checkbox among all the checkboxes this
@@ -66,9 +68,13 @@ export interface TaskClickPayload {
    * same source.
    */
   index: number
-  /** The checkbox's rendered state. The view never flips it — see the handler doc. */
+  /**
+   * The checkbox's rendered state. The view never flips it — see the handler doc.
+   */
   checked: boolean
-  /** The item's list marker as written (`+` renders a circle checkbox, `-`/`*` a square). */
+  /**
+   * The item's list marker as written (`+` renders a circle checkbox, `-`/`*` a square).
+   */
   marker: ListMarker
   /**
    * First line of the item's own inline content, exactly as it appears in the
@@ -77,7 +83,9 @@ export interface TaskClickPayload {
    * mismatch instead of toggling the wrong item.
    */
   text: string
-  /** The originating click. Read modifier keys or position a popover from it. */
+  /**
+   * The originating click. Read modifier keys or position a popover from it.
+   */
   event: globalThis.MouseEvent
 }
 
@@ -89,11 +97,17 @@ export interface TaskClickPayload {
 export type TaskClickHandler = (payload: TaskClickPayload) => void
 
 export interface MarkdownViewProps {
-  /** The Markdown to render. Live: changing it re-renders the content. */
+  /**
+   * The Markdown to render. Live: changing it re-renders the content.
+   */
   markdown: string
-  /** Mark mode for the read-only view. Defaults to `'hide'`. */
+  /**
+   * Mark mode for the read-only view. Defaults to `'hide'`.
+   */
   markMode?: MarkMode
-  /** Peel a leading YAML frontmatter block before rendering. Off by default. */
+  /**
+   * Peel a leading YAML frontmatter block before rendering. Off by default.
+   */
   frontmatter?: boolean
   /**
    * Whether rendered links, images, file pills, and task checkboxes can be activated.
@@ -109,28 +123,46 @@ export interface MarkdownViewProps {
    * the view exists to show.
    */
   expandCollapsed?: boolean
-  /** Map an image `src` to a displayable URL, or `undefined` to skip it. */
+  /**
+   * Map an image `src` to a displayable URL, or `undefined` to skip it.
+   */
   resolveImageUrl?: (src: string) => string | undefined
   /**
    * Claim a `[label](url)` link as a file pill instead of a regular link.
    * Must be pure; return `false` for links that should render normally.
    */
   resolveFileLink?: FileLinkResolver
-  /** Classify `![[target]]` as an image, file, or note; unresolved source stays literal. */
+  /**
+   * Classify `![[target]]` as an image, file, or note; unresolved source stays literal.
+   */
   resolveWikiEmbed?: WikiEmbedResolver
-  /** Resolve metadata shown on a file pill. */
+  /**
+   * Resolve metadata shown on a file pill.
+   */
   resolveFileInfo?: FileInfoResolver
-  /** Called when a rendered wikilink is clicked. Pass a stable function. */
+  /**
+   * Called when a rendered wikilink is clicked. Pass a stable function.
+   */
   onWikilinkClick?: WikilinkClickHandler
-  /** Called when a rendered Markdown link is clicked. Pass a stable function. */
+  /**
+   * Called when a rendered Markdown link is clicked. Pass a stable function.
+   */
   onLinkClick?: LinkClickHandler
-  /** Called when a rendered image is clicked. Pass a stable function. */
+  /**
+   * Called when a rendered image is clicked. Pass a stable function.
+   */
   onImageClick?: ImageClickHandler
-  /** Called when a rendered file pill is clicked. Pass a stable function. */
+  /**
+   * Called when a rendered file pill is clicked. Pass a stable function.
+   */
   onFileClick?: FileClickHandler
-  /** Called when a rendered task checkbox is clicked. Pass a stable function. */
+  /**
+   * Called when a rendered task checkbox is clicked. Pass a stable function.
+   */
   onTaskClick?: TaskClickHandler
-  /** Extra class on the content root (alongside `ProseMirror meowdown-content`). */
+  /**
+   * Extra class on the content root (alongside `ProseMirror meowdown-content`).
+   */
   className?: string
 }
 
@@ -148,7 +180,9 @@ interface RenderContext {
   onTaskClick?: TaskClickHandler
   referenceDefinitions: ReferenceDefinitions
   referenceDefinitionNodes: ReadonlySet<ProseMirrorNode>
-  /** Document-order checkbox counter feeding {@link TaskClickPayload.index}. */
+  /**
+   * Document-order checkbox counter feeding {@link TaskClickPayload.index}.
+   */
   taskCounter: { value: number }
   keyCounter: { value: number }
 }
@@ -462,7 +496,9 @@ function MathView(props: { formula: string; children: ReactNode }): ReactElement
   )
 }
 
-/** A `math` code block: the rendered formula alone, the source while KaTeX loads. */
+/**
+ * A `math` code block: the rendered formula alone, the source while KaTeX loads.
+ */
 function MathCodeBlock({ code }: { code: string }): ReactElement {
   const katex = useKaTeX(true)
   if (!katex) return <CodeBlock code={code} language="math" />
@@ -490,7 +526,9 @@ function MermaidCodeBlock({ code }: { code: string }): ReactElement {
   )
 }
 
-/** Wrap inline `children` in one mark, special-casing the view/link marks. */
+/**
+ * Wrap inline `children` in one mark, special-casing the view/link marks.
+ */
 function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): ReactNode {
   const name = mark.type.name as MarkName
   switch (name) {
@@ -557,7 +595,9 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
 
 interface InlineRun {
   text: string
-  /** Marks in ProseMirror's canonical order (outermost first). */
+  /**
+   * Marks in ProseMirror's canonical order (outermost first).
+   */
   marks: readonly Mark[]
 }
 
@@ -620,7 +660,9 @@ function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode 
   return renderRuns(runs, 0, context)
 }
 
-/** A collapsed list renders as an expanded one */
+/**
+ * A collapsed list renders as an expanded one
+ */
 function expandCollapsedList(node: ProseMirrorNode): ProseMirrorNode {
   const attrs = node.attrs as MeowdownListAttrs
   if (!attrs.collapsed) return node

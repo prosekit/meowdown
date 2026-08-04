@@ -5,7 +5,9 @@ import { type InlineElement, parseInline } from './inline.ts'
 import { LEZER_NODE_IDS } from './node-ids.ts'
 import { gfmBlockOnlyParser } from './parser.ts'
 
-/** Every `[[target]]` slice in the inline element tree, in document order. */
+/**
+ * Every `[[target]]` slice in the inline element tree, in document order.
+ */
 function findWikilinks(text: string): string[] {
   const links: string[] = []
   const walk = (elements: readonly InlineElement[]): void => {
@@ -20,7 +22,9 @@ function findWikilinks(text: string): string[] {
   return links
 }
 
-/** Render an inline element tree into an indented, human-readable string. */
+/**
+ * Render an inline element tree into an indented, human-readable string.
+ */
 function formatTree(text: string): string {
   const nameById = new Map(Object.entries(LEZER_NODE_IDS).map(([name, id]) => [id, name]))
   const format = (element: InlineElement, depth: number): string => {

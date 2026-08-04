@@ -14,7 +14,9 @@ export interface WikilinkHit {
   target: string
 }
 
-/** Exported for tests. */
+/**
+ * Exported for tests.
+ */
 export function findWikilinkAt(state: EditorState, pos: number): WikilinkHit | undefined {
   const range = getMarkRangeAt(state, pos, 'mdWikilink')
   if (!range) return
@@ -42,7 +44,9 @@ export function findWikilinkForElement(
 
 export interface WikilinkClickPayload {
   target: string
-  /** The originating click, or the `Enter`/`Mod-Enter` key press that followed the link. */
+  /**
+   * The originating click, or the `Enter`/`Mod-Enter` key press that followed the link.
+   */
   event: MouseEvent | KeyboardEvent
 }
 

@@ -13,7 +13,9 @@ import styles from './wikilink-hover-card.module.css'
 const OPEN_DELAY = 300
 const CLOSE_DELAY = 100
 
-/** Props for {@link WikilinkHoverCard}. */
+/**
+ * Props for {@link WikilinkHoverCard}.
+ */
 export interface WikilinkHoverCardProps {
   /**
    * Render the card body from the hovered wiki link. Returning `null` renders
@@ -24,7 +26,9 @@ export interface WikilinkHoverCardProps {
    * re-runs it for the current link.
    */
   readonly children: (hit: WikilinkHoverHit) => ReactNode | Promise<ReactNode>
-  /** Optional class applied to the popup, after the default card surface. */
+  /**
+   * Optional class applied to the popup, after the default card surface.
+   */
   readonly className?: string
 }
 

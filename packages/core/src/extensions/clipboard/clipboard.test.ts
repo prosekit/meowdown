@@ -19,7 +19,9 @@ function captureClipboardHTML(fixture: Fixture, markdown: string): string {
   return view.serializeForClipboard(doc.slice(0, doc.content.size)).dom.innerHTML
 }
 
-/** The clipboard HTML of a select-all text selection, `transformCopied` included. */
+/**
+ * The clipboard HTML of a select-all text selection, `transformCopied` included.
+ */
 function captureSelectionHTML(fixture: Fixture, markdown: string): string {
   const { editor, view } = fixture
   fixture.set(markdownToDoc(markdown, { nodes: editor.nodes }))

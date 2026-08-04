@@ -86,7 +86,9 @@ export function defineCodeBlockSyntaxHighlight(): Extension {
   })
 }
 
-/** A highlighted span of code: `[from, to)` carries the `@lezer/highlight` classes. */
+/**
+ * A highlighted span of code: `[from, to)` carries the `@lezer/highlight` classes.
+ */
 export type CodeToken = readonly [from: number, to: number, classes: string]
 
 function tokenize(code: string, support: LanguageSupport): CodeToken[] {

@@ -64,7 +64,9 @@ export function getIsTouchInput(): boolean {
   return lastIsTouchInput
 }
 
-/** Calls `listener` whenever {@link getIsTouchInput} may report a new value. */
+/**
+ * Calls `listener` whenever {@link getIsTouchInput} may report a new value.
+ */
 export function onIsTouchInputChange(listener: () => void): () => void {
   listeners.add(listener)
   return () => {
@@ -72,7 +74,9 @@ export function onIsTouchInputChange(listener: () => void): () => void {
   }
 }
 
-/** @internal Restores the initial no-events-yet state between tests. */
+/**
+ * @internal
+ */
 export function resetIsTouchInputForTest(): void {
   lastIsTouchInput = false
 }

@@ -4,11 +4,17 @@ import { useRef, useState, type ReactElement } from 'react'
 const COPIED_RESET_MS = 1500
 
 interface CopyButtonProps {
-  /** Returns the text written to the clipboard, evaluated at copy time. */
+  /**
+   * Returns the text written to the clipboard, evaluated at copy time.
+   */
   getText: () => string
-  /** aria-label / title in the idle state (e.g. "Copy code", "Copy link"). */
+  /**
+   * aria-label / title in the idle state (e.g. "Copy code", "Copy link").
+   */
   label: string
-  /** Fired after a successful copy (e.g. to show a toast). */
+  /**
+   * Fired after a successful copy (e.g. to show a toast).
+   */
   onCopy?: () => void
   className?: string
   'data-testid'?: string

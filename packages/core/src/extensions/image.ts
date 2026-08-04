@@ -22,7 +22,9 @@ import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
 
 type ImageUrlResolver = (src: string) => string | undefined
 
-/** Options for {@link defineImage}. */
+/**
+ * Options for {@link defineImage}.
+ */
 export interface ImageOptions {
   /**
    * Map a markdown `src` to a displayable URL, or `undefined` to skip rendering
@@ -38,7 +40,9 @@ export interface ImageOptions {
   persistTweetHeight?: boolean
 }
 
-/** Show an `src` as-is when it is an http(s) URL, otherwise skip rendering it. */
+/**
+ * Show an `src` as-is when it is an http(s) URL, otherwise skip rendering it.
+ */
 export function defaultResolveImageUrl(src: string): string | undefined {
   return /^https?:\/\//i.test(src) ? src : undefined
 }
@@ -142,7 +146,9 @@ function rewriteMagicComment(
   view.dispatch(transaction)
 }
 
-/** Persist a resized width and height into the trailing magic comment. */
+/**
+ * Persist a resized width and height into the trailing magic comment.
+ */
 function commitImageSize(
   view: EditorView,
   content: HTMLElement,
@@ -259,7 +265,9 @@ class ImageMarkView implements MarkView {
     return !this.#contentDOM.contains(mutation.target)
   }
 
-  /** Build the inline preview for the image `src`: an embed iframe or a resizable `<img>`. */
+  /**
+   * Build the inline preview for the image `src`: an embed iframe or a resizable `<img>`.
+   */
   #renderPreview(): HTMLElement | undefined {
     const { src } = this.#attrs
     const embed = matchEmbed(src)

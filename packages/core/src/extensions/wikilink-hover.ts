@@ -6,13 +6,19 @@ import { findWikilinkAt, findWikilinkForElement, type WikilinkHit } from './wiki
 
 const wikilinkHoverKey = new PluginKey('meowdown-wikilink-hover')
 
-/** A wikilink currently under the pointer. */
+/**
+ * A wikilink currently under the pointer.
+ */
 export interface WikilinkHoverHit extends WikilinkHit {
-  /** The rendered wikilink label used as the popup anchor. */
+  /**
+   * The rendered wikilink label used as the popup anchor.
+   */
   element: HTMLElement
 }
 
-/** Called once on wikilink enter and with `undefined` on leave or invalidation. */
+/**
+ * Called once on wikilink enter and with `undefined` on leave or invalidation.
+ */
 export type WikilinkHoverHandler = (hit: WikilinkHoverHit | undefined) => void
 
 /**

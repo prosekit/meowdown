@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest'
 import { collectInlineElements, parseInline } from './inline.ts'
 import { LEZER_NODE_IDS } from './node-ids.ts'
 
-/** Every `URL` node the parser emits for `text`, as `[from, to, slice]`. */
+/**
+ * Every `URL` node the parser emits for `text`, as `[from, to, slice]`.
+ */
 function urls(text: string): Array<[number, number, string]> {
   const elements = parseInline(text)
   const nodes = collectInlineElements(elements, (node) => node.type === LEZER_NODE_IDS.URL)

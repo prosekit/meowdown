@@ -179,7 +179,9 @@ describe('table cell is inline-only', () => {
   })
 })
 
-/** A header row plus a data row whose first cell holds the caret. */
+/**
+ * A header row plus a data row whose first cell holds the caret.
+ */
 function cellCaretTable(n: ReturnType<typeof setupFixture>['n']): EditorNode {
   return n.doc(
     n.table(

@@ -11,9 +11,13 @@ import type { MeowdownTableCellAttrs, TableColumnAlign } from '../extensions/tab
 import { CHAR_BACKTICK, CHAR_TILDE } from '../unicode.ts'
 import { longestCharRun } from '../utils/backticks.ts'
 
-/** Options for {@link docToMarkdown}. */
+/**
+ * Options for {@link docToMarkdown}.
+ */
 export interface DocToMarkdownOptions {
-  /** Whether to serialize the doc's `frontmatter` attribute as a leading `---` block. Off by default. */
+  /**
+   * Whether to serialize the doc's `frontmatter` attribute as a leading `---` block. Off by default.
+   */
   frontmatter?: boolean
 }
 
@@ -58,7 +62,9 @@ function emitFrontmatter(body: Frontmatter, out: MdOut): void {
   out.closeBlock()
 }
 
-/** Heading prefixes indexed by level (1..6). Index 0 is a sentinel. */
+/**
+ * Heading prefixes indexed by level (1..6). Index 0 is a sentinel.
+ */
 const HEADING_PREFIX: ReadonlyArray<string> = [
   '',
   '# ',
@@ -96,11 +102,17 @@ function emitHeading(node: ProseMirrorNode, out: MdOut): void {
 
 class MdOut {
   private parts: string[] = []
-  /** Prefix applied to every new line inside the current nesting. */
+  /**
+   * Prefix applied to every new line inside the current nesting.
+   */
   linePrefix = ''
-  /** One-shot prefix for the next line only (e.g. "- " on a list item start). */
+  /**
+   * One-shot prefix for the next line only (e.g. "- " on a list item start).
+   */
   private pendingFirst: string | null = null
-  /** True iff the next emitted character starts a new line. */
+  /**
+   * True iff the next emitted character starts a new line.
+   */
   private atLineStart = true
   /**
    * If non-null, a blank line will be emitted before the next write using
@@ -156,7 +168,9 @@ class MdOut {
     this.deferredBlankPrefix = this.linePrefix
   }
 
-  /** End the current block; the next write gets a blank line before it. */
+  /**
+   * End the current block; the next write gets a blank line before it.
+   */
   closeBlock(): void {
     // An empty block (e.g. an empty list item `- `) still owns a line: flush
     // its pending marker, trimmed, so it is neither dropped nor left dangling.
@@ -450,7 +464,9 @@ function toIndentedCode(code: string): string | undefined {
   return lines.join('\n')
 }
 
-/** Whether any content line would read as a closing `$$` fence. */
+/**
+ * Whether any content line would read as a closing `$$` fence.
+ */
 function hasDollarFenceLine(code: string): boolean {
   return code.split('\n').some((line) => line.trim() === '$$')
 }
