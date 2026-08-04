@@ -53,12 +53,17 @@ export function defineSharedConfig({
         },
         provider: playwright({
           launchOptions: {
+            // Opt into the new Chrome headless mode by using "chromium" channel. Along
+            // with `playwright install chromium --no-shell`, we no longer need to
+            // download two copies of Chromium anymore.
+            // See https://playwright.dev/docs/browsers#chromium-new-headless-mode
             channel: browserName === 'chromium' ? 'chrome' : undefined,
           },
           contextOptions: {
             reducedMotion: 'reduce',
             hasTouch: true,
-            // A list of permissions to grant to all pages in this context. See https://playwright.dev/docs/api/class-browsercontext#browser-context-grant-permissions
+            // A list of permissions to grant to all pages in this context.
+            // See https://playwright.dev/docs/api/class-browsercontext#browser-context-grant-permissions
             permissions:
               browserName === 'chromium' ? ['clipboard-read', 'clipboard-write'] : undefined,
           },
