@@ -235,7 +235,9 @@ function defineMdMath() {
   })
 }
 
-/** mdPack keys for units that store no extra data; their own marks carry it. */
+/**
+ * mdPack keys for units that store no extra data; their own marks carry it.
+ */
 export type MdPackSimpleKey =
   | 'bold'
   | 'italic'

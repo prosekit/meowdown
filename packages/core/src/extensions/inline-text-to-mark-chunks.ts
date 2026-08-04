@@ -168,7 +168,9 @@ function createUnitPack(
   return marks.mdPack.create({ ...attrs, slot: 1 })
 }
 
-/** Drop the surrounding `"" '' ()` delimiters of a `LinkTitle` slice and unescape. */
+/**
+ * Drop the surrounding `"" '' ()` delimiters of a `LinkTitle` slice and unescape.
+ */
 function unquoteTitle(raw: string): string {
   return raw.slice(1, -1).replaceAll(/\\(.)/g, '$1')
 }
