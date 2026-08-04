@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.64.1](https://github.com/prosekit/meowdown/compare/v0.64.0...v0.64.1) (2026-08-04)
+
+
+### Bug Fixes
+
+* cycle a nested list item back to a bullet with `cycleBulletOrderedList` ([#432](https://github.com/prosekit/meowdown/issues/432)) ([b3d7b3c](https://github.com/prosekit/meowdown/commit/b3d7b3c7b5d8adce12beb4be4681cb149a79837f))
+* render two identical adjacent units as two previews ([#431](https://github.com/prosekit/meowdown/issues/431)) ([46e058e](https://github.com/prosekit/meowdown/commit/46e058e3f951aba05ae9076b9fd1eeaa8eccf563))
+
 ## [0.64.0](https://github.com/prosekit/meowdown/compare/v0.63.1...v0.64.0) (2026-08-03)
 
 
