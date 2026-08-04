@@ -80,8 +80,8 @@ jobs:
 
       - uses: ./.github/actions/setup
 
-      - name: Install
-        run: pnpm run test:install:${{ matrix.config.browser }}
+      # - name: Install
+      # run: pnpm run test:install:${{ matrix.config.browser }}
 
       - name: Test
         run: pnpm run test
