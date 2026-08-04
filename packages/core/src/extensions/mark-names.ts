@@ -47,7 +47,7 @@ interface UnitKind {
 /**
  * Every inline unit kind that carries an `mdPack`, keyed by the pack's `key` attr.
  */
-export const UNIT_KINDS = {
+const UNIT_KINDS = {
   italic: {},
   bold: {},
   code: {},
