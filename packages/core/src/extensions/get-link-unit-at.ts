@@ -74,11 +74,10 @@ function lastMarkRunIn(
  */
 export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undefined {
   const linkText = getMarkRangeAt(state, pos, 'mdLinkText')
-  // A position inside nested units carries one `mdPack` per level and the mark
-  // set's order follows edit history, so select the pack by `key` instead of
-  // taking whichever sits first. `[text](url)` and `<url>` carry a pack over
-  // the whole unit; bare/www autolinks carry only `mdLinkText`, so fall back to
-  // that run.
+  // A position inside nested units carries one `mdPack` per level, so select
+  // the pack by `key`: a link inside `**bold**` must find its own pack, not
+  // the outer unit's. `[text](url)` and `<url>` carry a pack over the whole
+  // unit; bare/www autolinks carry only `mdLinkText`, so fall back to that run.
   const pack =
     getMarkRangeAt(state, pos, 'mdPack', { key: 'link' } satisfies Partial<MdPackAttrs>) ??
     getMarkRangeAt(state, pos, 'mdPack', { key: 'autolink' } satisfies Partial<MdPackAttrs>)
