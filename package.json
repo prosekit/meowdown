@@ -30,7 +30,7 @@
     "@ocavue/eslint-config": "^4.13.0",
     "@ocavue/tsconfig": "^0.7.1",
     "@types/node": "^24.0.0",
-    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/coverage-v8": "^5.0.0-beta.7",
     "clsx": "^2.1.1",
     "eslint": "^10.8.0",
     "knip": "^6.31.0",
@@ -42,7 +42,7 @@
     "simple-git-hooks": "^2.13.1",
     "typescript": "^6.0.3",
     "vite": "^8.2.0",
-    "vitest": "^4.1.10"
+    "vitest": "^5.0.0-beta.7"
   },
   "nano-staged": {
     "*": "oxfmt --no-error-on-unmatched-pattern"

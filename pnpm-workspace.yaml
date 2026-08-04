@@ -8,6 +8,14 @@ dedupePeers: true
 
 strictPeerDependencies: true
 
+# vitest-browser-react and vitest-browser-commands still declare vitest ^4 peer
+# deps, but they work with the v5 beta. Allow the newer versions to satisfy them.
+peerDependencyRules:
+  allowedVersions:
+    'vitest-browser-react>vitest': '^5.0.0-beta.7'
+    'vitest-browser-commands>vitest': '^5.0.0-beta.7'
+    'vitest-browser-commands>@vitest/browser-playwright': '^5.0.0-beta.7'
+
 trustPolicy: no-downgrade
 
 trustPolicyIgnoreAfter: 10080 # 7 days
@@ -24,6 +32,10 @@ minimumReleaseAgeExclude:
 
 allowBuilds:
   simple-git-hooks: false
+
+patchedDependencies:
+  vitest-browser-commands@0.2.1: patches/vitest-browser-commands@0.2.1.patch
+  vitest-browser-react@2.2.0: patches/vitest-browser-react@2.2.0.patch
 
 # "blockExoticSubdeps" and "overrides" install packages from pkg.pr.new
 # blockExoticSubdeps: false
