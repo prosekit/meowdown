@@ -318,6 +318,23 @@ describe('link', () => {
     `)
   })
 
+  it('adjacent and identical', () => {
+    expect(parse('[a](x)[a](x)')).toMatchInlineSnapshot(`
+      "
+      [0, 1]   mdPack(key=link,data={"href":"x","title":""}) + mdLinkText(href=x) + mdMark
+      [1, 2]   mdPack(key=link,data={"href":"x","title":""}) + mdLinkText(href=x)
+      [2, 4]   mdPack(key=link,data={"href":"x","title":""}) + mdMark
+      [4, 5]   mdPack(key=link,data={"href":"x","title":""}) + mdLinkUri
+      [5, 6]   mdPack(key=link,data={"href":"x","title":""}) + mdMark
+      [6, 7]   mdPack(key=link,data={"href":"x","title":""},slot=1) + mdLinkText(href=x) + mdMark
+      [7, 8]   mdPack(key=link,data={"href":"x","title":""},slot=1) + mdLinkText(href=x)
+      [8, 10]  mdPack(key=link,data={"href":"x","title":""},slot=1) + mdMark
+      [10, 11] mdPack(key=link,data={"href":"x","title":""},slot=1) + mdLinkUri
+      [11, 12] mdPack(key=link,data={"href":"x","title":""},slot=1) + mdMark
+      "
+    `)
+  })
+
   it('title', () => {
     expect(parse('[docs](url "title")')).toMatchInlineSnapshot(`
       "
@@ -504,7 +521,16 @@ describe('image', () => {
   it('image', () => {
     expect(parse('![ALT](URL "TITLE")')).toMatchInlineSnapshot(`
       "
-      [0, 19] mdImage(src=URL,alt=ALT,title=TITLE)
+      [0, 19] mdPack(key=image) + mdImage(src=URL,alt=ALT,title=TITLE)
+      "
+    `)
+  })
+
+  it('adjacent and identical', () => {
+    expect(parse('![a](x.png)![a](x.png)')).toMatchInlineSnapshot(`
+      "
+      [0, 11]  mdPack(key=image) + mdImage(src=x.png,alt=a)
+      [11, 22] mdPack(key=image,slot=1) + mdImage(src=x.png,alt=a)
       "
     `)
   })
@@ -512,7 +538,7 @@ describe('image', () => {
   it('only URL', () => {
     expect(parse('![](image.png)')).toMatchInlineSnapshot(`
       "
-      [0, 14] mdImage(src=image.png)
+      [0, 14] mdPack(key=image) + mdImage(src=image.png)
       "
     `)
   })
@@ -520,7 +546,7 @@ describe('image', () => {
   it('empty title', () => {
     expect(parse('![a](http://x "")')).toMatchInlineSnapshot(`
       "
-      [0, 17] mdImage(src=http://x,alt=a)
+      [0, 17] mdPack(key=image) + mdImage(src=http://x,alt=a)
       "
     `)
   })
@@ -528,7 +554,7 @@ describe('image', () => {
   it('formatted alt', () => {
     expect(parse('![a **b** c](http://x)')).toMatchInlineSnapshot(`
       "
-      [0, 22] mdImage(src=http://x,alt=a **b** c)
+      [0, 22] mdPack(key=image) + mdImage(src=http://x,alt=a **b** c)
       "
     `)
   })
@@ -537,7 +563,7 @@ describe('image', () => {
     expect(parse('text ![a](url) text')).toMatchInlineSnapshot(`
       "
       [0, 5]
-      [5, 14]  mdImage(src=url,alt=a)
+      [5, 14]  mdPack(key=image) + mdImage(src=url,alt=a)
       [14, 19]
       "
     `)
@@ -586,7 +612,7 @@ describe('image', () => {
   it('folds a trailing width comment into the image mark', () => {
     expect(parse('![a](u)<!-- {"width":320} -->')).toMatchInlineSnapshot(`
       "
-      [0, 29] mdImage(src=u,alt=a,width=320)
+      [0, 29] mdPack(key=image) + mdImage(src=u,alt=a,width=320)
       "
     `)
   })
@@ -594,7 +620,7 @@ describe('image', () => {
   it('keeps a non-adjacent comment separate', () => {
     expect(parse('![a](u) <!-- {"width":320} -->')).toMatchInlineSnapshot(`
       "
-      [0, 7]  mdImage(src=u,alt=a)
+      [0, 7]  mdPack(key=image) + mdImage(src=u,alt=a)
       [7, 30]
       "
     `)
@@ -604,7 +630,7 @@ describe('image', () => {
     expect(parse('x ![a](u)<!-- {"width":50} --> y')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 30]  mdImage(src=u,alt=a,width=50)
+      [2, 30]  mdPack(key=image) + mdImage(src=u,alt=a,width=50)
       [30, 32]
       "
     `)
@@ -613,7 +639,7 @@ describe('image', () => {
   it('ignores a non-metadata comment after an image', () => {
     expect(parse('![a](u)<!-- note -->')).toMatchInlineSnapshot(`
       "
-      [0, 7]  mdImage(src=u,alt=a)
+      [0, 7]  mdPack(key=image) + mdImage(src=u,alt=a)
       [7, 20]
       "
     `)
@@ -656,7 +682,7 @@ describe('wiki embed', () => {
       }),
     ).toMatchInlineSnapshot(`
       "
-      [0, 25] mdImage(src=assets/photo.png,alt=photo.png,width=320,syntax=wikiEmbed,wikiTarget=assets/photo.png)
+      [0, 25] mdPack(key=image) + mdImage(src=assets/photo.png,alt=photo.png,width=320,syntax=wikiEmbed,wikiTarget=assets/photo.png)
       "
     `)
   })
@@ -668,7 +694,7 @@ describe('wiki embed', () => {
       }),
     ).toMatchInlineSnapshot(`
       "
-      [0, 29] mdImage(src=asset://photo,alt=Photo,width=320,height=180,syntax=wikiEmbed,wikiTarget=assets/photo.png)
+      [0, 29] mdPack(key=image) + mdImage(src=asset://photo,alt=Photo,width=320,height=180,syntax=wikiEmbed,wikiTarget=assets/photo.png)
       "
     `)
   })
@@ -680,7 +706,7 @@ describe('wiki embed', () => {
       }),
     ).toMatchInlineSnapshot(`
       "
-      [0, 30] mdFile(href=docs/report.pdf,name=Quarterly)
+      [0, 30] mdPack(key=file) + mdFile(href=docs/report.pdf,name=Quarterly)
       "
     `)
   })
@@ -692,7 +718,7 @@ describe('wiki embed', () => {
       }),
     ).toMatchInlineSnapshot(`
       "
-      [0, 30] mdWikilink(target=Projects/Plan,display=Launch plan)
+      [0, 30] mdPack(key=wikilink) + mdWikilink(target=Projects/Plan,display=Launch plan)
       "
     `)
   })
@@ -707,9 +733,9 @@ describe('wiki embed', () => {
       }),
     ).toMatchInlineSnapshot(`
       "
-      [0, 12]  mdFile(href=vault/file.pdf,name=File)
+      [0, 12]  mdPack(key=file) + mdFile(href=vault/file.pdf,name=File)
       [12, 13]
-      [13, 23] mdWikilink(target=notes/other,display=Other note)
+      [13, 23] mdPack(key=wikilink) + mdWikilink(target=notes/other,display=Other note)
       "
     `)
   })
@@ -1005,7 +1031,7 @@ describe('wikilink', () => {
     expect(parse('a [[note]] b')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 10]  mdWikilink(target=note)
+      [2, 10]  mdPack(key=wikilink) + mdWikilink(target=note)
       [10, 12]
       "
     `)
@@ -1014,8 +1040,37 @@ describe('wikilink', () => {
   it('adjacent', () => {
     expect(parse('[[a]][[b]]')).toMatchInlineSnapshot(`
       "
-      [0, 5]  mdWikilink(target=a)
-      [5, 10] mdWikilink(target=b)
+      [0, 5]  mdPack(key=wikilink) + mdWikilink(target=a)
+      [5, 10] mdPack(key=wikilink,slot=1) + mdWikilink(target=b)
+      "
+    `)
+  })
+
+  it('adjacent and identical', () => {
+    expect(parse('[[a]][[a]]')).toMatchInlineSnapshot(`
+      "
+      [0, 5]  mdPack(key=wikilink) + mdWikilink(target=a)
+      [5, 10] mdPack(key=wikilink,slot=1) + mdWikilink(target=a)
+      "
+    `)
+  })
+
+  it('three adjacent and identical', () => {
+    expect(parse('[[a]][[a]][[a]]')).toMatchInlineSnapshot(`
+      "
+      [0, 5]   mdPack(key=wikilink) + mdWikilink(target=a)
+      [5, 10]  mdPack(key=wikilink,slot=1) + mdWikilink(target=a)
+      [10, 15] mdPack(key=wikilink) + mdWikilink(target=a)
+      "
+    `)
+  })
+
+  it('identical but separated by text', () => {
+    expect(parse('[[a]] [[a]]')).toMatchInlineSnapshot(`
+      "
+      [0, 5]  mdPack(key=wikilink) + mdWikilink(target=a)
+      [5, 6]
+      [6, 11] mdPack(key=wikilink) + mdWikilink(target=a)
       "
     `)
   })
@@ -1025,7 +1080,7 @@ describe('wikilink', () => {
       "
       [0, 1]   mdPack(key=italic) + mdEm + mdMark
       [1, 3]   mdPack(key=italic) + mdEm
-      [3, 8]   mdPack(key=italic) + mdEm + mdWikilink(target=n)
+      [3, 8]   mdPack(key=italic) + mdEm + mdPack(key=wikilink) + mdWikilink(target=n)
       [8, 10]  mdPack(key=italic) + mdEm
       [10, 11] mdPack(key=italic) + mdEm + mdMark
       "
@@ -1037,7 +1092,7 @@ describe('wikilink', () => {
       "
       [0, 1]   mdPack(key=link,data={"href":"http://y","title":""}) + mdLinkText(href=http://y) + mdMark
       [1, 5]   mdPack(key=link,data={"href":"http://y","title":""}) + mdLinkText(href=http://y)
-      [5, 10]  mdPack(key=link,data={"href":"http://y","title":""}) + mdLinkText(href=http://y) + mdWikilink(target=x)
+      [5, 10]  mdPack(key=link,data={"href":"http://y","title":""}) + mdLinkText(href=http://y) + mdPack(key=wikilink) + mdWikilink(target=x)
       [10, 12] mdPack(key=link,data={"href":"http://y","title":""}) + mdMark
       [12, 20] mdPack(key=link,data={"href":"http://y","title":""}) + mdLinkUri
       [20, 21] mdPack(key=link,data={"href":"http://y","title":""}) + mdMark
@@ -1048,7 +1103,7 @@ describe('wikilink', () => {
   it('tag inside target', () => {
     expect(parse('[[note #tag]]')).toMatchInlineSnapshot(`
       "
-      [0, 13] mdWikilink(target=note #tag)
+      [0, 13] mdPack(key=wikilink) + mdWikilink(target=note #tag)
       "
     `)
   })
@@ -1072,7 +1127,7 @@ describe('file link', () => {
       .toMatchInlineSnapshot(`
         "
         [0, 4]
-        [4, 35]  mdFile(href=assets/report.pdf,name=report.pdf)
+        [4, 35]  mdPack(key=file) + mdFile(href=assets/report.pdf,name=report.pdf)
         [35, 39]
         "
       `)
@@ -1094,46 +1149,46 @@ describe('file link', () => {
   it('names an empty label after the href basename', () => {
     expect(parse('[](assets/q3%20report.pdf)', { resolveFileLink: claimAssets }))
       .toMatchInlineSnapshot(`
-      "
-      [0, 26] mdFile(href=assets/q3%20report.pdf,name=q3 report.pdf)
-      "
-    `)
+        "
+        [0, 26] mdPack(key=file) + mdFile(href=assets/q3%20report.pdf,name=q3 report.pdf)
+        "
+      `)
   })
 
   it('strips query and hash from the basename', () => {
     expect(parse('[](assets/report.pdf?v=2#page)', { resolveFileLink: claimAssets }))
       .toMatchInlineSnapshot(`
-      "
-      [0, 30] mdFile(href=assets/report.pdf?v=2#page,name=report.pdf)
-      "
-    `)
+        "
+        [0, 30] mdPack(key=file) + mdFile(href=assets/report.pdf?v=2#page,name=report.pdf)
+        "
+      `)
   })
 
   it('keeps the raw segment when decoding fails', () => {
     expect(parse('[](assets/%E0%A4%A.pdf)', { resolveFileLink: claimAssets }))
       .toMatchInlineSnapshot(`
-      "
-      [0, 23] mdFile(href=assets/%E0%A4%A.pdf,name=%E0%A4%A.pdf)
-      "
-    `)
+        "
+        [0, 23] mdPack(key=file) + mdFile(href=assets/%E0%A4%A.pdf,name=%E0%A4%A.pdf)
+        "
+      `)
   })
 
   it('keeps a nested label as its raw slice', () => {
     expect(parse('[**final** report.pdf](assets/report.pdf)', { resolveFileLink: claimAssets }))
       .toMatchInlineSnapshot(`
-      "
-      [0, 41] mdFile(href=assets/report.pdf,name=**final** report.pdf)
-      "
-    `)
+        "
+        [0, 41] mdPack(key=file) + mdFile(href=assets/report.pdf,name=**final** report.pdf)
+        "
+      `)
   })
 
   it('passes the title through', () => {
     expect(parse('[report.pdf](assets/report.pdf "Quarterly")', { resolveFileLink: claimAssets }))
       .toMatchInlineSnapshot(`
-      "
-      [0, 43] mdFile(href=assets/report.pdf,name=report.pdf,title=Quarterly)
-      "
-    `)
+        "
+        [0, 43] mdPack(key=file) + mdFile(href=assets/report.pdf,name=report.pdf,title=Quarterly)
+        "
+      `)
   })
 
   it('claims only what the resolver claims in mixed content', () => {
@@ -1144,7 +1199,7 @@ describe('file link', () => {
     ).toMatchInlineSnapshot(`
       "
       [0, 4]
-      [4, 35]  mdFile(href=assets/report.pdf,name=report.pdf)
+      [4, 35]  mdPack(key=file) + mdFile(href=assets/report.pdf,name=report.pdf)
       [35, 40]
       [40, 41] mdPack(key=link,data={"href":"https://example.com","title":""}) + mdLinkText(href=https://example.com) + mdMark
       [41, 45] mdPack(key=link,data={"href":"https://example.com","title":""}) + mdLinkText(href=https://example.com)
@@ -1158,12 +1213,12 @@ describe('file link', () => {
   it('keeps parent marks inside emphasis', () => {
     expect(parse('*[report.pdf](assets/report.pdf)*', { resolveFileLink: claimAssets }))
       .toMatchInlineSnapshot(`
-      "
-      [0, 1]   mdPack(key=italic) + mdEm + mdMark
-      [1, 32]  mdPack(key=italic) + mdEm + mdFile(href=assets/report.pdf,name=report.pdf)
-      [32, 33] mdPack(key=italic) + mdEm + mdMark
-      "
-    `)
+        "
+        [0, 1]   mdPack(key=italic) + mdEm + mdMark
+        [1, 32]  mdPack(key=italic) + mdEm + mdPack(key=file) + mdFile(href=assets/report.pdf,name=report.pdf)
+        [32, 33] mdPack(key=italic) + mdEm + mdMark
+        "
+      `)
   })
 
   it('never consults the resolver for images, autolinks, or linkless shapes', () => {

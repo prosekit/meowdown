@@ -236,7 +236,7 @@ function defineMdMath() {
 }
 
 /**
- * mdPack keys for units that store no extra data; the syntax marks carry it.
+ * mdPack keys for units that store no extra data; their own marks carry it.
  */
 export type MdPackSimpleKey =
   | 'bold'
@@ -246,33 +246,38 @@ export type MdPackSimpleKey =
   | 'highlight'
   | 'autolink'
   | 'math'
+  | 'wikilink'
+  | 'image'
+  | 'file'
 
 /**
  * Content-derived identity of one inline syntax unit. Adjacent units of the
  * same kind are kept apart by it (so they do not merge into one mark run), and
  * it stays stable when unrelated text in the block is edited, so editing one
  * unit never re-marks the others. `data` carries the unit's parsed payload (a
- * link's `href`/`title`, an image's `src`) so callers read it off the mark
- * instead of re-parsing the text.
+ * link's `href`/`title`) so callers read it off the mark instead of re-parsing
+ * the text. The parser sets `slot: 1` on a unit whose pack would otherwise
+ * equal the pack of the unit ending exactly where it starts; equal packs would
+ * merge the two units into one mark run and one mark view.
  */
-export type MdPackAttrs =
+export type MdPackAttrs = (
   | {
       key: 'link'
       data: { href: string; title: string; reference?: true }
     }
   | {
-      key: 'image'
-      data: { src: string }
-    }
-  | {
       key: MdPackSimpleKey
       data?: null
     }
+) & {
+  slot?: 1 | null
+}
 
 /**
- * Wraps a whole revealable inline unit (emphasis, strong, code, strikethrough,
- * link, autolink, image) so focus mode can reveal the unit with one
- * `getMarkRange` lookup instead of stitching its punctuation back together.
+ * Wraps a whole inline unit. For a revealable unit (emphasis, strong, code,
+ * strikethrough, link, autolink, math) focus mode reveals the unit with one
+ * range lookup instead of stitching its punctuation back together; an atom
+ * unit (wikilink, image, file) carries it purely as unit identity.
  * `excludes: ''` lets nested units carry two of these marks at once.
  */
 function defineMdPack() {
@@ -280,7 +285,7 @@ function defineMdPack() {
     name: 'mdPack' satisfies MarkName,
     excludes: '',
     inclusive: false,
-    attrs: { key: {}, data: { default: null } },
+    attrs: { key: {}, data: { default: null }, slot: { default: null } },
     toDOM: (mark) => {
       const attrs = mark.attrs as MdPackAttrs
       return ['span', { class: 'md-pack', 'data-key': attrs.key }, 0]

@@ -432,21 +432,26 @@ describe('focus mode', () => {
       "
       <p>
         see
-        <span class="md-wikilink-view md-atom-view">
-          <span
-            class="md-wikilink-view-preview md-atom-view-preview"
-            contenteditable="false"
-            data-testid="wikilink"
-          >
+        <span
+          class="md-pack"
+          data-key="wikilink"
+        >
+          <span class="md-wikilink-view md-atom-view">
             <span
-              class="md-wikilink-view-label"
+              class="md-wikilink-view-preview md-atom-view-preview"
               contenteditable="false"
+              data-testid="wikilink"
             >
-              note
+              <span
+                class="md-wikilink-view-label"
+                contenteditable="false"
+              >
+                note
+              </span>
             </span>
-          </span>
-          <span class="md-wikilink-view-content md-atom-view-content">
-            [[note]]
+            <span class="md-wikilink-view-content md-atom-view-content">
+              [[note]]
+            </span>
           </span>
         </span>
         end
@@ -482,21 +487,142 @@ describe('focus mode', () => {
             )
           </span>
         </span>
-        <span class="md-wikilink-view md-atom-view">
-          <span
-            class="md-wikilink-view-preview md-atom-view-preview"
-            contenteditable="false"
-            data-testid="wikilink"
-          >
+        <span
+          class="md-pack"
+          data-key="wikilink"
+        >
+          <span class="md-wikilink-view md-atom-view">
             <span
-              class="md-wikilink-view-label"
+              class="md-wikilink-view-preview md-atom-view-preview"
               contenteditable="false"
+              data-testid="wikilink"
             >
-              note
+              <span
+                class="md-wikilink-view-label"
+                contenteditable="false"
+              >
+                note
+              </span>
+            </span>
+            <span class="md-wikilink-view-content md-atom-view-content">
+              [[note]]
             </span>
           </span>
-          <span class="md-wikilink-view-content md-atom-view-content">
-            [[note]]
+        </span>
+      </p>
+      "
+    `)
+  })
+
+  it('reveals a bold unit whose closing ** touches a wikilink', () => {
+    expect(renderHTML('focus', '**b**<a>[[n]]')).toMatchInlineSnapshot(`
+      "
+      <p>
+        <span
+          class="md-pack"
+          data-key="bold"
+        >
+          <strong>
+            <span class="md-mark">
+              <span class="show">
+                **
+              </span>
+            </span>
+            <span class="show">
+              b
+            </span>
+            <span class="md-mark">
+              <span class="show">
+                **
+              </span>
+            </span>
+          </strong>
+        </span>
+        <span
+          class="md-pack"
+          data-key="wikilink"
+        >
+          <span class="md-wikilink-view md-atom-view">
+            <span
+              class="md-wikilink-view-preview md-atom-view-preview"
+              contenteditable="false"
+              data-testid="wikilink"
+            >
+              <span
+                class="md-wikilink-view-label"
+                contenteditable="false"
+              >
+                n
+              </span>
+            </span>
+            <span class="md-wikilink-view-content md-atom-view-content">
+              [[n]]
+            </span>
+          </span>
+        </span>
+      </p>
+      "
+    `)
+  })
+
+  it('reveals only the first of two identical adjacent links', () => {
+    expect(renderHTML('focus', '[a<a>](x)[a](x)')).toMatchInlineSnapshot(`
+      "
+      <p>
+        <span
+          class="md-pack"
+          data-key="link"
+        >
+          <a
+            class="md-link"
+            href="x"
+          >
+            <span class="md-mark">
+              <span class="show">
+                [
+              </span>
+            </span>
+            <span class="show">
+              a
+            </span>
+          </a>
+          <span class="md-mark">
+            <span class="show">
+              ](
+            </span>
+          </span>
+          <span class="md-link-uri">
+            <span class="show">
+              x
+            </span>
+          </span>
+          <span class="md-mark">
+            <span class="show">
+              )
+            </span>
+          </span>
+        </span>
+        <span
+          class="md-pack"
+          data-key="link"
+        >
+          <a
+            class="md-link"
+            href="x"
+          >
+            <span class="md-mark">
+              [
+            </span>
+            a
+          </a>
+          <span class="md-mark">
+            ](
+          </span>
+          <span class="md-link-uri">
+            x
+          </span>
+          <span class="md-mark">
+            )
           </span>
         </span>
       </p>
@@ -740,32 +866,37 @@ describe('focus mode', () => {
     expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
       "
       <p>
-        <span class="md-image-view md-atom-view">
-          <span
-            class="md-image-view-preview md-atom-view-preview"
-            contenteditable="false"
-            data-testid="image-preview"
-          >
-            <prosekit-resizable-root
-              class="md-image-resizable"
-              data-loading
-              data-testid="image-resizable"
-              style="width: auto; height: auto;"
+        <span
+          class="md-pack"
+          data-key="image"
+        >
+          <span class="md-image-view md-atom-view">
+            <span
+              class="md-image-view-preview md-atom-view-preview"
+              contenteditable="false"
+              data-testid="image-preview"
             >
-              <img
-                alt="alt"
-                draggable="false"
-                src="http://x/p.png"
+              <prosekit-resizable-root
+                class="md-image-resizable"
+                data-loading
+                data-testid="image-resizable"
+                style="width: auto; height: auto;"
               >
-              <prosekit-resizable-handle
-                class="md-image-resize-handle"
-                position="bottom-right"
-              >
-              </prosekit-resizable-handle>
-            </prosekit-resizable-root>
-          </span>
-          <span class="md-image-view-content md-atom-view-content">
-            ![alt](pic.png)
+                <img
+                  alt="alt"
+                  draggable="false"
+                  src="http://x/p.png"
+                >
+                <prosekit-resizable-handle
+                  class="md-image-resize-handle"
+                  position="bottom-right"
+                >
+                </prosekit-resizable-handle>
+              </prosekit-resizable-root>
+            </span>
+            <span class="md-image-view-content md-atom-view-content">
+              ![alt](pic.png)
+            </span>
           </span>
         </span>
       </p>
@@ -894,21 +1025,26 @@ describe('hide mode', () => {
       "
       <p>
         see
-        <span class="md-wikilink-view md-atom-view">
-          <span
-            class="md-wikilink-view-preview md-atom-view-preview"
-            contenteditable="false"
-            data-testid="wikilink"
-          >
+        <span
+          class="md-pack"
+          data-key="wikilink"
+        >
+          <span class="md-wikilink-view md-atom-view">
             <span
-              class="md-wikilink-view-label"
+              class="md-wikilink-view-preview md-atom-view-preview"
               contenteditable="false"
+              data-testid="wikilink"
             >
-              note
+              <span
+                class="md-wikilink-view-label"
+                contenteditable="false"
+              >
+                note
+              </span>
             </span>
-          </span>
-          <span class="md-wikilink-view-content md-atom-view-content">
-            [[note]]
+            <span class="md-wikilink-view-content md-atom-view-content">
+              [[note]]
+            </span>
           </span>
         </span>
         end

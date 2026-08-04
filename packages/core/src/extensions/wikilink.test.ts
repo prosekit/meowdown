@@ -38,6 +38,14 @@ describe.each(ALL_MODES)('wikilink rendering in %s mode', (mode) => {
     await expect.element(label).toHaveTextContent('Note')
   })
 
+  it('renders one label per unit when two identical wikilinks touch', async () => {
+    using fixture = setupFixture({ extensionOptions: { markMode: mode } })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see [[Note]][[Note]] here')))
+    await expect.element(label.first()).toHaveTextContent('Note')
+    expect(label.all()).toHaveLength(2)
+  })
+
   it('renders the alias as the label', async () => {
     using fixture = setupFixture({ extensionOptions: { markMode: mode } })
     const { n } = fixture

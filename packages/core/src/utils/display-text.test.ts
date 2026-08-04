@@ -33,12 +33,20 @@ describe('getTextblockDisplayText', () => {
     expect(getTextblockDisplayText(fixture.doc.child(0))).toBe('read report.pdf')
   })
 
-  it('cannot split adjacent identical atoms', () => {
+  it('replaces both of two adjacent identical atoms', () => {
     using fixture = setupFixture()
     const { n } = fixture
-    // Adjacent same-attrs units merge into one text node carrying one mark
-    // instance, so the document cannot tell the two units apart.
     fixture.set(n.doc(n.heading({ level: 1 }, '[[a]][[a]]')))
-    expect(getTextblockDisplayText(fixture.doc.child(0))).toBe('a')
+    expect(getTextblockDisplayText(fixture.doc.child(0))).toBe('aa')
+  })
+
+  it('splits adjacent identical atoms after a JSON round trip', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.heading({ level: 1 }, '[[a]][[a]] and $x$')))
+    // A round trip loses mark instance identity, leaving pack equality as the
+    // only unit boundary.
+    const doc = fixture.editor.schema.nodeFromJSON(fixture.doc.toJSON())
+    expect(getTextblockDisplayText(doc.child(0))).toBe('aa and x')
   })
 })

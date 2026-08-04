@@ -146,6 +146,29 @@ export function inlineTextToMarkChunksWithContext(
 }
 
 /**
+ * The pack of one unit starting at `from`. When the chunk ending exactly there
+ * closes a unit whose pack equals this one, create it with `slot: 1` instead:
+ * equal packs would let ProseMirror merge the two units into one text node,
+ * one mark run and one mark view. The neighbour's own pack sits at the same
+ * depth, right after `parentMarks`; at any other depth that position holds a
+ * different mark (or nothing) and never compares equal.
+ */
+function createUnitPack(
+  marks: TypedMarkBuilders,
+  out: readonly MarkChunk[],
+  parentMarks: readonly Mark[],
+  from: number,
+  attrs: MdPackAttrs,
+): Mark {
+  const pack = marks.mdPack.create(attrs)
+  const previous = out.at(-1)
+  if (previous == null || previous[1] !== from) return pack
+  const neighbourPack = previous[2][parentMarks.length]
+  if (neighbourPack == null || !neighbourPack.eq(pack)) return pack
+  return marks.mdPack.create({ ...attrs, slot: 1 })
+}
+
+/**
  * Drop the surrounding `"" '' ()` delimiters of a `LinkTitle` slice and unescape.
  */
 function unquoteTitle(raw: string): string {
@@ -242,7 +265,7 @@ function walkGenericNode(
   }
 
   const base = packKey
-    ? [...parentMarks, marks.mdPack.create({ key: packKey } satisfies MdPackAttrs)]
+    ? [...parentMarks, createUnitPack(marks, out, parentMarks, node.from, { key: packKey })]
     : parentMarks
   const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(type)
   const childMarks = maybeMarkName ? [...base, marks[maybeMarkName].create()] : base
@@ -287,9 +310,13 @@ function walkLink(
     walkUnresolvedLink(node, parentMarks, text, marks, out, options, context)
     return
   }
-  const fileMarks = claimFileLink(parts, resolution, parentMarks, text, marks, options)
-  if (fileMarks) {
-    emit(out, node.from, node.to, fileMarks)
+  const fileMark = claimFileLink(parts, resolution, text, marks, options)
+  if (fileMark) {
+    emit(out, node.from, node.to, [
+      ...parentMarks,
+      createUnitPack(marks, out, parentMarks, node.from, { key: 'file' }),
+      fileMark,
+    ])
     return
   }
   walkResolvedLink(node, parts, resolution, parentMarks, text, marks, out, options, context)
@@ -416,19 +443,18 @@ function hrefBasename(href: string): string {
 }
 
 /**
- * The marks for a whole inline or resolved reference link that the host's `resolveFileLink`
- * claimed as a file, or `undefined` when the link stays a regular link. The
- * resolver is never consulted for a link without a closed label or a non-empty
- * destination.
+ * The `mdFile` mark for a whole inline or resolved reference link that the
+ * host's `resolveFileLink` claimed as a file, or `undefined` when the link
+ * stays a regular link. The resolver is never consulted for a link without a
+ * closed label or a non-empty destination.
  */
 function claimFileLink(
   parts: LinkParts,
   resolution: ResolvedLink,
-  parentMarks: readonly Mark[],
   text: string,
   marks: TypedMarkBuilders,
   options: InlineMarkOptions | undefined,
-): readonly Mark[] | undefined {
+): Mark | undefined {
   const resolveFileLink = options?.resolveFileLink
   if (!resolveFileLink) return undefined
   const { labelFrom, labelTo } = parts
@@ -438,7 +464,7 @@ function claimFileLink(
   const label = text.slice(labelFrom, labelTo)
   if (!resolveFileLink({ href, label, title })) return undefined
   const name = label || hrefBasename(href)
-  return [...parentMarks, marks.mdFile.create({ href, name, title } satisfies MdFileAttrs)]
+  return marks.mdFile.create({ href, name, title } satisfies MdFileAttrs)
 }
 
 /**
@@ -476,7 +502,7 @@ function walkResolvedLink(
   } satisfies MdLinkTextAttrs)
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd
   const data = isReference ? { href, title, reference: true as const } : { href, title }
-  const pack = marks.mdPack.create({ key: 'link', data } satisfies MdPackAttrs)
+  const pack = createUnitPack(marks, out, parentMarks, node.from, { key: 'link', data })
   const base = [...parentMarks, pack]
 
   let pos = node.from
@@ -580,6 +606,7 @@ function walkImage(
 
   emit(out, node.from, to, [
     ...parentMarks,
+    createUnitPack(marks, out, parentMarks, node.from, { key: 'image' }),
     marks.mdImage.create({
       src,
       alt,
@@ -615,7 +642,7 @@ function walkMath(
   const formula = text.slice(markNodes[0].to, markNodes[1].from)
   const base = [
     ...parentMarks,
-    marks.mdPack.create({ key: 'math' } satisfies MdPackAttrs),
+    createUnitPack(marks, out, parentMarks, node.from, { key: 'math' }),
     marks.mdMath.create({ formula } satisfies MdMathAttrs),
   ]
   emit(out, node.from, markNodes[0].to, [...base, marks.mdMark.create()])
@@ -635,7 +662,11 @@ function walkWikilink(
 ): void {
   const { target, display } = parseWikilink(text.slice(node.from, node.to))
 
-  emit(out, node.from, node.to, [...parentMarks, marks.mdWikilink.create({ target, display })])
+  emit(out, node.from, node.to, [
+    ...parentMarks,
+    createUnitPack(marks, out, parentMarks, node.from, { key: 'wikilink' }),
+    marks.mdWikilink.create({ target, display }),
+  ])
 }
 
 /**
@@ -663,6 +694,7 @@ function walkWikiEmbed(
     const alt = (resolution.alt ?? embed.display) || wikiEmbedBasename(embed.target)
     emit(out, node.from, node.to, [
       ...parentMarks,
+      createUnitPack(marks, out, parentMarks, node.from, { key: 'image' }),
       marks.mdImage.create({
         src,
         alt,
@@ -681,6 +713,7 @@ function walkWikiEmbed(
     const name = (resolution.name ?? embed.display) || wikiEmbedBasename(embed.target)
     emit(out, node.from, node.to, [
       ...parentMarks,
+      createUnitPack(marks, out, parentMarks, node.from, { key: 'file' }),
       marks.mdFile.create({ href, name, title: resolution.title ?? '' }),
     ])
     return
@@ -688,7 +721,11 @@ function walkWikiEmbed(
 
   const target = resolution.target ?? embed.target
   const display = resolution.display ?? embed.display
-  emit(out, node.from, node.to, [...parentMarks, marks.mdWikilink.create({ target, display })])
+  emit(out, node.from, node.to, [
+    ...parentMarks,
+    createUnitPack(marks, out, parentMarks, node.from, { key: 'wikilink' }),
+    marks.mdWikilink.create({ target, display }),
+  ])
 }
 
 /**
