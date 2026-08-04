@@ -5,6 +5,7 @@ import {
   defineKeymap,
   defineNodeAttr,
   definePlugin,
+  isNodeSelection,
   union,
   type Extension,
   type PlainExtension,
@@ -21,7 +22,7 @@ import {
 } from '@prosekit/extensions/list'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 import type { Command, EditorState } from '@prosekit/pm/state'
-import { NodeSelection, Plugin } from '@prosekit/pm/state'
+import { Plugin } from '@prosekit/pm/state'
 import {
   createListRenderingPlugin,
   createSafariInputMethodWorkaroundPlugin,
@@ -300,7 +301,8 @@ function wrapInSquareTask(): Command {
  */
 function getListAttrsAtSelection(state: EditorState): MeowdownListAttrs | null {
   const { selection } = state
-  if (selection instanceof NodeSelection && isNodeOfType(selection.node, 'list')) {
+
+  if (isNodeSelection(selection) && isNodeOfType(selection.node, 'list')) {
     return selection.node.attrs
   }
   const { $from } = selection
