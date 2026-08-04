@@ -88,6 +88,7 @@ jobs:
         env:
           MEOWDOWN_TEST_BROWSER: ${{ matrix.config.browser }}
           MEOWDOWN_TEST_COVERAGE: ${{ matrix.config.coverage && 'true' || '' }}
+          NO_COLOR: '1'
 
       - name: Report Coverage
         if: ${{ !cancelled() && matrix.config.coverage && github.event_name == 'pull_request' }}
