@@ -57,7 +57,7 @@ export function defineSharedConfig({
             // with `playwright install chromium --no-shell`, we no longer need to
             // download two copies of Chromium anymore.
             // See https://playwright.dev/docs/browsers#chromium-new-headless-mode
-            channel: browserName === 'chromium' ? 'chrome' : undefined,
+            channel: browserName === 'chromium' ? 'chromium' : undefined,
           },
           contextOptions: {
             reducedMotion: 'reduce',
