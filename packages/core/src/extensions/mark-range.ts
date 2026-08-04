@@ -3,7 +3,7 @@ import type { Attrs, ResolvedPos } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
 
 import { getInnermostPackRangeAt } from './hidden-run.ts'
-import { ATOM_MARK_NAMES, type MarkName } from './mark-names.ts'
+import { ATOM_MARK_NAMES, isMarkOfType, type MarkName } from './mark-names.ts'
 
 /**
  * Returns the resolved position, or `undefined` when it falls outside the
@@ -35,33 +35,37 @@ export function getMarkRangeAt(
 
   const markNames = Array.isArray(markName) ? markName : [markName]
   for (const name of markNames) {
-    const range = getMarkRange($pos, name, attrs)
-    if (range) return ATOM_MARK_NAMES.has(name) ? clampToUnitRange(state, $pos, range) : range
+    const range = ATOM_MARK_NAMES.has(name)
+      ? getAtomUnitRange(state, $pos, name)
+      : getMarkRange($pos, name, attrs)
+    if (range) return range
   }
 }
 
 /**
- * Two identical adjacent units carry equal atom marks (only their packs differ,
- * by `slot`), so `getMarkRange`'s eq-based expansion runs across both. Clamp
- * the range to the matched child's own unit: the innermost pack covering its
- * first character. A child without a pack (a document not produced by the
- * inline parser) keeps the unclamped range.
+ * The range of the atom unit touching `$pos`, preferring the child to the
+ * right like `getMarkRange`. Two identical adjacent units carry equal atom
+ * marks, so eq-based expansion would run across both; the unit boundary comes
+ * from the innermost pack instead, which `slot` keeps distinct. A text node
+ * without a pack (a document not produced by the inline parser) falls back to
+ * the eq-based range. Does not support `attrs` filtering.
  */
-function clampToUnitRange(state: EditorState, $pos: ResolvedPos, range: MarkRange): MarkRange {
+function getAtomUnitRange(
+  state: EditorState,
+  $pos: ResolvedPos,
+  name: MarkName,
+): MarkRange | undefined {
   const parent = $pos.parent
   const after = parent.childAfter($pos.parentOffset)
   const matched =
-    after.node && range.mark.isInSet(after.node.marks)
+    after.node && after.node.marks.some((mark) => isMarkOfType(mark, name))
       ? after
       : parent.childBefore($pos.parentOffset)
-  if (!matched.node) return range
+  const mark = matched.node?.marks.find((candidate) => isMarkOfType(candidate, name))
+  if (!matched.node || mark == null) return
   const pack = getInnermostPackRangeAt(state, $pos.start() + matched.offset)
-  if (!pack) return range
-  return {
-    from: Math.max(range.from, pack.from),
-    to: Math.min(range.to, pack.to),
-    mark: range.mark,
-  }
+  if (!pack) return getMarkRange($pos, name)
+  return { from: pack.from, to: pack.to, mark }
 }
 
 /**
