@@ -6,7 +6,7 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
-  vitest-browser-commands@0.2.1: 7700ba5b90fa88d0ef1090da0bab0a7e532c97f97fe914ae579b7842abb507b8
+  vitest-browser-commands@0.2.1: d78bc9aaa80579b05257e3c45a109d8834a04b0d841c565824191624b903549e
   vitest-browser-react@2.2.0: 14dbff430e18acd6bfe4796377e1827b1ee63e85f20c17322be1dd66369345a0
 
 importers:
@@ -286,7 +286,7 @@ importers:
         version: 5.0.0-beta.7(@types/node@24.13.3)(@vitest/browser-playwright@5.0.0-beta.7)(@vitest/coverage-v8@5.0.0-beta.7)(@vitest/ui@5.0.0-beta.7)(vite@8.2.0)
       vitest-browser-commands:
         specifier: ^0.2.1
-        version: 0.2.1(patch_hash=7700ba5b90fa88d0ef1090da0bab0a7e532c97f97fe914ae579b7842abb507b8)(@vitest/browser-playwright@5.0.0-beta.7)(vitest@5.0.0-beta.7)
+        version: 0.2.1(patch_hash=d78bc9aaa80579b05257e3c45a109d8834a04b0d841c565824191624b903549e)(@vitest/browser-playwright@5.0.0-beta.7)(vitest@5.0.0-beta.7)
       vitest-browser-react:
         specifier: ^2.2.0
         version: 2.2.0(patch_hash=14dbff430e18acd6bfe4796377e1827b1ee63e85f20c17322be1dd66369345a0)(@types/react-dom@19.2.4)(@types/react@19.2.18)(react-dom@19.2.8)(react@19.2.8)(vitest@5.0.0-beta.7)
@@ -310,7 +310,7 @@ importers:
         version: 5.0.0-beta.7(@types/node@24.13.3)(@vitest/browser-playwright@5.0.0-beta.7)(@vitest/coverage-v8@5.0.0-beta.7)(@vitest/ui@5.0.0-beta.7)(vite@8.2.0)
       vitest-browser-commands:
         specifier: ^0.2.1
-        version: 0.2.1(patch_hash=7700ba5b90fa88d0ef1090da0bab0a7e532c97f97fe914ae579b7842abb507b8)(@vitest/browser-playwright@5.0.0-beta.7)(vitest@5.0.0-beta.7)
+        version: 0.2.1(patch_hash=d78bc9aaa80579b05257e3c45a109d8834a04b0d841c565824191624b903549e)(@vitest/browser-playwright@5.0.0-beta.7)(vitest@5.0.0-beta.7)
 
   website:
     dependencies:
@@ -1430,9 +1430,6 @@ packages:
   '@sindresorhus/base62@1.0.0':
     resolution: {integrity: sha512-TeheYy0ILzBEI/CO55CP6zJCSdSWeRtGnHy8U8dWSUH4I68iqTsy7HkMktR4xakThc9jotkPQUXT4ITdbV7cHA==}
     engines: {node: '>=18'}
-
-  '@standard-schema/spec@1.1.0':
-    resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
   '@stricli/core@1.3.0':
     resolution: {integrity: sha512-LnBe2HntygaLDU5trtjiC3J4C/YkmIZuM0XB52IF4qaLqJH09kgD1fnZiS2gaYUnt0nAN2a+1b4PSOBcfPrN4Q==}
@@ -5159,8 +5156,6 @@ snapshots:
 
   '@sindresorhus/base62@1.0.0': {}
 
-  '@standard-schema/spec@1.1.0': {}
-
   '@stricli/core@1.3.0': {}
 
   '@tailwindcss/node@4.3.3':
@@ -7721,7 +7716,7 @@ snapshots:
       jiti: 2.7.0
       yaml: 2.9.0
 
-  vitest-browser-commands@0.2.1(patch_hash=7700ba5b90fa88d0ef1090da0bab0a7e532c97f97fe914ae579b7842abb507b8)(@vitest/browser-playwright@5.0.0-beta.7)(vitest@5.0.0-beta.7):
+  vitest-browser-commands@0.2.1(patch_hash=d78bc9aaa80579b05257e3c45a109d8834a04b0d841c565824191624b903549e)(@vitest/browser-playwright@5.0.0-beta.7)(vitest@5.0.0-beta.7):
     optionalDependencies:
       '@vitest/browser-playwright': 5.0.0-beta.7(playwright@1.62.0)(vite@8.2.0)(vitest@5.0.0-beta.7)
       vitest: 5.0.0-beta.7(@types/node@24.13.3)(@vitest/browser-playwright@5.0.0-beta.7)(@vitest/coverage-v8@5.0.0-beta.7)(@vitest/ui@5.0.0-beta.7)(vite@8.2.0)
