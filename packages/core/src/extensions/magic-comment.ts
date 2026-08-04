@@ -1,10 +1,16 @@
 import { isObject } from '@ocavue/utils'
 
-/** Metadata meowdown stores in a sidecar `<!-- {...} -->` comment. */
+/**
+ * Metadata meowdown stores in a sidecar `<!-- {...} -->` comment.
+ */
 export interface MagicComment {
-  /** Rendered width in CSS pixels. */
+  /**
+   * Rendered width in CSS pixels.
+   */
   width?: number
-  /** Rendered height in CSS pixels. */
+  /**
+   * Rendered height in CSS pixels.
+   */
   height?: number
 }
 
@@ -44,12 +50,16 @@ function toPositiveNumber(value: unknown): number | undefined {
   }
 }
 
-/** The canonical comment meowdown writes for the metadata. */
+/**
+ * The canonical comment meowdown writes for the metadata.
+ */
 export function formatMagicComment(magic: MagicComment): string {
   return `<!-- ${JSON.stringify(magic)} -->`
 }
 
-/** Drop a trailing magic comment from the source text. */
+/**
+ * Drop a trailing magic comment from the source text.
+ */
 export function stripMagicComment(source: string): string {
   return source.replace(TRAILING_MAGIC_COMMENT_RE, '')
 }

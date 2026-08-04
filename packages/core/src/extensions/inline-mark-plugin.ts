@@ -50,7 +50,9 @@ interface InlineMarkPluginState {
 const pluginKey = new PluginKey<InlineMarkPluginState>('inline-mark')
 const emptyReferenceKeys: ReadonlySet<string> = new Set()
 
-/** @internal only for test */
+/**
+ * @internal
+ */
 export function flushPendingRestyle(view: EditorView): void {
   if ((pluginKey.getState(view.state)?.pendingReferenceKeys.size ?? 0) > 0) {
     view.dispatch(view.state.tr.setMeta(RESTYLE_KEY, true))
@@ -65,13 +67,17 @@ export function flushPendingRestyle(view: EditorView): void {
 let chunkCacheParses = 0
 let chunkCacheHits = 0
 
-/** @internal only for test */
+/**
+ * @internal
+ */
 export function resetCacheStats(): void {
   chunkCacheParses = 0
   chunkCacheHits = 0
 }
 
-/** @internal only for test */
+/**
+ * @internal
+ */
 export function getCacheStats(): { parses: number; hits: number } {
   return { parses: chunkCacheParses, hits: chunkCacheHits }
 }

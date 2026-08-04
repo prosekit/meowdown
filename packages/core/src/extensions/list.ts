@@ -277,17 +277,23 @@ function defineMeowdownListInputRules(): PlainExtension {
   return union(listInputRules.map(defineInputRule))
 }
 
-/** Circle checkbox task: a `task` list item with a `+` marker. */
+/**
+ * Circle checkbox task: a `task` list item with a `+` marker.
+ */
 function wrapInCircleTask(): Command {
   return wrapInList<MeowdownListAttrs>({ kind: 'task', marker: '+' })
 }
 
-/** Square checkbox task: a `task` list item with the canonical `-` marker. */
+/**
+ * Square checkbox task: a `task` list item with the canonical `-` marker.
+ */
 function wrapInSquareTask(): Command {
   return wrapInList<MeowdownListAttrs>({ kind: 'task', marker: null })
 }
 
-/** The attributes of the closest list node enclosing the selection, if any. */
+/**
+ * The attributes of the closest list node enclosing the selection, if any.
+ */
 function getListAttrsAtSelection(state: EditorState): MeowdownListAttrs | null {
   const { $from } = state.selection
   for (let depth = $from.depth; depth > 0; depth--) {

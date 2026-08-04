@@ -3,7 +3,9 @@ import type { Slice } from '@prosekit/pm/model'
 import { SYNTAX_MARK_NAMES, type MarkName } from '../extensions/mark-names.ts'
 
 interface CleanTextOptions {
-  /** Keep math delimiters so the projected text remains valid Markdown. */
+  /**
+   * Keep math delimiters so the projected text remains valid Markdown.
+   */
   preserveMathSource?: boolean
 }
 

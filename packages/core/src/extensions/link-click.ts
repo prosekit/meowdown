@@ -8,7 +8,9 @@ const linkClickKey = new PluginKey('meowdown-link-click')
 
 export interface LinkClickPayload {
   href: string
-  /** The originating click, or the `Enter`/`Mod-Enter` key press that followed the link. */
+  /**
+   * The originating click, or the `Enter`/`Mod-Enter` key press that followed the link.
+   */
   event: MouseEvent | KeyboardEvent
 }
 

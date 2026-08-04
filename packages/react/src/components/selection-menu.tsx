@@ -29,20 +29,30 @@ import type {
 
 interface SelectionMenuProps {
   onSelectionMenuSearch: SelectionMenuSearchHandler
-  /** The selection the menu is open over; the menu is closed when undefined. */
+  /**
+   * The selection the menu is open over; the menu is closed when undefined.
+   */
   context: SelectionMenuContext | undefined
-  /** Requests opening over the current selection (from the affordance). */
+  /**
+   * Requests opening over the current selection (from the affordance).
+   */
   onOpen: () => void
-  /** Requests closing the menu. */
+  /**
+   * Requests closing the menu.
+   */
   onClose: () => void
-  /** Shows the floating button on a non-empty selection. On by default. */
+  /**
+   * Shows the floating button on a non-empty selection. On by default.
+   */
   affordance?: boolean
 }
 
 interface SelectionSnapshot {
   from: number
   to: number
-  /** Whether a floating affordance may anchor to this selection. */
+  /**
+   * Whether a floating affordance may anchor to this selection.
+   */
   anchorable: boolean
 }
 
@@ -172,8 +182,10 @@ export function SelectionMenu({
   return null
 }
 
-/** The menu content. Mounted only while the menu is open, so its filter state
- *  resets naturally on close. */
+/**
+ * The menu content. Mounted only while the menu is open, so its filter state
+ *  resets naturally on close.
+ */
 function SelectionMenuPopup({
   onSelectionMenuSearch,
   context,

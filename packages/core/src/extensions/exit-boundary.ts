@@ -11,11 +11,17 @@ import type { EditorView } from '@prosekit/pm/view'
 
 const exitBoundaryKey = new PluginKey('meowdown-exit-boundary')
 
-/** Payload for {@link ExitBoundaryHandler}. */
+/**
+ * Payload for {@link ExitBoundaryHandler}.
+ */
 export interface ExitBoundaryOptions {
-  /** The boundary the caret would leave: `up` at the document start, `down` at the end. */
+  /**
+   * The boundary the caret would leave: `up` at the document start, `down` at the end.
+   */
   direction: 'up' | 'down'
-  /** The originating arrow key press. */
+  /**
+   * The originating arrow key press.
+   */
   event: KeyboardEvent
 }
 
@@ -92,7 +98,9 @@ function createExitBoundaryPlugin(onExitBoundary: ExitBoundaryHandler) {
   })
 }
 
-/** Call `onExitBoundary` when an arrow key press would leave the document boundary. */
+/**
+ * Call `onExitBoundary` when an arrow key press would leave the document boundary.
+ */
 export function defineExitBoundaryHandler(onExitBoundary: ExitBoundaryHandler): PlainExtension {
   return withPriority(definePlugin(createExitBoundaryPlugin(onExitBoundary)), Priority.low)
 }

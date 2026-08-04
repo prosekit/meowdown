@@ -19,13 +19,17 @@ export interface LinkAttrs {
   title?: string
 }
 
-/** Normalize a typed URL with the existing autolink logic, else keep it verbatim. */
+/**
+ * Normalize a typed URL with the existing autolink logic, else keep it verbatim.
+ */
 function normalizeHref(raw: string): string {
   const value = raw.trim()
   return value ? (getAutolinkHref(value) ?? value) : ''
 }
 
-/** The `( ... )` body for a link: the href plus an optional CommonMark title. */
+/**
+ * The `( ... )` body for a link: the href plus an optional CommonMark title.
+ */
 function destText(href: string, title: string): string {
   const quoted = title ? ` "${title.replaceAll(/(["\\])/g, String.raw`\$1`)}"` : ''
   return href + quoted
@@ -89,7 +93,9 @@ export function insertLink({ href, title, wrapText = true }: InsertLinkOptions =
   }
 }
 
-/** Rewrite the `( ... )` of the link at the caret/selection. */
+/**
+ * Rewrite the `( ... )` of the link at the caret/selection.
+ */
 export function updateLink(attrs: LinkAttrs): Command {
   return (state, dispatch) => {
     const link = getLinkUnitAt(state, state.selection.from)
@@ -102,7 +108,9 @@ export function updateLink(attrs: LinkAttrs): Command {
   }
 }
 
-/** Unwrap the link at the caret: keep the label text, drop the syntax. */
+/**
+ * Unwrap the link at the caret: keep the label text, drop the syntax.
+ */
 export function removeLink(): Command {
   return (state, dispatch) => {
     const link = getLinkUnitAt(state, state.selection.from)

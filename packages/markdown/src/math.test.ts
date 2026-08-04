@@ -5,7 +5,9 @@ import { type InlineElement, parseInline } from './inline.ts'
 import { LEZER_NODE_IDS } from './node-ids.ts'
 import { gfmBlockOnlyParser, gfmParser } from './parser.ts'
 
-/** Every `$...$` slice in the inline element tree, in document order. */
+/**
+ * Every `$...$` slice in the inline element tree, in document order.
+ */
 function findMath(text: string): string[] {
   const expressions: string[] = []
   const walk = (elements: readonly InlineElement[]): void => {
@@ -20,7 +22,9 @@ function findMath(text: string): string[] {
   return expressions
 }
 
-/** Render an inline element tree into an indented, human-readable string. */
+/**
+ * Render an inline element tree into an indented, human-readable string.
+ */
 function formatTree(text: string): string {
   const nameById = new Map(Object.entries(LEZER_NODE_IDS).map(([name, id]) => [id, name]))
   const format = (element: InlineElement, depth: number): string => {
@@ -153,7 +157,9 @@ describe('math inline parser', () => {
   })
 })
 
-/** Render a full block tree into an indented, human-readable string. */
+/**
+ * Render a full block tree into an indented, human-readable string.
+ */
 function formatBlockTree(text: string): string {
   const cursor = gfmParser.parse(text).cursor()
   const lines: string[] = []

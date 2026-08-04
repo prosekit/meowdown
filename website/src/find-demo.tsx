@@ -16,12 +16,18 @@ const FIND_BUTTON_CLASS =
   'flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900 disabled:pointer-events-none disabled:opacity-35 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100'
 
 export interface FindDemoValue {
-  /** Goes to the editor as `searchQuery`; empty while the bar is closed. */
+  /**
+   * Goes to the editor as `searchQuery`; empty while the bar is closed.
+   */
   query: string
   onSearchChange: (status: SearchStatus) => void
-  /** Opens the bar; bound to `Mod-f` by `FindShortcut`. */
+  /**
+   * Opens the bar; bound to `Mod-f` by `FindShortcut`.
+   */
   openBar: () => void
-  /** The bar itself, rendered by the demo over the editor. */
+  /**
+   * The bar itself, rendered by the demo over the editor.
+   */
   bar: ReactElement | null
 }
 
@@ -124,7 +130,9 @@ export function useFindDemo(handleRef: RefObject<EditorHandle | null>): FindDemo
   return { query: open ? text : '', onSearchChange: setStatus, openBar, bar }
 }
 
-/** Opens the demo find bar on `Mod-f`, consuming the browser's own shortcut. */
+/**
+ * Opens the demo find bar on `Mod-f`, consuming the browser's own shortcut.
+ */
 export function FindShortcut({ onTrigger }: { onTrigger: () => void }) {
   const keymap = useMemo(
     () => ({

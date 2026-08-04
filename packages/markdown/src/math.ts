@@ -13,7 +13,9 @@ function isDigit(code: number): boolean {
   return code >= CHAR_0 && code <= CHAR_9
 }
 
-/** A line whose content is exactly `$$`, allowing trailing whitespace. */
+/**
+ * A line whose content is exactly `$$`, allowing trailing whitespace.
+ */
 function isBlockMathFence(line: Line): boolean {
   if (line.next !== CHAR_DOLLAR) return false
   if (line.text.charCodeAt(line.pos + 1) !== CHAR_DOLLAR) return false

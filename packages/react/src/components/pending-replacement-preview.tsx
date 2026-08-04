@@ -19,10 +19,14 @@ import type { PendingReplacementResolveHandler } from './types.ts'
  */
 const PREVIEW_CLEARANCE = 320
 
-/** Minimum gap (px) kept above the anchor line when scrolling to make room. */
+/**
+ * Minimum gap (px) kept above the anchor line when scrolling to make room.
+ */
 const SCROLL_TOP_MARGIN = 16
 
-/** The nearest ancestor that can scroll vertically, or the page scroller. */
+/**
+ * The nearest ancestor that can scroll vertically, or the page scroller.
+ */
 function closestScrollable(element: Element): Element | null {
   for (let node = element.parentElement; node; node = node.parentElement) {
     const { overflowY } = getComputedStyle(node)
@@ -37,9 +41,13 @@ function closestScrollable(element: Element): Element | null {
 }
 
 interface PendingReplacementPreviewProps {
-  /** Extra controls rendered in the preview footer (e.g. a retry button). */
+  /**
+   * Extra controls rendered in the preview footer (e.g. a retry button).
+   */
   actions?: ReactNode
-  /** Called when the stage ends, with the outcome and the final staged value. */
+  /**
+   * Called when the stage ends, with the outcome and the final staged value.
+   */
   onResolve?: PendingReplacementResolveHandler
 }
 

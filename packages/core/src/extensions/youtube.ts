@@ -7,7 +7,9 @@ const YOUTU_BE_HOST = /^(?:www\.)?youtu\.be$/i
 // Source: https://wiki.archiveteam.org/index.php/YouTube/Technical_details
 const VIDEO_ID = /^[\w-]{11}$/
 
-/** Extract `{ videoId, startSeconds? }` from any watch/shorts/embed/live/`youtu.be` URL. */
+/**
+ * Extract `{ videoId, startSeconds? }` from any watch/shorts/embed/live/`youtu.be` URL.
+ */
 function parseYouTube(src: string): { videoId: string; startSeconds?: number } | undefined {
   let url: URL
   try {
@@ -32,7 +34,9 @@ function parseYouTube(src: string): { videoId: string; startSeconds?: number } |
   return { videoId, startSeconds }
 }
 
-/** `90`, `90s`, `1m30s`, `1h2m3s` to seconds. */
+/**
+ * `90`, `90s`, `1m30s`, `1h2m3s` to seconds.
+ */
 function parseStartSeconds(value: string): number | undefined {
   if (/^\d+$/.test(value)) return Number(value)
   const matched = /^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$/.exec(value)

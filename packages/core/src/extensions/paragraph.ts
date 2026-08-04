@@ -36,12 +36,16 @@ function defineMeowdownParagraphSpec(): ParagraphSpecExtension {
   })
 }
 
-/** The clipboard DOM of a paragraph: semantic inline content plus `data-md`. */
+/**
+ * The clipboard DOM of a paragraph: semantic inline content plus `data-md`.
+ */
 export function paragraphClipboardDOM(node: ProseMirrorNode): HTMLElement {
   return semanticTextblockDOM('p', node)
 }
 
-/** The clipboard parse rules restoring a paragraph's source text from `data-md`. */
+/**
+ * The clipboard parse rules restoring a paragraph's source text from `data-md`.
+ */
 export function paragraphFromDOM(): TagParseRule[] {
   return [createSourceTextRule('p', 'paragraph' satisfies NodeName)]
 }

@@ -20,11 +20,17 @@ export {
 } from './caret.ts'
 
 export interface SetupFixtureOptions {
-  /** Whether to mount the editor onto a real DOM container. Defaults to `true`. */
+  /**
+   * Whether to mount the editor onto a real DOM container. Defaults to `true`.
+   */
   mount?: boolean
-  /** Creation-time options for `defineEditorExtension` (e.g. `resolveFileLink`). */
+  /**
+   * Creation-time options for `defineEditorExtension` (e.g. `resolveFileLink`).
+   */
   extensionOptions?: EditorExtensionOptions
-  /** The container's DOM id. Two fixtures need two ids to stay mounted at once. */
+  /**
+   * The container's DOM id. Two fixtures need two ids to stay mounted at once.
+   */
   containerId?: string
 }
 

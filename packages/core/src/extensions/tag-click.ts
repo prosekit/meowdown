@@ -26,7 +26,9 @@ export function findTagAt(state: EditorState, pos: number): TagHit | undefined {
 }
 
 export interface TagClickPayload {
-  /** The tag name, without the leading `#`. */
+  /**
+   * The tag name, without the leading `#`.
+   */
   tag: string
   /**
    * The originating click, or the `Enter`/`Mod-Enter` key press that followed the tag.

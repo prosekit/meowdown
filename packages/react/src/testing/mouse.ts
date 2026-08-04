@@ -26,7 +26,9 @@ export async function hover(
   return { x, y }
 }
 
-/** Parks the mouse at the top-left corner of the page. */
+/**
+ * Parks the mouse at the top-left corner of the page.
+ */
 export async function unhover(): Promise<void> {
   await hover(page.locate('body'), { position: { x: 0, y: 0 } })
 }
