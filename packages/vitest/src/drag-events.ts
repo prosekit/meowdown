@@ -23,7 +23,9 @@ function startDrag(view: EditorView, slice: Slice, node?: NodeSelection): DataTr
   return dataTransfer
 }
 
-/** Drag the block at `pos`, the way ProseKit's block handle does. */
+/**
+ * Drag the block at `pos`, the way ProseKit's block handle does.
+ */
 export function startBlockDrag(view: EditorView, pos: number): DataTransfer {
   const node = view.state.doc.nodeAt(pos)
   if (!node) throw new Error(`[meowdown] no node at position ${pos}`)
@@ -35,13 +37,17 @@ export function startBlockDrag(view: EditorView, pos: number): DataTransfer {
   )
 }
 
-/** Drag the text between `from` and `to`, which carries no `dragging.node`. */
+/**
+ * Drag the text between `from` and `to`, which carries no `dragging.node`.
+ */
 export function startTextDrag(view: EditorView, from: number, to: number): DataTransfer {
   view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, from, to)))
   return startDrag(view, view.state.selection.content())
 }
 
-/** Dispatch a `drop` carrying `dataTransfer` at the document position `pos`. */
+/**
+ * Dispatch a `drop` carrying `dataTransfer` at the document position `pos`.
+ */
 export function dropAt(
   view: EditorView,
   dataTransfer: DataTransfer,

@@ -114,7 +114,9 @@ export function definePlainTextSerializer(): PlainExtension {
   )
 }
 
-/** Drop the inline text a hide-mode editor never shows. */
+/**
+ * Drop the inline text a hide-mode editor never shows.
+ */
 function stripHiddenInline(slice: Slice): Slice {
   return new Slice(mapFragment(slice.content), slice.openStart, slice.openEnd)
 }

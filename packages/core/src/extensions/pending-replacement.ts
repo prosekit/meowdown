@@ -21,10 +21,14 @@ import type { PositionRange } from '../utils/range.ts'
 import { isNodeOfType } from './node-names.ts'
 import { getNodeBuildersForSchema } from './schema.ts'
 
-/** Where an accepted replacement lands relative to the source range. */
+/**
+ * Where an accepted replacement lands relative to the source range.
+ */
 export type PendingReplacementMode = 'replace' | 'append'
 
-/** How a pending replacement ended. */
+/**
+ * How a pending replacement ended.
+ */
 export type PendingReplacementOutcome = 'accepted' | 'discarded'
 
 /**
@@ -33,13 +37,21 @@ export type PendingReplacementOutcome = 'accepted' | 'discarded'
  * untouched; discarding is a no-op.
  */
 export interface PendingReplacement {
-  /** Start of the source range the replacement targets. */
+  /**
+   * Start of the source range the replacement targets.
+   */
   from: number
-  /** End of the source range the replacement targets. */
+  /**
+   * End of the source range the replacement targets.
+   */
   to: number
-  /** The Markdown accumulated so far (e.g. streamed from an AI provider). */
+  /**
+   * The Markdown accumulated so far (e.g. streamed from an AI provider).
+   */
   text: string
-  /** Whether accepting replaces the source range or inserts after its block. */
+  /**
+   * Whether accepting replaces the source range or inserts after its block.
+   */
   mode: PendingReplacementMode
 }
 
@@ -63,7 +75,9 @@ const pendingReplacementKey = new PluginKey<PendingReplacementPluginState>(
   'meowdownPendingReplacement',
 )
 
-/** The active pending replacement, or null when there is none. */
+/**
+ * The active pending replacement, or null when there is none.
+ */
 export function getPendingReplacement(state: EditorState): PendingReplacement | null {
   return pendingReplacementKey.getState(state)?.pending ?? null
 }
@@ -122,7 +136,9 @@ const pendingReplacementPlugin = new Plugin<PendingReplacementPluginState>({
   },
 })
 
-/** Options for the `startPendingReplacement` command. */
+/**
+ * Options for the `startPendingReplacement` command.
+ */
 export interface StartPendingReplacementOptions extends PositionRange {
   mode: PendingReplacementMode
 }
@@ -167,9 +183,13 @@ function discardPendingReplacement(): Command {
   }
 }
 
-/** Options for the `acceptPendingReplacement` command. */
+/**
+ * Options for the `acceptPendingReplacement` command.
+ */
 export interface AcceptPendingReplacementOptions {
-  /** Overrides the staged mode for this accept (e.g. "Insert below" on a replace stage). */
+  /**
+   * Overrides the staged mode for this accept (e.g. "Insert below" on a replace stage).
+   */
   mode?: PendingReplacementMode
 }
 
@@ -225,7 +245,9 @@ function definePendingReplacementCommands() {
   })
 }
 
-/** Accept on Mod-Enter and discard on Escape, only while a replacement is pending. */
+/**
+ * Accept on Mod-Enter and discard on Escape, only while a replacement is pending.
+ */
 function definePendingReplacementKeymap(): PlainExtension {
   return defineKeymap({
     'Mod-Enter': acceptPendingReplacement(),
@@ -252,7 +274,9 @@ export function definePendingReplacement() {
   )
 }
 
-/** A pending-replacement change: text/range updates, or how the stage ended. */
+/**
+ * A pending-replacement change: text/range updates, or how the stage ended.
+ */
 export type PendingReplacementEvent =
   | { type: 'update'; pending: PendingReplacement }
   | { type: 'ended'; pending: PendingReplacement; outcome: PendingReplacementOutcome }

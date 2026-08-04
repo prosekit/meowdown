@@ -11,7 +11,9 @@ import {
   trimRange,
 } from './inline-toggle.ts'
 
-/** Per-textblock slice of the selection, in text-offset space. */
+/**
+ * Per-textblock slice of the selection, in text-offset space.
+ */
 interface Segment {
   text: string
   base: number

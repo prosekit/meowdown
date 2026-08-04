@@ -58,7 +58,9 @@ function defineHeadingWhitespace(): HeadingSpecExtension {
   return defineNodeSpec({ name: 'heading' satisfies NodeName, whitespace: 'pre' })
 }
 
-/** The clipboard DOM of a heading: semantic inline content plus `data-md`. */
+/**
+ * The clipboard DOM of a heading: semantic inline content plus `data-md`.
+ */
 export function headingClipboardDOM(node: ProseMirrorNode): HTMLElement {
   const attrs = node.attrs as MeowdownHeadingAttrs
   return semanticTextblockDOM(`h${attrs.level}`, node, {
@@ -68,7 +70,9 @@ export function headingClipboardDOM(node: ProseMirrorNode): HTMLElement {
   })
 }
 
-/** The clipboard parse rules restoring a heading's source text from `data-md`. */
+/**
+ * The clipboard parse rules restoring a heading's source text from `data-md`.
+ */
 export function headingFromDOM(): TagParseRule[] {
   return [1, 2, 3, 4, 5, 6].map((level) =>
     createSourceTextRule(`h${level}`, 'heading' satisfies NodeName, (dom) => ({

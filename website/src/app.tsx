@@ -247,7 +247,9 @@ interface SegmentedControlProps<T extends string> {
   value: T
   onChange: (value: T) => void
   ariaLabel?: string
-  /** Shared radio group name; required when several controls coexist. */
+  /**
+   * Shared radio group name; required when several controls coexist.
+   */
   name?: string
 }
 

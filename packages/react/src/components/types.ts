@@ -7,7 +7,9 @@ import type {
 } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
 
-/** A selection to restore: an exact JSON selection, or a document edge. */
+/**
+ * A selection to restore: an exact JSON selection, or a document edge.
+ */
 export type SelectionHint = SelectionJSON | 'start' | 'end'
 
 /**
@@ -28,7 +30,9 @@ export interface EditorHandle {
    */
   getMarkdown: () => string
 
-  /** Replaces the whole document as a single undoable edit. */
+  /**
+   * Replaces the whole document as a single undoable edit.
+   */
   setMarkdown: (markdown: string) => void
 
   /**
@@ -42,7 +46,9 @@ export interface EditorHandle {
    */
   insertMarkdown: (markdown: string) => void
 
-  /** Returns the current Markdown and selection. */
+  /**
+   * Returns the current Markdown and selection.
+   */
   getState: () => EditorStateSnapshot
 
   /**
@@ -60,16 +66,24 @@ export interface EditorHandle {
    */
   refreshMarkdownRendering: () => void
 
-  /** Returns the current selection. */
+  /**
+   * Returns the current selection.
+   */
   getSelection: () => SelectionJSON
 
-  /** Restores a selection with the same hint semantics as `setState`. */
+  /**
+   * Restores a selection with the same hint semantics as `setState`.
+   */
   setSelection: (selection: SelectionHint) => void
 
-  /** Focuses the editor. */
+  /**
+   * Focuses the editor.
+   */
   focus: () => void
 
-  /** Scrolls the selection into view. */
+  /**
+   * Scrolls the selection into view.
+   */
   scrollIntoView: () => void
 
   /**
@@ -99,7 +113,9 @@ export interface EditorHandle {
    */
   startPendingReplacement: (options: StartPendingReplacementOptions) => boolean
 
-  /** Appends streamed text to the staged replacement. */
+  /**
+   * Appends streamed text to the staged replacement.
+   */
   appendPendingReplacementText: (text: string) => void
 
   /**
@@ -109,13 +125,19 @@ export interface EditorHandle {
    */
   acceptPendingReplacement: (options?: AcceptPendingReplacementOptions) => void
 
-  /** Clears the staged replacement without touching the document. */
+  /**
+   * Clears the staged replacement without touching the document.
+   */
   discardPendingReplacement: () => void
 
-  /** Selects the next match of the current search query, wrapping at the document end. */
+  /**
+   * Selects the next match of the current search query, wrapping at the document end.
+   */
   findNext: () => void
 
-  /** Selects the previous match of the current search query, wrapping at the document start. */
+  /**
+   * Selects the previous match of the current search query, wrapping at the document start.
+   */
   findPrevious: () => void
 
   /**
@@ -125,17 +147,29 @@ export interface EditorHandle {
   readonly editor: TypedEditor | undefined
 }
 
-/** One row of host items in the slash menu. The host ranks the rows; the menu does not re-sort. */
+/**
+ * One row of host items in the slash menu. The host ranks the rows; the menu does not re-sort.
+ */
 export interface SlashMenuItem {
-  /** Stable row key; defaults to `label`. */
+  /**
+   * Stable row key; defaults to `label`.
+   */
   id?: string
-  /** Display text, matched against the typed query like the built-in items. */
+  /**
+   * Display text, matched against the typed query like the built-in items.
+   */
   label: string
-  /** Extra match terms beyond the label; never displayed. */
+  /**
+   * Extra match terms beyond the label; never displayed.
+   */
   keywords?: string[]
-  /** Secondary text shown beside the label. */
+  /**
+   * Secondary text shown beside the label.
+   */
   detail?: string
-  /** Runs after the menu closes and the typed `/query` text is removed. */
+  /**
+   * Runs after the menu closes and the typed `/query` text is removed.
+   */
   onSelect: () => void
 }
 
@@ -146,15 +180,25 @@ export interface SlashMenuItem {
  */
 export type SlashMenuSearchHandler = (query: string) => SlashMenuItem[] | Promise<SlashMenuItem[]>
 
-/** One row in the tag menu. The host ranks the rows; the menu does not re-sort. */
+/**
+ * One row in the tag menu. The host ranks the rows; the menu does not re-sort.
+ */
 export interface TagItem {
-  /** Inserted as `#tag `. */
+  /**
+   * Inserted as `#tag `.
+   */
   tag: string
-  /** Display text; defaults to `#tag`. */
+  /**
+   * Display text; defaults to `#tag`.
+   */
   label?: string
-  /** Secondary text shown beside the label. */
+  /**
+   * Secondary text shown beside the label.
+   */
   detail?: string
-  /** Side effect run after the tag is inserted (e.g. create the tag). */
+  /**
+   * Side effect run after the tag is inserted (e.g. create the tag).
+   */
   onSelect?: () => void
 }
 
@@ -165,15 +209,25 @@ export interface TagItem {
  */
 export type TagSearchHandler = (query: string) => TagItem[] | Promise<TagItem[]>
 
-/** One row in the wikilink menu. The host ranks the rows; the menu does not re-sort. */
+/**
+ * One row in the wikilink menu. The host ranks the rows; the menu does not re-sort.
+ */
 export interface WikilinkItem {
-  /** Inserted as `[[target]]`. */
+  /**
+   * Inserted as `[[target]]`.
+   */
   target: string
-  /** Display text; defaults to `target`. */
+  /**
+   * Display text; defaults to `target`.
+   */
   label?: string
-  /** Secondary text shown beside the label. */
+  /**
+   * Secondary text shown beside the label.
+   */
   detail?: string
-  /** Side effect run after the link is inserted (e.g. create the note). */
+  /**
+   * Side effect run after the link is inserted (e.g. create the note).
+   */
   onSelect?: () => void
 }
 
@@ -185,25 +239,43 @@ export interface WikilinkItem {
  */
 export type WikilinkSearchHandler = (query: string) => WikilinkItem[] | Promise<WikilinkItem[]>
 
-/** The selection the selection menu was opened over. */
+/**
+ * The selection the selection menu was opened over.
+ */
 export interface SelectionMenuContext {
-  /** The selected text, with block boundaries as blank lines. */
+  /**
+   * The selected text, with block boundaries as blank lines.
+   */
   selectedText: string
-  /** Start of the selection. */
+  /**
+   * Start of the selection.
+   */
   from: number
-  /** End of the selection. */
+  /**
+   * End of the selection.
+   */
   to: number
 }
 
-/** One row in the selection menu. The host ranks the rows; the menu does not re-sort. */
+/**
+ * One row in the selection menu. The host ranks the rows; the menu does not re-sort.
+ */
 export interface SelectionMenuItem {
-  /** Stable identity for the row. */
+  /**
+   * Stable identity for the row.
+   */
   id: string
-  /** Display text. */
+  /**
+   * Display text.
+   */
   label: string
-  /** Secondary text shown beside the label. */
+  /**
+   * Secondary text shown beside the label.
+   */
   detail?: string
-  /** Runs when the row is picked, with the selection the menu was opened over. */
+  /**
+   * Runs when the row is picked, with the selection the menu was opened over.
+   */
   onSelect: (context: SelectionMenuContext) => void
 }
 
@@ -217,7 +289,9 @@ export type SelectionMenuSearchHandler = (
   context: SelectionMenuContext,
 ) => SelectionMenuItem[] | Promise<SelectionMenuItem[]>
 
-/** Reports how a pending replacement ended and its final staged value. */
+/**
+ * Reports how a pending replacement ended and its final staged value.
+ */
 export type PendingReplacementResolveHandler = (
   outcome: PendingReplacementOutcome,
   pending: PendingReplacement,

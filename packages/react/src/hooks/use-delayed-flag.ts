@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 
-/** Delay before the flag opens, in ms. */
+/**
+ * Delay before the flag opens, in ms.
+ */
 const OPEN_DELAY = 400
 
-/** Grace before the flag closes, in ms. The window lets a pointer travel from
- *  the hovered link onto the popover it anchors. */
+/**
+ * Grace before the flag closes, in ms. The window lets a pointer travel from
+ *  the hovered link onto the popover it anchors.
+ */
 const CLOSE_DELAY = 300
 
 /**

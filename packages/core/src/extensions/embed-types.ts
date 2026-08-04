@@ -18,16 +18,28 @@ export interface EmbedDescriptor {
    * keys the React element, so the embed never reloads.
    */
   readonly key: string
-  /** The iframe `src`. */
+  /**
+   * The iframe `src`.
+   */
   readonly src: string
-  /** The iframe `title`. */
+  /**
+   * The iframe `title`.
+   */
   readonly title: string
-  /** The iframe `class`, e.g. `md-embed md-embed-tweet`. */
+  /**
+   * The iframe `class`, e.g. `md-embed md-embed-tweet`.
+   */
   readonly className: string
-  /** The iframe `data-testid`. */
+  /**
+   * The iframe `data-testid`.
+   */
   readonly testid: string
-  /** The iframe `allow` policy, when the embed needs one. */
+  /**
+   * The iframe `allow` policy, when the embed needs one.
+   */
   readonly allow?: string
-  /** Whether the iframe is fullscreen-capable. */
+  /**
+   * Whether the iframe is fullscreen-capable.
+   */
   readonly allowFullscreen?: boolean
 }

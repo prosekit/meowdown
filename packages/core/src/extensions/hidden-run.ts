@@ -31,7 +31,9 @@ function isInsideNonCodeTextblock(state: EditorState, pos: number): boolean {
   return $pos.parent.isTextblock && !$pos.parent.type.spec.code
 }
 
-/** The maximal contiguous hidden run ending exactly at `pos`, or undefined. */
+/**
+ * The maximal contiguous hidden run ending exactly at `pos`, or undefined.
+ */
 export function getHiddenRunBefore(state: EditorState, pos: number): HiddenRun | undefined {
   if (!isInsideNonCodeTextblock(state, pos)) return
   const blockStart = state.doc.resolve(pos).start()
@@ -40,7 +42,9 @@ export function getHiddenRunBefore(state: EditorState, pos: number): HiddenRun |
   return from < pos ? { from, to: pos } : undefined
 }
 
-/** The maximal contiguous hidden run starting exactly at `pos`, or undefined. */
+/**
+ * The maximal contiguous hidden run starting exactly at `pos`, or undefined.
+ */
 export function getHiddenRunAfter(state: EditorState, pos: number): HiddenRun | undefined {
   if (!isInsideNonCodeTextblock(state, pos)) return
   const blockEnd = state.doc.resolve(pos).end()
@@ -55,7 +59,9 @@ export function isHiddenRunInterior(state: EditorState, pos: number): boolean {
   return isHiddenChar(state, pos - 1) && isHiddenChar(state, pos)
 }
 
-/** The full run around an interior position, or undefined for rest positions. */
+/**
+ * The full run around an interior position, or undefined for rest positions.
+ */
 export function getHiddenRunAround(state: EditorState, pos: number): HiddenRun | undefined {
   if (!isHiddenRunInterior(state, pos)) return
   const before = getHiddenRunBefore(state, pos)

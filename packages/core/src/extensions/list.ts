@@ -277,12 +277,16 @@ function defineMeowdownListInputRules(): PlainExtension {
   return union(listInputRules.map(defineInputRule))
 }
 
-/** Circle checkbox task: a `task` list item with a `+` marker. */
+/**
+ * Circle checkbox task: a `task` list item with a `+` marker.
+ */
 function wrapInCircleTask(): Command {
   return wrapInList<MeowdownListAttrs>({ kind: 'task', marker: '+' })
 }
 
-/** Square checkbox task: a `task` list item with the canonical `-` marker. */
+/**
+ * Square checkbox task: a `task` list item with the canonical `-` marker.
+ */
 function wrapInSquareTask(): Command {
   return wrapInList<MeowdownListAttrs>({ kind: 'task', marker: null })
 }

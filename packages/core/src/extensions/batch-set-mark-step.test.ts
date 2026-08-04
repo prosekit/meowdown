@@ -25,7 +25,9 @@ const m1 = () => schema.marks.mark1.create()
 const m2 = () => schema.marks.mark2.create()
 const m3 = (url: string) => schema.marks.mark3.create({ url })
 
-/** Build a paragraph doc from raw text (no marks). */
+/**
+ * Build a paragraph doc from raw text (no marks).
+ */
 function makeDoc(text: string) {
   return schema.node('doc', null, [schema.node('paragraph', null, [schema.text(text)])])
 }

@@ -7,7 +7,9 @@ export { listenForTweetHeight }
 
 const EMBED_MATCHERS: readonly EmbedMatcher[] = [matchYouTube, matchTweet]
 
-/** Detect a tweet/YouTube embed in an image `src`, or `undefined` for a plain image. */
+/**
+ * Detect a tweet/YouTube embed in an image `src`, or `undefined` for a plain image.
+ */
 export function matchEmbed(src: string): EmbedDescriptor | undefined {
   for (const match of EMBED_MATCHERS) {
     const descriptor = match(src)

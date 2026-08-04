@@ -10,9 +10,13 @@ export interface MarkHoverHit<Payload> {
 
 export interface MarkHoverConfig<Payload> {
   key: PluginKey
-  /** The hovered target must sit inside this selector, tested via `closest`. */
+  /**
+   * The hovered target must sit inside this selector, tested via `closest`.
+   */
   selector: string
-  /** The payload for the mark covering `pos`, or `undefined` on a miss. */
+  /**
+   * The payload for the mark covering `pos`, or `undefined` on a miss.
+   */
   findPayloadAt: (state: EditorState, pos: number) => Payload | undefined
   /**
    * Resolve a hit from its rendered element. Atom mark views should use their
@@ -20,9 +24,13 @@ export interface MarkHoverConfig<Payload> {
    * an adjacent mark's document boundary.
    */
   findPayloadForElement?: (view: EditorView, element: HTMLElement) => Payload | undefined
-  /** Whether a transaction left the hovered mark semantically unchanged. */
+  /**
+   * Whether a transaction left the hovered mark semantically unchanged.
+   */
   isSamePayload: (previous: Payload, next: Payload) => boolean
-  /** Fired with the hit on enter, and with `undefined` on leave. */
+  /**
+   * Fired with the hit on enter, and with `undefined` on leave.
+   */
   onHoverChange: (hit: MarkHoverHit<Payload> | undefined) => void
 }
 

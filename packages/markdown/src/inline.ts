@@ -25,7 +25,9 @@ export function parseInline(text: string): readonly InlineElement[] {
   return gfmParser.parseInline(text, 0) as InlineElement[]
 }
 
-/** Depth-first list of every element matching `test`. */
+/**
+ * Depth-first list of every element matching `test`.
+ */
 export function collectInlineElements(
   nodes: readonly InlineElement[],
   test: (node: InlineElement) => boolean,

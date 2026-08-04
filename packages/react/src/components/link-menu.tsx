@@ -25,15 +25,19 @@ export interface LinkMenuProps {
   onLinkCopy?: LinkCopyHandler
 }
 
-/** Select the link unit so the text-backed commands target it, and keep the
- *  editor focused so its virtual selection stays visible behind the popover. */
+/**
+ * Select the link unit so the text-backed commands target it, and keep the
+ *  editor focused so its virtual selection stays visible behind the popover.
+ */
 function selectLinkUnit(editor: TypedEditor, link: LinkUnit): void {
   editor.commands.selectText(link.unit.from, link.unit.to)
   editor.focus()
 }
 
-/** A Base UI popover anchored at `anchor`. Base UI dismisses it on an outside
- *  press or Escape, both routed through `onClose`. */
+/**
+ * A Base UI popover anchored at `anchor`. Base UI dismisses it on an outside
+ *  press or Escape, both routed through `onClose`.
+ */
 function LinkPopover({
   anchor,
   onClose,
@@ -75,7 +79,9 @@ function LinkPopover({
   )
 }
 
-/** The hover preview: the url plus copy, edit, and remove actions. */
+/**
+ * The hover preview: the url plus copy, edit, and remove actions.
+ */
 function LinkInfoContent({
   href,
   onLinkClick,
@@ -137,7 +143,9 @@ function LinkInfoContent({
   )
 }
 
-/** The url and title form, opened by `Mod-k` or the preview's edit button. */
+/**
+ * The url and title form, opened by `Mod-k` or the preview's edit button.
+ */
 function LinkEditContent({
   link,
   onSubmit,

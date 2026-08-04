@@ -22,7 +22,9 @@ interface DemoCommand {
   transform: (selectedText: string) => string
 }
 
-/** Leading Markdown block markers: heading, list, blockquote, task box. */
+/**
+ * Leading Markdown block markers: heading, list, blockquote, task box.
+ */
 const LEADING_BLOCK_MARKERS = /^\s*(?:(?:[\-*+>]|\d+[.)]|#{1,6})\s+)*(?:\[[ x]\]\s+)?/i
 
 const DEMO_COMMANDS: DemoCommand[] = [
@@ -70,7 +72,9 @@ const SEARCH_LATENCY_MS = 150
 const STREAM_CHUNK_SIZE = 4
 const STREAM_INTERVAL_MS = 30
 
-/** One in-flight (or previewed) demo run, kept for retry. */
+/**
+ * One in-flight (or previewed) demo run, kept for retry.
+ */
 interface DemoRun {
   command: DemoCommand
   context: SelectionMenuContext
@@ -111,7 +115,9 @@ export interface SelectionDemoValue {
   onSelectionMenuSearch: SelectionMenuSearchHandler
   pendingReplacementActions: ReactNode
   onPendingReplacementResolve: PendingReplacementResolveHandler
-  /** Opens the selection menu; bound to `Mod-Shift-j` by `SelectionMenuShortcut`. */
+  /**
+   * Opens the selection menu; bound to `Mod-Shift-j` by `SelectionMenuShortcut`.
+   */
   openMenu: () => void
 }
 

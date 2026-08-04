@@ -14,7 +14,9 @@ function setupPlainText(mode: MarkMode, markdown: string): Fixture {
   return fixture
 }
 
-/** The `text/plain` flavor of a whole-document block copy. */
+/**
+ * The `text/plain` flavor of a whole-document block copy.
+ */
 function copyText(mode: MarkMode, markdown: string): string {
   using fixture = setupPlainText(mode, markdown)
   const { view } = fixture
@@ -22,7 +24,9 @@ function copyText(mode: MarkMode, markdown: string): string {
   return view.serializeForClipboard(doc.slice(0, doc.content.size)).text
 }
 
-/** The `text/plain` flavor of the selection marked by `<a>` and `<b>`. */
+/**
+ * The `text/plain` flavor of the selection marked by `<a>` and `<b>`.
+ */
 function copySelectionText(mode: MarkMode, createDoc: (n: Fixture['n']) => EditorNode): string {
   using fixture = setupFixture({ extensionOptions: { markMode: mode } })
   const { view } = fixture

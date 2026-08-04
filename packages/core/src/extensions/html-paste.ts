@@ -98,7 +98,9 @@ function appendText(output: TextOutput, text: string): void {
   }
 }
 
-/** Recursive worker of {@link extractStyledPlainText}. */
+/**
+ * Recursive worker of {@link extractStyledPlainText}.
+ */
 function appendNodeText(node: Node, output: TextOutput, insideLine: boolean): boolean {
   if (node.nodeType === Node.TEXT_NODE) {
     appendText(output, node.nodeValue ?? '')

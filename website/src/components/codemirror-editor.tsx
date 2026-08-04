@@ -14,7 +14,9 @@ export interface CodeMirrorEditorProps {
    */
   initialMarkdown?: string
 
-  /** Reports the current Markdown text back to the mode-flip seeding. */
+  /**
+   * Reports the current Markdown text back to the mode-flip seeding.
+   */
   ref?: Ref<MarkdownSource>
 }
 

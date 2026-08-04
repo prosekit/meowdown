@@ -63,16 +63,24 @@ function SlashMenuItem({ label, keywords, detail, kbd, onSelect }: SlashMenuItem
 }
 
 interface SlashMenuProps {
-  /** The clock format the "Now" item inserts. Defaults to '12'. */
+  /**
+   * The clock format the "Now" item inserts. Defaults to '12'.
+   */
   timeFormat?: TimeFormat
 
-  /** Adds host items after the built-in ones. See `EditorProps.onSlashMenuSearch`. */
+  /**
+   * Adds host items after the built-in ones. See `EditorProps.onSlashMenuSearch`.
+   */
   onSlashMenuSearch?: SlashMenuSearchHandler
 
-  /** Persists files selected from the "Attach file" item. See `EditorProps.onFilePaste`. */
+  /**
+   * Persists files selected from the "Attach file" item. See `EditorProps.onFilePaste`.
+   */
   onFilePaste?: FilePasteOptions['onFilePaste']
 
-  /** Called when an attached file fails to persist. See `EditorProps.onFileSaveError`. */
+  /**
+   * Called when an attached file fails to persist. See `EditorProps.onFileSaveError`.
+   */
   onFileSaveError?: FilePasteOptions['onFileSaveError']
 }
 

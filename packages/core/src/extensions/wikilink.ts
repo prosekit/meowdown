@@ -9,7 +9,9 @@ export interface ParsedWikilink {
   display: string
 }
 
-/** Splits `[[target]]`/`[[target|alias]]` into its target and display label (the alias, or empty). */
+/**
+ * Splits `[[target]]`/`[[target|alias]]` into its target and display label (the alias, or empty).
+ */
 export function parseWikilink(text: string): ParsedWikilink {
   const inner = text.replace(/^\[\[/, '').replace(/\]\]$/, '')
   const pipe = inner.indexOf('|')
