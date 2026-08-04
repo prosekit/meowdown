@@ -52,7 +52,9 @@ export function defineSharedConfig({
           height: 600,
         },
         provider: playwright({
-          launchOptions: {},
+          launchOptions: {
+            channel: 'chromium',
+          },
           contextOptions: {
             reducedMotion: 'reduce',
             hasTouch: true,
