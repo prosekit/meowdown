@@ -9,7 +9,7 @@ import type { Mark } from '@prosekit/pm/model'
 import type { MdFileAttrs, MdLinkTextAttrs, MdMathAttrs, MdPackAttrs } from './inline-marks.ts'
 import { parseMagicComment, type MagicComment } from './magic-comment.ts'
 import type { MarkChunk } from './mark-chunk.ts'
-import { isMarkOfType, type MarkName } from './mark-names.ts'
+import type { MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
 import {
   normalizeReferenceLabel,
@@ -241,7 +241,7 @@ function walkNode(
     case LEZER_NODE_IDS.InlineMath:
       return walkMath(node, parentMarks, text, marks, out)
     case LEZER_NODE_IDS.Autolink:
-      return walkAutolink(node, parentMarks, text, marks, out, options, context)
+      return walkAutolink(node, parentMarks, text, marks, out)
     case LEZER_NODE_IDS.URL:
       return walkURL(node, parentMarks, text, marks, out)
     default:
@@ -278,10 +278,10 @@ function walkGenericNode(
 
 /**
  * Special walker for an angle autolink `<url>`. The unit's `href` lives on
- * its pack, computed from the `URL` child up front (`''` when the address is
- * not linkable, in which case the child walk emits the muted `mdLinkUri`
- * fallback). The children (the `<`/`>` marks and the `URL`) walk generically
- * under the pack.
+ * its pack, computed from the `URL` child (`''` when the address is not
+ * linkable, in which case the URL keeps the muted `mdLinkUri`). The children
+ * are only the `<`/`>` marks and the `URL`, consumed right here: the `URL`
+ * is a component of this unit, never a unit of its own.
  */
 function walkAutolink(
   node: InlineElement,
@@ -289,26 +289,41 @@ function walkAutolink(
   text: string,
   marks: TypedMarkBuilders,
   out: MarkChunk[],
-  options: InlineMarkOptions | undefined,
-  context: InlineMarkContext | undefined,
 ): void {
   const urlNode = node.children.find((child) => child.type === LEZER_NODE_IDS.URL)
   const href = urlNode ? (getAutolinkHref(text.slice(urlNode.from, urlNode.to)) ?? '') : ''
-  const pack = createUnitPack(marks, out, parentMarks, node.from, {
-    key: 'link',
-    data: { form: 'angle', href },
-    revealInFocus: true,
-  })
-  const base = [...parentMarks, pack]
-  walk(node.children, base, node.from, node.to, text, marks, out, options, context)
+  const base = [
+    ...parentMarks,
+    createUnitPack(marks, out, parentMarks, node.from, {
+      key: 'link',
+      data: { form: 'angle', href },
+      revealInFocus: true,
+    }),
+  ]
+  let pos = node.from
+  for (const child of node.children) {
+    if (child.from > pos) {
+      emit(out, pos, child.from, base)
+    }
+    const childMark =
+      child.type === LEZER_NODE_IDS.URL
+        ? href
+          ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs)
+          : marks.mdLinkUri.create()
+        : marks.mdMark.create()
+    emit(out, child.from, child.to, [...base, childMark])
+    pos = child.to
+  }
+  if (pos < node.to) {
+    emit(out, pos, node.to, base)
+  }
 }
 
 /**
- * A `URL` node outside `<>` is a GFM autolink (the address part of a real
- * `[text](url)` is handled inside `walkResolvedLink`, not here). Linkify the
- * shapes we recognize, packing each as its own unit; anything else keeps the
- * muted `mdLinkUri`. A `URL` inside an angle autolink is a component of that
- * unit (which already carries the angle `link` pack), never a unit of its own.
+ * A `URL` node reaching this walker is a standalone GFM autolink: the address
+ * part of a `[text](url)` link is consumed by `walkResolvedLink`, and an
+ * angle autolink's URL by `walkAutolink`. Linkify the shapes we recognize,
+ * packing each as its own unit; anything else keeps the muted `mdLinkUri`.
  */
 function walkURL(
   node: InlineElement,
@@ -322,20 +337,13 @@ function walkURL(
     emit(out, node.from, node.to, [...parentMarks, marks.mdLinkUri.create()])
     return
   }
-  const linkText = marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs)
-  const enclosingPack = parentMarks.findLast((mark) => isMarkOfType(mark, 'mdPack'))
-  const enclosingAttrs = enclosingPack?.attrs as MdPackAttrs | undefined
-  if (enclosingAttrs?.key === 'link' && enclosingAttrs.data.form === 'angle') {
-    emit(out, node.from, node.to, [...parentMarks, linkText])
-    return
-  }
   emit(out, node.from, node.to, [
     ...parentMarks,
     createUnitPack(marks, out, parentMarks, node.from, {
       key: 'link',
       data: { form: 'bare', href },
     }),
-    linkText,
+    marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs),
   ])
 }
 
