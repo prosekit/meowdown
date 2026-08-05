@@ -58,7 +58,7 @@ describe('math preview rendering', () => {
     await userEvent.keyboard('{ArrowRight}{ArrowRight}')
     await expect.element(preview).toBeVisible()
     await expect.element(preview.locate('.katex')).toBeInTheDocument()
-    await expect.element(preview).toHaveTextContent(/xy/)
+    await expect.element(preview).toMatchTextContent(/xy/)
   })
 })
 

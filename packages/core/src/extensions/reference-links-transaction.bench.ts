@@ -42,7 +42,7 @@
 import { createTestEditor, type TestEditor } from '@prosekit/core/test'
 import type { EditorNode } from '@prosekit/pm/model'
 import type { Transaction } from '@prosekit/pm/state'
-import { bench, describe } from 'vitest'
+import { test, type Bench } from 'vitest'
 
 import { defineEditorExtension, type EditorExtension } from './extension.ts'
 import { collectReferenceDefinitions } from './reference-links.ts'
@@ -107,13 +107,14 @@ function createDefinitionEditScenario(
   return { editor, position: findText(editor.state.doc, '/destination/0/x') + 15, next: 'y' }
 }
 
-function registerScenario(
+async function registerScenario(
+  bench: Bench,
   name: string,
   createScenario: () => Scenario,
   flushRestyle = false,
-): void {
+): Promise<void> {
   const scenario = createScenario()
-  bench(name, () => {
+  await bench(name, () => {
     const transaction = scenario.editor.state.tr.insertText(
       scenario.next,
       scenario.position,
@@ -124,44 +125,57 @@ function registerScenario(
       dispatch(scenario.editor, scenario.editor.state.tr.setMeta('inline-marks-restyle', true))
     }
     scenario.next = scenario.next === 'x' ? 'y' : 'x'
-  })
+  }).run()
 }
 
-describe('ordinary edit', () => {
-  registerScenario('1000 blocks, 20 definitions', () => createOrdinaryEditScenario(1_000, 20))
-  registerScenario('1000 blocks, 100 definitions', () => createOrdinaryEditScenario(1_000, 100))
-  registerScenario('1000 blocks, 400 definitions', () => createOrdinaryEditScenario(1_000, 400))
-  registerScenario('1000 blocks, 1000 definitions', () => createOrdinaryEditScenario(1_000, 1_000))
-  registerScenario('4000 blocks, 20 definitions', () => createOrdinaryEditScenario(4_000, 20))
-  registerScenario('16000 blocks, 1000 definitions', () =>
+test('ordinary edit', async ({ bench }) => {
+  await registerScenario(bench, '1000 blocks, 20 definitions', () =>
+    createOrdinaryEditScenario(1_000, 20),
+  )
+  await registerScenario(bench, '1000 blocks, 100 definitions', () =>
+    createOrdinaryEditScenario(1_000, 100),
+  )
+  await registerScenario(bench, '1000 blocks, 400 definitions', () =>
+    createOrdinaryEditScenario(1_000, 400),
+  )
+  await registerScenario(bench, '1000 blocks, 1000 definitions', () =>
+    createOrdinaryEditScenario(1_000, 1_000),
+  )
+  await registerScenario(bench, '4000 blocks, 20 definitions', () =>
+    createOrdinaryEditScenario(4_000, 20),
+  )
+  await registerScenario(bench, '16000 blocks, 1000 definitions', () =>
     createOrdinaryEditScenario(16_000, 1_000),
   )
 })
 
-describe('definition keystroke', () => {
-  registerScenario('1000 blocks, 100 dependents, 20 definitions', () =>
+test('definition keystroke', async ({ bench }) => {
+  await registerScenario(bench, '1000 blocks, 100 dependents, 20 definitions', () =>
     createDefinitionEditScenario(1_000, 100, 20),
   )
-  registerScenario('4000 blocks, 400 dependents, 20 definitions', () =>
+  await registerScenario(bench, '4000 blocks, 400 dependents, 20 definitions', () =>
     createDefinitionEditScenario(4_000, 400, 20),
   )
-  registerScenario('1000 blocks, 1000 dependents, 20 definitions', () =>
+  await registerScenario(bench, '1000 blocks, 1000 dependents, 20 definitions', () =>
     createDefinitionEditScenario(1_000, 1_000, 20),
   )
 })
 
-describe('definition edit and flush', () => {
-  registerScenario(
+test('definition edit and flush', async ({ bench }) => {
+  await registerScenario(
+    bench,
     '1000 blocks, 100 dependents, 20 definitions',
     () => createDefinitionEditScenario(1_000, 100, 20),
     true,
   )
-  registerScenario(
+  await registerScenario(
+    bench,
     '4000 blocks, 400 dependents, 20 definitions',
     () => createDefinitionEditScenario(4_000, 400, 20),
     true,
   )
-  registerScenario(
+  await registerScenario(
+    bench,
     '1000 blocks, 1000 dependents, 20 definitions',
     () => createDefinitionEditScenario(1_000, 1_000, 20),
     true,
@@ -180,7 +194,7 @@ function createIndexDocument(blockCount: number, definitionCount: number): Edito
   return n.doc(...paragraphs, ...definitions)
 }
 
-describe('reference index scan', () => {
+test('reference index scan', async ({ bench }) => {
   const docWithTwentyDefinitions = createIndexDocument(1_000, 20)
   const docWithThousandDefinitions = createIndexDocument(1_000, 1_000)
   const largeDoc = createIndexDocument(4_000, 20)
@@ -188,13 +202,13 @@ describe('reference index scan', () => {
   collectReferenceDefinitions(docWithThousandDefinitions)
   collectReferenceDefinitions(largeDoc)
 
-  bench('1000 blocks, 20 definitions', () => {
+  await bench('1000 blocks, 20 definitions', () => {
     collectReferenceDefinitions(docWithTwentyDefinitions)
-  })
-  bench('1000 blocks, 1000 definitions', () => {
+  }).run()
+  await bench('1000 blocks, 1000 definitions', () => {
     collectReferenceDefinitions(docWithThousandDefinitions)
-  })
-  bench('4000 blocks, 20 definitions', () => {
+  }).run()
+  await bench('4000 blocks, 20 definitions', () => {
     collectReferenceDefinitions(largeDoc)
-  })
+  }).run()
 })

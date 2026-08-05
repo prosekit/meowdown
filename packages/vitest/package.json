@@ -17,9 +17,8 @@
     "@ocavue/tsconfig": "^0.7.1",
     "@ocavue/utils": "^1.7.0",
     "@prosekit/pm": "^0.1.19-beta.4",
-    "@vitest/browser-playwright": "^4.1.10",
-    "vitest": "^4.1.10",
-    "vitest-browser-commands": "^0.2.1",
-    "vitest-fail-on-console": "^0.10.1"
+    "@vitest/browser-playwright": "^5.0.0-beta.7",
+    "vitest": "^5.0.0-beta.7",
+    "vitest-browser-commands": "^0.2.1"
   }
 }

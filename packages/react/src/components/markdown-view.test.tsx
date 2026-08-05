@@ -73,7 +73,7 @@ describe('MarkdownView', () => {
       onFileClick,
     })
     const pill = view.getByTestId('file-pill')
-    await expect.element(pill).toHaveTextContent('Quarterly')
+    await expect.element(pill).toMatchTextContent('Quarterly')
     await expect.element(view.getByTestId('file-pill-size')).toHaveTextContent('1.4 MB')
     await pill.click()
     expect(onFileClick).toHaveBeenCalledWith(
@@ -301,7 +301,7 @@ describe('MarkdownView', () => {
 
   it('folds a collapsed bullet, like the editor', async () => {
     await renderView('+ parent\n  - child')
-    await expect.element(view.locate('[data-list-collapsed]')).toHaveTextContent('parent')
+    await expect.element(view.locate('[data-list-collapsed]')).toMatchTextContent('parent')
     await expect.element(view.getByText('child')).not.toBeVisible()
   })
 
@@ -326,7 +326,7 @@ describe('MarkdownView', () => {
 
   it('renders truncated markdown without throwing', async () => {
     await renderView('foo [[Bar and a **bold')
-    await expect.element(view).toHaveTextContent('foo')
+    await expect.element(view).toMatchTextContent('foo')
   })
 
   it('renders task checkboxes with their checked state', async () => {
@@ -468,22 +468,22 @@ describe('MarkdownView Mermaid', () => {
     await renderView('```mermaid\nflowchart LR\n  A[Start] --> B[End]\n```')
 
     await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
-    await expect.element(mermaidPreview).toHaveTextContent('Start')
-    await expect.element(mermaidPreview).toHaveTextContent('End')
+    await expect.element(mermaidPreview).toMatchTextContent('Start')
+    await expect.element(mermaidPreview).toMatchTextContent('End')
   })
 
   it('renders a Sequence diagram as SVG', async () => {
     await renderView('```mermaid\nsequenceDiagram\n  Alice->>Bob: Hello Bob\n```')
 
     await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
-    await expect.element(mermaidPreview).toHaveTextContent('Hello Bob')
+    await expect.element(mermaidPreview).toMatchTextContent('Hello Bob')
   })
 
   it('renders unsupported syntax as an error', async () => {
     await renderView('```mermaid\npie\n  "Dogs" : 10\n```')
 
     await expect.element(mermaidPreview, { timeout: 15000 }).toHaveAttribute('data-error')
-    await expect.element(mermaidPreview).toHaveTextContent(/Invalid|Unsupported/i)
+    await expect.element(mermaidPreview).toMatchTextContent(/Invalid|Unsupported/i)
   })
 
   it('renders passive SVG when interaction is disabled', async () => {
