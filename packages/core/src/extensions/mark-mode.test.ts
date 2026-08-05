@@ -328,12 +328,17 @@ describe('focus mode', () => {
       "
       <p>
         visit
-        <a
-          class="md-link"
-          href="https://example.com"
+        <span
+          class="md-pack"
+          data-key="link"
         >
-          https://example.com
-        </a>
+          <a
+            class="md-link"
+            href="https://example.com"
+          >
+            https://example.com
+          </a>
+        </span>
         now
       </p>
       "
@@ -347,7 +352,7 @@ describe('focus mode', () => {
         a
         <span
           class="md-pack"
-          data-key="autolink"
+          data-key="link"
         >
           <span class="md-mark">
             <span class="show">
@@ -534,7 +539,7 @@ describe('focus mode', () => {
       <p>
         <span
           class="md-pack"
-          data-key="autolink"
+          data-key="link"
         >
           <span class="md-mark">
             <span class="show">
@@ -557,7 +562,7 @@ describe('focus mode', () => {
         </span>
         <span
           class="md-pack"
-          data-key="autolink"
+          data-key="link"
         >
           <span class="md-mark">
             <span class="show">
@@ -930,7 +935,7 @@ describe('focus mode', () => {
         a
         <span
           class="md-pack"
-          data-key="autolink"
+          data-key="link"
         >
           <span class="md-mark">
             <span class="show">

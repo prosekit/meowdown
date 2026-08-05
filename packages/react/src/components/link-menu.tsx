@@ -291,7 +291,7 @@ export function LinkMenu({ onLinkClick, onLinkCopy }: LinkMenuProps): ReactNode 
 
   if (hoverOpen && hover) {
     const link = hover
-    const editable = link.label != null && link.dest != null
+    const editable = link.form === 'inline'
     return (
       <LinkPopover anchor={anchor} onClose={closeHover} onPopupHover={setOverPopup}>
         <LinkInfoContent

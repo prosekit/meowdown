@@ -2,11 +2,11 @@ import type { EditorState } from '@prosekit/pm/state'
 
 import type { PositionRange } from '../utils/range.ts'
 
-import type { MdLinkTextAttrs, MdPackAttrs } from './inline-marks.ts'
+import type { MdPackAttrs } from './inline-marks.ts'
 import { isMarkOfType, type MarkName } from './mark-names.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 
-export interface LinkUnit {
+interface LinkUnitBase {
   /**
    * Whole inline link, reference link, or autolink range.
    */
@@ -21,16 +21,6 @@ export interface LinkUnit {
   text: PositionRange
 
   /**
-   * Interior of `[ ]`. Absent for an autolink.
-   */
-  label?: PositionRange
-
-  /**
-   * Interior of `( )`. What `updateLink` rewrites. Absent for an autolink.
-   */
-  dest?: PositionRange
-
-  /**
    * The link URL. Could be an empty string.
    */
   href: string
@@ -40,6 +30,30 @@ export interface LinkUnit {
    */
   title: string
 }
+
+export type LinkUnit =
+  | (LinkUnitBase & {
+      form: 'inline'
+
+      /**
+       * Interior of `[ ]`.
+       */
+      label: PositionRange
+
+      /**
+       * Interior of `( )`. What `updateLink` rewrites.
+       */
+      dest: PositionRange
+    })
+  | (LinkUnitBase & {
+      /**
+       * A reference link or autolink resolves an href but has no editable
+       * label/dest.
+       */
+      form: 'reference' | 'angle' | 'bare'
+      label?: undefined
+      dest?: undefined
+    })
 
 /**
  * The last text run carrying `markName` inside `range`. "Last" so a linked
@@ -73,71 +87,54 @@ function lastMarkRunIn(
  * the `mdLinkUri` run locates the `( )` body.
  */
 export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undefined {
-  const linkText = getMarkRangeAt(state, pos, 'mdLinkText')
   // A position inside nested units carries one `mdPack` per level, so select
   // the pack by `key`: a link inside `**bold**` must find its own pack, not
-  // the outer unit's. `[text](url)` and `<url>` carry a pack over the whole
-  // unit; bare/www autolinks carry only `mdLinkText`, so fall back to that run.
-  const pack =
-    getMarkRangeAt(state, pos, 'mdPack', { key: 'link' } satisfies Partial<MdPackAttrs>) ??
-    getMarkRangeAt(state, pos, 'mdPack', { key: 'autolink' } satisfies Partial<MdPackAttrs>)
-  const unit = pack ?? linkText
+  // the outer unit's.
+  const unit = getMarkRangeAt(state, pos, 'mdPack', { key: 'link' } satisfies Partial<MdPackAttrs>)
   if (!unit) return
 
-  const packAttrs = pack?.mark.attrs as MdPackAttrs | undefined
-  const linkTextAttrs = linkText?.mark.attrs as MdLinkTextAttrs | undefined
-  const href = linkTextAttrs?.href ?? ''
+  const { data } = unit.mark.attrs as Extract<MdPackAttrs, { key: 'link' }>
+  const unitRange = { from: unit.from, to: unit.to }
 
-  // Only a real `[text](dest)` has an editable label/dest.
-  // Autolinks just resolve an href. A bare autolink is its own visible text;
-  // an angle autolink's visible text is the URL run between the hidden `<`/`>`
-  // (the run lookup misses when `pos` sits on a bracket, so fall back to the
-  // grammar's fixed one-character brackets).
-  if (!pack || packAttrs?.key !== 'link') {
-    const unitRange = { from: unit.from, to: unit.to }
-    const text =
-      packAttrs?.key === 'autolink'
-        ? (lastMarkRunIn(state, unitRange, 'mdLinkText') ?? {
-            from: unit.from + 1,
-            to: unit.to - 1,
-          })
-        : unitRange
-    return {
-      unit: unitRange,
-      text,
-      href,
-      title: '',
+  switch (data.form) {
+    // A bare autolink is its own visible text.
+    case 'bare':
+      return { form: 'bare', unit: unitRange, text: unitRange, href: data.href, title: '' }
+
+    // An angle autolink's visible text is its interior: the grammar fixes the
+    // hidden `<`/`>` at one character each.
+    case 'angle': {
+      const text = { from: unit.from + 1, to: unit.to - 1 }
+      return { form: 'angle', unit: unitRange, text, href: data.href, title: '' }
     }
-  }
 
-  const linkData = packAttrs.data
-
-  if (linkData.isReference) {
-    const text =
-      linkText == null
-        ? { from: unit.from, to: unit.to }
-        : { from: linkText.from + 1, to: linkText.to }
-    return {
-      unit: { from: unit.from, to: unit.to },
-      text,
-      href: linkData.href,
-      title: linkData.title,
+    // A reference link's href/title live in its definition, so only its
+    // visible label is editable in place.
+    case 'reference': {
+      const linkText = getMarkRangeAt(state, pos, 'mdLinkText')
+      const text = linkText == null ? unitRange : { from: linkText.from + 1, to: linkText.to }
+      return { form: 'reference', unit: unitRange, text, href: data.href, title: data.title }
     }
-  }
 
-  // `[` at unit.from, `)` at unit.to - 1. With a url, `]` sits two chars before
-  // the url start (`](`); with an empty `()`, `]` is two chars before the `)`.
-  const uri = lastMarkRunIn(state, unit, 'mdLinkUri')
-  const closeBracket = uri ? uri.from - 2 : unit.to - 3
-  const destFrom = uri ? uri.from : unit.to - 1
+    // Only a real `[text](dest)` has an editable label/dest.
+    case 'inline': {
+      // `[` at unit.from, `)` at unit.to - 1. With a url, `]` sits two chars
+      // before the url start (`](`); with an empty `()`, `]` is two chars
+      // before the `)`.
+      const uri = lastMarkRunIn(state, unitRange, 'mdLinkUri')
+      const closeBracket = uri ? uri.from - 2 : unit.to - 3
+      const destFrom = uri ? uri.from : unit.to - 1
 
-  const label = { from: unit.from + 1, to: closeBracket }
-  return {
-    unit: { from: unit.from, to: unit.to },
-    text: label,
-    label,
-    dest: { from: destFrom, to: unit.to - 1 },
-    href: linkData.href,
-    title: linkData.title,
+      const label = { from: unit.from + 1, to: closeBracket }
+      return {
+        form: 'inline',
+        unit: unitRange,
+        text: label,
+        label,
+        dest: { from: destFrom, to: unit.to - 1 },
+        href: data.href,
+        title: data.title,
+      }
+    }
   }
 }

@@ -61,8 +61,6 @@ function getGenericPackKey(type: number) {
       return 'del'
     case LEZER_NODE_IDS.Highlight:
       return 'highlight'
-    case LEZER_NODE_IDS.Autolink:
-      return 'autolink'
     default:
       return
   }
@@ -242,6 +240,8 @@ function walkNode(
       return walkWikiEmbed(node, parentMarks, text, marks, out, options)
     case LEZER_NODE_IDS.InlineMath:
       return walkMath(node, parentMarks, text, marks, out)
+    case LEZER_NODE_IDS.Autolink:
+      return walkAutolink(node, parentMarks, text, marks, out)
     case LEZER_NODE_IDS.URL:
       return walkURL(node, parentMarks, text, marks, out)
     default:
@@ -277,9 +277,53 @@ function walkGenericNode(
 }
 
 /**
- * A standalone `URL` node is a GFM autolink (the address part of a real
- * `[text](url)` is handled inside `walkResolvedLink`, not here). Linkify the
- * shapes we recognize; anything else keeps the muted `mdLinkUri`.
+ * Special walker for an angle autolink `<url>`. The unit's `href` lives on
+ * its pack, computed from the `URL` child (`''` when the address is not
+ * linkable, in which case the URL keeps the muted `mdLinkUri`). The children
+ * are only the `<`/`>` marks and the `URL`, consumed right here: the `URL`
+ * is a component of this unit, never a unit of its own.
+ */
+function walkAutolink(
+  node: InlineElement,
+  parentMarks: readonly Mark[],
+  text: string,
+  marks: TypedMarkBuilders,
+  out: MarkChunk[],
+): void {
+  const urlNode = node.children.find((child) => child.type === LEZER_NODE_IDS.URL)
+  const href = urlNode ? (getAutolinkHref(text.slice(urlNode.from, urlNode.to)) ?? '') : ''
+  const base = [
+    ...parentMarks,
+    createUnitPack(marks, out, parentMarks, node.from, {
+      key: 'link',
+      data: { form: 'angle', href },
+      revealInFocus: true,
+    }),
+  ]
+  let pos = node.from
+  for (const child of node.children) {
+    if (child.from > pos) {
+      emit(out, pos, child.from, base)
+    }
+    const childMark =
+      child.type === LEZER_NODE_IDS.URL
+        ? href
+          ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs)
+          : marks.mdLinkUri.create()
+        : marks.mdMark.create()
+    emit(out, child.from, child.to, [...base, childMark])
+    pos = child.to
+  }
+  if (pos < node.to) {
+    emit(out, pos, node.to, base)
+  }
+}
+
+/**
+ * A `URL` node reaching this walker is a standalone GFM autolink: the address
+ * part of a `[text](url)` link is consumed by `walkResolvedLink`, and an
+ * angle autolink's URL by `walkAutolink`. Linkify the shapes we recognize,
+ * packing each as its own unit; anything else keeps the muted `mdLinkUri`.
  */
 function walkURL(
   node: InlineElement,
@@ -289,10 +333,18 @@ function walkURL(
   out: MarkChunk[],
 ): void {
   const href = getAutolinkHref(text.slice(node.from, node.to))
-  const mark: Mark = href
-    ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs)
-    : marks.mdLinkUri.create()
-  emit(out, node.from, node.to, [...parentMarks, mark])
+  if (!href) {
+    emit(out, node.from, node.to, [...parentMarks, marks.mdLinkUri.create()])
+    return
+  }
+  emit(out, node.from, node.to, [
+    ...parentMarks,
+    createUnitPack(marks, out, parentMarks, node.from, {
+      key: 'link',
+      data: { form: 'bare', href },
+    }),
+    marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs),
+  ])
 }
 
 function walkLink(
@@ -503,7 +555,7 @@ function walkResolvedLink(
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd
   const pack = createUnitPack(marks, out, parentMarks, node.from, {
     key: 'link',
-    data: { href, title, isReference },
+    data: { form: isReference ? 'reference' : 'inline', href, title },
     revealInFocus: true,
   })
   const base = [...parentMarks, pack]

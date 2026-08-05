@@ -19,27 +19,22 @@ function resolvePosition(state: EditorState, pos: number) {
 }
 
 /**
- * Returns the run of the first listed mark covering `pos`, or `undefined` when
- * none covers it. `attrs` narrows the match to marks whose attributes contain
- * it, which is how a caller picks one level out of a nested stack of the same
- * mark.
+ * Returns the run of the mark covering `pos`, or `undefined` when none covers
+ * it. `attrs` narrows the match to marks whose attributes contain it, which
+ * is how a caller picks one level out of a nested stack of the same mark.
  */
 export function getMarkRangeAt(
   state: EditorState,
   pos: number,
-  markName: MarkName | Array<MarkName>,
+  markName: MarkName,
   attrs?: Attrs,
 ): MarkRange | undefined {
   const $pos = resolvePosition(state, pos)
   if (!$pos) return
 
-  const markNames = Array.isArray(markName) ? markName : [markName]
-  for (const name of markNames) {
-    const range = ATOM_MARK_NAMES.includes(name)
-      ? getAtomUnitRange(state, $pos, name)
-      : getMarkRange($pos, name, attrs)
-    if (range) return range
-  }
+  return ATOM_MARK_NAMES.includes(markName)
+    ? getAtomUnitRange(state, $pos, markName)
+    : getMarkRange($pos, markName, attrs)
 }
 
 /**
