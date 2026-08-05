@@ -969,6 +969,19 @@ describe('bare autolink', () => {
     `)
   })
 
+  it('inside link label', () => {
+    expect(parse('[see www.example.com](http://x)')).toMatchInlineSnapshot(`
+      "
+      [0, 1]   mdPack(key=link,data={"form":"inline","href":"www.example.com","title":"","isReference":false},revealInFocus=true) + mdLinkText(href=www.example.com) + mdMark
+      [1, 5]   mdPack(key=link,data={"form":"inline","href":"www.example.com","title":"","isReference":false},revealInFocus=true) + mdLinkText(href=www.example.com)
+      [5, 20]  mdPack(key=link,data={"form":"inline","href":"www.example.com","title":"","isReference":false},revealInFocus=true) + mdLinkText(href=www.example.com) + mdLinkUri
+      [20, 22] mdPack(key=link,data={"form":"inline","href":"www.example.com","title":"","isReference":false},revealInFocus=true) + mdMark
+      [22, 30] mdPack(key=link,data={"form":"inline","href":"www.example.com","title":"","isReference":false},revealInFocus=true) + mdLinkUri
+      [30, 31] mdPack(key=link,data={"form":"inline","href":"www.example.com","title":"","isReference":false},revealInFocus=true) + mdMark
+      "
+    `)
+  })
+
   it('inside inline code', () => {
     expect(parse('`see google.com`')).toMatchInlineSnapshot(`
       "
