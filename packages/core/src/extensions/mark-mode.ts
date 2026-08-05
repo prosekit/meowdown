@@ -1,10 +1,10 @@
 import { defineCommands, definePlugin, getMarkRange, union } from '@prosekit/core'
+import type { Mark, ProseMirrorNode } from '@prosekit/pm/model'
 import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
-import type { MdPackAttrs } from './inline-marks.ts'
-import type { MarkName } from './mark-names.ts'
+import { isMarkOfType, type MarkName } from './mark-names.ts'
 
 /**
  * Controls how markdown syntax characters are rendered and how the clipboard's
@@ -35,10 +35,10 @@ function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
       },
       decorations: (state) => {
         const mode = getCurrentMarkMode(state)
-        if (mode === 'focus') return computeRevealDecorations(state, { revealInFocus: true })
+        if (mode === 'focus') return computeRevealDecorations(state, 'revealInFocus')
         // The units that opt into a hide-mode reveal hide content, not just
         // syntax, and could not be edited in place otherwise.
-        if (mode === 'hide') return computeRevealDecorations(state, { revealInHide: true })
+        if (mode === 'hide') return computeRevealDecorations(state, 'revealInHide')
         return
       },
     },
@@ -62,24 +62,34 @@ export function getMarkMode(state: EditorState): MarkMode | undefined {
   return markModeKey.getState(state)
 }
 
+// The outermost pack on `node` declaring `flag`. Outer packs sort before
+// inner ones in a node's marks, so `find` keeps nested units revealing as
+// their enclosing unit.
+function findFlaggedPack(
+  node: ProseMirrorNode | null,
+  flag: 'revealInFocus' | 'revealInHide',
+): Mark | undefined {
+  return node?.marks.find((mark) => isMarkOfType(mark, 'mdPack') && mark.attrs[flag] === true)
+}
+
 /**
- * Reveal the markdown syntax of the inline unit under the caret. `packAttrs`
- * selects the units: each mark mode queries the reveal flag it honours, so
- * only units declaring that flag reveal there.
+ * Reveal the markdown syntax of every inline unit touching the caret. Each
+ * mark mode queries the reveal flag it honours, so only units declaring that
+ * flag reveal there.
  *
- * Every unit carries one `mdPack` mark spanning it, so a single
- * boundary-inclusive `getMarkRange` finds the unit, returning the outermost
- * when units nest. One decoration over its range flips the hidden
- * punctuation/url/source visible via the `.show` CSS rule. Because the range
- * covers the whole unit, a caret at either edge (e.g. right after a link's
- * `)`) still reveals it. A pack without the queried flag is skipped; when the
- * pack on one side of the caret is filtered out, `getMarkRange` falls back to
- * the unit touching the caret's other side. `#tag` carries no pack and never
- * reveals.
+ * Every unit carries one `mdPack` mark spanning it, and the caret touches at
+ * most two units, one per side, so probe `nodeAfter` and `nodeBefore` for a
+ * flagged pack and place one decoration over each distinct unit found; the
+ * `.show` CSS rule flips its hidden punctuation/url/source visible. A caret
+ * inside a unit sees the same pack on both sides and reveals one unit
+ * (adjacent units never carry equal packs; `slot` keeps them apart), while a
+ * caret on the boundary between two flagged units reveals both, so the
+ * characters a deletion would touch are never hidden. `#tag` carries no pack
+ * and never reveals.
  */
 function computeRevealDecorations(
   state: EditorState,
-  packAttrs: Partial<MdPackAttrs>,
+  flag: 'revealInFocus' | 'revealInHide',
 ): DecorationSet | undefined {
   const { selection } = state
   if (!selection.empty) return
@@ -88,12 +98,22 @@ function computeRevealDecorations(
   const { parent } = $pos
   if (!parent.isTextblock || parent.type.spec.code) return DecorationSet.empty
 
-  const range = getMarkRange($pos, 'mdPack' satisfies MarkName, packAttrs)
-  if (!range) return
+  const packAfter = findFlaggedPack($pos.nodeAfter, flag)
+  const packBefore = findFlaggedPack($pos.nodeBefore, flag)
+  const packs =
+    packAfter != null && packBefore != null && !packAfter.eq(packBefore)
+      ? [packAfter, packBefore]
+      : [packAfter ?? packBefore]
 
-  return DecorationSet.create(state.doc, [
-    Decoration.inline(range.from, range.to, { class: 'show' }),
-  ])
+  const decorations: Decoration[] = []
+  for (const pack of packs) {
+    if (pack == null) continue
+    const range = getMarkRange($pos, 'mdPack' satisfies MarkName, pack.attrs)
+    if (range) decorations.push(Decoration.inline(range.from, range.to, { class: 'show' }))
+  }
+  if (decorations.length === 0) return
+
+  return DecorationSet.create(state.doc, decorations)
 }
 
 export function defineMarkMode(mode: MarkMode) {
