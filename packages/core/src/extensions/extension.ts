@@ -13,6 +13,7 @@ import { defineText } from '@prosekit/extensions/text'
 import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineAtomMarkNavigation } from './atom-mark-navigation.ts'
+import { defineCaretPerch } from './caret-perch.ts'
 import { defineClipboard } from './clipboard/clipboard.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineCodeBlock } from './code-block.ts'
@@ -80,6 +81,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineAtomMarkNavigation({
       marks: ATOM_SOURCE_MARK_NAMES.map((name) => ({ name, modes: ['hide', 'focus', 'show'] })),
     }),
+    defineCaretPerch(),
 
     // others
     defineBaseKeymap(),
