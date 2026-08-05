@@ -583,7 +583,57 @@ describe('focus mode', () => {
     `)
   })
 
-  it('reveals nothing on a multi-char selection', () => {
+  it('reveals the units at both edges of a multi-char selection', () => {
+    expect(renderHTML('focus', '*a<a>* and ~~b<b>~~')).toMatchInlineSnapshot(`
+      "
+      <p>
+        <span
+          class="md-pack"
+          data-key="italic"
+        >
+          <em>
+            <span class="md-mark">
+              <span class="show">
+                *
+              </span>
+            </span>
+            <span class="show">
+              a
+            </span>
+            <span class="md-mark">
+              <span class="show">
+                *
+              </span>
+            </span>
+          </em>
+        </span>
+        and
+        <span
+          class="md-pack"
+          data-key="del"
+        >
+          <del>
+            <span class="md-mark">
+              <span class="show">
+                ~~
+              </span>
+            </span>
+            <span class="show">
+              b
+            </span>
+            <span class="md-mark">
+              <span class="show">
+                ~~
+              </span>
+            </span>
+          </del>
+        </span>
+      </p>
+      "
+    `)
+  })
+
+  it('reveals the unit a multi-char selection sits inside', () => {
     expect(renderHTML('focus', '**<a>bold<b>**')).toMatchInlineSnapshot(`
       "
       <p>
@@ -593,11 +643,17 @@ describe('focus mode', () => {
         >
           <strong>
             <span class="md-mark">
-              **
+              <span class="show">
+                **
+              </span>
             </span>
-            bold
+            <span class="show">
+              bold
+            </span>
             <span class="md-mark">
-              **
+              <span class="show">
+                **
+              </span>
             </span>
           </strong>
         </span>
