@@ -79,7 +79,7 @@ function findRevealablePack(
   for (const mark of node?.marks ?? []) {
     if (isMarkOfType(mark, 'mdPack')) {
       const attrs = mark.attrs as MdPackAttrs
-      if (attrs[mode === 'focus' ? 'revealInFocus' : 'revealInHide']) {
+      if ((mode === "focus" && attrs.revealInFocus) || (mode === "hide" && attrs.revealInHide)) {
         return mark
       }
     }
