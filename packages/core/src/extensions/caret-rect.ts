@@ -120,5 +120,8 @@ function findAtomPreviewElement(view: EditorView, insidePos: number): Element | 
  * Undefined when the head has no measurable geometry at all.
  */
 export function measureCaretScrollRect(view: EditorView): CaretRect | undefined {
-  return findCoordsCaretRect(view) ?? findAtomCaretRect(view)
+  // Atom first, mirroring the virtual caret's own measuring order: the atom
+  // source keeps real inline boxes now, so the coords probe would report the
+  // source box's geometry instead of the preview fragment the caret hugs.
+  return findAtomCaretRect(view) ?? findCoordsCaretRect(view)
 }
