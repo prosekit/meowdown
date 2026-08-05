@@ -99,7 +99,7 @@ export function insertLink({ href, title, wrapText = true }: InsertLinkOptions =
 export function updateLink(attrs: LinkAttrs): Command {
   return (state, dispatch) => {
     const link = getLinkUnitAt(state, state.selection.from)
-    if (!link?.dest) return false
+    if (link?.form !== 'inline') return false
     const dest = destText(normalizeHref(attrs.href ?? link.href), attrs.title ?? link.title)
     if (dispatch) {
       dispatch(state.tr.insertText(dest, link.dest.from, link.dest.to).scrollIntoView())
@@ -114,7 +114,7 @@ export function updateLink(attrs: LinkAttrs): Command {
 export function removeLink(): Command {
   return (state, dispatch) => {
     const link = getLinkUnitAt(state, state.selection.from)
-    if (!link?.label) return false // autolinks cannot be text-unwrapped
+    if (link?.form !== 'inline') return false
     if (dispatch) {
       // delete the tail `](url "title")` first, then the leading `[`
       const tr = state.tr
@@ -149,7 +149,7 @@ function openLinkEdit(onLinkEdit: LinkEditHandler): Command {
     const link = getLinkUnitAt(state, state.selection.from)
 
     if (link) {
-      if (link.label == null || link.dest == null) return false
+      if (link.form !== 'inline') return false
       if (dispatch && view) {
         const {
           unit: { from, to },
