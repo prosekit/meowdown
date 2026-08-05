@@ -528,6 +528,61 @@ describe('focus mode', () => {
     `)
   })
 
+  it('reveals both identical adjacent angle autolinks from their shared boundary', () => {
+    expect(renderHTML('focus', '<https://a.com><a><https://a.com>')).toMatchInlineSnapshot(`
+      "
+      <p>
+        <span
+          class="md-pack"
+          data-key="autolink"
+        >
+          <span class="md-mark">
+            <span class="show">
+              &lt;
+            </span>
+          </span>
+          <a
+            class="md-link"
+            href="https://a.com"
+          >
+            <span class="show">
+              https://a.com
+            </span>
+          </a>
+          <span class="md-mark">
+            <span class="show">
+              &gt;
+            </span>
+          </span>
+        </span>
+        <span
+          class="md-pack"
+          data-key="autolink"
+        >
+          <span class="md-mark">
+            <span class="show">
+              &lt;
+            </span>
+          </span>
+          <a
+            class="md-link"
+            href="https://a.com"
+          >
+            <span class="show">
+              https://a.com
+            </span>
+          </a>
+          <span class="md-mark">
+            <span class="show">
+              &gt;
+            </span>
+          </span>
+        </span>
+      </p>
+      "
+    `)
+  })
+
   it('reveals nothing on a multi-char selection', () => {
     expect(renderHTML('focus', '**<a>bold<b>**')).toMatchInlineSnapshot(`
       "
