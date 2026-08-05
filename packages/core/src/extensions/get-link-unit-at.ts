@@ -87,14 +87,10 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
     case 'bare':
       return { unit: unitRange, text: unitRange, href: data.href, title: '' }
 
-    // An angle autolink's visible text is the URL run between the hidden
-    // `<`/`>` (a unit whose address is not linkable carries `mdLinkUri`
-    // instead, so fall back to the grammar's fixed one-character brackets).
+    // An angle autolink's visible text is its interior: the grammar fixes the
+    // hidden `<`/`>` at one character each.
     case 'angle': {
-      const text = lastMarkRunIn(state, unitRange, 'mdLinkText') ?? {
-        from: unit.from + 1,
-        to: unit.to - 1,
-      }
+      const text = { from: unit.from + 1, to: unit.to - 1 }
       return { unit: unitRange, text, href: data.href, title: '' }
     }
 
