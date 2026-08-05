@@ -547,7 +547,7 @@ function walkResolvedLink(
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd
   const pack = createUnitPack(marks, out, parentMarks, node.from, {
     key: 'link',
-    data: { form: 'inline', href, title, isReference },
+    data: { form: isReference ? 'reference' : 'inline', href, title },
     revealInFocus: true,
   })
   const base = [...parentMarks, pack]

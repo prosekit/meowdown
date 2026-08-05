@@ -98,14 +98,16 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
       return { unit: unitRange, text, href: data.href, title: '' }
     }
 
+    // A reference link's href/title live in its definition, so only its
+    // visible label is editable in place.
+    case 'reference': {
+      const linkText = getMarkRangeAt(state, pos, 'mdLinkText')
+      const text = linkText == null ? unitRange : { from: linkText.from + 1, to: linkText.to }
+      return { unit: unitRange, text, href: data.href, title: data.title }
+    }
+
     // Only a real `[text](dest)` has an editable label/dest.
     case 'inline': {
-      if (data.isReference) {
-        const linkText = getMarkRangeAt(state, pos, 'mdLinkText')
-        const text = linkText == null ? unitRange : { from: linkText.from + 1, to: linkText.to }
-        return { unit: unitRange, text, href: data.href, title: data.title }
-      }
-
       // `[` at unit.from, `)` at unit.to - 1. With a url, `]` sits two chars
       // before the url start (`](`); with an empty `()`, `]` is two chars
       // before the `)`.

@@ -260,7 +260,7 @@ export type MdPackAttrs =
   | {
       key: 'link'
       data:
-        | { form: 'inline'; href: string; title: string; isReference: boolean }
+        | { form: 'inline' | 'reference'; href: string; title: string }
         | { form: 'angle'; href: string }
       slot?: 1 | null
       revealInFocus: true
