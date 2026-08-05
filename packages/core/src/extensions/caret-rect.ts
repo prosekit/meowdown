@@ -2,8 +2,8 @@ import type { EditorView } from '@prosekit/pm/view'
 
 import { tryCoordsAtPos, type CaretCoords } from '../utils/caret-coords.ts'
 
-import { ATOM_SOURCE_MARK_NAMES } from './atom-mark-navigation.ts'
 import { getHiddenRunAfter, getHiddenRunBefore } from './hidden-run.ts'
+import { ATOM_SOURCE_MARK_NAMES } from './mark-names.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 
 export interface CaretRect {

@@ -6,13 +6,7 @@ import {
 } from '@meowdown/markdown'
 import type { Mark } from '@prosekit/pm/model'
 
-import type {
-  MdFileAttrs,
-  MdLinkTextAttrs,
-  MdMathAttrs,
-  MdPackAttrs,
-  MdPackSimpleKey,
-} from './inline-marks.ts'
+import type { MdFileAttrs, MdLinkTextAttrs, MdMathAttrs, MdPackAttrs } from './inline-marks.ts'
 import { parseMagicComment, type MagicComment } from './magic-comment.ts'
 import type { MarkChunk } from './mark-chunk.ts'
 import type { MarkName } from './mark-names.ts'
@@ -52,6 +46,27 @@ const MARK_NAME_BY_TYPE_ID: ReadonlyMap<number, MarkName> = new Map([
   [LEZER_NODE_IDS.Hashtag, 'mdTag'],
   [LEZER_NODE_IDS.WikilinkMark, 'mdMark'],
 ])
+
+// The pack key of a generic wrapper unit, or undefined for a marker or child
+// node (they reach the generic walker too).
+function getGenericPackKey(type: number) {
+  switch (type) {
+    case LEZER_NODE_IDS.Emphasis:
+      return 'italic'
+    case LEZER_NODE_IDS.StrongEmphasis:
+      return 'bold'
+    case LEZER_NODE_IDS.InlineCode:
+      return 'code'
+    case LEZER_NODE_IDS.Strikethrough:
+      return 'del'
+    case LEZER_NODE_IDS.Highlight:
+      return 'highlight'
+    case LEZER_NODE_IDS.Autolink:
+      return 'autolink'
+    default:
+      return
+  }
+}
 
 /**
  * What {@link FileLinkResolver} sees for one `[label](url)` link.
@@ -247,27 +262,12 @@ function walkGenericNode(
   options: InlineMarkOptions | undefined,
   context: InlineMarkContext | undefined,
 ): void {
-  const type: number = node.type
-  let packKey: MdPackSimpleKey | undefined
-
-  if (type === LEZER_NODE_IDS.Emphasis) {
-    packKey = 'italic'
-  } else if (type === LEZER_NODE_IDS.StrongEmphasis) {
-    packKey = 'bold'
-  } else if (type === LEZER_NODE_IDS.InlineCode) {
-    packKey = 'code'
-  } else if (type === LEZER_NODE_IDS.Strikethrough) {
-    packKey = 'strike'
-  } else if (type === LEZER_NODE_IDS.Highlight) {
-    packKey = 'highlight'
-  } else if (type === LEZER_NODE_IDS.Autolink) {
-    packKey = 'autolink'
-  }
-
-  const base = packKey
-    ? [...parentMarks, createUnitPack(marks, out, parentMarks, node.from, { key: packKey })]
-    : parentMarks
-  const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(type)
+  const packKey = getGenericPackKey(node.type)
+  const packMark =
+    packKey &&
+    createUnitPack(marks, out, parentMarks, node.from, { key: packKey, revealInFocus: true })
+  const base = packMark ? [...parentMarks, packMark] : parentMarks
+  const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(node.type)
   const childMarks = maybeMarkName ? [...base, marks[maybeMarkName].create()] : base
   if (node.children.length === 0) {
     emit(out, node.from, node.to, childMarks)
@@ -501,8 +501,11 @@ function walkResolvedLink(
     href,
   } satisfies MdLinkTextAttrs)
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd
-  const data = isReference ? { href, title, reference: true as const } : { href, title }
-  const pack = createUnitPack(marks, out, parentMarks, node.from, { key: 'link', data })
+  const pack = createUnitPack(marks, out, parentMarks, node.from, {
+    key: 'link',
+    data: { href, title, isReference },
+    revealInFocus: true,
+  })
   const base = [...parentMarks, pack]
 
   let pos = node.from
@@ -642,7 +645,11 @@ function walkMath(
   const formula = text.slice(markNodes[0].to, markNodes[1].from)
   const base = [
     ...parentMarks,
-    createUnitPack(marks, out, parentMarks, node.from, { key: 'math' }),
+    createUnitPack(marks, out, parentMarks, node.from, {
+      key: 'math',
+      revealInFocus: true,
+      revealInHide: true,
+    }),
     marks.mdMath.create({ formula } satisfies MdMathAttrs),
   ]
   emit(out, node.from, markNodes[0].to, [...base, marks.mdMark.create()])

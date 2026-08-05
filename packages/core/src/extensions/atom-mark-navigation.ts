@@ -17,7 +17,7 @@ import { getIsComposing } from '../utils/composition.ts'
 import { hasPointerSelectionTransaction } from '../utils/transaction.ts'
 
 import { getMarkMode, type MarkMode } from './mark-mode.ts'
-import type { MarkName } from './mark-names.ts'
+import { ATOM_SOURCE_MARK_NAMES, type MarkName } from './mark-names.ts'
 import {
   getMarkRangeAfter,
   getMarkRangeAt,
@@ -25,13 +25,7 @@ import {
   getMarkRangeStrictlyAround,
 } from './mark-range.ts'
 
-/**
- * The source marks whose mark views hide the raw text behind a rendered
- * preview (`.md-atom-view-preview`) and act as one caret stop.
- */
-export const ATOM_SOURCE_MARK_NAMES: readonly MarkName[] = ['mdImage', 'mdWikilink', 'mdFile']
-
-type AtomMarks = Array<{ name: MarkName; modes: ReadonlyArray<MarkMode> }>
+type AtomMarks = ReadonlyArray<{ name: MarkName; modes: ReadonlyArray<MarkMode> }>
 
 export interface AtomMarkNavigationOptions {
   marks: AtomMarks
@@ -46,7 +40,10 @@ function getActiveMarkNames(marks: AtomMarks, state: EditorState): MarkName[] {
 }
 
 // The unit range a non-empty selection exactly spans, or undefined.
-function getSelectedRange(state: EditorState, markNames: MarkName[]): MarkRange | undefined {
+function getSelectedRange(
+  state: EditorState,
+  markNames: readonly MarkName[],
+): MarkRange | undefined {
   const { from, to, empty } = state.selection
   if (empty) return
   for (const name of markNames) {
@@ -62,7 +59,7 @@ function getSelectedRange(state: EditorState, markNames: MarkName[]): MarkRange 
  */
 export function getSelectedAtomRange(state: EditorState): MarkRange | undefined {
   if (!getMarkMode(state)) return
-  return getSelectedRange(state, [...ATOM_SOURCE_MARK_NAMES])
+  return getSelectedRange(state, ATOM_SOURCE_MARK_NAMES)
 }
 
 // The blockwise step out of `pos`'s textblock in `direction`, or undefined when
@@ -72,7 +69,7 @@ export function getSelectedAtomRange(state: EditorState): MarkRange | undefined 
 function findSelectionAcrossBlockBoundary(
   state: EditorState,
   pos: number,
-  markNames: MarkName[],
+  markNames: readonly MarkName[],
   direction: -1 | 1,
 ): Selection | undefined {
   const $pos = state.doc.resolve(pos)

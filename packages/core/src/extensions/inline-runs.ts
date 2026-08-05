@@ -1,9 +1,9 @@
 import type { Mark, ProseMirrorNode } from '@prosekit/pm/model'
 
-import { ATOM_MARK_NAMES, isMarkOfType, SYNTAX_MARK_NAMES } from './mark-names.ts'
+import { ATOM_MARK_NAMES, isMarkOfType, isMarkOfTypes, SYNTAX_MARK_NAMES } from './mark-names.ts'
 
 function findAtomMark(marks: readonly Mark[]): Mark | undefined {
-  return marks.find((mark) => ATOM_MARK_NAMES.has(mark.type.name))
+  return marks.find((mark) => isMarkOfTypes(mark, ATOM_MARK_NAMES))
 }
 
 // The unit's own pack: the innermost `mdPack` (outer entries belong to
@@ -13,7 +13,7 @@ function findOwnPackMark(marks: readonly Mark[]): Mark | undefined {
 }
 
 export function hasSyntaxMark(marks: readonly Mark[]): boolean {
-  return marks.some((mark) => SYNTAX_MARK_NAMES.has(mark.type.name))
+  return marks.some((mark) => isMarkOfTypes(mark, SYNTAX_MARK_NAMES))
 }
 
 export interface InlineRun {
