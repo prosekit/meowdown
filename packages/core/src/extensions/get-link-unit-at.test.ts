@@ -69,6 +69,24 @@ describe('getLinkUnitAt', () => {
     expect(fixture.doc.textBetween(link.text.from, link.text.to)).toBe('https://example.com')
   })
 
+  it('reads the angle autolink href when the position sits on a bracket', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see <https://example.com> here')))
+    const link = getLinkUnitAt(fixture.state, findText(fixture.doc, '<'))!
+    expect(link.href).toBe('https://example.com')
+    expect(fixture.doc.textBetween(link.text.from, link.text.to)).toBe('https://example.com')
+  })
+
+  it('returns the unit after the boundary where two link units touch', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('[a](http://a.test)<https://b.test>')))
+    const link = getLinkUnitAt(fixture.state, findText(fixture.doc, '<'))!
+    expect(link.href).toBe('https://b.test')
+    expect(fixture.doc.textBetween(link.unit.from, link.unit.to)).toBe('<https://b.test>')
+  })
+
   it('handles an empty dest', () => {
     using fixture = setupFixture()
     const { n } = fixture

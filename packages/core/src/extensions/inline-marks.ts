@@ -251,7 +251,7 @@ function defineMdMath() {
  */
 export type MdPackAttrs =
   | {
-      key: 'italic' | 'bold' | 'code' | 'del' | 'highlight' | 'autolink'
+      key: 'italic' | 'bold' | 'code' | 'del' | 'highlight'
       data?: null
       slot?: 1 | null
       revealInFocus: true
@@ -259,7 +259,9 @@ export type MdPackAttrs =
     }
   | {
       key: 'link'
-      data: { href: string; title: string; isReference: boolean }
+      data:
+        | { form: 'inline'; href: string; title: string; isReference: boolean }
+        | { form: 'angle'; href: string }
       slot?: 1 | null
       revealInFocus: true
       revealInHide?: null
@@ -268,8 +270,8 @@ export type MdPackAttrs =
       // A bare autolink (`https://a.com`, `www.a.com`, `a@b.com`) is all
       // visible content with no hidden syntax, so no mode reveals it; the
       // pack only carries the resolved `href`.
-      key: 'bareAutolink'
-      data: { href: string }
+      key: 'link'
+      data: { form: 'bare'; href: string }
       slot?: 1 | null
       revealInFocus?: null
       revealInHide?: null
@@ -296,11 +298,11 @@ export type MdPackAttrs =
 
 /**
  * Wraps a whole inline unit. For a revealable unit (emphasis, strong, code,
- * strikethrough, link, autolink, math) focus mode reveals the unit with one
- * range lookup instead of stitching its punctuation back together; a unit
- * that never reveals (wikilink, image, file, bare autolink) carries it as
- * unit identity. `excludes: ''` lets nested units carry two of these marks
- * at once.
+ * strikethrough, inline and angle link, math) focus mode reveals the unit
+ * with one range lookup instead of stitching its punctuation back together;
+ * a unit that never reveals (wikilink, image, file, bare autolink) carries
+ * it as unit identity. `excludes: ''` lets nested units carry two of these
+ * marks at once.
  */
 function defineMdPack() {
   return defineMarkSpec<'mdPack', MdPackAttrs>({

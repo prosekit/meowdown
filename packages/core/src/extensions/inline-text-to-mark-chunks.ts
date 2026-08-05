@@ -61,8 +61,6 @@ function getGenericPackKey(type: number) {
       return 'del'
     case LEZER_NODE_IDS.Highlight:
       return 'highlight'
-    case LEZER_NODE_IDS.Autolink:
-      return 'autolink'
     default:
       return
   }
@@ -242,6 +240,8 @@ function walkNode(
       return walkWikiEmbed(node, parentMarks, text, marks, out, options)
     case LEZER_NODE_IDS.InlineMath:
       return walkMath(node, parentMarks, text, marks, out)
+    case LEZER_NODE_IDS.Autolink:
+      return walkAutolink(node, parentMarks, text, marks, out, options, context)
     case LEZER_NODE_IDS.URL:
       return walkURL(node, parentMarks, text, marks, out)
     default:
@@ -277,11 +277,38 @@ function walkGenericNode(
 }
 
 /**
+ * Special walker for an angle autolink `<url>`. The unit's `href` lives on
+ * its pack, computed from the `URL` child up front (`''` when the address is
+ * not linkable, in which case the child walk emits the muted `mdLinkUri`
+ * fallback). The children (the `<`/`>` marks and the `URL`) walk generically
+ * under the pack.
+ */
+function walkAutolink(
+  node: InlineElement,
+  parentMarks: readonly Mark[],
+  text: string,
+  marks: TypedMarkBuilders,
+  out: MarkChunk[],
+  options: InlineMarkOptions | undefined,
+  context: InlineMarkContext | undefined,
+): void {
+  const urlNode = node.children.find((child) => child.type === LEZER_NODE_IDS.URL)
+  const href = urlNode ? (getAutolinkHref(text.slice(urlNode.from, urlNode.to)) ?? '') : ''
+  const pack = createUnitPack(marks, out, parentMarks, node.from, {
+    key: 'link',
+    data: { form: 'angle', href },
+    revealInFocus: true,
+  })
+  const base = [...parentMarks, pack]
+  walk(node.children, base, node.from, node.to, text, marks, out, options, context)
+}
+
+/**
  * A `URL` node outside `<>` is a GFM autolink (the address part of a real
  * `[text](url)` is handled inside `walkResolvedLink`, not here). Linkify the
  * shapes we recognize, packing each as its own unit; anything else keeps the
  * muted `mdLinkUri`. A `URL` inside an angle autolink is a component of that
- * unit (which already carries the `autolink` pack), never a unit of its own.
+ * unit (which already carries the angle `link` pack), never a unit of its own.
  */
 function walkURL(
   node: InlineElement,
@@ -297,13 +324,17 @@ function walkURL(
   }
   const linkText = marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs)
   const enclosingPack = parentMarks.findLast((mark) => isMarkOfType(mark, 'mdPack'))
-  if (enclosingPack != null && (enclosingPack.attrs as MdPackAttrs).key === 'autolink') {
+  const enclosingAttrs = enclosingPack?.attrs as MdPackAttrs | undefined
+  if (enclosingAttrs?.key === 'link' && enclosingAttrs.data.form === 'angle') {
     emit(out, node.from, node.to, [...parentMarks, linkText])
     return
   }
   emit(out, node.from, node.to, [
     ...parentMarks,
-    createUnitPack(marks, out, parentMarks, node.from, { key: 'bareAutolink', data: { href } }),
+    createUnitPack(marks, out, parentMarks, node.from, {
+      key: 'link',
+      data: { form: 'bare', href },
+    }),
     linkText,
   ])
 }
@@ -516,7 +547,7 @@ function walkResolvedLink(
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd
   const pack = createUnitPack(marks, out, parentMarks, node.from, {
     key: 'link',
-    data: { href, title, isReference },
+    data: { form: 'inline', href, title, isReference },
     revealInFocus: true,
   })
   const base = [...parentMarks, pack]
