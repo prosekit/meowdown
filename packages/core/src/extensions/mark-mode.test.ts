@@ -404,7 +404,236 @@ describe('focus mode', () => {
     `)
   })
 
-  it('reveals nothing on a multi-char selection', () => {
+  it('reveals both units when the cursor sits on their shared boundary', () => {
+    expect(renderHTML('focus', '*a*<a>~~b~~')).toMatchInlineSnapshot(`
+      "
+      <p>
+        <span
+          class="md-pack"
+          data-key="italic"
+        >
+          <em>
+            <span class="md-mark">
+              <span class="show">
+                *
+              </span>
+            </span>
+            <span class="show">
+              a
+            </span>
+            <span class="md-mark">
+              <span class="show">
+                *
+              </span>
+            </span>
+          </em>
+        </span>
+        <span
+          class="md-pack"
+          data-key="del"
+        >
+          <del>
+            <span class="md-mark">
+              <span class="show">
+                ~~
+              </span>
+            </span>
+            <span class="show">
+              b
+            </span>
+            <span class="md-mark">
+              <span class="show">
+                ~~
+              </span>
+            </span>
+          </del>
+        </span>
+      </p>
+      "
+    `)
+  })
+
+  it('reveals both identical adjacent links from their shared boundary', () => {
+    expect(renderHTML('focus', '[a](x)<a>[a](x)')).toMatchInlineSnapshot(`
+      "
+      <p>
+        <span
+          class="md-pack"
+          data-key="link"
+        >
+          <a
+            class="md-link"
+            href="x"
+          >
+            <span class="md-mark">
+              <span class="show">
+                [
+              </span>
+            </span>
+            <span class="show">
+              a
+            </span>
+          </a>
+          <span class="md-mark">
+            <span class="show">
+              ](
+            </span>
+          </span>
+          <span class="md-link-uri">
+            <span class="show">
+              x
+            </span>
+          </span>
+          <span class="md-mark">
+            <span class="show">
+              )
+            </span>
+          </span>
+        </span>
+        <span
+          class="md-pack"
+          data-key="link"
+        >
+          <a
+            class="md-link"
+            href="x"
+          >
+            <span class="md-mark">
+              <span class="show">
+                [
+              </span>
+            </span>
+            <span class="show">
+              a
+            </span>
+          </a>
+          <span class="md-mark">
+            <span class="show">
+              ](
+            </span>
+          </span>
+          <span class="md-link-uri">
+            <span class="show">
+              x
+            </span>
+          </span>
+          <span class="md-mark">
+            <span class="show">
+              )
+            </span>
+          </span>
+        </span>
+      </p>
+      "
+    `)
+  })
+
+  it('reveals both identical adjacent angle autolinks from their shared boundary', () => {
+    expect(renderHTML('focus', '<https://a.com><a><https://a.com>')).toMatchInlineSnapshot(`
+      "
+      <p>
+        <span
+          class="md-pack"
+          data-key="autolink"
+        >
+          <span class="md-mark">
+            <span class="show">
+              &lt;
+            </span>
+          </span>
+          <a
+            class="md-link"
+            href="https://a.com"
+          >
+            <span class="show">
+              https://a.com
+            </span>
+          </a>
+          <span class="md-mark">
+            <span class="show">
+              &gt;
+            </span>
+          </span>
+        </span>
+        <span
+          class="md-pack"
+          data-key="autolink"
+        >
+          <span class="md-mark">
+            <span class="show">
+              &lt;
+            </span>
+          </span>
+          <a
+            class="md-link"
+            href="https://a.com"
+          >
+            <span class="show">
+              https://a.com
+            </span>
+          </a>
+          <span class="md-mark">
+            <span class="show">
+              &gt;
+            </span>
+          </span>
+        </span>
+      </p>
+      "
+    `)
+  })
+
+  it('reveals the units at both edges of a multi-char selection', () => {
+    expect(renderHTML('focus', '*a<a>* and ~~b<b>~~')).toMatchInlineSnapshot(`
+      "
+      <p>
+        <span
+          class="md-pack"
+          data-key="italic"
+        >
+          <em>
+            <span class="md-mark">
+              <span class="show">
+                *
+              </span>
+            </span>
+            <span class="show">
+              a
+            </span>
+            <span class="md-mark">
+              <span class="show">
+                *
+              </span>
+            </span>
+          </em>
+        </span>
+        and
+        <span
+          class="md-pack"
+          data-key="del"
+        >
+          <del>
+            <span class="md-mark">
+              <span class="show">
+                ~~
+              </span>
+            </span>
+            <span class="show">
+              b
+            </span>
+            <span class="md-mark">
+              <span class="show">
+                ~~
+              </span>
+            </span>
+          </del>
+        </span>
+      </p>
+      "
+    `)
+  })
+
+  it('reveals the unit a multi-char selection sits inside', () => {
     expect(renderHTML('focus', '**<a>bold<b>**')).toMatchInlineSnapshot(`
       "
       <p>
@@ -414,11 +643,17 @@ describe('focus mode', () => {
         >
           <strong>
             <span class="md-mark">
-              **
+              <span class="show">
+                **
+              </span>
             </span>
-            bold
+            <span class="show">
+              bold
+            </span>
             <span class="md-mark">
-              **
+              <span class="show">
+                **
+              </span>
             </span>
           </strong>
         </span>
