@@ -107,19 +107,20 @@ function computeRevealDecorations(
   const packBefore = findRevealablePack($from, mode, -1)
   const packAfter = findRevealablePack($to, mode, 1)
 
-  const decorations: Decoration[] = []
+  const ranges: Array<{ from: number; to: number }> = []
   for (const [$pos, pack] of [
     [$from, packBefore],
     [$to, packAfter],
   ] as const) {
-    if (pack == null) continue
-    const range = getMarkRange($pos, 'mdPack' satisfies MarkName, pack.attrs)
-    if (range == null) continue
-    if (decorations.some((deco) => deco.from === range.from && deco.to === range.to)) continue
-    decorations.push(Decoration.inline(range.from, range.to, { class: 'show' }))
+    if (!pack) continue
+    const range = getMarkRange($pos, 'mdPack' satisfies MarkName, pack.attrs  )
+    if (!range) continue
+    if (ranges.some((r) => r.from === range.from && r.to === range.to)) continue
+    ranges.push({ from: range.from, to: range.to })
   }
-  if (decorations.length === 0) return
+  if (ranges.length === 0) return
 
+  const decorations = ranges.map((range) => Decoration.inline(range.from, range.to, { class: 'reveal' }))
   return DecorationSet.create(state.doc, decorations)
 }
 
