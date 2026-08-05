@@ -233,15 +233,15 @@ describe('math DOM structure', () => {
             </span>
             <span class="md-math-view-content">
               <span class="md-mark">
-                <span class="reveal">
+                <span class="show">
                   $
                 </span>
               </span>
-              <span class="reveal">
+              <span class="show">
                 x
               </span>
               <span class="md-mark">
-                <span class="reveal">
+                <span class="show">
                   $
                 </span>
               </span>

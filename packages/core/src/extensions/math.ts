@@ -12,7 +12,7 @@ import type { MarkName } from './mark-names.ts'
  * Renders one inline math unit: a KaTeX preview next to the editable
  * `$formula$` source. CSS decides which of the two is visible; in hide and
  * focus modes the source collapses (`font-size: 0`) and the preview shows,
- * unless the caret is inside the unit (the `.reveal` decoration), which
+ * unless the caret is inside the unit (the `.show` reveal decoration), which
  * flips it back.
  */
 class MathMarkView implements MarkView {

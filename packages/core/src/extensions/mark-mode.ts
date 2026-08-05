@@ -93,7 +93,7 @@ function findRevealablePack(
  *
  * Every unit carries one `mdPack` mark spanning it, so one `getMarkRange`
  * per probed pack expands it to its whole unit, and one decoration over
- * each range flips the hidden punctuation/url/source visible via the `.reveal`
+ * each range flips the hidden punctuation/url/source visible via the `.show`
  * CSS rule. The two probes land on the same unit when the selection sits
  * inside one (equal ranges dedupe to one decoration), and on two units at a
  * shared boundary, so the characters an edit would touch are never hidden.
@@ -121,7 +121,7 @@ function computeRevealDecorations(
   if (ranges.length === 0) return
 
   const decorations = ranges.map((range) =>
-    Decoration.inline(range.from, range.to, { class: 'reveal' }),
+    Decoration.inline(range.from, range.to, { class: 'show' }),
   )
   return DecorationSet.create(state.doc, decorations)
 }
