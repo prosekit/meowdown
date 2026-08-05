@@ -785,6 +785,17 @@
 
   /* atom marks (image, wikilink) */
   .ProseMirror {
+    /* The caret perch (caret-perch.ts): an empty zero-width box that still
+     * spans the line height, giving the DOM selection real geometry to anchor
+     * beside a hidden atom source. Empty on purpose; a text node inside would
+     * be a landing spot iOS enters and ProseMirror cannot accept. */
+    .md-caret-perch {
+      display: inline-block;
+      width: 0;
+      height: 1em;
+      vertical-align: text-bottom;
+    }
+
     .md-atom-view {
       display: contents;
     }

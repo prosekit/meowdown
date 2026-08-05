@@ -46,16 +46,17 @@ function findPerchSpot(state: EditorState): PerchSpot | undefined {
   return
 }
 
-// A zero-width inline box with the surrounding line's height: real geometry
-// for the caret to anchor beside, unlike the font-size: 0 atom source. The
-// zero-width space lives outside the document (widget DOM is opaque to
-// ProseMirror's parser), and contenteditable=false keeps the browser from
-// anchoring inside it.
+// A zero-width inline box (styled in style.css) with line height: real
+// geometry for the caret to anchor beside, unlike the font-size: 0 atom
+// source. Deliberately empty: the first device round showed iOS diving into a
+// zero-width-space text node inside the widget, a position prosemirror-view's
+// selection-equivalence scan can never reach (it skips the whole widget), so
+// the two sides fought at ~60Hz. With no text node inside, every landing iOS
+// can pick is an element offset beside the perch.
 function createPerchDOM(): HTMLElement {
   const span = document.createElement('span')
   span.className = 'md-caret-perch'
   span.contentEditable = 'false'
-  span.textContent = '\u{200B}'
   log('perch DOM created')
   return span
 }
@@ -151,6 +152,49 @@ class PerchLogView implements PluginView {
       `anchor=${describeDOMPosition(sel?.anchorNode ?? null, sel?.anchorOffset ?? 0)}`,
       `pmHead=${this.#view.state.selection.head}`,
       `focus=${this.#view.hasFocus()}`,
+    )
+    this.#acceptBenignAnchor(sel)
+  }
+
+  // Round two of the device experiment: beside the perch, iOS and
+  // prosemirror-view can disagree about which of several EQUALLY HEALTHY DOM
+  // positions holds the anchor (observed at a paragraph end, where iOS parks
+  // it after prosemirror-view's own `ProseMirror-separator` image while
+  // prosemirror-view insists on the slot before it; its equivalence scan
+  // hard-fails across any IMG, so it rewrote every frame). When the browser's
+  // landing maps to the exact selection prosemirror-view already holds and
+  // does not sit in hidden source text, adopt it as the observer's tracked
+  // selection so the next flush has nothing to correct. On iOS the flush runs
+  // after this listener, so adoption wins the race; on desktop the flush has
+  // usually already rewritten by now, making this a no-op.
+  #acceptBenignAnchor(sel: Selection | null): void {
+    const view = this.#view
+    if (sel == null || sel.anchorNode == null || !sel.isCollapsed) return
+    if (!view.hasFocus() || view.composing) return
+    const selection = view.state.selection
+    if (!isTextSelection(selection) || !selection.empty) return
+    if (findPerchSpot(view.state) == null) return
+    if (!view.dom.contains(sel.anchorNode)) return
+    const anchorEl =
+      sel.anchorNode.nodeType === Node.TEXT_NODE
+        ? sel.anchorNode.parentElement
+        : (sel.anchorNode as Element)
+    // A landing inside hidden source is the disease itself; never adopt it.
+    if (anchorEl == null || anchorEl.closest('.md-atom-view-content') != null) return
+    let pos: number
+    try {
+      pos = view.posAtDOM(sel.anchorNode, sel.anchorOffset)
+    } catch {
+      return
+    }
+    if (pos !== selection.head) return
+    const observer = (view as unknown as { domObserver?: { setCurSelection?: () => void } })
+      .domObserver
+    if (observer?.setCurSelection == null) return
+    observer.setCurSelection()
+    log(
+      this.#stamp(),
+      `adopted benign anchor ${describeDOMPosition(sel.anchorNode, sel.anchorOffset)} for pos ${pos}`,
     )
   }
 }
