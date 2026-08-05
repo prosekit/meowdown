@@ -4,8 +4,8 @@ import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
-import { isMarkOfType, type MarkName } from './mark-names.ts'
 import type { MdPackAttrs } from './inline-marks.ts'
+import { isMarkOfType, type MarkName } from './mark-names.ts'
 
 /**
  * Controls how markdown syntax characters are rendered and how the clipboard's
@@ -36,7 +36,9 @@ function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
       },
       decorations: (state) => {
         const mode = getCurrentMarkMode(state) ?? initialMode
-        return (mode === "focus" || mode === "hide") ? computeRevealDecorations(state, mode) : undefined
+        return mode === 'focus' || mode === 'hide'
+          ? computeRevealDecorations(state, mode)
+          : undefined
       },
     },
   })
@@ -67,7 +69,7 @@ export function getMarkMode(state: EditorState): MarkMode | undefined {
 // otherwise; show mode reveals through CSS alone and declares no flag.
 function findRevealablePack(
   $pos: ResolvedPos,
-  mode: "focus" | "hide",
+  mode: 'focus' | 'hide',
   direction: -1 | 1,
 ): Mark | undefined {
   const { parent } = $pos
