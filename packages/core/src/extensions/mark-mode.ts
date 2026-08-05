@@ -79,7 +79,7 @@ function findRevealablePack(
   for (const mark of node?.marks ?? []) {
     if (isMarkOfType(mark, 'mdPack')) {
       const attrs = mark.attrs as MdPackAttrs
-      if ((mode === "focus" && attrs.revealInFocus) || (mode === "hide" && attrs.revealInHide)) {
+      if ((mode === 'focus' && attrs.revealInFocus) || (mode === 'hide' && attrs.revealInHide)) {
         return mark
       }
     }
@@ -113,14 +113,16 @@ function computeRevealDecorations(
     [$to, packAfter],
   ] as const) {
     if (!pack) continue
-    const range = getMarkRange($pos, 'mdPack' satisfies MarkName, pack.attrs  )
+    const range = getMarkRange($pos, 'mdPack' satisfies MarkName, pack.attrs)
     if (!range) continue
     if (ranges.some((r) => r.from === range.from && r.to === range.to)) continue
     ranges.push({ from: range.from, to: range.to })
   }
   if (ranges.length === 0) return
 
-  const decorations = ranges.map((range) => Decoration.inline(range.from, range.to, { class: 'reveal' }))
+  const decorations = ranges.map((range) =>
+    Decoration.inline(range.from, range.to, { class: 'reveal' }),
+  )
   return DecorationSet.create(state.doc, decorations)
 }
 
