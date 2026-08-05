@@ -110,7 +110,9 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
     }
   }
 
-  if (packAttrs.data.reference === true) {
+  const linkData = packAttrs.data
+
+  if (linkData.isReference) {
     const text =
       linkText == null
         ? { from: unit.from, to: unit.to }
@@ -118,8 +120,8 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
     return {
       unit: { from: unit.from, to: unit.to },
       text,
-      href: packAttrs.data.href,
-      title: packAttrs.data.title,
+      href: linkData.href,
+      title: linkData.title,
     }
   }
 
@@ -135,7 +137,7 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
     text: label,
     label,
     dest: { from: destFrom, to: unit.to - 1 },
-    href: packAttrs.data.href,
-    title: packAttrs.data.title,
+    href: linkData.href,
+    title: linkData.title,
   }
 }

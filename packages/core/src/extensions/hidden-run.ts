@@ -2,7 +2,7 @@ import { getMarkType } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
 
-import { SYNTAX_MARK_NAMES, type MarkName } from './mark-names.ts'
+import { isMarkOfTypes, SYNTAX_MARK_NAMES, type MarkName } from './mark-names.ts'
 
 export interface HiddenRun {
   from: number
@@ -22,7 +22,7 @@ function getCharMarks(state: EditorState, pos: number): readonly Mark[] | undefi
 export function isHiddenChar(state: EditorState, pos: number): boolean {
   const marks = getCharMarks(state, pos)
   if (marks == null) return false
-  return marks.some((mark) => SYNTAX_MARK_NAMES.has(mark.type.name))
+  return marks.some((mark) => isMarkOfTypes(mark, SYNTAX_MARK_NAMES))
 }
 
 function isInsideNonCodeTextblock(state: EditorState, pos: number): boolean {

@@ -22,7 +22,7 @@ export function cleanTextFromSlice(slice: Slice, options: CleanTextOptions = {})
       if (!textNode.isText || !textNode.text) return true
       const textNodeMarks = textNode.marks.map((mark) => mark.type.name as MarkName)
       const stripped =
-        textNodeMarks.some((markName) => SYNTAX_MARK_NAMES.has(markName)) &&
+        textNodeMarks.some((markName) => SYNTAX_MARK_NAMES.includes(markName)) &&
         !(options.preserveMathSource && textNodeMarks.includes('mdMath'))
       if (!stripped) parts.push(textNode.text)
       return false

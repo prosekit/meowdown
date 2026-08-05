@@ -236,42 +236,53 @@ function defineMdMath() {
 }
 
 /**
- * mdPack keys for units that store no extra data; their own marks carry it.
+ * Content-derived identity of one inline syntax unit.
+ *
+ * - `key`: the unit's kind. It keeps adjacent same-kind units apart and stays
+ *   stable when unrelated text in the block is edited, so editing one unit
+ *   never re-marks the others.
+ * - `data`: the unit's parsed data, read off the mark instead of
+ *   re-parsing the text.
+ * - `slot`: `1` when the pack would otherwise equal the pack of the unit
+ *   ending exactly where this one starts; equal packs would merge the two
+ *   units into one mark run and one mark view.
+ * - `revealInFocus`/`revealInHide`: the mark modes in which the unit's
+ *   source reveals around the caret.
  */
-export type MdPackSimpleKey =
-  | 'bold'
-  | 'italic'
-  | 'code'
-  | 'strike'
-  | 'highlight'
-  | 'autolink'
-  | 'math'
-  | 'wikilink'
-  | 'image'
-  | 'file'
-
-/**
- * Content-derived identity of one inline syntax unit. Adjacent units of the
- * same kind are kept apart by it (so they do not merge into one mark run), and
- * it stays stable when unrelated text in the block is edited, so editing one
- * unit never re-marks the others. `data` carries the unit's parsed payload (a
- * link's `href`/`title`) so callers read it off the mark instead of re-parsing
- * the text. The parser sets `slot: 1` on a unit whose pack would otherwise
- * equal the pack of the unit ending exactly where it starts; equal packs would
- * merge the two units into one mark run and one mark view.
- */
-export type MdPackAttrs = (
+export type MdPackAttrs =
+  | {
+      key: 'italic' | 'bold' | 'code' | 'del' | 'highlight' | 'autolink'
+      data?: null
+      slot?: 1 | null
+      revealInFocus: true
+      revealInHide?: null
+    }
   | {
       key: 'link'
-      data: { href: string; title: string; reference?: true }
+      data: { href: string; title: string; isReference: boolean }
+      slot?: 1 | null
+      revealInFocus: true
+      revealInHide?: null
     }
   | {
-      key: MdPackSimpleKey
+      // Math hides the formula source (not just syntax) behind its preview,
+      // so it also reveals in hide mode; otherwise it could not be edited in
+      // place there.
+      key: 'math'
       data?: null
+      slot?: 1 | null
+      revealInFocus: true
+      revealInHide: true
     }
-) & {
-  slot?: 1 | null
-}
+  | {
+      // A preview unit reveals in no mode: its source hides behind the
+      // preview, so revealing it would change nothing visible.
+      key: 'wikilink' | 'image' | 'file'
+      data?: null
+      slot?: 1 | null
+      revealInFocus?: null
+      revealInHide?: null
+    }
 
 /**
  * Wraps a whole inline unit. For a revealable unit (emphasis, strong, code,
@@ -285,7 +296,13 @@ function defineMdPack() {
     name: 'mdPack' satisfies MarkName,
     excludes: '',
     inclusive: false,
-    attrs: { key: {}, data: { default: null }, slot: { default: null } },
+    attrs: {
+      key: {},
+      data: { default: null },
+      slot: { default: null },
+      revealInFocus: { default: null },
+      revealInHide: { default: null },
+    },
     toDOM: (mark) => {
       const attrs = mark.attrs as MdPackAttrs
       return ['span', { class: 'md-pack', 'data-key': attrs.key }, 0]
@@ -296,8 +313,8 @@ function defineMdPack() {
 
 export function defineInlineMarks() {
   // The last mark registered gets the lowest rank and becomes the outermost DOM
-  // wrapper, so mdWikilink/mdImage go near the end: each covers a whole
-  // wikilink/image source that a mark view renders. The pack mark goes last of
+  // wrapper, so `mdWikilink`/`mdImage` go near the end: each covers a whole
+  // wikilink/image source that a mark view renders. The `mdMark` goes last of
   // all, so it wraps the whole unit (including a mark view).
   return union(
     defineMdMark(),
