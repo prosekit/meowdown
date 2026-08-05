@@ -328,12 +328,17 @@ describe('focus mode', () => {
       "
       <p>
         visit
-        <a
-          class="md-link"
-          href="https://example.com"
+        <span
+          class="md-pack"
+          data-key="bareAutolink"
         >
-          https://example.com
-        </a>
+          <a
+            class="md-link"
+            href="https://example.com"
+          >
+            https://example.com
+          </a>
+        </span>
         now
       </p>
       "

@@ -9,7 +9,7 @@ import type { Mark } from '@prosekit/pm/model'
 import type { MdFileAttrs, MdLinkTextAttrs, MdMathAttrs, MdPackAttrs } from './inline-marks.ts'
 import { parseMagicComment, type MagicComment } from './magic-comment.ts'
 import type { MarkChunk } from './mark-chunk.ts'
-import type { MarkName } from './mark-names.ts'
+import { isMarkOfType, type MarkName } from './mark-names.ts'
 import { marksEqual } from './marks-equal.ts'
 import {
   normalizeReferenceLabel,
@@ -277,9 +277,11 @@ function walkGenericNode(
 }
 
 /**
- * A standalone `URL` node is a GFM autolink (the address part of a real
+ * A `URL` node outside `<>` is a GFM autolink (the address part of a real
  * `[text](url)` is handled inside `walkResolvedLink`, not here). Linkify the
- * shapes we recognize; anything else keeps the muted `mdLinkUri`.
+ * shapes we recognize, packing each as its own unit; anything else keeps the
+ * muted `mdLinkUri`. A `URL` inside an angle autolink is a component of that
+ * unit (which already carries the `autolink` pack), never a unit of its own.
  */
 function walkURL(
   node: InlineElement,
@@ -289,10 +291,21 @@ function walkURL(
   out: MarkChunk[],
 ): void {
   const href = getAutolinkHref(text.slice(node.from, node.to))
-  const mark: Mark = href
-    ? marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs)
-    : marks.mdLinkUri.create()
-  emit(out, node.from, node.to, [...parentMarks, mark])
+  if (!href) {
+    emit(out, node.from, node.to, [...parentMarks, marks.mdLinkUri.create()])
+    return
+  }
+  const linkText = marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs)
+  const enclosingPack = parentMarks.findLast((mark) => isMarkOfType(mark, 'mdPack'))
+  if (enclosingPack != null && (enclosingPack.attrs as MdPackAttrs).key === 'autolink') {
+    emit(out, node.from, node.to, [...parentMarks, linkText])
+    return
+  }
+  emit(out, node.from, node.to, [
+    ...parentMarks,
+    createUnitPack(marks, out, parentMarks, node.from, { key: 'bareAutolink', data: { href } }),
+    linkText,
+  ])
 }
 
 function walkLink(

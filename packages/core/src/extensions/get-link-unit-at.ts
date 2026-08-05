@@ -76,32 +76,33 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
   const linkText = getMarkRangeAt(state, pos, 'mdLinkText')
   // A position inside nested units carries one `mdPack` per level, so select
   // the pack by `key`: a link inside `**bold**` must find its own pack, not
-  // the outer unit's. `[text](url)` and `<url>` carry a pack over the whole
-  // unit; bare/www autolinks carry only `mdLinkText`, so fall back to that run.
-  const pack =
+  // the outer unit's.
+  const unit =
     getMarkRangeAt(state, pos, 'mdPack', { key: 'link' } satisfies Partial<MdPackAttrs>) ??
-    getMarkRangeAt(state, pos, 'mdPack', { key: 'autolink' } satisfies Partial<MdPackAttrs>)
-  const unit = pack ?? linkText
+    getMarkRangeAt(state, pos, 'mdPack', { key: 'autolink' } satisfies Partial<MdPackAttrs>) ??
+    getMarkRangeAt(state, pos, 'mdPack', { key: 'bareAutolink' } satisfies Partial<MdPackAttrs>)
   if (!unit) return
 
-  const packAttrs = pack?.mark.attrs as MdPackAttrs | undefined
+  const packAttrs = unit.mark.attrs as MdPackAttrs
   const linkTextAttrs = linkText?.mark.attrs as MdLinkTextAttrs | undefined
-  const href = linkTextAttrs?.href ?? ''
 
   // Only a real `[text](dest)` has an editable label/dest.
-  // Autolinks just resolve an href. A bare autolink is its own visible text;
-  // an angle autolink's visible text is the URL run between the hidden `<`/`>`
-  // (the run lookup misses when `pos` sits on a bracket, so fall back to the
-  // grammar's fixed one-character brackets).
-  if (!pack || packAttrs?.key !== 'link') {
+  // Autolinks just resolve an href. A bare autolink is its own visible text
+  // and carries its `href` in its pack; an angle autolink's visible text is
+  // the URL run between the hidden `<`/`>` (the run lookup misses when `pos`
+  // sits on a bracket, so fall back to the grammar's fixed one-character
+  // brackets).
+  if (packAttrs.key !== 'link') {
     const unitRange = { from: unit.from, to: unit.to }
     const text =
-      packAttrs?.key === 'autolink'
+      packAttrs.key === 'autolink'
         ? (lastMarkRunIn(state, unitRange, 'mdLinkText') ?? {
             from: unit.from + 1,
             to: unit.to - 1,
           })
         : unitRange
+    const href =
+      packAttrs.key === 'bareAutolink' ? packAttrs.data.href : (linkTextAttrs?.href ?? '')
     return {
       unit: unitRange,
       text,

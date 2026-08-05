@@ -265,6 +265,16 @@ export type MdPackAttrs =
       revealInHide?: null
     }
   | {
+      // A bare autolink (`https://a.com`, `www.a.com`, `a@b.com`) is all
+      // visible content with no hidden syntax, so no mode reveals it; the
+      // pack only carries the resolved `href`.
+      key: 'bareAutolink'
+      data: { href: string }
+      slot?: 1 | null
+      revealInFocus?: null
+      revealInHide?: null
+    }
+  | {
       // Math hides the formula source (not just syntax) behind its preview,
       // so it also reveals in hide mode; otherwise it could not be edited in
       // place there.
@@ -287,9 +297,10 @@ export type MdPackAttrs =
 /**
  * Wraps a whole inline unit. For a revealable unit (emphasis, strong, code,
  * strikethrough, link, autolink, math) focus mode reveals the unit with one
- * range lookup instead of stitching its punctuation back together; an atom
- * unit (wikilink, image, file) carries it purely as unit identity.
- * `excludes: ''` lets nested units carry two of these marks at once.
+ * range lookup instead of stitching its punctuation back together; a unit
+ * that never reveals (wikilink, image, file, bare autolink) carries it as
+ * unit identity. `excludes: ''` lets nested units carry two of these marks
+ * at once.
  */
 function defineMdPack() {
   return defineMarkSpec<'mdPack', MdPackAttrs>({

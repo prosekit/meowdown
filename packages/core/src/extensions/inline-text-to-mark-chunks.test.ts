@@ -773,7 +773,7 @@ describe('autolink', () => {
     expect(parse('visit https://example.com now')).toMatchInlineSnapshot(`
       "
       [0, 6]
-      [6, 25]  mdLinkText(href=https://example.com)
+      [6, 25]  mdPack(key=bareAutolink,data={"href":"https://example.com"}) + mdLinkText(href=https://example.com)
       [25, 29]
       "
     `)
@@ -783,7 +783,7 @@ describe('autolink', () => {
     expect(parse('see www.example.com here')).toMatchInlineSnapshot(`
       "
       [0, 4]
-      [4, 19]  mdLinkText(href=https://www.example.com)
+      [4, 19]  mdPack(key=bareAutolink,data={"href":"https://www.example.com"}) + mdLinkText(href=https://www.example.com)
       [19, 24]
       "
     `)
@@ -793,7 +793,7 @@ describe('autolink', () => {
     expect(parse('mail me@example.com ok')).toMatchInlineSnapshot(`
       "
       [0, 5]
-      [5, 19]  mdLinkText(href=mailto:me@example.com)
+      [5, 19]  mdPack(key=bareAutolink,data={"href":"mailto:me@example.com"}) + mdLinkText(href=mailto:me@example.com)
       [19, 22]
       "
     `)
@@ -803,7 +803,7 @@ describe('autolink', () => {
     expect(parse('a mailto:me@example.com b')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 23]  mdLinkText(href=mailto:me@example.com)
+      [2, 23]  mdPack(key=bareAutolink,data={"href":"mailto:me@example.com"}) + mdLinkText(href=mailto:me@example.com)
       [23, 25]
       "
     `)
@@ -813,7 +813,7 @@ describe('autolink', () => {
     expect(parse('end https://example.com.')).toMatchInlineSnapshot(`
       "
       [0, 4]
-      [4, 23]  mdLinkText(href=https://example.com)
+      [4, 23]  mdPack(key=bareAutolink,data={"href":"https://example.com"}) + mdLinkText(href=https://example.com)
       [23, 24]
       "
     `)
@@ -823,7 +823,7 @@ describe('autolink', () => {
     expect(parse('*https://example.com*')).toMatchInlineSnapshot(`
       "
       [0, 1]   mdPack(key=italic,revealInFocus=true) + mdEm + mdMark
-      [1, 20]  mdPack(key=italic,revealInFocus=true) + mdEm + mdLinkText(href=https://example.com)
+      [1, 20]  mdPack(key=italic,revealInFocus=true) + mdEm + mdPack(key=bareAutolink,data={"href":"https://example.com"}) + mdLinkText(href=https://example.com)
       [20, 21] mdPack(key=italic,revealInFocus=true) + mdEm + mdMark
       "
     `)
@@ -833,7 +833,7 @@ describe('autolink', () => {
     expect(parse('a ftp://example.com b')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 19]  mdLinkText(href=ftp://example.com)
+      [2, 19]  mdPack(key=bareAutolink,data={"href":"ftp://example.com"}) + mdLinkText(href=ftp://example.com)
       [19, 21]
       "
     `)
@@ -843,7 +843,7 @@ describe('autolink', () => {
     expect(parse('a x-custom-schema://ABCD b')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 24]  mdLinkText(href=x-custom-schema://ABCD)
+      [2, 24]  mdPack(key=bareAutolink,data={"href":"x-custom-schema://ABCD"}) + mdLinkText(href=x-custom-schema://ABCD)
       [24, 26]
       "
     `)
@@ -893,7 +893,7 @@ describe('bare autolink', () => {
     expect(parse('a example.com b')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 13]  mdLinkText(href=https://example.com)
+      [2, 13]  mdPack(key=bareAutolink,data={"href":"https://example.com"}) + mdLinkText(href=https://example.com)
       [13, 15]
       "
     `)
@@ -910,7 +910,7 @@ describe('bare autolink', () => {
   it('starts text', () => {
     expect(parse('google.com')).toMatchInlineSnapshot(`
       "
-      [0, 10] mdLinkText(href=https://google.com)
+      [0, 10] mdPack(key=bareAutolink,data={"href":"https://google.com"}) + mdLinkText(href=https://google.com)
       "
     `)
   })
@@ -918,7 +918,7 @@ describe('bare autolink', () => {
   it('with path', () => {
     expect(parse('sub.domain.com/path?q=1')).toMatchInlineSnapshot(`
       "
-      [0, 23] mdLinkText(href=https://sub.domain.com/path?q=1)
+      [0, 23] mdPack(key=bareAutolink,data={"href":"https://sub.domain.com/path?q=1"}) + mdLinkText(href=https://sub.domain.com/path?q=1)
       "
     `)
   })
@@ -926,7 +926,7 @@ describe('bare autolink', () => {
   it('preserves case', () => {
     expect(parse('GOOGLE.COM')).toMatchInlineSnapshot(`
       "
-      [0, 10] mdLinkText(href=https://GOOGLE.COM)
+      [0, 10] mdPack(key=bareAutolink,data={"href":"https://GOOGLE.COM"}) + mdLinkText(href=https://GOOGLE.COM)
       "
     `)
   })
@@ -935,7 +935,7 @@ describe('bare autolink', () => {
     expect(parse('Visit google.com.')).toMatchInlineSnapshot(`
       "
       [0, 6]
-      [6, 16]  mdLinkText(href=https://google.com)
+      [6, 16]  mdPack(key=bareAutolink,data={"href":"https://google.com"}) + mdLinkText(href=https://google.com)
       [16, 17]
       "
     `)
@@ -952,7 +952,7 @@ describe('bare autolink', () => {
   it('www prefix', () => {
     expect(parse('www.example.com')).toMatchInlineSnapshot(`
       "
-      [0, 15] mdLinkText(href=https://www.example.com)
+      [0, 15] mdPack(key=bareAutolink,data={"href":"https://www.example.com"}) + mdLinkText(href=https://www.example.com)
       "
     `)
   })
@@ -983,7 +983,7 @@ describe('bare autolink', () => {
     expect(parse('mail a@google.com here')).toMatchInlineSnapshot(`
       "
       [0, 5]
-      [5, 17]  mdLinkText(href=mailto:a@google.com)
+      [5, 17]  mdPack(key=bareAutolink,data={"href":"mailto:a@google.com"}) + mdLinkText(href=mailto:a@google.com)
       [17, 22]
       "
     `)
