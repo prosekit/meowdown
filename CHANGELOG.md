@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.64.2](https://github.com/prosekit/meowdown/compare/v0.64.1...v0.64.2) (2026-08-05)
+
+
+### Bug Fixes
+
+* **core:** reveal the units on both sides of a boundary caret ([#443](https://github.com/prosekit/meowdown/issues/443)) ([2615ec8](https://github.com/prosekit/meowdown/commit/2615ec8d9282c338ed007aa3e83d0eff769a80e7))
+
 ## [0.64.1](https://github.com/prosekit/meowdown/compare/v0.64.0...v0.64.1) (2026-08-04)
 
 
