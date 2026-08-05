@@ -5,6 +5,7 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
 import { isMarkOfType, type MarkName } from './mark-names.ts'
+import type { MdPackAttrs } from './inline-marks.ts'
 
 /**
  * Controls how markdown syntax characters are rendered and how the clipboard's
@@ -34,7 +35,8 @@ function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
         return { 'data-mark-mode': getCurrentMarkMode(state) ?? initialMode }
       },
       decorations: (state) => {
-        return computeRevealDecorations(state, getCurrentMarkMode(state) ?? initialMode)
+        const mode = getCurrentMarkMode(state) ?? initialMode
+        return (mode === "focus" || mode === "hide") ? computeRevealDecorations(state, mode) : undefined
       },
     },
   })
@@ -65,15 +67,22 @@ export function getMarkMode(state: EditorState): MarkMode | undefined {
 // otherwise; show mode reveals through CSS alone and declares no flag.
 function findRevealablePack(
   $pos: ResolvedPos,
-  mode: MarkMode,
+  mode: "focus" | "hide",
   direction: -1 | 1,
 ): Mark | undefined {
   const { parent } = $pos
   if (!parent.isTextblock || parent.type.spec.code) return
-  const flag = mode === 'focus' ? 'revealInFocus' : mode === 'hide' ? 'revealInHide' : undefined
-  if (flag == null) return
+
   const node = direction === -1 ? $pos.nodeBefore : $pos.nodeAfter
-  return node?.marks.find((mark) => isMarkOfType(mark, 'mdPack') && mark.attrs[flag] === true)
+  for (const mark of node?.marks ?? []) {
+    if (isMarkOfType(mark, 'mdPack')) {
+      const attrs = mark.attrs as MdPackAttrs
+      if (attrs[mode === 'focus' ? 'revealInFocus' : 'revealInHide']) {
+        return mark
+      }
+    }
+  }
+  return
 }
 
 /**
@@ -89,7 +98,10 @@ function findRevealablePack(
  * shared boundary, so the characters an edit would touch are never hidden.
  * `#tag` carries no pack and never reveals.
  */
-function computeRevealDecorations(state: EditorState, mode: MarkMode): DecorationSet | undefined {
+function computeRevealDecorations(
+  state: EditorState,
+  mode: 'focus' | 'hide',
+): DecorationSet | undefined {
   const { $from, $to } = state.selection
   const packBefore = findRevealablePack($from, mode, -1)
   const packAfter = findRevealablePack($to, mode, 1)
