@@ -39,15 +39,15 @@ describe('focus mode', () => {
         >
           <strong>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 **
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               bold
             </span>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 **
               </span>
             </span>
@@ -94,15 +94,15 @@ describe('focus mode', () => {
         >
           <strong>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 **
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               one
             </span>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 **
               </span>
             </span>
@@ -138,7 +138,7 @@ describe('focus mode', () => {
         >
           <em>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 *
               </span>
             </span>
@@ -150,15 +150,15 @@ describe('focus mode', () => {
             <strong>
               <em>
                 <span class="md-mark">
-                  <span class="show">
+                  <span class="reveal">
                     **
                   </span>
                 </span>
-                <span class="show">
+                <span class="reveal">
                   foo
                 </span>
                 <span class="md-mark">
-                  <span class="show">
+                  <span class="reveal">
                     **
                   </span>
                 </span>
@@ -167,7 +167,7 @@ describe('focus mode', () => {
           </span>
           <em>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 *
               </span>
             </span>
@@ -197,7 +197,7 @@ describe('focus mode', () => {
         >
           <em>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 *
               </span>
             </span>
@@ -209,15 +209,15 @@ describe('focus mode', () => {
             <strong>
               <em>
                 <span class="md-mark">
-                  <span class="show">
+                  <span class="reveal">
                     **
                   </span>
                 </span>
-                <span class="show">
+                <span class="reveal">
                   bold_and_italic
                 </span>
                 <span class="md-mark">
-                  <span class="show">
+                  <span class="reveal">
                     **
                   </span>
                 </span>
@@ -226,7 +226,7 @@ describe('focus mode', () => {
           </span>
           <em>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 *
               </span>
             </span>
@@ -251,26 +251,26 @@ describe('focus mode', () => {
             href="http://x.test"
           >
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 [
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               docs
             </span>
           </a>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               ](
             </span>
           </span>
           <span class="md-link-uri">
-            <span class="show">
+            <span class="reveal">
               http://x.test
             </span>
           </span>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               )
             </span>
           </span>
@@ -294,26 +294,26 @@ describe('focus mode', () => {
             href="http://x.test"
           >
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 [
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               docs
             </span>
           </a>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               ](
             </span>
           </span>
           <span class="md-link-uri">
-            <span class="show">
+            <span class="reveal">
               http://x.test
             </span>
           </span>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               )
             </span>
           </span>
@@ -350,7 +350,7 @@ describe('focus mode', () => {
           data-key="autolink"
         >
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               &lt;
             </span>
           </span>
@@ -358,12 +358,12 @@ describe('focus mode', () => {
             class="md-link"
             href="https://example.com"
           >
-            <span class="show">
+            <span class="reveal">
               https://example.com
             </span>
           </a>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               &gt;
             </span>
           </span>
@@ -384,15 +384,15 @@ describe('focus mode', () => {
         >
           <strong>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 **
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               bold
             </span>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 **
               </span>
             </span>
@@ -414,15 +414,15 @@ describe('focus mode', () => {
         >
           <em>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 *
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               a
             </span>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 *
               </span>
             </span>
@@ -434,15 +434,15 @@ describe('focus mode', () => {
         >
           <del>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 ~~
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               b
             </span>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 ~~
               </span>
             </span>
@@ -466,26 +466,26 @@ describe('focus mode', () => {
             href="x"
           >
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 [
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               a
             </span>
           </a>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               ](
             </span>
           </span>
           <span class="md-link-uri">
-            <span class="show">
+            <span class="reveal">
               x
             </span>
           </span>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               )
             </span>
           </span>
@@ -499,26 +499,26 @@ describe('focus mode', () => {
             href="x"
           >
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 [
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               a
             </span>
           </a>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               ](
             </span>
           </span>
           <span class="md-link-uri">
-            <span class="show">
+            <span class="reveal">
               x
             </span>
           </span>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               )
             </span>
           </span>
@@ -537,7 +537,7 @@ describe('focus mode', () => {
           data-key="autolink"
         >
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               &lt;
             </span>
           </span>
@@ -545,12 +545,12 @@ describe('focus mode', () => {
             class="md-link"
             href="https://a.com"
           >
-            <span class="show">
+            <span class="reveal">
               https://a.com
             </span>
           </a>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               &gt;
             </span>
           </span>
@@ -560,7 +560,7 @@ describe('focus mode', () => {
           data-key="autolink"
         >
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               &lt;
             </span>
           </span>
@@ -568,12 +568,12 @@ describe('focus mode', () => {
             class="md-link"
             href="https://a.com"
           >
-            <span class="show">
+            <span class="reveal">
               https://a.com
             </span>
           </a>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               &gt;
             </span>
           </span>
@@ -593,15 +593,15 @@ describe('focus mode', () => {
         >
           <em>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 *
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               a
             </span>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 *
               </span>
             </span>
@@ -614,15 +614,15 @@ describe('focus mode', () => {
         >
           <del>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 ~~
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               b
             </span>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 ~~
               </span>
             </span>
@@ -643,15 +643,15 @@ describe('focus mode', () => {
         >
           <strong>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 **
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               bold
             </span>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 **
               </span>
             </span>
@@ -759,15 +759,15 @@ describe('focus mode', () => {
         >
           <strong>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 **
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               b
             </span>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 **
               </span>
             </span>
@@ -813,26 +813,26 @@ describe('focus mode', () => {
             href="x"
           >
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 [
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               a
             </span>
           </a>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               ](
             </span>
           </span>
           <span class="md-link-uri">
-            <span class="show">
+            <span class="reveal">
               x
             </span>
           </span>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               )
             </span>
           </span>
@@ -893,26 +893,26 @@ describe('focus mode', () => {
             href="https://example.com"
           >
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 [
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               link
             </span>
           </a>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               ](
             </span>
           </span>
           <span class="md-link-uri">
-            <span class="show">
+            <span class="reveal">
               https://example.com
             </span>
           </span>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               )
             </span>
           </span>
@@ -933,7 +933,7 @@ describe('focus mode', () => {
           data-key="autolink"
         >
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               &lt;
             </span>
           </span>
@@ -941,12 +941,12 @@ describe('focus mode', () => {
             class="md-link"
             href="https://example.com"
           >
-            <span class="show">
+            <span class="reveal">
               https://example.com
             </span>
           </a>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               &gt;
             </span>
           </span>
@@ -967,11 +967,11 @@ describe('focus mode', () => {
         >
           <strong>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 **
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               bold
             </span>
           </strong>
@@ -982,15 +982,15 @@ describe('focus mode', () => {
             <strong>
               <em>
                 <span class="md-mark">
-                  <span class="show">
+                  <span class="reveal">
                     *
                   </span>
                 </span>
-                <span class="show">
+                <span class="reveal">
                   italic
                 </span>
                 <span class="md-mark">
-                  <span class="show">
+                  <span class="reveal">
                     *
                   </span>
                 </span>
@@ -998,11 +998,11 @@ describe('focus mode', () => {
             </strong>
           </span>
           <strong>
-            <span class="show">
+            <span class="reveal">
               bold
             </span>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 **
               </span>
             </span>
@@ -1026,26 +1026,26 @@ describe('focus mode', () => {
             href="x"
           >
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 [
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               a
             </span>
           </a>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               ](
             </span>
           </span>
           <span class="md-link-uri">
-            <span class="show">
+            <span class="reveal">
               x
             </span>
           </span>
           <span class="md-mark">
-            <span class="show">
+            <span class="reveal">
               )
             </span>
           </span>
@@ -1152,15 +1152,15 @@ describe('focus mode', () => {
         >
           <strong>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 **
               </span>
             </span>
-            <span class="show">
+            <span class="reveal">
               alpha
             </span>
             <span class="md-mark">
-              <span class="show">
+              <span class="reveal">
                 **
               </span>
             </span>

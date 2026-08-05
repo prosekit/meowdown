@@ -93,7 +93,7 @@ function findRevealablePack(
  *
  * Every unit carries one `mdPack` mark spanning it, so one `getMarkRange`
  * per probed pack expands it to its whole unit, and one decoration over
- * each range flips the hidden punctuation/url/source visible via the `.show`
+ * each range flips the hidden punctuation/url/source visible via the `.reveal`
  * CSS rule. The two probes land on the same unit when the selection sits
  * inside one (equal ranges dedupe to one decoration), and on two units at a
  * shared boundary, so the characters an edit would touch are never hidden.

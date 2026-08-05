@@ -746,7 +746,7 @@
   /* The mdPack mark wraps a whole inline unit so focus mode can reveal it with one
    * range lookup. It is layout-only: `display: contents` keeps it out of the box
    * tree, so it never affects flow or an inner image mark view, while still being a
-   * real element a `.show` decoration can land inside. */
+   * real element a `.reveal` decoration can land inside. */
   .ProseMirror .md-pack {
     display: contents;
   }
@@ -768,14 +768,14 @@
   }
 
   /* Hide mode is included because math is its one revealable unit: the
-   * decoration logic only ever emits `.show` inside a math pack there, so
+   * decoration logic only ever emits `.reveal` inside a math pack there, so
    * ordinary syntax still never reveals in hide mode. */
   .ProseMirror[data-mark-mode='focus'],
   .ProseMirror[data-mark-mode='hide'] {
     .md-mark,
     .md-link-uri,
     .md-link-title {
-      &:has(.show) {
+      &:has(.reveal) {
         opacity: 1;
         font-size: inherit;
         letter-spacing: inherit;
@@ -829,7 +829,7 @@
    * hides behind its preview, so `:has` mirrors the range decoration onto the
    * preview beside it. A match inside an ordinary hidden run (a link
    * destination, a link title, math source) instead reveals itself while it is
-   * active, through the same `.show` class focus mode uses. */
+   * active, through the same `.reveal` class focus mode uses. */
   .ProseMirror {
     .ProseMirror-search-match {
       border-radius: 2px;
@@ -868,12 +868,12 @@
 
   /* A math unit not under the caret collapses its whole source (font-size: 0
    * keeps the boxes, same as .md-mark) and shows the KaTeX preview instead.
-   * The `.show` reveal decoration (caret inside the unit) flips it back:
+   * The `.reveal` decoration (caret inside the unit) flips it back:
    * source visible, preview gone. Show mode keeps the source and never
    * renders the preview. */
   .ProseMirror[data-mark-mode='hide'],
   .ProseMirror[data-mark-mode='focus'] {
-    .md-math-view:not(:has(.show)) {
+    .md-math-view:not(:has(.reveal)) {
       .md-math-view-content {
         font-size: 0;
         letter-spacing: 0;
