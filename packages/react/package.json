@@ -24,7 +24,7 @@
     "build": "cmk && tsdown"
   },
   "dependencies": {
-    "@base-ui/react": "^1.6.0",
+    "@base-ui/react": "^1.7.0",
     "@meowdown/core": "workspace:*",
     "@ocavue/utils": "^1.7.0",
     "@prosekit/core": "^0.13.0-beta.7",

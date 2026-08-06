@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.64.2",
   "private": true,
-  "packageManager": "pnpm@11.18.0",
+  "packageManager": "pnpm@11.20.0",
   "scripts": {
     "dev": "pnpm --filter ./website run dev",
     "build": "pnpm -r run build",
@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@meowdown/eslint-rules": "workspace:*",
-    "@ocavue/eslint-config": "^4.13.0",
+    "@ocavue/eslint-config": "^4.13.1",
     "@ocavue/tsconfig": "^0.7.1",
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^4.1.10",
@@ -36,7 +36,7 @@
     "knip": "^6.31.0",
     "monorepo-typescript-references": "^1.1.2",
     "nano-staged": "^1.0.2",
-    "oxfmt": "^0.61.0",
+    "oxfmt": "^0.62.0",
     "pkg-pr-new": "^0.0.86",
     "playwright": "^1.62.0",
     "simple-git-hooks": "^2.13.1",

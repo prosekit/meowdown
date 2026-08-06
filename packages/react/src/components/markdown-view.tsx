@@ -651,12 +651,10 @@ function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode 
   )
   // Sort each chunk's marks into ProseMirror's canonical order so the grouping
   // and nesting match the editor.
-  const runs = chunks.map(
-    ([from, to, marks]): InlineRun => ({
-      text: text.slice(from, to),
-      marks: Mark.setFrom(marks),
-    }),
-  )
+  const runs = chunks.map(([from, to, marks]): InlineRun => ({
+    text: text.slice(from, to),
+    marks: Mark.setFrom(marks),
+  }))
   return renderRuns(runs, 0, context)
 }
 
