@@ -393,6 +393,9 @@ interface LinkParts {
  * Locate the pieces of a `Link` node in Lezer's flat child list:
  *   LinkMark `[`, [label children], LinkMark `]`, LinkMark `(`, URL,
  *   optional LinkTitle, LinkMark `)`.
+ *
+ * An autolink inside the label also emits a `URL` child, so only a `URL`
+ * after the second `LinkMark` (the `]` closing the label) is the destination.
  */
 function scanLinkParts(node: InlineElement): LinkParts {
   let labelFrom = -1
@@ -409,7 +412,7 @@ function scanLinkParts(node: InlineElement): LinkParts {
       bracketCount++
       if (bracketCount === 1) labelFrom = child.to
       if (bracketCount === 2) labelTo = child.from
-    } else if (urlNode == null && childType === LEZER_NODE_IDS.URL) {
+    } else if (urlNode == null && bracketCount >= 2 && childType === LEZER_NODE_IDS.URL) {
       urlNode = child
     } else if (titleNode == null && childType === LEZER_NODE_IDS.LinkTitle) {
       titleNode = child
@@ -586,6 +589,13 @@ function walkResolvedLink(
     }
     if (isReference && child.type === LEZER_NODE_IDS.LinkLabel) {
       emit(out, child.from, child.to, [...baseForChild, marks.mdMark.create()])
+      pos = child.to
+      continue
+    }
+    // An autolink inside the label is plain label text: the outer link owns
+    // the href, and the muted `mdLinkUri` styling belongs to the destination.
+    if (child.type === LEZER_NODE_IDS.URL && inLabel(child.from)) {
+      emit(out, child.from, child.to, baseForChild)
       pos = child.to
       continue
     }
