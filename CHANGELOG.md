@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.64.3](https://github.com/prosekit/meowdown/compare/v0.64.2...v0.64.3) (2026-08-06)
+
+
+### Bug Fixes
+
+* **core:** resolve the link `href` from the `URL` after the closing `]` ([#445](https://github.com/prosekit/meowdown/issues/445)) ([d1e2e5c](https://github.com/prosekit/meowdown/commit/d1e2e5c0a52274f93fd6fc1df3b99ac9f5abd172))
+
 ## [0.64.2](https://github.com/prosekit/meowdown/compare/v0.64.1...v0.64.2) (2026-08-05)
 
 
