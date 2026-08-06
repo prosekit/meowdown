@@ -972,12 +972,11 @@ describe('bare autolink', () => {
   it('inside link label', () => {
     expect(parse('[see www.example.com](http://x)')).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"inline","href":"www.example.com","title":""},revealInFocus=true) + mdLinkText(href=www.example.com) + mdMark
-      [1, 5]   mdPack(key=link,data={"form":"inline","href":"www.example.com","title":""},revealInFocus=true) + mdLinkText(href=www.example.com)
-      [5, 20]  mdPack(key=link,data={"form":"inline","href":"www.example.com","title":""},revealInFocus=true) + mdLinkText(href=www.example.com) + mdLinkUri
-      [20, 22] mdPack(key=link,data={"form":"inline","href":"www.example.com","title":""},revealInFocus=true) + mdMark
-      [22, 30] mdPack(key=link,data={"form":"inline","href":"www.example.com","title":""},revealInFocus=true) + mdLinkUri
-      [30, 31] mdPack(key=link,data={"form":"inline","href":"www.example.com","title":""},revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdMark
+      [1, 20]  mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x)
+      [20, 22] mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdMark
+      [22, 30] mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkUri
+      [30, 31] mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -988,18 +987,6 @@ describe('bare autolink', () => {
       [0, 1]   mdPack(key=code,revealInFocus=true) + mdCode + mdMark
       [1, 15]  mdPack(key=code,revealInFocus=true) + mdCode
       [15, 16] mdPack(key=code,revealInFocus=true) + mdCode + mdMark
-      "
-    `)
-  })
-
-  it('inside link label', () => {
-    expect(parse('[see www.example.com](http://x)')).toMatchInlineSnapshot(`
-      "
-      [0, 1]   mdPack(key=link,data={"href":"http://x","title":"","isReference":false},revealInFocus=true) + mdLinkText(href=http://x) + mdMark
-      [1, 20]  mdPack(key=link,data={"href":"http://x","title":"","isReference":false},revealInFocus=true) + mdLinkText(href=http://x)
-      [20, 22] mdPack(key=link,data={"href":"http://x","title":"","isReference":false},revealInFocus=true) + mdMark
-      [22, 30] mdPack(key=link,data={"href":"http://x","title":"","isReference":false},revealInFocus=true) + mdLinkUri
-      [30, 31] mdPack(key=link,data={"href":"http://x","title":"","isReference":false},revealInFocus=true) + mdMark
       "
     `)
   })
