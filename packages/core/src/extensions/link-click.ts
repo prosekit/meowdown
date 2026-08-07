@@ -1,6 +1,8 @@
 import type { PlainExtension } from '@prosekit/core'
 import { PluginKey } from '@prosekit/pm/state'
 
+import { isModHeld } from '../utils/mod-key.ts'
+
 import { getLinkUnitAt } from './get-link-unit-at.ts'
 import { defineMarkClickHandler } from './mark-click.ts'
 
@@ -13,11 +15,12 @@ export interface LinkClickPayload {
    */
   event: MouseEvent | KeyboardEvent
   /**
-   * Whether the activation carried `⌘`/`Ctrl` beyond the gesture that
-   * triggered it: a modifier click, or a modifier `Enter` press on a selected
-   * atom unit (where plain `Enter` already follows). Always false for the
-   * `Mod-Enter` caret follow, whose modifier is the trigger itself. Hosts
-   * conventionally open a `mod` follow in a new window or pane.
+   * Whether the activation carried the platform's mod key (`⌘` on Apple,
+   * `Ctrl` elsewhere) beyond the gesture that triggered it: a mod click, or
+   * a mod `Enter` press on a selected atom unit (where plain `Enter` already
+   * follows). Always false for the `Mod-Enter` caret follow, whose mod key
+   * is the trigger itself. Hosts conventionally open a `mod` follow in a new
+   * window or pane.
    */
   mod: boolean
 }
@@ -41,6 +44,6 @@ export function defineLinkClickHandler(onClick: LinkClickHandler): PlainExtensio
     selector: '.md-link',
     preventDefault: true,
     findPayloadAt: (state, pos) => getLinkUnitAt(state, pos)?.href,
-    onClick: (href, event) => onClick({ href, event, mod: event.metaKey || event.ctrlKey }),
+    onClick: (href, event) => onClick({ href, event, mod: isModHeld(event) }),
   })
 }

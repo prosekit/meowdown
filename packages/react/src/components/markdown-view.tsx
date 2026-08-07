@@ -11,6 +11,7 @@ import {
   matchEmbed,
   type CodeBlockAttrs,
   type CodeToken,
+  isModHeld,
   type EmbedDescriptor,
   type FileClickHandler,
   type FileInfoResolver,
@@ -231,7 +232,7 @@ function WikilinkChip(props: {
   const { target, display, onWikilinkClick, children } = props
   const handleClick = onWikilinkClick
     ? (event: MouseEvent) =>
-        onWikilinkClick({ target, event: event.nativeEvent, mod: event.metaKey || event.ctrlKey })
+        onWikilinkClick({ target, event: event.nativeEvent, mod: isModHeld(event.nativeEvent) })
     : undefined
   return (
     <span className="md-wikilink-view md-atom-view">
@@ -397,7 +398,7 @@ function FileView(props: {
           href,
           name,
           event: event.nativeEvent,
-          mod: event.metaKey || event.ctrlKey,
+          mod: isModHeld(event.nativeEvent),
         })
     : undefined
   return (
@@ -586,7 +587,7 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
             context.onLinkClick?.({
               href: attrs.href,
               event: event.nativeEvent,
-              mod: event.metaKey || event.ctrlKey,
+              mod: isModHeld(event.nativeEvent),
             })
           }
         : undefined

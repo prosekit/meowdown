@@ -1,14 +1,8 @@
-import {
-  definePlugin,
-  isApple,
-  Priority,
-  withPriority,
-  type MarkRange,
-  type PlainExtension,
-} from '@prosekit/core'
+import { definePlugin, Priority, withPriority, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 
 import { getIsComposing } from '../utils/composition.ts'
+import { isModHeld } from '../utils/mod-key.ts'
 
 import { getSelectedAtomRange } from './atom-mark-navigation.ts'
 import type { FileClickHandler } from './file-click.ts'
@@ -29,12 +23,6 @@ export interface FollowLinkHandlers {
   onLinkClick?: LinkClickHandler
 }
 
-// The spare modifier state a follow reports: only a selected-unit follow has
-// one, a caret follow consumed its modifier as the trigger.
-function getSpareMod(selectedAtom: MarkRange | undefined, event: KeyboardEvent): boolean {
-  return selectedAtom !== undefined && (event.metaKey || event.ctrlKey)
-}
-
 function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
   return new Plugin({
     key: followLinkKey,
@@ -47,12 +35,14 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
         const { state } = view
         const selectedAtom = getSelectedAtomRange(state)
         // Off a selected atom unit, plain Enter stays a regular split.
-        const trigger = isApple ? event.metaKey : event.ctrlKey
+        const trigger = isModHeld(event)
         if (!trigger && !selectedAtom) {
           return false
         }
 
-        const mod = getSpareMod(selectedAtom, event)
+        // A spare mod only exists on a selected-unit follow: a caret follow
+        // consumed its modifier as the trigger.
+        const mod = selectedAtom !== undefined && trigger
 
         // Resolve inside the selected unit, not at its edge: either edge may
         // also touch an adjacent unit, and edge positions prefer the
@@ -99,9 +89,10 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
  * falls through to the regular split. High priority puts this ahead of every
  * keymap binding.
  *
- * A selected-unit follow reports `mod: true` when `⌘`/`Ctrl` was held beyond
- * its plain-`Enter` trigger; a caret follow always reports `mod: false`, its
- * modifier being the trigger itself.
+ * A selected-unit follow reports `mod: true` when the platform's mod key
+ * (`⌘` on Apple, `Ctrl` elsewhere) was held beyond its plain-`Enter` trigger;
+ * a caret follow always reports `mod: false`, its mod key being the trigger
+ * itself.
  */
 export function defineFollowLinkHandler(handlers: FollowLinkHandlers): PlainExtension {
   return withPriority(definePlugin(createFollowLinkPlugin(handlers)), Priority.high)

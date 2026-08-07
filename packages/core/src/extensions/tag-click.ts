@@ -1,6 +1,8 @@
 import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 
+import { isModHeld } from '../utils/mod-key.ts'
+
 import { defineMarkClickHandler } from './mark-click.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 
@@ -36,11 +38,12 @@ export interface TagClickPayload {
    */
   event: MouseEvent | KeyboardEvent
   /**
-   * Whether the activation carried `⌘`/`Ctrl` beyond the gesture that
-   * triggered it: a modifier click, or a modifier `Enter` press on a selected
-   * atom unit (where plain `Enter` already follows). Always false for the
-   * `Mod-Enter` caret follow, whose modifier is the trigger itself. Hosts
-   * conventionally open a `mod` follow in a new window or pane.
+   * Whether the activation carried the platform's mod key (`⌘` on Apple,
+   * `Ctrl` elsewhere) beyond the gesture that triggered it: a mod click, or
+   * a mod `Enter` press on a selected atom unit (where plain `Enter` already
+   * follows). Always false for the `Mod-Enter` caret follow, whose mod key
+   * is the trigger itself. Hosts conventionally open a `mod` follow in a new
+   * window or pane.
    */
   mod: boolean
 }
@@ -58,6 +61,6 @@ export function defineTagClickHandler(onClick: TagClickHandler): PlainExtension 
     selector: '.md-tag',
     preventDefault: false,
     findPayloadAt: (state, pos) => findTagAt(state, pos)?.tag,
-    onClick: (tag, event) => onClick({ tag, event, mod: event.metaKey || event.ctrlKey }),
+    onClick: (tag, event) => onClick({ tag, event, mod: isModHeld(event) }),
   })
 }

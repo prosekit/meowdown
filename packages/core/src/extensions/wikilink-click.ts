@@ -2,6 +2,8 @@ import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
+import { isModHeld } from '../utils/mod-key.ts'
+
 import type { MdWikilinkAttrs } from './inline-marks.ts'
 import { defineMarkClickHandler } from './mark-click.ts'
 import { getMarkRangeAt } from './mark-range.ts'
@@ -49,11 +51,12 @@ export interface WikilinkClickPayload {
    */
   event: MouseEvent | KeyboardEvent
   /**
-   * Whether the activation carried `⌘`/`Ctrl` beyond the gesture that
-   * triggered it: a modifier click, or a modifier `Enter` press on a selected
-   * atom unit (where plain `Enter` already follows). Always false for the
-   * `Mod-Enter` caret follow, whose modifier is the trigger itself. Hosts
-   * conventionally open a `mod` follow in a new window or pane.
+   * Whether the activation carried the platform's mod key (`⌘` on Apple,
+   * `Ctrl` elsewhere) beyond the gesture that triggered it: a mod click, or
+   * a mod `Enter` press on a selected atom unit (where plain `Enter` already
+   * follows). Always false for the `Mod-Enter` caret follow, whose mod key
+   * is the trigger itself. Hosts conventionally open a `mod` follow in a new
+   * window or pane.
    */
   mod: boolean
 }
@@ -72,6 +75,6 @@ export function defineWikilinkClickHandler(onClick: WikilinkClickHandler): Plain
     preventDefault: false,
     findPayloadAt: (state, pos) => findWikilinkAt(state, pos)?.target,
     findPayloadForElement: (view, element) => findWikilinkForElement(view, element)?.target,
-    onClick: (target, event) => onClick({ target, event, mod: event.metaKey || event.ctrlKey }),
+    onClick: (target, event) => onClick({ target, event, mod: isModHeld(event) }),
   })
 }

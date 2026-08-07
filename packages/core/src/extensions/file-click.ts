@@ -1,6 +1,8 @@
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
+import { isModHeld } from '../utils/mod-key.ts'
+
 import type { MdFileAttrs } from './inline-marks.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 
@@ -36,11 +38,12 @@ export interface FileClickPayload {
    */
   event: MouseEvent | KeyboardEvent
   /**
-   * Whether the activation carried `⌘`/`Ctrl` beyond the gesture that
-   * triggered it: a modifier click, or a modifier `Enter` press on a selected
-   * atom unit (where plain `Enter` already follows). Always false for the
-   * `Mod-Enter` caret follow, whose modifier is the trigger itself. Hosts
-   * conventionally open a `mod` follow in a new window or pane.
+   * Whether the activation carried the platform's mod key (`⌘` on Apple,
+   * `Ctrl` elsewhere) beyond the gesture that triggered it: a mod click, or
+   * a mod `Enter` press on a selected atom unit (where plain `Enter` already
+   * follows). Always false for the `Mod-Enter` caret follow, whose mod key
+   * is the trigger itself. Hosts conventionally open a `mod` follow in a new
+   * window or pane.
    */
   mod: boolean
 }
@@ -68,7 +71,7 @@ export function defineFileClickHandler(onClick: FileClickHandler): PlainExtensio
           if (!content) return false
           const hit = findFileAt(view.state, view.posAtDOM(content, 0))
           if (!hit) return false
-          onClick({ href: hit.href, name: hit.name, event, mod: event.metaKey || event.ctrlKey })
+          onClick({ href: hit.href, name: hit.name, event, mod: isModHeld(event) })
           return true
         },
       },
