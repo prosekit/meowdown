@@ -1,12 +1,16 @@
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
+import { isModEvent } from '../utils/is-mod-event.ts'
+
 import type { MdFileAttrs } from './inline-marks.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 
 const fileClickKey = new PluginKey('meowdown-file-click')
 
 interface FileHit {
+  from: number
+  to: number
   href: string
   name: string
 }
@@ -15,7 +19,7 @@ export function findFileAt(state: EditorState, pos: number): FileHit | undefined
   const range = getMarkRangeAt(state, pos, 'mdFile')
   if (!range) return
   const { href, name } = range.mark.attrs as MdFileAttrs
-  return { href, name }
+  return { from: range.from, to: range.to, href, name }
 }
 
 /**
@@ -35,6 +39,11 @@ export interface FileClickPayload {
    * pill. Read modifier keys or position a popover from it.
    */
   event: MouseEvent | KeyboardEvent
+  /**
+   * Whether the platform's mod key (`Command` on Apple, `Ctrl` elsewhere) was held
+   * beyond the gesture that triggered the activation.
+   */
+  mod: boolean
 }
 
 export type FileClickHandler = (payload: FileClickPayload) => void
@@ -60,7 +69,7 @@ export function defineFileClickHandler(onClick: FileClickHandler): PlainExtensio
           if (!content) return false
           const hit = findFileAt(view.state, view.posAtDOM(content, 0))
           if (!hit) return false
-          onClick({ href: hit.href, name: hit.name, event })
+          onClick({ href: hit.href, name: hit.name, event, mod: isModEvent(event) })
           return true
         },
       },

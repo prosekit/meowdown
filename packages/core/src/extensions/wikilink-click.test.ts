@@ -74,7 +74,25 @@ describe('wikilink click callback', () => {
     await expect.element(label).toBeInTheDocument()
     await userEvent.click(label)
     await vi.waitFor(() => {
-      expect(onWikilinkClick).toHaveBeenCalledWith(expect.objectContaining({ target: 'Note' }))
+      expect(onWikilinkClick).toHaveBeenCalledWith(
+        expect.objectContaining({ target: 'Note', mod: false }),
+      )
+    })
+  })
+
+  it('reports a held modifier on a click', async () => {
+    const onWikilinkClick = vi.fn<WikilinkClickHandler>()
+    using fixture = setupFixture()
+    applyClickable(fixture, 'see [[Note]] here', onWikilinkClick)
+    const label = pmRoot.getByTestId('wikilink')
+    await expect.element(label).toBeInTheDocument()
+    await userEvent.keyboard('{ControlOrMeta>}')
+    await userEvent.click(label)
+    await userEvent.keyboard('{/ControlOrMeta}')
+    await vi.waitFor(() => {
+      expect(onWikilinkClick).toHaveBeenCalledWith(
+        expect.objectContaining({ target: 'Note', mod: true }),
+      )
     })
   })
 
