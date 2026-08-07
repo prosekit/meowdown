@@ -35,6 +35,14 @@ export interface TagClickPayload {
    * Read modifier keys or position a popover from it.
    */
   event: MouseEvent | KeyboardEvent
+  /**
+   * Whether the activation carried `⌘`/`Ctrl` beyond the gesture that
+   * triggered it: a modifier click, or a modifier `Enter` press on a selected
+   * atom unit (where plain `Enter` already follows). Always false for the
+   * `Mod-Enter` caret follow, whose modifier is the trigger itself. Hosts
+   * conventionally open a `mod` follow in a new window or pane.
+   */
+  mod: boolean
 }
 
 export type TagClickHandler = (payload: TagClickPayload) => void
@@ -50,6 +58,6 @@ export function defineTagClickHandler(onClick: TagClickHandler): PlainExtension 
     selector: '.md-tag',
     preventDefault: false,
     findPayloadAt: (state, pos) => findTagAt(state, pos)?.tag,
-    onClick: (tag, event) => onClick({ tag, event }),
+    onClick: (tag, event) => onClick({ tag, event, mod: event.metaKey || event.ctrlKey }),
   })
 }

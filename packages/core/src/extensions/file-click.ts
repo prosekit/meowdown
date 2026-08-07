@@ -35,6 +35,14 @@ export interface FileClickPayload {
    * pill. Read modifier keys or position a popover from it.
    */
   event: MouseEvent | KeyboardEvent
+  /**
+   * Whether the activation carried `⌘`/`Ctrl` beyond the gesture that
+   * triggered it: a modifier click, or a modifier `Enter` press on a selected
+   * atom unit (where plain `Enter` already follows). Always false for the
+   * `Mod-Enter` caret follow, whose modifier is the trigger itself. Hosts
+   * conventionally open a `mod` follow in a new window or pane.
+   */
+  mod: boolean
 }
 
 export type FileClickHandler = (payload: FileClickPayload) => void
@@ -60,7 +68,7 @@ export function defineFileClickHandler(onClick: FileClickHandler): PlainExtensio
           if (!content) return false
           const hit = findFileAt(view.state, view.posAtDOM(content, 0))
           if (!hit) return false
-          onClick({ href: hit.href, name: hit.name, event })
+          onClick({ href: hit.href, name: hit.name, event, mod: event.metaKey || event.ctrlKey })
           return true
         },
       },

@@ -106,7 +106,11 @@ function LinkInfoContent({
         onClick={(event) => {
           if (!onLinkClick) return
           event.preventDefault()
-          onLinkClick({ href, event: event.nativeEvent })
+          onLinkClick({
+            href,
+            event: event.nativeEvent,
+            mod: event.metaKey || event.ctrlKey,
+          })
         }}
       >
         {href}

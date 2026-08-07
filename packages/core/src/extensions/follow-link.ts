@@ -1,4 +1,11 @@
-import { definePlugin, isApple, Priority, withPriority, type PlainExtension } from '@prosekit/core'
+import {
+  definePlugin,
+  isApple,
+  Priority,
+  withPriority,
+  type MarkRange,
+  type PlainExtension,
+} from '@prosekit/core'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 
 import { getIsComposing } from '../utils/composition.ts'
@@ -22,6 +29,12 @@ export interface FollowLinkHandlers {
   onLinkClick?: LinkClickHandler
 }
 
+// The spare modifier state a follow reports: only a selected-unit follow has
+// one, a caret follow consumed its modifier as the trigger.
+function getSpareMod(selectedAtom: MarkRange | undefined, event: KeyboardEvent): boolean {
+  return selectedAtom !== undefined && (event.metaKey || event.ctrlKey)
+}
+
 function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
   return new Plugin({
     key: followLinkKey,
@@ -34,10 +47,12 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
         const { state } = view
         const selectedAtom = getSelectedAtomRange(state)
         // Off a selected atom unit, plain Enter stays a regular split.
-        const mod = isApple ? event.metaKey : event.ctrlKey
-        if (!mod && !selectedAtom) {
+        const trigger = isApple ? event.metaKey : event.ctrlKey
+        if (!trigger && !selectedAtom) {
           return false
         }
+
+        const mod = getSpareMod(selectedAtom, event)
 
         // Resolve inside the selected unit, not at its edge: either edge may
         // also touch an adjacent unit, and edge positions prefer the
@@ -46,13 +61,13 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
 
         const wikilink = handlers.onWikilinkClick && findWikilinkAt(state, pos)
         if (wikilink) {
-          handlers.onWikilinkClick?.({ target: wikilink.target, event })
+          handlers.onWikilinkClick?.({ target: wikilink.target, event, mod })
           return true
         }
 
         const tag = handlers.onTagClick && findTagAt(state, pos)
         if (tag) {
-          handlers.onTagClick?.({ tag: tag.tag, event })
+          handlers.onTagClick?.({ tag: tag.tag, event, mod })
           return true
         }
 
@@ -60,13 +75,13 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
         // lookup below never sees it.
         const file = handlers.onFileClick && findFileAt(state, pos)
         if (file) {
-          handlers.onFileClick?.({ href: file.href, name: file.name, event })
+          handlers.onFileClick?.({ href: file.href, name: file.name, event, mod })
           return true
         }
 
         const link = handlers.onLinkClick && getLinkUnitAt(state, pos)
         if (link) {
-          handlers.onLinkClick?.({ href: link.href, event })
+          handlers.onLinkClick?.({ href: link.href, event, mod })
           return true
         }
 
@@ -83,6 +98,10 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
  * the list keymap keeps cycling checkbox tasks; off a selected unit, `Enter`
  * falls through to the regular split. High priority puts this ahead of every
  * keymap binding.
+ *
+ * A selected-unit follow reports `mod: true` when `⌘`/`Ctrl` was held beyond
+ * its plain-`Enter` trigger; a caret follow always reports `mod: false`, its
+ * modifier being the trigger itself.
  */
 export function defineFollowLinkHandler(handlers: FollowLinkHandlers): PlainExtension {
   return withPriority(definePlugin(createFollowLinkPlugin(handlers)), Priority.high)

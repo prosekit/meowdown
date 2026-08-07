@@ -48,6 +48,14 @@ export interface WikilinkClickPayload {
    * The originating click, or the `Enter`/`Mod-Enter` key press that followed the link.
    */
   event: MouseEvent | KeyboardEvent
+  /**
+   * Whether the activation carried `⌘`/`Ctrl` beyond the gesture that
+   * triggered it: a modifier click, or a modifier `Enter` press on a selected
+   * atom unit (where plain `Enter` already follows). Always false for the
+   * `Mod-Enter` caret follow, whose modifier is the trigger itself. Hosts
+   * conventionally open a `mod` follow in a new window or pane.
+   */
+  mod: boolean
 }
 
 export type WikilinkClickHandler = (payload: WikilinkClickPayload) => void
@@ -64,6 +72,6 @@ export function defineWikilinkClickHandler(onClick: WikilinkClickHandler): Plain
     preventDefault: false,
     findPayloadAt: (state, pos) => findWikilinkAt(state, pos)?.target,
     findPayloadForElement: (view, element) => findWikilinkForElement(view, element)?.target,
-    onClick: (target, event) => onClick({ target, event }),
+    onClick: (target, event) => onClick({ target, event, mod: event.metaKey || event.ctrlKey }),
   })
 }

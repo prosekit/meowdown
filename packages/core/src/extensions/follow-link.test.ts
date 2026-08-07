@@ -30,7 +30,10 @@ describe('defineFollowLinkHandler', () => {
     fixture.set(n.doc(n.paragraph('see [[No<a>te]] here')))
     fixture.view.focus()
     await pressModEnter()
-    expect(onWikilinkClick).toHaveBeenCalledWith(expect.objectContaining({ target: 'Note' }))
+    // The caret follow's modifier is its trigger, never a spare `mod`.
+    expect(onWikilinkClick).toHaveBeenCalledWith(
+      expect.objectContaining({ target: 'Note', mod: false }),
+    )
     expect(onWikilinkClick.mock.calls[0][0].event).toBeInstanceOf(KeyboardEvent)
     // The key was consumed: the block did not become a checkbox task.
     expect(docToMarkdown(fixture.doc)).toBe('see [[Note]] here\n')
@@ -143,6 +146,8 @@ describe('defineFollowLinkHandler', () => {
         "Aaa",
       ]
     `)
+    // On a selected unit, plain Enter is the trigger, so the modifier is spare.
+    expect(onWikilinkClick.mock.calls[0][0].mod).toBe(true)
   })
   it('Enter on a selected wikilink', async () => {
     const onWikilinkClick = vi.fn<WikilinkClickHandler>()
@@ -163,6 +168,7 @@ describe('defineFollowLinkHandler', () => {
         "Note",
       ]
     `)
+    expect(onWikilinkClick.mock.calls[0][0].mod).toBe(false)
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
       """
       see [[Note]] here
