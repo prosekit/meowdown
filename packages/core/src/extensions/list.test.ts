@@ -581,8 +581,9 @@ describe('keymap', () => {
 
   // The physical digit keys, so the shifted character ('&', '*', '(' on a US
   // layout) exercises prosemirror-keymap's keyCode fallback.
-  const pressModShiftDigit = (digit: 7 | 8 | 9) =>
-    userEvent.keyboard(`{ControlOrMeta>}{Shift>}[Digit${digit}]{/Shift}{/ControlOrMeta}`)
+  const pressModShiftDigit = (digit: 7 | 8 | 9) => {
+    return userEvent.keyboard(`{ControlOrMeta>}{Shift>}[Digit${digit}]{/Shift}{/ControlOrMeta}`)
+  }
 
   it('Mod-Shift-8 wraps a paragraph into a bullet and unwraps it again', async () => {
     using fixture = setupFixture()

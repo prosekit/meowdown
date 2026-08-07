@@ -107,7 +107,11 @@ function LinkInfoContent({
         onClick={(event) => {
           if (!onLinkClick) return
           event.preventDefault()
-          onLinkClick({ href, event: event.nativeEvent, mod: isModEvent(event.nativeEvent) })
+          onLinkClick({
+            href,
+            event: event.nativeEvent,
+            mod: isModEvent(event),
+          })
         }}
       >
         {href}

@@ -232,7 +232,11 @@ function WikilinkChip(props: {
   const { target, display, onWikilinkClick, children } = props
   const handleClick = onWikilinkClick
     ? (event: MouseEvent) =>
-        onWikilinkClick({ target, event: event.nativeEvent, mod: isModEvent(event.nativeEvent) })
+        onWikilinkClick({
+          target,
+          event: event.nativeEvent,
+          mod: isModEvent(event),
+        })
     : undefined
   return (
     <span className="md-wikilink-view md-atom-view">
@@ -393,13 +397,14 @@ function FileView(props: {
       : ''
 
   const handleClick = context.onFileClick
-    ? (event: MouseEvent) =>
+    ? (event: MouseEvent) => {
         context.onFileClick?.({
           href,
           name,
           event: event.nativeEvent,
-          mod: isModEvent(event.nativeEvent),
+          mod: isModEvent(event),
         })
+      }
     : undefined
   return (
     <span className="md-file-view md-atom-view">
@@ -587,7 +592,7 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
             context.onLinkClick?.({
               href: attrs.href,
               event: event.nativeEvent,
-              mod: isModEvent(event.nativeEvent),
+              mod: isModEvent(event),
             })
           }
         : undefined
