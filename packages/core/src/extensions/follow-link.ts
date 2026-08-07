@@ -42,11 +42,15 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
         const selectedAtom = getSelectedAtomRange(state)
         const mod = isModEvent(event)
 
+        if (!selectedAtom && !mod) {
+          return
+        }
+
         if (selectedAtom && handlerAtomMarkTrigger(state, event, handlers, mod, selectedAtom)) {
           return true
         }
 
-        if (!selectedAtom && handlerTextMarkTrigger(state, event, handlers, mod)) {
+        if (handlerTextMarkTrigger(state, event, handlers, mod)) {
           return true
         }
 
@@ -91,10 +95,6 @@ function handlerTextMarkTrigger(
   handlers: FollowLinkHandlers,
   mod: boolean,
 ): boolean | undefined {
-  if (!mod) {
-    return
-  }
-
   const pos = state.selection.head
 
   const { onTagClick, onLinkClick } = handlers

@@ -183,6 +183,7 @@ describe('defineFollowLinkHandler', () => {
     // On a selected unit, plain Enter is the trigger, so the modifier is spare.
     expect(onWikilinkClick.mock.calls[0][0].mod).toBe(true)
   })
+
   it('Enter on a selected wikilink', async () => {
     const onWikilinkClick = vi.fn<WikilinkClickHandler>()
     using fixture = setup({ onWikilinkClick })
@@ -210,6 +211,7 @@ describe('defineFollowLinkHandler', () => {
       """
     `)
   })
+
   it('Enter on a selected image with no matching handler is a no-op', async () => {
     using fixture = setup({})
     const { n } = fixture
@@ -229,19 +231,14 @@ describe('defineFollowLinkHandler', () => {
   })
 
   it('Enter on a selected wikilink inside a list item does not split the item', async () => {
-    using fixture = setup({})
+    using fixture = setup({ onWikilinkClick: vi.fn<WikilinkClickHandler>() })
     const { n } = fixture
     fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('see [[Note]]<a> here'))))
     fixture.view.focus()
 
     await userEvent.keyboard('{ArrowLeft}')
+    expect(docToMarkdown(fixture.doc).trim()).toMatchInlineSnapshot(`"- see [[Note]] here"`)
     await userEvent.keyboard('{Enter}')
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      """
-      - see
-      -  here
-
-      """
-    `)
+    expect(docToMarkdown(fixture.doc).trim()).toMatchInlineSnapshot(`"- see [[Note]] here"`)
   })
 })
