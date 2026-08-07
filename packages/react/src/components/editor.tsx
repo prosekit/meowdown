@@ -217,9 +217,9 @@ export interface EditorProps {
   onFileSaveError?: FilePasteOptions['onFileSaveError']
 
   /**
-   * Called when the user clicks a rendered image, with its markdown `src`,
-   * `alt`, and the originating `MouseEvent`. Pass a stable function (e.g. from
-   * `useCallback`).
+   * Called when the user clicks a rendered image (or presses `Enter` on a
+   * selected one), with its markdown `src`, `alt`, and the originating event.
+   * Pass a stable function (e.g. from `useCallback`).
    */
   onImageClick?: ImageClickHandler
 
