@@ -39,6 +39,7 @@ import { defineMeowdownParagraph } from './paragraph.ts'
 import { definePendingReplacement } from './pending-replacement.ts'
 import { defineScrollToSelection } from './scroll-to-selection.ts'
 import { defineSelectDocBoundary } from './select-doc-boundary.ts'
+import { defineSystemSubstitutionGuard } from './system-substitution-guard.ts'
 import { defineTable } from './table.ts'
 import { defineViewAttributes } from './view-attributes.ts'
 import { defineWikilink } from './wikilink.ts'
@@ -77,6 +78,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineClipboard(),
     defineScrollToSelection(),
     defineHiddenRunCaret(),
+    defineSystemSubstitutionGuard(),
     defineAtomMarkNavigation({
       marks: ATOM_SOURCE_MARK_NAMES.map((name) => ({ name, modes: ['hide', 'focus', 'show'] })),
     }),
