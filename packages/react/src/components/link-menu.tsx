@@ -3,7 +3,7 @@ import {
   defineLinkEditKeymap,
   defineLinkHoverHandler,
   getVirtualElementFromRange,
-  isModHeld,
+  isModEvent,
   type EditorExtension,
   type LinkClickHandler,
   type LinkCopyHandler,
@@ -107,7 +107,7 @@ function LinkInfoContent({
         onClick={(event) => {
           if (!onLinkClick) return
           event.preventDefault()
-          onLinkClick({ href, event: event.nativeEvent, mod: isModHeld(event.nativeEvent) })
+          onLinkClick({ href, event: event.nativeEvent, mod: isModEvent(event.nativeEvent) })
         }}
       >
         {href}

@@ -1,7 +1,7 @@
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
-import { isModHeld } from '../utils/mod-key.ts'
+import { isModEvent } from '../utils/mod-key.ts'
 
 import type { MdFileAttrs } from './inline-marks.ts'
 import { getMarkRangeAt } from './mark-range.ts'
@@ -71,7 +71,7 @@ export function defineFileClickHandler(onClick: FileClickHandler): PlainExtensio
           if (!content) return false
           const hit = findFileAt(view.state, view.posAtDOM(content, 0))
           if (!hit) return false
-          onClick({ href: hit.href, name: hit.name, event, mod: isModHeld(event) })
+          onClick({ href: hit.href, name: hit.name, event, mod: isModEvent(event) })
           return true
         },
       },

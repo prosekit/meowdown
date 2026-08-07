@@ -1,7 +1,7 @@
 import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 
-import { isModHeld } from '../utils/mod-key.ts'
+import { isModEvent } from '../utils/mod-key.ts'
 
 import { defineMarkClickHandler } from './mark-click.ts'
 import { getMarkRangeAt } from './mark-range.ts'
@@ -61,6 +61,6 @@ export function defineTagClickHandler(onClick: TagClickHandler): PlainExtension 
     selector: '.md-tag',
     preventDefault: false,
     findPayloadAt: (state, pos) => findTagAt(state, pos)?.tag,
-    onClick: (tag, event) => onClick({ tag, event, mod: isModHeld(event) }),
+    onClick: (tag, event) => onClick({ tag, event, mod: isModEvent(event) }),
   })
 }

@@ -2,7 +2,7 @@ import { definePlugin, Priority, withPriority, type PlainExtension } from '@pros
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 
 import { getIsComposing } from '../utils/composition.ts'
-import { isModHeld } from '../utils/mod-key.ts'
+import { isModEvent } from '../utils/mod-key.ts'
 
 import { getSelectedAtomRange } from './atom-mark-navigation.ts'
 import type { FileClickHandler } from './file-click.ts'
@@ -35,7 +35,7 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
         const { state } = view
         const selectedAtom = getSelectedAtomRange(state)
         // Off a selected atom unit, plain Enter stays a regular split.
-        const trigger = isModHeld(event)
+        const trigger = isModEvent(event)
         if (!trigger && !selectedAtom) {
           return false
         }

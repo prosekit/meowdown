@@ -1,7 +1,7 @@
 import type { PlainExtension } from '@prosekit/core'
 import { PluginKey } from '@prosekit/pm/state'
 
-import { isModHeld } from '../utils/mod-key.ts'
+import { isModEvent } from '../utils/mod-key.ts'
 
 import { getLinkUnitAt } from './get-link-unit-at.ts'
 import { defineMarkClickHandler } from './mark-click.ts'
@@ -44,6 +44,6 @@ export function defineLinkClickHandler(onClick: LinkClickHandler): PlainExtensio
     selector: '.md-link',
     preventDefault: true,
     findPayloadAt: (state, pos) => getLinkUnitAt(state, pos)?.href,
-    onClick: (href, event) => onClick({ href, event, mod: isModHeld(event) }),
+    onClick: (href, event) => onClick({ href, event, mod: isModEvent(event) }),
   })
 }

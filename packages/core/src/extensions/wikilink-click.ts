@@ -2,7 +2,7 @@ import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
-import { isModHeld } from '../utils/mod-key.ts'
+import { isModEvent } from '../utils/mod-key.ts'
 
 import type { MdWikilinkAttrs } from './inline-marks.ts'
 import { defineMarkClickHandler } from './mark-click.ts'
@@ -75,6 +75,6 @@ export function defineWikilinkClickHandler(onClick: WikilinkClickHandler): Plain
     preventDefault: false,
     findPayloadAt: (state, pos) => findWikilinkAt(state, pos)?.target,
     findPayloadForElement: (view, element) => findWikilinkForElement(view, element)?.target,
-    onClick: (target, event) => onClick({ target, event, mod: isModHeld(event) }),
+    onClick: (target, event) => onClick({ target, event, mod: isModEvent(event) }),
   })
 }
