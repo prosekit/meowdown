@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.65.0](https://github.com/prosekit/meowdown/compare/v0.64.3...v0.65.0) (2026-08-07)
+
+
+### Features
+
+* add a `mod` flag to link follow payloads ([#450](https://github.com/prosekit/meowdown/issues/450)) ([601b38b](https://github.com/prosekit/meowdown/commit/601b38b64c96a4e433619c856d0fd5a17656011a))
+* fire `onImageClick` on `Enter` over a selected image ([#453](https://github.com/prosekit/meowdown/issues/453)) ([74864e7](https://github.com/prosekit/meowdown/commit/74864e7ba77a7b1630a9aa908d6011e14de49168))
+
 ## [0.64.3](https://github.com/prosekit/meowdown/compare/v0.64.2...v0.64.3) (2026-08-06)
 
 
