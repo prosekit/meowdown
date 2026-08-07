@@ -32,7 +32,7 @@ export interface FindDemoValue {
 }
 
 /**
- * A browser-style find bar for the demo: `⌘F` opens it, Enter and Shift-Enter
+ * A browser-style find bar for the demo: `Command-F` opens it, Enter and Shift-Enter
  * walk the matches, and Escape closes it and hands focus back to the editor.
  */
 export function useFindDemo(handleRef: RefObject<EditorHandle | null>): FindDemoValue {

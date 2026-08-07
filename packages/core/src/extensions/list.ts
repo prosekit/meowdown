@@ -184,8 +184,9 @@ function defineMeowdownListSerializer(): PlainExtension {
         const nodes = nodesFromSchema(...args)
         return {
           ...nodes,
-          list: (node) =>
-            listToDOM({ node, nativeList: true, getAttributes: getListClipboardAttributes }),
+          list: (node) => {
+            return listToDOM({ node, nativeList: true, getAttributes: getListClipboardAttributes })
+          },
         }
       }
     },

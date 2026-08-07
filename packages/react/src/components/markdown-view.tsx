@@ -6,6 +6,7 @@ import {
   getFileKind,
   getMarkBuilders,
   inlineTextToMarkChunksWithContext,
+  isModEvent,
   listenForTweetHeight,
   markdownToDoc,
   matchEmbed,
@@ -230,7 +231,12 @@ function WikilinkChip(props: {
 }): ReactElement {
   const { target, display, onWikilinkClick, children } = props
   const handleClick = onWikilinkClick
-    ? (event: MouseEvent) => onWikilinkClick({ target, event: event.nativeEvent })
+    ? (event: MouseEvent) =>
+        onWikilinkClick({
+          target,
+          event: event.nativeEvent,
+          mod: isModEvent(event),
+        })
     : undefined
   return (
     <span className="md-wikilink-view md-atom-view">
@@ -391,7 +397,14 @@ function FileView(props: {
       : ''
 
   const handleClick = context.onFileClick
-    ? (event: MouseEvent) => context.onFileClick?.({ href, name, event: event.nativeEvent })
+    ? (event: MouseEvent) => {
+        context.onFileClick?.({
+          href,
+          name,
+          event: event.nativeEvent,
+          mod: isModEvent(event),
+        })
+      }
     : undefined
   return (
     <span className="md-file-view md-atom-view">
@@ -576,7 +589,11 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
       const handleClick = context.onLinkClick
         ? (event: MouseEvent) => {
             event.preventDefault()
-            context.onLinkClick?.({ href: attrs.href, event: event.nativeEvent })
+            context.onLinkClick?.({
+              href: attrs.href,
+              event: event.nativeEvent,
+              mod: isModEvent(event),
+            })
           }
         : undefined
       return (

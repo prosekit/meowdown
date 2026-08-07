@@ -1,6 +1,8 @@
 import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 
+import { isModEvent } from '../utils/is-mod-event.ts'
+
 import { defineMarkClickHandler } from './mark-click.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 
@@ -35,6 +37,11 @@ export interface TagClickPayload {
    * Read modifier keys or position a popover from it.
    */
   event: MouseEvent | KeyboardEvent
+  /**
+   * Whether the platform's mod key (`Command` on Apple, `Ctrl` elsewhere) was held
+   * beyond the gesture that triggered the activation.
+   */
+  mod: boolean
 }
 
 export type TagClickHandler = (payload: TagClickPayload) => void
@@ -50,6 +57,6 @@ export function defineTagClickHandler(onClick: TagClickHandler): PlainExtension 
     selector: '.md-tag',
     preventDefault: false,
     findPayloadAt: (state, pos) => findTagAt(state, pos)?.tag,
-    onClick: (tag, event) => onClick({ tag, event }),
+    onClick: (tag, event) => onClick({ tag, event, mod: isModEvent(event) }),
   })
 }
