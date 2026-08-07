@@ -2,7 +2,7 @@ import { definePlugin, Priority, withPriority, type PlainExtension } from '@pros
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 
 import { getIsComposing } from '../utils/composition.ts'
-import { isModEvent } from '../utils/mod-key.ts'
+import { isModEvent } from '../utils/is-mod-event.ts'
 
 import { getSelectedAtomRange } from './atom-mark-navigation.ts'
 import type { FileClickHandler } from './file-click.ts'

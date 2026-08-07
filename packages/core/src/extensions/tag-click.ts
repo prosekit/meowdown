@@ -1,7 +1,7 @@
 import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 
-import { isModEvent } from '../utils/mod-key.ts'
+import { isModEvent } from '../utils/is-mod-event.ts'
 
 import { defineMarkClickHandler } from './mark-click.ts'
 import { getMarkRangeAt } from './mark-range.ts'
