@@ -68,7 +68,7 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
         ): T | undefined =>
           hit && (selectedAtom !== undefined || (hit.from < pos && pos < hit.to)) ? hit : undefined
 
-        const wikilink = handlers.onWikilinkClick && inside(findWikilinkAt(state, pos))
+        const wikilink = handlers.onWikilinkClick && selectedAtom && findWikilinkAt(state, pos)
         if (wikilink) {
           handlers.onWikilinkClick?.({ target: wikilink.target, event, mod })
           return true
@@ -76,7 +76,7 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
 
         // A claimed file link carries only the `mdFile` mark, so the link
         // lookup below never sees it.
-        const file = handlers.onFileClick && inside(findFileAt(state, pos))
+        const file = handlers.onFileClick && selectedAtom && findFileAt(state, pos)
         if (file) {
           handlers.onFileClick?.({ href: file.href, name: file.name, event, mod })
           return true
