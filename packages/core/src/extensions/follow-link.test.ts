@@ -6,6 +6,7 @@ import { setupFixture, type Fixture } from '../testing/index.ts'
 
 import type { FileClickHandler } from './file-click.ts'
 import { defineFollowLinkHandler, type FollowLinkHandlers } from './follow-link.ts'
+import type { ImageClickHandler } from './image-click.ts'
 import type { LinkClickHandler } from './link-click.ts'
 import type { TagClickHandler } from './tag-click.ts'
 import type { WikilinkClickHandler } from './wikilink-click.ts'
@@ -210,6 +211,38 @@ describe('defineFollowLinkHandler', () => {
 
       """
     `)
+  })
+
+  it('Enter on a selected image', async () => {
+    const onImageClick = vi.fn<ImageClickHandler>()
+    using fixture = setup({ onImageClick })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see ![pic](https://example.com/a.png)<a> here')))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{ArrowLeft}')
+    await userEvent.keyboard('{Enter}')
+
+    expect(onImageClick).toHaveBeenCalledWith(
+      expect.objectContaining({ src: 'https://example.com/a.png', alt: 'pic', mod: false }),
+    )
+    expect(onImageClick.mock.calls[0][0].event).toBeInstanceOf(KeyboardEvent)
+    // The key was consumed: the image survived and the paragraph did not split.
+    expect(docToMarkdown(fixture.doc)).toBe('see ![pic](https://example.com/a.png) here\n')
+  })
+
+  it('Mod-Enter on a selected image reports `mod`', async () => {
+    const onImageClick = vi.fn<ImageClickHandler>()
+    using fixture = setup({ onImageClick })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see ![pic](https://example.com/a.png)<a> here')))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{ArrowLeft}')
+    await pressModEnter()
+
+    expect(onImageClick).toHaveBeenCalledWith(expect.objectContaining({ mod: true }))
+    expect(docToMarkdown(fixture.doc)).toBe('see ![pic](https://example.com/a.png) here\n')
   })
 
   it('Enter on a selected image with no matching handler is a no-op', async () => {

@@ -14,6 +14,8 @@ import { getSelectedAtomRange } from './atom-mark-navigation.ts'
 import type { FileClickHandler } from './file-click.ts'
 import { findFileAt } from './file-click.ts'
 import { getLinkUnitAt } from './get-link-unit-at.ts'
+import type { ImageClickHandler } from './image-click.ts'
+import { findImageAt } from './image-click.ts'
 import type { LinkClickHandler } from './link-click.ts'
 import type { TagClickHandler } from './tag-click.ts'
 import { findTagAt } from './tag-click.ts'
@@ -27,6 +29,7 @@ export interface FollowLinkHandlers {
   onTagClick?: TagClickHandler
   onFileClick?: FileClickHandler
   onLinkClick?: LinkClickHandler
+  onImageClick?: ImageClickHandler
 }
 
 function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
@@ -72,7 +75,7 @@ function handlerAtomMarkTrigger(
   // neighbour to the right.
   const pos = selectedAtom.from + 1
 
-  const { onWikilinkClick, onFileClick } = handlers
+  const { onWikilinkClick, onFileClick, onImageClick } = handlers
 
   const wikilink = onWikilinkClick && findWikilinkAt(state, pos)
   if (wikilink) {
@@ -85,6 +88,12 @@ function handlerAtomMarkTrigger(
   const file = onFileClick && findFileAt(state, pos)
   if (file) {
     onFileClick({ href: file.href, name: file.name, event, mod })
+    return true
+  }
+
+  const image = onImageClick && findImageAt(state, pos)
+  if (image) {
+    onImageClick({ src: image.src, alt: image.alt, event, mod })
     return true
   }
 }
@@ -114,9 +123,10 @@ function handlerTextMarkTrigger(
 
 /**
  * Binds `Mod-Enter` to follow the wikilink, tag, file pill, or Markdown link
- * under the caret, and plain `Enter` to follow a selected atom unit, firing
- * the same handlers a click does. "Under the caret" means strictly inside
- * the unit: a caret merely touching a unit's edge is next to it, not on it.
+ * under the caret, and plain `Enter` to follow a selected atom unit (a
+ * wikilink, file pill, or image), firing the same handlers a click does.
+ * "Under the caret" means strictly inside the unit: a caret merely touching
+ * a unit's edge is next to it, not on it.
  * Off a link, `Mod-Enter` falls through so the list keymap keeps cycling
  * checkbox tasks; off a selected unit, `Enter` falls through to the regular
  * split. High priority puts this ahead of every keymap binding.

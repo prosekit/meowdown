@@ -156,10 +156,16 @@ export function EditorExtensions({
     useMemo(() => {
       // Mod-Enter follows the link under the caret through the same handlers
       // a click uses.
-      return onWikilinkClick || onTagClick || onFileClick || onLinkClick
-        ? defineFollowLinkHandler({ onWikilinkClick, onTagClick, onFileClick, onLinkClick })
+      return onWikilinkClick || onTagClick || onFileClick || onLinkClick || onImageClick
+        ? defineFollowLinkHandler({
+            onWikilinkClick,
+            onTagClick,
+            onFileClick,
+            onLinkClick,
+            onImageClick,
+          })
         : null
-    }, [onWikilinkClick, onTagClick, onFileClick, onLinkClick]),
+    }, [onWikilinkClick, onTagClick, onFileClick, onLinkClick, onImageClick]),
   )
 
   useExtension(
