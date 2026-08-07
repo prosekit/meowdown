@@ -68,17 +68,19 @@ function handlerAtomMarkTrigger(
   // neighbour to the right.
   const pos = selectedAtom.from + 1
 
-  const wikilink = handlers.onWikilinkClick && selectedAtom && findWikilinkAt(state, pos)
+  const { onWikilinkClick, onFileClick } = handlers
+
+  const wikilink = onWikilinkClick && findWikilinkAt(state, pos)
   if (wikilink) {
-    handlers.onWikilinkClick?.({ target: wikilink.target, event, mod })
+    onWikilinkClick({ target: wikilink.target, event, mod })
     return true
   }
 
   // A claimed file link carries only the `mdFile` mark, so the link
   // lookup below never sees it.
-  const file = handlers.onFileClick && selectedAtom && findFileAt(state, pos)
+  const file = onFileClick && findFileAt(state, pos)
   if (file) {
-    handlers.onFileClick?.({ href: file.href, name: file.name, event, mod })
+    onFileClick({ href: file.href, name: file.name, event, mod })
     return true
   }
 }
@@ -95,15 +97,17 @@ function handlerTextMarkTrigger(
 
   const pos = state.selection.head
 
-  const tag = handlers.onTagClick && findTagAt(state, pos)
+  const { onTagClick, onLinkClick } = handlers
+
+  const tag = onTagClick && findTagAt(state, pos)
   if (tag && tag.from < pos && pos < tag.to) {
-    handlers.onTagClick?.({ tag: tag.tag, event, mod })
+    onTagClick({ tag: tag.tag, event, mod })
     return true
   }
 
-  const link = handlers.onLinkClick && getLinkUnitAt(state, pos)
+  const link = onLinkClick && getLinkUnitAt(state, pos)
   if (link && link.unit.from < pos && pos < link.unit.to) {
-    handlers.onLinkClick?.({ href: link.href, event, mod })
+    onLinkClick({ href: link.href, event, mod })
     return true
   }
 }

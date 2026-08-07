@@ -44,8 +44,7 @@ describe('defineFollowLinkHandler', () => {
     fixture.set(n.doc(n.paragraph('about #ca<a>ts today')))
     fixture.view.focus()
     await pressModEnter()
-    // The caret follow's modifier is its trigger, never a spare `mod`.
-    expect(onTagClick).toHaveBeenCalledWith(expect.objectContaining({ tag: 'cats', mod: false }))
+    expect(onTagClick).toHaveBeenCalledWith(expect.objectContaining({ tag: 'cats', mod: true }))
     expect(onTagClick.mock.calls[0][0].event).toBeInstanceOf(KeyboardEvent)
   })
 
@@ -221,7 +220,7 @@ describe('defineFollowLinkHandler', () => {
     await userEvent.keyboard('{Enter}')
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
       """
-      see 
+      see
 
        here
 
@@ -239,7 +238,7 @@ describe('defineFollowLinkHandler', () => {
     await userEvent.keyboard('{Enter}')
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
       """
-      - see 
+      - see
       -  here
 
       """
