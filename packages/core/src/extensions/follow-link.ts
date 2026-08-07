@@ -1,4 +1,10 @@
-import { definePlugin, Priority, withPriority, type PlainExtension } from '@prosekit/core'
+import {
+  definePlugin,
+  Priority,
+  withPriority,
+  type MarkRange,
+  type PlainExtension,
+} from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
 import { getIsComposing } from '../utils/composition.ts'
@@ -7,7 +13,7 @@ import { isModEvent } from '../utils/is-mod-event.ts'
 import { getSelectedAtomRange } from './atom-mark-navigation.ts'
 import type { FileClickHandler } from './file-click.ts'
 import { findFileAt } from './file-click.ts'
-import { getLinkUnitAt, type LinkUnit } from './get-link-unit-at.ts'
+import { getLinkUnitAt } from './get-link-unit-at.ts'
 import type { LinkClickHandler } from './link-click.ts'
 import type { TagClickHandler } from './tag-click.ts'
 import { findTagAt } from './tag-click.ts'
@@ -15,16 +21,6 @@ import type { WikilinkClickHandler } from './wikilink-click.ts'
 import { findWikilinkAt } from './wikilink-click.ts'
 
 const followLinkKey = new PluginKey('meowdown-follow-link')
-
-// The link unit at `pos`, flattened to carry its own range so the caret
-// filter can treat it like the other finds.
-function findLinkAt(
-  state: EditorState,
-  pos: number,
-): (LinkUnit & { from: number; to: number }) | undefined {
-  const unit = getLinkUnitAt(state, pos)
-  return unit && { ...unit, from: unit.unit.from, to: unit.unit.to }
-}
 
 export interface FollowLinkHandlers {
   onWikilinkClick?: WikilinkClickHandler
@@ -44,53 +40,13 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
 
         const { state } = view
         const selectedAtom = getSelectedAtomRange(state)
-        // Off a selected atom unit, plain Enter stays a regular split.
-        const trigger = isModEvent(event)
-        if (!trigger && !selectedAtom) {
-          return false
-        }
+        const mod = isModEvent(event)
 
-        // A spare mod only exists on a selected-unit follow: a caret follow
-        // consumed its modifier as the trigger.
-        const mod = selectedAtom !== undefined && trigger
-
-        // Resolve inside the selected unit, not at its edge: either edge may
-        // also touch an adjacent unit, and edge positions prefer the
-        // neighbour to the right.
-        const pos = selectedAtom ? selectedAtom.from + 1 : state.selection.head
-
-        // A caret follow needs the caret strictly inside the unit: the finds
-        // use touching semantics (for clicks), so an edge position would
-        // follow a link the caret is merely next to. A selected unit already
-        // proved itself.
-        const inside = <T extends { from: number; to: number }>(
-          hit: T | undefined,
-        ): T | undefined =>
-          hit && (selectedAtom !== undefined || (hit.from < pos && pos < hit.to)) ? hit : undefined
-
-        const wikilink = handlers.onWikilinkClick && selectedAtom && findWikilinkAt(state, pos)
-        if (wikilink) {
-          handlers.onWikilinkClick?.({ target: wikilink.target, event, mod })
+        if (selectedAtom && handlerAtomMarkTrigger(state, event, handlers, mod, selectedAtom)) {
           return true
         }
 
-        // A claimed file link carries only the `mdFile` mark, so the link
-        // lookup below never sees it.
-        const file = handlers.onFileClick && selectedAtom && findFileAt(state, pos)
-        if (file) {
-          handlers.onFileClick?.({ href: file.href, name: file.name, event, mod })
-          return true
-        }
-
-        const tag = handlers.onTagClick && inside(findTagAt(state, pos))
-        if (tag) {
-          handlers.onTagClick?.({ tag: tag.tag, event, mod })
-          return true
-        }
-
-        const link = handlers.onLinkClick && inside(findLinkAt(state, pos))
-        if (link) {
-          handlers.onLinkClick?.({ href: link.href, event, mod })
+        if (!selectedAtom && handlerTextMarkTrigger(state, event, handlers, mod)) {
           return true
         }
 
@@ -98,6 +54,58 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
       },
     },
   })
+}
+
+function handlerAtomMarkTrigger(
+  state: EditorState,
+  event: KeyboardEvent,
+  handlers: FollowLinkHandlers,
+  mod: boolean,
+  selectedAtom: MarkRange,
+) {
+  // Resolve inside the selected unit, not at its edge: either edge may
+  // also touch an adjacent unit, and edge positions prefer the
+  // neighbour to the right.
+  const pos = selectedAtom.from + 1
+
+  const wikilink = handlers.onWikilinkClick && selectedAtom && findWikilinkAt(state, pos)
+  if (wikilink) {
+    handlers.onWikilinkClick?.({ target: wikilink.target, event, mod })
+    return true
+  }
+
+  // A claimed file link carries only the `mdFile` mark, so the link
+  // lookup below never sees it.
+  const file = handlers.onFileClick && selectedAtom && findFileAt(state, pos)
+  if (file) {
+    handlers.onFileClick?.({ href: file.href, name: file.name, event, mod })
+    return true
+  }
+}
+
+function handlerTextMarkTrigger(
+  state: EditorState,
+  event: KeyboardEvent,
+  handlers: FollowLinkHandlers,
+  mod: boolean,
+): boolean | undefined {
+  if (!mod) {
+    return
+  }
+
+  const pos = state.selection.head
+
+  const tag = handlers.onTagClick && findTagAt(state, pos)
+  if (tag && tag.from < pos && pos < tag.to) {
+    handlers.onTagClick?.({ tag: tag.tag, event, mod })
+    return true
+  }
+
+  const link = handlers.onLinkClick && getLinkUnitAt(state, pos)
+  if (link && link.unit.from < pos && pos < link.unit.to) {
+    handlers.onLinkClick?.({ href: link.href, event, mod })
+    return true
+  }
 }
 
 /**

@@ -15,10 +15,8 @@ export interface LinkClickPayload {
    */
   event: MouseEvent | KeyboardEvent
   /**
-   * Whether the platform's mod key (`⌘` on Apple, `Ctrl` elsewhere) was held
-   * beyond the gesture that triggered the activation. A `Mod-Enter` caret
-   * follow therefore reports false: there the mod key is the trigger itself.
-   * Hosts conventionally open a `mod` follow in a new window or pane.
+   * Whether the platform's mod key (`Command` on Apple, `Ctrl` elsewhere) was held
+   * beyond the gesture that triggered the activation.
    */
   mod: boolean
 }
