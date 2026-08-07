@@ -222,14 +222,7 @@ describe('defineFollowLinkHandler', () => {
     await userEvent.keyboard('{Enter}')
     await userEvent.keyboard('A')
 
-    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
-      """
-      see 
-
-      A here
-
-      """
-    `)
+    expect(fixture.doc.toString()).toMatchInlineSnapshot(`"doc(paragraph("see "), paragraph("A here"))"`)
   })
 
   it('Enter on a selected wikilink inside a list item does not split the item', async () => {
