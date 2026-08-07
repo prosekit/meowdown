@@ -220,11 +220,13 @@ describe('defineFollowLinkHandler', () => {
 
     await userEvent.keyboard('{ArrowLeft}')
     await userEvent.keyboard('{Enter}')
+    await userEvent.keyboard('A')
+
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
       """
       see 
 
-       here
+      A here
 
       """
     `)
