@@ -23,30 +23,30 @@ function setup(handlers: FollowLinkHandlers): Fixture {
 }
 
 describe('defineFollowLinkHandler', () => {
-  it('follows the wikilink under the caret and passes the KeyboardEvent', async () => {
+  it('does not follow a wikilink pill from the caret', async () => {
     const onWikilinkClick = vi.fn<WikilinkClickHandler>()
     using fixture = setup({ onWikilinkClick })
     const { n } = fixture
+    // The hidden source snaps the caret to a pill edge, and an edge is next
+    // to the pill, not on it: pills follow through selection only.
     fixture.set(n.doc(n.paragraph('see [[No<a>te]] here')))
     fixture.view.focus()
     await pressModEnter()
-    // The caret follow's modifier is its trigger, never a spare `mod`.
-    expect(onWikilinkClick).toHaveBeenCalledWith(
-      expect.objectContaining({ target: 'Note', mod: false }),
-    )
-    expect(onWikilinkClick.mock.calls[0][0].event).toBeInstanceOf(KeyboardEvent)
-    // The key was consumed: the block did not become a checkbox task.
-    expect(docToMarkdown(fixture.doc)).toBe('see [[Note]] here\n')
+    expect(onWikilinkClick).not.toHaveBeenCalled()
+    // The key fell through to the task rotation instead.
+    expect(docToMarkdown(fixture.doc)).toBe('- [ ] see [[Note]] here\n')
   })
 
-  it('follows the tag under the caret', async () => {
+  it('follows the tag under the caret and passes the KeyboardEvent', async () => {
     const onTagClick = vi.fn<TagClickHandler>()
     using fixture = setup({ onTagClick })
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('about #ca<a>ts today')))
     fixture.view.focus()
     await pressModEnter()
-    expect(onTagClick).toHaveBeenCalledWith(expect.objectContaining({ tag: 'cats' }))
+    // The caret follow's modifier is its trigger, never a spare `mod`.
+    expect(onTagClick).toHaveBeenCalledWith(expect.objectContaining({ tag: 'cats', mod: false }))
+    expect(onTagClick.mock.calls[0][0].event).toBeInstanceOf(KeyboardEvent)
   })
 
   it('follows the Markdown link under the caret', async () => {
@@ -61,7 +61,7 @@ describe('defineFollowLinkHandler', () => {
     )
   })
 
-  it('follows the file pill under the caret instead of the link handler', async () => {
+  it('follows a selected file pill instead of the link handler', async () => {
     const onFileClick = vi.fn<FileClickHandler>()
     const onLinkClick = vi.fn<LinkClickHandler>()
     using fixture = setupFixture({
@@ -69,24 +69,26 @@ describe('defineFollowLinkHandler', () => {
     })
     fixture.editor.use(defineFollowLinkHandler({ onFileClick, onLinkClick }))
     const { n } = fixture
-    fixture.set(n.doc(n.paragraph('see [repo<a>rt.pdf](assets/report.pdf) here')))
+    fixture.set(n.doc(n.paragraph('see [report.pdf](assets/report.pdf)<a> here')))
     fixture.view.focus()
+    await userEvent.keyboard('{ArrowLeft}')
     await pressModEnter()
     expect(onFileClick).toHaveBeenCalledWith(
-      expect.objectContaining({ href: 'assets/report.pdf', name: 'report.pdf' }),
+      expect.objectContaining({ href: 'assets/report.pdf', name: 'report.pdf', mod: true }),
     )
     expect(onFileClick.mock.calls[0][0].event).toBeInstanceOf(KeyboardEvent)
     expect(onLinkClick).not.toHaveBeenCalled()
   })
 
-  it('on a wikilink inside a task item follows instead of rotating the task', async () => {
+  it('on a selected wikilink inside a task item follows instead of rotating the task', async () => {
     const onWikilinkClick = vi.fn<WikilinkClickHandler>()
     using fixture = setup({ onWikilinkClick })
     const { n } = fixture
     fixture.set(
-      n.doc(n.list({ kind: 'task', checked: false }, n.paragraph('see [[No<a>te]] here'))),
+      n.doc(n.list({ kind: 'task', checked: false }, n.paragraph('see [[Note]]<a> here'))),
     )
     fixture.view.focus()
+    await userEvent.keyboard('{ArrowLeft}')
     await pressModEnter()
     expect(onWikilinkClick).toHaveBeenCalledTimes(1)
     expect(docToMarkdown(fixture.doc)).toBe('- [ ] see [[Note]] here\n')
@@ -125,6 +127,39 @@ describe('defineFollowLinkHandler', () => {
     await pressModEnter()
     expect(onTagClick).not.toHaveBeenCalled()
     expect(docToMarkdown(fixture.doc)).toBe('- [ ] see [[Note]] here\n')
+  })
+
+  it('does not follow a wikilink the caret only touches at its left edge', async () => {
+    const onWikilinkClick = vi.fn<WikilinkClickHandler>()
+    using fixture = setup({ onWikilinkClick })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see <a>[[Note]] here')))
+    fixture.view.focus()
+    await pressModEnter()
+    expect(onWikilinkClick).not.toHaveBeenCalled()
+    // The key fell through to the task rotation instead.
+    expect(docToMarkdown(fixture.doc)).toBe('- [ ] see [[Note]] here\n')
+  })
+
+  it('does not follow a wikilink the caret only touches at its right edge', async () => {
+    const onWikilinkClick = vi.fn<WikilinkClickHandler>()
+    using fixture = setup({ onWikilinkClick })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('see [[Note]]<a> here')))
+    fixture.view.focus()
+    await pressModEnter()
+    expect(onWikilinkClick).not.toHaveBeenCalled()
+    expect(docToMarkdown(fixture.doc)).toBe('- [ ] see [[Note]] here\n')
+  })
+
+  it('does not follow a tag the caret only touches at its edge', async () => {
+    const onTagClick = vi.fn<TagClickHandler>()
+    using fixture = setup({ onTagClick })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('about <a>#cats today')))
+    fixture.view.focus()
+    await pressModEnter()
+    expect(onTagClick).not.toHaveBeenCalled()
   })
 
   it('Mod-Enter on a selected wikilink next to another wikilink', async () => {

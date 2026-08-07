@@ -9,6 +9,8 @@ import { getMarkRangeAt } from './mark-range.ts'
 const fileClickKey = new PluginKey('meowdown-file-click')
 
 interface FileHit {
+  from: number
+  to: number
   href: string
   name: string
 }
@@ -17,7 +19,7 @@ export function findFileAt(state: EditorState, pos: number): FileHit | undefined
   const range = getMarkRangeAt(state, pos, 'mdFile')
   if (!range) return
   const { href, name } = range.mark.attrs as MdFileAttrs
-  return { href, name }
+  return { from: range.from, to: range.to, href, name }
 }
 
 /**
@@ -38,12 +40,10 @@ export interface FileClickPayload {
    */
   event: MouseEvent | KeyboardEvent
   /**
-   * Whether the activation carried the platform's mod key (`⌘` on Apple,
-   * `Ctrl` elsewhere) beyond the gesture that triggered it: a mod click, or
-   * a mod `Enter` press on a selected atom unit (where plain `Enter` already
-   * follows). Always false for the `Mod-Enter` caret follow, whose mod key
-   * is the trigger itself. Hosts conventionally open a `mod` follow in a new
-   * window or pane.
+   * Whether the platform's mod key (`⌘` on Apple, `Ctrl` elsewhere) was held
+   * beyond the gesture that triggered the activation. A `Mod-Enter` caret
+   * follow therefore reports false: there the mod key is the trigger itself.
+   * Hosts conventionally open a `mod` follow in a new window or pane.
    */
   mod: boolean
 }
