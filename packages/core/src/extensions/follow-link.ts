@@ -74,17 +74,17 @@ function createFollowLinkPlugin(handlers: FollowLinkHandlers) {
           return true
         }
 
-        const tag = handlers.onTagClick && inside(findTagAt(state, pos))
-        if (tag) {
-          handlers.onTagClick?.({ tag: tag.tag, event, mod })
-          return true
-        }
-
         // A claimed file link carries only the `mdFile` mark, so the link
         // lookup below never sees it.
         const file = handlers.onFileClick && inside(findFileAt(state, pos))
         if (file) {
           handlers.onFileClick?.({ href: file.href, name: file.name, event, mod })
+          return true
+        }
+
+        const tag = handlers.onTagClick && inside(findTagAt(state, pos))
+        if (tag) {
+          handlers.onTagClick?.({ tag: tag.tag, event, mod })
           return true
         }
 
