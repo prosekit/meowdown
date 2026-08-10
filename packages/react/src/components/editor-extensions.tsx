@@ -13,7 +13,6 @@ import {
   definePlaceholder,
   defineReadonly,
   defineSearchStatusHandler,
-  defineSpellCheckPlugin,
   defineSubstitution,
   defineTagClickHandler,
   defineViewAttributes,
@@ -101,10 +100,15 @@ export function EditorExtensions({
 
   // Set extra editor class name.
   useLayoutEffect(() => {
-    if (!editorClassName) return
-    const extension = defineViewAttributes({ class: editorClassName })
+    const attrs: { [key: string]: string } = {
+      spellcheck: spellCheck ? 'true' : 'false',
+    }
+    if (editorClassName) {
+      attrs['class'] = editorClassName
+    }
+    const extension = defineViewAttributes(attrs)
     return editor.use(extension)
-  }, [editor, editorClassName])
+  }, [editor, editorClassName, spellCheck])
 
   // Search has no latency requirement, so a slow device may skip the
   // intermediate values of a fast typist entirely. `literal` turns off
@@ -240,12 +244,6 @@ export function EditorExtensions({
     useMemo(() => {
       return wikilinkEnabled ? defineWikilinkTrigger() : null
     }, [wikilinkEnabled]),
-  )
-
-  useExtension(
-    useMemo(() => {
-      return spellCheck == null ? null : defineSpellCheckPlugin(spellCheck)
-    }, [spellCheck]),
   )
 
   return null
