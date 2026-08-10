@@ -118,7 +118,7 @@ function createSpellCheckPlugin(spellCheck: boolean) {
 }
 
 /**
- * @deprecated
+ * @deprecated This will be removed in future versions.
  */
 export function defineSpellCheckPlugin(spellCheck: boolean): PlainExtension {
   return definePlugin(createSpellCheckPlugin(spellCheck))
