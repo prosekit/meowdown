@@ -683,6 +683,36 @@ describe('image', () => {
       "
     `)
   })
+
+  it('folds a stacked run of size comments, first data winning', () => {
+    expect(parse('![a](u)<!-- {"width":100} --><!-- {"width":320} -->')).toMatchInlineSnapshot(`
+      "
+      [0, 51] mdPack(key=image) + mdImage(src=u,alt=a,width=100)
+      "
+    `)
+  })
+
+  it('folds a stacked run of size comments inside a link label', () => {
+    expect(parse('[![a](u)<!-- {"width":100} --><!-- {"width":320} -->](/target)'))
+      .toMatchInlineSnapshot(`
+      "
+      [0, 1]   mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdLinkText(href=/target) + mdMark
+      [1, 52]  mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdLinkText(href=/target) + mdPack(key=image) + mdImage(src=u,alt=a,width=100)
+      [52, 54] mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdMark
+      [54, 61] mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdLinkUri
+      [61, 62] mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdMark
+      "
+    `)
+  })
+
+  it('stops the fold at a non-metadata comment', () => {
+    expect(parse('![a](u)<!-- {"width":100} --><!-- note -->')).toMatchInlineSnapshot(`
+      "
+      [0, 29]  mdPack(key=image) + mdImage(src=u,alt=a,width=100)
+      [29, 42]
+      "
+    `)
+  })
 })
 
 describe('wiki embed', () => {

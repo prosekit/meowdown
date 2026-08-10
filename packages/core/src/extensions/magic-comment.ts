@@ -16,8 +16,10 @@ export interface MagicComment {
 
 // A whole inline comment carrying a JSON object: `<!-- {...} -->`.
 const MAGIC_COMMENT_RE = /^<!--\s*(\{[^}]*\})\s*-->$/
-// Same, anchored to the end of a string, for stripping a trailing comment.
-const TRAILING_MAGIC_COMMENT_RE = /<!--\s*\{[^}]*\}\s*-->$/
+// Same, anchored to the end of a string, for stripping the whole trailing
+// run: a rewrite of an image whose comment had not folded could stack a
+// second comment behind the first.
+const TRAILING_MAGIC_COMMENT_RE = /(?:<!--\s*\{[^}]*\}\s*-->)+$/
 
 /**
  * Read the metadata out of a `<!-- {...} -->` comment, or `undefined` when the
@@ -58,7 +60,7 @@ export function formatMagicComment(magic: MagicComment): string {
 }
 
 /**
- * Drop a trailing magic comment from the source text.
+ * Drop the trailing run of magic comments from the source text.
  */
 export function stripMagicComment(source: string): string {
   return source.replace(TRAILING_MAGIC_COMMENT_RE, '')
