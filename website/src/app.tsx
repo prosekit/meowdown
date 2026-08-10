@@ -9,12 +9,12 @@ import {
 import { getId } from '@ocavue/utils'
 import { clsx } from 'clsx/lite'
 import {
-  type CSSProperties,
   useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
+  type CSSProperties,
 } from 'react'
 
 import { DemoEditor } from './components/demo-editor.tsx'
@@ -160,7 +160,7 @@ Outline your thoughts with nested bullets. Hover a bullet that has children and 
 
 Drop in an image and it renders right where you wrote it. Paste or drag one in to upload your own:
 
-Small images flow inline ![](https://static.photos/yellow/16x16/3) with the surrounding text.
+Small images flow inline ![](https://static.photos/yellow/16x16/3)<!--{"width":128,"height":128}--> with the surrounding text.
 
 Paste a YouTube or tweet link and it embeds itself. Undo once to get the plain link back:
 
