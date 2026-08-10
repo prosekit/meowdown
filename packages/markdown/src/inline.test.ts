@@ -227,6 +227,26 @@ describe('image', () => {
       "
     `)
   })
+
+  it('parses a comment after a linked image as a direct child of the Link', () => {
+    expect(parse('[![a](u)<!-- {"width":100} -->](/target)')).toMatchInlineSnapshot(`
+      "
+      Link [0, 40] "[![a](u)<!-- {\\"width\\":100} -->](/target)"
+        LinkMark [0, 1] "["
+        Image [1, 8] "![a](u)"
+          LinkMark [1, 3] "!["
+          LinkMark [4, 5] "]"
+          LinkMark [5, 6] "("
+          URL [6, 7] "u"
+          LinkMark [7, 8] ")"
+        Comment [8, 30] "<!-- {\\"width\\":100} -->"
+        LinkMark [30, 31] "]"
+        LinkMark [31, 32] "("
+        URL [32, 39] "/target"
+        LinkMark [39, 40] ")"
+      "
+    `)
+  })
 })
 
 describe('highlight', () => {
