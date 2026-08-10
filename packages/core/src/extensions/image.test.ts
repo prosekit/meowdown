@@ -379,6 +379,47 @@ describe('image resize', () => {
     await expect.element(resizable).toHaveAttribute('data-width', '320')
   })
 
+  it('applies a persisted width to a linked image', async () => {
+    using fixture = setupResize('[![cat](u)<!-- {"width":200} -->](/target)')
+    void fixture
+    await expect.element(resizable).toHaveAttribute('data-width', '200')
+  })
+
+  it('writes the size comment inside the link label when a linked image is resized', async () => {
+    using fixture = setupResize('[![cat](u)](/target)')
+    await expect.element(resizable).toBeInTheDocument()
+    endResize(320)
+    await vi.waitFor(() => {
+      expect(fixture.doc.textContent).toBe(
+        '[![cat](u)<!-- {"width":320,"height":100} -->](/target)',
+      )
+    })
+    await expect.element(resizable).toHaveAttribute('data-width', '320')
+  })
+
+  it('replaces the size comment of a linked image when resized again', async () => {
+    using fixture = setupResize('[![cat](u)<!-- {"width":100} -->](/target)')
+    await expect.element(resizable).toHaveAttribute('data-width', '100')
+    endResize(320)
+    await vi.waitFor(() => {
+      expect(fixture.doc.textContent).toBe(
+        '[![cat](u)<!-- {"width":320,"height":100} -->](/target)',
+      )
+    })
+  })
+
+  // Stacked comments are what a formerly buggy rewrite left behind: each
+  // resize inserted a fresh comment before the unfolded old one. The first
+  // comment's size applies, and one resize collapses the run.
+  it('collapses a stacked run of size comments when resized', async () => {
+    using fixture = setupResize('![cat](u)<!-- {"width":300} --><!-- {"width":100} -->')
+    await expect.element(resizable).toHaveAttribute('data-width', '300')
+    endResize(320)
+    await vi.waitFor(() => {
+      expect(fixture.doc.textContent).toBe('![cat](u)<!-- {"width":320,"height":100} -->')
+    })
+  })
+
   it('keeps the same preview DOM when resized', async () => {
     using fixture = setupResize('![cat](u)<!-- {"width":100} -->')
     void fixture
