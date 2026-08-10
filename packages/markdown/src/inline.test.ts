@@ -85,7 +85,7 @@ describe('link', () => {
   // signature in the tree: only two LinkMark children (`[` and `]`); a
   // reference label, when present, is a single LinkLabel node, never more
   // LinkMarks. Inline links carry at least three LinkMarks (`[`, `]`, `(`).
-  // `hasInlineDestination` in `inline-text-to-mark-chunks.ts` relies on this.
+  // `resolveLink` in `inline-text-to-mark-chunks.ts` relies on this.
 
   it('parses a shortcut reference link with two LinkMarks', () => {
     expect(parse('[foo]')).toMatchInlineSnapshot(`
