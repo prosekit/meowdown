@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.65.1](https://github.com/prosekit/meowdown/compare/v0.65.0...v0.65.1) (2026-08-10)
+
+
+### Bug Fixes
+
+* fold stacked image size comments ([#455](https://github.com/prosekit/meowdown/issues/455)) ([dc5710c](https://github.com/prosekit/meowdown/commit/dc5710c618d18668b687a4d8ce12b0927e47b943))
+* stop pausing `spellcheck` around edits ([#451](https://github.com/prosekit/meowdown/issues/451)) ([563162c](https://github.com/prosekit/meowdown/commit/563162c3280526b14742192bd2159ebee53fb190))
+
 ## [0.65.0](https://github.com/prosekit/meowdown/compare/v0.64.3...v0.65.0) (2026-08-07)
 
 
