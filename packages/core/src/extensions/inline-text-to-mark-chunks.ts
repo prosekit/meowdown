@@ -202,16 +202,15 @@ function walk(
   let pos = rangeStart
   for (let index = 0; index < nodes.length; index++) {
     const node = nodes[index]
+    // A previous child may have consumed this one (e.g. an image folding its
+    // trailing magic comments), so anything fully behind `pos` is done.
+    if (node.to <= pos) continue
     if (node.from > pos) {
       emit(out, pos, node.from, parentMarks)
     }
-    // An image may fold the next sibling into its own range, so it is the one
-    // node type the loop resolves itself.
-    if (node.type === LEZER_NODE_IDS.Image) {
-      const trailing = takeMagicComment(node, nodes[index + 1], text)
-      walkImage(node, parentMarks, text, marks, out, options, context, trailing)
-      if (trailing) index++ // skip the folded comment
-      pos = trailing ? trailing.to : node.to
+    const atomEnd = walkAtomChild(nodes, index, parentMarks, text, marks, out, options, context)
+    if (atomEnd != null) {
+      pos = atomEnd
       continue
     }
     walkNode(node, parentMarks, text, marks, out, options, context)
@@ -234,10 +233,6 @@ function walkNode(
   switch (node.type) {
     case LEZER_NODE_IDS.Link:
       return walkLink(node, parentMarks, text, marks, out, options, context)
-    case LEZER_NODE_IDS.Wikilink:
-      return walkWikilink(node, parentMarks, text, marks, out)
-    case LEZER_NODE_IDS.WikiEmbed:
-      return walkWikiEmbed(node, parentMarks, text, marks, out, options)
     case LEZER_NODE_IDS.InlineMath:
       return walkMath(node, parentMarks, text, marks, out)
     case LEZER_NODE_IDS.Autolink:
@@ -246,6 +241,42 @@ function walkNode(
       return walkURL(node, parentMarks, text, marks, out)
     default:
       return walkGenericNode(node, parentMarks, text, marks, out, options, context)
+  }
+}
+
+/**
+ * Walk `nodes[index]` when it is a source-backed atom (wikilink, wiki embed,
+ * or image); returns the source position after everything the atom consumed,
+ * or undefined for any other node type. An image also consumes the magic
+ * comments chained behind it, so callers must skip children ending at or
+ * before the returned position. Shared by `walk` and `walkResolvedLink` so an
+ * atom behaves the same at the top level and inside a link label.
+ */
+function walkAtomChild(
+  nodes: readonly InlineElement[],
+  index: number,
+  parentMarks: readonly Mark[],
+  text: string,
+  marks: TypedMarkBuilders,
+  out: MarkChunk[],
+  options: InlineMarkOptions | undefined,
+  context: InlineMarkContext | undefined,
+): number | undefined {
+  const node = nodes[index]
+  switch (node.type) {
+    case LEZER_NODE_IDS.Wikilink:
+      walkWikilink(node, parentMarks, text, marks, out)
+      return node.to
+    case LEZER_NODE_IDS.WikiEmbed:
+      walkWikiEmbed(node, parentMarks, text, marks, out, options)
+      return node.to
+    case LEZER_NODE_IDS.Image: {
+      const trailing = takeMagicComments(nodes, index, text)
+      walkImage(node, parentMarks, text, marks, out, options, context, trailing)
+      return trailing ? trailing.to : node.to
+    }
+    default:
+      return undefined
   }
 }
 
@@ -564,27 +595,28 @@ function walkResolvedLink(
   const base = [...parentMarks, pack]
 
   let pos = node.from
-  for (const child of node.children) {
+  for (let index = 0; index < node.children.length; index++) {
+    const child = node.children[index]
+    // A previous child may have consumed this one (e.g. an image folding its
+    // trailing magic comments), so anything fully behind `pos` is done.
+    if (child.to <= pos) continue
     if (child.from > pos) {
       const childMarks = inLabel(pos) ? [...base, linkTextMark] : base
       emit(out, pos, child.from, childMarks)
     }
     const baseForChild = inLabel(child.from) ? [...base, linkTextMark] : base
-    // A wikilink in the label needs its own source/view walk, not the generic
-    // per-child mark mapping.
-    if (child.type === LEZER_NODE_IDS.Wikilink) {
-      walkWikilink(child, baseForChild, text, marks, out)
-      pos = child.to
-      continue
-    }
-    if (child.type === LEZER_NODE_IDS.WikiEmbed) {
-      walkWikiEmbed(child, baseForChild, text, marks, out, options)
-      pos = child.to
-      continue
-    }
-    if (child.type === LEZER_NODE_IDS.Image) {
-      walkImage(child, baseForChild, text, marks, out, options, context)
-      pos = child.to
+    const atomEnd = walkAtomChild(
+      node.children,
+      index,
+      baseForChild,
+      text,
+      marks,
+      out,
+      options,
+      context,
+    )
+    if (atomEnd != null) {
+      pos = atomEnd
       continue
     }
     if (isReference && child.type === LEZER_NODE_IDS.LinkLabel) {
@@ -617,27 +649,40 @@ function walkResolvedLink(
   }
 }
 
-interface AdjacentMagicComment {
+interface FoldedMagicComments {
   magic: MagicComment
   to: number
 }
 
-// A magic comment sitting immediately after `image`, or undefined.
-function takeMagicComment(
-  image: InlineElement,
-  next: InlineElement | undefined,
+/**
+ * The run of magic comments chained immediately behind `nodes[index]` (an
+ * image), or undefined when no magic comment directly abuts it. The first
+ * comment's data wins: a rewrite of an unfolded image inserted the fresh
+ * comment right at the image's end, so in a stacked run left is newest.
+ */
+function takeMagicComments(
+  nodes: readonly InlineElement[],
+  index: number,
   text: string,
-): AdjacentMagicComment | undefined {
-  if (!next || next.type !== LEZER_NODE_IDS.Comment || next.from !== image.to) return undefined
-  const magic = parseMagicComment(text.slice(next.from, next.to))
+): FoldedMagicComments | undefined {
+  let magic: MagicComment | undefined
+  let to = nodes[index].to
+  for (let i = index + 1; i < nodes.length; i++) {
+    const next = nodes[i]
+    if (next.type !== LEZER_NODE_IDS.Comment || next.from !== to) break
+    const parsed = parseMagicComment(text.slice(next.from, next.to))
+    if (!parsed) break
+    magic ??= parsed
+    to = next.to
+  }
   if (!magic) return undefined
-  return { magic, to: next.to }
+  return { magic, to }
 }
 
 /**
  * Special walker for a direct image `![alt](url)`.
  *
- * A `trailing` magic comment immediately after the image (e.g.
+ * A `trailing` run of magic comments immediately after the image (e.g.
  * `<!-- {"width":320} -->`) is folded into the mark range so it round-trips as
  * source while supplying the image's `width`.
  */
@@ -649,7 +694,7 @@ function walkImage(
   out: MarkChunk[],
   options: InlineMarkOptions | undefined,
   context: InlineMarkContext | undefined,
-  trailing?: AdjacentMagicComment,
+  trailing?: FoldedMagicComments,
 ): void {
   const parts = scanLinkParts(node)
   const resolution = resolveLink(parts, text, context)

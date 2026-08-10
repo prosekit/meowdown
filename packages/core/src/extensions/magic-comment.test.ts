@@ -40,4 +40,10 @@ describe('formatMagicComment / stripMagicComment', () => {
     expect(stripMagicComment('![a](u)<!-- {"width":320} -->')).toBe('![a](u)')
     expect(stripMagicComment('![a](u)')).toBe('![a](u)')
   })
+
+  it('strips a whole stacked run of trailing comments', () => {
+    expect(stripMagicComment('![a](u)<!-- {"width":320} --><!-- {"height":240} -->')).toBe(
+      '![a](u)',
+    )
+  })
 })

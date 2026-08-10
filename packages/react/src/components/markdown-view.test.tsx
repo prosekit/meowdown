@@ -54,6 +54,12 @@ describe('MarkdownView', () => {
     await expect.element(img).toHaveAttribute('alt', 'cat')
   })
 
+  it('applies a size comment to an image inside a link', async () => {
+    await renderView('[![cat](https://example.com/cat.png)<!-- {"width":320} -->](/target)')
+    const img = view.getByTestId('image-preview').locate('img')
+    await expect.element(img).toHaveStyle({ width: '320px' })
+  })
+
   it('renders a resolved wiki image with its alias and width', async () => {
     await renderView('![[assets/cat.png|120]]', {
       resolveWikiEmbed: () => ({ kind: 'image' }),
