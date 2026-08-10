@@ -100,15 +100,17 @@ export function EditorExtensions({
 
   // Set extra editor class name.
   useLayoutEffect(() => {
-    const attrs: { [key: string]: string } = {
-      spellcheck: spellCheck ? 'true' : 'false',
-    }
-    if (editorClassName) {
-      attrs['class'] = editorClassName
-    }
-    const extension = defineViewAttributes(attrs)
+    if (!editorClassName) return
+    const extension = defineViewAttributes({ class: editorClassName })
     return editor.use(extension)
-  }, [editor, editorClassName, spellCheck])
+  }, [editor, editorClassName])
+
+  // Set spellCheck
+  useLayoutEffect(() => {
+    if (spellCheck == null) return
+    const extension = defineViewAttributes({ spellcheck: spellCheck ? 'true' : 'false' })
+    return editor.use(extension)
+  }, [editor, spellCheck])
 
   // Search has no latency requirement, so a slow device may skip the
   // intermediate values of a fast typist entirely. `literal` turns off
