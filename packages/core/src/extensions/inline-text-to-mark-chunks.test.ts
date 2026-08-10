@@ -671,6 +671,18 @@ describe('image', () => {
       "
     `)
   })
+
+  it('folds a trailing width comment on an image inside a link label', () => {
+    expect(parse('[![a](u)<!-- {"width":320} -->](/target)')).toMatchInlineSnapshot(`
+      "
+      [0, 1]   mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdLinkText(href=/target) + mdMark
+      [1, 30]  mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdLinkText(href=/target) + mdPack(key=image) + mdImage(src=u,alt=a,width=320)
+      [30, 32] mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdMark
+      [32, 39] mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdLinkUri
+      [39, 40] mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdMark
+      "
+    `)
+  })
 })
 
 describe('wiki embed', () => {

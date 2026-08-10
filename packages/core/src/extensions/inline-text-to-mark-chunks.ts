@@ -564,57 +564,85 @@ function walkResolvedLink(
   const base = [...parentMarks, pack]
 
   let pos = node.from
-  for (const child of node.children) {
+  for (let index = 0; index < node.children.length; index++) {
+    const child = node.children[index]
+    // A previous child may have consumed this one (e.g. an image folding its
+    // trailing magic comment), so anything fully behind `pos` is done.
+    if (child.to <= pos) continue
     if (child.from > pos) {
       const childMarks = inLabel(pos) ? [...base, linkTextMark] : base
       emit(out, pos, child.from, childMarks)
     }
     const baseForChild = inLabel(child.from) ? [...base, linkTextMark] : base
-    // A wikilink in the label needs its own source/view walk, not the generic
-    // per-child mark mapping.
-    if (child.type === LEZER_NODE_IDS.Wikilink) {
-      walkWikilink(child, baseForChild, text, marks, out)
-      pos = child.to
-      continue
-    }
-    if (child.type === LEZER_NODE_IDS.WikiEmbed) {
-      walkWikiEmbed(child, baseForChild, text, marks, out, options)
-      pos = child.to
-      continue
-    }
-    if (child.type === LEZER_NODE_IDS.Image) {
-      walkImage(child, baseForChild, text, marks, out, options, context)
-      pos = child.to
-      continue
-    }
-    if (isReference && child.type === LEZER_NODE_IDS.LinkLabel) {
-      emit(out, child.from, child.to, [...baseForChild, marks.mdMark.create()])
-      pos = child.to
-      continue
-    }
-    // An autolink inside the label is plain label text: the outer link owns
-    // the href, and the muted `mdLinkUri` styling belongs to the destination.
-    if (child.type === LEZER_NODE_IDS.URL && inLabel(child.from)) {
-      emit(out, child.from, child.to, baseForChild)
-      pos = child.to
-      continue
-    }
-    const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(child.type)
-    const childMarks = maybeMarkName
-      ? [...baseForChild, marks[maybeMarkName].create()]
-      : baseForChild
-    if (child.children.length === 0) {
-      emit(out, child.from, child.to, childMarks)
-    } else {
-      // A link label cannot contain another `[label](url)` link, but custom
-      // atom syntax inside the label still uses the host resolvers.
-      walk(child.children, childMarks, child.from, child.to, text, marks, out, options, context)
-    }
-    pos = child.to
+    pos = walkResolvedLinkChild(
+      child,
+      node.children[index + 1],
+      baseForChild,
+      isReference,
+      inLabel,
+      text,
+      marks,
+      out,
+      options,
+      context,
+    )
   }
   if (pos < node.to) {
     emit(out, pos, node.to, base)
   }
+}
+
+/**
+ * Walk one child of a resolved link's inline content; returns the new source
+ * position.
+ */
+function walkResolvedLinkChild(
+  child: InlineElement,
+  next: InlineElement | undefined,
+  baseForChild: readonly Mark[],
+  isReference: boolean,
+  inLabel: (pos: number) => boolean,
+  text: string,
+  marks: TypedMarkBuilders,
+  out: MarkChunk[],
+  options: InlineMarkOptions | undefined,
+  context: InlineMarkContext | undefined,
+): number {
+  // A wikilink in the label needs its own source/view walk, not the generic
+  // per-child mark mapping.
+  if (child.type === LEZER_NODE_IDS.Wikilink) {
+    walkWikilink(child, baseForChild, text, marks, out)
+    return child.to
+  }
+  if (child.type === LEZER_NODE_IDS.WikiEmbed) {
+    walkWikiEmbed(child, baseForChild, text, marks, out, options)
+    return child.to
+  }
+  if (child.type === LEZER_NODE_IDS.Image) {
+    const trailing = takeMagicComment(child, next, text)
+    walkImage(child, baseForChild, text, marks, out, options, context, trailing)
+    return trailing ? trailing.to : child.to
+  }
+  if (isReference && child.type === LEZER_NODE_IDS.LinkLabel) {
+    emit(out, child.from, child.to, [...baseForChild, marks.mdMark.create()])
+    return child.to
+  }
+  // An autolink inside the label is plain label text: the outer link owns the
+  // href, and the muted `mdLinkUri` styling belongs to the destination.
+  if (child.type === LEZER_NODE_IDS.URL && inLabel(child.from)) {
+    emit(out, child.from, child.to, baseForChild)
+    return child.to
+  }
+  const maybeMarkName = MARK_NAME_BY_TYPE_ID.get(child.type)
+  const childMarks = maybeMarkName ? [...baseForChild, marks[maybeMarkName].create()] : baseForChild
+  if (child.children.length === 0) {
+    emit(out, child.from, child.to, childMarks)
+  } else {
+    // A link label cannot contain another `[label](url)` link, but custom
+    // atom syntax inside the label still uses the host resolvers.
+    walk(child.children, childMarks, child.from, child.to, text, marks, out, options, context)
+  }
+  return child.to
 }
 
 interface AdjacentMagicComment {
