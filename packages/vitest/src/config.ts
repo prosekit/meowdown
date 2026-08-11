@@ -51,6 +51,11 @@ export function defineSharedConfig({
           width: 900,
           height: 600,
         },
+        locators: {
+          // Vitest 5 matches text exactly by default; keep the v4 substring
+          // matching so `getByText` calls keep finding partial text.
+          exact: false,
+        },
         provider: playwright({
           launchOptions: {
             // Opt into the new Chrome headless mode by using "chromium" channel. Along

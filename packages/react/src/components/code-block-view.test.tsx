@@ -14,6 +14,7 @@ import type { EditorHandle } from './types.ts'
 const selector = page.getByTestId('code-block-language')
 const search = page.getByTestId('code-block-language-search')
 const copyButton = page.getByTestId('code-block-copy')
+const codeBlock = page.locate('.ProseMirror pre')
 const tokens = page.locate('.ProseMirror pre code [class*="tok-"]')
 
 const CODE_BLOCK_MD = '```rust\nfn main() {}\n```'
@@ -35,6 +36,7 @@ describe('code block language selector', () => {
     await render(<ProseKitEditor ref={ref} initialMarkdown={CODE_BLOCK_MD} />)
     await expect.element(selector).toHaveTextContent('Rust')
 
+    await codeBlock.hover()
     await selector.click()
     await page.getByRole('option', { name: 'Python', exact: true }).click()
 
@@ -47,6 +49,7 @@ describe('code block language selector', () => {
   it('filters the languages as the user types', async () => {
     await render(<ProseKitEditor initialMarkdown={CODE_BLOCK_MD} />)
 
+    await codeBlock.hover()
     await selector.click()
     await search.fill('python')
 
@@ -62,6 +65,7 @@ describe('code block language selector', () => {
     const ref = createRef<EditorHandle>()
     await render(<ProseKitEditor ref={ref} initialMarkdown={CODE_BLOCK_MD} />)
 
+    await codeBlock.hover()
     await selector.click()
     await search.fill('mylang')
     await page.getByRole('option', { name: 'Use "mylang"', exact: true }).click()
@@ -76,6 +80,7 @@ describe('code block language selector', () => {
     await render(<ProseKitEditor initialMarkdown={CODE_BLOCK_MD} />)
     await expect.element(copyButton).toBeInTheDocument()
 
+    await codeBlock.hover()
     await copyButton.click()
 
     await expect.element(copyButton).toHaveAttribute('data-copied')
@@ -120,7 +125,7 @@ describe('code block math preview', () => {
 
     await userEvent.keyboard('c')
 
-    await expect.element(mathPreview).toHaveTextContent(/cE=m/)
+    await expect.element(mathPreview).toMatchTextContent(/cE=m/)
   })
 
   it('renders a math fence with the same preview', async () => {
@@ -170,7 +175,7 @@ describe('code block Mermaid preview', () => {
     await render(<ProseKitEditor initialMarkdown={MERMAID_BLOCK_MD} />)
 
     await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
-    await expect.element(mermaidPreview).toHaveTextContent('Start')
+    await expect.element(mermaidPreview).toMatchTextContent('Start')
     await expect.element(mermaidSource).not.toBeVisible()
   })
 
@@ -198,7 +203,7 @@ describe('code block Mermaid preview', () => {
     await userEvent.keyboard('{Enter}')
     await userEvent.keyboard('  B --> Done')
 
-    await expect.element(mermaidPreview).toHaveTextContent('Done')
+    await expect.element(mermaidPreview).toMatchTextContent('Done')
   })
 
   it('renders a Sequence diagram', async () => {
@@ -207,8 +212,8 @@ describe('code block Mermaid preview', () => {
     await render(<ProseKitEditor initialMarkdown={markdown} />)
 
     await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
-    await expect.element(mermaidPreview).toHaveTextContent('Hello Bob')
-    await expect.element(mermaidPreview).toHaveTextContent('Hello Alice')
+    await expect.element(mermaidPreview).toMatchTextContent('Hello Bob')
+    await expect.element(mermaidPreview).toMatchTextContent('Hello Alice')
   })
 
   it('keeps the source visible for an empty Mermaid block', async () => {

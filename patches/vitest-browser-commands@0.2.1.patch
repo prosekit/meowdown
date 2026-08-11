@@ -1,0 +1,26 @@
+diff --git a/dist/playwright.js b/dist/playwright.js
+index 461d4f54c60a8ef11894fa94f824f7e1da4789fe..854a84378014c6f20b8f43699336913f6055e32f 100644
+--- a/dist/playwright.js
++++ b/dist/playwright.js
+@@ -1,3 +1,4 @@
++import { getIframeScale } from "@vitest/browser/locators";
+ import { commands } from "vitest/browser";
+ //#region src/playwright/commands/keyboard-down.browser.ts
+ const playwrightKeyboardDown = (key) => {
+@@ -32,15 +33,10 @@ var IframeTransform = class {
+ 	constructor() {
+ 		const iframe = window.parent.document.querySelector(`iframe[data-vitest]`);
+ 		if (!iframe) throw new Error(`Cannot find iframe element. This is a bug in vitest-browser-commands. Please, open a new issue with reproduction.`);
+-		const testerUi = iframe.parentElement;
+-		if (!testerUi) throw new Error(`Cannot find Tester element. This is a bug in vitest-browser-commands. Please, open a new issue with reproduction.`);
+-		const scaleAttribute = testerUi.getAttribute("data-scale");
+-		const scale = Number(scaleAttribute);
+-		if (Number.isNaN(scale)) throw new TypeError(`Cannot parse scale value from Tester element (${scaleAttribute}). This is a bug in vitest-browser-commands. Please, open a new issue with reproduction.`);
+ 		const rect = iframe.getBoundingClientRect();
+ 		this.iframeX = rect.x;
+ 		this.iframeY = rect.y;
+-		this.iframeScale = scale;
++		this.iframeScale = getIframeScale();
+ 	}
+ 	/**
+ 	* Given a position on the page, return the position on the iframe.

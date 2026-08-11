@@ -1,0 +1,21 @@
+diff --git a/dist/index.js b/dist/index.js
+index 0bb4af6a9760d8e4936a2993bb0603f9023bf5cc..d05e2e5be78f4e2c079ec5a470af2eac6cecd907 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -1,6 +1,5 @@
+ import { i as renderHook, r as render, t as cleanup } from "./pure-C_qo4W4L.js";
+ import { page } from "vitest/browser";
+-import { beforeEach } from "vitest";
+ 
+ //#region src/index.ts
+ page.extend({
+@@ -8,9 +7,6 @@ page.extend({
+ 	renderHook,
+ 	[Symbol.for("vitest:component-cleanup")]: cleanup
+ });
+-beforeEach(async () => {
+-	await cleanup();
+-});
+ 
+ //#endregion
+ export { cleanup, render, renderHook };

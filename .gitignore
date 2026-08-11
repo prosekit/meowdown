@@ -10,6 +10,5 @@ logs
 node_modules
 temp
 .eslintcache
-.vitest-attachments
-.vitest-reports
+.vitest
 __screenshots__

@@ -1,5 +1,5 @@
 import { createEditor, type NodeJSON } from '@prosekit/core'
-import { bench, describe } from 'vitest'
+import { test } from 'vitest'
 
 import { defineEditorExtension } from '../extensions/extension.ts'
 
@@ -22,12 +22,12 @@ const largeContent: NodeJSON = {
 const sampleNode = editor.schema.nodeFromJSON(sampleContent)
 const largeNode = editor.schema.nodeFromJSON(largeContent)
 
-describe('docToMarkdown', () => {
-  bench('sampleNode', () => {
+test('docToMarkdown', async ({ bench }) => {
+  await bench('sampleNode', () => {
     docToMarkdown(sampleNode)
-  })
+  }).run()
 
-  bench('largeNode', () => {
+  await bench('largeNode', () => {
     docToMarkdown(largeNode)
-  })
+  }).run()
 })
