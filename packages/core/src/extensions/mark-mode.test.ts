@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
 import { findText } from '../testing/find-text.ts'
-import { setupFixture } from '../testing/index.ts'
+import { setupFixture, traceKeySelection, traceShiftKeySelection } from '../testing/index.ts'
 
 import { defineImage } from './image.ts'
 import type { MarkMode } from './mark-mode.ts'
@@ -1225,6 +1225,59 @@ describe('focus mode', () => {
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold**┃*italic* text"`)
     await userEvent.keyboard('{Backspace}')
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"text **bold*┃*italic* text"`)
+  })
+
+  // Entering a paragraph from the block after it must land at the paragraph
+  // end, then walk the revealed source one position per press. WebKit's native
+  // block-entry motion skips a trailing `display: contents` subtree (the
+  // mdPack wrapper), jumping straight to `foo ┃**bar**` and passing the
+  // visible "bar" without a single caret stop.
+  it('ArrowLeft from an empty paragraph lands at the end of a trailing bold unit', async () => {
+    using fixture = setupFixture({ extensionOptions: { markMode: 'focus' } })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('foo **bar**'), n.paragraph(), n.paragraph('<a>')))
+    fixture.view.focus()
+
+    expect(await traceKeySelection(fixture, 'ArrowLeft', 4)).toMatchInlineSnapshot(`
+      [
+        "foo **bar**\\n\\n┃",
+        "foo **bar**\\n┃\\n",
+        "foo **bar**┃\\n\\n",
+        "foo **bar*┃*\\n\\n",
+        "foo **bar┃**\\n\\n",
+      ]
+    `)
+  })
+
+  it('ArrowRight from an empty paragraph lands at the start of a leading bold unit', async () => {
+    using fixture = setupFixture({ extensionOptions: { markMode: 'focus' } })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>'), n.paragraph('**bar** foo')))
+    fixture.view.focus()
+
+    expect(await traceKeySelection(fixture, 'ArrowRight', 3)).toMatchInlineSnapshot(`
+      [
+        "┃\\n**bar** foo",
+        "\\n┃**bar** foo",
+        "\\n*┃*bar** foo",
+        "\\n**┃bar** foo",
+      ]
+    `)
+  })
+
+  it('Shift-ArrowLeft from an empty paragraph extends to the end of a trailing bold unit', async () => {
+    using fixture = setupFixture({ extensionOptions: { markMode: 'focus' } })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('foo **bar**'), n.paragraph('<a>')))
+    fixture.view.focus()
+
+    expect(await traceShiftKeySelection(fixture, 'ArrowLeft', 2)).toMatchInlineSnapshot(`
+      [
+        "foo **bar**\\n┃",
+        "foo **bar**❰\\n❱",
+        "foo **bar*❰*\\n❱",
+      ]
+    `)
   })
 })
 
