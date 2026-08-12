@@ -66,23 +66,30 @@ export function getSelectedAtomRange(state: EditorState): MarkRange | undefined 
 // the step is not this keymap's to take. Chromium and WebKit cannot move the
 // native caret across the contenteditable=false preview at a textblock edge,
 // and prosemirror-view's own blockwise handling only covers vertical arrows.
+// The probes look past the atom marks to every inline unit: WebKit's native
+// entry into a block skips all caret stops inside a `display: contents`
+// subtree (the mdPack wrapper), so a unit touching the boundary from either
+// side takes the owned step.
 function findSelectionAcrossBlockBoundary(
   state: EditorState,
   pos: number,
   markNames: readonly MarkName[],
   direction: -1 | 1,
 ): Selection | undefined {
+  const unitMarkNames: readonly MarkName[] = [...markNames, 'mdPack']
   const $pos = state.doc.resolve(pos)
   // Only a caret sitting exactly on the textblock edge can leave the block.
   const atEdge =
     direction === -1 ? $pos.parentOffset === 0 : $pos.parentOffset === $pos.parent.content.size
   if (!atEdge || $pos.depth === 0) return
   // The unit being left behind: one starting (going left) or ending (going
-  // right) exactly at the caret. Chromium/WebKit cannot walk out past it.
+  // right) exactly at the caret. Chromium/WebKit cannot walk out past an
+  // atom's preview; a plain unit exits natively, but owning its step too
+  // keeps the walk deterministic.
   const nearUnit =
     direction === -1
-      ? getMarkRangeAfter(state, pos, markNames)
-      : getMarkRangeBefore(state, pos, markNames)
+      ? getMarkRangeAfter(state, pos, unitMarkNames)
+      : getMarkRangeBefore(state, pos, unitMarkNames)
   // The nearest selection past the boundary: the adjacent textblock's near
   // edge, or a NodeSelection for a selectable block such as a horizontal rule
   // (the same landing prosemirror-view's moveSelectionBlock would pick).
@@ -93,8 +100,8 @@ function findSelectionAcrossBlockBoundary(
   // side. WebKit skips caret stops when walking into such a block.
   const farUnit = isTextSelection(target)
     ? direction === -1
-      ? getMarkRangeBefore(state, target.head, markNames)
-      : getMarkRangeAfter(state, target.head, markNames)
+      ? getMarkRangeBefore(state, target.head, unitMarkNames)
+      : getMarkRangeAfter(state, target.head, unitMarkNames)
     : undefined
   // No unit on either side of the boundary: stay out of the browser's way
   // (native handles bidi/RTL horizontal motion better than we can).
