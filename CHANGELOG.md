@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.65.2](https://github.com/prosekit/meowdown/compare/v0.65.1...v0.65.2) (2026-08-12)
+
+
+### Bug Fixes
+
+* stop Safari skipping a boundary unit on block entry ([#459](https://github.com/prosekit/meowdown/issues/459)) ([5a0cf30](https://github.com/prosekit/meowdown/commit/5a0cf304bce0ee1b789f59d48c5bf52a71a0ed5d))
+
 ## [0.65.1](https://github.com/prosekit/meowdown/compare/v0.65.0...v0.65.1) (2026-08-10)
 
 
