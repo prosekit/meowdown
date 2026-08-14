@@ -8,6 +8,7 @@ interface ViteTypeOptions {
 
 interface ImportMetaEnv {
   readonly VITE_FUZZ_SEED: string
+  readonly CI: string
 }
 
 interface ImportMeta {
