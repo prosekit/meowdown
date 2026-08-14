@@ -39,7 +39,7 @@ const TOKENS: string[] = [
   'b',
 ]
 
-const CONFIG = { seed: 1, numRuns: 100_000, verbose: true } satisfies fc.Parameters
+const CONFIG = { seed: 100, numRuns: 100_000, verbose: true } satisfies fc.Parameters
 
 it('finds no lossy input among ascii characters', { timeout: 60_000 }, () => {
   fc.assert(
