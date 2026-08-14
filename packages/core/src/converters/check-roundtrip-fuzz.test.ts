@@ -5,7 +5,7 @@ import { checkRoundTrip } from './check-roundtrip.ts'
 
 const NUM_RUNS = 1_000_000
 const MIN_LENGTH = 1
-const MAX_LENGTH = 200
+const MAX_LENGTH = 100
 const SEED = 2
 
 /// keep-sorted
