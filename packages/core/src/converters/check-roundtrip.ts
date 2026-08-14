@@ -32,7 +32,7 @@ function collapseWhitespace(line: string): string {
 // backslash; the parser keeps the backslash verbatim, so both spellings are the
 // same text here.
 function unescapeBlockGuard(line: string): string {
-  return line.replaceAll(/\\([#>+*`~=$_0-9-])/gu, (match, char) => char)
+  return line.replaceAll(/\\([#>+*`~=$_0-9-])/gu, (_match, char: string) => char)
 }
 
 // A line that starts with a fence marker (`$$`, ```` ``` ````, `~~~`, with or

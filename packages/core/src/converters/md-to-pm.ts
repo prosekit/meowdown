@@ -256,8 +256,10 @@ function convertHeading(
   if (isSetext) {
     // A setext heading's span swallows the underline line's blockquote marker
     // (`> =\n> -` reads as content `=\n>`); the marker is structural, not
-    // content, so drop the trailing marker line.
-    content = content.replace(/(?:\n[>\s]*)+$/u, '')
+    // content, so drop the trailing marker lines.
+    const lines = content.split('\n')
+    while (lines.length > 1 && /^[>\s]*$/u.test(lines[lines.length - 1])) lines.pop()
+    content = lines.join('\n')
   }
   // A trailing HeaderMark is the setext underline of a setext heading, or the
   // closing `#` run of an ATX heading (`# foo #`). CommonMark allows either run
@@ -505,6 +507,39 @@ function convertTaskItem(
   return { checked, taskMarker, paragraph }
 }
 
+function matchBareTask(
+  text: string,
+  from: number,
+  to: number,
+): { checked: boolean; taskMarker: TaskMarker | undefined } | undefined {
+  if (text[from] !== '[') return undefined
+  const match = /^\[([ x])\]$/iu.exec(text.slice(from, to).trimEnd())
+  if (match == null) return undefined
+  const char = match[1]
+  return { checked: char !== ' ', taskMarker: char === 'X' ? 'X' : char === 'x' ? 'x' : undefined }
+}
+
+// Convert a bullet item's task-shaped child: either lezer's `Task` leaf or a
+// `Paragraph` holding just `[ ]` / `[x]` (lezer only emits a `Task` when a
+// space follows the marker). Both are the same empty-or-text task, or the
+// round trip is unstable (an empty task item serializes to a bare `- [ ]`
+// that re-parses as plain text).
+function convertTaskChild(
+  nodes: TypedNodeBuilders,
+  cursor: TreeCursor,
+  text: string,
+): { checked: boolean; taskMarker: TaskMarker | undefined; content: ProseMirrorNode[] } | undefined {
+  if (cursor.type.id === LEZER_NODE_IDS.Task) {
+    const task = convertTaskItem(nodes, cursor, text)
+    return { checked: task.checked, taskMarker: task.taskMarker, content: [task.paragraph] }
+  }
+  const bareTask = matchBareTask(text, cursor.from, cursor.to)
+  if (bareTask != null) {
+    return { checked: bareTask.checked, taskMarker: bareTask.taskMarker, content: [nodes.paragraph()] }
+  }
+  return undefined
+}
+
 function convertListItem(
   nodes: TypedNodeBuilders,
   cursor: TreeCursor,
@@ -533,23 +568,11 @@ function convertListItem(
         markEndColumn = measureContentColumn(text, cursor.to)
         continue
       }
-      if (kind === 'bullet' && cursor.type.id === LEZER_NODE_IDS.Task) {
-        const task = convertTaskItem(nodes, cursor, text)
+      const task = kind === 'bullet' ? convertTaskChild(nodes, cursor, text) : undefined
+      if (task != null) {
         taskChecked = task.checked
         taskMarker = task.taskMarker
-        content.push(task.paragraph)
-        continue
-      }
-      // Lezer only emits a `Task` leaf when the marker is followed by a space
-      // or content; a marker at the end of the line is a `Paragraph` holding
-      // just `[ ]` / `[x]`. That is the same empty task and must parse the
-      // same way, or the round trip is unstable (an empty task item
-      // serializes to a bare `- [ ]` that re-parses as plain text).
-      const bareTaskMatch = kind === 'bullet' ? /^\[([ xX])\]$/u.exec(text.slice(cursor.from, cursor.to).trimEnd()) : null
-      if (bareTaskMatch != null) {
-        taskChecked = bareTaskMatch[1] !== ' '
-        taskMarker = bareTaskMatch[1] === 'X' ? 'X' : bareTaskMatch[1] === 'x' ? 'x' : undefined
-        content.push(nodes.paragraph())
+        content.push(...task.content)
         continue
       }
       content.push(...convertBlock(nodes, cursor, text))
