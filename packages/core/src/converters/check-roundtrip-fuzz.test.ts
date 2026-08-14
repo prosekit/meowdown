@@ -52,6 +52,7 @@ const TOKENS_BASE: string[] = [
   'a',
   'A',
   'b',
+  "'",
 ]
 
 /// keep-sorted
@@ -68,7 +69,6 @@ const TOKENS_EXTENDED: string[] = [
   '\v',
   '🍄',
   '永',
-  "'",
 ]
 
 const UNITS = [
