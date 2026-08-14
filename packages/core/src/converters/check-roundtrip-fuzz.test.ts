@@ -60,6 +60,7 @@ const TOKENS_EXTENDED: string[] = [
   '’',
   '«',
   '\f',
+  '\r\n',
   '\u{200D}',
   '\u{300}',
   '\u{3000}',
@@ -68,6 +69,7 @@ const TOKENS_EXTENDED: string[] = [
   '\u{FFFD}',
   '\v',
   '🍄',
+  '€',
   '永',
 ]
 
