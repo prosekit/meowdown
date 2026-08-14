@@ -239,6 +239,35 @@ describe('checkRoundTrip', () => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })
 
+  // A closing fence may be longer than the one it closes, and the serializer
+  // writes it back at the opening fence's length - the spelling `roundtrip.test.ts`
+  // asserts in `normalizes a longer closing fence to the opening length`. The
+  // document is unchanged, so the trip is normalizing; `contentLines` reads the
+  // closing fence as content and reports loss instead.
+  it.fails('reports normalizing for a longer closing backtick fence', () => {
+    expect(checkRoundTrip('```\ncode\n````')).toBe('normalizing')
+  })
+
+  it.fails('reports normalizing for a longer closing tilde fence', () => {
+    expect(checkRoundTrip('~~~\ncode\n~~~~~')).toBe('normalizing')
+  })
+
+  it.fails('reports normalizing for a longer closing fence under an info string', () => {
+    expect(checkRoundTrip('```js\ncode\n````')).toBe('normalizing')
+  })
+
+  it.fails('reports normalizing for a longer closing fence around an empty block', () => {
+    expect(checkRoundTrip('```\n````')).toBe('normalizing')
+  })
+
+  it.fails('reports normalizing for a longer closing fence inside a blockquote', () => {
+    expect(checkRoundTrip('> ```\n> ````')).toBe('normalizing')
+  })
+
+  it.fails('reports normalizing for a longer closing fence inside a list item', () => {
+    expect(checkRoundTrip('- ```\n  ````')).toBe('normalizing')
+  })
+
   it.each([])('reports lossy for %j', (markdown: string) => {
     expect(checkRoundTrip(markdown)).toBe('lossy')
   })
