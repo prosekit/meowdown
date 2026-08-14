@@ -75,7 +75,11 @@ const TOKENS_EXTENDED: string[] = [
   "'",
 ]
 
-const TOKENS: string[] = [...TOKENS_BASE, ...TOKENS_EXTENDED]
+const UNITS = [
+  { name: 'grapheme-ascii', unit: 'grapheme-ascii' },
+  { name: 'base', unit: fc.constantFrom(...TOKENS_BASE) },
+  { name: 'extended', unit: fc.constantFrom(...TOKENS_BASE, ...TOKENS_EXTENDED) },
+]
 
 const RANGES = [
   [1, 50],
