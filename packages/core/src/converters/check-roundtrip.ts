@@ -20,20 +20,22 @@ function trimTrailingNewlines(text: string): string {
   return text.slice(0, end)
 }
 
-// A line's leading whitespace and blockquote markers say which block the line
-// belongs to, not what it says. Which line carries them is the serializer's
-// choice: a marker swallows one optional space (`>x` and `> x` are the same
-// quote), and a lazy continuation is written back under its container's marker
-// (`>a\nb` serializes as `> a\n> b`). Block structure is compared as a document
-// instead, so strip the prefix here and compare the content behind it.
-const CONTAINER_PREFIX_RE = /^[\s>]+/u
+// A line's opening markers - indentation, blockquote `>`, list bullets and
+// numbers - say which block the line belongs to, not what it says. Which line
+// carries them is the serializer's choice: a `>` swallows one optional space, a
+// lazy continuation is written back under its container's marker, and an item
+// whose marker and content start on separate source lines is joined onto one.
+// Every detail that distinguishes one marker from another (bullet character,
+// start number, gap width) is a node attribute, so the document comparison
+// covers them; here the markers only get in the way of comparing content.
+const CONTAINER_PREFIX_RE = /^(?:[\s>]|[-+*](?=\s|$)|\d{1,9}[.)](?=\s|$))+/u
 
-// Collapse internal whitespace runs to a single space and trim the end. The
-// serializer normalizes insignificant spacing without changing content (a double
-// space after a heading marker, `#  x` becomes `# x`), so two lines that differ
-// only in their whitespace runs carry the same content: that is layout, not loss.
-function collapseWhitespace(line: string): string {
-  return line.trim().replaceAll(/\s+/gu, ' ')
+// Whitespace inside a line is layout as well: markdown ignores the spacing
+// around a heading marker (`#  x`), a fence's info string (``` ``` js ```), a
+// table's pipes, and a line's own ends. What the line says is its non-blank
+// characters, so drop the whitespace rather than trying to place it.
+function stripWhitespace(line: string): string {
+  return line.replaceAll(/\s/gu, '')
 }
 
 // A GFM delimiter cell is optional colons around a run of dashes. The dash
@@ -49,34 +51,30 @@ function canonicalizeDelimiterCell(cell: string): string {
   return '---'
 }
 
-// Rebuild a pipe-bearing line into the serializer's `| a | b |` form. Outer
-// pipes, spacing around pipes, and delimiter dash counts are table layout the
-// parser reads through, so two rows that differ only there carry the same
-// content. Lines the serializer never restructures (a paragraph or code line
-// holding pipes) canonicalize the same way on both sides, so equal lines stay
-// equal.
+// Rebuild a pipe-bearing line into one canonical row. Outer pipes and delimiter
+// dash counts are table layout the parser reads through, so two rows that differ
+// only there carry the same content. Lines the serializer never restructures (a
+// paragraph or code line holding pipes) canonicalize the same way on both sides,
+// so equal lines stay equal.
 function canonicalizeTableRow(line: string): string | undefined {
   if (!line.includes('|')) return undefined
-  const inner = line.trim().replace(/^\|/u, '').replace(/\|$/u, '')
-  const cells = inner.split('|').map((cell) => collapseWhitespace(cell))
+  const cells = line.replace(/^\|/u, '').replace(/\|$/u, '').split('|')
   const rendered = cells.every((cell) => DELIMITER_CELL_RE.test(cell))
     ? cells.map(canonicalizeDelimiterCell)
     : cells
-  return `| ${rendered.join(' | ')} |`
+  return `|${rendered.join('|')}|`
 }
 
 /**
  * The lines of `text` that carry content, each reduced to that content. A line
- * left empty by dropping its container prefix (a blank line, a bare `>`, a list
- * marker with nothing after it) carries none and is skipped.
+ * left empty by dropping its markers and whitespace (a blank line, a bare `>`,
+ * a list marker whose content is on the next line) carries none and is skipped.
  */
 function contentLines(text: string): string[] {
   const lines: string[] = []
   for (const line of text.split('\n')) {
-    const bare = line.replace(CONTAINER_PREFIX_RE, '')
-    if (bare === '') continue
-    const content = canonicalizeTableRow(bare) ?? collapseWhitespace(bare)
-    if (content !== '') lines.push(content)
+    const content = stripWhitespace(line.replace(CONTAINER_PREFIX_RE, ''))
+    if (content !== '') lines.push(canonicalizeTableRow(content) ?? content)
   }
   return lines
 }
