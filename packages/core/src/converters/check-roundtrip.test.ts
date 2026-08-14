@@ -240,9 +240,42 @@ const NORMALIZING_CASES: string[] = [
   // a git conflict marker run is a blockquote nest, so `>>>>>>> b` is
   // rewritten as `> > > > > > > b`: same document, different bytes
   '<<<<<<< a\nx\n=======\ny\n>>>>>>> b',
+
+  // a lone dash cell reads as a delimiter row until the pretty-printer pads it
+  '-|\n-|\n`|-',
+
+  // a pipe-less row's text keeps markers the piped spelling shows as cell text
+  '-|\n-|\n\t>#',
+  '#|\n-|\n\t1.\t!',
+
+  // a lone `:-` data cell is a delimiter lookalike only when piped
+  '|#\n-|\n:-',
+
+  // a cell keeps a fence run whose width the bare line would shorten
+  '~|\n-|\n\t````',
 ]
 
-const LOSSY_CASES: string[] = []
+const LOSSY_CASES: string[] = [
+  // an empty task's trailing space plus a lazy line: the rewritten `>   b`
+  // re-parses as literal text, marker included
+  '> - [ ] \nb',
+
+  // a lazy line beside a fence or table lookalike is re-quoted into the quote
+  '>2\n```|`\n|-|',
+  '>~\n>*|\n-|',
+  '>$\n~|\n>|-|',
+  '>\\\n|-\n>|-|',
+
+  // a conflict marker run respaces into a blockquote nest that swallows the
+  // second marker line
+  '>>>>>>>,\n>>>>>>> \t>',
+
+  // an empty ordered item keeps blank lines; the re-indented `~` changes blocks
+  '  1.\n\n\n\t~',
+
+  // CommonMark spec example 312: escalating one-space indents flatten
+  '- a\n - b\n  - c\n   - d\n    - e',
+]
 
 describe('checkRoundTrip', () => {
   it.each(EXACT_CASES)('reports exact for %j', (markdown) => {

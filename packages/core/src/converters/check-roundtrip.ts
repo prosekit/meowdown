@@ -55,29 +55,42 @@ function shortenFenceRun(line: string): string {
 // A GFM delimiter cell is optional colons around a run of dashes.
 const DELIMITER_CELL_RE = /^:?-+:?$/u
 
+// Reduce one cell the way a bare line is reduced: the serializer moves a
+// pipe-less row's text into a piped cell, and only an identical reduction on
+// both spellings keeps them equal.
+function reduceCell(cell: string): string {
+  return stripWhitespace(shortenFenceRun(cell.replace(CONTAINER_PREFIX_RE, '')))
+}
+
 // Reduce a pipe-bearing line to the cell text it carries. Outer pipes are table
-// layout, an empty cell says nothing, and a delimiter row is pure structure: it
-// encodes the column count and the alignment, both of which are node attributes
-// the document comparison covers. A line the serializer never restructures (a
-// paragraph or code line holding pipes) reduces the same way on both sides, so
-// equal lines stay equal.
+// layout, an empty cell says nothing, and a cell of pure delimiter dashes is
+// structure: it encodes the column count and the alignment, both of which are
+// node attributes the document comparison covers. A line the serializer never
+// restructures (a paragraph or code line holding pipes) reduces the same way on
+// both sides, so equal lines stay equal.
 function canonicalizeTableRow(line: string): string | undefined {
   if (!line.includes('|')) return undefined
-  const cells = line.replace(/^\|/u, '').replace(/\|$/u, '').split('|')
-  if (cells.every((cell) => DELIMITER_CELL_RE.test(cell))) return ''
+  const cells = line
+    .replace(/^\s*\|/u, '')
+    .replace(/\|\s*$/u, '')
+    .split('|')
+    .map(reduceCell)
+  if (cells.every((cell) => cell === '' || DELIMITER_CELL_RE.test(cell))) return ''
   return cells.filter((cell) => cell !== '').join('|')
 }
 
 /**
  * The lines of `text` that carry content, each reduced to that content. A line
- * left empty by dropping its markers and whitespace (a blank line, a bare `>`,
- * a list marker whose content is on the next line) carries none and is skipped.
+ * left empty by dropping its markers, whitespace, and table structure (a blank
+ * line, a bare `>`, a list marker whose content is on the next line, a
+ * delimiter row or a lone delimiter cell) carries none and is skipped.
  */
 function contentLines(text: string): string[] {
   const lines: string[] = []
   for (const line of text.split('\n')) {
-    const content = stripWhitespace(shortenFenceRun(line.replace(CONTAINER_PREFIX_RE, '')))
-    if (content !== '') lines.push(canonicalizeTableRow(content) ?? content)
+    const bare = line.replace(CONTAINER_PREFIX_RE, '')
+    const content = canonicalizeTableRow(bare) ?? stripWhitespace(shortenFenceRun(bare))
+    if (content !== '' && !DELIMITER_CELL_RE.test(content)) lines.push(content)
   }
   return lines
 }
