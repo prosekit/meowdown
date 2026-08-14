@@ -1,4 +1,4 @@
-import { CHAR_LINE_FEED } from '../unicode.ts'
+import { CHAR_BACKTICK, CHAR_LINE_FEED, CHAR_TILDE } from '../unicode.ts'
 
 import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
@@ -39,6 +39,19 @@ function stripWhitespace(line: string): string {
   return line.replaceAll(/\s/gu, '')
 }
 
+// Shorten a fence's opening run to the three characters it takes to open one: a
+// closing fence may be written longer than the fence it closes, and the
+// serializer writes it back at the opening fence's length, so the width is
+// layout. This runs before the whitespace goes, so `~~~ ~` keeps its `~` info
+// string instead of reading as a four-tilde run.
+function shortenFenceRun(line: string): string {
+  const fence = line.charCodeAt(0)
+  if (fence !== CHAR_BACKTICK && fence !== CHAR_TILDE) return line
+  let width = 1
+  while (line.charCodeAt(width) === fence) width++
+  return width > 3 ? line.slice(0, 3) + line.slice(width) : line
+}
+
 // A GFM delimiter cell is optional colons around a run of dashes.
 const DELIMITER_CELL_RE = /^:?-+:?$/u
 
@@ -63,7 +76,7 @@ function canonicalizeTableRow(line: string): string | undefined {
 function contentLines(text: string): string[] {
   const lines: string[] = []
   for (const line of text.split('\n')) {
-    const content = stripWhitespace(line.replace(CONTAINER_PREFIX_RE, ''))
+    const content = stripWhitespace(shortenFenceRun(line.replace(CONTAINER_PREFIX_RE, '')))
     if (content !== '') lines.push(canonicalizeTableRow(content) ?? content)
   }
   return lines
