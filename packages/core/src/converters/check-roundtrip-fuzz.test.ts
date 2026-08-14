@@ -73,10 +73,56 @@ const TOKENS_EXTENDED: string[] = [
   '永',
 ]
 
+// Markdown block structure is spelled with character runs and line prefixes;
+// uniform single characters almost never line up into one, so the shapes join
+// the alphabet as whole tokens.
+/// keep-sorted
+const TOKENS_RUNS: string[] = [
+  '---',
+  '-->',
+  '```',
+  '````',
+  '<!--',
+  '<?',
+  '<<<<<<< ',
+  '===',
+  '> ',
+  '>>>>>>> ',
+  '| --- |',
+  '~~~',
+  '~~~~',
+  '$$',
+  '1. ',
+]
+
+// The characters that spell block syntax, over-weighted below so marker-dense
+// multi-line documents dominate the weighted unit.
+/// keep-sorted
+const TOKENS_STRUCTURAL: string[] = [' ', '-', '*', '\t', '#', '`', '+', '=', '>', '|', '~', '$']
+
+const asciiGrapheme = fc.string({ unit: 'grapheme-ascii', minLength: 1, maxLength: 1 })
+const baseUnit = fc.constantFrom(...TOKENS_BASE, ...TOKENS_RUNS)
+
 const UNITS = [
-  { name: 'ascii', unit: 'grapheme-ascii' },
-  { name: 'base', unit: fc.constantFrom(...TOKENS_BASE) },
-  { name: 'extended', unit: fc.constantFrom(...TOKENS_BASE, ...TOKENS_EXTENDED) },
+  // printable ASCII plus the line structure `grapheme-ascii` lacks
+  {
+    name: 'ascii',
+    unit: fc.oneof(
+      { arbitrary: asciiGrapheme, weight: 9 },
+      { arbitrary: fc.constantFrom('\n', '\t'), weight: 1 },
+    ),
+  },
+  { name: 'base', unit: baseUnit },
+  { name: 'extended', unit: fc.constantFrom(...TOKENS_BASE, ...TOKENS_RUNS, ...TOKENS_EXTENDED) },
+  // the base alphabet re-weighted toward newlines and block markers
+  {
+    name: 'weighted',
+    unit: fc.oneof(
+      { arbitrary: fc.constant('\n'), weight: 20 },
+      { arbitrary: fc.constantFrom(...TOKENS_STRUCTURAL), weight: 40 },
+      { arbitrary: baseUnit, weight: 40 },
+    ),
+  },
 ] as const
 
 const RANGES = [
@@ -89,14 +135,13 @@ const RANGES = [
 for (const [minLength, maxLength] of RANGES) {
   for (const unit of UNITS) {
     it(
-      `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, unit=${unit.name}`,
+      `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, unit=${unit.name})`,
       { timeout: 60_000 },
       () => {
-        fc.assert(fc.property(fc.string({ unit: unit.unit, minLength, maxLength }), check), {
-          seed: SEED,
-          numRuns: NUM_RUNS,
-          verbose: true,
-        })
+        fc.assert(
+          fc.property(fc.string({ unit: unit.unit, minLength, maxLength, size: 'max' }), check),
+          { seed: SEED, numRuns: NUM_RUNS, verbose: true },
+        )
       },
     )
   }
