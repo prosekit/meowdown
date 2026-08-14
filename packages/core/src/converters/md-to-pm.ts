@@ -6,8 +6,9 @@ import {
 } from '@meowdown/markdown'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
-import type { CodeBlockFenceStyle } from '../extensions/code-block.ts'
+import type { CodeBlockFenceStyle, MeowdownCodeBlockAttrs } from '../extensions/code-block.ts'
 import type { ListMarker, MeowdownListAttrs, TaskMarker } from '../extensions/list.ts'
+import { isNodeOfType } from '../extensions/node-names.ts'
 import { getNodeBuilders, type TypedNodeBuilders } from '../extensions/schema.ts'
 import type { TableColumnAlign } from '../extensions/table-column-align.ts'
 import {
@@ -25,6 +26,8 @@ import {
   CHAR_TILDE,
   CHAR_UPPERCASE_X,
 } from '../unicode.ts'
+
+import { canIndentCode, minFenceLength } from './pm-to-md.ts'
 
 /**
  * Options for {@link markdownToDoc}.
@@ -113,10 +116,40 @@ function collectBlocks(
   do {
     if (previousTo != null) appendGapParagraphs(out, nodes, text, previousTo, cursor.from)
     previousTo = cursor.to
-    out.push(...convertBlock(nodes, cursor, text, column))
+    appendBlocks(out, nodes, convertBlock(nodes, cursor, text, column))
   } while (cursor.nextSibling())
   cursor.parent()
   return out
+}
+
+/**
+ * Append `blocks`, dropping the indented spelling from a code block that lands
+ * right after a list: four columns of indentation would put it inside the item
+ * above instead of after it, so it can only be written as a fence.
+ */
+function appendBlocks(
+  out: ProseMirrorNode[],
+  nodes: TypedNodeBuilders,
+  blocks: ProseMirrorNode[],
+): void {
+  for (const block of blocks) {
+    const attrs = block.attrs as MeowdownCodeBlockAttrs
+    if (
+      attrs.fenceStyle === 'indented' &&
+      isNodeOfType(block, 'codeBlock') &&
+      out.length > 0 &&
+      isNodeOfType(out[out.length - 1], 'list')
+    ) {
+      out.push(
+        nodes.codeBlock(
+          { language: attrs.language, fenceStyle: null, fenceLength: attrs.fenceLength },
+          block.textContent,
+        ),
+      )
+      continue
+    }
+    out.push(block)
+  }
 }
 
 /**
@@ -179,7 +212,7 @@ function convertBlock(
       // text; it survives verbatim through a round-trip.
       return [convertParagraph(nodes, cursor, text, column)]
     case LEZER_NODE_IDS.Blockquote:
-      return [convertBlockquote(nodes, cursor, text, column)]
+      return [convertBlockquote(nodes, cursor, text)]
     case LEZER_NODE_IDS.BulletList:
       return convertList(nodes, cursor, text, column, 'bullet')
     case LEZER_NODE_IDS.OrderedList:
@@ -262,7 +295,7 @@ function convertHeading(
   // whole lines and keeps its own spacing - `#\t` is a paragraph line where a
   // bare `#` would be a heading.
   const raw = dedentContinuation(readLeafText(cursor, text, contentStart, contentEnd), column)
-  const content = isSetext ? raw : raw.trim()
+  const content = isSetext ? raw : trimGap(raw)
   // A trailing HeaderMark is the setext underline of a setext heading, or the
   // closing `#` run of an ATX heading (`# foo #`). CommonMark allows either run
   // any length, so keep the source count to make the round-trip lossless.
@@ -274,6 +307,21 @@ function convertHeading(
       ? countHashChars(text, trailingMarkFrom, trailingMarkTo) || null
       : null
   return nodes.heading({ level, setextUnderline, closingHashes }, content)
+}
+
+/**
+ * Trim the whitespace lezer's marker gap can contain: space, tab and the line
+ * ends (`space` in `@lezer/markdown`, matching `isSpaceChar`). A plain
+ * `String.prototype.trim` would also take a no-break or an ideographic space,
+ * which lezer reads as heading text - and a `#` left standing next to one flips
+ * into a closing run on the way back (`# #\u{A0}`).
+ */
+function trimGap(text: string): string {
+  let start = 0
+  let end = text.length
+  while (start < end && isSpaceChar(text.charCodeAt(start))) start++
+  while (end > start && isSpaceChar(text.charCodeAt(end - 1))) end--
+  return text.slice(start, end)
 }
 
 /**
@@ -317,13 +365,15 @@ export function measureContentColumn(text: string, from: number): number {
 
 /**
  * Drop a line's leading whitespace up to `column`, counting a tab as `4 - col % 4`
- * columns. A tab that would reach past `column` is left alone: it stands for more
- * columns than the container takes, and the rest of them are the line's own.
+ * columns. Whitespace the container never wrote is left alone: a tab that would
+ * reach past `column` stands for more columns than the container takes, and a
+ * line whose indentation stops short of `column` was written lazily, without any
+ * prefix at all.
  */
 export function sliceColumn(line: string, column: number): string {
   let col = 0
   let index = 0
-  while (index < line.length && col < column) {
+  while (col < column) {
     const code = line.charCodeAt(index)
     if (code === CHAR_SPACE) {
       col += 1
@@ -332,7 +382,9 @@ export function sliceColumn(line: string, column: number): string {
       if (col + width > column) break
       col += width
     } else {
-      break
+      // The line stops short of `column`, so it never carried the container's
+      // prefix: it is a lazy continuation, and every column it has is its own.
+      return line
     }
     index++
   }
@@ -359,32 +411,76 @@ export function dedentContinuation(content: string, column: number): string {
 }
 
 /**
+ * The blockquote markers inside `from`..`to`, as a flat run of `from, to` pairs
+ * in document order. A marker can sit at any depth: a paragraph carries its own,
+ * while a link reference's lands inside the `LinkLabel` that spans the break.
+ * The cursor ends where it started.
+ */
+function collectQuoteMarks(cursor: TreeCursor, marks: number[], from: number, to: number): void {
+  if (!cursor.firstChild()) return
+  do {
+    if (cursor.from >= to) break
+    if (cursor.to <= from) continue
+    if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) {
+      marks.push(cursor.from, cursor.to)
+      continue
+    }
+    collectQuoteMarks(cursor, marks, from, to)
+  } while (cursor.nextSibling())
+  cursor.parent()
+}
+
+/**
  * The source between `from` and `to`, minus the blockquote markers inside it.
  *
  * In block-only parsing a leaf block has no inline children, with one
  * exception: lezer leaves the `QuoteMark` of every continuation line of a
- * multi-line block (`> l1\n> l2`) inside the block's own span. Each marker
- * swallows the single space after it, exactly as the serializer's `> ` prefix
- * puts it back. Markers outside `from`..`to` (an ATX heading's own marks, a
- * setext underline's line) are left alone. The cursor ends where it started.
+ * multi-line block (`> l1\n> l2`) inside the block's own span. A marker takes
+ * the whole line prefix with it, the single space after it included, exactly as
+ * the serializer's own prefix puts it back. Only a space: a tab after the marker
+ * stands for the columns up to the next tab stop, more than the prefix writes
+ * back, so it stays in the text as the indentation it is. A line with no marker
+ * carried no prefix at all - it is a lazy continuation, and every column on it
+ * is its own. Markers outside `from`..`to` (an ATX heading's own marks, a setext
+ * underline's line) are left alone. The cursor ends where it started.
  */
 function readLeafText(cursor: TreeCursor, text: string, from: number, to: number): string {
-  // A raw HTML or processing-instruction block runs its span past its last
-  // character to the line break that ends it. No leaf block's text holds that
-  // break: the serializer writes one of its own.
-  if (text.charCodeAt(to - 1) === CHAR_LINE_FEED) to -= 1
-  if (!cursor.firstChild()) return text.slice(from, to)
+  // Only a block that spans a line break can carry a marker inside it, or end on
+  // a line that is not its last.
+  const lineBreak = text.indexOf('\n', from)
+  if (lineBreak < 0 || lineBreak >= to) return text.slice(from, to)
+
+  const marks: number[] = []
+  collectQuoteMarks(cursor, marks, from, to)
   let content = ''
   let pos = from
-  do {
-    if (cursor.type.id !== LEZER_NODE_IDS.QuoteMark) continue
-    if (cursor.from < pos || cursor.to > to) continue
-    content += text.slice(pos, cursor.from)
-    pos = cursor.to
-    if (isSpaceChar(text.charCodeAt(pos))) pos += 1
-  } while (cursor.nextSibling())
-  cursor.parent()
-  return content + text.slice(pos, to)
+  for (let index = 0; index < marks.length; index += 2) {
+    // Everything from the start of the marker's line up to the marker is the
+    // indent the enclosing containers wrote, which the serializer writes back
+    // as its own line prefix. A second marker on the same line (`> > a`) starts
+    // behind `pos`, and the text between two markers is theirs alone.
+    content += text.slice(pos, Math.max(pos, text.lastIndexOf('\n', marks[index]) + 1))
+    pos = marks[index + 1]
+    if (text.charCodeAt(pos) === CHAR_SPACE) pos += 1
+  }
+  return trimTrailingBlankLines(content + text.slice(pos, to))
+}
+
+/**
+ * Drop the blank lines a block ends with, the line break in front of them
+ * included. A raw HTML or processing-instruction block with no closing sequence
+ * runs its span to the end of the document and swallows them; a leaf block's
+ * text ends where its last line does, which is where the serializer ends its
+ * own output (`MdOut.finish`), so recording more would lose it on the way back.
+ */
+function trimTrailingBlankLines(content: string): string {
+  let end = content.length
+  for (let index = end - 1; index >= 0; index--) {
+    const code = content.charCodeAt(index)
+    if (code === CHAR_LINE_FEED) end = index
+    else if (code !== CHAR_SPACE && code !== CHAR_TAB) break
+  }
+  return content.slice(0, end)
 }
 
 /**
@@ -424,15 +520,18 @@ function convertHTMLComment(
   text: string,
   column: number,
 ): ProseMirrorNode {
-  const content = dedentContinuation(text.slice(cursor.from, cursor.to), column)
+  const content = dedentContinuation(readLeafText(cursor, text, cursor.from, cursor.to), column)
   return nodes.htmlComment({ content })
 }
 
+/**
+ * A blockquote's children start at column 0: every column an enclosing container
+ * wrote sits in front of the `> ` marker on the line, and comes off with it.
+ */
 function convertBlockquote(
   nodes: TypedNodeBuilders,
   cursor: TreeCursor,
   text: string,
-  column: number,
 ): ProseMirrorNode {
   const content: ProseMirrorNode[] = []
   if (cursor.firstChild()) {
@@ -441,7 +540,7 @@ function convertBlockquote(
       if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) continue
       if (previousTo != null) appendGapParagraphs(content, nodes, text, previousTo, cursor.from)
       previousTo = cursor.to
-      content.push(...convertBlock(nodes, cursor, text, column))
+      appendBlocks(content, nodes, convertBlock(nodes, cursor, text, 0))
     } while (cursor.nextSibling())
     cursor.parent()
   }
@@ -590,7 +689,7 @@ function convertListItem(
         content.push(task.paragraph)
         continue
       }
-      content.push(...convertBlock(nodes, cursor, text, contentColumn))
+      appendBlocks(content, nodes, convertBlock(nodes, cursor, text, contentColumn))
     } while (cursor.nextSibling())
     cursor.parent()
   }
@@ -619,13 +718,17 @@ function convertCodeBlock(
   text: string,
 ): ProseMirrorNode {
   const indented = cursor.type.id === LEZER_NODE_IDS.CodeBlock
+  const blockTo = cursor.to
   let language = ''
   let code = ''
   let fenceStyle: CodeBlockFenceStyle | null = indented ? 'indented' : null
   let fenceLength: number | null = null
   let sawOpeningMark = false
+  let pos = cursor.from
   if (cursor.firstChild()) {
     do {
+      code += uncoveredCode(text, pos, cursor.from)
+      pos = cursor.to
       switch (cursor.type.id) {
         case LEZER_NODE_IDS.CodeMark: {
           // Only the opening fence sets the style and length; a longer
@@ -633,8 +736,7 @@ function convertCodeBlock(
           if (sawOpeningMark) break
           sawOpeningMark = true
           if (text.charCodeAt(cursor.from) === CHAR_TILDE) fenceStyle = 'tilde'
-          const markLength = cursor.to - cursor.from
-          if (markLength > 3) fenceLength = markLength
+          fenceLength = cursor.to - cursor.from
           break
         }
         case LEZER_NODE_IDS.CodeInfo:
@@ -646,11 +748,32 @@ function convertCodeBlock(
       }
     } while (cursor.nextSibling())
     cursor.parent()
+    code += uncoveredCode(text, pos, blockTo)
   }
-  // Indentation cannot spell an empty block: there is no line to indent. Record
-  // no style, so the fence the serializer falls back to is the style all along.
-  if (fenceStyle === 'indented' && code === '') fenceStyle = null
+  // Record no style for a block indentation cannot spell, so the fence the
+  // serializer falls back to is the style all along.
+  if (fenceStyle === 'indented' && !canIndentCode(code)) fenceStyle = null
+  // Record no length for a fence no narrower than the code needs: the
+  // serializer writes that width anyway, and a source fence the content forces
+  // wider (```` ``` ```` around a line reading ```` ``` ````) is not a choice.
+  if (fenceLength != null && fenceLength <= minFenceLength(code, fenceStyle === 'tilde')) {
+    fenceLength = null
+  }
   return nodes.codeBlock({ language, fenceStyle, fenceLength }, code)
+}
+
+/**
+ * Text inside a code block that no child node covers is the whitespace in
+ * front of a line's content: indentation, marker spaces, line breaks. The one
+ * exception is a quote marker indented with a tab (`>\t \n\t>2`), where lezer
+ * leaves the content after the marker uncovered too, so anything from a gap's
+ * first non-whitespace character on is code the child list dropped.
+ */
+function uncoveredCode(text: string, from: number, to: number): string {
+  for (let index = from; index < to; index++) {
+    if (!isSpaceChar(text.charCodeAt(index))) return text.slice(index, to)
+  }
+  return ''
 }
 
 /**

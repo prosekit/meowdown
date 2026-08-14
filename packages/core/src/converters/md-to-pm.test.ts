@@ -992,8 +992,8 @@ describe('sliceColumn', () => {
     expect(sliceColumn('  line', 2)).toBe('line')
   })
 
-  it('stops at the first non-whitespace', () => {
-    expect(sliceColumn('  line', 8)).toBe('line')
+  it('leaves a line that stops short of the column', () => {
+    expect(sliceColumn('  line', 8)).toBe('  line')
   })
 
   it('keeps whitespace beyond the column', () => {

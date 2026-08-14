@@ -3,16 +3,17 @@ import { it } from 'vitest'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
 
-const NUM_RUNS = 1_000_000
-const MIN_LENGTH = 1
-const MAX_LENGTH = 100
-const SEED = 2
+// Use a fixed seed from the environment variable for reproducibility, or fallback to a random seed
+const SEED = Number.parseInt(import.meta.env.VITE_FUZZ_SEED || '') || Date.now() % (1 << 30)
+
+const NUM_RUNS = 100_000
 
 /// keep-sorted
-const TOKENS: string[] = [
+const TOKENS_BASE: string[] = [
   ' ',
   '_',
   '-',
+  ',',
   ';',
   ':',
   '!',
@@ -23,13 +24,19 @@ const TOKENS: string[] = [
   ')',
   '[',
   ']',
+  '{',
+  '}',
+  '@',
   '*',
   '/',
   '\\',
   '\n',
   '\t',
+  '&',
   '#',
+  '%',
   '`',
+  '^',
   '+',
   '<',
   '=',
@@ -37,40 +44,63 @@ const TOKENS: string[] = [
   '|',
   '~',
   '$',
+  '0',
   '1',
   '2',
   '3',
+  '9',
   'a',
+  'A',
   'b',
+  "'",
 ]
 
-it('finds no lossy input among ascii characters', { timeout: 60_000 }, () => {
-  fc.assert(
-    fc.property(
-      fc.string({
-        unit: 'grapheme-ascii',
-        minLength: MIN_LENGTH,
-        maxLength: MAX_LENGTH,
-      }),
-      check,
-    ),
-    { seed: SEED, numRuns: NUM_RUNS, verbose: true },
-  )
-})
+/// keep-sorted
+const TOKENS_EXTENDED: string[] = [
+  '’',
+  '«',
+  '\f',
+  '\r\n',
+  '\u{200D}',
+  '\u{300}',
+  '\u{3000}',
+  '\u{A0}',
+  '\u{FEFF}',
+  '\u{FFFD}',
+  '\v',
+  '🍄',
+  '€',
+  '永',
+]
 
-it.fails('finds no lossy input among sampled characters', { timeout: 60_000 }, () => {
-  fc.assert(
-    fc.property(
-      fc.string({
-        unit: fc.constantFrom(...TOKENS),
-        minLength: MIN_LENGTH,
-        maxLength: MAX_LENGTH,
-      }),
-      check,
-    ),
-    { seed: SEED, numRuns: NUM_RUNS, verbose: true },
-  )
-})
+const UNITS = [
+  { name: 'ascii', unit: 'grapheme-ascii' },
+  { name: 'base', unit: fc.constantFrom(...TOKENS_BASE) },
+  { name: 'extended', unit: fc.constantFrom(...TOKENS_BASE, ...TOKENS_EXTENDED) },
+] as const
+
+const RANGES = [
+  [1, 50],
+  [51, 100],
+  [101, 200],
+  [201, 500],
+] as const
+
+for (const [minLength, maxLength] of RANGES) {
+  for (const unit of UNITS) {
+    it(
+      `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, unit=${unit.name}`,
+      { timeout: 60_000 },
+      () => {
+        fc.assert(fc.property(fc.string({ unit: unit.unit, minLength, maxLength }), check), {
+          seed: SEED,
+          numRuns: NUM_RUNS,
+          verbose: true,
+        })
+      },
+    )
+  }
+}
 
 function check(input: string): boolean {
   try {
