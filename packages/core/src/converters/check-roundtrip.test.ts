@@ -70,6 +70,10 @@ describe('checkRoundTrip', () => {
     // a lazy continuation that reads as a setext underline stays lazy
     '- a\n=',
     '- a\n--',
+    // a task's continuation lines align with the item, not with the checkbox
+    '- [ ] a\n      b',
+    // a nested blockquote's continuation keeps the indent inside the quote
+    '- > a\n  >   b',
   ])('reports exact for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('exact')
   })
@@ -101,6 +105,7 @@ describe('checkRoundTrip', () => {
     '~~~', // same, for a tilde fence
     '>a\n=', // a lazy setext underline stays text, and gains nothing but the marker space
     '>a\n    code', // a lazy continuation keeps the indentation the marker never took
+    ' |\n\t-', // an indented paragraph is not a container: its continuation keeps the tab
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })
