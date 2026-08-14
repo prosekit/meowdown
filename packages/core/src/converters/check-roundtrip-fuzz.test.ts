@@ -33,6 +33,7 @@ it.fails('finds no lossy input among sampled character', { timeout: 60_000 }, ()
     '#',
     '`',
     '+',
+    '?',
     '<',
     '=',
     '>',
