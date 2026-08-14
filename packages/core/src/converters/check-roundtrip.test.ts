@@ -235,13 +235,7 @@ const NORMALIZING_CASES: string[] = [
 ]
 
 const LOSSY_CASES: string[] = [
-  // A closing fence may be longer than the one it closes, and the serializer
-  // writes it back at the opening fence's length - the spelling
-  // `roundtrip.test.ts` asserts in `normalizes a longer closing fence to the
-  // opening length`. The document survives, so these belong above with
-  // `normalizing`; `contentLines` reads the closing fence as content and
-  // reports loss instead. Backtick and tilde fences alike, with an info
-  // string, with no body, and inside a blockquote or a list item.
+  // a closing fence may be longer than the one it closes
   '```\ncode\n````',
   '~~~\ncode\n~~~~~',
   '```js\ncode\n````',
