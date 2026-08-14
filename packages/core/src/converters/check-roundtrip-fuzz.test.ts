@@ -10,7 +10,7 @@ it.fails('finds no lossy input among ascii characters', { timeout: 60_000 }, () 
   )
 })
 
-it.fails('finds no lossy input among sampled character', { timeout: 60_000 }, () => {
+it('finds no lossy input among sampled character', { timeout: 60_000 }, () => {
   const tokens: string[] = [...'->#*`= \n\t$|.1[]a']
   const markdownArbitrary = fc.string({
     unit: fc.constantFrom(...tokens),
