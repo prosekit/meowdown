@@ -3,6 +3,11 @@ import { it } from 'vitest'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
 
+const NUM_RUNS = 1_000_000
+const MIN_LENGTH = 1
+const MAX_LENGTH = 200
+const SEED = 2
+
 /// keep-sorted
 const TOKENS: string[] = [
   ' ',
@@ -39,18 +44,33 @@ const TOKENS: string[] = [
   'b',
 ]
 
-const CONFIG = { seed: 1, numRuns: 1_000_000, verbose: true } satisfies fc.Parameters
-
 it('finds no lossy input among ascii characters', { timeout: 60_000 }, () => {
   fc.assert(
-    fc.property(fc.string({ unit: 'grapheme-ascii', minLength: 1, maxLength: 200 }), check),
-    CONFIG,
+    fc.property(
+      fc.string({
+        unit: 'grapheme-ascii',
+        minLength: MIN_LENGTH,
+        maxLength: MAX_LENGTH,
+      }),
+      check,
+    ),
+    { seed: SEED, numRuns: NUM_RUNS, verbose: true },
   )
 })
 
 it.fails('finds no lossy input among sampled characters', { timeout: 60_000 }, () => {
   const unit = fc.constantFrom(...TOKENS)
-  fc.assert(fc.property(fc.string({ unit, minLength: 1, maxLength: 200 }), check), CONFIG)
+  fc.assert(
+    fc.property(
+      fc.string({
+        unit,
+        minLength: MIN_LENGTH,
+        maxLength: MAX_LENGTH,
+      }),
+      check,
+    ),
+    { seed: SEED, numRuns: NUM_RUNS, verbose: true },
+  )
 })
 
 function check(input: string): boolean {
