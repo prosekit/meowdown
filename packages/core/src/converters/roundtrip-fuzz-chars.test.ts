@@ -11,9 +11,9 @@ it.fails('finds no lossy input among ascii characters', { timeout: 60_000 }, () 
 })
 
 it.fails('finds no lossy input among sampled character', { timeout: 60_000 }, () => {
-  const CHARS = [...'->#*`= \n\t$|.1[]a']
+  const tokens: string[] = [...'->#*`= \n\t$|.1[]a']
   const markdownArbitrary = fc.string({
-    unit: fc.constantFrom(...CHARS),
+    unit: fc.constantFrom(...tokens),
     minLength: 1,
     maxLength: 32,
   })
