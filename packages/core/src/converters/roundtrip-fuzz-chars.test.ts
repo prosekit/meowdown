@@ -3,34 +3,27 @@ import { it } from 'vitest'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
 
-// Block markers, fence and emphasis punctuation, the three whitespace kinds
-// that carry block structure, and one filler letter. Sampling characters
-// rather than whole tokens reaches shapes a token alphabet cannot spell.
-const CHARS = [...'->#*`= \n\t$|.1[]a']
-
-const markdownArbitrary = fc.string({
-  unit: fc.constantFrom(...CHARS),
-  minLength: 1,
-  maxLength: 16,
+it('finds no lossy input among ascii characters', { timeout: 60_000 }, () => {
+  fc.assert(
+    fc.property(fc.string({ unit: 'grapheme-ascii', minLength: 1, maxLength: 100 }), check),
+    { seed: 1, numRuns: 100_000, verbose: true },
+  )
 })
 
-it.fails('finds no lossy input among sampled character sequences', { timeout: 60_000 }, () => {
-  // Fuzz inputs reach blocks the converter warns about; the warnings are not
-  // what this test measures.
-  const originalWarn = console.warn
-  console.warn = () => {}
+it('finds no lossy input among sampled character', { timeout: 60_000 }, () => {
+  const CHARS = [...'->#*`= \n\t$|.1[]a']
+  const markdownArbitrary = fc.string({
+    unit: fc.constantFrom(...CHARS),
+    minLength: 1,
+    maxLength: 32,
+  })
+  fc.assert(fc.property(markdownArbitrary, check), { seed: 2, numRuns: 100_000, verbose: true })
+})
+
+function check(input: string): boolean {
   try {
-    fc.assert(
-      fc.property(markdownArbitrary, (source) => {
-        try {
-          return checkRoundTrip(source) !== 'lossy'
-        } catch {
-          return false
-        }
-      }),
-      { seed: 42, numRuns: 100_000 },
-    )
-  } finally {
-    console.warn = originalWarn
+    return checkRoundTrip(input) !== 'lossy'
+  } catch {
+    return false
   }
-})
+}
