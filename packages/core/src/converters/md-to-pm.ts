@@ -528,14 +528,20 @@ function convertTaskChild(
   nodes: TypedNodeBuilders,
   cursor: TreeCursor,
   text: string,
-): { checked: boolean; taskMarker: TaskMarker | undefined; content: ProseMirrorNode[] } | undefined {
+):
+  | { checked: boolean; taskMarker: TaskMarker | undefined; content: ProseMirrorNode[] }
+  | undefined {
   if (cursor.type.id === LEZER_NODE_IDS.Task) {
     const task = convertTaskItem(nodes, cursor, text)
     return { checked: task.checked, taskMarker: task.taskMarker, content: [task.paragraph] }
   }
   const bareTask = matchBareTask(text, cursor.from, cursor.to)
   if (bareTask != null) {
-    return { checked: bareTask.checked, taskMarker: bareTask.taskMarker, content: [nodes.paragraph()] }
+    return {
+      checked: bareTask.checked,
+      taskMarker: bareTask.taskMarker,
+      content: [nodes.paragraph()],
+    }
   }
   return undefined
 }
