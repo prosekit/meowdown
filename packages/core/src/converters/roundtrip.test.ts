@@ -229,9 +229,9 @@ describe('inline', () => {
     expect(roundtrip('[foo]: /url')).toBe('[foo]: /url\n')
   })
 
-  it('normalizes nested multiline link reference indentation', () => {
+  it('keeps nested multiline link reference indentation', () => {
     const markdown = '> [foo]: /url\n>   "A title"\n'
-    expect(roundtrip(markdown)).toBe('> [foo]: /url\n> "A title"\n')
+    expect(roundtrip(markdown)).toBe(markdown)
   })
 })
 

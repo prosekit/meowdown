@@ -8,7 +8,7 @@ import type { MeowdownHTMLCommentAttrs } from '../extensions/html-comment.ts'
 import type { MeowdownListAttrs } from '../extensions/list.ts'
 import { isNodeOfType, type NodeName } from '../extensions/node-names.ts'
 import type { MeowdownTableCellAttrs, TableColumnAlign } from '../extensions/table-column-align.ts'
-import { CHAR_BACKTICK, CHAR_TILDE } from '../unicode.ts'
+import { CHAR_BACKTICK, CHAR_EQUAL, CHAR_HYPHEN_MINUS, CHAR_TILDE } from '../unicode.ts'
 import { longestCharRun } from '../utils/backticks.ts'
 
 /**
@@ -125,7 +125,17 @@ class MdOut {
    */
   private deferredBlankPrefix: string | null = null
 
-  write(text: string): void {
+  /**
+   * Write `text`, opening each embedded line with the current line prefix.
+   *
+   * `lazyUnderline` exempts a line that reads as a setext underline (`===` /
+   * `---`) from that prefix. Under the prefix such a line underlines the line
+   * above it into a heading; markdown keeps it as text only when it arrives as
+   * a lazy continuation, flush left, and the container picks the paragraph up
+   * again on the next line. Only leaf-block text may ask for this - an
+   * unprefixed line would fall out of a code block or an html comment.
+   */
+  write(text: string, lazyUnderline = false): void {
     if (text === '') return
     this.emitDeferredBlankLine()
     if (this.atLineStart) {
@@ -142,9 +152,9 @@ class MdOut {
     const lines = text.split('\n')
     // Index loop avoids the `.entries()` iterator allocation - measurable
     // (~7%) on the hot write() path.
-
+    const lazy = lazyUnderline && this.linePrefix !== ''
     for (let i = 0; i < lines.length; i++) {
-      if (i > 0) this.parts.push('\n', this.linePrefix)
+      if (i > 0) this.parts.push('\n', lazy && isSetextUnderline(lines[i]) ? '' : this.linePrefix)
       if (lines[i] !== '') this.parts.push(lines[i])
     }
   }
@@ -348,6 +358,19 @@ function isTightItem(item: ProseMirrorNode): boolean {
 }
 
 /**
+ * Whether `line` is a run of one character, `=` or `-`, and so would read as a
+ * setext underline under a container's line prefix.
+ */
+function isSetextUnderline(line: string): boolean {
+  const first = line.charCodeAt(0)
+  if (first !== CHAR_EQUAL && first !== CHAR_HYPHEN_MINUS) return false
+  for (let i = 1; i < line.length; i++) {
+    if (line.charCodeAt(i) !== first) return false
+  }
+  return true
+}
+
+/**
  * Walk inline children writing text directly. The schema has no marks, so
  * every inline child is currently a text node - but going through this
  * loop instead of `node.textContent` avoids one intermediate string
@@ -357,7 +380,7 @@ function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
   const count = node.childCount
   for (let i = 0; i < count; i++) {
     const child = node.child(i)
-    if (child.isText && child.text) out.write(child.text)
+    if (child.isText && child.text) out.write(child.text, true)
     // Future inline node types (hardBreak, image, mention) go here.
   }
 }

@@ -14,6 +14,7 @@ import {
   CHAR_ASTERISK,
   CHAR_DOT,
   CHAR_EQUAL,
+  CHAR_GREATER_THAN,
   CHAR_HASH,
   CHAR_HYPHEN_MINUS,
   CHAR_LINE_FEED,
@@ -306,6 +307,31 @@ export function measureContentColumn(text: string, from: number): number {
 }
 
 /**
+ * The column a block's continuation lines are indented to, past the blockquote
+ * prefix on the line containing `from`.
+ *
+ * A blockquote's `>` is not part of that indent: `convertParagraph` strips it
+ * from every line it appears on, and a lazy continuation line never carried it
+ * at all. Counting it would dedent such a line a second time and eat the
+ * leading whitespace that is its content.
+ */
+function measureContinuationColumn(text: string, from: number): number {
+  const lineStart = text.lastIndexOf('\n', from - 1) + 1
+  let col = 0
+  let quoteEnd = 0
+  for (let index = lineStart; index < from; index++) {
+    const code = text.charCodeAt(index)
+    col += code === CHAR_TAB ? 4 - (col % 4) : 1
+    // A blockquote marker also swallows the single space or tab after it.
+    if (code === CHAR_GREATER_THAN) {
+      const next = text.charCodeAt(index + 1)
+      quoteEnd = col + (next === CHAR_TAB ? 4 - (col % 4) : next === CHAR_SPACE ? 1 : 0)
+    }
+  }
+  return col - quoteEnd
+}
+
+/**
  * Drop a line's leading whitespace up to `column`, counting a tab as `4 - col % 4` columns.
  */
 export function sliceColumn(line: string, column: number): string {
@@ -363,7 +389,7 @@ function convertParagraph(
 ): ProseMirrorNode {
   const from = cursor.from
   const to = cursor.to
-  const column = measureContentColumn(text, from)
+  const column = measureContinuationColumn(text, from)
   // In block-only parsing a paragraph has no inline children, with one
   // exception: lezer leaves the lazy-continuation `QuoteMark`s of a multi-line
   // blockquote (`> l1\n> l2`) embedded in the paragraph's span.

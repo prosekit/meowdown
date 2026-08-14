@@ -64,6 +64,12 @@ describe('checkRoundTrip', () => {
     'a $x$ b $$y$$ c',
     // extra blank lines round-trip as empty paragraphs
     'a\n\n\nb',
+
+    // a blockquote's continuation line keeps its own indentation
+    '> a\n>   b',
+    // a lazy continuation that reads as a setext underline stays lazy
+    '- a\n=',
+    '- a\n--',
   ])('reports exact for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('exact')
   })
@@ -93,6 +99,8 @@ describe('checkRoundTrip', () => {
     '```\ncode', // same, with content
     '$$', // same, for a math block
     '~~~', // same, for a tilde fence
+    '>a\n=', // a lazy setext underline stays text, and gains nothing but the marker space
+    '>a\n    code', // a lazy continuation keeps the indentation the marker never took
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })
