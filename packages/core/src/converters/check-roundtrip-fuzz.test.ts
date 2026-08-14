@@ -92,8 +92,6 @@ const TOKENS_RUNS: string[] = [
   '1. ',
 ]
 
-// The characters that spell block syntax, over-weighted below so marker-dense
-// multi-line documents dominate the weighted unit.
 /// keep-sorted
 const TOKENS_STRUCTURAL: string[] = [' ', '-', '*', '\t', '#', '`', '+', '=', '>', '|', '~', '$']
 
