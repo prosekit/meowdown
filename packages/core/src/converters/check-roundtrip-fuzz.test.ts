@@ -3,6 +3,42 @@ import { it } from 'vitest'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
 
+/// keep-sorted
+const TOKENS: string[] = [
+  ' ',
+  '_',
+  '-',
+  ';',
+  ':',
+  '!',
+  '?',
+  '.',
+  '"',
+  '(',
+  ')',
+  '[',
+  ']',
+  '*',
+  '/',
+  '\\',
+  '\n',
+  '\t',
+  '#',
+  '`',
+  '+',
+  '<',
+  '=',
+  '>',
+  '|',
+  '~',
+  '$',
+  '1',
+  '2',
+  '3',
+  'a',
+  'b',
+]
+
 it.fails('finds no lossy input among ascii characters', { timeout: 60_000 }, () => {
   fc.assert(
     fc.property(fc.string({ unit: 'grapheme-ascii', minLength: 1, maxLength: 100 }), check),
@@ -11,42 +47,7 @@ it.fails('finds no lossy input among ascii characters', { timeout: 60_000 }, () 
 })
 
 it.fails('finds no lossy input among sampled character', { timeout: 60_000 }, () => {
-  /// keep-sorted
-  const tokens: string[] = [
-    ' ',
-    '_',
-    '-',
-    ';',
-    ':',
-    '!',
-    '?',
-    '.',
-    '"',
-    '(',
-    ')',
-    '[',
-    ']',
-    '*',
-    '/',
-    '\\',
-    '\n',
-    '\t',
-    '#',
-    '`',
-    '+',
-    '<',
-    '=',
-    '>',
-    '|',
-    '~',
-    '$',
-    '1',
-    '2',
-    '3',
-    'a',
-    'b',
-  ]
-  const unit = fc.constantFrom(...tokens)
+  const unit = fc.constantFrom(...TOKENS)
   fc.assert(fc.property(fc.string({ unit, minLength: 1, maxLength: 16 }), check), {
     seed: 2,
     numRuns: 100_000,
