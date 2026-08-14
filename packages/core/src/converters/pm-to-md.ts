@@ -81,7 +81,12 @@ function emitHeading(node: ProseMirrorNode, out: MdOut): void {
   // Setext exists only for levels 1-2 and needs a content line to underline;
   // an empty or deeper heading falls back to ATX.
   if (underline != null && node.content.size > 0 && attrs.level <= 2) {
-    emitInlineChildren(node, out)
+    const text = node.textContent
+    if (!text.includes('\n') && !BLOCK_LINE_RE.test(text.trim())) {
+      emitInlineChildren(node, out)
+    } else {
+      out.write(escapeBlockGuardLines(text, null, true))
+    }
     const underlineChar = attrs.level === 1 ? '=' : '-'
     out.write('\n' + underlineChar.repeat(Math.max(1, underline)))
     out.closeBlock()
@@ -236,13 +241,22 @@ class MdOut {
     this.parts.push(prefix.trimEnd(), '\n')
     this.deferredBlankPrefix = null
   }
+
+  /**
+   * Whether the next write would consume a fresh bullet marker (`- ` / `* `).
+   * A thematic break written right after it (`- ---`) would merge into one
+   * break, so the break must start on its own line instead.
+   */
+  isListItemStart(): boolean {
+    return this.atLineStart && this.pendingFirst != null && /^[-*] +$/u.test(this.pendingFirst)
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────
 // Dispatch
 // ─────────────────────────────────────────────────────────────────────
 
-function emit(node: ProseMirrorNode, out: MdOut): void {
+function emit(node: ProseMirrorNode, out: MdOut, itemMarkerChar: string | null = null): void {
   switch (node.type.name as NodeName) {
     case 'doc':
       emitBlockChildren(node, out)
@@ -252,7 +266,7 @@ function emit(node: ProseMirrorNode, out: MdOut): void {
         out.closeEmptyBlock()
         return
       }
-      emitInlineChildren(node, out)
+      emitParagraph(node, out, itemMarkerChar)
       out.closeBlock()
       return
     case 'heading':
@@ -270,6 +284,7 @@ function emit(node: ProseMirrorNode, out: MdOut): void {
       return
     case 'horizontalRule': {
       const { marker } = node.attrs as MeowdownHorizontalRuleAttrs
+      if (out.isListItemStart()) out.write('\n')
       out.write(marker || '---')
       out.closeBlock()
       return
@@ -298,14 +313,19 @@ function emit(node: ProseMirrorNode, out: MdOut): void {
  * blocks (a paragraph followed by nested lists) are then separated by single
  * newlines instead of blank lines.
  */
-function emitBlockChildren(node: ProseMirrorNode, out: MdOut, tightItem = false): void {
+function emitBlockChildren(
+  node: ProseMirrorNode,
+  out: MdOut,
+  tightItem = false,
+  itemMarkerChar: string | null = null,
+): void {
   const count = node.childCount
   let index = 0
   while (index < count) {
     const child = node.child(index)
     if (!isNodeOfType(child, 'list')) {
       if (tightItem && index > 0) out.suppressBlank()
-      emit(child, out)
+      emit(child, out, index === 0 ? itemMarkerChar : null)
       index++
       continue
     }
@@ -362,6 +382,67 @@ function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
   }
 }
 
+// A single line that re-parses as a block (a setext underline, an empty ATX
+// heading, a list item, a blockquote, a fence, ...). Emitting such a line
+// inside a paragraph would change it into that block, so it gets a backslash
+// guard.
+const BLOCK_LINE_RE =
+  /^(?:#+$|>|`{3,}|~{3,}|\${2}|=+$|-+$|\*+$|_+$|(?:[-+*]|\d{1,9}[.)])(?:[ \t]|$))/u
+
+// A paragraph or setext-heading content line that would re-parse as a block
+// gets a backslash guard: a lazy continuation like `>a\n-` serializes to
+// `> a\n> -`, which re-reads as a setext heading, and heading content like `#`
+// re-reads as an ATX heading. The same guard covers a line whose trailing
+// whitespace the buffer trims, exposing a block start (`#\t` would re-read as a
+// heading). A bullet marker followed by a line of the same character (`-   --`)
+// would re-read as a thematic break, so a marker's first content line gets the
+// guard too. The block parser preserves the backslash verbatim, so the round
+// trip is a fixed point.
+function emitParagraph(node: ProseMirrorNode, out: MdOut, itemMarkerChar: string | null): void {
+  const text = node.textContent
+  if (
+    !text.includes('\n') &&
+    !(/\s$/u.test(text) && BLOCK_LINE_RE.test(text.trimEnd())) &&
+    !(itemMarkerChar != null && isThematicBreakWithMarker(itemMarkerChar, text.trimEnd()))
+  ) {
+    emitInlineChildren(node, out)
+    return
+  }
+  out.write(escapeBlockGuardLines(text, itemMarkerChar))
+}
+
+function escapeBlockGuardLines(
+  text: string,
+  itemMarkerChar: string | null = null,
+  guardFirstLine = false,
+): string {
+  const lines = text.split('\n')
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index]
+    const trimmed = line.trim()
+    const blockLike =
+      BLOCK_LINE_RE.test(trimmed) && (guardFirstLine || index > 0 || trimmed !== line)
+    const hrRisk =
+      index === 0 && itemMarkerChar != null && isThematicBreakWithMarker(itemMarkerChar, trimmed)
+    if (blockLike || hrRisk) lines[index] = line.replace(/^[ \t]*/u, (leading) => leading + '\\')
+  }
+  return lines.join('\n')
+}
+
+// Whether a bullet marker char plus this content line would read as a thematic
+// break: the marker and every content character (ignoring spaces/tabs) are the
+// same `-`/`*`/`_`, three or more of them.
+function isThematicBreakWithMarker(markerChar: string, line: string): boolean {
+  if (markerChar !== '-' && markerChar !== '*' && markerChar !== '_') return false
+  let count = 1
+  for (const char of line) {
+    if (char === ' ' || char === '\t') continue
+    if (char !== markerChar) return false
+    count++
+  }
+  return count >= 3
+}
+
 // ─────────────────────────────────────────────────────────────────────
 // List
 // ─────────────────────────────────────────────────────────────────────
@@ -393,7 +474,8 @@ function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
   const prefix = `${delimiter}${' '.repeat(gap)}`
   const outputMarker = kind === 'task' ? `${prefix}[${checked ? checkMark : ' '}] ` : prefix
   const continuation = ' '.repeat(prefix.length)
-  out.withPrefix(continuation, outputMarker, () => emitBlockChildren(node, out, tight))
+  const hrRiskChar = kind === 'ordered' ? null : bulletMarker
+  out.withPrefix(continuation, outputMarker, () => emitBlockChildren(node, out, tight, hrRiskChar))
   out.closeBlock()
 }
 
@@ -456,6 +538,10 @@ function emitCodeBlock(node: ProseMirrorNode, out: MdOut): void {
  */
 function toIndentedCode(code: string): string | undefined {
   if (code === '') return undefined
+  // The output buffer trims the document's trailing whitespace, so a code block
+  // that ends in whitespace cannot carry it in the indented form; fall back to a
+  // fence, whose closing fence protects the last content line.
+  if (/\s$/u.test(code)) return undefined
   const lines = code.split('\n')
   if (lines[0] === '' || lines[lines.length - 1] === '') return undefined
   for (let i = 0; i < lines.length; i++) {
