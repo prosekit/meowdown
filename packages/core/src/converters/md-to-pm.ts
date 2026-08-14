@@ -295,7 +295,7 @@ function convertHeading(
   // whole lines and keeps its own spacing - `#\t` is a paragraph line where a
   // bare `#` would be a heading.
   const raw = dedentContinuation(readLeafText(cursor, text, contentStart, contentEnd), column)
-  const content = isSetext ? raw : raw.trim()
+  const content = isSetext ? raw : trimGap(raw)
   // A trailing HeaderMark is the setext underline of a setext heading, or the
   // closing `#` run of an ATX heading (`# foo #`). CommonMark allows either run
   // any length, so keep the source count to make the round-trip lossless.
@@ -307,6 +307,21 @@ function convertHeading(
       ? countHashChars(text, trailingMarkFrom, trailingMarkTo) || null
       : null
   return nodes.heading({ level, setextUnderline, closingHashes }, content)
+}
+
+/**
+ * Trim the whitespace lezer's marker gap can contain: space, tab and the line
+ * ends (`space` in `@lezer/markdown`, matching `isSpaceChar`). A plain
+ * `String.prototype.trim` would also take a no-break or an ideographic space,
+ * which lezer reads as heading text - and a `#` left standing next to one flips
+ * into a closing run on the way back (`# #\u{A0}`).
+ */
+function trimGap(text: string): string {
+  let start = 0
+  let end = text.length
+  while (start < end && isSpaceChar(text.charCodeAt(start))) start++
+  while (end > start && isSpaceChar(text.charCodeAt(end - 1))) end--
+  return text.slice(start, end)
 }
 
 /**
