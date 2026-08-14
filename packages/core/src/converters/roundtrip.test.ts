@@ -456,6 +456,45 @@ describe('bullet lists', () => {
   })
 })
 
+describe('empty items followed by indented blocks', () => {
+  // An empty list item whose next block sits at the item's content column
+  // serializes with that block hoisted onto the marker line (`- >`): the
+  // blank line and the item's emptiness are lost.
+  it.fails('keeps a blockquote after an empty item', () => {
+    const md = ['-', '', '  >'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
+
+  it.fails('keeps a nested list after an empty item', () => {
+    const md = ['-', '', '  -'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
+
+  it.fails('keeps a blockquote after an empty nested item', () => {
+    const md = ['- -', '', '    >'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
+
+  it.fails('keeps a nested list after an empty nested item', () => {
+    // Serializes to `- - -`, a spaced thematic break.
+    const md = ['- -', '', '    -'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
+
+  it.fails('keeps the doc when a nested list follows an empty nested item', () => {
+    // The `- - -` output re-parses as a thematic break, so the round trip
+    // destroys the list instead of re-laying it out.
+    const md = ['- -', '', '    -'].join('\n')
+    const reparsed = markdownToDoc(docToMarkdown(markdownToDoc(md)))
+    expect(reparsed.toJSON()).toEqual(markdownToDoc(md).toJSON())
+  })
+
+  it.fails('keeps a blockquote and a list after an empty nested item', () => {
+    const md = ['- -', '', '    >', '', '    -'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
+})
+
 describe('list folding', () => {
   it('keeps a collapsed bullet as `+`', () => {
     expect(roundtrip('+ parent\n  - child')).toBe('+ parent\n  - child\n')
