@@ -79,7 +79,7 @@ const UNITS = [
   { name: 'grapheme-ascii', unit: 'grapheme-ascii' },
   { name: 'base', unit: fc.constantFrom(...TOKENS_BASE) },
   { name: 'extended', unit: fc.constantFrom(...TOKENS_BASE, ...TOKENS_EXTENDED) },
-]
+] as const
 
 const RANGES = [
   [1, 50],
@@ -89,29 +89,25 @@ const RANGES = [
 ] as const
 
 for (const [minLength, maxLength] of RANGES) {
-  for (const customToken of [false, true]) {
+  for (const unit of UNITS) {
     it(
-      `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, customToken=${customToken}`,
+      `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, unit=${unit.name}`,
       { timeout: 60_000 },
       () => {
-        runTest(SEED, minLength, maxLength, customToken)
+        fc.assert(
+          fc.property(
+            fc.string({
+              unit: unit.unit,
+              minLength,
+              maxLength,
+            }),
+            check,
+          ),
+          { seed: SEED, numRuns: NUM_RUNS, verbose: true },
+        )
       },
     )
   }
-}
-
-function runTest(seed: number, minLength: number, maxLength: number, customToken: boolean) {
-  fc.assert(
-    fc.property(
-      fc.string({
-        unit: customToken ? fc.constantFrom(...TOKENS) : 'grapheme-ascii',
-        minLength,
-        maxLength,
-      }),
-      check,
-    ),
-    { seed, numRuns: NUM_RUNS, verbose: true },
-  )
 }
 
 function check(input: string): boolean {
