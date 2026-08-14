@@ -317,13 +317,15 @@ export function measureContentColumn(text: string, from: number): number {
 
 /**
  * Drop a line's leading whitespace up to `column`, counting a tab as `4 - col % 4`
- * columns. A tab that would reach past `column` is left alone: it stands for more
- * columns than the container takes, and the rest of them are the line's own.
+ * columns. Whitespace the container never wrote is left alone: a tab that would
+ * reach past `column` stands for more columns than the container takes, and a
+ * line whose indentation stops short of `column` was written lazily, without any
+ * prefix at all.
  */
 export function sliceColumn(line: string, column: number): string {
   let col = 0
   let index = 0
-  while (index < line.length && col < column) {
+  while (col < column) {
     const code = line.charCodeAt(index)
     if (code === CHAR_SPACE) {
       col += 1
@@ -332,7 +334,9 @@ export function sliceColumn(line: string, column: number): string {
       if (col + width > column) break
       col += width
     } else {
-      break
+      // The line stops short of `column`, so it never carried the container's
+      // prefix: it is a lazy continuation, and every column it has is its own.
+      return line
     }
     index++
   }

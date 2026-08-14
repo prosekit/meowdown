@@ -173,13 +173,10 @@ class MdOut {
     // Index loop avoids the `.entries()` iterator allocation - measurable
     // (~7%) on the hot write() path.
     const lazy = lazyLines && this.linePrefix !== ''
-    // Only a blockquote's prefix moves a tab: a list's is whitespace, and the
-    // parser measures that back off in the same columns it added.
-    const quoted = lazy && this.linePrefix.includes('>')
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
       if (i > 0) {
-        const flush = lazy && (isSetextUnderline(line) || (quoted && hasTabIndent(line)))
+        const flush = lazy && (isSetextUnderline(line) || hasTabIndent(line))
         this.parts.push('\n', flush ? '' : this.linePrefix)
       }
       if (line !== '') this.parts.push(line)

@@ -91,11 +91,11 @@ function report(seed: number, runs: number): void {
   )
 }
 
-it('triage', { timeout: 900_000 }, () => {
-  for (let seed = 2; seed <= 12; seed++) report(seed, 1_000_000)
+it('triage', { timeout: 3_600_000 }, () => {
+  for (let seed = 13; seed <= 45; seed++) report(seed, 1_000_000)
 })
 
-const INSPECT: string[] = ['*\t \\\n\t>', '>[\n$]:*', '>[<\n]:;', '+ ;\n\n2.']
+const INSPECT: string[] = ['*    a\n\t>', '- a\n\t\t-', '*\t \\\n\t>', '+ ;\n\n2.']
 
 it('inspect', () => {
   for (const input of INSPECT) {

@@ -82,6 +82,10 @@ describe('checkRoundTrip', () => {
     '> a\n> -',
     // a link reference's label spans the break, and holds the `>` marker inside it
     '> [\n> $]:*',
+    // a lazy continuation that would open a blockquote under the item's indent
+    '*    a\n\t>',
+    // a tab-indented continuation keeps every column the container never took
+    '- a\n\t\t-',
     // only a list numbered 1 interrupts a paragraph, so the blank line stays
     '+ ;\n\n2.',
   ])('reports exact for %j', (markdown) => {
