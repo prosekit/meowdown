@@ -74,6 +74,8 @@ describe('checkRoundTrip', () => {
     '- [ ] a\n      b',
     // a nested blockquote's continuation keeps the indent inside the quote
     '- > a\n  >   b',
+    // a setext heading inside a blockquote keeps its underline on its own line
+    '> a\n> -',
   ])('reports exact for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('exact')
   })

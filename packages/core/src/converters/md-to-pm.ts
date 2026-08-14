@@ -253,8 +253,9 @@ function convertHeading(
   }
 
   // Dedent before trimming so a multi-line setext heading inside a container
-  // (rare) keeps its continuation lines aligned; trim then drops the outer ends.
-  const raw = text.slice(contentStart, contentEnd)
+  // (rare) keeps its continuation lines aligned; trim then drops the outer ends,
+  // the underline's own line among them.
+  const raw = stripQuotePrefixes(readLeafText(cursor, text, contentStart, contentEnd))
   const content = dedentContinuation(raw, column).trim()
   // A trailing HeaderMark is the setext underline of a setext heading, or the
   // closing `#` run of an ATX heading (`# foo #`). CommonMark allows either run
@@ -343,6 +344,50 @@ export function dedentContinuation(content: string, column: number): string {
     .join('\n')
 }
 
+// A blockquote prefix at the head of a continuation line: indent, then a `>`
+// per nesting level, each swallowing one space.
+const QUOTE_PREFIX_RE = /^[ \t]*(?:>[ \t]?)+/u
+
+/**
+ * Drop the blockquote prefix from a block's continuation lines.
+ *
+ * A setext heading is the one block lezer gives no `QuoteMark` children: its
+ * span simply runs over the `>` of every line after the first, the underline's
+ * line included. A lazy line carries no marker and is left alone.
+ */
+function stripQuotePrefixes(content: string): string {
+  if (!content.includes('\n')) return content
+  return content
+    .split('\n')
+    .map((line, index) => (index === 0 ? line : line.replace(QUOTE_PREFIX_RE, '')))
+    .join('\n')
+}
+
+/**
+ * The source between `from` and `to`, minus the blockquote markers inside it.
+ *
+ * In block-only parsing a leaf block has no inline children, with one
+ * exception: lezer leaves the `QuoteMark` of every continuation line of a
+ * multi-line block (`> l1\n> l2`) inside the block's own span. Each marker
+ * swallows the single space after it, exactly as the serializer's `> ` prefix
+ * puts it back. Markers outside `from`..`to` (an ATX heading's own marks, a
+ * setext underline's line) are left alone. The cursor ends where it started.
+ */
+function readLeafText(cursor: TreeCursor, text: string, from: number, to: number): string {
+  if (!cursor.firstChild()) return text.slice(from, to)
+  let content = ''
+  let pos = from
+  do {
+    if (cursor.type.id !== LEZER_NODE_IDS.QuoteMark) continue
+    if (cursor.from < pos || cursor.to > to) continue
+    content += text.slice(pos, cursor.from)
+    pos = cursor.to
+    if (isSpaceChar(text.charCodeAt(pos))) pos += 1
+  } while (cursor.nextSibling())
+  cursor.parent()
+  return content + text.slice(pos, to)
+}
+
 /**
  * Build a paragraph from raw markdown content, dedenting continuation lines so
  * the serializer's own line prefix does not double the indent. A soft line break
@@ -365,26 +410,7 @@ function convertParagraph(
   text: string,
   column: number,
 ): ProseMirrorNode {
-  const from = cursor.from
-  const to = cursor.to
-  // In block-only parsing a paragraph has no inline children, with one
-  // exception: lezer leaves the lazy-continuation `QuoteMark`s of a multi-line
-  // blockquote (`> l1\n> l2`) embedded in the paragraph's span.
-  if (cursor.firstChild()) {
-    let content = ''
-    let pos = from
-    do {
-      if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) {
-        content += text.slice(pos, cursor.from)
-        pos = cursor.to
-        if (isSpaceChar(text.charCodeAt(pos))) pos += 1
-      }
-    } while (cursor.nextSibling())
-    cursor.parent()
-    content += text.slice(pos, to)
-    return buildParagraph(nodes, content, column)
-  }
-  return buildParagraph(nodes, text.slice(from, to), column)
+  return buildParagraph(nodes, readLeafText(cursor, text, cursor.from, cursor.to), column)
 }
 
 /**

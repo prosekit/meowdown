@@ -1,3 +1,4 @@
+import { isSpaceChar } from '@meowdown/markdown'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
 import type { MeowdownCodeBlockAttrs } from '../extensions/code-block.ts'
@@ -364,11 +365,14 @@ function isTightItem(item: ProseMirrorNode): boolean {
  * four columns, and any trailing spaces at all.
  */
 function isSetextUnderline(line: string): boolean {
-  const run = line.trim()
-  const first = run.charCodeAt(0)
+  let start = 0
+  while (start < line.length && isSpaceChar(line.charCodeAt(start))) start++
+  const first = line.charCodeAt(start)
   if (first !== CHAR_EQUAL && first !== CHAR_HYPHEN_MINUS) return false
-  for (let i = 1; i < run.length; i++) {
-    if (run.charCodeAt(i) !== first) return false
+  let end = line.length
+  while (isSpaceChar(line.charCodeAt(end - 1))) end--
+  for (let i = start + 1; i < end; i++) {
+    if (line.charCodeAt(i) !== first) return false
   }
   return true
 }
