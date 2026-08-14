@@ -72,19 +72,7 @@ it('triage tokens', { timeout: 600_000 }, () => {
   report('tokens', TOKENS, 2)
 })
 
-const INSPECT: string[] = [
-  '* >=',
-  '*\t>*',
-  '-\n  `',
-  '-\n\t*',
-  '*\n\t1',
-  '``` 1',
-  '>-\n>',
-  ' |\n\t-',
-  '>\t \n1',
-  ' $\n\t>',
-  '>.\n\t=',
-]
+const INSPECT: string[] = ['>[\n-\t\n$', '>\t \n1', '>.\n\t=', '>-\n>']
 
 it('inspect', () => {
   for (const input of INSPECT) {
@@ -103,7 +91,7 @@ it('inspect', () => {
 })
 
 it('probe trees', () => {
-  const inputs = ['>a\n    code', '> a\n>    code', '>a\n  b', '> a\n>   b', '>a\n=', '- a\n=']
+  const inputs = ['>-\n>', '>.\n\t=', '>\t \n1']
   const rows: string[] = []
   for (const input of inputs) {
     rows.push(`=== ${JSON.stringify(input)}`)

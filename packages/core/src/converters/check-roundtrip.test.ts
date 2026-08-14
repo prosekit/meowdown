@@ -106,6 +106,10 @@ describe('checkRoundTrip', () => {
     '>a\n=', // a lazy setext underline stays text, and gains nothing but the marker space
     '>a\n    code', // a lazy continuation keeps the indentation the marker never took
     ' |\n\t-', // an indented paragraph is not a container: its continuation keeps the tab
+    '>a\n\t=', // an indented setext underline stays lazy too
+    '>[\n-\t\n$', // same, for a dash run with trailing whitespace
+    '>-\n>', // a blockquote marker on the line after an empty item is not item text
+    '>\t \n1', // an empty indented code block has no indented spelling
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })

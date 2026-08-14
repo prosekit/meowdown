@@ -359,13 +359,16 @@ function isTightItem(item: ProseMirrorNode): boolean {
 
 /**
  * Whether `line` is a run of one character, `=` or `-`, and so would read as a
- * setext underline under a container's line prefix.
+ * setext underline under a container's line prefix. Surrounding whitespace does
+ * not save it: an underline may carry any indentation the prefix leaves under
+ * four columns, and any trailing spaces at all.
  */
 function isSetextUnderline(line: string): boolean {
-  const first = line.charCodeAt(0)
+  const run = line.trim()
+  const first = run.charCodeAt(0)
   if (first !== CHAR_EQUAL && first !== CHAR_HYPHEN_MINUS) return false
-  for (let i = 1; i < line.length; i++) {
-    if (line.charCodeAt(i) !== first) return false
+  for (let i = 1; i < run.length; i++) {
+    if (run.charCodeAt(i) !== first) return false
   }
   return true
 }

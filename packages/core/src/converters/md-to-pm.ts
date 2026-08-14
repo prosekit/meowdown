@@ -535,6 +535,9 @@ function convertListItem(
 
   if (cursor.firstChild()) {
     do {
+      // A blockquote line that continues past the item leaves its `QuoteMark`
+      // inside the item, the same way it does inside a paragraph.
+      if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) continue
       if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
         const listMark = readListMark(cursor, text, kind)
         marker = listMark.marker
@@ -614,6 +617,9 @@ function convertCodeBlock(
     } while (cursor.nextSibling())
     cursor.parent()
   }
+  // Indentation cannot spell an empty block: there is no line to indent. Record
+  // no style, so the fence the serializer falls back to is the style all along.
+  if (fenceStyle === 'indented' && code === '') fenceStyle = null
   return nodes.codeBlock({ language, fenceStyle, fenceLength }, code)
 }
 
