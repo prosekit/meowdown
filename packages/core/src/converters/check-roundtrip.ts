@@ -8,8 +8,8 @@ import { docToMarkdown } from './pm-to-md.ts'
  * - `exact`: byte-identical (modulo the trailing newline).
  * - `normalizing`: bytes differ, but only as layout the parser reads back
  *   through - every content line survives and the output re-parses to the same
- *   document (e.g. a lazy continuation re-indented to its canonical column, or
- *   a table delimiter row rewritten to canonical dashes).
+ *   document (e.g. a lazy continuation re-indented, or `>>>>>>> x` respaced to
+ *   the seven blockquotes it already meant).
  * - `lossy`: content changed - a content line differs or disappeared, or the
  *   output re-parses to a different document.
  */
