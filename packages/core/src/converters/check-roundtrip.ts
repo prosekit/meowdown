@@ -1,4 +1,3 @@
-import { CHAR_GREATER_THAN } from '../unicode.ts'
 import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
 
@@ -6,10 +5,11 @@ import { docToMarkdown } from './pm-to-md.ts'
  * How faithfully markdown survives a parse-then-serialize round trip:
  * - `exact`: byte-identical (modulo the trailing newline).
  * - `normalizing`: bytes differ, but only as layout the parser collapses back -
- *   no non-blank line content is lost and re-parsing the output yields the same
- *   doc (e.g. a lazy continuation re-indented to its canonical column, or a
- *   table delimiter row rewritten to canonical dashes).
- * - `lossy`: content changed - a non-blank line differs, or the re-parsed doc does.
+ *   re-parsing the output yields the same doc and every content line survives
+ *   (e.g. a lazy continuation re-indented to its canonical column, or a table
+ *   delimiter row rewritten to canonical dashes).
+ * - `lossy`: content changed - a content line differs or disappeared, or the
+ *   re-parsed doc does.
  */
 export type RoundTripFidelity = 'exact' | 'normalizing' | 'lossy'
 
@@ -67,26 +67,37 @@ function canonicalizeTableRow(line: string): string | undefined {
   return `| ${rendered.join(' | ')} |`
 }
 
-// A blockquote marker swallows one optional space, so `>x` and `> x` open the
-// same quote around the same content: the space is layout. Every `>` still
-// counts, so a line that gains or loses a nesting level stays different.
-const QUOTE_PREFIX_RE = /^\s*(?:>[ \t]?)*/u
+// A line's leading indent and blockquote markers say which block the line
+// belongs to, not what it says. Which line carries them is the serializer's
+// choice: a lazy continuation is written back under its container's marker
+// (`>a\n*` serializes as `> a\n> *`), and the marker swallows one optional
+// space either way. Block structure is compared as a document below, so strip
+// the prefix here and compare the content behind it.
+const CONTAINER_PREFIX_RE = /^\s*(?:>[ \t]?)*/u
 
-function splitQuotePrefix(line: string): { depth: number; rest: string } {
-  const prefix = QUOTE_PREFIX_RE.exec(line)?.[0] ?? ''
-  let depth = 0
-  for (let i = 0; i < prefix.length; i++) {
-    if (prefix.charCodeAt(i) === CHAR_GREATER_THAN) depth++
-  }
-  return { depth, rest: line.slice(prefix.length) }
+function stripContainerPrefix(line: string): string {
+  return line.slice(CONTAINER_PREFIX_RE.exec(line)?.[0].length ?? 0)
 }
 
-// Compare a line's blockquote depth against the other side's depth, and its
-// content against the other side's content, so quote nesting stays significant
-// while the marker's own spelling does not.
 function normalizeLine(line: string): string {
-  const { depth, rest } = splitQuotePrefix(line)
-  return '>'.repeat(depth) + (canonicalizeTableRow(rest) ?? collapseWhitespace(rest))
+  const content = stripContainerPrefix(line)
+  return canonicalizeTableRow(content) ?? collapseWhitespace(content)
+}
+
+/**
+ * Whether `wanted` appears in `found` as an ordered subsequence.
+ *
+ * The serializer may write a line the source never had: an unterminated fenced
+ * block gets the closing fence it was missing. Such a line changes no content,
+ * which the document comparison proves - so only a content line that fails to
+ * come back out is loss.
+ */
+function containsInOrder(found: ReadonlyArray<string>, wanted: ReadonlyArray<string>): boolean {
+  let index = 0
+  for (const line of found) {
+    if (index < wanted.length && line === wanted[index]) index++
+  }
+  return index === wanted.length
 }
 
 /**
@@ -106,15 +117,20 @@ export function checkRoundTrip(
   markdown: string,
   options: CheckRoundTripOptions = {},
 ): RoundTripFidelity {
-  const doc = markdownToDoc(markdown, { frontmatter: options.frontmatter })
-  const serialized = docToMarkdown(doc, { frontmatter: options.frontmatter })
+  const { frontmatter } = options
+  // The serializer ends its output with one newline and no trailing whitespace,
+  // so a source ending in whitespace carries a tail no round trip can bring
+  // back. Drop it before parsing, or the document comparison below would read
+  // that known trim as a changed document.
+  const doc = markdownToDoc(markdown.replace(/\s+$/u, ''), { frontmatter })
+  const serialized = docToMarkdown(doc, { frontmatter })
   if (trimTrailingNewlines(serialized) === trimTrailingNewlines(markdown)) return 'exact'
 
-  const before = nonBlankLines(markdown)
-  const after = nonBlankLines(serialized)
-  const textMatches =
-    before.length === after.length &&
-    before.every((line, i) => normalizeLine(line) === normalizeLine(after[i]))
+  // Structure: the output must re-parse to the document it was written from.
+  if (!markdownToDoc(serialized, { frontmatter }).eq(doc)) return 'lossy'
 
-  return textMatches ? 'normalizing' : 'lossy'
+  // Content: every line the source wrote must still be in the output.
+  const before = nonBlankLines(markdown).map(normalizeLine)
+  const after = nonBlankLines(serialized).map(normalizeLine)
+  return containsInOrder(after, before) ? 'normalizing' : 'lossy'
 }

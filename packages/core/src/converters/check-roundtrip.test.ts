@@ -88,6 +88,11 @@ describe('checkRoundTrip', () => {
     '>a', // the space after a blockquote marker is optional
     '>>a', // same, nested
     '> >a', // same, mixed
+    '>a\n*', // a lazy continuation regains its blockquote marker
+    '```', // an unterminated fence gains its closing fence
+    '```\ncode', // same, with content
+    '$$', // same, for a math block
+    '~~~', // same, for a tilde fence
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })
