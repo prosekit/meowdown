@@ -9,7 +9,7 @@ const SEED = Number.parseInt(import.meta.env.VITE_FUZZ_SEED) || Date.now() % (1 
 const NUM_RUNS = 100_000
 
 /// keep-sorted
-const TOKENS: string[] = [
+const TOKENS_BASE: string[] = [
   ' ',
   '_',
   '-',
@@ -44,12 +44,47 @@ const TOKENS: string[] = [
   'b',
 ]
 
-for (const [minLength, maxLength] of [
+// More characters markdown gives meaning to, sampled from the CommonMark, GFM,
+// micromark and markdown-it test suites. Control and non-ASCII characters get
+// their only coverage here, since the `grapheme-ascii` unit generates printable
+// ASCII alone.
+/// keep-sorted
+const TOKENS_EXTENDED: string[] = [
+  ',',
+  '’',
+  '«',
+  '{',
+  '}',
+  '@',
+  '\f',
+  '\u{200D}',
+  '\u{300}',
+  '\u{3000}',
+  '\u{A0}',
+  '\u{FEFF}',
+  '\u{FFFD}',
+  '\v',
+  '&',
+  '%',
+  '^',
+  '🍄',
+  '0',
+  '9',
+  'A',
+  '片',
+  "'",
+]
+
+const TOKENS: string[] = [...TOKENS_BASE, ...TOKENS_EXTENDED]
+
+const RANGES = [
   [1, 50],
   [51, 100],
   [101, 200],
   [201, 500],
-]) {
+] as const
+
+for (const [minLength, maxLength] of RANGES) {
   for (const customToken of [false, true]) {
     it(
       `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, customToken=${customToken}`,
