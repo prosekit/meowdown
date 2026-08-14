@@ -39,6 +39,19 @@ function stripWhitespace(line: string): string {
   return line.replaceAll(/\s/gu, '')
 }
 
+// A fence opens with a run of at least three backticks or tildes.
+const FENCE_RUN_RE = /^(?:`{3,}|~{3,})/u
+
+// Shorten a fence's run to the three characters it takes to open one: a closing
+// fence may be written longer than the fence it closes, and the serializer
+// writes it back at the opening fence's length, so the width is layout. This
+// runs before the whitespace goes, so `~~~ ~` keeps its `~` info string instead
+// of reading as a four-tilde run.
+function shortenFenceRun(line: string): string {
+  const run = FENCE_RUN_RE.exec(line)?.[0]
+  return run === undefined ? line : run.slice(0, 3) + line.slice(run.length)
+}
+
 // A GFM delimiter cell is optional colons around a run of dashes.
 const DELIMITER_CELL_RE = /^:?-+:?$/u
 
@@ -63,7 +76,7 @@ function canonicalizeTableRow(line: string): string | undefined {
 function contentLines(text: string): string[] {
   const lines: string[] = []
   for (const line of text.split('\n')) {
-    const content = stripWhitespace(line.replace(CONTAINER_PREFIX_RE, ''))
+    const content = stripWhitespace(shortenFenceRun(line.replace(CONTAINER_PREFIX_RE, '')))
     if (content !== '') lines.push(canonicalizeTableRow(content) ?? content)
   }
   return lines

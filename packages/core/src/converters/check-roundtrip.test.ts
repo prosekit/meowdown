@@ -161,6 +161,14 @@ const NORMALIZING_CASES: string[] = [
   '$$',
   '~~~',
 
+  // a closing fence may be longer than the one it closes
+  '```\ncode\n````',
+  '~~~\ncode\n~~~~~',
+  '```js\ncode\n````',
+  '```\n````',
+  '> ```\n> ````',
+  '- ```\n  ````',
+
   // a lazy setext underline stays text, and gains nothing but the marker space
   '>a\n=',
 
@@ -234,15 +242,7 @@ const NORMALIZING_CASES: string[] = [
   '<<<<<<< a\nx\n=======\ny\n>>>>>>> b',
 ]
 
-const LOSSY_CASES: string[] = [
-  // a closing fence may be longer than the one it closes
-  '```\ncode\n````',
-  '~~~\ncode\n~~~~~',
-  '```js\ncode\n````',
-  '```\n````',
-  '> ```\n> ````',
-  '- ```\n  ````',
-]
+const LOSSY_CASES: string[] = []
 
 describe('checkRoundTrip', () => {
   it.each(EXACT_CASES)('reports exact for %j', (markdown) => {
