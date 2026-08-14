@@ -176,7 +176,10 @@ class MdOut {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
       if (i > 0) {
-        this.parts.push('\n', lazy && needsLazyLine(line, this.linePrefix.length) ? '' : this.linePrefix)
+        this.parts.push(
+          '\n',
+          lazy && needsLazyLine(line, this.linePrefix.length) ? '' : this.linePrefix,
+        )
       }
       if (line !== '') this.parts.push(line)
     }
@@ -386,7 +389,8 @@ function emitBlockChildren(node: ProseMirrorNode, out: MdOut, tightItem = false)
       // An item that carries on the list above it needs no blank line. One that
       // opens a new list does, unless its own marker can interrupt what it
       // follows - which is a paragraph whenever the blank is being dropped.
-      const carriesOn = !isRunStart && listMarkerChar(node.child(item - 1)) === listMarkerChar(child)
+      const carriesOn =
+        !isRunStart && listMarkerChar(node.child(item - 1)) === listMarkerChar(child)
       if (tight && (carriesOn || canInterruptParagraph(child))) out.suppressBlank()
       emitList(child, out, tightRun)
     }

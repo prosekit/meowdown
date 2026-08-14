@@ -11,8 +11,6 @@ import type { ListMarker, MeowdownListAttrs, TaskMarker } from '../extensions/li
 import { isNodeOfType } from '../extensions/node-names.ts'
 import { getNodeBuilders, type TypedNodeBuilders } from '../extensions/schema.ts'
 import type { TableColumnAlign } from '../extensions/table-column-align.ts'
-
-import { canIndentCode } from './pm-to-md.ts'
 import {
   CHAR_ASTERISK,
   CHAR_DOT,
@@ -28,6 +26,8 @@ import {
   CHAR_TILDE,
   CHAR_UPPERCASE_X,
 } from '../unicode.ts'
+
+import { canIndentCode } from './pm-to-md.ts'
 
 /**
  * Options for {@link markdownToDoc}.
