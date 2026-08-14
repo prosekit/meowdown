@@ -255,11 +255,14 @@ function convertHeading(
   let content = dedentContinuation(raw, measureContentColumn(text, contentStart)).trim()
   if (isSetext) {
     // A setext heading's span swallows the underline line's blockquote marker
-    // (`> =\n> -` reads as content `=\n>`); the marker is structural, not
-    // content, so drop the trailing marker lines.
-    const lines = content.split('\n')
-    while (lines.length > 1 && /^[>\s]*$/u.test(lines[lines.length - 1])) lines.pop()
-    content = lines.join('\n')
+    // (`> =\n> -` reads as content `=\n>`); the markers are structural, not
+    // content, so strip them from each continuation line and drop any trailing
+    // lines that were only markers.
+    content = content
+      .split('\n')
+      .map((line, index) => (index === 0 ? line : line.replace(/^(?:>[ \t]*)+/u, '')))
+      .join('\n')
+      .trim()
   }
   // A trailing HeaderMark is the setext underline of a setext heading, or the
   // closing `#` run of an ATX heading (`# foo #`). CommonMark allows either run

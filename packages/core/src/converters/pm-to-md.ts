@@ -243,12 +243,14 @@ class MdOut {
   }
 
   /**
-   * Whether the next write would consume a fresh bullet marker (`- ` / `* `).
-   * A thematic break written right after it (`- ---`) would merge into one
-   * break, so the break must start on its own line instead.
+   * The bullet marker char of a pending list-item first line (`- ` / `* `), or
+   * null. A thematic break written right after it (`- ---`) would merge into
+   * one break, so it must start on its own line instead; a paragraph's first
+   * line may complete such a break too (`- --`).
    */
-  isListItemStart(): boolean {
-    return this.atLineStart && this.pendingFirst != null && /^[-*] +$/u.test(this.pendingFirst)
+  listItemMarker(): string | null {
+    if (!this.atLineStart || this.pendingFirst == null) return null
+    return /^([-*]) +$/u.exec(this.pendingFirst)?.[1] ?? null
   }
 }
 
@@ -256,7 +258,7 @@ class MdOut {
 // Dispatch
 // ─────────────────────────────────────────────────────────────────────
 
-function emit(node: ProseMirrorNode, out: MdOut, itemMarkerChar: string | null = null): void {
+function emit(node: ProseMirrorNode, out: MdOut): void {
   switch (node.type.name as NodeName) {
     case 'doc':
       emitBlockChildren(node, out)
@@ -266,7 +268,7 @@ function emit(node: ProseMirrorNode, out: MdOut, itemMarkerChar: string | null =
         out.closeEmptyBlock()
         return
       }
-      emitParagraph(node, out, itemMarkerChar)
+      emitParagraph(node, out)
       out.closeBlock()
       return
     case 'heading':
@@ -284,7 +286,7 @@ function emit(node: ProseMirrorNode, out: MdOut, itemMarkerChar: string | null =
       return
     case 'horizontalRule': {
       const { marker } = node.attrs as MeowdownHorizontalRuleAttrs
-      if (out.isListItemStart()) out.write('\n')
+      if (out.listItemMarker() != null) out.write('\n')
       out.write(marker || '---')
       out.closeBlock()
       return
@@ -313,19 +315,14 @@ function emit(node: ProseMirrorNode, out: MdOut, itemMarkerChar: string | null =
  * blocks (a paragraph followed by nested lists) are then separated by single
  * newlines instead of blank lines.
  */
-function emitBlockChildren(
-  node: ProseMirrorNode,
-  out: MdOut,
-  tightItem = false,
-  itemMarkerChar: string | null = null,
-): void {
+function emitBlockChildren(node: ProseMirrorNode, out: MdOut, tightItem = false): void {
   const count = node.childCount
   let index = 0
   while (index < count) {
     const child = node.child(index)
     if (!isNodeOfType(child, 'list')) {
       if (tightItem && index > 0) out.suppressBlank()
-      emit(child, out, index === 0 ? itemMarkerChar : null)
+      emit(child, out)
       index++
       continue
     }
@@ -398,17 +395,28 @@ const BLOCK_LINE_RE =
 // would re-read as a thematic break, so a marker's first content line gets the
 // guard too. The block parser preserves the backslash verbatim, so the round
 // trip is a fixed point.
-function emitParagraph(node: ProseMirrorNode, out: MdOut, itemMarkerChar: string | null): void {
-  const text = node.textContent
-  if (
-    !text.includes('\n') &&
-    !(/\s$/u.test(text) && BLOCK_LINE_RE.test(text.trimEnd())) &&
-    !(itemMarkerChar != null && isThematicBreakWithMarker(itemMarkerChar, text.trimEnd()))
-  ) {
-    emitInlineChildren(node, out)
-    return
+function emitParagraph(node: ProseMirrorNode, out: MdOut): void {
+  const itemMarkerChar = out.listItemMarker()
+  const single = node.childCount === 1 && node.child(0).isText ? node.child(0).text : undefined
+  if (single != null) {
+    const trimmed = single.trimEnd()
+    const needsGuard =
+      single.includes('\n') ||
+      (trimmed !== single && BLOCK_LINE_RE.test(trimmed)) ||
+      (itemMarkerChar != null && isThematicBreakWithMarker(itemMarkerChar, trimmed))
+    if (!needsGuard) {
+      out.write(single)
+      return
+    }
   }
-  out.write(escapeBlockGuardLines(text, itemMarkerChar))
+  out.write(escapeBlockGuardLines(node.textContent, itemMarkerChar))
+}
+
+// Whether a line would re-parse as a table delimiter row (each `|`-separated
+// cell is a dash run, optionally colon-aligned). A paragraph continuation line
+// shaped like this would turn the paragraph into a table, so it gets escaped.
+function isTableDelimiterLine(line: string): boolean {
+  return line.split('|').every((cell) => cell.trim() === '' || /^:?-+:?$/u.test(cell.trim()))
 }
 
 function escapeBlockGuardLines(
@@ -424,7 +432,10 @@ function escapeBlockGuardLines(
       BLOCK_LINE_RE.test(trimmed) && (guardFirstLine || index > 0 || trimmed !== line)
     const hrRisk =
       index === 0 && itemMarkerChar != null && isThematicBreakWithMarker(itemMarkerChar, trimmed)
-    if (blockLike || hrRisk) lines[index] = line.replace(/^[ \t]*/u, (leading) => leading + '\\')
+    const tableRisk = index > 0 && isTableDelimiterLine(trimmed)
+    if (blockLike || hrRisk || tableRisk) {
+      lines[index] = line.replace(/^[ \t]*/u, (leading) => leading + '\\')
+    }
   }
   return lines.join('\n')
 }
@@ -474,8 +485,7 @@ function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
   const prefix = `${delimiter}${' '.repeat(gap)}`
   const outputMarker = kind === 'task' ? `${prefix}[${checked ? checkMark : ' '}] ` : prefix
   const continuation = ' '.repeat(prefix.length)
-  const hrRiskChar = kind === 'ordered' ? null : bulletMarker
-  out.withPrefix(continuation, outputMarker, () => emitBlockChildren(node, out, tight, hrRiskChar))
+  out.withPrefix(continuation, outputMarker, () => emitBlockChildren(node, out, tight))
   out.closeBlock()
 }
 

@@ -32,7 +32,7 @@ function collapseWhitespace(line: string): string {
 // backslash; the parser keeps the backslash verbatim, so both spellings are the
 // same text here.
 function unescapeBlockGuard(line: string): string {
-  return line.replaceAll(/\\([#>+*`~=$_0-9-])/gu, (_match, char: string) => char)
+  return line.replaceAll(/\\([#>+*|`~=$_0-9-])/gu, (_match, char: string) => char)
 }
 
 // A line that starts with a fence marker (`$$`, ```` ``` ````, `~~~`, with or
@@ -62,6 +62,17 @@ function stripListMarker(line: string): string {
   return rest.replace(/^[ \t]+/u, '')
 }
 
+// Blockquote and list markers nest in either order (`> - x`, `- > x`), so strip
+// them until stable.
+function stripContainers(line: string): string {
+  for (;;) {
+    const stripped = stripBlockquotePrefix(stripListMarker(line))
+    if (stripped === line) break
+    line = stripped
+  }
+  return line
+}
+
 // A GFM delimiter cell is optional colons around a run of dashes. The dash
 // count is layout; only the colon positions carry content (column alignment).
 const DELIMITER_CELL_RE = /^:?-+:?$/u
@@ -75,17 +86,23 @@ function canonicalizeDelimiterCell(cell: string): string {
   return '---'
 }
 
-// A pipe-bearing line is read as a table row. The column count is layout (the
-// parser sizes a table by its widest row), so trailing empty cells in a data
-// row and trailing no-alignment cells in a delimiter row are dropped; the
-// re-parsed doc comparison below keeps the real column structure.
-function normalizeTableRow(line: string): string {
-  const cells = line
+// Split a pipe-bearing line into its cells, dropping leading container markers
+// and outer pipes. Used by both the row canonicalizer and the delimiter check.
+function splitTableCells(line: string): string[] {
+  return line
     .replace(/^[\s>]*/u, '')
     .replace(/^\|/u, '')
     .replace(/\|$/u, '')
     .split('|')
     .map(collapseWhitespace)
+}
+
+// A pipe-bearing line is read as a table row. The column count is layout (the
+// parser sizes a table by its widest row), so trailing empty cells in a data
+// row and trailing no-alignment cells in a delimiter row are dropped; the
+// re-parsed doc comparison below keeps the real column structure.
+function normalizeTableRow(line: string): string {
+  const cells = splitTableCells(line)
   while (cells.length > 0 && cells[cells.length - 1] === '') cells.pop()
   if (cells.length > 0 && cells.every((cell) => DELIMITER_CELL_RE.test(cell))) {
     for (let index = 0; index < cells.length; index++) {
@@ -97,19 +114,30 @@ function normalizeTableRow(line: string): string {
 }
 
 // Reduce one line to its content; a line that normalizes to nothing (blank,
-// structural, or a bare fence marker) is dropped from the comparison.
-function normalizeLine(line: string): string {
+// structural, or a bare fence marker) is dropped from the comparison. When
+// `forceTable` is set, a pipe-less line is read as a table row (GFM lets a
+// single-cell row omit its pipes), matching the `contentLines` table context.
+function normalizeLine(line: string, forceTable = false): string {
   let rest = unescapeBlockGuard(line)
   rest = collapseWhitespace(rest)
-  // Blockquote and list markers nest in either order (`> - x`, `- > x`), so
-  // strip them until stable.
-  for (;;) {
-    const stripped = stripBlockquotePrefix(stripListMarker(rest))
-    if (stripped === rest) break
-    rest = stripped
-  }
-  if (rest.includes('|')) return normalizeTableRow(rest)
-  return FENCE_START_RE.test(rest) ? '' : rest
+  rest = stripContainers(rest)
+  if (FENCE_START_RE.test(rest)) return ''
+  if (forceTable || rest.includes('|')) return normalizeTableRow(rest)
+  return rest
+}
+
+// Whether a container-stripped line would start a block that ends a table
+// (a heading, blockquote, list item, fence, or thematic break). A plain-text
+// line after a table's delimiter is a data row instead.
+const BLOCK_START_RE =
+  /^(?:#{1,6}(?:[ \t]|$)|>|(?:[-+*]|\d{1,9}[.)])(?:[ \t]|$)|(?:`{3,}|~{3,}|\${2})(?:[ \t]|$)|(?:-{3,}|\*{3,}|_{3,})[ \t]*$)/u
+
+// Whether a pipe-bearing line would read as a table delimiter row (every cell
+// is a dash run, optionally colon-aligned). A delimiter row is what makes the
+// following pipe-less lines data rows.
+function isDelimiterLine(line: string): boolean {
+  const cells = splitTableCells(line).filter((cell) => cell !== '')
+  return cells.length > 0 && cells.every((cell) => DELIMITER_CELL_RE.test(cell))
 }
 
 /**
@@ -117,12 +145,29 @@ function normalizeLine(line: string): string {
  * lines and lines that carry only structural markers. Two texts are
  * content-equal when their sequences match, so the serializer may normalize
  * layout (blockquote and list markers, fence forms, table cell padding) without
- * a line being reported as lost.
+ * a line being reported as lost. After a table's delimiter row (a delimiter
+ * cell following an earlier pipe line), following non-blank lines are rows
+ * until a blank line or a block start; a single-cell row may omit its pipes,
+ * so such a line is read as a row.
  */
 function contentLines(text: string): string[] {
   const out: string[] = []
+  let seenPipe = false
+  let afterDelimiter = false
   for (const line of text.split('\n')) {
-    const normalized = normalizeLine(line)
+    if (line.trim() === '') {
+      seenPipe = false
+      afterDelimiter = false
+      continue
+    }
+    const hasPipe = line.includes('|')
+    if (hasPipe) {
+      if (seenPipe && isDelimiterLine(line)) afterDelimiter = true
+      seenPipe = true
+    } else if (afterDelimiter && BLOCK_START_RE.test(collapseWhitespace(line))) {
+      afterDelimiter = false
+    }
+    const normalized = normalizeLine(line, hasPipe || afterDelimiter)
     if (normalized !== '') out.push(normalized)
   }
   return out
@@ -141,10 +186,7 @@ function sameContent(a: ProseMirrorNode, b: ProseMirrorNode): boolean {
 // whitespace and re-parsing can consume a leading tab as container indent, so
 // space/tab runs within a line are layout. Newlines (soft breaks) stay content.
 function normalizeText(text: string): string {
-  return unescapeBlockGuard(text)
-    .split('\n')
-    .map((line) => line.trim().replaceAll(/[ \t]+/gu, ' '))
-    .join('\n')
+  return unescapeBlockGuard(text).split('\n').map(collapseWhitespace).join('\n')
 }
 
 /**

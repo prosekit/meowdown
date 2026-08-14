@@ -86,6 +86,56 @@ describe('checkRoundTrip', () => {
     'a | b\n--- | ---\nc | d', // outer pipes are layout
     '> a | b\n> --- | ---', // same, inside a blockquote
     '| a |\n| --- |\n| b | c |', // a row wider than the delimiter grows the table instead of dropping the extra cell
+
+    // found by `checkRoundtrip-fuzz`: the serializer's canonical forms differ
+    // from the source but re-parse to the same document
+
+    // blockquote marker spacing
+    '>!',
+    '>-',
+    '>?',
+    '>! ',
+    '>? ',
+    '>>|',
+    // an empty math fence, and one with content
+    '$$',
+    '$$\n-',
+    // fence-with-language spacing
+    '```-',
+    '``` -',
+    '```\t-|-',
+    // an empty indented code block in a list item
+    '-\t\t',
+    // nested lists with tab gaps
+    '-\n\t-',
+    '-\t>-',
+    '-\n\t-\t-',
+    '-\n\t- -',
+    '-\n\t--',
+    // a bullet inside a blockquote-in-list
+    '- >-',
+    '- >-|-',
+    // a lazy continuation that would re-read as a setext heading
+    '>a\n-',
+    '>a\n|-',
+    '>-\n>',
+    '>-\n>\n-',
+    '>=\n>-',
+    '>|\n-\n>-',
+    '>=\n-\n>-',
+    '#\t\n-',
+    // trailing whitespace exposing a block start
+    '#\t',
+    '>]\n \t-',
+    '>]\n\t- -',
+    // pipe lines that are paragraphs, not tables
+    '?| ',
+    '-| ',
+    '|-\n-| ',
+    '-|\n-|\n-=',
+    // indented continuations
+    ' $\n\t-\t-',
+    ' $\n\t-\t[',
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })
