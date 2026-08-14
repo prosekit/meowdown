@@ -45,12 +45,17 @@ it.fails('finds no lossy input among sampled character', { timeout: 60_000 }, ()
     'a',
     'b',
   ]
-  const markdownArbitrary = fc.string({
-    unit: fc.constantFrom(...tokens),
-    minLength: 1,
-    maxLength: 60,
+  const unit = fc.constantFrom(...tokens)
+  fc.assert(fc.property(fc.string({ unit, minLength: 1, maxLength: 16 }), check), {
+    seed: 2,
+    numRuns: 100_000,
+    verbose: true,
   })
-  fc.assert(fc.property(markdownArbitrary, check), { seed: 2, numRuns: 100_000, verbose: true })
+  fc.assert(fc.property(fc.string({ unit, minLength: 17, maxLength: 60 }), check), {
+    seed: 2,
+    numRuns: 100_000,
+    verbose: true,
+  })
 })
 
 function check(input: string): boolean {
