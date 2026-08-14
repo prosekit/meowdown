@@ -1011,8 +1011,8 @@ describe('sliceColumn', () => {
     expect(sliceColumn('\t\tx', 4)).toBe('\tx')
   })
 
-  it('consumes a whole tab when the column falls mid-tab', () => {
-    expect(sliceColumn('\tx', 2)).toBe('x')
+  it('leaves a tab that would reach past the column', () => {
+    expect(sliceColumn('\tx', 2)).toBe('\tx')
   })
 
   it('returns the line unchanged at column 0', () => {

@@ -316,16 +316,24 @@ export function measureContentColumn(text: string, from: number): number {
 }
 
 /**
- * Drop a line's leading whitespace up to `column`, counting a tab as `4 - col % 4` columns.
+ * Drop a line's leading whitespace up to `column`, counting a tab as `4 - col % 4`
+ * columns. A tab that would reach past `column` is left alone: it stands for more
+ * columns than the container takes, and the rest of them are the line's own.
  */
 export function sliceColumn(line: string, column: number): string {
   let col = 0
   let index = 0
   while (index < line.length && col < column) {
     const code = line.charCodeAt(index)
-    if (code === CHAR_SPACE) col += 1
-    else if (code === CHAR_TAB) col += 4 - (col % 4)
-    else break
+    if (code === CHAR_SPACE) {
+      col += 1
+    } else if (code === CHAR_TAB) {
+      const width = 4 - (col % 4)
+      if (col + width > column) break
+      col += width
+    } else {
+      break
+    }
     index++
   }
   return line.slice(index)
@@ -361,6 +369,10 @@ export function dedentContinuation(content: string, column: number): string {
  * setext underline's line) are left alone. The cursor ends where it started.
  */
 function readLeafText(cursor: TreeCursor, text: string, from: number, to: number): string {
+  // A raw HTML or processing-instruction block runs its span past its last
+  // character to the line break that ends it. No leaf block's text holds that
+  // break: the serializer writes one of its own.
+  if (text.charCodeAt(to - 1) === CHAR_LINE_FEED) to -= 1
   if (!cursor.firstChild()) return text.slice(from, to)
   let content = ''
   let pos = from
@@ -534,7 +546,8 @@ function convertListItem(
   let order: number | undefined
   let marker: ListMarker | undefined
   let markWidth = 1
-  let markEndColumn: number | undefined
+  let markTo: number | undefined
+  let markEndColumn = 0
   // The gap between the marker and the content. A gap of 5+ is indented code (a
   // different node, so the first child's column would be the code block's), and 1 is
   // the canonical default; only a 2-4 space gap is a faithful, content-preserving
@@ -556,13 +569,17 @@ function convertListItem(
         marker = listMark.marker
         order = listMark.order
         markWidth = cursor.to - cursor.from
+        markTo = cursor.to
         markEndColumn = measureContentColumn(text, cursor.to)
         continue
       }
       if (!sawContent) {
         sawContent = true
-        const gap =
-          markEndColumn == null ? 1 : measureContentColumn(text, cursor.from) - markEndColumn
+        // Only content that opens on the marker's own line measures a gap; an
+        // item whose content starts on the next line takes the canonical single
+        // space, the column its own continuation lines are indented to.
+        const onMarkLine = markTo != null && text.lastIndexOf('\n', cursor.from - 1) < markTo
+        const gap = onMarkLine ? measureContentColumn(text, cursor.from) - markEndColumn : 1
         markerGap = gap >= 2 && gap <= 4 ? gap : 1
         contentColumn = column + markWidth + markerGap
       }
