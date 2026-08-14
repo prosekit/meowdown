@@ -252,7 +252,13 @@ function convertHeading(
   // Dedent before trimming so a multi-line setext heading inside a container
   // (rare) keeps its continuation lines aligned; trim then drops the outer ends.
   const raw = text.slice(contentStart, contentEnd)
-  const content = dedentContinuation(raw, measureContentColumn(text, contentStart)).trim()
+  let content = dedentContinuation(raw, measureContentColumn(text, contentStart)).trim()
+  if (isSetext) {
+    // A setext heading's span swallows the underline line's blockquote marker
+    // (`> =\n> -` reads as content `=\n>`); the marker is structural, not
+    // content, so drop the trailing marker line.
+    content = content.replace(/(?:\n[>\s]*)+$/u, '')
+  }
   // A trailing HeaderMark is the setext underline of a setext heading, or the
   // closing `#` run of an ATX heading (`# foo #`). CommonMark allows either run
   // any length, so keep the source count to make the round-trip lossless.
@@ -516,6 +522,7 @@ function convertListItem(
 
   if (cursor.firstChild()) {
     do {
+      if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) continue
       if (cursor.type.id !== LEZER_NODE_IDS.ListMark && firstContentColumn == null) {
         firstContentColumn = measureContentColumn(text, cursor.from)
       }
@@ -531,6 +538,18 @@ function convertListItem(
         taskChecked = task.checked
         taskMarker = task.taskMarker
         content.push(task.paragraph)
+        continue
+      }
+      // Lezer only emits a `Task` leaf when the marker is followed by a space
+      // or content; a marker at the end of the line is a `Paragraph` holding
+      // just `[ ]` / `[x]`. That is the same empty task and must parse the
+      // same way, or the round trip is unstable (an empty task item
+      // serializes to a bare `- [ ]` that re-parses as plain text).
+      const bareTaskMatch = kind === 'bullet' ? /^\[([ xX])\]$/u.exec(text.slice(cursor.from, cursor.to).trimEnd()) : null
+      if (bareTaskMatch != null) {
+        taskChecked = bareTaskMatch[1] !== ' '
+        taskMarker = bareTaskMatch[1] === 'X' ? 'X' : bareTaskMatch[1] === 'x' ? 'x' : undefined
+        content.push(nodes.paragraph())
         continue
       }
       content.push(...convertBlock(nodes, cursor, text))
@@ -622,32 +641,55 @@ function convertBlockMath(
 function convertTable(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string): ProseMirrorNode {
   // The delimiter row (a `TableDelimiter` that is a direct child of `Table`)
   // is the only source that always encodes every column, so it drives the
-  // column count and the column alignment. `@lezer/markdown` emits no
-  // `TableCell` for an empty cell, so counting per-row cells would drop empty
-  // columns and misalign the rest.
+  // column alignment. `@lezer/markdown` emits no `TableCell` for an empty
+  // cell, so counting per-row cells would drop empty columns and misalign the
+  // rest. The column count is the max across the delimiter row and every data
+  // row, so a row wider than the delimiter keeps its trailing cells instead of
+  // dropping them (the delimiters for the extra columns fall back to no
+  // alignment).
   let aligns: Array<TableColumnAlign | null> = []
+  let columnCount = 0
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.TableDelimiter) {
         aligns = parseDelimiterAligns(text.slice(cursor.from, cursor.to))
+        columnCount = Math.max(columnCount, aligns.length)
+      } else if (
+        cursor.type.id === LEZER_NODE_IDS.TableHeader ||
+        cursor.type.id === LEZER_NODE_IDS.TableRow
+      ) {
+        columnCount = Math.max(columnCount, countTableRowCells(cursor))
       }
     } while (cursor.nextSibling())
     cursor.parent()
   }
+  const paddedAligns: Array<TableColumnAlign | null> = []
+  for (let index = 0; index < columnCount; index++) paddedAligns.push(aligns[index] ?? null)
 
   const rows: ProseMirrorNode[] = []
   if (cursor.firstChild()) {
     do {
       const id = cursor.type.id
       if (id === LEZER_NODE_IDS.TableHeader) {
-        rows.push(convertTableRow(nodes, cursor, text, true, aligns))
+        rows.push(convertTableRow(nodes, cursor, text, true, paddedAligns))
       } else if (id === LEZER_NODE_IDS.TableRow) {
-        rows.push(convertTableRow(nodes, cursor, text, false, aligns))
+        rows.push(convertTableRow(nodes, cursor, text, false, paddedAligns))
       }
     } while (cursor.nextSibling())
     cursor.parent()
   }
   return nodes.table(rows)
+}
+
+function countTableRowCells(cursor: TreeCursor): number {
+  let count = 0
+  if (cursor.firstChild()) {
+    do {
+      if (cursor.type.id === LEZER_NODE_IDS.TableCell) count++
+    } while (cursor.nextSibling())
+    cursor.parent()
+  }
+  return count
 }
 
 function parseDelimiterAligns(separator: string): Array<TableColumnAlign | null> {
