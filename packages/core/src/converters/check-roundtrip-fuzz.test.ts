@@ -72,7 +72,7 @@ const TOKENS_EXTENDED: string[] = [
 ]
 
 const UNITS = [
-  { name: 'grapheme-ascii', unit: 'grapheme-ascii' },
+  { name: 'ascii', unit: 'grapheme-ascii' },
   { name: 'base', unit: fc.constantFrom(...TOKENS_BASE) },
   { name: 'extended', unit: fc.constantFrom(...TOKENS_BASE, ...TOKENS_EXTENDED) },
 ] as const
