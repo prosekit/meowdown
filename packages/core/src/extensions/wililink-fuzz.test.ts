@@ -749,10 +749,14 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 20 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       - top
         - [[foo]]
         - [[bar]]
+      ----- markdown after -------------
+      - top
+        - [[foo]]
+        - [[bar]]·
       ----- selection before -----------
       top
       [[foo]]
@@ -764,10 +768,14 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 21 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       - top
         - [[foo]]
         - [[bar]]
+      ----- markdown after -------------
+      - top
+        - [[foo]]
+        - [[bar]]·
       ----- selection before -----------
       top
       [[foo]]
@@ -779,10 +787,14 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 22 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       - top
         - [[foo]]
         - [[bar]]
+      ----- markdown after -------------
+      - top
+        - [[foo]]
+        - [[bar]]·
       ----- selection before -----------
       top
       [[foo]]
@@ -794,10 +806,14 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 23 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       - top
         - [[foo]]
         - [[bar]]
+      ----- markdown after -------------
+      - top
+        - [[foo]]
+        - [[bar]]·
       ----- selection before -----------
       top
       [[foo]]
@@ -809,10 +825,14 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 24 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       - top
         - [[foo]]
         - [[bar]]
+      ----- markdown after -------------
+      - top
+        - [[foo]]
+        - [[bar]]·
       ----- selection before -----------
       top
       [[foo]]
@@ -824,10 +844,14 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 25 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       - top
         - [[foo]]
         - [[bar]]
+      ----- markdown after -------------
+      - top
+        - [[foo]]
+        - [[bar]]·
       ----- selection before -----------
       top
       [[foo]]
@@ -839,10 +863,14 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 26 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       - top
         - [[foo]]
         - [[bar]]
+      ----- markdown after -------------
+      - top
+        - [[foo]]
+        - [[bar]]·
       ----- selection before -----------
       top
       [[foo]]
@@ -1914,10 +1942,14 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 20 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       - top
         - [[foo]]
         - [[bar]]
+      ----- markdown after -------------
+      - top
+        - [[foo]]
+        - [[bar]]·
       ----- selection before -----------
       top
       [[foo]]
@@ -1929,10 +1961,14 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 21 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       - top
         - [[foo]]
         - [[bar]]
+      ----- markdown after -------------
+      - top
+        - [[foo]]
+        - [[bar]]·
       ----- selection before -----------
       top
       [[foo]]
@@ -1944,10 +1980,14 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 22 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       - top
         - [[foo]]
         - [[bar]]
+      ----- markdown after -------------
+      - top
+        - [[foo]]
+        - [[bar]]·
       ----- selection before -----------
       top
       [[foo]]
@@ -1959,10 +1999,14 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 23 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       - top
         - [[foo]]
         - [[bar]]
+      ----- markdown after -------------
+      - top
+        - [[foo]]
+        - [[bar]]·
       ----- selection before -----------
       top
       [[foo]]
@@ -1974,10 +2018,14 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 24 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       - top
         - [[foo]]
         - [[bar]]
+      ----- markdown after -------------
+      - top
+        - [[foo]]
+        - [[bar]]·
       ----- selection before -----------
       top
       [[foo]]
@@ -1989,10 +2037,14 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 25 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       - top
         - [[foo]]
         - [[bar]]
+      ----- markdown after -------------
+      - top
+        - [[foo]]
+        - [[bar]]·
       ----- selection before -----------
       top
       [[foo]]
@@ -2004,10 +2056,14 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 26 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       - top
         - [[foo]]
         - [[bar]]
+      ----- markdown after -------------
+      - top
+        - [[foo]]
+        - [[bar]]·
       ----- selection before -----------
       top
       [[foo]]
@@ -2573,7 +2629,7 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
       ----- markdown before ------------
       a [[foo]] b
       ----- markdown after -------------
-      a [[foo]]
+      a [[foo]]·
       ----- selection before -----------
       a [[foo]] b┃
       ----- selection after ------------
@@ -2708,8 +2764,10 @@ describe('caret fuzz over a wikilink inside a paragraph in focus mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 12 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       a [[foo]] b
+      ----- markdown after -------------
+      a [[foo]] b·
       ----- selection before -----------
       a [[foo]] b┃
       ----- selection after ------------
@@ -3146,8 +3204,10 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 9 ========
-      ----- markdown before/after ------
+      ----- markdown before ------------
       [[foo]][[bar]]
+      ----- markdown after -------------
+      [[foo]][[bar]]·
       ----- selection before -----------
       [[foo]][[bar]]┃
       ----- selection after ------------
@@ -3155,8 +3215,10 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 10 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       [[foo]][[bar]]
+      ----- markdown after -------------
+      [[foo]][[bar]]·
       ----- selection before -----------
       [[foo]][[bar]]┃
       ----- selection after ------------
@@ -3164,8 +3226,10 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 11 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       [[foo]][[bar]]
+      ----- markdown after -------------
+      [[foo]][[bar]]·
       ----- selection before -----------
       [[foo]][[bar]]┃
       ----- selection after ------------
@@ -3173,8 +3237,10 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 12 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       [[foo]][[bar]]
+      ----- markdown after -------------
+      [[foo]][[bar]]·
       ----- selection before -----------
       [[foo]][[bar]]┃
       ----- selection after ------------
@@ -3182,8 +3248,10 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 13 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       [[foo]][[bar]]
+      ----- markdown after -------------
+      [[foo]][[bar]]·
       ----- selection before -----------
       [[foo]][[bar]]┃
       ----- selection after ------------
@@ -3191,8 +3259,10 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 14 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       [[foo]][[bar]]
+      ----- markdown after -------------
+      [[foo]][[bar]]·
       ----- selection before -----------
       [[foo]][[bar]]┃
       ----- selection after ------------
@@ -3200,8 +3270,10 @@ describe('caret fuzz over two adjacent wikilinks in focus mode', () => {
       ----------------------------------
 
       ===== key: {Space} pos: 15 =======
-      ----- markdown before/after ------
+      ----- markdown before ------------
       [[foo]][[bar]]
+      ----- markdown after -------------
+      [[foo]][[bar]]·
       ----- selection before -----------
       [[foo]][[bar]]┃
       ----- selection after ------------

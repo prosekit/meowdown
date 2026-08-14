@@ -123,7 +123,7 @@ describe('SlashMenu', () => {
     await expect.element(pmRoot.locate('h1')).not.toBeInTheDocument()
     expect(ref.current?.getMarkdown()).toMatchInlineSnapshot(`
       """
-      Hello
+      Hello 
 
       """
     `)
@@ -140,7 +140,7 @@ describe('SlashMenu', () => {
     await expect.element(pmRoot.locate('.prosemirror-flat-list')).not.toBeInTheDocument()
     expect(ref.current?.getMarkdown()).toMatchInlineSnapshot(`
       """
-      Buy milk
+      Buy milk 
 
       """
     `)

@@ -1,3 +1,4 @@
+import { isSpaceChar } from '@meowdown/markdown'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
 import type { MeowdownCodeBlockAttrs } from '../extensions/code-block.ts'
@@ -8,7 +9,17 @@ import type { MeowdownHTMLCommentAttrs } from '../extensions/html-comment.ts'
 import type { MeowdownListAttrs } from '../extensions/list.ts'
 import { isNodeOfType, type NodeName } from '../extensions/node-names.ts'
 import type { MeowdownTableCellAttrs, TableColumnAlign } from '../extensions/table-column-align.ts'
-import { CHAR_BACKTICK, CHAR_TILDE } from '../unicode.ts'
+import {
+  CHAR_ASTERISK,
+  CHAR_BACKTICK,
+  CHAR_EQUAL,
+  CHAR_GREATER_THAN,
+  CHAR_HYPHEN_MINUS,
+  CHAR_LINE_FEED,
+  CHAR_SPACE,
+  CHAR_TAB,
+  CHAR_TILDE,
+} from '../unicode.ts'
 import { longestCharRun } from '../utils/backticks.ts'
 
 /**
@@ -87,7 +98,10 @@ function emitHeading(node: ProseMirrorNode, out: MdOut): void {
     out.closeBlock()
     return
   }
-  out.write(HEADING_PREFIX[attrs.level] ?? '# ')
+  // Every entry ends with the space that separates the marker from the text.
+  // An empty heading has no text to separate, and writes just its hashes.
+  const prefix = HEADING_PREFIX[attrs.level] ?? '# '
+  out.write(node.content.size > 0 ? prefix : prefix.slice(0, -1))
   emitInlineChildren(node, out)
   const closingHashes = attrs.closingHashes
   if (closingHashes != null && closingHashes > 0) {
@@ -125,10 +139,26 @@ class MdOut {
    */
   private deferredBlankPrefix: string | null = null
 
-  write(text: string): void {
+  /**
+   * Write `text`, opening each embedded line with the current line prefix.
+   *
+   * `lazyLines` lets a line the prefix would change the meaning of - a setext
+   * underline, or a tab-indented line under a blockquote - go out flush left
+   * instead. Markdown keeps such a line as text only when it arrives as a lazy
+   * continuation, and the container picks the paragraph up again on the next
+   * line. Only leaf-block text may ask for this: an unprefixed line would fall
+   * out of a code block or an html comment.
+   */
+  write(text: string, lazyLines = false): void {
     if (text === '') return
     this.emitDeferredBlankLine()
     if (this.atLineStart) {
+      // `- ` and a paragraph reading `--` make the line `- --`, a thematic
+      // break. Leave the marker on a line of its own and indent the text under
+      // it, where it stays the item's own paragraph.
+      if (this.pendingFirst !== null && isThematicBreak(this.pendingFirst + text)) {
+        this.breakMarkerLine()
+      }
       this.parts.push(this.pendingFirst ?? this.linePrefix)
       this.pendingFirst = null
       this.atLineStart = false
@@ -142,10 +172,17 @@ class MdOut {
     const lines = text.split('\n')
     // Index loop avoids the `.entries()` iterator allocation - measurable
     // (~7%) on the hot write() path.
-
+    const lazy = lazyLines && this.linePrefix !== ''
+    // Only a blockquote's prefix moves a tab: a list's is whitespace, and the
+    // parser measures that back off in the same columns it added.
+    const quoted = lazy && this.linePrefix.includes('>')
     for (let i = 0; i < lines.length; i++) {
-      if (i > 0) this.parts.push('\n', this.linePrefix)
-      if (lines[i] !== '') this.parts.push(lines[i])
+      const line = lines[i]
+      if (i > 0) {
+        const flush = lazy && (isSetextUnderline(line) || (quoted && hasTabIndent(line)))
+        this.parts.push('\n', flush ? '' : this.linePrefix)
+      }
+      if (line !== '') this.parts.push(line)
     }
   }
 
@@ -173,16 +210,33 @@ class MdOut {
    */
   closeBlock(): void {
     // An empty block (e.g. an empty list item `- `) still owns a line: flush
-    // its pending marker, trimmed, so it is neither dropped nor left dangling.
+    // its pending marker so it is neither dropped nor left dangling. The gap it
+    // left for content that never came is dropped - except after a checkbox,
+    // where that space is what keeps the line a task instead of a bullet whose
+    // text reads `[ ]`.
     if (this.atLineStart && this.pendingFirst !== null) {
       this.emitDeferredBlankLine()
-      this.parts.push(this.pendingFirst.trimEnd())
+      const marker = this.pendingFirst
+      this.parts.push(marker.endsWith('] ') ? marker : marker.trimEnd())
       this.pendingFirst = null
       this.atLineStart = false
     }
     if (!this.atLineStart) this.parts.push('\n')
     this.atLineStart = true
     this.deferredBlankPrefix = this.linePrefix
+  }
+
+  /**
+   * Give the markers pending on this line a line of their own, so what comes
+   * next opens a new one. Unlike `closeBlock` this owes no blank line: the
+   * items are still part of the same tight list.
+   */
+  private breakMarkerLine(): void {
+    if (this.pendingFirst === null) return
+    this.emitDeferredBlankLine()
+    this.parts.push(this.pendingFirst.trimEnd(), '\n')
+    this.pendingFirst = null
+    this.atLineStart = true
   }
 
   /**
@@ -208,7 +262,15 @@ class MdOut {
     this.linePrefix = savedLine + continuation
     if (firstLine !== null) {
       const base = savedFirst ?? savedLine
-      this.pendingFirst = base + firstLine
+      // Three nested empty bullets fold their markers onto one line (`- - -`),
+      // which reads back as a thematic break. Break the line first, so this
+      // marker opens a new one under the parent item's indent.
+      if (savedFirst !== null && isThematicBreak(base + firstLine)) {
+        this.breakMarkerLine()
+        this.pendingFirst = savedLine + firstLine
+      } else {
+        this.pendingFirst = base + firstLine
+      }
     }
     fn()
     this.linePrefix = savedLine
@@ -222,8 +284,17 @@ class MdOut {
   }
 
   finish(): string {
-    // Trim trailing whitespace + ensure exactly one final newline.
-    return this.parts.join('').replace(/\s+$/, '') + '\n'
+    // Drop the blank lines the last block left behind and end with exactly one
+    // newline. A blank line is layout; trailing spaces on a line that carries
+    // content are part of that text and stay, so the text survives a round trip.
+    const text = this.parts.join('')
+    let cut = text.length
+    for (let i = text.length - 1; i >= 0; i--) {
+      const code = text.charCodeAt(i)
+      if (code === CHAR_LINE_FEED) cut = i
+      else if (code !== CHAR_SPACE && code !== CHAR_TAB) break
+    }
+    return text.slice(0, cut) + '\n'
   }
 
   private emitDeferredBlankLine(): void {
@@ -348,6 +419,43 @@ function isTightItem(item: ProseMirrorNode): boolean {
 }
 
 /**
+ * Whether `line` opens with a tab. A tab measures to the next multiple of four
+ * from where it sits*, so a blockquote's `> ` in front of it stands for fewer
+ * columns than it did flush left - which can drop the line under the four
+ * columns that were keeping its `$$` or ``` ``` ``` from opening a block.
+ */
+function hasTabIndent(line: string): boolean {
+  for (let i = 0; i < line.length; i++) {
+    const code = line.charCodeAt(i)
+    if (code === CHAR_TAB) return true
+    if (code !== CHAR_SPACE) return false
+  }
+  return false
+}
+
+/**
+ * Whether `line` is a run of one character, `=` or `-`, and so would read as a
+ * setext underline under a container's line prefix. Surrounding whitespace does
+ * not save it: an underline may carry any indentation the prefix leaves under
+ * four columns, and any trailing spaces at all.
+ */
+function isSetextUnderline(line: string): boolean {
+  // Measured against `/^\s*([=-])\1*\s*$/u` over the lines this actually sees
+  // (mostly prose, some underlines, two 400-char lines), chromium, `pnpm bench`:
+  // this scan 1.77M hz, the regex 1.08M hz - 1.65x, repeatable across runs.
+  let start = 0
+  while (start < line.length && isSpaceChar(line.charCodeAt(start))) start++
+  const first = line.charCodeAt(start)
+  if (first !== CHAR_EQUAL && first !== CHAR_HYPHEN_MINUS) return false
+  let end = line.length
+  while (isSpaceChar(line.charCodeAt(end - 1))) end--
+  for (let i = start + 1; i < end; i++) {
+    if (line.charCodeAt(i) !== first) return false
+  }
+  return true
+}
+
+/**
  * Walk inline children writing text directly. The schema has no marks, so
  * every inline child is currently a text node - but going through this
  * loop instead of `node.textContent` avoids one intermediate string
@@ -357,7 +465,7 @@ function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
   const count = node.childCount
   for (let i = 0; i < count; i++) {
     const child = node.child(i)
-    if (child.isText && child.text) out.write(child.text)
+    if (child.isText && child.text) out.write(child.text, true)
     // Future inline node types (hardBreak, image, mention) go here.
   }
 }
@@ -395,6 +503,29 @@ function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
   const continuation = ' '.repeat(prefix.length)
   out.withPrefix(continuation, outputMarker, () => emitBlockChildren(node, out, tight))
   out.closeBlock()
+}
+
+/**
+ * Whether a line of list markers reads as a thematic break: three or more `-`
+ * or `*`, all the same character, with nothing but spaces, tabs and blockquote
+ * markers around them.
+ */
+function isThematicBreak(line: string): boolean {
+  let breakChar = 0
+  let count = 0
+  for (let i = 0; i < line.length; i++) {
+    const code = line.charCodeAt(i)
+    if (code === CHAR_LINE_FEED) break
+    if (code === CHAR_SPACE || code === CHAR_TAB) continue
+    // A blockquote marker only opens the line. One between the dashes is text,
+    // and text keeps the line from reading as a break at all.
+    if (code === CHAR_GREATER_THAN && count === 0) continue
+    if (code !== CHAR_HYPHEN_MINUS && code !== CHAR_ASTERISK) return false
+    if (breakChar === 0) breakChar = code
+    else if (code !== breakChar) return false
+    count++
+  }
+  return count >= 3
 }
 
 // ─────────────────────────────────────────────────────────────────────

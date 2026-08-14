@@ -187,7 +187,9 @@ describe('docToMarkdown', () => {
   it('keeps an empty task marker', () => {
     const doc = n.doc(n.list({ kind: 'task', checked: false }, n.paragraph()))
     const markdown = docToMarkdown(doc)
-    expect(markdown).toBe('- [ ]\n')
+    // The space after the checkbox stays: `- [ ]` on its own is a bullet whose
+    // text reads `[ ]`, not a task.
+    expect(markdown).toBe('- [ ] \n')
   })
 
   it('keeps an empty ordered marker', () => {

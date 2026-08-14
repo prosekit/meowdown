@@ -50,7 +50,7 @@ describe('text', () => {
     expect(roundtrip('amp & lt < gt >')).toBe('amp & lt < gt >\n')
   })
 
-  it.fails('keeps trailing spaces', () => {
+  it('keeps trailing spaces', () => {
     expect(roundtrip('trailing spaces   ')).toBe('trailing spaces   \n')
   })
 })
@@ -229,9 +229,9 @@ describe('inline', () => {
     expect(roundtrip('[foo]: /url')).toBe('[foo]: /url\n')
   })
 
-  it('normalizes nested multiline link reference indentation', () => {
+  it('keeps nested multiline link reference indentation', () => {
     const markdown = '> [foo]: /url\n>   "A title"\n'
-    expect(roundtrip(markdown)).toBe('> [foo]: /url\n> "A title"\n')
+    expect(roundtrip(markdown)).toBe(markdown)
   })
 })
 
@@ -576,7 +576,7 @@ describe('task lists', () => {
     expect(roundtrip('- [X] upper')).toBe('- [X] upper\n')
   })
 
-  it.fails('keeps a trailing space after the marker', () => {
+  it('keeps a trailing space after the marker', () => {
     expect(roundtrip('- [ ] ')).toBe('- [ ] \n')
   })
 
