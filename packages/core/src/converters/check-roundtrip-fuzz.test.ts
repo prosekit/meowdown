@@ -13,6 +13,7 @@ const TOKENS_STRUCTURAL: string[] = [
   ' ',
   '-',
   '*',
+  '\n',
   '\t',
   '#',
   '`',
@@ -22,7 +23,6 @@ const TOKENS_STRUCTURAL: string[] = [
   '|',
   '~',
   '$',
-  '\n',
 ]
 
 /// keep-sorted
