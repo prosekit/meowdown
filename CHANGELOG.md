@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.65.4](https://github.com/prosekit/meowdown/compare/v0.65.3...v0.65.4) (2026-08-14)
+
+
+### Bug Fixes
+
+* stop reporting loss when only a closing fence shortens ([#473](https://github.com/prosekit/meowdown/issues/473)) ([5d5fb1d](https://github.com/prosekit/meowdown/commit/5d5fb1db2dca255ccbf35c333e13776b08f8d9f3))
+* stop the table-row false positive in `checkRoundTrip` ([#475](https://github.com/prosekit/meowdown/issues/475)) ([e2d6700](https://github.com/prosekit/meowdown/commit/e2d67009ef00d5ce17707e1b22e3c6ff22088866))
+
 ## [0.65.3](https://github.com/prosekit/meowdown/compare/v0.65.2...v0.65.3) (2026-08-14)
 
 
