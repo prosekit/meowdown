@@ -95,10 +95,8 @@ const TOKENS_RUNS: string[] = [
 /// keep-sorted
 const TOKENS_STRUCTURAL: string[] = [' ', '-', '*', '\t', '#', '`', '+', '=', '>', '|', '~', '$']
 
-const baseUnit = fc.constantFrom(...TOKENS_BASE, ...TOKENS_RUNS)
-
 const UNITS = [
-  { name: 'base', unit: baseUnit },
+  { name: 'base', unit: fc.constantFrom(...TOKENS_BASE, ...TOKENS_RUNS) },
   { name: 'extended', unit: fc.constantFrom(...TOKENS_BASE, ...TOKENS_RUNS, ...TOKENS_EXTENDED) },
   // the base alphabet re-weighted toward newlines and block markers
   {
@@ -106,7 +104,7 @@ const UNITS = [
     unit: fc.oneof(
       { arbitrary: fc.constant('\n'), weight: 20 },
       { arbitrary: fc.constantFrom(...TOKENS_STRUCTURAL), weight: 40 },
-      { arbitrary: baseUnit, weight: 40 },
+      { arbitrary: fc.constantFrom(...TOKENS_BASE, ...TOKENS_RUNS), weight: 40 },
     ),
   },
 ] as const
