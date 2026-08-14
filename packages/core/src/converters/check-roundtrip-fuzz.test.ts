@@ -94,17 +94,11 @@ for (const [minLength, maxLength] of RANGES) {
       `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, unit=${unit.name}`,
       { timeout: 60_000 },
       () => {
-        fc.assert(
-          fc.property(
-            fc.string({
-              unit: unit.unit,
-              minLength,
-              maxLength,
-            }),
-            check,
-          ),
-          { seed: SEED, numRuns: NUM_RUNS, verbose: true },
-        )
+        fc.assert(fc.property(fc.string({ unit: unit.unit, minLength, maxLength }), check), {
+          seed: SEED,
+          numRuns: NUM_RUNS,
+          verbose: true,
+        })
       },
     )
   }
