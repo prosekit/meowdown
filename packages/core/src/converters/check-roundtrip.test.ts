@@ -85,13 +85,8 @@ describe('checkRoundTrip', () => {
     '| a    | b  |\n| ---- | -- |\n| c    | d  |', // pretty-printed cell padding is layout
     'a | b\n--- | ---\nc | d', // outer pipes are layout
     '> a | b\n> --- | ---', // same, inside a blockquote
+    '| a |\n| --- |\n| b | c |', // a row wider than the delimiter grows the table instead of dropping the extra cell
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
-  })
-
-  it.each([
-    '| a |\n| --- |\n| b | c |', // a cell beyond the delimiter's column count is dropped
-  ])('reports lossy for %j', (markdown) => {
-    expect(checkRoundTrip(markdown)).toBe('lossy')
   })
 })
