@@ -80,6 +80,10 @@ describe('checkRoundTrip', () => {
     '- > a\n  >   b',
     // a setext heading inside a blockquote keeps its underline on its own line
     '> a\n> -',
+    // a link reference's label spans the break, and holds the `>` marker inside it
+    '> [\n> $]:*',
+    // only a list numbered 1 interrupts a paragraph, so the blank line stays
+    '+ ;\n\n2.',
   ])('reports exact for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('exact')
   })
@@ -114,6 +118,8 @@ describe('checkRoundTrip', () => {
     '>[\n-\t\n$', // same, for a dash run with trailing whitespace
     '>-\n>', // a blockquote marker on the line after an empty item is not item text
     '>\t \n1', // an empty indented code block has no indented spelling
+    '<?\n\t', // an unterminated processing instruction runs to the end of the document
+    '\n<?\n\n', // same, with the blank lines after it
     '| a |\n| --- |\n| b | c |', // a cell past the delimiter row widens the table instead of dropping
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')

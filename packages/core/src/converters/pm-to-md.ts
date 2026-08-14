@@ -384,12 +384,41 @@ function emitBlockChildren(node: ProseMirrorNode, out: MdOut, tightItem = false)
     while (runEnd < count && isNodeOfType(node.child(runEnd), 'list')) runEnd++
     const tightRun = isTightRun(node, index, runEnd)
     for (let item = index; item < runEnd; item++) {
+      const child = node.child(item)
       const isRunStart = item === index
-      if (isRunStart ? tightItem && index > 0 : tightRun) out.suppressBlank()
-      emitList(node.child(item), out, tightRun)
+      const tight = isRunStart ? tightItem && index > 0 : tightRun
+      // An item that carries on the list above it needs no blank line. One that
+      // opens a new list does, unless its own marker can interrupt what it
+      // follows - which is a paragraph whenever the blank is being dropped.
+      const carriesOn = !isRunStart && listMarkerChar(node.child(item - 1)) === listMarkerChar(child)
+      if (tight && (carriesOn || canInterruptParagraph(child))) out.suppressBlank()
+      emitList(child, out, tightRun)
     }
     index = runEnd
   }
+}
+
+/**
+ * Whether `list`'s marker line still opens an item when the line above it is a
+ * paragraph. CommonMark lets a list interrupt a paragraph only when the item is
+ * numbered 1 or unnumbered; any other number reads as more of the paragraph, so
+ * the blank line before it is what keeps it a list at all.
+ */
+function canInterruptParagraph(list: ProseMirrorNode): boolean {
+  const attrs = list.attrs as MeowdownListAttrs
+  return attrs.kind !== 'ordered' || (attrs.order ?? 1) === 1
+}
+
+/**
+ * The character a list item's marker ends with: the bullet itself, or the
+ * delimiter after an ordered item's number. A markdown list runs for as long as
+ * this stays the same, and a different one opens a new list.
+ */
+function listMarkerChar(node: ProseMirrorNode): string {
+  const { kind, marker, collapsed } = node.attrs as MeowdownListAttrs
+  if (kind === 'ordered') return marker === ')' ? ')' : '.'
+  if (kind === 'task') return marker === '+' ? '+' : marker === '*' ? '*' : '-'
+  return collapsed ? '+' : marker === '*' ? '*' : '-'
 }
 
 /**
@@ -475,29 +504,15 @@ function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
 // ─────────────────────────────────────────────────────────────────────
 
 function emitList(node: ProseMirrorNode, out: MdOut, tight: boolean): void {
-  const { kind, marker, order, taskMarker, collapsed, markerGap, checked } =
-    node.attrs as MeowdownListAttrs
+  const { kind, order, taskMarker, markerGap, checked } = node.attrs as MeowdownListAttrs
   // A bullet records its fold state in the marker: `+` is collapsed, `-`/`*` are
   // expanded. A task uses `+` for the circle shape, independent of collapse (a
-  // task's fold is view-state and never written to Markdown). Ordered lists use
-  // the `delimiter` below, so `bulletMarker` does not apply to them.
-  const bulletMarker =
-    kind === 'task'
-      ? marker === '+'
-        ? '+'
-        : marker === '*'
-          ? '*'
-          : '-'
-      : collapsed
-        ? '+'
-        : marker === '*'
-          ? '*'
-          : '-'
-  const orderMarker = marker === ')' ? ')' : '.'
+  // task's fold is view-state and never written to Markdown).
+  const markerChar = listMarkerChar(node)
   const checkMark = taskMarker === 'X' ? 'X' : 'x'
   // The delimiter plus its original gap (1-4 spaces).
   const gap = Math.min(Math.max(markerGap ?? 1, 1), 4)
-  const delimiter = kind === 'ordered' ? `${order ?? 1}${orderMarker}` : bulletMarker
+  const delimiter = kind === 'ordered' ? `${order ?? 1}${markerChar}` : markerChar
   const prefix = `${delimiter}${' '.repeat(gap)}`
   const outputMarker = kind === 'task' ? `${prefix}[${checked ? checkMark : ' '}] ` : prefix
   const continuation = ' '.repeat(prefix.length)

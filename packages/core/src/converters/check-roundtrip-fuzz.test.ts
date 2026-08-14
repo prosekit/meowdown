@@ -58,7 +58,7 @@ it('finds no lossy input among ascii characters', { timeout: 60_000 }, () => {
   )
 })
 
-it.fails('finds no lossy input among sampled characters', { timeout: 60_000 }, () => {
+it('finds no lossy input among sampled characters', { timeout: 60_000 }, () => {
   fc.assert(
     fc.property(
       fc.string({

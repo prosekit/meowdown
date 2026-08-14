@@ -359,6 +359,26 @@ export function dedentContinuation(content: string, column: number): string {
 }
 
 /**
+ * The blockquote markers inside `from`..`to`, as a flat run of `from, to` pairs
+ * in document order. A marker can sit at any depth: a paragraph carries its own,
+ * while a link reference's lands inside the `LinkLabel` that spans the break.
+ * The cursor ends where it started.
+ */
+function collectQuoteMarks(cursor: TreeCursor, marks: number[], from: number, to: number): void {
+  if (!cursor.firstChild()) return
+  do {
+    if (cursor.from >= to) break
+    if (cursor.to <= from) continue
+    if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) {
+      marks.push(cursor.from, cursor.to)
+      continue
+    }
+    collectQuoteMarks(cursor, marks, from, to)
+  } while (cursor.nextSibling())
+  cursor.parent()
+}
+
+/**
  * The source between `from` and `to`, minus the blockquote markers inside it.
  *
  * In block-only parsing a leaf block has no inline children, with one
@@ -369,21 +389,29 @@ export function dedentContinuation(content: string, column: number): string {
  * setext underline's line) are left alone. The cursor ends where it started.
  */
 function readLeafText(cursor: TreeCursor, text: string, from: number, to: number): string {
-  // A raw HTML or processing-instruction block runs its span past its last
-  // character to the line break that ends it. No leaf block's text holds that
-  // break: the serializer writes one of its own.
-  if (text.charCodeAt(to - 1) === CHAR_LINE_FEED) to -= 1
-  if (!cursor.firstChild()) return text.slice(from, to)
+  // A raw HTML or processing-instruction block with no closing sequence runs its
+  // span to the end of the document, the line break that ends its last line and
+  // any blank lines after it included. A leaf block's text ends where its last
+  // line does: the serializer ends its output the same way (`MdOut.finish`), so
+  // recording more would lose it on the way back.
+  for (let index = to - 1; index >= from; index--) {
+    const code = text.charCodeAt(index)
+    if (code === CHAR_LINE_FEED) to = index
+    else if (code !== CHAR_SPACE && code !== CHAR_TAB) break
+  }
+  // Only a block that spans a line break can carry a marker inside it.
+  const lineBreak = text.indexOf('\n', from)
+  if (lineBreak < 0 || lineBreak >= to) return text.slice(from, to)
+
+  const marks: number[] = []
+  collectQuoteMarks(cursor, marks, from, to)
   let content = ''
   let pos = from
-  do {
-    if (cursor.type.id !== LEZER_NODE_IDS.QuoteMark) continue
-    if (cursor.from < pos || cursor.to > to) continue
-    content += text.slice(pos, cursor.from)
-    pos = cursor.to
+  for (let index = 0; index < marks.length; index += 2) {
+    content += text.slice(pos, marks[index])
+    pos = marks[index + 1]
     if (isSpaceChar(text.charCodeAt(pos))) pos += 1
-  } while (cursor.nextSibling())
-  cursor.parent()
+  }
   return content + text.slice(pos, to)
 }
 
