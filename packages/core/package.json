@@ -55,6 +55,7 @@
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "@vitest/browser-playwright": "^4.1.10",
+    "commonmark.json": "^0.31.0",
     "dedent": "^1.7.2",
     "diffable-html-snapshot": "^0.3.0",
     "fast-check": "^4.9.0",
