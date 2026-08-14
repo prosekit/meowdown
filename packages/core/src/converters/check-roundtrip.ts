@@ -1,3 +1,4 @@
+import { CHAR_GREATER_THAN } from '../unicode.ts'
 import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
 
@@ -54,22 +55,38 @@ function canonicalizeDelimiterCell(cell: string): string {
 // parser reads through, so two rows that differ only there carry the same
 // content. Lines the serializer never restructures (a paragraph or code line
 // holding pipes) canonicalize the same way on both sides, so equal lines stay
-// equal; the leading `[\s>]*` prefix is kept so rows inside a blockquote
-// compare within their blockquote.
+// equal.
 function canonicalizeTableRow(line: string): string | undefined {
   if (!line.includes('|')) return undefined
-  const prefix = /^[\s>]*/u.exec(line)?.[0] ?? ''
-  const row = line.slice(prefix.length).trim()
+  const row = line.trim()
   const inner = row.replace(/^\|/u, '').replace(/\|$/u, '')
   const cells = inner.split('|').map((cell) => collapseWhitespace(cell))
   const rendered = cells.every((cell) => DELIMITER_CELL_RE.test(cell))
     ? cells.map(canonicalizeDelimiterCell)
     : cells
-  return collapseWhitespace(`${prefix} | ${rendered.join(' | ')} |`)
+  return `| ${rendered.join(' | ')} |`
 }
 
+// A blockquote marker swallows one optional space, so `>x` and `> x` open the
+// same quote around the same content: the space is layout. Every `>` still
+// counts, so a line that gains or loses a nesting level stays different.
+const QUOTE_PREFIX_RE = /^\s*(?:>[ \t]?)*/u
+
+function splitQuotePrefix(line: string): { depth: number; rest: string } {
+  const prefix = QUOTE_PREFIX_RE.exec(line)?.[0] ?? ''
+  let depth = 0
+  for (let i = 0; i < prefix.length; i++) {
+    if (prefix.charCodeAt(i) === CHAR_GREATER_THAN) depth++
+  }
+  return { depth, rest: line.slice(prefix.length) }
+}
+
+// Compare a line's blockquote depth against the other side's depth, and its
+// content against the other side's content, so quote nesting stays significant
+// while the marker's own spelling does not.
 function normalizeLine(line: string): string {
-  return canonicalizeTableRow(line) ?? collapseWhitespace(line)
+  const { depth, rest } = splitQuotePrefix(line)
+  return '>'.repeat(depth) + (canonicalizeTableRow(rest) ?? collapseWhitespace(rest))
 }
 
 /**

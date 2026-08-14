@@ -85,6 +85,9 @@ describe('checkRoundTrip', () => {
     '| a    | b  |\n| ---- | -- |\n| c    | d  |', // pretty-printed cell padding is layout
     'a | b\n--- | ---\nc | d', // outer pipes are layout
     '> a | b\n> --- | ---', // same, inside a blockquote
+    '>a', // the space after a blockquote marker is optional
+    '>>a', // same, nested
+    '> >a', // same, mixed
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })
