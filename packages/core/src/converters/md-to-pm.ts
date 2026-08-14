@@ -11,6 +11,8 @@ import type { ListMarker, MeowdownListAttrs, TaskMarker } from '../extensions/li
 import { isNodeOfType } from '../extensions/node-names.ts'
 import { getNodeBuilders, type TypedNodeBuilders } from '../extensions/schema.ts'
 import type { TableColumnAlign } from '../extensions/table-column-align.ts'
+
+import { canIndentCode } from './pm-to-md.ts'
 import {
   CHAR_ASTERISK,
   CHAR_DOT,
@@ -710,9 +712,9 @@ function convertCodeBlock(
     } while (cursor.nextSibling())
     cursor.parent()
   }
-  // Indentation cannot spell an empty block: there is no line to indent. Record
-  // no style, so the fence the serializer falls back to is the style all along.
-  if (fenceStyle === 'indented' && code === '') fenceStyle = null
+  // Record no style for a block indentation cannot spell, so the fence the
+  // serializer falls back to is the style all along.
+  if (fenceStyle === 'indented' && !canIndentCode(code)) fenceStyle = null
   return nodes.codeBlock({ language, fenceStyle, fenceLength }, code)
 }
 

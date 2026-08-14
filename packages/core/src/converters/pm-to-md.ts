@@ -615,16 +615,24 @@ function emitCodeBlock(node: ProseMirrorNode, out: MdOut): void {
 }
 
 /**
+ * Whether indentation can spell `code` as an indented code block. There is no
+ * line to carry the four columns of a block with no content at all, and none to
+ * carry a blank line at either end.
+ */
+export function canIndentCode(code: string): boolean {
+  return code !== '' && !code.startsWith('\n') && !code.endsWith('\n')
+}
+
+/**
  * Indent `code` for an indented code block, or return `undefined` for shapes
- * the indented form cannot express (empty content, or a leading or trailing
- * blank line), which fall back to a fence. Blank interior lines stay empty so
- * a round-trip adds no trailing whitespace; `MdOut.write` still prepends the
- * enclosing `linePrefix` (blockquote or list continuation) per line.
+ * the indented form cannot express, which fall back to a fence. Blank interior
+ * lines stay empty so a round-trip adds no trailing whitespace; `MdOut.write`
+ * still prepends the enclosing `linePrefix` (blockquote or list continuation)
+ * per line.
  */
 function toIndentedCode(code: string): string | undefined {
-  if (code === '') return undefined
+  if (!canIndentCode(code)) return undefined
   const lines = code.split('\n')
-  if (lines[0] === '' || lines[lines.length - 1] === '') return undefined
   for (let i = 0; i < lines.length; i++) {
     if (lines[i] !== '') lines[i] = `    ${lines[i]}`
   }

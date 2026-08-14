@@ -129,6 +129,7 @@ describe('checkRoundTrip', () => {
     '*\t]\n\t\t2', // a tab-indented continuation is re-indented, keeping its own columns
     '- a\n\t\t-', // same, for a line that would read as a setext underline unindented
     ' 33)\n\t1', // indentation cannot spell a code block that follows a list
+    '*\t\t\n\t\t[', // nor one that opens with a blank line
     '| a |\n| --- |\n| b | c |', // a cell past the delimiter row widens the table instead of dropping
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
