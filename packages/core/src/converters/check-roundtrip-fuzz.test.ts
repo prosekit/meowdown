@@ -9,13 +9,25 @@ const SEED = Number.parseInt(import.meta.env.VITE_FUZZ_SEED || '') || Date.now()
 const NUM_RUNS = 100_000
 
 /// keep-sorted
-const TOKENS_STRUCTURAL: string[] = [' ', '-', '*', '\t', '#', '`', '+', '=', '>', '|', '~', '$']
+const TOKENS_STRUCTURAL: string[] = [
+  ' ',
+  '-',
+  '*',
+  '\t',
+  '#',
+  '`',
+  '+',
+  '=',
+  '>',
+  '|',
+  '~',
+  '$',
+  '\n',
+]
 
 /// keep-sorted
 const TOKENS_BASE: string[] = [
-  ' ',
   '_',
-  '-',
   ',',
   ';',
   ':',
@@ -30,11 +42,8 @@ const TOKENS_BASE: string[] = [
   '{',
   '}',
   '@',
-  '*',
   '/',
   '\\',
-  '\n',
-  '\t',
   '&',
   '#',
   '%',
