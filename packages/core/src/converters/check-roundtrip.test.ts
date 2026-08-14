@@ -231,6 +231,10 @@ describe('checkRoundTrip', () => {
 
     // a bare bullet opens an item even empty, so it cannot keep the prefix
     '>\t*\t\\\n\t+',
+
+    // a git conflict marker run is a blockquote nest, so `>>>>>>> b` is
+    // rewritten as `> > > > > > > b`: same document, different bytes
+    '<<<<<<< a\nx\n=======\ny\n>>>>>>> b',
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })
