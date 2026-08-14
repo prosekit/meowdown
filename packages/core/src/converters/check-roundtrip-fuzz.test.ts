@@ -95,12 +95,14 @@ const TOKENS_RUNS: string[] = [
 /// keep-sorted
 const TOKENS_STRUCTURAL: string[] = [' ', '-', '*', '\t', '#', '`', '+', '=', '>', '|', '~', '$']
 
+// REVIEW: REMOVE "asciiGrapheme"
 const asciiGrapheme = fc.string({ unit: 'grapheme-ascii', minLength: 1, maxLength: 1 })
 const baseUnit = fc.constantFrom(...TOKENS_BASE, ...TOKENS_RUNS)
 
 const UNITS = [
   // printable ASCII plus the line structure `grapheme-ascii` lacks
   {
+    // REVIEW: remove "name: 'ascii'"
     name: 'ascii',
     unit: fc.oneof(
       { arbitrary: asciiGrapheme, weight: 9 },
@@ -134,7 +136,15 @@ for (const [minLength, maxLength] of RANGES) {
       { timeout: 60_000 },
       () => {
         fc.assert(
-          fc.property(fc.string({ unit: unit.unit, minLength, maxLength, size: 'max' }), check),
+          fc.property(
+            fc.string({
+              unit: unit.unit,
+              minLength,
+              maxLength,
+              size: 'max',
+            }),
+            check,
+          ),
           { seed: SEED, numRuns: NUM_RUNS, verbose: true },
         )
       },
