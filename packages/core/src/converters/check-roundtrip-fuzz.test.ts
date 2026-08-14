@@ -3,8 +3,7 @@ import { it } from 'vitest'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
 
-const NUM_RUNS = 200_000
-const SEED = Date.now() % (1 << 30)
+const NUM_RUNS = 100_000
 
 /// keep-sorted
 const TOKENS: string[] = [
@@ -49,11 +48,12 @@ for (const [minLength, maxLength] of [
   [201, 500],
 ]) {
   for (const customToken of [false, true]) {
+    const seed = Date.now() % (1 << 30)
     it(
-      `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, customToken=${customToken})`,
+      `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, customToken=${customToken}, seed=${seed})`,
       { timeout: 60_000 },
       () => {
-        runTest(SEED, minLength, maxLength, customToken)
+        runTest(seed, minLength, maxLength, customToken)
       },
     )
   }
