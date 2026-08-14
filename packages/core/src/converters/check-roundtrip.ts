@@ -12,6 +12,11 @@ import { docToMarkdown } from './pm-to-md.ts'
  *   a table delimiter row rewritten to canonical dashes).
  * - `lossy`: content changed - a content line differs or disappeared, or the
  *   output re-parses to a different document.
+ *
+ * `normalizing` grades the document, not the bytes: a content-bearing line may
+ * be respelled as long as it parses the same. A blockquote marker run is the
+ * sharp edge, since `>>>>>>> x` comes back as `> > > > > > > x`. Do not read it
+ * as a byte-fidelity gate.
  */
 export type RoundTripFidelity = 'exact' | 'normalizing' | 'lossy'
 
