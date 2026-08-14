@@ -72,7 +72,7 @@ it('triage tokens', { timeout: 600_000 }, () => {
   report('tokens', TOKENS, 2)
 })
 
-const INSPECT: string[] = [']\n\t>\n-', 'a\n\t>\n-']
+const INSPECT: string[] = ['| a |\n| --- |\n| b | c |']
 
 it('inspect', () => {
   for (const input of INSPECT) {

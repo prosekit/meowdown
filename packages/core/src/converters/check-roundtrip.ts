@@ -38,31 +38,20 @@ function stripWhitespace(line: string): string {
   return line.replaceAll(/\s/gu, '')
 }
 
-// A GFM delimiter cell is optional colons around a run of dashes. The dash
-// count is layout; only the colon positions carry content (column alignment).
+// A GFM delimiter cell is optional colons around a run of dashes.
 const DELIMITER_CELL_RE = /^:?-+:?$/u
 
-function canonicalizeDelimiterCell(cell: string): string {
-  const alignsLeft = cell.startsWith(':')
-  const alignsRight = cell.endsWith(':')
-  if (alignsLeft && alignsRight) return ':-:'
-  if (alignsLeft) return ':--'
-  if (alignsRight) return '--:'
-  return '---'
-}
-
-// Rebuild a pipe-bearing line into one canonical row. Outer pipes and delimiter
-// dash counts are table layout the parser reads through, so two rows that differ
-// only there carry the same content. Lines the serializer never restructures (a
-// paragraph or code line holding pipes) canonicalize the same way on both sides,
-// so equal lines stay equal.
+// Reduce a pipe-bearing line to the cell text it carries. Outer pipes are table
+// layout, an empty cell says nothing, and a delimiter row is pure structure: it
+// encodes the column count and the alignment, both of which are node attributes
+// the document comparison covers. A line the serializer never restructures (a
+// paragraph or code line holding pipes) reduces the same way on both sides, so
+// equal lines stay equal.
 function canonicalizeTableRow(line: string): string | undefined {
   if (!line.includes('|')) return undefined
   const cells = line.replace(/^\|/u, '').replace(/\|$/u, '').split('|')
-  const rendered = cells.every((cell) => DELIMITER_CELL_RE.test(cell))
-    ? cells.map(canonicalizeDelimiterCell)
-    : cells
-  return `|${rendered.join('|')}|`
+  if (cells.every((cell) => DELIMITER_CELL_RE.test(cell))) return ''
+  return cells.filter((cell) => cell !== '').join('|')
 }
 
 /**

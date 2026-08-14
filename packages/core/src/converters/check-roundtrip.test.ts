@@ -114,13 +114,12 @@ describe('checkRoundTrip', () => {
     '>[\n-\t\n$', // same, for a dash run with trailing whitespace
     '>-\n>', // a blockquote marker on the line after an empty item is not item text
     '>\t \n1', // an empty indented code block has no indented spelling
+    '| a |\n| --- |\n| b | c |', // a cell past the delimiter row widens the table instead of dropping
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })
 
-  it.each([
-    '| a |\n| --- |\n| b | c |', // a cell beyond the delimiter's column count is dropped
-  ])('reports lossy for %j', (markdown) => {
+  it.each([])('reports lossy for %j', (markdown: string) => {
     expect(checkRoundTrip(markdown)).toBe('lossy')
   })
 })

@@ -673,19 +673,33 @@ function convertTable(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string
     cursor.parent()
   }
 
-  const rows: ProseMirrorNode[] = []
+  // A row may still carry more cells than the delimiter row declares columns.
+  // GFM drops the excess; widening the table instead keeps that text, and every
+  // row is built to the same width so the table stays rectangular.
+  const rows: Array<{ isHeader: boolean; cells: string[] }> = []
+  let columnCount = aligns.length
   if (cursor.firstChild()) {
     do {
       const id = cursor.type.id
-      if (id === LEZER_NODE_IDS.TableHeader) {
-        rows.push(convertTableRow(nodes, cursor, text, true, aligns))
-      } else if (id === LEZER_NODE_IDS.TableRow) {
-        rows.push(convertTableRow(nodes, cursor, text, false, aligns))
-      }
+      if (id !== LEZER_NODE_IDS.TableHeader && id !== LEZER_NODE_IDS.TableRow) continue
+      const cells = readTableCells(cursor, text)
+      if (cells.length > columnCount) columnCount = cells.length
+      rows.push({ isHeader: id === LEZER_NODE_IDS.TableHeader, cells })
     } while (cursor.nextSibling())
     cursor.parent()
   }
-  return nodes.table(rows)
+
+  return nodes.table(
+    rows.map(({ isHeader, cells }) => {
+      const built: ProseMirrorNode[] = []
+      for (let column = 0; column < columnCount; column++) {
+        const attrs = { align: aligns[column] ?? null }
+        const paragraph = nodes.paragraph(cells[column] ?? '')
+        built.push(isHeader ? nodes.tableHeaderCell(attrs, paragraph) : nodes.tableCell(attrs, paragraph))
+      }
+      return nodes.tableRow(built)
+    }),
+  )
 }
 
 function parseDelimiterAligns(separator: string): Array<TableColumnAlign | null> {
@@ -703,39 +717,28 @@ function parseDelimiterAligns(separator: string): Array<TableColumnAlign | null>
     })
 }
 
-function convertTableRow(
-  nodes: TypedNodeBuilders,
-  cursor: TreeCursor,
-  text: string,
-  isHeader: boolean,
-  aligns: ReadonlyArray<TableColumnAlign | null>,
-): ProseMirrorNode {
-  const columnCount = aligns.length
-  const cellTexts: string[] = Array<string>(columnCount).fill('')
-  if (cursor.firstChild()) {
-    const hasLeadingPipe = cursor.type.id === LEZER_NODE_IDS.TableDelimiter
-    let delimiterCount = 0
-    do {
-      if (cursor.type.id === LEZER_NODE_IDS.TableDelimiter) {
-        delimiterCount++
-      } else if (cursor.type.id === LEZER_NODE_IDS.TableCell) {
-        const column = delimiterCount - (hasLeadingPipe ? 1 : 0)
-        if (column >= 0 && column < columnCount) {
-          // Unescape `\|` to a logical `|`; the serializer re-escapes it.
-          cellTexts[column] = text
-            .slice(cursor.from, cursor.to)
-            .trim()
-            .replaceAll(String.raw`\|`, '|')
-        }
-      }
-    } while (cursor.nextSibling())
-    cursor.parent()
-  }
-
-  const cells = cellTexts.map((cellText, column) => {
-    const paragraph = nodes.paragraph(cellText)
-    const attrs = { align: aligns[column] }
-    return isHeader ? nodes.tableHeaderCell(attrs, paragraph) : nodes.tableCell(attrs, paragraph)
-  })
-  return nodes.tableRow(cells)
+/**
+ * A row's cell texts, indexed by column. `@lezer/markdown` emits no `TableCell`
+ * for an empty cell, so the column comes from the pipes counted so far, not
+ * from the cells seen so far.
+ */
+function readTableCells(cursor: TreeCursor, text: string): string[] {
+  const cellTexts: string[] = []
+  if (!cursor.firstChild()) return cellTexts
+  const hasLeadingPipe = cursor.type.id === LEZER_NODE_IDS.TableDelimiter
+  let delimiterCount = 0
+  do {
+    if (cursor.type.id === LEZER_NODE_IDS.TableDelimiter) {
+      delimiterCount++
+      continue
+    }
+    if (cursor.type.id !== LEZER_NODE_IDS.TableCell) continue
+    const column = delimiterCount - (hasLeadingPipe ? 1 : 0)
+    if (column < 0) continue
+    while (cellTexts.length <= column) cellTexts.push('')
+    // Unescape `\|` to a logical `|`; the serializer re-escapes it.
+    cellTexts[column] = text.slice(cursor.from, cursor.to).trim().replaceAll(String.raw`\|`, '|')
+  } while (cursor.nextSibling())
+  cursor.parent()
+  return cellTexts
 }
