@@ -9,6 +9,7 @@ export default defineESLintConfig(
       files: ['**/*.tsx'],
     },
     markdown: false,
+    command: true,
   },
   {
     ignores: ['**/*.module.d.css.ts'],

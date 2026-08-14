@@ -11,6 +11,7 @@ it.fails('finds no lossy input among ascii characters', { timeout: 60_000 }, () 
 })
 
 it.fails('finds no lossy input among sampled character', { timeout: 60_000 }, () => {
+  /// keep-sorted
   const tokens: string[] = [
     '\t',
     '\n',
@@ -18,8 +19,8 @@ it.fails('finds no lossy input among sampled character', { timeout: 60_000 }, ()
     '!',
     '"',
     '#',
-    '$',
     '(',
+    '$',
     ')',
     '*',
     '+',
