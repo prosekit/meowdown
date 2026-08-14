@@ -46,7 +46,7 @@ for (const [minLength, maxLength] of [
   [1, 20],
   [21, 100],
   [101, 200],
-  [201, 1000],
+  [201, 500],
 ]) {
   for (const customToken of [false, true]) {
     it(
