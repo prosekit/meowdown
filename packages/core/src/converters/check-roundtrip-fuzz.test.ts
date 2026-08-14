@@ -3,9 +3,7 @@ import { it } from 'vitest'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
 
-const NUM_RUNS = 1_000_000
-const MIN_LENGTH = 1
-const MAX_LENGTH = 100
+const NUM_RUNS = 200_000
 const SEED = Date.now() % (1<<30)
 
 /// keep-sorted
@@ -44,33 +42,33 @@ const TOKENS: string[] = [
   'b',
 ]
 
-it('finds no lossy input among ascii characters', { timeout: 60_000 }, () => {
-  fc.assert(
-    fc.property(
-      fc.string({
-        unit: 'grapheme-ascii',
-        minLength: MIN_LENGTH,
-        maxLength: MAX_LENGTH,
-      }),
-      check,
-    ),
-    { seed: SEED, numRuns: NUM_RUNS, verbose: true },
-  )
-})
+for (const [minLength, maxLength] of [
+  [1, 20],
+  [21, 100],
+  [101, 200],
+  [201, 1000],
+]) {
+  for (const customToken of [false, true]) {
+    it(`finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, customToken=${customToken})`, { timeout: 60_000 }, () => {
+      runTest(SEED, minLength, maxLength, customToken)
+    })
+  }
+}
 
-it('finds no lossy input among sampled characters', { timeout: 60_000 }, () => {
+function runTest(seed: number, minLength: number, maxLength: number, customToken: boolean) {
   fc.assert(
     fc.property(
       fc.string({
-        unit: fc.constantFrom(...TOKENS),
-        minLength: MIN_LENGTH,
-        maxLength: MAX_LENGTH,
+        unit: customToken ? fc.constantFrom(...TOKENS) : 'grapheme-ascii',
+        minLength,
+        maxLength,
       }),
       check,
     ),
-    { seed: SEED, numRuns: NUM_RUNS, verbose: true },
+    { seed, numRuns: NUM_RUNS, verbose: true },
   )
-})
+}
+
 
 function check(input: string): boolean {
   try {
