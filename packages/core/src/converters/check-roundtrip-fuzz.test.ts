@@ -48,7 +48,7 @@ it('finds no lossy input among ascii characters', { timeout: 60_000 }, () => {
   )
 })
 
-it.fails('finds no lossy input among sampled character', { timeout: 60_000 }, () => {
+it('finds no lossy input among sampled character', { timeout: 60_000 }, () => {
   const unit = fc.constantFrom(...TOKENS)
   fc.assert(fc.property(fc.string({ unit, minLength: 1, maxLength: 16 }), check), CONFIG)
   fc.assert(fc.property(fc.string({ unit, minLength: 17, maxLength: 60 }), check), CONFIG)
