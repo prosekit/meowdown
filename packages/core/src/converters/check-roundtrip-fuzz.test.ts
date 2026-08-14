@@ -71,7 +71,7 @@ const TOKENS_EXTENDED: string[] = [
   '\u{FFFD}',
   '\v',
   '🍄',
-  '片',
+  '永',
   "'",
 ]
 
