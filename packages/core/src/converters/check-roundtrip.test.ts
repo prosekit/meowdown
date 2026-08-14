@@ -86,6 +86,10 @@ describe('checkRoundTrip', () => {
     '*    a\n\t>',
     // a tab-indented continuation keeps every column the container never took
     '- a\n\t\t-',
+    // an info string that opens with the fence character keeps off the fence
+    '~~~ ~',
+    // an empty item cannot interrupt a paragraph, so the blank line stays
+    '1.  ~\n\n-',
     // only a list numbered 1 interrupts a paragraph, so the blank line stays
     '+ ;\n\n2.',
   ])('reports exact for %j', (markdown) => {
@@ -124,6 +128,8 @@ describe('checkRoundTrip', () => {
     '>\t \n1', // an empty indented code block has no indented spelling
     '<?\n\t', // an unterminated processing instruction runs to the end of the document
     '\n<?\n\n', // same, with the blank lines after it
+    ' <!--', // an unterminated comment, same
+    '*\t]\n\t\t2', // a tab-indented continuation is re-indented, keeping its own columns
     '| a |\n| --- |\n| b | c |', // a cell past the delimiter row widens the table instead of dropping
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')

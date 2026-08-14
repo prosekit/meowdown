@@ -176,8 +176,7 @@ class MdOut {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
       if (i > 0) {
-        const flush = lazy && (isSetextUnderline(line) || hasTabIndent(line))
-        this.parts.push('\n', flush ? '' : this.linePrefix)
+        this.parts.push('\n', lazy && needsLazyLine(line, this.linePrefix.length) ? '' : this.linePrefix)
       }
       if (line !== '') this.parts.push(line)
     }
@@ -397,13 +396,16 @@ function emitBlockChildren(node: ProseMirrorNode, out: MdOut, tightItem = false)
 
 /**
  * Whether `list`'s marker line still opens an item when the line above it is a
- * paragraph. CommonMark lets a list interrupt a paragraph only when the item is
- * numbered 1 or unnumbered; any other number reads as more of the paragraph, so
- * the blank line before it is what keeps it a list at all.
+ * paragraph. CommonMark lets a list interrupt a paragraph only when the item
+ * carries content and, if ordered, is numbered 1; anything else reads as more of
+ * the paragraph, so the blank line before it is what keeps it a list at all.
  */
 function canInterruptParagraph(list: ProseMirrorNode): boolean {
   const attrs = list.attrs as MeowdownListAttrs
-  return attrs.kind !== 'ordered' || (attrs.order ?? 1) === 1
+  if (attrs.kind === 'ordered' && (attrs.order ?? 1) !== 1) return false
+  // An empty item writes a bare marker, and a bare marker interrupts nothing.
+  // A task always writes its `[ ]`, which is content enough.
+  return attrs.kind === 'task' || (list.childCount > 0 && list.child(0).content.size > 0)
 }
 
 /**
@@ -445,18 +447,36 @@ function isTightItem(item: ProseMirrorNode): boolean {
 }
 
 /**
- * Whether `line` opens with a tab. A tab measures to the next multiple of four
- * from where it sits*, so a blockquote's `> ` in front of it stands for fewer
- * columns than it did flush left - which can drop the line under the four
- * columns that were keeping its `$$` or ``` ``` ``` from opening a block.
+ * Whether a container's line prefix would change what `line` means, so the line
+ * has to go out flush left, as the lazy continuation it was written as.
+ *
+ * Two ways that happens. A run of `=` or `-` underlines the line above it into a
+ * setext heading. And a tab measures to the next multiple of four *from where it
+ * sits*, so a prefix in front of one can leave the line with less than the four
+ * columns of indentation that were keeping its first character - a `>`, a `$$`,
+ * a fence - from opening a block. Spaces shift nothing, and a line that keeps
+ * four columns either way is already safe.
  */
-function hasTabIndent(line: string): boolean {
+function needsLazyLine(line: string, prefixWidth: number): boolean {
+  if (isSetextUnderline(line)) return true
+  const first = line.charCodeAt(0)
+  if (first !== CHAR_TAB && first !== CHAR_SPACE) return false
+  return measureIndent(line, prefixWidth) < 4 && measureIndent(line, 0) >= 4
+}
+
+/**
+ * The columns of leading whitespace `line` stands for when it starts at column
+ * `start`, where a tab reaches the next multiple of four.
+ */
+function measureIndent(line: string, start: number): number {
+  let col = start
   for (let i = 0; i < line.length; i++) {
     const code = line.charCodeAt(i)
-    if (code === CHAR_TAB) return true
-    if (code !== CHAR_SPACE) return false
+    if (code === CHAR_SPACE) col += 1
+    else if (code === CHAR_TAB) col += 4 - (col % 4)
+    else break
   }
-  return false
+  return col - start
 }
 
 /**
@@ -580,7 +600,9 @@ function emitCodeBlock(node: ProseMirrorNode, out: MdOut): void {
   const fence = (tilde ? '~' : '`').repeat(Math.max(attrs.fenceLength ?? 0, minWidth))
 
   out.write(fence)
-  if (language) out.write(language)
+  // An info string that opens with the fence character would widen the fence
+  // instead of naming a language; a space keeps the two apart.
+  if (language) out.write(language.startsWith(tilde ? '~' : '`') ? ' ' + language : language)
   out.write('\n')
   if (code) {
     out.write(code)

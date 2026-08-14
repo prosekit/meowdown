@@ -456,7 +456,7 @@ function convertHTMLComment(
   text: string,
   column: number,
 ): ProseMirrorNode {
-  const content = dedentContinuation(text.slice(cursor.from, cursor.to), column)
+  const content = dedentContinuation(readLeafText(cursor, text, cursor.from, cursor.to), column)
   return nodes.htmlComment({ content })
 }
 

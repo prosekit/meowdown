@@ -95,7 +95,7 @@ it('triage', { timeout: 3_600_000 }, () => {
   for (let seed = 13; seed <= 45; seed++) report(seed, 1_000_000)
 })
 
-const INSPECT: string[] = ['*    a\n\t>', '- a\n\t\t-', '*\t \\\n\t>', '+ ;\n\n2.']
+const INSPECT: string[] = ['*\t]\n\t\t2', '\n<!--', ' <!--', '~~~ ~', '~~~\t~', '1.\t~\n\n-', '*    a\n\t>', '- a\n\t\t-']
 
 it('inspect', () => {
   for (const input of INSPECT) {
