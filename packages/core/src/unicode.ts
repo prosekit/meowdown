@@ -15,4 +15,3 @@ export const CHAR_RIGHT_PARENTHESIS = 41 /* ) */
 export const CHAR_BACKTICK = 96 /* ` */
 export const CHAR_TILDE = 126 /* ~ */
 export const CHAR_EQUAL = 61 /* = */
-export const CHAR_GREATER_THAN = 62 /* > */

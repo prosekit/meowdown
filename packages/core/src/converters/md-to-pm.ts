@@ -695,7 +695,9 @@ function convertTable(nodes: TypedNodeBuilders, cursor: TreeCursor, text: string
       for (let column = 0; column < columnCount; column++) {
         const attrs = { align: aligns[column] ?? null }
         const paragraph = nodes.paragraph(cells[column] ?? '')
-        built.push(isHeader ? nodes.tableHeaderCell(attrs, paragraph) : nodes.tableCell(attrs, paragraph))
+        built.push(
+          isHeader ? nodes.tableHeaderCell(attrs, paragraph) : nodes.tableCell(attrs, paragraph),
+        )
       }
       return nodes.tableRow(built)
     }),
@@ -737,7 +739,10 @@ function readTableCells(cursor: TreeCursor, text: string): string[] {
     if (column < 0) continue
     while (cellTexts.length <= column) cellTexts.push('')
     // Unescape `\|` to a logical `|`; the serializer re-escapes it.
-    cellTexts[column] = text.slice(cursor.from, cursor.to).trim().replaceAll(String.raw`\|`, '|')
+    cellTexts[column] = text
+      .slice(cursor.from, cursor.to)
+      .trim()
+      .replaceAll(String.raw`\|`, '|')
   } while (cursor.nextSibling())
   cursor.parent()
   return cellTexts

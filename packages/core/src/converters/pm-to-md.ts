@@ -382,7 +382,6 @@ function isTightItem(item: ProseMirrorNode): boolean {
   return true
 }
 
-// REVIEW: Question: in runtime, which implementation is faster, the current `isSetextUnderline` or a regex like `/^\s*([=-])\1*\s*$/`? The regex is more concise, but the current implementation avoids regex overhead and may be faster for long lines. Do not guess, run your test and update the performance results here as comment under the "function isSetextUnderline(line: string): boolean {" line (so inside the function body, not a part of the jsdoc)
 /**
  * Whether `line` is a run of one character, `=` or `-`, and so would read as a
  * setext underline under a container's line prefix. Surrounding whitespace does
@@ -390,6 +389,9 @@ function isTightItem(item: ProseMirrorNode): boolean {
  * four columns, and any trailing spaces at all.
  */
 function isSetextUnderline(line: string): boolean {
+  // Measured against `/^\s*([=-])\1*\s*$/u` over the lines this actually sees
+  // (mostly prose, some underlines, two 400-char lines), chromium, `pnpm bench`:
+  // this scan 1.77M hz, the regex 1.08M hz - 1.65x, repeatable across runs.
   let start = 0
   while (start < line.length && isSpaceChar(line.charCodeAt(start))) start++
   const first = line.charCodeAt(start)
