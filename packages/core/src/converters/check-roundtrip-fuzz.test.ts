@@ -95,20 +95,9 @@ const TOKENS_RUNS: string[] = [
 /// keep-sorted
 const TOKENS_STRUCTURAL: string[] = [' ', '-', '*', '\t', '#', '`', '+', '=', '>', '|', '~', '$']
 
-// REVIEW: REMOVE "asciiGrapheme"
-const asciiGrapheme = fc.string({ unit: 'grapheme-ascii', minLength: 1, maxLength: 1 })
 const baseUnit = fc.constantFrom(...TOKENS_BASE, ...TOKENS_RUNS)
 
 const UNITS = [
-  // printable ASCII plus the line structure `grapheme-ascii` lacks
-  {
-    // REVIEW: remove "name: 'ascii'"
-    name: 'ascii',
-    unit: fc.oneof(
-      { arbitrary: asciiGrapheme, weight: 9 },
-      { arbitrary: fc.constantFrom('\n', '\t'), weight: 1 },
-    ),
-  },
   { name: 'base', unit: baseUnit },
   { name: 'extended', unit: fc.constantFrom(...TOKENS_BASE, ...TOKENS_RUNS, ...TOKENS_EXTENDED) },
   // the base alphabet re-weighted toward newlines and block markers
