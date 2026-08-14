@@ -43,8 +43,8 @@ const TOKENS: string[] = [
 ]
 
 for (const [minLength, maxLength] of [
-  [1, 20],
-  [21, 100],
+  [1, 50],
+  [51, 100],
   [101, 200],
   [201, 500],
 ]) {
