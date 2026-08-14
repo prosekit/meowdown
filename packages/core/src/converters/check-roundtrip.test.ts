@@ -131,6 +131,15 @@ describe('checkRoundTrip', () => {
     ' 33)\n\t1', // indentation cannot spell a code block that follows a list
     '*\t\t\n\t\t[', // nor one that opens with a blank line
     '| a |\n| --- |\n| b | c |', // a cell past the delimiter row widens the table instead of dropping
+    '>=\n>\t\t>', // a tab after a blockquote marker is indentation, not the marker's space
+    '><?\n\t>', // an unterminated block ends with its last content line, marker or not
+    '-\t>$\n\t\t2', // a lazy continuation inside a blockquote keeps every column it has
+    '```\n```-', // a fence line with trailing text closes nothing, so the fence stays narrow
+    '>\t \n\t>2', // lezer leaves code after a tab-indented quote marker uncovered; keep it
+    '><?\n>\tb', // an HTML block has no lazy continuation, so its lines keep the full prefix
+    '>\t*\ta\n\t<?', // a block opener the dedent bared goes back out behind the containers' columns
+    '>\t*\ta\n\t\tx', // so does a tab the dedent would otherwise eat
+    '>\t*\t\\\n\t+', // a bare bullet opens an item even empty, so it cannot keep the prefix either
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')
   })

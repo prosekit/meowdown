@@ -12,15 +12,22 @@ import type { MeowdownTableCellAttrs, TableColumnAlign } from '../extensions/tab
 import {
   CHAR_ASTERISK,
   CHAR_BACKTICK,
+  CHAR_DIGIT_ONE,
+  CHAR_DOLLAR,
+  CHAR_DOT,
   CHAR_EQUAL,
   CHAR_GREATER_THAN,
+  CHAR_HASH,
   CHAR_HYPHEN_MINUS,
+  CHAR_LESS_THAN,
   CHAR_LINE_FEED,
+  CHAR_PLUS,
+  CHAR_RIGHT_PARENTHESIS,
   CHAR_SPACE,
   CHAR_TAB,
   CHAR_TILDE,
+  CHAR_UNDERSCORE,
 } from '../unicode.ts'
-import { longestCharRun } from '../utils/backticks.ts'
 
 /**
  * Options for {@link docToMarkdown}.
@@ -143,11 +150,12 @@ class MdOut {
    * Write `text`, opening each embedded line with the current line prefix.
    *
    * `lazyLines` lets a line the prefix would change the meaning of - a setext
-   * underline, or a tab-indented line under a blockquote - go out flush left
-   * instead. Markdown keeps such a line as text only when it arrives as a lazy
-   * continuation, and the container picks the paragraph up again on the next
-   * line. Only leaf-block text may ask for this: an unprefixed line would fall
-   * out of a code block or an html comment.
+   * underline, a tab-indented line under a blockquote, a block opener - go out
+   * as a lazy continuation instead (see `continuationPrefix`). Markdown keeps
+   * such a line as text only when it arrives lazily, and the container picks
+   * the paragraph up again on the next line. Only paragraph-like text may ask
+   * for this: an unprefixed line would fall out of a code block, an html
+   * comment, or an HTML block.
    */
   write(text: string, lazyLines = false): void {
     if (text === '') return
@@ -176,10 +184,7 @@ class MdOut {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
       if (i > 0) {
-        this.parts.push(
-          '\n',
-          lazy && needsLazyLine(line, this.linePrefix.length) ? '' : this.linePrefix,
-        )
+        this.parts.push('\n', lazy ? continuationPrefix(line, this.linePrefix) : this.linePrefix)
       }
       if (line !== '') this.parts.push(line)
     }
@@ -451,23 +456,184 @@ function isTightItem(item: ProseMirrorNode): boolean {
 }
 
 /**
- * Whether a container's line prefix would change what `line` means, so the line
- * has to go out flush left, as the lazy continuation it was written as.
+ * The prefix a leaf's continuation line goes out with. The container's full
+ * `prefix` is the default. A line the full prefix would change the meaning of -
+ * a setext underline, a tab whose columns the prefix shrinks below the four
+ * that kept it inert, a block opener the source kept inert with indentation the
+ * parser dedented away - needs a lazy spelling instead: without its `>` marker
+ * the line can only continue the paragraph, because no block may start on a
+ * lazy line.
  *
- * Two ways that happens. A run of `=` or `-` underlines the line above it into a
- * setext heading. And a tab measures to the next multiple of four *from where it
- * sits*, so a prefix in front of one can leave the line with less than the four
- * columns of indentation that were keeping its first character - a `>`, a `$$`,
- * a fence - from opening a block. Spaces shift nothing.
+ * The lazy spelling carries `lazyIndent(prefix)`, the columns the parser
+ * dedents an unmarked line by, so the text comes back exactly. It goes out bare
+ * only when the dedent would leave it alone anyway and its own whitespace
+ * measures four columns flush left (or it is a setext underline, which nothing
+ * at the top level turns back into an underline).
  */
-function needsLazyLine(line: string, prefixWidth: number): boolean {
-  // Four columns of indentation put a line out of reach of every block opener,
-  // a setext underline included, so under the prefix it is already safe.
-  if (measureIndent(line, prefixWidth) >= 4) return false
-  if (isSetextUnderline(line)) return true
-  const first = line.charCodeAt(0)
-  if (first !== CHAR_TAB && first !== CHAR_SPACE) return false
-  return measureIndent(line, 0) >= 4
+function continuationPrefix(line: string, prefix: string): string {
+  // Four columns of indentation behind the prefix put a line out of reach of
+  // every block opener, a setext underline included, so it is already safe.
+  if (measureIndent(line, prefix.length) >= 4) return prefix
+  // Whitespace that measures four columns flush left keeps the line inert on
+  // its own; behind the prefix it measures less (a tab shrinks to the next tab
+  // stop), so the prefix would put its content back in reach.
+  const shrunk = measureIndent(line, 0) >= 4
+  const underline = isSetextUnderline(line)
+  const opens = !shrunk && lineOpensBlock(line)
+  if (!shrunk && !underline && !opens) return prefix
+  const lazy = lazyIndent(prefix)
+  // Bare keeps the line byte-exact, but only when the parser's dedent leaves
+  // it alone and nothing at the far left reads it back as a block: an
+  // underline binds to no lazy paragraph, while an opener still opens.
+  return !opens && dedentKeepsLine(line, lazy.length) ? '' : lazy
+}
+
+/**
+ * The lazy spelling's indent: the whitespace the containers write after the
+ * last `>` marker, which is also the columns the parser dedents an unmarked
+ * continuation line by (`sliceColumn` in `md-to-pm.ts`). The single space
+ * directly after the `>` belongs to the marker, not to the indent. A prefix
+ * with no `>` to drop has flush left as its only lazy spelling: its columns
+ * are the list's own indent, and writing them would just re-match the item.
+ */
+function lazyIndent(prefix: string): string {
+  let start = prefix.length
+  while (start > 0 && prefix.charCodeAt(start - 1) === CHAR_SPACE) start--
+  if (start === 0 || prefix.charCodeAt(start - 1) !== CHAR_GREATER_THAN) return ''
+  return prefix.slice(start + 1)
+}
+
+/**
+ * Whether the parser's dedent (`sliceColumn` at `column`) returns `line`
+ * unchanged: its leading whitespace stops short of the column, or a tab in it
+ * reaches past. Such a line round-trips byte-exact when written bare.
+ */
+function dedentKeepsLine(line: string, column: number): boolean {
+  let col = 0
+  for (let index = 0; col < column; index++) {
+    const code = line.charCodeAt(index)
+    if (code === CHAR_SPACE) {
+      col += 1
+    } else if (code === CHAR_TAB) {
+      const width = 4 - (col % 4)
+      if (col + width > column) return true
+      col += width
+    } else {
+      return true
+    }
+  }
+  return false
+}
+
+/**
+ * The line patterns that open an HTML block, the openers of `HTMLBlockStyle`
+ * in `@lezer/markdown`: script/pre/style, a comment, a processing instruction,
+ * a declaration, CDATA, a known block-level tag, and a complete tag alone on
+ * its line. Leading whitespace is stripped before matching.
+ */
+const HTML_BLOCK_OPEN = [
+  /^<(?:script|pre|style)(?:\s|>|$)/i,
+  /^<!--/,
+  /^<\?/,
+  /^<![A-Z]/,
+  /^<!\[CDATA\[/,
+  /^<\/?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h1|h2|h3|h4|h5|h6|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|nav|noframes|ol|optgroup|option|p|param|section|source|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul)(?:\s|\/?>|$)/i,
+  /^(?:<\/[a-z][\w-]*\s*>|<[a-z][\w-]*(\s+[a-z:_][\w.-]*(?:\s*=\s*(?:[^\s"'=<>`]+|'[^']*'|"[^"]*"))?)*\s*>)\s*$/i,
+]
+
+/**
+ * Whether `text`'s first line opens an HTML block. The last pattern (a
+ * complete tag) cannot interrupt a paragraph, but a lazy spelling of such a
+ * line round-trips all the same, so one check serves both callers.
+ */
+function opensHTMLBlock(text: string): boolean {
+  const lineEnd = text.indexOf('\n')
+  const line = lineEnd < 0 ? text : text.slice(0, lineEnd)
+  for (const pattern of HTML_BLOCK_OPEN) {
+    if (pattern.test(line)) return true
+  }
+  return false
+}
+
+/**
+ * Whether `line`, at the start of a container's content, opens a block instead
+ * of continuing the paragraph above it: a blockquote, an ATX heading, a fence,
+ * `$$` math, an HTML block, a thematic break, a bullet item (even an empty
+ * one), and an ordered item that carries content and is numbered 1.
+ */
+function lineOpensBlock(line: string): boolean {
+  // The whitespace in front measures under four columns here, so it does not
+  // put the opener out of reach.
+  let index = 0
+  while (isSpaceOrTab(line.charCodeAt(index))) index++
+  const first = line.charCodeAt(index)
+  switch (first) {
+    case CHAR_GREATER_THAN:
+      return true
+    case CHAR_LESS_THAN:
+      return opensHTMLBlock(index === 0 ? line : line.slice(index))
+    case CHAR_HASH: {
+      let end = index + 1
+      while (line.charCodeAt(end) === CHAR_HASH) end++
+      return end - index <= 6 && (end === line.length || isSpaceOrTab(line.charCodeAt(end)))
+    }
+    case CHAR_BACKTICK:
+    case CHAR_TILDE: {
+      let end = index + 1
+      while (line.charCodeAt(end) === first) end++
+      return end - index >= 3
+    }
+    case CHAR_DOLLAR:
+      return line.charCodeAt(index + 1) === CHAR_DOLLAR
+    case CHAR_UNDERSCORE:
+      return isUnderscoreBreak(line, index)
+    case CHAR_ASTERISK:
+    case CHAR_HYPHEN_MINUS:
+    case CHAR_PLUS:
+      // A bullet marker opens an item even with nothing after it; an ordered
+      // marker below does not.
+      return (
+        isThematicBreak(line) ||
+        index + 1 >= line.length ||
+        isSpaceOrTab(line.charCodeAt(index + 1))
+      )
+    case CHAR_DIGIT_ONE: {
+      const delimiter = line.charCodeAt(index + 1)
+      return (
+        (delimiter === CHAR_DOT || delimiter === CHAR_RIGHT_PARENTHESIS) &&
+        startsNonEmptyItem(line, index + 1)
+      )
+    }
+    default:
+      return false
+  }
+}
+
+/**
+ * A `___` thematic break: three or more underscores with nothing but spaces
+ * and tabs between them. (`isThematicBreak` covers `-` and `*`, the two break
+ * characters that double as list bullets.)
+ */
+function isUnderscoreBreak(line: string, index: number): boolean {
+  let count = 0
+  for (; index < line.length; index++) {
+    const code = line.charCodeAt(index)
+    if (code === CHAR_UNDERSCORE) count++
+    else if (!isSpaceOrTab(code)) return false
+  }
+  return count >= 3
+}
+
+/**
+ * Whether the list delimiter at `index` is followed by the gap and content
+ * (`1. x`) that let an ordered item interrupt a paragraph.
+ */
+function startsNonEmptyItem(line: string, index: number): boolean {
+  if (!isSpaceOrTab(line.charCodeAt(index + 1))) return false
+  for (let i = index + 2; i < line.length; i++) {
+    if (!isSpaceOrTab(line.charCodeAt(i))) return true
+  }
+  return false
 }
 
 /**
@@ -515,9 +681,16 @@ function isSetextUnderline(line: string): boolean {
  */
 function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
   const count = node.childCount
+  if (count === 0) return
+  // A leaf whose first line opens an HTML block (`<?`, `<!--`, `<div`) reads
+  // back as one, and an HTML block keeps a continuation line only when it
+  // carries its container markers - there is no lazy continuation to fall back
+  // on, so every line keeps the full prefix.
+  const first = node.child(0).text
+  const lazy = first == null || first.charCodeAt(0) !== CHAR_LESS_THAN || !opensHTMLBlock(first)
   for (let i = 0; i < count; i++) {
     const child = node.child(i)
-    if (child.isText && child.text) out.write(child.text, true)
+    if (child.isText && child.text) out.write(child.text, lazy)
     // Future inline node types (hardBreak, image, mention) go here.
   }
 }
@@ -600,10 +773,10 @@ function emitCodeBlock(node: ProseMirrorNode, out: MdOut): void {
   }
 
   const tilde = attrs.fenceStyle === 'tilde'
-  // min 2 keeps the fence width >= 3, CommonMark's minimum; a recorded
-  // opening-fence length only ever widens it.
-  const minWidth = longestCharRun(code, tilde ? CHAR_TILDE : CHAR_BACKTICK, 2) + 1
-  const fence = (tilde ? '~' : '`').repeat(Math.max(attrs.fenceLength ?? 0, minWidth))
+  // A recorded opening-fence length only ever widens the fence.
+  const fence = (tilde ? '~' : '`').repeat(
+    Math.max(attrs.fenceLength ?? 0, minFenceLength(code, tilde)),
+  )
 
   out.write(fence)
   // An info string that opens with the fence character would widen the fence
@@ -616,6 +789,39 @@ function emitCodeBlock(node: ProseMirrorNode, out: MdOut): void {
   }
   out.write(fence)
   out.closeBlock()
+}
+
+/**
+ * The narrowest fence that can hold `code`: wider than every line of it that
+ * would close the fence early, and never under CommonMark's minimum of three. A
+ * closing fence is a run of the fence character alone on its line; a run with
+ * anything else on the line (`` a ``` ``, `` ``` x ``) or four columns in closes
+ * nothing, so the fence holds it as it is.
+ */
+export function minFenceLength(code: string, tilde: boolean): number {
+  const fenceChar = tilde ? CHAR_TILDE : CHAR_BACKTICK
+  let longest = 2
+  let lineStart = 0
+  while (lineStart <= code.length) {
+    let lineEnd = code.indexOf('\n', lineStart)
+    if (lineEnd < 0) lineEnd = code.length
+    // Up to three columns of indentation, and a tab is four of them.
+    let index = lineStart
+    while (index < lineEnd && code.charCodeAt(index) === CHAR_SPACE) index++
+    if (index - lineStart < 4) {
+      const runStart = index
+      while (index < lineEnd && code.charCodeAt(index) === fenceChar) index++
+      const run = index - runStart
+      while (index < lineEnd && isSpaceOrTab(code.charCodeAt(index))) index++
+      if (index === lineEnd && run > longest) longest = run
+    }
+    lineStart = lineEnd + 1
+  }
+  return longest + 1
+}
+
+function isSpaceOrTab(char: number): boolean {
+  return char === CHAR_SPACE || char === CHAR_TAB
 }
 
 /**

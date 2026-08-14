@@ -16,3 +16,7 @@ export const CHAR_BACKTICK = 96 /* ` */
 export const CHAR_TILDE = 126 /* ~ */
 export const CHAR_EQUAL = 61 /* = */
 export const CHAR_GREATER_THAN = 62 /* > */
+export const CHAR_LESS_THAN = 60 /* < */
+export const CHAR_DOLLAR = 36 /* $ */
+export const CHAR_UNDERSCORE = 95 /* _ */
+export const CHAR_DIGIT_ONE = 49 /* 1 */

@@ -3,7 +3,7 @@ import { CHAR_BACKTICK } from '../unicode.ts'
 /**
  * Length of the longest run of `charCode` in `text`, at least `min`.
  */
-export function longestCharRun(text: string, charCode: number, min = 0): number {
+function longestCharRun(text: string, charCode: number, min = 0): number {
   let longest = min
   let run = 0
   for (let i = 0; i < text.length; i++) {
