@@ -92,10 +92,10 @@ function report(seed: number, runs: number): void {
 }
 
 it('triage', { timeout: 3_600_000 }, () => {
-  for (let seed = 13; seed <= 45; seed++) report(seed, 1_000_000)
+  for (let seed = 46; seed <= 120; seed++) report(seed, 1_000_000)
 })
 
-const INSPECT: string[] = ['*\t]\n\t\t2', '\n<!--', ' <!--', '~~~ ~', '~~~\t~', '1.\t~\n\n-', '*    a\n\t>', '- a\n\t\t-']
+const INSPECT: string[] = ['*\ta\n\t\t-', ' 33)\n\t1', '- a\n\t\t-']
 
 it('inspect', () => {
   for (const input of INSPECT) {

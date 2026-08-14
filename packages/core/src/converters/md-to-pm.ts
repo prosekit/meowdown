@@ -6,8 +6,9 @@ import {
 } from '@meowdown/markdown'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 
-import type { CodeBlockFenceStyle } from '../extensions/code-block.ts'
+import type { CodeBlockFenceStyle, MeowdownCodeBlockAttrs } from '../extensions/code-block.ts'
 import type { ListMarker, MeowdownListAttrs, TaskMarker } from '../extensions/list.ts'
+import { isNodeOfType } from '../extensions/node-names.ts'
 import { getNodeBuilders, type TypedNodeBuilders } from '../extensions/schema.ts'
 import type { TableColumnAlign } from '../extensions/table-column-align.ts'
 import {
@@ -113,10 +114,40 @@ function collectBlocks(
   do {
     if (previousTo != null) appendGapParagraphs(out, nodes, text, previousTo, cursor.from)
     previousTo = cursor.to
-    out.push(...convertBlock(nodes, cursor, text, column))
+    appendBlocks(out, nodes, convertBlock(nodes, cursor, text, column))
   } while (cursor.nextSibling())
   cursor.parent()
   return out
+}
+
+/**
+ * Append `blocks`, dropping the indented spelling from a code block that lands
+ * right after a list: four columns of indentation would put it inside the item
+ * above instead of after it, so it can only be written as a fence.
+ */
+function appendBlocks(
+  out: ProseMirrorNode[],
+  nodes: TypedNodeBuilders,
+  blocks: ProseMirrorNode[],
+): void {
+  for (const block of blocks) {
+    const attrs = block.attrs as MeowdownCodeBlockAttrs
+    if (
+      attrs.fenceStyle === 'indented' &&
+      isNodeOfType(block, 'codeBlock') &&
+      out.length > 0 &&
+      isNodeOfType(out[out.length - 1], 'list')
+    ) {
+      out.push(
+        nodes.codeBlock(
+          { language: attrs.language, fenceStyle: null, fenceLength: attrs.fenceLength },
+          block.textContent,
+        ),
+      )
+      continue
+    }
+    out.push(block)
+  }
 }
 
 /**
@@ -473,7 +504,7 @@ function convertBlockquote(
       if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) continue
       if (previousTo != null) appendGapParagraphs(content, nodes, text, previousTo, cursor.from)
       previousTo = cursor.to
-      content.push(...convertBlock(nodes, cursor, text, column))
+      appendBlocks(content, nodes, convertBlock(nodes, cursor, text, column))
     } while (cursor.nextSibling())
     cursor.parent()
   }
@@ -622,7 +653,7 @@ function convertListItem(
         content.push(task.paragraph)
         continue
       }
-      content.push(...convertBlock(nodes, cursor, text, contentColumn))
+      appendBlocks(content, nodes, convertBlock(nodes, cursor, text, contentColumn))
     } while (cursor.nextSibling())
     cursor.parent()
   }

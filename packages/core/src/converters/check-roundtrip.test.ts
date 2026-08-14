@@ -84,8 +84,6 @@ describe('checkRoundTrip', () => {
     '> [\n> $]:*',
     // a lazy continuation that would open a blockquote under the item's indent
     '*    a\n\t>',
-    // a tab-indented continuation keeps every column the container never took
-    '- a\n\t\t-',
     // an empty item cannot interrupt a paragraph, so the blank line stays
     '1.  ~\n\n-',
     // only a list numbered 1 interrupts a paragraph, so the blank line stays
@@ -129,6 +127,8 @@ describe('checkRoundTrip', () => {
     ' <!--', // an unterminated comment, same
     '~~~ ~', // an info string that opens with the fence character keeps off the fence
     '*\t]\n\t\t2', // a tab-indented continuation is re-indented, keeping its own columns
+    '- a\n\t\t-', // same, for a line that would read as a setext underline unindented
+    ' 33)\n\t1', // indentation cannot spell a code block that follows a list
     '| a |\n| --- |\n| b | c |', // a cell past the delimiter row widens the table instead of dropping
   ])('reports normalizing for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('normalizing')

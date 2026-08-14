@@ -454,14 +454,16 @@ function isTightItem(item: ProseMirrorNode): boolean {
  * setext heading. And a tab measures to the next multiple of four *from where it
  * sits*, so a prefix in front of one can leave the line with less than the four
  * columns of indentation that were keeping its first character - a `>`, a `$$`,
- * a fence - from opening a block. Spaces shift nothing, and a line that keeps
- * four columns either way is already safe.
+ * a fence - from opening a block. Spaces shift nothing.
  */
 function needsLazyLine(line: string, prefixWidth: number): boolean {
+  // Four columns of indentation put a line out of reach of every block opener,
+  // a setext underline included, so under the prefix it is already safe.
+  if (measureIndent(line, prefixWidth) >= 4) return false
   if (isSetextUnderline(line)) return true
   const first = line.charCodeAt(0)
   if (first !== CHAR_TAB && first !== CHAR_SPACE) return false
-  return measureIndent(line, prefixWidth) < 4 && measureIndent(line, 0) >= 4
+  return measureIndent(line, 0) >= 4
 }
 
 /**
