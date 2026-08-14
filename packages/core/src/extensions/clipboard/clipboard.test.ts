@@ -326,7 +326,7 @@ describe('selection copy', () => {
     )
     expect(pasteIntoEmptyDoc(html)).toMatchInlineSnapshot(`
       """
-      lain **bold**
+      lain **bold** 
 
       """
     `)

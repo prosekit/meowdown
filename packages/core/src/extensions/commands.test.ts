@@ -138,7 +138,7 @@ describe('insertTrigger', () => {
     fixture.set(n.doc(n.paragraph('Hello <a>')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
       """
-      Hello
+      Hello 
 
       """
     `)

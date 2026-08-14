@@ -1,75 +1,89 @@
+import { CHAR_LINE_FEED } from '../unicode.ts'
+
 import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
 
 /**
  * How faithfully markdown survives a parse-then-serialize round trip:
  * - `exact`: byte-identical (modulo the trailing newline).
- * - `normalizing`: bytes differ, but only as layout the parser collapses back -
- *   no non-blank line content is lost and re-parsing the output yields the same
- *   doc (e.g. a lazy continuation re-indented to its canonical column, or a
- *   table delimiter row rewritten to canonical dashes).
- * - `lossy`: content changed - a non-blank line differs, or the re-parsed doc does.
+ * - `normalizing`: bytes differ, but only as layout the parser reads back
+ *   through - every content line survives and the output re-parses to the same
+ *   document (e.g. a lazy continuation re-indented to its canonical column, or
+ *   a table delimiter row rewritten to canonical dashes).
+ * - `lossy`: content changed - a content line differs or disappeared, or the
+ *   output re-parses to a different document.
  */
 export type RoundTripFidelity = 'exact' | 'normalizing' | 'lossy'
 
 function trimTrailingNewlines(text: string): string {
-  return text.replace(/\n+$/u, '')
+  let end = text.length
+  while (end > 0 && text.charCodeAt(end - 1) === CHAR_LINE_FEED) end--
+  return text.slice(0, end)
 }
 
-// A line carries no content when it is empty, whitespace, or holds only
-// blockquote markers (`>`). An empty `>` is the blockquote form of a blank
-// line, so the serializer inserting one between blocks is layout, not content.
-function isBlankLine(line: string): boolean {
-  return /^[\s>]*$/u.test(line)
+// A line's opening markers - indentation, blockquote `>`, list bullets and
+// numbers - say which block the line belongs to, not what it says. Which line
+// carries them is the serializer's choice: a `>` swallows one optional space, a
+// lazy continuation is written back under its container's marker, and an item
+// whose marker and content start on separate source lines is joined onto one.
+// Every detail that distinguishes one marker from another (bullet character,
+// start number, gap width) is a node attribute, so the document comparison
+// covers them; here the markers only get in the way of comparing content.
+const CONTAINER_PREFIX_RE = /^(?:[\s>]|[-+*](?=\s|$)|\d{1,9}[.)](?=\s|$))+/u
+
+// Whitespace inside a line is layout as well: markdown ignores the spacing
+// around a heading marker (`#  x`), a fence's info string (``` ``` js ```), a
+// table's pipes, and a line's own ends. What the line says is its non-blank
+// characters, so drop the whitespace rather than trying to place it.
+function stripWhitespace(line: string): string {
+  return line.replaceAll(/\s/gu, '')
 }
 
-function nonBlankLines(text: string): string[] {
-  return text.split('\n').filter((line) => !isBlankLine(line))
-}
-
-// Collapse internal whitespace runs to a single space and trim the ends. The
-// serializer normalizes insignificant spacing without changing content (a double
-// space after a heading marker, `#  x` becomes `# x`; a re-indented lazy
-// continuation), so two lines that differ only in their whitespace runs carry
-// the same content: that is layout, not loss.
-function collapseWhitespace(line: string): string {
-  return line.trim().replaceAll(/\s+/gu, ' ')
-}
-
-// A GFM delimiter cell is optional colons around a run of dashes. The dash
-// count is layout; only the colon positions carry content (column alignment).
+// A GFM delimiter cell is optional colons around a run of dashes.
 const DELIMITER_CELL_RE = /^:?-+:?$/u
 
-function canonicalizeDelimiterCell(cell: string): string {
-  const alignsLeft = cell.startsWith(':')
-  const alignsRight = cell.endsWith(':')
-  if (alignsLeft && alignsRight) return ':-:'
-  if (alignsLeft) return ':--'
-  if (alignsRight) return '--:'
-  return '---'
-}
-
-// Rebuild a pipe-bearing line into the serializer's `| a | b |` form. Outer
-// pipes, spacing around pipes, and delimiter dash counts are table layout the
-// parser reads through, so two rows that differ only there carry the same
-// content. Lines the serializer never restructures (a paragraph or code line
-// holding pipes) canonicalize the same way on both sides, so equal lines stay
-// equal; the leading `[\s>]*` prefix is kept so rows inside a blockquote
-// compare within their blockquote.
+// Reduce a pipe-bearing line to the cell text it carries. Outer pipes are table
+// layout, an empty cell says nothing, and a delimiter row is pure structure: it
+// encodes the column count and the alignment, both of which are node attributes
+// the document comparison covers. A line the serializer never restructures (a
+// paragraph or code line holding pipes) reduces the same way on both sides, so
+// equal lines stay equal.
 function canonicalizeTableRow(line: string): string | undefined {
   if (!line.includes('|')) return undefined
-  const prefix = /^[\s>]*/u.exec(line)?.[0] ?? ''
-  const row = line.slice(prefix.length).trim()
-  const inner = row.replace(/^\|/u, '').replace(/\|$/u, '')
-  const cells = inner.split('|').map((cell) => collapseWhitespace(cell))
-  const rendered = cells.every((cell) => DELIMITER_CELL_RE.test(cell))
-    ? cells.map(canonicalizeDelimiterCell)
-    : cells
-  return collapseWhitespace(`${prefix} | ${rendered.join(' | ')} |`)
+  const cells = line.replace(/^\|/u, '').replace(/\|$/u, '').split('|')
+  if (cells.every((cell) => DELIMITER_CELL_RE.test(cell))) return ''
+  return cells.filter((cell) => cell !== '').join('|')
 }
 
-function normalizeLine(line: string): string {
-  return canonicalizeTableRow(line) ?? collapseWhitespace(line)
+/**
+ * The lines of `text` that carry content, each reduced to that content. A line
+ * left empty by dropping its markers and whitespace (a blank line, a bare `>`,
+ * a list marker whose content is on the next line) carries none and is skipped.
+ */
+function contentLines(text: string): string[] {
+  const lines: string[] = []
+  for (const line of text.split('\n')) {
+    const content = stripWhitespace(line.replace(CONTAINER_PREFIX_RE, ''))
+    if (content !== '') lines.push(canonicalizeTableRow(content) ?? content)
+  }
+  return lines
+}
+
+/**
+ * Whether `wanted` appears in `found` as an ordered subsequence.
+ *
+ * The serializer may write a line the source never had: an unterminated fenced
+ * block gets the closing fence it was missing. Such a line carries no content,
+ * which the document comparison proves - so only a content line that fails to
+ * come back out is loss.
+ */
+function containsInOrder(found: ReadonlyArray<string>, wanted: ReadonlyArray<string>): boolean {
+  let index = 0
+  for (const line of found) {
+    if (index === wanted.length) return true
+    if (line === wanted[index]) index++
+  }
+  return index === wanted.length
 }
 
 /**
@@ -89,15 +103,13 @@ export function checkRoundTrip(
   markdown: string,
   options: CheckRoundTripOptions = {},
 ): RoundTripFidelity {
-  const doc = markdownToDoc(markdown, { frontmatter: options.frontmatter })
-  const serialized = docToMarkdown(doc, { frontmatter: options.frontmatter })
+  const { frontmatter } = options
+  const doc = markdownToDoc(markdown, { frontmatter })
+  const serialized = docToMarkdown(doc, { frontmatter })
   if (trimTrailingNewlines(serialized) === trimTrailingNewlines(markdown)) return 'exact'
 
-  const before = nonBlankLines(markdown)
-  const after = nonBlankLines(serialized)
-  const textMatches =
-    before.length === after.length &&
-    before.every((line, i) => normalizeLine(line) === normalizeLine(after[i]))
-
-  return textMatches ? 'normalizing' : 'lossy'
+  // Content first: it is the cheaper of the two checks, and skipping it saves
+  // the second parse whenever the text alone already shows the loss.
+  if (!containsInOrder(contentLines(serialized), contentLines(markdown))) return 'lossy'
+  return markdownToDoc(serialized, { frontmatter }).eq(doc) ? 'normalizing' : 'lossy'
 }
