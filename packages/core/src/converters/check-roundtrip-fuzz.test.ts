@@ -73,9 +73,6 @@ const TOKENS_EXTENDED: string[] = [
   '永',
 ]
 
-// Markdown block structure is spelled with character runs and line prefixes;
-// uniform single characters almost never line up into one, so the shapes join
-// the alphabet as whole tokens.
 /// keep-sorted
 const TOKENS_RUNS: string[] = [
   '---',
