@@ -11,11 +11,43 @@ it.fails('finds no lossy input among ascii characters', { timeout: 60_000 }, () 
 })
 
 it.fails('finds no lossy input among sampled character', { timeout: 60_000 }, () => {
-  const tokens: string[] = [...'->#*`= \n\t$|.1[]a']
+  const tokens: string[] = [
+    '\t',
+    '\n',
+    ' ',
+    '!',
+    '"',
+    '#',
+    '$',
+    '(',
+    ')',
+    '*',
+    '+',
+    '-',
+    '.',
+    '/',
+    '1',
+    '2',
+    '3',
+    ':',
+    ';',
+    '<',
+    '=',
+    '>',
+    '[',
+    '\\',
+    ']',
+    '_',
+    '`',
+    'a',
+    'b',
+    '|',
+    '~',
+  ]
   const markdownArbitrary = fc.string({
     unit: fc.constantFrom(...tokens),
     minLength: 1,
-    maxLength: 32,
+    maxLength: 60,
   })
   fc.assert(fc.property(markdownArbitrary, check), { seed: 2, numRuns: 100_000, verbose: true })
 })
