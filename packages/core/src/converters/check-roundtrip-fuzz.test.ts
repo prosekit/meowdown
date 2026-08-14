@@ -3,9 +3,10 @@ import { it } from 'vitest'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
 
-const NUM_RUNS = 100_000
 // Use a fixed seed for reproducibility from the environment variable, or fallback to a random seed
 const SEED = Number.parseInt(import.meta.env.VITE_FUZZ_SEED) || Date.now() % (1 << 30)
+
+const NUM_RUNS = 100_000
 
 /// keep-sorted
 const TOKENS: string[] = [
