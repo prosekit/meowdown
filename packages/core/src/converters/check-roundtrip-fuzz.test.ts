@@ -56,6 +56,11 @@ it.fails('finds no lossy input among sampled character', { timeout: 60_000 }, ()
     numRuns: 100_000,
     verbose: true,
   })
+  fc.assert(fc.property(fc.string({ unit, minLength: 61, maxLength: 1000 }), check), {
+    seed: 2,
+    numRuns: 100_000,
+    verbose: true,
+  })
 })
 
 function check(input: string): boolean {
