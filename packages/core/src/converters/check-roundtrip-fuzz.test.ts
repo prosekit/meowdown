@@ -41,6 +41,16 @@ const TOKENS_BASE: string[] = [
   '2',
   '3',
   'a',
+  ',',
+  '{',
+  '}',
+  '0',
+  '&',
+  '%',
+  '^',
+  '9',
+  'A',
+  '@',
   'b',
 ]
 
@@ -50,12 +60,8 @@ const TOKENS_BASE: string[] = [
 // ASCII alone.
 /// keep-sorted
 const TOKENS_EXTENDED: string[] = [
-  ',',
   '’',
   '«',
-  '{',
-  '}',
-  '@',
   '\f',
   '\u{200D}',
   '\u{300}',
@@ -64,13 +70,7 @@ const TOKENS_EXTENDED: string[] = [
   '\u{FEFF}',
   '\u{FFFD}',
   '\v',
-  '&',
-  '%',
-  '^',
   '🍄',
-  '0',
-  '9',
-  'A',
   '片',
   "'",
 ]
