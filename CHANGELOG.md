@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.65.3](https://github.com/prosekit/meowdown/compare/v0.65.2...v0.65.3) (2026-08-14)
+
+
+### Bug Fixes
+
+* make the round trip lossless ([#466](https://github.com/prosekit/meowdown/issues/466)) ([25907f9](https://github.com/prosekit/meowdown/commit/25907f9370313f9ddc07a183f3b50ad5e4945f7e))
+* make the round trip lossless for the wider fuzz alphabet ([#468](https://github.com/prosekit/meowdown/issues/468)) ([06ae70f](https://github.com/prosekit/meowdown/commit/06ae70f3f5087217c6aad0378cf03bdda03d2a63))
+
 ## [0.65.2](https://github.com/prosekit/meowdown/compare/v0.65.1...v0.65.2) (2026-08-12)
 
 
