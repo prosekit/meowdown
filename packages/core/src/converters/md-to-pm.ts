@@ -245,24 +245,24 @@ function convertHeading(
       lastTo = cursor.to
     } while (cursor.nextSibling())
     if (lastId === LEZER_NODE_IDS.HeaderMark && lastFrom > contentStart) {
-      contentEnd = lastFrom
+      // A setext underline owns a line of its own, the container prefix and the
+      // indent in front of it included - and that line is the one place lezer
+      // marks no `QuoteMark`. Cut at the break before it. An ATX heading's
+      // closing run instead sits on the content's own line.
+      contentEnd = isSetext ? text.lastIndexOf('\n', lastFrom - 1) : lastFrom
       trailingMarkFrom = lastFrom
       trailingMarkTo = lastTo
     }
     cursor.parent()
   }
 
-  // Dedent before trimming so a multi-line setext heading inside a container
-  // (rare) keeps its continuation lines aligned; trim then drops the outer ends.
-  const raw = dedentContinuation(
-    stripQuotePrefixes(readLeafText(cursor, text, contentStart, contentEnd)),
-    column,
-  )
-  // An ATX heading's text sits between two marks, so whitespace at either end is
-  // the gap around it. A setext heading's text is whole lines: only the break
-  // before the underline is layout, and what precedes it stays text - `#\t` is a
-  // paragraph line where a bare `#` would be a heading.
-  const content = isSetext ? raw.replace(/\r?\n[ \t]*$/u, '').trimStart() : raw.trim()
+  // Dedent so a multi-line setext heading inside a container keeps its
+  // continuation lines aligned. An ATX heading's text sits between two marks, so
+  // whitespace at either end is the gap around it; a setext heading's text is
+  // whole lines and keeps its own spacing - `#\t` is a paragraph line where a
+  // bare `#` would be a heading.
+  const raw = dedentContinuation(readLeafText(cursor, text, contentStart, contentEnd), column)
+  const content = isSetext ? raw : raw.trim()
   // A trailing HeaderMark is the setext underline of a setext heading, or the
   // closing `#` run of an ATX heading (`# foo #`). CommonMark allows either run
   // any length, so keep the source count to make the round-trip lossless.
@@ -347,25 +347,6 @@ export function dedentContinuation(content: string, column: number): string {
   return content
     .split('\n')
     .map((line, index) => (index === 0 ? line : sliceColumn(line, column)))
-    .join('\n')
-}
-
-// A blockquote prefix at the head of a continuation line: indent, then a `>`
-// per nesting level, each swallowing one space.
-const QUOTE_PREFIX_RE = /^[ \t]*(?:>[ \t]?)+/u
-
-/**
- * Drop the blockquote prefix from a block's continuation lines.
- *
- * A setext heading is the one block lezer gives no `QuoteMark` children: its
- * span simply runs over the `>` of every line after the first, the underline's
- * line included. A lazy line carries no marker and is left alone.
- */
-function stripQuotePrefixes(content: string): string {
-  if (!content.includes('\n')) return content
-  return content
-    .split('\n')
-    .map((line, index) => (index === 0 ? line : line.replace(QUOTE_PREFIX_RE, '')))
     .join('\n')
 }
 
