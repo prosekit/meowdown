@@ -9,7 +9,15 @@ import type { MeowdownHTMLCommentAttrs } from '../extensions/html-comment.ts'
 import type { MeowdownListAttrs } from '../extensions/list.ts'
 import { isNodeOfType, type NodeName } from '../extensions/node-names.ts'
 import type { MeowdownTableCellAttrs, TableColumnAlign } from '../extensions/table-column-align.ts'
-import { CHAR_BACKTICK, CHAR_EQUAL, CHAR_HYPHEN_MINUS, CHAR_TILDE } from '../unicode.ts'
+import {
+  CHAR_BACKTICK,
+  CHAR_EQUAL,
+  CHAR_HYPHEN_MINUS,
+  CHAR_LINE_FEED,
+  CHAR_SPACE,
+  CHAR_TAB,
+  CHAR_TILDE,
+} from '../unicode.ts'
 import { longestCharRun } from '../utils/backticks.ts'
 
 /**
@@ -88,7 +96,10 @@ function emitHeading(node: ProseMirrorNode, out: MdOut): void {
     out.closeBlock()
     return
   }
-  out.write(HEADING_PREFIX[attrs.level] ?? '# ')
+  // Every entry ends with the space that separates the marker from the text.
+  // An empty heading has no text to separate, and writes just its hashes.
+  const prefix = HEADING_PREFIX[attrs.level] ?? '# '
+  out.write(node.content.size > 0 ? prefix : prefix.slice(0, -1))
   emitInlineChildren(node, out)
   const closingHashes = attrs.closingHashes
   if (closingHashes != null && closingHashes > 0) {
@@ -184,10 +195,14 @@ class MdOut {
    */
   closeBlock(): void {
     // An empty block (e.g. an empty list item `- `) still owns a line: flush
-    // its pending marker, trimmed, so it is neither dropped nor left dangling.
+    // its pending marker so it is neither dropped nor left dangling. The gap it
+    // left for content that never came is dropped - except after a checkbox,
+    // where that space is what keeps the line a task instead of a bullet whose
+    // text reads `[ ]`.
     if (this.atLineStart && this.pendingFirst !== null) {
       this.emitDeferredBlankLine()
-      this.parts.push(this.pendingFirst.trimEnd())
+      const marker = this.pendingFirst
+      this.parts.push(marker.endsWith('] ') ? marker : marker.trimEnd())
       this.pendingFirst = null
       this.atLineStart = false
     }
@@ -233,8 +248,17 @@ class MdOut {
   }
 
   finish(): string {
-    // Trim trailing whitespace + ensure exactly one final newline.
-    return this.parts.join('').replace(/\s+$/, '') + '\n'
+    // Drop the blank lines the last block left behind and end with exactly one
+    // newline. A blank line is layout; trailing spaces on a line that carries
+    // content are part of that text and stay, so the text survives a round trip.
+    const text = this.parts.join('')
+    let cut = text.length
+    for (let i = text.length - 1; i >= 0; i--) {
+      const code = text.charCodeAt(i)
+      if (code === CHAR_LINE_FEED) cut = i
+      else if (code !== CHAR_SPACE && code !== CHAR_TAB) break
+    }
+    return text.slice(0, cut) + '\n'
   }
 
   private emitDeferredBlankLine(): void {

@@ -253,10 +253,16 @@ function convertHeading(
   }
 
   // Dedent before trimming so a multi-line setext heading inside a container
-  // (rare) keeps its continuation lines aligned; trim then drops the outer ends,
-  // the underline's own line among them.
-  const raw = stripQuotePrefixes(readLeafText(cursor, text, contentStart, contentEnd))
-  const content = dedentContinuation(raw, column).trim()
+  // (rare) keeps its continuation lines aligned; trim then drops the outer ends.
+  const raw = dedentContinuation(
+    stripQuotePrefixes(readLeafText(cursor, text, contentStart, contentEnd)),
+    column,
+  )
+  // An ATX heading's text sits between two marks, so whitespace at either end is
+  // the gap around it. A setext heading's text is whole lines: only the break
+  // before the underline is layout, and what precedes it stays text - `#\t` is a
+  // paragraph line where a bare `#` would be a heading.
+  const content = isSetext ? raw.replace(/\r?\n[ \t]*$/u, '').trimStart() : raw.trim()
   // A trailing HeaderMark is the setext underline of a setext heading, or the
   // closing `#` run of an ATX heading (`# foo #`). CommonMark allows either run
   // any length, so keep the source count to make the round-trip lossless.

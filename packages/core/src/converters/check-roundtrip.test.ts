@@ -64,6 +64,10 @@ describe('checkRoundTrip', () => {
     'a $x$ b $$y$$ c',
     // extra blank lines round-trip as empty paragraphs
     'a\n\n\nb',
+    // trailing spaces on a line that carries text are part of that text
+    'trailing spaces   ',
+    // an empty task keeps the space that tells it apart from a `[ ]` bullet
+    '- [ ] Asdf\n- [ ]\n- [ ] ',
 
     // a blockquote's continuation line keeps its own indentation
     '> a\n>   b',
@@ -82,8 +86,6 @@ describe('checkRoundTrip', () => {
 
   it.each([
     '- a\n\n- b', // a loose list serializes tight
-    '- [ ] Asdf\n- [ ]\n- [ ] ', // a trailing space on an empty task is normalized away
-    'trailing spaces   ', // trailing whitespace is insignificant
     '> text\n> - item', // a blockquote gains an empty `>` line before a following list
     '> a\n> - x\n> - y', // same, with a multi-item list inside the blockquote
     '- [ ] todo\neen voorlopig idee', // a lazy continuation gains the canonical item indent

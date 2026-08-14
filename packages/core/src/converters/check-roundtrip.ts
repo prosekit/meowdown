@@ -114,11 +114,7 @@ export function checkRoundTrip(
   options: CheckRoundTripOptions = {},
 ): RoundTripFidelity {
   const { frontmatter } = options
-  // The serializer ends its output with one newline and no trailing whitespace,
-  // so a source ending in whitespace holds a tail no round trip can bring back.
-  // Drop it before parsing, or the document comparison below reads that known
-  // trim as a changed document.
-  const doc = markdownToDoc(markdown.trimEnd(), { frontmatter })
+  const doc = markdownToDoc(markdown, { frontmatter })
   const serialized = docToMarkdown(doc, { frontmatter })
   if (trimTrailingNewlines(serialized) === trimTrailingNewlines(markdown)) return 'exact'
 
