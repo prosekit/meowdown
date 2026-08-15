@@ -56,9 +56,7 @@ export interface DocToMarkdownOptions {
  */
 export function docToMarkdown(node: ProseMirrorNode, options: DocToMarkdownOptions = {}): string {
   const out = new MdOut()
-  if (options.frontmatter) {
-    emitFrontmatter(node.attrs.frontmatter as Frontmatter, out)
-  }
+  if (options.frontmatter) emitFrontmatter(node.attrs.frontmatter as Frontmatter, out)
   emit(node, out)
   return out.finish()
 }
@@ -70,28 +68,14 @@ export function docToMarkdown(node: ProseMirrorNode, options: DocToMarkdownOptio
  */
 function emitFrontmatter(body: Frontmatter, out: MdOut): void {
   if (body === null) return
-  out.write('---')
-  out.write('\n')
-  if (body !== '') {
-    out.write(body)
-    out.write('\n')
-  }
-  out.write('---')
+  out.write(body === '' ? '---\n---' : `---\n${body}\n---`)
   out.closeBlock()
 }
 
 /**
  * Heading prefixes indexed by level (1..6). Index 0 is a sentinel.
  */
-const HEADING_PREFIX: ReadonlyArray<string> = [
-  '',
-  '# ',
-  '## ',
-  '### ',
-  '#### ',
-  '##### ',
-  '###### ',
-]
+const HEADING_PREFIX = ['', '# ', '## ', '### ', '#### ', '##### ', '###### ']
 
 function emitHeading(node: ProseMirrorNode, out: MdOut): void {
   const attrs = node.attrs as MeowdownHeadingAttrs
@@ -111,9 +95,7 @@ function emitHeading(node: ProseMirrorNode, out: MdOut): void {
   out.write(node.content.size > 0 ? prefix : prefix.slice(0, -1))
   emitInlineChildren(node, out)
   const closingHashes = attrs.closingHashes
-  if (closingHashes != null && closingHashes > 0) {
-    out.write(' ' + '#'.repeat(closingHashes))
-  }
+  if (closingHashes != null && closingHashes > 0) out.write(' ' + '#'.repeat(closingHashes))
   out.closeBlock()
 }
 
@@ -442,9 +424,7 @@ function listMarkerChar(node: ProseMirrorNode): string {
  * loose.
  */
 function isTightRun(parent: ProseMirrorNode, from: number, to: number): boolean {
-  for (let i = from; i < to; i++) {
-    if (!isTightItem(parent.child(i))) return false
-  }
+  for (let i = from; i < to; i++) if (!isTightItem(parent.child(i))) return false
   return true
 }
 
@@ -555,10 +535,7 @@ function opensHTMLBlock(text: string): boolean {
   if (text.charCodeAt(0) !== CHAR_LESS_THAN) return false
   const lineEnd = text.indexOf('\n')
   const line = lineEnd < 0 ? text : text.slice(0, lineEnd)
-  for (const pattern of HTML_BLOCK_OPEN) {
-    if (pattern.test(line)) return true
-  }
-  return false
+  return HTML_BLOCK_OPEN.some((pattern) => pattern.test(line))
 }
 
 /**
@@ -636,9 +613,7 @@ function isUnderscoreBreak(line: string, index: number): boolean {
  */
 function startsNonEmptyItem(line: string, index: number): boolean {
   if (!isSpaceOrTab(line.charCodeAt(index + 1))) return false
-  for (let i = index + 2; i < line.length; i++) {
-    if (!isSpaceOrTab(line.charCodeAt(i))) return true
-  }
+  for (let i = index + 2; i < line.length; i++) if (!isSpaceOrTab(line.charCodeAt(i))) return true
   return false
 }
 
@@ -673,9 +648,7 @@ function isSetextUnderline(line: string): boolean {
   if (first !== CHAR_EQUAL && first !== CHAR_HYPHEN_MINUS) return false
   let end = line.length
   while (isSpaceChar(line.charCodeAt(end - 1))) end--
-  for (let i = start + 1; i < end; i++) {
-    if (line.charCodeAt(i) !== first) return false
-  }
+  for (let i = start + 1; i < end; i++) if (line.charCodeAt(i) !== first) return false
   return true
 }
 
@@ -849,9 +822,7 @@ export function canIndentCode(code: string): boolean {
 function toIndentedCode(code: string): string | undefined {
   if (!canIndentCode(code)) return undefined
   const lines = code.split('\n')
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i] !== '') lines[i] = `    ${lines[i]}`
-  }
+  for (let i = 0; i < lines.length; i++) if (lines[i] !== '') lines[i] = `    ${lines[i]}`
   return lines.join('\n')
 }
 
@@ -928,9 +899,7 @@ function formatDelimiter(align: TableColumnAlign | null | undefined): string {
 
 function formatTableRow(cells: ReadonlyArray<string>, colCount: number): string {
   let s = '|'
-  for (let c = 0; c < colCount; c++) {
-    s += ' ' + (cells[c] ?? '') + ' |'
-  }
+  for (let c = 0; c < colCount; c++) s += ' ' + (cells[c] ?? '') + ' |'
   return s
 }
 
