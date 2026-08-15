@@ -624,7 +624,7 @@ function convertTaskItem(
   }
   // Skip the single separating whitespace after `[ ]` / `[x]`
   if (isSpaceChar(text.charCodeAt(taskStart))) taskStart += 1
-  const taskText = text.slice(taskStart, taskEnd)
+  const taskText = readLeafText(cursor, text, taskStart, taskEnd)
   // The checkbox sits on the first line only: the serializer indents the task's
   // continuation lines to the item's own column, not past `[ ] `.
   const paragraph = buildParagraph(nodes, taskText, column)

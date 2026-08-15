@@ -253,13 +253,12 @@ const NORMALIZING_CASES: string[] = [
 
   // a cell keeps a fence run whose width the bare line would shorten
   '~|\n-|\n\t````',
+
+  // an empty task's lazy line goes back out under the quote's own marker
+  '> - [ ] \nb',
 ]
 
 const LOSSY_CASES: string[] = [
-  // an empty task's trailing space plus a lazy line: the rewritten `>   b`
-  // re-parses as literal text, marker included
-  '> - [ ] \nb',
-
   // a lazy line beside a fence or table lookalike is re-quoted into the quote
   '>2\n```|`\n|-|',
   '>~\n>*|\n-|',

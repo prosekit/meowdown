@@ -558,6 +558,10 @@ describe('task lists', () => {
     expect(roundtrip('- [ ] line one\n  line two')).toBe('- [ ] line one\n  line two\n')
   })
 
+  it('keeps a soft break in a quoted task', () => {
+    expect(roundtrip('> - [ ] line one\n>   line two')).toBe('> - [ ] line one\n>   line two\n')
+  })
+
   it.fails('keeps a lazy continuation in a task', () => {
     // Same lazy-continuation limitation as bullet lists; the flush line is
     // re-indented to the task's content column on serialize.
