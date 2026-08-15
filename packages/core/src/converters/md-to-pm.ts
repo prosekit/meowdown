@@ -124,8 +124,8 @@ function collectBlocks(
 
 /**
  * Append `blocks`, dropping the indented spelling from a code block that lands
- * right after a list: four columns of indentation would put it inside the item
- * above instead of after it, so it can only be written as a fence.
+ * after a list: four columns of indentation would put it inside the item above
+ * instead of after it, so it can only be written as a fence.
  */
 function appendBlocks(
   out: ProseMirrorNode[],
@@ -134,12 +134,7 @@ function appendBlocks(
 ): void {
   for (const block of blocks) {
     const attrs = block.attrs as MeowdownCodeBlockAttrs
-    if (
-      attrs.fenceStyle === 'indented' &&
-      isNodeOfType(block, 'codeBlock') &&
-      out.length > 0 &&
-      isNodeOfType(out[out.length - 1], 'list')
-    ) {
+    if (attrs.fenceStyle === 'indented' && isNodeOfType(block, 'codeBlock') && followsList(out)) {
       out.push(
         nodes.codeBlock(
           { language: attrs.language, fenceStyle: null, fenceLength: attrs.fenceLength },
@@ -150,6 +145,20 @@ function appendBlocks(
     }
     out.push(block)
   }
+}
+
+/**
+ * Whether the blocks written so far end in a list the next one still lands
+ * inside of. The empty paragraphs a blank-line run leaves behind write nothing
+ * but those blank lines, and blank lines do not end a list.
+ */
+function followsList(out: ReadonlyArray<ProseMirrorNode>): boolean {
+  for (let index = out.length - 1; index >= 0; index--) {
+    const block = out[index]
+    if (isNodeOfType(block, 'list')) return true
+    if (!isNodeOfType(block, 'paragraph') || block.content.size > 0) return false
+  }
+  return false
 }
 
 /**
