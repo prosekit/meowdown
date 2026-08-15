@@ -1022,20 +1022,28 @@ describe('sliceColumn', () => {
 
 describe('dedentContinuation', () => {
   it('returns single-line content unchanged', () => {
-    expect(dedentContinuation('hello', 2)).toBe('hello')
+    expect(dedentContinuation('hello', 2, 2)).toBe('hello')
   })
 
   it('returns content unchanged at column 0', () => {
-    expect(dedentContinuation('a\n  b', 0)).toBe('a\n  b')
+    expect(dedentContinuation('a\n  b', 0, 0)).toBe('a\n  b')
   })
 
   it('keeps the first line and dedents the rest', () => {
-    expect(dedentContinuation('one\n    two', 2)).toBe('one\n  two')
+    expect(dedentContinuation('one\n    two', 2, 2)).toBe('one\n  two')
   })
 
   it('strips the full column from each continuation line', () => {
-    expect(dedentContinuation('line one\n  line two\n  line three', 2)).toBe(
+    expect(dedentContinuation('line one\n  line two\n  line three', 2, 2)).toBe(
       'line one\nline two\nline three',
     )
+  })
+
+  it('leaves a line that stops short of the source column', () => {
+    expect(dedentContinuation('one\n    two', 2, 5)).toBe('one\n    two')
+  })
+
+  it('dedents a line that reaches the source column', () => {
+    expect(dedentContinuation('one\n     two', 2, 5)).toBe('one\n   two')
   })
 })

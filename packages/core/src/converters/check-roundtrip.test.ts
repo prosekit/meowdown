@@ -266,15 +266,16 @@ const NORMALIZING_CASES: string[] = [
   '>~\n>*|\n-|',
   '>$\n~|\n>|-|',
   '>\\\n|-\n>|-|',
+
+  // CommonMark spec example 312: escalating one-space indents flatten, and the
+  // lazy line under the last of them keeps the columns that kept it lazy
+  '- a\n - b\n  - c\n   - d\n    - e',
 ]
 
 const LOSSY_CASES: string[] = [
   // a conflict marker run respaces into a blockquote nest that swallows the
   // second marker line
   '>>>>>>>,\n>>>>>>> \t>',
-
-  // CommonMark spec example 312: escalating one-space indents flatten
-  '- a\n - b\n  - c\n   - d\n    - e',
 ]
 
 describe('checkRoundTrip', () => {

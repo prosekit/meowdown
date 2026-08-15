@@ -4,8 +4,8 @@ import { expect, it } from 'vitest'
 import { checkRoundTrip } from './check-roundtrip.ts'
 
 // Spec inputs that are genuinely lossy today, pinned like `LOSSY_CASES` and
-// burned down over time. 312 is the escalating-indent list.
-const KNOWN_LOSSY = new Set<number>([312])
+// burned down over time. Every spec example survives the round trip today.
+const KNOWN_LOSSY = new Set<number>()
 
 it.each(commonmark.map((example, index) => [index + 1, example.markdown] as const))(
   'spec example %i round-trips without loss',

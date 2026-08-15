@@ -394,6 +394,13 @@ describe('bullet lists', () => {
     expect(roundtrip(md)).toBe(md + '\n')
   })
 
+  it('keeps a lazy line under an indented item', () => {
+    // Three columns of indentation put the item's content column at 5, so the
+    // four-column line below it is a lazy continuation, not a nested item; the
+    // columns it keeps are what stop it from becoming one on the way back.
+    expect(roundtrip('   - d\n    - e')).toBe('- d\n      - e\n')
+  })
+
   it('keeps a soft break in a nested item', () => {
     const md = ['- a', '  - x', '', '    line one', '    line two'].join('\n')
     expect(roundtrip(md)).toBe(md + '\n')

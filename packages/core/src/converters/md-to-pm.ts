@@ -75,7 +75,7 @@ export function markdownToDoc(
 
   const tree = gfmBlockOnlyParser.parse(rest)
   const cursor = tree.cursor()
-  const blocks = collectBlocks(nodes, cursor, rest, 0)
+  const blocks = collectBlocks(nodes, cursor, rest, 0, 0)
 
   return nodes.doc(frontmatterBody === undefined ? {} : { frontmatter: frontmatterBody }, blocks)
 }
@@ -109,6 +109,7 @@ function collectBlocks(
   cursor: TreeCursor,
   text: string,
   column: number,
+  sourceColumn: number,
 ): ProseMirrorNode[] {
   const out: ProseMirrorNode[] = []
   if (!cursor.firstChild()) return out
@@ -116,7 +117,7 @@ function collectBlocks(
   do {
     if (previousTo != null) appendGapParagraphs(out, nodes, text, previousTo, cursor.from)
     previousTo = cursor.to
-    appendBlocks(out, nodes, convertBlock(nodes, cursor, text, column))
+    appendBlocks(out, nodes, convertBlock(nodes, cursor, text, column, sourceColumn))
   } while (cursor.nextSibling())
   cursor.parent()
   return out
@@ -187,45 +188,46 @@ function convertBlock(
   cursor: TreeCursor,
   text: string,
   column: number,
+  sourceColumn: number,
 ): ProseMirrorNode[] {
   switch (cursor.type.id) {
     case LEZER_NODE_IDS.ATXHeading1:
-      return [convertHeading(nodes, cursor, text, column, 1, false)]
+      return [convertHeading(nodes, cursor, text, column, sourceColumn, 1, false)]
     case LEZER_NODE_IDS.ATXHeading2:
-      return [convertHeading(nodes, cursor, text, column, 2, false)]
+      return [convertHeading(nodes, cursor, text, column, sourceColumn, 2, false)]
     case LEZER_NODE_IDS.ATXHeading3:
-      return [convertHeading(nodes, cursor, text, column, 3, false)]
+      return [convertHeading(nodes, cursor, text, column, sourceColumn, 3, false)]
     case LEZER_NODE_IDS.ATXHeading4:
-      return [convertHeading(nodes, cursor, text, column, 4, false)]
+      return [convertHeading(nodes, cursor, text, column, sourceColumn, 4, false)]
     case LEZER_NODE_IDS.ATXHeading5:
-      return [convertHeading(nodes, cursor, text, column, 5, false)]
+      return [convertHeading(nodes, cursor, text, column, sourceColumn, 5, false)]
     case LEZER_NODE_IDS.ATXHeading6:
-      return [convertHeading(nodes, cursor, text, column, 6, false)]
+      return [convertHeading(nodes, cursor, text, column, sourceColumn, 6, false)]
     case LEZER_NODE_IDS.SetextHeading1:
-      return [convertHeading(nodes, cursor, text, column, 1, true)]
+      return [convertHeading(nodes, cursor, text, column, sourceColumn, 1, true)]
     case LEZER_NODE_IDS.SetextHeading2:
-      return [convertHeading(nodes, cursor, text, column, 2, true)]
+      return [convertHeading(nodes, cursor, text, column, sourceColumn, 2, true)]
     case LEZER_NODE_IDS.Paragraph:
-      return [convertParagraph(nodes, cursor, text, column)]
+      return [convertParagraph(nodes, cursor, text, column, sourceColumn)]
     case LEZER_NODE_IDS.LinkReference:
-      return [convertParagraph(nodes, cursor, text, column)]
+      return [convertParagraph(nodes, cursor, text, column, sourceColumn)]
     case LEZER_NODE_IDS.CommentBlock:
       // A comment is not rendered output: map it onto the invisible `htmlComment`
       // node so it stays in the document (and round-trips) without reading as
       // body text. Raw HTML / processing-instruction blocks fall through to a
       // paragraph - they can carry content a reader expects to see.
-      return [convertHTMLComment(nodes, cursor, text, column)]
+      return [convertHTMLComment(nodes, cursor, text, column, sourceColumn)]
     case LEZER_NODE_IDS.HTMLBlock:
     case LEZER_NODE_IDS.ProcessingInstructionBlock:
       // The schema has no HTML node, so keep the raw block as literal paragraph
       // text; it survives verbatim through a round-trip.
-      return [convertParagraph(nodes, cursor, text, column)]
+      return [convertParagraph(nodes, cursor, text, column, sourceColumn)]
     case LEZER_NODE_IDS.Blockquote:
       return [convertBlockquote(nodes, cursor, text)]
     case LEZER_NODE_IDS.BulletList:
-      return convertList(nodes, cursor, text, column, 'bullet')
+      return convertList(nodes, cursor, text, column, sourceColumn, 'bullet')
     case LEZER_NODE_IDS.OrderedList:
-      return convertList(nodes, cursor, text, column, 'ordered')
+      return convertList(nodes, cursor, text, column, sourceColumn, 'ordered')
     case LEZER_NODE_IDS.FencedCode:
     case LEZER_NODE_IDS.CodeBlock:
       return [convertCodeBlock(nodes, cursor, text)]
@@ -244,14 +246,14 @@ function convertBlock(
       // the Task in `convertListItem`). The flat-list schema has a single
       // `kind`, so an ordered item cannot also be a task - keep the
       // `[x]` marker as literal paragraph text so it round-trips verbatim.
-      return [convertParagraph(nodes, cursor, text, column)]
+      return [convertParagraph(nodes, cursor, text, column, sourceColumn)]
     default: {
       // Never silently drop a block: an unhandled type keeps its raw source as literal paragraph text. Warn so a
       // missing converter case surfaces instead of losing content quietly.
       const raw = text.slice(cursor.from, cursor.to)
       if (raw.trim() === '') return []
       console.warn(`[meowdown] unsupported lezer block "${cursor.type.name}"`)
-      return [convertParagraph(nodes, cursor, text, column)]
+      return [convertParagraph(nodes, cursor, text, column, sourceColumn)]
     }
   }
 }
@@ -261,6 +263,7 @@ function convertHeading(
   cursor: TreeCursor,
   text: string,
   column: number,
+  sourceColumn: number,
   level: number,
   isSetext: boolean,
 ): ProseMirrorNode {
@@ -303,7 +306,11 @@ function convertHeading(
   // whitespace at either end is the gap around it; a setext heading's text is
   // whole lines and keeps its own spacing - `#\t` is a paragraph line where a
   // bare `#` would be a heading.
-  const raw = dedentContinuation(readLeafText(cursor, text, contentStart, contentEnd), column)
+  const raw = dedentContinuation(
+    readLeafText(cursor, text, contentStart, contentEnd),
+    column,
+    sourceColumn,
+  )
   const content = isSetext ? raw : trimGap(raw)
   // A trailing HeaderMark is the setext underline of a setext heading, or the
   // closing `#` run of an ATX heading (`# foo #`). CommonMark allows either run
@@ -372,6 +379,12 @@ export function measureContentColumn(text: string, from: number): number {
   return col
 }
 
+function measureIndent(line: string): number {
+  let index = 0
+  while (line.charCodeAt(index) === CHAR_SPACE || line.charCodeAt(index) === CHAR_TAB) index++
+  return measureContentColumn(line, index)
+}
+
 /**
  * Drop a line's leading whitespace up to `column`, counting a tab as `4 - col % 4`
  * columns. Whitespace the container never wrote is left alone: a tab that would
@@ -405,17 +418,24 @@ export function sliceColumn(line: string, column: number): string {
  *
  * lezer keeps the indent of a multi-line block's continuation lines inside the
  * source span (its `scrub` pads each line's container prefix to equal-width
- * whitespace to preserve positions). CommonMark and lezer require every
- * continuation line to be indented to the same content `column`, which equals
- * the block's first-line column. The first line is already past its indent, so
- * only lines 2..n are dedented. Returns `content` untouched at column 0 (a
+ * whitespace to preserve positions). The first line is already past its indent,
+ * so only lines 2..n are dedented. Returns `content` untouched at column 0 (a
  * top-level block) or when there is no continuation line.
+ *
+ * `column` is the column the serializer writes the containers' prefixes back at,
+ * and so the only one that may come off. `sourceColumn` is the column the source
+ * indents to, which a list item's own indentation puts further right.
  */
-export function dedentContinuation(content: string, column: number): string {
-  if (column === 0 || !content.includes('\n')) return content
+export function dedentContinuation(content: string, column: number, sourceColumn: number): string {
+  if (sourceColumn === 0 || !content.includes('\n')) return content
   return content
     .split('\n')
-    .map((line, index) => (index === 0 ? line : sliceColumn(line, column)))
+    .map((line, index) => {
+      // A line that stops short of `sourceColumn` carried no container prefix at
+      // all - it is a lazy continuation, and every column on it is its own.
+      if (index === 0 || measureIndent(line) < sourceColumn) return line
+      return sliceColumn(line, column)
+    })
     .join('\n')
 }
 
@@ -502,10 +522,11 @@ function buildParagraph(
   nodes: TypedNodeBuilders,
   content: string,
   column: number,
+  sourceColumn: number,
 ): ProseMirrorNode {
   // An empty string adds no child (the builder skips falsy text), so this also
   // covers the empty-paragraph case.
-  return nodes.paragraph(dedentContinuation(content, column))
+  return nodes.paragraph(dedentContinuation(content, column, sourceColumn))
 }
 
 function convertParagraph(
@@ -513,8 +534,14 @@ function convertParagraph(
   cursor: TreeCursor,
   text: string,
   column: number,
+  sourceColumn: number,
 ): ProseMirrorNode {
-  return buildParagraph(nodes, readLeafText(cursor, text, cursor.from, cursor.to), column)
+  return buildParagraph(
+    nodes,
+    readLeafText(cursor, text, cursor.from, cursor.to),
+    column,
+    sourceColumn,
+  )
 }
 
 /**
@@ -528,8 +555,13 @@ function convertHTMLComment(
   cursor: TreeCursor,
   text: string,
   column: number,
+  sourceColumn: number,
 ): ProseMirrorNode {
-  const content = dedentContinuation(readLeafText(cursor, text, cursor.from, cursor.to), column)
+  const content = dedentContinuation(
+    readLeafText(cursor, text, cursor.from, cursor.to),
+    column,
+    sourceColumn,
+  )
   return nodes.htmlComment({ content })
 }
 
@@ -549,7 +581,7 @@ function convertBlockquote(
       if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) continue
       if (previousTo != null) appendGapParagraphs(content, nodes, text, previousTo, cursor.from)
       previousTo = cursor.to
-      appendBlocks(content, nodes, convertBlock(nodes, cursor, text, 0))
+      appendBlocks(content, nodes, convertBlock(nodes, cursor, text, 0, 0))
     } while (cursor.nextSibling())
     cursor.parent()
   }
@@ -561,13 +593,14 @@ function convertList(
   cursor: TreeCursor,
   text: string,
   column: number,
+  sourceColumn: number,
   kind: 'bullet' | 'ordered',
 ): ProseMirrorNode[] {
   const items: ProseMirrorNode[] = []
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.ListItem) {
-        items.push(convertListItem(nodes, cursor, text, column, kind))
+        items.push(convertListItem(nodes, cursor, text, column, sourceColumn, kind))
       }
     } while (cursor.nextSibling())
     cursor.parent()
@@ -612,6 +645,7 @@ function convertTaskItem(
   cursor: TreeCursor,
   text: string,
   column: number,
+  sourceColumn: number,
 ): { checked: boolean; taskMarker: TaskMarker | undefined; paragraph: ProseMirrorNode } {
   let taskStart = cursor.from
   const taskEnd = cursor.to
@@ -636,8 +670,25 @@ function convertTaskItem(
   const taskText = readLeafText(cursor, text, taskStart, taskEnd)
   // The checkbox sits on the first line only: the serializer indents the task's
   // continuation lines to the item's own column, not past `[ ] `.
-  const paragraph = buildParagraph(nodes, taskText, column)
+  const paragraph = buildParagraph(nodes, taskText, column, sourceColumn)
   return { checked, taskMarker, paragraph }
+}
+
+/**
+ * The gap between an item's marker and the content at `contentFrom`. Only
+ * content that opens on the marker's own line measures one; an item whose
+ * content starts on the next line takes the canonical single space, the column
+ * its own continuation lines are indented to.
+ */
+function measureMarkerGap(
+  text: string,
+  contentFrom: number,
+  markTo: number | undefined,
+  markEndColumn: number,
+): number {
+  const onMarkLine = markTo != null && text.lastIndexOf('\n', contentFrom - 1) < markTo
+  const gap = onMarkLine ? measureContentColumn(text, contentFrom) - markEndColumn : 1
+  return gap >= 2 && gap <= 4 ? gap : 1
 }
 
 function convertListItem(
@@ -645,17 +696,22 @@ function convertListItem(
   cursor: TreeCursor,
   text: string,
   column: number,
+  sourceColumn: number,
   kind: 'bullet' | 'ordered',
 ): ProseMirrorNode {
   const content: ProseMirrorNode[] = []
 
   let taskChecked: boolean | undefined
   let taskMarker: TaskMarker | undefined
-  let order: number | undefined
-  let marker: ListMarker | undefined
-  let markWidth = 1
+  let listMark: { marker: ListMarker | undefined; order: number | undefined } | undefined
   let markTo: number | undefined
-  let markEndColumn = 0
+  let markWidth = 1
+  // The columns between these two are the marker plus the up to three columns of
+  // indentation an item may carry on top of the enclosing containers'. The
+  // serializer writes the marker back without that indentation, which is why the
+  // two content columns below differ.
+  const itemColumn = measureContentColumn(text, cursor.from)
+  let markEndColumn = itemColumn + markWidth
   // The gap between the marker and the content. A gap of 5+ is indented code (a
   // different node, so the first child's column would be the code block's), and 1 is
   // the canonical default; only a 2-4 space gap is a faithful, content-preserving
@@ -665,6 +721,7 @@ function convertListItem(
   // on top of whatever the enclosing containers already add. Both the marker and
   // the gap are known once the first block after the mark is reached.
   let contentColumn = column + markWidth + markerGap
+  let sourceContentColumn = sourceColumn + markEndColumn - itemColumn + markerGap
   let sawContent = false
 
   if (cursor.firstChild()) {
@@ -673,9 +730,7 @@ function convertListItem(
       // inside the item, the same way it does inside a paragraph.
       if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) continue
       if (cursor.type.id === LEZER_NODE_IDS.ListMark) {
-        const listMark = readListMark(cursor, text, kind)
-        marker = listMark.marker
-        order = listMark.order
+        listMark = readListMark(cursor, text, kind)
         markWidth = cursor.to - cursor.from
         markTo = cursor.to
         markEndColumn = measureContentColumn(text, cursor.to)
@@ -683,22 +738,22 @@ function convertListItem(
       }
       if (!sawContent) {
         sawContent = true
-        // Only content that opens on the marker's own line measures a gap; an
-        // item whose content starts on the next line takes the canonical single
-        // space, the column its own continuation lines are indented to.
-        const onMarkLine = markTo != null && text.lastIndexOf('\n', cursor.from - 1) < markTo
-        const gap = onMarkLine ? measureContentColumn(text, cursor.from) - markEndColumn : 1
-        markerGap = gap >= 2 && gap <= 4 ? gap : 1
+        markerGap = measureMarkerGap(text, cursor.from, markTo, markEndColumn)
         contentColumn = column + markWidth + markerGap
+        sourceContentColumn = sourceColumn + markEndColumn - itemColumn + markerGap
       }
       if (kind === 'bullet' && cursor.type.id === LEZER_NODE_IDS.Task) {
-        const task = convertTaskItem(nodes, cursor, text, contentColumn)
+        const task = convertTaskItem(nodes, cursor, text, contentColumn, sourceContentColumn)
         taskChecked = task.checked
         taskMarker = task.taskMarker
         content.push(task.paragraph)
         continue
       }
-      appendBlocks(content, nodes, convertBlock(nodes, cursor, text, contentColumn))
+      appendBlocks(
+        content,
+        nodes,
+        convertBlock(nodes, cursor, text, contentColumn, sourceContentColumn),
+      )
     } while (cursor.nextSibling())
     cursor.parent()
   }
@@ -708,13 +763,13 @@ function convertListItem(
   // `+ [ ]` is still a circle task, so collapse only applies when there is no
   // checkbox.
   const isTask = taskChecked != null
-  const collapsed = !isTask && kind === 'bullet' && marker === '+'
+  const collapsed = !isTask && kind === 'bullet' && listMark?.marker === '+'
   const attrs: MeowdownListAttrs = {
     kind: isTask ? 'task' : kind,
-    order: kind === 'ordered' ? (order ?? 1) : null,
+    order: kind === 'ordered' ? (listMark?.order ?? 1) : null,
     checked: taskChecked ?? false,
     collapsed,
-    marker: collapsed ? null : marker,
+    marker: collapsed ? null : listMark?.marker,
     taskMarker,
     markerGap,
   }
