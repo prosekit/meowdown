@@ -11,6 +11,7 @@ import { isNodeOfType, type NodeName } from '../extensions/node-names.ts'
 import type { MeowdownTableCellAttrs, TableColumnAlign } from '../extensions/table-column-align.ts'
 import {
   CHAR_ASTERISK,
+  CHAR_BACKSLASH,
   CHAR_BACKTICK,
   CHAR_DIGIT_ONE,
   CHAR_DOLLAR,
@@ -21,6 +22,7 @@ import {
   CHAR_HYPHEN_MINUS,
   CHAR_LESS_THAN,
   CHAR_LINE_FEED,
+  CHAR_PIPE,
   CHAR_PLUS,
   CHAR_RIGHT_PARENTHESIS,
   CHAR_SPACE,
@@ -160,6 +162,7 @@ class MdOut {
   write(text: string, lazyLines = false): void {
     if (text === '') return
     this.emitDeferredBlankLine()
+    let opening = this.linePrefix
     if (this.atLineStart) {
       // `- ` and a paragraph reading `--` make the line `- --`, a thematic
       // break. Leave the marker on a line of its own and indent the text under
@@ -167,7 +170,8 @@ class MdOut {
       if (this.pendingFirst !== null && isThematicBreak(this.pendingFirst + text)) {
         this.breakMarkerLine()
       }
-      this.parts.push(this.pendingFirst ?? this.linePrefix)
+      opening = this.pendingFirst ?? this.linePrefix
+      this.parts.push(opening)
       this.pendingFirst = null
       this.atLineStart = false
     }
@@ -181,10 +185,21 @@ class MdOut {
     // Index loop avoids the `.entries()` iterator allocation - measurable
     // (~7%) on the hot write() path.
     const lazy = lazyLines && this.linePrefix !== ''
+    // A first line with a pipe of its own gets lezer's table parser, which reads
+    // every row from the same column whichever spelling it goes out in. Only
+    // without one can a delimiter row below take the line above out of the
+    // paragraph.
+    const tableRisk = lazy && !hasPipe(lines[0], 0)
+    let base = opening.length
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
       if (i > 0) {
-        this.parts.push('\n', lazy ? continuationPrefix(line, this.linePrefix) : this.linePrefix)
+        let prefix = lazy ? continuationPrefix(line, this.linePrefix) : this.linePrefix
+        if (tableRisk && opensTable(line, prefix, lines[i - 1], base)) {
+          prefix = lazyIndent(this.linePrefix)
+        }
+        this.parts.push('\n', prefix)
+        base = prefix.length
       }
       if (line !== '') this.parts.push(line)
     }
@@ -486,6 +501,59 @@ function continuationPrefix(line: string, prefix: string): string {
   // it alone and nothing at the far left reads it back as a block: an
   // underline binds to no lazy paragraph, while an opener still opens.
   return !opens && dedentKeepsLine(line, lazy.length) ? '' : lazy
+}
+
+// A GFM delimiter row, minus whatever container markers open its line: optional
+// pipes around cells of dashes with optional colons. Those markers are all `>`
+// or whitespace, which is what lets a line read the same with or without the
+// prefix it will be written behind.
+const DELIMITER_ROW_RE = /^\|?(?:\s*:?-+:?\s*\|)+(?:\s*:?-+:?\s*)?$/u
+const DELIMITER_ROW_MARKERS_RE = /^[>\s]*/u
+
+/**
+ * Whether writing `line` behind `prefix` reads as a delimiter row under
+ * `previous`, the line above it, which ends the paragraph there and starts a
+ * table. Both rows are counted from `previousBase`, the column the line above
+ * ends its own markers at, so a row written without them counts different cells
+ * and the two lines stay one paragraph.
+ */
+function opensTable(line: string, prefix: string, previous: string, previousBase: number): boolean {
+  if (!DELIMITER_ROW_RE.test(line.replace(DELIMITER_ROW_MARKERS_RE, ''))) return false
+  if (!hasPipe(previous, 0)) return false
+  return countTableCells(previous, 0) === countTableCells(prefix + line, previousBase)
+}
+
+function hasPipe(line: string, start: number): boolean {
+  for (let index = start; index < line.length; index++) {
+    const code = line.charCodeAt(index)
+    if (code === CHAR_PIPE) return true
+    if (code === CHAR_BACKSLASH) index++
+  }
+  return false
+}
+
+/**
+ * The cells `line` carries from `start` on. An unescaped pipe closes the cell in
+ * front of it and whitespace alone is no cell, so the outer pipes a row may or
+ * may not carry count for nothing.
+ */
+function countTableCells(line: string, start: number): number {
+  let count = 0
+  let first = true
+  let inCell = false
+  let escaped = false
+  for (let index = start; index < line.length; index++) {
+    const code = line.charCodeAt(index)
+    if (code === CHAR_PIPE && !escaped) {
+      if (!first || inCell) count++
+      first = false
+      inCell = false
+    } else if (escaped || !isSpaceOrTab(code)) {
+      inCell = true
+    }
+    escaped = !escaped && code === CHAR_BACKSLASH
+  }
+  return inCell ? count + 1 : count
 }
 
 /**

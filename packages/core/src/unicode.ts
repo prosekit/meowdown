@@ -20,3 +20,5 @@ export const CHAR_LESS_THAN = 60 /* < */
 export const CHAR_DOLLAR = 36 /* $ */
 export const CHAR_UNDERSCORE = 95 /* _ */
 export const CHAR_DIGIT_ONE = 49 /* 1 */
+export const CHAR_PIPE = 124 /* | */
+export const CHAR_BACKSLASH = 92 /* \ */

@@ -256,15 +256,16 @@ const NORMALIZING_CASES: string[] = [
 
   // an empty task's lazy line goes back out under the quote's own marker
   '> - [ ] \nb',
-]
 
-const LOSSY_CASES: string[] = [
-  // a lazy line beside a fence or table lookalike is re-quoted into the quote
+  // a delimiter row under a pipe-bearing line stays lazy, so the quote's own
+  // lines keep it out of a table
   '>2\n```|`\n|-|',
   '>~\n>*|\n-|',
   '>$\n~|\n>|-|',
   '>\\\n|-\n>|-|',
+]
 
+const LOSSY_CASES: string[] = [
   // a conflict marker run respaces into a blockquote nest that swallows the
   // second marker line
   '>>>>>>>,\n>>>>>>> \t>',
