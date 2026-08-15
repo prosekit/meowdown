@@ -729,6 +729,12 @@ describe('code blocks', () => {
   it('keeps an indented code block after a paragraph', () => {
     expect(roundtrip('text\n\n    code')).toBe('text\n\n    code\n')
   })
+
+  it('fences a code block a blank-line run leaves after a list', () => {
+    // The blank lines do not end the list, so four columns would still land
+    // inside the item above.
+    expect(roundtrip('  1.\n\n\n    code')).toBe('1.\n\n\n```\ncode\n```\n')
+  })
 })
 
 describe('thematic breaks', () => {
