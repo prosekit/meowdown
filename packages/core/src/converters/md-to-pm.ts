@@ -167,9 +167,7 @@ function appendGapParagraphs(
   gapTo: number,
 ): void {
   let newlineCount = 0
-  for (let i = gapFrom; i < gapTo; i++) {
-    if (text.charCodeAt(i) === CHAR_LINE_FEED) newlineCount++
-  }
+  for (let i = gapFrom; i < gapTo; i++) if (text.charCodeAt(i) === CHAR_LINE_FEED) newlineCount++
   for (let i = 2; i < newlineCount; i++) out.push(nodes.paragraph())
 }
 
