@@ -204,9 +204,11 @@ const NORMALIZING_CASES: string[] = [
   '- a\n\t\t-',
 
   // indentation cannot spell a code block that follows a list, nor one that
-  // opens with a blank line
+  // opens with a blank line. Blank lines do not end the list, so the empty
+  // paragraphs a run of them leaves behind keep the code block in reach too
   ' 33)\n\t1',
   '*\t\t\n\t\t[',
+  '  1.\n\n\n\t~',
 
   // a cell past the delimiter row widens the table instead of dropping
   '| a |\n| --- |\n| b | c |',
@@ -268,9 +270,6 @@ const LOSSY_CASES: string[] = [
   // a conflict marker run respaces into a blockquote nest that swallows the
   // second marker line
   '>>>>>>>,\n>>>>>>> \t>',
-
-  // an empty ordered item keeps blank lines; the re-indented `~` changes blocks
-  '  1.\n\n\n\t~',
 
   // CommonMark spec example 312: escalating one-space indents flatten
   '- a\n - b\n  - c\n   - d\n    - e',
