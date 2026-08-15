@@ -242,6 +242,11 @@ class MdOut {
     this.deferredBlankPrefix = null
   }
 
+  // A task's `[ ] ` is content of its own, so what follows it opens nothing.
+  get atContentStart(): boolean {
+    return this.atLineStart && !this.pendingFirst?.endsWith('] ')
+  }
+
   /**
    * Run `fn` with `linePrefix` extended by `continuation`.
    * If `firstLine` is given, it replaces the prefix on the NEXT line only -
@@ -552,6 +557,7 @@ const HTML_BLOCK_OPEN = [
  * line round-trips all the same, so one check serves both callers.
  */
 function opensHTMLBlock(text: string): boolean {
+  if (text.charCodeAt(0) !== CHAR_LESS_THAN) return false
   const lineEnd = text.indexOf('\n')
   const line = lineEnd < 0 ? text : text.slice(0, lineEnd)
   return HTML_BLOCK_OPEN.some((pattern) => pattern.test(line))
@@ -685,7 +691,7 @@ function emitInlineChildren(node: ProseMirrorNode, out: MdOut): void {
   // carries its container markers - there is no lazy continuation to fall back
   // on, so every line keeps the full prefix.
   const first = node.child(0).text
-  const lazy = first == null || first.charCodeAt(0) !== CHAR_LESS_THAN || !opensHTMLBlock(first)
+  const lazy = first == null || !out.atContentStart || !opensHTMLBlock(first)
   for (let i = 0; i < count; i++) {
     const child = node.child(i)
     if (child.isText && child.text) out.write(child.text, lazy)
