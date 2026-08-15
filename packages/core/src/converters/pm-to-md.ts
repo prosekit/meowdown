@@ -180,11 +180,18 @@ class MdOut {
     const lines = text.split('\n')
     // Index loop avoids the `.entries()` iterator allocation - measurable
     // (~7%) on the hot write() path.
-    const lazy = lazyLines && this.linePrefix !== ''
+    const prefix = this.linePrefix
+    const lazy = lazyLines && prefix !== ''
+    // The columns the line above went out without, which its own cells are
+    // counted from and which the next line's prefix would fill with a cell.
+    let lead = ''
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
       if (i > 0) {
-        this.parts.push('\n', lazy ? continuationPrefix(line, this.linePrefix) : this.linePrefix)
+        const table = lazy && opensTable(line, lines[i - 1], lead)
+        const written = lazy ? continuationPrefix(line, prefix, table) : prefix
+        lead = prefix.slice(written.length)
+        this.parts.push('\n', written)
       }
       if (line !== '') this.parts.push(line)
     }
@@ -460,6 +467,24 @@ function isTightItem(item: ProseMirrorNode): boolean {
   return true
 }
 
+// A GFM delimiter row binds to the line above it the way a setext underline
+// does, turning the paragraph into a table instead of a heading. It only binds
+// to a line that counts the same cells, which is why the source could keep the
+// two apart by writing one of them lazily, from a column of its own.
+const DELIMITER_ROW_RE = /^\s*\|?(?::?-+:?\s*\|\s*)+(?::?-+:?\s*)?$/u
+
+function opensTable(line: string, previous: string, lead: string): boolean {
+  return DELIMITER_ROW_RE.test(line) && countCells(previous) === countCells(lead + line)
+}
+
+// The cells a row carries: one per pipe, plus the cell at either end unless a
+// pipe sits there too.
+function countCells(row: string): number {
+  const text = row.trim()
+  if (text === '') return 0
+  return text.split('|').length - Number(text.startsWith('|')) - Number(text.endsWith('|'))
+}
+
 /**
  * The prefix a leaf's continuation line goes out with. The container's full
  * `prefix` is the default. A line the full prefix would change the meaning of -
@@ -475,7 +500,7 @@ function isTightItem(item: ProseMirrorNode): boolean {
  * measures four columns flush left (or it is a setext underline, which nothing
  * at the top level turns back into an underline).
  */
-function continuationPrefix(line: string, prefix: string): string {
+function continuationPrefix(line: string, prefix: string, table: boolean): string {
   // Four columns of indentation behind the prefix put a line out of reach of
   // every block opener, a setext underline included, so it is already safe.
   if (measureIndent(line, prefix.length) >= 4) return prefix
@@ -483,7 +508,7 @@ function continuationPrefix(line: string, prefix: string): string {
   // its own; behind the prefix it measures less (a tab shrinks to the next tab
   // stop), so the prefix would put its content back in reach.
   const shrunk = measureIndent(line, 0) >= 4
-  const underline = isSetextUnderline(line)
+  const underline = table || isSetextUnderline(line)
   const opens = !shrunk && lineOpensBlock(line)
   if (!shrunk && !underline && !opens) return prefix
   const lazy = lazyIndent(prefix)

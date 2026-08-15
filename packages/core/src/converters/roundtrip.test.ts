@@ -355,6 +355,12 @@ describe('blockquotes', () => {
   it('keeps a two-item list in a quote', () => {
     expect(roundtrip('> - a\n> - b')).toBe('> - a\n> - b\n')
   })
+
+  it('keeps a delimiter row out of the quote', () => {
+    // Under the quote marker the two lines would read as a table header and
+    // its delimiter row; lazily is the only spelling that keeps them text.
+    expect(roundtrip('> text\n> a|\n-|')).toBe('> text\n> a|\n-|\n')
+  })
 })
 
 describe('bullet lists', () => {

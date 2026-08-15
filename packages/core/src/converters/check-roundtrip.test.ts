@@ -260,7 +260,7 @@ const NORMALIZING_CASES: string[] = [
   // an empty task's lazy line goes back out under the quote's own marker
   '> - [ ] \nb',
 
-  // a lazy line beside a fence or table lookalike is re-quoted into the quote
+  // a delimiter row binds to the line above it, so it goes out lazily
   '>2\n```|`\n|-|',
   '>~\n>*|\n-|',
   '>$\n~|\n>|-|',
