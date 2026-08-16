@@ -73,6 +73,7 @@ export function checkRoundTrip(
   return 'lossy'
 }
 
+// Removes all markdown structure characters
 function removeMarkdownStructure(markdown: string) {
   return markdown.replaceAll(/[-+=_:|\\/[\]<>()`~$*#\s!]+/gu, '')
 }
