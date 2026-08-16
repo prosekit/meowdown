@@ -43,9 +43,8 @@ export function checkRoundTrip(
   const serialized = docToMarkdown(doc, { frontmatter })
   if (trimTrailingNewlines(serialized) === trimTrailingNewlines(markdown)) return 'exact'
 
-  let markdownContent = removeMarkdownStructure(markdown)
-  let serializedContent = removeMarkdownStructure(serialized)
-
+  const markdownContent = removeMarkdownStructure(markdown)
+  const serializedContent = removeMarkdownStructure(serialized)
   return markdownContent === serializedContent ? 'normalizing' : 'lossy'
 }
 
