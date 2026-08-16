@@ -277,6 +277,9 @@ const NORMALIZING_CASES: string[] = [
 
   // CommonMark spec example 312: escalating one-space indents flatten
   '- a\n - b\n  - c\n   - d\n    - e',
+
+  // a math block with \f
+  '$$\nA\n$$\f',
 ]
 
 const LOSSY_CASES: string[] = []

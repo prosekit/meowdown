@@ -40,14 +40,47 @@ export function checkRoundTrip(
 ): RoundTripFidelity {
   const { frontmatter } = options
   const doc = markdownToDoc(markdown, { frontmatter })
-  const serialized = docToMarkdown(doc, { frontmatter })
-  if (trimTrailingNewlines(serialized) === trimTrailingNewlines(markdown)) return 'exact'
+  let serialized = docToMarkdown(doc, { frontmatter })
 
-  const markdownContent = removeMarkdownStructure(markdown)
-  const serializedContent = removeMarkdownStructure(serialized)
-  return markdownContent === serializedContent ? 'normalizing' : 'lossy'
+  if (markdown === serialized) {
+    return 'exact'
+  }
+
+  markdown = trimTrailingNewlines(markdown)
+  serialized = trimTrailingNewlines(serialized)
+  if (markdown === serialized) {
+    return 'exact'
+  }
+
+  markdown = removeMarkdownStructure(markdown)
+  serialized = removeMarkdownStructure(serialized)
+  if (markdown === serialized) {
+    return 'normalizing'
+  }
+
+  markdown = removeNumberZeroPrefix(markdown)
+  serialized = removeNumberZeroPrefix(serialized)
+  if (markdown === serialized) {
+    return 'normalizing'
+  }
+
+  markdown = removeMathCodeBlockLanguage(markdown)
+  serialized = removeMathCodeBlockLanguage(serialized)
+  if (markdown === serialized) {
+    return 'normalizing'
+  }
+
+  return 'lossy'
 }
 
 function removeMarkdownStructure(markdown: string) {
-  return markdown.replaceAll(/[-+=_:|\\/[\]<>()`~$*#\s0!]+/gu, '')
+  return markdown.replaceAll(/[-+=_:|\\/[\]<>()`~$*#\s!]+/gu, '')
+}
+
+function removeNumberZeroPrefix(markdown: string) {
+  return markdown.replaceAll(/0+/gu, '')
+}
+
+function removeMathCodeBlockLanguage(markdown: string) {
+  return markdown.replaceAll(/math|latex/giu, '')
 }
