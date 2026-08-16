@@ -259,6 +259,9 @@ const NORMALIZING_CASES: string[] = [
 
   // a task with an HTML comment in its lazy line
   '- [x] <!--\nABC\n-->',
+
+  // a task with an HTML element
+  '- [x] <div></div>\nABC',
 ]
 
 const LOSSY_CASES: string[] = [
