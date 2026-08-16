@@ -1,4 +1,4 @@
-import { CHAR_BACKTICK, CHAR_LINE_FEED, CHAR_TILDE } from '../unicode.ts'
+import { CHAR_LINE_FEED } from '../unicode.ts'
 
 import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
@@ -19,97 +19,6 @@ function trimTrailingNewlines(text: string): string {
   let end = text.length
   while (end > 0 && text.charCodeAt(end - 1) === CHAR_LINE_FEED) end--
   return text.slice(0, end)
-}
-
-// A line's opening markers - indentation, blockquote `>`, list bullets and
-// numbers - say which block the line belongs to, not what it says. Which line
-// carries them is the serializer's choice: a `>` swallows one optional space, a
-// lazy continuation is written back under its container's marker, and an item
-// whose marker and content start on separate source lines is joined onto one.
-// Every detail that distinguishes one marker from another (bullet character,
-// start number, gap width) is a node attribute, so the document comparison
-// covers them; here the markers only get in the way of comparing content.
-const CONTAINER_PREFIX_RE = /^(?:[\s>]|[-+*](?=\s|$)|\d{1,9}[.)](?=\s|$))+/u
-
-// Whitespace inside a line is layout as well: markdown ignores the spacing
-// around a heading marker (`#  x`), a fence's info string (``` ``` js ```), a
-// table's pipes, and a line's own ends. What the line says is its non-blank
-// characters, so drop the whitespace rather than trying to place it.
-function stripWhitespace(line: string): string {
-  return line.replaceAll(/\s/gu, '')
-}
-
-// Shorten a fence's opening run to the three characters it takes to open one: a
-// closing fence may be written longer than the fence it closes, and the
-// serializer writes it back at the opening fence's length, so the width is
-// layout. This runs before the whitespace goes, so `~~~ ~` keeps its `~` info
-// string instead of reading as a four-tilde run.
-function shortenFenceRun(line: string): string {
-  const fence = line.charCodeAt(0)
-  if (fence !== CHAR_BACKTICK && fence !== CHAR_TILDE) return line
-  let width = 1
-  while (line.charCodeAt(width) === fence) width++
-  return width > 3 ? line.slice(0, 3) + line.slice(width) : line
-}
-
-// A GFM delimiter cell is optional colons around a run of dashes.
-const DELIMITER_CELL_RE = /^:?-+:?$/u
-
-// Reduce one cell the way a bare line is reduced: the serializer moves a
-// pipe-less row's text into a piped cell, and only an identical reduction on
-// both spellings keeps them equal.
-function reduceCell(cell: string): string {
-  return stripWhitespace(shortenFenceRun(cell.replace(CONTAINER_PREFIX_RE, '')))
-}
-
-// Reduce a pipe-bearing line to the cell text it carries. Outer pipes are table
-// layout, an empty cell says nothing, and a cell of pure delimiter dashes is
-// structure: it encodes the column count and the alignment, both of which are
-// node attributes the document comparison covers. A line the serializer never
-// restructures (a paragraph or code line holding pipes) reduces the same way on
-// both sides, so equal lines stay equal.
-function canonicalizeTableRow(line: string): string | undefined {
-  if (!line.includes('|')) return undefined
-  const cells = line
-    .replace(/^\s*\|/u, '')
-    .replace(/\|\s*$/u, '')
-    .split('|')
-    .map(reduceCell)
-  if (cells.every((cell) => cell === '' || DELIMITER_CELL_RE.test(cell))) return ''
-  return cells.filter((cell) => cell !== '').join('|')
-}
-
-/**
- * The lines of `text` that carry content, each reduced to that content. A line
- * left empty by dropping its markers, whitespace, and table structure (a blank
- * line, a bare `>`, a list marker whose content is on the next line, a
- * delimiter row or a lone delimiter cell) carries none and is skipped.
- */
-function contentLines(text: string): string[] {
-  const lines: string[] = []
-  for (const line of text.split('\n')) {
-    const bare = line.replace(CONTAINER_PREFIX_RE, '')
-    const content = canonicalizeTableRow(bare) ?? stripWhitespace(shortenFenceRun(bare))
-    if (content !== '' && !DELIMITER_CELL_RE.test(content)) lines.push(content)
-  }
-  return lines
-}
-
-/**
- * Whether `wanted` appears in `found` as an ordered subsequence.
- *
- * The serializer may write a line the source never had: an unterminated fenced
- * block gets the closing fence it was missing. Such a line carries no content,
- * which the document comparison proves - so only a content line that fails to
- * come back out is loss.
- */
-function containsInOrder(found: ReadonlyArray<string>, wanted: ReadonlyArray<string>): boolean {
-  let index = 0
-  for (const line of found) {
-    if (index === wanted.length) return true
-    if (line === wanted[index]) index++
-  }
-  return index === wanted.length
 }
 
 /**
@@ -141,5 +50,5 @@ export function checkRoundTrip(
 }
 
 function removeMarkdownStructure(markdown: string) {
-  return markdown.replaceAll(/[-+=[\]\s|<>`~$*]+/gu, '')
+  return markdown.replaceAll(/[-+=[\]|<>()`~$*\s]+/gu, '')
 }
