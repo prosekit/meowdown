@@ -134,8 +134,12 @@ export function checkRoundTrip(
   const serialized = docToMarkdown(doc, { frontmatter })
   if (trimTrailingNewlines(serialized) === trimTrailingNewlines(markdown)) return 'exact'
 
-  // Content first: it is the cheaper of the two checks, and skipping it saves
-  // the second parse whenever the text alone already shows the loss.
-  if (!containsInOrder(contentLines(serialized), contentLines(markdown))) return 'lossy'
-  return markdownToDoc(serialized, { frontmatter }).eq(doc) ? 'normalizing' : 'lossy'
+  let markdownContent = removeMarkdownStructure(markdown)
+  let serializedContent = removeMarkdownStructure(serialized)
+
+  return markdownContent === serializedContent ? 'normalizing' : 'lossy'
+}
+
+function removeMarkdownStructure(markdown: string) {
+  return markdown.replaceAll(/[-+=[\]\s|<>`~$*]+/gu, '')
 }

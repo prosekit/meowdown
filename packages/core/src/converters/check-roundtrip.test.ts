@@ -2,6 +2,8 @@ import dedent from 'dedent'
 import { describe, expect, it } from 'vitest'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
+import { markdownToDoc } from './md-to-pm.ts'
+import { docToMarkdown } from './pm-to-md.ts'
 
 const EXACT_CASES: string[] = [
   // a plain paragraph
@@ -285,7 +287,18 @@ describe('checkRoundTrip', () => {
   })
 
   it.each(NORMALIZING_CASES)('reports normalizing for %j', (markdown) => {
-    expect(checkRoundTrip(markdown)).toBe('normalizing')
+    let result = checkRoundTrip(markdown)
+    if (result !== 'normalizing') {
+      console.log(
+        'Expected normalizing, got',
+        result,
+        'for markdown:\n',
+        markdown,
+        '\n',
+        docToMarkdown(markdownToDoc(markdown)),
+      )
+    }
+    expect(result).toBe('normalizing')
   })
 
   it.each(LOSSY_CASES)('reports lossy for %j', (markdown) => {
