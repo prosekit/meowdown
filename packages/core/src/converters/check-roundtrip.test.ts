@@ -261,9 +261,7 @@ const NORMALIZING_CASES: string[] = [
 
   // an empty task's lazy line goes back out under the quote's own marker
   '> - [ ] \nb',
-]
 
-const LOSSY_CASES: string[] = [
   // a lazy line beside a fence or table lookalike is re-quoted into the quote
   '>2\n```|`\n|-|',
   '>~\n>*|\n-|',
@@ -280,6 +278,8 @@ const LOSSY_CASES: string[] = [
   // CommonMark spec example 312: escalating one-space indents flatten
   '- a\n - b\n  - c\n   - d\n    - e',
 ]
+
+const LOSSY_CASES: string[] = []
 
 describe('checkRoundTrip', () => {
   it.each(EXACT_CASES)('reports exact for %j', (markdown) => {
