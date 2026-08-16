@@ -77,10 +77,12 @@ function removeMarkdownStructure(markdown: string) {
   return markdown.replaceAll(/[-+=_:|\\/[\]<>()`~$*#\s!]+/gu, '')
 }
 
+// "01. " and "1. " should be treated as equivalent
 function removeNumberZeroPrefix(markdown: string) {
   return markdown.replaceAll(/0+/gu, '')
 }
 
+// "$$" and "```math" should be treated as equivalent
 function removeMathCodeBlockLanguage(markdown: string) {
   return markdown.replaceAll(/math|latex/giu, '')
 }
