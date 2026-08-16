@@ -49,5 +49,5 @@ export function checkRoundTrip(
 }
 
 function removeMarkdownStructure(markdown: string) {
-  return markdown.replaceAll(/[-+=_:|\\/[\]<>()`~$*#\s!]+/gu, '')
+  return markdown.replaceAll(/[-+=_:|\\/[\]<>()`~$*#\s0!]+/gu, '')
 }
