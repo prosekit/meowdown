@@ -9,10 +9,25 @@ const SEED = Number.parseInt(import.meta.env.VITE_FUZZ_SEED || '') || Date.now()
 const NUM_RUNS = 100_000
 
 /// keep-sorted
-const TOKENS_BASE: string[] = [
+const TOKENS_STRUCTURAL: string[] = [
   ' ',
-  '_',
   '-',
+  '*',
+  '\n',
+  '\t',
+  '#',
+  '`',
+  '+',
+  '=',
+  '>',
+  '|',
+  '~',
+  '$',
+]
+
+/// keep-sorted
+const TOKENS_BASE: string[] = [
+  '_',
   ',',
   ';',
   ':',
@@ -27,19 +42,14 @@ const TOKENS_BASE: string[] = [
   '{',
   '}',
   '@',
-  '*',
   '/',
   '\\',
-  '\n',
-  '\t',
   '&',
   '#',
   '%',
   '`',
   '^',
-  '+',
   '<',
-  '=',
   '>',
   '|',
   '~',
@@ -73,10 +83,36 @@ const TOKENS_EXTENDED: string[] = [
   '永',
 ]
 
+/// keep-sorted
+const TOKENS_RUNS: string[] = [
+  '---',
+  '-->',
+  '```',
+  '````',
+  '<!--',
+  '<?',
+  '<<<<<<< ',
+  '===',
+  '> ',
+  '>>>>>>> ',
+  '| --- |',
+  '~~~',
+  '~~~~',
+  '$$',
+  '1. ',
+]
+
 const UNITS = [
-  { name: 'ascii', unit: 'grapheme-ascii' },
-  { name: 'base', unit: fc.constantFrom(...TOKENS_BASE) },
-  { name: 'extended', unit: fc.constantFrom(...TOKENS_BASE, ...TOKENS_EXTENDED) },
+  { name: 'base', unit: fc.constantFrom(...TOKENS_BASE, ...TOKENS_RUNS) },
+  { name: 'extended', unit: fc.constantFrom(...TOKENS_BASE, ...TOKENS_RUNS, ...TOKENS_EXTENDED) },
+  {
+    name: 'weighted',
+    unit: fc.oneof(
+      { arbitrary: fc.constant('\n'), weight: 20 },
+      { arbitrary: fc.constantFrom(...TOKENS_STRUCTURAL), weight: 40 },
+      { arbitrary: fc.constantFrom(...TOKENS_BASE, ...TOKENS_RUNS), weight: 40 },
+    ),
+  },
 ] as const
 
 const RANGES = [
@@ -89,14 +125,21 @@ const RANGES = [
 for (const [minLength, maxLength] of RANGES) {
   for (const unit of UNITS) {
     it(
-      `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, unit=${unit.name}`,
+      `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, unit=${unit.name})`,
       { timeout: 60_000 },
       () => {
-        fc.assert(fc.property(fc.string({ unit: unit.unit, minLength, maxLength }), check), {
-          seed: SEED,
-          numRuns: NUM_RUNS,
-          verbose: true,
-        })
+        fc.assert(
+          fc.property(
+            fc.string({
+              unit: unit.unit,
+              minLength,
+              maxLength,
+              size: 'max',
+            }),
+            check,
+          ),
+          { seed: SEED, numRuns: NUM_RUNS, verbose: true },
+        )
       },
     )
   }
