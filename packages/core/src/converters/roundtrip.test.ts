@@ -558,6 +558,16 @@ describe('task lists', () => {
     expect(roundtrip('- [ ] line one\n  line two')).toBe('- [ ] line one\n  line two\n')
   })
 
+  it('keeps a soft break in a quoted task', () => {
+    expect(roundtrip('> - [ ] line one\n>   line two')).toBe('> - [ ] line one\n>   line two\n')
+  })
+
+  it('keeps a comment opener in a task', () => {
+    // The checkbox in front is content of its own, so the `<!--` behind it
+    // opens no HTML block and the line below can still go out lazily.
+    expect(roundtrip('- [ ] <!--\n=')).toBe('- [ ] <!--\n=\n')
+  })
+
   it.fails('keeps a lazy continuation in a task', () => {
     // Same lazy-continuation limitation as bullet lists; the flush line is
     // re-indented to the task's content column on serialize.
