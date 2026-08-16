@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.65.5](https://github.com/prosekit/meowdown/compare/v0.65.4...v0.65.5) (2026-08-16)
+
+
+### Bug Fixes
+
+* open no HTML block behind a task checkbox ([#488](https://github.com/prosekit/meowdown/issues/488)) ([c2c8031](https://github.com/prosekit/meowdown/commit/c2c8031b459a49ad278d186029051b1bb84d69e8))
+* strip the quote marker from a multi-line task's text ([#479](https://github.com/prosekit/meowdown/issues/479)) ([eecb28d](https://github.com/prosekit/meowdown/commit/eecb28d03ec0613087da4ab3a1acc91c1ebc1647))
+
 ## [0.65.4](https://github.com/prosekit/meowdown/compare/v0.65.3...v0.65.4) (2026-08-14)
 
 
