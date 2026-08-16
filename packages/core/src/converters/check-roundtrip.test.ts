@@ -290,7 +290,7 @@ describe('checkRoundTrip', () => {
   })
 
   it.each(NORMALIZING_CASES)('reports normalizing for %j', (markdown) => {
-    let result = checkRoundTrip(markdown)
+    const result = checkRoundTrip(markdown)
     if (result !== 'normalizing') {
       console.log(
         'Expected normalizing, got',
