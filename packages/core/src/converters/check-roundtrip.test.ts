@@ -256,6 +256,9 @@ const NORMALIZING_CASES: string[] = [
 
   // an empty task's lazy line goes back out under the quote's own marker
   '> - [ ] \nb',
+
+  // a task with an HTML comment in its lazy line
+  '- [x] <!--\nABC\n-->',
 ]
 
 const LOSSY_CASES: string[] = [
