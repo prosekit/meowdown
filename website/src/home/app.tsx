@@ -17,11 +17,11 @@ import {
   type CSSProperties,
 } from 'react'
 
-import { DemoEditor } from './components/demo-editor.tsx'
+import { DemoEditor } from '../components/demo-editor.tsx'
 import { FindShortcut, useFindDemo } from './find-demo.tsx'
-import INITIAL_CONTENT from './presets/default.md?raw'
+import INITIAL_CONTENT from '../presets/default.md?raw'
 import { SelectionMenuShortcut, useSelectionDemo } from './selection-demo.tsx'
-import { uploadFile } from './upload-file.ts'
+import { uploadFile } from '../upload-file.ts'
 import { MODES, useEditorMode } from './use-editor-mode.ts'
 
 // Confirm, then open the target in a new tab. Shared by the link and image

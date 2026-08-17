@@ -1,0 +1,8 @@
+---
+import { HomeApp } from '../home/home-app.tsx'
+import Base from '../layouts/base.astro'
+---
+
+<Base title="Meowdown">
+  <HomeApp client:only="react" />
+</Base>

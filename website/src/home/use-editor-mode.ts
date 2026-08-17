@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 
-import type { DemoMode } from './components/demo-editor.tsx'
+import type { DemoMode } from '../components/demo-editor.tsx'
 
 interface ModeOption {
   value: DemoMode

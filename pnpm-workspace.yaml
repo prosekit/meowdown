@@ -23,6 +23,7 @@ minimumReleaseAgeExclude:
   - eslint-plugin-unicorn@73.0.0
 
 allowBuilds:
+  esbuild: true
   simple-git-hooks: false
 
 # "blockExoticSubdeps" and "overrides" install packages from pkg.pr.new

@@ -12,7 +12,7 @@ export default defineESLintConfig(
     command: true,
   },
   {
-    ignores: ['**/*.module.d.css.ts'],
+    ignores: ['**/*.module.d.css.ts', '**/*.astro'],
   },
   {
     files: ['**/*.ts', '**/*.tsx'],
