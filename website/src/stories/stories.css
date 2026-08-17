@@ -1,0 +1,122 @@
+/* Shared styles for the astrobook stories. Astrobook pages do not load the
+ * site's Tailwind stylesheet, so stories use these plain classes instead. */
+
+@import '@meowdown/core/style.css';
+@import '@meowdown/react/style.css';
+
+/* aria-ui positioners are hidden while closed by an inline `display: none`
+ * that the popover JS applies; under astrobook's `client:load` hydration the
+ * very first closed state can slip through before that write, so back it up
+ * in CSS. */
+[popover][data-state='closed'] {
+  display: none;
+}
+
+.story-frame {
+  max-width: 42rem;
+  margin-inline: auto;
+  padding: 1rem;
+}
+
+/* Daily notes */
+
+.story-day {
+  padding-block: 1.5rem;
+  border-bottom: 1px solid light-dark(rgb(0 0 0 / 8%), rgb(255 255 255 / 12%));
+}
+
+.story-day-subject {
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  color: light-dark(#1c1917, #fafaf9);
+
+  &.is-today {
+    color: light-dark(#d97706, #fbbf24);
+  }
+}
+
+.story-day-editor-past {
+  min-height: 100px;
+}
+
+.story-day-editor-today {
+  min-height: 40vh;
+}
+
+/* Task list */
+
+.story-task-heading {
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 650;
+  color: light-dark(#1c1917, #fafaf9);
+}
+
+.story-task-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.story-task-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid light-dark(rgb(0 0 0 / 8%), rgb(255 255 255 / 12%));
+
+  &.is-editing {
+    background: light-dark(rgb(217 119 6 / 8%), rgb(251 191 36 / 8%));
+  }
+}
+
+/* The 1.5rem height matches the content's line height, so the toggle centers
+ * on the first line even when a task wraps. */
+.story-task-toggle {
+  display: flex;
+  align-items: center;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: light-dark(#78716c, #a8a29e);
+
+  .is-done & {
+    color: light-dark(#d97706, #fbbf24);
+  }
+}
+
+.story-task-content {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  cursor: pointer;
+
+  p {
+    margin: 0;
+  }
+}
+
+.story-task-preview {
+  pointer-events: none;
+
+  .is-done & {
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+}
+
+.story-task-hint {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  color: light-dark(#78716c, #a8a29e);
+}

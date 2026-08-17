@@ -355,6 +355,9 @@ importers:
       astro-theme-toggle:
         specifier: ^0.8.1
         version: 0.8.1
+      astrobook:
+        specifier: ^0.13.3
+        version: 0.13.3(astro@7.2.2)(typescript@6.0.3)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -412,6 +415,30 @@ packages:
 
   '@aria-ui/utils@0.1.7':
     resolution: {integrity: sha512-ZKc/JOugSEYqsPUHYomxSbLyK9TcypsnhGL/yK2X14q6qyXVax5vHjLqgZmX5pwm28vYP4FOsUiUUtuSIK/eKw==}
+
+  '@astrobook/core@0.13.3':
+    resolution: {integrity: sha512-tQtDvyhK23lq8JpaRLP+9JVhsFCmg3gH+HY80aBdrjK+wo4lyWyJ3UzimvRg5pDJCxLnM5bh3BehXKgDaZBotA==}
+    peerDependencies:
+      astro: '>=5.0.0'
+    peerDependenciesMeta:
+      astro:
+        optional: true
+
+  '@astrobook/types@0.13.3':
+    resolution: {integrity: sha512-CEcHX5JLjnROlgXgB89CdtXijgBxbwQvPUxYf2BUbiioRn0qFasx5n8EJ0wuZZigBO04pZZVSjWOeMrWwsv5/w==}
+    peerDependencies:
+      astro: '>=5.0.0'
+    peerDependenciesMeta:
+      astro:
+        optional: true
+
+  '@astrobook/ui@0.13.3':
+    resolution: {integrity: sha512-T292ibc1UPqqQoYaCpMsB7B5s7+lRN8ri5PQ2ySp3DrVOslL03z3zFsuRX9pLICieY4Gt34eTToMskKeuk83xw==}
+    peerDependencies:
+      astro: '>=5.0.0'
+    peerDependenciesMeta:
+      astro:
+        optional: true
 
   '@astrojs/compiler-binding-darwin-arm64@0.3.2':
     resolution: {integrity: sha512-MM8tn8CSimcfytaOla4b6acN8mKWiL/rlAA1fpT3/Wl7dNGSE4y8FjTN/zJVNnb63CsLWG5zZwCt01TXtDKh9g==}
@@ -1940,6 +1967,11 @@ packages:
   '@stricli/core@1.3.0':
     resolution: {integrity: sha512-LnBe2HntygaLDU5trtjiC3J4C/YkmIZuM0XB52IF4qaLqJH09kgD1fnZiS2gaYUnt0nAN2a+1b4PSOBcfPrN4Q==}
 
+  '@sveltejs/acorn-typescript@1.0.13':
+    resolution: {integrity: sha512-wgKggnhZVL9Bfx1OaKKTrYY9BFRk6C8UAkQNUcIv1+llzYrIqy+RZm5HPKzn0NpEBvTVhTqB4kQyllZywsRBRQ==}
+    peerDependencies:
+      acorn: ^8.9.0
+
   '@tailwindcss/node@4.3.3':
     resolution: {integrity: sha512-/T8IKEsf9VTU6tLjgC7+sv2mOPtQxzE2jMw7u4Tt40Tx+QSZxpzh95/H6cMKoja9XuW7iMdLJYBB0o9G1CaAgg==}
 
@@ -2467,6 +2499,14 @@ packages:
       '@astrojs/markdown-remark': 7.2.2
     peerDependenciesMeta:
       '@astrojs/markdown-remark':
+        optional: true
+
+  astrobook@0.13.3:
+    resolution: {integrity: sha512-tXccfrMNwcFIFDHXJ2qe07F3JRP1ZTIKYwFDdwfgE4zV09UfR19105zCxh8Jp/ZARpONtuxoAmOp9xmV+M8Tfg==}
+    peerDependencies:
+      astro: '>=5.0.0'
+    peerDependenciesMeta:
+      astro:
         optional: true
 
   axobject-query@4.1.0:
@@ -3336,6 +3376,9 @@ packages:
 
   jsonc-parser@3.3.1:
     resolution: {integrity: sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ==}
+
+  just-group-by@2.2.0:
+    resolution: {integrity: sha512-brZocDSmkvDYc+FOr07GiTar4cp7K6OB9huVOrj5LX+iXfCe3hTvn2KGM811LE/SBQkCzuYDDEcG8HA/dKDrnw==}
 
   katex@0.16.47:
     resolution: {integrity: sha512-Eeo8Ys1doU1z+x8AZsPpQu+p/QcZBI5PeOo7QGQdy2x2m0MU/hYagBbGOmXwr5KVbEfVuWv9LpnQWeehogurjg==}
@@ -4262,6 +4305,10 @@ packages:
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
 
+  slash@5.1.0:
+    resolution: {integrity: sha512-ZA6oR3T/pEyuqwMgAKT0/hAv8oAXckzbkmR0UkUosQ+Mc4RxGoJkRmwHgHufaenlyAgE1Mxgpdcrf75y6XcnDg==}
+    engines: {node: '>=14.16'}
+
   smol-toml@1.8.0:
     resolution: {integrity: sha512-kCZr2V3ch9i00x8zXRhjUNVcjG9ijES5dDudkXvUVCT5QlJNQWElSJdZqyPemffHoLNUYwOcou0Fy+ojN0uHSQ==}
     engines: {node: '>= 18'}
@@ -4603,6 +4650,14 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
+  valibot@1.4.2:
+    resolution: {integrity: sha512-gjdCvJ6d3RyHAneqxMYMW9QMCwYMb3jpOO0IyHZV1bnRHFBHrX3VkIILt5XYR0WhwHiH7Mty8ovuPZ/O3gamrg==}
+    peerDependencies:
+      typescript: '>=5'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
 
@@ -4819,6 +4874,10 @@ packages:
     resolution: {integrity: sha512-4LCcse/U2MHZ63HAJVE+v71o7yOdIe4cZ70Wpf8D/IyjDKYQLV5GD46B+hSTjJsvV5PztjvHoU580EftxjDZFQ==}
     engines: {node: '>=12.20'}
 
+  yoctocolors@2.2.0:
+    resolution: {integrity: sha512-xYqdZFUK/VYazNl/oCDYN+3WloWQwMfZxBoiNt6qNyk+xfOdi598muWE42rNZFp1kNOiqW936q5RhUdnpqElSg==}
+    engines: {node: '>=18'}
+
   yuku-ast@0.8.5:
     resolution: {integrity: sha512-Ez2CI2BnPK/if0tVI7jB9UUDSNibcChjJDEPEKuWPJNRkbvzSoAQrSqpKtdzl8qTPp4ftVb87f/jx5HIKOieQw==}
 
@@ -4868,6 +4927,36 @@ snapshots:
     dependencies:
       '@aria-ui/core': 0.2.1
       '@zag-js/dom-query': 1.43.0
+
+  '@astrobook/core@0.13.3(astro@7.2.2)(typescript@6.0.3)':
+    dependencies:
+      '@astrobook/types': 0.13.3(astro@7.2.2)
+      '@sveltejs/acorn-typescript': 1.0.13(acorn@8.18.0)
+      acorn: 8.18.0
+      fdir: 6.5.0(picomatch@4.0.5)
+      picomatch: 4.0.5
+      slash: 5.1.0
+      valibot: 1.4.2(typescript@6.0.3)
+      yoctocolors: 2.2.0
+    optionalDependencies:
+      astro: 7.2.2(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@24.13.3)(jiti@2.7.0)(yaml@2.9.0)
+    transitivePeerDependencies:
+      - typescript
+
+  '@astrobook/types@0.13.3(astro@7.2.2)':
+    optionalDependencies:
+      astro: 7.2.2(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@24.13.3)(jiti@2.7.0)(yaml@2.9.0)
+
+  '@astrobook/ui@0.13.3(astro@7.2.2)(typescript@6.0.3)':
+    dependencies:
+      '@astrobook/core': 0.13.3(astro@7.2.2)(typescript@6.0.3)
+      '@astrobook/types': 0.13.3(astro@7.2.2)
+      astro-theme-toggle: 0.8.1
+      just-group-by: 2.2.0
+    optionalDependencies:
+      astro: 7.2.2(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@24.13.3)(jiti@2.7.0)(yaml@2.9.0)
+    transitivePeerDependencies:
+      - typescript
 
   '@astrojs/compiler-binding-darwin-arm64@0.3.2':
     optional: true
@@ -6455,6 +6544,10 @@ snapshots:
 
   '@stricli/core@1.3.0': {}
 
+  '@sveltejs/acorn-typescript@1.0.13(acorn@8.18.0)':
+    dependencies:
+      acorn: 8.18.0
+
   '@tailwindcss/node@4.3.3':
     dependencies:
       '@jridgewell/remapping': 2.3.5
@@ -7083,6 +7176,16 @@ snapshots:
       - tsx
       - uploadthing
       - yaml
+
+  astrobook@0.13.3(astro@7.2.2)(typescript@6.0.3):
+    dependencies:
+      '@astrobook/core': 0.13.3(astro@7.2.2)(typescript@6.0.3)
+      '@astrobook/types': 0.13.3(astro@7.2.2)
+      '@astrobook/ui': 0.13.3(astro@7.2.2)(typescript@6.0.3)
+    optionalDependencies:
+      astro: 7.2.2(@emnapi/core@1.11.2)(@emnapi/runtime@1.11.2)(@types/node@24.13.3)(jiti@2.7.0)(yaml@2.9.0)
+    transitivePeerDependencies:
+      - typescript
 
   axobject-query@4.1.0: {}
 
@@ -8020,6 +8123,8 @@ snapshots:
       verkit: 0.3.2
 
   jsonc-parser@3.3.1: {}
+
+  just-group-by@2.2.0: {}
 
   katex@0.16.47:
     dependencies:
@@ -9184,6 +9289,8 @@ snapshots:
 
   sisteransi@1.0.5: {}
 
+  slash@5.1.0: {}
+
   smol-toml@1.8.0: {}
 
   sort-object-keys@2.1.0: {}
@@ -9464,6 +9571,10 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
+  valibot@1.4.2(typescript@6.0.3):
+    optionalDependencies:
+      typescript: 6.0.3
+
   validate-npm-package-license@3.0.4:
     dependencies:
       spdx-correct: 3.2.0
@@ -9602,6 +9713,8 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   yocto-queue@1.2.2: {}
+
+  yoctocolors@2.2.0: {}
 
   yuku-ast@0.8.5:
     dependencies:

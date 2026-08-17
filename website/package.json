@@ -21,6 +21,7 @@
     "@ocavue/utils": "^1.7.0",
     "astro": "^7.2.1",
     "astro-theme-toggle": "^0.8.1",
+    "astrobook": "^0.13.3",
     "clsx": "^2.1.1",
     "lz-string": "^1.5.0",
     "nuqs": "^2.9.5",
