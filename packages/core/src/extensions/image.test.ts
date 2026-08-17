@@ -565,6 +565,6 @@ describe('image source spellcheck exemption', () => {
     await expect.element(imageSource).toHaveAttribute('autocorrect', 'off')
     await expect.element(imageSource).toHaveAttribute('autocapitalize', 'off')
     await expect.element(imageSource).toHaveAttribute('writingsuggestions', 'false')
-    expect(imageSource.element().spellcheck).toBe(false)
+    expect(imageSource.element()).toHaveProperty('spellcheck', false)
   })
 })

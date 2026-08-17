@@ -41,7 +41,7 @@ describe('inline mark spellcheck exemption', () => {
     await expect.element(inlineCode).toHaveAttribute('autocorrect', 'off')
     await expect.element(inlineCode).toHaveAttribute('autocapitalize', 'off')
     await expect.element(inlineCode).toHaveAttribute('writingsuggestions', 'false')
-    expect(inlineCode.element().spellcheck).toBe(false)
+    expect(inlineCode.element()).toHaveProperty('spellcheck', false)
   })
 
   it('renders the link destination with spellcheck off', async () => {
@@ -49,6 +49,6 @@ describe('inline mark spellcheck exemption', () => {
     void fixture
     const uri = pmRoot.getByText('https://example.com')
     await expect.element(uri).toHaveAttribute('spellcheck', 'false')
-    expect(uri.element().spellcheck).toBe(false)
+    expect(uri.element()).toHaveProperty('spellcheck', false)
   })
 })

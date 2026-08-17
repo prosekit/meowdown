@@ -275,6 +275,6 @@ describe('math source spellcheck exemption', () => {
     await expect.element(mathContent).toHaveAttribute('autocorrect', 'off')
     await expect.element(mathContent).toHaveAttribute('autocapitalize', 'off')
     await expect.element(mathContent).toHaveAttribute('writingsuggestions', 'false')
-    expect(mathContent.element().spellcheck).toBe(false)
+    expect(mathContent.element()).toHaveProperty('spellcheck', false)
   })
 })
