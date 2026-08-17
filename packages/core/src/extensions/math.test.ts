@@ -197,7 +197,13 @@ describe('math DOM structure', () => {
               data-testid="math-preview"
             >
             </span>
-            <span class="md-math-view-content">
+            <span
+              autocapitalize="off"
+              autocorrect="off"
+              class="md-math-view-content"
+              spellcheck="false"
+              writingsuggestions="false"
+            >
               <span class="md-mark">
                 $
               </span>
@@ -231,7 +237,13 @@ describe('math DOM structure', () => {
               data-testid="math-preview"
             >
             </span>
-            <span class="md-math-view-content">
+            <span
+              autocapitalize="off"
+              autocorrect="off"
+              class="md-math-view-content"
+              spellcheck="false"
+              writingsuggestions="false"
+            >
               <span class="md-mark">
                 <span class="show">
                   $
@@ -252,5 +264,17 @@ describe('math DOM structure', () => {
       </p>
       "
     `)
+  })
+})
+
+describe('math source spellcheck exemption', () => {
+  it('renders the math source with spellcheck off', async () => {
+    using fixture = setup('show', 'A<a> $E=mc^2$ B')
+    void fixture
+    await expect.element(mathContent).toHaveAttribute('spellcheck', 'false')
+    await expect.element(mathContent).toHaveAttribute('autocorrect', 'off')
+    await expect.element(mathContent).toHaveAttribute('autocapitalize', 'off')
+    await expect.element(mathContent).toHaveAttribute('writingsuggestions', 'false')
+    expect(mathContent.element()).toHaveProperty('spellcheck', false)
   })
 })

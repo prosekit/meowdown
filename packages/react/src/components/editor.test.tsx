@@ -591,3 +591,12 @@ describe('file pill props', () => {
     expect(pmRoot.getByTestId('file-pill').query()).toBeNull()
   })
 })
+
+describe('spellCheck prop', () => {
+  it('applies and updates the spellCheck prop on the editor root', async () => {
+    const screen = await render(<MeowdownEditor spellCheck />)
+    await expect.element(pmRoot).toHaveAttribute('spellcheck', 'true')
+    await screen.rerender(<MeowdownEditor spellCheck={false} />)
+    await expect.element(pmRoot).toHaveAttribute('spellcheck', 'false')
+  })
+})

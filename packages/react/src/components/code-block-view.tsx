@@ -19,6 +19,7 @@ import {
 
 import { useBeautifulMermaid } from '../hooks/use-beautiful-mermaid.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
+import { NON_PROSE_PROPS } from '../utils/non-prose-props.ts'
 
 import styles from './code-block-view.module.css'
 import { CopyButton } from './copy-button.tsx'
@@ -70,7 +71,7 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
 
   return (
     <div className={styles.Root} data-preview={previewOnly || undefined}>
-      <pre ref={contentRef} data-language={language}></pre>
+      <pre ref={contentRef} data-language={language} {...NON_PROSE_PROPS}></pre>
       {
         /* Skip rendering the toolbar during dragging to improve the performance of rendering the drag preview image in Safari */
         selected ? null : (
