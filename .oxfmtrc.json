@@ -24,6 +24,7 @@
     "dist-types",
     "*.tsbuildinfo",
     "*.astro",
-    ".astro"
+    ".astro",
+    "website/src/presets"
   ]
 }
