@@ -4,6 +4,7 @@ import { TextSelection } from '@prosekit/pm/state'
 import type { EditorView, MarkView, ViewMutationRecord } from '@prosekit/pm/view'
 
 import { loadKaTeX, renderMathInto } from '../utils/katex.ts'
+import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
 
 import type { MdMathAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
@@ -44,6 +45,9 @@ class MathMarkView implements MarkView {
 
     this.#contentDOM = document.createElement('span')
     this.#contentDOM.className = 'md-math-view-content'
+    for (const [name, value] of Object.entries(NON_PROSE_ATTRS)) {
+      this.#contentDOM.setAttribute(name, value)
+    }
 
     this.#dom.appendChild(this.#preview)
     this.#dom.appendChild(this.#contentDOM)

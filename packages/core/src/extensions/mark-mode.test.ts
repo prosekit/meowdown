@@ -1194,7 +1194,14 @@ describe('focus mode', () => {
                 </prosekit-resizable-handle>
               </prosekit-resizable-root>
             </span>
-            <span class="md-image-view-content md-atom-view-content">
+            <span
+              autocapitalize="off"
+              autocorrect="off"
+              class="md-image-view-content md-atom-view-content"
+              data-testid="image-source"
+              spellcheck="false"
+              writingsuggestions="false"
+            >
               ![alt](pic.png)
             </span>
           </span>

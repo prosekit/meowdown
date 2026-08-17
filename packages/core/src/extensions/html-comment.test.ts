@@ -46,6 +46,7 @@ describe('html comment in a mounted editor', () => {
     const element = fixture.dom.querySelector<HTMLElement>('[data-html-comment]')
     expect(element).not.toBeNull()
     expect(getComputedStyle(element as HTMLElement).display).toBe('none')
+    expect(element?.getAttribute('spellcheck')).toBe('false')
     // The raw comment must not read as body text in the editor.
     expect(fixture.dom.textContent).not.toContain('reflect-capture-page-text')
     expect(fixture.dom.textContent).toContain('before')

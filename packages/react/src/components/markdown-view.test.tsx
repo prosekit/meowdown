@@ -422,6 +422,9 @@ function canonicalize(root: Element): string {
     'translate',
     'draggable',
     'spellcheck',
+    'autocorrect',
+    'autocapitalize',
+    'writingsuggestions',
     'tabindex',
     'readonly',
   ])

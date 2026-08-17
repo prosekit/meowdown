@@ -7,6 +7,8 @@ import {
   type ResizeEndEvent,
 } from '@prosekit/web/resizable'
 
+import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
+
 import { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './embed.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import {
@@ -221,6 +223,10 @@ class ImageMarkView implements MarkView {
 
     this.#contentDOM = document.createElement('span')
     this.#contentDOM.className = 'md-image-view-content md-atom-view-content'
+    this.#contentDOM.dataset.testid = 'image-source'
+    for (const [name, value] of Object.entries(NON_PROSE_ATTRS)) {
+      this.#contentDOM.setAttribute(name, value)
+    }
 
     const preview = this.#renderPreview()
     if (preview) {

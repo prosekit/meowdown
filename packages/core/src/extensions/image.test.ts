@@ -554,3 +554,17 @@ describe('image mark view update', () => {
     expect(image2Element).toBe(image1Element)
   })
 })
+
+describe('image source spellcheck exemption', () => {
+  const imageSource = pmRoot.getByTestId('image-source')
+
+  it('renders the image source with spellcheck off', async () => {
+    using fixture = setup('show', '![alt](https://example.com/a.png)')
+    void fixture
+    await expect.element(imageSource).toHaveAttribute('spellcheck', 'false')
+    await expect.element(imageSource).toHaveAttribute('autocorrect', 'off')
+    await expect.element(imageSource).toHaveAttribute('autocapitalize', 'off')
+    await expect.element(imageSource).toHaveAttribute('writingsuggestions', 'false')
+    expect(imageSource.element().spellcheck).toBe(false)
+  })
+})

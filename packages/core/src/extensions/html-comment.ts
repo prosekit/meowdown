@@ -1,5 +1,7 @@
 import { defineNodeSpec, type Extension } from '@prosekit/core'
 
+import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
+
 import type { NodeName } from './node-names.ts'
 
 export interface MeowdownHTMLCommentAttrs {
@@ -50,6 +52,7 @@ export function defineHTMLComment(): HTMLCommentExtension {
       {
         'data-html-comment': (node.attrs as MeowdownHTMLCommentAttrs).content,
         style: 'display: none',
+        ...NON_PROSE_ATTRS,
       },
     ],
     parseDOM: [
