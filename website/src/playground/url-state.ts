@@ -3,10 +3,9 @@ import { createParser, parseAsBoolean, parseAsStringLiteral } from 'nuqs'
 
 import { DEFAULT_PRESET_ID, PRESETS } from '../presets/presets.ts'
 
-export const MODE_VALUES = ['focus', 'show', 'hide'] as const
-export const SPELLCHECK_VALUES = ['default', 'on', 'off'] as const
+const MODE_VALUES = ['focus', 'show', 'hide'] as const
 
-export type SpellcheckValue = (typeof SPELLCHECK_VALUES)[number]
+export const SPELLCHECK_VALUES = ['default', 'on', 'off'] as const
 
 export const parseAsMode = parseAsStringLiteral(MODE_VALUES).withDefault('focus')
 export const parseAsSpellcheck = parseAsStringLiteral(SPELLCHECK_VALUES).withDefault('default')

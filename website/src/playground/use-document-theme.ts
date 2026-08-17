@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 
 function readTheme(): 'light' | 'dark' {
-  return window.astroThemeToggle?.getTheme() ?? 'light'
+  const themeToggle = window.astroThemeToggle
+  return themeToggle ? themeToggle.getTheme() : 'light'
 }
 
 // astro-theme-toggle fires no event; the documented hook is the `data-theme`

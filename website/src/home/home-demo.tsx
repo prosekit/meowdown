@@ -19,6 +19,7 @@ import {
   uploadAndTrackFile,
 } from '../lib/demo-data.ts'
 import INITIAL_CONTENT from '../presets/default.md?raw'
+
 import { FindShortcut, useFindDemo } from './find-demo.tsx'
 import { SelectionMenuShortcut, useSelectionDemo } from './selection-demo.tsx'
 import { MODES, useEditorMode } from './use-editor-mode.ts'

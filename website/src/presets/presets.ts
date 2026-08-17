@@ -10,7 +10,7 @@ const presetModules = import.meta.glob('./*.md', {
   query: '?raw',
   import: 'default',
   eager: true,
-}) as Record<string, string>
+})
 
 export const PRESETS: Preset[] = Object.entries(presetModules)
   .map(([path, content]) => {

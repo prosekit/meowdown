@@ -61,10 +61,9 @@ export function CodeMirrorPane({ initialDoc, readOnly, viewRef, onBlur }: CodeMi
       view.destroy()
       viewRef.current = null
     }
-    // The initial doc and the blur callback are captured once, like
-    // MeowdownEditor's initialMarkdown.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    // In practice these never change while the pane is mounted: the seed and
+    // the blur callback are stable, and toggling the pane remounts it.
+  }, [initialDoc, onBlur, viewRef])
 
   useLayoutEffect(() => {
     viewRef.current?.dispatch({ effects: themeCompartment.reconfigure(themeExtensions(theme)) })
