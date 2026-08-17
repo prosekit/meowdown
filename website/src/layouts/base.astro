@@ -1,4 +1,6 @@
 ---
+import { ThemeScript } from 'astro-theme-toggle/components'
+
 import '../styles/index.css'
 
 interface Props {
@@ -14,6 +16,7 @@ const { title } = Astro.props
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
+    <ThemeScript />
   </head>
   <body>
     <slot />

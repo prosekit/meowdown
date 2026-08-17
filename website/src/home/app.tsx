@@ -7,15 +7,9 @@ import {
   type WikilinkItem,
 } from '@meowdown/react'
 import { getId } from '@ocavue/utils'
+import { handleToggleClick } from 'astro-theme-toggle/client'
 import { clsx } from 'clsx/lite'
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-} from 'react'
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 
 import { DemoEditor } from '../components/demo-editor.tsx'
 import { FindShortcut, useFindDemo } from './find-demo.tsx'
@@ -209,30 +203,17 @@ function SegmentedControl<T extends string>({
   )
 }
 
-type Theme = 'light' | 'dark'
-
 function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>(() =>
-    window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
-  )
-
-  // `dark` class drives Tailwind's `dark:` variant; `color-scheme` drives the
-  // `light-dark()` colors in the stylesheets.
-  useLayoutEffect(() => {
-    const root = document.documentElement
-    root.classList.toggle('dark', theme === 'dark')
-    root.style.colorScheme = theme
-  }, [theme])
-
   return (
     <button
       type="button"
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      onClick={handleToggleClick}
       aria-label="Toggle color theme"
       title="Toggle color theme"
       className={ICON_BUTTON_CLASS}
     >
-      {theme === 'dark' ? '🌙' : '☀️'}
+      <span className="dark:hidden">☀️</span>
+      <span className="hidden dark:inline">🌙</span>
     </button>
   )
 }

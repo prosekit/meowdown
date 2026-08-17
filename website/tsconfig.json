@@ -4,7 +4,10 @@
     "jsx": "react-jsx",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "erasableSyntaxOnly": true
+    "erasableSyntaxOnly": true,
+    "paths": {
+      "astro-theme-toggle/client": ["./src/types/astro-theme-toggle-client.d.ts"]
+    }
   },
   "references": [
     {
