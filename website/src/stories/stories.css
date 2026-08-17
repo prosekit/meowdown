@@ -104,6 +104,12 @@
   p {
     margin: 0;
   }
+
+  /* Both the preview and the one-line editor render a .ProseMirror root;
+   * dropping the reading gutter keeps the row compact and the swap jump-free. */
+  .ProseMirror {
+    padding: 0;
+  }
 }
 
 .story-task-preview {
