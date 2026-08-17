@@ -1,8 +1,67 @@
 ---
+import { Toggle } from 'astro-theme-toggle/components'
+
 import { HomeApp } from '../home/home-app.tsx'
 import Base from '../layouts/base.astro'
+
+const iconButtonClass =
+  'flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/70 text-stone-500 shadow-sm backdrop-blur transition-colors hover:bg-white hover:text-stone-900 dark:border-stone-700/70 dark:bg-stone-900/70 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100'
 ---
 
 <Base title="Meowdown">
-  <HomeApp client:only="react" />
+  <main class="relative min-h-dvh overflow-hidden text-stone-600 dark:bg-stone-950">
+    <div class="relative mx-auto flex h-dvh max-w-5xl flex-col px-4 py-5 sm:px-6 sm:py-7">
+      <nav class="flex shrink-0 items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span
+            class="flex h-9 w-9 items-center justify-center rounded-xl bg-yellow-100 text-lg shadow-sm shadow-amber-500/30"
+          >
+            🐱
+          </span>
+          <span class="text-lg font-semibold tracking-tight text-stone-900 dark:text-white">
+            Meowdown
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <a
+            href="https://github.com/prosekit/meowdown"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="View source on GitHub"
+            title="View source on GitHub"
+            class={iconButtonClass}
+          >
+            <span class="i-simple-icons-github size-4" aria-hidden="true"></span>
+          </a>
+          <Toggle
+            class={iconButtonClass}
+            style="padding: 9px;"
+            aria-label="Toggle color theme"
+            title="Toggle color theme"
+          />
+        </div>
+      </nav>
+
+      <header class="shrink-0 py-5 text-center sm:py-6">
+        <h1
+          class="text-3xl font-semibold tracking-tight text-balance text-stone-900 sm:text-4xl dark:text-white"
+        >
+          Markdown that <span class="text-amber-500 dark:text-amber-400">renders as you type</span>
+        </h1>
+      </header>
+
+      <HomeApp client:only="react" />
+
+      <footer class="shrink-0 pt-4 text-center text-xs text-stone-400 dark:text-stone-600">
+        Built with <a
+          href="https://prosekit.dev"
+          target="_blank"
+          rel="noreferrer"
+          class="font-medium text-stone-500 underline-offset-2 transition-colors hover:text-stone-700 hover:underline dark:text-stone-500 dark:hover:text-stone-300"
+        >
+          ProseKit
+        </a>
+      </footer>
+    </div>
+  </main>
 </Base>

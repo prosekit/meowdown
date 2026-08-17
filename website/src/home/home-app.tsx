@@ -1,11 +1,11 @@
 import { StrictMode } from 'react'
 
-import { App } from './app.tsx'
+import { HomeDemo } from './home-demo.tsx'
 
 export function HomeApp() {
   return (
     <StrictMode>
-      <App />
+      <HomeDemo />
     </StrictMode>
   )
 }
