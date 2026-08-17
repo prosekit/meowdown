@@ -1,9 +1,9 @@
 import type { EditorView } from '@codemirror/view'
 import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import { throttle } from '@ocavue/utils'
-import { useQueryStates } from 'nuqs'
+import { debounce, useQueryState, useQueryStates } from 'nuqs'
 import { NuqsAdapter } from 'nuqs/adapters/react'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { SegmentedControl } from '../components/segmented-control.tsx'
 import { WikilinkPreviewCard } from '../components/wikilink-preview-card.tsx'
@@ -19,6 +19,7 @@ import {
 import { getPresetContent, PRESETS } from '../presets/presets.ts'
 import { CodeMirrorPane } from './codemirror-pane.tsx'
 import {
+  parseAsCompressedMarkdown,
   parseAsFlag,
   parseAsMode,
   parseAsPreset,
@@ -39,6 +40,22 @@ const playgroundParsers = {
 // The rich pane pushes to the source pane near-real-time; one `getMarkdown()`
 // call at most every 1.5s keeps large documents cheap.
 const PUSH_THROTTLE_MS = 1500
+
+const DOC_URL_DEBOUNCE_MS = 800
+// lz-string halves markdown at worst; 20K raw chars keeps the URL inside a
+// realistic ~8K shareable budget.
+const DOC_URL_MAX_CHARS = 20_000
+const DOC_TRUNCATION_NOTICE =
+  '\n\n---\n\nTruncated: this shared document was cut here to fit into the URL.'
+
+// The shared copy is cut at a line boundary with a notice appended; the live
+// editor content is never truncated.
+function clampDocForUrl(markdown: string): string {
+  if (markdown.length <= DOC_URL_MAX_CHARS) return markdown
+  const head = markdown.slice(0, DOC_URL_MAX_CHARS)
+  const lastLineBreak = head.lastIndexOf('\n')
+  return (lastLineBreak > 0 ? head.slice(0, lastLineBreak) : head) + DOC_TRUNCATION_NOTICE
+}
 
 const SPELLCHECK_OPTIONS = SPELLCHECK_VALUES.map((value) => ({
   value,
@@ -100,6 +117,10 @@ function SelectField<T extends string>({
 
 function PlaygroundApp() {
   const [options, setOptions] = useQueryStates(playgroundParsers)
+  const [doc, setDoc] = useQueryState(
+    'doc',
+    parseAsCompressedMarkdown.withOptions({ limitUrlUpdates: debounce(DOC_URL_DEBOUNCE_MS) }),
+  )
   const editorRef = useRef<EditorHandle>(null)
   const sourceViewRef = useRef<EditorView>(null)
   // The last markdown one pane accepted from the other. Lets the blur pull
@@ -108,9 +129,26 @@ function PlaygroundApp() {
 
   // The editor is uncontrolled: the initial document is resolved once, and
   // later preset switches go through the imperative handle.
-  const [initialDoc] = useState(() => getPresetContent(options.preset))
+  const [initialDoc] = useState(() => doc ?? getPresetContent(options.preset))
   // The seed of the source pane, refreshed whenever the pane is toggled on.
   const [sourceSeed, setSourceSeed] = useState(initialDoc)
+
+  // Kept in sync via an effect so the stable sync callbacks below can read the
+  // current preset without re-capturing it.
+  const presetRef = useRef(options.preset)
+  useEffect(() => {
+    presetRef.current = options.preset
+  }, [options.preset])
+
+  // A document matching its preset (or over budget after clamping to the
+  // preset either way) keeps the URL clean.
+  const writeDocParam = useCallback(
+    (markdown: string) => {
+      const shared = clampDocForUrl(markdown)
+      return setDoc(shared === getPresetContent(presetRef.current) ? null : shared)
+    },
+    [setDoc],
+  )
 
   // ProseMirror -> CodeMirror. Only fires on user edits (programmatic
   // setMarkdown suppresses onDocChange) and never rewrites a focused source
@@ -119,13 +157,15 @@ function PlaygroundApp() {
     () =>
       throttle(() => {
         const markdown = editorRef.current?.getMarkdown()
+        if (markdown == null) return
+        void writeDocParam(markdown)
         const view = sourceViewRef.current
-        if (markdown == null || !view || view.hasFocus) return
+        if (!view || view.hasFocus) return
         if (view.state.doc.toString() === markdown) return
         lastSyncedRef.current = markdown
         view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: markdown } })
       }, PUSH_THROTTLE_MS),
-    [],
+    [writeDocParam],
   )
 
   // CodeMirror -> ProseMirror, on blur only. setMarkdown no-ops on equivalent
@@ -135,22 +175,30 @@ function PlaygroundApp() {
       if (markdown !== lastSyncedRef.current) {
         lastSyncedRef.current = markdown
         editorRef.current?.setMarkdown(markdown)
+        void writeDocParam(markdown)
       }
       // Flush rich-pane edits the push held back while the source pane had
       // focus.
       pushToSource()
     },
-    [pushToSource],
+    [pushToSource, writeDocParam],
   )
 
   const selectPreset = useCallback(
     (preset: string) => {
       void setOptions({ preset })
+      void setDoc(null)
       editorRef.current?.setMarkdown(getPresetContent(preset))
       pushToSource()
     },
-    [setOptions, pushToSource],
+    [setOptions, setDoc, pushToSource],
   )
+
+  const copyShareLink = useCallback(async () => {
+    const markdown = editorRef.current?.getMarkdown() ?? ''
+    await writeDocParam(markdown)
+    await navigator.clipboard.writeText(window.location.href)
+  }, [writeDocParam])
 
   const toggleSource = useCallback(
     (source: boolean) => {
@@ -200,6 +248,13 @@ function PlaygroundApp() {
           onChange={(glide) => void setOptions({ glide })}
         />
         <ToggleField label="Source" checked={options.source} onChange={toggleSource} />
+        <button
+          type="button"
+          onClick={() => void copyShareLink()}
+          className="ml-auto cursor-pointer rounded-lg border border-stone-200/80 bg-white/70 px-2.5 py-1 text-sm font-medium text-stone-600 transition-colors hover:bg-white hover:text-stone-900 dark:border-stone-700/70 dark:bg-stone-900/70 dark:text-stone-300 dark:hover:bg-stone-800 dark:hover:text-stone-100"
+        >
+          Copy link
+        </button>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 lg:flex-row">
