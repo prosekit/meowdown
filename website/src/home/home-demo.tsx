@@ -1,10 +1,10 @@
 import type { ExitBoundaryHandler } from '@meowdown/core'
-import type { EditorHandle } from '@meowdown/react'
+import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import { getId } from '@ocavue/utils'
 import { clsx } from 'clsx/lite'
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { DemoEditor } from '../components/demo-editor.tsx'
+import { SegmentedControl } from '../components/segmented-control.tsx'
 import { WikilinkPreviewCard } from '../components/wikilink-preview-card.tsx'
 import {
   handleFileClick,
@@ -22,47 +22,6 @@ import INITIAL_CONTENT from '../presets/default.md?raw'
 import { FindShortcut, useFindDemo } from './find-demo.tsx'
 import { SelectionMenuShortcut, useSelectionDemo } from './selection-demo.tsx'
 import { MODES, useEditorMode } from './use-editor-mode.ts'
-
-interface SegmentedControlProps<T extends string> {
-  options: ReadonlyArray<{ value: T; label: string }>
-  value: T
-  onChange: (value: T) => void
-  ariaLabel?: string
-  /**
-   * Shared radio group name; required when several controls coexist.
-   */
-  name?: string
-}
-
-function SegmentedControl<T extends string>({
-  options,
-  value,
-  onChange,
-  ariaLabel,
-  name = 'segmented-control',
-}: SegmentedControlProps<T>) {
-  return (
-    <div
-      role="radiogroup"
-      aria-label={ariaLabel}
-      className="segmented"
-      style={{ '--seg-count': options.length } as CSSProperties}
-    >
-      {options.map((option) => (
-        <label key={option.value}>
-          <input
-            type="radio"
-            name={name}
-            value={option.value}
-            checked={option.value === value}
-            onChange={() => onChange(option.value)}
-          />
-          {option.label}
-        </label>
-      ))}
-    </div>
-  )
-}
 
 export function HomeDemo() {
   const { mode, setMode, activeMode } = useEditorMode()
@@ -125,7 +84,7 @@ export function HomeDemo() {
 
       <div className="relative flex min-h-0 flex-1 flex-col">
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-          <DemoEditor
+          <MeowdownEditor
             mode={mode}
             spellCheck={spellCheck}
             searchQuery={findDemo.query}
@@ -150,7 +109,7 @@ export function HomeDemo() {
             <SelectionMenuShortcut onTrigger={selectionDemo.openMenu} />
             <FindShortcut onTrigger={findDemo.openBar} />
             <WikilinkPreviewCard />
-          </DemoEditor>
+          </MeowdownEditor>
         </div>
 
         {findDemo.bar}

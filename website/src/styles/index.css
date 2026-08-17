@@ -13,30 +13,8 @@ html {
   background-color: light-dark(var(--color-orange-50), var(--color-stone-950));
 }
 
-/* The source mode renders a CodeMirror editor. */
-.meowdown [data-editor='codemirror'] {
-  display: flex;
-  flex: 1 0 auto;
-
-  .cm-editor {
-    flex: 1;
-    font-size: 0.95rem;
-
-    &.cm-focused {
-      outline: none;
-    }
-  }
-
-  .cm-content {
-    /* Same gutter as .ProseMirror so switching modes does not shift text. */
-    padding: 1.25rem var(--meowdown-gutter) 1.75rem;
-    font-family: var(--meowdown-font-mono);
-    caret-color: var(--meowdown-accent);
-  }
-}
-
 /* The active mode description re-animates whenever the mode changes (keyed
- * remount in app.tsx). */
+ * remount in home-demo.tsx). */
 @keyframes meowdown-fade-in {
   from {
     opacity: 0;
@@ -105,18 +83,12 @@ html {
   pointer-events: none;
 }
 
-/* Slide the thumb onto the checked option (supports up to 5 segments). */
+/* Slide the thumb onto the checked option (supports up to 3 segments). */
 .segmented:has(> label:nth-child(2) input:checked)::before {
   transform: translateX(100%);
 }
 .segmented:has(> label:nth-child(3) input:checked)::before {
   transform: translateX(200%);
-}
-.segmented:has(> label:nth-child(4) input:checked)::before {
-  transform: translateX(300%);
-}
-.segmented:has(> label:nth-child(5) input:checked)::before {
-  transform: translateX(400%);
 }
 
 .segmented label {

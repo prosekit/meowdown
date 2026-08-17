@@ -1,9 +1,8 @@
+import type { EditorMode } from '@meowdown/react'
 import { useCallback, useState } from 'react'
 
-import type { DemoMode } from '../components/demo-editor.tsx'
-
 interface ModeOption {
-  value: DemoMode
+  value: EditorMode
   label: string
   description: string
 }
@@ -24,49 +23,39 @@ export const MODES: ModeOption[] = [
     label: 'Hide',
     description: 'Markdown characters disappear for a clean, fully rendered view.',
   },
-  {
-    value: 'source',
-    label: 'Source',
-    description: 'Raw Markdown text.',
-  },
-  {
-    value: 'readonly',
-    label: 'Readonly',
-    description: 'A read-only render of the document, with no editor behind it.',
-  },
 ]
 
 const MODE_STORAGE_KEY = 'meowdown:mode'
 const MODE_QUERY_KEY = 'mode'
 
-function isDemoMode(value: string | null): value is DemoMode {
+function isEditorMode(value: string | null): value is EditorMode {
   return MODES.some((option) => option.value === value)
 }
 
 // The URL query outranks sessionStorage, so a shared `?mode=` link pins the
 // mode regardless of what the visitor picked before.
-function readInitialMode(): DemoMode {
+function readInitialMode(): EditorMode {
   const queryMode = new URLSearchParams(window.location.search).get(MODE_QUERY_KEY)
   if (queryMode != null) {
-    if (isDemoMode(queryMode)) {
+    if (isEditorMode(queryMode)) {
       return queryMode
     }
     console.warn(`[meowdown] Invalid mode in URL query: ${queryMode}`)
   }
   const storedMode = sessionStorage.getItem(MODE_STORAGE_KEY)
-  return isDemoMode(storedMode) ? storedMode : 'focus'
+  return isEditorMode(storedMode) ? storedMode : 'focus'
 }
 
-function writeModeQuery(mode: DemoMode): void {
+function writeModeQuery(mode: EditorMode): void {
   const url = new URL(window.location.href)
   url.searchParams.set(MODE_QUERY_KEY, mode)
   history.replaceState(null, '', url)
 }
 
 export function useEditorMode() {
-  const [mode, setModeState] = useState<DemoMode>(readInitialMode)
+  const [mode, setModeState] = useState<EditorMode>(readInitialMode)
 
-  const setMode = useCallback((nextMode: DemoMode) => {
+  const setMode = useCallback((nextMode: EditorMode) => {
     setModeState(nextMode)
     sessionStorage.setItem(MODE_STORAGE_KEY, nextMode)
     writeModeQuery(nextMode)
