@@ -7,7 +7,6 @@ import {
   type WikilinkItem,
 } from '@meowdown/react'
 import { getId } from '@ocavue/utils'
-import { handleToggleClick } from 'astro-theme-toggle/client'
 import { clsx } from 'clsx/lite'
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 
@@ -203,11 +202,17 @@ function SegmentedControl<T extends string>({
   )
 }
 
+function toggleTheme(): void {
+  const themeToggle = window.astroThemeToggle
+  if (!themeToggle) return
+  themeToggle.setTheme(themeToggle.getTheme() === 'dark' ? 'light' : 'dark')
+}
+
 function ThemeToggle() {
   return (
     <button
       type="button"
-      onClick={handleToggleClick}
+      onClick={toggleTheme}
       aria-label="Toggle color theme"
       title="Toggle color theme"
       className={ICON_BUTTON_CLASS}
