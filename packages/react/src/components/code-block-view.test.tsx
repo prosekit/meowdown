@@ -315,3 +315,18 @@ describe('typing over code block selections', () => {
     })
   })
 })
+
+describe('code block spellcheck exemption', () => {
+  const pmRoot = page.locate('.ProseMirror')
+  const editorPre = pmRoot.locate('pre')
+
+  it('keeps the pre exempt while the editor root has spellcheck on', async () => {
+    await render(<ProseKitEditor initialMarkdown={CODE_BLOCK_MD} spellCheck />)
+    await expect.element(pmRoot).toHaveAttribute('spellcheck', 'true')
+    await expect.element(editorPre).toHaveAttribute('spellcheck', 'false')
+    await expect.element(editorPre).toHaveAttribute('autocorrect', 'off')
+    await expect.element(editorPre).toHaveAttribute('autocapitalize', 'off')
+    await expect.element(editorPre).toHaveAttribute('writingsuggestions', 'false')
+    expect(editorPre.element()).toHaveProperty('spellcheck', false)
+  })
+})
