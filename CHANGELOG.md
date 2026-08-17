@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.65.6](https://github.com/prosekit/meowdown/compare/v0.65.5...v0.65.6) (2026-08-17)
+
+
+### Bug Fixes
+
+* disable native spellcheck in code, math, and URL source text ([#490](https://github.com/prosekit/meowdown/issues/490)) ([f0b1506](https://github.com/prosekit/meowdown/commit/f0b15060e160dc89aa19a4fa6f47cad5df232b5e))
+
 ## [0.65.5](https://github.com/prosekit/meowdown/compare/v0.65.4...v0.65.5) (2026-08-16)
 
 
