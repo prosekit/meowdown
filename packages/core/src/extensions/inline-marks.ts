@@ -1,5 +1,7 @@
 import { defineMarkSpec, union } from '@prosekit/core'
 
+import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
+
 import type { MarkName } from './mark-names.ts'
 
 /**
@@ -87,7 +89,7 @@ function defineMdStrong() {
 function defineMdCode() {
   return defineMarkSpec({
     name: 'mdCode' satisfies MarkName,
-    toDOM: () => ['code', 0],
+    toDOM: () => ['code', { ...NON_PROSE_ATTRS }, 0],
     parseDOM: [{ tag: 'code' }],
   })
 }
@@ -118,7 +120,7 @@ function defineMdLinkUri() {
   return defineMarkSpec({
     name: 'mdLinkUri' satisfies MarkName,
     inclusive: false,
-    toDOM: () => ['span', { class: 'md-link-uri' }, 0],
+    toDOM: () => ['span', { class: 'md-link-uri', ...NON_PROSE_ATTRS }, 0],
     parseDOM: [{ tag: 'span.md-link-uri' }],
   })
 }

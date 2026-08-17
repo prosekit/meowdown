@@ -264,7 +264,13 @@ describe('focus mode', () => {
               ](
             </span>
           </span>
-          <span class="md-link-uri">
+          <span
+            autocapitalize="off"
+            autocorrect="off"
+            class="md-link-uri"
+            spellcheck="false"
+            writingsuggestions="false"
+          >
             <span class="show">
               http://x.test
             </span>
@@ -307,7 +313,13 @@ describe('focus mode', () => {
               ](
             </span>
           </span>
-          <span class="md-link-uri">
+          <span
+            autocapitalize="off"
+            autocorrect="off"
+            class="md-link-uri"
+            spellcheck="false"
+            writingsuggestions="false"
+          >
             <span class="show">
               http://x.test
             </span>
@@ -484,7 +496,13 @@ describe('focus mode', () => {
               ](
             </span>
           </span>
-          <span class="md-link-uri">
+          <span
+            autocapitalize="off"
+            autocorrect="off"
+            class="md-link-uri"
+            spellcheck="false"
+            writingsuggestions="false"
+          >
             <span class="show">
               x
             </span>
@@ -517,7 +535,13 @@ describe('focus mode', () => {
               ](
             </span>
           </span>
-          <span class="md-link-uri">
+          <span
+            autocapitalize="off"
+            autocorrect="off"
+            class="md-link-uri"
+            spellcheck="false"
+            writingsuggestions="false"
+          >
             <span class="show">
               x
             </span>
@@ -720,7 +744,13 @@ describe('focus mode', () => {
           <span class="md-mark">
             ](
           </span>
-          <span class="md-link-uri">
+          <span
+            autocapitalize="off"
+            autocorrect="off"
+            class="md-link-uri"
+            spellcheck="false"
+            writingsuggestions="false"
+          >
             http://x
           </span>
           <span class="md-mark">
@@ -831,7 +861,13 @@ describe('focus mode', () => {
               ](
             </span>
           </span>
-          <span class="md-link-uri">
+          <span
+            autocapitalize="off"
+            autocorrect="off"
+            class="md-link-uri"
+            spellcheck="false"
+            writingsuggestions="false"
+          >
             <span class="show">
               x
             </span>
@@ -858,7 +894,13 @@ describe('focus mode', () => {
           <span class="md-mark">
             ](
           </span>
-          <span class="md-link-uri">
+          <span
+            autocapitalize="off"
+            autocorrect="off"
+            class="md-link-uri"
+            spellcheck="false"
+            writingsuggestions="false"
+          >
             x
           </span>
           <span class="md-mark">
@@ -911,7 +953,13 @@ describe('focus mode', () => {
               ](
             </span>
           </span>
-          <span class="md-link-uri">
+          <span
+            autocapitalize="off"
+            autocorrect="off"
+            class="md-link-uri"
+            spellcheck="false"
+            writingsuggestions="false"
+          >
             <span class="show">
               https://example.com
             </span>
@@ -1044,7 +1092,13 @@ describe('focus mode', () => {
               ](
             </span>
           </span>
-          <span class="md-link-uri">
+          <span
+            autocapitalize="off"
+            autocorrect="off"
+            class="md-link-uri"
+            spellcheck="false"
+            writingsuggestions="false"
+          >
             <span class="show">
               x
             </span>
@@ -1071,7 +1125,13 @@ describe('focus mode', () => {
           <span class="md-mark">
             ](
           </span>
-          <span class="md-link-uri">
+          <span
+            autocapitalize="off"
+            autocorrect="off"
+            class="md-link-uri"
+            spellcheck="false"
+            writingsuggestions="false"
+          >
             y
           </span>
           <span class="md-mark">
