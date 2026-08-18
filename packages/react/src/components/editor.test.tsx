@@ -357,12 +357,12 @@ describe('MeowdownEditor', () => {
     const screen = await render(
       <MeowdownEditor initialMarkdown="A [[link]]" mode="hide" editorClassName="first" />,
     )
-    await expect.element(source).toHaveStyle({ fontSize: '0px' })
+    await expect.element(source).toHaveStyle({ width: '0px', opacity: '0' })
 
     await screen.rerender(
       <MeowdownEditor initialMarkdown="A [[link]]" mode="hide" editorClassName="second" />,
     )
-    await expect.element(source).toHaveStyle({ fontSize: '0px' })
+    await expect.element(source).toHaveStyle({ width: '0px', opacity: '0' })
   })
 
   // The test browser forces `prefers-reduced-motion: reduce`, which zeroes the

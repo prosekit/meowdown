@@ -813,14 +813,24 @@
       }
     }
 
-    /* The source keeps a zero-width inline box (font-size: 0, same as .md-mark)
-     * instead of leaving the box tree (display: none): a boxless source next to
-     * the contenteditable=false preview makes the browser relocate typing at a
-     * textblock start past the whole mark view. */
+    /* The source keeps a zero-width inline box instead of leaving the box
+     * tree (display: none): a boxless source next to the contenteditable=false
+     * preview makes the browser relocate typing at a textblock start past the
+     * whole mark view. Unlike font-size: 0, the text keeps its natural size
+     * inside a width: 0 box, so every caret position in the source has real
+     * inline box geometry: iOS WebKit only anchors the DOM selection at
+     * positions with caret geometry and relocates a geometryless anchor every
+     * frame, fighting prosemirror-view's selection sync. The glyphs overflow
+     * the box invisibly (opacity) and untouchably (pointer-events), so taps
+     * aimed at content after the atom keep hitting that content. */
     .md-atom-view-content {
-      font-size: 0;
-      letter-spacing: 0;
+      display: inline-block;
+      width: 0;
+      /* pre, not nowrap: nowrap collapses whitespace, and the browser then
+       * types NBSP instead of a plain space when the caret anchors in here. */
+      white-space: pre;
       opacity: 0;
+      pointer-events: none;
     }
   }
 

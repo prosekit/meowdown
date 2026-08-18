@@ -33,22 +33,23 @@ export function getVirtualElementFromRange(view: EditorView, range: PositionRang
   let lastRect = new DOMRect(0, 0, 0, 0)
   const getBoundingClientRect = (): DOMRect => {
     if (view.isDestroyed) return lastRect
-    // Bias both measurements into the range's own content. Measured outward
-    // (the default `side`), an edge that sits against hidden markdown syntax
-    // at a block boundary has no visible neighbor and yields a bogus
-    // zero rect, anchoring the popover at the viewport corner. An edge
-    // touching an atom unit (image, wikilink, file) has no measurable glyph on
-    // either side; its preview element is the visible geometry. An edge
-    // against plain hidden syntax anchors on the visible glyph past the run.
+    // Bias both measurements into the range's own content. An edge touching
+    // an atom unit (image, wikilink, file) anchors on its preview element,
+    // measured first: the source text keeps real inline boxes whose glyphs
+    // overflow the zero-width source box invisibly, so a coords probe there
+    // would report geometry far from anything visible. An edge that sits
+    // against hidden markdown syntax at a block boundary has no visible
+    // neighbor and yields a bogus zero rect (anchoring the popover at the
+    // viewport corner); it anchors on the visible glyph past the run.
     const start =
-      tryCoordsAtPos(view, range.from, 1) ??
       findAtomEdgeRect(view, range.from, 1) ??
+      tryCoordsAtPos(view, range.from, 1) ??
       tryHiddenRunCoords(view, range.from, 1) ??
       tryCoordsAtPos(view, range.from, -1)
     if (start == null) return lastRect
     const end =
-      tryCoordsAtPos(view, range.to, -1) ??
       findAtomEdgeRect(view, range.to, -1) ??
+      tryCoordsAtPos(view, range.to, -1) ??
       tryHiddenRunCoords(view, range.to, -1) ??
       tryCoordsAtPos(view, range.to, 1)
     if (end == null) return lastRect

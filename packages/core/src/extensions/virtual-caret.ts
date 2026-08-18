@@ -137,7 +137,14 @@ class VirtualCaretView implements PluginView {
       return
     }
 
-    const nativeRect = findNativeCaretRect(view)
+    // Measure the atom preview first: the atom source keeps real inline boxes
+    // (style.css) so the DOM selection has geometry to anchor on, and the
+    // native and coords measurements would report that geometry, one shared
+    // point inside the source box for both unit edges. The preview
+    // measurement keeps the drawn caret hugging the correct label edge, the
+    // same rect it drew when the source measured as nothing.
+    const atomRect = findAtomCaretRect(view)
+    const nativeRect = atomRect == null ? findNativeCaretRect(view) : undefined
 
     // Use the native rect if it exists and the last input modality was touch.
     // This ensures that we can render the drag magnifier on touch devices.
@@ -147,7 +154,7 @@ class VirtualCaretView implements PluginView {
       return
     }
 
-    const viewportRect = measureCaretRect(view, nativeRect)
+    const viewportRect = atomRect ?? measureCaretRect(view, nativeRect)
     let rect: CaretRect | undefined
     if (viewportRect != null) {
       const layerRect = this.#layer.getBoundingClientRect()

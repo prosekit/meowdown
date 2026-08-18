@@ -1,0 +1,120 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>iOS hidden-anchor relocation repro</title>
+<style>
+  body {
+    font:
+      17px/1.5 -apple-system,
+      sans-serif;
+    margin: 12px;
+  }
+  [contenteditable] {
+    border: 1px solid #999;
+    padding: 8px;
+  }
+  .list-item {
+    display: flex;
+  }
+  .list-marker {
+    user-select: none;
+    -webkit-user-select: none;
+    color: #888;
+    margin-right: 6px;
+  }
+  .atom {
+    display: contents;
+  }
+  .preview {
+    user-select: none;
+    -webkit-user-select: none;
+    background: #e0ecff;
+    border-radius: 4px;
+    padding: 0 4px;
+  }
+  .source {
+    font-size: 0;
+    letter-spacing: 0;
+    opacity: 0;
+  }
+  #log {
+    font:
+      11px/1.4 ui-monospace,
+      monospace;
+    white-space: pre-wrap;
+    margin-top: 8px;
+  }
+  button {
+    font-size: 15px;
+    padding: 6px 10px;
+    margin: 8px 4px 0 0;
+  }
+</style>
+
+<p>
+  Framework-free repro for the meowdown wikilink-bullet anchor oscillation. Tap a button to collapse
+  the DOM selection into (or beside) the hidden (font-size: 0) text, then watch whether this browser
+  relocates the anchor on its own. No editor library involved.
+</p>
+
+<div id="editor" contenteditable="true">
+  <div class="list-item">
+    <div class="list-marker" contenteditable="false">&bull;</div>
+    <div class="list-content">
+      <p id="para">
+        <span class="atom"
+          ><span class="preview" contenteditable="false">Cat care basics</span
+          ><span class="source">[[Cat care basics]]</span></span
+        >
+      </p>
+    </div>
+  </div>
+  <p>plain text line</p>
+</div>
+
+<button id="collapse-hidden">into hidden text</button>
+<button id="collapse-para">at p offset 0</button>
+<button id="clear-log">clear</button>
+
+<div id="log"></div>
+
+<script>
+  const logEl = document.getElementById('log')
+  const t0 = performance.now()
+  function describeEl(el) {
+    if (el == null || el.nodeType !== 1) return String(el && el.nodeName).toLowerCase()
+    return (
+      el.nodeName.toLowerCase() +
+      (el.className ? '.' + String(el.className).split(' ').join('.') : '')
+    )
+  }
+  function describe(node, offset) {
+    if (node == null) return 'null'
+    const name =
+      node.nodeType === 3
+        ? 'text(' + JSON.stringify(node.nodeValue.slice(0, 20)) + ')@' + describeEl(node.parentNode)
+        : describeEl(node)
+    return name + '+' + offset
+  }
+  function log(msg) {
+    logEl.textContent += (performance.now() - t0).toFixed(1).padStart(8) + '  ' + msg + '\n'
+  }
+  document.addEventListener('selectionchange', () => {
+    const sel = getSelection()
+    log('selectionchange  anchor=' + describe(sel.anchorNode, sel.anchorOffset))
+  })
+  function set(node, offset) {
+    document.getElementById('editor').focus()
+    getSelection().collapse(node, offset)
+    log('SET anchor=' + describe(node, offset))
+  }
+  document.getElementById('collapse-hidden').addEventListener('click', () => {
+    set(document.querySelector('.source').firstChild, 0)
+  })
+  document.getElementById('collapse-para').addEventListener('click', () => {
+    set(document.getElementById('para'), 0)
+  })
+  document.getElementById('clear-log').addEventListener('click', () => {
+    logEl.textContent = ''
+  })
+</script>
