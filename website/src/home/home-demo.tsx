@@ -2,7 +2,7 @@ import type { ExitBoundaryHandler } from '@meowdown/core'
 import { MarkdownView, MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import { getId } from '@ocavue/utils'
 import { clsx } from 'clsx/lite'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 import { SegmentedControl } from '../components/segmented-control.tsx'
 import { WikilinkPreviewCard } from '../components/wikilink-preview-card.tsx'
@@ -34,32 +34,6 @@ export function HomeDemo() {
   const editorRef = useRef<EditorHandle>(null)
   const selectionDemo = useSelectionDemo(editorRef)
   const findDemo = useFindDemo(editorRef)
-
-  const [spellCheck, setSpellCheck] = useState<boolean | undefined>(undefined)
-
-  useEffect(() => {
-    // REVIEW: we do not need the spellcheck query param anymore in the home demo, because we now have a playground to test this.
-    const id = setTimeout(() => {
-      const urlParams = new URLSearchParams(window.location.search)
-      const value = urlParams.get('spellcheck') || urlParams.get('spellCheck')
-
-      if (value === 'true') {
-        setSpellCheck(true)
-        console.log('[meowdown] Spellcheck enabled')
-      } else if (value === 'false') {
-        setSpellCheck(false)
-        console.log('[meowdown] Spellcheck disabled')
-      } else if (value) {
-        console.warn(
-          `[meowdown] Invalid spellcheck value in URL query: ${value}. Expected "true" or "false".`,
-        )
-      }
-    }, 0)
-
-    return () => {
-      clearTimeout(id)
-    }
-  }, [])
 
   // When the caret leaves the document boundary (onExitBoundary), briefly flash
   // a top or bottom border inside the editor box. A bumped id remounts the
@@ -98,7 +72,6 @@ export function HomeDemo() {
           {mounted && (
             <MeowdownEditor
               mode={mode}
-              spellCheck={spellCheck}
               searchQuery={findDemo.query}
               onSearchChange={findDemo.onSearchChange}
               initialMarkdown={INITIAL_CONTENT}
