@@ -13,6 +13,17 @@ html {
   background-color: light-dark(var(--color-orange-50), var(--color-stone-950));
 }
 
+/* Hover preview for wikilinks; also styled in stories.css for astrobook
+ * pages, which do not load this stylesheet. */
+.wikilink-preview-card {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+
+  .meowdown-content {
+    padding: 0 !important;
+  }
+}
+
 /* The playground's side-by-side source pane (CodeMirror). */
 .playground-source {
   display: flex;
