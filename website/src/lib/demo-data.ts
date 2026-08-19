@@ -1,5 +1,11 @@
 import type { TagItem, WikilinkItem } from '@meowdown/react'
 
+import catCareBasics from '../presets/notes/cat-care-basics.md?raw'
+import dailyJournal from '../presets/notes/daily-journal.md?raw'
+import meetingNotes from '../presets/notes/meeting-notes.md?raw'
+import projectIdeas from '../presets/notes/project-ideas.md?raw'
+import readingList from '../presets/notes/reading-list.md?raw'
+
 import { uploadFile } from './upload-file.ts'
 
 // Confirm, then open the target in a new tab. Shared by the link and image
@@ -26,35 +32,16 @@ export function handleWikilinkClick({ target }: { target: string }): void {
   window.alert(`Clicked wikilink: ${target}`)
 }
 
-// REVIEW: put these content into the presets dir, and import them directly (i.g. do not use the presets.ts to import these content because we have a fixed set of content for the demo)
-// Demo note contents for the wikilink hover cards. `Travel plans` is left out
-// on purpose: a target without content renders no card.
+// Demo note contents for the wikilink hover cards, one .md file per note
+// under `presets/notes/` (out of the preset glob's reach: these are a fixed
+// set, not playground presets). `Travel plans` is left out on purpose: a
+// target without content renders no card.
 export const NOTE_PREVIEWS: Record<string, string> = {
-  'Cat care basics': `# Cat care basics
-
-Feed twice a day, fresh water always, and never skip **play time**.
-
-- Brush long-haired cats daily
-- Scratching posts save the couch`,
-  'Daily journal': `# Daily journal
-
-Slow morning, good coffee. Sketched the outline for the #meowdown demo and moved [[Project ideas]] forward.
-
-+ [x] Morning pages
-+ [ ] Publish the changelog`,
-  'Meeting notes': `# Meeting notes
-
-Agreed to ship the hover card demo this week. *Everyone* liked the passive preview approach.`,
-  'Project ideas': `# Project ideas
-
-- A cozy reading nook
-- A cat-shaped bookshelf
-- A tiny herb garden`,
-  'Reading list': `# Reading list
-
-1. *The Mythical Man-Month*
-2. [CommonMark spec](https://commonmark.org)
-3. ~~Working in Public~~ (finished!)`,
+  'Cat care basics': catCareBasics,
+  'Daily journal': dailyJournal,
+  'Meeting notes': meetingNotes,
+  'Project ideas': projectIdeas,
+  'Reading list': readingList,
 }
 
 // Sizes for the file pills: the demo file in the default preset, plus every
