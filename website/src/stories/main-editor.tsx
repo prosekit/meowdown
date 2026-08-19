@@ -15,7 +15,7 @@ import {
   searchTags,
 } from '../lib/demo-data.ts'
 import { useMounted } from '../lib/use-mounted.ts'
-import { DEFAULT_PRESET_ID, getPresetContent, PRESETS } from '../presets/presets.ts'
+import { getPresetContent, PRESETS } from '../presets/presets.ts'
 
 import { CodeMirrorPane } from './codemirror-pane.tsx'
 
@@ -23,20 +23,12 @@ const MODES: readonly EditorMode[] = ['focus', 'show', 'hide']
 const SPELLCHECKS = ['default', 'on', 'off'] as const
 type Spellcheck = (typeof SPELLCHECKS)[number]
 
+const PRESET_IDS = PRESETS.map((preset) => preset.id)
+const INITIAL_PRESET = PRESETS[0]
+
 // The rich pane pushes to the source pane near-real-time; one `getMarkdown()`
 // call at most every 1.5s keeps large documents cheap.
 const PUSH_THROTTLE_MS = 1500
-
-function toOptions<T extends string>(values: readonly T[]) {
-  return values.map((value) => ({
-    value,
-    label: value.charAt(0).toUpperCase() + value.slice(1),
-  }))
-}
-
-const MODE_OPTIONS = toOptions(MODES)
-const SPELLCHECK_OPTIONS = toOptions(SPELLCHECKS)
-const PRESET_OPTIONS = PRESETS.map((preset) => ({ value: preset.id, label: preset.label }))
 
 function ToggleField({
   label,
@@ -67,7 +59,7 @@ function SelectField<T extends string>({
 }: {
   label: string
   value: T
-  options: ReadonlyArray<{ value: T; label: string }>
+  options: readonly T[]
   onChange: (value: T) => void
 }) {
   return (
@@ -75,8 +67,8 @@ function SelectField<T extends string>({
       {label}
       <select value={value} onChange={(event) => onChange(event.target.value as T)}>
         {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
+          <option key={option} value={option}>
+            {option}
           </option>
         ))}
       </select>
@@ -91,12 +83,12 @@ function MainEditorDemo() {
   const [blockHandle, setBlockHandle] = useState(true)
   const [caretGlide, setCaretGlide] = useState(true)
   const [showSource, setShowSource] = useState(true)
-  const [preset, setPreset] = useState(DEFAULT_PRESET_ID)
+  const [preset, setPreset] = useState(INITIAL_PRESET.id)
 
   const editorRef = useRef<EditorHandle>(null)
   const sourceViewRef = useRef<EditorView>(null)
   // The seed of the source pane, refreshed whenever the pane is toggled on.
-  const [sourceSeed, setSourceSeed] = useState(() => getPresetContent(DEFAULT_PRESET_ID))
+  const [sourceSeed, setSourceSeed] = useState(INITIAL_PRESET.content)
 
   // Both sync directions are created once; they close over the two stable
   // refs, so they never need to be re-created.
@@ -140,17 +132,12 @@ function MainEditorDemo() {
   return (
     <div className="story-main">
       <div className="story-controls">
-        <SelectField label="Mode" value={mode} options={MODE_OPTIONS} onChange={setMode} />
-        <SelectField
-          label="Document"
-          value={preset}
-          options={PRESET_OPTIONS}
-          onChange={selectPreset}
-        />
+        <SelectField label="Mode" value={mode} options={MODES} onChange={setMode} />
+        <SelectField label="Document" value={preset} options={PRESET_IDS} onChange={selectPreset} />
         <SelectField
           label="Spellcheck"
           value={spellcheck}
-          options={SPELLCHECK_OPTIONS}
+          options={SPELLCHECKS}
           onChange={setSpellcheck}
         />
         <ToggleField label="Readonly" checked={readOnly} onChange={setReadOnly} />
@@ -167,7 +154,7 @@ function MainEditorDemo() {
             readOnly={readOnly}
             blockHandle={blockHandle}
             caretGlide={caretGlide}
-            initialMarkdown={getPresetContent(DEFAULT_PRESET_ID)}
+            initialMarkdown={INITIAL_PRESET.content}
             handleRef={editorRef}
             onDocChange={pushToSource}
             onTagSearch={searchTags}

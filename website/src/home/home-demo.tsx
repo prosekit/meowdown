@@ -19,7 +19,7 @@ import {
   uploadAndTrackFile,
 } from '../lib/demo-data.ts'
 import { useMounted } from '../lib/use-mounted.ts'
-import INITIAL_CONTENT from '../presets/default.md?raw'
+import INITIAL_CONTENT from '../presets/000-default.md?raw'
 
 import { FindShortcut, useFindDemo } from './find-demo.tsx'
 import { SelectionMenuShortcut, useSelectionDemo } from './selection-demo.tsx'
