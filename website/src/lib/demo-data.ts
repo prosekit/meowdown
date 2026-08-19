@@ -26,6 +26,7 @@ export function handleWikilinkClick({ target }: { target: string }): void {
   window.alert(`Clicked wikilink: ${target}`)
 }
 
+// REVIEW: put these content into the presets dir, and import them directly (i.g. do not use the presets.ts to import these content because we have a fixed set of content for the demo)
 // Demo note contents for the wikilink hover cards. `Travel plans` is left out
 // on purpose: a target without content renders no card.
 export const NOTE_PREVIEWS: Record<string, string> = {
