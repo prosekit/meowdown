@@ -189,6 +189,7 @@
   }
 }
 
+/* Do not use plain CSS. use tailwindcss REVIEW */
 .story-task-content {
   flex: 1;
   min-width: 0;
