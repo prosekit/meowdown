@@ -9,7 +9,9 @@ lib-cov
 logs
 node_modules
 temp
+__screenshots__
 .eslintcache
 .vitest-attachments
 .vitest-reports
-__screenshots__
+.vitest
+.astro

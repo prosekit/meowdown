@@ -1,0 +1,46 @@
+---
+import { NavActions } from '../components/nav-actions.tsx'
+import { HomeApp } from '../home/home-app.tsx'
+import Base from '../layouts/base.astro'
+---
+
+<Base title="Meowdown">
+  <main class="relative min-h-dvh overflow-hidden text-stone-600 dark:bg-stone-950">
+    <div class="relative mx-auto flex h-dvh max-w-5xl flex-col px-4 py-5 sm:px-6 sm:py-7">
+      <nav class="flex shrink-0 items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span
+            class="flex h-9 w-9 items-center justify-center rounded-xl bg-yellow-100 text-lg shadow-sm shadow-amber-500/30"
+          >
+            🐱
+          </span>
+          <span class="text-lg font-semibold tracking-tight text-stone-900 dark:text-white">
+            Meowdown
+          </span>
+        </div>
+        <NavActions client:load />
+      </nav>
+
+      <header class="shrink-0 py-5 text-center sm:py-6">
+        <h1
+          class="text-3xl font-semibold tracking-tight text-balance text-stone-900 sm:text-4xl dark:text-white"
+        >
+          Markdown that <span class="text-amber-500 dark:text-amber-400">renders as you type</span>
+        </h1>
+      </header>
+
+      <HomeApp client:load />
+
+      <footer class="shrink-0 pt-4 text-center text-xs text-stone-400 dark:text-stone-600">
+        Built with <a
+          href="https://prosekit.dev"
+          target="_blank"
+          rel="noreferrer"
+          class="font-medium text-stone-500 underline-offset-2 transition-colors hover:text-stone-700 hover:underline dark:text-stone-500 dark:hover:text-stone-300"
+        >
+          ProseKit
+        </a>
+      </footer>
+    </div>
+  </main>
+</Base>

@@ -20,9 +20,10 @@ minimumReleaseAgeExclude:
   - '@aria-ui/*'
   - '@prosemirror-adapter/*'
   - prosemirror-view
-  - eslint-plugin-unicorn@73.0.0
+  - astro-theme-toggle@0.8.2
 
 allowBuilds:
+  esbuild: false
   simple-git-hooks: false
 
 # "blockExoticSubdeps" and "overrides" install packages from pkg.pr.new

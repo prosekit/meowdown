@@ -1,0 +1,20 @@
+/* Shared stylesheet for the astrobook stories, which never load the site's
+ * styles/index.css. Tailwind comes without preflight: stories render inline
+ * inside astrobook's dashboard, and the reset would restyle its chrome. The
+ * missing preflight defaults (border-style, form fonts) are set per-utility
+ * in the story components. */
+
+@import '@meowdown/core/style.css';
+@import '@meowdown/react/style.css';
+@import 'tailwindcss/theme.css';
+@import 'tailwindcss/utilities.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* aria-ui positioners are hidden while closed by an inline `display: none`
+ * that the popover JS applies; under astrobook's `client:load` hydration the
+ * very first closed state can slip through before that write, so back it up
+ * in CSS. */
+[popover][data-state='closed'] {
+  display: none;
+}
