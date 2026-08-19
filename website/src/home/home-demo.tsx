@@ -38,6 +38,7 @@ export function HomeDemo() {
   const [spellCheck, setSpellCheck] = useState<boolean | undefined>(undefined)
 
   useEffect(() => {
+    // REVIEW: we do not need the spellcheck query param anymore in the home demo, because we now have a playground to test this.
     const id = setTimeout(() => {
       const urlParams = new URLSearchParams(window.location.search)
       const value = urlParams.get('spellcheck') || urlParams.get('spellCheck')
