@@ -10,6 +10,7 @@ export default defineESLintConfig(
     },
     markdown: false,
     command: true,
+    jsdoc: true,
   },
   {
     ignores: ['**/*.module.d.css.ts', '**/*.astro'],
