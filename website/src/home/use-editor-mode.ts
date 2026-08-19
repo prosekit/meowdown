@@ -1,5 +1,5 @@
 import type { EditorMode } from '@meowdown/react'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface ModeOption {
   value: EditorMode
@@ -53,7 +53,13 @@ function writeModeQuery(mode: EditorMode): void {
 }
 
 export function useEditorMode() {
-  const [mode, setModeState] = useState<EditorMode>(readInitialMode)
+  const [mode, setModeState] = useState<EditorMode>('focus')
+
+  // The URL query and sessionStorage are read after mount, so the hook can
+  // render on the server.
+  useEffect(() => {
+    setModeState(readInitialMode())
+  }, [])
 
   const setMode = useCallback((nextMode: EditorMode) => {
     setModeState(nextMode)

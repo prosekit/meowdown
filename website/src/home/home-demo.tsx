@@ -1,5 +1,5 @@
 import type { ExitBoundaryHandler } from '@meowdown/core'
-import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
+import { MarkdownView, MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import { getId } from '@ocavue/utils'
 import { clsx } from 'clsx/lite'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -18,6 +18,7 @@ import {
   searchTags,
   uploadAndTrackFile,
 } from '../lib/demo-data.ts'
+import { useMounted } from '../lib/use-mounted.ts'
 import INITIAL_CONTENT from '../presets/default.md?raw'
 
 import { FindShortcut, useFindDemo } from './find-demo.tsx'
@@ -25,6 +26,9 @@ import { SelectionMenuShortcut, useSelectionDemo } from './selection-demo.tsx'
 import { MODES, useEditorMode } from './use-editor-mode.ts'
 
 export function HomeDemo() {
+  // The page is server-rendered: until the island hydrates and mounts, the
+  // editor slot shows a static read-only render of the same document.
+  const mounted = useMounted()
   const { mode, setMode, activeMode } = useEditorMode()
 
   const editorRef = useRef<EditorHandle>(null)
@@ -85,32 +89,39 @@ export function HomeDemo() {
 
       <div className="relative flex min-h-0 flex-1 flex-col">
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-          <MeowdownEditor
-            mode={mode}
-            spellCheck={spellCheck}
-            searchQuery={findDemo.query}
-            onSearchChange={findDemo.onSearchChange}
-            initialMarkdown={INITIAL_CONTENT}
-            handleRef={editorRef}
-            onTagSearch={searchTags}
-            onWikilinkSearch={searchNotes}
-            onSelectionMenuSearch={selectionDemo.onSelectionMenuSearch}
-            pendingReplacementActions={selectionDemo.pendingReplacementActions}
-            onPendingReplacementResolve={selectionDemo.onPendingReplacementResolve}
-            onFilePaste={uploadAndTrackFile}
-            resolveFileLink={resolveFileLink}
-            resolveFileInfo={resolveFileInfo}
-            onFileClick={handleFileClick}
-            onImageClick={handleImageClick}
-            onLinkClick={handleLinkClick}
-            onTagClick={handleTagClick}
-            onWikilinkClick={handleWikilinkClick}
-            onExitBoundary={handleExitBoundary}
-          >
-            <SelectionMenuShortcut onTrigger={selectionDemo.openMenu} />
-            <FindShortcut onTrigger={findDemo.openBar} />
-            <WikilinkPreviewCard />
-          </MeowdownEditor>
+          {!mounted && (
+            <div className="meowdown">
+              <MarkdownView markdown={INITIAL_CONTENT} interactive={false} />
+            </div>
+          )}
+          {mounted && (
+            <MeowdownEditor
+              mode={mode}
+              spellCheck={spellCheck}
+              searchQuery={findDemo.query}
+              onSearchChange={findDemo.onSearchChange}
+              initialMarkdown={INITIAL_CONTENT}
+              handleRef={editorRef}
+              onTagSearch={searchTags}
+              onWikilinkSearch={searchNotes}
+              onSelectionMenuSearch={selectionDemo.onSelectionMenuSearch}
+              pendingReplacementActions={selectionDemo.pendingReplacementActions}
+              onPendingReplacementResolve={selectionDemo.onPendingReplacementResolve}
+              onFilePaste={uploadAndTrackFile}
+              resolveFileLink={resolveFileLink}
+              resolveFileInfo={resolveFileInfo}
+              onFileClick={handleFileClick}
+              onImageClick={handleImageClick}
+              onLinkClick={handleLinkClick}
+              onTagClick={handleTagClick}
+              onWikilinkClick={handleWikilinkClick}
+              onExitBoundary={handleExitBoundary}
+            >
+              <SelectionMenuShortcut onTrigger={selectionDemo.openMenu} />
+              <FindShortcut onTrigger={findDemo.openBar} />
+              <WikilinkPreviewCard />
+            </MeowdownEditor>
+          )}
         </div>
 
         {findDemo.bar}

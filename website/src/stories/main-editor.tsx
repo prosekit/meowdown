@@ -14,10 +14,10 @@ import {
   searchNotes,
   searchTags,
 } from '../lib/demo-data.ts'
+import { useMounted } from '../lib/use-mounted.ts'
 import { DEFAULT_PRESET_ID, getPresetContent, PRESETS } from '../presets/presets.ts'
 
 import { CodeMirrorPane } from './codemirror-pane.tsx'
-import { useMounted } from './use-mounted.ts'
 
 const MODES: readonly EditorMode[] = ['focus', 'show', 'hide']
 const SPELLCHECKS = ['default', 'on', 'off'] as const

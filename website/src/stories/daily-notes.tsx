@@ -5,7 +5,7 @@ import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import { clsx } from 'clsx/lite'
 import { useCallback, useMemo, useRef } from 'react'
 
-import { useMounted } from './use-mounted.ts'
+import { useMounted } from '../lib/use-mounted.ts'
 
 const PAST_DAYS = 5
 const FUTURE_DAYS = 1

@@ -5,7 +5,7 @@ import { MarkdownView, MeowdownEditor, useKeymap, type EditorHandle } from '@meo
 import { clsx } from 'clsx/lite'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
-import { useMounted } from './use-mounted.ts'
+import { useMounted } from '../lib/use-mounted.ts'
 
 interface Task {
   id: number
