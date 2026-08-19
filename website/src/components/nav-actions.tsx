@@ -1,24 +1,17 @@
 import { Tooltip } from '@base-ui/react/tooltip'
+import { handleToggleClick } from 'astro-theme-toggle/client'
 import type { MouseEvent, ReactElement } from 'react'
 
 const iconButtonClass =
   'flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/70 text-stone-500 shadow-sm backdrop-blur transition-colors hover:bg-white hover:text-stone-900 dark:border-stone-700/70 dark:bg-stone-900/70 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100'
 
 function toggleTheme(event: MouseEvent<HTMLButtonElement>) {
-  const ripple = window.astroThemeToggleClick
-  if (ripple) {
-    // Keyboard activation carries no pointer position; ripple from the button
-    // center instead.
-    const rect = event.currentTarget.getBoundingClientRect()
-    const clientX = event.detail === 0 ? rect.left + rect.width / 2 : event.clientX
-    const clientY = event.detail === 0 ? rect.top + rect.height / 2 : event.clientY
-    ripple({ clientX, clientY })
-    return
-  }
-  const themeToggle = window.astroThemeToggle
-  if (themeToggle) {
-    themeToggle.setTheme(themeToggle.getTheme() === 'dark' ? 'light' : 'dark')
-  }
+  // Keyboard activation carries no pointer position; ripple from the button
+  // center instead.
+  const rect = event.currentTarget.getBoundingClientRect()
+  const clientX = event.detail === 0 ? rect.left + rect.width / 2 : event.clientX
+  const clientY = event.detail === 0 ? rect.top + rect.height / 2 : event.clientY
+  handleToggleClick({ clientX, clientY })
 }
 
 function IconTooltip({ label, children }: { label: string; children: ReactElement }) {
