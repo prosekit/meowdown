@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     astrobook({
       directory: 'src/stories',
-      subpath: '/stories',
+      subpath: '/playground',
       previewSubpath: '/preview',
       title: 'Meowdown',
     }),
