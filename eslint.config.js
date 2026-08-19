@@ -13,7 +13,7 @@ export default defineESLintConfig(
     jsdoc: true,
   },
   {
-    ignores: ['**/*.module.d.css.ts'],
+    ignores: ['**/*.module.d.css.ts', 'website/src/presets/*.md'],
   },
   {
     files: ['**/*.ts', '**/*.tsx'],
