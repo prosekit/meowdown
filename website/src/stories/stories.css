@@ -18,6 +18,101 @@
   padding: 1rem;
 }
 
+/* Hover preview for wikilinks; also styled in styles/index.css for the site
+ * pages, which do not load this stylesheet. */
+.wikilink-preview-card {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+
+  .meowdown-content {
+    padding: 0 !important;
+  }
+}
+
+/* Main editor */
+
+.story-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-sizing: border-box;
+  height: 100%;
+  padding: 1rem;
+}
+
+.story-controls {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.story-field {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: light-dark(#57534e, #d6d3d1);
+
+  select {
+    font: inherit;
+    color: inherit;
+    background: light-dark(#fff, #1c1917);
+    border: 1px solid light-dark(rgb(0 0 0 / 12%), rgb(255 255 255 / 16%));
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+  }
+}
+
+.story-panes {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 0;
+
+  @media (width >= 64rem) {
+    flex-direction: row;
+  }
+}
+
+.story-pane {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid light-dark(rgb(0 0 0 / 8%), rgb(255 255 255 / 12%));
+  border-radius: 0.75rem;
+  background: light-dark(#fff, #1c1917);
+}
+
+/* The side-by-side source pane (CodeMirror). */
+.story-source {
+  display: flex;
+  flex: 1 0 auto;
+
+  .cm-editor {
+    flex: 1;
+    font-size: 0.95rem;
+
+    &.cm-focused {
+      outline: none;
+    }
+  }
+
+  .cm-content {
+    /* Same gutter as .ProseMirror so the two panes align. */
+    padding: 1.25rem var(--meowdown-gutter) 1.75rem;
+    font-family: var(--meowdown-font-mono);
+    caret-color: var(--meowdown-accent);
+  }
+}
+
 /* Daily notes */
 
 .story-day {

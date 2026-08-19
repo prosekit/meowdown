@@ -75,5 +75,5 @@ export function CodeMirrorPane({ initialDoc, readOnly, viewRef, onBlur }: CodeMi
     })
   }, [readOnly, viewRef])
 
-  return <div ref={containerRef} data-testid="playground-source" className="playground-source" />
+  return <div ref={containerRef} className="story-source" />
 }
