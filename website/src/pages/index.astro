@@ -1,11 +1,7 @@
 ---
-import { Toggle } from 'astro-theme-toggle/components'
-
+import { NavActions } from '../components/nav-actions.tsx'
 import { HomeApp } from '../home/home-app.tsx'
 import Base from '../layouts/base.astro'
-
-const iconButtonClass =
-  'flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-stone-200/80 bg-white/70 text-stone-500 shadow-sm backdrop-blur transition-colors hover:bg-white hover:text-stone-900 dark:border-stone-700/70 dark:bg-stone-900/70 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-100'
 ---
 
 <Base title="Meowdown">
@@ -22,30 +18,7 @@ const iconButtonClass =
             Meowdown
           </span>
         </div>
-        <div class="flex items-center gap-2">
-          <a
-            href="/playground"
-            class="mr-1 text-sm font-medium text-stone-500 underline-offset-4 transition-colors hover:text-stone-900 hover:underline dark:text-stone-400 dark:hover:text-stone-100"
-          >
-            Playground
-          </a>
-          <a
-            href="https://github.com/prosekit/meowdown"
-            target="_blank"
-            rel="noreferrer"
-            aria-label="View source on GitHub"
-            title="View source on GitHub"
-            class={iconButtonClass}
-          >
-            <span class="i-simple-icons-github size-4" aria-hidden="true"></span>
-          </a>
-          <Toggle
-            class={iconButtonClass}
-            style="padding: 9px;"
-            aria-label="Toggle color theme"
-            title="Toggle color theme"
-          />
-        </div>
+        <NavActions client:load />
       </nav>
 
       <header class="shrink-0 py-5 text-center sm:py-6">
@@ -71,3 +44,9 @@ const iconButtonClass =
     </div>
   </main>
 </Base>
+
+<script>
+  import { handleToggleClick } from 'astro-theme-toggle/client'
+
+  window.astroThemeToggleClick = handleToggleClick
+</script>

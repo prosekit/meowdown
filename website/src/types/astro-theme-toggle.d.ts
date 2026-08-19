@@ -6,4 +6,7 @@ interface Window {
     getTheme: () => 'light' | 'dark'
     setTheme: (theme: 'light' | 'dark') => void
   }
+  // Bridged from `astro-theme-toggle/client` by a script in `index.astro`:
+  // the toggle click handler that runs the circular view-transition reveal.
+  astroThemeToggleClick?: (event: { clientX: number; clientY: number }) => void
 }
