@@ -4,7 +4,7 @@
   "ignore": ["packages/react/src/components/*.module.d.css.ts"],
   "workspaces": {
     "website": {
-      "entry": ["src/stories/*.stories.ts"]
+      "entry": ["src/stories/*.stories.{ts,tsx}"]
     }
   }
 }
