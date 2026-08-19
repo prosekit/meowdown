@@ -7,6 +7,11 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { useMounted } from '../lib/use-mounted.ts'
 
+// Both the preview and the one-line editor render a .ProseMirror root; the
+// zeroed reading gutter keeps the row compact and the swap jump-free.
+const taskContentClass =
+  'min-w-0 flex-1 cursor-pointer text-sm leading-6 [&_p]:m-0 [&_.ProseMirror]:p-0!'
+
 interface Task {
   id: number
   text: string
@@ -86,7 +91,7 @@ function TaskEditor({
   const move = useCallback((delta: -1 | 1) => onMove(delta, readText()), [onMove, readText])
 
   return (
-    <div className="story-task-content">
+    <div className={taskContentClass}>
       <MeowdownEditor
         initialMarkdown={task.text}
         mode="hide"
@@ -129,22 +134,28 @@ export function TaskList() {
   }
 
   return (
-    <div className="story-frame">
-      <h2 className="story-task-heading">Tasks</h2>
-      <ul className="story-task-list">
+    <div className="mx-auto max-w-2xl p-4">
+      <h2 className="mb-2 text-xl font-[650] text-stone-900 dark:text-stone-50">Tasks</h2>
+      <ul className="m-0 flex list-none flex-col p-0">
         {tasks.map((task) => (
           <li
             key={task.id}
             className={clsx(
-              'story-task-row',
-              task.id === editingId && 'is-editing',
-              task.done && 'is-done',
+              'flex min-h-10 items-start gap-3 border-0 border-b border-solid border-black/8 px-3 py-2 dark:border-white/12',
+              task.id === editingId && 'bg-amber-600/8 dark:bg-amber-400/8',
             )}
           >
             <button
               type="button"
               aria-label={task.done ? 'Mark as open' : 'Mark as done'}
-              className="story-task-toggle"
+              className={clsx(
+                // h-6 matches the content's line height, so the toggle centers
+                // on the first line even when a task wraps.
+                'flex h-6 cursor-pointer items-center border-none bg-transparent p-0 text-base',
+                task.done
+                  ? 'text-amber-600 dark:text-amber-400'
+                  : 'text-stone-500 dark:text-stone-400',
+              )}
               onClick={() => toggleDone(task.id)}
             >
               {task.done ? '●' : '○'}
@@ -163,19 +174,22 @@ export function TaskList() {
               <div
                 role="button"
                 tabIndex={0}
-                className="story-task-content"
+                className={taskContentClass}
                 onClick={() => setEditingId(task.id)}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') setEditingId(task.id)
                 }}
               >
-                <MarkdownView markdown={task.text} className="story-task-preview" />
+                <MarkdownView
+                  markdown={task.text}
+                  className={clsx('pointer-events-none', task.done && 'line-through opacity-60')}
+                />
               </div>
             )}
           </li>
         ))}
       </ul>
-      <p className="story-task-hint">
+      <p className="mt-3 text-[0.8125rem] text-stone-500 dark:text-stone-400">
         Click a row to edit it. Enter commits, Escape cancels, ArrowUp and ArrowDown move between
         rows.
       </p>

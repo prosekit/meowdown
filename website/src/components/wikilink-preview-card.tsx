@@ -11,7 +11,7 @@ export function WikilinkPreviewCard() {
         const markdown = NOTE_PREVIEWS[hit.target]
         if (!markdown) return null
         return (
-          <div className="meowdown wikilink-preview-card">
+          <div className="meowdown px-3 py-2 text-sm [&_.meowdown-content]:p-0!">
             <MarkdownView markdown={markdown} interactive={false} />
           </div>
         )

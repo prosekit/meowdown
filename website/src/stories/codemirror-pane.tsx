@@ -75,5 +75,11 @@ export function CodeMirrorPane({ initialDoc, readOnly, viewRef, onBlur }: CodeMi
     })
   }, [readOnly, viewRef])
 
-  return <div ref={containerRef} className="story-source" />
+  // The .cm-content gutter matches .ProseMirror's so the two panes align.
+  return (
+    <div
+      ref={containerRef}
+      className="flex flex-[1_0_auto] [&_.cm-content]:px-(--meowdown-gutter) [&_.cm-content]:pt-5 [&_.cm-content]:pb-7 [&_.cm-content]:font-(family-name:--meowdown-font-mono) [&_.cm-content]:caret-(--meowdown-accent) [&_.cm-editor]:flex-1 [&_.cm-editor]:text-[0.95rem] [&_.cm-editor.cm-focused]:outline-none"
+    />
+  )
 }

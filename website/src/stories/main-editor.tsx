@@ -24,6 +24,9 @@ const SPELLCHECKS = ['default', 'on', 'off'] as const
 type Spellcheck = (typeof SPELLCHECKS)[number]
 
 const PRESET_IDS = PRESETS.map((preset) => preset.id)
+
+const fieldClass =
+  'flex cursor-pointer items-center gap-1.5 text-sm text-stone-600 dark:text-stone-300'
 const INITIAL_PRESET = PRESETS[0]
 
 // The rich pane pushes to the source pane near-real-time; one `getMarkdown()`
@@ -40,7 +43,7 @@ function ToggleField({
   onChange: (checked: boolean) => void
 }) {
   return (
-    <label className="story-field">
+    <label className={fieldClass}>
       <input
         type="checkbox"
         checked={checked}
@@ -63,9 +66,13 @@ function SelectField<T extends string>({
   onChange: (value: T) => void
 }) {
   return (
-    <label className="story-field">
+    <label className={fieldClass}>
       {label}
-      <select value={value} onChange={(event) => onChange(event.target.value as T)}>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value as T)}
+        className="cursor-pointer rounded-lg border border-solid border-black/12 bg-white px-2 py-1 [font:inherit] text-inherit dark:border-white/16 dark:bg-stone-900"
+      >
         {options.map((option) => (
           <option key={option} value={option}>
             {option}
@@ -130,8 +137,8 @@ function MainEditorDemo() {
   }
 
   return (
-    <div className="story-main">
-      <div className="story-controls">
+    <div className="box-border flex h-full flex-col gap-3 p-4">
+      <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2">
         <SelectField label="Mode" value={mode} options={MODES} onChange={setMode} />
         <SelectField label="Document" value={preset} options={PRESET_IDS} onChange={selectPreset} />
         <SelectField
@@ -146,8 +153,8 @@ function MainEditorDemo() {
         <ToggleField label="Source" checked={showSource} onChange={toggleSource} />
       </div>
 
-      <div className="story-panes">
-        <div className="story-pane">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 lg:flex-row">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto rounded-xl border border-solid border-black/8 bg-white dark:border-white/12 dark:bg-stone-900">
           <MeowdownEditor
             mode={mode}
             spellCheck={spellcheck === 'default' ? undefined : spellcheck === 'on'}
@@ -169,7 +176,7 @@ function MainEditorDemo() {
         </div>
 
         {showSource && (
-          <div className="story-pane">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto rounded-xl border border-solid border-black/8 bg-white dark:border-white/12 dark:bg-stone-900">
             <CodeMirrorPane
               initialDoc={sourceSeed}
               readOnly={readOnly}

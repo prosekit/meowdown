@@ -53,9 +53,12 @@ function DailyNoteRow({
   )
 
   return (
-    <section className="story-day">
+    <section className="border-0 border-b border-solid border-black/8 py-6 dark:border-white/12">
       <h2
-        className={clsx('story-day-subject', offset === 0 && 'is-today')}
+        className={clsx(
+          'mb-3 cursor-pointer text-xl font-[650] tracking-[-0.01em]',
+          offset === 0 ? 'text-amber-600 dark:text-amber-400' : 'text-stone-900 dark:text-stone-50',
+        )}
         onClick={() => focusDay(offset, 'start')}
       >
         {formatDayLabel(offset, date)}
@@ -63,7 +66,7 @@ function DailyNoteRow({
       <MeowdownEditor
         initialMarkdown={DAY_SEEDS[offset] ?? ''}
         handleRef={handleRef}
-        editorClassName={offset < 0 ? 'story-day-editor-past' : 'story-day-editor-today'}
+        editorClassName={offset < 0 ? 'min-h-[100px]' : 'min-h-[40vh]'}
         onExitBoundary={handleExitBoundary}
       />
     </section>
@@ -104,7 +107,7 @@ export function DailyNotes() {
   if (!mounted) return null
 
   return (
-    <div className="story-frame">
+    <div className="mx-auto max-w-2xl p-4">
       {days.map(({ offset, date }) => (
         <DailyNoteRow
           key={offset}
