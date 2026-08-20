@@ -10,6 +10,7 @@ import {
   findAtomCaretRect,
   findCoordsCaretRect,
   findNativeCaretRect,
+  isAfterLineBreak,
   type CaretRect,
 } from './caret-rect.ts'
 import { getCaretTail, type CaretTail } from './hidden-run.ts'
@@ -34,6 +35,7 @@ function measureCaretRect(
   view: EditorView,
   nativeRect: CaretRect | undefined,
 ): CaretRect | undefined {
+  if (isAfterLineBreak(view.state, view.state.selection.head)) nativeRect = undefined
   const rect = nativeRect ?? findCoordsCaretRect(view)
   if (rect != null) return stretchCaretRect(rect)
   return findAtomCaretRect(view)
