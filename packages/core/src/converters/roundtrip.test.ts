@@ -74,12 +74,17 @@ describe('soft breaks markdown cannot hold', () => {
   // one. Shift-Enter turns a pending soft break into this split itself, rather
   // than leaving the document to do it on the next load.
   it('reads a blank soft line back as a block break', () => {
-    const markdown = docToMarkdown(n.doc(n.paragraph('foo\n\nbar')))
+
+    // REVIEW: FIXME: use the following pattern. name them as doc1 doc2
+    let doc1 = n.doc(n.paragraph('foo\n\nbar'))
+    let doc2 = n.doc(n.paragraph('foo'), n.paragraph('bar'))
+    const markdown = docToMarkdown(doc1)
     expect(markdown).toBe('foo\n\nbar\n')
     const reparsed = markdownToDoc(markdown, { nodes: n })
-    expect(reparsed.eq(n.doc(n.paragraph('foo'), n.paragraph('bar')))).toBe(true)
+    expect(reparsed.eq(doc2)).toBe(true)
   })
 
+  // REVIEW: remove the following conment FIXME
   // `MdOut.finish` trims the trailing blank lines a block ends with.
   it('drops a break with nothing after it', () => {
     expect(docToMarkdown(n.doc(n.paragraph('foo\n')))).toBe('foo\n')
