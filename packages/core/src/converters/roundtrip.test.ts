@@ -55,42 +55,6 @@ describe('text', () => {
   })
 })
 
-// 1. MOVE this describe block between describe('tables') and describe('escapes and whitespace')
-// 2. RENAME "soft breaks markdown cannot hold" to "soft breaks"
-// REVIEW / FIXME
-describe('soft breaks markdown cannot hold', () => {
-  // At the top level a continuation line goes out bare: `MdOut.write` only
-  // reaches for a lazy spelling when a container prefix would change the line's
-  // meaning. A source-faithful editor cannot escape the `#` either, because the
-  // backslash would become part of the text.
-  it('reads a continuation line that opens a block back as that block', () => {
-    const markdown = docToMarkdown(n.doc(n.paragraph('foo\n# bar')))
-    expect(markdown).toBe('foo\n# bar\n')
-    const reparsed = markdownToDoc(markdown, { nodes: n })
-    expect(reparsed.eq(n.doc(n.paragraph('foo'), n.heading({ level: 1 }, 'bar')))).toBe(true)
-  })
-
-  // A blank line ends a paragraph in CommonMark, so a paragraph can never hold
-  // one. Shift-Enter turns a pending soft break into this split itself, rather
-  // than leaving the document to do it on the next load.
-  it('reads a blank soft line back as a block break', () => {
-
-    // REVIEW: FIXME: use the following pattern. name them as doc1 doc2. same the the test above too.
-    let doc1 = n.doc(n.paragraph('foo\n\nbar'))
-    let doc2 = n.doc(n.paragraph('foo'), n.paragraph('bar'))
-    const markdown = docToMarkdown(doc1)
-    expect(markdown).toBe('foo\n\nbar\n')
-    const reparsed = markdownToDoc(markdown, { nodes: n })
-    expect(reparsed.eq(doc2)).toBe(true)
-  })
-
-  // REVIEW: remove the following conment FIXME
-  // `MdOut.finish` trims the trailing blank lines a block ends with.
-  it('drops a break with nothing after it', () => {
-    expect(docToMarkdown(n.doc(n.paragraph('foo\n')))).toBe('foo\n')
-  })
-})
-
 describe('inline', () => {
   it('keeps bold markers', () => {
     expect(roundtrip('**bold**')).toBe('**bold**\n')
@@ -847,6 +811,36 @@ describe('tables', () => {
     expect(roundtrip('| **a** | [c](d) |\n| --- | --- |\n| e | f |')).toBe(
       '| **a** | [c](d) |\n| --- | --- |\n| e | f |\n',
     )
+  })
+})
+
+describe('soft breaks', () => {
+  // At the top level a continuation line goes out bare: `MdOut.write` only
+  // reaches for a lazy spelling when a container prefix would change the line's
+  // meaning. A source-faithful editor cannot escape the `#` either, because the
+  // backslash would become part of the text.
+  it('reads a continuation line that opens a block back as that block', () => {
+    const doc1 = n.doc(n.paragraph('foo\n# bar'))
+    const doc2 = n.doc(n.paragraph('foo'), n.heading({ level: 1 }, 'bar'))
+    const markdown = docToMarkdown(doc1)
+    expect(markdown).toBe('foo\n# bar\n')
+    expect(markdownToDoc(markdown, { nodes: n }).eq(doc2)).toBe(true)
+  })
+
+  // A blank line ends a paragraph in CommonMark, so a paragraph can never hold
+  // one. Shift-Enter turns a pending soft break into this split itself, rather
+  // than leaving the document to do it on the next load.
+  it('reads a blank soft line back as a block break', () => {
+    const doc1 = n.doc(n.paragraph('foo\n\nbar'))
+    const doc2 = n.doc(n.paragraph('foo'), n.paragraph('bar'))
+    const markdown = docToMarkdown(doc1)
+    expect(markdown).toBe('foo\n\nbar\n')
+    expect(markdownToDoc(markdown, { nodes: n }).eq(doc2)).toBe(true)
+  })
+
+  it('drops a break with nothing after it', () => {
+    const doc1 = n.doc(n.paragraph('foo\n'))
+    expect(docToMarkdown(doc1)).toBe('foo\n')
   })
 })
 
