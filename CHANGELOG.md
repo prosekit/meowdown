@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.66.0](https://github.com/prosekit/meowdown/compare/v0.65.6...v0.66.0) (2026-08-21)
+
+
+### Features
+
+* **core:** insert a soft line break on Shift-Enter ([#498](https://github.com/prosekit/meowdown/issues/498)) ([a9d0aa1](https://github.com/prosekit/meowdown/commit/a9d0aa1393683fd7b445662cdf39eaf2b252e2b8))
+* **core:** remove the deprecated `defineSpellCheckPlugin` ([#499](https://github.com/prosekit/meowdown/issues/499)) ([aecd080](https://github.com/prosekit/meowdown/commit/aecd080360926c65ee454fc566585334361ab64f))
+
+
+### Bug Fixes
+
+* draw the virtual caret at the start of the line after a line break ([#495](https://github.com/prosekit/meowdown/issues/495)) ([dae8220](https://github.com/prosekit/meowdown/commit/dae8220765de1ac8659e116ffc08ea1cd0deb4a1))
+
 ## [0.65.6](https://github.com/prosekit/meowdown/compare/v0.65.5...v0.65.6) (2026-08-17)
 
 
