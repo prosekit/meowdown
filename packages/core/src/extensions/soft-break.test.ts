@@ -224,11 +224,11 @@ describe('a second press splits the block', () => {
 
   it('undoes both presses in one step', async () => {
     using fixture = setupEditor()
-    const { n } = fixture
+    const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('foo<a>bar')))
     await pressShiftEnter()
     await pressShiftEnter()
-    await userEvent.keyboard('{Meta>}z{/Meta}')
+    editor.commands.undo()
     expect(fixture.doc.eq(n.doc(n.paragraph('foobar')))).toBe(true)
   })
 })
