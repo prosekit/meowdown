@@ -3,7 +3,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'astro/config'
 import astrobook from 'astrobook'
 
-import { version } from '../packages/react/package.json' with { type: 'json' }
+import packageJson from '../packages/react/package.json' with { type: 'json' }
 
 export default defineConfig({
   integrations: [
@@ -16,7 +16,7 @@ export default defineConfig({
       homeContent: {
         title: 'Meowdown',
         version: {
-          label: `v${version}`,
+          label: `v${packageJson.version}`,
           href: 'https://github.com/prosekit/meowdown/blob/master/CHANGELOG.md',
         },
         repo: {
