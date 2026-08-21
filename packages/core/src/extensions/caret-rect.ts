@@ -1,7 +1,7 @@
-import type { EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
 import { tryCoordsAtPos, type CaretCoords } from '../utils/caret-coords.ts'
+import { isAfterLineBreak } from '../utils/is-after-line-break.ts'
 
 import { getHiddenRunAfter, getHiddenRunBefore } from './hidden-run.ts'
 import { ATOM_SOURCE_MARK_NAMES } from './mark-names.ts'
@@ -29,16 +29,6 @@ export function findNativeCaretRect(view: EditorView): CaretRect | undefined {
   return { left: rect.left, top: rect.top, height: rect.height }
 }
 
-// A position right after a literal newline starts a soft line. Every engine
-// measures the collapsed native range there against the line before: Gecko
-// reports that line's end, WebKit one character cell past it, Blink no rect at
-// all.
-export function isAfterLineBreak(state: EditorState, pos: number): boolean {
-  const $pos = state.doc.resolve(pos)
-  const { parentOffset, parent } = $pos
-  return parentOffset > 0 && parent.textBetween(parentOffset - 1, parentOffset) === '\n'
-}
-
 // coordsAtPos with the side biased toward a visible neighbor. Every position
 // touching a hidden run shares one visual point (the run has zero width), so
 // when the head itself measures flat we probe from the run's far ends instead.
@@ -47,6 +37,10 @@ export function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   const head = state.selection.head
   const runBefore = getHiddenRunBefore(state, head)
   const runAfter = getHiddenRunAfter(state, head)
+  // A position right after a literal newline starts a soft line. Every engine
+  // measures the collapsed native range there against the line before: Gecko
+  // reports that line's end, WebKit one character cell past it, Blink no rect at
+  // all.
   const afterLineBreak = isAfterLineBreak(state, head)
   const preferredBeforeSide: boolean = runBefore == null && !afterLineBreak
   // `side` picks which neighbor to measure: -1 the character before the

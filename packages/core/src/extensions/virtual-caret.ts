@@ -5,12 +5,12 @@ import type { EditorView } from '@prosekit/pm/view'
 
 import { forceReflow } from '../utils/force-reflow.ts'
 import { getIsTouchInput, onIsTouchInputChange } from '../utils/input-modality.ts'
+import { isAfterLineBreak } from '../utils/is-after-line-break.ts'
 
 import {
   findAtomCaretRect,
   findCoordsCaretRect,
   findNativeCaretRect,
-  isAfterLineBreak,
   type CaretRect,
 } from './caret-rect.ts'
 import { getCaretTail, type CaretTail } from './hidden-run.ts'
