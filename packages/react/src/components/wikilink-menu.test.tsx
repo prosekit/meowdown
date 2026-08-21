@@ -1,12 +1,12 @@
 import '../testing/index.ts'
 
+import { waitForAnimationFrame } from '@meowdown/vitest/helpers'
 import { canUseRegexLookbehind } from '@prosekit/core'
 import { createRef, type RefObject } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
-import { waitForAnimationFrame } from '@meowdown/vitest/helpers'
 import { MeowdownEditor } from './editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle, WikilinkItem } from './types.ts'
@@ -36,12 +36,12 @@ async function pressInsertShortcut(): Promise<void> {
  * Walk the caret `count` characters to the right and confirm it arrived.
  */
 async function pressArrowRight(ref: RefObject<EditorHandle | null>, count: number): Promise<void> {
-  let getPos = () => {
+  const getPos = () => {
     return ref.current?.getSelection().head ?? 0
   }
-  let startPos = getPos()
-  let targetPos = startPos + count
-  let maxRetries = 10 // ArrowRight event could be dropped outright, so we retry
+  const startPos = getPos()
+  const targetPos = startPos + count
+  const maxRetries = 10 // ArrowRight event could be dropped outright, so we retry
   for (let press = 0; press < count + maxRetries; press++) {
     await waitForAnimationFrame()
     if (getPos() >= targetPos) break
