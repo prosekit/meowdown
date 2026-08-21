@@ -33,6 +33,7 @@ const splitPendingSoftBreak: Command = (state, dispatch, view) => {
   const { $from, empty } = state.selection
   if (!empty || !canHoldSoftBreak($from)) return false
   const offset = $from.parentOffset
+  // REVIEW: FIXME: 1. merge the latest origin/master; 2. use the shared isAfterLineBreak helper here.
   if (offset === 0 || $from.parent.textBetween(offset - 1, offset) !== '\n') return false
   let split: Transaction | undefined
   const handled = splitBlockOnEnter(
