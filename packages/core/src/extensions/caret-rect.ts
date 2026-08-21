@@ -35,10 +35,8 @@ export function findNativeCaretRect(view: EditorView): CaretRect | undefined {
 // all.
 export function isAfterLineBreak(state: EditorState, pos: number): boolean {
   const $pos = state.doc.resolve(pos)
-  return (
-    $pos.parentOffset > 0 &&
-    $pos.parent.textBetween($pos.parentOffset - 1, $pos.parentOffset) === '\n'
-  )
+  const { parentOffset, parent } = $pos
+  return parentOffset > 0 && parent.textBetween(parentOffset - 1, parentOffset) === '\n'
 }
 
 // coordsAtPos with the side biased toward a visible neighbor. Every position

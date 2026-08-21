@@ -35,7 +35,6 @@ function measureCaretRect(
   view: EditorView,
   nativeRect: CaretRect | undefined,
 ): CaretRect | undefined {
-  if (isAfterLineBreak(view.state, view.state.selection.head)) nativeRect = undefined
   const rect = nativeRect ?? findCoordsCaretRect(view)
   if (rect != null) return stretchCaretRect(rect)
   return findAtomCaretRect(view)
@@ -139,7 +138,8 @@ class VirtualCaretView implements PluginView {
       return
     }
 
-    const nativeRect = findNativeCaretRect(view)
+    const skipNativeCaretRect = isAfterLineBreak(view.state, view.state.selection.head)
+    const nativeRect = skipNativeCaretRect ? undefined : findNativeCaretRect(view)
 
     // Use the native rect if it exists and the last input modality was touch.
     // This ensures that we can render the drag magnifier on touch devices.
