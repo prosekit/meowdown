@@ -55,6 +55,9 @@ describe('text', () => {
   })
 })
 
+// 1. MOVE this describe block between describe('tables') and describe('escapes and whitespace')
+// 2. RENAME "soft breaks markdown cannot hold" to "soft breaks"
+// REVIEW / FIXME
 describe('soft breaks markdown cannot hold', () => {
   // At the top level a continuation line goes out bare: `MdOut.write` only
   // reaches for a lazy spelling when a container prefix would change the line's
