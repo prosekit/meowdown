@@ -127,7 +127,6 @@ export {
   type ReferenceDefinitions,
 } from './extensions/reference-links.ts'
 export { getMarkBuilders, type TypedMarkBuilders } from './extensions/schema.ts'
-export { defineSpellCheckPlugin } from './extensions/spell-check.ts'
 export { defineSubstitution } from './extensions/substitution.ts'
 export {
   getTableColumnAlign,
