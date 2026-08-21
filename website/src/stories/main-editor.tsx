@@ -2,8 +2,10 @@ import './stories.css'
 
 import { Transaction } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
-import { MeowdownEditor, type EditorHandle, type EditorMode } from '@meowdown/react'
+import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import { throttle } from '@ocavue/utils'
+import { useQueryStates } from 'nuqs'
+import { NuqsAdapter } from 'nuqs/adapters/react'
 import { useEffect, useRef, useState } from 'react'
 
 import { WikilinkPreviewCard } from '../components/wikilink-preview-card.tsx'
@@ -17,20 +19,14 @@ import {
 } from '../lib/demo-data.ts'
 import { computeTextPatch } from '../lib/text-patch.ts'
 import { useMounted } from '../lib/use-mounted.ts'
-import { getPresetContent, PRESETS } from '../presets/presets.ts'
+import { getPresetContent } from '../presets/presets.ts'
 
 import { CodeMirrorPane } from './codemirror-pane.tsx'
+import { MODES, PLAYGROUND_PARAMS, PRESET_IDS, SPELLCHECKS } from './playground-params.ts'
 import { SyncStatusPill, type SyncStatus } from './sync-status.tsx'
-
-const MODES: readonly EditorMode[] = ['focus', 'show', 'hide']
-const SPELLCHECKS = ['default', 'on', 'off'] as const
-type Spellcheck = (typeof SPELLCHECKS)[number]
-
-const PRESET_IDS = PRESETS.map((preset) => preset.id)
 
 const fieldClass =
   'flex cursor-pointer items-center gap-1.5 text-sm text-stone-600 dark:text-stone-300'
-const INITIAL_PRESET = PRESETS[0]
 
 // Both directions settle on the same delay: one `getMarkdown()` or one parse a
 // second keeps large documents cheap either way.
@@ -90,23 +86,29 @@ function SelectField<T extends string>({
 }
 
 function MainEditorDemo() {
-  const [mode, setMode] = useState<EditorMode>('focus')
-  const [spellcheck, setSpellcheck] = useState<Spellcheck>('default')
-  const [readOnly, setReadOnly] = useState(false)
-  const [blockHandle, setBlockHandle] = useState(true)
-  const [caretGlide, setCaretGlide] = useState(true)
-  const [showSource, setShowSource] = useState(true)
-  const [preset, setPreset] = useState(INITIAL_PRESET.id)
+  const [params, setParams] = useQueryStates(PLAYGROUND_PARAMS)
+  const { mode, doc, spellcheck, readOnly, blockHandle, caretGlide, source: showSource } = params
 
   const editorRef = useRef<EditorHandle>(null)
   const sourceViewRef = useRef<EditorView>(null)
   const [syncStatus, setSyncStatus] = useState<SyncStatus>()
+  // The document both panes are created with: the shared content when the link
+  // carries one, otherwise the selected preset.
+  const [initialMarkdown] = useState(() => params.content ?? getPresetContent(params.doc))
   // The seed of the source pane, refreshed whenever the pane is toggled on.
-  const [sourceSeed, setSourceSeed] = useState(INITIAL_PRESET.content)
+  const [sourceSeed, setSourceSeed] = useState(initialMarkdown)
 
   // Both sync directions are created once; they close over the two stable
   // refs, so they never need to be re-created.
   const [{ handleRichChange, handleSourceChange, flushToSource }] = useState(() => {
+    // nuqs' setter is referentially stable for a module-level key map, so
+    // capturing it once here is safe. Only the two throttled ticks call this,
+    // and both run after a user edit; a preset switch clears `content` instead.
+    const shareMarkdown = (markdown: string) => {
+      setSyncStatus('saved')
+      void setParams({ content: markdown })
+    }
+
     // ProseMirror -> CodeMirror, as the smallest patch that gets there, so the
     // source caret and scroll position survive. The `remote` annotation is what
     // stops the write from coming straight back as a user edit.
@@ -122,12 +124,12 @@ function MainEditorDemo() {
     // CodeMirror -> ProseMirror. setMarkdown no-ops on equivalent markdown and
     // stays silent to onDocChange, so neither direction echoes.
     const writeRichText = (markdown: string) => {
-      setSyncStatus('saved')
+      shareMarkdown(markdown)
       editorRef.current?.setMarkdown(markdown)
     }
 
     const pushToSource = throttle(() => {
-      setSyncStatus('saved')
+      shareMarkdown(editorRef.current?.getMarkdown() ?? '')
       // A stale trailing tick must never overwrite source text being typed now.
       if (sourceViewRef.current?.hasFocus) return
       writeSourceText()
@@ -157,7 +159,7 @@ function MainEditorDemo() {
   }, [syncStatus])
 
   const selectPreset = (id: string) => {
-    setPreset(id)
+    void setParams({ doc: id, content: null })
     editorRef.current?.setMarkdown(getPresetContent(id))
     flushToSource()
   }
@@ -166,23 +168,40 @@ function MainEditorDemo() {
     if (show) {
       setSourceSeed(editorRef.current?.getMarkdown() ?? '')
     }
-    setShowSource(show)
+    void setParams({ source: show })
   }
 
   return (
     <div className="box-border flex h-full flex-col gap-3 p-4">
       <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 relative">
-        <SelectField label="Mode" value={mode} options={MODES} onChange={setMode} />
-        <SelectField label="Document" value={preset} options={PRESET_IDS} onChange={selectPreset} />
+        <SelectField
+          label="Mode"
+          value={mode}
+          options={MODES}
+          onChange={(value) => void setParams({ mode: value })}
+        />
+        <SelectField label="Document" value={doc} options={PRESET_IDS} onChange={selectPreset} />
         <SelectField
           label="Spellcheck"
           value={spellcheck}
           options={SPELLCHECKS}
-          onChange={setSpellcheck}
+          onChange={(value) => void setParams({ spellcheck: value })}
         />
-        <ToggleField label="Readonly" checked={readOnly} onChange={setReadOnly} />
-        <ToggleField label="Block handle" checked={blockHandle} onChange={setBlockHandle} />
-        <ToggleField label="Caret glide" checked={caretGlide} onChange={setCaretGlide} />
+        <ToggleField
+          label="Readonly"
+          checked={readOnly}
+          onChange={(checked) => void setParams({ readOnly: checked })}
+        />
+        <ToggleField
+          label="Block handle"
+          checked={blockHandle}
+          onChange={(checked) => void setParams({ blockHandle: checked })}
+        />
+        <ToggleField
+          label="Caret glide"
+          checked={caretGlide}
+          onChange={(checked) => void setParams({ caretGlide: checked })}
+        />
         <ToggleField label="Source" checked={showSource} onChange={toggleSource} />
         {syncStatus && <SyncStatusPill status={syncStatus} />}
       </div>
@@ -195,7 +214,7 @@ function MainEditorDemo() {
             readOnly={readOnly}
             blockHandle={blockHandle}
             caretGlide={caretGlide}
-            initialMarkdown={INITIAL_PRESET.content}
+            initialMarkdown={initialMarkdown}
             handleRef={editorRef}
             onDocChange={handleRichChange}
             onTagSearch={searchTags}
@@ -227,5 +246,12 @@ function MainEditorDemo() {
 
 export function MainEditor() {
   const mounted = useMounted()
-  return mounted ? <MainEditorDemo /> : null
+  if (!mounted) return null
+  // Inside the mount gate: nuqs reads an empty search string on the server, so
+  // rendering its hooks during SSR would mismatch a populated URL on the client.
+  return (
+    <NuqsAdapter>
+      <MainEditorDemo />
+    </NuqsAdapter>
+  )
 }
