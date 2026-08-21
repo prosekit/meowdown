@@ -33,11 +33,6 @@ export function NavActions() {
   return (
     <Tooltip.Provider delay={300} closeDelay={100}>
       <div className="flex items-center gap-2">
-        <IconTooltip label="Playground">
-          <a href="/playground" aria-label="Playground" className={iconButtonClass}>
-            <span className="i-lucide-flask-conical size-4.5" aria-hidden="true"></span>
-          </a>
-        </IconTooltip>
         <IconTooltip label="View source on GitHub">
           <a
             href="https://github.com/prosekit/meowdown"
@@ -47,6 +42,15 @@ export function NavActions() {
             className={iconButtonClass}
           >
             <span className="i-simple-icons-github size-4.5" aria-hidden="true"></span>
+          </a>
+        </IconTooltip>
+        <IconTooltip label="Playground">
+          <a
+            href="/playground/dashboard/meowdown/main-editor"
+            aria-label="Playground"
+            className={iconButtonClass}
+          >
+            <span className="i-lucide-flask-conical size-4.5" aria-hidden="true"></span>
           </a>
         </IconTooltip>
         <IconTooltip label="Toggle color theme">
