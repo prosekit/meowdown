@@ -20,3 +20,9 @@ export function isSafari() {
 export function isFirefox() {
   return getBrowserName() === 'firefox'
 }
+
+export function waitForAnimationFrame(): Promise<void> {
+  const { promise, resolve } = Promise.withResolvers<void>()
+  requestAnimationFrame(() => resolve())
+  return promise
+}

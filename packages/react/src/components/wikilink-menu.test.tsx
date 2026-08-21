@@ -1,7 +1,8 @@
 import '../testing/index.ts'
 
+import { waitForAnimationFrame } from '@meowdown/vitest/helpers'
 import { canUseRegexLookbehind } from '@prosekit/core'
-import { createRef } from 'react'
+import { createRef, type RefObject } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
@@ -29,6 +30,25 @@ const TWO_BRACKETS = '[[[['
 
 async function pressInsertShortcut(): Promise<void> {
   await userEvent.keyboard('{ControlOrMeta>}{Shift>}K{/Shift}{/ControlOrMeta}')
+}
+
+/**
+ * Walk the caret `count` characters to the right and confirm it arrived.
+ */
+async function pressArrowRight(ref: RefObject<EditorHandle | null>, count: number): Promise<void> {
+  const getPos = () => {
+    return ref.current?.getSelection().head ?? 0
+  }
+  const startPos = getPos()
+  const targetPos = startPos + count
+  const maxRetries = 10 // ArrowRight event could be dropped outright, so we retry
+  for (let press = 0; press < count + maxRetries; press++) {
+    await waitForAnimationFrame()
+    if (getPos() >= targetPos) break
+    await userEvent.keyboard('{ArrowRight}')
+    await waitForAnimationFrame()
+  }
+  expect(getPos()).toEqual(targetPos)
 }
 
 describe('WikilinkMenu', () => {
@@ -248,7 +268,7 @@ describe('WikilinkMenu', () => {
     ref.current?.focus()
 
     await userEvent.keyboard(TWO_BRACKETS)
-    await userEvent.keyboard('{ArrowRight}'.repeat('Reading list'.length))
+    await pressArrowRight(ref, 'Reading list'.length)
 
     await vi.waitFor(() => {
       expect(onWikilinkSearch).toHaveBeenLastCalledWith('Reading list')
@@ -276,7 +296,7 @@ describe('WikilinkMenu', () => {
     ref.current?.focus()
 
     await userEvent.keyboard(TWO_BRACKETS)
-    await userEvent.keyboard('{ArrowRight}'.repeat('New project'.length))
+    await pressArrowRight(ref, 'New project'.length)
 
     const createItem = menu.getByText('Create "New project"')
     await expect.element(createItem).toBeVisible()
@@ -297,7 +317,7 @@ describe('WikilinkMenu', () => {
     await userEvent.keyboard(TWO_BRACKETS)
     await expect.element(menu).toBeVisible()
     await userEvent.keyboard('{Escape}')
-    await userEvent.keyboard('{ArrowRight}')
+    await pressArrowRight(ref, 1)
 
     await expect.element(menu).not.toBeVisible()
     expect(ref.current?.getSelection()).toMatchObject({ anchor: 8, head: 8 })
