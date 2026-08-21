@@ -138,7 +138,7 @@ class VirtualCaretView implements PluginView {
       return
     }
 
-    const skipNativeCaretRect = isAfterLineBreak_v2_tmp(view.state.selection.$head)
+    const skipNativeCaretRect = isAfterLineBreak_v2_tmp(selection.$head)
     const nativeRect = skipNativeCaretRect ? undefined : findNativeCaretRect(view)
 
     // Use the native rect if it exists and the last input modality was touch.
