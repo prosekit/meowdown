@@ -75,7 +75,7 @@ describe('soft breaks markdown cannot hold', () => {
   // than leaving the document to do it on the next load.
   it('reads a blank soft line back as a block break', () => {
 
-    // REVIEW: FIXME: use the following pattern. name them as doc1 doc2
+    // REVIEW: FIXME: use the following pattern. name them as doc1 doc2. same the the test above too.
     let doc1 = n.doc(n.paragraph('foo\n\nbar'))
     let doc2 = n.doc(n.paragraph('foo'), n.paragraph('bar'))
     const markdown = docToMarkdown(doc1)
