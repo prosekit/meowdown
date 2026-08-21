@@ -2,11 +2,6 @@ import { clsx } from 'clsx/lite'
 
 export type SyncStatus = 'editing' | 'saved'
 
-const STATUS_LABEL: Record<SyncStatus, string> = {
-  editing: 'Editing…',
-  saved: 'Saved',
-}
-
 export function SyncStatusPill({ status }: { status: SyncStatus }) {
   const editing = status === 'editing'
   return (
@@ -14,7 +9,7 @@ export function SyncStatusPill({ status }: { status: SyncStatus }) {
       role="status"
       aria-live="polite"
       className={clsx(
-        'ml-auto flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
+        'ml-auto flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium absolute right-2 top-0.5 opacity-80',
         editing
           ? 'bg-amber-100 text-amber-800 dark:bg-amber-400/15 dark:text-amber-300'
           : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-400/15 dark:text-emerald-300',
@@ -27,7 +22,7 @@ export function SyncStatusPill({ status }: { status: SyncStatus }) {
           editing ? 'animate-pulse bg-amber-500' : 'bg-emerald-500',
         )}
       />
-      {STATUS_LABEL[status]}
+      {status === 'editing' ? 'Editing' : 'Saved'}
     </span>
   )
 }

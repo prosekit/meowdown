@@ -171,7 +171,7 @@ function MainEditorDemo() {
 
   return (
     <div className="box-border flex h-full flex-col gap-3 p-4">
-      <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2">
+      <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 relative">
         <SelectField label="Mode" value={mode} options={MODES} onChange={setMode} />
         <SelectField label="Document" value={preset} options={PRESET_IDS} onChange={selectPreset} />
         <SelectField
