@@ -34,7 +34,7 @@ export function findNativeCaretRect(view: EditorView): CaretRect | undefined {
 // when the head itself measures flat we probe from the run's far ends instead.
 export function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   const state = view.state
-  const {head, $head} = state.selection.head
+  const {head, $head} = state.selection
   const runBefore = getHiddenRunBefore(state, head)
   const runAfter = getHiddenRunAfter(state, head)
   // A position right after a literal newline starts a soft line. Every engine
