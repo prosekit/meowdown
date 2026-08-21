@@ -1,7 +1,7 @@
 import type { EditorView } from '@prosekit/pm/view'
 
 import { tryCoordsAtPos, type CaretCoords } from '../utils/caret-coords.ts'
-import { isAfterLineBreak } from '../utils/is-after-line-break.ts'
+import { isAfterLineBreak_v2_tmp } from '../utils/is-after-line-break.ts'
 
 import { getHiddenRunAfter, getHiddenRunBefore } from './hidden-run.ts'
 import { ATOM_SOURCE_MARK_NAMES } from './mark-names.ts'
@@ -34,14 +34,14 @@ export function findNativeCaretRect(view: EditorView): CaretRect | undefined {
 // when the head itself measures flat we probe from the run's far ends instead.
 export function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   const state = view.state
-  const head = state.selection.head
+  const {head, $head} = state.selection.head
   const runBefore = getHiddenRunBefore(state, head)
   const runAfter = getHiddenRunAfter(state, head)
   // A position right after a literal newline starts a soft line. Every engine
   // measures the collapsed native range there against the line before: Gecko
   // reports that line's end, WebKit one character cell past it, Blink no rect at
   // all.
-  const afterLineBreak = isAfterLineBreak(state, head)
+  const afterLineBreak = isAfterLineBreak_v2_tmp($head)
   const preferredBeforeSide: boolean = runBefore == null && !afterLineBreak
   // `side` picks which neighbor to measure: -1 the character before the
   // position, 1 the character after it.
