@@ -1,6 +1,7 @@
 import type { ResolvedPos } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
 
+// REVIEW / FIXME: now isAfterLineBreak is useless, remomve it from ther codebase
 export function isAfterLineBreak(state: EditorState, pos: number): boolean {
   const $pos = state.doc.resolve(pos)
   const { parentOffset, parent } = $pos
