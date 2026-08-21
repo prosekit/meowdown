@@ -197,6 +197,31 @@ describe('a second press splits the block', () => {
     expect(docToMarkdown(fixture.doc)).toBe('foo **bar**\n\n qux\n')
   })
 
+  it('splits from the end of the line in front of a break', async () => {
+    using fixture = setupEditor()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('foo<a>\nbar')))
+    await pressShiftEnter()
+    expect(fixture.doc.eq(n.doc(n.paragraph('foo'), n.paragraph('bar')))).toBe(true)
+  })
+
+  it('lands the caret in the same place from either side of a break', async () => {
+    using fixture = setupEditor()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('foo<a>\nbar')))
+    await pressShiftEnter()
+    await userEvent.keyboard('baz')
+    expect(fixture.doc.eq(n.doc(n.paragraph('foo'), n.paragraph('bazbar')))).toBe(true)
+  })
+
+  it('splits a list item from the end of the line in front of a break', async () => {
+    using fixture = setupEditor()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('foo<a>\nbar'))))
+    await pressShiftEnter()
+    expect(docToMarkdown(fixture.doc)).toBe('- foo\n- bar\n')
+  })
+
   it('undoes both presses in one step', async () => {
     using fixture = setupEditor()
     const { n } = fixture

@@ -27,14 +27,25 @@ function canHoldSoftBreak($pos: ResolvedPos): boolean {
 // neither.
 const splitBlockOnEnter = chainCommands(enterCommand, splitBlock)
 
-// A caret already sitting after a soft break: markdown cannot hold a blank line
-// inside a paragraph, so make the block split now instead of leaving a break
-// that becomes one on the next load. Split first, then drop the `\n` the split
-// left at the end of the first block.
+// The mirror of `isAfterLineBreak`: whether a literal newline follows the caret.
+function isBeforeLineBreak($pos: ResolvedPos): boolean {
+  const { parentOffset, parent } = $pos
+  return (
+    parentOffset < parent.content.size &&
+    parent.textBetween(parentOffset, parentOffset + 1) === '\n'
+  )
+}
+
+// A caret already sitting beside a soft break: markdown cannot hold a blank
+// line inside a paragraph, so make the block split now instead of leaving a
+// break that becomes one on the next load. Split first, then drop the `\n`,
+// which the split leaves at the end of the first block when it was in front of
+// the caret and at the start of the second when it was behind.
 const splitPendingSoftBreak: Command = (state, dispatch, view) => {
   const { $from, empty } = state.selection
   if (!empty || !canHoldSoftBreak($from)) return false
-  if (!isAfterLineBreak(state, $from.pos)) return false
+  const inFront = isAfterLineBreak(state, $from.pos)
+  if (!inFront && !isBeforeLineBreak($from)) return false
   let split: Transaction | undefined
   const handled = splitBlockOnEnter(
     state,
@@ -45,8 +56,10 @@ const splitPendingSoftBreak: Command = (state, dispatch, view) => {
   )
   if (!handled || split == null) return false
   if (dispatch == null) return true
-  const from = split.mapping.map($from.pos - 1, -1)
-  const to = split.mapping.map($from.pos, -1)
+  const start = inFront ? $from.pos - 1 : $from.pos
+  const side = inFront ? -1 : 1
+  const from = split.mapping.map(start, side)
+  const to = split.mapping.map(start + 1, side)
   dispatch(split.delete(from, to).scrollIntoView())
   return true
 }
@@ -62,8 +75,8 @@ const softBreakCommand = chainCommands(newlineInCode, splitPendingSoftBreak, ins
 /**
  * Insert a markdown soft line break at the caret: a literal `\n` in the
  * paragraph's text. In a code block it writes the newline plain Enter writes
- * there. On a caret that already sits right after a soft break it splits the
- * block instead, because a paragraph cannot hold a blank line.
+ * there. On a caret that already sits beside a soft break it splits the block
+ * instead, because a paragraph cannot hold a blank line.
  */
 function insertSoftBreak(): Command {
   return softBreakCommand
