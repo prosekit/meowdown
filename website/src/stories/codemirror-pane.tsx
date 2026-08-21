@@ -1,7 +1,7 @@
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language'
-import { Compartment, EditorState } from '@codemirror/state'
+import { Compartment, EditorState, Transaction } from '@codemirror/state'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { EditorView, keymap } from '@codemirror/view'
 import { useLayoutEffect, useRef, type RefObject } from 'react'
@@ -13,10 +13,18 @@ export interface CodeMirrorPaneProps {
   readOnly: boolean
   viewRef: RefObject<EditorView | null>
   /**
-   * Fires with the full source text when the pane loses focus. Must be stable
-   * (useCallback): the mount effect captures it once when the view is created.
+   * Fires with the full source text after every edit made here. Writes coming
+   * from the rich pane carry `Transaction.remote` and are not reported. Must be
+   * stable (useCallback): the mount effect captures it once when the view is
+   * created.
    */
-  onBlur: (markdown: string) => void
+  onChange: (markdown: string) => void
+  /**
+   * Fires when the pane takes focus, before any keystroke can reach it. Must be
+   * stable (useCallback): the mount effect captures it once when the view is
+   * created.
+   */
+  onFocus: VoidFunction
 }
 
 const themeCompartment = new Compartment()
@@ -30,7 +38,13 @@ function themeExtensions(theme: 'light' | 'dark') {
   return theme === 'dark' ? oneDark : syntaxHighlighting(defaultHighlightStyle, { fallback: true })
 }
 
-export function CodeMirrorPane({ initialDoc, readOnly, viewRef, onBlur }: CodeMirrorPaneProps) {
+export function CodeMirrorPane({
+  initialDoc,
+  readOnly,
+  viewRef,
+  onChange,
+  onFocus,
+}: CodeMirrorPaneProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const theme = useDocumentTheme()
 
@@ -48,10 +62,13 @@ export function CodeMirrorPane({ initialDoc, readOnly, viewRef, onBlur }: CodeMi
           EditorView.lineWrapping,
           themeCompartment.of(themeExtensions('light')),
           readOnlyCompartment.of(readOnlyExtensions(false)),
+          EditorView.updateListener.of((update) => {
+            if (!update.docChanged) return
+            if (update.transactions.some((tr) => tr.annotation(Transaction.remote))) return
+            onChange(update.state.doc.toString())
+          }),
           EditorView.domEventHandlers({
-            blur: (_event, blurredView) => {
-              onBlur(blurredView.state.doc.toString())
-            },
+            focus: () => onFocus(),
           }),
         ],
       }),
@@ -62,8 +79,8 @@ export function CodeMirrorPane({ initialDoc, readOnly, viewRef, onBlur }: CodeMi
       viewRef.current = null
     }
     // In practice these never change while the pane is mounted: the seed and
-    // the blur callback are stable, and toggling the pane remounts it.
-  }, [initialDoc, onBlur, viewRef])
+    // the callbacks are stable, and toggling the pane remounts it.
+  }, [initialDoc, onChange, onFocus, viewRef])
 
   useLayoutEffect(() => {
     viewRef.current?.dispatch({ effects: themeCompartment.reconfigure(themeExtensions(theme)) })
