@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
+import { waitForAnimationFrame } from '@meowdown/vitest/helpers'
 import { MeowdownEditor } from './editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle, WikilinkItem } from './types.ts'
@@ -31,24 +32,23 @@ async function pressInsertShortcut(): Promise<void> {
   await userEvent.keyboard('{ControlOrMeta>}{Shift>}K{/Shift}{/ControlOrMeta}')
 }
 
-// A synthetic ArrowRight sent while the editor is mid-update is occasionally
-// dropped outright: the DOM selection does not move, and no amount of waiting
-// recovers it. Measured at roughly one press in a hundred on WebKit and
-// Firefox, never on Chromium, and never in a bare contenteditable driven the
-// same way, so it belongs to the editor's update cycle rather than to key
-// delivery. A few spare presses absorb it.
-const ARROW_RETRIES = 5
-
 /**
  * Walk the caret `count` characters to the right and confirm it arrived.
  */
 async function pressArrowRight(ref: RefObject<EditorHandle | null>, count: number): Promise<void> {
-  const target = (ref.current?.getSelection().head ?? 0) + count
-  for (let press = 0; press < count + ARROW_RETRIES; press++) {
-    if (ref.current?.getSelection().head === target) break
-    await userEvent.keyboard('{ArrowRight}')
+  let getPos = () => {
+    return ref.current?.getSelection().head ?? 0
   }
-  expect(ref.current?.getSelection().head).toBe(target)
+  let startPos = getPos()
+  let targetPos = startPos + count
+  let maxRetries = 10 // ArrowRight event could be dropped outright, so we retry
+  for (let press = 0; press < count + maxRetries; press++) {
+    await waitForAnimationFrame()
+    if (getPos() >= targetPos) break
+    await userEvent.keyboard('{ArrowRight}')
+    await waitForAnimationFrame()
+  }
+  expect(getPos()).toEqual(targetPos)
 }
 
 describe('WikilinkMenu', () => {
