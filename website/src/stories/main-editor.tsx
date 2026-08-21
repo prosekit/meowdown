@@ -1,9 +1,10 @@
 import './stories.css'
 
+import { Transaction } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
 import { MeowdownEditor, type EditorHandle, type EditorMode } from '@meowdown/react'
 import { throttle } from '@ocavue/utils'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { WikilinkPreviewCard } from '../components/wikilink-preview-card.tsx'
 import {
@@ -14,10 +15,12 @@ import {
   searchNotes,
   searchTags,
 } from '../lib/demo-data.ts'
+import { computeTextPatch } from '../lib/text-patch.ts'
 import { useMounted } from '../lib/use-mounted.ts'
 import { getPresetContent, PRESETS } from '../presets/presets.ts'
 
 import { CodeMirrorPane } from './codemirror-pane.tsx'
+import { SyncStatusPill, type SyncStatus } from './sync-status.tsx'
 
 const MODES: readonly EditorMode[] = ['focus', 'show', 'hide']
 const SPELLCHECKS = ['default', 'on', 'off'] as const
@@ -29,9 +32,12 @@ const fieldClass =
   'flex cursor-pointer items-center gap-1.5 text-sm text-stone-600 dark:text-stone-300'
 const INITIAL_PRESET = PRESETS[0]
 
-// The rich pane pushes to the source pane near-real-time; one `getMarkdown()`
-// call at most every 1.5s keeps large documents cheap.
-const PUSH_THROTTLE_MS = 1500
+// Both directions settle on the same delay: one `getMarkdown()` or one parse a
+// second keeps large documents cheap either way.
+const SYNC_THROTTLE_MS = 1000
+
+// The "Saved" pill is a confirmation, not a status line; it clears itself.
+const SAVED_LINGER_MS = 2000
 
 function ToggleField({
   label,
@@ -94,39 +100,66 @@ function MainEditorDemo() {
 
   const editorRef = useRef<EditorHandle>(null)
   const sourceViewRef = useRef<EditorView>(null)
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>()
   // The seed of the source pane, refreshed whenever the pane is toggled on.
   const [sourceSeed, setSourceSeed] = useState(INITIAL_PRESET.content)
 
   // Both sync directions are created once; they close over the two stable
   // refs, so they never need to be re-created.
-  const [{ pushToSource, pullFromSource }] = useState(() => {
-    // ProseMirror -> CodeMirror. Only fires on user edits (programmatic
-    // setMarkdown suppresses onDocChange) and never rewrites a focused source
-    // pane.
-    const pushToSource = throttle(() => {
-      const markdown = editorRef.current?.getMarkdown()
+  const [{ handleRichChange, handleSourceChange, flushToSource }] = useState(() => {
+    // ProseMirror -> CodeMirror, as the smallest patch that gets there, so the
+    // source caret and scroll position survive. The `remote` annotation is what
+    // stops the write from coming straight back as a user edit.
+    const writeSourceText = () => {
       const view = sourceViewRef.current
-      if (markdown == null || !view || view.hasFocus) return
-      if (view.state.doc.toString() === markdown) return
-      view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: markdown } })
-    }, PUSH_THROTTLE_MS)
-
-    // CodeMirror -> ProseMirror, on blur only. setMarkdown no-ops on
-    // equivalent markdown and stays silent to onDocChange, so neither
-    // direction echoes. The push flushes rich-pane edits that were held back
-    // while the source pane had focus.
-    const pullFromSource = (markdown: string) => {
-      editorRef.current?.setMarkdown(markdown)
-      pushToSource()
+      const markdown = editorRef.current?.getMarkdown()
+      if (!view || markdown == null) return
+      const patch = computeTextPatch(view.state.doc.toString(), markdown)
+      if (!patch) return
+      view.dispatch({ changes: patch, annotations: Transaction.remote.of(true) })
     }
 
-    return { pushToSource, pullFromSource }
+    // CodeMirror -> ProseMirror. setMarkdown no-ops on equivalent markdown and
+    // stays silent to onDocChange, so neither direction echoes.
+    const writeRichText = (markdown: string) => {
+      setSyncStatus('saved')
+      editorRef.current?.setMarkdown(markdown)
+    }
+
+    const pushToSource = throttle(() => {
+      setSyncStatus('saved')
+      // A stale trailing tick must never overwrite source text being typed now.
+      if (sourceViewRef.current?.hasFocus) return
+      writeSourceText()
+    }, SYNC_THROTTLE_MS)
+
+    const pullFromSource = throttle(writeRichText, SYNC_THROTTLE_MS)
+
+    return {
+      handleRichChange: () => {
+        setSyncStatus('editing')
+        pushToSource()
+      },
+      handleSourceChange: (markdown: string) => {
+        setSyncStatus('editing')
+        pullFromSource(markdown)
+      },
+      // Focus is about to land in the source pane, or a preset was picked: make
+      // the source text current before anything is typed into stale text.
+      flushToSource: writeSourceText,
+    }
   })
+
+  useEffect(() => {
+    if (syncStatus !== 'saved') return
+    const timer = setTimeout(() => setSyncStatus(undefined), SAVED_LINGER_MS)
+    return () => clearTimeout(timer)
+  }, [syncStatus])
 
   const selectPreset = (id: string) => {
     setPreset(id)
     editorRef.current?.setMarkdown(getPresetContent(id))
-    pushToSource()
+    flushToSource()
   }
 
   const toggleSource = (show: boolean) => {
@@ -138,7 +171,7 @@ function MainEditorDemo() {
 
   return (
     <div className="box-border flex h-full flex-col gap-3 p-4">
-      <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2">
+      <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 relative">
         <SelectField label="Mode" value={mode} options={MODES} onChange={setMode} />
         <SelectField label="Document" value={preset} options={PRESET_IDS} onChange={selectPreset} />
         <SelectField
@@ -151,6 +184,7 @@ function MainEditorDemo() {
         <ToggleField label="Block handle" checked={blockHandle} onChange={setBlockHandle} />
         <ToggleField label="Caret glide" checked={caretGlide} onChange={setCaretGlide} />
         <ToggleField label="Source" checked={showSource} onChange={toggleSource} />
+        {syncStatus && <SyncStatusPill status={syncStatus} />}
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 lg:flex-row">
@@ -163,7 +197,7 @@ function MainEditorDemo() {
             caretGlide={caretGlide}
             initialMarkdown={INITIAL_PRESET.content}
             handleRef={editorRef}
-            onDocChange={pushToSource}
+            onDocChange={handleRichChange}
             onTagSearch={searchTags}
             onWikilinkSearch={searchNotes}
             onImageClick={handleImageClick}
@@ -181,7 +215,8 @@ function MainEditorDemo() {
               initialDoc={sourceSeed}
               readOnly={readOnly}
               viewRef={sourceViewRef}
-              onBlur={pullFromSource}
+              onChange={handleSourceChange}
+              onFocus={flushToSource}
             />
           </div>
         )}
