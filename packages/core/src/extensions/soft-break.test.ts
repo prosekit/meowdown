@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { userEvent } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { findText } from '../testing/find-text.ts'
 import { setupFixture, type SetupFixtureOptions } from '../testing/index.ts'
 import { marksAt } from '../testing/marks-at.ts'
+
+const pmRoot = page.locate('.ProseMirror')
 
 function setupEditor(options?: SetupFixtureOptions) {
   const fixture = setupFixture(options)
@@ -292,5 +294,17 @@ describe('the insertSoftBreak command', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('foo\n<a>bar')))
     expect(editor.commands.insertSoftBreak.canExec()).toBe(true)
+  })
+})
+
+describe('rendering', () => {
+  it('paints the break as a new line', async () => {
+    using fixture = setupEditor()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('foo<a>bar')))
+    const root = pmRoot.element()
+    const before = root.getBoundingClientRect().height
+    await pressShiftEnter()
+    await expect.poll(() => root.getBoundingClientRect().height).toBeGreaterThan(before)
   })
 })
