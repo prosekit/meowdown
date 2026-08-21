@@ -16,6 +16,7 @@ export const EDITOR_KEY_BINDINGS = {
   'Mod-5': 'Heading 5',
   'Mod-6': 'Heading 6',
   'Mod-.': 'Fold or unfold a bullet',
+  'Shift-Enter': 'Insert a line break',
   'Mod-Enter': 'Follow the link under the caret, or cycle a checkbox task',
   'Mod-Shift-Enter': 'Cycle a circle checkbox task',
   'Mod-Shift-7': 'Ordered list',
