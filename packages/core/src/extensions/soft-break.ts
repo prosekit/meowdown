@@ -4,6 +4,8 @@ import type { ResolvedPos } from '@prosekit/pm/model'
 import type { Command, Transaction } from '@prosekit/pm/state'
 import { enterCommand } from 'prosemirror-flat-list'
 
+import { isAfterLineBreak } from '../utils/is-after-line-break.ts'
+
 import { isNodeOfType } from './node-names.ts'
 
 // Only a paragraph can hold a soft break. A heading ends where its line does
@@ -32,9 +34,7 @@ const splitBlockOnEnter = chainCommands(enterCommand, splitBlock)
 const splitPendingSoftBreak: Command = (state, dispatch, view) => {
   const { $from, empty } = state.selection
   if (!empty || !canHoldSoftBreak($from)) return false
-  const offset = $from.parentOffset
-  // REVIEW: FIXME: 1. merge the latest origin/master; 2. use the shared isAfterLineBreak helper here.
-  if (offset === 0 || $from.parent.textBetween(offset - 1, offset) !== '\n') return false
+  if (!isAfterLineBreak(state, $from.pos)) return false
   let split: Transaction | undefined
   const handled = splitBlockOnEnter(
     state,
