@@ -4,7 +4,7 @@ import type { ResolvedPos } from '@prosekit/pm/model'
 import type { Command, Transaction } from '@prosekit/pm/state'
 import { enterCommand } from 'prosemirror-flat-list'
 
-import { isAfterLineBreak_v2_tmp } from '../utils/is-after-line-break.ts'
+import { isAfterLineBreak } from '../utils/line-break.ts'
 
 import { isNodeOfType } from './node-names.ts'
 
@@ -27,7 +27,7 @@ function canHoldSoftBreak($pos: ResolvedPos): boolean {
 // neither.
 const splitBlockOnEnter = chainCommands(enterCommand, splitBlock)
 
-// The mirror of `isAfterLineBreak_v2_tmp`: whether a newline follows the caret.
+// The mirror of `isAfterLineBreak`: whether a newline follows the caret.
 function isBeforeLineBreak($pos: ResolvedPos): boolean {
   const { parentOffset, parent } = $pos
   return (
@@ -44,7 +44,7 @@ function isBeforeLineBreak($pos: ResolvedPos): boolean {
 const splitPendingSoftBreak: Command = (state, dispatch, view) => {
   const { $from, empty } = state.selection
   if (!empty || !canHoldSoftBreak($from)) return false
-  const inFront = isAfterLineBreak_v2_tmp($from)
+  const inFront = isAfterLineBreak($from)
   if (!inFront && !isBeforeLineBreak($from)) return false
   let split: Transaction | undefined
   const handled = splitBlockOnEnter(
