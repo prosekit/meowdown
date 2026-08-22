@@ -12,13 +12,11 @@ import { TextSelection } from '@prosekit/pm/state'
 import type { PositionRange } from '../utils/range.ts'
 
 import { getLinkUnitAt, type LinkUnit } from './get-link-unit-at.ts'
-import { hasSyntaxMark } from './inline-runs.ts'
 import { trimRange } from './inline-toggle.ts'
 
 export interface LinkAttrs {
   href?: string
   title?: string
-  text?: string
 }
 
 /**
@@ -35,45 +33,6 @@ function normalizeHref(raw: string): string {
 function destText(href: string, title: string): string {
   const quoted = title ? ` "${title.replaceAll(/(["\\])/g, String.raw`\$1`)}"` : ''
   return href + quoted
-}
-
-function linkLabelText(text: string): string {
-  return text.replaceAll(/([&<\\[\]_*`~])/g, String.raw`\$1`)
-}
-
-/**
- * Get a link's plain visible text, omitting live-preview Markdown syntax.
- */
-export function getLinkText(state: EditorState, link: LinkUnit): string {
-  let text = ''
-  state.doc.nodesBetween(link.text.from, link.text.to, (node, position) => {
-    if (!node.isText || !node.text || hasSyntaxMark(node.marks)) return
-    const from = Math.max(link.text.from, position) - position
-    const to = Math.min(link.text.to, position + node.nodeSize) - position
-    text += node.text.slice(from, to)
-  })
-  return text
-}
-
-/**
- * Whether plain visible link text names the same destination as the link.
- */
-export function isLinkTextForHref(text: string, href: string): boolean {
-  const value = text.trim()
-  return value === href || getAutolinkHref(value) === href
-}
-
-function unlinkedText(text: string): string {
-  const href = getAutolinkHref(text)
-  if (!href) return text
-
-  if (/^[a-z][a-z\d+.-]*:/iu.test(text)) {
-    return text.replace(':', String.raw`\:`)
-  }
-  if (text.includes('@')) {
-    return text.replace('@', String.raw`\@`)
-  }
-  return text.replace('.', String.raw`\.`)
 }
 
 /**
@@ -107,16 +66,10 @@ function getWrapRange(state: EditorState): undefined | PositionRange {
 export interface InsertLinkOptions {
   href?: string
   title?: string
-  text?: string
   wrapText?: boolean
 }
 
-export function insertLink({
-  href,
-  title,
-  text,
-  wrapText = true,
-}: InsertLinkOptions = {}): Command {
+export function insertLink({ href, title, wrapText = true }: InsertLinkOptions = {}): Command {
   return (state, dispatch) => {
     const range = getWrapRange(state)
     if (!range) return false
@@ -124,19 +77,6 @@ export function insertLink({
       const { from, to } = range
       const tr = state.tr
       const dest = destText(normalizeHref(href ?? ''), title ?? '')
-      if (text !== undefined) {
-        const markdown = `[${linkLabelText(text)}](${dest})`
-        tr.insertText(markdown, from, to)
-        const linkTo = from + markdown.length
-        tr.setSelection(
-          wrapText
-            ? TextSelection.create(tr.doc, from, linkTo)
-            : TextSelection.create(tr.doc, linkTo),
-        )
-        tr.scrollIntoView()
-        dispatch(tr)
-        return true
-      }
       const close = `](${dest})`
       tr.insertText(close, to).insertText('[', from)
       // The position after the closing `)`
@@ -154,28 +94,15 @@ export function insertLink({
 }
 
 /**
- * Rewrite a mutable link. Autolinks are promoted to inline Markdown when
- * their visible text or destination changes.
+ * Rewrite the `( ... )` of the link at the caret/selection.
  */
 export function updateLink(attrs: LinkAttrs): Command {
   return (state, dispatch) => {
     const link = getLinkUnitAt(state, state.selection.from)
-    if (!link || link.form === 'reference') return false
-
-    const href = normalizeHref(attrs.href ?? link.href)
-    const title = attrs.title ?? link.title
-    const text = attrs.text ?? getLinkText(state, link)
-    const replacingUnit = attrs.text !== undefined || link.form !== 'inline'
-
+    if (link?.form !== 'inline') return false
+    const dest = destText(normalizeHref(attrs.href ?? link.href), attrs.title ?? link.title)
     if (dispatch) {
-      const transaction = replacingUnit
-        ? state.tr.insertText(
-            `[${linkLabelText(text)}](${destText(href, title)})`,
-            link.unit.from,
-            link.unit.to,
-          )
-        : state.tr.insertText(destText(href, title), link.dest.from, link.dest.to)
-      dispatch(transaction.scrollIntoView())
+      dispatch(state.tr.insertText(dest, link.dest.from, link.dest.to).scrollIntoView())
     }
     return true
   }
@@ -187,21 +114,13 @@ export function updateLink(attrs: LinkAttrs): Command {
 export function removeLink(): Command {
   return (state, dispatch) => {
     const link = getLinkUnitAt(state, state.selection.from)
-    if (!link || link.form === 'reference') return false
+    if (link?.form !== 'inline') return false
     if (dispatch) {
-      const text = getLinkText(state, link)
-      if (link.form === 'inline' && !getAutolinkHref(text)) {
-        // Keep authored label Markdown intact when it cannot immediately
-        // become an autolink again.
-        const transaction = state.tr
-          .delete(link.label.to, link.unit.to)
-          .delete(link.unit.from, link.label.from)
-        dispatch(transaction.scrollIntoView())
-      } else {
-        dispatch(
-          state.tr.insertText(unlinkedText(text), link.unit.from, link.unit.to).scrollIntoView(),
-        )
-      }
+      // delete the tail `](url "title")` first, then the leading `[`
+      const tr = state.tr
+        .delete(link.label.to, link.unit.to)
+        .delete(link.unit.from, link.label.from)
+      dispatch(tr.scrollIntoView())
     }
     return true
   }
@@ -221,7 +140,6 @@ export interface LinkEditOptions {
   from: number
   to: number
   link: LinkUnit | undefined
-  text: string
 }
 
 export type LinkEditHandler = (options: LinkEditOptions) => void
@@ -231,14 +149,14 @@ function openLinkEdit(onLinkEdit: LinkEditHandler): Command {
     const link = getLinkUnitAt(state, state.selection.from)
 
     if (link) {
-      if (link.form === 'reference') return false
+      if (link.form !== 'inline') return false
       if (dispatch && view) {
         const {
           unit: { from, to },
         } = link
         dispatch(state.tr.setSelection(TextSelection.create(state.doc, from, to)).scrollIntoView())
         view.focus()
-        onLinkEdit({ from, to, link, text: getLinkText(state, link) })
+        onLinkEdit({ from, to, link })
       }
       return true
     }
@@ -249,12 +167,7 @@ function openLinkEdit(onLinkEdit: LinkEditHandler): Command {
         const { from, to } = wrapRange
         dispatch(state.tr.setSelection(TextSelection.create(state.doc, from, to)).scrollIntoView())
         view.focus()
-        onLinkEdit({
-          from,
-          to,
-          link: undefined,
-          text: state.doc.textBetween(from, to),
-        })
+        onLinkEdit({ from, to, link: undefined })
       }
       return true
     }
