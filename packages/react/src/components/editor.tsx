@@ -9,6 +9,7 @@ import type {
   ImageOptions,
   LinkClickHandler,
   LinkCopyHandler,
+  LinkPreviewResolver,
   MarkMode,
   PlaceholderOptions,
   SearchStatusHandler,
@@ -144,6 +145,12 @@ export interface EditorProps {
    * for a toast. Pass a stable function (e.g. from `useCallback`).
    */
   onLinkCopy?: LinkCopyHandler
+
+  /**
+   * Resolves optional display metadata for the link popup. Failures should be
+   * represented by `undefined`; the popup keeps its URL and actions available.
+   */
+  resolveLinkPreview?: LinkPreviewResolver
 
   /**
    * Called with the tag name (without the leading `#`) on click of a rendered
@@ -347,6 +354,7 @@ export function MeowdownEditor({
   onWikilinkClick,
   onLinkClick,
   onLinkCopy,
+  resolveLinkPreview,
   onTagClick,
   onExitBoundary,
   resolveImageUrl,
@@ -482,6 +490,7 @@ export function MeowdownEditor({
         onWikilinkClick={onWikilinkClick}
         onLinkClick={onLinkClick}
         onLinkCopy={onLinkCopy}
+        resolveLinkPreview={resolveLinkPreview}
         onTagClick={onTagClick}
         onExitBoundary={onExitBoundary}
         resolveImageUrl={resolveImageUrl}

@@ -16,6 +16,7 @@ import {
   type ImageOptions,
   type LinkClickHandler,
   type LinkCopyHandler,
+  type LinkPreviewResolver,
   type MarkMode,
   type PlaceholderOptions,
   type SearchStatusHandler,
@@ -187,6 +188,11 @@ export interface ProseKitEditorProps {
   onLinkCopy?: LinkCopyHandler
 
   /**
+   * Resolves link popup metadata. See `EditorProps.resolveLinkPreview`.
+   */
+  resolveLinkPreview?: LinkPreviewResolver
+
+  /**
    * Called on click or Mod-Enter of a rendered tag. See `EditorProps.onTagClick`.
    */
   onTagClick?: TagClickHandler
@@ -326,6 +332,7 @@ export function ProseKitEditor({
   onWikilinkClick,
   onLinkClick,
   onLinkCopy,
+  resolveLinkPreview,
   onTagClick,
   onExitBoundary,
   resolveImageUrl,
@@ -559,7 +566,13 @@ export function ProseKitEditor({
         onFilePaste={onFilePaste}
         onFileSaveError={onFileSaveError}
       />
-      {!readOnly && <LinkMenu onLinkClick={onLinkClick} onLinkCopy={onLinkCopy} />}
+      {!readOnly && (
+        <LinkMenu
+          onLinkClick={onLinkClick}
+          onLinkCopy={onLinkCopy}
+          resolveLinkPreview={resolveLinkPreview}
+        />
+      )}
       {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
       {onWikilinkSearch && <WikilinkMenu onWikilinkSearch={onWikilinkSearch} />}
       {onSelectionMenuSearch && !readOnly && (
