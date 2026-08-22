@@ -48,7 +48,7 @@ function useLinkPreview(
   }>()
 
   useEffect(() => {
-    if (!href || !resolveLinkPreview) return
+    if (!href || !resolveLinkPreview || !isWebHref(href)) return
 
     let stale = false
     void Promise.resolve()
@@ -70,8 +70,17 @@ function useLinkPreview(
     }
   }, [href, resolveLinkPreview])
 
-  if (!href || !resolveLinkPreview) return { status: 'idle' }
+  if (!href || !resolveLinkPreview || !isWebHref(href)) return { status: 'idle' }
   return settled?.href === href ? settled.result : { status: 'loading' }
+}
+
+function isWebHref(href: string): boolean {
+  try {
+    const protocol = new URL(href).protocol
+    return protocol === 'https:' || protocol === 'http:'
+  } catch {
+    return false
+  }
 }
 
 function selectLinkUnit(editor: TypedEditor, link: LinkUnit): void {

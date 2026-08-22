@@ -61,6 +61,17 @@ describe('LinkMenu', () => {
     await expect.element(popover.getByRole('button', { name: 'Remove link' })).toBeVisible()
   })
 
+  it('keeps non-web destinations actions-only without resolving metadata', async () => {
+    const resolver = vi.fn(() => ({ title: 'Never used' }))
+    await render(
+      <MeowdownEditor initialMarkdown="[File](file:///tmp/a.txt)" resolveLinkPreview={resolver} />,
+    )
+
+    await hover(pmRoot.getByRole('link', { name: 'File' }))
+    await expect.element(popover.getByText('file:///tmp/a.txt')).toBeVisible()
+    expect(resolver).not.toHaveBeenCalled()
+  })
+
   it('ignores a stale metadata response after moving to another link', async () => {
     const pending = new Map<string, (preview: LinkPreview | undefined) => void>()
     const resolver = (href: string) =>
