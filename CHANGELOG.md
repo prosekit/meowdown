@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.67.0](https://github.com/prosekit/meowdown/compare/v0.66.0...v0.67.0) (2026-08-22)
+
+
+### Features
+
+* add rich link previews and editing ([#502](https://github.com/prosekit/meowdown/issues/502)) ([fdec0f9](https://github.com/prosekit/meowdown/commit/fdec0f97c7c730a06c130b210658c961a652818e))
+
+
+### Reverts
+
+* rich link preview changes ([#505](https://github.com/prosekit/meowdown/issues/505)) ([d5c6f89](https://github.com/prosekit/meowdown/commit/d5c6f8984ef866c867cc3d2b641a060a331a12c2))
+
 ## [0.66.0](https://github.com/prosekit/meowdown/compare/v0.65.6...v0.66.0) (2026-08-21)
 
 
