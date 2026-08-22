@@ -91,20 +91,27 @@ function selectLinkUnit(editor: TypedEditor, link: LinkUnit): void {
 
 function LinkPopover({
   anchor,
+  open,
   onClose,
+  onCloseComplete,
   onPopupHover,
   children,
 }: {
   anchor?: VirtualElement
+  open: boolean
   onClose: () => void
+  onCloseComplete?: () => void
   onPopupHover?: (over: boolean) => void
   children: ReactNode
 }) {
   return (
     <Popover.Root
-      open
+      open={open}
       onOpenChange={(open) => {
         if (!open) onClose()
+      }}
+      onOpenChangeComplete={(open) => {
+        if (!open) onCloseComplete?.()
       }}
     >
       <Popover.Portal>
@@ -387,13 +394,18 @@ export function LinkMenu({
   const [onLink, setOnLink] = useState(false)
   const [overPopup, setOverPopup] = useState(false)
   const [edit, setEdit] = useState<LinkEditOptions>()
+  const [editOpen, setEditOpen] = useState(false)
+  const [displayedRead, setDisplayedRead] = useState<LinkUnit>()
   const hoverOpen = useDelayedFlag(onLink || overPopup)
 
   const linkHoverExtension = useMemo(
     () =>
       defineLinkHoverHandler((hit) => {
         setOnLink(!!hit)
-        if (hit) setHover(hit.payload)
+        if (hit) {
+          setHover(hit.payload)
+          setDisplayedRead(hit.payload)
+        }
       }),
     [],
   )
@@ -403,6 +415,7 @@ export function LinkMenu({
     () =>
       defineLinkTapHandler(({ link }) => {
         setTap(link)
+        setDisplayedRead(link)
         setOnLink(false)
         setHover(undefined)
       }),
@@ -416,6 +429,7 @@ export function LinkMenu({
         ? null
         : defineLinkEditKeymap((options) => {
             setEdit(options)
+            setEditOpen(true)
             setTap(undefined)
           }),
     [readOnly],
@@ -430,14 +444,13 @@ export function LinkMenu({
   }, [])
 
   const closeEdit = useCallback(() => {
-    setEdit(undefined)
+    setEditOpen(false)
     closeRead()
-    editor.focus()
-  }, [editor, closeRead])
+  }, [closeRead])
 
-  const readLink = tap ?? (hoverOpen ? hover : undefined)
-  const previewState = useLinkPreview(readLink?.href, resolveLinkPreview)
-  const range = edit ? (edit.link?.text ?? edit) : readLink?.text
+  const requestedRead = tap ?? (hoverOpen ? hover : undefined)
+  const previewState = useLinkPreview(displayedRead?.href, resolveLinkPreview)
+  const range = edit ? (edit.link?.text ?? edit) : displayedRead?.text
   const anchor: VirtualElement | undefined = useMemo(() => {
     if (!range) return
     return getVirtualElementFromRange(editor.view, range)
@@ -445,7 +458,15 @@ export function LinkMenu({
 
   if (edit && !readOnly) {
     return (
-      <LinkPopover anchor={anchor} onClose={closeEdit}>
+      <LinkPopover
+        anchor={anchor}
+        open={editOpen}
+        onClose={closeEdit}
+        onCloseComplete={() => {
+          setEdit(undefined)
+          editor.focus()
+        }}
+      >
         <LinkEditContent
           edit={edit}
           resolveLinkPreview={resolveLinkPreview}
@@ -470,25 +491,39 @@ export function LinkMenu({
     )
   }
 
-  if (readLink) {
-    const mutable = !readOnly && readLink.form !== 'reference'
-    const text = getLinkText(editor.view.state, readLink)
-    const canUseTitle = mutable && isLinkTextForHref(text, readLink.href)
+  if (displayedRead) {
+    const mutable = !readOnly && displayedRead.form !== 'reference'
+    const text = getLinkText(editor.view.state, displayedRead)
+    const canUseTitle = mutable && isLinkTextForHref(text, displayedRead.href)
     const editLink = () => {
-      selectLinkUnit(editor, readLink)
-      setEdit({ from: readLink.unit.from, to: readLink.unit.to, link: readLink, text })
+      selectLinkUnit(editor, displayedRead)
+      setEdit({
+        from: displayedRead.unit.from,
+        to: displayedRead.unit.to,
+        link: displayedRead,
+        text,
+      })
+      setEditOpen(true)
       closeRead()
     }
     const removeLink = () => {
-      selectLinkUnit(editor, readLink)
+      selectLinkUnit(editor, displayedRead)
       editor.commands.removeLink()
       closeRead()
     }
 
     return (
-      <LinkPopover anchor={anchor} onClose={closeRead} onPopupHover={setOverPopup}>
+      <LinkPopover
+        anchor={anchor}
+        open={requestedRead !== undefined}
+        onClose={closeRead}
+        onCloseComplete={() => {
+          if (!requestedRead) setDisplayedRead(undefined)
+        }}
+        onPopupHover={setOverPopup}
+      >
         <LinkInfoContent
-          href={readLink.href}
+          href={displayedRead.href}
           previewState={previewState}
           onLinkClick={onLinkClick}
           onLinkCopy={onLinkCopy}
@@ -497,7 +532,7 @@ export function LinkMenu({
           onUseTitle={
             canUseTitle
               ? (title) => {
-                  selectLinkUnit(editor, readLink)
+                  selectLinkUnit(editor, displayedRead)
                   editor.commands.updateLink({ text: title })
                   closeRead()
                 }

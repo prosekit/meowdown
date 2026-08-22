@@ -2,6 +2,13 @@
   display: block;
   z-index: 50;
   width: min(20rem, calc(100vw - 1rem));
+  transition-property: top, left, right, bottom, transform;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  transition-duration: 350ms;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 }
 
 .Popup {
@@ -10,12 +17,33 @@
   box-sizing: border-box;
   width: 100%;
   overflow: hidden;
+  outline: none;
   font-size: 0.875rem;
   color: var(--meowdown-text);
-  border: 1px solid var(--meowdown-border);
-  border-radius: 0.5rem;
+  border: 1px solid var(--meowdown-hover-card-border);
+  border-radius: var(--meowdown-hover-card-radius);
   background: var(--meowdown-popover-bg);
-  box-shadow: 0 8px 28px rgb(0 0 0 / 0.16);
+  box-shadow: var(--meowdown-hover-card-shadow);
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+
+  &[data-closed] {
+    transition:
+      opacity 100ms ease,
+      transform 100ms ease;
+  }
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 }
 
 .Row,
