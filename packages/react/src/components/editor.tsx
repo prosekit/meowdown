@@ -149,6 +149,8 @@ export interface EditorProps {
   /**
    * Resolves optional display metadata for the link popup. Failures should be
    * represented by `undefined`; the popup keeps its URL and actions available.
+   * May be called repeatedly for the same `href`, so cache expensive work in
+   * the host. Pass a stable function (e.g. from `useCallback`).
    */
   resolveLinkPreview?: LinkPreviewResolver
 

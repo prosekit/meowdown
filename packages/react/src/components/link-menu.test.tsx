@@ -93,6 +93,7 @@ describe('LinkMenu', () => {
     pending.get('https://second.test')?.({ title: 'Second title' })
     await expect.element(popover.getByText('Second title')).toBeVisible()
     pending.get('https://first.test')?.({ title: 'Stale first title' })
+    await new Promise((resolve) => setTimeout(resolve, 50))
     await expect.element(popover.getByText('Stale first title')).not.toBeInTheDocument()
     await expect.element(popover.getByText('Second title')).toBeVisible()
   })
@@ -347,6 +348,31 @@ describe('LinkMenu', () => {
     expect(ref.current?.getMarkdown()).toContain('[Example Domain](https://example.com)')
   })
 
+  it('debounces preview resolution while editing the destination', async () => {
+    const resolver = vi.fn(() => ({ title: 'Resolved title' }))
+    await render(
+      <MeowdownEditor
+        initialMarkdown="[https://old.test](https://old.test)"
+        resolveLinkPreview={resolver}
+      />,
+    )
+    await pmRoot.getByRole('link', { name: 'https://old.test' }).click()
+    await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
+    await vi.waitFor(() => expect(resolver).toHaveBeenCalledWith('https://old.test'))
+    resolver.mockClear()
+
+    const input = popover.getByTestId('link-popover-input')
+    await input.fill('https://n')
+    await input.fill('https://ne')
+    await input.fill('https://new.test')
+    expect(resolver).not.toHaveBeenCalled()
+    await vi.waitFor(() => expect(resolver).toHaveBeenCalledWith('https://new.test'), {
+      timeout: 1_000,
+    })
+    expect(resolver).not.toHaveBeenCalledWith('https://n')
+    expect(resolver).not.toHaveBeenCalledWith('https://ne')
+  })
+
   it('focuses Text on Mod-k and dismisses with Escape', async () => {
     const screen = await render(<MeowdownEditor initialMarkdown="[Docs](https://example.com)" />)
     await screen.getByText('Docs').click()
@@ -375,5 +401,25 @@ describe('LinkMenu', () => {
     await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
     await expect.element(popover.getByTestId('link-popover-edit')).not.toBeInTheDocument()
     expect(ref.current?.getMarkdown()).toBe(markdown + '\n')
+  })
+
+  it('keeps preview and copy available in a read-only editor', async () => {
+    const onLinkCopy = vi.fn()
+    const screen = await render(
+      <MeowdownEditor
+        initialMarkdown="[Docs](https://example.com)"
+        readOnly
+        onLinkCopy={onLinkCopy}
+        resolveLinkPreview={() => ({ title: 'Example docs' })}
+      />,
+    )
+
+    await hover(screen.getByText('Docs'))
+    await expect.element(popover.getByText('Example docs')).toBeVisible()
+    await expect.element(popover.getByRole('button', { name: 'Copy link' })).toBeVisible()
+    await expect.element(popover.getByRole('button', { name: 'Edit link' })).not.toBeInTheDocument()
+    await expect
+      .element(popover.getByRole('button', { name: 'Remove link' }))
+      .not.toBeInTheDocument()
   })
 })

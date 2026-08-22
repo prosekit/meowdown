@@ -30,6 +30,7 @@ export interface LinkMenuProps {
   onLinkClick?: LinkClickHandler
   onLinkCopy?: LinkCopyHandler
   resolveLinkPreview?: LinkPreviewResolver
+  readOnly?: boolean
 }
 
 type PreviewResult =
@@ -239,6 +240,7 @@ function LinkInfoContent({
       <div
         className={styles.Skeleton}
         data-testid="link-popover-loading"
+        role="status"
         aria-label="Loading link preview"
       >
         <div className={styles.SkeletonHeader} />
@@ -305,9 +307,15 @@ function LinkEditContent({
 }) {
   const [text, setText] = useState(edit.text)
   const [href, setHref] = useState(edit.link?.href ?? '')
+  const [debouncedHref, setDebouncedHref] = useState(href.trim())
   const textInputRef = useRef<HTMLInputElement>(null)
-  const previewState = useLinkPreview(href.trim() || undefined, resolveLinkPreview)
+  const previewState = useLinkPreview(debouncedHref || undefined, resolveLinkPreview)
   const canUseTitle = !!edit.link && isLinkTextForHref(text, href)
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedHref(href.trim()), 400)
+    return () => window.clearTimeout(timer)
+  }, [href])
 
   useEffect(() => {
     textInputRef.current?.focus()
@@ -371,6 +379,7 @@ export function LinkMenu({
   onLinkClick,
   onLinkCopy,
   resolveLinkPreview,
+  readOnly = false,
 }: LinkMenuProps): ReactNode {
   const editor: TypedEditor = useEditor<EditorExtension>()
   const [hover, setHover] = useState<LinkUnit>()
@@ -403,11 +412,13 @@ export function LinkMenu({
 
   const linkEditExtension = useMemo(
     () =>
-      defineLinkEditKeymap((options) => {
-        setEdit(options)
-        setTap(undefined)
-      }),
-    [],
+      readOnly
+        ? null
+        : defineLinkEditKeymap((options) => {
+            setEdit(options)
+            setTap(undefined)
+          }),
+    [readOnly],
   )
   useExtension(linkEditExtension)
 
@@ -432,7 +443,7 @@ export function LinkMenu({
     return getVirtualElementFromRange(editor.view, range)
   }, [range, editor])
 
-  if (edit) {
+  if (edit && !readOnly) {
     return (
       <LinkPopover anchor={anchor} onClose={closeEdit}>
         <LinkEditContent
@@ -460,7 +471,7 @@ export function LinkMenu({
   }
 
   if (readLink) {
-    const mutable = readLink.form !== 'reference'
+    const mutable = !readOnly && readLink.form !== 'reference'
     const text = getLinkText(editor.view.state, readLink)
     const canUseTitle = mutable && isLinkTextForHref(text, readLink.href)
     const editLink = () => {

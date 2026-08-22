@@ -566,13 +566,12 @@ export function ProseKitEditor({
         onFilePaste={onFilePaste}
         onFileSaveError={onFileSaveError}
       />
-      {!readOnly && (
-        <LinkMenu
-          onLinkClick={onLinkClick}
-          onLinkCopy={onLinkCopy}
-          resolveLinkPreview={resolveLinkPreview}
-        />
-      )}
+      <LinkMenu
+        onLinkClick={onLinkClick}
+        onLinkCopy={onLinkCopy}
+        resolveLinkPreview={resolveLinkPreview}
+        readOnly={readOnly}
+      />
       {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
       {onWikilinkSearch && <WikilinkMenu onWikilinkSearch={onWikilinkSearch} />}
       {onSelectionMenuSearch && !readOnly && (
