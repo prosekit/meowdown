@@ -12,6 +12,7 @@ import {
   handleLinkClick,
   handleTagClick,
   handleWikilinkClick,
+  resolveLinkPreview,
   searchNotes,
   searchTags,
 } from '../lib/demo-data.ts'
@@ -202,6 +203,7 @@ function MainEditorDemo() {
             onWikilinkSearch={searchNotes}
             onImageClick={handleImageClick}
             onLinkClick={handleLinkClick}
+            resolveLinkPreview={resolveLinkPreview}
             onTagClick={handleTagClick}
             onWikilinkClick={handleWikilinkClick}
           >
