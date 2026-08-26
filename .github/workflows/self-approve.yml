@@ -1,0 +1,16 @@
+name: Self Approve
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  approve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: ocavue/self-approve-action@v1
