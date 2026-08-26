@@ -13,4 +13,4 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: ocavue/self-approve-action@e3f71dd232cbec2eb29e72fa30af20fffc1db360 # v1.0.0
+      - uses: ocavue/self-approve-action@v1
