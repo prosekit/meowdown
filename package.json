@@ -14,7 +14,7 @@
     "lint:eslint": "eslint --cache --max-warnings 0",
     "lint:knip": "knip",
     "fix": "pnpm run fix:oxfmt && pnpm run fix:eslint && pnpm run fix:tsconfig",
-    "fix:oxfmt": "oxfmt",
+    "fix:oxfmt": "oxfmt --help",
     "fix:eslint": "eslint --cache --max-warnings 0 --fix",
     "fix:tsconfig": "monorepo-typescript-references fix",
     "test": "vitest",
