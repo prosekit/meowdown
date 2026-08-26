@@ -11,6 +11,6 @@ permissions:
 jobs:
   approve:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: ocavue/self-approve-action@v1
