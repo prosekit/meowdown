@@ -178,7 +178,9 @@ describe('image click callback', () => {
     const rect = target.getBoundingClientRect()
     const startX = rect.left + rect.width / 2
     const startY = rect.top + rect.height / 2
-    const touchAt = (clientX: number, clientY: number): Touch => { return new Touch({ identifier: 7, target, clientX, clientY }) }
+    const touchAt = (clientX: number, clientY: number): Touch => {
+      return new Touch({ identifier: 7, target, clientX, clientY })
+    }
     const startTouch = touchAt(startX, startY)
     const endTouch = touchAt(options.endX ?? startX, options.endY ?? startY)
     return {

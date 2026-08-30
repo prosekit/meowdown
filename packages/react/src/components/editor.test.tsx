@@ -203,7 +203,9 @@ describe('MeowdownEditor', () => {
   })
 
   it('renders a resolved wiki image and leaves an unresolved one literal', async () => {
-    const resolveWikiEmbed = ({ target }: { target: string }) => { return target === 'photo.png' ? ({ kind: 'image' } as const) : undefined }
+    const resolveWikiEmbed = ({ target }: { target: string }) => {
+      return target === 'photo.png' ? ({ kind: 'image' } as const) : undefined
+    }
     await render(
       <MeowdownEditor
         initialMarkdown={'![[photo.png|Photo]] ![[ambiguous.png]]'}
@@ -372,7 +374,9 @@ describe('MeowdownEditor', () => {
     await pmRoot.click()
     const caret = page.getByTestId('virtual-caret')
     await expect.element(caret).toBeVisible()
-    const caretGlideValue = () => { return getComputedStyle(caret.element()).getPropertyValue('--meowdown-caret-glide') }
+    const caretGlideValue = () => {
+      return getComputedStyle(caret.element()).getPropertyValue('--meowdown-caret-glide')
+    }
     expect(caretGlideValue()).toBe('80ms')
 
     await screen.rerender(<MeowdownEditor initialMarkdown="Hi" caretGlide={false} />)

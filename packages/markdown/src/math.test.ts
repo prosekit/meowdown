@@ -98,14 +98,20 @@ describe('math inline parser', () => {
   describe('claims the content atomically', () => {
     it('never produces Emphasis inside math', () => {
       const elements = parseInline('$a*b*c$')
-      const hasEmphasis = (els: readonly InlineElement[]): boolean => { return els.some((el) => el.type === LEZER_NODE_IDS.Emphasis || hasEmphasis(el.children)) }
+      const hasEmphasis = (els: readonly InlineElement[]): boolean => {
+        return els.some((el) => el.type === LEZER_NODE_IDS.Emphasis || hasEmphasis(el.children))
+      }
       expect(hasEmphasis(elements)).toBe(false)
       expect(findMath('$a*b*c$')).toEqual(['$a*b*c$'])
     })
 
     it('never produces Strikethrough inside math', () => {
       const elements = parseInline('$~~a~~$')
-      const hasStrikethrough = (els: readonly InlineElement[]): boolean => { return els.some((el) => el.type === LEZER_NODE_IDS.Strikethrough || hasStrikethrough(el.children)) }
+      const hasStrikethrough = (els: readonly InlineElement[]): boolean => {
+        return els.some(
+          (el) => el.type === LEZER_NODE_IDS.Strikethrough || hasStrikethrough(el.children),
+        )
+      }
       expect(hasStrikethrough(elements)).toBe(false)
     })
 

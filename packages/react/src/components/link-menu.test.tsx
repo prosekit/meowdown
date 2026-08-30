@@ -18,11 +18,11 @@ const popover = page.getByTestId('link-popover')
 describe('LinkMenu', () => {
   it('shows loading and then rich metadata', async () => {
     let resolvePreview: (preview: LinkPreview | undefined) => void = () => undefined
-    const resolver = vi.fn(
-      () => { return new Promise<LinkPreview | undefined>((resolve) => {
-          resolvePreview = resolve
-        }) },
-    )
+    const resolver = vi.fn(() => {
+      return new Promise<LinkPreview | undefined>((resolve) => {
+        resolvePreview = resolve
+      })
+    })
     await render(
       <MeowdownEditor
         initialMarkdown="[https://example.com](https://example.com)"
@@ -75,7 +75,9 @@ describe('LinkMenu', () => {
 
   it('ignores a stale metadata response after moving to another link', async () => {
     const pending = new Map<string, (preview: LinkPreview | undefined) => void>()
-    const resolver = (href: string) => { return new Promise<LinkPreview | undefined>((resolve) => pending.set(href, resolve)) }
+    const resolver = (href: string) => {
+      return new Promise<LinkPreview | undefined>((resolve) => pending.set(href, resolve))
+    }
     await render(
       <MeowdownEditor
         initialMarkdown="[First](https://first.test) and [Second](https://second.test)"
@@ -105,10 +107,11 @@ describe('LinkMenu', () => {
       <MeowdownEditor
         handleRef={ref}
         initialMarkdown="[https://example.com](https://example.com)"
-        resolveLinkPreview={() => { return new Promise((resolve) => {
+        resolveLinkPreview={() => {
+          return new Promise((resolve) => {
             resolvePreview = resolve
-          }) }
-        }
+          })
+        }}
       />,
     )
 
@@ -125,10 +128,11 @@ describe('LinkMenu', () => {
     const screen = await render(
       <MeowdownEditor
         initialMarkdown="[My label](https://example.com)"
-        resolveLinkPreview={() => { return new Promise((resolve) => {
+        resolveLinkPreview={() => {
+          return new Promise((resolve) => {
             resolvePreview = resolve
-          }) }
-        }
+          })
+        }}
       />,
     )
 

@@ -231,11 +231,13 @@ function WikilinkChip(props: {
 }): ReactElement {
   const { target, display, onWikilinkClick, children } = props
   const handleClick = onWikilinkClick
-    ? (event: MouseEvent) => { return onWikilinkClick({
+    ? (event: MouseEvent) => {
+        return onWikilinkClick({
           target,
           event: event.nativeEvent,
           mod: isModEvent(event),
-        }) }
+        })
+      }
     : undefined
   return (
     <span className="md-wikilink-view md-atom-view">
@@ -315,12 +317,14 @@ function ImagePreview(props: {
   const url = (resolveImageUrl ?? defaultResolveImageUrl)(src)
   if (!url) return null
   const handleClick = onImageClick
-    ? (event: MouseEvent) => { return onImageClick({
+    ? (event: MouseEvent) => {
+        return onImageClick({
           src,
           alt,
           event: event.nativeEvent,
           mod: isModEvent(event),
-        }) }
+        })
+      }
     : undefined
   return (
     <span

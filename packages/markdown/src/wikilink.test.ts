@@ -113,7 +113,9 @@ describe('wikilink inline parser', () => {
 
     it('never produces a Hashtag inside a wikilink', () => {
       const elements = parseInline('[[note #tag]]')
-      const hasHashtag = (els: readonly InlineElement[]): boolean => { return els.some((el) => el.type === LEZER_NODE_IDS.Hashtag || hasHashtag(el.children)) }
+      const hasHashtag = (els: readonly InlineElement[]): boolean => {
+        return els.some((el) => el.type === LEZER_NODE_IDS.Hashtag || hasHashtag(el.children))
+      }
       expect(hasHashtag(elements)).toBe(false)
     })
   })

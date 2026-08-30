@@ -120,8 +120,9 @@ function computeRevealDecorations(
   }
   if (ranges.length === 0) return
 
-  const decorations = ranges.map((range) => { return Decoration.inline(range.from, range.to, { class: 'show' }) },
-  )
+  const decorations = ranges.map((range) => {
+    return Decoration.inline(range.from, range.to, { class: 'show' })
+  })
   return DecorationSet.create(state.doc, decorations)
 }
 

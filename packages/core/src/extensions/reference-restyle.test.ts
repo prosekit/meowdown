@@ -24,8 +24,9 @@ function insertText(fixture: Fixture, position: number, text: string): void {
 function setupCitingDoc(citingCount: number): Fixture {
   const fixture = setupFixture()
   const { n } = fixture
-  const citing = Array.from({ length: citingCount }, (_, index) => { return n.paragraph(`Cited ${index} points at [alpha] mid-sentence.`) },
-  )
+  const citing = Array.from({ length: citingCount }, (_, index) => {
+    return n.paragraph(`Cited ${index} points at [alpha] mid-sentence.`)
+  })
   fixture.set(n.doc(...citing, n.paragraph('[alpha]: https://a.test')))
   return fixture
 }

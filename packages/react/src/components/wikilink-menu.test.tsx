@@ -191,9 +191,11 @@ describe('WikilinkMenu', () => {
   it('supports async onWikilinkSearch and shows a loading state', async () => {
     // Deferred promise keeps the pending window deterministic.
     let resolve!: (items: WikilinkItem[]) => void
-    const asyncSearch = () => { return new Promise<WikilinkItem[]>((r) => {
+    const asyncSearch = () => {
+      return new Promise<WikilinkItem[]>((r) => {
         resolve = r
-      }) }
+      })
+    }
     await render(<ProseKitEditor onWikilinkSearch={asyncSearch} />)
     await pmRoot.click()
     await userEvent.keyboard(TWO_BRACKETS)

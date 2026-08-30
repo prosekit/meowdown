@@ -6,5 +6,7 @@ failOnConsole({
   // A benign browser artifact: the skipped notifications are delivered on the
   // next frame. Base UI's popup auto-resize measurements trigger it in tight
   // viewports.
-  silenceMessage: (message) => { return message.includes('ResizeObserver loop completed with undelivered notifications') },
+  silenceMessage: (message) => {
+    return message.includes('ResizeObserver loop completed with undelivered notifications')
+  },
 })

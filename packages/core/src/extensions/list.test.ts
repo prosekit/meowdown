@@ -337,7 +337,9 @@ describe('commands', () => {
 
 describe('keymap', () => {
   const pressModEnter = () => userEvent.keyboard('{ControlOrMeta>}{Enter}{/ControlOrMeta}')
-  const pressModShiftEnter = () => { return userEvent.keyboard('{ControlOrMeta>}{Shift>}{Enter}{/Shift}{/ControlOrMeta}') }
+  const pressModShiftEnter = () => {
+    return userEvent.keyboard('{ControlOrMeta>}{Shift>}{Enter}{/Shift}{/ControlOrMeta}')
+  }
 
   it('Mod-Enter cycles a square checkbox task: unchecked -> checked -> bullet', async () => {
     using fixture = setupFixture()

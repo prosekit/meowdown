@@ -74,12 +74,13 @@ export function headingClipboardDOM(node: ProseMirrorNode): HTMLElement {
  * The clipboard parse rules restoring a heading's source text from `data-md`.
  */
 export function headingFromDOM(): TagParseRule[] {
-  return [1, 2, 3, 4, 5, 6].map((level) => { return createSourceTextRule(`h${level}`, 'heading' satisfies NodeName, (dom) => ({
+  return [1, 2, 3, 4, 5, 6].map((level) => {
+    return createSourceTextRule(`h${level}`, 'heading' satisfies NodeName, (dom) => ({
       level,
       setextUnderline: parsePositiveInteger(dom.getAttribute('data-setext-underline')) ?? null,
       closingHashes: parsePositiveInteger(dom.getAttribute('data-closing-hashes')) ?? null,
-    })) },
-  )
+    }))
+  })
 }
 
 type SetextUnderlineExtension = Extension<{

@@ -189,8 +189,9 @@ describe('BatchSetMarkStep', () => {
   })
 
   it('rewrites more than 32 chunks inside a nested blockquote', () => {
-    const paragraphs = Array.from({ length: 40 }, () => { return schema.node('paragraph', null, schema.text('x')) },
-    )
+    const paragraphs = Array.from({ length: 40 }, () => {
+      return schema.node('paragraph', null, schema.text('x'))
+    })
     const quote = schema.node('blockquote', null, paragraphs)
     const doc = schema.node('doc', null, quote)
     const chunks = paragraphs.map((_paragraph, index): MarkChunk => {
@@ -218,8 +219,9 @@ describe('BatchSetMarkStep', () => {
       schema.text('a', [m1()]),
       schema.text('b', [m2()]),
     ])
-    const remaining = Array.from({ length: 32 }, () => { return schema.node('paragraph', null, schema.text('x')) },
-    )
+    const remaining = Array.from({ length: 32 }, () => {
+      return schema.node('paragraph', null, schema.text('x'))
+    })
     const doc = schema.node('doc', null, [first, ...remaining])
     const chunks: MarkChunk[] = [[1, 3, [m3('/target')]]]
     for (let index = 0; index < remaining.length; index++) {

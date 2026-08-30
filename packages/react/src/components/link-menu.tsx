@@ -398,28 +398,26 @@ export function LinkMenu({
   const [edit, setEdit] = useState<LinkEditOptions | undefined>()
   const isPointerOverPopupRef = useRef(false)
 
-  const linkHoverExtension = useMemo(
-    () => { return defineLinkHoverHandler(
-        (nextHit) => {
-          setInfoOpen(nextHit != null)
-          if (nextHit) setLink(nextHit.payload)
-        },
-        { canLeave: () => !isPointerOverPopupRef.current },
-      ) },
-    [],
-  )
+  const linkHoverExtension = useMemo(() => {
+    return defineLinkHoverHandler(
+      (nextHit) => {
+        setInfoOpen(nextHit != null)
+        if (nextHit) setLink(nextHit.payload)
+      },
+      { canLeave: () => !isPointerOverPopupRef.current },
+    )
+  }, [])
   useExtension(linkHoverExtension)
 
-  const linkEditExtension = useMemo(
-    () => { return readOnly
-        ? null
-        : defineLinkEditKeymap((options) => {
-            setEdit(options)
-            setEditOpen(true)
-            setInfoOpen(false)
-          }) },
-    [readOnly],
-  )
+  const linkEditExtension = useMemo(() => {
+    return readOnly
+      ? null
+      : defineLinkEditKeymap((options) => {
+          setEdit(options)
+          setEditOpen(true)
+          setInfoOpen(false)
+        })
+  }, [readOnly])
   useExtension(linkEditExtension)
 
   const handlePointerHover = useCallback((over: boolean) => {
