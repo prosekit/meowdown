@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.67.2](https://github.com/prosekit/meowdown/compare/v0.67.1...v0.67.2) (2026-08-30)
+
+
+### Bug Fixes
+
+* hide the native caret in `noLink` units ([#524](https://github.com/prosekit/meowdown/issues/524)) ([cd582b7](https://github.com/prosekit/meowdown/commit/cd582b79f1c6aab3417e5a4a48346bc57db7dd1c))
+* work around WebKit bug in range rects after newline ([#531](https://github.com/prosekit/meowdown/issues/531)) ([9c1fd74](https://github.com/prosekit/meowdown/commit/9c1fd744893a5c9c42f27ac8fd12718a0e387219))
+
 ## [0.67.1](https://github.com/prosekit/meowdown/compare/v0.67.0...v0.67.1) (2026-08-30)
 
 
