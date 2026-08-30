@@ -443,6 +443,33 @@ export function LinkMenu({
     closeInfo()
   }, [closeInfo])
 
+  const handleEditRemove = useMemo(() => {
+    if (!edit?.link) return
+    return () => {
+      editor.commands.removeLink()
+      closeEdit()
+    }
+  }, [edit, editor, closeEdit])
+
+  const handleEditSubmit = useCallback(
+    (text: string, href: string) => {
+      if (!edit) return
+      if (edit.link) {
+        // An unchanged label passes no `text`: passing it rebuilds the
+        // whole unit and strips authored Markdown like `[**Docs**](...)`.
+        editor.commands.updateLink({
+          text: text === edit.text ? undefined : text,
+          href,
+          title: edit.link.title,
+        })
+      } else {
+        editor.commands.insertLink({ text, href })
+      }
+      closeEdit()
+    },
+    [edit, editor, closeEdit],
+  )
+
   const mutable = link != null && !readOnly && link.form !== 'reference'
 
   const linkText = useMemo(() => (link ? getLinkText(link) : ''), [link])
@@ -485,50 +512,6 @@ export function LinkMenu({
 
   const editing = edit != null && !readOnly
 
-  let content: ReactNode
-  if (editing) {
-    content = (
-      <LinkEditContent
-        edit={edit}
-        resolveLinkPreview={resolveLinkPreview}
-        onRemove={
-          edit.link
-            ? () => {
-                editor.commands.removeLink()
-                closeEdit()
-              }
-            : undefined
-        }
-        onSubmit={(text, href) => {
-          if (edit.link) {
-            // An unchanged label passes no `text`: passing it rebuilds the
-            // whole unit and strips authored Markdown like `[**Docs**](...)`.
-            editor.commands.updateLink({
-              text: text === edit.text ? undefined : text,
-              href,
-              title: edit.link.title,
-            })
-          } else {
-            editor.commands.insertLink({ text, href })
-          }
-          closeEdit()
-        }}
-      />
-    )
-  } else if (link) {
-    content = (
-      <LinkInfoContent
-        href={link.href}
-        previewState={previewState}
-        onLinkClick={onLinkClick}
-        onLinkCopy={onLinkCopy}
-        onEdit={mutable ? editLink : undefined}
-        onRemove={mutable ? removeLink : undefined}
-        onUseTitle={handleUseTitle}
-      />
-    )
-  }
-
   // While closed the popover renders nothing, but its root must stay mounted:
   // Base UI plays the open transition only when `open` flips on a mounted
   // root, and a root that mounts with `open` already true skips
@@ -548,7 +531,24 @@ export function LinkMenu({
       }}
       onPopupHover={handlePointerHover}
     >
-      {content}
+      {editing ? (
+        <LinkEditContent
+          edit={edit}
+          resolveLinkPreview={resolveLinkPreview}
+          onRemove={handleEditRemove}
+          onSubmit={handleEditSubmit}
+        />
+      ) : link ? (
+        <LinkInfoContent
+          href={link.href}
+          previewState={previewState}
+          onLinkClick={onLinkClick}
+          onLinkCopy={onLinkCopy}
+          onEdit={mutable ? editLink : undefined}
+          onRemove={mutable ? removeLink : undefined}
+          onUseTitle={handleUseTitle}
+        />
+      ) : undefined}
     </LinkPopover>
   )
 }
