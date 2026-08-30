@@ -5,10 +5,11 @@ import { it } from 'vitest'
 import { checkRoundTrip } from './check-roundtrip.ts'
 
 // Use a fixed seed from the environment variable for reproducibility, or fallback to a random seed
-const SEED = Number.parseInt(import.meta.env.VITE_FUZZ_SEED || '') || Date.now() % (1 << 30)
+const SEED = Number.parseInt(import.meta.env.VITE_FUZZ_SEED || '') || Date.now()
 
 const NUM_SAMPLES = 100_000
 
+/// keep-sorted
 const TOKENS_NEWLINE: readonly string[] = ['\n']
 
 /// keep-sorted
@@ -130,37 +131,14 @@ const RANGES = [
 ] as const
 
 function isLossy(input: string): boolean {
-  try {
-    return checkRoundTrip(input) === 'lossy'
-  } catch {
-    return true
-  }
-}
-
-function shrink(input: string): string {
-  let current = input
-  let size = Math.ceil(current.length / 2)
-  while (size >= 1) {
-    let start = 0
-    let removed = false
-    while (start + size <= current.length) {
-      const candidate = current.slice(0, start) + current.slice(start + size)
-      if (candidate.length > 0 && isLossy(candidate)) {
-        current = candidate
-        removed = true
-      } else {
-        start += size
-      }
-    }
-    if (!removed) size = Math.floor(size / 2)
-  }
-  return current
+  return checkRoundTrip(input) === 'lossy'
 }
 
 let testIndex = 0
 for (const [minLength, maxLength] of RANGES) {
   for (const { name, pool } of POOLS) {
-    const seed = SEED + testIndex++ * 2
+    testIndex++
+    const seed = SEED + testIndex
     it(
       `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, pool=${name})`,
       { timeout: 60_000 },
@@ -170,12 +148,11 @@ for (const [minLength, maxLength] of RANGES) {
           const input = pickString()
           if (isLossy(input)) {
             throw new Error(
-              `lossy input (seed=${seed}, sample=${sample}): ${JSON.stringify(shrink(input))}` +
-                ` (original: ${JSON.stringify(input)})`,
+              `lossy input (seed=${seed}, sample=${sample}, input=${JSON.stringify(input)})`,
             )
           }
-          if (sample % 10_000 === 0) {
-            // Yield the run loop so JSC can garbage-collect; without idle windows the heap balloons until CI kills the WebKit process
+          if (sample % 5_000 === 0) {
+            // This might be helpful for GC in WebKit.
             await sleep(20)
           }
         }

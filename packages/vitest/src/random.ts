@@ -26,8 +26,8 @@ export function createStringPicker(
   maxLength: number,
   tokens: readonly string[],
 ): () => string {
-  const pickToken = createTokenPicker(seed, tokens)
-  const pickLength = createIntPicker(seed + 1, minLength, maxLength)
+  const pickToken = createTokenPicker(seed + 1, tokens)
+  const pickLength = createIntPicker(seed + 2, minLength, maxLength)
   const parts: string[] = []
   return () => {
     parts.length = 0
