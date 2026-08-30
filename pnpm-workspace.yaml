@@ -15,7 +15,7 @@ trustPolicyIgnoreAfter: 10080 # 7 days
 trustLockfile: true
 
 minimumReleaseAgeExclude:
-  - '@ocavue/eslint-config'
+  - '@ocavue/*'
   - '@prosekit/*'
   - '@aria-ui/*'
   - '@prosemirror-adapter/*'
