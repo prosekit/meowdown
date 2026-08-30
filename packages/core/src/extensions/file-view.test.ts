@@ -103,8 +103,7 @@ describe('file pill size', () => {
   it('leaves the size empty and logs when the resolver rejects', async () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     try {
-      using fixture = setup('[report.pdf](assets/report.pdf)', () =>
-        Promise.reject(new Error('boom')),
+      using fixture = setup('[report.pdf](assets/report.pdf)', () => { return Promise.reject(new Error('boom')) },
       )
       void fixture
       await expect.element(pill).toBeInTheDocument()

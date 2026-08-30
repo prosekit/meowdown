@@ -92,8 +92,7 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
   // A position inside nested units carries one `mdPack` per level, so select
   // the pack by `key`: a link inside `**bold**` must find its own pack, not
   // the outer unit's.
-  const unit = getMarkRangeAt(state, pos, 'mdPack', (mark) =>
-    (mark.attrs as MdPackAttrs).key.startsWith('link-'),
+  const unit = getMarkRangeAt(state, pos, 'mdPack', (mark) => { return (mark.attrs as MdPackAttrs).key.startsWith('link-') },
   )
   if (!unit) return
 

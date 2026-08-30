@@ -47,10 +47,9 @@ describe('TagMenu', () => {
     // Deferred promise keeps the pending window deterministic (a setTimeout
     // delay could resolve before the loading assertion runs).
     let resolve!: (items: TagItem[]) => void
-    const asyncSearch = () =>
-      new Promise<TagItem[]>((r) => {
+    const asyncSearch = () => { return new Promise<TagItem[]>((r) => {
         resolve = r
-      })
+      }) }
     await render(<ProseKitEditor onTagSearch={asyncSearch} />)
     await pmRoot.click()
     await userEvent.keyboard('#bo')

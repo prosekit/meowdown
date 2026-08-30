@@ -399,27 +399,25 @@ export function LinkMenu({
   const isPointerOverPopupRef = useRef(false)
 
   const linkHoverExtension = useMemo(
-    () =>
-      defineLinkHoverHandler(
+    () => { return defineLinkHoverHandler(
         (nextHit) => {
           setInfoOpen(nextHit != null)
           if (nextHit) setLink(nextHit.payload)
         },
         { canLeave: () => !isPointerOverPopupRef.current },
-      ),
+      ) },
     [],
   )
   useExtension(linkHoverExtension)
 
   const linkEditExtension = useMemo(
-    () =>
-      readOnly
+    () => { return readOnly
         ? null
         : defineLinkEditKeymap((options) => {
             setEdit(options)
             setEditOpen(true)
             setInfoOpen(false)
-          }),
+          }) },
     [readOnly],
   )
   useExtension(linkEditExtension)

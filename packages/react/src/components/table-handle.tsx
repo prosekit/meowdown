@@ -28,8 +28,7 @@ function getTableHandleState(editor: Editor<EditorExtension>) {
     setTableColumnAlign: {
       canExec: commands.setTableColumnAlign.canExec('left'),
       // Selecting the current alignment again clears it back to `---`.
-      command: (align: TableColumnAlign) =>
-        commands.setTableColumnAlign(columnAlign === align ? null : align),
+      command: (align: TableColumnAlign) => { return commands.setTableColumnAlign(columnAlign === align ? null : align) },
     },
     addTableColumnBefore: {
       canExec: commands.addTableColumnBefore.canExec(),

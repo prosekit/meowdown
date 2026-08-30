@@ -53,12 +53,11 @@ function toggleInline(spec: ToggleSpec): Command {
     const remove = segments.length > 0 && segments.every((segment) => segment.active)
     const edits: TextEdit[] = segments
       .filter((segment) => remove || !segment.active)
-      .flatMap((segment) =>
-        toggleInlineEdits(segment.text, segment.from, segment.to, spec, remove).map((edit) => ({
+      .flatMap((segment) => { return toggleInlineEdits(segment.text, segment.from, segment.to, spec, remove).map((edit) => ({
           from: edit.from + segment.base,
           to: edit.to + segment.base,
           insert: edit.insert,
-        })),
+        })) },
       )
     if (edits.length === 0) return false
 

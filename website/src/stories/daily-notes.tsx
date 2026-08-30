@@ -47,8 +47,7 @@ function DailyNoteRow({
   // on the last line to the start of the next one. `focusDay` returns false at
   // the stream's edges, handing the key back to the editor.
   const handleExitBoundary: ExitBoundaryHandler = useCallback(
-    ({ direction }) =>
-      focusDay(direction === 'up' ? offset - 1 : offset + 1, direction === 'up' ? 'end' : 'start'),
+    ({ direction }) => { return focusDay(direction === 'up' ? offset - 1 : offset + 1, direction === 'up' ? 'end' : 'start') },
     [focusDay, offset],
   )
 
