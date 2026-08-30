@@ -17,12 +17,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mode: [natural]
-        round: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        mode: [amplified]
+        round: [1, 2, 3, 4, 5, 6]
         include:
-          - mode: pressure
+          - mode: natural
             round: 1
-          - mode: pressure
+          - mode: natural
             round: 2
 
     steps:
@@ -46,6 +46,9 @@ jobs:
 
       - name: Run tests in a loop
         run: bash .github/research/run-loop.sh
+        env:
+          RESEARCH_FUZZ_NUM_RUNS: ${{ matrix.mode == 'amplified' && '300000' || '' }}
+          RESEARCH_ITERATIONS: ${{ matrix.mode == 'amplified' && '2' || '4' }}
 
       - name: Collect evidence
         if: always()
