@@ -70,6 +70,20 @@ function defineMdMark() {
   })
 }
 
+/**
+ * Editor-managed metadata riding in the source as a magic comment, e.g. the
+ * `<!-- {"noLink":true} -->` behind an unlinked URL. No mark mode renders it;
+ * style.css keeps it a zero-width box unconditionally.
+ */
+function defineMdMagic() {
+  return defineMarkSpec({
+    name: 'mdMagic' satisfies MarkName,
+    inclusive: false,
+    toDOM: () => ['span', { class: 'md-magic', ...NON_PROSE_ATTRS }, 0],
+    parseDOM: [{ tag: 'span.md-magic' }],
+  })
+}
+
 function defineMdEm() {
   return defineMarkSpec({
     name: 'mdEm' satisfies MarkName,
@@ -286,12 +300,11 @@ export type MdPackAttrs =
   | {
       // A URL opted out of autolinking by a trailing `<!-- {"noLink":true} -->`
       // magic comment (written by `removeLink`): the address is plain visible
-      // text, and the comment is hidden syntax revealed in focus so it can be
-      // edited in place.
+      // text, and the comment is editor metadata no mark mode renders.
       key: 'noLink'
       data?: null
       slot?: 1 | null
-      revealInFocus: true
+      revealInFocus?: null
       revealInHide?: null
     }
   | {
@@ -349,6 +362,7 @@ export function defineInlineMarks() {
   // all, so it wraps the whole unit (including a mark view).
   return union(
     defineMdMark(),
+    defineMdMagic(),
     defineMdEm(),
     defineMdStrong(),
     defineMdCode(),

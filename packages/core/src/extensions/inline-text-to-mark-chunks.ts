@@ -388,9 +388,9 @@ function walkURL(
 
 /**
  * A URL followed directly by a `<!-- {"noLink":true} -->` magic comment
- * stays plain text instead of autolinking. The comment rides behind the
- * address as hidden syntax that reveals in focus, so it can be edited or
- * deleted in place.
+ * stays plain text instead of autolinking. The comment is editor metadata:
+ * an `mdMagic` run no mark mode renders. Deleting into it dissolves the
+ * whole comment and the address autolinks again.
  */
 function walkUnlinkedURL(
   node: InlineElement,
@@ -401,10 +401,10 @@ function walkUnlinkedURL(
 ): void {
   const base = [
     ...parentMarks,
-    createUnitPack(marks, out, parentMarks, node.from, { key: 'noLink', revealInFocus: true }),
+    createUnitPack(marks, out, parentMarks, node.from, { key: 'noLink' }),
   ]
   emit(out, node.from, node.to, base)
-  emit(out, node.to, trailing.to, [...base, marks.mdMark.create()])
+  emit(out, node.to, trailing.to, [...base, marks.mdMagic.create()])
 }
 
 function walkLink(

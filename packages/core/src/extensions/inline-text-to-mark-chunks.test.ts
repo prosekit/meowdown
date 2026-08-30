@@ -1322,3 +1322,24 @@ describe('file link', () => {
     ).toContain('mdFile(href=assets/report.pdf,name=report,title=Quarterly)')
   })
 })
+
+describe('noLink', () => {
+  it('unlinks a URL followed by a noLink magic comment', () => {
+    expect(parse('www.example.com<!-- {"noLink":true} -->')).toMatchInlineSnapshot(`
+      "
+      [0, 15]  mdPack(key=noLink)
+      [15, 39] mdPack(key=noLink) + mdMagic
+      "
+    `)
+  })
+
+  it('folds a stacked comment run behind the address', () => {
+    expect(parse('www.example.com<!-- {"noLink":true} --><!-- {"noLink":true} -->'))
+      .toMatchInlineSnapshot(`
+      "
+      [0, 15]  mdPack(key=noLink)
+      [15, 63] mdPack(key=noLink) + mdMagic
+      "
+    `)
+  })
+})

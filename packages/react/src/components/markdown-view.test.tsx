@@ -29,6 +29,13 @@ describe('MarkdownView', () => {
     await expect.element(view.locate('code').first()).toBeInTheDocument()
   })
 
+  it('hides a noLink magic comment in show mode', async () => {
+    await renderView('go to www.example.com<!-- {"noLink":true} --> now', { markMode: 'show' })
+    const comment = view.getByText('noLink')
+    await expect.element(comment).toBeInTheDocument()
+    expect(getComputedStyle(comment.element()).fontSize).toBe('0px')
+  })
+
   it('renders a wikilink as a chip showing the target', async () => {
     await renderView('[[Reflect Playground 4]]')
     await expect.element(wikilink).toHaveTextContent('Reflect Playground 4')
