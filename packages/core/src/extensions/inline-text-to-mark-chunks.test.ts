@@ -309,11 +309,11 @@ describe('link', () => {
   it('link', () => {
     expect(parse('[text](url)')).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"inline","href":"url","title":""},revealInFocus=true) + mdLinkText(href=url) + mdMark
-      [1, 5]   mdPack(key=link,data={"form":"inline","href":"url","title":""},revealInFocus=true) + mdLinkText(href=url)
-      [5, 7]   mdPack(key=link,data={"form":"inline","href":"url","title":""},revealInFocus=true) + mdMark
-      [7, 10]  mdPack(key=link,data={"form":"inline","href":"url","title":""},revealInFocus=true) + mdLinkUri
-      [10, 11] mdPack(key=link,data={"form":"inline","href":"url","title":""},revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link-inline,data={"href":"url","title":""},revealInFocus=true) + mdLinkText(href=url) + mdMark
+      [1, 5]   mdPack(key=link-inline,data={"href":"url","title":""},revealInFocus=true) + mdLinkText(href=url)
+      [5, 7]   mdPack(key=link-inline,data={"href":"url","title":""},revealInFocus=true) + mdMark
+      [7, 10]  mdPack(key=link-inline,data={"href":"url","title":""},revealInFocus=true) + mdLinkUri
+      [10, 11] mdPack(key=link-inline,data={"href":"url","title":""},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -321,16 +321,16 @@ describe('link', () => {
   it('adjacent and identical', () => {
     expect(parse('[a](x)[a](x)')).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"inline","href":"x","title":""},revealInFocus=true) + mdLinkText(href=x) + mdMark
-      [1, 2]   mdPack(key=link,data={"form":"inline","href":"x","title":""},revealInFocus=true) + mdLinkText(href=x)
-      [2, 4]   mdPack(key=link,data={"form":"inline","href":"x","title":""},revealInFocus=true) + mdMark
-      [4, 5]   mdPack(key=link,data={"form":"inline","href":"x","title":""},revealInFocus=true) + mdLinkUri
-      [5, 6]   mdPack(key=link,data={"form":"inline","href":"x","title":""},revealInFocus=true) + mdMark
-      [6, 7]   mdPack(key=link,data={"form":"inline","href":"x","title":""},slot=1,revealInFocus=true) + mdLinkText(href=x) + mdMark
-      [7, 8]   mdPack(key=link,data={"form":"inline","href":"x","title":""},slot=1,revealInFocus=true) + mdLinkText(href=x)
-      [8, 10]  mdPack(key=link,data={"form":"inline","href":"x","title":""},slot=1,revealInFocus=true) + mdMark
-      [10, 11] mdPack(key=link,data={"form":"inline","href":"x","title":""},slot=1,revealInFocus=true) + mdLinkUri
-      [11, 12] mdPack(key=link,data={"form":"inline","href":"x","title":""},slot=1,revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link-inline,data={"href":"x","title":""},revealInFocus=true) + mdLinkText(href=x) + mdMark
+      [1, 2]   mdPack(key=link-inline,data={"href":"x","title":""},revealInFocus=true) + mdLinkText(href=x)
+      [2, 4]   mdPack(key=link-inline,data={"href":"x","title":""},revealInFocus=true) + mdMark
+      [4, 5]   mdPack(key=link-inline,data={"href":"x","title":""},revealInFocus=true) + mdLinkUri
+      [5, 6]   mdPack(key=link-inline,data={"href":"x","title":""},revealInFocus=true) + mdMark
+      [6, 7]   mdPack(key=link-inline,data={"href":"x","title":""},slot=1,revealInFocus=true) + mdLinkText(href=x) + mdMark
+      [7, 8]   mdPack(key=link-inline,data={"href":"x","title":""},slot=1,revealInFocus=true) + mdLinkText(href=x)
+      [8, 10]  mdPack(key=link-inline,data={"href":"x","title":""},slot=1,revealInFocus=true) + mdMark
+      [10, 11] mdPack(key=link-inline,data={"href":"x","title":""},slot=1,revealInFocus=true) + mdLinkUri
+      [11, 12] mdPack(key=link-inline,data={"href":"x","title":""},slot=1,revealInFocus=true) + mdMark
       "
     `)
   })
@@ -338,13 +338,13 @@ describe('link', () => {
   it('title', () => {
     expect(parse('[docs](url "title")')).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"inline","href":"url","title":"title"},revealInFocus=true) + mdLinkText(href=url) + mdMark
-      [1, 5]   mdPack(key=link,data={"form":"inline","href":"url","title":"title"},revealInFocus=true) + mdLinkText(href=url)
-      [5, 7]   mdPack(key=link,data={"form":"inline","href":"url","title":"title"},revealInFocus=true) + mdMark
-      [7, 10]  mdPack(key=link,data={"form":"inline","href":"url","title":"title"},revealInFocus=true) + mdLinkUri
-      [10, 11] mdPack(key=link,data={"form":"inline","href":"url","title":"title"},revealInFocus=true)
-      [11, 18] mdPack(key=link,data={"form":"inline","href":"url","title":"title"},revealInFocus=true) + mdLinkTitle
-      [18, 19] mdPack(key=link,data={"form":"inline","href":"url","title":"title"},revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link-inline,data={"href":"url","title":"title"},revealInFocus=true) + mdLinkText(href=url) + mdMark
+      [1, 5]   mdPack(key=link-inline,data={"href":"url","title":"title"},revealInFocus=true) + mdLinkText(href=url)
+      [5, 7]   mdPack(key=link-inline,data={"href":"url","title":"title"},revealInFocus=true) + mdMark
+      [7, 10]  mdPack(key=link-inline,data={"href":"url","title":"title"},revealInFocus=true) + mdLinkUri
+      [10, 11] mdPack(key=link-inline,data={"href":"url","title":"title"},revealInFocus=true)
+      [11, 18] mdPack(key=link-inline,data={"href":"url","title":"title"},revealInFocus=true) + mdLinkTitle
+      [18, 19] mdPack(key=link-inline,data={"href":"url","title":"title"},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -352,13 +352,13 @@ describe('link', () => {
   it('emphasis inside', () => {
     expect(parse('[*italic*](http://x)')).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdMark
-      [1, 2]   mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdEm + mdMark
-      [2, 8]   mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdEm
-      [8, 9]   mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdEm + mdMark
-      [9, 11]  mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdMark
-      [11, 19] mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkUri
-      [19, 20] mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdMark
+      [1, 2]   mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdEm + mdMark
+      [2, 8]   mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdEm
+      [8, 9]   mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdEm + mdMark
+      [9, 11]  mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdMark
+      [11, 19] mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdLinkUri
+      [19, 20] mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -366,16 +366,16 @@ describe('link', () => {
   it('adjacent', () => {
     expect(parse('[a](x)[b](y)')).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"inline","href":"x","title":""},revealInFocus=true) + mdLinkText(href=x) + mdMark
-      [1, 2]   mdPack(key=link,data={"form":"inline","href":"x","title":""},revealInFocus=true) + mdLinkText(href=x)
-      [2, 4]   mdPack(key=link,data={"form":"inline","href":"x","title":""},revealInFocus=true) + mdMark
-      [4, 5]   mdPack(key=link,data={"form":"inline","href":"x","title":""},revealInFocus=true) + mdLinkUri
-      [5, 6]   mdPack(key=link,data={"form":"inline","href":"x","title":""},revealInFocus=true) + mdMark
-      [6, 7]   mdPack(key=link,data={"form":"inline","href":"y","title":""},revealInFocus=true) + mdLinkText(href=y) + mdMark
-      [7, 8]   mdPack(key=link,data={"form":"inline","href":"y","title":""},revealInFocus=true) + mdLinkText(href=y)
-      [8, 10]  mdPack(key=link,data={"form":"inline","href":"y","title":""},revealInFocus=true) + mdMark
-      [10, 11] mdPack(key=link,data={"form":"inline","href":"y","title":""},revealInFocus=true) + mdLinkUri
-      [11, 12] mdPack(key=link,data={"form":"inline","href":"y","title":""},revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link-inline,data={"href":"x","title":""},revealInFocus=true) + mdLinkText(href=x) + mdMark
+      [1, 2]   mdPack(key=link-inline,data={"href":"x","title":""},revealInFocus=true) + mdLinkText(href=x)
+      [2, 4]   mdPack(key=link-inline,data={"href":"x","title":""},revealInFocus=true) + mdMark
+      [4, 5]   mdPack(key=link-inline,data={"href":"x","title":""},revealInFocus=true) + mdLinkUri
+      [5, 6]   mdPack(key=link-inline,data={"href":"x","title":""},revealInFocus=true) + mdMark
+      [6, 7]   mdPack(key=link-inline,data={"href":"y","title":""},revealInFocus=true) + mdLinkText(href=y) + mdMark
+      [7, 8]   mdPack(key=link-inline,data={"href":"y","title":""},revealInFocus=true) + mdLinkText(href=y)
+      [8, 10]  mdPack(key=link-inline,data={"href":"y","title":""},revealInFocus=true) + mdMark
+      [10, 11] mdPack(key=link-inline,data={"href":"y","title":""},revealInFocus=true) + mdLinkUri
+      [11, 12] mdPack(key=link-inline,data={"href":"y","title":""},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -413,9 +413,9 @@ describe('link', () => {
   it('explicit empty destination keeps the link pack', () => {
     expect(parse('[a]()')).toMatchInlineSnapshot(`
       "
-      [0, 1] mdPack(key=link,data={"form":"inline","href":"","title":""},revealInFocus=true) + mdLinkText + mdMark
-      [1, 2] mdPack(key=link,data={"form":"inline","href":"","title":""},revealInFocus=true) + mdLinkText
-      [2, 5] mdPack(key=link,data={"form":"inline","href":"","title":""},revealInFocus=true) + mdMark
+      [0, 1] mdPack(key=link-inline,data={"href":"","title":""},revealInFocus=true) + mdLinkText + mdMark
+      [1, 2] mdPack(key=link-inline,data={"href":"","title":""},revealInFocus=true) + mdLinkText
+      [2, 5] mdPack(key=link-inline,data={"href":"","title":""},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -431,16 +431,16 @@ describe('reference link', () => {
   it('resolves a full reference link', () => {
     expect(parse('[read this][documentation]', undefined, definitions)).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"reference","href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs) + mdMark
-      [1, 10]  mdPack(key=link,data={"form":"reference","href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs)
-      [10, 26] mdPack(key=link,data={"form":"reference","href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link-reference,data={"href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs) + mdMark
+      [1, 10]  mdPack(key=link-reference,data={"href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs)
+      [10, 26] mdPack(key=link-reference,data={"href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdMark
       "
     `)
     expect(parse('[read this][documentation]', undefined, definitions)).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"reference","href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs) + mdMark
-      [1, 10]  mdPack(key=link,data={"form":"reference","href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs)
-      [10, 26] mdPack(key=link,data={"form":"reference","href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link-reference,data={"href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs) + mdMark
+      [1, 10]  mdPack(key=link-reference,data={"href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs)
+      [10, 26] mdPack(key=link-reference,data={"href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -448,9 +448,9 @@ describe('reference link', () => {
   it('resolves a collapsed reference link', () => {
     expect(parse('[documentation][]', undefined, definitions)).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"reference","href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs) + mdMark
-      [1, 14]  mdPack(key=link,data={"form":"reference","href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs)
-      [14, 17] mdPack(key=link,data={"form":"reference","href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link-reference,data={"href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs) + mdMark
+      [1, 14]  mdPack(key=link-reference,data={"href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs)
+      [14, 17] mdPack(key=link-reference,data={"href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -458,9 +458,9 @@ describe('reference link', () => {
   it('resolves a shortcut reference link', () => {
     expect(parse('[documentation]', undefined, definitions)).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"reference","href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs) + mdMark
-      [1, 14]  mdPack(key=link,data={"form":"reference","href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs)
-      [14, 15] mdPack(key=link,data={"form":"reference","href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link-reference,data={"href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs) + mdMark
+      [1, 14]  mdPack(key=link-reference,data={"href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdLinkText(href=https://example.com/docs)
+      [14, 15] mdPack(key=link-reference,data={"href":"https://example.com/docs","title":"Documentation"},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -468,9 +468,9 @@ describe('reference link', () => {
   it('normalizes case, whitespace, and Unicode labels', () => {
     expect(parse('[x][  CAFÉ  ]', undefined, definitions)).toMatchInlineSnapshot(`
       "
-      [0, 1]  mdPack(key=link,data={"form":"reference","href":"/cafe","title":""},revealInFocus=true) + mdLinkText(href=/cafe) + mdMark
-      [1, 2]  mdPack(key=link,data={"form":"reference","href":"/cafe","title":""},revealInFocus=true) + mdLinkText(href=/cafe)
-      [2, 13] mdPack(key=link,data={"form":"reference","href":"/cafe","title":""},revealInFocus=true) + mdMark
+      [0, 1]  mdPack(key=link-reference,data={"href":"/cafe","title":""},revealInFocus=true) + mdLinkText(href=/cafe) + mdMark
+      [1, 2]  mdPack(key=link-reference,data={"href":"/cafe","title":""},revealInFocus=true) + mdLinkText(href=/cafe)
+      [2, 13] mdPack(key=link-reference,data={"href":"/cafe","title":""},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -479,9 +479,9 @@ describe('reference link', () => {
     const output = parse('[empty]', undefined, definitions)
     expect(output).toMatchInlineSnapshot(`
       "
-      [0, 1] mdPack(key=link,data={"form":"reference","href":"","title":""},revealInFocus=true) + mdLinkText + mdMark
-      [1, 6] mdPack(key=link,data={"form":"reference","href":"","title":""},revealInFocus=true) + mdLinkText
-      [6, 7] mdPack(key=link,data={"form":"reference","href":"","title":""},revealInFocus=true) + mdMark
+      [0, 1] mdPack(key=link-reference,data={"href":"","title":""},revealInFocus=true) + mdLinkText + mdMark
+      [1, 6] mdPack(key=link-reference,data={"href":"","title":""},revealInFocus=true) + mdLinkText
+      [6, 7] mdPack(key=link-reference,data={"href":"","title":""},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -675,11 +675,11 @@ describe('image', () => {
   it('folds a trailing width comment on an image inside a link label', () => {
     expect(parse('[![a](u)<!-- {"width":320} -->](/target)')).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdLinkText(href=/target) + mdMark
-      [1, 30]  mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdLinkText(href=/target) + mdPack(key=image) + mdImage(src=u,alt=a,width=320)
-      [30, 32] mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdMark
-      [32, 39] mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdLinkUri
-      [39, 40] mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link-inline,data={"href":"/target","title":""},revealInFocus=true) + mdLinkText(href=/target) + mdMark
+      [1, 30]  mdPack(key=link-inline,data={"href":"/target","title":""},revealInFocus=true) + mdLinkText(href=/target) + mdPack(key=image) + mdImage(src=u,alt=a,width=320)
+      [30, 32] mdPack(key=link-inline,data={"href":"/target","title":""},revealInFocus=true) + mdMark
+      [32, 39] mdPack(key=link-inline,data={"href":"/target","title":""},revealInFocus=true) + mdLinkUri
+      [39, 40] mdPack(key=link-inline,data={"href":"/target","title":""},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -696,11 +696,11 @@ describe('image', () => {
     expect(parse('[![a](u)<!-- {"width":100} --><!-- {"width":320} -->](/target)'))
       .toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdLinkText(href=/target) + mdMark
-      [1, 52]  mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdLinkText(href=/target) + mdPack(key=image) + mdImage(src=u,alt=a,width=100)
-      [52, 54] mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdMark
-      [54, 61] mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdLinkUri
-      [61, 62] mdPack(key=link,data={"form":"inline","href":"/target","title":""},revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link-inline,data={"href":"/target","title":""},revealInFocus=true) + mdLinkText(href=/target) + mdMark
+      [1, 52]  mdPack(key=link-inline,data={"href":"/target","title":""},revealInFocus=true) + mdLinkText(href=/target) + mdPack(key=image) + mdImage(src=u,alt=a,width=100)
+      [52, 54] mdPack(key=link-inline,data={"href":"/target","title":""},revealInFocus=true) + mdMark
+      [54, 61] mdPack(key=link-inline,data={"href":"/target","title":""},revealInFocus=true) + mdLinkUri
+      [61, 62] mdPack(key=link-inline,data={"href":"/target","title":""},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -815,7 +815,7 @@ describe('autolink', () => {
     expect(parse('visit https://example.com now')).toMatchInlineSnapshot(`
       "
       [0, 6]
-      [6, 25]  mdPack(key=link,data={"form":"bare","href":"https://example.com"}) + mdLinkText(href=https://example.com)
+      [6, 25]  mdPack(key=link-bare,data={"href":"https://example.com"}) + mdLinkText(href=https://example.com)
       [25, 29]
       "
     `)
@@ -825,7 +825,7 @@ describe('autolink', () => {
     expect(parse('see www.example.com here')).toMatchInlineSnapshot(`
       "
       [0, 4]
-      [4, 19]  mdPack(key=link,data={"form":"bare","href":"https://www.example.com"}) + mdLinkText(href=https://www.example.com)
+      [4, 19]  mdPack(key=link-bare,data={"href":"https://www.example.com"}) + mdLinkText(href=https://www.example.com)
       [19, 24]
       "
     `)
@@ -835,7 +835,7 @@ describe('autolink', () => {
     expect(parse('mail me@example.com ok')).toMatchInlineSnapshot(`
       "
       [0, 5]
-      [5, 19]  mdPack(key=link,data={"form":"bare","href":"mailto:me@example.com"}) + mdLinkText(href=mailto:me@example.com)
+      [5, 19]  mdPack(key=link-bare,data={"href":"mailto:me@example.com"}) + mdLinkText(href=mailto:me@example.com)
       [19, 22]
       "
     `)
@@ -845,7 +845,7 @@ describe('autolink', () => {
     expect(parse('a mailto:me@example.com b')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 23]  mdPack(key=link,data={"form":"bare","href":"mailto:me@example.com"}) + mdLinkText(href=mailto:me@example.com)
+      [2, 23]  mdPack(key=link-bare,data={"href":"mailto:me@example.com"}) + mdLinkText(href=mailto:me@example.com)
       [23, 25]
       "
     `)
@@ -855,7 +855,7 @@ describe('autolink', () => {
     expect(parse('end https://example.com.')).toMatchInlineSnapshot(`
       "
       [0, 4]
-      [4, 23]  mdPack(key=link,data={"form":"bare","href":"https://example.com"}) + mdLinkText(href=https://example.com)
+      [4, 23]  mdPack(key=link-bare,data={"href":"https://example.com"}) + mdLinkText(href=https://example.com)
       [23, 24]
       "
     `)
@@ -865,7 +865,7 @@ describe('autolink', () => {
     expect(parse('*https://example.com*')).toMatchInlineSnapshot(`
       "
       [0, 1]   mdPack(key=italic,revealInFocus=true) + mdEm + mdMark
-      [1, 20]  mdPack(key=italic,revealInFocus=true) + mdEm + mdPack(key=link,data={"form":"bare","href":"https://example.com"}) + mdLinkText(href=https://example.com)
+      [1, 20]  mdPack(key=italic,revealInFocus=true) + mdEm + mdPack(key=link-bare,data={"href":"https://example.com"}) + mdLinkText(href=https://example.com)
       [20, 21] mdPack(key=italic,revealInFocus=true) + mdEm + mdMark
       "
     `)
@@ -875,7 +875,7 @@ describe('autolink', () => {
     expect(parse('a ftp://example.com b')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 19]  mdPack(key=link,data={"form":"bare","href":"ftp://example.com"}) + mdLinkText(href=ftp://example.com)
+      [2, 19]  mdPack(key=link-bare,data={"href":"ftp://example.com"}) + mdLinkText(href=ftp://example.com)
       [19, 21]
       "
     `)
@@ -885,7 +885,7 @@ describe('autolink', () => {
     expect(parse('a x-custom-schema://ABCD b')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 24]  mdPack(key=link,data={"form":"bare","href":"x-custom-schema://ABCD"}) + mdLinkText(href=x-custom-schema://ABCD)
+      [2, 24]  mdPack(key=link-bare,data={"href":"x-custom-schema://ABCD"}) + mdLinkText(href=x-custom-schema://ABCD)
       [24, 26]
       "
     `)
@@ -897,9 +897,9 @@ describe('angle autolink', () => {
     expect(parse('a <https://example.com> b')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 3]   mdPack(key=link,data={"form":"angle","href":"https://example.com"},revealInFocus=true) + mdMark
-      [3, 22]  mdPack(key=link,data={"form":"angle","href":"https://example.com"},revealInFocus=true) + mdLinkText(href=https://example.com)
-      [22, 23] mdPack(key=link,data={"form":"angle","href":"https://example.com"},revealInFocus=true) + mdMark
+      [2, 3]   mdPack(key=link-angle,data={"href":"https://example.com"},revealInFocus=true) + mdMark
+      [3, 22]  mdPack(key=link-angle,data={"href":"https://example.com"},revealInFocus=true) + mdLinkText(href=https://example.com)
+      [22, 23] mdPack(key=link-angle,data={"href":"https://example.com"},revealInFocus=true) + mdMark
       [23, 25]
       "
     `)
@@ -909,9 +909,9 @@ describe('angle autolink', () => {
     expect(parse('a <ftp://example.com> b')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 3]   mdPack(key=link,data={"form":"angle","href":"ftp://example.com"},revealInFocus=true) + mdMark
-      [3, 20]  mdPack(key=link,data={"form":"angle","href":"ftp://example.com"},revealInFocus=true) + mdLinkText(href=ftp://example.com)
-      [20, 21] mdPack(key=link,data={"form":"angle","href":"ftp://example.com"},revealInFocus=true) + mdMark
+      [2, 3]   mdPack(key=link-angle,data={"href":"ftp://example.com"},revealInFocus=true) + mdMark
+      [3, 20]  mdPack(key=link-angle,data={"href":"ftp://example.com"},revealInFocus=true) + mdLinkText(href=ftp://example.com)
+      [20, 21] mdPack(key=link-angle,data={"href":"ftp://example.com"},revealInFocus=true) + mdMark
       [21, 23]
       "
     `)
@@ -921,9 +921,9 @@ describe('angle autolink', () => {
     expect(parse('a <ssh://example.com> b')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 3]   mdPack(key=link,data={"form":"angle","href":"ssh://example.com"},revealInFocus=true) + mdMark
-      [3, 20]  mdPack(key=link,data={"form":"angle","href":"ssh://example.com"},revealInFocus=true) + mdLinkText(href=ssh://example.com)
-      [20, 21] mdPack(key=link,data={"form":"angle","href":"ssh://example.com"},revealInFocus=true) + mdMark
+      [2, 3]   mdPack(key=link-angle,data={"href":"ssh://example.com"},revealInFocus=true) + mdMark
+      [3, 20]  mdPack(key=link-angle,data={"href":"ssh://example.com"},revealInFocus=true) + mdLinkText(href=ssh://example.com)
+      [20, 21] mdPack(key=link-angle,data={"href":"ssh://example.com"},revealInFocus=true) + mdMark
       [21, 23]
       "
     `)
@@ -935,7 +935,7 @@ describe('bare autolink', () => {
     expect(parse('a example.com b')).toMatchInlineSnapshot(`
       "
       [0, 2]
-      [2, 13]  mdPack(key=link,data={"form":"bare","href":"https://example.com"}) + mdLinkText(href=https://example.com)
+      [2, 13]  mdPack(key=link-bare,data={"href":"https://example.com"}) + mdLinkText(href=https://example.com)
       [13, 15]
       "
     `)
@@ -952,7 +952,7 @@ describe('bare autolink', () => {
   it('starts text', () => {
     expect(parse('google.com')).toMatchInlineSnapshot(`
       "
-      [0, 10] mdPack(key=link,data={"form":"bare","href":"https://google.com"}) + mdLinkText(href=https://google.com)
+      [0, 10] mdPack(key=link-bare,data={"href":"https://google.com"}) + mdLinkText(href=https://google.com)
       "
     `)
   })
@@ -960,7 +960,7 @@ describe('bare autolink', () => {
   it('with path', () => {
     expect(parse('sub.domain.com/path?q=1')).toMatchInlineSnapshot(`
       "
-      [0, 23] mdPack(key=link,data={"form":"bare","href":"https://sub.domain.com/path?q=1"}) + mdLinkText(href=https://sub.domain.com/path?q=1)
+      [0, 23] mdPack(key=link-bare,data={"href":"https://sub.domain.com/path?q=1"}) + mdLinkText(href=https://sub.domain.com/path?q=1)
       "
     `)
   })
@@ -968,7 +968,7 @@ describe('bare autolink', () => {
   it('preserves case', () => {
     expect(parse('GOOGLE.COM')).toMatchInlineSnapshot(`
       "
-      [0, 10] mdPack(key=link,data={"form":"bare","href":"https://GOOGLE.COM"}) + mdLinkText(href=https://GOOGLE.COM)
+      [0, 10] mdPack(key=link-bare,data={"href":"https://GOOGLE.COM"}) + mdLinkText(href=https://GOOGLE.COM)
       "
     `)
   })
@@ -977,7 +977,7 @@ describe('bare autolink', () => {
     expect(parse('Visit google.com.')).toMatchInlineSnapshot(`
       "
       [0, 6]
-      [6, 16]  mdPack(key=link,data={"form":"bare","href":"https://google.com"}) + mdLinkText(href=https://google.com)
+      [6, 16]  mdPack(key=link-bare,data={"href":"https://google.com"}) + mdLinkText(href=https://google.com)
       [16, 17]
       "
     `)
@@ -994,7 +994,7 @@ describe('bare autolink', () => {
   it('www prefix', () => {
     expect(parse('www.example.com')).toMatchInlineSnapshot(`
       "
-      [0, 15] mdPack(key=link,data={"form":"bare","href":"https://www.example.com"}) + mdLinkText(href=https://www.example.com)
+      [0, 15] mdPack(key=link-bare,data={"href":"https://www.example.com"}) + mdLinkText(href=https://www.example.com)
       "
     `)
   })
@@ -1002,11 +1002,11 @@ describe('bare autolink', () => {
   it('explicit link label', () => {
     expect(parse('[google.com](http://x)')).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdMark
-      [1, 11]  mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x)
-      [11, 13] mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdMark
-      [13, 21] mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkUri
-      [21, 22] mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdMark
+      [1, 11]  mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x)
+      [11, 13] mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdMark
+      [13, 21] mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdLinkUri
+      [21, 22] mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -1014,11 +1014,11 @@ describe('bare autolink', () => {
   it('inside link label', () => {
     expect(parse('[see www.example.com](http://x)')).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdMark
-      [1, 20]  mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x)
-      [20, 22] mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdMark
-      [22, 30] mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkUri
-      [30, 31] mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdMark
+      [1, 20]  mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x)
+      [20, 22] mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdMark
+      [22, 30] mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdLinkUri
+      [30, 31] mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -1037,7 +1037,7 @@ describe('bare autolink', () => {
     expect(parse('mail a@google.com here')).toMatchInlineSnapshot(`
       "
       [0, 5]
-      [5, 17]  mdPack(key=link,data={"form":"bare","href":"mailto:a@google.com"}) + mdLinkText(href=mailto:a@google.com)
+      [5, 17]  mdPack(key=link-bare,data={"href":"mailto:a@google.com"}) + mdLinkText(href=mailto:a@google.com)
       [17, 22]
       "
     `)
@@ -1080,12 +1080,12 @@ describe('tag', () => {
   it('inside link label', () => {
     expect(parse('[see #tag](http://x)')).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdMark
-      [1, 5]   mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x)
-      [5, 9]   mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdTag
-      [9, 11]  mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdMark
-      [11, 19] mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdLinkUri
-      [19, 20] mdPack(key=link,data={"form":"inline","href":"http://x","title":""},revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdMark
+      [1, 5]   mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x)
+      [5, 9]   mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdLinkText(href=http://x) + mdTag
+      [9, 11]  mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdMark
+      [11, 19] mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdLinkUri
+      [19, 20] mdPack(key=link-inline,data={"href":"http://x","title":""},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -1171,12 +1171,12 @@ describe('wikilink', () => {
   it('inside link label', () => {
     expect(parse('[see [[x]]](http://y)')).toMatchInlineSnapshot(`
       "
-      [0, 1]   mdPack(key=link,data={"form":"inline","href":"http://y","title":""},revealInFocus=true) + mdLinkText(href=http://y) + mdMark
-      [1, 5]   mdPack(key=link,data={"form":"inline","href":"http://y","title":""},revealInFocus=true) + mdLinkText(href=http://y)
-      [5, 10]  mdPack(key=link,data={"form":"inline","href":"http://y","title":""},revealInFocus=true) + mdLinkText(href=http://y) + mdPack(key=wikilink) + mdWikilink(target=x)
-      [10, 12] mdPack(key=link,data={"form":"inline","href":"http://y","title":""},revealInFocus=true) + mdMark
-      [12, 20] mdPack(key=link,data={"form":"inline","href":"http://y","title":""},revealInFocus=true) + mdLinkUri
-      [20, 21] mdPack(key=link,data={"form":"inline","href":"http://y","title":""},revealInFocus=true) + mdMark
+      [0, 1]   mdPack(key=link-inline,data={"href":"http://y","title":""},revealInFocus=true) + mdLinkText(href=http://y) + mdMark
+      [1, 5]   mdPack(key=link-inline,data={"href":"http://y","title":""},revealInFocus=true) + mdLinkText(href=http://y)
+      [5, 10]  mdPack(key=link-inline,data={"href":"http://y","title":""},revealInFocus=true) + mdLinkText(href=http://y) + mdPack(key=wikilink) + mdWikilink(target=x)
+      [10, 12] mdPack(key=link-inline,data={"href":"http://y","title":""},revealInFocus=true) + mdMark
+      [12, 20] mdPack(key=link-inline,data={"href":"http://y","title":""},revealInFocus=true) + mdLinkUri
+      [20, 21] mdPack(key=link-inline,data={"href":"http://y","title":""},revealInFocus=true) + mdMark
       "
     `)
   })
@@ -1218,11 +1218,11 @@ describe('file link', () => {
     expect(parse('[report.pdf](assets/report.pdf)', { resolveFileLink: () => false }))
       .toMatchInlineSnapshot(`
         "
-        [0, 1]   mdPack(key=link,data={"form":"inline","href":"assets/report.pdf","title":""},revealInFocus=true) + mdLinkText(href=assets/report.pdf) + mdMark
-        [1, 11]  mdPack(key=link,data={"form":"inline","href":"assets/report.pdf","title":""},revealInFocus=true) + mdLinkText(href=assets/report.pdf)
-        [11, 13] mdPack(key=link,data={"form":"inline","href":"assets/report.pdf","title":""},revealInFocus=true) + mdMark
-        [13, 30] mdPack(key=link,data={"form":"inline","href":"assets/report.pdf","title":""},revealInFocus=true) + mdLinkUri
-        [30, 31] mdPack(key=link,data={"form":"inline","href":"assets/report.pdf","title":""},revealInFocus=true) + mdMark
+        [0, 1]   mdPack(key=link-inline,data={"href":"assets/report.pdf","title":""},revealInFocus=true) + mdLinkText(href=assets/report.pdf) + mdMark
+        [1, 11]  mdPack(key=link-inline,data={"href":"assets/report.pdf","title":""},revealInFocus=true) + mdLinkText(href=assets/report.pdf)
+        [11, 13] mdPack(key=link-inline,data={"href":"assets/report.pdf","title":""},revealInFocus=true) + mdMark
+        [13, 30] mdPack(key=link-inline,data={"href":"assets/report.pdf","title":""},revealInFocus=true) + mdLinkUri
+        [30, 31] mdPack(key=link-inline,data={"href":"assets/report.pdf","title":""},revealInFocus=true) + mdMark
         "
       `)
   })
@@ -1282,11 +1282,11 @@ describe('file link', () => {
       [0, 4]
       [4, 35]  mdPack(key=file) + mdFile(href=assets/report.pdf,name=report.pdf)
       [35, 40]
-      [40, 41] mdPack(key=link,data={"form":"inline","href":"https://example.com","title":""},revealInFocus=true) + mdLinkText(href=https://example.com) + mdMark
-      [41, 45] mdPack(key=link,data={"form":"inline","href":"https://example.com","title":""},revealInFocus=true) + mdLinkText(href=https://example.com)
-      [45, 47] mdPack(key=link,data={"form":"inline","href":"https://example.com","title":""},revealInFocus=true) + mdMark
-      [47, 66] mdPack(key=link,data={"form":"inline","href":"https://example.com","title":""},revealInFocus=true) + mdLinkUri
-      [66, 67] mdPack(key=link,data={"form":"inline","href":"https://example.com","title":""},revealInFocus=true) + mdMark
+      [40, 41] mdPack(key=link-inline,data={"href":"https://example.com","title":""},revealInFocus=true) + mdLinkText(href=https://example.com) + mdMark
+      [41, 45] mdPack(key=link-inline,data={"href":"https://example.com","title":""},revealInFocus=true) + mdLinkText(href=https://example.com)
+      [45, 47] mdPack(key=link-inline,data={"href":"https://example.com","title":""},revealInFocus=true) + mdMark
+      [47, 66] mdPack(key=link-inline,data={"href":"https://example.com","title":""},revealInFocus=true) + mdLinkUri
+      [66, 67] mdPack(key=link-inline,data={"href":"https://example.com","title":""},revealInFocus=true) + mdMark
       "
     `)
   })

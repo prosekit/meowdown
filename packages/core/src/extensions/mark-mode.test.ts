@@ -244,7 +244,7 @@ describe('focus mode', () => {
         see
         <span
           class="md-pack"
-          data-key="link"
+          data-key="link-inline"
         >
           <a
             class="md-link"
@@ -293,7 +293,7 @@ describe('focus mode', () => {
         see
         <span
           class="md-pack"
-          data-key="link"
+          data-key="link-inline"
         >
           <a
             class="md-link"
@@ -342,7 +342,7 @@ describe('focus mode', () => {
         visit
         <span
           class="md-pack"
-          data-key="link"
+          data-key="link-bare"
         >
           <a
             class="md-link"
@@ -364,7 +364,7 @@ describe('focus mode', () => {
         a
         <span
           class="md-pack"
-          data-key="link"
+          data-key="link-angle"
         >
           <span class="md-mark">
             <span class="show">
@@ -476,7 +476,7 @@ describe('focus mode', () => {
       <p>
         <span
           class="md-pack"
-          data-key="link"
+          data-key="link-inline"
         >
           <a
             class="md-link"
@@ -515,7 +515,7 @@ describe('focus mode', () => {
         </span>
         <span
           class="md-pack"
-          data-key="link"
+          data-key="link-inline"
         >
           <a
             class="md-link"
@@ -563,7 +563,7 @@ describe('focus mode', () => {
       <p>
         <span
           class="md-pack"
-          data-key="link"
+          data-key="link-angle"
         >
           <span class="md-mark">
             <span class="show">
@@ -586,7 +586,7 @@ describe('focus mode', () => {
         </span>
         <span
           class="md-pack"
-          data-key="link"
+          data-key="link-angle"
         >
           <span class="md-mark">
             <span class="show">
@@ -730,7 +730,7 @@ describe('focus mode', () => {
       <p>
         <span
           class="md-pack"
-          data-key="link"
+          data-key="link-inline"
         >
           <a
             class="md-link"
@@ -841,7 +841,7 @@ describe('focus mode', () => {
       <p>
         <span
           class="md-pack"
-          data-key="link"
+          data-key="link-inline"
         >
           <a
             class="md-link"
@@ -880,7 +880,7 @@ describe('focus mode', () => {
         </span>
         <span
           class="md-pack"
-          data-key="link"
+          data-key="link-inline"
         >
           <a
             class="md-link"
@@ -933,7 +933,7 @@ describe('focus mode', () => {
         ABC
         <span
           class="md-pack"
-          data-key="link"
+          data-key="link-inline"
         >
           <a
             class="md-link"
@@ -983,7 +983,7 @@ describe('focus mode', () => {
         a
         <span
           class="md-pack"
-          data-key="link"
+          data-key="link-angle"
         >
           <span class="md-mark">
             <span class="show">
@@ -1072,7 +1072,7 @@ describe('focus mode', () => {
       <p>
         <span
           class="md-pack"
-          data-key="link"
+          data-key="link-inline"
         >
           <a
             class="md-link"
@@ -1111,7 +1111,7 @@ describe('focus mode', () => {
         </span>
         <span
           class="md-pack"
-          data-key="link"
+          data-key="link-inline"
         >
           <a
             class="md-link"

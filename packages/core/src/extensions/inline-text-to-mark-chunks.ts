@@ -326,8 +326,8 @@ function walkAutolink(
   const base = [
     ...parentMarks,
     createUnitPack(marks, out, parentMarks, node.from, {
-      key: 'link',
-      data: { form: 'angle', href },
+      key: 'link-angle',
+      data: { href },
       revealInFocus: true,
     }),
   ]
@@ -371,8 +371,8 @@ function walkURL(
   emit(out, node.from, node.to, [
     ...parentMarks,
     createUnitPack(marks, out, parentMarks, node.from, {
-      key: 'link',
-      data: { form: 'bare', href },
+      key: 'link-bare',
+      data: { href },
     }),
     marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs),
   ])
@@ -588,8 +588,8 @@ function walkResolvedLink(
   } satisfies MdLinkTextAttrs)
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd
   const pack = createUnitPack(marks, out, parentMarks, node.from, {
-    key: 'link',
-    data: { form: isReference ? 'reference' : 'inline', href, title },
+    key: isReference ? 'link-reference' : 'link-inline',
+    data: { href, title },
     revealInFocus: true,
   })
   const base = [...parentMarks, pack]
