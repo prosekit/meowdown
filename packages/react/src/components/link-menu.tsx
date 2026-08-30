@@ -392,25 +392,25 @@ export function LinkMenu({
   readOnly = false,
 }: LinkMenuProps): ReactNode {
   const editor: TypedEditor = useEditor<EditorExtension>()
-  // The link under the pointer, or tapped on touch. `undefined` asks an open
-  // info popup to close.
-  const [hoveredLink, setHoveredLink] = useState<LinkUnit | undefined>()
-  // The link whose info the popup shows. It outlives `hoveredLink` until the
-  // close animation finishes, so the popup keeps its content while fading
-  // out.
-  const [displayedLink, setDisplayedLink] = useState<LinkUnit | undefined>()
+  // Whether a link is under the pointer, or tapped on touch. Turning `false`
+  // asks an open info popup to close.
+  const [infoOpen, setInfoOpen] = useState(false)
+  // The link whose info the popup shows. It stays after `infoOpen` turns
+  // false until the close animation finishes, so the popup keeps its content
+  // while fading out.
+  const [link, setLink] = useState<LinkUnit | undefined>()
   const [edit, setEdit] = useState<LinkEditOptions | undefined>()
   const [editOpen, setEditOpen] = useState(false)
-  const overPopupRef = useRef(false)
+  const isPointerOverPopupRef = useRef(false)
 
   const linkHoverExtension = useMemo(
     () =>
       defineLinkHoverHandler(
         (nextHit) => {
-          setHoveredLink(nextHit?.payload)
-          if (nextHit) setDisplayedLink(nextHit.payload)
+          setInfoOpen(nextHit != null)
+          if (nextHit) setLink(nextHit.payload)
         },
-        { canLeave: () => !overPopupRef.current },
+        { canLeave: () => !isPointerOverPopupRef.current },
       ),
     [],
   )
@@ -423,15 +423,19 @@ export function LinkMenu({
         : defineLinkEditKeymap((options) => {
             setEdit(options)
             setEditOpen(true)
-            setHoveredLink(undefined)
+            setInfoOpen(false)
           }),
     [readOnly],
   )
   useExtension(linkEditExtension)
 
+  const handlePointerHover = useCallback((over: boolean) => {
+    isPointerOverPopupRef.current = over
+  }, [])
+
   const closeInfo = useCallback(() => {
-    overPopupRef.current = false
-    setHoveredLink(undefined)
+    isPointerOverPopupRef.current = false
+    setInfoOpen(false)
   }, [])
 
   const closeEdit = useCallback(() => {
@@ -439,42 +443,41 @@ export function LinkMenu({
     closeInfo()
   }, [closeInfo])
 
-  const mutable = displayedLink != null && !readOnly && displayedLink.form !== 'reference'
+  const mutable = link != null && !readOnly && link.form !== 'reference'
 
-  const linkText = useMemo(() => (displayedLink ? getLinkText(displayedLink) : ''), [displayedLink])
-
+  const linkText = useMemo(() => (link ? getLinkText(link) : ''), [link])
 
   const editLink = useCallback(() => {
-    if (!displayedLink) return
-    selectLinkUnit(editor, displayedLink)
+    if (!link) return
+    selectLinkUnit(editor, link)
     setEdit({
-      from: displayedLink.unit.from,
-      to: displayedLink.unit.to,
-      link: displayedLink,
+      from: link.unit.from,
+      to: link.unit.to,
+      link,
       text: linkText,
     })
     setEditOpen(true)
     closeInfo()
-  }, [displayedLink, editor, linkText, closeInfo])
+  }, [link, editor, linkText, closeInfo])
 
   const removeLink = useCallback(() => {
-    if (!displayedLink) return
-    selectLinkUnit(editor, displayedLink)
+    if (!link) return
+    selectLinkUnit(editor, link)
     editor.commands.removeLink()
     closeInfo()
-  }, [displayedLink, editor, closeInfo])
+  }, [link, editor, closeInfo])
 
   const handleUseTitle = useMemo(() => {
-    if (!displayedLink || !mutable ||!isLinkTextForHref(linkText, displayedLink.href)) return
+    if (!link || !mutable || !isLinkTextForHref(linkText, link.href)) return
     return (title: string) => {
-      selectLinkUnit(editor, displayedLink)
+      selectLinkUnit(editor, link)
       editor.commands.updateLink({ text: title })
       closeInfo()
     }
-  }, [displayedLink, editor, closeInfo, linkText, mutable])
+  }, [link, editor, closeInfo, linkText, mutable])
 
-  const previewState = useLinkPreview(displayedLink?.href, resolveLinkPreview)
-  const range = edit ? (edit.link?.text ?? edit) : displayedLink?.text
+  const previewState = useLinkPreview(link?.href, resolveLinkPreview)
+  const range = edit ? (edit.link?.text ?? edit) : link?.text
   const anchor: VirtualElement | undefined = useMemo(() => {
     if (!range) return
     return getVirtualElementFromRange(editor.view, range)
@@ -512,10 +515,10 @@ export function LinkMenu({
         }}
       />
     )
-  } else if (displayedLink) {
+  } else if (link) {
     content = (
       <LinkInfoContent
-        href={displayedLink.href}
+        href={link.href}
         previewState={previewState}
         onLinkClick={onLinkClick}
         onLinkCopy={onLinkCopy}
@@ -533,23 +536,17 @@ export function LinkMenu({
   return (
     <LinkPopover
       anchor={anchor}
-      open={editing ? editOpen : hoveredLink !== undefined}
+      open={editing ? editOpen : infoOpen}
       onClose={editing ? closeEdit : closeInfo}
       onCloseComplete={() => {
         if (editing) {
           setEdit(undefined)
           editor.focus()
-        } else if (!hoveredLink) {
-          setDisplayedLink(undefined)
+        } else if (!infoOpen) {
+          setLink(undefined)
         }
       }}
-      onPopupHover={
-        editing
-          ? undefined
-          : (over) => {
-              overPopupRef.current = over
-            }
-      }
+      onPopupHover={handlePointerHover}
     >
       {content}
     </LinkPopover>
