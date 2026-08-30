@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@meowdown/eslint-rules": "workspace:*",
-    "@ocavue/eslint-config": "https://pkg.pr.new/@ocavue/eslint-config@533",
+    "@ocavue/eslint-config": "^4.16.0",
     "@ocavue/tsconfig": "^0.7.1",
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^4.1.11",
