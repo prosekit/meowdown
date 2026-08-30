@@ -110,8 +110,14 @@ function repeat(tokens: readonly string[], times: number): string[] {
 }
 
 const POOLS = [
-  { name: 'base', pool: [...TOKENS_BASE, ...TOKENS_RUNS] },
-  { name: 'extended', pool: [...TOKENS_BASE, ...TOKENS_RUNS, ...TOKENS_EXTENDED] },
+  {
+    name: 'base',
+    pool: [...TOKENS_BASE, ...TOKENS_RUNS],
+  },
+  {
+    name: 'extended',
+    pool: [...TOKENS_NEWLINE, ...TOKENS_BASE, ...TOKENS_RUNS, ...TOKENS_EXTENDED],
+  },
   {
     name: 'weighted',
     pool: [
