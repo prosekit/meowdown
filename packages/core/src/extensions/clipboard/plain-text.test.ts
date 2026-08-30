@@ -86,77 +86,77 @@ describe('plain text copy in show and focus mode', () => {
 
   it('copies part of a code block without its fence in focus mode', () => {
     expect(
-      copySelectionText('focus', (n) =>
-        n.doc(n.codeBlock({ language: 'typescript' }, 'const <a>value<b> = 1')),
-      ),
+      copySelectionText('focus', (n) => {
+        return n.doc(n.codeBlock({ language: 'typescript' }, 'const <a>value<b> = 1'))
+      }),
     ).toBe('value')
   })
 
   it('copies part of a code block without its fence in show mode', () => {
     expect(
-      copySelectionText('show', (n) =>
-        n.doc(n.codeBlock({ language: 'typescript' }, 'const <a>value<b> = 1')),
-      ),
+      copySelectionText('show', (n) => {
+        return n.doc(n.codeBlock({ language: 'typescript' }, 'const <a>value<b> = 1'))
+      }),
     ).toBe('value')
   })
 
   it('keeps newlines inside a partial code block selection', () => {
     expect(
-      copySelectionText('focus', (n) =>
-        n.doc(n.codeBlock({ language: 'ts' }, 'line <a>one\nline<b> two')),
-      ),
+      copySelectionText('focus', (n) => {
+        return n.doc(n.codeBlock({ language: 'ts' }, 'line <a>one\nline<b> two'))
+      }),
     ).toBe('one\nline')
   })
 
   it('drops fences when a code block selection starts at its content start', () => {
     expect(
-      copySelectionText('focus', (n) =>
-        n.doc(n.codeBlock({ language: 'typescript' }, '<a>const value<b> = 1')),
-      ),
+      copySelectionText('focus', (n) => {
+        return n.doc(n.codeBlock({ language: 'typescript' }, '<a>const value<b> = 1'))
+      }),
     ).toBe('const value')
   })
 
   it('drops fences when a code block selection ends at its content end', () => {
     expect(
-      copySelectionText('focus', (n) =>
-        n.doc(n.codeBlock({ language: 'typescript' }, 'const <a>value = 1<b>')),
-      ),
+      copySelectionText('focus', (n) => {
+        return n.doc(n.codeBlock({ language: 'typescript' }, 'const <a>value = 1<b>'))
+      }),
     ).toBe('value = 1')
   })
 
   it('keeps both heading prefixes when only the last heading ends partially', () => {
     expect(
-      copySelectionText('focus', (n) =>
-        n.doc(
+      copySelectionText('focus', (n) => {
+        return n.doc(
           n.heading({ level: 1 }, '<a>Heading A'),
           n.paragraph('Paragraph B'),
           n.heading({ level: 2 }, 'Heading<b> C'),
-        ),
-      ),
+        )
+      }),
     ).toBe('# Heading A\n\nParagraph B\n\n## Heading')
   })
 
   it('drops only the heading prefix whose content start is not selected', () => {
     expect(
-      copySelectionText('focus', (n) =>
-        n.doc(
+      copySelectionText('focus', (n) => {
+        return n.doc(
           n.heading({ level: 1 }, 'Heading <a>A'),
           n.paragraph('Paragraph B'),
           n.heading({ level: 2 }, 'Heading<b> C'),
-        ),
-      ),
+        )
+      }),
     ).toBe('A\n\nParagraph B\n\n## Heading')
   })
 
   it('keeps both markers when both edge headings are complete', () => {
     expect(
-      copySelectionText('focus', (n) =>
-        n.doc(
+      copySelectionText('focus', (n) => {
+        return n.doc(
           n.heading({ level: 1 }, '<a>Heading A'),
           n.paragraph('Paragraph B'),
           n.heading({ level: 2 }, 'Heading C<b>'),
-        ),
-      ),
+        )
+      }),
     ).toBe('# Heading A\n\nParagraph B\n\n## Heading C')
   })
 
@@ -168,17 +168,17 @@ describe('plain text copy in show and focus mode', () => {
 
   it('does not synthesize a setext underline after a partial heading end', () => {
     expect(
-      copySelectionText('focus', (n) =>
-        n.doc(n.heading({ level: 1, setextUnderline: 3 }, '<a>Head<b>ing')),
-      ),
+      copySelectionText('focus', (n) => {
+        return n.doc(n.heading({ level: 1, setextUnderline: 3 }, '<a>Head<b>ing'))
+      }),
     ).toBe('Head')
   })
 
   it('does not synthesize closing hashes after a partial heading end', () => {
     expect(
-      copySelectionText('focus', (n) =>
-        n.doc(n.heading({ level: 1, closingHashes: 3 }, '<a>Head<b>ing')),
-      ),
+      copySelectionText('focus', (n) => {
+        return n.doc(n.heading({ level: 1, closingHashes: 3 }, '<a>Head<b>ing'))
+      }),
     ).toBe('# Head')
   })
 })
@@ -301,9 +301,9 @@ describe('plain text copy in hide mode', () => {
 
   it('copies part of a code block without its fence', () => {
     expect(
-      copySelectionText('hide', (n) =>
-        n.doc(n.codeBlock({ language: 'typescript' }, 'const <a>value<b> = 1')),
-      ),
+      copySelectionText('hide', (n) => {
+        return n.doc(n.codeBlock({ language: 'typescript' }, 'const <a>value<b> = 1'))
+      }),
     ).toBe('value')
   })
 
@@ -352,17 +352,17 @@ describe('plain text copy block layout', () => {
 
   it('drops a blockquote marker from a partial selection', () => {
     expect(
-      copySelectionText('focus', (n) =>
-        n.doc(n.blockquote(n.paragraph('f<a>irs<b>t'), n.paragraph('second'))),
-      ),
+      copySelectionText('focus', (n) => {
+        return n.doc(n.blockquote(n.paragraph('f<a>irs<b>t'), n.paragraph('second')))
+      }),
     ).toBe('irs')
   })
 
   it('keeps a blockquote marker when all content is selected', () => {
     expect(
-      copySelectionText('focus', (n) =>
-        n.doc(n.blockquote(n.paragraph('<a>first'), n.paragraph('second<b>'))),
-      ),
+      copySelectionText('focus', (n) => {
+        return n.doc(n.blockquote(n.paragraph('<a>first'), n.paragraph('second<b>')))
+      }),
     ).toBe('> first\n>\n> second')
   })
 
@@ -374,8 +374,8 @@ describe('plain text copy block layout', () => {
 
   it('does not build a table around one fully selected cell', () => {
     expect(
-      copySelectionText('focus', (n) =>
-        n.doc(
+      copySelectionText('focus', (n) => {
+        return n.doc(
           n.table(
             n.tableRow(
               n.tableHeaderCell(n.paragraph('<a>a<b>')),
@@ -383,32 +383,32 @@ describe('plain text copy block layout', () => {
             ),
             n.tableRow(n.tableCell(n.paragraph('c')), n.tableCell(n.paragraph('d'))),
           ),
-        ),
-      ),
+        )
+      }),
     ).toBe('a')
   })
 
   it('keeps a table when all cell content is selected', () => {
     expect(
-      copySelectionText('focus', (n) =>
-        n.doc(
+      copySelectionText('focus', (n) => {
+        return n.doc(
           n.table(
             n.tableRow(n.tableHeaderCell(n.paragraph('<a>a')), n.tableHeaderCell(n.paragraph('b'))),
             n.tableRow(n.tableCell(n.paragraph('c')), n.tableCell(n.paragraph('d<b>'))),
           ),
-        ),
-      ),
+        )
+      }),
     ).toBe('| a | b |\n| --- | --- |\n| c | d |')
   })
 
   it('keeps flat-list selection unwrapping', () => {
     expect(
-      copySelectionText('focus', (n) =>
-        n.doc(
+      copySelectionText('focus', (n) => {
+        return n.doc(
           n.list({ kind: 'bullet' }, n.paragraph('<a>one<b>')),
           n.list({ kind: 'bullet' }, n.paragraph('two')),
-        ),
-      ),
+        )
+      }),
     ).toBe('one')
   })
 })

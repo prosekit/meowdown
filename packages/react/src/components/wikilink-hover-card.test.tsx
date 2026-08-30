@@ -160,11 +160,11 @@ describe('WikilinkHoverCard', () => {
     await render(
       <MeowdownEditor initialMarkdown="see [[Note]] here" blockHandle={false}>
         <WikilinkHoverCard>
-          {() =>
-            new Promise<ReactNode>((resolve) => {
+          {() => {
+            return new Promise<ReactNode>((resolve) => {
               resolveBody = resolve
             })
-          }
+          }}
         </WikilinkHoverCard>
       </MeowdownEditor>,
     )
@@ -183,11 +183,11 @@ describe('WikilinkHoverCard', () => {
     await render(
       <MeowdownEditor initialMarkdown="[[Alpha]] and [[Beta]]" blockHandle={false}>
         <WikilinkHoverCard>
-          {(hit) =>
-            new Promise<ReactNode>((resolve) => {
+          {(hit) => {
+            return new Promise<ReactNode>((resolve) => {
               resolvers.set(hit.target, resolve)
             })
-          }
+          }}
         </WikilinkHoverCard>
       </MeowdownEditor>,
     )

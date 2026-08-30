@@ -795,10 +795,11 @@ describe('wiki embed', () => {
   it('uses resolution overrides for file and note fallbacks', () => {
     expect(
       parse('![[missing]] ![[other]]', {
-        resolveWikiEmbed: ({ target }) =>
-          target === 'missing'
+        resolveWikiEmbed: ({ target }) => {
+          return target === 'missing'
             ? { kind: 'file', href: 'vault/file.pdf', name: 'File' }
-            : { kind: 'note', target: 'notes/other', display: 'Other note' },
+            : { kind: 'note', target: 'notes/other', display: 'Other note' }
+        },
       }),
     ).toMatchInlineSnapshot(`
       "
