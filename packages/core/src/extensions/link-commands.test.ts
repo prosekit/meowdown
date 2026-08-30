@@ -1,7 +1,10 @@
+import type { EditorState } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
 
 import { findText } from '../testing/find-text.ts'
 import { setupFixture } from '../testing/index.ts'
+
+import { getLinkUnitAt } from './get-link-unit-at.ts'
 
 describe('insertLink', () => {
   it('wraps the selection as a link', () => {
@@ -25,6 +28,22 @@ describe('insertLink', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('docs')))
     expect(editor.commands.insertLink({ href: 'http://x' })).toBe(false)
+  })
+
+  it('keeps authored Markdown when the label matches the visible text', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('see <a>**bold** docs<b> now')))
+    expect(editor.commands.insertLink({ text: 'bold docs', href: 'http://x' })).toBe(true)
+    expect(fixture.doc.child(0).textContent).toBe('see [**bold** docs](http://x) now')
+  })
+
+  it('replaces authored Markdown when the label is edited', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('see <a>**bold** docs<b> now')))
+    expect(editor.commands.insertLink({ text: 'plain docs', href: 'http://x' })).toBe(true)
+    expect(fixture.doc.child(0).textContent).toBe('see [plain docs](http://x) now')
   })
 })
 
@@ -67,6 +86,15 @@ describe('updateLink', () => {
     )
   })
 
+  it('escapes meowdown delimiters in a new label', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('[Old](http://x)')))
+    editor.commands.selectText(findText(fixture.doc, 'Old') + 1)
+    editor.commands.updateLink({ text: '==hi== $x$ #tag' })
+    expect(fixture.doc.child(0).textContent).toBe(String.raw`[\=\=hi\=\= \$x\$ \#tag](http://x)`)
+  })
+
   it('promotes a bare autolink to an inline link', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
@@ -107,6 +135,17 @@ describe('updateLink', () => {
   })
 })
 
+/**
+ * Assert no link unit remains anywhere: `textContent` alone cannot prove
+ * unlinking, because re-autolinked text keeps identical source characters
+ * and only the marks change.
+ */
+function expectNoLink(state: EditorState): void {
+  for (let pos = 0; pos <= state.doc.content.size; pos++) {
+    expect(getLinkUnitAt(state, pos)).toBeUndefined()
+  }
+}
+
 describe('removeLink', () => {
   it('keeps the label and drops the syntax', () => {
     using fixture = setupFixture()
@@ -117,31 +156,58 @@ describe('removeLink', () => {
     expect(fixture.doc.child(0).textContent).toBe('a docs b')
   })
 
-  it('escapes a bare URL so it does not autolink again', () => {
+  it('unlinks a bare URL with a magic comment so it does not autolink again', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('see https://example.com now')))
     editor.commands.selectText(findText(fixture.doc, 'example.com') + 1)
     expect(editor.commands.removeLink()).toBe(true)
-    expect(fixture.doc.child(0).textContent).toBe(String.raw`see https\://example.com now`)
+    expect(fixture.doc.child(0).textContent).toBe(
+      'see https://example.com<!-- {"autolink":false} --> now',
+    )
+    expectNoLink(fixture.state)
   })
 
-  it('escapes an angle URL while preserving its visible text', () => {
+  it('unlinks an angle URL while preserving its visible text', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('<https://example.com>')))
     editor.commands.selectText(findText(fixture.doc, 'example.com') + 1)
     expect(editor.commands.removeLink()).toBe(true)
-    expect(fixture.doc.child(0).textContent).toBe(String.raw`https\://example.com`)
+    expect(fixture.doc.child(0).textContent).toBe('https://example.com<!-- {"autolink":false} -->')
+    expectNoLink(fixture.state)
   })
 
-  it('escapes a URL-labelled inline link', () => {
+  it('unlinks a URL-labelled inline link', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('[google.com](https://google.com)')))
     editor.commands.selectText(findText(fixture.doc, 'google.com') + 1)
     editor.commands.removeLink()
-    expect(fixture.doc.child(0).textContent).toBe(String.raw`google\.com`)
+    expect(fixture.doc.child(0).textContent).toBe('google.com<!-- {"autolink":false} -->')
+    expectNoLink(fixture.state)
+  })
+
+  it('unlinks a mailto URL so the email does not autolink again', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('mailto:a@b.com')))
+    editor.commands.selectText(findText(fixture.doc, 'b.com') + 1)
+    expect(editor.commands.removeLink()).toBe(true)
+    expect(fixture.doc.child(0).textContent).toBe('mailto:a@b.com<!-- {"autolink":false} -->')
+    expectNoLink(fixture.state)
+  })
+
+  it('unlinks a userinfo URL so the email part does not autolink again', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('https://user@example.com')))
+    editor.commands.selectText(findText(fixture.doc, 'example.com') + 1)
+    expect(editor.commands.removeLink()).toBe(true)
+    expect(fixture.doc.child(0).textContent).toBe(
+      'https://user@example.com<!-- {"autolink":false} -->',
+    )
+    expectNoLink(fixture.state)
   })
 
   it('removes in one undoable transaction', () => {

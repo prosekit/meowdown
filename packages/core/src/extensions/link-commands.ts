@@ -14,6 +14,7 @@ import type { PositionRange } from '../utils/range.ts'
 import { getLinkUnitAt, type LinkUnit } from './get-link-unit-at.ts'
 import { hasSyntaxMark } from './inline-runs.ts'
 import { trimRange } from './inline-toggle.ts'
+import { formatMagicComment } from './magic-comment.ts'
 
 export interface LinkAttrs {
   href?: string
@@ -24,7 +25,7 @@ export interface LinkAttrs {
 /**
  * Normalize a typed URL with the existing autolink logic, else keep it verbatim.
  */
-function normalizeHref(raw: string): string {
+export function normalizeHref(raw: string): string {
   const value = raw.trim()
   return value ? (getAutolinkHref(value) ?? value) : ''
 }
@@ -37,22 +38,33 @@ function destText(href: string, title: string): string {
   return href + quoted
 }
 
+/**
+ * Escape a plain-text label so it cannot pick up inline semantics: the
+ * CommonMark delimiters plus meowdown's `==highlight==`, `$math$`, and `#tag`.
+ */
 function linkLabelText(text: string): string {
-  return text.replaceAll(/([&<\\[\]_*`~])/g, String.raw`\$1`)
+  return text.replaceAll(/([&<\\[\]_*`~=$#])/g, String.raw`\$1`)
 }
 
 /**
- * Get a link's plain visible text, omitting live-preview Markdown syntax.
+ * Get a range's plain visible text, skipping hidden syntax runs.
  */
-export function getLinkText(state: EditorState, link: LinkUnit): string {
+function getVisibleText(state: EditorState, range: PositionRange): string {
   let text = ''
-  state.doc.nodesBetween(link.text.from, link.text.to, (node, position) => {
+  state.doc.nodesBetween(range.from, range.to, (node, pos) => {
     if (!node.isText || !node.text || hasSyntaxMark(node.marks)) return
-    const from = Math.max(link.text.from, position) - position
-    const to = Math.min(link.text.to, position + node.nodeSize) - position
+    const from = Math.max(range.from, pos) - pos
+    const to = Math.min(range.to, pos + node.nodeSize) - pos
     text += node.text.slice(from, to)
   })
   return text
+}
+
+/**
+ * Get a link's plain visible text.
+ */
+export function getLinkText(state: EditorState, link: LinkUnit): string {
+  return getVisibleText(state, link.text)
 }
 
 /**
@@ -61,19 +73,6 @@ export function getLinkText(state: EditorState, link: LinkUnit): string {
 export function isLinkTextForHref(text: string, href: string): boolean {
   const value = text.trim()
   return value === href || getAutolinkHref(value) === href
-}
-
-function unlinkedText(text: string): string {
-  const href = getAutolinkHref(text)
-  if (!href) return text
-
-  if (/^[a-z][a-z\d+.-]*:/iu.test(text)) {
-    return text.replace(':', String.raw`\:`)
-  }
-  if (text.includes('@')) {
-    return text.replace('@', String.raw`\@`)
-  }
-  return text.replace('.', String.raw`\.`)
 }
 
 /**
@@ -124,23 +123,19 @@ export function insertLink({
       const { from, to } = range
       const tr = state.tr
       const dest = destText(normalizeHref(href ?? ''), title ?? '')
-      if (text !== undefined) {
+      let linkTo: number
+      // A label matching the selection's visible text wraps the original
+      // source instead, keeping any authored inline Markdown intact.
+      if (text !== undefined && text !== getVisibleText(state, range)) {
         const markdown = `[${linkLabelText(text)}](${dest})`
         tr.insertText(markdown, from, to)
-        const linkTo = from + markdown.length
-        tr.setSelection(
-          wrapText
-            ? TextSelection.create(tr.doc, from, linkTo)
-            : TextSelection.create(tr.doc, linkTo),
-        )
-        tr.scrollIntoView()
-        dispatch(tr)
-        return true
+        linkTo = from + markdown.length
+      } else {
+        const close = `](${dest})`
+        tr.insertText(close, to).insertText('[', from)
+        // The position after the closing `)`
+        linkTo = to + 1 + close.length
       }
-      const close = `](${dest})`
-      tr.insertText(close, to).insertText('[', from)
-      // The position after the closing `)`
-      const linkTo = to + 1 + close.length
       tr.setSelection(
         wrapText
           ? TextSelection.create(tr.doc, from, linkTo)
@@ -190,18 +185,19 @@ export function removeLink(): Command {
     if (!link || link.form === 'reference') return false
     if (dispatch) {
       const text = getLinkText(state, link)
-      if (link.form === 'inline' && !getAutolinkHref(text)) {
-        // Keep authored label Markdown intact when it cannot immediately
-        // become an autolink again.
-        const transaction = state.tr
-          .delete(link.label.to, link.unit.to)
-          .delete(link.unit.from, link.label.from)
-        dispatch(transaction.scrollIntoView())
-      } else {
-        dispatch(
-          state.tr.insertText(unlinkedText(text), link.unit.from, link.unit.to).scrollIntoView(),
-        )
-      }
+      // Keep authored label Markdown intact when it cannot immediately become
+      // an autolink again; otherwise keep the text verbatim and opt it out of
+      // autolinking with an invisible trailing magic comment.
+      const tr =
+        link.form === 'inline' && !getAutolinkHref(text)
+          ? // delete the tail `](url "title")` first, then the leading `[`
+            state.tr.delete(link.label.to, link.unit.to).delete(link.unit.from, link.label.from)
+          : state.tr.insertText(
+              text + formatMagicComment({ autolink: false }),
+              link.unit.from,
+              link.unit.to,
+            )
+      dispatch(tr.scrollIntoView())
     }
     return true
   }
@@ -253,7 +249,7 @@ function openLinkEdit(onLinkEdit: LinkEditHandler): Command {
           from,
           to,
           link: undefined,
-          text: state.doc.textBetween(from, to),
+          text: getVisibleText(state, wrapRange),
         })
       }
       return true

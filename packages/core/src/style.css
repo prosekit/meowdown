@@ -25,6 +25,10 @@
     /* links, wikilinks, tags, caret, drop indicator */
     --meowdown-accent: light-dark(oklch(0.646 0.194 41), oklch(0.758 0.159 56));
 
+    /* text on an accent-filled surface: the dark-mode accent is light, so it
+     * needs dark text to stay readable */
+    --meowdown-accent-contrast: light-dark(oklch(1 0 0), oklch(0.21 0.006 286));
+
     /* the self-drawn caret */
     --meowdown-caret: var(--meowdown-accent);
 

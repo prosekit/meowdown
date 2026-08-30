@@ -24,6 +24,7 @@ describe('wikilink hover callback', () => {
     const label = preview.locate('.md-wikilink-view-label')
 
     await preview.hover()
+    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
     label.element().dispatchEvent(
       new MouseEvent('mouseover', {
         bubbles: true,
@@ -37,7 +38,7 @@ describe('wikilink hover callback', () => {
     )
   })
 
-  it('leaves one adjacent link before entering the next', async () => {
+  it('switches between adjacent links without a leave', async () => {
     const onHoverChange = vi.fn<WikilinkHoverHandler>()
     using fixture = applyHoverable(
       '[[Alpha|A wide alias]][[Beta|Another wide alias]]',
@@ -47,13 +48,10 @@ describe('wikilink hover callback', () => {
     const links = pmRoot.getByTestId('wikilink')
 
     await links.nth(0).hover()
+    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
     await links.nth(1).hover()
 
-    expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual([
-      'Alpha',
-      undefined,
-      'Beta',
-    ])
+    expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Alpha', 'Beta'])
   })
 
   it('leaves when the hovered link is deleted without pointer movement', async () => {
@@ -61,6 +59,7 @@ describe('wikilink hover callback', () => {
     using fixture = applyHoverable('before [[Note]] after', onHoverChange)
 
     await pmRoot.getByTestId('wikilink').hover()
+    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
     fixture.set(fixture.n.doc(fixture.n.paragraph('before after')))
 
     expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note', undefined])
@@ -71,6 +70,7 @@ describe('wikilink hover callback', () => {
     using fixture = applyHoverable('[[Alpha]]', onHoverChange)
 
     await pmRoot.getByTestId('wikilink').hover()
+    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
     fixture.set(fixture.n.doc(fixture.n.paragraph('[[Beta]]')))
 
     expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Alpha', undefined])
@@ -81,6 +81,7 @@ describe('wikilink hover callback', () => {
     using fixture = applyHoverable('before [[Note]]', onHoverChange)
 
     await pmRoot.getByTestId('wikilink').hover()
+    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
     fixture.view.dispatch(fixture.state.tr.insertText('new ', 1))
 
     expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note'])
@@ -92,6 +93,7 @@ describe('wikilink hover callback', () => {
       using fixture = applyHoverable('[[Note]]', onHoverChange)
       void fixture
       await pmRoot.getByTestId('wikilink').hover()
+      await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
     }
 
     expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note', undefined])

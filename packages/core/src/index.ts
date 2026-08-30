@@ -98,19 +98,19 @@ export {
   getLinkText,
   isLinkTextForHref,
   insertLink,
+  normalizeHref,
   removeLink,
   updateLink,
   type LinkAttrs,
 } from './extensions/link-commands.ts'
 export type { LinkEditHandler, LinkEditOptions } from './extensions/link-commands.ts'
-export { defineLinkHoverHandler, type LinkHoverHandler } from './extensions/link-hover.ts'
+export {
+  defineLinkHoverHandler,
+  type LinkHoverHandler,
+  type LinkHoverOptions,
+} from './extensions/link-hover.ts'
 export { defineLinkPaste } from './extensions/link-paste.ts'
 export type { LinkPreview, LinkPreviewResolver } from './extensions/link-preview.ts'
-export {
-  defineLinkTapHandler,
-  type LinkTapHandler,
-  type LinkTapPayload,
-} from './extensions/link-tap.ts'
 export type { ListMarker, MeowdownListAttrs } from './extensions/list.ts'
 export type { MarkChunk } from './extensions/mark-chunk.ts'
 export type { MarkMode } from './extensions/mark-mode.ts'

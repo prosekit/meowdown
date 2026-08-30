@@ -33,6 +33,8 @@ describe('LinkMenu', () => {
 
     await hover(pmRoot.getByRole('link', { name: 'https://example.com' }))
     await expect.element(popover.getByTestId('link-popover-loading')).toBeVisible()
+    await expect.element(popover.getByRole('button', { name: 'Copy link' })).toBeVisible()
+    await expect.element(popover.getByRole('button', { name: 'Remove link' })).toBeVisible()
     await hover(popover)
     resolvePreview({
       title: 'Example Domain',
@@ -117,7 +119,7 @@ describe('LinkMenu', () => {
     await expect.element(popover.getByTestId('link-popover-loading')).toBeVisible()
     await hover(popover)
     resolvePreview({ title: 'Example Domain' })
-    await popover.getByRole('button', { name: 'Yes' }).click()
+    await popover.getByRole('button', { name: 'Replace URL with its title' }).click()
     expect(ref.current?.getMarkdown()).toContain('[Example Domain](https://example.com)')
   })
 
@@ -316,6 +318,19 @@ describe('LinkMenu', () => {
     expect(ref.current?.getMarkdown()).toContain('[Docs](https://new.test)')
   })
 
+  it('keeps an authored Markdown label on a URL-only edit', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(
+      <MeowdownEditor handleRef={ref} initialMarkdown="[**bold** docs](https://old.test)" />,
+    )
+    await hover(pmRoot.getByRole('link', { name: 'docs' }))
+    await popover.getByRole('button', { name: 'Edit link' }).click()
+    await popover.getByTestId('link-popover-input').fill('https://new.test')
+    await popover.getByRole('button', { name: 'Save' }).click()
+
+    expect(ref.current?.getMarkdown()).toContain('[**bold** docs](https://new.test)')
+  })
+
   it('edits visible text while preserving the hidden CommonMark tooltip', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(
@@ -346,6 +361,17 @@ describe('LinkMenu', () => {
     await popover.getByRole('button', { name: 'Save' }).click()
 
     expect(ref.current?.getMarkdown()).toContain('[Example Domain](https://example.com)')
+  })
+
+  it('previews a bare host in the edit form via its normalized URL', async () => {
+    const resolver = vi.fn(() => ({ title: 'Example Domain' }))
+    await render(
+      <MeowdownEditor initialMarkdown="[example.com](example.com)" resolveLinkPreview={resolver} />,
+    )
+    await pmRoot.getByRole('link', { name: 'example.com' }).click()
+    await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
+    await expect.element(popover.getByRole('button', { name: 'Use page title' })).toBeVisible()
+    expect(resolver).toHaveBeenCalledWith('https://example.com')
   })
 
   it('debounces preview resolution while editing the destination', async () => {

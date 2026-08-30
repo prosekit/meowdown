@@ -2,11 +2,11 @@ import { Popover } from '@base-ui/react/popover'
 import {
   defineLinkEditKeymap,
   defineLinkHoverHandler,
-  defineLinkTapHandler,
   getLinkText,
   getVirtualElementFromRange,
   isLinkTextForHref,
   isModEvent,
+  normalizeHref,
   type EditorExtension,
   type LinkClickHandler,
   type LinkCopyHandler,
@@ -20,8 +20,6 @@ import {
 import { useEditor, useExtension } from '@prosekit/react'
 import { Globe2Icon, PencilIcon, SparklesIcon, UnlinkIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-
-import { useDelayedFlag } from '../hooks/use-delayed-flag.ts'
 
 import { CopyButton } from './copy-button.tsx'
 import styles from './link-menu.module.css'
@@ -242,21 +240,6 @@ function LinkInfoContent({
   onRemove?: () => void
   onUseTitle?: (title: string) => void
 }) {
-  if (previewState.status === 'loading') {
-    return (
-      <div
-        className={styles.Skeleton}
-        data-testid="link-popover-loading"
-        role="status"
-        aria-label="Loading link preview"
-      >
-        <div className={styles.SkeletonHeader} />
-        <div className={styles.SkeletonLine} />
-        <div className={styles.SkeletonLineShort} />
-      </div>
-    )
-  }
-
   if (previewState.status === 'resolved') {
     const { preview } = previewState
     return (
@@ -281,6 +264,7 @@ function LinkInfoContent({
             <button
               type="button"
               className={styles.ReplaceButton}
+              aria-label="Replace URL with its title"
               onClick={() => onUseTitle(preview.title)}
             >
               Yes
@@ -291,12 +275,27 @@ function LinkInfoContent({
     )
   }
 
+  // While metadata loads, the URL and actions stay usable: a slow or hung
+  // resolver must not block the link's core actions.
   return (
-    <div className={styles.Row} data-testid="link-popover-read">
-      <LinkAnchor href={href} className={styles.Url} onLinkClick={onLinkClick}>
-        {href}
-      </LinkAnchor>
-      <LinkActions href={href} onLinkCopy={onLinkCopy} onEdit={onEdit} onRemove={onRemove} />
+    <div data-testid="link-popover-read">
+      <div className={styles.Row}>
+        <LinkAnchor href={href} className={styles.Url} onLinkClick={onLinkClick}>
+          {href}
+        </LinkAnchor>
+        <LinkActions href={href} onLinkCopy={onLinkCopy} onEdit={onEdit} onRemove={onRemove} />
+      </div>
+      {previewState.status === 'loading' && (
+        <div
+          className={styles.Skeleton}
+          data-testid="link-popover-loading"
+          role="status"
+          aria-label="Loading link preview"
+        >
+          <div className={styles.SkeletonLine} />
+          <div className={styles.SkeletonLineShort} />
+        </div>
+      )}
     </div>
   )
 }
@@ -316,8 +315,14 @@ function LinkEditContent({
   const [href, setHref] = useState(edit.link?.href ?? '')
   const [debouncedHref, setDebouncedHref] = useState(href.trim())
   const textInputRef = useRef<HTMLInputElement>(null)
-  const previewState = useLinkPreview(debouncedHref || undefined, resolveLinkPreview)
-  const canUseTitle = !!edit.link && isLinkTextForHref(text, href)
+  // Preview the URL saving would produce, so a bare `example.com` resolves.
+  const previewHref = normalizeHref(debouncedHref)
+  const previewState = useLinkPreview(previewHref || undefined, resolveLinkPreview)
+  // The debounce must settle first: until then `previewState` still belongs
+  // to the previous URL, and "Use page title" would apply the old page's
+  // title.
+  const canUseTitle =
+    !!edit.link && debouncedHref === href.trim() && isLinkTextForHref(text, previewHref)
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedHref(href.trim()), 400)
@@ -389,39 +394,24 @@ export function LinkMenu({
   readOnly = false,
 }: LinkMenuProps): ReactNode {
   const editor: TypedEditor = useEditor<EditorExtension>()
-  const [hover, setHover] = useState<LinkUnit>()
-  const [tap, setTap] = useState<LinkUnit>()
-  const [onLink, setOnLink] = useState(false)
-  const [overPopup, setOverPopup] = useState(false)
+  const [hit, setHit] = useState<LinkUnit>()
   const [edit, setEdit] = useState<LinkEditOptions>()
   const [editOpen, setEditOpen] = useState(false)
   const [displayedRead, setDisplayedRead] = useState<LinkUnit>()
-  const hoverOpen = useDelayedFlag(onLink || overPopup)
+  const overPopupRef = useRef(false)
 
   const linkHoverExtension = useMemo(
     () =>
-      defineLinkHoverHandler((hit) => {
-        setOnLink(!!hit)
-        if (hit) {
-          setHover(hit.payload)
-          setDisplayedRead(hit.payload)
-        }
-      }),
+      defineLinkHoverHandler(
+        (nextHit) => {
+          setHit(nextHit?.payload)
+          if (nextHit) setDisplayedRead(nextHit.payload)
+        },
+        { canLeave: () => !overPopupRef.current },
+      ),
     [],
   )
   useExtension(linkHoverExtension)
-
-  const linkTapExtension = useMemo(
-    () =>
-      defineLinkTapHandler(({ link }) => {
-        setTap(link)
-        setDisplayedRead(link)
-        setOnLink(false)
-        setHover(undefined)
-      }),
-    [],
-  )
-  useExtension(linkTapExtension)
 
   const linkEditExtension = useMemo(
     () =>
@@ -430,17 +420,15 @@ export function LinkMenu({
         : defineLinkEditKeymap((options) => {
             setEdit(options)
             setEditOpen(true)
-            setTap(undefined)
+            setHit(undefined)
           }),
     [readOnly],
   )
   useExtension(linkEditExtension)
 
   const closeRead = useCallback(() => {
-    setOnLink(false)
-    setOverPopup(false)
-    setHover(undefined)
-    setTap(undefined)
+    overPopupRef.current = false
+    setHit(undefined)
   }, [])
 
   const closeEdit = useCallback(() => {
@@ -448,7 +436,7 @@ export function LinkMenu({
     closeRead()
   }, [closeRead])
 
-  const requestedRead = tap ?? (hoverOpen ? hover : undefined)
+  const requestedRead = hit
   const previewState = useLinkPreview(displayedRead?.href, resolveLinkPreview)
   const range = edit ? (edit.link?.text ?? edit) : displayedRead?.text
   const anchor: VirtualElement | undefined = useMemo(() => {
@@ -480,7 +468,13 @@ export function LinkMenu({
           }
           onSubmit={(text, href) => {
             if (edit.link) {
-              editor.commands.updateLink({ text, href, title: edit.link.title })
+              // An unchanged label passes no `text`: passing it rebuilds the
+              // whole unit and strips authored Markdown like `[**Docs**](...)`.
+              editor.commands.updateLink({
+                text: text === edit.text ? undefined : text,
+                href,
+                title: edit.link.title,
+              })
             } else {
               editor.commands.insertLink({ text, href })
             }
@@ -520,7 +514,9 @@ export function LinkMenu({
         onCloseComplete={() => {
           if (!requestedRead) setDisplayedRead(undefined)
         }}
-        onPopupHover={setOverPopup}
+        onPopupHover={(over) => {
+          overPopupRef.current = over
+        }}
       >
         <LinkInfoContent
           href={displayedRead.href}

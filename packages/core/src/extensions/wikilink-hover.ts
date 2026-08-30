@@ -32,6 +32,11 @@ export function defineWikilinkHoverHandler(onHoverChange: WikilinkHoverHandler):
   return defineMarkHoverHandler<WikilinkHit>({
     key: wikilinkHoverKey,
     selector: '.md-wikilink-view-preview',
+    // WikilinkHoverCard owns the dwell and grace, and a touch tap must keep
+    // navigating: the card is inert.
+    openDelay: 0,
+    closeDelay: 0,
+    tap: false,
     findPayloadAt: findWikilinkAt,
     findPayloadForElement: findWikilinkForElement,
     isSamePayload: (previous, next) => previous.target === next.target,
