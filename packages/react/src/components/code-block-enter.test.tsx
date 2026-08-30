@@ -33,18 +33,23 @@ describe('enter after a composition commit', () => {
     view.focus()
   }
 
-  // See `code-block-enter-guard.test.ts` in the core package: synthetic
-  // composition events arm prosemirror-view's post-composition keydown
-  // swallow, so the following real Enter reaches WebKit's native editing.
-  function fakeCompositionCommit(view: EditorView) {
-    view.dom.dispatchEvent(new CompositionEvent('compositionstart'))
-    view.dom.dispatchEvent(new CompositionEvent('compositionend'))
+  // prosemirror-view swallows the first Safari keydown within 500ms after
+  // `compositionend` without `preventDefault`, handing the key to the
+  // browser's native editing (WebKit fires `compositionend` before the keydown
+  // that commits an IME composition, so that keydown reads as a likely IME
+  // confirmation). No automation driver can run a real IME, so stamp the
+  // timestamp prosemirror-view records from that `compositionend`; the Enter
+  // pressed afterwards stays a real key whose native default action runs.
+  function armPostCompositionWindow(view: EditorView) {
+    const input = (view as EditorView & { input?: { compositionEndedAt: number } }).input
+    if (input == null) throw new Error('prosemirror-view no longer exposes view.input')
+    input.compositionEndedAt = Date.now()
   }
 
   it('keeps one pre and no rogue br at the start of the code text', async () => {
     const { ref, view } = await setupCodeBlockEditor()
     placeCaret(view, 1)
-    fakeCompositionCommit(view)
+    armPostCompositionWindow(view)
     await userEvent.keyboard('{Enter}')
     await vi.waitFor(() => {
       expect(ref.current?.getMarkdown()).toContain('```js\n\nfoobar\n```')
@@ -56,7 +61,7 @@ describe('enter after a composition commit', () => {
   it('keeps the text before the caret in the middle of the code text', async () => {
     const { ref, view } = await setupCodeBlockEditor()
     placeCaret(view, 4)
-    fakeCompositionCommit(view)
+    armPostCompositionWindow(view)
     await userEvent.keyboard('{Enter}')
     await vi.waitFor(() => {
       expect(ref.current?.getMarkdown()).toContain('```js\nfoo\nbar\n```')
