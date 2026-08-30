@@ -14,18 +14,23 @@ export interface CaretRect {
 }
 
 // The collapsed native selection range. The browser resolves fonts,
-// baselines, and bidi for us. At a line wrap Chrome reports two rects and the
-// last one is the start of the next visual line, which is where the caret
-// belongs.
+// baselines, and bidi for us.
 export function findNativeCaretRect(view: EditorView): CaretRect | undefined {
   const selection = view.dom.ownerDocument.getSelection()
   if (selection == null || selection.rangeCount === 0) return undefined
   if (!view.dom.contains(selection.anchorNode)) return undefined
   const range = selection.getRangeAt(0).cloneRange()
   range.collapse(true)
+  return findLastRangeRect(range)
+}
+
+// The last line fragment of a collapsed range. At a line wrap Chrome reports
+// two rects and the last one is the start of the next visual line, which is
+// where the caret belongs.
+function findLastRangeRect(range: Range): CaretRect | undefined {
   const rects = Array.from(range.getClientRects()).filter((rect) => rect.height > 0)
-  if (rects.length === 0) return undefined
   const rect = rects[rects.length - 1]
+  if (rect == null) return undefined
   return { left: rect.left, top: rect.top, height: rect.height }
 }
 
@@ -48,13 +53,16 @@ export function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   // newline's own rect (side -1) always lies on the previous line, which tells
   // the lie apart: a caret at a soft line start must measure strictly below it.
   const previousLineTop = afterLineBreak ? tryCoordsAtPos(view, head, -1)?.top : undefined
-  const preferredBeforeSide: boolean = runBefore == null && !afterLineBreak
-  // `side` picks which neighbor to measure: -1 the character before the
-  // position, 1 the character after it.
-  const probes: [pos: number, beforeSide: boolean][] = [
-    [head, preferredBeforeSide],
-    [head, !preferredBeforeSide],
-  ]
+  // `beforeSide` picks which neighbor to measure: true the character before
+  // the position, false the character after it. At a soft line start only the
+  // after side is meaningful: the before side would measure the newline,
+  // which is the previous-line baseline itself.
+  const probes: [pos: number, beforeSide: boolean][] = afterLineBreak
+    ? [[head, false]]
+    : [
+        [head, runBefore == null],
+        [head, runBefore != null],
+      ]
   if (runBefore != null) probes.push([runBefore.from, true])
   if (runAfter != null) probes.push([runAfter.to, false])
   for (const [pos, beforeSide] of probes) {
@@ -80,10 +88,7 @@ function findCollapsedRangeRect(view: EditorView, pos: number): CaretRect | unde
     const range = view.dom.ownerDocument.createRange()
     range.setStart(node, offset)
     range.collapse(true)
-    const rects = Array.from(range.getClientRects()).filter((rect) => rect.height > 0)
-    if (rects.length === 0) return undefined
-    const rect = rects[rects.length - 1]
-    return { left: rect.left, top: rect.top, height: rect.height }
+    return findLastRangeRect(range)
   } catch {
     return undefined
   }
