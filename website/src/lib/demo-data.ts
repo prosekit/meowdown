@@ -1,4 +1,5 @@
-import type { TagItem, WikilinkItem } from '@meowdown/react'
+import type { LinkPreview, TagItem, WikilinkItem } from '@meowdown/react'
+import { sleep } from '@ocavue/utils'
 
 import catCareBasics from '../presets/notes/cat-care-basics.md?raw'
 import dailyJournal from '../presets/notes/daily-journal.md?raw'
@@ -30,6 +31,21 @@ export function handleTagClick({ tag }: { tag: string }): void {
 
 export function handleWikilinkClick({ target }: { target: string }): void {
   window.alert(`Clicked wikilink: ${target}`)
+}
+
+// Metadata for the link preview popup, derived from the URL itself so any
+// typed link resolves without a per-site table. Stands in for the metadata
+// fetch a real host would do.
+export async function resolveLinkPreview(href: string): Promise<LinkPreview> {
+  // Simulate a metadata round-trip so the loading skeleton shows up.
+  await sleep(600)
+  const hostname = new URL(href).hostname
+  const label = hostname.replace(/^www\./, '').split('.')[0]
+  return {
+    title: label.charAt(0).toUpperCase() + label.slice(1),
+    description: `Demo preview for ${href}`,
+    iconSrc: `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
+  }
 }
 
 // Demo note contents for the wikilink hover cards, one .md file per note
