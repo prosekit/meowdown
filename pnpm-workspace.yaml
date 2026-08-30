@@ -20,7 +20,7 @@ minimumReleaseAgeExclude:
   - '@aria-ui/*'
   - '@prosemirror-adapter/*'
   - prosemirror-view
-  - astro-theme-toggle@0.8.2
+  - eslint-plugin-ocavue
 
 allowBuilds:
   esbuild: false
