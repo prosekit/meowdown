@@ -1,7 +1,5 @@
 import '../testing/index.ts'
 
-import { TextSelection } from '@prosekit/pm/state'
-import type { EditorView } from '@prosekit/pm/view'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -11,45 +9,36 @@ import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle } from './types.ts'
 
 const pmRoot = page.locate('.ProseMirror')
-const tokens = pmRoot.locate('pre code [class*="tok-"]')
+const codeText = pmRoot.locate('pre code')
+const tokens = codeText.locate('[class*="tok-"]')
 const rogueBreak = pmRoot.locate('br:not(.ProseMirror-trailingBreak)')
 
 const CODE_BLOCK_MD = '```js\nfoobar\n```'
 
-describe('enter after a composition commit', () => {
+// In the `react-webkit-ios` project this file runs with an iPhone Safari user
+// agent, where prosemirror-view hands every plain Enter in a code block to
+// WebKit's native editing; in the regular project the same gestures pin the
+// desktop behavior. Every step is a user gesture: click, arrow keys, Enter.
+describe('enter inside a code block', () => {
   async function setupCodeBlockEditor() {
     const ref = createRef<EditorHandle>()
     await render(<ProseKitEditor ref={ref} initialMarkdown={CODE_BLOCK_MD} />)
-    // WebKit's clone-split only takes its production shape once highlight
-    // token spans wrap the code text.
+    // The corruption only takes its production shape once highlight token
+    // spans wrap the code text.
     await expect.element(tokens.first(), { timeout: 15000 }).toBeInTheDocument()
-    const view = ref.current?.editor?.view
-    if (!view) throw new Error('editor not mounted')
-    return { ref, view }
+    return ref
   }
 
-  function placeCaret(view: EditorView, position: number) {
-    view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, position)))
-    view.focus()
+  // Click into the code text, then walk left to the line start: six presses
+  // cover every caret position `foobar` allows.
+  async function moveCaretToCodeStart() {
+    await codeText.click()
+    await userEvent.keyboard('{ArrowLeft}'.repeat(6))
   }
 
-  // prosemirror-view swallows the first Safari keydown within 500ms after
-  // `compositionend` without `preventDefault`, handing the key to the
-  // browser's native editing (WebKit fires `compositionend` before the keydown
-  // that commits an IME composition, so that keydown reads as a likely IME
-  // confirmation). No automation driver can run a real IME, so stamp the
-  // timestamp prosemirror-view records from that `compositionend`; the Enter
-  // pressed afterwards stays a real key whose native default action runs.
-  function armPostCompositionWindow(view: EditorView) {
-    const input = (view as EditorView & { input?: { compositionEndedAt: number } }).input
-    if (input == null) throw new Error('prosemirror-view no longer exposes view.input')
-    input.compositionEndedAt = Date.now()
-  }
-
-  it('keeps one pre and no rogue br at the start of the code text', async () => {
-    const { ref, view } = await setupCodeBlockEditor()
-    placeCaret(view, 1)
-    armPostCompositionWindow(view)
+  it('inserts a newline at the start of the code text', async () => {
+    const ref = await setupCodeBlockEditor()
+    await moveCaretToCodeStart()
     await userEvent.keyboard('{Enter}')
     await vi.waitFor(() => {
       expect(ref.current?.getMarkdown()).toContain('```js\n\nfoobar\n```')
@@ -58,10 +47,10 @@ describe('enter after a composition commit', () => {
     await expect.element(rogueBreak).not.toBeInTheDocument()
   })
 
-  it('keeps the text before the caret in the middle of the code text', async () => {
-    const { ref, view } = await setupCodeBlockEditor()
-    placeCaret(view, 4)
-    armPostCompositionWindow(view)
+  it('keeps the text before the caret when pressing enter mid-line', async () => {
+    const ref = await setupCodeBlockEditor()
+    await moveCaretToCodeStart()
+    await userEvent.keyboard('{ArrowRight}'.repeat(3))
     await userEvent.keyboard('{Enter}')
     await vi.waitFor(() => {
       expect(ref.current?.getMarkdown()).toContain('```js\nfoo\nbar\n```')
