@@ -34,8 +34,9 @@ const DEMO_COMMANDS: DemoCommand[] = [
     detail: 'Every word becomes meow',
     mode: 'replace',
     transform: (selectedText) => {
-      return selectedText.replaceAll(/\p{L}+/gu, (word) => { return /^\p{Lu}/u.test(word) ? 'Meow' : 'meow' },
-      )
+      return selectedText.replaceAll(/\p{L}+/gu, (word) => {
+        return /^\p{Lu}/u.test(word) ? 'Meow' : 'meow'
+      })
     },
   },
   {
