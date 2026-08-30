@@ -1,10 +1,13 @@
 import type { EditorState } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
+import { page } from 'vitest/browser'
 
 import { findText } from '../testing/find-text.ts'
 import { setupFixture } from '../testing/index.ts'
 
 import { getLinkUnitAt } from './get-link-unit-at.ts'
+
+const pmRoot = page.locate('.ProseMirror')
 
 describe('insertLink', () => {
   it('wraps the selection as a link', () => {
@@ -136,13 +139,14 @@ describe('updateLink', () => {
 })
 
 /**
- * Assert no link unit remains anywhere: `textContent` alone cannot prove
+ * Assert nothing linkable remains anywhere: `textContent` alone cannot prove
  * unlinking, because re-autolinked text keeps identical source characters
- * and only the marks change.
+ * and only the marks change. An unlinked URL still reports its `noLink` unit.
  */
 function expectNoLink(state: EditorState): void {
   for (let pos = 0; pos <= state.doc.content.size; pos++) {
-    expect(getLinkUnitAt(state, pos)).toBeUndefined()
+    const unit = getLinkUnitAt(state, pos)
+    if (unit) expect(unit.form).toBe('noLink')
   }
 }
 
@@ -228,5 +232,49 @@ describe('removeLink', () => {
 
     expect(editor.commands.removeLink()).toBe(false)
     expect(fixture.doc.textContent).toContain('[Docs][doc]')
+  })
+})
+
+describe('relinkURL', () => {
+  it('deletes the magic comment so the address autolinks again', async () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('see https://example.com<!-- {"noLink":true} --> now')))
+    editor.commands.selectText(findText(fixture.doc, 'example.com') + 1)
+    expect(editor.commands.relinkURL()).toBe(true)
+    expect(fixture.doc.child(0).textContent).toBe('see https://example.com now')
+    await expect
+      .element(pmRoot.getByRole('link', { name: 'https://example.com' }))
+      .toBeInTheDocument()
+  })
+
+  it('declines on a real link', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('see https://example.com now')))
+    editor.commands.selectText(findText(fixture.doc, 'example.com') + 1)
+    expect(editor.commands.relinkURL()).toBe(false)
+  })
+
+  it('removeLink declines on an already unlinked URL', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('see https://example.com<!-- {"noLink":true} --> now')))
+    editor.commands.selectText(findText(fixture.doc, 'example.com') + 1)
+    expect(editor.commands.removeLink()).toBe(false)
+    expect(fixture.doc.child(0).textContent).toBe(
+      'see https://example.com<!-- {"noLink":true} --> now',
+    )
+  })
+
+  it('updateLink replaces the whole unit, comment included', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('see https://example.com<!-- {"noLink":true} --> now')))
+    editor.commands.selectText(findText(fixture.doc, 'example.com') + 1)
+    expect(editor.commands.updateLink({ href: 'https://other.dev' })).toBe(true)
+    expect(fixture.doc.child(0).textContent).toBe(
+      'see [https://example.com](https://other.dev) now',
+    )
   })
 })

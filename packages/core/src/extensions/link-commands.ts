@@ -181,7 +181,7 @@ export function updateLink(attrs: LinkAttrs): Command {
 export function removeLink(): Command {
   return (state, dispatch) => {
     const link = getLinkUnitAt(state, state.selection.from)
-    if (!link || link.form === 'reference') return false
+    if (!link || link.form === 'reference' || link.form === 'noLink') return false
     if (dispatch) {
       const text = getLinkText(link)
       // Keep authored label Markdown intact when it cannot immediately become
@@ -201,14 +201,27 @@ export function removeLink(): Command {
   }
 }
 
+/**
+ * Delete the trailing `noLink` magic comment so the address autolinks again.
+ */
+export function relinkURL(): Command {
+  return (state, dispatch) => {
+    const link = getLinkUnitAt(state, state.selection.from)
+    if (!link || link.form !== 'noLink' || link.text.to === link.unit.to) return false
+    dispatch?.(state.tr.delete(link.text.to, link.unit.to).scrollIntoView())
+    return true
+  }
+}
+
 export function defineLinkCommands(): Extension<{
   Commands: {
     insertLink: [options?: InsertLinkOptions]
     updateLink: [attrs: LinkAttrs]
     removeLink: []
+    relinkURL: []
   }
 }> {
-  return defineCommands({ insertLink, updateLink, removeLink })
+  return defineCommands({ insertLink, updateLink, removeLink, relinkURL })
 }
 
 export interface LinkEditOptions {
