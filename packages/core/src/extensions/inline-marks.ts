@@ -279,11 +279,11 @@ export type MdPackAttrs =
       revealInHide?: null
     }
   | {
-      // A URL opted out of autolinking by a trailing `<!-- {"autolink":false} -->`
+      // A URL opted out of autolinking by a trailing `<!-- {"unlinked":true} -->`
       // magic comment (written by `removeLink`): the address is plain visible
       // text, and the comment is hidden syntax revealed in focus so it can be
       // edited in place.
-      key: 'noLink'
+      key: 'unlinked'
       data?: null
       slot?: 1 | null
       revealInFocus: true

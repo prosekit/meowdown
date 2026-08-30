@@ -16,10 +16,10 @@ describe('parseMagicComment', () => {
     expect(parseMagicComment('<!-- {"height":240} -->')).toEqual({ height: 240 })
   })
 
-  it('reads an autolink opt-out and rejects other values', () => {
-    expect(parseMagicComment('<!-- {"autolink":false} -->')).toEqual({ autolink: false })
-    expect(parseMagicComment('<!-- {"autolink":true} -->')).toBeUndefined()
-    expect(parseMagicComment('<!-- {"autolink":0} -->')).toBeUndefined()
+  it('reads an unlinked flag and rejects other values', () => {
+    expect(parseMagicComment('<!-- {"unlinked":true} -->')).toEqual({ unlinked: true })
+    expect(parseMagicComment('<!-- {"unlinked":false} -->')).toBeUndefined()
+    expect(parseMagicComment('<!-- {"unlinked":1} -->')).toBeUndefined()
   })
 
   it('rounds width and height, and rejects junk', () => {

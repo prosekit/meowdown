@@ -13,10 +13,10 @@ export interface MagicComment {
    */
   height?: number
   /**
-   * Whether the URL directly before the comment may autolink. `false` keeps
-   * it plain text.
+   * Whether the URL directly before the comment stays plain text instead of
+   * autolinking.
    */
-  autolink?: boolean
+  unlinked?: boolean
 }
 
 // A whole inline comment carrying a JSON object: `<!-- {...} -->`.
@@ -44,12 +44,12 @@ export function parseMagicComment(comment: string): MagicComment | undefined {
 
   const width = toPositiveNumber(data.width)
   const height = toPositiveNumber(data.height)
-  const autolink = data.autolink === false ? false : undefined
+  const unlinked = data.unlinked === true ? true : undefined
 
   // Not a magic comment unless it carries at least one recognized field.
-  if (!width && !height && autolink === undefined) return
+  if (!width && !height && !unlinked) return
 
-  return { width, height, autolink }
+  return { width, height, unlinked }
 }
 
 function toPositiveNumber(value: unknown): number | undefined {
