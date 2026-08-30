@@ -140,21 +140,18 @@ function isLossy(input: string): boolean {
   return checkRoundTrip(input) === 'lossy'
 }
 
-let testIndex = 0
 for (const [minLength, maxLength] of RANGES) {
   for (const { name, pool } of POOLS) {
-    testIndex++
-    const seed = SEED + testIndex
     it(
       `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, pool=${name})`,
       { timeout: 60_000 },
       async () => {
-        const pickString = createStringPicker(seed, minLength, maxLength, pool)
+        const pickString = createStringPicker(SEED, minLength, maxLength, pool)
         for (let sample = 1; sample <= NUM_SAMPLES; sample++) {
           const input = pickString()
           if (isLossy(input)) {
             throw new Error(
-              `lossy input (seed=${seed}, sample=${sample}, input=${JSON.stringify(input)})`,
+              `lossy input (seed=${SEED}, sample=${sample}, input=${JSON.stringify(input)})`,
             )
           }
           if (sample % 5_000 === 0) {
