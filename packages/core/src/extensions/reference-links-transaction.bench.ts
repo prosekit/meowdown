@@ -75,12 +75,12 @@ function wakeEditor(editor: TestEditor<EditorExtension>): void {
 function createOrdinaryEditScenario(blockCount: number, definitionCount: number): Scenario {
   const editor = createTestEditor({ extension: defineEditorExtension() })
   const n = editor.nodes
-  const paragraphs = Array.from({ length: blockCount }, (_, index) =>
-    n.paragraph(index === 0 ? 'plain target x' : `plain paragraph ${index}`),
-  )
-  const definitions = Array.from({ length: definitionCount }, (_, index) =>
-    n.paragraph(`[definition-${index}]: /destination/${index}`),
-  )
+  const paragraphs = Array.from({ length: blockCount }, (_, index) => {
+    return n.paragraph(index === 0 ? 'plain target x' : `plain paragraph ${index}`)
+  })
+  const definitions = Array.from({ length: definitionCount }, (_, index) => {
+    return n.paragraph(`[definition-${index}]: /destination/${index}`)
+  })
   editor.set(n.doc(...paragraphs, ...definitions))
   wakeEditor(editor)
   return { editor, position: findText(editor.state.doc, 'x'), next: 'y' }
@@ -93,15 +93,15 @@ function createDefinitionEditScenario(
 ): Scenario {
   const editor = createTestEditor({ extension: defineEditorExtension() })
   const n = editor.nodes
-  const dependents = Array.from({ length: dependentCount }, (_, index) =>
-    n.paragraph(`dependent ${index} [target][definition-0]`),
-  )
-  const ordinary = Array.from({ length: blockCount - dependentCount }, (_, index) =>
-    n.paragraph(`ordinary paragraph ${index}`),
-  )
-  const definitions = Array.from({ length: definitionCount }, (_, index) =>
-    n.paragraph(`[definition-${index}]: /destination/${index}/x`),
-  )
+  const dependents = Array.from({ length: dependentCount }, (_, index) => {
+    return n.paragraph(`dependent ${index} [target][definition-0]`)
+  })
+  const ordinary = Array.from({ length: blockCount - dependentCount }, (_, index) => {
+    return n.paragraph(`ordinary paragraph ${index}`)
+  })
+  const definitions = Array.from({ length: definitionCount }, (_, index) => {
+    return n.paragraph(`[definition-${index}]: /destination/${index}/x`)
+  })
   editor.set(n.doc(...dependents, ...ordinary, ...definitions))
   wakeEditor(editor)
   return { editor, position: findText(editor.state.doc, '/destination/0/x') + 15, next: 'y' }
@@ -133,21 +133,21 @@ describe('ordinary edit', () => {
   registerScenario('1000 blocks, 400 definitions', () => createOrdinaryEditScenario(1_000, 400))
   registerScenario('1000 blocks, 1000 definitions', () => createOrdinaryEditScenario(1_000, 1_000))
   registerScenario('4000 blocks, 20 definitions', () => createOrdinaryEditScenario(4_000, 20))
-  registerScenario('16000 blocks, 1000 definitions', () =>
-    createOrdinaryEditScenario(16_000, 1_000),
-  )
+  registerScenario('16000 blocks, 1000 definitions', () => {
+    return createOrdinaryEditScenario(16_000, 1_000)
+  })
 })
 
 describe('definition keystroke', () => {
-  registerScenario('1000 blocks, 100 dependents, 20 definitions', () =>
-    createDefinitionEditScenario(1_000, 100, 20),
-  )
-  registerScenario('4000 blocks, 400 dependents, 20 definitions', () =>
-    createDefinitionEditScenario(4_000, 400, 20),
-  )
-  registerScenario('1000 blocks, 1000 dependents, 20 definitions', () =>
-    createDefinitionEditScenario(1_000, 1_000, 20),
-  )
+  registerScenario('1000 blocks, 100 dependents, 20 definitions', () => {
+    return createDefinitionEditScenario(1_000, 100, 20)
+  })
+  registerScenario('4000 blocks, 400 dependents, 20 definitions', () => {
+    return createDefinitionEditScenario(4_000, 400, 20)
+  })
+  registerScenario('1000 blocks, 1000 dependents, 20 definitions', () => {
+    return createDefinitionEditScenario(1_000, 1_000, 20)
+  })
 })
 
 describe('definition edit and flush', () => {
@@ -171,12 +171,12 @@ describe('definition edit and flush', () => {
 function createIndexDocument(blockCount: number, definitionCount: number): EditorNode {
   const editor = createTestEditor({ extension: defineEditorExtension() })
   const n = editor.nodes
-  const paragraphs = Array.from({ length: blockCount }, (_, index) =>
-    n.paragraph(`plain paragraph ${index}`),
-  )
-  const definitions = Array.from({ length: definitionCount }, (_, index) =>
-    n.paragraph(`[definition-${index}]: /destination/${index}`),
-  )
+  const paragraphs = Array.from({ length: blockCount }, (_, index) => {
+    return n.paragraph(`plain paragraph ${index}`)
+  })
+  const definitions = Array.from({ length: definitionCount }, (_, index) => {
+    return n.paragraph(`[definition-${index}]: /destination/${index}`)
+  })
   return n.doc(...paragraphs, ...definitions)
 }
 

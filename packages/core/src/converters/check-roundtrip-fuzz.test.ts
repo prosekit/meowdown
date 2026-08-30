@@ -1,19 +1,22 @@
-import fc from 'fast-check'
+import { createStringPicker } from '@meowdown/vitest/random'
 import { it } from 'vitest'
+import { requestGC } from 'vitest-browser-commands/playwright'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
 
 // Use a fixed seed from the environment variable for reproducibility, or fallback to a random seed
-const SEED = Number.parseInt(import.meta.env.VITE_FUZZ_SEED || '') || Date.now() % (1 << 30)
+const SEED = Number.parseInt(import.meta.env.VITE_FUZZ_SEED || '') || Date.now()
 
-const NUM_RUNS = 100_000
+const NUM_SAMPLES = 100_000
 
 /// keep-sorted
-const TOKENS_STRUCTURAL: string[] = [
+const TOKENS_NEWLINE: readonly string[] = ['\n']
+
+/// keep-sorted
+const TOKENS_STRUCTURAL: readonly string[] = [
   ' ',
   '-',
   '*',
-  '\n',
   '\t',
   '#',
   '`',
@@ -26,7 +29,7 @@ const TOKENS_STRUCTURAL: string[] = [
 ]
 
 /// keep-sorted
-const TOKENS_BASE: string[] = [
+const TOKENS_BASE: readonly string[] = [
   '_',
   ',',
   ';',
@@ -66,7 +69,7 @@ const TOKENS_BASE: string[] = [
 ]
 
 /// keep-sorted
-const TOKENS_EXTENDED: string[] = [
+const TOKENS_EXTENDED: readonly string[] = [
   '’',
   '«',
   '\f',
@@ -84,17 +87,17 @@ const TOKENS_EXTENDED: string[] = [
 ]
 
 /// keep-sorted
-const TOKENS_RUNS: string[] = [
+const TOKENS_RUNS: readonly string[] = [
   '---',
   '-->',
   '```',
   '````',
   '<!--',
   '<?',
-  '<<<<<<< ',
-  '===',
-  '> ',
-  '>>>>>>> ',
+  '<'.repeat(7),
+  '='.repeat(7),
+  '>'.repeat(7),
+  '>',
   '| --- |',
   '~~~',
   '~~~~',
@@ -102,16 +105,27 @@ const TOKENS_RUNS: string[] = [
   '1. ',
 ]
 
-const UNITS = [
-  { name: 'base', unit: fc.constantFrom(...TOKENS_BASE, ...TOKENS_RUNS) },
-  { name: 'extended', unit: fc.constantFrom(...TOKENS_BASE, ...TOKENS_RUNS, ...TOKENS_EXTENDED) },
+function repeat(tokens: readonly string[], times: number): string[] {
+  return Array.from({ length: times }, () => tokens).flat()
+}
+
+const POOLS = [
+  {
+    name: 'base',
+    pool: [...TOKENS_BASE, ...TOKENS_RUNS],
+  },
+  {
+    name: 'extended',
+    pool: [...TOKENS_NEWLINE, ...TOKENS_BASE, ...TOKENS_RUNS, ...TOKENS_EXTENDED],
+  },
   {
     name: 'weighted',
-    unit: fc.oneof(
-      { arbitrary: fc.constant('\n'), weight: 20 },
-      { arbitrary: fc.constantFrom(...TOKENS_STRUCTURAL), weight: 40 },
-      { arbitrary: fc.constantFrom(...TOKENS_BASE, ...TOKENS_RUNS), weight: 40 },
-    ),
+    pool: [
+      ...TOKENS_BASE,
+      ...TOKENS_RUNS,
+      ...repeat(TOKENS_STRUCTURAL, 3),
+      ...repeat(TOKENS_NEWLINE, 10),
+    ],
   },
 ] as const
 
@@ -122,33 +136,29 @@ const RANGES = [
   [201, 500],
 ] as const
 
-for (const [minLength, maxLength] of RANGES) {
-  for (const unit of UNITS) {
-    it(
-      `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, unit=${unit.name})`,
-      { timeout: 60_000 },
-      () => {
-        fc.assert(
-          fc.property(
-            fc.string({
-              unit: unit.unit,
-              minLength,
-              maxLength,
-              size: 'max',
-            }),
-            check,
-          ),
-          { seed: SEED, numRuns: NUM_RUNS, verbose: true },
-        )
-      },
-    )
-  }
+function isLossy(input: string): boolean {
+  return checkRoundTrip(input) === 'lossy'
 }
 
-function check(input: string): boolean {
-  try {
-    return checkRoundTrip(input) !== 'lossy'
-  } catch {
-    return false
+for (const [minLength, maxLength] of RANGES) {
+  for (const { name, pool } of POOLS) {
+    it(
+      `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, pool=${name})`,
+      { timeout: 60_000 },
+      async () => {
+        const pickString = createStringPicker(SEED, minLength, maxLength, pool)
+        for (let sample = 1; sample <= NUM_SAMPLES; sample++) {
+          const input = pickString()
+          if (isLossy(input)) {
+            throw new Error(
+              `lossy input (seed=${SEED}, sample=${sample}, input=${JSON.stringify(input)})`,
+            )
+          }
+          if (sample % 5_000 === 0) {
+            await requestGC()
+          }
+        }
+      },
+    )
   }
 }

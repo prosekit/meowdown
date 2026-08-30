@@ -60,6 +60,7 @@ the current block to that level (or back to a paragraph).
 | `Mod-5`                | Heading 5                                                 | `##### heading`     |
 | `Mod-6`                | Heading 6                                                 | `###### heading`    |
 | `Mod-.`                | Fold or unfold a bullet                                   |                     |
+| `Shift-Enter`          | Insert a line break                                       |                     |
 | `Mod-Enter`            | Follow the link under the caret, or cycle a checkbox task | `- [ ]` / `- [x]`   |
 | `Mod-Shift-Enter`      | Cycle a circle checkbox task                              | `+ [ ]` / `+ [x]`   |
 | `Mod-Shift-7`          | Ordered list                                              | `1. item`           |

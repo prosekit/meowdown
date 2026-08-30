@@ -5,7 +5,7 @@ import type { EditorView } from '@prosekit/pm/view'
 
 import { forceReflow } from '../utils/force-reflow.ts'
 import { getIsTouchInput, onIsTouchInputChange } from '../utils/input-modality.ts'
-import { isAfterLineBreak } from '../utils/is-after-line-break.ts'
+import { isAfterLineBreak } from '../utils/line-break.ts'
 
 import {
   findAtomCaretRect,
@@ -138,7 +138,7 @@ class VirtualCaretView implements PluginView {
       return
     }
 
-    const skipNativeCaretRect = isAfterLineBreak(view.state, view.state.selection.head)
+    const skipNativeCaretRect = isAfterLineBreak(selection.$head)
     const nativeRect = skipNativeCaretRect ? undefined : findNativeCaretRect(view)
 
     // Use the native rect if it exists and the last input modality was touch.

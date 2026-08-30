@@ -7,6 +7,8 @@ import { isMarkOfType, type MarkName } from './mark-names.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 
 interface LinkUnitBase {
+  state: EditorState
+
   /**
    * Whole inline link, reference link, or autolink range.
    */
@@ -90,34 +92,50 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
   // A position inside nested units carries one `mdPack` per level, so select
   // the pack by `key`: a link inside `**bold**` must find its own pack, not
   // the outer unit's.
-  const unit = getMarkRangeAt(state, pos, 'mdPack', { key: 'link' } satisfies Partial<MdPackAttrs>)
+  const unit = getMarkRangeAt(state, pos, 'mdPack', (mark) => {
+    return (mark.attrs as MdPackAttrs).key.startsWith('link-')
+  })
   if (!unit) return
 
-  const { data } = unit.mark.attrs as Extract<MdPackAttrs, { key: 'link' }>
+  const attrs = unit.mark.attrs as Extract<MdPackAttrs, { key: `link-${string}` }>
   const unitRange = { from: unit.from, to: unit.to }
 
-  switch (data.form) {
+  switch (attrs.key) {
     // A bare autolink is its own visible text.
-    case 'bare':
-      return { form: 'bare', unit: unitRange, text: unitRange, href: data.href, title: '' }
+    case 'link-bare':
+      return {
+        state,
+        form: 'bare',
+        unit: unitRange,
+        text: unitRange,
+        href: attrs.data.href,
+        title: '',
+      }
 
     // An angle autolink's visible text is its interior: the grammar fixes the
     // hidden `<`/`>` at one character each.
-    case 'angle': {
+    case 'link-angle': {
       const text = { from: unit.from + 1, to: unit.to - 1 }
-      return { form: 'angle', unit: unitRange, text, href: data.href, title: '' }
+      return { state, form: 'angle', unit: unitRange, text, href: attrs.data.href, title: '' }
     }
 
     // A reference link's href/title live in its definition, so only its
     // visible label is editable in place.
-    case 'reference': {
+    case 'link-reference': {
       const linkText = getMarkRangeAt(state, pos, 'mdLinkText')
       const text = linkText == null ? unitRange : { from: linkText.from + 1, to: linkText.to }
-      return { form: 'reference', unit: unitRange, text, href: data.href, title: data.title }
+      return {
+        state,
+        form: 'reference',
+        unit: unitRange,
+        text,
+        href: attrs.data.href,
+        title: attrs.data.title,
+      }
     }
 
     // Only a real `[text](dest)` has an editable label/dest.
-    case 'inline': {
+    case 'link-inline': {
       // `[` at unit.from, `)` at unit.to - 1. With a url, `]` sits two chars
       // before the url start (`](`); with an empty `()`, `]` is two chars
       // before the `)`.
@@ -127,13 +145,14 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
 
       const label = { from: unit.from + 1, to: closeBracket }
       return {
+        state,
         form: 'inline',
         unit: unitRange,
         text: label,
         label,
         dest: { from: destFrom, to: unit.to - 1 },
-        href: data.href,
-        title: data.title,
+        href: attrs.data.href,
+        title: attrs.data.title,
       }
     }
   }

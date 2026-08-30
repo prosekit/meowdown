@@ -25,6 +25,10 @@
     /* links, wikilinks, tags, caret, drop indicator */
     --meowdown-accent: light-dark(oklch(0.646 0.194 41), oklch(0.758 0.159 56));
 
+    /* text on an accent-filled surface: the dark-mode accent is light, so it
+     * needs dark text to stay readable */
+    --meowdown-accent-contrast: light-dark(oklch(1 0 0), oklch(0.21 0.006 286));
+
     /* the self-drawn caret */
     --meowdown-caret: var(--meowdown-accent);
 
@@ -100,6 +104,12 @@
 
     /* highlighted/hovered row in those menus */
     --meowdown-popover-hover-bg: light-dark(oklch(0.967 0 0), oklch(0.274 0.005 286));
+
+    /* link and wiki-link hover card surface */
+    --meowdown-hover-card-border: var(--meowdown-border);
+    --meowdown-hover-card-radius: 0.75rem;
+    --meowdown-hover-card-shadow:
+      0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 
     /* destructive menu items */
     --meowdown-danger: light-dark(oklch(0.637 0.208 25), oklch(0.711 0.166 22));
@@ -749,6 +759,17 @@
    * real element a `.show` decoration can land inside. */
   .ProseMirror .md-pack {
     display: contents;
+  }
+
+  /* The `noLink` unit is the one pack whose visible text has no inner mark
+   * element. WebKit resolves the caret color from the text's parent element
+   * renderer, and `display: contents` has none: the native caret then paints
+   * fallback black, ignoring `caret-color: transparent`, and doubles the
+   * virtual caret. A plain inline box (not an atomic inline-block) restores
+   * caret-color resolution without changing wrapping or decoration
+   * propagation. */
+  .ProseMirror .md-pack[data-key='noLink'] {
+    display: inline;
   }
 
   /* Hidden syntax keeps a real zero-width inline box (font-size: 0) instead of

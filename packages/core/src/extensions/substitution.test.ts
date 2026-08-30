@@ -128,8 +128,9 @@ describe('substitutions', () => {
     {
       trigger: 'Enter',
       keys: '<!-- x -->{Enter}',
-      expected: (n: ReturnType<typeof setupFixture>['n']) =>
-        n.doc(n.paragraph('<!-- x -->'), n.paragraph()),
+      expected: (n: ReturnType<typeof setupFixture>['n']) => {
+        return n.doc(n.paragraph('<!-- x -->'), n.paragraph())
+      },
     },
   ])('preserves HTML comment delimiters before $trigger', async ({ keys, expected }) => {
     using fixture = setup()
@@ -150,8 +151,9 @@ describe('substitutions', () => {
     {
       trigger: 'Enter',
       keys: '{Enter}',
-      expected: (n: ReturnType<typeof setupFixture>['n']) =>
-        n.doc(n.paragraph('---'), n.paragraph()),
+      expected: (n: ReturnType<typeof setupFixture>['n']) => {
+        return n.doc(n.paragraph('---'), n.paragraph())
+      },
     },
   ])('preserves a thematic-break marker before $trigger', async ({ keys, expected }) => {
     using fixture = setup()

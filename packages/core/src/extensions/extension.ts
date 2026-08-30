@@ -39,6 +39,7 @@ import { defineMeowdownParagraph } from './paragraph.ts'
 import { definePendingReplacement } from './pending-replacement.ts'
 import { defineScrollToSelection } from './scroll-to-selection.ts'
 import { defineSelectDocBoundary } from './select-doc-boundary.ts'
+import { defineSoftBreak } from './soft-break.ts'
 import { defineSystemSubstitutionGuard } from './system-substitution-guard.ts'
 import { defineTable } from './table.ts'
 import { defineViewAttributes } from './view-attributes.ts'
@@ -67,6 +68,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineCodeBlockSyntaxHighlight(),
     defineCrossEditorDrag(),
     defineEscapeCollapse(),
+    defineSoftBreak(),
     defineMoveBlock(),
     defineSelectDocBoundary(),
     defineInlineMarkPlugin(options),

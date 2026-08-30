@@ -1,5 +1,5 @@
-import { getMarkRange, type MarkRange } from '@prosekit/core'
-import type { Attrs, ResolvedPos } from '@prosekit/pm/model'
+import { findMarkRange, getMarkRange, type MarkRange } from '@prosekit/core'
+import type { Mark, ResolvedPos } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
 
 import { getInnermostPackRangeAt } from './hidden-run.ts'
@@ -20,21 +20,21 @@ function resolvePosition(state: EditorState, pos: number) {
 
 /**
  * Returns the run of the mark covering `pos`, or `undefined` when none covers
- * it. `attrs` narrows the match to marks whose attributes contain it, which
- * is how a caller picks one level out of a nested stack of the same mark.
+ * it. `predicate` narrows the match to marks it accepts, which is how a
+ * caller picks one level out of a nested stack of the same mark.
  */
 export function getMarkRangeAt(
   state: EditorState,
   pos: number,
   markName: MarkName,
-  attrs?: Attrs,
+  predicate?: (mark: Mark) => boolean,
 ): MarkRange | undefined {
   const $pos = resolvePosition(state, pos)
   if (!$pos) return
 
   return ATOM_MARK_NAMES.includes(markName)
     ? getAtomUnitRange(state, $pos, markName)
-    : getMarkRange($pos, markName, attrs)
+    : findMarkRange($pos, (mark) => isMarkOfType(mark, markName) && (!predicate || predicate(mark)))
 }
 
 /**
@@ -43,7 +43,7 @@ export function getMarkRangeAt(
  * marks, so eq-based expansion would run across both; the unit boundary comes
  * from the innermost pack instead, which `slot` keeps distinct. A text node
  * without a pack (a document not produced by the inline parser) falls back to
- * the eq-based range. Does not support `attrs` filtering.
+ * the eq-based range. Does not support `predicate` filtering.
  */
 function getAtomUnitRange(
   state: EditorState,

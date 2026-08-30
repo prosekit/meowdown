@@ -213,6 +213,14 @@ function walk(
       pos = atomEnd
       continue
     }
+    if (node.type === LEZER_NODE_IDS.URL) {
+      const trailing = takeMagicComments(nodes, index, text)
+      if (trailing?.magic.noLink) {
+        walkUnlinkedURL(node, trailing, parentMarks, marks, out)
+        pos = trailing.to
+        continue
+      }
+    }
     walkNode(node, parentMarks, text, marks, out, options, context)
     pos = node.to
   }
@@ -326,8 +334,8 @@ function walkAutolink(
   const base = [
     ...parentMarks,
     createUnitPack(marks, out, parentMarks, node.from, {
-      key: 'link',
-      data: { form: 'angle', href },
+      key: 'link-angle',
+      data: { href },
       revealInFocus: true,
     }),
   ]
@@ -371,11 +379,32 @@ function walkURL(
   emit(out, node.from, node.to, [
     ...parentMarks,
     createUnitPack(marks, out, parentMarks, node.from, {
-      key: 'link',
-      data: { form: 'bare', href },
+      key: 'link-bare',
+      data: { href },
     }),
     marks.mdLinkText.create({ href } satisfies MdLinkTextAttrs),
   ])
+}
+
+/**
+ * A URL followed directly by a `<!-- {"noLink":true} -->` magic comment
+ * stays plain text instead of autolinking. The comment rides behind the
+ * address as hidden syntax that reveals in focus, so it can be edited or
+ * deleted in place.
+ */
+function walkUnlinkedURL(
+  node: InlineElement,
+  trailing: FoldedMagicComments,
+  parentMarks: readonly Mark[],
+  marks: TypedMarkBuilders,
+  out: MarkChunk[],
+): void {
+  const base = [
+    ...parentMarks,
+    createUnitPack(marks, out, parentMarks, node.from, { key: 'noLink', revealInFocus: true }),
+  ]
+  emit(out, node.from, node.to, base)
+  emit(out, node.to, trailing.to, [...base, marks.mdMark.create()])
 }
 
 function walkLink(
@@ -588,8 +617,8 @@ function walkResolvedLink(
   } satisfies MdLinkTextAttrs)
   const inLabel = (pos: number): boolean => labelEnd >= 0 && pos < labelEnd
   const pack = createUnitPack(marks, out, parentMarks, node.from, {
-    key: 'link',
-    data: { form: isReference ? 'reference' : 'inline', href, title },
+    key: isReference ? 'link-reference' : 'link-inline',
+    data: { href, title },
     revealInFocus: true,
   })
   const base = [...parentMarks, pack]
@@ -656,9 +685,9 @@ interface FoldedMagicComments {
 
 /**
  * The run of magic comments chained immediately behind `nodes[index]` (an
- * image), or undefined when no magic comment directly abuts it. The first
- * comment's data wins: a rewrite of an unfolded image inserted the fresh
- * comment right at the image's end, so in a stacked run left is newest.
+ * image or a URL), or undefined when no magic comment directly abuts it. The
+ * first comment's data wins: a rewrite of an unfolded image inserted the
+ * fresh comment right at the image's end, so in a stacked run left is newest.
  */
 function takeMagicComments(
   nodes: readonly InlineElement[],

@@ -33,8 +33,11 @@ const DEMO_COMMANDS: DemoCommand[] = [
     label: 'Meowify',
     detail: 'Every word becomes meow',
     mode: 'replace',
-    transform: (selectedText) =>
-      selectedText.replaceAll(/\p{L}+/gu, (word) => (/^\p{Lu}/u.test(word) ? 'Meow' : 'meow')),
+    transform: (selectedText) => {
+      return selectedText.replaceAll(/\p{L}+/gu, (word) => {
+        return /^\p{Lu}/u.test(word) ? 'Meow' : 'meow'
+      })
+    },
   },
   {
     id: 'uppercase',
@@ -48,13 +51,14 @@ const DEMO_COMMANDS: DemoCommand[] = [
     label: 'Turn into bullet list',
     detail: 'One bullet per line',
     mode: 'replace',
-    transform: (selectedText) =>
-      selectedText
+    transform: (selectedText) => {
+      return selectedText
         .split('\n')
         .map((line) => line.replace(LEADING_BLOCK_MARKERS, '').trim())
         .filter((line) => line.length > 0)
         .map((line) => `- ${line}`)
-        .join('\n'),
+        .join('\n')
+    },
   },
   {
     id: 'summarize',

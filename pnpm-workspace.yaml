@@ -15,12 +15,13 @@ trustPolicyIgnoreAfter: 10080 # 7 days
 trustLockfile: true
 
 minimumReleaseAgeExclude:
-  - '@ocavue/eslint-config'
+  - '@ocavue/*'
   - '@prosekit/*'
   - '@aria-ui/*'
   - '@prosemirror-adapter/*'
   - prosemirror-view
-  - astro-theme-toggle@0.8.2
+  - eslint-plugin-ocavue
+  - vitest-browser-commands@0.4.1
 
 allowBuilds:
   esbuild: false

@@ -30,6 +30,7 @@ describe('EDITOR_KEY_BINDINGS', () => {
         "Mod-e": "Inline code",
         "Mod-i": "Italic",
         "Mod-k": "Link",
+        "Shift-Enter": "Insert a line break",
         "Shift-Meta-ArrowDown": "Select to the document end",
         "Shift-Meta-ArrowUp": "Select to the document start",
       }

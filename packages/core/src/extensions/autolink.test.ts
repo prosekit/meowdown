@@ -49,3 +49,18 @@ describe('autolink rendering', () => {
     await expect.element(pmRoot.getByRole('link', { name: 'google.com' })).toBeInTheDocument()
   })
 })
+
+describe('noLink unit', () => {
+  // WebKit resolves the caret color from the renderer of the text's parent
+  // element; a boxless (`display: contents`) parent has none, so the native
+  // caret paints fallback black over the transparent virtual-caret setup and
+  // Safari shows a second caret beside the virtual one.
+  it('keeps the unlinked address inside an element with a layout box', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('go to www.example.com<!-- {"noLink":true} --> now')))
+    const address = pmRoot.getByText('www.example.com')
+    await expect.element(address).toBeInTheDocument()
+    expect(address.element().getClientRects().length).toBeGreaterThan(0)
+  })
+})

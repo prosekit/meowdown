@@ -1,7 +1,7 @@
 {
   "name": "@meowdown/core",
   "type": "module",
-  "version": "0.65.6",
+  "version": "0.67.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -30,10 +30,10 @@
     "@lezer/highlight": "^1.2.3",
     "@meowdown/markdown": "workspace:^",
     "@ocavue/utils": "^1.7.0",
-    "@prosekit/core": "^0.13.0",
-    "@prosekit/extensions": "^0.18.0",
+    "@prosekit/core": "^0.13.1",
+    "@prosekit/extensions": "^0.18.1",
     "@prosekit/pm": "^0.1.19",
-    "@prosekit/web": "^0.9.0",
+    "@prosekit/web": "^0.9.1",
     "hast-util-to-mdast": "^10.1.2",
     "katex": "^0.18.1",
     "mdast-util-to-markdown": "^2.1.2",
@@ -54,13 +54,13 @@
     "@tsdown/css": "^0.23.0-beta.2",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
-    "@vitest/browser-playwright": "^4.1.10",
+    "@vitest/browser-playwright": "^4.1.11",
     "commonmark.json": "^0.31.0",
     "dedent": "^1.7.2",
     "diffable-html-snapshot": "^0.3.0",
-    "fast-check": "^4.9.0",
     "tsdown": "^0.23.0-beta.2",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11",
+    "vitest-browser-commands": "^0.4.1"
   },
   "publishConfig": {
     "exports": {

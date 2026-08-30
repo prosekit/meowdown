@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.67.1](https://github.com/prosekit/meowdown/compare/v0.67.0...v0.67.1) (2026-08-30)
+
+
+### Bug Fixes
+
+* keep the link popover root mounted so open animations play ([#516](https://github.com/prosekit/meowdown/issues/516)) ([fac9081](https://github.com/prosekit/meowdown/commit/fac90818aaf308e9d4d3e927680cacd7d50e3f3f))
+* **react:** update button and anchor styles in popup components ([#519](https://github.com/prosekit/meowdown/issues/519)) ([ae89868](https://github.com/prosekit/meowdown/commit/ae89868f4eeb432941d276f80639ab3b9e80e832))
+
+## [0.67.0](https://github.com/prosekit/meowdown/compare/v0.66.0...v0.67.0) (2026-08-30)
+
+
+### Features
+
+* add rich link previews and editing ([#506](https://github.com/prosekit/meowdown/issues/506)) ([8356777](https://github.com/prosekit/meowdown/commit/8356777904ec9ee55da8c36746d0e0abe1c2a433))
+
+## [0.66.0](https://github.com/prosekit/meowdown/compare/v0.65.6...v0.66.0) (2026-08-21)
+
+
+### Features
+
+* **core:** insert a soft line break on Shift-Enter ([#498](https://github.com/prosekit/meowdown/issues/498)) ([a9d0aa1](https://github.com/prosekit/meowdown/commit/a9d0aa1393683fd7b445662cdf39eaf2b252e2b8))
+* **core:** remove the deprecated `defineSpellCheckPlugin` ([#499](https://github.com/prosekit/meowdown/issues/499)) ([aecd080](https://github.com/prosekit/meowdown/commit/aecd080360926c65ee454fc566585334361ab64f))
+
+
+### Bug Fixes
+
+* draw the virtual caret at the start of the line after a line break ([#495](https://github.com/prosekit/meowdown/issues/495)) ([dae8220](https://github.com/prosekit/meowdown/commit/dae8220765de1ac8659e116ffc08ea1cd0deb4a1))
+
 ## [0.65.6](https://github.com/prosekit/meowdown/compare/v0.65.5...v0.65.6) (2026-08-17)
 
 

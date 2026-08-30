@@ -110,15 +110,15 @@ export function TaskList() {
   const [editingId, setEditingId] = useState<number | undefined>(undefined)
 
   const updateTask = useCallback((id: number, text: string) => {
-    setTasks((current) =>
-      current.map((task) => (task.id === id && text !== '' ? { ...task, text } : task)),
-    )
+    setTasks((current) => {
+      return current.map((task) => (task.id === id && text !== '' ? { ...task, text } : task))
+    })
   }, [])
 
   const toggleDone = useCallback((id: number) => {
-    setTasks((current) =>
-      current.map((task) => (task.id === id ? { ...task, done: !task.done } : task)),
-    )
+    setTasks((current) => {
+      return current.map((task) => (task.id === id ? { ...task, done: !task.done } : task))
+    })
   }, [])
 
   if (!mounted) return null

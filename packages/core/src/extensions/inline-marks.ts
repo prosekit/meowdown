@@ -260,10 +260,15 @@ export type MdPackAttrs =
       revealInHide?: null
     }
   | {
-      key: 'link'
-      data:
-        | { form: 'inline' | 'reference'; href: string; title: string }
-        | { form: 'angle'; href: string }
+      key: 'link-inline' | 'link-reference'
+      data: { href: string; title: string }
+      slot?: 1 | null
+      revealInFocus: true
+      revealInHide?: null
+    }
+  | {
+      key: 'link-angle'
+      data: { href: string }
       slot?: 1 | null
       revealInFocus: true
       revealInHide?: null
@@ -272,10 +277,21 @@ export type MdPackAttrs =
       // A bare autolink (`https://a.com`, `www.a.com`, `a@b.com`) is all
       // visible content with no hidden syntax, so no mode reveals it; the
       // pack only carries the resolved `href`.
-      key: 'link'
-      data: { form: 'bare'; href: string }
+      key: 'link-bare'
+      data: { href: string }
       slot?: 1 | null
       revealInFocus?: null
+      revealInHide?: null
+    }
+  | {
+      // A URL opted out of autolinking by a trailing `<!-- {"noLink":true} -->`
+      // magic comment (written by `removeLink`): the address is plain visible
+      // text, and the comment is hidden syntax revealed in focus so it can be
+      // edited in place.
+      key: 'noLink'
+      data?: null
+      slot?: 1 | null
+      revealInFocus: true
       revealInHide?: null
     }
   | {

@@ -14,6 +14,7 @@ import {
   handleWikilinkClick,
   resolveFileInfo,
   resolveFileLink,
+  resolveLinkPreview,
   searchNotes,
   searchTags,
   uploadAndTrackFile,
@@ -87,6 +88,7 @@ export function HomeDemo() {
               onFileClick={handleFileClick}
               onImageClick={handleImageClick}
               onLinkClick={handleLinkClick}
+              resolveLinkPreview={resolveLinkPreview}
               onTagClick={handleTagClick}
               onWikilinkClick={handleWikilinkClick}
               onExitBoundary={handleExitBoundary}
