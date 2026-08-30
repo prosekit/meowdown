@@ -392,15 +392,10 @@ export function LinkMenu({
   readOnly = false,
 }: LinkMenuProps): ReactNode {
   const editor: TypedEditor = useEditor<EditorExtension>()
-  // Whether a link is under the pointer, or tapped on touch. Turning `false`
-  // asks an open info popup to close.
   const [infoOpen, setInfoOpen] = useState(false)
-  // The link whose info the popup shows. It stays after `infoOpen` turns
-  // false until the close animation finishes, so the popup keeps its content
-  // while fading out.
+  const [editOpen, setEditOpen] = useState(false)
   const [link, setLink] = useState<LinkUnit | undefined>()
   const [edit, setEdit] = useState<LinkEditOptions | undefined>()
-  const [editOpen, setEditOpen] = useState(false)
   const isPointerOverPopupRef = useRef(false)
 
   const linkHoverExtension = useMemo(
