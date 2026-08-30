@@ -439,8 +439,8 @@ export function LinkMenu({
   }, [closeInfo])
 
   const handleEditRemove = useCallback(() => {
-      editor.commands.removeLink()
-      closeEdit()
+    editor.commands.removeLink()
+    closeEdit()
   }, [editor, closeEdit])
 
   const handleEditSubmit = useCallback(
