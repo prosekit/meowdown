@@ -17,13 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mode: [starved]
-        round: [1, 2, 3, 4]
-        include:
-          - mode: starved-amplified
-            round: 1
-          - mode: starved-amplified
-            round: 2
+        mode: [spike]
+        round: [1, 2, 3, 4, 5, 6]
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -40,21 +35,16 @@ jobs:
           mkdir -p "$RUNNER_TEMP/research-out"
           nohup bash .github/research/sample-memory.sh > "$RUNNER_TEMP/research-out/memory-samples.log" 2>&1 &
 
-      - name: Start CPU burners
-        if: startsWith(matrix.mode, 'starved')
+      - name: Start memory spiker
+        if: matrix.mode == 'spike'
         run: |
-          nohup yes > /dev/null 2>&1 &
-          nohup yes > /dev/null 2>&1 &
-          nohup yes > /dev/null 2>&1 &
-
-      - name: Start memory hog
-        if: startsWith(matrix.mode, 'starved')
-        run: nohup node .github/research/memory-hog.mjs 1.5 500 > "$RUNNER_TEMP/research-out/memory-hog.log" 2>&1 &
+          mkdir -p "$RUNNER_TEMP/research-out"
+          nohup node .github/research/memory-spike.mjs 2.5 > "$RUNNER_TEMP/research-out/memory-spike.log" 2>&1 &
 
       - name: Run tests in a loop
         run: bash .github/research/run-loop.sh
         env:
-          RESEARCH_FUZZ_NUM_RUNS: ${{ matrix.mode == 'starved-amplified' && '300000' || '' }}
+          RESEARCH_FUZZ_NUM_RUNS: '300000'
           RESEARCH_ITERATIONS: '2'
 
       - name: Collect evidence
