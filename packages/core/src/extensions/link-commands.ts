@@ -133,7 +133,6 @@ export function insertLink({
       } else {
         const close = `](${dest})`
         tr.insertText(close, to).insertText('[', from)
-        // The position after the closing `)`
         linkTo = to + 1 + close.length
       }
       tr.setSelection(
@@ -190,8 +189,7 @@ export function removeLink(): Command {
       // autolinking with an invisible trailing magic comment.
       const tr =
         link.form === 'inline' && !getAutolinkHref(text)
-          ? // delete the tail `](url "title")` first, then the leading `[`
-            state.tr.delete(link.label.to, link.unit.to).delete(link.unit.from, link.label.from)
+          ? state.tr.delete(link.label.to, link.unit.to).delete(link.unit.from, link.label.from)
           : state.tr.insertText(
               text + formatMagicComment({ noLink: true }),
               link.unit.from,

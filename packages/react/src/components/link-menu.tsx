@@ -275,8 +275,6 @@ function LinkInfoContent({
     )
   }
 
-  // While metadata loads, the URL and actions stay usable: a slow or hung
-  // resolver must not block the link's core actions.
   return (
     <div data-testid="link-popover-read">
       <div className={styles.Row}>
