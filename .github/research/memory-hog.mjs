@@ -1,9 +1,11 @@
-// Hold incompressible memory to push the runner toward memory exhaustion,
-// simulating the pressure under which the WebKit job fails.
+// Hold incompressible memory and keep touching every page so macOS cannot
+// page it out, shrinking the runner's free-memory headroom.
 import { randomFillSync } from 'node:crypto'
 
-const targetGB = Number(process.argv[2] || 3.5)
+const targetGB = Number(process.argv[2] || 1.5)
+const touchMs = Number(process.argv[3] || 500)
 const CHUNK = 64 * 1024 * 1024
+const PAGE = 16384
 const chunks = []
 
 while ((chunks.length * CHUNK) / 1024 ** 3 < targetGB) {
@@ -15,7 +17,8 @@ while ((chunks.length * CHUNK) / 1024 ** 3 < targetGB) {
 
 setInterval(() => {
   for (const buffer of chunks) {
-    buffer[0] ^= 1
+    for (let offset = 0; offset < buffer.length; offset += PAGE) {
+      buffer[offset] ^= 1
+    }
   }
-  console.log(`hog alive with ${chunks.length} chunks`)
-}, 30_000)
+}, touchMs)
