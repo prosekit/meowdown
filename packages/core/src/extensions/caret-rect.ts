@@ -14,18 +14,23 @@ export interface CaretRect {
 }
 
 // The collapsed native selection range. The browser resolves fonts,
-// baselines, and bidi for us. At a line wrap Chrome reports two rects and the
-// last one is the start of the next visual line, which is where the caret
-// belongs.
+// baselines, and bidi for us.
 export function findNativeCaretRect(view: EditorView): CaretRect | undefined {
   const selection = view.dom.ownerDocument.getSelection()
   if (selection == null || selection.rangeCount === 0) return undefined
   if (!view.dom.contains(selection.anchorNode)) return undefined
   const range = selection.getRangeAt(0).cloneRange()
   range.collapse(true)
+  return findLastRangeRect(range)
+}
+
+// The last line fragment of a collapsed range. At a line wrap Chrome reports
+// two rects and the last one is the start of the next visual line, which is
+// where the caret belongs.
+function findLastRangeRect(range: Range): CaretRect | undefined {
   const rects = Array.from(range.getClientRects()).filter((rect) => rect.height > 0)
-  if (rects.length === 0) return undefined
   const rect = rects[rects.length - 1]
+  if (rect == null) return undefined
   return { left: rect.left, top: rect.top, height: rect.height }
 }
 
@@ -42,22 +47,51 @@ export function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   // reports that line's end, WebKit one character cell past it, Blink no rect at
   // all.
   const afterLineBreak = isAfterLineBreak($head)
-  const preferredBeforeSide: boolean = runBefore == null && !afterLineBreak
-  // `side` picks which neighbor to measure: -1 the character before the
-  // position, 1 the character after it.
-  const probes: [pos: number, beforeSide: boolean][] = [
-    [head, preferredBeforeSide],
-    [head, !preferredBeforeSide],
-  ]
+  // Safari 26.5.2 and earlier report a spurious previous-line rect here and
+  // coordsAtPos picks it, so a caret at a soft line start must measure
+  // strictly below the previous line: the newline's own rect (side -1). See
+  // https://github.com/prosekit/meowdown/issues/530 and
+  // https://github.com/issueset/repro-pm-coords-after-newline for details.
+  const previousLineTop = afterLineBreak ? tryCoordsAtPos(view, head, -1)?.top : undefined
+  // `beforeSide` picks which neighbor to measure: true the character before
+  // the position, false the character after it. At a soft line start only the
+  // after side is meaningful: the before side would measure the newline,
+  // which is the previous-line baseline itself.
+  const probes: [pos: number, beforeSide: boolean][] = afterLineBreak
+    ? [[head, false]]
+    : [
+        [head, runBefore == null],
+        [head, runBefore != null],
+      ]
   if (runBefore != null) probes.push([runBefore.from, true])
   if (runAfter != null) probes.push([runAfter.to, false])
   for (const [pos, beforeSide] of probes) {
     const coords = tryCoordsAtPos(view, pos, beforeSide ? -1 : 1)
-    if (coords != null && coords.bottom > coords.top) {
-      return { left: coords.left, top: coords.top, height: coords.bottom - coords.top }
-    }
+    if (coords == null || coords.bottom <= coords.top) continue
+    if (pos === head && previousLineTop != null && coords.top <= previousLineTop) continue
+    return { left: coords.left, top: coords.top, height: coords.bottom - coords.top }
+  }
+  if (previousLineTop != null) {
+    const collapsed = findCollapsedRangeRect(view, head)
+    if (collapsed != null && collapsed.top > previousLineTop) return collapsed
   }
   return undefined
+}
+
+// The collapsed DOM range at the caret's own position: old WebKit measures it
+// on the caret's line even where its char-range rects lie, Gecko measures it
+// on the previous line (the caller's validation rejects that), and Blink
+// returns no rect at all.
+function findCollapsedRangeRect(view: EditorView, pos: number): CaretRect | undefined {
+  try {
+    const { node, offset } = view.domAtPos(pos, 0)
+    const range = view.dom.ownerDocument.createRange()
+    range.setStart(node, offset)
+    range.collapse(true)
+    return findLastRangeRect(range)
+  } catch {
+    return undefined
+  }
 }
 
 // An atom mark view collapses its source text to a zero-size box

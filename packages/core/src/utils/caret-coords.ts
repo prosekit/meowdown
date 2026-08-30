@@ -32,7 +32,8 @@ export function tryCoordsAtPos(
   let coords: CaretCoords
   try {
     coords = view.coordsAtPos(pos, side)
-  } catch {
+  } catch (error) {
+    console.warn(`[meowdown] Failed to get caret coords at pos ${pos}:`, error)
     return undefined
   }
   return isPointRect(coords) ? undefined : coords
