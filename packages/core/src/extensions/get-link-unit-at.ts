@@ -7,6 +7,8 @@ import { isMarkOfType, type MarkName } from './mark-names.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 
 interface LinkUnitBase {
+  state: EditorState
+
   /**
    * Whole inline link, reference link, or autolink range.
    */
@@ -101,13 +103,20 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
   switch (attrs.key) {
     // A bare autolink is its own visible text.
     case 'link-bare':
-      return { form: 'bare', unit: unitRange, text: unitRange, href: attrs.data.href, title: '' }
+      return {
+        state,
+        form: 'bare',
+        unit: unitRange,
+        text: unitRange,
+        href: attrs.data.href,
+        title: '',
+      }
 
     // An angle autolink's visible text is its interior: the grammar fixes the
     // hidden `<`/`>` at one character each.
     case 'link-angle': {
       const text = { from: unit.from + 1, to: unit.to - 1 }
-      return { form: 'angle', unit: unitRange, text, href: attrs.data.href, title: '' }
+      return { state, form: 'angle', unit: unitRange, text, href: attrs.data.href, title: '' }
     }
 
     // A reference link's href/title live in its definition, so only its
@@ -116,6 +125,7 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
       const linkText = getMarkRangeAt(state, pos, 'mdLinkText')
       const text = linkText == null ? unitRange : { from: linkText.from + 1, to: linkText.to }
       return {
+        state,
         form: 'reference',
         unit: unitRange,
         text,
@@ -135,6 +145,7 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
 
       const label = { from: unit.from + 1, to: closeBracket }
       return {
+        state,
         form: 'inline',
         unit: unitRange,
         text: label,

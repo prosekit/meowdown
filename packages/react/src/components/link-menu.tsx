@@ -243,7 +243,7 @@ function LinkInfoContent({
   if (previewState.status === 'resolved') {
     const { preview } = previewState
     return (
-      <div data-testid="link-popover-read">
+      <div data-testid="link-popover-info">
         <div className={styles.Preview}>
           <div className={styles.Icon}>
             <PreviewIcon key={preview.iconSrc} preview={preview} />
@@ -276,7 +276,7 @@ function LinkInfoContent({
   }
 
   return (
-    <div data-testid="link-popover-read">
+    <div data-testid="link-popover-info">
       <div className={styles.Row}>
         <LinkAnchor href={href} className={styles.Url} onLinkClick={onLinkClick}>
           {href}
@@ -392,20 +392,20 @@ export function LinkMenu({
   readOnly = false,
 }: LinkMenuProps): ReactNode {
   const editor: TypedEditor = useEditor<EditorExtension>()
-  const [hit, setHit] = useState<LinkUnit>()
-  const [edit, setEdit] = useState<LinkEditOptions>()
+  const [infoOpen, setInfoOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
-  const [displayedRead, setDisplayedRead] = useState<LinkUnit>()
-  const overPopupRef = useRef(false)
+  const [link, setLink] = useState<LinkUnit | undefined>()
+  const [edit, setEdit] = useState<LinkEditOptions | undefined>()
+  const isPointerOverPopupRef = useRef(false)
 
   const linkHoverExtension = useMemo(
     () =>
       defineLinkHoverHandler(
         (nextHit) => {
-          setHit(nextHit?.payload)
-          if (nextHit) setDisplayedRead(nextHit.payload)
+          setInfoOpen(nextHit != null)
+          if (nextHit) setLink(nextHit.payload)
         },
-        { canLeave: () => !overPopupRef.current },
+        { canLeave: () => !isPointerOverPopupRef.current },
       ),
     [],
   )
@@ -418,124 +418,125 @@ export function LinkMenu({
         : defineLinkEditKeymap((options) => {
             setEdit(options)
             setEditOpen(true)
-            setHit(undefined)
+            setInfoOpen(false)
           }),
     [readOnly],
   )
   useExtension(linkEditExtension)
 
-  const closeRead = useCallback(() => {
-    overPopupRef.current = false
-    setHit(undefined)
+  const handlePointerHover = useCallback((over: boolean) => {
+    isPointerOverPopupRef.current = over
+  }, [])
+
+  const closeInfo = useCallback(() => {
+    isPointerOverPopupRef.current = false
+    setInfoOpen(false)
   }, [])
 
   const closeEdit = useCallback(() => {
     setEditOpen(false)
-    closeRead()
-  }, [closeRead])
+    closeInfo()
+  }, [closeInfo])
 
-  const requestedRead = hit
-  const previewState = useLinkPreview(displayedRead?.href, resolveLinkPreview)
-  const range = edit ? (edit.link?.text ?? edit) : displayedRead?.text
+  const handleEditRemove = useCallback(() => {
+    editor.commands.removeLink()
+    closeEdit()
+  }, [editor, closeEdit])
+
+  const handleEditSubmit = useCallback(
+    (text: string, href: string) => {
+      if (!edit) return
+      if (edit.link) {
+        // An unchanged label passes no `text`: passing it rebuilds the
+        // whole unit and strips authored Markdown like `[**Docs**](...)`.
+        editor.commands.updateLink({
+          text: text === edit.text ? undefined : text,
+          href,
+          title: edit.link.title,
+        })
+      } else {
+        editor.commands.insertLink({ text, href })
+      }
+      closeEdit()
+    },
+    [edit, editor, closeEdit],
+  )
+
+  const mutable = link != null && !readOnly && link.form !== 'reference'
+
+  const linkText = useMemo(() => (link ? getLinkText(link) : ''), [link])
+
+  const editLink = useCallback(() => {
+    if (!link) return
+    selectLinkUnit(editor, link)
+    setEdit({
+      from: link.unit.from,
+      to: link.unit.to,
+      link,
+      text: linkText,
+    })
+    setEditOpen(true)
+    closeInfo()
+  }, [link, editor, linkText, closeInfo])
+
+  const removeLink = useCallback(() => {
+    if (!link) return
+    selectLinkUnit(editor, link)
+    editor.commands.removeLink()
+    closeInfo()
+  }, [link, editor, closeInfo])
+
+  const handleUseTitle = useMemo(() => {
+    if (!link || !mutable || !isLinkTextForHref(linkText, link.href)) return
+    return (title: string) => {
+      selectLinkUnit(editor, link)
+      editor.commands.updateLink({ text: title })
+      closeInfo()
+    }
+  }, [link, editor, closeInfo, linkText, mutable])
+
+  const previewState = useLinkPreview(link?.href, resolveLinkPreview)
+  const range = edit ? (edit.link?.text ?? edit) : link?.text
   const anchor: VirtualElement | undefined = useMemo(() => {
     if (!range) return
     return getVirtualElementFromRange(editor.view, range)
   }, [range, editor])
 
-  if (edit && !readOnly) {
-    return (
-      <LinkPopover
-        anchor={anchor}
-        open={editOpen}
-        onClose={closeEdit}
-        onCloseComplete={() => {
+  const editing = edit != null && !readOnly
+
+  return (
+    <LinkPopover
+      anchor={anchor}
+      open={editing ? editOpen : infoOpen}
+      onClose={editing ? closeEdit : closeInfo}
+      onCloseComplete={() => {
+        if (editing) {
           setEdit(undefined)
           editor.focus()
-        }}
-      >
+        } else if (!infoOpen) {
+          setLink(undefined)
+        }
+      }}
+      onPopupHover={handlePointerHover}
+    >
+      {editing ? (
         <LinkEditContent
           edit={edit}
           resolveLinkPreview={resolveLinkPreview}
-          onRemove={
-            edit.link
-              ? () => {
-                  editor.commands.removeLink()
-                  closeEdit()
-                }
-              : undefined
-          }
-          onSubmit={(text, href) => {
-            if (edit.link) {
-              // An unchanged label passes no `text`: passing it rebuilds the
-              // whole unit and strips authored Markdown like `[**Docs**](...)`.
-              editor.commands.updateLink({
-                text: text === edit.text ? undefined : text,
-                href,
-                title: edit.link.title,
-              })
-            } else {
-              editor.commands.insertLink({ text, href })
-            }
-            closeEdit()
-          }}
+          onRemove={handleEditRemove}
+          onSubmit={handleEditSubmit}
         />
-      </LinkPopover>
-    )
-  }
-
-  if (displayedRead) {
-    const mutable = !readOnly && displayedRead.form !== 'reference'
-    const text = getLinkText(editor.view.state, displayedRead)
-    const canUseTitle = mutable && isLinkTextForHref(text, displayedRead.href)
-    const editLink = () => {
-      selectLinkUnit(editor, displayedRead)
-      setEdit({
-        from: displayedRead.unit.from,
-        to: displayedRead.unit.to,
-        link: displayedRead,
-        text,
-      })
-      setEditOpen(true)
-      closeRead()
-    }
-    const removeLink = () => {
-      selectLinkUnit(editor, displayedRead)
-      editor.commands.removeLink()
-      closeRead()
-    }
-
-    return (
-      <LinkPopover
-        anchor={anchor}
-        open={requestedRead !== undefined}
-        onClose={closeRead}
-        onCloseComplete={() => {
-          if (!requestedRead) setDisplayedRead(undefined)
-        }}
-        onPopupHover={(over) => {
-          overPopupRef.current = over
-        }}
-      >
+      ) : link ? (
         <LinkInfoContent
-          href={displayedRead.href}
+          href={link.href}
           previewState={previewState}
           onLinkClick={onLinkClick}
           onLinkCopy={onLinkCopy}
           onEdit={mutable ? editLink : undefined}
           onRemove={mutable ? removeLink : undefined}
-          onUseTitle={
-            canUseTitle
-              ? (title) => {
-                  selectLinkUnit(editor, displayedRead)
-                  editor.commands.updateLink({ text: title })
-                  closeRead()
-                }
-              : undefined
-          }
+          onUseTitle={handleUseTitle}
         />
-      </LinkPopover>
-    )
-  }
-
-  return null
+      ) : undefined}
+    </LinkPopover>
+  )
 }
