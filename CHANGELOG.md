@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.67.1](https://github.com/prosekit/meowdown/compare/v0.67.0...v0.67.1) (2026-08-30)
+
+
+### Bug Fixes
+
+* keep the link popover root mounted so open animations play ([#516](https://github.com/prosekit/meowdown/issues/516)) ([fac9081](https://github.com/prosekit/meowdown/commit/fac90818aaf308e9d4d3e927680cacd7d50e3f3f))
+* **react:** update button and anchor styles in popup components ([#519](https://github.com/prosekit/meowdown/issues/519)) ([ae89868](https://github.com/prosekit/meowdown/commit/ae89868f4eeb432941d276f80639ab3b9e80e832))
+
 ## [0.67.0](https://github.com/prosekit/meowdown/compare/v0.66.0...v0.67.0) (2026-08-30)
 
 
