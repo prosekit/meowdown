@@ -34,8 +34,9 @@ export function defineCodeBlockEnterGuard(): PlainExtension {
 
           // After an iOS Enter keydown, prosemirror-view schedules a synthetic
           // Enter 200ms later as a fallback for the native edit this guard just
-          // canceled; clear the flag so the fallback cannot insert a second
-          // newline.
+          // canceled (`lastIOSEnterFallbackTimeout` in
+          // https://github.com/ProseMirror/prosemirror-view/blob/1.42.2/src/input.ts#L123-L131);
+          // clear the flag so the fallback cannot insert a second newline.
           const input = (view as EditorView & { input?: { lastIOSEnter: number } }).input
           if (input != null) input.lastIOSEnter = 0
 

@@ -1,3 +1,6 @@
+// TODO: import `isWebKit` from `@prosekit/core` once a released version ships
+// it, and delete this file.
+//
 // Apple's WebKit engine: Safari on any platform, every iOS browser, and
 // WKWebView hosts. Blink reports a "Google Inc." vendor, and Node's global
 // `navigator` has no `vendor` at all.
