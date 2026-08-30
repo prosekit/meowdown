@@ -443,10 +443,6 @@ export function LinkMenu({
 
   const linkText = useMemo(() => (displayedLink ? getLinkText(displayedLink) : ''), [displayedLink])
 
-  const canUseTitle = useMemo(
-    () => displayedLink != null && mutable && isLinkTextForHref(linkText, displayedLink.href),
-    [displayedLink, mutable, linkText],
-  )
 
   const editLink = useCallback(() => {
     if (!displayedLink) return
@@ -469,13 +465,13 @@ export function LinkMenu({
   }, [displayedLink, editor, closeInfo])
 
   const handleUseTitle = useMemo(() => {
-    if (!canUseTitle || !displayedLink) return
+    if (!displayedLink || !mutable ||!isLinkTextForHref(linkText, displayedLink.href)) return
     return (title: string) => {
       selectLinkUnit(editor, displayedLink)
       editor.commands.updateLink({ text: title })
       closeInfo()
     }
-  }, [canUseTitle, displayedLink, editor, closeInfo])
+  }, [displayedLink, editor, closeInfo, linkText, mutable])
 
   const previewState = useLinkPreview(displayedLink?.href, resolveLinkPreview)
   const range = edit ? (edit.link?.text ?? edit) : displayedLink?.text
