@@ -42,6 +42,12 @@ export function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   // reports that line's end, WebKit one character cell past it, Blink no rect at
   // all.
   const afterLineBreak = isAfterLineBreak($head)
+  // WebKit up to the engine in current stable Safari also lies about a range
+  // STARTING right after the newline: it prepends a zero-width rect at the end
+  // of the previous line, which coordsAtPos picks as the first rect. The
+  // newline's own rect (side -1) always lies on the previous line, which tells
+  // the lie apart: a caret at a soft line start must measure strictly below it.
+  const previousLineTop = afterLineBreak ? tryCoordsAtPos(view, head, -1)?.top : undefined
   const preferredBeforeSide: boolean = runBefore == null && !afterLineBreak
   // `side` picks which neighbor to measure: -1 the character before the
   // position, 1 the character after it.
@@ -53,11 +59,34 @@ export function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   if (runAfter != null) probes.push([runAfter.to, false])
   for (const [pos, beforeSide] of probes) {
     const coords = tryCoordsAtPos(view, pos, beforeSide ? -1 : 1)
-    if (coords != null && coords.bottom > coords.top) {
-      return { left: coords.left, top: coords.top, height: coords.bottom - coords.top }
-    }
+    if (coords == null || coords.bottom <= coords.top) continue
+    if (pos === head && previousLineTop != null && coords.top <= previousLineTop) continue
+    return { left: coords.left, top: coords.top, height: coords.bottom - coords.top }
+  }
+  if (previousLineTop != null) {
+    const collapsed = findCollapsedRangeRect(view, head)
+    if (collapsed != null && collapsed.top > previousLineTop) return collapsed
   }
   return undefined
+}
+
+// The collapsed DOM range at the caret's own position: old WebKit measures it
+// on the caret's line even where its char-range rects lie, Gecko measures it
+// on the previous line (the caller's validation rejects that), and Blink
+// returns no rect at all.
+function findCollapsedRangeRect(view: EditorView, pos: number): CaretRect | undefined {
+  try {
+    const { node, offset } = view.domAtPos(pos, 0)
+    const range = view.dom.ownerDocument.createRange()
+    range.setStart(node, offset)
+    range.collapse(true)
+    const rects = Array.from(range.getClientRects()).filter((rect) => rect.height > 0)
+    if (rects.length === 0) return undefined
+    const rect = rects[rects.length - 1]
+    return { left: rect.left, top: rect.top, height: rect.height }
+  } catch {
+    return undefined
+  }
 }
 
 // An atom mark view collapses its source text to a zero-size box
