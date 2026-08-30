@@ -10,6 +10,7 @@
     "./drag-events": "./src/drag-events.ts",
     "./file-events": "./src/file-events.ts",
     "./helpers": "./src/helpers.ts",
+    "./random": "./src/random.ts",
     "./setup-console": "./src/setup-console.ts",
     "./setup-webkit": "./src/setup-webkit.ts"
   },
@@ -18,6 +19,7 @@
     "@ocavue/utils": "^1.7.0",
     "@prosekit/pm": "^0.1.19",
     "@vitest/browser-playwright": "^4.1.11",
+    "pure-rand": "^8.4.2",
     "vitest": "^4.1.11",
     "vitest-browser-commands": "^0.2.1",
     "vitest-fail-on-console": "^0.10.1"
