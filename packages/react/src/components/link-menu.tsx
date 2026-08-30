@@ -395,6 +395,9 @@ export function LinkMenu({
   const [hit, setHit] = useState<LinkUnit>()
   const [edit, setEdit] = useState<LinkEditOptions>()
   const [editOpen, setEditOpen] = useState(false)
+  // The link whose info the read popup shows. It outlives `hit` until the
+  // close animation finishes, so the popup keeps its content while fading
+  // out.
   const [displayedRead, setDisplayedRead] = useState<LinkUnit>()
   const overPopupRef = useRef(false)
 
@@ -434,6 +437,8 @@ export function LinkMenu({
     closeRead()
   }, [closeRead])
 
+  // The link currently requesting the read popup: the one under the pointer,
+  // or tapped on touch. `undefined` asks an open popup to close.
   const requestedRead = hit
   const previewState = useLinkPreview(displayedRead?.href, resolveLinkPreview)
   const range = edit ? (edit.link?.text ?? edit) : displayedRead?.text
@@ -442,48 +447,39 @@ export function LinkMenu({
     return getVirtualElementFromRange(editor.view, range)
   }, [range, editor])
 
-  if (edit && !readOnly) {
-    return (
-      <LinkPopover
-        anchor={anchor}
-        open={editOpen}
-        onClose={closeEdit}
-        onCloseComplete={() => {
-          setEdit(undefined)
-          editor.focus()
-        }}
-      >
-        <LinkEditContent
-          edit={edit}
-          resolveLinkPreview={resolveLinkPreview}
-          onRemove={
-            edit.link
-              ? () => {
-                  editor.commands.removeLink()
-                  closeEdit()
-                }
-              : undefined
-          }
-          onSubmit={(text, href) => {
-            if (edit.link) {
-              // An unchanged label passes no `text`: passing it rebuilds the
-              // whole unit and strips authored Markdown like `[**Docs**](...)`.
-              editor.commands.updateLink({
-                text: text === edit.text ? undefined : text,
-                href,
-                title: edit.link.title,
-              })
-            } else {
-              editor.commands.insertLink({ text, href })
-            }
-            closeEdit()
-          }}
-        />
-      </LinkPopover>
-    )
-  }
+  const editing = edit != null && !readOnly
 
-  if (displayedRead) {
+  let content: ReactNode
+  if (editing) {
+    content = (
+      <LinkEditContent
+        edit={edit}
+        resolveLinkPreview={resolveLinkPreview}
+        onRemove={
+          edit.link
+            ? () => {
+                editor.commands.removeLink()
+                closeEdit()
+              }
+            : undefined
+        }
+        onSubmit={(text, href) => {
+          if (edit.link) {
+            // An unchanged label passes no `text`: passing it rebuilds the
+            // whole unit and strips authored Markdown like `[**Docs**](...)`.
+            editor.commands.updateLink({
+              text: text === edit.text ? undefined : text,
+              href,
+              title: edit.link.title,
+            })
+          } else {
+            editor.commands.insertLink({ text, href })
+          }
+          closeEdit()
+        }}
+      />
+    )
+  } else if (displayedRead) {
     const mutable = !readOnly && displayedRead.form !== 'reference'
     const text = getLinkText(editor.view.state, displayedRead)
     const canUseTitle = mutable && isLinkTextForHref(text, displayedRead.href)
@@ -504,38 +500,53 @@ export function LinkMenu({
       closeRead()
     }
 
-    return (
-      <LinkPopover
-        anchor={anchor}
-        open={requestedRead !== undefined}
-        onClose={closeRead}
-        onCloseComplete={() => {
-          if (!requestedRead) setDisplayedRead(undefined)
-        }}
-        onPopupHover={(over) => {
-          overPopupRef.current = over
-        }}
-      >
-        <LinkInfoContent
-          href={displayedRead.href}
-          previewState={previewState}
-          onLinkClick={onLinkClick}
-          onLinkCopy={onLinkCopy}
-          onEdit={mutable ? editLink : undefined}
-          onRemove={mutable ? removeLink : undefined}
-          onUseTitle={
-            canUseTitle
-              ? (title) => {
-                  selectLinkUnit(editor, displayedRead)
-                  editor.commands.updateLink({ text: title })
-                  closeRead()
-                }
-              : undefined
-          }
-        />
-      </LinkPopover>
+    content = (
+      <LinkInfoContent
+        href={displayedRead.href}
+        previewState={previewState}
+        onLinkClick={onLinkClick}
+        onLinkCopy={onLinkCopy}
+        onEdit={mutable ? editLink : undefined}
+        onRemove={mutable ? removeLink : undefined}
+        onUseTitle={
+          canUseTitle
+            ? (title) => {
+                selectLinkUnit(editor, displayedRead)
+                editor.commands.updateLink({ text: title })
+                closeRead()
+              }
+            : undefined
+        }
+      />
     )
   }
 
-  return null
+  // While closed the popover renders nothing, but its root must stay mounted:
+  // Base UI plays the open transition only when `open` flips on a mounted
+  // root, and a root that mounts with `open` already true skips
+  // `[data-starting-style]`, so the popup would appear without animation.
+  return (
+    <LinkPopover
+      anchor={anchor}
+      open={editing ? editOpen : requestedRead !== undefined}
+      onClose={editing ? closeEdit : closeRead}
+      onCloseComplete={() => {
+        if (editing) {
+          setEdit(undefined)
+          editor.focus()
+        } else if (!requestedRead) {
+          setDisplayedRead(undefined)
+        }
+      }}
+      onPopupHover={
+        editing
+          ? undefined
+          : (over) => {
+              overPopupRef.current = over
+            }
+      }
+    >
+      {content}
+    </LinkPopover>
+  )
 }
