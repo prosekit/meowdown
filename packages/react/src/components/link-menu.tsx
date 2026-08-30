@@ -443,13 +443,10 @@ export function LinkMenu({
     closeInfo()
   }, [closeInfo])
 
-  const handleEditRemove = useMemo(() => {
-    if (!edit?.link) return
-    return () => {
+  const handleEditRemove = useCallback(() => {
       editor.commands.removeLink()
       closeEdit()
-    }
-  }, [edit, editor, closeEdit])
+  }, [editor, closeEdit])
 
   const handleEditSubmit = useCallback(
     (text: string, href: string) => {
