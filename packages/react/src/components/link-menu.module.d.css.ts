@@ -14,8 +14,11 @@ declare const styles = {
   'Description': '' as string,
   'ReplaceRow': '' as string,
   'ReplaceButton': '' as string,
+  'SaveButton': '' as string,
+  'ReplaceButton': '' as string,
   'Skeleton': '' as string,
-  'SkeletonHeader': '' as string,
+  'SkeletonLine': '' as string,
+  'SkeletonLineShort': '' as string,
   'SkeletonLine': '' as string,
   'SkeletonLineShort': '' as string,
   'pulse': '' as string,
@@ -25,6 +28,7 @@ declare const styles = {
   'FormActions': '' as string,
   'RemoveButton': '' as string,
   'UseTitleButton': '' as string,
-  'SaveButton': '' as string,
+  'RemoveButton': '' as string,
+  'UseTitleButton': '' as string,
 } as const;
 export default styles;
