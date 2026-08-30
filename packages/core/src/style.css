@@ -761,6 +761,17 @@
     display: contents;
   }
 
+  /* The `noLink` unit is the one pack whose visible text has no inner mark
+   * element. WebKit resolves the caret color from the text's parent element
+   * renderer, and `display: contents` has none: the native caret then paints
+   * fallback black, ignoring `caret-color: transparent`, and doubles the
+   * virtual caret. A plain inline box (not an atomic inline-block) restores
+   * caret-color resolution without changing wrapping or decoration
+   * propagation. */
+  .ProseMirror .md-pack[data-key='noLink'] {
+    display: inline;
+  }
+
   /* Hidden syntax keeps a real zero-width inline box (font-size: 0) instead of
    * leaving the box tree (display: none): the caret, click hit-testing, native
    * deletion, and scrolling all assume the text has a box. letter-spacing is
