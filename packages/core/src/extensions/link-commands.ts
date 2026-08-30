@@ -193,7 +193,7 @@ export function removeLink(): Command {
           ? // delete the tail `](url "title")` first, then the leading `[`
             state.tr.delete(link.label.to, link.unit.to).delete(link.unit.from, link.label.from)
           : state.tr.insertText(
-              text + formatMagicComment({ unlinked: true }),
+              text + formatMagicComment({ noLink: true }),
               link.unit.from,
               link.unit.to,
             )

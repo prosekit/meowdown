@@ -163,7 +163,7 @@ describe('removeLink', () => {
     editor.commands.selectText(findText(fixture.doc, 'example.com') + 1)
     expect(editor.commands.removeLink()).toBe(true)
     expect(fixture.doc.child(0).textContent).toBe(
-      'see https://example.com<!-- {"unlinked":true} --> now',
+      'see https://example.com<!-- {"noLink":true} --> now',
     )
     expectNoLink(fixture.state)
   })
@@ -174,7 +174,7 @@ describe('removeLink', () => {
     fixture.set(n.doc(n.paragraph('<https://example.com>')))
     editor.commands.selectText(findText(fixture.doc, 'example.com') + 1)
     expect(editor.commands.removeLink()).toBe(true)
-    expect(fixture.doc.child(0).textContent).toBe('https://example.com<!-- {"unlinked":true} -->')
+    expect(fixture.doc.child(0).textContent).toBe('https://example.com<!-- {"noLink":true} -->')
     expectNoLink(fixture.state)
   })
 
@@ -184,7 +184,7 @@ describe('removeLink', () => {
     fixture.set(n.doc(n.paragraph('[google.com](https://google.com)')))
     editor.commands.selectText(findText(fixture.doc, 'google.com') + 1)
     editor.commands.removeLink()
-    expect(fixture.doc.child(0).textContent).toBe('google.com<!-- {"unlinked":true} -->')
+    expect(fixture.doc.child(0).textContent).toBe('google.com<!-- {"noLink":true} -->')
     expectNoLink(fixture.state)
   })
 
@@ -194,7 +194,7 @@ describe('removeLink', () => {
     fixture.set(n.doc(n.paragraph('mailto:a@b.com')))
     editor.commands.selectText(findText(fixture.doc, 'b.com') + 1)
     expect(editor.commands.removeLink()).toBe(true)
-    expect(fixture.doc.child(0).textContent).toBe('mailto:a@b.com<!-- {"unlinked":true} -->')
+    expect(fixture.doc.child(0).textContent).toBe('mailto:a@b.com<!-- {"noLink":true} -->')
     expectNoLink(fixture.state)
   })
 
@@ -205,7 +205,7 @@ describe('removeLink', () => {
     editor.commands.selectText(findText(fixture.doc, 'example.com') + 1)
     expect(editor.commands.removeLink()).toBe(true)
     expect(fixture.doc.child(0).textContent).toBe(
-      'https://user@example.com<!-- {"unlinked":true} -->',
+      'https://user@example.com<!-- {"noLink":true} -->',
     )
     expectNoLink(fixture.state)
   })

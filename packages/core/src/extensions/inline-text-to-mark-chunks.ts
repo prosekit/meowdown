@@ -215,7 +215,7 @@ function walk(
     }
     if (node.type === LEZER_NODE_IDS.URL) {
       const trailing = takeMagicComments(nodes, index, text)
-      if (trailing?.magic.unlinked) {
+      if (trailing?.magic.noLink) {
         walkUnlinkedURL(node, trailing, parentMarks, marks, out)
         pos = trailing.to
         continue
@@ -387,7 +387,7 @@ function walkURL(
 }
 
 /**
- * A URL followed directly by a `<!-- {"unlinked":true} -->` magic comment
+ * A URL followed directly by a `<!-- {"noLink":true} -->` magic comment
  * stays plain text instead of autolinking. The comment rides behind the
  * address as hidden syntax that reveals in focus, so it can be edited or
  * deleted in place.
@@ -401,7 +401,7 @@ function walkUnlinkedURL(
 ): void {
   const base = [
     ...parentMarks,
-    createUnitPack(marks, out, parentMarks, node.from, { key: 'unlinked', revealInFocus: true }),
+    createUnitPack(marks, out, parentMarks, node.from, { key: 'noLink', revealInFocus: true }),
   ]
   emit(out, node.from, node.to, base)
   emit(out, node.to, trailing.to, [...base, marks.mdMark.create()])
