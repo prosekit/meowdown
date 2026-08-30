@@ -284,6 +284,17 @@ export type MdPackAttrs =
       revealInHide?: null
     }
   | {
+      // A URL opted out of autolinking by a trailing `<!-- {"noLink":true} -->`
+      // magic comment (written by `removeLink`): the address is plain visible
+      // text, and the comment is hidden syntax revealed in focus so it can be
+      // edited in place.
+      key: 'noLink'
+      data?: null
+      slot?: 1 | null
+      revealInFocus: true
+      revealInHide?: null
+    }
+  | {
       // Math hides the formula source (not just syntax) behind its preview,
       // so it also reveals in hide mode; otherwise it could not be edited in
       // place there.

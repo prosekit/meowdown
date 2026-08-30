@@ -9,18 +9,47 @@
   flex-direction: column;
   box-sizing: border-box;
   width: 100%;
-  padding: 0.25rem;
+  overflow: hidden;
+  outline: none;
   font-size: 0.875rem;
-  border: 1px solid var(--meowdown-border);
-  border-radius: 0.75rem;
+  color: var(--meowdown-text);
+  border: 1px solid var(--meowdown-hover-card-border);
+  border-radius: var(--meowdown-hover-card-radius);
   background: var(--meowdown-popover-bg);
-  box-shadow:
-    0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  box-shadow: var(--meowdown-hover-card-shadow);
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+
+  &[data-closed] {
+    transition:
+      opacity 100ms ease,
+      transform 100ms ease;
+  }
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 }
 
-.Row {
+.Row,
+.Preview {
   display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+
+.Actions {
+  display: flex;
+  flex: none;
   align-items: center;
   gap: 0.125rem;
 }
@@ -28,7 +57,7 @@
 .Url {
   flex: 1;
   min-width: 0;
-  padding: 0.25rem 0.5rem;
+  padding: 0.25rem 0.375rem;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -41,7 +70,9 @@
   flex: none;
   align-items: center;
   justify-content: center;
-  padding: 0.375rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
   color: var(--meowdown-text);
   border-radius: 0.5rem;
   cursor: pointer;
@@ -54,31 +85,181 @@
     width: 1rem;
     height: 1rem;
   }
+
+  @media (pointer: coarse) {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+.Icon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  overflow: hidden;
+  color: var(--meowdown-muted);
+  border-radius: 0.375rem;
+
+  & img,
+  & svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    object-fit: contain;
+  }
+}
+
+.PreviewBody {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.Title {
+  overflow: hidden;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--meowdown-accent);
+}
+
+.Host {
+  overflow: hidden;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--meowdown-muted);
+}
+
+.Description {
+  display: -webkit-box;
+  margin: 0;
+  padding: 0 0.75rem 0.75rem 3rem;
+  overflow: hidden;
+  line-height: 1.4;
+  color: var(--meowdown-muted);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.ReplaceRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.375rem 0.5rem 0.375rem 0.75rem;
+  color: var(--meowdown-text);
+  border-top: 1px solid var(--meowdown-border);
+
+  & > svg {
+    width: 0.875rem;
+    height: 0.875rem;
+    color: var(--meowdown-accent);
+  }
+
+  & > span {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+}
+
+.ReplaceButton,
+.SaveButton {
+  min-height: 2rem;
+  padding: 0.375rem 0.625rem;
+  font: inherit;
+  font-weight: 500;
+  color: var(--meowdown-accent-contrast);
+  background: var(--meowdown-accent);
+  border: 0;
+  border-radius: 0.5rem;
+  cursor: pointer;
+
+  @media (pointer: coarse) {
+    min-height: 2.75rem;
+  }
+}
+
+.ReplaceButton {
+  flex: none;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.625rem;
+  transition:
+    filter 100ms ease,
+    transform 100ms ease-out;
+
+  &:hover {
+    filter: brightness(1.05);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.Skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0 0.5rem 0.625rem;
+}
+
+.SkeletonLine,
+.SkeletonLineShort {
+  height: 0.75rem;
+  border-radius: 999px;
+  background: var(--meowdown-popover-hover-bg);
+  animation: pulse 1.4s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+.SkeletonLine {
+  width: 90%;
+}
+
+.SkeletonLineShort {
+  width: 70%;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.45;
+  }
 }
 
 .Form {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.25rem;
+  gap: 0.625rem;
+  padding: 0.75rem;
 }
 
-/* A present-but-invisible submit button so Enter submits the two-input form. */
-.SrOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
+.Field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  & > span {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--meowdown-muted);
+  }
 }
 
 .Input {
   box-sizing: border-box;
   width: 100%;
-  padding: 0.375rem 0.5rem;
+  padding: 0.5rem 0.625rem;
   font: inherit;
   color: var(--meowdown-text);
   background: transparent;
@@ -89,4 +270,33 @@
     outline: 2px solid var(--meowdown-accent);
     outline-offset: -1px;
   }
+}
+
+.FormActions {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding-top: 0.125rem;
+}
+
+.RemoveButton,
+.UseTitleButton {
+  min-height: 2rem;
+  padding: 0.375rem 0.625rem;
+  font: inherit;
+  border-radius: 0.5rem;
+  cursor: pointer;
+
+  @media (pointer: coarse) {
+    min-height: 2.75rem;
+  }
+}
+
+.RemoveButton {
+  color: var(--meowdown-danger, #c33);
+}
+
+.UseTitleButton {
+  margin-left: auto;
+  color: var(--meowdown-accent);
 }

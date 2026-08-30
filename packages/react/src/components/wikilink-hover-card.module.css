@@ -15,12 +15,10 @@
   max-height: min(12rem, calc(100vh - 1rem));
   outline: none;
   pointer-events: none;
-  border: 1px solid var(--meowdown-border);
-  border-radius: 0.75rem;
+  border: 1px solid var(--meowdown-hover-card-border);
+  border-radius: var(--meowdown-hover-card-radius);
   background: var(--meowdown-popover-bg);
-  box-shadow:
-    0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  box-shadow: var(--meowdown-hover-card-shadow);
   transform-origin: var(--transform-origin);
   transition:
     opacity 150ms ease,
