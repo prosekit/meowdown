@@ -47,11 +47,11 @@ export function findCoordsCaretRect(view: EditorView): CaretRect | undefined {
   // reports that line's end, WebKit one character cell past it, Blink no rect at
   // all.
   const afterLineBreak = isAfterLineBreak($head)
-  // WebKit up to the engine in current stable Safari also lies about a range
-  // STARTING right after the newline: it prepends a zero-width rect at the end
-  // of the previous line, which coordsAtPos picks as the first rect. The
-  // newline's own rect (side -1) always lies on the previous line, which tells
-  // the lie apart: a caret at a soft line start must measure strictly below it.
+  // Safari 26.5.2 and earlier report a spurious previous-line rect here and
+  // coordsAtPos picks it, so a caret at a soft line start must measure
+  // strictly below the previous line: the newline's own rect (side -1). See
+  // https://github.com/prosekit/meowdown/issues/530 and
+  // https://github.com/issueset/repro-pm-coords-after-newline for details.
   const previousLineTop = afterLineBreak ? tryCoordsAtPos(view, head, -1)?.top : undefined
   // `beforeSide` picks which neighbor to measure: true the character before
   // the position, false the character after it. At a soft line start only the
