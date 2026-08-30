@@ -1,0 +1,60 @@
+name: WebKit Crash Research
+
+on:
+  push:
+    branches: [research/webkit-birpc-crash]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repro:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    name: repro-${{ matrix.mode }}-${{ matrix.round }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [natural]
+        round: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        include:
+          - mode: pressure
+            round: 1
+          - mode: pressure
+            round: 2
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+
+      - name: Install WebKit
+        run: pnpm run test:install:webkit
+
+      - name: Start memory sampler
+        run: |
+          mkdir -p "$RUNNER_TEMP/research-out"
+          nohup bash .github/research/sample-memory.sh > "$RUNNER_TEMP/research-out/memory-samples.log" 2>&1 &
+
+      - name: Start memory hog
+        if: matrix.mode == 'pressure'
+        run: nohup node .github/research/memory-hog.mjs 3.5 > "$RUNNER_TEMP/research-out/memory-hog.log" 2>&1 &
+
+      - name: Run tests in a loop
+        run: bash .github/research/run-loop.sh
+
+      - name: Collect evidence
+        if: always()
+        run: bash .github/research/collect-evidence.sh
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: evidence-${{ matrix.mode }}-${{ matrix.round }}
+          path: ${{ runner.temp }}/research-out
+          include-hidden-files: true
