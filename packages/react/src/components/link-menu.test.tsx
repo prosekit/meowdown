@@ -155,7 +155,7 @@ describe('LinkMenu', () => {
     // Focus the document first; `clipboard.writeText` rejects otherwise.
     await pmRoot.click()
     await hover(screen.getByText('Docs'))
-    await expect.element(popover.getByTestId('link-popover-read')).toBeVisible()
+    await expect.element(popover.getByTestId('link-popover-info')).toBeVisible()
     await popover.getByRole('button', { name: 'Copy link' }).click()
     await vi.waitFor(() => {
       expect(onLinkCopy).toHaveBeenCalledWith({ href: 'https://example.com' })
@@ -173,7 +173,7 @@ describe('LinkMenu', () => {
     )
     const link = screen.getByText(label)
     await hover(link)
-    await expect.element(popover.getByTestId('link-popover-read')).toBeVisible()
+    await expect.element(popover.getByTestId('link-popover-info')).toBeVisible()
 
     const linkRect = link.element().getBoundingClientRect()
     const popRect = popover.element().getBoundingClientRect()
@@ -193,7 +193,7 @@ describe('LinkMenu', () => {
     await render(<MeowdownEditor initialMarkdown="see <https://www.example.com> here" />)
     const link = pmRoot.getByText('https://www.example.com')
     await hover(link)
-    await expect.element(popover.getByTestId('link-popover-read')).toBeVisible()
+    await expect.element(popover.getByTestId('link-popover-info')).toBeVisible()
 
     const linkRect = link.element().getBoundingClientRect()
     const popRect = popover.element().getBoundingClientRect()
@@ -216,7 +216,7 @@ describe('LinkMenu', () => {
     await pmRoot.getByText('park the caret here').click()
     const link = pmRoot.getByText('https://www.example.com')
     await hover(link)
-    await expect.element(popover.getByTestId('link-popover-read')).toBeVisible()
+    await expect.element(popover.getByTestId('link-popover-info')).toBeVisible()
 
     const linkRect = link.element().getBoundingClientRect()
     const popRect = popover.element().getBoundingClientRect()
@@ -416,7 +416,7 @@ describe('LinkMenu', () => {
     const label = screen.getByText('Docs')
 
     await hover(label)
-    await expect.element(popover.getByTestId('link-popover-read')).toBeVisible()
+    await expect.element(popover.getByTestId('link-popover-info')).toBeVisible()
     await expect.element(popover.locate('a')).toHaveAttribute('href', 'https://example.com')
     await expect.element(popover.getByRole('button', { name: 'Edit link' })).not.toBeInTheDocument()
     await expect
