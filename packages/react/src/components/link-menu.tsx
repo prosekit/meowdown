@@ -392,13 +392,13 @@ export function LinkMenu({
   readOnly = false,
 }: LinkMenuProps): ReactNode {
   const editor: TypedEditor = useEditor<EditorExtension>()
-  const [hit, setHit] = useState<LinkUnit>()
-  const [edit, setEdit] = useState<LinkEditOptions>()
+  const [hit, setHit] = useState<LinkUnit | undefined >()
+  const [edit, setEdit] = useState<LinkEditOptions | undefined>()
   const [editOpen, setEditOpen] = useState(false)
   // The link whose info the read popup shows. It outlives `hit` until the
   // close animation finishes, so the popup keeps its content while fading
   // out.
-  const [displayedRead, setDisplayedRead] = useState<LinkUnit>()
+  const [displayedRead, setDisplayedRead] = useState<LinkUnit | undefined>()
   const overPopupRef = useRef(false)
 
   const linkHoverExtension = useMemo(
