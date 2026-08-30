@@ -9,7 +9,7 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "@astrojs/react": "^6.0.2",
+    "@astrojs/react": "^6.0.4",
     "@base-ui/react": "^1.7.0",
     "@codemirror/commands": "^6.11.0",
     "@codemirror/lang-markdown": "^6.5.2",
@@ -20,7 +20,7 @@
     "@meowdown/core": "workspace:*",
     "@meowdown/react": "workspace:*",
     "@ocavue/utils": "^1.7.0",
-    "astro": "^7.2.1",
+    "astro": "^7.2.9",
     "astro-theme-toggle": "^0.8.2",
     "astrobook": "^0.13.3",
     "clsx": "^2.1.1",
