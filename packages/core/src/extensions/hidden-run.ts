@@ -2,8 +2,8 @@ import { getMarkType } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
 
-import { isMarkOfType, isMarkOfTypes, SYNTAX_MARK_NAMES, type MarkName } from './mark-names.ts'
 import { getMarkMode } from './mark-mode.ts'
+import { isMarkOfType, isMarkOfTypes, SYNTAX_MARK_NAMES, type MarkName } from './mark-names.ts'
 
 export interface HiddenRun {
   from: number
