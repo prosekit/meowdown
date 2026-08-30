@@ -504,10 +504,6 @@ export function LinkMenu({
 
   const editing = edit != null && !readOnly
 
-  // While closed the popover renders nothing, but its root must stay mounted:
-  // Base UI plays the open transition only when `open` flips on a mounted
-  // root, and a root that mounts with `open` already true skips
-  // `[data-starting-style]`, so the popup would appear without animation.
   return (
     <LinkPopover
       anchor={anchor}
