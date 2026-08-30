@@ -439,6 +439,15 @@ export function LinkMenu({
     closeInfo()
   }, [closeInfo])
 
+  const mutable = displayedLink != null && !readOnly && displayedLink.form !== 'reference'
+
+  const linkText = useMemo(() => (displayedLink ? getLinkText(displayedLink) : ''), [displayedLink])
+
+  const canUseTitle = useMemo(
+    () => displayedLink != null && mutable && isLinkTextForHref(linkText, displayedLink.href),
+    [displayedLink, mutable, linkText],
+  )
+
   const editLink = useCallback(() => {
     if (!displayedLink) return
     selectLinkUnit(editor, displayedLink)
@@ -446,11 +455,11 @@ export function LinkMenu({
       from: displayedLink.unit.from,
       to: displayedLink.unit.to,
       link: displayedLink,
-      text: getLinkText(displayedLink),
+      text: linkText,
     })
     setEditOpen(true)
     closeInfo()
-  }, [displayedLink, editor, closeInfo])
+  }, [displayedLink, editor, linkText, closeInfo])
 
   const removeLink = useCallback(() => {
     if (!displayedLink) return
@@ -458,6 +467,15 @@ export function LinkMenu({
     editor.commands.removeLink()
     closeInfo()
   }, [displayedLink, editor, closeInfo])
+
+  const handleUseTitle = useMemo(() => {
+    if (!canUseTitle || !displayedLink) return
+    return (title: string) => {
+      selectLinkUnit(editor, displayedLink)
+      editor.commands.updateLink({ text: title })
+      closeInfo()
+    }
+  }, [canUseTitle, displayedLink, editor, closeInfo])
 
   const previewState = useLinkPreview(displayedLink?.href, resolveLinkPreview)
   const range = edit ? (edit.link?.text ?? edit) : displayedLink?.text
@@ -499,10 +517,6 @@ export function LinkMenu({
       />
     )
   } else if (displayedLink) {
-    const mutable = !readOnly && displayedLink.form !== 'reference'
-    const text = getLinkText(displayedLink)
-    const canUseTitle = mutable && isLinkTextForHref(text, displayedLink.href)
-
     content = (
       <LinkInfoContent
         href={displayedLink.href}
@@ -511,15 +525,7 @@ export function LinkMenu({
         onLinkCopy={onLinkCopy}
         onEdit={mutable ? editLink : undefined}
         onRemove={mutable ? removeLink : undefined}
-        onUseTitle={
-          canUseTitle
-            ? (title) => {
-                selectLinkUnit(editor, displayedLink)
-                editor.commands.updateLink({ text: title })
-                closeInfo()
-              }
-            : undefined
-        }
+        onUseTitle={handleUseTitle}
       />
     )
   }
