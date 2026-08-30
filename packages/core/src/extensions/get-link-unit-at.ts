@@ -103,7 +103,14 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
   switch (attrs.key) {
     // A bare autolink is its own visible text.
     case 'link-bare':
-      return { state, form: 'bare', unit: unitRange, text: unitRange, href: attrs.data.href, title: '' }
+      return {
+        state,
+        form: 'bare',
+        unit: unitRange,
+        text: unitRange,
+        href: attrs.data.href,
+        title: '',
+      }
 
     // An angle autolink's visible text is its interior: the grammar fixes the
     // hidden `<`/`>` at one character each.

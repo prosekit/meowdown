@@ -446,7 +446,7 @@ export function LinkMenu({
       from: displayedLink.unit.from,
       to: displayedLink.unit.to,
       link: displayedLink,
-      text: getLinkText(editor.view.state, displayedLink),
+      text: getLinkText(displayedLink),
     })
     setEditOpen(true)
     closeInfo()
@@ -500,7 +500,7 @@ export function LinkMenu({
     )
   } else if (displayedLink) {
     const mutable = !readOnly && displayedLink.form !== 'reference'
-    const text = getLinkText(editor.view.state, displayedLink)
+    const text = getLinkText(displayedLink)
     const canUseTitle = mutable && isLinkTextForHref(text, displayedLink.href)
 
     content = (

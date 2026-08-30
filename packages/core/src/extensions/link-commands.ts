@@ -63,8 +63,8 @@ function getVisibleText(state: EditorState, range: PositionRange): string {
 /**
  * Get a link's plain visible text.
  */
-export function getLinkText(state: EditorState, link: LinkUnit): string {
-  return getVisibleText(state, link.text)
+export function getLinkText(link: LinkUnit): string {
+  return getVisibleText(link.state, link.text)
 }
 
 /**
@@ -158,7 +158,7 @@ export function updateLink(attrs: LinkAttrs): Command {
 
     const href = normalizeHref(attrs.href ?? link.href)
     const title = attrs.title ?? link.title
-    const text = attrs.text ?? getLinkText(state, link)
+    const text = attrs.text ?? getLinkText(link)
     const replacingUnit = attrs.text !== undefined || link.form !== 'inline'
 
     if (dispatch) {
@@ -183,7 +183,7 @@ export function removeLink(): Command {
     const link = getLinkUnitAt(state, state.selection.from)
     if (!link || link.form === 'reference') return false
     if (dispatch) {
-      const text = getLinkText(state, link)
+      const text = getLinkText(link)
       // Keep authored label Markdown intact when it cannot immediately become
       // an autolink again; otherwise keep the text verbatim and opt it out of
       // autolinking with an invisible trailing magic comment.
@@ -232,7 +232,7 @@ function openLinkEdit(onLinkEdit: LinkEditHandler): Command {
         } = link
         dispatch(state.tr.setSelection(TextSelection.create(state.doc, from, to)).scrollIntoView())
         view.focus()
-        onLinkEdit({ from, to, link, text: getLinkText(state, link) })
+        onLinkEdit({ from, to, link, text: getLinkText(link) })
       }
       return true
     }
