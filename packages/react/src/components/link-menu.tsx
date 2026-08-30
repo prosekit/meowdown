@@ -392,17 +392,20 @@ export function LinkMenu({
   readOnly = false,
 }: LinkMenuProps): ReactNode {
   const editor: TypedEditor = useEditor<EditorExtension>()
+  // REVIEW: rename "hit" to "hoveredLink"
   const [hit, setHit] = useState<LinkUnit | undefined >()
   const [edit, setEdit] = useState<LinkEditOptions | undefined>()
   const [editOpen, setEditOpen] = useState(false)
   // The link whose info the read popup shows. It outlives `hit` until the
   // close animation finishes, so the popup keeps its content while fading
   // out.
+  // REVIEW: rename "displayedRead" to "displayedLink". Also move this useState right after const [hit, setHit] = useState<LinkUnit | undefined >() so that these two LinkUnit states are next to each other.
   const [displayedRead, setDisplayedRead] = useState<LinkUnit | undefined>()
   const overPopupRef = useRef(false)
 
   const linkHoverExtension = useMemo(
     () =>
+      // REVIEW: use {} and add "return"
       defineLinkHoverHandler(
         (nextHit) => {
           setHit(nextHit?.payload)
