@@ -21,6 +21,7 @@ minimumReleaseAgeExclude:
   - '@prosemirror-adapter/*'
   - prosemirror-view
   - eslint-plugin-ocavue
+  - vitest-browser-commands@0.4.1
 
 allowBuilds:
   esbuild: false

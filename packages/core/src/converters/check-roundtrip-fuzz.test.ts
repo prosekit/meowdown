@@ -1,6 +1,6 @@
 import { createStringPicker } from '@meowdown/vitest/random'
-import { sleep } from '@ocavue/utils'
 import { it } from 'vitest'
+import { requestGC } from 'vitest-browser-commands/playwright'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
 
@@ -155,8 +155,7 @@ for (const [minLength, maxLength] of RANGES) {
             )
           }
           if (sample % 5_000 === 0) {
-            // This might be helpful for GC in WebKit.
-            await sleep(20)
+            await requestGC()
           }
         }
       },
