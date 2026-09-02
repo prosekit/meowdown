@@ -210,6 +210,19 @@ describe('MarkdownView', () => {
     expect(view.element().querySelector('.md-atom-view')).toBeNull()
   })
 
+  it('renders a resolved wikilink label and reports the full target', async () => {
+    const onWikilinkClick = vi.fn()
+    await renderView('[[Tim MacCaw // Dad]]', {
+      resolveWikilink: ({ target }: { target: string }) => ({ display: target.split(' // ')[0] }),
+      onWikilinkClick,
+    })
+    await expect.element(wikilink).toHaveTextContent('Tim MacCaw')
+    await wikilink.click()
+    expect(onWikilinkClick).toHaveBeenCalledWith(
+      expect.objectContaining({ target: 'Tim MacCaw // Dad' }),
+    )
+  })
+
   it('renders a tweet embed', async () => {
     await renderView('![](https://x.com/jack/status/20)')
     const iframe = view.getByTestId('tweet-embed')

@@ -17,6 +17,7 @@ import type {
   TagClickHandler,
   WikiEmbedResolver,
   WikilinkClickHandler,
+  WikilinkResolver,
 } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
 import { clsx } from 'clsx/lite'
@@ -197,6 +198,14 @@ export interface EditorProps {
   resolveWikiEmbed?: WikiEmbedResolver
 
   /**
+   * Resolves the label shown on a `[[target]]`/`[[target|alias]]` chip. Return
+   * `undefined` to keep the default (the alias, else the target). Only the
+   * label changes: clicks still report the target and the markdown text is
+   * untouched. Must be pure and is read once when the editor is created.
+   */
+  resolveWikilink?: WikilinkResolver
+
+  /**
    * Resolves the metadata (file size in bytes) shown on a file pill, directly
    * or as a promise; the pill renders immediately and fills the size in when
    * the promise settles. May be called repeatedly for the same `href`, so
@@ -362,6 +371,7 @@ export function MeowdownEditor({
   resolveImageUrl,
   resolveFileLink,
   resolveWikiEmbed,
+  resolveWikilink,
   resolveFileInfo,
   onFileClick,
   onFilePaste,
@@ -498,6 +508,7 @@ export function MeowdownEditor({
         resolveImageUrl={resolveImageUrl}
         resolveFileLink={resolveFileLink}
         resolveWikiEmbed={resolveWikiEmbed}
+        resolveWikilink={resolveWikilink}
         resolveFileInfo={resolveFileInfo}
         onFileClick={onFileClick}
         onFilePaste={onFilePaste}

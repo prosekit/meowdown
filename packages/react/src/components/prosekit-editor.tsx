@@ -25,6 +25,7 @@ import {
   type TypedEditor,
   type WikiEmbedResolver,
   type WikilinkClickHandler,
+  type WikilinkResolver,
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
 import { createEditor, union, type SelectionJSON } from '@prosekit/core'
@@ -218,6 +219,11 @@ export interface ProseKitEditorProps {
   resolveWikiEmbed?: WikiEmbedResolver
 
   /**
+   * Resolves wikilink chip labels. Read once on mount; see `EditorProps.resolveWikilink`.
+   */
+  resolveWikilink?: WikilinkResolver
+
+  /**
    * Resolves the size shown on a file pill. See `EditorProps.resolveFileInfo`.
    */
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
@@ -338,6 +344,7 @@ export function ProseKitEditor({
   resolveImageUrl,
   resolveFileLink,
   resolveWikiEmbed,
+  resolveWikilink,
   resolveFileInfo,
   onFileClick,
   onFilePaste,
@@ -363,6 +370,7 @@ export function ProseKitEditor({
     const baseExtension: EditorExtension = defineEditorExtension({
       resolveFileLink,
       resolveWikiEmbed,
+      resolveWikilink,
       markMode,
     })
     const extension = union(baseExtension, defineCodeBlockView())

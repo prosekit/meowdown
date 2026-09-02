@@ -217,6 +217,21 @@ describe('MeowdownEditor', () => {
     await expect.element(pmRoot).toHaveTextContent('![[ambiguous.png]]')
   })
 
+  it('renders a resolved wikilink label and keeps an authored alias', async () => {
+    await render(
+      <MeowdownEditor
+        mode="hide"
+        initialMarkdown="[[Tim MacCaw // Dad]] [[Tim MacCaw // Dad|Dad]]"
+        resolveWikilink={({ target, display }) => {
+          return display === '' ? { display: target.split(' // ')[0] } : undefined
+        }}
+      />,
+    )
+    const labels = pmRoot.getByTestId('wikilink')
+    await expect.element(labels.first()).toHaveTextContent('Tim MacCaw')
+    await expect.element(labels.last()).toHaveTextContent('Dad')
+  })
+
   it('embeds a pasted YouTube link by default', async () => {
     const ref = createRef<EditorHandle>()
     await render(<MeowdownEditor handleRef={ref} resolveImageUrl={(src) => src} />)
