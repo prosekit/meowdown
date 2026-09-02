@@ -27,8 +27,10 @@ declare const styles = {
   'Input': '' as string,
   'FormActions': '' as string,
   'RemoveButton': '' as string,
+  'RelinkButton': '' as string,
   'UseTitleButton': '' as string,
   'RemoveButton': '' as string,
+  'RelinkButton': '' as string,
   'UseTitleButton': '' as string,
 } as const;
 export default styles;

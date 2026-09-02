@@ -115,7 +115,7 @@ function handlerTextMarkTrigger(
   }
 
   const link = onLinkClick && getLinkUnitAt(state, pos)
-  if (link && link.unit.from < pos && pos < link.unit.to) {
+  if (link && link.form !== 'noLink' && link.unit.from < pos && pos < link.unit.to) {
     onLinkClick({ href: link.href, event, mod })
     return true
   }

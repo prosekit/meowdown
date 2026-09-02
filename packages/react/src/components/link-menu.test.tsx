@@ -291,6 +291,22 @@ describe('LinkMenu', () => {
     expect(ref.current?.getMarkdown()).toContain('[Docs](https://example.com)')
   })
 
+  it('relinks an unlinked URL from the edit form', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(
+      <MeowdownEditor
+        handleRef={ref}
+        initialMarkdown={'see www.example.com<!-- {"noLink":true} --> now'}
+      />,
+    )
+    await pmRoot.getByText('www.example.com').click()
+    await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
+    await expect.element(popover.getByTestId('link-popover-edit')).toBeVisible()
+    await popover.getByRole('button', { name: 'Relink' }).click()
+    await expect.element(pmRoot.getByRole('link', { name: 'www.example.com' })).toBeInTheDocument()
+    expect(ref.current?.getMarkdown()).toBe('see www.example.com now\n')
+  })
+
   it('removes a link from the read preview', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(

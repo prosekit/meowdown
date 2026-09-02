@@ -1,7 +1,9 @@
+import { getAutolinkHref } from '@meowdown/markdown'
 import type { EditorState } from '@prosekit/pm/state'
 
 import type { PositionRange } from '../utils/range.ts'
 
+import { getHiddenRunBefore, isMagicChar } from './hidden-run.ts'
 import type { MdPackAttrs } from './inline-marks.ts'
 import { isMarkOfType, type MarkName } from './mark-names.ts'
 import { getMarkRangeAt } from './mark-range.ts'
@@ -56,6 +58,16 @@ export type LinkUnit =
       label?: undefined
       dest?: undefined
     })
+  | (LinkUnitBase & {
+      /**
+       * A URL kept plain by a trailing `noLink` magic comment. `href` is the
+       * address relinking would resolve, or `''` when the text no longer
+       * autolinks.
+       */
+      form: 'noLink'
+      label?: undefined
+      dest?: undefined
+    })
 
 /**
  * The last text run carrying `markName` inside `range`. "Last" so a linked
@@ -93,14 +105,31 @@ export function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undef
   // the pack by `key`: a link inside `**bold**` must find its own pack, not
   // the outer unit's.
   const unit = getMarkRangeAt(state, pos, 'mdPack', (mark) => {
-    return (mark.attrs as MdPackAttrs).key.startsWith('link-')
+    const key = (mark.attrs as MdPackAttrs).key
+    return key.startsWith('link-') || key === 'noLink'
   })
   if (!unit) return
 
-  const attrs = unit.mark.attrs as Extract<MdPackAttrs, { key: `link-${string}` }>
+  const attrs = unit.mark.attrs as Extract<MdPackAttrs, { key: `link-${string}` | 'noLink' }>
   const unitRange = { from: unit.from, to: unit.to }
 
   switch (attrs.key) {
+    // An unlinked URL: the visible address is the unit minus its trailing
+    // magic comment.
+    case 'noLink': {
+      const comment = getHiddenRunBefore(state, unit.to, isMagicChar)
+      const text = { from: unit.from, to: comment?.from ?? unit.to }
+      const address = state.doc.textBetween(text.from, text.to)
+      return {
+        state,
+        form: 'noLink',
+        unit: unitRange,
+        text,
+        href: getAutolinkHref(address) ?? '',
+        title: '',
+      }
+    }
+
     // A bare autolink is its own visible text.
     case 'link-bare':
       return {

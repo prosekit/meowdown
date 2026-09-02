@@ -32,7 +32,7 @@ export function isHiddenChar(state: EditorState, pos: number): boolean {
  * A character hidden in every mark mode: editor-managed magic-comment
  * metadata (`mdMagic`), which style.css never renders.
  */
-function isMagicChar(state: EditorState, pos: number): boolean {
+export function isMagicChar(state: EditorState, pos: number): boolean {
   const marks = getCharMarks(state, pos)
   if (marks == null) return false
   return marks.some((mark) => isMarkOfType(mark, 'mdMagic'))

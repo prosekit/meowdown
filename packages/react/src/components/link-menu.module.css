@@ -284,6 +284,7 @@
 }
 
 .RemoveButton,
+.RelinkButton,
 .UseTitleButton {
   min-height: 2rem;
   padding: 0.375rem 0.625rem;
@@ -300,6 +301,10 @@
 
 .RemoveButton {
   color: var(--meowdown-danger, #c33);
+}
+
+.RelinkButton {
+  color: var(--meowdown-accent);
 }
 
 .UseTitleButton {

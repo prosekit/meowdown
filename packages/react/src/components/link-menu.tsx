@@ -303,11 +303,13 @@ function LinkEditContent({
   resolveLinkPreview,
   onSubmit,
   onRemove,
+  onRelink,
 }: {
   edit: LinkEditOptions
   resolveLinkPreview?: LinkPreviewResolver
   onSubmit: (text: string, href: string) => void
   onRemove?: () => void
+  onRelink?: () => void
 }) {
   const [text, setText] = useState(edit.text)
   const [href, setHref] = useState(edit.link?.href ?? '')
@@ -366,6 +368,11 @@ function LinkEditContent({
         {onRemove && (
           <button type="button" className={styles.RemoveButton} onClick={onRemove}>
             Remove link
+          </button>
+        )}
+        {onRelink && (
+          <button type="button" className={styles.RelinkButton} onClick={onRelink}>
+            Relink
           </button>
         )}
         {canUseTitle && previewState.status === 'resolved' && (
@@ -436,6 +443,11 @@ export function LinkMenu({
 
   const handleEditRemove = useCallback(() => {
     editor.commands.removeLink()
+    closeEdit()
+  }, [editor, closeEdit])
+
+  const handleEditRelink = useCallback(() => {
+    editor.commands.relinkURL()
     closeEdit()
   }, [editor, closeEdit])
 
@@ -519,7 +531,8 @@ export function LinkMenu({
         <LinkEditContent
           edit={edit}
           resolveLinkPreview={resolveLinkPreview}
-          onRemove={handleEditRemove}
+          onRemove={edit.link?.form === 'noLink' ? undefined : handleEditRemove}
+          onRelink={edit.link?.form === 'noLink' ? handleEditRelink : undefined}
           onSubmit={handleEditSubmit}
         />
       ) : link ? (

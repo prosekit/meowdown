@@ -99,6 +99,7 @@ export {
   isLinkTextForHref,
   insertLink,
   normalizeHref,
+  relinkURL,
   removeLink,
   updateLink,
   type LinkAttrs,
