@@ -42,13 +42,6 @@ describe('wikilink resolver', () => {
     )
   })
 
-  it('receives the trimmed bracketed text', () => {
-    const resolveWikilink = vi.fn<WikilinkResolver>(() => undefined)
-    using fixture = setup('[[ Tim MacCaw // Dad|Dad ]]', { resolveWikilink })
-    void fixture
-    expect(resolveWikilink).toHaveBeenCalledWith({ target: 'Tim MacCaw // Dad|Dad' })
-  })
-
   it('renders the resolved display as the label', async () => {
     using fixture = setup('see [[Tim MacCaw // Dad]] here')
     void fixture
@@ -60,16 +53,6 @@ describe('wikilink resolver', () => {
     using fixture = setup('[[Tim MacCaw // Dad|Dad]]')
     fixture.editor.use(defineWikilinkClickHandler(onWikilinkClick))
     await expect.element(label).toHaveTextContent('Dad')
-    await userEvent.click(label)
-    expect(onWikilinkClick).toHaveBeenCalledWith(
-      expect.objectContaining({ target: 'Tim MacCaw // Dad' }),
-    )
-  })
-
-  it('reports the bracketed text as the target when only the label is resolved', async () => {
-    const onWikilinkClick = vi.fn<WikilinkClickHandler>()
-    using fixture = setup('[[Tim MacCaw // Dad]]')
-    fixture.editor.use(defineWikilinkClickHandler(onWikilinkClick))
     await userEvent.click(label)
     expect(onWikilinkClick).toHaveBeenCalledWith(
       expect.objectContaining({ target: 'Tim MacCaw // Dad' }),

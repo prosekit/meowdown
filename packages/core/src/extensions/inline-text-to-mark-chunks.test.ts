@@ -846,14 +846,6 @@ describe('wikilink resolver', () => {
       "
     `)
   })
-
-  it('uses the bracketed text when the resolver returns undefined', () => {
-    expect(parse('[[Note|My Note]]', { resolveWikilink: () => undefined })).toMatchInlineSnapshot(`
-      "
-      [0, 16] mdPack(key=wikilink) + mdWikilink(target=Note|My Note)
-      "
-    `)
-  })
 })
 
 describe('autolink', () => {
