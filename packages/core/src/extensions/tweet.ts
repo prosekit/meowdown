@@ -20,7 +20,6 @@ export const matchTweet: EmbedMatcher = (src) => {
   const tweetId = parseTweetId(src)
   if (!tweetId) return
   const theme = prefersDarkColorScheme() ? 'dark' : 'light'
-  console.log('THIS CONSOLE LOG SHOULD NOT BE HERE. THIS IS A TEST')
   return {
     kind: 'tweet',
     key: `tweet:${tweetId}`,
