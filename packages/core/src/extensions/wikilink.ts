@@ -20,6 +20,32 @@ export function parseWikilink(text: string): ParsedWikilink {
 }
 
 /**
+ * A resolved wikilink label.
+ */
+export interface WikilinkResolution {
+  /**
+   * Label shown in place of the source. Defaults to the alias, else the target.
+   */
+  display?: string
+}
+
+/**
+ * Resolves the label of one `[[target]]`/`[[target|alias]]`. Only the label
+ * changes: the target, click payloads, and the Markdown source stay as
+ * written. Return `undefined` to keep the default label. The resolver
+ * participates in the parse cache, so it must be pure: the same link must
+ * always return the same result.
+ */
+export type WikilinkResolver = (link: ParsedWikilink) => WikilinkResolution | undefined
+
+/**
+ * Host options for wikilink parsing.
+ */
+export interface WikilinkOptions {
+  resolveWikilink?: WikilinkResolver
+}
+
+/**
  * Render `mdWikilink` as a non-editable label standing in for the raw source.
  * The source stays in `contentDOM` after the label, hidden by `style.css`
  * (`.md-atom-view-content`); the whole wikilink is one caret stop owned by

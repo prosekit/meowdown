@@ -102,9 +102,9 @@ export type EditorExtension = ReturnType<typeof defineEditorExtensionImpl>
 
 /**
  * Options for {@link defineEditorExtension}. Creation-time configuration:
- * `resolveFileLink` and `resolveWikiEmbed` are baked into the editor's parse
- * pipeline, so changing them requires rebuilding the editor; `markMode` is
- * only the initial value.
+ * `resolveFileLink`, `resolveWikiEmbed`, and `resolveWikilink` are baked into
+ * the editor's parse pipeline, so changing them requires rebuilding the
+ * editor; `markMode` is only the initial value.
  */
 export type EditorExtensionOptions = InlineMarkOptions & {
   /**

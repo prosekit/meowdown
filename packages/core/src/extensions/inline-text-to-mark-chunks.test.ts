@@ -811,6 +811,40 @@ describe('wiki embed', () => {
   })
 })
 
+describe('wikilink resolver', () => {
+  it('passes the parsed target and alias to the resolver', () => {
+    const resolveWikilink = vi.fn(() => undefined)
+    parse('[[Tim MacCaw // Dad|Dad]]', { resolveWikilink })
+    expect(resolveWikilink).toHaveBeenCalledWith({ target: 'Tim MacCaw // Dad', display: 'Dad' })
+  })
+
+  it('writes the resolved display into the mark and keeps the target', () => {
+    expect(parse('[[Tim MacCaw // Dad]]', { resolveWikilink: () => ({ display: 'Tim MacCaw' }) }))
+      .toMatchInlineSnapshot(`
+      "
+      [0, 21] mdPack(key=wikilink) + mdWikilink(target=Tim MacCaw // Dad,display=Tim MacCaw)
+      "
+    `)
+  })
+
+  it('keeps the parsed alias when the resolver returns undefined', () => {
+    expect(parse('[[Note|My Note]]', { resolveWikilink: () => undefined })).toMatchInlineSnapshot(`
+      "
+      [0, 16] mdPack(key=wikilink) + mdWikilink(target=Note,display=My Note)
+      "
+    `)
+  })
+
+  it('lets the resolver override an authored alias', () => {
+    expect(parse('[[Note|My Note]]', { resolveWikilink: () => ({ display: 'Shown' }) }))
+      .toMatchInlineSnapshot(`
+      "
+      [0, 16] mdPack(key=wikilink) + mdWikilink(target=Note,display=Shown)
+      "
+    `)
+  })
+})
+
 describe('autolink', () => {
   it('https', () => {
     expect(parse('visit https://example.com now')).toMatchInlineSnapshot(`

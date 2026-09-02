@@ -18,7 +18,7 @@ import {
 } from './reference-links.ts'
 import type { TypedMarkBuilders } from './schema.ts'
 import { parseWikiEmbed, wikiEmbedBasename, type WikiEmbedOptions } from './wiki-embed.ts'
-import { parseWikilink } from './wikilink.ts'
+import { parseWikilink, type WikilinkOptions } from './wikilink.ts'
 
 /**
  * Lookup from Lezer node type id to the ProseMirror mark.
@@ -107,7 +107,7 @@ export interface FileLinkOptions {
 /**
  * Host options that influence source-backed inline atom parsing.
  */
-export type InlineMarkOptions = FileLinkOptions & WikiEmbedOptions
+export type InlineMarkOptions = FileLinkOptions & WikiEmbedOptions & WikilinkOptions
 
 export interface InlineMarkContext {
   /**
@@ -273,7 +273,7 @@ function walkAtomChild(
   const node = nodes[index]
   switch (node.type) {
     case LEZER_NODE_IDS.Wikilink:
-      walkWikilink(node, parentMarks, text, marks, out)
+      walkWikilink(node, parentMarks, text, marks, out, options)
       return node.to
     case LEZER_NODE_IDS.WikiEmbed:
       walkWikiEmbed(node, parentMarks, text, marks, out, options)
@@ -794,7 +794,8 @@ function walkMath(
 }
 
 /**
- * Special walker for a wikilink `[[target]]`/`[[target|alias]]`.
+ * Special walker for a wikilink `[[target]]`/`[[target|alias]]`. The host's
+ * `resolveWikilink` may replace the label; the target is always the source.
  */
 function walkWikilink(
   node: InlineElement,
@@ -802,13 +803,16 @@ function walkWikilink(
   text: string,
   marks: TypedMarkBuilders,
   out: MarkChunk[],
+  options: WikilinkOptions | undefined,
 ): void {
-  const { target, display } = parseWikilink(text.slice(node.from, node.to))
+  const link = parseWikilink(text.slice(node.from, node.to))
+  const resolution = options?.resolveWikilink?.(link)
+  const display = resolution?.display ?? link.display
 
   emit(out, node.from, node.to, [
     ...parentMarks,
     createUnitPack(marks, out, parentMarks, node.from, { key: 'wikilink' }),
-    marks.mdWikilink.create({ target, display }),
+    marks.mdWikilink.create({ target: link.target, display }),
   ])
 }
 
