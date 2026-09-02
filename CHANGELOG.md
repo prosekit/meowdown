@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.68.0](https://github.com/prosekit/meowdown/compare/v0.67.2...v0.68.0) (2026-09-02)
+
+
+### Features
+
+* add `resolveWikilink` ([#533](https://github.com/prosekit/meowdown/issues/533)) ([32b139f](https://github.com/prosekit/meowdown/commit/32b139fc2ae51a385919d5eca40f79b55f66fe6c))
+
 ## [0.67.2](https://github.com/prosekit/meowdown/compare/v0.67.1...v0.67.2) (2026-08-30)
 
 
