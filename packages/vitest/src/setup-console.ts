@@ -1,10 +1,4 @@
-import { afterEach, beforeEach } from 'vitest'
-
-const consoleMethods = ['assert', 'debug', 'dir', 'error', 'info', 'log', 'table', 'warn'] as const
-
-type ConsoleMethod = (typeof consoleMethods)[number]
-
-type ConsoleFunction = (...args: unknown[]) => void
+import { afterEach, beforeEach, vi } from 'vitest'
 
 const silencedMessages = [
   // A benign browser artifact: the skipped notifications are delivered on the
@@ -13,33 +7,48 @@ const silencedMessages = [
   'ResizeObserver loop completed with undelivered notifications',
 ]
 
-const consoleObject = console as unknown as Record<ConsoleMethod, ConsoleFunction>
-
-const originalMethods = {} as Record<ConsoleMethod, ConsoleFunction>
-
 const unexpectedCalls: string[] = []
+
+function logImplementation(...args: unknown[]) {
+  const message = args.map(String).join(' ')
+  for (const pattern of silencedMessages) {
+    if (message.includes(pattern)) return
+  }
+  unexpectedCalls.push(message)
+}
+
+function assertImplementation(condition: unknown, ...args: unknown[]) {
+  if (condition) return
+  logImplementation(...args)
+}
+
+function spy() {
+  const warn = vi.spyOn(console, 'warn').mockImplementation(logImplementation)
+  const error = vi.spyOn(console, 'error').mockImplementation(logImplementation)
+  const log = vi.spyOn(console, 'log').mockImplementation(logImplementation)
+  const info = vi.spyOn(console, 'info').mockImplementation(logImplementation)
+  const assert = vi.spyOn(console, 'assert').mockImplementation(assertImplementation)
+
+  return () => {
+    warn.mockRestore()
+    error.mockRestore()
+    log.mockRestore()
+    info.mockRestore()
+    assert.mockRestore()
+  }
+}
+
+let restoreSpy: VoidFunction | undefined
 
 beforeEach(() => {
   unexpectedCalls.length = 0
-  for (const method of consoleMethods) {
-    originalMethods[method] = consoleObject[method]
-    consoleObject[method] = (...args: unknown[]) => {
-      if (method === 'assert') {
-        // `console.assert` only prints when its first argument is falsy.
-        if (args[0]) return
-        args = ['Assertion failed:', ...args.slice(1)]
-      }
-      const message = args.map(String).join(' ')
-      if (silencedMessages.some((silenced) => message.includes(silenced))) return
-      unexpectedCalls.push(`console.${method}: ${message}`)
-    }
-  }
+  restoreSpy = spy()
 })
 
 afterEach(() => {
-  for (const method of consoleMethods) {
-    consoleObject[method] = originalMethods[method]
-  }
+  restoreSpy?.()
+  restoreSpy = undefined
+
   if (unexpectedCalls.length === 0) return
   throw new Error(
     [
