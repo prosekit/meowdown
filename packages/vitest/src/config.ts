@@ -5,12 +5,20 @@ import { defineProject } from 'vitest/config'
 const IS_BOT = !!(process.env.AI_AGENT || process.env.CI)
 const IS_DEBUG = !!process.env.DEBUG
 
+// An iPhone Safari user agent. prosemirror-view detects iOS from the `Mobile/`
+// token alone and hands every plain Enter in that mode to WebKit's native
+// editing instead of the keymap.
+const IPHONE_USER_AGENT =
+  'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1'
+
 export function defineSharedConfig({
   groupOrder,
   env,
+  emulateIPhone = false,
 }: {
   groupOrder: number
   env: 'browser' | 'node'
+  emulateIPhone?: boolean
 }) {
   const browserName = (() => {
     if (process.env.MEOWDOWN_TEST_BROWSER === 'webkit') {
@@ -60,6 +68,7 @@ export function defineSharedConfig({
             channel: browserName === 'chromium' ? 'chromium' : undefined,
           },
           contextOptions: {
+            ...(emulateIPhone ? { userAgent: IPHONE_USER_AGENT } : {}),
             reducedMotion: 'reduce',
             hasTouch: true,
             // A list of permissions to grant to all pages in this context.
