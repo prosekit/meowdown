@@ -2,10 +2,10 @@ import { getSearchStatus } from '@prosekit/extensions/search'
 import { describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
 
-import { setupFixture, type Fixture } from '../testing/index.ts'
+import { resolveWikilinkAlias, setupFixture, type Fixture } from '../testing/index.ts'
 
 function setupFind(markdown: string): Fixture {
-  const fixture = setupFixture()
+  const fixture = setupFixture({ extensionOptions: { resolveWikilink: resolveWikilinkAlias } })
   const { n } = fixture
   fixture.set(n.doc(n.paragraph(markdown)))
   return fixture

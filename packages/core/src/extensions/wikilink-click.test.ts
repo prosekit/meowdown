@@ -1,27 +1,15 @@
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
-import { setupFixture, type Fixture } from '../testing/index.ts'
+import { resolveWikilinkAlias, setupFixture, type Fixture } from '../testing/index.ts'
 
 import {
   defineWikilinkClickHandler,
   findWikilinkAt,
   type WikilinkClickHandler,
 } from './wikilink-click.ts'
-import { parseWikilink } from './wikilink.ts'
 
 const pmRoot = page.locate('.ProseMirror')
-
-describe('parseWikilink', () => {
-  it.each([
-    ['[[Note]]', 'Note', ''],
-    ['[[Note|Alias]]', 'Note', 'Alias'],
-    ['[[  Spaced Name  ]]', 'Spaced Name', ''],
-    ['[[Note | My Note]]', 'Note', 'My Note'],
-  ])('parses %s', (input, target, display) => {
-    expect(parseWikilink(input)).toEqual({ target, display })
-  })
-})
 
 describe('findWikilinkAt', () => {
   it('finds the wikilink covering a position', () => {
@@ -117,7 +105,7 @@ describe('wikilink click callback', () => {
 
   it('resolves adjacent wide aliases from their own hidden content holders', async () => {
     const onWikilinkClick = vi.fn<WikilinkClickHandler>()
-    using fixture = setupFixture()
+    using fixture = setupFixture({ extensionOptions: { resolveWikilink: resolveWikilinkAlias } })
     applyClickable(
       fixture,
       '[[Alpha|An alias much wider than its source]][[Beta|Another very wide alias]]',

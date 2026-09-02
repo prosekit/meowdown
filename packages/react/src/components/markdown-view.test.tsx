@@ -5,6 +5,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 
+import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
+
 import { MarkdownView } from './markdown-view.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
 
@@ -34,8 +36,8 @@ describe('MarkdownView', () => {
     await expect.element(wikilink).toHaveTextContent('Reflect Playground 4')
   })
 
-  it('renders a wikilink alias', async () => {
-    await renderView('[[target|Alias]]')
+  it('renders the label the host resolver splits from an alias', async () => {
+    await renderView('[[target|Alias]]', { resolveWikilink: resolveWikilinkAlias })
     await expect.element(wikilink).toHaveTextContent('Alias')
   })
 
@@ -208,6 +210,19 @@ describe('MarkdownView', () => {
     await renderView('![[ambiguous.png]]', { resolveWikiEmbed: () => undefined })
     await expect.element(view).toHaveTextContent('![[ambiguous.png]]')
     expect(view.element().querySelector('.md-atom-view')).toBeNull()
+  })
+
+  it('renders a resolved wikilink label and reports the full target', async () => {
+    const onWikilinkClick = vi.fn()
+    await renderView('[[Tim MacCaw // Dad]]', {
+      resolveWikilink: ({ target }: { target: string }) => ({ display: target.split(' // ')[0] }),
+      onWikilinkClick,
+    })
+    await expect.element(wikilink).toHaveTextContent('Tim MacCaw')
+    await wikilink.click()
+    expect(onWikilinkClick).toHaveBeenCalledWith(
+      expect.objectContaining({ target: 'Tim MacCaw // Dad' }),
+    )
   })
 
   it('renders a tweet embed', async () => {

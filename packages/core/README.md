@@ -31,7 +31,7 @@ const markdown = docToMarkdown(editor.state.doc)
 
 [CommonMark](https://commonmark.org/) and [GFM](https://github.github.com/gfm/), plus:
 
-- Wikilinks (`[[target]]`, `[[target|alias]]`)
+- Wikilinks (`[[target]]`; alias forms such as `[[target|alias]]` are the host's to split via `resolveWikilink`)
 - Wiki embeds (`![[path]]`)
 - Tags (`#tag`)
 - Highlight (`==highlight==`)

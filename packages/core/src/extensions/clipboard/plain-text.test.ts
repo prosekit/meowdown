@@ -4,11 +4,13 @@ import { describe, expect, it } from 'vitest'
 import { userEvent } from 'vitest/browser'
 
 import { markdownToDoc } from '../../converters/md-to-pm.ts'
-import { setupFixture, type Fixture } from '../../testing/index.ts'
+import { resolveWikilinkAlias, setupFixture, type Fixture } from '../../testing/index.ts'
 import type { MarkMode } from '../mark-mode.ts'
 
 function setupPlainText(mode: MarkMode, markdown: string): Fixture {
-  const fixture = setupFixture({ extensionOptions: { markMode: mode } })
+  const fixture = setupFixture({
+    extensionOptions: { markMode: mode, resolveWikilink: resolveWikilinkAlias },
+  })
   const { editor } = fixture
   fixture.set(markdownToDoc(markdown, { nodes: editor.nodes }))
   return fixture

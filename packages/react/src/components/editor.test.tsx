@@ -9,6 +9,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
+import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
+
 import { MeowdownEditor } from './editor.tsx'
 import type { EditorHandle } from './types.ts'
 
@@ -215,6 +217,21 @@ describe('MeowdownEditor', () => {
     )
     await expect.element(page.getByAltText('Photo')).toHaveAttribute('src', 'https://cdn/photo.png')
     await expect.element(pmRoot).toHaveTextContent('![[ambiguous.png]]')
+  })
+
+  it('resolves wikilink targets and labels through the host resolver', async () => {
+    await render(
+      <MeowdownEditor
+        mode="hide"
+        initialMarkdown="[[Tim MacCaw // Dad]] [[Tim MacCaw // Dad|Dad]]"
+        resolveWikilink={(link) => {
+          return resolveWikilinkAlias(link) ?? { display: link.target.split(' // ')[0] }
+        }}
+      />,
+    )
+    const labels = pmRoot.getByTestId('wikilink')
+    await expect.element(labels.first()).toHaveTextContent('Tim MacCaw')
+    await expect.element(labels.last()).toHaveTextContent('Dad')
   })
 
   it('embeds a pasted YouTube link by default', async () => {

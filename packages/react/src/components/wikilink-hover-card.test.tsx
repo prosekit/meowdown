@@ -6,6 +6,7 @@ import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 
 import { hover, unhover } from '../testing/mouse.ts'
+import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
 
 import { MeowdownEditor } from './editor.tsx'
 import type { EditorHandle } from './types.ts'
@@ -44,6 +45,7 @@ describe('WikilinkHoverCard', () => {
     await render(
       <MeowdownEditor
         initialMarkdown="[[Alpha|A wide alias]][[Beta|Another wide alias]]"
+        resolveWikilink={resolveWikilinkAlias}
         blockHandle={false}
       >
         <HostPreviewCard />

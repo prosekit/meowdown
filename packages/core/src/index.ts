@@ -169,6 +169,12 @@ export {
   type WikilinkHoverHit,
 } from './extensions/wikilink-hover.ts'
 export { defineWikilinkTrigger } from './extensions/wikilink-trigger.ts'
+export {
+  type WikilinkOptions,
+  type WikilinkPayload,
+  type WikilinkResolution,
+  type WikilinkResolver,
+} from './extensions/wikilink.ts'
 export { getIsComposing } from './utils/composition.ts'
 export { getTextblockDisplayText } from './utils/display-text.ts'
 export { formatFileSize } from './utils/format-file-size.ts'

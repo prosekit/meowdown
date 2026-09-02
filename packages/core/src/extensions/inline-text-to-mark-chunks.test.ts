@@ -811,6 +811,43 @@ describe('wiki embed', () => {
   })
 })
 
+describe('wikilink resolver', () => {
+  it('keeps a `|` inside the target without a resolver', () => {
+    expect(parse('[[Note|My Note]]')).toMatchInlineSnapshot(`
+      "
+      [0, 16] mdPack(key=wikilink) + mdWikilink(target=Note|My Note)
+      "
+    `)
+  })
+
+  it('passes the trimmed bracketed text to the resolver', () => {
+    const resolveWikilink = vi.fn(() => undefined)
+    parse('[[  Tim MacCaw // Dad|Dad  ]]', { resolveWikilink })
+    expect(resolveWikilink).toHaveBeenCalledWith({ target: 'Tim MacCaw // Dad|Dad' })
+  })
+
+  it('writes the resolved target and display into the mark', () => {
+    expect(
+      parse('[[Note|My Note]]', {
+        resolveWikilink: () => ({ target: 'Note', display: 'My Note' }),
+      }),
+    ).toMatchInlineSnapshot(`
+      "
+      [0, 16] mdPack(key=wikilink) + mdWikilink(target=Note,display=My Note)
+      "
+    `)
+  })
+
+  it('keeps the bracketed text as the target when only the display is resolved', () => {
+    expect(parse('[[Tim MacCaw // Dad]]', { resolveWikilink: () => ({ display: 'Tim MacCaw' }) }))
+      .toMatchInlineSnapshot(`
+      "
+      [0, 21] mdPack(key=wikilink) + mdWikilink(target=Tim MacCaw // Dad,display=Tim MacCaw)
+      "
+    `)
+  })
+})
+
 describe('autolink', () => {
   it('https', () => {
     expect(parse('visit https://example.com now')).toMatchInlineSnapshot(`

@@ -32,6 +32,7 @@ import {
   type ReferenceDefinitions,
   type WikiEmbedResolver,
   type WikilinkClickHandler,
+  type WikilinkResolver,
 } from '@meowdown/core'
 import type { DOMOutputSpec } from '@prosekit/pm/model'
 import { Mark, type Node as ProseMirrorNode } from '@prosekit/pm/model'
@@ -138,6 +139,11 @@ export interface MarkdownViewProps {
    */
   resolveWikiEmbed?: WikiEmbedResolver
   /**
+   * Resolve a `[[...]]` wikilink into its target and chip label; the bracketed
+   * text is both by default. Must be pure.
+   */
+  resolveWikilink?: WikilinkResolver
+  /**
    * Resolve metadata shown on a file pill.
    */
   resolveFileInfo?: FileInfoResolver
@@ -173,6 +179,7 @@ interface RenderContext {
   resolveImageUrl?: (src: string) => string | undefined
   resolveFileLink?: FileLinkResolver
   resolveWikiEmbed?: WikiEmbedResolver
+  resolveWikilink?: WikilinkResolver
   resolveFileInfo?: FileInfoResolver
   onWikilinkClick?: WikilinkClickHandler
   onLinkClick?: LinkClickHandler
@@ -668,6 +675,7 @@ function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode 
     {
       resolveFileLink: context.resolveFileLink,
       resolveWikiEmbed: context.resolveWikiEmbed,
+      resolveWikilink: context.resolveWikilink,
     },
     {
       referenceDefinitions: context.referenceDefinitions,
@@ -795,6 +803,7 @@ export function MarkdownView({
   resolveImageUrl,
   resolveFileLink,
   resolveWikiEmbed,
+  resolveWikilink,
   resolveFileInfo,
   onWikilinkClick,
   onLinkClick,
@@ -812,6 +821,7 @@ export function MarkdownView({
       resolveImageUrl,
       resolveFileLink,
       resolveWikiEmbed,
+      resolveWikilink,
       resolveFileInfo,
       onWikilinkClick: interactive ? onWikilinkClick : undefined,
       onLinkClick: interactive ? onLinkClick : undefined,
@@ -832,6 +842,7 @@ export function MarkdownView({
     resolveImageUrl,
     resolveFileLink,
     resolveWikiEmbed,
+    resolveWikilink,
     resolveFileInfo,
     onWikilinkClick,
     onLinkClick,
