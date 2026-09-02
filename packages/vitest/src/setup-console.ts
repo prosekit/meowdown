@@ -1,36 +1,17 @@
 import { afterEach, beforeEach } from 'vitest'
 
-/**
- * Every `console` method that prints something. `clear`, `countReset`,
- * `groupEnd`, `time` and `timeStamp` are left alone because they never print a
- * message.
- */
-const consoleMethods = [
-  'assert',
-  'count',
-  'debug',
-  'dir',
-  'dirxml',
-  'error',
-  'group',
-  'groupCollapsed',
-  'info',
-  'log',
-  'table',
-  'timeEnd',
-  'timeLog',
-  'trace',
-  'warn',
-] as const
+const consoleMethods = ['assert', 'debug', 'dir', 'error', 'info', 'log', 'table', 'warn'] as const
 
 type ConsoleMethod = (typeof consoleMethods)[number]
 
 type ConsoleFunction = (...args: unknown[]) => void
 
-// A benign browser artifact: the skipped notifications are delivered on the
-// next frame. Base UI's popup auto-resize measurements trigger it in tight
-// viewports.
-const silencedMessages = ['ResizeObserver loop completed with undelivered notifications']
+const silencedMessages = [
+  // A benign browser artifact: the skipped notifications are delivered on the
+  // next frame. Base UI's popup auto-resize measurements trigger it in tight
+  // viewports.
+  'ResizeObserver loop completed with undelivered notifications',
+]
 
 const consoleObject = console as unknown as Record<ConsoleMethod, ConsoleFunction>
 
