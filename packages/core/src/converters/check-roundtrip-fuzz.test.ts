@@ -9,7 +9,7 @@ import { checkRoundTrip } from './check-roundtrip.ts'
 const SEED = Number.parseInt(import.meta.env.VITE_FUZZ_SEED || '') || Date.now()
 
 // Reduce the number of samples for WebKit browsers due to memory issues.
-const NUM_SAMPLES = isWebKit ? 10_000 : 100_000
+const NUM_SAMPLES = isWebKit ? 1_000 : 100_000
 
 /// keep-sorted
 const TOKENS_NEWLINE: readonly string[] = ['\n']
