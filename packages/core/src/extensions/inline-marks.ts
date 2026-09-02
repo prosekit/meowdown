@@ -163,7 +163,7 @@ function defineMdTag() {
 }
 
 /**
- * Covers the whole `[[target]]`/`[[target|alias]]` source.
+ * Covers the whole `[[...]]` source.
  */
 function defineMdWikilink() {
   return defineMarkSpec<'mdWikilink', MdWikilinkAttrs>({
@@ -176,7 +176,14 @@ function defineMdWikilink() {
 }
 
 export interface MdWikilinkAttrs {
+  /**
+   * Target passed to click and hover handlers: the bracketed text unless the
+   * host's `resolveWikilink` replaced it.
+   */
   target: string
+  /**
+   * Label shown in place of the source, or `''` to show the target.
+   */
   display: string
 }
 

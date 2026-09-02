@@ -139,8 +139,8 @@ export interface MarkdownViewProps {
    */
   resolveWikiEmbed?: WikiEmbedResolver
   /**
-   * Resolve the label shown on a wikilink chip. Must be pure; return
-   * `undefined` to keep the default (the alias, else the target).
+   * Resolve a `[[...]]` wikilink into its target and chip label; the bracketed
+   * text is both by default. Must be pure.
    */
   resolveWikilink?: WikilinkResolver
   /**

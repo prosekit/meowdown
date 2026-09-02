@@ -4,6 +4,7 @@ import { page, userEvent } from 'vitest/browser'
 import {
   formatSelectionSteps,
   getSelectionSnapshot,
+  resolveWikilinkAlias,
   setupFixture,
   traceKeyAt,
   traceKeySelection,
@@ -46,8 +47,10 @@ describe.each(ALL_MODES)('wikilink rendering in %s mode', (mode) => {
     expect(label.all()).toHaveLength(2)
   })
 
-  it('renders the alias as the label', async () => {
-    using fixture = setupFixture({ extensionOptions: { markMode: mode } })
+  it('renders the label the host resolver returns', async () => {
+    using fixture = setupFixture({
+      extensionOptions: { markMode: mode, resolveWikilink: resolveWikilinkAlias },
+    })
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('see [[Note|My Note]] here')))
     await expect.element(label).toHaveTextContent('My Note')

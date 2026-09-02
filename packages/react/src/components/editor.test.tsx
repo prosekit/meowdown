@@ -9,6 +9,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
+import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
+
 import { MeowdownEditor } from './editor.tsx'
 import type { EditorHandle } from './types.ts'
 
@@ -217,13 +219,13 @@ describe('MeowdownEditor', () => {
     await expect.element(pmRoot).toHaveTextContent('![[ambiguous.png]]')
   })
 
-  it('renders a resolved wikilink label and keeps an authored alias', async () => {
+  it('resolves wikilink targets and labels through the host resolver', async () => {
     await render(
       <MeowdownEditor
         mode="hide"
         initialMarkdown="[[Tim MacCaw // Dad]] [[Tim MacCaw // Dad|Dad]]"
-        resolveWikilink={({ target, display }) => {
-          return display === '' ? { display: target.split(' // ')[0] } : undefined
+        resolveWikilink={(link) => {
+          return resolveWikilinkAlias(link) ?? { display: link.target.split(' // ')[0] }
         }}
       />,
     )

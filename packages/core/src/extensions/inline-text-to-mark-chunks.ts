@@ -18,7 +18,7 @@ import {
 } from './reference-links.ts'
 import type { TypedMarkBuilders } from './schema.ts'
 import { parseWikiEmbed, wikiEmbedBasename, type WikiEmbedOptions } from './wiki-embed.ts'
-import { parseWikilink, type WikilinkOptions } from './wikilink.ts'
+import type { WikilinkOptions } from './wikilink.ts'
 
 /**
  * Lookup from Lezer node type id to the ProseMirror mark.
@@ -794,8 +794,8 @@ function walkMath(
 }
 
 /**
- * Special walker for a wikilink `[[target]]`/`[[target|alias]]`. The host's
- * `resolveWikilink` may replace the label; the target is always the source.
+ * Special walker for a wikilink `[[...]]`. The bracketed text is the target
+ * and the label unless the host's `resolveWikilink` replaces either.
  */
 function walkWikilink(
   node: InlineElement,
@@ -805,14 +805,16 @@ function walkWikilink(
   out: MarkChunk[],
   options: WikilinkOptions | undefined,
 ): void {
-  const link = parseWikilink(text.slice(node.from, node.to))
-  const resolution = options?.resolveWikilink?.(link)
-  const display = resolution?.display ?? link.display
+  const source = text.slice(node.from + 2, node.to - 2).trim()
+  const resolution = options?.resolveWikilink?.({ target: source })
 
   emit(out, node.from, node.to, [
     ...parentMarks,
     createUnitPack(marks, out, parentMarks, node.from, { key: 'wikilink' }),
-    marks.mdWikilink.create({ target: link.target, display }),
+    marks.mdWikilink.create({
+      target: resolution?.target ?? source,
+      display: resolution?.display ?? '',
+    }),
   ])
 }
 

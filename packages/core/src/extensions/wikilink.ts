@@ -4,39 +4,39 @@ import type { MarkViewConstructor } from '@prosekit/pm/view'
 import type { MdWikilinkAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
 
-export interface ParsedWikilink {
-  target: string
-  display: string
-}
-
 /**
- * Splits `[[target]]`/`[[target|alias]]` into its target and display label (the alias, or empty).
+ * What {@link WikilinkResolver} sees for one `[[...]]` wikilink.
  */
-export function parseWikilink(text: string): ParsedWikilink {
-  const inner = text.replace(/^\[\[/, '').replace(/\]\]$/, '')
-  const pipe = inner.indexOf('|')
-  if (pipe < 0) return { target: inner.trim(), display: '' }
-  return { target: inner.slice(0, pipe).trim(), display: inner.slice(pipe + 1).trim() }
+export interface WikilinkPayload {
+  /**
+   * The text between the brackets, trimmed. Meowdown reads no syntax inside
+   * it: an alias form such as `[[target|alias]]` arrives here whole.
+   */
+  target: string
 }
 
 /**
- * A resolved wikilink label.
+ * A resolved wikilink.
  */
 export interface WikilinkResolution {
   /**
-   * Label shown in place of the source. Defaults to the alias, else the target.
+   * Target passed to click and hover handlers. Defaults to the bracketed text.
+   */
+  target?: string
+  /**
+   * Label shown in place of the source. Defaults to the target.
    */
   display?: string
 }
 
 /**
- * Resolves the label of one `[[target]]`/`[[target|alias]]`. Only the label
- * changes: the target, click payloads, and the Markdown source stay as
- * written. Return `undefined` to keep the default label. The resolver
- * participates in the parse cache, so it must be pure: the same link must
- * always return the same result.
+ * Resolves one `[[...]]` wikilink into the target its handlers receive and
+ * the label its chip shows; the Markdown source stays as written. Return
+ * `undefined` to use the bracketed text as both. The resolver participates
+ * in the parse cache, so it must be pure: the same payload must always
+ * return the same result.
  */
-export type WikilinkResolver = (link: ParsedWikilink) => WikilinkResolution | undefined
+export type WikilinkResolver = (link: WikilinkPayload) => WikilinkResolution | undefined
 
 /**
  * Host options for wikilink parsing.
@@ -83,7 +83,7 @@ function createWikilinkMarkView(): MarkViewConstructor {
 }
 
 /**
- * Render `[[target]]`/`[[target|alias]]` as an immutable inline label (a mark
+ * Render `[[...]]` as an immutable inline label (a mark
  * view) standing in for the raw source. The single-caret-stop behavior comes
  * from the shared `defineAtomMarkNavigation` in the editor extension, which
  * treats `mdWikilink` (and `mdImage`) as one unit.

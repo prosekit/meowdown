@@ -62,7 +62,7 @@ Common `MeowdownEditor` props:
 | `mode`                                                                                                        | `'focus'` (default), `'show'`, or `'hide'`: how much Markdown syntax stays in view |
 | `searchQuery` / `onSearchChange`                                                                              | Find in document, with `EditorHandle.findNext()` / `findPrevious()`                |
 | `onWikilinkClick` / `onLinkClick` / `onTagClick` / `onImageClick` / `onFileClick`                             | Click handling for the rendered atoms                                              |
-| `resolveImageUrl` / `resolveWikiEmbed` / `resolveFileLink` / `resolveFileInfo`                                | Resolve and classify local content                                                 |
+| `resolveImageUrl` / `resolveWikiEmbed` / `resolveWikilink` / `resolveFileLink` / `resolveFileInfo`            | Resolve and classify local content                                                 |
 | `onFilePaste`                                                                                                 | Persist pasted or dropped files                                                    |
 | `onSlashMenuSearch` / `onTagSearch` / `onWikilinkSearch` / `onSelectionMenuSearch`                            | Search menus for `/`, `#`, `[[`, and selection commands                            |
 | `readOnly` / `placeholder` / `blockHandle` / `caretGlide` / `embedPaste` / `linkPaste` / `bulletAfterHeading` | Behavior toggles                                                                   |

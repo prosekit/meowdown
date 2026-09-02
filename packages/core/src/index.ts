@@ -170,8 +170,8 @@ export {
 } from './extensions/wikilink-hover.ts'
 export { defineWikilinkTrigger } from './extensions/wikilink-trigger.ts'
 export {
-  type ParsedWikilink,
   type WikilinkOptions,
+  type WikilinkPayload,
   type WikilinkResolution,
   type WikilinkResolver,
 } from './extensions/wikilink.ts'

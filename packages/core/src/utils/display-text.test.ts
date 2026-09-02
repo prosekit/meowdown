@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { setupFixture } from '../testing/index.ts'
+import { resolveWikilinkAlias, setupFixture } from '../testing/index.ts'
 
 import { getTextblockDisplayText } from './display-text.ts'
 
@@ -13,7 +13,7 @@ describe('getTextblockDisplayText', () => {
   })
 
   it('replaces a wikilink with its display text, falling back to the target', () => {
-    using fixture = setupFixture()
+    using fixture = setupFixture({ extensionOptions: { resolveWikilink: resolveWikilinkAlias } })
     const { n } = fixture
     fixture.set(n.doc(n.heading({ level: 1 }, 'see [[target|shown]] and [[bare]]')))
     expect(getTextblockDisplayText(fixture.doc.child(0))).toBe('see shown and bare')

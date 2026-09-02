@@ -5,6 +5,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 
+import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
+
 import { MarkdownView } from './markdown-view.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
 
@@ -34,8 +36,8 @@ describe('MarkdownView', () => {
     await expect.element(wikilink).toHaveTextContent('Reflect Playground 4')
   })
 
-  it('renders a wikilink alias', async () => {
-    await renderView('[[target|Alias]]')
+  it('renders the label the host resolver splits from an alias', async () => {
+    await renderView('[[target|Alias]]', { resolveWikilink: resolveWikilinkAlias })
     await expect.element(wikilink).toHaveTextContent('Alias')
   })
 

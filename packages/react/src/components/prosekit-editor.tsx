@@ -219,7 +219,7 @@ export interface ProseKitEditorProps {
   resolveWikiEmbed?: WikiEmbedResolver
 
   /**
-   * Resolves wikilink chip labels. Read once on mount; see `EditorProps.resolveWikilink`.
+   * Resolves wikilink targets and labels. Read once on mount; see `EditorProps.resolveWikilink`.
    */
   resolveWikilink?: WikilinkResolver
 

@@ -11,6 +11,7 @@ import { defineVirtualCaret } from '../extensions/virtual-caret.ts'
 
 import { getSelectionSnapshot } from './selection-snapshot.ts'
 
+export { resolveWikilinkAlias } from './resolve-wikilink-alias.ts'
 export { getSelectionSnapshot } from './selection-snapshot.ts'
 export {
   formatSelectionSteps,

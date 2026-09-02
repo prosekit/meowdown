@@ -198,10 +198,12 @@ export interface EditorProps {
   resolveWikiEmbed?: WikiEmbedResolver
 
   /**
-   * Resolves the label shown on a `[[target]]`/`[[target|alias]]` chip. Return
-   * `undefined` to keep the default (the alias, else the target). Only the
-   * label changes: clicks still report the target and the markdown text is
-   * untouched. Must be pure and is read once when the editor is created.
+   * Resolves a `[[...]]` wikilink into the target its click and hover
+   * handlers receive and the label its chip shows. Meowdown reads no syntax
+   * inside the brackets, so an alias form such as `[[target|alias]]` is
+   * split here by the host. Return `undefined` to use the bracketed text as
+   * both; the markdown text is untouched either way. Must be pure and is
+   * read once when the editor is created.
    */
   resolveWikilink?: WikilinkResolver
 

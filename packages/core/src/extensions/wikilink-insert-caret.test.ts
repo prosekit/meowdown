@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
-import { getSelectionSnapshot, setupFixture, type Fixture } from '../testing/index.ts'
+import {
+  getSelectionSnapshot,
+  resolveWikilinkAlias,
+  setupFixture,
+  type Fixture,
+} from '../testing/index.ts'
 
 import type { MarkMode } from './mark-mode.ts'
 
@@ -14,7 +19,9 @@ const ALL_MODES: MarkMode[] = ['hide', 'focus', 'show']
 // (the `<a>` tag), exactly the state of a user who typed `A` then opened the
 // wikilink menu.
 function setupAfterA(mode: MarkMode): Fixture {
-  const fixture = setupFixture({ extensionOptions: { markMode: mode } })
+  const fixture = setupFixture({
+    extensionOptions: { markMode: mode, resolveWikilink: resolveWikilinkAlias },
+  })
   const { n } = fixture
   fixture.set(n.doc(n.paragraph('A<a>')))
   fixture.view.focus()
