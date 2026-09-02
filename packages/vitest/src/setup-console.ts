@@ -19,27 +19,17 @@ const originalMethods = {} as Record<ConsoleMethod, ConsoleFunction>
 
 const unexpectedCalls: string[] = []
 
-function formatArguments(args: unknown[]): string {
-  return args
-    .map((arg) => {
-      if (typeof arg === 'string') return arg
-      if (arg instanceof Error) return arg.stack || `${arg.name}: ${arg.message}`
-      return String(arg)
-    })
-    .join(' ')
-}
-
 beforeEach(() => {
   unexpectedCalls.length = 0
   for (const method of consoleMethods) {
     originalMethods[method] = consoleObject[method]
     consoleObject[method] = (...args: unknown[]) => {
-      // `console.assert` only prints when its first argument is falsy.
       if (method === 'assert') {
+        // `console.assert` only prints when its first argument is falsy.
         if (args[0]) return
         args = ['Assertion failed:', ...args.slice(1)]
       }
-      const message = formatArguments(args)
+      const message = args.map(String).join(' ')
       if (silencedMessages.some((silenced) => message.includes(silenced))) return
       unexpectedCalls.push(`console.${method}: ${message}`)
     }
