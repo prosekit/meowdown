@@ -1506,3 +1506,42 @@ describe('mark mode lifecycle', () => {
     expect(fixture.dom.getAttribute('data-mark-mode')).toBe('hide')
   })
 })
+
+describe('magic comment visibility', () => {
+  it('keeps the noLink comment hidden in focus mode when the caret touches it', async () => {
+    using fixture = setupFixture({ extensionOptions: { markMode: 'focus' } })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('go to www.example.co<a>m<!-- {"noLink":true} --> now')))
+    const comment = pmRoot.getByText('noLink')
+    await expect.element(comment).toBeInTheDocument()
+    expect(getComputedStyle(comment.element()).fontSize).toBe('0px')
+  })
+
+  it('hides the noLink comment in show mode', async () => {
+    using fixture = setupFixture({ extensionOptions: { markMode: 'show' } })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('go to www.example.com<!-- {"noLink":true} --> now')))
+    const comment = pmRoot.getByText('noLink')
+    await expect.element(comment).toBeInTheDocument()
+    expect(getComputedStyle(comment.element()).fontSize).toBe('0px')
+    expect(getComputedStyle(comment.element()).opacity).toBe('0')
+  })
+
+  it('hides the noLink comment in hide mode', async () => {
+    using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('go to www.example.com<!-- {"noLink":true} --> now')))
+    const comment = pmRoot.getByText('noLink')
+    await expect.element(comment).toBeInTheDocument()
+    expect(getComputedStyle(comment.element()).fontSize).toBe('0px')
+  })
+
+  it('keeps the noLink comment hidden while an enclosing unit reveals', async () => {
+    using fixture = setupFixture({ extensionOptions: { markMode: 'focus' } })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph('*a<a> www.example.com<!-- {"noLink":true} --> b*')))
+    const comment = pmRoot.getByText('noLink')
+    await expect.element(comment).toBeInTheDocument()
+    expect(getComputedStyle(comment.element()).fontSize).toBe('0px')
+  })
+})

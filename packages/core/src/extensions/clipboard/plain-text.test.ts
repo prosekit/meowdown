@@ -425,3 +425,23 @@ describe('native plain text copy', () => {
     expect((await readClipboard()).text).toBe('value')
   })
 })
+
+describe('magic comments in plain text copy', () => {
+  it('keeps the noLink comment in show mode', () => {
+    expect(
+      copyText('show', 'go www.example.com<!-- {"noLink":true} --> end'),
+    ).toMatchInlineSnapshot(`"go www.example.com<!-- {"noLink":true} --> end"`)
+  })
+
+  it('keeps the noLink comment in focus mode', () => {
+    expect(
+      copyText('focus', 'go www.example.com<!-- {"noLink":true} --> end'),
+    ).toMatchInlineSnapshot(`"go www.example.com<!-- {"noLink":true} --> end"`)
+  })
+
+  it('strips the noLink comment in hide mode', () => {
+    expect(
+      copyText('hide', 'go www.example.com<!-- {"noLink":true} --> end'),
+    ).toMatchInlineSnapshot(`"go www.example.com end"`)
+  })
+})

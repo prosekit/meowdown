@@ -804,6 +804,17 @@
     }
   }
 
+  /* Magic comments are editor-managed metadata, not authored syntax: an
+   * `mdMagic` run keeps a zero-width inline box in every mark mode. It is
+   * not `.md-mark`, so no `.show` reveal (mode or find) ever applies to
+   * it. */
+  .ProseMirror .md-magic {
+    display: inline;
+    font-size: 0;
+    letter-spacing: 0;
+    opacity: 0;
+  }
+
   /* atom marks (image, wikilink) */
   .ProseMirror {
     .md-atom-view {
