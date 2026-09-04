@@ -43,7 +43,7 @@ importers:
         specifier: ^0.0.88
         version: 0.0.88
       playwright:
-        specifier: ^1.62.0
+        specifier: ^1.62.1
         version: 1.62.1
       simple-git-hooks:
         specifier: ^2.14.0
