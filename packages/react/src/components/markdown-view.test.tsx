@@ -124,7 +124,9 @@ describe('MarkdownView', () => {
       '[Plan][ DOCS ]\n\n[docs]: https://first.example\n\n[DOCS]: https://second.example',
     )
 
-    await expect.element(view.getByText('Plan')).toHaveAttribute('href', 'https://first.example')
+    await expect
+      .element(view.getByText('Plan', { exact: false }))
+      .toHaveAttribute('href', 'https://first.example')
     await expect.element(view).not.toMatchTextContent('https://second.example')
   })
 
@@ -139,7 +141,9 @@ describe('MarkdownView', () => {
   it('resolves a definition inside a blockquote', async () => {
     await renderView('> [docs]: https://example.com\n\nRead [Docs].')
 
-    await expect.element(view.getByText('Docs')).toHaveAttribute('href', 'https://example.com')
+    await expect
+      .element(view.getByText('Docs', { exact: false }))
+      .toHaveAttribute('href', 'https://example.com')
     await expect.element(view).not.toMatchTextContent('[docs]:')
   })
 
@@ -285,7 +289,7 @@ describe('MarkdownView', () => {
       ),
     ).toHaveLength(0)
     await wikilink.click()
-    await view.getByText('Docs').click()
+    await view.getByText('Docs', { exact: false }).click()
     await view.getByAltText('cat').click()
     await view.getByTestId('file-pill').click()
     expect(onWikilinkClick).not.toHaveBeenCalled()

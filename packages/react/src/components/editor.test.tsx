@@ -178,7 +178,7 @@ describe('MeowdownEditor', () => {
     )
 
     await expect
-      .element(pmRoot.getByText('the plan'))
+      .element(pmRoot.getByText('the plan', { exact: false }))
       .toHaveAttribute('href', 'https://example.com/docs')
     await expect
       .element(page.getByAltText('diagram'))
@@ -445,7 +445,7 @@ describe('MeowdownEditor', () => {
         onLinkClick={onLinkClick}
       />,
     )
-    await screen.getByText('Docs').click()
+    await screen.getByText('Docs', { exact: false }).click()
     await vi.waitFor(() => {
       expect(onLinkClick).toHaveBeenCalledWith(
         expect.objectContaining({ href: 'https://example.com' }),

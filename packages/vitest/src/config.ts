@@ -51,13 +51,6 @@ export function defineSharedConfig({
           width: 900,
           height: 600,
         },
-        locators: {
-          // meowdown hides Markdown syntax with `font-size: 0` instead of
-          // `display: none`, so the syntax characters stay inside the same
-          // element as the visible text. Text locators have to match a
-          // substring for `getByText('Docs')` to find `[Docs](...)`.
-          exact: false,
-        },
         provider: playwright({
           launchOptions: {
             // Opt into the new Chrome headless mode by using "chromium" channel. Along

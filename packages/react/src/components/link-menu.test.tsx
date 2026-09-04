@@ -30,7 +30,7 @@ describe('LinkMenu', () => {
       />,
     )
 
-    await hover(pmRoot.getByRole('link', { name: 'https://example.com' }))
+    await hover(pmRoot.getByRole('link', { name: 'https://example.com', exact: false }))
     await expect.element(popover.getByTestId('link-popover-loading')).toBeVisible()
     await expect.element(popover.getByRole('button', { name: 'Copy link' })).toBeVisible()
     await expect.element(popover.getByRole('button', { name: 'Remove link' })).toBeVisible()
@@ -68,7 +68,7 @@ describe('LinkMenu', () => {
       <MeowdownEditor initialMarkdown="[File](file:///tmp/a.txt)" resolveLinkPreview={resolver} />,
     )
 
-    await hover(pmRoot.getByRole('link', { name: 'File' }))
+    await hover(pmRoot.getByRole('link', { name: 'File', exact: false }))
     await expect.element(popover.getByText('file:///tmp/a.txt')).toBeVisible()
     expect(resolver).not.toHaveBeenCalled()
   })
@@ -86,10 +86,10 @@ describe('LinkMenu', () => {
     )
 
     await unhover()
-    await hover(pmRoot.getByRole('link', { name: 'First' }))
+    await hover(pmRoot.getByRole('link', { name: 'First', exact: false }))
     await expect.element(popover.getByTestId('link-popover-loading')).toBeVisible()
     await vi.waitFor(() => expect(pending.has('https://first.test')).toBe(true))
-    await hover(pmRoot.getByRole('link', { name: 'Second' }))
+    await hover(pmRoot.getByRole('link', { name: 'Second', exact: false }))
     await vi.waitFor(() => expect(pending.has('https://second.test')).toBe(true))
     await hover(popover)
     pending.get('https://second.test')?.({ title: 'Second title' })
@@ -115,7 +115,7 @@ describe('LinkMenu', () => {
       />,
     )
 
-    await hover(pmRoot.getByRole('link', { name: 'https://example.com' }))
+    await hover(pmRoot.getByRole('link', { name: 'https://example.com', exact: false }))
     await expect.element(popover.getByTestId('link-popover-loading')).toBeVisible()
     await hover(popover)
     resolvePreview({ title: 'Example Domain' })
@@ -154,7 +154,7 @@ describe('LinkMenu', () => {
     )
     // Focus the document first; `clipboard.writeText` rejects otherwise.
     await pmRoot.click()
-    await hover(screen.getByText('Docs'))
+    await hover(screen.getByText('Docs', { exact: false }))
     await expect.element(popover.getByTestId('link-popover-info')).toBeVisible()
     await popover.getByRole('button', { name: 'Copy link' }).click()
     await vi.waitFor(() => {
@@ -258,7 +258,7 @@ describe('LinkMenu', () => {
     await render(
       <MeowdownEditor initialMarkdown="read the [long linked documentation](https://example.com)" />,
     )
-    const label = pmRoot.getByText('long linked documentation')
+    const label = pmRoot.getByText('long linked documentation', { exact: false })
     await label.click()
     await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}')
     await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
@@ -271,7 +271,10 @@ describe('LinkMenu', () => {
       expect(popRect.top).toBeLessThan(labelRect.bottom + 40)
       // The anchor spans the visible text: from the paragraph's first glyph to
       // the end of the label, skipping the hidden trailing syntax.
-      const paragraphRect = pmRoot.getByText('read the').element().getBoundingClientRect()
+      const paragraphRect = pmRoot
+        .getByText('read the', { exact: false })
+        .element()
+        .getBoundingClientRect()
       const anchorCenter = (paragraphRect.left + labelRect.right) / 2
       const popCenter = (popRect.left + popRect.right) / 2
       expect(Math.abs(popCenter - anchorCenter)).toBeLessThan(20)
@@ -296,7 +299,7 @@ describe('LinkMenu', () => {
     const screen = await render(
       <MeowdownEditor handleRef={ref} initialMarkdown="a [Docs](https://example.com) b" />,
     )
-    await hover(screen.getByText('Docs'))
+    await hover(screen.getByText('Docs', { exact: false }))
     await popover.getByRole('button', { name: 'Remove link' }).click()
     await expect.element(popover).not.toBeInTheDocument()
     const markdown = ref.current?.getMarkdown() ?? ''
@@ -323,7 +326,7 @@ describe('LinkMenu', () => {
     await render(
       <MeowdownEditor handleRef={ref} initialMarkdown="[**bold** docs](https://old.test)" />,
     )
-    await hover(pmRoot.getByRole('link', { name: 'docs' }))
+    await hover(pmRoot.getByRole('link', { name: 'docs', exact: false }))
     await popover.getByRole('button', { name: 'Edit link' }).click()
     await popover.getByTestId('link-popover-input').fill('https://new.test')
     await popover.getByRole('button', { name: 'Save' }).click()
@@ -368,7 +371,7 @@ describe('LinkMenu', () => {
     await render(
       <MeowdownEditor initialMarkdown="[example.com](example.com)" resolveLinkPreview={resolver} />,
     )
-    await pmRoot.getByRole('link', { name: 'example.com' }).click()
+    await pmRoot.getByRole('link', { name: 'example.com', exact: false }).click()
     await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
     await expect.element(popover.getByRole('button', { name: 'Use page title' })).toBeVisible()
     expect(resolver).toHaveBeenCalledWith('https://example.com')
@@ -382,7 +385,7 @@ describe('LinkMenu', () => {
         resolveLinkPreview={resolver}
       />,
     )
-    await pmRoot.getByRole('link', { name: 'https://old.test' }).click()
+    await pmRoot.getByRole('link', { name: 'https://old.test', exact: false }).click()
     await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
     await vi.waitFor(() => expect(resolver).toHaveBeenCalledWith('https://old.test'))
     resolver.mockClear()

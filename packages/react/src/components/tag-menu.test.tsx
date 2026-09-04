@@ -31,9 +31,9 @@ describe('TagMenu', () => {
     await expect.element(menu).not.toBeVisible()
     await userEvent.keyboard('#m')
     await expect.element(menu).toBeVisible()
-    await expect.element(menu.getByText('movie')).toBeVisible()
-    await expect.element(menu.getByText('music')).toBeVisible()
-    await expect.element(menu.getByText('book')).not.toBeInTheDocument()
+    await expect.element(menu.getByText('#movie')).toBeVisible()
+    await expect.element(menu.getByText('#music')).toBeVisible()
+    await expect.element(menu.getByText('#book')).not.toBeInTheDocument()
   })
 
   it('does not open while typing a heading', async () => {
@@ -57,7 +57,7 @@ describe('TagMenu', () => {
     await userEvent.keyboard('#bo')
     await expect.element(menu.getByText('Loading...')).toBeVisible()
     resolve([{ tag: 'book' }])
-    await expect.element(menu.getByText('book')).toBeVisible()
+    await expect.element(menu.getByText('#book')).toBeVisible()
   })
 
   it('shows label and detail, inserts the tag, and runs onSelect', async () => {
@@ -82,7 +82,7 @@ describe('TagMenu', () => {
     await render(<ProseKitEditor ref={ref} onTagSearch={searchTags} />)
     await pmRoot.click()
     await userEvent.keyboard('Hello #mo')
-    await menu.getByText('movie').click()
+    await menu.getByText('#movie').click()
 
     await expect.element(menu).not.toBeVisible()
     expect(ref.current?.getMarkdown()).toContain('Hello #movie')
@@ -100,6 +100,6 @@ describe('TagMenu', () => {
     await render(<MeowdownEditor onTagSearch={searchTags} />)
     await pmRoot.click()
     await userEvent.keyboard('#a')
-    await expect.element(menu.getByText('art')).toBeVisible()
+    await expect.element(menu.getByText('#art')).toBeVisible()
   })
 })
