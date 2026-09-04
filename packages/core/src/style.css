@@ -581,6 +581,14 @@
     border-top: 1px solid var(--meowdown-hr);
   }
 
+  /* The wrapper is the non-editable box prosemirror-view gives a leaf node;
+   * without this a caret can land beside the `<hr>` inside it, which iOS
+   * trackpad mode then bounces out of on every touch move. */
+  .ProseMirror .prosekit-horizontal-rule {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
   /* ---------------------------------------------------------------------------
    * Tables
    * ------------------------------------------------------------------------- */
