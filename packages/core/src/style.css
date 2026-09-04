@@ -387,6 +387,16 @@
     margin-top: 0.25em;
   }
 
+  /* A caret must never land inside the marker. iOS trackpad mode otherwise
+   * bounces between the marker and the previous block on every touch move
+   * (WebKit accepts an empty non-editable block as a caret position; UIKit
+   * then pushes the caret back out). `-webkit-user-select` is the one Safari
+   * honors and the one that inherits to the task checkbox. */
+  .ProseMirror .prosemirror-flat-list > .list-marker {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
   /* The bullet dot is painted as a radial-gradient on the (1lh square)
    * `.list-marker` box, so the dot and, when collapsed, its halo always share one
    * center (a separate halo element drifts by a sub-pixel). Override prosekit's
@@ -569,6 +579,14 @@
     margin: 1.5em 0;
     border: none;
     border-top: 1px solid var(--meowdown-hr);
+  }
+
+  /* The wrapper is the non-editable box prosemirror-view gives a leaf node;
+   * without this a caret can land beside the `<hr>` inside it, which iOS
+   * trackpad mode then bounces out of on every touch move. */
+  .ProseMirror .prosekit-horizontal-rule {
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   /* ---------------------------------------------------------------------------
