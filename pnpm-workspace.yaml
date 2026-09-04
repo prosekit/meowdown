@@ -10,6 +10,7 @@ strictPeerDependencies: true
 
 peerDependencyRules:
   allowedVersions:
+    # TODO: Remove this once https://github.com/vitest-community/vitest-browser-react/pull/63 is fixed and released
     vitest-browser-react>vitest: '5'
 
 trustPolicy: no-downgrade
