@@ -28,7 +28,7 @@
     "@ocavue/tsconfig": "^0.7.1",
     "dedent": "^1.7.2",
     "tsdown": "^0.23.0-rc.1",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   },
   "publishConfig": {
     "exports": {

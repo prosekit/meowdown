@@ -59,7 +59,7 @@ describe('noLink unit', () => {
     using fixture = setupFixture()
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('go to www.example.com<!-- {"noLink":true} --> now')))
-    const address = pmRoot.getByText('www.example.com')
+    const address = pmRoot.getByText('www.example.com', { exact: false })
     await expect.element(address).toBeInTheDocument()
     expect(address.element().getClientRects().length).toBeGreaterThan(0)
   })

@@ -81,7 +81,7 @@ describe('MarkdownView', () => {
       onFileClick,
     })
     const pill = view.getByTestId('file-pill')
-    await expect.element(pill).toHaveTextContent('Quarterly')
+    await expect.element(pill).toMatchTextContent('Quarterly')
     await expect.element(view.getByTestId('file-pill-size')).toHaveTextContent('1.4 MB')
     await pill.click()
     expect(onFileClick).toHaveBeenCalledWith(
@@ -116,7 +116,7 @@ describe('MarkdownView', () => {
 
     const links = view.locate('a[href="https://example.com"]')
     await expect.element(links).toHaveLength(3)
-    await expect.element(view).not.toHaveTextContent('[docs]:')
+    await expect.element(view).not.toMatchTextContent('[docs]:')
   })
 
   it('uses the first normalized reference definition', async () => {
@@ -124,8 +124,10 @@ describe('MarkdownView', () => {
       '[Plan][ DOCS ]\n\n[docs]: https://first.example\n\n[DOCS]: https://second.example',
     )
 
-    await expect.element(view.getByText('Plan')).toHaveAttribute('href', 'https://first.example')
-    await expect.element(view).not.toHaveTextContent('https://second.example')
+    await expect
+      .element(view.getByText('Plan', { exact: false }))
+      .toHaveAttribute('href', 'https://first.example')
+    await expect.element(view).not.toMatchTextContent('https://second.example')
   })
 
   it('renders a reference image and omits its definition', async () => {
@@ -133,14 +135,16 @@ describe('MarkdownView', () => {
 
     const image = view.getByAltText('Diagram')
     await expect.element(image).toHaveAttribute('src', 'https://example.com/diagram.png')
-    await expect.element(view).not.toHaveTextContent('[asset]:')
+    await expect.element(view).not.toMatchTextContent('[asset]:')
   })
 
   it('resolves a definition inside a blockquote', async () => {
     await renderView('> [docs]: https://example.com\n\nRead [Docs].')
 
-    await expect.element(view.getByText('Docs')).toHaveAttribute('href', 'https://example.com')
-    await expect.element(view).not.toHaveTextContent('[docs]:')
+    await expect
+      .element(view.getByText('Docs', { exact: false }))
+      .toHaveAttribute('href', 'https://example.com')
+    await expect.element(view).not.toMatchTextContent('[docs]:')
   })
 
   it('reports clicks from a reference link', async () => {
@@ -285,7 +289,7 @@ describe('MarkdownView', () => {
       ),
     ).toHaveLength(0)
     await wikilink.click()
-    await view.getByText('Docs').click()
+    await view.getByText('Docs', { exact: false }).click()
     await view.getByAltText('cat').click()
     await view.getByTestId('file-pill').click()
     expect(onWikilinkClick).not.toHaveBeenCalled()
@@ -322,7 +326,7 @@ describe('MarkdownView', () => {
 
   it('folds a collapsed bullet, like the editor', async () => {
     await renderView('+ parent\n  - child')
-    await expect.element(view.locate('[data-list-collapsed]')).toHaveTextContent('parent')
+    await expect.element(view.locate('[data-list-collapsed]')).toMatchTextContent('parent')
     await expect.element(view.getByText('child')).not.toBeVisible()
   })
 
@@ -347,7 +351,7 @@ describe('MarkdownView', () => {
 
   it('renders truncated markdown without throwing', async () => {
     await renderView('foo [[Bar and a **bold')
-    await expect.element(view).toHaveTextContent('foo')
+    await expect.element(view).toMatchTextContent('foo')
   })
 
   it('renders task checkboxes with their checked state', async () => {
@@ -492,22 +496,22 @@ describe('MarkdownView Mermaid', () => {
     await renderView('```mermaid\nflowchart LR\n  A[Start] --> B[End]\n```')
 
     await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
-    await expect.element(mermaidPreview).toHaveTextContent('Start')
-    await expect.element(mermaidPreview).toHaveTextContent('End')
+    await expect.element(mermaidPreview).toMatchTextContent('Start')
+    await expect.element(mermaidPreview).toMatchTextContent('End')
   })
 
   it('renders a Sequence diagram as SVG', async () => {
     await renderView('```mermaid\nsequenceDiagram\n  Alice->>Bob: Hello Bob\n```')
 
     await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
-    await expect.element(mermaidPreview).toHaveTextContent('Hello Bob')
+    await expect.element(mermaidPreview).toMatchTextContent('Hello Bob')
   })
 
   it('renders unsupported syntax as an error', async () => {
     await renderView('```mermaid\npie\n  "Dogs" : 10\n```')
 
     await expect.element(mermaidPreview, { timeout: 15000 }).toHaveAttribute('data-error')
-    await expect.element(mermaidPreview).toHaveTextContent(/Invalid|Unsupported/i)
+    await expect.element(mermaidPreview).toMatchTextContent(/Invalid|Unsupported/i)
   })
 
   it('renders passive SVG when interaction is disabled', async () => {
