@@ -1,5 +1,5 @@
 import { createEditor, type NodeJSON } from '@prosekit/core'
-import { bench, describe } from 'vitest'
+import { test } from 'vitest'
 
 import { defineEditorExtension } from '../extensions/extension.ts'
 
@@ -30,12 +30,13 @@ const PERTURBATION = '- a\n\n- b\n\n'
 const sampleMarkdown = PERTURBATION + docToMarkdown(editor.schema.nodeFromJSON(sampleContent))
 const largeMarkdown = PERTURBATION + docToMarkdown(editor.schema.nodeFromJSON(largeContent))
 
-describe('checkRoundTrip', () => {
-  bench('sampleMarkdown', () => {
-    checkRoundTrip(sampleMarkdown)
-  })
-
-  bench('largeMarkdown', () => {
-    checkRoundTrip(largeMarkdown)
-  })
+test('checkRoundTrip', async ({ bench }) => {
+  await bench.compare(
+    bench('sampleMarkdown', () => {
+      checkRoundTrip(sampleMarkdown)
+    }),
+    bench('largeMarkdown', () => {
+      checkRoundTrip(largeMarkdown)
+    }),
+  )
 })

@@ -183,7 +183,7 @@ describe('MeowdownEditor', () => {
     await expect
       .element(page.getByAltText('diagram'))
       .toHaveAttribute('src', 'https://example.com/diagram.png')
-    await expect.element(pmRoot).toHaveTextContent('[doc]: https://example.com/docs "Plan"')
+    await expect.element(pmRoot).toMatchTextContent('[doc]: https://example.com/docs "Plan"')
     expect(ref.current?.getMarkdown()).toBe(markdown + '\n')
   })
 
@@ -216,7 +216,7 @@ describe('MeowdownEditor', () => {
       />,
     )
     await expect.element(page.getByAltText('Photo')).toHaveAttribute('src', 'https://cdn/photo.png')
-    await expect.element(pmRoot).toHaveTextContent('![[ambiguous.png]]')
+    await expect.element(pmRoot).toMatchTextContent('![[ambiguous.png]]')
   })
 
   it('resolves wikilink targets and labels through the host resolver', async () => {
@@ -578,7 +578,7 @@ describe('file pill props', () => {
       />,
     )
     const pill = pmRoot.getByTestId('file-pill')
-    await expect.element(pill).toHaveTextContent('report.pdf')
+    await expect.element(pill).toMatchTextContent('report.pdf')
     await expect.element(pmRoot.getByTestId('file-pill-size')).toHaveTextContent('1.4 MB')
     await userEvent.click(pill)
     await vi.waitFor(() => {

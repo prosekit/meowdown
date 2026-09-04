@@ -13,6 +13,6 @@
     "@ocavue/tsconfig": "^0.7.1",
     "@typescript-eslint/rule-tester": "^8.69.0",
     "eslint": "^10.9.1",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.0"
   }
 }
