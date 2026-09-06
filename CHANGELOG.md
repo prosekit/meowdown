@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.68.1](https://github.com/prosekit/meowdown/compare/v0.68.0...v0.68.1) (2026-09-06)
+
+
+### Bug Fixes
+
+* keep the caret out of list marker ([#539](https://github.com/prosekit/meowdown/issues/539)) ([2da748b](https://github.com/prosekit/meowdown/commit/2da748b0f7c0677442019aa4104c63cfd782b5d3))
+
 ## [0.68.0](https://github.com/prosekit/meowdown/compare/v0.67.2...v0.68.0) (2026-09-02)
 
 
