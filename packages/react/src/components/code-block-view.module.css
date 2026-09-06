@@ -50,6 +50,7 @@
   top: 0.5rem;
   right: 0.5rem;
   z-index: 1;
+  -webkit-user-select: none;
   user-select: none;
   opacity: 0;
   pointer-events: none;
