@@ -116,6 +116,7 @@ function MainEditorDemo() {
     const writeSourceText = () => {
       const view = sourceViewRef.current
       const markdown = editorRef.current?.getMarkdown()
+      shareMarkdown(markdown || '')
       if (!view || markdown == null) return
       const patch = computeTextPatch(view.state.doc.toString(), markdown)
       if (!patch) return
@@ -129,14 +130,8 @@ function MainEditorDemo() {
       editorRef.current?.setMarkdown(markdown)
     }
 
-    const pushToSource = throttle(() => {
-      shareMarkdown(editorRef.current?.getMarkdown() ?? '')
-      // A stale trailing tick must never overwrite source text being typed now.
-      if (sourceViewRef.current?.hasFocus) return
-      writeSourceText()
-    }, SYNC_THROTTLE_MS)
-
-    const pullFromSource = throttle(writeRichText, SYNC_THROTTLE_MS)
+    const pushToSource = throttle(writeSourceText, SYNC_THROTTLE_MS, { leading: false })
+    const pullFromSource = throttle(writeRichText, SYNC_THROTTLE_MS, { leading: false })
 
     return {
       handleRichChange: () => {

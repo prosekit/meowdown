@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "@ocavue/tsconfig": "^0.7.1",
-    "@ocavue/utils": "^1.7.0",
+    "@ocavue/utils": "^1.8.0",
     "@prosekit/pm": "^0.1.19",
     "@vitest/browser-playwright": "^5.0.0",
     "pure-rand": "^8.4.2",
