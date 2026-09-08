@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.68.2](https://github.com/prosekit/meowdown/compare/v0.68.1...v0.68.2) (2026-09-08)
+
+
+### Bug Fixes
+
+* match slash menu headings from the `h1`-`h4` shorthand ([#542](https://github.com/prosekit/meowdown/issues/542)) ([db742e6](https://github.com/prosekit/meowdown/commit/db742e600f14811d896aee6e24206a6e4aa08a99))
+
 ## [0.68.1](https://github.com/prosekit/meowdown/compare/v0.68.0...v0.68.1) (2026-09-06)
 
 
