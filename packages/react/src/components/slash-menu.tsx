@@ -185,21 +185,25 @@ export function SlashMenu({
               />
               <SlashMenuItem
                 label="Heading 1"
+                keywords={['h1']}
                 kbd="#"
                 onSelect={() => editor.commands.setHeading({ level: 1 })}
               />
               <SlashMenuItem
                 label="Heading 2"
+                keywords={['h2']}
                 kbd="##"
                 onSelect={() => editor.commands.setHeading({ level: 2 })}
               />
               <SlashMenuItem
                 label="Heading 3"
+                keywords={['h3']}
                 kbd="###"
                 onSelect={() => editor.commands.setHeading({ level: 3 })}
               />
               <SlashMenuItem
                 label="Heading 4"
+                keywords={['h4']}
                 kbd="####"
                 onSelect={() => editor.commands.setHeading({ level: 4 })}
               />

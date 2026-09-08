@@ -51,6 +51,35 @@ describe('SlashMenu', () => {
     await expect.element(menu.getByText('Heading 1')).not.toBeVisible()
   })
 
+  it('matches "Heading 3" from the /h3 shorthand', async () => {
+    await render(<ProseKitEditor />)
+    await pmRoot.click()
+    await userEvent.keyboard('/h3')
+    await expect.element(menu.getByText('Heading 3', { exact: true })).toBeVisible()
+    await expect.element(menu.getByText('Heading 1', { exact: true })).not.toBeVisible()
+    await expect.element(menu.getByText('Heading 4', { exact: true })).not.toBeVisible()
+  })
+
+  it('matches "Heading 1" from the /h1 shorthand', async () => {
+    await render(<ProseKitEditor />)
+    await pmRoot.click()
+    await userEvent.keyboard('/h1')
+    await expect.element(menu.getByText('Heading 1', { exact: true })).toBeVisible()
+    await expect.element(menu.getByText('Heading 3', { exact: true })).not.toBeVisible()
+  })
+
+  it('applies the heading selected through the /h3 shorthand', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} />)
+    await pmRoot.click()
+    await userEvent.keyboard('/h3')
+    await menu.getByText('Heading 3', { exact: true }).click()
+
+    await expect.element(pmRoot.locate('h3')).toBeInTheDocument()
+    await userEvent.keyboard('Hello')
+    expect(ref.current?.getMarkdown()).toBe('### Hello\n')
+  })
+
   it('inserts a table when Enter selects a normal single-slash command', async () => {
     const ref = createRef<EditorHandle>()
     await render(<ProseKitEditor ref={ref} />)
