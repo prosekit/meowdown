@@ -294,6 +294,46 @@ describe('LinkMenu', () => {
     expect(ref.current?.getMarkdown()).toContain('[Docs](https://example.com)')
   })
 
+  it('takes the destination typed straight after Mod-k on a selection', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Docs" />)
+    await screen.getByText('Docs').click()
+    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}')
+    await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
+    await expect.element(popover.getByTestId('link-popover-edit')).toBeVisible()
+    await expect
+      .element(popover.getByRole('button', { name: 'Remove link' }))
+      .not.toBeInTheDocument()
+    await userEvent.keyboard('https://example.com{Enter}')
+    expect(ref.current?.getMarkdown()).toContain('[Docs](https://example.com)')
+  })
+
+  it('keeps Save disabled until the destination is filled', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Docs" />)
+    await screen.getByText('Docs').click()
+    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}')
+    await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
+    await expect.element(popover.getByTestId('link-popover-submit')).toBeDisabled()
+    await userEvent.keyboard('{Enter}')
+    await expect.element(popover.getByTestId('link-popover-edit')).toBeVisible()
+    expect(ref.current?.getMarkdown()).toBe('Docs\n')
+    await popover.getByTestId('link-popover-input').fill('https://example.com')
+    await expect.element(popover.getByTestId('link-popover-submit')).toBeEnabled()
+  })
+
+  it('selects the destination when editing an existing link', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(
+      <MeowdownEditor handleRef={ref} initialMarkdown="[Docs](https://old.test)" />,
+    )
+    await hover(screen.getByText('Docs'))
+    await popover.getByRole('button', { name: 'Edit link' }).click()
+    await expect.element(popover.getByTestId('link-popover-input')).toHaveFocus()
+    await userEvent.keyboard('https://new.test{Enter}')
+    expect(ref.current?.getMarkdown()).toContain('[Docs](https://new.test)')
+  })
+
   it('removes a link from the read preview', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(
@@ -402,12 +442,11 @@ describe('LinkMenu', () => {
     expect(resolver).not.toHaveBeenCalledWith('https://ne')
   })
 
-  it('focuses Text on Mod-k and dismisses with Escape', async () => {
+  it('focuses Link on Mod-k and dismisses with Escape', async () => {
     const screen = await render(<MeowdownEditor initialMarkdown="[Docs](https://example.com)" />)
     await screen.getByText('Docs').click()
     await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
-    const textInput = popover.getByTestId('link-popover-text-input')
-    await expect.element(textInput).toHaveFocus()
+    await expect.element(popover.getByTestId('link-popover-input')).toHaveFocus()
     await userEvent.keyboard('{Escape}')
     await expect.element(popover).not.toBeInTheDocument()
   })
