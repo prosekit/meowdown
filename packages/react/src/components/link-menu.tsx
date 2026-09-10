@@ -312,7 +312,7 @@ function LinkEditContent({
   const [text, setText] = useState(edit.text)
   const [href, setHref] = useState(edit.link?.href ?? '')
   const [debouncedHref, setDebouncedHref] = useState(href.trim())
-  const textInputRef = useRef<HTMLInputElement>(null)
+  const hrefInputRef = useRef<HTMLInputElement>(null)
   // Preview the URL saving would produce, so a bare `example.com` resolves.
   const previewHref = normalizeHref(debouncedHref)
   const previewState = useLinkPreview(previewHref || undefined, resolveLinkPreview)
@@ -321,6 +321,7 @@ function LinkEditContent({
   // title.
   const canUseTitle =
     !!edit.link && debouncedHref === href.trim() && isLinkTextForHref(text, previewHref)
+  const canSave = text.trim() !== '' && href.trim() !== ''
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedHref(href.trim()), 400)
@@ -328,25 +329,25 @@ function LinkEditContent({
   }, [href])
 
   useEffect(() => {
-    textInputRef.current?.focus()
+    hrefInputRef.current?.focus()
+    hrefInputRef.current?.select()
   }, [])
 
   return (
     <form
       className={styles.Form}
       data-testid="link-popover-edit"
+      noValidate
       onSubmit={(event) => {
         event.preventDefault()
-        if (text.trim() && href.trim()) onSubmit(text, href)
+        if (canSave) onSubmit(text, href)
       }}
     >
       <label className={styles.Field}>
         <span>Text</span>
         <input
-          ref={textInputRef}
           className={styles.Input}
           value={text}
-          required
           data-testid="link-popover-text-input"
           onChange={(event) => setText(event.target.value)}
         />
@@ -354,10 +355,10 @@ function LinkEditContent({
       <label className={styles.Field}>
         <span>Link</span>
         <input
+          ref={hrefInputRef}
           className={styles.Input}
           value={href}
-          required
-          placeholder="Paste link..."
+          placeholder="Paste link…"
           data-testid="link-popover-input"
           onChange={(event) => setHref(event.target.value)}
         />
@@ -377,7 +378,12 @@ function LinkEditContent({
             Use page title
           </button>
         )}
-        <button type="submit" className={styles.SaveButton} data-testid="link-popover-submit">
+        <button
+          type="submit"
+          className={styles.SaveButton}
+          disabled={!canSave}
+          data-testid="link-popover-submit"
+        >
           Save
         </button>
       </div>
@@ -519,7 +525,7 @@ export function LinkMenu({
         <LinkEditContent
           edit={edit}
           resolveLinkPreview={resolveLinkPreview}
-          onRemove={handleEditRemove}
+          onRemove={edit.link ? handleEditRemove : undefined}
           onSubmit={handleEditSubmit}
         />
       ) : link ? (
