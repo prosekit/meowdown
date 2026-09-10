@@ -1,7 +1,8 @@
 import '../testing/index.ts'
 
+import { isNodeOfType } from '@meowdown/core'
 import { readClipboard } from '@meowdown/vitest/clipboard'
-import { TextSelection } from '@prosekit/pm/state'
+import { NodeSelection, TextSelection } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
@@ -21,6 +22,151 @@ const tokens = page.locate('.ProseMirror pre code [class*="tok-"]')
 const CODE_BLOCK_MD = '```rust\nfn main() {}\n```'
 
 describe('code block language selector', () => {
+  it('falls back to the built-in code block when the host declines to render it', async () => {
+    await render(<ProseKitEditor initialMarkdown={CODE_BLOCK_MD} renderCodeBlock={() => null} />)
+    await expect.element(selector).toHaveTextContent('Rust')
+    await expect.element(page.locate('.ProseMirror pre[data-language="rust"]')).toBeVisible()
+  })
+
+  it('keeps host widget lists outside the editor prose list styling', async () => {
+    await render(
+      <ProseKitEditor
+        initialMarkdown={'before\n\n```collection\ntag: people\n```\n\nafter'}
+        renderCodeBlock={({ language }) => {
+          return language === 'collection' ? (
+            <ul data-testid="collection-list">
+              <li data-testid="collection-list-item">Person</li>
+            </ul>
+          ) : null
+        }}
+      />,
+    )
+
+    const list = page.getByTestId('collection-list').element()
+    const item = page.getByTestId('collection-list-item').element()
+    expect(getComputedStyle(list).listStyleType).toBe('none')
+    expect(getComputedStyle(list).paddingLeft).toBe('0px')
+    expect(getComputedStyle(item).marginTop).toBe('0px')
+  })
+
+  it('renders host content in document order and updates the body as one undoable change', async () => {
+    const ref = createRef<EditorHandle>()
+    const onDocChange = vi.fn()
+    const markdown = 'before\n\n```collection\ntag: people\n```\n\nafter'
+
+    await render(
+      <ProseKitEditor
+        ref={ref}
+        initialMarkdown={markdown}
+        onDocChange={onDocChange}
+        renderCodeBlock={({ language, code, updateCode }) => {
+          return language === 'collection' ? (
+            <button
+              type="button"
+              data-testid="collection-view"
+              onClick={() => updateCode('tag: people\nview: board')}
+            >
+              {code}
+            </button>
+          ) : null
+        }}
+      />,
+    )
+
+    const customView = page.getByTestId('collection-view')
+    await expect.element(customView).toHaveTextContent('tag: people')
+    await expect
+      .element(page.locate('.ProseMirror pre[data-language="collection"]'))
+      .not.toBeVisible()
+    const before = page.getByText('before').element()
+    const custom = customView.element()
+    const after = page.getByText('after').element()
+    expect(before.compareDocumentPosition(custom) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(custom.compareDocumentPosition(after) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+
+    const editor = ref.current?.editor
+    if (!editor) throw new Error('editor not mounted')
+    let codeBlockPosition: number | undefined
+    editor.state.doc.descendants((node, pos) => {
+      if (isNodeOfType(node, 'codeBlock')) {
+        codeBlockPosition = pos
+        return false
+      }
+      return true
+    })
+    if (codeBlockPosition == null) throw new Error('code block not found')
+    editor.view.dispatch(
+      editor.state.tr.setSelection(
+        TextSelection.near(editor.state.doc.resolve(codeBlockPosition + 1)),
+      ),
+    )
+    await expect.element(page.locate('.ProseMirror pre[data-language="collection"]')).toBeVisible()
+    await expect.element(customView).toBeVisible()
+    const currentCodeBlock = editor.state.doc.nodeAt(codeBlockPosition)
+    if (!currentCodeBlock) throw new Error('code block not found')
+    editor.view.dispatch(
+      editor.state.tr.setSelection(
+        TextSelection.near(editor.state.doc.resolve(codeBlockPosition + currentCodeBlock.nodeSize)),
+      ),
+    )
+    await expect
+      .element(page.locate('.ProseMirror pre[data-language="collection"]'))
+      .not.toBeVisible()
+
+    await customView.click()
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toContain('```collection\ntag: people\nview: board\n```')
+    })
+    expect(onDocChange).toHaveBeenCalled()
+
+    ref.current?.editor?.commands.undo()
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toBe(`${markdown}\n`)
+    })
+    await expect.element(customView).toHaveTextContent('tag: people')
+  })
+
+  it('removes a host-rendered code block as a node selection and restores it with undo', async () => {
+    const ref = createRef<EditorHandle>()
+    const markdown = 'before\n\n```collection\ntag: people\n```\n\nafter'
+
+    await render(
+      <ProseKitEditor
+        ref={ref}
+        initialMarkdown={markdown}
+        renderCodeBlock={({ language }) => {
+          return language === 'collection' ? (
+            <div data-testid="collection-view">Collection</div>
+          ) : null
+        }}
+      />,
+    )
+
+    const editor = ref.current?.editor
+    if (!editor) throw new Error('editor not mounted')
+    let codeBlockPosition: number | undefined
+    editor.state.doc.descendants((node, pos) => {
+      if (isNodeOfType(node, 'codeBlock')) {
+        codeBlockPosition = pos
+        return false
+      }
+      return true
+    })
+    if (codeBlockPosition == null) throw new Error('code block not found')
+    editor.view.dispatch(
+      editor.state.tr.setSelection(NodeSelection.create(editor.state.doc, codeBlockPosition)),
+    )
+    editor.view.focus()
+    await userEvent.keyboard('{Backspace}')
+
+    await expect.element(page.getByTestId('collection-view')).not.toBeInTheDocument()
+    expect(ref.current?.getMarkdown()).not.toContain('```collection')
+
+    ref.current?.editor?.commands.undo()
+    await expect.element(page.getByTestId('collection-view')).toBeInTheDocument()
+    expect(ref.current?.getMarkdown()).toBe(`${markdown}\n`)
+  })
+
   it('shows the current language for a code block', async () => {
     await render(<ProseKitEditor initialMarkdown={CODE_BLOCK_MD} />)
     await expect.element(selector).toBeInTheDocument()

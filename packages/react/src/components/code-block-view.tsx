@@ -5,6 +5,7 @@ import {
   type CodeBlockAttrs,
   type LanguageItem,
 } from '@meowdown/core'
+import { Fragment } from '@prosekit/pm/model'
 import { TextSelection } from '@prosekit/pm/state'
 import type { ReactNodeViewProps } from '@prosekit/react'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
@@ -15,6 +16,7 @@ import {
   useState,
   type MouseEvent,
   type ReactElement,
+  type ReactNode,
 } from 'react'
 
 import { useBeautifulMermaid } from '../hooks/use-beautiful-mermaid.ts'
@@ -26,16 +28,60 @@ import { CopyButton } from './copy-button.tsx'
 import { MathRender } from './math-render.tsx'
 import { MermaidRender } from './mermaid-render.tsx'
 
-export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
+export interface CodeBlockRenderOptions {
+  /**
+   * The language written after the opening fence, or an empty string.
+   */
+  language: string
+  /**
+   * The code block body without its fences.
+   */
+  code: string
+  /**
+   * Replace the block body as one undoable editor transaction.
+   */
+  updateCode: (code: string) => void
+}
+
+/**
+ * Return custom content for a code block, or null to use Meowdown's built-in view.
+ */
+export type CodeBlockRenderer = (options: CodeBlockRenderOptions) => ReactNode | null
+
+/**
+ * Props for {@link CodeBlockView}.
+ */
+export interface CodeBlockViewProps extends ReactNodeViewProps {
+  renderCodeBlock?: CodeBlockRenderer
+}
+
+export function CodeBlockView(props: CodeBlockViewProps): ReactElement {
   const { node, view, getPos, decorations, selected, setAttrs, contentRef } = props
 
   const attrs = node.attrs as CodeBlockAttrs
   const language = attrs.language || ''
-  const isMath = language === 'math'
-  const isMermaid = language === 'mermaid'
   const code = node.textContent
 
+  const updateCode = useCallback(
+    (nextCode: string) => {
+      const pos = getPos()
+      if (pos == null) return
+      const currentNode = view.state.doc.nodeAt(pos)
+      if (currentNode?.type !== view.state.schema.nodes.codeBlock) return
+      const from = pos + 1
+      const to = from + currentNode.content.size
+      const content = nextCode === '' ? Fragment.empty : view.state.schema.text(nextCode)
+      view.dispatch(view.state.tr.replaceWith(from, to, content))
+    },
+    [getPos, view],
+  )
+
   const caretInside = decorations.some(isCodeBlockPreviewHiddenDecoration)
+  const customContent = props.renderCodeBlock?.({ language, code, updateCode }) ?? null
+  const hasCustomContent = customContent !== null
+  const customPreviewOnly = hasCustomContent && !caretInside
+  const isMath = !hasCustomContent && language === 'math'
+  const isMermaid = !hasCustomContent && language === 'mermaid'
 
   const katex = useKaTeX(isMath)
   const mermaid = useBeautifulMermaid(isMermaid)
@@ -48,7 +94,7 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
   // caret inside, the source stays on top and the preview updates live below.
   // An empty or not-yet-rendered block keeps its source, so it never turns
   // invisible and unclickable.
-  const previewOnly = showPreview && !caretInside && code.trim() !== ''
+  const previewOnly = !hasCustomContent && showPreview && !caretInside && code.trim() !== ''
 
   const focusSource = useCallback(
     (event: MouseEvent) => {
@@ -70,14 +116,25 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
   )
 
   return (
-    <div className={styles.Root} data-preview={previewOnly || undefined}>
+    <div
+      className={styles.Root}
+      data-custom={customPreviewOnly || undefined}
+      data-preview={previewOnly || undefined}
+    >
       <pre ref={contentRef} data-language={language} {...NON_PROSE_PROPS}></pre>
-      {
+      {hasCustomContent ? (
+        <div
+          className={styles.CustomContent}
+          contentEditable={false}
+          data-meowdown-code-block-custom=""
+          {...NON_PROSE_PROPS}
+        >
+          {customContent}
+        </div>
+      ) : (
         /* Skip rendering the toolbar during dragging to improve the performance of rendering the drag preview image in Safari */
-        selected ? null : (
-          <CodeBlockToolbar code={code} language={language} setLanguage={setLanguage} />
-        )
-      }
+        !selected && <CodeBlockToolbar code={code} language={language} setLanguage={setLanguage} />
+      )}
       {showMathPreview && (
         <MathRender
           katex={katex}

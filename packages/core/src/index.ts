@@ -85,6 +85,7 @@ export {
   type InlineMarkOptions,
 } from './extensions/inline-text-to-mark-chunks.ts'
 export { EDITOR_KEY_BINDINGS } from './extensions/key-bindings.ts'
+export type { InsertMarkdownOptions } from './extensions/commands.ts'
 export {
   defineLinkClickHandler,
   type LinkClickHandler,
