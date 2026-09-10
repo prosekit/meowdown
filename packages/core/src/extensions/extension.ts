@@ -14,6 +14,7 @@ import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineAtomMarkNavigation } from './atom-mark-navigation.ts'
 import { defineClipboard } from './clipboard/clipboard.ts'
+import { defineCodeBlockEnterGuard } from './code-block-enter-guard.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineCodeBlock } from './code-block.ts'
 import { defineEditorCommands } from './commands.ts'
@@ -81,6 +82,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineScrollToSelection(),
     defineHiddenRunCaret(),
     defineSystemSubstitutionGuard(),
+    defineCodeBlockEnterGuard(),
     defineAtomMarkNavigation({
       marks: ATOM_SOURCE_MARK_NAMES.map((name) => ({ name, modes: ['hide', 'focus', 'show'] })),
     }),
