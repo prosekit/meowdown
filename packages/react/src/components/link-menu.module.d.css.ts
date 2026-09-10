@@ -30,5 +30,6 @@ declare const styles = {
   'UseTitleButton': '' as string,
   'RemoveButton': '' as string,
   'UseTitleButton': '' as string,
+  'SaveButton': '' as string,
 } as const;
 export default styles;
