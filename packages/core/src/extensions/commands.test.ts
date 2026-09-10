@@ -76,6 +76,36 @@ describe('insertMarkdown', () => {
     `)
   })
 
+  it('keeps a block suffix outside and places the cursor in its paragraph', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('Before<a>After')))
+
+    editor.commands.insertMarkdown('```collection\ncollection: people\n```', {
+      selection: 'after-block',
+    })
+    editor.commands.insertText({ text: 'Next ' })
+
+    expect(docToMarkdown(fixture.doc)).toBe(
+      'Before\n\n```collection\ncollection: people\n```\n\nNext After\n',
+    )
+  })
+
+  it('creates a trailing paragraph when an inserted block ends the document', () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('Before<a>')))
+
+    editor.commands.insertMarkdown('```collection\ncollection: people\n```', {
+      selection: 'after-block',
+    })
+    editor.commands.insertText({ text: 'Next' })
+
+    expect(docToMarkdown(fixture.doc)).toBe(
+      'Before\n\n```collection\ncollection: people\n```\n\nNext\n',
+    )
+  })
+
   it('undoes an inserted fragment as a single history entry', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture

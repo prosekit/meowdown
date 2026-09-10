@@ -10,6 +10,15 @@ import { markdownToDoc } from '../converters/md-to-pm.ts'
 import { isNodeOfType, type NodeName } from './node-names.ts'
 import { getNodeBuildersForSchema } from './schema.ts'
 
+export interface InsertMarkdownOptions {
+  /**
+   * Where the caret lands after a code-block fragment. `after-block` keeps
+   * any paragraph suffix outside the inserted block and creates an ordinary
+   * following paragraph when needed.
+   */
+  selection?: 'end' | 'after-block'
+}
+
 function selectText(anchor: number, head?: number): Command {
   return (state, dispatch) => {
     if (dispatch) {
@@ -32,7 +41,7 @@ function selectTextBetween($anchor: ResolvedPos, $head: ResolvedPos, bias?: numb
   }
 }
 
-function insertMarkdown(markdown: string): Command {
+function insertMarkdown(markdown: string, options: InsertMarkdownOptions = {}): Command {
   return (state, dispatch) => {
     if (!markdown.trim()) return false
     const nodes = getNodeBuildersForSchema(state.schema)
@@ -42,14 +51,30 @@ function insertMarkdown(markdown: string): Command {
       content.childCount === 1 && isNodeOfType(content.child(0), 'paragraph')
     const slice = isSingleParagraph
       ? new Slice(content, 1, 1)
-      : new Slice(content, 0, Slice.maxOpen(content).openEnd)
+      : options.selection === 'after-block'
+        ? new Slice(content, 0, 0)
+        : new Slice(content, 0, Slice.maxOpen(content).openEnd)
     if (dispatch) {
       const tr = state.tr
       const selection = tr.selection
       if (!isTextSelection(selection) || !selection.empty) {
         tr.setSelection(TextSelection.near(selection.$from))
       }
-      dispatch(tr.replaceSelection(slice).scrollIntoView())
+      tr.replaceSelection(slice)
+      if (options.selection === 'after-block') {
+        const $selection = tr.selection.$from
+        for (let depth = $selection.depth; depth > 0; depth -= 1) {
+          if (!isNodeOfType($selection.node(depth), 'codeBlock')) continue
+          const after = $selection.after(depth)
+          const nodeAfter = tr.doc.resolve(after).nodeAfter
+          if (nodeAfter === null || !isNodeOfType(nodeAfter, 'paragraph')) {
+            tr.insert(after, nodes.paragraph())
+          }
+          tr.setSelection(TextSelection.near(tr.doc.resolve(after), 1))
+          break
+        }
+      }
+      dispatch(tr.scrollIntoView())
     }
     return true
   }

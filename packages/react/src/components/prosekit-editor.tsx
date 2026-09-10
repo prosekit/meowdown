@@ -14,6 +14,7 @@ import {
   type FileViewOptions,
   type ImageClickHandler,
   type ImageOptions,
+  type InsertMarkdownOptions,
   type LinkClickHandler,
   type LinkCopyHandler,
   type LinkPreviewResolver,
@@ -48,6 +49,7 @@ import { defineCodeBlockView } from '../extensions/code-block-view.ts'
 import type { TimeFormat } from '../utils/date-format.ts'
 
 import { BlockHandle } from './block-handle.tsx'
+import type { CodeBlockRenderer } from './code-block-view.tsx'
 import { DropIndicator } from './drop-indicator.tsx'
 import { EditorExtensions } from './editor-extensions.tsx'
 import { LinkMenu } from './link-menu.tsx'
@@ -137,6 +139,11 @@ export interface ProseKitEditorProps {
    * Called on every user-driven document change, not on programmatic setState.
    */
   onDocChange?: VoidFunction
+
+  /**
+   * Renders host-owned content for fenced code blocks. See `EditorProps.renderCodeBlock`.
+   */
+  renderCodeBlock?: CodeBlockRenderer
 
   /**
    * Adds host items to the slash menu. See `EditorProps.onSlashMenuSearch`.
@@ -328,6 +335,7 @@ export function ProseKitEditor({
   markMode = 'focus',
   initialMarkdown,
   onDocChange,
+  renderCodeBlock,
   onSlashMenuSearch,
   onTagSearch,
   onWikilinkSearch,
@@ -373,7 +381,7 @@ export function ProseKitEditor({
       resolveWikilink,
       markMode,
     })
-    const extension = union(baseExtension, defineCodeBlockView())
+    const extension = union(baseExtension, defineCodeBlockView(renderCodeBlock))
     const editor: TypedEditor = createEditor({ extension })
     if (initialMarkdown) {
       editor.setContent(markdownToDoc(initialMarkdown, { nodes: editor.nodes, frontmatter }))
@@ -456,8 +464,8 @@ export function ProseKitEditor({
       const [markdown, selection] = getState()
       replaceState(markdown, selection, false, true)
     }
-    function insertMarkdown(markdown: string): void {
-      editor.commands.insertMarkdown(markdown)
+    function insertMarkdown(markdown: string, options?: InsertMarkdownOptions): void {
+      editor.commands.insertMarkdown(markdown, options)
     }
     function setSelection(selection: SelectionHint): void {
       setState(undefined, selection)

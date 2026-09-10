@@ -4,6 +4,7 @@ import type {
   PendingReplacementOutcome,
   StartPendingReplacementOptions,
   TypedEditor,
+  InsertMarkdownOptions,
 } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
 
@@ -44,7 +45,7 @@ export interface EditorHandle {
    * whitespace-only string is a no-op. Unlike `setMarkdown`, it fires
    * `onDocChange`: the host cannot know the resulting document.
    */
-  insertMarkdown: (markdown: string) => void
+  insertMarkdown: (markdown: string, options?: InsertMarkdownOptions) => void
 
   /**
    * Returns the current Markdown and selection.
