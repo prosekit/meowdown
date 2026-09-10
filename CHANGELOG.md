@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.68.3](https://github.com/prosekit/meowdown/compare/v0.68.2...v0.68.3) (2026-09-10)
+
+
+### Bug Fixes
+
+* **react:** polish the link editor popover ([#545](https://github.com/prosekit/meowdown/issues/545)) ([db472c1](https://github.com/prosekit/meowdown/commit/db472c1b3c5ccd320d7860e1033ce88a261a4d29))
+
 ## [0.68.2](https://github.com/prosekit/meowdown/compare/v0.68.1...v0.68.2) (2026-09-08)
 
 
