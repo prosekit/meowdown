@@ -6,6 +6,7 @@ export const MARK_NAMES = [
   'mdFile',
   'mdMath',
   'mdMark',
+  'mdMagic',
   'mdEm',
   'mdStrong',
   'mdCode',
@@ -31,7 +32,12 @@ export function isMarkOfTypes(mark: Mark, names: readonly MarkName[]): boolean {
 // Marks whose text is Markdown syntax rather than content. Hide mode renders
 // these runs at font-size 0 (mirroring the CSS rules in style.css), and text
 // projections drop them.
-export const SYNTAX_MARK_NAMES: readonly MarkName[] = ['mdMark', 'mdLinkUri', 'mdLinkTitle']
+export const SYNTAX_MARK_NAMES: readonly MarkName[] = [
+  'mdMark',
+  'mdMagic',
+  'mdLinkUri',
+  'mdLinkTitle',
+]
 
 // Marks covering a whole source unit, emitted as one replacement per unit by
 // text projections.

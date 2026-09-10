@@ -13,8 +13,7 @@ import {
   findNativeCaretRect,
   type CaretRect,
 } from './caret-rect.ts'
-import { getCaretTail, type CaretTail } from './hidden-run.ts'
-import { getMarkMode } from './mark-mode.ts'
+import { getCaretTail, getHiddenPredicate, type CaretTail } from './hidden-run.ts'
 
 const key = new PluginKey('meowdown-virtual-caret')
 
@@ -159,11 +158,11 @@ class VirtualCaretView implements PluginView {
         height: viewportRect.height,
       }
     }
-    // In hide mode the two doc positions at a hidden run boundary render at
-    // one x; the tail (typing affinity) tells them apart.
+    // The two doc positions at a hidden run boundary render at one x; the
+    // tail (typing affinity) tells them apart.
     const tail =
-      rect != null && getMarkMode(state) === 'hide' && !getIsTouchInput()
-        ? getCaretTail(state, selection.head)
+      rect != null && !getIsTouchInput()
+        ? getCaretTail(state, selection.head, getHiddenPredicate(state))
         : undefined
     this.#renderTail(tail)
     this.#renderCaret(rect)

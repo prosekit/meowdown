@@ -1031,3 +1031,10 @@ describe('idempotency', () => {
     expect(roundtrip(once)).toBe(once)
   })
 })
+
+describe('magic comments', () => {
+  it('keeps a noLink magic comment', () => {
+    const md = 'go to www.example.com<!-- {"noLink":true} --> now'
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
+})

@@ -467,3 +467,82 @@ describe('hide mode typing at coincident positions', () => {
     expect(docToMarkdown(fixture.doc)).toBe('foo **bold**x bar\n')
   })
 })
+
+describe('magic run caret in every mode', () => {
+  it('ArrowRight crosses the comment in one step in show mode', async () => {
+    using fixture = setupMode('show', 'go www.example.co<a>m<!-- {"noLink":true} --> end')
+    const steps = await traceKeySelection(fixture, 'ArrowRight', 2)
+    expect(steps).toMatchInlineSnapshot(`
+      [
+        "go www.example.co┃m<!-- {"noLink":true} --> end",
+        "go www.example.com⎦<!-- {"noLink":true} --> end",
+        "go www.example.com<!-- {"noLink":true} -->⎣ end",
+      ]
+    `)
+  })
+
+  it('ArrowRight crosses the comment in one step in focus mode', async () => {
+    using fixture = setupMode('focus', 'go www.example.co<a>m<!-- {"noLink":true} --> end')
+    const steps = await traceKeySelection(fixture, 'ArrowRight', 2)
+    expect(steps).toMatchInlineSnapshot(`
+      [
+        "go www.example.co┃m<!-- {"noLink":true} --> end",
+        "go www.example.com⎦<!-- {"noLink":true} --> end",
+        "go www.example.com<!-- {"noLink":true} -->⎣ end",
+      ]
+    `)
+  })
+
+  it('Shift+ArrowLeft extends over the comment without cutting it in show mode', async () => {
+    using fixture = setupMode('show', 'go www.example.com<!-- {"noLink":true} --> <a>end')
+    await userEvent.keyboard('{Shift>}{ArrowLeft}{/Shift}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(
+      `"go www.example.com<!-- {"noLink":true} -->❰ ❱end"`,
+    )
+    await userEvent.keyboard('{Shift>}{ArrowLeft}{/Shift}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(
+      `"go www.example.com❰<!-- {"noLink":true} --> ❱end"`,
+    )
+  })
+
+  it('Enter beside the comment splits outside the unit in show mode', async () => {
+    using fixture = setupMode('show', 'go www.example.com<a><!-- {"noLink":true} --> end')
+    await userEvent.keyboard('{Enter}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`
+      "
+      go www.example.com<!-- {"noLink":true} -->
+      ┃ end
+      "
+    `)
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      go www.example.com<!-- {"noLink":true} -->
+
+       end
+
+      """
+    `)
+  })
+
+  it('Backspace after the comment dissolves it and relinks in show mode', async () => {
+    using fixture = setupMode('show', 'go www.example.com<!-- {"noLink":true} --><a> end')
+    await userEvent.keyboard('{Backspace}')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"go www.example.com┃ end"`)
+    expect(docToMarkdown(fixture.doc)).toBe('go www.example.com end\n')
+    await expect.element(pmRoot.getByRole('link', { name: 'www.example.com' })).toBeInTheDocument()
+    fixture.editor.commands.undo()
+    expect(docToMarkdown(fixture.doc)).toBe('go www.example.com<!-- {"noLink":true} --> end\n')
+  })
+
+  it('Delete before the comment dissolves it in focus mode', async () => {
+    using fixture = setupMode('focus', 'go www.example.com<a><!-- {"noLink":true} --> end')
+    await userEvent.keyboard('{Delete}')
+    expect(docToMarkdown(fixture.doc)).toBe('go www.example.com end\n')
+  })
+
+  it('Backspace after the comment dissolves it in hide mode too', async () => {
+    using fixture = setupMode('hide', 'go www.example.com<!-- {"noLink":true} --><a> end')
+    await userEvent.keyboard('{Backspace}')
+    expect(docToMarkdown(fixture.doc)).toBe('go www.example.com end\n')
+  })
+})

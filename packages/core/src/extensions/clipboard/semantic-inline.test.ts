@@ -225,3 +225,17 @@ describe('headingClipboardDOM', () => {
     `)
   })
 })
+
+describe('magic comments', () => {
+  it('omits the noLink comment from the semantic children', () => {
+    using fixture = setupFixture()
+    expect(firstTextblockDOM(fixture, 'go www.example.com<!-- {"noLink":true} --> end'))
+      .toMatchInlineSnapshot(`
+      "
+      <p data-md="go www.example.com&lt;!-- {&quot;noLink&quot;:true} --&gt; end">
+        go www.example.com end
+      </p>
+      "
+    `)
+  })
+})

@@ -15,38 +15,45 @@ import { executeCommand } from '../utils/execute-command.ts'
 import { hasPointerSelectionTransaction } from '../utils/transaction.ts'
 
 import {
+  getHiddenPredicate,
   getHiddenRunAfter,
   getHiddenRunAround,
   getHiddenRunBefore,
   getRestPosition,
   getUnitMarkerRuns,
 } from './hidden-run.ts'
-import { getMarkMode } from './mark-mode.ts'
 
 const snapKey = new PluginKey('meowdown-hidden-run-snap')
 const beforeInputKey = new PluginKey('meowdown-hidden-run-beforeinput')
 
-// Keeps the hide-mode caret on rest positions, whatever moved it: arrow keys,
-// clicks, vertical motion, Home/End, shift-extension, or programmatic
-// setSelection. Keyboard motion continues through a run interior in the travel
-// direction; a pointer caret snaps to the unit's outer edge; a range selection
-// expands outward so it never cuts a run in half.
+// Keeps the caret on rest positions, whatever moved it: arrow keys, clicks,
+// vertical motion, Home/End, shift-extension, or programmatic setSelection.
+// Keyboard motion continues through a run interior in the travel direction; a
+// pointer caret snaps to the unit's outer edge; a range selection expands
+// outward so it never cuts a run in half. The runs are what the current mode
+// hides: every syntax run in hide mode, only magic runs in focus and show.
 function createSnapPlugin(): Plugin {
   return new Plugin({
     key: snapKey,
     appendTransaction: (transactions, oldState, newState) => {
       if (getIsComposing()) return null
-      if (getMarkMode(newState) !== 'hide') return null
+      const isHidden = getHiddenPredicate(newState)
       const selection = newState.selection
       if (!isTextSelection(selection)) return null
       const isPointer = hasPointerSelectionTransaction(transactions)
       if (selection.empty) {
-        const next = getRestPosition(newState, oldState.selection.head, selection.head, isPointer)
+        const next = getRestPosition(
+          newState,
+          oldState.selection.head,
+          selection.head,
+          isPointer,
+          isHidden,
+        )
         if (next === selection.head) return null
         return newState.tr.setSelection(TextSelection.create(newState.doc, next))
       }
-      const from = getHiddenRunAround(newState, selection.from)?.from ?? selection.from
-      const to = getHiddenRunAround(newState, selection.to)?.to ?? selection.to
+      const from = getHiddenRunAround(newState, selection.from, isHidden)?.from ?? selection.from
+      const to = getHiddenRunAround(newState, selection.to, isHidden)?.to ?? selection.to
       if (from === selection.from && to === selection.to) return null
       const anchor = selection.anchor === selection.from ? from : to
       const head = selection.head === selection.from ? from : to
@@ -59,10 +66,15 @@ function createSnapPlugin(): Plugin {
 // Enter chain (flat-list, base keymap) performs the split there. A split can
 // then never separate a unit from half of its markers.
 const relocateEnterSplit: Command = (state, dispatch) => {
-  if (getMarkMode(state) !== 'hide') return false
   const selection = state.selection
   if (!isTextSelection(selection) || !selection.empty) return false
-  const outer = getRestPosition(state, selection.head, selection.head, true)
+  const outer = getRestPosition(
+    state,
+    selection.head,
+    selection.head,
+    true,
+    getHiddenPredicate(state),
+  )
   if (outer === selection.head) return false
   dispatch?.(state.tr.setSelection(TextSelection.create(state.doc, outer)))
   return false
@@ -74,18 +86,18 @@ const relocateEnterSplit: Command = (state, dispatch) => {
 // trailing run first, so the deletions never need remapping.
 function createUnformatCommand(direction: -1 | 1): Command {
   return (state, dispatch) => {
-    if (getMarkMode(state) !== 'hide') return false
+    const isHidden = getHiddenPredicate(state)
     const selection = state.selection
     if (!isTextSelection(selection) || !selection.empty) return false
     const $head = selection.$head
     if (!$head.parent.isTextblock || $head.parent.type.spec.code) return false
     const run =
       direction === -1
-        ? getHiddenRunBefore(state, selection.head)
-        : getHiddenRunAfter(state, selection.head)
+        ? getHiddenRunBefore(state, selection.head, isHidden)
+        : getHiddenRunAfter(state, selection.head, isHidden)
     if (run == null) return false
     const markerChar = direction === -1 ? run.to - 1 : run.from
-    const markerRuns = getUnitMarkerRuns(state, markerChar)
+    const markerRuns = getUnitMarkerRuns(state, markerChar, isHidden)
     const tr = state.tr
     if (markerRuns.length === 0) {
       tr.delete(run.from, run.to)

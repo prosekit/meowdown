@@ -2,12 +2,15 @@ import { getMarkType } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
 
-import { isMarkOfTypes, SYNTAX_MARK_NAMES, type MarkName } from './mark-names.ts'
+import { getMarkMode } from './mark-mode.ts'
+import { isMarkOfType, isMarkOfTypes, SYNTAX_MARK_NAMES, type MarkName } from './mark-names.ts'
 
 export interface HiddenRun {
   from: number
   to: number
 }
+
+export type HiddenCharPredicate = (state: EditorState, pos: number) => boolean
 
 // Marks of the character occupying [pos, pos + 1), or undefined when that slot
 // is not a text character (block boundary, inline atom node, end of block).
@@ -25,6 +28,23 @@ export function isHiddenChar(state: EditorState, pos: number): boolean {
   return marks.some((mark) => isMarkOfTypes(mark, SYNTAX_MARK_NAMES))
 }
 
+/**
+ * A character hidden in every mark mode: editor-managed magic-comment
+ * metadata (`mdMagic`), which style.css never renders.
+ */
+function isMagicChar(state: EditorState, pos: number): boolean {
+  const marks = getCharMarks(state, pos)
+  if (marks == null) return false
+  return marks.some((mark) => isMarkOfType(mark, 'mdMagic'))
+}
+
+// In hide mode every syntax run is invisible; in focus and show only the
+// always-hidden magic runs are. The caret rules act on what the current mode
+// actually hides.
+export function getHiddenPredicate(state: EditorState): HiddenCharPredicate {
+  return getMarkMode(state) === 'hide' ? isHiddenChar : isMagicChar
+}
+
 function isInsideNonCodeTextblock(state: EditorState, pos: number): boolean {
   if (pos < 0 || pos > state.doc.content.size) return false
   const $pos = state.doc.resolve(pos)
@@ -34,39 +54,55 @@ function isInsideNonCodeTextblock(state: EditorState, pos: number): boolean {
 /**
  * The maximal contiguous hidden run ending exactly at `pos`, or undefined.
  */
-export function getHiddenRunBefore(state: EditorState, pos: number): HiddenRun | undefined {
+export function getHiddenRunBefore(
+  state: EditorState,
+  pos: number,
+  isHidden: HiddenCharPredicate = isHiddenChar,
+): HiddenRun | undefined {
   if (!isInsideNonCodeTextblock(state, pos)) return
   const blockStart = state.doc.resolve(pos).start()
   let from = pos
-  while (from > blockStart && isHiddenChar(state, from - 1)) from--
+  while (from > blockStart && isHidden(state, from - 1)) from--
   return from < pos ? { from, to: pos } : undefined
 }
 
 /**
  * The maximal contiguous hidden run starting exactly at `pos`, or undefined.
  */
-export function getHiddenRunAfter(state: EditorState, pos: number): HiddenRun | undefined {
+export function getHiddenRunAfter(
+  state: EditorState,
+  pos: number,
+  isHidden: HiddenCharPredicate = isHiddenChar,
+): HiddenRun | undefined {
   if (!isInsideNonCodeTextblock(state, pos)) return
   const blockEnd = state.doc.resolve(pos).end()
   let to = pos
-  while (to < blockEnd && isHiddenChar(state, to)) to++
+  while (to < blockEnd && isHidden(state, to)) to++
   return to > pos ? { from: pos, to } : undefined
 }
 
 // A position is a hidden-run interior (never a caret rest position in hide
 // mode) when the characters on both sides are hidden.
-export function isHiddenRunInterior(state: EditorState, pos: number): boolean {
-  return isHiddenChar(state, pos - 1) && isHiddenChar(state, pos)
+export function isHiddenRunInterior(
+  state: EditorState,
+  pos: number,
+  isHidden: HiddenCharPredicate = isHiddenChar,
+): boolean {
+  return isHidden(state, pos - 1) && isHidden(state, pos)
 }
 
 /**
  * The full run around an interior position, or undefined for rest positions.
  */
-export function getHiddenRunAround(state: EditorState, pos: number): HiddenRun | undefined {
-  if (!isHiddenRunInterior(state, pos)) return
-  const before = getHiddenRunBefore(state, pos)
+export function getHiddenRunAround(
+  state: EditorState,
+  pos: number,
+  isHidden: HiddenCharPredicate = isHiddenChar,
+): HiddenRun | undefined {
+  if (!isHiddenRunInterior(state, pos, isHidden)) return
+  const before = getHiddenRunBefore(state, pos, isHidden)
   if (!before) return
-  const after = getHiddenRunAfter(state, pos)
+  const after = getHiddenRunAfter(state, pos, isHidden)
   if (!after) return
   return { from: before.from, to: after.to }
 }
@@ -131,17 +167,18 @@ export function getRestPosition(
   oldPos: number,
   newPos: number,
   isPointer: boolean,
+  isHidden: HiddenCharPredicate = isHiddenChar,
 ): number {
   if (!isInsideNonCodeTextblock(state, newPos)) return newPos
-  const run = getHiddenRunAround(state, newPos)
+  const run = getHiddenRunAround(state, newPos, isHidden)
   if (run != null) {
     if (!isPointer) return newPos >= oldPos ? run.to : run.from
     return getPointerEdge(state, run, newPos)
   }
   if (!isPointer) return newPos
-  const runBefore = getHiddenRunBefore(state, newPos)
+  const runBefore = getHiddenRunBefore(state, newPos, isHidden)
   if (runBefore != null && isPackOuterEdge(state, runBefore, 'from')) return runBefore.from
-  const runAfter = getHiddenRunAfter(state, newPos)
+  const runAfter = getHiddenRunAfter(state, newPos, isHidden)
   if (runAfter != null && isPackOuterEdge(state, runAfter, 'to')) return runAfter.to
   return newPos
 }
@@ -150,10 +187,14 @@ export type CaretTail = 'left' | 'right'
 
 // Typing affinity: the tail points to the side whose formatting a typed
 // character would adopt, which is the opposite side of the hidden run.
-export function getCaretTail(state: EditorState, pos: number): CaretTail | undefined {
+export function getCaretTail(
+  state: EditorState,
+  pos: number,
+  isHidden: HiddenCharPredicate = isHiddenChar,
+): CaretTail | undefined {
   if (!isInsideNonCodeTextblock(state, pos)) return
-  const hiddenBefore = isHiddenChar(state, pos - 1)
-  const hiddenAfter = isHiddenChar(state, pos)
+  const hiddenBefore = isHidden(state, pos - 1)
+  const hiddenAfter = isHidden(state, pos)
   if (hiddenBefore === hiddenAfter) return
   return hiddenAfter ? 'left' : 'right'
 }
@@ -163,11 +204,15 @@ export function getCaretTail(state: EditorState, pos: number): CaretTail | undef
  * character sits at `charPos`, trailing first so callers can delete them in
  * order without remapping. A fully hidden unit yields one run.
  */
-export function getUnitMarkerRuns(state: EditorState, charPos: number): HiddenRun[] {
+export function getUnitMarkerRuns(
+  state: EditorState,
+  charPos: number,
+  isHidden: HiddenCharPredicate = isHiddenChar,
+): HiddenRun[] {
   const pack = getInnermostPackRangeAt(state, charPos)
   if (pack == null) return []
-  const leading = getHiddenRunAfter(state, pack.from)
-  const trailing = getHiddenRunBefore(state, pack.to)
+  const leading = getHiddenRunAfter(state, pack.from, isHidden)
+  const trailing = getHiddenRunBefore(state, pack.to, isHidden)
   const runs: HiddenRun[] = []
   if (trailing != null) runs.push(trailing)
   if (leading != null && (trailing == null || leading.from !== trailing.from)) {
