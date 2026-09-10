@@ -376,7 +376,10 @@ export function ProseKitEditor({
       resolveWikilink,
       markMode,
     })
-    const extension = union(baseExtension, defineCodeBlockView(CodeBlockView))
+    const extension =
+      CodeBlockView === false
+        ? baseExtension
+        : union(baseExtension, defineCodeBlockView(CodeBlockView))
     const editor: TypedEditor = createEditor({ extension })
     if (initialMarkdown) {
       editor.setContent(markdownToDoc(initialMarkdown, { nodes: editor.nodes, frontmatter }))
