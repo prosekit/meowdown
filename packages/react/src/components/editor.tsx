@@ -20,6 +20,7 @@ import type {
   WikilinkResolver,
 } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
+import type { ReactNodeViewComponent } from '@prosekit/react'
 import { clsx } from 'clsx/lite'
 import {
   useImperativeHandle,
@@ -337,6 +338,13 @@ export interface EditorProps {
   wrapperClassName?: string
 
   /**
+   * React component that renders code blocks in place of the built-in one.
+   * It receives ProseKit's node view props and must render a `contentDOM`
+   * hole for the code text. Read once at mount; later changes are ignored.
+   */
+  CodeBlockView?: ReactNodeViewComponent | undefined
+
+  /**
    * Imperative handle for the editor.
    */
   handleRef?: Ref<EditorHandle>
@@ -394,6 +402,7 @@ export function MeowdownEditor({
   timeFormat,
   editorClassName,
   wrapperClassName,
+  CodeBlockView,
   handleRef,
   children,
 }: EditorProps): ReactElement {
@@ -529,6 +538,7 @@ export function MeowdownEditor({
         onSearchChange={onSearchChange}
         timeFormat={timeFormat}
         editorClassName={editorClassName}
+        CodeBlockView={CodeBlockView}
       >
         {children}
       </ProseKitEditor>

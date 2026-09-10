@@ -28,4 +28,4 @@ export type {
 
 export type { SelectionJSON } from '@prosekit/core'
 export type { LinkPreview, LinkPreviewResolver } from '@meowdown/core'
-export { useEditor, useExtension, useKeymap } from '@prosekit/react'
+export { useEditor, useExtension, useKeymap, type ReactNodeViewComponent } from '@prosekit/react'

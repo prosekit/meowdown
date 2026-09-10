@@ -66,6 +66,7 @@ Common `MeowdownEditor` props:
 | `onFilePaste`                                                                                                 | Persist pasted or dropped files                                                    |
 | `onSlashMenuSearch` / `onTagSearch` / `onWikilinkSearch` / `onSelectionMenuSearch`                            | Search menus for `/`, `#`, `[[`, and selection commands                            |
 | `readOnly` / `placeholder` / `blockHandle` / `caretGlide` / `embedPaste` / `linkPaste` / `bulletAfterHeading` | Behavior toggles                                                                   |
+| `CodeBlockView`                                                                                               | Custom React node view component for code blocks                                   |
 
 Every prop, callback, and `EditorHandle` method is documented in the [API reference](https://npmx.dev/package-docs/@meowdown%2Freact/).
 
