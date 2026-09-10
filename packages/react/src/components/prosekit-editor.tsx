@@ -313,10 +313,7 @@ export interface ProseKitEditorProps {
    */
   editorClassName?: string
 
-  /**
-   * Component rendering code blocks. See `EditorProps.CodeBlockView`.
-   */
-  CodeBlockView?: ReactNodeViewComponent | undefined
+  CodeBlockView?: ReactNodeViewComponent | false | undefined
 
   /**
    * Imperative handle for the editor.

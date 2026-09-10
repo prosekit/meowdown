@@ -339,10 +339,9 @@ export interface EditorProps {
 
   /**
    * React component that renders code blocks in place of the built-in one.
-   * It receives ProseKit's node view props and must render a `contentDOM`
-   * hole for the code text. Read once at mount; later changes are ignored.
+   * `false` disables the React code block view.
    */
-  CodeBlockView?: ReactNodeViewComponent | undefined
+  CodeBlockView?: ReactNodeViewComponent | false | undefined
 
   /**
    * Imperative handle for the editor.
