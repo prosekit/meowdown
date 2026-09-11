@@ -4,12 +4,12 @@ import { defineReactNodeView, type ReactNodeViewComponent } from '@prosekit/reac
 
 import { CodeBlockView } from '../components/code-block-view.tsx'
 
-export function defineCodeBlockView(): Extension {
+export function defineCodeBlockView(component: ReactNodeViewComponent = CodeBlockView): Extension {
   return union(
     defineReactNodeView({
       name: 'codeBlock',
       contentAs: 'code',
-      component: CodeBlockView satisfies ReactNodeViewComponent,
+      component,
     }),
     // Decorates the code block under the caret; `CodeBlockView` reads it to
     // decide whether the preview shows alone or below the source.

@@ -31,7 +31,7 @@ import { clamp } from '@ocavue/utils'
 import { createEditor, union, type SelectionJSON } from '@prosekit/core'
 import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
-import { ProseKit } from '@prosekit/react'
+import { ProseKit, type ReactNodeViewComponent } from '@prosekit/react'
 import GithubSlugger from 'github-slugger'
 import {
   useCallback,
@@ -313,6 +313,8 @@ export interface ProseKitEditorProps {
    */
   editorClassName?: string
 
+  CodeBlockView?: ReactNodeViewComponent | false | undefined
+
   /**
    * Imperative handle for the editor.
    */
@@ -363,6 +365,7 @@ export function ProseKitEditor({
   onSearchChange,
   timeFormat,
   editorClassName,
+  CodeBlockView,
   ref,
   children,
 }: ProseKitEditorProps): ReactElement {
@@ -373,7 +376,10 @@ export function ProseKitEditor({
       resolveWikilink,
       markMode,
     })
-    const extension = union(baseExtension, defineCodeBlockView())
+    const extension =
+      CodeBlockView === false
+        ? baseExtension
+        : union(baseExtension, defineCodeBlockView(CodeBlockView))
     const editor: TypedEditor = createEditor({ extension })
     if (initialMarkdown) {
       editor.setContent(markdownToDoc(initialMarkdown, { nodes: editor.nodes, frontmatter }))
