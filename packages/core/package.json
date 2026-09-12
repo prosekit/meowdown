@@ -30,6 +30,8 @@
     "@lezer/highlight": "^1.2.3",
     "@meowdown/markdown": "workspace:^",
     "@ocavue/utils": "^1.8.0",
+    "@post-embed/elements": "^0.0.3",
+    "@post-embed/types": "^0.0.3",
     "@prosekit/core": "^0.13.2",
     "@prosekit/extensions": "^0.18.2",
     "@prosekit/pm": "^0.1.19",

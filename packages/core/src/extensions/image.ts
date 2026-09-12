@@ -1,3 +1,5 @@
+import { registerXPost } from '@post-embed/elements/x'
+import type { Tweet } from '@post-embed/types'
 import { defineMarkView, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
 import type { EditorView, MarkView, ViewMutationRecord } from '@prosekit/pm/view'
@@ -19,6 +21,7 @@ import {
 } from './magic-comment.ts'
 import type { MarkName } from './mark-names.ts'
 import { getMarkRangeAt } from './mark-range.ts'
+import type { PostResolver } from './post-resolver.ts'
 import { applyTweetHeight } from './tweet.ts'
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
 
@@ -40,6 +43,11 @@ export interface ImageOptions {
    * user edit (e.g. deterministic tests).
    */
   persistTweetHeight?: boolean
+  /**
+   * Resolve the saved data for a tweet URL. With data, the tweet renders as a
+   * `post-embed-x-post` card in place of the provider iframe.
+   */
+  resolvePost?: PostResolver
 }
 
 /**
@@ -207,16 +215,20 @@ class ImageMarkView implements MarkView {
   readonly #view: EditorView
   readonly #resolveImageUrl: ImageUrlResolver | undefined
   readonly #persistTweetHeight: boolean
+  readonly #resolvePost: PostResolver | undefined
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
   #tweetIframe: HTMLIFrameElement | undefined
+  #heightObserver: ResizeObserver | undefined
+  #destroyed = false
 
   constructor(mark: Mark, view: EditorView, options: ImageOptions) {
     this.#attrs = mark.attrs as MdImageAttrs
     this.#view = view
     this.#resolveImageUrl = options.resolveImageUrl
     this.#persistTweetHeight = options.persistTweetHeight ?? true
+    this.#resolvePost = options.resolvePost
 
     this.#dom = document.createElement('span')
     this.#dom.className = 'md-image-view md-atom-view'
@@ -271,8 +283,14 @@ class ImageMarkView implements MarkView {
     return !this.#contentDOM.contains(mutation.target)
   }
 
+  destroy(): void {
+    this.#destroyed = true
+    this.#heightObserver?.disconnect()
+  }
+
   /**
-   * Build the inline preview for the image `src`: an embed iframe or a resizable `<img>`.
+   * Build the inline preview for the image `src`: a post card, an embed iframe,
+   * or a resizable `<img>`.
    */
   #renderPreview(): HTMLElement | undefined {
     const { src } = this.#attrs
@@ -280,13 +298,12 @@ class ImageMarkView implements MarkView {
     if (embed) {
       const wrapper = document.createElement('span')
       wrapper.className = 'md-image-view-preview md-atom-view-preview'
-      const onHeight = this.#persistTweetHeight
-        ? (height: number) => {
-            commitTweetHeight(this.#view, this.#contentDOM, height)
-          }
-        : undefined
-      const iframe = buildEmbedIframe(embed, this.#attrs.height, onHeight)
-      if (embed.kind === 'tweet') this.#tweetIframe = iframe
+      if (embed.kind === 'tweet' && this.#resolvePost) {
+        wrapper.dataset.testid = 'post-embed'
+        this.#renderPost(wrapper, embed, src)
+        return wrapper
+      }
+      const iframe = this.#buildEmbedIframe(embed)
       wrapper.appendChild(embed.kind === 'youtube' ? this.#buildResizableEmbed(iframe) : iframe)
       return wrapper
     }
@@ -299,6 +316,67 @@ class ImageMarkView implements MarkView {
     wrapper.dataset.testid = 'image-preview'
     wrapper.appendChild(this.#buildResizableImage(url))
     return wrapper
+  }
+
+  #buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
+    const onHeight = this.#persistTweetHeight
+      ? (height: number) => {
+          commitTweetHeight(this.#view, this.#contentDOM, height)
+        }
+      : undefined
+    const iframe = buildEmbedIframe(embed, this.#attrs.height, onHeight)
+    if (embed.kind === 'tweet') this.#tweetIframe = iframe
+    return iframe
+  }
+
+  /**
+   * A synchronous answer renders in the constructor, so the card is in the
+   * first frame with the rest of the document. A promise reserves the
+   * persisted height (or the stylesheet's default) until it settles.
+   */
+  #renderPost(wrapper: HTMLElement, embed: EmbedDescriptor, src: string): void {
+    let result: ReturnType<PostResolver>
+    try {
+      result = this.#resolvePost!(src)
+    } catch (error) {
+      console.error('[meowdown] resolvePost failed:', error)
+      result = undefined
+    }
+    if (!(result instanceof Promise)) {
+      this.#showPost(wrapper, embed, result)
+      return
+    }
+    wrapper.dataset.pending = ''
+    if (this.#attrs.height != null) wrapper.style.minHeight = `${this.#attrs.height}px`
+    void result.then(
+      (tweet) => this.#showPost(wrapper, embed, tweet),
+      (error: unknown) => {
+        console.error('[meowdown] resolvePost failed:', error)
+        this.#showPost(wrapper, embed, undefined)
+      },
+    )
+  }
+
+  #showPost(wrapper: HTMLElement, embed: EmbedDescriptor, tweet: Tweet | undefined): void {
+    if (this.#destroyed) return
+    delete wrapper.dataset.pending
+    wrapper.style.minHeight = ''
+    if (!tweet) {
+      wrapper.replaceChildren(this.#buildEmbedIframe(embed))
+      return
+    }
+    registerXPost()
+    const element = document.createElement('post-embed-x-post')
+    element.data = tweet
+    wrapper.replaceChildren(element)
+    if (!this.#persistTweetHeight) return
+    // The card's own height stands in for the iframe's height report, so a
+    // snapshot that arrives after the first paint still seeds the next load.
+    this.#heightObserver = new ResizeObserver((entries) => {
+      const height = entries[0]?.contentRect.height
+      if (height) commitTweetHeight(this.#view, this.#contentDOM, height)
+    })
+    this.#heightObserver.observe(element)
   }
 
   /**
