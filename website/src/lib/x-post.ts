@@ -7,6 +7,8 @@ const API_URL = 'https://react-tweet.vercel.app/api/tweet/'
 
 const CACHE_LIMIT = 32
 
+// REVIEW: 1 install https://npmx.dev/package/lru.min; 2. use its LRU cache instead of Map; 3. set the CACHE_LIMIT to 64
+
 type Entry = Tweet | undefined | Promise<Tweet | undefined>
 
 // Insertion-ordered, so the first key is the least recently used.

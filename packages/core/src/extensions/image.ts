@@ -194,6 +194,7 @@ function commitImageSize(
  */
 const TWEET_HEIGHT_TOLERANCE = 8
 
+// REVIEW: we do NOT need height magic comments for tweets anymore, because we know the height of the tweet embed from the X Post card. We can remove this in this PR. we do not need to persist the height of the tweet embed anymore. Also remove heightObserver: ResizeObserver
 /**
  * Persist the height a tweet embed reported, so the next load can seed the
  * iframe before the tweet renders. A passive metadata write: outside undo
