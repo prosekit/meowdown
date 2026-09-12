@@ -92,12 +92,15 @@ describe('markdownToDoc', () => {
   it('materializes empty paragraphs from a blank-line run inside a list item', () => {
     const doc = markdownToDoc('- a\n\n\n\n  b')
     expect(doc.childCount).toBe(1)
-    expect(doc.child(0).toJSON().content).toEqual([
-      { type: 'paragraph', content: [{ type: 'text', text: 'a' }] },
-      { type: 'paragraph' },
-      { type: 'paragraph' },
-      { type: 'paragraph', content: [{ type: 'text', text: 'b' }] },
-    ])
+    expect(doc.child(0).toJSON()).toMatchObject({
+      type: 'list',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'a' }] },
+        { type: 'paragraph' },
+        { type: 'paragraph' },
+        { type: 'paragraph', content: [{ type: 'text', text: 'b' }] },
+      ],
+    })
   })
 
   it('materializes empty paragraphs from blank quote lines at the edges', () => {
