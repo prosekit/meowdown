@@ -1,11 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createTweet } from '../testing/tweet-fixture.ts'
+import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import {
   defaultResolveXPost,
   defaultResolveYouTubeVideo,
   matchPostEmbed,
+  parsePostEmbedSnapshot,
   parseXPostId,
 } from './post-embed.ts'
 
@@ -41,6 +43,33 @@ describe('matchPostEmbed', () => {
     expect(matchPostEmbed('https://example.com/cat.png')).toBeUndefined()
     expect(matchPostEmbed('https://www.youtube.com/@Blender')).toBeUndefined()
     expect(matchPostEmbed('https://www.youtube.com/watch?v=short')).toBeUndefined()
+  })
+})
+
+describe('parsePostEmbedSnapshot', () => {
+  it('validates the data against the schema the kind names', () => {
+    const tweet = createTweet()
+    expect(parsePostEmbedSnapshot({ kind: 'x-post', data: tweet })).toEqual({
+      kind: 'x-post',
+      data: tweet,
+    })
+    const video = createYouTubeVideo()
+    expect(parsePostEmbedSnapshot({ kind: 'youtube-video', data: video })).toEqual({
+      kind: 'youtube-video',
+      data: video,
+    })
+  })
+
+  it('drops unknown fields', () => {
+    const parsed = parsePostEmbedSnapshot({ kind: 'x-post', data: { ...createTweet(), extra: 1 } })
+    expect(parsed?.data).not.toHaveProperty('extra')
+  })
+
+  it('rejects data of another kind, an unknown kind, and a missing kind', () => {
+    expect(parsePostEmbedSnapshot({ kind: 'x-post', data: createYouTubeVideo() })).toBeUndefined()
+    expect(parsePostEmbedSnapshot({ kind: 'other', data: createTweet() })).toBeUndefined()
+    expect(parsePostEmbedSnapshot({ data: createTweet() })).toBeUndefined()
+    expect(parsePostEmbedSnapshot({})).toBeUndefined()
   })
 })
 

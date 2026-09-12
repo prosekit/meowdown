@@ -13,6 +13,7 @@ import {
   isReferenceDefinitionNode,
   markdownToDoc,
   matchPostEmbed,
+  parsePostEmbedSnapshot,
   type CodeBlockAttrs,
   type CodeToken,
   type FileClickHandler,
@@ -296,14 +297,17 @@ function PostEmbed(props: {
   kind: PostEmbedKind
   src: string
   width: number | null
+  snapshot: object | null
   resolveXPost: XPostResolver
   resolveYouTubeVideo: YouTubeVideoResolver
 }): ReactElement {
-  const { kind, src, width, resolveXPost, resolveYouTubeVideo } = props
+  const { kind, src, width, snapshot, resolveXPost, resolveYouTubeVideo } = props
   // Registration is idempotent and must precede the element so React sets
-  // `url` and `resolver` as properties of the upgraded element.
+  // `data`, `url`, and `resolver` as properties of the upgraded element.
   registerXPost()
   registerYouTubeVideo()
+  // A saved snapshot renders as is; the card only resolves while `data` is null.
+  const saved = snapshot == null ? undefined : parsePostEmbedSnapshot(snapshot)
   return (
     <span
       className="md-image-view-preview md-atom-view-preview"
@@ -311,8 +315,13 @@ function PostEmbed(props: {
       data-testid={`${kind}-embed`}
     >
       {kind === 'x-post'
-        ? createElement('post-embed-x-post', { url: src, resolver: resolveXPost })
+        ? createElement('post-embed-x-post', {
+            data: saved?.kind === 'x-post' ? saved.data : null,
+            url: src,
+            resolver: resolveXPost,
+          })
         : createElement('post-embed-youtube-video', {
+            data: saved?.kind === 'youtube-video' ? saved.data : null,
             url: src,
             resolver: resolveYouTubeVideo,
             playback: 'inline',
@@ -328,6 +337,7 @@ function ImagePreview(props: {
   src: string
   alt: string
   width: number | null
+  snapshot: object | null
   resolveImageUrl?: (src: string) => string | undefined
   resolveXPost?: XPostResolver
   resolveYouTubeVideo?: YouTubeVideoResolver
@@ -338,6 +348,7 @@ function ImagePreview(props: {
     src,
     alt,
     width,
+    snapshot,
     resolveImageUrl,
     resolveXPost,
     resolveYouTubeVideo,
@@ -353,6 +364,7 @@ function ImagePreview(props: {
         kind={kind}
         src={src}
         width={width}
+        snapshot={snapshot}
         resolveXPost={resolveXPost ?? defaultResolveXPost}
         resolveYouTubeVideo={resolveYouTubeVideo ?? defaultResolveYouTubeVideo}
       />
@@ -391,16 +403,18 @@ function ImageView(props: {
   src: string
   alt: string
   width: number | null
+  snapshot: object | null
   context: RenderContext
   children: ReactNode
 }): ReactElement {
-  const { src, alt, width, context, children } = props
+  const { src, alt, width, snapshot, context, children } = props
   return (
     <span className="md-image-view md-atom-view">
       <ImagePreview
         src={src}
         alt={alt}
         width={width}
+        snapshot={snapshot}
         resolveImageUrl={context.resolveImageUrl}
         resolveXPost={context.resolveXPost}
         resolveYouTubeVideo={context.resolveYouTubeVideo}
@@ -612,7 +626,13 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
     case 'mdImage': {
       const attrs = mark.attrs as MdImageAttrs
       return (
-        <ImageView src={attrs.src} alt={attrs.alt} width={attrs.width} context={context}>
+        <ImageView
+          src={attrs.src}
+          alt={attrs.alt}
+          width={attrs.width}
+          snapshot={attrs.snapshot}
+          context={context}
+        >
           {children}
         </ImageView>
       )

@@ -11,8 +11,6 @@ import {
   traceShiftKeySelection,
   type Fixture,
 } from '../testing/index.ts'
-import { createTweet } from '../testing/tweet-fixture.ts'
-import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { defineImage } from './image.ts'
 import type { MarkMode } from './mark-mode.ts'
@@ -35,8 +33,10 @@ function setup(mode: MarkMode, paragraphs: string[]): Fixture {
   editor.use(
     defineImage({
       resolveImageUrl: () => getSVGImageURL(24, 24),
-      resolveXPost: () => createTweet(),
-      resolveYouTubeVideo: () => createYouTubeVideo(),
+      // No snapshot: a resolved one is written back into the source, which
+      // would put its JSON into every traced selection below.
+      resolveXPost: () => undefined,
+      resolveYouTubeVideo: () => undefined,
     }),
   )
   fixture.set(n.doc(...paragraphs.map((text) => n.paragraph(text))))

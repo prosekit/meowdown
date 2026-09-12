@@ -30,6 +30,10 @@ export interface MdImageAttrs {
    */
   height: number | null
   /**
+   * The saved post-embed snapshot from the trailing comment, or `null`.
+   */
+  snapshot: object | null
+  /**
    * `wikiEmbed` when the source is `![[target]]`; otherwise `null`.
    */
   syntax: 'wikiEmbed' | null
@@ -49,6 +53,7 @@ function defineMdImage() {
       title: { default: '' },
       width: { default: null },
       height: { default: null },
+      snapshot: { default: null },
       syntax: { default: null },
       wikiTarget: { default: null },
     },

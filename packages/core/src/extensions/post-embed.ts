@@ -1,6 +1,8 @@
 import type { Resolver } from '@post-embed/elements/x'
+import { TweetSchema, YouTubeVideoSchema } from '@post-embed/schema'
 import type { Tweet, YouTubeVideo } from '@post-embed/types'
 import { createLRU } from 'lru.min'
+import * as v from 'valibot'
 
 export type XPostResolver = Resolver<Tweet>
 export type YouTubeVideoResolver = Resolver<YouTubeVideo>
@@ -106,3 +108,25 @@ export const defaultResolveYouTubeVideo: YouTubeVideoResolver = cached(async (ur
   if (!response.ok) return
   return { url, ...((await response.json()) as Omit<YouTubeVideo, 'url'>) }
 })
+
+/**
+ * The `snapshot` field of an image's magic comment: the card kind and the
+ * data post-embed renders. The kind is stored explicitly, so a saved snapshot
+ * is validated once, against the schema it names.
+ */
+const PostEmbedSnapshotSchema = v.variant('kind', [
+  v.object({ kind: v.literal('x-post'), data: TweetSchema }),
+  v.object({ kind: v.literal('youtube-video'), data: YouTubeVideoSchema }),
+])
+
+export type PostEmbedSnapshot = v.InferOutput<typeof PostEmbedSnapshotSchema>
+
+/**
+ * The snapshot a card renders from a saved JSON object, or `undefined` when
+ * the object does not validate. Unknown fields are dropped, so a persisted
+ * snapshot is exactly what the card needs.
+ */
+export function parsePostEmbedSnapshot(value: unknown): PostEmbedSnapshot | undefined {
+  const result = v.safeParse(PostEmbedSnapshotSchema, value)
+  return result.success ? result.output : undefined
+}

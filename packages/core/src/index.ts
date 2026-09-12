@@ -114,8 +114,10 @@ export {
   defaultResolveXPost,
   defaultResolveYouTubeVideo,
   matchPostEmbed,
+  parsePostEmbedSnapshot,
   parseXPostId,
   type PostEmbedKind,
+  type PostEmbedSnapshot,
   type XPostResolver,
   type YouTubeVideoResolver,
 } from './extensions/post-embed.ts'

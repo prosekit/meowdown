@@ -1,5 +1,6 @@
-import { registerXPost } from '@post-embed/elements/x'
+import { registerXPost, type Resolver } from '@post-embed/elements/x'
 import { registerYouTubeVideo } from '@post-embed/elements/youtube'
+import type { Tweet, YouTubeVideo } from '@post-embed/types'
 import { defineMarkView, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
 import type { EditorView, MarkView, ViewMutationRecord } from '@prosekit/pm/view'
@@ -24,7 +25,9 @@ import {
   defaultResolveXPost,
   defaultResolveYouTubeVideo,
   matchPostEmbed,
+  parsePostEmbedSnapshot,
   type PostEmbedKind,
+  type PostEmbedSnapshot,
   type XPostResolver,
   type YouTubeVideoResolver,
 } from './post-embed.ts'
@@ -176,6 +179,38 @@ function commitEmbedWidth(view: EditorView, content: HTMLElement, rawWidth: numb
   rewriteMagicComment(view, range, { width: Math.round(rawWidth), height: undefined }, true)
 }
 
+/**
+ * Persist a resolved snapshot into the trailing magic comment. The whole
+ * `![alt](src)<!-- ... -->` range is rewritten, not just the comment: the
+ * transaction stays out of history, and undoing the edit that inserted the
+ * image must delete the snapshot with it. prosemirror-history maps the
+ * inverse deletion through this step, and a position at the end of a
+ * replaced range maps to the end of the replacement, so the mapped deletion
+ * covers the comment. An insertion at the range end would survive that undo
+ * as an orphan comment rendered as plain text.
+ */
+function commitSnapshot(
+  view: EditorView,
+  content: HTMLElement,
+  src: string,
+  snapshot: PostEmbedSnapshot,
+): void {
+  const pos = view.posAtDOM(content, 0)
+  const range = getMarkRangeAt(view.state, pos, 'mdImage')
+  if (!range) return
+  const attrs = range.mark.attrs as MdImageAttrs
+  if (attrs.src !== src) return
+
+  const current = view.state.doc.textBetween(range.from, range.to)
+  const base = stripMagicComment(current)
+  const comment = formatMagicComment({ ...parseMagicComment(current.slice(base.length)), snapshot })
+  if (base + comment === current) return
+
+  view.dispatch(
+    view.state.tr.insertText(base + comment, range.from, range.to).setMeta('addToHistory', false),
+  )
+}
+
 class ImageMarkView implements MarkView {
   readonly #dom: HTMLElement
   readonly #contentDOM: HTMLElement
@@ -186,6 +221,7 @@ class ImageMarkView implements MarkView {
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
+  #destroyed = false
 
   constructor(mark: Mark, view: EditorView, options: ImageOptions) {
     this.#attrs = mark.attrs as MdImageAttrs
@@ -224,8 +260,9 @@ class ImageMarkView implements MarkView {
   update(mark: Mark): boolean {
     const next = mark.attrs as MdImageAttrs
     const previous = this.#attrs
-    // False rebuilds the view from the constructor; a new src can change the preview shape.
-    if (next.src !== previous.src) return false
+    // False rebuilds the view from the constructor: a new src can change the
+    // preview shape, and a new snapshot switches the card to its data path.
+    if (next.src !== previous.src || next.snapshot !== previous.snapshot) return false
     this.#attrs = next
     if (this.#image && next.alt !== previous.alt) {
       this.#image.alt = next.alt
@@ -242,6 +279,10 @@ class ImageMarkView implements MarkView {
 
   ignoreMutation(mutation: ViewMutationRecord): boolean {
     return !this.#contentDOM.contains(mutation.target)
+  }
+
+  destroy(): void {
+    this.#destroyed = true
   }
 
   /**
@@ -267,23 +308,53 @@ class ImageMarkView implements MarkView {
   }
 
   /**
-   * A post-embed card loads its own snapshot through the resolver, and renders
-   * its own pending and unavailable states.
+   * A post-embed card renders a saved snapshot as is. Without one (or with
+   * one that does not validate or names another kind) it loads through the
+   * resolver, rendering its own pending and unavailable states, and the first
+   * answer is written back into the source so the next open renders in the
+   * first frame with no request.
    */
   #buildPostEmbed(kind: PostEmbedKind, src: string): HTMLElement {
+    const saved =
+      this.#attrs.snapshot == null ? undefined : parsePostEmbedSnapshot(this.#attrs.snapshot)
     if (kind === 'x-post') {
       registerXPost()
       const element = document.createElement('post-embed-x-post')
-      element.resolver = this.#resolveXPost
+      element.data = saved?.kind === 'x-post' ? saved.data : null
+      element.resolver = this.#persisting(kind, this.#resolveXPost)
       element.url = src
       return element
     }
     registerYouTubeVideo()
     const element = document.createElement('post-embed-youtube-video')
     element.playback = 'inline'
-    element.resolver = this.#resolveYouTubeVideo
+    element.data = saved?.kind === 'youtube-video' ? saved.data : null
+    element.resolver = this.#persisting(kind, this.#resolveYouTubeVideo)
     element.url = src
     return this.#buildResizableVideo(element)
+  }
+
+  /**
+   * Wrap a resolver so its first valid answer is persisted under `kind`.
+   * post-embed only calls it while `data` is null, and logs a rejection
+   * itself.
+   */
+  #persisting<T extends Tweet | YouTubeVideo>(
+    kind: PostEmbedKind,
+    resolver: Resolver<T>,
+  ): Resolver<T> {
+    return (url) => {
+      const result = resolver(url)
+      void Promise.resolve(result).then(
+        (value) => {
+          if (this.#destroyed || value == null) return
+          const snapshot = parsePostEmbedSnapshot({ kind, data: value })
+          if (snapshot) commitSnapshot(this.#view, this.#contentDOM, url, snapshot)
+        },
+        () => {},
+      )
+      return result
+    }
   }
 
   /**

@@ -151,11 +151,14 @@ describe('undo restores the raw link', () => {
     editor.commands.undo()
     expect(editor.state.doc.textContent).toBe('')
 
-    // Redo mirrors it: link, then embed.
+    // Redo mirrors it: link, then embed. The second redo restores what the
+    // first undo removed: the embed together with the snapshot that had been
+    // written behind it.
     editor.commands.redo()
     expect(editor.state.doc.textContent).toBe(YT)
     editor.commands.redo()
-    expect(editor.state.doc.textContent).toBe(EMBED)
+    expect(editor.state.doc.textContent.startsWith(EMBED)).toBe(true)
+    expect(editor.state.doc.textContent).toContain('"snapshot"')
     await expect.element(youtubeEmbed).toBeInTheDocument()
   })
 
