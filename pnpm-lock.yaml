@@ -79,14 +79,17 @@ importers:
         specifier: ^1.8.0
         version: 1.8.0
       '@post-embed/elements':
-        specifier: ^0.1.0
-        version: 0.1.0(typescript@6.0.3)
+        specifier: ^0.2.0
+        version: 0.2.0(typescript@6.0.3)
+      '@post-embed/exporter':
+        specifier: ^0.2.0
+        version: 0.2.0(typescript@6.0.3)
       '@post-embed/schema':
-        specifier: ^0.1.0
-        version: 0.1.0(typescript@6.0.3)
+        specifier: ^0.2.0
+        version: 0.2.0(typescript@6.0.3)
       '@post-embed/types':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
       '@prosekit/core':
         specifier: ^0.13.2
         version: 0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
@@ -238,11 +241,11 @@ importers:
         specifier: ^1.8.0
         version: 1.8.0
       '@post-embed/elements':
-        specifier: ^0.1.0
-        version: 0.1.0(typescript@6.0.3)
+        specifier: ^0.2.0
+        version: 0.2.0(typescript@6.0.3)
       '@post-embed/types':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.0
+        version: 0.2.0
       '@prosekit/core':
         specifier: ^0.13.2
         version: 0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
@@ -1797,14 +1800,17 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@post-embed/elements@0.1.0':
-    resolution: {integrity: sha512-T4gIWLvWZCK7DxKe0lwOJqHZuwUYIxvjt5mCBlq7BCBJe1pLdiD/mdoEndy2Ce/0FOjyaMN677eq6g6jRjaTPg==}
+  '@post-embed/elements@0.2.0':
+    resolution: {integrity: sha512-0YwCDYLuW0p0U5JLi8wmL6CgyisWUcA9vZlX2WsbkPu4JWTiJBpwpI2xHKc/iMKrwe2Nh9wdo4VoDDTNSYpwAQ==}
 
-  '@post-embed/schema@0.1.0':
-    resolution: {integrity: sha512-f39lVuMZk9vCVGihLQKaNrlO80kvsYYYb3DDo16ZlO9tCWNDVjoT7A9RjunK7JRayumOUytWm/BkVsJu236HyQ==}
+  '@post-embed/exporter@0.2.0':
+    resolution: {integrity: sha512-FzHfsOiSsaQydsBvPDOmOmKAug9I7EmAnmkGP+ZyrlXa2x0W4ALhFF0xdh04gSYZGlWKeUqvAZhj1zLwcY4Rsg==}
 
-  '@post-embed/types@0.1.0':
-    resolution: {integrity: sha512-/CZTGLljvtv4Hs2b0sx7XKK0kMKaRT7vZxTPpgGuluTY/Thz+nYp1bnE6KntSdahy2FFAjE66MyO8sbvw26VRQ==}
+  '@post-embed/schema@0.2.0':
+    resolution: {integrity: sha512-bFJYiON0/56HJ7yFJMLS0/aoc4fdZ/Xf08aUUgaKuaKlCXsqLbYXt//uMFqhLo11n8thI2p54kv8e1xwWZvD4Q==}
+
+  '@post-embed/types@0.2.0':
+    resolution: {integrity: sha512-eqRPU20eyWS9dl6CdeqyZ0xwgdjAN+CwexhY4YYe0glhEMnodT7JTzPt68tKjOI4HSgXqfIMFTAqVxR+sh6TAw==}
 
   '@prosekit/core@0.13.2':
     resolution: {integrity: sha512-0pdKLy442VCo4Pa+5z+pNGhiLAmHgreWHWc2pn2IIbsy4dhchNEQN+ycfCYbjDVHxXfNrGpp1aHSMn5VOhmnhA==}
@@ -2592,6 +2598,9 @@ packages:
 
   birecord@0.1.2:
     resolution: {integrity: sha512-5PAPTTmMpMEb+GuMb5DebfBkipRGyIW9+gtwEBSoDA9xkhHILm04+hZQ702pMksu3d8YAuGkmgTzQWcKqTPScA==}
+
+  birpc@4.2.0:
+    resolution: {integrity: sha512-KxgKcZPfrtzJDDALHPguGpGJUrzdgpymyiQQgzFjWreHMOpWrnFNVREr5J48x2DBh8ZVioscrV1SBkDipGiX+Q==}
 
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
@@ -4743,6 +4752,14 @@ packages:
       typescript:
         optional: true
 
+  valibot@1.5.0:
+    resolution: {integrity: sha512-nil6AkP2TChWL43Z5uJ6GTxX01CUA+g8LWUM+N/rB9NBbkUMaUsi9PUNzlUPgoKASgmx9f7eGOYpJ04/fSa6FQ==}
+    peerDependencies:
+      typescript: '>=5'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   validate-npm-package-license@3.0.4:
     resolution: {integrity: sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew==}
 
@@ -6432,25 +6449,35 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@post-embed/elements@0.1.0(typescript@6.0.3)':
+  '@post-embed/elements@0.2.0(typescript@6.0.3)':
     dependencies:
       '@aria-ui/core': 0.2.1
-      '@post-embed/schema': 0.1.0(typescript@6.0.3)
-      '@post-embed/types': 0.1.0
+      '@post-embed/schema': 0.2.0(typescript@6.0.3)
+      '@post-embed/types': 0.2.0
       crelt: 1.0.7
-      entities: 8.1.0
     transitivePeerDependencies:
       - typescript
 
-  '@post-embed/schema@0.1.0(typescript@6.0.3)':
+  '@post-embed/exporter@0.2.0(typescript@6.0.3)':
     dependencies:
-      '@post-embed/types': 0.1.0
-      '@standard-schema/spec': 1.1.0
-      valibot: 1.4.2(typescript@6.0.3)
+      '@post-embed/schema': 0.2.0(typescript@6.0.3)
+      '@post-embed/types': 0.2.0
+      birpc: 4.2.0
+      entities: 8.1.0
+      lru.min: 1.1.5
+      valibot: 1.5.0(typescript@6.0.3)
     transitivePeerDependencies:
       - typescript
 
-  '@post-embed/types@0.1.0': {}
+  '@post-embed/schema@0.2.0(typescript@6.0.3)':
+    dependencies:
+      '@post-embed/types': 0.2.0
+      '@standard-schema/spec': 1.1.0
+      valibot: 1.5.0(typescript@6.0.3)
+    transitivePeerDependencies:
+      - typescript
+
+  '@post-embed/types@0.2.0': {}
 
   '@prosekit/core@0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)':
     dependencies:
@@ -7356,6 +7383,8 @@ snapshots:
       entities: 7.0.1
 
   birecord@0.1.2: {}
+
+  birpc@4.2.0: {}
 
   boolbase@1.0.0: {}
 
@@ -9758,6 +9787,10 @@ snapshots:
   util-deprecate@1.0.2: {}
 
   valibot@1.4.2(typescript@6.0.3):
+    optionalDependencies:
+      typescript: 6.0.3
+
+  valibot@1.5.0(typescript@6.0.3):
     optionalDependencies:
       typescript: 6.0.3
 

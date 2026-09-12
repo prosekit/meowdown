@@ -4,7 +4,7 @@ import { page, userEvent } from 'vitest/browser'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
-import { createTweet } from '../testing/tweet-fixture.ts'
+import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { defineEmbedPaste, detectEmbedUrl } from './embed-paste.ts'
@@ -22,7 +22,7 @@ function useEmbedPaste(fixture: Fixture): void {
   editor.use(
     defineImage({
       resolveImageUrl: (src) => src,
-      resolveXPost: () => createTweet(),
+      resolveXPost: () => createXPost(),
       resolveYouTubeVideo: () => createYouTubeVideo(),
     }),
   )

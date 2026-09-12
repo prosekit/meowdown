@@ -10,7 +10,7 @@ import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
 import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
-import { createTweet } from '../testing/tweet-fixture.ts'
+import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { MeowdownEditor } from './editor.tsx'
@@ -577,7 +577,7 @@ describe('X post embed props', () => {
       <MeowdownEditor
         mode="hide"
         initialMarkdown="![](https://x.com/jack/status/20)"
-        resolveXPost={() => createTweet()}
+        resolveXPost={() => createXPost()}
       />,
     )
     const card = pmRoot.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')

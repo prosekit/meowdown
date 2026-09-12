@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { createTweet } from '../testing/tweet-fixture.ts'
+import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import {
@@ -48,10 +49,10 @@ describe('matchPostEmbed', () => {
 
 describe('parsePostEmbedSnapshot', () => {
   it('validates the data against the schema the kind names', () => {
-    const tweet = createTweet()
-    expect(parsePostEmbedSnapshot({ kind: 'x-post', data: tweet })).toEqual({
+    const post = createXPost()
+    expect(parsePostEmbedSnapshot({ kind: 'x-post', data: post })).toEqual({
       kind: 'x-post',
-      data: tweet,
+      data: post,
     })
     const video = createYouTubeVideo()
     expect(parsePostEmbedSnapshot({ kind: 'youtube-video', data: video })).toEqual({
@@ -61,14 +62,14 @@ describe('parsePostEmbedSnapshot', () => {
   })
 
   it('drops unknown fields', () => {
-    const parsed = parsePostEmbedSnapshot({ kind: 'x-post', data: { ...createTweet(), extra: 1 } })
+    const parsed = parsePostEmbedSnapshot({ kind: 'x-post', data: { ...createXPost(), extra: 1 } })
     expect(parsed?.data).not.toHaveProperty('extra')
   })
 
   it('rejects data of another kind, an unknown kind, and a missing kind', () => {
     expect(parsePostEmbedSnapshot({ kind: 'x-post', data: createYouTubeVideo() })).toBeUndefined()
-    expect(parsePostEmbedSnapshot({ kind: 'other', data: createTweet() })).toBeUndefined()
-    expect(parsePostEmbedSnapshot({ data: createTweet() })).toBeUndefined()
+    expect(parsePostEmbedSnapshot({ kind: 'other', data: createXPost() })).toBeUndefined()
+    expect(parsePostEmbedSnapshot({ data: createXPost() })).toBeUndefined()
     expect(parsePostEmbedSnapshot({})).toBeUndefined()
   })
 })
@@ -78,15 +79,14 @@ describe('default resolvers', () => {
     vi.restoreAllMocks()
   })
 
-  it('fetches an X post once through the proxy, then answers synchronously', async () => {
-    const tweet = createTweet('cached')
+  it('fetches an X post once through the proxy, converts it, then answers synchronously', async () => {
     const fetchSpy = vi
       .spyOn(globalThis, 'fetch')
-      .mockResolvedValue(new Response(JSON.stringify({ data: tweet })))
+      .mockResolvedValue(new Response(JSON.stringify({ data: createTweet('cached') })))
     const first = defaultResolveXPost('https://x.com/jack/status/1001')
     expect(first).toBeInstanceOf(Promise)
-    expect(await first).toEqual(tweet)
-    expect(defaultResolveXPost('https://x.com/jack/status/1001')).toEqual(tweet)
+    expect(await first).toEqual(createXPost('cached'))
+    expect(defaultResolveXPost('https://x.com/jack/status/1001')).toEqual(createXPost('cached'))
     expect(fetchSpy).toHaveBeenCalledExactlyOnceWith(
       'https://react-tweet.vercel.app/api/tweet/1001',
     )
