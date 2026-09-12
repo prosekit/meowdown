@@ -10,7 +10,7 @@ import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { defineEmbedPaste } from './embed-paste.ts'
 import { defineImage, type ImageOptions } from './image.ts'
-import { formatMagicComment } from './magic-comment.ts'
+import { formatMagicComment, parseMagicComment } from './magic-comment.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const xPostEmbed = pmRoot.getByTestId('x-post-embed')
@@ -108,15 +108,27 @@ describe('snapshot persistence', () => {
   const tweet = createTweet('a -- b')
   const saved = `${TWEET}${formatMagicComment({ snapshot: { kind: 'x-post', data: tweet } })}`
 
+  // The comment written behind `prefix`, and the snapshot it carries. The
+  // schema writes the fields in its own order, so tests compare the parsed
+  // object, not the string.
+  function written(fixture: Fixture, prefix: string) {
+    const markdown = docToMarkdown(fixture.editor.state.doc).trim()
+    const comment = markdown.startsWith(prefix) ? markdown.slice(prefix.length) : ''
+    return { markdown, comment, snapshot: parseMagicComment(comment)?.snapshot }
+  }
+
   it('writes the resolved snapshot back, escaped, outside history', async () => {
     using fixture = setup(TWEET, { resolveXPost: () => Promise.resolve(tweet) })
     const { editor } = fixture
     await expect.element(xPostCard.getByText('a -- b')).toBeInTheDocument()
-    await expect.poll(() => docToMarkdown(editor.state.doc).trim()).toBe(saved)
-    expect(saved).not.toContain('--')
+    await expect
+      .poll(() => written(fixture, TWEET).snapshot)
+      .toEqual({ kind: 'x-post', data: tweet })
+    const { markdown, comment } = written(fixture, TWEET)
+    expect(comment.slice('<!--'.length, -'-->'.length)).not.toContain('--')
 
     editor.commands.undo()
-    expect(docToMarkdown(editor.state.doc).trim()).toBe(saved)
+    expect(docToMarkdown(editor.state.doc).trim()).toBe(markdown)
   })
 
   it('renders a saved snapshot without calling the resolver', async () => {
@@ -132,11 +144,10 @@ describe('snapshot persistence', () => {
     using fixture = setup(`${TWEET}<!-- {"snapshot":{"kind":"x-post","data":{"bogus":1}}} -->`, {
       resolveXPost: () => createTweet(),
     })
-    const { editor } = fixture
     await expect.element(xPostCard.getByText('just setting up my twttr')).toBeInTheDocument()
     await expect
-      .poll(() => docToMarkdown(editor.state.doc).trim())
-      .toBe(`${TWEET}${formatMagicComment({ snapshot: { kind: 'x-post', data: createTweet() } })}`)
+      .poll(() => written(fixture, TWEET).snapshot)
+      .toEqual({ kind: 'x-post', data: createTweet() })
   })
 
   it('replaces a snapshot whose kind does not match the URL', async () => {
@@ -145,14 +156,11 @@ describe('snapshot persistence', () => {
       `${VIDEO}${formatMagicComment({ snapshot: { kind: 'x-post', data: tweet } })}`,
       { resolveYouTubeVideo },
     )
-    const { editor } = fixture
     await expect.element(videoCard.getByText('Big Buck Bunny')).toBeInTheDocument()
     expect(resolveYouTubeVideo).toHaveBeenCalledOnce()
     await expect
-      .poll(() => docToMarkdown(editor.state.doc).trim())
-      .toBe(
-        `${VIDEO}${formatMagicComment({ snapshot: { kind: 'youtube-video', data: createYouTubeVideo() } })}`,
-      )
+      .poll(() => written(fixture, VIDEO).snapshot)
+      .toEqual({ kind: 'youtube-video', data: createYouTubeVideo() })
   })
 
   it('writes nothing when the resolver has no snapshot', async () => {
@@ -201,8 +209,9 @@ describe('YouTube video resize', () => {
     expect(getComputedStyle(videoCard.element()).width).toBe('320px')
   })
 
+  // No snapshot from the resolver, so the width is the only thing written.
   it('writes a width comment when resized', async () => {
-    using fixture = setup(VIDEO, { resolveYouTubeVideo })
+    using fixture = setup(VIDEO, { resolveYouTubeVideo: () => undefined })
     const { editor } = fixture
     await expect.element(videoResizable).toBeInTheDocument()
     endResize(200)
@@ -223,7 +232,9 @@ describe('YouTube video resize', () => {
   })
 
   it('drops a stale height when resized again', async () => {
-    using fixture = setup(`${VIDEO}<!-- {"width":100,"height":75} -->`, { resolveYouTubeVideo })
+    using fixture = setup(`${VIDEO}<!-- {"width":100,"height":75} -->`, {
+      resolveYouTubeVideo: () => undefined,
+    })
     const { editor } = fixture
     await expect.element(videoResizable).toHaveAttribute('data-width', '100')
     endResize(320)
