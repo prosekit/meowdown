@@ -11,6 +11,8 @@ import {
   traceShiftKeySelection,
   type Fixture,
 } from '../testing/index.ts'
+import { createTweet } from '../testing/tweet-fixture.ts'
+import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { defineImage } from './image.ts'
 import type { MarkMode } from './mark-mode.ts'
@@ -31,7 +33,11 @@ function setup(mode: MarkMode, paragraphs: string[]): Fixture {
   const fixture = setupFixture({ extensionOptions: { markMode: mode } })
   const { editor, n } = fixture
   editor.use(
-    defineImage({ resolveImageUrl: () => getSVGImageURL(24, 24), persistTweetHeight: false }),
+    defineImage({
+      resolveImageUrl: () => getSVGImageURL(24, 24),
+      resolveXPost: () => createTweet(),
+      resolveYouTubeVideo: () => createYouTubeVideo(),
+    }),
   )
   fixture.set(n.doc(...paragraphs.map((text) => n.paragraph(text))))
   fixture.view.focus()

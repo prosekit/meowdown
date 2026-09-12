@@ -2,6 +2,8 @@
 
 @import '@prosekit/pm/view/style/prosemirror.css' layer(meowdown.base);
 @import '@prosekit/extensions/list/style.css' layer(meowdown.base);
+@import '@post-embed/elements/x/theme.css' layer(meowdown.base);
+@import '@post-embed/elements/youtube/theme.css' layer(meowdown.base);
 
 @layer meowdown.theme {
   /* ---------------------------------------------------------------------------
@@ -695,54 +697,39 @@
    * view at the image's source position.
    * ------------------------------------------------------------------------- */
 
-  .ProseMirror .md-embed-youtube {
+  /* The cards are the atom previews whose text is meant to be selected. */
+  .ProseMirror .md-image-view-preview post-embed-x-post,
+  .ProseMirror .md-image-view-preview post-embed-youtube-video {
     display: block;
-    width: 100%;
-    max-width: 100%;
-    aspect-ratio: 16 / 9;
-    border: 0;
-    border-radius: var(--meowdown-image-radius, 0.5rem);
-  }
-
-  .ProseMirror .md-embed-tweet {
-    display: block;
-    width: 100%;
     max-width: 550px;
-    border: 0;
+
+    -webkit-user-select: text;
+    user-select: text;
   }
 
-  /* Reserve space for a tweet whose height is unknown (no persisted size and no
-   * height report yet), so the loaded tweet shifts layout less. Released once a
-   * height is applied (`data-sized`). */
-  .ProseMirror .md-embed-tweet:not([data-sized]) {
-    min-height: 250px;
-  }
-
-  /* A YouTube embed wrapped in the resizable root: the root owns the size (its
-   * inline `aspect-ratio` derives the height from the persisted or dragged
-   * width; block-level `width: auto` keeps the default width when nothing is
-   * persisted), and the iframe just fills it. The bare `.md-embed-youtube` rule
-   * above keeps covering iframes rendered without the root (the static React
-   * renderer). */
+  /* A video card wrapped in the resizable root: the root owns the width (the
+   * persisted or dragged one; block-level `width: auto` keeps the default
+   * width when nothing is persisted) and the card fills it. The card's height
+   * is its content's, so the height the root writes while dragging is
+   * overridden. */
   .ProseMirror .md-embed-resizable {
     position: relative;
     display: block;
     /* New stacking context so the handle's `mix-blend-mode` mixes only with the
-     * video, not the page behind it. */
+     * card, not the page behind it. */
     isolation: isolate;
     max-width: 100%;
     min-width: 2.5rem;
-    min-height: 2.5rem;
+    height: auto !important;
   }
 
-  .ProseMirror .md-embed-resizable .md-embed-youtube {
+  .ProseMirror .md-embed-resizable post-embed-youtube-video {
     width: 100%;
-    height: 100%;
-    aspect-ratio: auto;
+    max-width: none;
   }
 
-  /* The resize handle tracks pointer moves on `window`; a cross-origin iframe
-   * would swallow them mid-drag, so mute it while resizing. */
+  /* The resize handle tracks pointer moves on `window`; a cross-origin player
+   * iframe would swallow them mid-drag, so mute it while resizing. */
   .ProseMirror .md-embed-resizable[data-resizing] iframe {
     pointer-events: none;
   }

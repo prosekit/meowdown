@@ -4,20 +4,28 @@ import { page, userEvent } from 'vitest/browser'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
+import { createTweet } from '../testing/tweet-fixture.ts'
+import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { defineEmbedPaste, detectEmbedUrl } from './embed-paste.ts'
 import { defineImage } from './image.ts'
 
 const pmRoot = page.locate('.ProseMirror')
-const youtubeEmbed = pmRoot.getByTestId('youtube-embed')
-const tweetEmbed = pmRoot.getByTestId('tweet-embed')
+const youtubeEmbed = pmRoot.getByTestId('youtube-video-embed')
+const xPostEmbed = pmRoot.getByTestId('x-post-embed')
 
 const YT = 'https://youtu.be/aqz-KE-bpKQ'
 const EMBED = `![](${YT})`
 
 function useEmbedPaste(fixture: Fixture): void {
   const { editor } = fixture
-  editor.use(defineImage({ resolveImageUrl: (src) => src, persistTweetHeight: false }))
+  editor.use(
+    defineImage({
+      resolveImageUrl: (src) => src,
+      resolveXPost: () => createTweet(),
+      resolveYouTubeVideo: () => createYouTubeVideo(),
+    }),
+  )
   editor.use(defineEmbedPaste())
 }
 
@@ -59,9 +67,7 @@ describe('paste a lone embed link', () => {
     expect(docToMarkdown(editor.state.doc).trim()).toBe(
       '![](https://www.youtube.com/watch?v=aqz-KE-bpKQ)',
     )
-    await expect
-      .element(youtubeEmbed)
-      .toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ')
+    await expect.element(youtubeEmbed).toMatchTextContent('Big Buck Bunny')
   })
 
   it('embeds a pasted tweet link', async () => {
@@ -71,7 +77,7 @@ describe('paste a lone embed link', () => {
     fixture.set(n.doc(n.paragraph('<a>')))
     pasteText(view, 'https://twitter.com/jack/status/20')
     expect(editor.state.doc.textContent).toBe('![](https://twitter.com/jack/status/20)')
-    await expect.element(tweetEmbed).toBeInTheDocument()
+    await expect.element(xPostEmbed).toBeInTheDocument()
   })
 
   it('replaces the selected text when pasting onto a selection', async () => {

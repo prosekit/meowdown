@@ -10,6 +10,8 @@ import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
 import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
+import { createTweet } from '../testing/tweet-fixture.ts'
+import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { MeowdownEditor } from './editor.tsx'
 import type { EditorHandle } from './types.ts'
@@ -236,14 +238,20 @@ describe('MeowdownEditor', () => {
 
   it('embeds a pasted YouTube link by default', async () => {
     const ref = createRef<EditorHandle>()
-    await render(<MeowdownEditor handleRef={ref} resolveImageUrl={(src) => src} />)
+    await render(
+      <MeowdownEditor
+        handleRef={ref}
+        resolveImageUrl={(src) => src}
+        resolveYouTubeVideo={() => createYouTubeVideo()}
+      />,
+    )
     await pmRoot.click()
     const view = ref.current?.editor?.view
     if (!view) throw new Error('editor not mounted')
     pasteText(view, 'https://www.youtube.com/watch?v=aqz-KE-bpKQ')
     await expect
-      .element(pmRoot.getByTestId('youtube-embed'))
-      .toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ')
+      .element(pmRoot.getByTestId('youtube-video-embed'))
+      .toMatchTextContent('Big Buck Bunny')
   })
 
   it('does not embed a pasted link when embedPaste is off', async () => {
@@ -257,7 +265,7 @@ describe('MeowdownEditor', () => {
     if (!view) throw new Error('editor not mounted')
     pasteText(view, url)
     await expect.element(screen.getByText(url)).toBeInTheDocument()
-    await expect.element(pmRoot.getByTestId('youtube-embed')).not.toBeInTheDocument()
+    await expect.element(pmRoot.getByTestId('youtube-video-embed')).not.toBeInTheDocument()
   })
 
   it('starts a bullet on Enter after a heading when bulletAfterHeading is on', async () => {
@@ -560,6 +568,20 @@ describe('MeowdownEditor', () => {
 
     await expect.element(image).toBeInTheDocument()
     expect(ref.current?.getState()).toEqual(before)
+  })
+})
+
+describe('X post embed props', () => {
+  it('renders a saved tweet as an X post card', async () => {
+    await render(
+      <MeowdownEditor
+        mode="hide"
+        initialMarkdown="![](https://x.com/jack/status/20)"
+        resolveXPost={() => createTweet()}
+      />,
+    )
+    const card = pmRoot.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
+    await expect.element(card).toMatchTextContent('just setting up my twttr')
   })
 })
 

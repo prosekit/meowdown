@@ -1,11 +1,14 @@
 import '../testing/index.ts'
 
 import type { FileClickHandler } from '@meowdown/core'
+import type { Tweet } from '@post-embed/types'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 
 import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
+import { createTweet } from '../testing/tweet-fixture.ts'
+import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { MarkdownView } from './markdown-view.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
@@ -229,25 +232,65 @@ describe('MarkdownView', () => {
     )
   })
 
-  it('renders a tweet embed', async () => {
-    await renderView('![](https://x.com/jack/status/20)')
-    const iframe = view.getByTestId('tweet-embed')
-    await expect.element(iframe).toBeInTheDocument()
-    await expect
-      .element(iframe)
-      .toHaveAttribute(
-        'src',
-        expect.stringContaining('platform.twitter.com/embed/Tweet.html?id=20'),
+  it('renders an X post card through the default resolver', async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(JSON.stringify({ data: createTweet('fetched by default') })))
+    try {
+      await renderView('![](https://x.com/jack/status/3001)')
+      const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
+      await expect.element(card).toMatchTextContent('fetched by default')
+      expect(fetchSpy).toHaveBeenCalledExactlyOnceWith(
+        'https://react-tweet.vercel.app/api/tweet/3001',
       )
+    } finally {
+      fetchSpy.mockRestore()
+    }
   })
 
-  it('renders a youtube embed', async () => {
-    await renderView('![](https://youtu.be/dQw4w9WgXcQ)')
-    const iframe = view.getByTestId('youtube-embed')
-    await expect.element(iframe).toBeInTheDocument()
+  it('renders an X post card from a synchronous snapshot', async () => {
+    await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => createTweet() })
+    const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
+    await expect.element(card).toMatchTextContent('just setting up my twttr')
+  })
+
+  it('shows the loading card until a promised snapshot settles', async () => {
+    let settle!: (tweet: Tweet) => void
+    const pending = new Promise<Tweet>((resolve) => {
+      settle = resolve
+    })
+    await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => pending })
+    const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
+    await expect.element(card.locate('[data-fallback][data-pending]')).toBeInTheDocument()
+
+    settle(createTweet())
+    await expect.element(card).toMatchTextContent('just setting up my twttr')
+    expect(card.locate('[data-pending]').query()).toBeNull()
+  })
+
+  it('renders the unavailable card without a snapshot', async () => {
+    await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => undefined })
     await expect
-      .element(iframe)
-      .toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
+      .element(view.getByTestId('x-post-embed').locate('[data-fallback]'))
+      .toBeInTheDocument()
+  })
+
+  it('renders a YouTube video card', async () => {
+    await renderView('![](https://youtu.be/aqz-KE-bpKQ)', {
+      resolveYouTubeVideo: () => createYouTubeVideo(),
+    })
+    const card = view.getByTestId('youtube-video-embed').locate('[data-post-embed="youtube-video"]')
+    await expect.element(card).toMatchTextContent('Big Buck Bunny')
+    expect(view.locate('iframe').query()).toBeNull()
+  })
+
+  it('applies a persisted width to a YouTube video card', async () => {
+    await renderView('![](https://youtu.be/aqz-KE-bpKQ)<!-- {"width":320} -->', {
+      resolveYouTubeVideo: () => createYouTubeVideo(),
+    })
+    const card = view.getByTestId('youtube-video-embed').locate('[data-post-embed="youtube-video"]')
+    await expect.element(card).toMatchTextContent('Big Buck Bunny')
+    expect(getComputedStyle(card.element()).width).toBe('320px')
   })
 
   it('omits recognized embeds before resolving images when interactive is false', async () => {

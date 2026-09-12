@@ -1,6 +1,8 @@
 import {
   collectReferenceDefinitions,
   defaultResolveImageUrl,
+  defaultResolveXPost,
+  defaultResolveYouTubeVideo,
   formatFileSize,
   getCodeTokens,
   getFileKind,
@@ -9,12 +11,10 @@ import {
   isModEvent,
   isNodeOfType,
   isReferenceDefinitionNode,
-  listenForTweetHeight,
   markdownToDoc,
-  matchEmbed,
+  matchPostEmbed,
   type CodeBlockAttrs,
   type CodeToken,
-  type EmbedDescriptor,
   type FileClickHandler,
   type FileInfoResolver,
   type FileLinkResolver,
@@ -31,11 +31,16 @@ import {
   type MdWikilinkAttrs,
   type MeowdownListAttrs,
   type NodeName,
+  type PostEmbedKind,
+  type XPostResolver,
+  type YouTubeVideoResolver,
   type ReferenceDefinitions,
   type WikiEmbedResolver,
   type WikilinkClickHandler,
   type WikilinkResolver,
 } from '@meowdown/core'
+import { registerXPost } from '@post-embed/elements/x'
+import { registerYouTubeVideo } from '@post-embed/elements/youtube'
 import type { DOMOutputSpec } from '@prosekit/pm/model'
 import { Mark, type Node as ProseMirrorNode } from '@prosekit/pm/model'
 import { clsx } from 'clsx/lite'
@@ -46,7 +51,6 @@ import {
   memo,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type MouseEvent,
   type ReactElement,
@@ -151,6 +155,16 @@ export interface MarkdownViewProps {
    */
   resolveFileInfo?: FileInfoResolver
   /**
+   * Resolve the data behind an X post URL, rendered as a `post-embed-x-post`
+   * card. Defaults to `defaultResolveXPost`.
+   */
+  resolveXPost?: XPostResolver
+  /**
+   * Resolve the data behind a YouTube video URL, rendered as a
+   * `post-embed-youtube-video` card. Defaults to `defaultResolveYouTubeVideo`.
+   */
+  resolveYouTubeVideo?: YouTubeVideoResolver
+  /**
    * Called when a rendered wikilink is clicked. Pass a stable function.
    */
   onWikilinkClick?: WikilinkClickHandler
@@ -188,6 +202,8 @@ interface BlockContext {
   resolveWikiEmbed?: WikiEmbedResolver
   resolveWikilink?: WikilinkResolver
   resolveFileInfo?: FileInfoResolver
+  resolveXPost?: XPostResolver
+  resolveYouTubeVideo?: YouTubeVideoResolver
   onWikilinkClick?: WikilinkClickHandler
   onLinkClick?: LinkClickHandler
   onImageClick?: ImageClickHandler
@@ -276,47 +292,34 @@ function WikilinkChip(props: {
   )
 }
 
-function EmbedFrame(props: {
-  embed: EmbedDescriptor
+function PostEmbed(props: {
+  kind: PostEmbedKind
+  src: string
   width: number | null
-  height: number | null
+  resolveXPost: XPostResolver
+  resolveYouTubeVideo: YouTubeVideoResolver
 }): ReactElement {
-  const { embed, width, height } = props
-  const iframeRef = useRef<HTMLIFrameElement>(null)
-  useEffect(() => {
-    if (embed.kind !== 'tweet') return
-    const iframe = iframeRef.current
-    if (!iframe) return
-    return listenForTweetHeight(iframe)
-  }, [embed.kind, embed.key])
-  // A persisted width narrows the player; the `aspect-ratio` CSS on
-  // `.md-embed-youtube` derives the height. Tweets stay fluid-width and seed
-  // their persisted height instead.
-  const youtubeWidth = embed.kind === 'youtube' ? width : null
-  const tweetHeight = embed.kind === 'tweet' ? height : null
+  const { kind, src, width, resolveXPost, resolveYouTubeVideo } = props
+  // Registration is idempotent and must precede the element so React sets
+  // `url` and `resolver` as properties of the upgraded element.
+  registerXPost()
+  registerYouTubeVideo()
   return (
-    <span className="md-image-view-preview md-atom-view-preview" contentEditable={false}>
-      <iframe
-        ref={iframeRef}
-        key={embed.key}
-        src={embed.src}
-        title={embed.title}
-        className={embed.className}
-        data-testid={embed.testid}
-        loading="lazy"
-        referrerPolicy="strict-origin-when-cross-origin"
-        frameBorder="0"
-        allow={embed.allow}
-        allowFullScreen={embed.allowFullscreen}
-        style={
-          youtubeWidth != null
-            ? { width: youtubeWidth }
-            : tweetHeight != null
-              ? { height: tweetHeight }
-              : undefined
-        }
-        data-sized={tweetHeight == null ? undefined : ''}
-      />
+    <span
+      className="md-image-view-preview md-atom-view-preview"
+      contentEditable={false}
+      data-testid={`${kind}-embed`}
+    >
+      {kind === 'x-post'
+        ? createElement('post-embed-x-post', { url: src, resolver: resolveXPost })
+        : createElement('post-embed-youtube-video', {
+            url: src,
+            resolver: resolveYouTubeVideo,
+            playback: 'inline',
+            // A persisted width from a resize in the editor; the card's own
+            // 550px cap only applies to the default width.
+            style: width == null ? undefined : { width, maxWidth: 'none' },
+          })}
     </span>
   )
 }
@@ -325,15 +328,36 @@ function ImagePreview(props: {
   src: string
   alt: string
   width: number | null
-  height: number | null
   resolveImageUrl?: (src: string) => string | undefined
+  resolveXPost?: XPostResolver
+  resolveYouTubeVideo?: YouTubeVideoResolver
   onImageClick?: ImageClickHandler
   interactive: boolean
 }): ReactElement | null {
-  const { src, alt, width, height, resolveImageUrl, onImageClick, interactive } = props
-  const embed = matchEmbed(src)
-  if (embed) return interactive ? <EmbedFrame embed={embed} width={width} height={height} /> : null
-
+  const {
+    src,
+    alt,
+    width,
+    resolveImageUrl,
+    resolveXPost,
+    resolveYouTubeVideo,
+    onImageClick,
+    interactive,
+  } = props
+  const kind = matchPostEmbed(src)
+  if (kind) {
+    if (!interactive) return null
+    return (
+      <PostEmbed
+        key={src}
+        kind={kind}
+        src={src}
+        width={width}
+        resolveXPost={resolveXPost ?? defaultResolveXPost}
+        resolveYouTubeVideo={resolveYouTubeVideo ?? defaultResolveYouTubeVideo}
+      />
+    )
+  }
   const url = (resolveImageUrl ?? defaultResolveImageUrl)(src)
   if (!url) return null
   const handleClick = onImageClick
@@ -367,19 +391,19 @@ function ImageView(props: {
   src: string
   alt: string
   width: number | null
-  height: number | null
   context: RenderContext
   children: ReactNode
 }): ReactElement {
-  const { src, alt, width, height, context, children } = props
+  const { src, alt, width, context, children } = props
   return (
     <span className="md-image-view md-atom-view">
       <ImagePreview
         src={src}
         alt={alt}
         width={width}
-        height={height}
         resolveImageUrl={context.resolveImageUrl}
+        resolveXPost={context.resolveXPost}
+        resolveYouTubeVideo={context.resolveYouTubeVideo}
         onImageClick={context.onImageClick}
         interactive={context.interactive}
       />
@@ -588,13 +612,7 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
     case 'mdImage': {
       const attrs = mark.attrs as MdImageAttrs
       return (
-        <ImageView
-          src={attrs.src}
-          alt={attrs.alt}
-          width={attrs.width}
-          height={attrs.height}
-          context={context}
-        >
+        <ImageView src={attrs.src} alt={attrs.alt} width={attrs.width} context={context}>
           {children}
         </ImageView>
       )
@@ -907,6 +925,8 @@ export function MarkdownView({
   resolveWikiEmbed,
   resolveWikilink,
   resolveFileInfo,
+  resolveXPost,
+  resolveYouTubeVideo,
   onWikilinkClick,
   onLinkClick,
   onImageClick,
@@ -923,6 +943,8 @@ export function MarkdownView({
       resolveWikiEmbed,
       resolveWikilink,
       resolveFileInfo,
+      resolveXPost,
+      resolveYouTubeVideo,
       onWikilinkClick: interactive ? onWikilinkClick : undefined,
       onLinkClick: interactive ? onLinkClick : undefined,
       onImageClick: interactive ? onImageClick : undefined,
@@ -937,6 +959,8 @@ export function MarkdownView({
       resolveWikiEmbed,
       resolveWikilink,
       resolveFileInfo,
+      resolveXPost,
+      resolveYouTubeVideo,
       onWikilinkClick,
       onLinkClick,
       onImageClick,

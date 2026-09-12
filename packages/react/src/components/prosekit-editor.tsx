@@ -19,6 +19,8 @@ import {
   type LinkPreviewResolver,
   type MarkMode,
   type PlaceholderOptions,
+  type XPostResolver,
+  type YouTubeVideoResolver,
   type SearchStatusHandler,
   type StartPendingReplacementOptions,
   type TagClickHandler,
@@ -227,6 +229,14 @@ export interface ProseKitEditorProps {
    * Resolves the size shown on a file pill. See `EditorProps.resolveFileInfo`.
    */
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
+  /**
+   * Resolves the data behind an X post URL. See `EditorProps.resolveXPost`.
+   */
+  resolveXPost?: XPostResolver
+  /**
+   * Resolves the data behind a YouTube video URL. See `EditorProps.resolveYouTubeVideo`.
+   */
+  resolveYouTubeVideo?: YouTubeVideoResolver
 
   /**
    * Called on click or Mod-Enter of a rendered file pill. See `EditorProps.onFileClick`.
@@ -348,6 +358,8 @@ export function ProseKitEditor({
   resolveWikiEmbed,
   resolveWikilink,
   resolveFileInfo,
+  resolveXPost,
+  resolveYouTubeVideo,
   onFileClick,
   onFilePaste,
   onFileSaveError,
@@ -556,6 +568,8 @@ export function ProseKitEditor({
         onExitBoundary={onExitBoundary}
         resolveImageUrl={resolveImageUrl}
         resolveFileInfo={resolveFileInfo}
+        resolveXPost={resolveXPost}
+        resolveYouTubeVideo={resolveYouTubeVideo}
         onFileClick={onFileClick}
         onFilePaste={onFilePaste}
         onFileSaveError={onFileSaveError}

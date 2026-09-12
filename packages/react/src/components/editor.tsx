@@ -12,6 +12,8 @@ import type {
   LinkPreviewResolver,
   MarkMode,
   PlaceholderOptions,
+  XPostResolver,
+  YouTubeVideoResolver,
   SearchStatusHandler,
   StartPendingReplacementOptions,
   TagClickHandler,
@@ -218,6 +220,22 @@ export interface EditorProps {
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
 
   /**
+   * Resolves the data behind an X post URL, directly or as a promise; the post
+   * renders as a `post-embed-x-post` card. Defaults to `defaultResolveXPost`,
+   * which fetches through react-tweet's hosted proxy. Pass a stable function
+   * (e.g. from `useCallback`).
+   */
+  resolveXPost?: XPostResolver
+
+  /**
+   * Resolves the data behind a YouTube video URL, directly or as a promise;
+   * the video renders as a `post-embed-youtube-video` card. Defaults to
+   * `defaultResolveYouTubeVideo`, which reads YouTube's oEmbed endpoint. Pass
+   * a stable function (e.g. from `useCallback`).
+   */
+  resolveYouTubeVideo?: YouTubeVideoResolver
+
+  /**
    * Called when the user clicks a rendered file pill (or presses `Mod-Enter`
    * with the caret on one), with its `href`, `name`, and the originating
    * event. The host decides what a click does (e.g. open the file in the OS
@@ -382,6 +400,8 @@ export function MeowdownEditor({
   resolveWikiEmbed,
   resolveWikilink,
   resolveFileInfo,
+  resolveXPost,
+  resolveYouTubeVideo,
   onFileClick,
   onFilePaste,
   onFileSaveError,
@@ -520,6 +540,8 @@ export function MeowdownEditor({
         resolveWikiEmbed={resolveWikiEmbed}
         resolveWikilink={resolveWikilink}
         resolveFileInfo={resolveFileInfo}
+        resolveXPost={resolveXPost}
+        resolveYouTubeVideo={resolveYouTubeVideo}
         onFileClick={onFileClick}
         onFilePaste={onFilePaste}
         onFileSaveError={onFileSaveError}

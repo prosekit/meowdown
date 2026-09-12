@@ -3,13 +3,15 @@ import { describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
 
 import { setupFixture, type Fixture } from '../testing/index.ts'
+import { createTweet } from '../testing/tweet-fixture.ts'
+import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { defineEmbedPaste } from './embed-paste.ts'
 import { defineImage } from './image.ts'
 import { defineLinkPaste, detectLinkUrl } from './link-paste.ts'
 
 const pmRoot = page.locate('.ProseMirror')
-const youtubeEmbed = pmRoot.getByTestId('youtube-embed')
+const youtubeEmbed = pmRoot.getByTestId('youtube-video-embed')
 
 const LINK = 'https://example.com/page'
 const YT = 'https://youtu.be/aqz-KE-bpKQ'
@@ -147,7 +149,13 @@ describe('falls through to a plain paste', () => {
 describe('ordering against embed paste', () => {
   function useEmbedThenLinkPaste(fixture: Fixture): void {
     const { editor } = fixture
-    editor.use(defineImage({ resolveImageUrl: (src) => src }))
+    editor.use(
+      defineImage({
+        resolveImageUrl: (src) => src,
+        resolveXPost: () => createTweet(),
+        resolveYouTubeVideo: () => createYouTubeVideo(),
+      }),
+    )
     // Embed paste registered first: without `Priority.high` on link paste,
     // its `handlePaste` would win and the selection would be discarded.
     editor.use(defineEmbedPaste())
