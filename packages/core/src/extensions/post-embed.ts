@@ -115,12 +115,14 @@ export const defaultResolveYouTubeVideo: YouTubeVideoResolver = cached(async (ur
  * data post-embed renders. The kind is stored explicitly, so a saved snapshot
  * is validated once, against the schema it names.
  */
-const PostEmbedSnapshotSchema = v.variant('kind', [
+export type PostEmbedSnapshot =
+  | { kind: 'x-post'; data: XPost }
+  | { kind: 'youtube-video'; data: YouTubeVideo }
+
+const PostEmbedSnapshotSchema: v.GenericSchema<unknown, PostEmbedSnapshot> = v.variant('kind', [
   v.object({ kind: v.literal('x-post'), data: XPostSchema }),
   v.object({ kind: v.literal('youtube-video'), data: YouTubeVideoSchema }),
 ])
-
-export type PostEmbedSnapshot = v.InferOutput<typeof PostEmbedSnapshotSchema>
 
 /**
  * The snapshot a card renders from a saved JSON object, or `undefined` when
