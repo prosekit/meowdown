@@ -433,6 +433,61 @@ describe('MarkdownView', () => {
   })
 })
 
+describe('MarkdownView block memoization', () => {
+  it('parses only the block that changed when the markdown grows', async () => {
+    const resolveWikilink = vi.fn(resolveWikilinkAlias)
+    const screen = await renderView('[[target|Alias]]\n\nfirst', { resolveWikilink })
+    await expect.element(wikilink).toHaveTextContent('Alias')
+    const parses = resolveWikilink.mock.calls.length
+    await screen.rerender(
+      <div data-testid="markdown-view">
+        <MarkdownView
+          markdown={'[[target|Alias]]\n\nfirst\n\nsecond'}
+          resolveWikilink={resolveWikilink}
+        />
+      </div>,
+    )
+    await expect.element(view.locate('p').last()).toHaveTextContent('second')
+    expect(resolveWikilink).toHaveBeenCalledTimes(parses)
+  })
+
+  it('keeps task indexes document-wide when a task list appears before an unchanged one', async () => {
+    const onTaskClick = vi.fn()
+    const screen = await renderView('intro\n\n- [ ] later', { onTaskClick })
+    await expect.element(view.locate('input[type="checkbox"]')).toBeInTheDocument()
+    await screen.rerender(
+      <div data-testid="markdown-view">
+        <MarkdownView markdown={'- [ ] earlier\n\n- [ ] later'} onTaskClick={onTaskClick} />
+      </div>,
+    )
+    await view.locate('input[type="checkbox"]').nth(1).click()
+    expect(onTaskClick).toHaveBeenCalledWith(expect.objectContaining({ index: 1, text: 'later' }))
+  })
+
+  it('resolves a reference in an unchanged block when its definition arrives later', async () => {
+    const screen = await renderView('See [docs].\n\nfiller')
+    await expect.element(view.locate('p').first()).toHaveTextContent('See [docs].')
+    expect(view.element().querySelector('a')).toBeNull()
+    await screen.rerender(
+      <div data-testid="markdown-view">
+        <MarkdownView markdown={'See [docs].\n\nfiller\n\n[docs]: https://example.com'} />
+      </div>,
+    )
+    await expect.element(view.locate('a')).toHaveAttribute('href', 'https://example.com')
+  })
+
+  it('re-renders a block the appended source merges into', async () => {
+    const screen = await renderView('title')
+    await expect.element(view.locate('p')).toHaveTextContent('title')
+    await screen.rerender(
+      <div data-testid="markdown-view">
+        <MarkdownView markdown={'title\n==='} />
+      </div>,
+    )
+    await expect.element(view.locate('h1')).toHaveTextContent('title')
+  })
+})
+
 // Strip editor-only attributes and sort the rest, so two DOM subtrees compare
 // equal regardless of attribute order or ProseMirror's editing affordances.
 function canonicalize(root: Element): string {
