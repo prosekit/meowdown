@@ -1,13 +1,14 @@
 import '../testing/index.ts'
 
 import type { FileClickHandler } from '@meowdown/core'
-import type { Tweet } from '@post-embed/types'
+import type { XPost } from '@post-embed/types'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 
 import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
 import { createTweet } from '../testing/tweet-fixture.ts'
+import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { MarkdownView } from './markdown-view.tsx'
@@ -249,28 +250,28 @@ describe('MarkdownView', () => {
   })
 
   it('renders an X post card from a synchronous snapshot', async () => {
-    await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => createTweet() })
+    await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => createXPost() })
     const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
   })
 
   it('shows the loading card until a promised snapshot settles', async () => {
-    let settle!: (tweet: Tweet) => void
-    const pending = new Promise<Tweet>((resolve) => {
+    let settle!: (post: XPost) => void
+    const pending = new Promise<XPost>((resolve) => {
       settle = resolve
     })
     await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => pending })
     const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card.locate('[data-fallback][data-pending]')).toBeInTheDocument()
 
-    settle(createTweet())
+    settle(createXPost())
     await expect.element(card).toMatchTextContent('just setting up my twttr')
     expect(card.locate('[data-pending]').query()).toBeNull()
   })
 
   it('renders a saved snapshot in the first frame without calling the resolver', async () => {
-    const resolveXPost = vi.fn(() => createTweet())
-    const comment = `<!-- ${JSON.stringify({ snapshot: { kind: 'x-post', data: createTweet('saved') } })} -->`
+    const resolveXPost = vi.fn(() => createXPost())
+    const comment = `<!-- ${JSON.stringify({ snapshot: { kind: 'x-post', data: createXPost('saved') } })} -->`
     await renderView(`![](https://x.com/jack/status/20)${comment}`, { resolveXPost })
     const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card).toMatchTextContent('saved')
@@ -281,7 +282,7 @@ describe('MarkdownView', () => {
   it('resolves when the saved snapshot does not validate', async () => {
     await renderView(
       '![](https://x.com/jack/status/20)<!-- {"snapshot":{"kind":"x-post","data":{"bogus":1}}} -->',
-      { resolveXPost: () => createTweet() },
+      { resolveXPost: () => createXPost() },
     )
     const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')

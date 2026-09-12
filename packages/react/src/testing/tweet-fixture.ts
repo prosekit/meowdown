@@ -1,8 +1,8 @@
 import type { Tweet } from '@post-embed/types'
 
 /**
- * A minimal saved X post: no avatar or media URL, so rendering it never
- * requests the network.
+ * A minimal syndication API tweet, as the default resolver's proxy answers it:
+ * no avatar or media URL, so rendering it never requests the network.
  */
 export function createTweet(text = 'just setting up my twttr'): Tweet {
   return {

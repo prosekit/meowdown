@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
 
 import { setupFixture, type Fixture } from '../testing/index.ts'
-import { createTweet } from '../testing/tweet-fixture.ts'
+import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { defineEmbedPaste } from './embed-paste.ts'
@@ -152,7 +152,7 @@ describe('ordering against embed paste', () => {
     editor.use(
       defineImage({
         resolveImageUrl: (src) => src,
-        resolveXPost: () => createTweet(),
+        resolveXPost: () => createXPost(),
         resolveYouTubeVideo: () => createYouTubeVideo(),
       }),
     )

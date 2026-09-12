@@ -1,4 +1,4 @@
-import type { Tweet } from '@post-embed/types'
+import type { XPost } from '@post-embed/types'
 import { pasteText } from '@prosekit/core/test'
 import { describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
@@ -6,6 +6,7 @@ import { page } from 'vitest/browser'
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 import { createTweet } from '../testing/tweet-fixture.ts'
+import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { defineEmbedPaste } from './embed-paste.ts'
@@ -33,7 +34,7 @@ function setup(markdown: string, options: ImageOptions): Fixture {
 
 describe('X post embed', () => {
   it('renders the resolved post as a card with selectable text', async () => {
-    using fixture = setup(TWEET, { resolveXPost: () => createTweet() })
+    using fixture = setup(TWEET, { resolveXPost: () => createXPost() })
     void fixture
     const text = xPostCard.getByText('just setting up my twttr')
     await expect.element(text).toBeInTheDocument()
@@ -42,15 +43,15 @@ describe('X post embed', () => {
   })
 
   it('shows the loading card until a promise settles', async () => {
-    let settle!: (tweet: Tweet) => void
-    const pending = new Promise<Tweet>((resolve) => {
+    let settle!: (post: XPost) => void
+    const pending = new Promise<XPost>((resolve) => {
       settle = resolve
     })
     using fixture = setup(TWEET, { resolveXPost: () => pending })
     void fixture
     await expect.element(xPostCard.locate('[data-fallback][data-pending]')).toBeInTheDocument()
 
-    settle(createTweet())
+    settle(createXPost())
     await expect.element(xPostCard.getByText('just setting up my twttr')).toBeInTheDocument()
   })
 
@@ -105,8 +106,8 @@ describe('YouTube video embed', () => {
 // `{"snapshot":{"kind":...,"data":{...}}}`; a saved snapshot renders in the
 // first frame and never calls the resolver.
 describe('snapshot persistence', () => {
-  const tweet = createTweet('a -- b')
-  const saved = `${TWEET}${formatMagicComment({ snapshot: { kind: 'x-post', data: tweet } })}`
+  const post = createXPost('a -- b')
+  const saved = `${TWEET}${formatMagicComment({ snapshot: { kind: 'x-post', data: post } })}`
 
   // The comment written behind `prefix`, and the snapshot it carries. The
   // schema writes the fields in its own order, so tests compare the parsed
@@ -118,12 +119,12 @@ describe('snapshot persistence', () => {
   }
 
   it('writes the resolved snapshot back, escaped, outside history', async () => {
-    using fixture = setup(TWEET, { resolveXPost: () => Promise.resolve(tweet) })
+    using fixture = setup(TWEET, { resolveXPost: () => Promise.resolve(post) })
     const { editor } = fixture
     await expect.element(xPostCard.getByText('a -- b')).toBeInTheDocument()
     await expect
       .poll(() => written(fixture, TWEET).snapshot)
-      .toEqual({ kind: 'x-post', data: tweet })
+      .toEqual({ kind: 'x-post', data: post })
     const { markdown, comment } = written(fixture, TWEET)
     expect(comment.slice('<!--'.length, -'-->'.length)).not.toContain('--')
 
@@ -132,7 +133,7 @@ describe('snapshot persistence', () => {
   })
 
   it('renders a saved snapshot without calling the resolver', async () => {
-    const resolveXPost = vi.fn(() => createTweet())
+    const resolveXPost = vi.fn(() => createXPost())
     using fixture = setup(saved, { resolveXPost })
     void fixture
     await expect.element(xPostCard.getByText('a -- b')).toBeInTheDocument()
@@ -142,18 +143,18 @@ describe('snapshot persistence', () => {
 
   it('replaces a snapshot that does not validate', async () => {
     using fixture = setup(`${TWEET}<!-- {"snapshot":{"kind":"x-post","data":{"bogus":1}}} -->`, {
-      resolveXPost: () => createTweet(),
+      resolveXPost: () => createXPost(),
     })
     await expect.element(xPostCard.getByText('just setting up my twttr')).toBeInTheDocument()
     await expect
       .poll(() => written(fixture, TWEET).snapshot)
-      .toEqual({ kind: 'x-post', data: createTweet() })
+      .toEqual({ kind: 'x-post', data: createXPost() })
   })
 
   it('replaces a snapshot whose kind does not match the URL', async () => {
     const resolveYouTubeVideo = vi.fn(() => createYouTubeVideo())
     using fixture = setup(
-      `${VIDEO}${formatMagicComment({ snapshot: { kind: 'x-post', data: tweet } })}`,
+      `${VIDEO}${formatMagicComment({ snapshot: { kind: 'x-post', data: post } })}`,
       { resolveYouTubeVideo },
     )
     await expect.element(videoCard.getByText('Big Buck Bunny')).toBeInTheDocument()
@@ -176,7 +177,7 @@ describe('snapshot persistence', () => {
   it('undoing the paste that inserted the image removes the snapshot with it', async () => {
     using fixture = setupFixture()
     const { editor, n, view } = fixture
-    editor.use(defineImage({ resolveXPost: () => tweet }))
+    editor.use(defineImage({ resolveXPost: () => post }))
     editor.use(defineEmbedPaste())
     fixture.set(n.doc(n.paragraph('<a>')))
     const url = 'https://x.com/jack/status/20'

@@ -1,10 +1,11 @@
 import type { Resolver } from '@post-embed/elements/x'
-import { TweetSchema, YouTubeVideoSchema } from '@post-embed/schema'
-import type { Tweet, YouTubeVideo } from '@post-embed/types'
+import { fromSyndication } from '@post-embed/exporter/x/syndication'
+import { XPostSchema, YouTubeVideoSchema } from '@post-embed/schema'
+import type { XPost, YouTubeVideo } from '@post-embed/types'
 import { createLRU } from 'lru.min'
 import * as v from 'valibot'
 
-export type XPostResolver = Resolver<Tweet>
+export type XPostResolver = Resolver<XPost>
 export type YouTubeVideoResolver = Resolver<YouTubeVideo>
 
 export type PostEmbedKind = 'x-post' | 'youtube-video'
@@ -87,7 +88,7 @@ function cached<T>(load: (url: string) => Promise<T | undefined>): Resolver<T> {
 }
 
 // react-tweet's hosted proxy in front of X's syndication API, which refuses
-// browser origins; it answers `{ data: Tweet }` for a post id.
+// browser origins; it answers `{ data }` with the syndication tweet for a post id.
 const X_POST_API = 'https://react-tweet.vercel.app/api/tweet/'
 
 export const defaultResolveXPost: XPostResolver = cached(async (url) => {
@@ -95,8 +96,8 @@ export const defaultResolveXPost: XPostResolver = cached(async (url) => {
   if (id === undefined) return
   const response = await fetch(X_POST_API + id)
   if (!response.ok) return
-  const json = (await response.json()) as { data?: Tweet | null }
-  return json.data ?? undefined
+  const json = (await response.json()) as { data?: unknown }
+  return fromSyndication(json.data)
 })
 
 // YouTube's oEmbed endpoint allows cross-origin requests; the snapshot is its
@@ -115,7 +116,7 @@ export const defaultResolveYouTubeVideo: YouTubeVideoResolver = cached(async (ur
  * is validated once, against the schema it names.
  */
 const PostEmbedSnapshotSchema = v.variant('kind', [
-  v.object({ kind: v.literal('x-post'), data: TweetSchema }),
+  v.object({ kind: v.literal('x-post'), data: XPostSchema }),
   v.object({ kind: v.literal('youtube-video'), data: YouTubeVideoSchema }),
 ])
 

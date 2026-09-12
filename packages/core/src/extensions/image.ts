@@ -1,6 +1,6 @@
 import { registerXPost, type Resolver } from '@post-embed/elements/x'
 import { registerYouTubeVideo } from '@post-embed/elements/youtube'
-import type { Tweet, YouTubeVideo } from '@post-embed/types'
+import type { XPost, YouTubeVideo } from '@post-embed/types'
 import { defineMarkView, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
 import type { EditorView, MarkView, ViewMutationRecord } from '@prosekit/pm/view'
@@ -339,7 +339,7 @@ class ImageMarkView implements MarkView {
    * post-embed only calls it while `data` is null, and logs a rejection
    * itself.
    */
-  #persisting<T extends Tweet | YouTubeVideo>(
+  #persisting<T extends XPost | YouTubeVideo>(
     kind: PostEmbedKind,
     resolver: Resolver<T>,
   ): Resolver<T> {
