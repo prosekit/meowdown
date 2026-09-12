@@ -674,6 +674,26 @@ function convertTaskItem(
   return { checked, taskMarker, paragraph }
 }
 
+/**
+ * The gap between a list marker ending at `markTo` and the item's first content
+ * at `contentFrom`. Only content that opens on the marker's own line measures a
+ * gap; an item whose content starts on the next line takes the canonical single
+ * space, the column its own continuation lines are indented to. A gap of 5+ is
+ * indented code (a different node, so the content's column would be the code
+ * block's), and 1 is the canonical default; only a 2-4 space gap is a faithful,
+ * content-preserving variation.
+ */
+function measureMarkerGap(
+  text: string,
+  contentFrom: number,
+  markTo: number | undefined,
+  markEndColumn: number,
+): number {
+  const onMarkLine = markTo != null && text.lastIndexOf('\n', contentFrom - 1) < markTo
+  const gap = onMarkLine ? measureContentColumn(text, contentFrom) - markEndColumn : 1
+  return gap >= 2 && gap <= 4 ? gap : 1
+}
+
 function convertListItem(
   nodes: TypedNodeBuilders,
   cursor: TreeCursor,
@@ -690,16 +710,15 @@ function convertListItem(
   let markWidth = 1
   let markTo: number | undefined
   let markEndColumn = 0
-  // The gap between the marker and the content. A gap of 5+ is indented code (a
-  // different node, so the first child's column would be the code block's), and 1 is
-  // the canonical default; only a 2-4 space gap is a faithful, content-preserving
-  // variation.
   let markerGap = 1
   // The item's blocks are indented past the marker on every line but the first,
   // on top of whatever the enclosing containers already add. Both the marker and
   // the gap are known once the first block after the mark is reached.
   let contentColumn = column + markWidth + markerGap
-  let sawContent = false
+  // The end of the previous block, once the item has one. Blank lines between
+  // an item's blocks are empty paragraphs, as between any siblings; a blank
+  // quote line's `QuoteMark` sits in the gap and is counted through it.
+  let previousTo: number | undefined
 
   if (cursor.firstChild()) {
     do {
@@ -715,16 +734,13 @@ function convertListItem(
         markEndColumn = measureContentColumn(text, cursor.to)
         continue
       }
-      if (!sawContent) {
-        sawContent = true
-        // Only content that opens on the marker's own line measures a gap; an
-        // item whose content starts on the next line takes the canonical single
-        // space, the column its own continuation lines are indented to.
-        const onMarkLine = markTo != null && text.lastIndexOf('\n', cursor.from - 1) < markTo
-        const gap = onMarkLine ? measureContentColumn(text, cursor.from) - markEndColumn : 1
-        markerGap = gap >= 2 && gap <= 4 ? gap : 1
+      if (previousTo == null) {
+        markerGap = measureMarkerGap(text, cursor.from, markTo, markEndColumn)
         contentColumn = column + markWidth + markerGap
+      } else {
+        appendGapParagraphs(content, nodes, text, previousTo, cursor.from)
       }
+      previousTo = cursor.to
       if (kind === 'bullet' && cursor.type.id === LEZER_NODE_IDS.Task) {
         const task = convertTaskItem(nodes, cursor, text, contentColumn)
         taskChecked = task.checked
