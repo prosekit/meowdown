@@ -25,6 +25,7 @@
     "astro-theme-toggle": "^0.8.2",
     "astrobook": "^0.13.3",
     "clsx": "^2.1.1",
+    "lru.min": "^1.1.5",
     "lz-string": "^1.5.0",
     "nuqs": "^2.10.1",
     "react": "^19.3.0",
