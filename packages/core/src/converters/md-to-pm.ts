@@ -597,16 +597,26 @@ function convertList(
   column: number,
   kind: 'bullet' | 'ordered',
 ): ProseMirrorNode[] {
-  const items: ProseMirrorNode[] = []
+  const out: ProseMirrorNode[] = []
   if (cursor.firstChild()) {
+    // One blank line between two items only makes the list loose; each further
+    // one is an empty paragraph between the items, which the flat list model
+    // holds as a sibling of the two `list` nodes. The gap is measured from the
+    // item's last block, not the item's end: in a blockquote the item's range
+    // swallows the `>` of the blank lines after it.
+    let previousContentEnd: number | undefined
     do {
-      if (cursor.type.id === LEZER_NODE_IDS.ListItem) {
-        items.push(convertListItem(nodes, cursor, text, column, kind))
+      if (cursor.type.id !== LEZER_NODE_IDS.ListItem) continue
+      if (previousContentEnd != null) {
+        appendGapParagraphs(out, nodes, text, previousContentEnd, cursor.from)
       }
+      const [item, contentEnd] = convertListItem(nodes, cursor, text, column, kind)
+      out.push(item)
+      previousContentEnd = contentEnd
     } while (cursor.nextSibling())
     cursor.parent()
   }
-  return items
+  return out
 }
 
 /**
@@ -700,7 +710,7 @@ function convertListItem(
   text: string,
   column: number,
   kind: 'bullet' | 'ordered',
-): ProseMirrorNode {
+): [item: ProseMirrorNode, contentEnd: number] {
   const content: ProseMirrorNode[] = []
 
   let taskChecked: boolean | undefined
@@ -768,7 +778,7 @@ function convertListItem(
     taskMarker,
     markerGap,
   }
-  return nodes.list(attrs, content)
+  return [nodes.list(attrs, content), previousTo ?? cursor.to]
 }
 
 function convertCodeBlock(

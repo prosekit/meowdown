@@ -936,6 +936,29 @@ describe('escapes and whitespace', () => {
     expect(roundtrip('> - a\n>\n>\n>   b')).toBe('> - a\n>\n>\n>   b\n')
   })
 
+  it('keeps a blank-line run between list items', () => {
+    expect(roundtrip('- a\n\n\n- b')).toBe('- a\n\n\n- b\n')
+    expect(roundtrip('- a\n\n\n\n- b')).toBe('- a\n\n\n\n- b\n')
+  })
+
+  it('keeps a blank-line run between ordered items', () => {
+    expect(roundtrip('1. a\n\n\n2. b')).toBe('1. a\n\n\n2. b\n')
+  })
+
+  it('keeps a blank-line run between quoted list items', () => {
+    expect(roundtrip('> - a\n>\n>\n> - b')).toBe('> - a\n>\n>\n> - b\n')
+  })
+
+  it('keeps a typed empty paragraph between two lists', () => {
+    const doc = n.doc(
+      n.list({ kind: 'bullet', marker: '-' }, n.paragraph('x')),
+      n.paragraph(),
+      n.list({ kind: 'bullet', marker: '-' }, n.paragraph('y')),
+    )
+    const reparsed = markdownToDoc(docToMarkdown(doc))
+    expect(reparsed.toJSON()).toEqual(doc.toJSON())
+  })
+
   it('keeps typed empty paragraphs inside a list item', () => {
     const doc = n.doc(
       n.list({ kind: 'bullet', marker: '-' }, n.paragraph('x'), n.paragraph(), n.paragraph('y')),
