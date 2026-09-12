@@ -24,12 +24,9 @@ minimumReleaseAgeExclude:
   - '@prosekit/*'
   - '@aria-ui/*'
   - '@prosemirror-adapter/*'
+  - '@post-embed/*'
   - prosemirror-view
   - eslint-plugin-ocavue
-  - vitest-browser-commands@0.4.1
-  - '@post-embed/elements@0.1.0'
-  - '@post-embed/schema@0.1.0'
-  - '@post-embed/types@0.1.0'
 
 allowBuilds:
   esbuild: false
