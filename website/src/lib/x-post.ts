@@ -1,4 +1,4 @@
-import type { PostResolver } from '@meowdown/react'
+import type { XPostResolver } from '@meowdown/react'
 import type { Tweet } from '@post-embed/types'
 
 // The endpoint react-tweet's `useTweet` hook reads by default: X's syndication
@@ -37,10 +37,10 @@ function remember(id: string, entry: Entry): void {
 }
 
 /**
- * A settled post answers synchronously, so a revisited document renders its
+ * A settled X post answers synchronously, so a revisited document renders its
  * cards in the first frame; the first visit returns the in-flight fetch.
  */
-export const resolvePost: PostResolver = (url) => {
+export const resolveXPost: XPostResolver = (url) => {
   const id = parsePostId(url)
   if (id === undefined) return
   if (cache.has(id)) {

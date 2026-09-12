@@ -243,9 +243,9 @@ describe('MarkdownView', () => {
       )
   })
 
-  it('renders a post card from a synchronous snapshot', async () => {
-    await renderView('![](https://x.com/jack/status/20)', { resolvePost: () => createTweet() })
-    const card = view.getByTestId('post-embed').locate('[data-post-embed="x-post"]')
+  it('renders an X post card from a synchronous snapshot', async () => {
+    await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => createTweet() })
+    const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
     expect(view.getByTestId('tweet-embed').query()).toBeNull()
   })
@@ -256,9 +256,9 @@ describe('MarkdownView', () => {
       settle = resolve
     })
     await renderView('![](https://x.com/jack/status/20)<!-- {"height":300} -->', {
-      resolvePost: () => pending,
+      resolveXPost: () => pending,
     })
-    const embed = view.getByTestId('post-embed')
+    const embed = view.getByTestId('x-post-embed')
     await expect.element(embed).toHaveAttribute('data-pending', '')
     expect(getComputedStyle(embed.element()).minHeight).toBe('300px')
 
@@ -269,9 +269,9 @@ describe('MarkdownView', () => {
   })
 
   it('falls back to the tweet iframe without a snapshot', async () => {
-    await renderView('![](https://x.com/jack/status/20)', { resolvePost: () => undefined })
+    await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => undefined })
     await expect.element(view.getByTestId('tweet-embed')).toBeInTheDocument()
-    expect(view.getByTestId('post-embed').query()).toBeNull()
+    expect(view.getByTestId('x-post-embed').query()).toBeNull()
   })
 
   it('renders a youtube embed', async () => {

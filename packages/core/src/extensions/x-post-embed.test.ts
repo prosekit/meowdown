@@ -7,29 +7,29 @@ import { setupFixture, type Fixture } from '../testing/index.ts'
 import { createTweet } from '../testing/tweet-fixture.ts'
 
 import { defineImage } from './image.ts'
-import type { PostResolver } from './post-resolver.ts'
+import type { XPostResolver } from './x-post-resolver.ts'
 
 const pmRoot = page.locate('.ProseMirror')
-const postEmbed = pmRoot.getByTestId('post-embed')
+const postEmbed = pmRoot.getByTestId('x-post-embed')
 const card = postEmbed.locate('[data-post-embed="x-post"]')
 const tweetIframe = pmRoot.getByTestId('tweet-embed')
 
 const TWEET = '![](https://x.com/jack/status/20)'
 
-// An editor whose tweet embeds ask `resolvePost` for a saved snapshot.
+// An editor whose tweet embeds ask `resolveXPost` for a saved snapshot.
 function setup(
   markdown: string,
-  resolvePost: PostResolver | undefined,
+  resolveXPost: XPostResolver | undefined,
   persistTweetHeight = false,
 ): Fixture {
   const fixture = setupFixture()
   const { editor, n } = fixture
-  editor.use(defineImage({ resolvePost, persistTweetHeight }))
+  editor.use(defineImage({ resolveXPost, persistTweetHeight }))
   fixture.set(n.doc(n.paragraph(markdown)))
   return fixture
 }
 
-describe('post embed', () => {
+describe('X post embed', () => {
   it('renders a synchronous snapshot in the first frame', () => {
     using fixture = setup(TWEET, () => createTweet())
     void fixture
@@ -40,7 +40,7 @@ describe('post embed', () => {
     expect(tweetIframe.query()).toBeNull()
   })
 
-  it('keeps the post text selectable', async () => {
+  it('keeps the X post text selectable', async () => {
     using fixture = setup(TWEET, () => createTweet())
     void fixture
     const text = card.getByText('just setting up my twttr')
@@ -89,7 +89,10 @@ describe('post embed', () => {
       using fixture = setup(TWEET, () => Promise.reject(new Error('boom')))
       void fixture
       await expect.element(tweetIframe).toBeInTheDocument()
-      expect(consoleError).toHaveBeenCalledWith('[meowdown] resolvePost failed:', expect.any(Error))
+      expect(consoleError).toHaveBeenCalledWith(
+        '[meowdown] resolveXPost failed:',
+        expect.any(Error),
+      )
     } finally {
       consoleError.mockRestore()
     }

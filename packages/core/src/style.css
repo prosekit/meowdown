@@ -728,7 +728,7 @@
     user-select: text;
   }
 
-  /* Reserve space while a post snapshot is still resolving; released once the
+  /* Reserve space while an X post snapshot is still resolving; released once the
    * card or the fallback iframe is in place. */
   .ProseMirror .md-image-view-preview[data-pending] {
     display: block;

@@ -12,7 +12,7 @@ import type {
   LinkPreviewResolver,
   MarkMode,
   PlaceholderOptions,
-  PostResolver,
+  XPostResolver,
   SearchStatusHandler,
   StartPendingReplacementOptions,
   TagClickHandler,
@@ -225,7 +225,7 @@ export interface EditorProps {
    * the first frame; a promise reserves the persisted height until it
    * settles. Pass a stable function (e.g. from `useCallback`).
    */
-  resolvePost?: PostResolver
+  resolveXPost?: XPostResolver
 
   /**
    * Called when the user clicks a rendered file pill (or presses `Mod-Enter`
@@ -392,7 +392,7 @@ export function MeowdownEditor({
   resolveWikiEmbed,
   resolveWikilink,
   resolveFileInfo,
-  resolvePost,
+  resolveXPost,
   onFileClick,
   onFilePaste,
   onFileSaveError,
@@ -531,7 +531,7 @@ export function MeowdownEditor({
         resolveWikiEmbed={resolveWikiEmbed}
         resolveWikilink={resolveWikilink}
         resolveFileInfo={resolveFileInfo}
-        resolvePost={resolvePost}
+        resolveXPost={resolveXPost}
         onFileClick={onFileClick}
         onFilePaste={onFilePaste}
         onFileSaveError={onFileSaveError}

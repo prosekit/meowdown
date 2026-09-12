@@ -564,16 +564,16 @@ describe('MeowdownEditor', () => {
   })
 })
 
-describe('post embed props', () => {
-  it('renders a saved tweet as a post card', async () => {
+describe('X post embed props', () => {
+  it('renders a saved tweet as an X post card', async () => {
     await render(
       <MeowdownEditor
         mode="hide"
         initialMarkdown="![](https://x.com/jack/status/20)"
-        resolvePost={() => createTweet()}
+        resolveXPost={() => createTweet()}
       />,
     )
-    const card = pmRoot.getByTestId('post-embed').locate('[data-post-embed="x-post"]')
+    const card = pmRoot.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
     expect(pmRoot.getByTestId('tweet-embed').query()).toBeNull()
   })

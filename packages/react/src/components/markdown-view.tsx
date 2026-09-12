@@ -31,7 +31,7 @@ import {
   type MdWikilinkAttrs,
   type MeowdownListAttrs,
   type NodeName,
-  type PostResolver,
+  type XPostResolver,
   type ReferenceDefinitions,
   type WikiEmbedResolver,
   type WikilinkClickHandler,
@@ -157,7 +157,7 @@ export interface MarkdownViewProps {
    * Resolve the saved data for a tweet URL; with data the tweet renders as a
    * `post-embed-x-post` card instead of the provider iframe.
    */
-  resolvePost?: PostResolver
+  resolveXPost?: XPostResolver
   /**
    * Called when a rendered wikilink is clicked. Pass a stable function.
    */
@@ -196,7 +196,7 @@ interface BlockContext {
   resolveWikiEmbed?: WikiEmbedResolver
   resolveWikilink?: WikilinkResolver
   resolveFileInfo?: FileInfoResolver
-  resolvePost?: PostResolver
+  resolveXPost?: XPostResolver
   onWikilinkClick?: WikilinkClickHandler
   onLinkClick?: LinkClickHandler
   onImageClick?: ImageClickHandler
@@ -330,25 +330,25 @@ function EmbedFrame(props: {
   )
 }
 
-type PostState = { tweet: Tweet | undefined } | { pending: Promise<Tweet | undefined> }
+type XPostState = { tweet: Tweet | undefined } | { pending: Promise<Tweet | undefined> }
 
-function PostEmbed(props: {
+function XPostEmbed(props: {
   src: string
   embed: EmbedDescriptor
   height: number | null
-  resolvePost: PostResolver
+  resolveXPost: XPostResolver
 }): ReactElement {
-  const { src, embed, height, resolvePost } = props
+  const { src, embed, height, resolveXPost } = props
   // The initializer runs during the first render, so a synchronous answer is
   // in the first frame; `key={src}` at the call site remounts on a new URL.
-  const [state, setState] = useState<PostState>(() => {
+  const [state, setState] = useState<XPostState>(() => {
     try {
-      const result = resolvePost(src)
+      const result = resolveXPost(src)
       if (result instanceof Promise) return { pending: result }
       if (result) registerXPost()
       return { tweet: result }
     } catch (error) {
-      console.error('[meowdown] resolvePost failed:', error)
+      console.error('[meowdown] resolveXPost failed:', error)
       return { tweet: undefined }
     }
   })
@@ -362,7 +362,7 @@ function PostEmbed(props: {
         setState({ tweet })
       },
       (error: unknown) => {
-        console.error('[meowdown] resolvePost failed:', error)
+        console.error('[meowdown] resolveXPost failed:', error)
         if (!cancelled) setState({ tweet: undefined })
       },
     )
@@ -375,7 +375,7 @@ function PostEmbed(props: {
       <span
         className="md-image-view-preview md-atom-view-preview"
         contentEditable={false}
-        data-testid="post-embed"
+        data-testid="x-post-embed"
         data-pending=""
         style={height == null ? undefined : { minHeight: height }}
       />
@@ -386,7 +386,7 @@ function PostEmbed(props: {
     <span
       className="md-image-view-preview md-atom-view-preview"
       contentEditable={false}
-      data-testid="post-embed"
+      data-testid="x-post-embed"
     >
       {createElement('post-embed-x-post', { data: state.tweet })}
     </span>
@@ -399,17 +399,18 @@ function ImagePreview(props: {
   width: number | null
   height: number | null
   resolveImageUrl?: (src: string) => string | undefined
-  resolvePost?: PostResolver
+  resolveXPost?: XPostResolver
   onImageClick?: ImageClickHandler
   interactive: boolean
 }): ReactElement | null {
-  const { src, alt, width, height, resolveImageUrl, resolvePost, onImageClick, interactive } = props
+  const { src, alt, width, height, resolveImageUrl, resolveXPost, onImageClick, interactive } =
+    props
   const embed = matchEmbed(src)
   if (embed) {
     if (!interactive) return null
-    if (embed.kind === 'tweet' && resolvePost) {
+    if (embed.kind === 'tweet' && resolveXPost) {
       return (
-        <PostEmbed key={src} src={src} embed={embed} height={height} resolvePost={resolvePost} />
+        <XPostEmbed key={src} src={src} embed={embed} height={height} resolveXPost={resolveXPost} />
       )
     }
     return <EmbedFrame embed={embed} width={width} height={height} />
@@ -461,7 +462,7 @@ function ImageView(props: {
         width={width}
         height={height}
         resolveImageUrl={context.resolveImageUrl}
-        resolvePost={context.resolvePost}
+        resolveXPost={context.resolveXPost}
         onImageClick={context.onImageClick}
         interactive={context.interactive}
       />
@@ -989,7 +990,7 @@ export function MarkdownView({
   resolveWikiEmbed,
   resolveWikilink,
   resolveFileInfo,
-  resolvePost,
+  resolveXPost,
   onWikilinkClick,
   onLinkClick,
   onImageClick,
@@ -1006,7 +1007,7 @@ export function MarkdownView({
       resolveWikiEmbed,
       resolveWikilink,
       resolveFileInfo,
-      resolvePost,
+      resolveXPost,
       onWikilinkClick: interactive ? onWikilinkClick : undefined,
       onLinkClick: interactive ? onLinkClick : undefined,
       onImageClick: interactive ? onImageClick : undefined,
@@ -1021,7 +1022,7 @@ export function MarkdownView({
       resolveWikiEmbed,
       resolveWikilink,
       resolveFileInfo,
-      resolvePost,
+      resolveXPost,
       onWikilinkClick,
       onLinkClick,
       onImageClick,

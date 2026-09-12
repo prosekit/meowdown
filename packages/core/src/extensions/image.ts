@@ -21,9 +21,9 @@ import {
 } from './magic-comment.ts'
 import type { MarkName } from './mark-names.ts'
 import { getMarkRangeAt } from './mark-range.ts'
-import type { PostResolver } from './post-resolver.ts'
 import { applyTweetHeight } from './tweet.ts'
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
+import type { XPostResolver } from './x-post-resolver.ts'
 
 type ImageUrlResolver = (src: string) => string | undefined
 
@@ -47,7 +47,7 @@ export interface ImageOptions {
    * Resolve the saved data for a tweet URL. With data, the tweet renders as a
    * `post-embed-x-post` card in place of the provider iframe.
    */
-  resolvePost?: PostResolver
+  resolveXPost?: XPostResolver
 }
 
 /**
@@ -215,7 +215,7 @@ class ImageMarkView implements MarkView {
   readonly #view: EditorView
   readonly #resolveImageUrl: ImageUrlResolver | undefined
   readonly #persistTweetHeight: boolean
-  readonly #resolvePost: PostResolver | undefined
+  readonly #resolveXPost: XPostResolver | undefined
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
@@ -228,7 +228,7 @@ class ImageMarkView implements MarkView {
     this.#view = view
     this.#resolveImageUrl = options.resolveImageUrl
     this.#persistTweetHeight = options.persistTweetHeight ?? true
-    this.#resolvePost = options.resolvePost
+    this.#resolveXPost = options.resolveXPost
 
     this.#dom = document.createElement('span')
     this.#dom.className = 'md-image-view md-atom-view'
@@ -289,7 +289,7 @@ class ImageMarkView implements MarkView {
   }
 
   /**
-   * Build the inline preview for the image `src`: a post card, an embed iframe,
+   * Build the inline preview for the image `src`: an X post card, an embed iframe,
    * or a resizable `<img>`.
    */
   #renderPreview(): HTMLElement | undefined {
@@ -298,9 +298,9 @@ class ImageMarkView implements MarkView {
     if (embed) {
       const wrapper = document.createElement('span')
       wrapper.className = 'md-image-view-preview md-atom-view-preview'
-      if (embed.kind === 'tweet' && this.#resolvePost) {
-        wrapper.dataset.testid = 'post-embed'
-        this.#renderPost(wrapper, embed, src)
+      if (embed.kind === 'tweet' && this.#resolveXPost) {
+        wrapper.dataset.testid = 'x-post-embed'
+        this.#renderXPost(wrapper, embed, src)
         return wrapper
       }
       const iframe = this.#buildEmbedIframe(embed)
@@ -334,30 +334,30 @@ class ImageMarkView implements MarkView {
    * first frame with the rest of the document. A promise reserves the
    * persisted height (or the stylesheet's default) until it settles.
    */
-  #renderPost(wrapper: HTMLElement, embed: EmbedDescriptor, src: string): void {
-    let result: ReturnType<PostResolver>
+  #renderXPost(wrapper: HTMLElement, embed: EmbedDescriptor, src: string): void {
+    let result: ReturnType<XPostResolver>
     try {
-      result = this.#resolvePost!(src)
+      result = this.#resolveXPost!(src)
     } catch (error) {
-      console.error('[meowdown] resolvePost failed:', error)
+      console.error('[meowdown] resolveXPost failed:', error)
       result = undefined
     }
     if (!(result instanceof Promise)) {
-      this.#showPost(wrapper, embed, result)
+      this.#showXPost(wrapper, embed, result)
       return
     }
     wrapper.dataset.pending = ''
     if (this.#attrs.height != null) wrapper.style.minHeight = `${this.#attrs.height}px`
     void result.then(
-      (tweet) => this.#showPost(wrapper, embed, tweet),
+      (tweet) => this.#showXPost(wrapper, embed, tweet),
       (error: unknown) => {
-        console.error('[meowdown] resolvePost failed:', error)
-        this.#showPost(wrapper, embed, undefined)
+        console.error('[meowdown] resolveXPost failed:', error)
+        this.#showXPost(wrapper, embed, undefined)
       },
     )
   }
 
-  #showPost(wrapper: HTMLElement, embed: EmbedDescriptor, tweet: Tweet | undefined): void {
+  #showXPost(wrapper: HTMLElement, embed: EmbedDescriptor, tweet: Tweet | undefined): void {
     if (this.#destroyed) return
     delete wrapper.dataset.pending
     wrapper.style.minHeight = ''
