@@ -893,9 +893,6 @@ const MarkdownBlock = memo(
  * and CSS (the root carries `ProseMirror` + `data-mark-mode` so the existing
  * stylesheet applies). Requires a DOM environment.
  *
- * Only the top-level blocks whose source changed re-render, so a growing
- * `markdown` (a streaming reply) costs one block per update, not the document.
- *
  * Callbacks (`onWikilinkClick`, etc.) and resolvers should be stable; pass them via
  * `useCallback` to avoid re-rendering the whole tree.
  */

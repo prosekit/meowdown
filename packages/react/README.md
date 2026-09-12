@@ -49,11 +49,11 @@ export function App() {
 
 ## Components
 
-| Component           | Description                                                                                                                                      |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `MeowdownEditor`    | The editor. Callbacks and resolvers must be stable; pass them via `useCallback`.                                                                 |
-| `MarkdownView`      | Read-only Markdown renderer; a growing `markdown` re-renders only the changed block. `interactive={false}` renders passive content for previews. |
-| `WikilinkHoverCard` | Mount inside `MeowdownEditor`; renders host content for the hovered wiki link's `target`. Return `null` to render no card.                       |
+| Component           | Description                                                                                                                |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `MeowdownEditor`    | The editor. Callbacks and resolvers must be stable; pass them via `useCallback`.                                           |
+| `MarkdownView`      | Read-only Markdown renderer. `interactive={false}` renders passive content for previews.                                   |
+| `WikilinkHoverCard` | Mount inside `MeowdownEditor`; renders host content for the hovered wiki link's `target`. Return `null` to render no card. |
 
 Common `MeowdownEditor` props:
 
