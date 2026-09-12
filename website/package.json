@@ -26,8 +26,8 @@
     "clsx": "^2.1.1",
     "lz-string": "^1.5.0",
     "nuqs": "^2.10.1",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
     "@egoist/tailwindcss-icons": "^1.9.2",
@@ -35,8 +35,8 @@
     "@iconify-json/simple-icons": "^1.2.94",
     "@ocavue/tsconfig": "^0.7.1",
     "@tailwindcss/vite": "^4.3.3",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "tailwindcss": "^4.3.3"
   }
 }
