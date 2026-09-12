@@ -28,6 +28,7 @@ import {
   type LinkClickHandler,
   type MarkMode,
   type PlaceholderOptions,
+  type PostResolver,
   type SearchStatusHandler,
   type TagClickHandler,
   type WikilinkClickHandler,
@@ -45,6 +46,7 @@ export interface EditorExtensionsProps {
   onExitBoundary?: ExitBoundaryHandler
   resolveImageUrl?: ImageOptions['resolveImageUrl']
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
+  resolvePost?: PostResolver
   onFileClick?: FileClickHandler
   onFilePaste?: FilePasteOptions['onFilePaste']
   onFileSaveError?: FilePasteOptions['onFileSaveError']
@@ -74,6 +76,7 @@ export function EditorExtensions({
   onExitBoundary,
   resolveImageUrl,
   resolveFileInfo,
+  resolvePost,
   onFileClick,
   onFilePaste,
   onFileSaveError,
@@ -182,8 +185,8 @@ export function EditorExtensions({
 
   useExtension(
     useMemo(() => {
-      return defineImage({ resolveImageUrl })
-    }, [resolveImageUrl]),
+      return defineImage({ resolveImageUrl, resolvePost })
+    }, [resolveImageUrl, resolvePost]),
   )
 
   useExtension(

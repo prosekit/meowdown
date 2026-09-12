@@ -27,5 +27,5 @@ export type {
 } from './components/types.ts'
 
 export type { SelectionJSON } from '@prosekit/core'
-export type { LinkPreview, LinkPreviewResolver } from '@meowdown/core'
+export type { LinkPreview, LinkPreviewResolver, PostResolver } from '@meowdown/core'
 export { useEditor, useExtension, useKeymap, type ReactNodeViewComponent } from '@prosekit/react'

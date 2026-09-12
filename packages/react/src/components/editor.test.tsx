@@ -10,6 +10,7 @@ import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
 import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
+import { createTweet } from '../testing/tweet-fixture.ts'
 
 import { MeowdownEditor } from './editor.tsx'
 import type { EditorHandle } from './types.ts'
@@ -560,6 +561,21 @@ describe('MeowdownEditor', () => {
 
     await expect.element(image).toBeInTheDocument()
     expect(ref.current?.getState()).toEqual(before)
+  })
+})
+
+describe('post embed props', () => {
+  it('renders a saved tweet as a post card', async () => {
+    await render(
+      <MeowdownEditor
+        mode="hide"
+        initialMarkdown="![](https://x.com/jack/status/20)"
+        resolvePost={() => createTweet()}
+      />,
+    )
+    const card = pmRoot.getByTestId('post-embed').locate('[data-post-embed="x-post"]')
+    await expect.element(card).toHaveTextContent('just setting up my twttr')
+    expect(pmRoot.getByTestId('tweet-embed').query()).toBeNull()
   })
 })
 

@@ -12,6 +12,7 @@ import type {
   LinkPreviewResolver,
   MarkMode,
   PlaceholderOptions,
+  PostResolver,
   SearchStatusHandler,
   StartPendingReplacementOptions,
   TagClickHandler,
@@ -218,6 +219,15 @@ export interface EditorProps {
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
 
   /**
+   * Resolves the saved data for a tweet URL, directly or as a promise. With
+   * data, the tweet renders as a `post-embed-x-post` card instead of the
+   * provider iframe; `undefined` keeps the iframe. A synchronous answer is in
+   * the first frame; a promise reserves the persisted height until it
+   * settles. Pass a stable function (e.g. from `useCallback`).
+   */
+  resolvePost?: PostResolver
+
+  /**
    * Called when the user clicks a rendered file pill (or presses `Mod-Enter`
    * with the caret on one), with its `href`, `name`, and the originating
    * event. The host decides what a click does (e.g. open the file in the OS
@@ -382,6 +392,7 @@ export function MeowdownEditor({
   resolveWikiEmbed,
   resolveWikilink,
   resolveFileInfo,
+  resolvePost,
   onFileClick,
   onFilePaste,
   onFileSaveError,
@@ -520,6 +531,7 @@ export function MeowdownEditor({
         resolveWikiEmbed={resolveWikiEmbed}
         resolveWikilink={resolveWikilink}
         resolveFileInfo={resolveFileInfo}
+        resolvePost={resolvePost}
         onFileClick={onFileClick}
         onFilePaste={onFilePaste}
         onFileSaveError={onFileSaveError}

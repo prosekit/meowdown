@@ -19,6 +19,7 @@ import {
   type LinkPreviewResolver,
   type MarkMode,
   type PlaceholderOptions,
+  type PostResolver,
   type SearchStatusHandler,
   type StartPendingReplacementOptions,
   type TagClickHandler,
@@ -227,6 +228,10 @@ export interface ProseKitEditorProps {
    * Resolves the size shown on a file pill. See `EditorProps.resolveFileInfo`.
    */
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
+  /**
+   * Resolves a saved tweet for a post card. See `EditorProps.resolvePost`.
+   */
+  resolvePost?: PostResolver
 
   /**
    * Called on click or Mod-Enter of a rendered file pill. See `EditorProps.onFileClick`.
@@ -348,6 +353,7 @@ export function ProseKitEditor({
   resolveWikiEmbed,
   resolveWikilink,
   resolveFileInfo,
+  resolvePost,
   onFileClick,
   onFilePaste,
   onFileSaveError,
@@ -556,6 +562,7 @@ export function ProseKitEditor({
         onExitBoundary={onExitBoundary}
         resolveImageUrl={resolveImageUrl}
         resolveFileInfo={resolveFileInfo}
+        resolvePost={resolvePost}
         onFileClick={onFileClick}
         onFilePaste={onFilePaste}
         onFileSaveError={onFileSaveError}

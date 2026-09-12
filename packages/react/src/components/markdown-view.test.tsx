@@ -1,11 +1,13 @@
 import '../testing/index.ts'
 
 import type { FileClickHandler } from '@meowdown/core'
+import type { Tweet } from '@post-embed/types'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 
 import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
+import { createTweet } from '../testing/tweet-fixture.ts'
 
 import { MarkdownView } from './markdown-view.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
@@ -239,6 +241,37 @@ describe('MarkdownView', () => {
         'src',
         expect.stringContaining('platform.twitter.com/embed/Tweet.html?id=20'),
       )
+  })
+
+  it('renders a post card from a synchronous snapshot', async () => {
+    await renderView('![](https://x.com/jack/status/20)', { resolvePost: () => createTweet() })
+    const card = view.getByTestId('post-embed').locate('[data-post-embed="x-post"]')
+    await expect.element(card).toHaveTextContent('just setting up my twttr')
+    expect(view.getByTestId('tweet-embed').query()).toBeNull()
+  })
+
+  it('reserves the persisted height until a promised snapshot settles', async () => {
+    let settle!: (tweet: Tweet) => void
+    const pending = new Promise<Tweet>((resolve) => {
+      settle = resolve
+    })
+    await renderView('![](https://x.com/jack/status/20)<!-- {"height":300} -->', {
+      resolvePost: () => pending,
+    })
+    const embed = view.getByTestId('post-embed')
+    await expect.element(embed).toHaveAttribute('data-pending', '')
+    expect(getComputedStyle(embed.element()).minHeight).toBe('300px')
+
+    settle(createTweet())
+    const card = embed.locate('[data-post-embed="x-post"]')
+    await expect.element(card).toHaveTextContent('just setting up my twttr')
+    await expect.element(embed).not.toHaveAttribute('data-pending')
+  })
+
+  it('falls back to the tweet iframe without a snapshot', async () => {
+    await renderView('![](https://x.com/jack/status/20)', { resolvePost: () => undefined })
+    await expect.element(view.getByTestId('tweet-embed')).toBeInTheDocument()
+    expect(view.getByTestId('post-embed').query()).toBeNull()
   })
 
   it('renders a youtube embed', async () => {
