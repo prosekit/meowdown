@@ -7,6 +7,8 @@ import {
   getMarkBuilders,
   inlineTextToMarkChunksWithContext,
   isModEvent,
+  isNodeOfType,
+  isReferenceDefinitionNode,
   listenForTweetHeight,
   markdownToDoc,
   matchEmbed,
@@ -41,6 +43,7 @@ import {
   cloneElement,
   createElement,
   Fragment,
+  memo,
   useEffect,
   useMemo,
   useRef,
@@ -173,7 +176,11 @@ export interface MarkdownViewProps {
   className?: string
 }
 
-interface RenderContext {
+/**
+ * The props every block renders with. One object per set of props, so a
+ * block's `memo` comparator can test it by identity.
+ */
+interface BlockContext {
   interactive: boolean
   expandCollapsed: boolean
   resolveImageUrl?: (src: string) => string | undefined
@@ -186,12 +193,18 @@ interface RenderContext {
   onImageClick?: ImageClickHandler
   onFileClick?: FileClickHandler
   onTaskClick?: TaskClickHandler
+}
+
+interface RenderContext extends BlockContext {
   referenceDefinitions: ReferenceDefinitions
-  referenceDefinitionNodes: ReadonlySet<ProseMirrorNode>
   /**
    * Document-order checkbox counter feeding {@link TaskClickPayload.index}.
+   * Starts at the block's `taskBase` so the index stays document-wide.
    */
   taskCounter: { value: number }
+  /**
+   * Per-block element key counter. Keys only need to be unique among siblings.
+   */
   keyCounter: { value: number }
 }
 
@@ -677,10 +690,7 @@ function renderInline(node: ProseMirrorNode, context: RenderContext): ReactNode 
       resolveWikiEmbed: context.resolveWikiEmbed,
       resolveWikilink: context.resolveWikilink,
     },
-    {
-      referenceDefinitions: context.referenceDefinitions,
-      isReferenceDefinition: context.referenceDefinitionNodes.has(node),
-    },
+    { referenceDefinitions: context.referenceDefinitions },
   )
   // Sort each chunk's marks into ProseMirror's canonical order so the grouping
   // and nesting match the editor.
@@ -733,8 +743,13 @@ function renderCodeBlock(node: ProseMirrorNode, key: number): ReactNode {
   return <CodeBlock key={key} code={node.textContent} language={language} />
 }
 
-function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
-  if (context.referenceDefinitionNodes.has(node)) return null
+function renderBlock(
+  node: ProseMirrorNode,
+  context: RenderContext,
+  parent: ProseMirrorNode | null,
+  index: number,
+): ReactNode {
+  if (isReferenceDefinitionNode(node, parent, index)) return null
 
   const key = context.keyCounter.value++
   const typeName = node.type.name as NodeName
@@ -762,7 +777,9 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
     )
   }
 
-  const children: ReactNode[] = node.content.content.map((child) => renderBlock(child, context))
+  const children: ReactNode[] = node.content.content.map((child, childIndex) => {
+    return renderBlock(child, context, node, childIndex)
+  })
 
   const reactNode = toDOM ? (
     outputSpecToReact(toDOM(node), children, context)
@@ -783,6 +800,91 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
   return reactNode
 }
 
+function isTaskList(node: ProseMirrorNode): boolean {
+  return isNodeOfType(node, 'list') && (node.attrs as MeowdownListAttrs).kind === 'task'
+}
+
+/**
+ * Checkboxes a block renders, in the same pre-order `renderBlock` walks, so a
+ * block's first checkbox index is the sum over the blocks before it.
+ */
+function countTaskItems(node: ProseMirrorNode): number {
+  let count = isTaskList(node) ? 1 : 0
+  node.descendants((child) => {
+    if (isTaskList(child)) count++
+    return true
+  })
+  return count
+}
+
+/**
+ * The effective definitions as one string, so blocks can compare them by
+ * content: `collectReferenceDefinitions` builds a new map on every parse.
+ */
+function definitionsSignature(definitions: ReferenceDefinitions): string {
+  let signature = ''
+  for (const { key, href, title } of definitions.values()) {
+    signature += `${key}\0${href}\0${title}\n`
+  }
+  return signature
+}
+
+interface Block {
+  node: ProseMirrorNode
+  /**
+   * Checkboxes rendered by the blocks before this one.
+   */
+  taskBase: number
+}
+
+function splitBlocks(doc: ProseMirrorNode): Block[] {
+  const blocks: Block[] = []
+  let taskBase = 0
+  for (const node of doc.content.content) {
+    blocks.push({ node, taskBase })
+    taskBase += countTaskItems(node)
+  }
+  return blocks
+}
+
+interface MarkdownBlockProps {
+  node: ProseMirrorNode
+  taskBase: number
+  context: BlockContext
+  referenceDefinitions: ReferenceDefinitions
+  definitionsKey: string
+}
+
+/**
+ * One top-level block. Memoized on the block's own content (`Node.eq`), its
+ * first checkbox index, the shared props object, and the definitions'
+ * content, so a growing document re-renders only the block that changed.
+ */
+const MarkdownBlock = memo(
+  function MarkdownBlock({
+    node,
+    taskBase,
+    context,
+    referenceDefinitions,
+  }: MarkdownBlockProps): ReactNode {
+    const renderContext: RenderContext = {
+      ...context,
+      referenceDefinitions,
+      taskCounter: { value: taskBase },
+      keyCounter: { value: 0 },
+    }
+    return renderBlock(node, renderContext, null, 0)
+  },
+  (previous, next) => {
+    return (
+      previous.taskBase === next.taskBase &&
+      previous.context === next.context &&
+      previous.definitionsKey === next.definitionsKey &&
+      (previous.node === next.node || previous.node.eq(next.node))
+    )
+  },
+)
+
 /**
  * Render Markdown to a read-only React tree that looks exactly like the editor
  * in `hide` mark mode: inline marks, wikilink chips, images, tweet/YouTube
@@ -790,6 +892,9 @@ function renderBlock(node: ProseMirrorNode, context: RenderContext): ReactNode {
  * walk over `markdownToDoc`'s document reusing meowdown's own parse, mark logic,
  * and CSS (the root carries `ProseMirror` + `data-mark-mode` so the existing
  * stylesheet applies). Requires a DOM environment.
+ *
+ * Only the top-level blocks whose source changed re-render, so a growing
+ * `markdown` (a streaming reply) costs one block per update, not the document.
  *
  * Callbacks (`onWikilinkClick`, etc.) and resolvers should be stable; pass them via
  * `useCallback` to avoid re-rendering the whole tree.
@@ -812,10 +917,8 @@ export function MarkdownView({
   onTaskClick,
   className,
 }: MarkdownViewProps): ReactElement {
-  const content = useMemo(() => {
-    const doc = markdownToDoc(markdown, { frontmatter })
-    const referenceIndex = collectReferenceDefinitions(doc)
-    const context: RenderContext = {
+  const context = useMemo<BlockContext>(
+    () => ({
       interactive,
       expandCollapsed,
       resolveImageUrl,
@@ -828,32 +931,45 @@ export function MarkdownView({
       onImageClick: interactive ? onImageClick : undefined,
       onFileClick: interactive ? onFileClick : undefined,
       onTaskClick: interactive ? onTaskClick : undefined,
-      referenceDefinitions: referenceIndex.definitions,
-      referenceDefinitionNodes: referenceIndex.nodes,
-      taskCounter: { value: 0 },
-      keyCounter: { value: 0 },
+    }),
+    [
+      interactive,
+      expandCollapsed,
+      resolveImageUrl,
+      resolveFileLink,
+      resolveWikiEmbed,
+      resolveWikilink,
+      resolveFileInfo,
+      onWikilinkClick,
+      onLinkClick,
+      onImageClick,
+      onFileClick,
+      onTaskClick,
+    ],
+  )
+
+  const { blocks, referenceDefinitions, definitionsKey } = useMemo(() => {
+    const doc = markdownToDoc(markdown, { frontmatter })
+    const referenceDefinitions = collectReferenceDefinitions(doc).definitions
+    return {
+      blocks: splitBlocks(doc),
+      referenceDefinitions,
+      definitionsKey: definitionsSignature(referenceDefinitions),
     }
-    return doc.content.content.map((node) => renderBlock(node, context))
-  }, [
-    markdown,
-    frontmatter,
-    interactive,
-    expandCollapsed,
-    resolveImageUrl,
-    resolveFileLink,
-    resolveWikiEmbed,
-    resolveWikilink,
-    resolveFileInfo,
-    onWikilinkClick,
-    onLinkClick,
-    onImageClick,
-    onFileClick,
-    onTaskClick,
-  ])
+  }, [markdown, frontmatter])
 
   return (
     <div className={clsx('ProseMirror', 'meowdown-content', className)} data-mark-mode={markMode}>
-      {content}
+      {blocks.map(({ node, taskBase }, index) => (
+        <MarkdownBlock
+          key={index}
+          node={node}
+          taskBase={taskBase}
+          context={context}
+          referenceDefinitions={referenceDefinitions}
+          definitionsKey={definitionsKey}
+        />
+      ))}
     </div>
   )
 }

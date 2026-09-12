@@ -130,6 +130,7 @@ export {
 } from './extensions/pending-replacement.ts'
 export {
   collectReferenceDefinitions,
+  isReferenceDefinitionNode,
   type ReferenceDefinition,
   type ReferenceDefinitionIndex,
   type ReferenceDefinitions,
