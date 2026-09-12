@@ -12,6 +12,7 @@ import {
   type Fixture,
 } from '../testing/index.ts'
 import { createTweet } from '../testing/tweet-fixture.ts'
+import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { defineImage } from './image.ts'
 import type { MarkMode } from './mark-mode.ts'
@@ -35,6 +36,7 @@ function setup(mode: MarkMode, paragraphs: string[]): Fixture {
     defineImage({
       resolveImageUrl: () => getSVGImageURL(24, 24),
       resolveXPost: () => createTweet(),
+      resolveYouTubeVideo: () => createYouTubeVideo(),
     }),
   )
   fixture.set(n.doc(...paragraphs.map((text) => n.paragraph(text))))

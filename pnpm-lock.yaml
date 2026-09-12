@@ -79,11 +79,11 @@ importers:
         specifier: ^1.8.0
         version: 1.8.0
       '@post-embed/elements':
-        specifier: ^0.0.3
-        version: 0.0.3(typescript@6.0.3)
+        specifier: ^0.1.0
+        version: 0.1.0(typescript@6.0.3)
       '@post-embed/types':
-        specifier: ^0.0.3
-        version: 0.0.3
+        specifier: ^0.1.0
+        version: 0.1.0
       '@prosekit/core':
         specifier: ^0.13.2
         version: 0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
@@ -232,11 +232,11 @@ importers:
         specifier: ^1.8.0
         version: 1.8.0
       '@post-embed/elements':
-        specifier: ^0.0.3
-        version: 0.0.3(typescript@6.0.3)
+        specifier: ^0.1.0
+        version: 0.1.0(typescript@6.0.3)
       '@post-embed/types':
-        specifier: ^0.0.3
-        version: 0.0.3
+        specifier: ^0.1.0
+        version: 0.1.0
       '@prosekit/core':
         specifier: ^0.13.2
         version: 0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)
@@ -1791,14 +1791,14 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@post-embed/elements@0.0.3':
-    resolution: {integrity: sha512-EiaUrHtOb2yGTeN4AF+UIm/c4ruIsxV0w25brAOd0PG+PRVig6SiQ/sL6kzl9aXAAPjFbVDEBhYc61rjSQ/Ueg==}
+  '@post-embed/elements@0.1.0':
+    resolution: {integrity: sha512-T4gIWLvWZCK7DxKe0lwOJqHZuwUYIxvjt5mCBlq7BCBJe1pLdiD/mdoEndy2Ce/0FOjyaMN677eq6g6jRjaTPg==}
 
-  '@post-embed/schema@0.0.3':
-    resolution: {integrity: sha512-2X36PIfHKm+nZuYtztsllkVhHnOfkbBXLrd4HZ0BEdrnCrnMAZUyVaPPN2c7bfnAHcpaNZGNh7++lTc2nnls/Q==}
+  '@post-embed/schema@0.1.0':
+    resolution: {integrity: sha512-f39lVuMZk9vCVGihLQKaNrlO80kvsYYYb3DDo16ZlO9tCWNDVjoT7A9RjunK7JRayumOUytWm/BkVsJu236HyQ==}
 
-  '@post-embed/types@0.0.3':
-    resolution: {integrity: sha512-lkQOYCl1tfTEQPFS1DNNmS2UFkvT8HCCn82HtbGW7pGsIOYFianBLvY3Fq4KkTTogHi9tXJCZT/OedMJ5DrDUQ==}
+  '@post-embed/types@0.1.0':
+    resolution: {integrity: sha512-/CZTGLljvtv4Hs2b0sx7XKK0kMKaRT7vZxTPpgGuluTY/Thz+nYp1bnE6KntSdahy2FFAjE66MyO8sbvw26VRQ==}
 
   '@prosekit/core@0.13.2':
     resolution: {integrity: sha512-0pdKLy442VCo4Pa+5z+pNGhiLAmHgreWHWc2pn2IIbsy4dhchNEQN+ycfCYbjDVHxXfNrGpp1aHSMn5VOhmnhA==}
@@ -2865,10 +2865,6 @@ packages:
   entities@7.0.1:
     resolution: {integrity: sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA==}
     engines: {node: '>=0.12'}
-
-  entities@8.0.0:
-    resolution: {integrity: sha512-zwfzJecQ/Uej6tusMqwAqU/6KL2XaB2VZ2Jg54Je6ahNBGNH6Ek6g3jjNCF0fG9EWQKGZNddNjU5F1ZQn/sBnA==}
-    engines: {node: '>=20.19.0'}
 
   entities@8.1.0:
     resolution: {integrity: sha512-kxL7msIffSuh9aaFAMD7rxAIuTRMAHMeBtgHW2yUdWw732ZNh4MehkF2gdjvtdmikkaIP9bFDDJOPlsvm7avrA==}
@@ -6430,25 +6426,25 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@post-embed/elements@0.0.3(typescript@6.0.3)':
+  '@post-embed/elements@0.1.0(typescript@6.0.3)':
     dependencies:
       '@aria-ui/core': 0.2.1
-      '@post-embed/schema': 0.0.3(typescript@6.0.3)
-      '@post-embed/types': 0.0.3
+      '@post-embed/schema': 0.1.0(typescript@6.0.3)
+      '@post-embed/types': 0.1.0
       crelt: 1.0.7
       entities: 8.1.0
     transitivePeerDependencies:
       - typescript
 
-  '@post-embed/schema@0.0.3(typescript@6.0.3)':
+  '@post-embed/schema@0.1.0(typescript@6.0.3)':
     dependencies:
-      '@post-embed/types': 0.0.3
+      '@post-embed/types': 0.1.0
       '@standard-schema/spec': 1.1.0
       valibot: 1.4.2(typescript@6.0.3)
     transitivePeerDependencies:
       - typescript
 
-  '@post-embed/types@0.0.3': {}
+  '@post-embed/types@0.1.0': {}
 
   '@prosekit/core@0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.0)':
     dependencies:
@@ -7570,8 +7566,6 @@ snapshots:
 
   entities@7.0.1: {}
 
-  entities@8.0.0: {}
-
   entities@8.1.0: {}
 
   es-module-lexer@2.3.2: {}
@@ -7822,7 +7816,7 @@ snapshots:
       ci-info: 4.4.0
       core-js-compat: 3.50.0
       detect-indent: 7.0.2
-      entities: 8.0.0
+      entities: 8.1.0
       eslint: 10.9.1(jiti@2.7.0)(supports-color@7.2.0)
       find-up-simple: 1.0.1
       globals: 17.11.0
@@ -8188,7 +8182,7 @@ snapshots:
       domelementtype: 3.0.0
       domhandler: 6.0.1
       domutils: 4.0.2
-      entities: 8.0.0
+      entities: 8.1.0
 
   http-cache-semantics@4.2.0: {}
 

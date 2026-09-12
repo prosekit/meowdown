@@ -1,5 +1,5 @@
 import { registerXPost } from '@post-embed/elements/x'
-import type { Tweet } from '@post-embed/types'
+import { registerYouTubeVideo } from '@post-embed/elements/youtube'
 import { defineMarkView, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
 import type { EditorView, MarkView, ViewMutationRecord } from '@prosekit/pm/view'
@@ -11,7 +11,6 @@ import {
 
 import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
 
-import { matchEmbed, type EmbedDescriptor } from './embed.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import {
   formatMagicComment,
@@ -21,8 +20,15 @@ import {
 } from './magic-comment.ts'
 import type { MarkName } from './mark-names.ts'
 import { getMarkRangeAt } from './mark-range.ts'
+import {
+  defaultResolveXPost,
+  defaultResolveYouTubeVideo,
+  matchPostEmbed,
+  type PostEmbedKind,
+  type XPostResolver,
+  type YouTubeVideoResolver,
+} from './post-embed.ts'
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
-import { defaultResolveXPost, parseXPostId, type XPostResolver } from './x-post.ts'
 
 type ImageUrlResolver = (src: string) => string | undefined
 
@@ -41,6 +47,12 @@ export interface ImageOptions {
    * react-tweet's hosted proxy.
    */
   resolveXPost?: XPostResolver
+  /**
+   * Resolve the data behind a YouTube video URL, rendered as a
+   * `post-embed-youtube-video` card. Defaults to `defaultResolveYouTubeVideo`,
+   * which reads YouTube's oEmbed endpoint.
+   */
+  resolveYouTubeVideo?: YouTubeVideoResolver
 }
 
 /**
@@ -54,23 +66,6 @@ export function defaultResolveImageUrl(src: string): string | undefined {
  * Default cap on an image's displayed height in CSS pixels.
  */
 const MAX_DISPLAY_HEIGHT = 500
-
-/**
- * Build the iframe DOM for an embed descriptor.
- */
-function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
-  const iframe = document.createElement('iframe')
-  iframe.src = embed.src
-  iframe.title = embed.title
-  iframe.className = embed.className
-  iframe.dataset.testid = embed.testid
-  iframe.loading = 'lazy'
-  iframe.referrerPolicy = 'strict-origin-when-cross-origin'
-  iframe.setAttribute('frameborder', '0')
-  if (embed.allow) iframe.allow = embed.allow
-  if (embed.allowFullscreen) iframe.allowFullscreen = true
-  return iframe
-}
 
 /**
  * Write a persisted display size onto a resizable resizable root.
@@ -176,16 +171,17 @@ class ImageMarkView implements MarkView {
   readonly #view: EditorView
   readonly #resolveImageUrl: ImageUrlResolver | undefined
   readonly #resolveXPost: XPostResolver
+  readonly #resolveYouTubeVideo: YouTubeVideoResolver
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
-  #destroyed = false
 
   constructor(mark: Mark, view: EditorView, options: ImageOptions) {
     this.#attrs = mark.attrs as MdImageAttrs
     this.#view = view
     this.#resolveImageUrl = options.resolveImageUrl
     this.#resolveXPost = options.resolveXPost ?? defaultResolveXPost
+    this.#resolveYouTubeVideo = options.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
 
     this.#dom = document.createElement('span')
     this.#dom.className = 'md-image-view md-atom-view'
@@ -237,26 +233,18 @@ class ImageMarkView implements MarkView {
     return !this.#contentDOM.contains(mutation.target)
   }
 
-  destroy(): void {
-    this.#destroyed = true
-  }
-
   /**
-   * Build the inline preview for the image `src`: an X post card, a YouTube
-   * iframe, or a resizable `<img>`.
+   * Build the inline preview for the image `src`: a post-embed card or a
+   * resizable `<img>`.
    */
   #renderPreview(): HTMLElement | undefined {
     const { src } = this.#attrs
     const wrapper = document.createElement('span')
     wrapper.className = 'md-image-view-preview md-atom-view-preview'
-    if (parseXPostId(src) !== undefined) {
-      wrapper.dataset.testid = 'x-post-embed'
-      this.#renderXPost(wrapper, src)
-      return wrapper
-    }
-    const embed = matchEmbed(src)
-    if (embed) {
-      wrapper.appendChild(this.#buildResizableEmbed(buildEmbedIframe(embed)))
+    const kind = matchPostEmbed(src)
+    if (kind) {
+      wrapper.dataset.testid = `${kind}-embed`
+      wrapper.appendChild(this.#buildPostEmbed(kind, src))
       return wrapper
     }
 
@@ -268,73 +256,23 @@ class ImageMarkView implements MarkView {
   }
 
   /**
-   * A synchronous answer renders in the constructor, so the card is in the
-   * first frame with the rest of the document. A promise reserves the
-   * stylesheet's placeholder height until it settles.
+   * A post-embed card loads its own snapshot through the resolver, and renders
+   * its own pending and unavailable states.
    */
-  #renderXPost(wrapper: HTMLElement, src: string): void {
-    let result: ReturnType<XPostResolver>
-    try {
-      result = this.#resolveXPost(src)
-    } catch (error) {
-      console.error('[meowdown] resolveXPost failed:', error)
-      result = undefined
+  #buildPostEmbed(kind: PostEmbedKind, src: string): HTMLElement {
+    if (kind === 'x-post') {
+      registerXPost()
+      const element = document.createElement('post-embed-x-post')
+      element.resolver = this.#resolveXPost
+      element.url = src
+      return element
     }
-    if (!(result instanceof Promise)) {
-      this.#showXPost(wrapper, result)
-      return
-    }
-    wrapper.dataset.pending = ''
-    void result.then(
-      (tweet) => this.#showXPost(wrapper, tweet),
-      (error: unknown) => {
-        console.error('[meowdown] resolveXPost failed:', error)
-        this.#showXPost(wrapper, undefined)
-      },
-    )
-  }
-
-  #showXPost(wrapper: HTMLElement, tweet: Tweet | undefined): void {
-    if (this.#destroyed) return
-    delete wrapper.dataset.pending
-    registerXPost()
-    const element = document.createElement('post-embed-x-post')
-    // `null` renders the card's own unavailable state.
-    element.data = tweet ?? null
-    wrapper.replaceChildren(element)
-  }
-
-  /**
-   * A resizable YouTube embed: the same resizable web component as images, with
-   * the player's fixed 16:9 ratio, so a drag only ever picks a width. Releasing
-   * a drag writes the size into the markdown source as a
-   * `<!-- {"width":N,"height":M} -->` comment, exactly like an image.
-   */
-  #buildResizableEmbed(iframe: HTMLIFrameElement): HTMLElement {
-    registerResizableRootElement()
-    registerResizableHandleElement()
-
-    const root = document.createElement('prosekit-resizable-root')
-    root.className = 'md-embed-resizable'
-    root.dataset.testid = 'embed-resizable'
-    root.setAttribute('data-aspect-ratio', String(16 / 9))
-    applySize(root, this.#attrs.width, this.#attrs.height)
-    root.appendChild(iframe)
-
-    const handle = document.createElement('prosekit-resizable-handle')
-    handle.className = 'md-image-resize-handle'
-    handle.setAttribute('position', 'bottom-right')
-    // A click (no drag) on the handle must not bubble to the image-click handler.
-    handle.addEventListener('click', (event) => event.stopPropagation())
-    root.appendChild(handle)
-
-    root.addEventListener('resizeEnd', (event) => {
-      const { width: nextWidth, height: nextHeight } = (event as ResizeEndEvent).detail
-      commitImageSize(this.#view, this.#contentDOM, nextWidth, nextHeight)
-    })
-
-    this.#resizableRoot = root
-    return root
+    registerYouTubeVideo()
+    const element = document.createElement('post-embed-youtube-video')
+    element.playback = 'inline'
+    element.resolver = this.#resolveYouTubeVideo
+    element.url = src
+    return element
   }
 
   /**

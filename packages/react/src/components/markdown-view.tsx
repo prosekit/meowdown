@@ -2,6 +2,7 @@ import {
   collectReferenceDefinitions,
   defaultResolveImageUrl,
   defaultResolveXPost,
+  defaultResolveYouTubeVideo,
   formatFileSize,
   getCodeTokens,
   getFileKind,
@@ -11,11 +12,9 @@ import {
   isNodeOfType,
   isReferenceDefinitionNode,
   markdownToDoc,
-  matchEmbed,
-  parseXPostId,
+  matchPostEmbed,
   type CodeBlockAttrs,
   type CodeToken,
-  type EmbedDescriptor,
   type FileClickHandler,
   type FileInfoResolver,
   type FileLinkResolver,
@@ -32,14 +31,16 @@ import {
   type MdWikilinkAttrs,
   type MeowdownListAttrs,
   type NodeName,
+  type PostEmbedKind,
   type XPostResolver,
+  type YouTubeVideoResolver,
   type ReferenceDefinitions,
   type WikiEmbedResolver,
   type WikilinkClickHandler,
   type WikilinkResolver,
 } from '@meowdown/core'
 import { registerXPost } from '@post-embed/elements/x'
-import type { Tweet } from '@post-embed/types'
+import { registerYouTubeVideo } from '@post-embed/elements/youtube'
 import type { DOMOutputSpec } from '@prosekit/pm/model'
 import { Mark, type Node as ProseMirrorNode } from '@prosekit/pm/model'
 import { clsx } from 'clsx/lite'
@@ -159,6 +160,11 @@ export interface MarkdownViewProps {
    */
   resolveXPost?: XPostResolver
   /**
+   * Resolve the data behind a YouTube video URL, rendered as a
+   * `post-embed-youtube-video` card. Defaults to `defaultResolveYouTubeVideo`.
+   */
+  resolveYouTubeVideo?: YouTubeVideoResolver
+  /**
    * Called when a rendered wikilink is clicked. Pass a stable function.
    */
   onWikilinkClick?: WikilinkClickHandler
@@ -197,6 +203,7 @@ interface BlockContext {
   resolveWikilink?: WikilinkResolver
   resolveFileInfo?: FileInfoResolver
   resolveXPost?: XPostResolver
+  resolveYouTubeVideo?: YouTubeVideoResolver
   onWikilinkClick?: WikilinkClickHandler
   onLinkClick?: LinkClickHandler
   onImageClick?: ImageClickHandler
@@ -285,84 +292,30 @@ function WikilinkChip(props: {
   )
 }
 
-function EmbedFrame(props: { embed: EmbedDescriptor; width: number | null }): ReactElement {
-  const { embed, width } = props
-  // A persisted width narrows the player; the `aspect-ratio` CSS on
-  // `.md-embed-youtube` derives the height.
-  return (
-    <span className="md-image-view-preview md-atom-view-preview" contentEditable={false}>
-      <iframe
-        key={embed.key}
-        src={embed.src}
-        title={embed.title}
-        className={embed.className}
-        data-testid={embed.testid}
-        loading="lazy"
-        referrerPolicy="strict-origin-when-cross-origin"
-        frameBorder="0"
-        allow={embed.allow}
-        allowFullScreen={embed.allowFullscreen}
-        style={width == null ? undefined : { width }}
-      />
-    </span>
-  )
-}
-
-type XPostState = { tweet: Tweet | undefined } | { pending: Promise<Tweet | undefined> }
-
-function XPostEmbed(props: { src: string; resolveXPost: XPostResolver }): ReactElement {
-  const { src, resolveXPost } = props
-  // The initializer runs during the first render, so a synchronous answer is
-  // in the first frame; `key={src}` at the call site remounts on a new URL.
-  const [state, setState] = useState<XPostState>(() => {
-    try {
-      const result = resolveXPost(src)
-      if (result instanceof Promise) return { pending: result }
-      registerXPost()
-      return { tweet: result }
-    } catch (error) {
-      console.error('[meowdown] resolveXPost failed:', error)
-      registerXPost()
-      return { tweet: undefined }
-    }
-  })
-  useEffect(() => {
-    if (!('pending' in state)) return
-    let cancelled = false
-    void state.pending.then(
-      (tweet) => {
-        if (cancelled) return
-        registerXPost()
-        setState({ tweet })
-      },
-      (error: unknown) => {
-        console.error('[meowdown] resolveXPost failed:', error)
-        if (cancelled) return
-        registerXPost()
-        setState({ tweet: undefined })
-      },
-    )
-    return () => {
-      cancelled = true
-    }
-  }, [state])
-  if ('pending' in state) {
-    return (
-      <span
-        className="md-image-view-preview md-atom-view-preview"
-        contentEditable={false}
-        data-testid="x-post-embed"
-        data-pending=""
-      />
-    )
-  }
+function PostEmbed(props: {
+  kind: PostEmbedKind
+  src: string
+  resolveXPost: XPostResolver
+  resolveYouTubeVideo: YouTubeVideoResolver
+}): ReactElement {
+  const { kind, src, resolveXPost, resolveYouTubeVideo } = props
+  // Registration is idempotent and must precede the element so React sets
+  // `url` and `resolver` as properties of the upgraded element.
+  registerXPost()
+  registerYouTubeVideo()
   return (
     <span
       className="md-image-view-preview md-atom-view-preview"
       contentEditable={false}
-      data-testid="x-post-embed"
+      data-testid={`${kind}-embed`}
     >
-      {createElement('post-embed-x-post', { data: state.tweet ?? null })}
+      {kind === 'x-post'
+        ? createElement('post-embed-x-post', { url: src, resolver: resolveXPost })
+        : createElement('post-embed-youtube-video', {
+            url: src,
+            resolver: resolveYouTubeVideo,
+            playback: 'inline',
+          })}
     </span>
   )
 }
@@ -373,16 +326,33 @@ function ImagePreview(props: {
   width: number | null
   resolveImageUrl?: (src: string) => string | undefined
   resolveXPost?: XPostResolver
+  resolveYouTubeVideo?: YouTubeVideoResolver
   onImageClick?: ImageClickHandler
   interactive: boolean
 }): ReactElement | null {
-  const { src, alt, width, resolveImageUrl, resolveXPost, onImageClick, interactive } = props
-  if (parseXPostId(src) !== undefined) {
+  const {
+    src,
+    alt,
+    width,
+    resolveImageUrl,
+    resolveXPost,
+    resolveYouTubeVideo,
+    onImageClick,
+    interactive,
+  } = props
+  const kind = matchPostEmbed(src)
+  if (kind) {
     if (!interactive) return null
-    return <XPostEmbed key={src} src={src} resolveXPost={resolveXPost ?? defaultResolveXPost} />
+    return (
+      <PostEmbed
+        key={src}
+        kind={kind}
+        src={src}
+        resolveXPost={resolveXPost ?? defaultResolveXPost}
+        resolveYouTubeVideo={resolveYouTubeVideo ?? defaultResolveYouTubeVideo}
+      />
+    )
   }
-  const embed = matchEmbed(src)
-  if (embed) return interactive ? <EmbedFrame embed={embed} width={width} /> : null
   const url = (resolveImageUrl ?? defaultResolveImageUrl)(src)
   if (!url) return null
   const handleClick = onImageClick
@@ -428,6 +398,7 @@ function ImageView(props: {
         width={width}
         resolveImageUrl={context.resolveImageUrl}
         resolveXPost={context.resolveXPost}
+        resolveYouTubeVideo={context.resolveYouTubeVideo}
         onImageClick={context.onImageClick}
         interactive={context.interactive}
       />
@@ -950,6 +921,7 @@ export function MarkdownView({
   resolveWikilink,
   resolveFileInfo,
   resolveXPost,
+  resolveYouTubeVideo,
   onWikilinkClick,
   onLinkClick,
   onImageClick,
@@ -967,6 +939,7 @@ export function MarkdownView({
       resolveWikilink,
       resolveFileInfo,
       resolveXPost,
+      resolveYouTubeVideo,
       onWikilinkClick: interactive ? onWikilinkClick : undefined,
       onLinkClick: interactive ? onLinkClick : undefined,
       onImageClick: interactive ? onImageClick : undefined,
@@ -982,6 +955,7 @@ export function MarkdownView({
       resolveWikilink,
       resolveFileInfo,
       resolveXPost,
+      resolveYouTubeVideo,
       onWikilinkClick,
       onLinkClick,
       onImageClick,

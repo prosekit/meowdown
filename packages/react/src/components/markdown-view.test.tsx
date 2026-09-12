@@ -8,6 +8,7 @@ import { page } from 'vitest/browser'
 
 import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
 import { createTweet } from '../testing/tweet-fixture.ts'
+import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { MarkdownView } from './markdown-view.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
@@ -253,20 +254,18 @@ describe('MarkdownView', () => {
     await expect.element(card).toMatchTextContent('just setting up my twttr')
   })
 
-  it('reserves space until a promised snapshot settles', async () => {
+  it('shows the loading card until a promised snapshot settles', async () => {
     let settle!: (tweet: Tweet) => void
     const pending = new Promise<Tweet>((resolve) => {
       settle = resolve
     })
     await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => pending })
-    const embed = view.getByTestId('x-post-embed')
-    await expect.element(embed).toHaveAttribute('data-pending', '')
-    expect(getComputedStyle(embed.element()).minHeight).toBe('250px')
+    const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
+    await expect.element(card.locate('[data-fallback][data-pending]')).toBeInTheDocument()
 
     settle(createTweet())
-    const card = embed.locate('[data-post-embed="x-post"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
-    await expect.element(embed).not.toHaveAttribute('data-pending')
+    expect(card.locate('[data-pending]').query()).toBeNull()
   })
 
   it('renders the unavailable card without a snapshot', async () => {
@@ -276,13 +275,13 @@ describe('MarkdownView', () => {
       .toBeInTheDocument()
   })
 
-  it('renders a youtube embed', async () => {
-    await renderView('![](https://youtu.be/dQw4w9WgXcQ)')
-    const iframe = view.getByTestId('youtube-embed')
-    await expect.element(iframe).toBeInTheDocument()
-    await expect
-      .element(iframe)
-      .toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
+  it('renders a YouTube video card', async () => {
+    await renderView('![](https://youtu.be/aqz-KE-bpKQ)', {
+      resolveYouTubeVideo: () => createYouTubeVideo(),
+    })
+    const card = view.getByTestId('youtube-video-embed').locate('[data-post-embed="youtube-video"]')
+    await expect.element(card).toMatchTextContent('Big Buck Bunny')
+    expect(view.locate('iframe').query()).toBeNull()
   })
 
   it('omits recognized embeds before resolving images when interactive is false', async () => {
