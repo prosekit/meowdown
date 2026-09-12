@@ -20,6 +20,7 @@ import {
 } from '../lib/demo-data.ts'
 import { computeTextPatch } from '../lib/text-patch.ts'
 import { useMounted } from '../lib/use-mounted.ts'
+import { resolvePost } from '../lib/x-post.ts'
 import { getPresetContent } from '../presets/presets.ts'
 
 import { CodeMirrorPane } from './codemirror-pane.tsx'
@@ -218,6 +219,7 @@ function MainEditorDemo() {
             onImageClick={handleImageClick}
             onLinkClick={handleLinkClick}
             resolveLinkPreview={resolveLinkPreview}
+            resolvePost={resolvePost}
             onTagClick={handleTagClick}
             onWikilinkClick={handleWikilinkClick}
           >

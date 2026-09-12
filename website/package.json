@@ -20,6 +20,7 @@
     "@meowdown/core": "workspace:*",
     "@meowdown/react": "workspace:*",
     "@ocavue/utils": "^1.8.0",
+    "@post-embed/types": "^0.0.3",
     "astro": "^7.2.10",
     "astro-theme-toggle": "^0.8.2",
     "astrobook": "^0.13.3",
