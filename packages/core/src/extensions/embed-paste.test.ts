@@ -4,20 +4,21 @@ import { page, userEvent } from 'vitest/browser'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
+import { createTweet } from '../testing/tweet-fixture.ts'
 
 import { defineEmbedPaste, detectEmbedUrl } from './embed-paste.ts'
 import { defineImage } from './image.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const youtubeEmbed = pmRoot.getByTestId('youtube-embed')
-const tweetEmbed = pmRoot.getByTestId('tweet-embed')
+const xPostEmbed = pmRoot.getByTestId('x-post-embed')
 
 const YT = 'https://youtu.be/aqz-KE-bpKQ'
 const EMBED = `![](${YT})`
 
 function useEmbedPaste(fixture: Fixture): void {
   const { editor } = fixture
-  editor.use(defineImage({ resolveImageUrl: (src) => src }))
+  editor.use(defineImage({ resolveImageUrl: (src) => src, resolveXPost: () => createTweet() }))
   editor.use(defineEmbedPaste())
 }
 
@@ -71,7 +72,7 @@ describe('paste a lone embed link', () => {
     fixture.set(n.doc(n.paragraph('<a>')))
     pasteText(view, 'https://twitter.com/jack/status/20')
     expect(editor.state.doc.textContent).toBe('![](https://twitter.com/jack/status/20)')
-    await expect.element(tweetEmbed).toBeInTheDocument()
+    await expect.element(xPostEmbed).toBeInTheDocument()
   })
 
   it('replaces the selected text when pasting onto a selection', async () => {

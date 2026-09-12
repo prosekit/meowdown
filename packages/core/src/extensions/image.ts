@@ -11,7 +11,7 @@ import {
 
 import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
 
-import { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './embed.ts'
+import { matchEmbed, type EmbedDescriptor } from './embed.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import {
   formatMagicComment,
@@ -21,9 +21,8 @@ import {
 } from './magic-comment.ts'
 import type { MarkName } from './mark-names.ts'
 import { getMarkRangeAt } from './mark-range.ts'
-import { applyTweetHeight } from './tweet.ts'
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
-import type { XPostResolver } from './x-post-resolver.ts'
+import { defaultResolveXPost, parseXPostId, type XPostResolver } from './x-post.ts'
 
 type ImageUrlResolver = (src: string) => string | undefined
 
@@ -37,8 +36,9 @@ export interface ImageOptions {
    */
   resolveImageUrl?: ImageUrlResolver
   /**
-   * Resolve the saved data for a tweet URL. With data, the tweet renders as a
-   * `post-embed-x-post` card in place of the provider iframe.
+   * Resolve the data behind an X post URL, rendered as a `post-embed-x-post`
+   * card. Defaults to `defaultResolveXPost`, which fetches through
+   * react-tweet's hosted proxy.
    */
   resolveXPost?: XPostResolver
 }
@@ -56,11 +56,9 @@ export function defaultResolveImageUrl(src: string): string | undefined {
 const MAX_DISPLAY_HEIGHT = 500
 
 /**
- * Build the iframe DOM for an embed descriptor and start its height listener.
- * A persisted tweet height seeds the iframe before `Tweet.html` reports the
- * real one, so a revisited tweet keeps its space instead of shifting layout.
+ * Build the iframe DOM for an embed descriptor.
  */
-function buildEmbedIframe(embed: EmbedDescriptor, height: number | null): HTMLIFrameElement {
+function buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
   const iframe = document.createElement('iframe')
   iframe.src = embed.src
   iframe.title = embed.title
@@ -71,10 +69,6 @@ function buildEmbedIframe(embed: EmbedDescriptor, height: number | null): HTMLIF
   iframe.setAttribute('frameborder', '0')
   if (embed.allow) iframe.allow = embed.allow
   if (embed.allowFullscreen) iframe.allowFullscreen = true
-  if (embed.kind === 'tweet') {
-    applyTweetHeight(iframe, height)
-    listenForTweetHeight(iframe)
-  }
   return iframe
 }
 
@@ -181,18 +175,17 @@ class ImageMarkView implements MarkView {
   readonly #contentDOM: HTMLElement
   readonly #view: EditorView
   readonly #resolveImageUrl: ImageUrlResolver | undefined
-  readonly #resolveXPost: XPostResolver | undefined
+  readonly #resolveXPost: XPostResolver
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
-  #tweetIframe: HTMLIFrameElement | undefined
   #destroyed = false
 
   constructor(mark: Mark, view: EditorView, options: ImageOptions) {
     this.#attrs = mark.attrs as MdImageAttrs
     this.#view = view
     this.#resolveImageUrl = options.resolveImageUrl
-    this.#resolveXPost = options.resolveXPost
+    this.#resolveXPost = options.resolveXPost ?? defaultResolveXPost
 
     this.#dom = document.createElement('span')
     this.#dom.className = 'md-image-view md-atom-view'
@@ -237,9 +230,6 @@ class ImageMarkView implements MarkView {
         applySize(this.#resizableRoot, next.width, next.height)
       }
     }
-    if (this.#tweetIframe && next.height !== previous.height) {
-      applyTweetHeight(this.#tweetIframe, next.height)
-    }
     return true
   }
 
@@ -252,39 +242,29 @@ class ImageMarkView implements MarkView {
   }
 
   /**
-   * Build the inline preview for the image `src`: an X post card, an embed iframe,
-   * or a resizable `<img>`.
+   * Build the inline preview for the image `src`: an X post card, a YouTube
+   * iframe, or a resizable `<img>`.
    */
   #renderPreview(): HTMLElement | undefined {
     const { src } = this.#attrs
+    const wrapper = document.createElement('span')
+    wrapper.className = 'md-image-view-preview md-atom-view-preview'
+    if (parseXPostId(src) !== undefined) {
+      wrapper.dataset.testid = 'x-post-embed'
+      this.#renderXPost(wrapper, src)
+      return wrapper
+    }
     const embed = matchEmbed(src)
     if (embed) {
-      const wrapper = document.createElement('span')
-      wrapper.className = 'md-image-view-preview md-atom-view-preview'
-      if (embed.kind === 'tweet' && this.#resolveXPost) {
-        wrapper.dataset.testid = 'x-post-embed'
-        this.#renderXPost(wrapper, embed, src)
-        return wrapper
-      }
-      const iframe = this.#buildEmbedIframe(embed)
-      wrapper.appendChild(embed.kind === 'youtube' ? this.#buildResizableEmbed(iframe) : iframe)
+      wrapper.appendChild(this.#buildResizableEmbed(buildEmbedIframe(embed)))
       return wrapper
     }
 
     const url = (this.#resolveImageUrl ?? defaultResolveImageUrl)(src)
     if (!url) return undefined
-
-    const wrapper = document.createElement('span')
-    wrapper.className = 'md-image-view-preview md-atom-view-preview'
     wrapper.dataset.testid = 'image-preview'
     wrapper.appendChild(this.#buildResizableImage(url))
     return wrapper
-  }
-
-  #buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
-    const iframe = buildEmbedIframe(embed, this.#attrs.height)
-    if (embed.kind === 'tweet') this.#tweetIframe = iframe
-    return iframe
   }
 
   /**
@@ -292,38 +272,35 @@ class ImageMarkView implements MarkView {
    * first frame with the rest of the document. A promise reserves the
    * stylesheet's placeholder height until it settles.
    */
-  #renderXPost(wrapper: HTMLElement, embed: EmbedDescriptor, src: string): void {
+  #renderXPost(wrapper: HTMLElement, src: string): void {
     let result: ReturnType<XPostResolver>
     try {
-      result = this.#resolveXPost!(src)
+      result = this.#resolveXPost(src)
     } catch (error) {
       console.error('[meowdown] resolveXPost failed:', error)
       result = undefined
     }
     if (!(result instanceof Promise)) {
-      this.#showXPost(wrapper, embed, result)
+      this.#showXPost(wrapper, result)
       return
     }
     wrapper.dataset.pending = ''
     void result.then(
-      (tweet) => this.#showXPost(wrapper, embed, tweet),
+      (tweet) => this.#showXPost(wrapper, tweet),
       (error: unknown) => {
         console.error('[meowdown] resolveXPost failed:', error)
-        this.#showXPost(wrapper, embed, undefined)
+        this.#showXPost(wrapper, undefined)
       },
     )
   }
 
-  #showXPost(wrapper: HTMLElement, embed: EmbedDescriptor, tweet: Tweet | undefined): void {
+  #showXPost(wrapper: HTMLElement, tweet: Tweet | undefined): void {
     if (this.#destroyed) return
     delete wrapper.dataset.pending
-    if (!tweet) {
-      wrapper.replaceChildren(this.#buildEmbedIframe(embed))
-      return
-    }
     registerXPost()
     const element = document.createElement('post-embed-x-post')
-    element.data = tweet
+    // `null` renders the card's own unavailable state.
+    element.data = tweet ?? null
     wrapper.replaceChildren(element)
   }
 

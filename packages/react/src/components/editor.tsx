@@ -219,11 +219,11 @@ export interface EditorProps {
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
 
   /**
-   * Resolves the saved data for a tweet URL, directly or as a promise. With
-   * data, the tweet renders as a `post-embed-x-post` card instead of the
-   * provider iframe; `undefined` keeps the iframe. A synchronous answer is in
-   * the first frame; a promise reserves the persisted height until it
-   * settles. Pass a stable function (e.g. from `useCallback`).
+   * Resolves the data behind an X post URL, directly or as a promise; the post
+   * renders as a `post-embed-x-post` card. A synchronous answer is in the
+   * first frame; a promise reserves a placeholder until it settles. Defaults
+   * to `defaultResolveXPost`, which fetches through react-tweet's hosted
+   * proxy. Pass a stable function (e.g. from `useCallback`).
    */
   resolveXPost?: XPostResolver
 

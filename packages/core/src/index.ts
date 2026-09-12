@@ -28,7 +28,7 @@ export {
 export { codeBlockLanguages, type LanguageItem } from './extensions/code-block-languages.ts'
 export type { CodeBlockFenceStyle, MeowdownCodeBlockAttrs } from './extensions/code-block.ts'
 export { defineEmbedPaste } from './extensions/embed-paste.ts'
-export { listenForTweetHeight, matchEmbed, type EmbedDescriptor } from './extensions/embed.ts'
+export { matchEmbed, type EmbedDescriptor } from './extensions/embed.ts'
 export {
   defineExitBoundaryHandler,
   type ExitBoundaryHandler,
@@ -111,7 +111,7 @@ export {
 } from './extensions/link-hover.ts'
 export { defineLinkPaste } from './extensions/link-paste.ts'
 export type { LinkPreview, LinkPreviewResolver } from './extensions/link-preview.ts'
-export type { XPostResolver } from './extensions/x-post-resolver.ts'
+export { defaultResolveXPost, parseXPostId, type XPostResolver } from './extensions/x-post.ts'
 export type { ListMarker, MeowdownListAttrs } from './extensions/list.ts'
 export type { MarkChunk } from './extensions/mark-chunk.ts'
 export type { MarkMode } from './extensions/mark-mode.ts'

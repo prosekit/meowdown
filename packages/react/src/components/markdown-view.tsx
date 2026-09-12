@@ -1,6 +1,7 @@
 import {
   collectReferenceDefinitions,
   defaultResolveImageUrl,
+  defaultResolveXPost,
   formatFileSize,
   getCodeTokens,
   getFileKind,
@@ -9,9 +10,9 @@ import {
   isModEvent,
   isNodeOfType,
   isReferenceDefinitionNode,
-  listenForTweetHeight,
   markdownToDoc,
   matchEmbed,
+  parseXPostId,
   type CodeBlockAttrs,
   type CodeToken,
   type EmbedDescriptor,
@@ -49,7 +50,6 @@ import {
   memo,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type MouseEvent,
   type ReactElement,
@@ -154,8 +154,8 @@ export interface MarkdownViewProps {
    */
   resolveFileInfo?: FileInfoResolver
   /**
-   * Resolve the saved data for a tweet URL; with data the tweet renders as a
-   * `post-embed-x-post` card instead of the provider iframe.
+   * Resolve the data behind an X post URL, rendered as a `post-embed-x-post`
+   * card. Defaults to `defaultResolveXPost`.
    */
   resolveXPost?: XPostResolver
   /**
@@ -285,28 +285,13 @@ function WikilinkChip(props: {
   )
 }
 
-function EmbedFrame(props: {
-  embed: EmbedDescriptor
-  width: number | null
-  height: number | null
-}): ReactElement {
-  const { embed, width, height } = props
-  const iframeRef = useRef<HTMLIFrameElement>(null)
-  useEffect(() => {
-    if (embed.kind !== 'tweet') return
-    const iframe = iframeRef.current
-    if (!iframe) return
-    return listenForTweetHeight(iframe)
-  }, [embed.kind, embed.key])
+function EmbedFrame(props: { embed: EmbedDescriptor; width: number | null }): ReactElement {
+  const { embed, width } = props
   // A persisted width narrows the player; the `aspect-ratio` CSS on
-  // `.md-embed-youtube` derives the height. Tweets stay fluid-width and seed
-  // their persisted height instead.
-  const youtubeWidth = embed.kind === 'youtube' ? width : null
-  const tweetHeight = embed.kind === 'tweet' ? height : null
+  // `.md-embed-youtube` derives the height.
   return (
     <span className="md-image-view-preview md-atom-view-preview" contentEditable={false}>
       <iframe
-        ref={iframeRef}
         key={embed.key}
         src={embed.src}
         title={embed.title}
@@ -317,14 +302,7 @@ function EmbedFrame(props: {
         frameBorder="0"
         allow={embed.allow}
         allowFullScreen={embed.allowFullscreen}
-        style={
-          youtubeWidth != null
-            ? { width: youtubeWidth }
-            : tweetHeight != null
-              ? { height: tweetHeight }
-              : undefined
-        }
-        data-sized={tweetHeight == null ? undefined : ''}
+        style={width == null ? undefined : { width }}
       />
     </span>
   )
@@ -332,23 +310,19 @@ function EmbedFrame(props: {
 
 type XPostState = { tweet: Tweet | undefined } | { pending: Promise<Tweet | undefined> }
 
-function XPostEmbed(props: {
-  src: string
-  embed: EmbedDescriptor
-  height: number | null
-  resolveXPost: XPostResolver
-}): ReactElement {
-  const { src, embed, height, resolveXPost } = props
+function XPostEmbed(props: { src: string; resolveXPost: XPostResolver }): ReactElement {
+  const { src, resolveXPost } = props
   // The initializer runs during the first render, so a synchronous answer is
   // in the first frame; `key={src}` at the call site remounts on a new URL.
   const [state, setState] = useState<XPostState>(() => {
     try {
       const result = resolveXPost(src)
       if (result instanceof Promise) return { pending: result }
-      if (result) registerXPost()
+      registerXPost()
       return { tweet: result }
     } catch (error) {
       console.error('[meowdown] resolveXPost failed:', error)
+      registerXPost()
       return { tweet: undefined }
     }
   })
@@ -358,12 +332,14 @@ function XPostEmbed(props: {
     void state.pending.then(
       (tweet) => {
         if (cancelled) return
-        if (tweet) registerXPost()
+        registerXPost()
         setState({ tweet })
       },
       (error: unknown) => {
         console.error('[meowdown] resolveXPost failed:', error)
-        if (!cancelled) setState({ tweet: undefined })
+        if (cancelled) return
+        registerXPost()
+        setState({ tweet: undefined })
       },
     )
     return () => {
@@ -380,14 +356,13 @@ function XPostEmbed(props: {
       />
     )
   }
-  if (!state.tweet) return <EmbedFrame embed={embed} width={null} height={height} />
   return (
     <span
       className="md-image-view-preview md-atom-view-preview"
       contentEditable={false}
       data-testid="x-post-embed"
     >
-      {createElement('post-embed-x-post', { data: state.tweet })}
+      {createElement('post-embed-x-post', { data: state.tweet ?? null })}
     </span>
   )
 }
@@ -396,25 +371,18 @@ function ImagePreview(props: {
   src: string
   alt: string
   width: number | null
-  height: number | null
   resolveImageUrl?: (src: string) => string | undefined
   resolveXPost?: XPostResolver
   onImageClick?: ImageClickHandler
   interactive: boolean
 }): ReactElement | null {
-  const { src, alt, width, height, resolveImageUrl, resolveXPost, onImageClick, interactive } =
-    props
-  const embed = matchEmbed(src)
-  if (embed) {
+  const { src, alt, width, resolveImageUrl, resolveXPost, onImageClick, interactive } = props
+  if (parseXPostId(src) !== undefined) {
     if (!interactive) return null
-    if (embed.kind === 'tweet' && resolveXPost) {
-      return (
-        <XPostEmbed key={src} src={src} embed={embed} height={height} resolveXPost={resolveXPost} />
-      )
-    }
-    return <EmbedFrame embed={embed} width={width} height={height} />
+    return <XPostEmbed key={src} src={src} resolveXPost={resolveXPost ?? defaultResolveXPost} />
   }
-
+  const embed = matchEmbed(src)
+  if (embed) return interactive ? <EmbedFrame embed={embed} width={width} /> : null
   const url = (resolveImageUrl ?? defaultResolveImageUrl)(src)
   if (!url) return null
   const handleClick = onImageClick
@@ -448,18 +416,16 @@ function ImageView(props: {
   src: string
   alt: string
   width: number | null
-  height: number | null
   context: RenderContext
   children: ReactNode
 }): ReactElement {
-  const { src, alt, width, height, context, children } = props
+  const { src, alt, width, context, children } = props
   return (
     <span className="md-image-view md-atom-view">
       <ImagePreview
         src={src}
         alt={alt}
         width={width}
-        height={height}
         resolveImageUrl={context.resolveImageUrl}
         resolveXPost={context.resolveXPost}
         onImageClick={context.onImageClick}
@@ -670,13 +636,7 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
     case 'mdImage': {
       const attrs = mark.attrs as MdImageAttrs
       return (
-        <ImageView
-          src={attrs.src}
-          alt={attrs.alt}
-          width={attrs.width}
-          height={attrs.height}
-          context={context}
-        >
+        <ImageView src={attrs.src} alt={attrs.alt} width={attrs.width} context={context}>
           {children}
         </ImageView>
       )

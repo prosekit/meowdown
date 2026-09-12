@@ -5,13 +5,14 @@ import type { EditorView } from '@prosekit/pm/view'
 
 import { matchEmbed } from './embed.ts'
 import { getPastedText } from './paste.ts'
+import { parseXPostId } from './x-post.ts'
 
 const embedPasteKey = new PluginKey('meowdown-embed-paste')
 
 export function detectEmbedUrl(text: string): string | undefined {
   const trimmed = text.trim()
   if (!trimmed || /\s/.test(trimmed)) return undefined
-  return matchEmbed(trimmed) ? trimmed : undefined
+  return matchEmbed(trimmed) || parseXPostId(trimmed) ? trimmed : undefined
 }
 
 function insertEmbedFromPaste(view: EditorView, url: string): void {

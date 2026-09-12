@@ -705,20 +705,6 @@
     border-radius: var(--meowdown-image-radius, 0.5rem);
   }
 
-  .ProseMirror .md-embed-tweet {
-    display: block;
-    width: 100%;
-    max-width: 550px;
-    border: 0;
-  }
-
-  /* Reserve space for a tweet whose height is unknown (no persisted size and no
-   * height report yet), so the loaded tweet shifts layout less. Released once a
-   * height is applied (`data-sized`). */
-  .ProseMirror .md-embed-tweet:not([data-sized]) {
-    min-height: 250px;
-  }
-
   /* The card is the one atom preview whose text is meant to be selected. */
   .ProseMirror .md-image-view-preview > post-embed-x-post {
     display: block;

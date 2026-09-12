@@ -6,7 +6,6 @@ import { clsx } from 'clsx/lite'
 import { useCallback, useMemo, useRef } from 'react'
 
 import { useMounted } from '../lib/use-mounted.ts'
-import { resolveXPost } from '../lib/x-post.ts'
 
 const PAST_DAYS = 5
 const FUTURE_DAYS = 1
@@ -73,7 +72,6 @@ function DailyNoteRow({
         handleRef={handleRef}
         editorClassName={offset < 0 ? 'min-h-[100px]' : 'min-h-[40vh]'}
         onExitBoundary={handleExitBoundary}
-        resolveXPost={resolveXPost}
       />
     </section>
   )

@@ -229,7 +229,7 @@ export interface ProseKitEditorProps {
    */
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
   /**
-   * Resolves a saved tweet for an X post card. See `EditorProps.resolveXPost`.
+   * Resolves the data behind an X post URL. See `EditorProps.resolveXPost`.
    */
   resolveXPost?: XPostResolver
 

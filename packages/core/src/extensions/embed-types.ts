@@ -11,11 +11,11 @@ export type EmbedMatcher = (src: string) => EmbedDescriptor | undefined
  * the URL/attribute logic lives in one place while each side renders natively.
  */
 export interface EmbedDescriptor {
-  readonly kind: 'tweet' | 'youtube'
+  readonly kind: 'youtube'
   /**
-   * Stable identity for the widget, unique per rendered embed (e.g. the video or
-   * tweet id). Keeps ProseMirror from rebuilding the iframe on every edit, and
-   * keys the React element, so the embed never reloads.
+   * Stable identity for the widget, unique per rendered embed (e.g. the video
+   * id). Keeps ProseMirror from rebuilding the iframe on every edit, and keys
+   * the React element, so the embed never reloads.
    */
   readonly key: string
   /**
@@ -27,7 +27,7 @@ export interface EmbedDescriptor {
    */
   readonly title: string
   /**
-   * The iframe `class`, e.g. `md-embed md-embed-tweet`.
+   * The iframe `class`, e.g. `md-embed md-embed-youtube`.
    */
   readonly className: string
   /**

@@ -575,7 +575,6 @@ describe('X post embed props', () => {
     )
     const card = pmRoot.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
-    expect(pmRoot.getByTestId('tweet-embed').query()).toBeNull()
   })
 })
 

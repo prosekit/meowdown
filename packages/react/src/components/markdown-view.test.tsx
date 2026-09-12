@@ -231,23 +231,26 @@ describe('MarkdownView', () => {
     )
   })
 
-  it('renders a tweet embed', async () => {
-    await renderView('![](https://x.com/jack/status/20)')
-    const iframe = view.getByTestId('tweet-embed')
-    await expect.element(iframe).toBeInTheDocument()
-    await expect
-      .element(iframe)
-      .toHaveAttribute(
-        'src',
-        expect.stringContaining('platform.twitter.com/embed/Tweet.html?id=20'),
+  it('renders an X post card through the default resolver', async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(JSON.stringify({ data: createTweet('fetched by default') })))
+    try {
+      await renderView('![](https://x.com/jack/status/3001)')
+      const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
+      await expect.element(card).toMatchTextContent('fetched by default')
+      expect(fetchSpy).toHaveBeenCalledExactlyOnceWith(
+        'https://react-tweet.vercel.app/api/tweet/3001',
       )
+    } finally {
+      fetchSpy.mockRestore()
+    }
   })
 
   it('renders an X post card from a synchronous snapshot', async () => {
     await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => createTweet() })
     const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
-    expect(view.getByTestId('tweet-embed').query()).toBeNull()
   })
 
   it('reserves space until a promised snapshot settles', async () => {
@@ -266,10 +269,11 @@ describe('MarkdownView', () => {
     await expect.element(embed).not.toHaveAttribute('data-pending')
   })
 
-  it('falls back to the tweet iframe without a snapshot', async () => {
+  it('renders the unavailable card without a snapshot', async () => {
     await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => undefined })
-    await expect.element(view.getByTestId('tweet-embed')).toBeInTheDocument()
-    expect(view.getByTestId('x-post-embed').query()).toBeNull()
+    await expect
+      .element(view.getByTestId('x-post-embed').locate('[data-fallback]'))
+      .toBeInTheDocument()
   })
 
   it('renders a youtube embed', async () => {
