@@ -103,6 +103,21 @@ describe('markdownToDoc', () => {
     })
   })
 
+  it('splits a list at a blank-line run between items', () => {
+    const doc = markdownToDoc('- a\n\n\n- b')
+    expect(doc.childCount).toBe(3)
+    expect(doc.child(0).type.name).toBe('list')
+    expect(doc.child(1).toJSON()).toEqual({ type: 'paragraph' })
+    expect(doc.child(2).type.name).toBe('list')
+  })
+
+  it('keeps a loose list together', () => {
+    const doc = markdownToDoc('- a\n\n- b')
+    expect(doc.childCount).toBe(2)
+    expect(doc.child(0).type.name).toBe('list')
+    expect(doc.child(1).type.name).toBe('list')
+  })
+
   it('materializes empty paragraphs from blank quote lines at the edges', () => {
     expect(markdownToDoc('>\n>\n> a\n>').toJSON()).toEqual({
       type: 'doc',
