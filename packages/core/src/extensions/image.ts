@@ -37,13 +37,6 @@ export interface ImageOptions {
    */
   resolveImageUrl?: ImageUrlResolver
   /**
-   * Whether to write the height a tweet embed reports back into the trailing
-   * size comment, so the next load can seed the iframe at its final height.
-   * Defaults to `true`; disable when the document must never change without a
-   * user edit (e.g. deterministic tests).
-   */
-  persistTweetHeight?: boolean
-  /**
    * Resolve the saved data for a tweet URL. With data, the tweet renders as a
    * `post-embed-x-post` card in place of the provider iframe.
    */
@@ -67,11 +60,7 @@ const MAX_DISPLAY_HEIGHT = 500
  * A persisted tweet height seeds the iframe before `Tweet.html` reports the
  * real one, so a revisited tweet keeps its space instead of shifting layout.
  */
-function buildEmbedIframe(
-  embed: EmbedDescriptor,
-  height: number | null,
-  onHeight?: (height: number) => void,
-): HTMLIFrameElement {
+function buildEmbedIframe(embed: EmbedDescriptor, height: number | null): HTMLIFrameElement {
   const iframe = document.createElement('iframe')
   iframe.src = embed.src
   iframe.title = embed.title
@@ -84,7 +73,7 @@ function buildEmbedIframe(
   if (embed.allowFullscreen) iframe.allowFullscreen = true
   if (embed.kind === 'tweet') {
     applyTweetHeight(iframe, height)
-    listenForTweetHeight(iframe, onHeight)
+    listenForTweetHeight(iframe)
   }
   return iframe
 }
@@ -187,48 +176,22 @@ function commitImageSize(
   )
 }
 
-/**
- * Ignore reported tweet heights this close to the persisted one. Fonts, theme,
- * and container width nudge the rendered height by a few pixels per device;
- * writing those back would churn the document on every open.
- */
-const TWEET_HEIGHT_TOLERANCE = 8
-
-// REVIEW: we do NOT need height magic comments for tweets anymore, because we know the height of the tweet embed from the X Post card. We can remove this in this PR. we do not need to persist the height of the tweet embed anymore. Also remove heightObserver: ResizeObserver
-/**
- * Persist the height a tweet embed reported, so the next load can seed the
- * iframe before the tweet renders. A passive metadata write: outside undo
- * history, skipped in read-only views, and skipped inside the tolerance.
- */
-function commitTweetHeight(view: EditorView, content: HTMLElement, height: number): void {
-  if (!view.editable || !content.isConnected) return
-  const pos = view.posAtDOM(content, 0)
-  const range = getMarkRangeAt(view.state, pos, 'mdImage')
-  if (!range) return
-  const attrs = range.mark.attrs as MdImageAttrs
-  if (attrs.height != null && Math.abs(height - attrs.height) <= TWEET_HEIGHT_TOLERANCE) return
-  rewriteMagicComment(view, range, { height: Math.round(height) }, false)
-}
-
 class ImageMarkView implements MarkView {
   readonly #dom: HTMLElement
   readonly #contentDOM: HTMLElement
   readonly #view: EditorView
   readonly #resolveImageUrl: ImageUrlResolver | undefined
-  readonly #persistTweetHeight: boolean
   readonly #resolveXPost: XPostResolver | undefined
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
   #tweetIframe: HTMLIFrameElement | undefined
-  #heightObserver: ResizeObserver | undefined
   #destroyed = false
 
   constructor(mark: Mark, view: EditorView, options: ImageOptions) {
     this.#attrs = mark.attrs as MdImageAttrs
     this.#view = view
     this.#resolveImageUrl = options.resolveImageUrl
-    this.#persistTweetHeight = options.persistTweetHeight ?? true
     this.#resolveXPost = options.resolveXPost
 
     this.#dom = document.createElement('span')
@@ -286,7 +249,6 @@ class ImageMarkView implements MarkView {
 
   destroy(): void {
     this.#destroyed = true
-    this.#heightObserver?.disconnect()
   }
 
   /**
@@ -320,12 +282,7 @@ class ImageMarkView implements MarkView {
   }
 
   #buildEmbedIframe(embed: EmbedDescriptor): HTMLIFrameElement {
-    const onHeight = this.#persistTweetHeight
-      ? (height: number) => {
-          commitTweetHeight(this.#view, this.#contentDOM, height)
-        }
-      : undefined
-    const iframe = buildEmbedIframe(embed, this.#attrs.height, onHeight)
+    const iframe = buildEmbedIframe(embed, this.#attrs.height)
     if (embed.kind === 'tweet') this.#tweetIframe = iframe
     return iframe
   }
@@ -333,7 +290,7 @@ class ImageMarkView implements MarkView {
   /**
    * A synchronous answer renders in the constructor, so the card is in the
    * first frame with the rest of the document. A promise reserves the
-   * persisted height (or the stylesheet's default) until it settles.
+   * stylesheet's placeholder height until it settles.
    */
   #renderXPost(wrapper: HTMLElement, embed: EmbedDescriptor, src: string): void {
     let result: ReturnType<XPostResolver>
@@ -348,7 +305,6 @@ class ImageMarkView implements MarkView {
       return
     }
     wrapper.dataset.pending = ''
-    if (this.#attrs.height != null) wrapper.style.minHeight = `${this.#attrs.height}px`
     void result.then(
       (tweet) => this.#showXPost(wrapper, embed, tweet),
       (error: unknown) => {
@@ -361,7 +317,6 @@ class ImageMarkView implements MarkView {
   #showXPost(wrapper: HTMLElement, embed: EmbedDescriptor, tweet: Tweet | undefined): void {
     if (this.#destroyed) return
     delete wrapper.dataset.pending
-    wrapper.style.minHeight = ''
     if (!tweet) {
       wrapper.replaceChildren(this.#buildEmbedIframe(embed))
       return
@@ -370,14 +325,6 @@ class ImageMarkView implements MarkView {
     const element = document.createElement('post-embed-x-post')
     element.data = tweet
     wrapper.replaceChildren(element)
-    if (!this.#persistTweetHeight) return
-    // The card's own height stands in for the iframe's height report, so a
-    // snapshot that arrives after the first paint still seeds the next load.
-    this.#heightObserver = new ResizeObserver((entries) => {
-      const height = entries[0]?.contentRect.height
-      if (height) commitTweetHeight(this.#view, this.#contentDOM, height)
-    })
-    this.#heightObserver.observe(element)
   }
 
   /**

@@ -2,7 +2,6 @@ import type { Tweet } from '@post-embed/types'
 import { describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
-import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 import { createTweet } from '../testing/tweet-fixture.ts'
 
@@ -17,14 +16,10 @@ const tweetIframe = pmRoot.getByTestId('tweet-embed')
 const TWEET = '![](https://x.com/jack/status/20)'
 
 // An editor whose tweet embeds ask `resolveXPost` for a saved snapshot.
-function setup(
-  markdown: string,
-  resolveXPost: XPostResolver | undefined,
-  persistTweetHeight = false,
-): Fixture {
+function setup(markdown: string, resolveXPost: XPostResolver | undefined): Fixture {
   const fixture = setupFixture()
   const { editor, n } = fixture
-  editor.use(defineImage({ resolveXPost, persistTweetHeight }))
+  editor.use(defineImage({ resolveXPost }))
   fixture.set(n.doc(n.paragraph(markdown)))
   return fixture
 }
@@ -48,32 +43,20 @@ describe('X post embed', () => {
     expect(getComputedStyle(text.element()).userSelect).not.toBe('none')
   })
 
-  it('reserves the persisted height until a promise settles, then writes the card height back', async () => {
+  it('reserves space until a promise settles', async () => {
     let settle!: (tweet: Tweet) => void
     const pending = new Promise<Tweet>((resolve) => {
       settle = resolve
     })
-    using fixture = setup(`${TWEET}<!-- {"height":300} -->`, () => pending, true)
-    const { editor } = fixture
+    using fixture = setup(TWEET, () => pending)
+    void fixture
     expect(postEmbed.element().hasAttribute('data-pending')).toBe(true)
-    expect(getComputedStyle(postEmbed.element()).minHeight).toBe('300px')
+    expect(getComputedStyle(postEmbed.element()).minHeight).toBe('250px')
     expect(card.query()).toBeNull()
 
     settle(createTweet())
     await expect.element(card).toBeInTheDocument()
     expect(postEmbed.element().hasAttribute('data-pending')).toBe(false)
-    await vi.waitFor(() => {
-      const height = /<!-- \{"height":(\d+)\} -->/.exec(docToMarkdown(editor.state.doc))?.[1]
-      expect(height).toBeDefined()
-      expect(Number(height)).not.toBe(300)
-    })
-  })
-
-  it('reserves the default height when no height is persisted', () => {
-    using fixture = setup(TWEET, () => new Promise<Tweet>(() => {}))
-    void fixture
-    expect(postEmbed.element().hasAttribute('data-pending')).toBe(true)
-    expect(getComputedStyle(postEmbed.element()).minHeight).toBe('250px')
   })
 
   it('falls back to the provider iframe without a snapshot', async () => {

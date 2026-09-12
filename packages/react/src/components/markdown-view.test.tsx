@@ -250,17 +250,15 @@ describe('MarkdownView', () => {
     expect(view.getByTestId('tweet-embed').query()).toBeNull()
   })
 
-  it('reserves the persisted height until a promised snapshot settles', async () => {
+  it('reserves space until a promised snapshot settles', async () => {
     let settle!: (tweet: Tweet) => void
     const pending = new Promise<Tweet>((resolve) => {
       settle = resolve
     })
-    await renderView('![](https://x.com/jack/status/20)<!-- {"height":300} -->', {
-      resolveXPost: () => pending,
-    })
+    await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => pending })
     const embed = view.getByTestId('x-post-embed')
     await expect.element(embed).toHaveAttribute('data-pending', '')
-    expect(getComputedStyle(embed.element()).minHeight).toBe('300px')
+    expect(getComputedStyle(embed.element()).minHeight).toBe('250px')
 
     settle(createTweet())
     const card = embed.locate('[data-post-embed="x-post"]')

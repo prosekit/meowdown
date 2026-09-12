@@ -33,15 +33,11 @@ export const matchTweet: EmbedMatcher = (src) => {
 
 /**
  * `Tweet.html` reports its rendered height via `postMessage`; size the iframe to
- * fit and pass each reported height to `onHeight`. Returns a cleanup that
- * removes the listener. The cleanup also runs once the iframe leaves the DOM, so
- * the editor's DOM mark view (which has no destroy hook) is covered, while a
+ * fit. Returns a cleanup that removes the listener. The cleanup also runs once
+ * the iframe leaves the DOM, so the editor's DOM mark view is covered, while a
  * React caller can call it on unmount.
  */
-export function listenForTweetHeight(
-  iframe: HTMLIFrameElement,
-  onHeight?: (height: number) => void,
-): () => void {
+export function listenForTweetHeight(iframe: HTMLIFrameElement): () => void {
   const onMessage = (event: MessageEvent) => {
     if (event.source !== iframe.contentWindow) return
     try {
@@ -57,7 +53,6 @@ export function listenForTweetHeight(
       // when the tweet is unavailable); only a positive height is a real size.
       if (typeof height === 'number' && height > 0) {
         applyTweetHeight(iframe, height)
-        onHeight?.(height)
       }
     } catch (error) {
       console.warn('[meowdown] failed to parse tweet resize message:', error)

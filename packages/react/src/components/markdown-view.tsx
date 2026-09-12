@@ -377,7 +377,6 @@ function XPostEmbed(props: {
         contentEditable={false}
         data-testid="x-post-embed"
         data-pending=""
-        style={height == null ? undefined : { minHeight: height }}
       />
     )
   }
