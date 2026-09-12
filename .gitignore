@@ -15,4 +15,3 @@ __screenshots__
 .vitest-reports
 .vitest
 .astro
-perf-out
