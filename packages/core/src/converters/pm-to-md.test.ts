@@ -22,14 +22,50 @@ describe('docToMarkdown', () => {
     expect(docToMarkdown(doc)).toBe('a\n\n\nb\n')
   })
 
-  it('drops a leading empty paragraph', () => {
+  it('keeps a leading empty paragraph', () => {
     const doc = n.doc(n.paragraph(), n.paragraph('a'))
-    expect(docToMarkdown(doc)).toBe('a\n')
+    expect(docToMarkdown(doc)).toBe('\na\n')
   })
 
-  it('drops a trailing empty paragraph', () => {
+  it('keeps a trailing empty paragraph', () => {
     const doc = n.doc(n.paragraph('a'), n.paragraph())
-    expect(docToMarkdown(doc)).toBe('a\n')
+    expect(docToMarkdown(doc)).toBe('a\n\n')
+  })
+
+  it('keeps a document of empty paragraphs', () => {
+    const doc = n.doc(n.paragraph(), n.paragraph(), n.paragraph())
+    expect(docToMarkdown(doc)).toBe('\n\n\n')
+  })
+
+  it('writes a lone empty paragraph as the empty document', () => {
+    expect(docToMarkdown(n.doc(n.paragraph()))).toBe('\n')
+    const doc = n.doc({ frontmatter: 'title: x' }, n.paragraph())
+    expect(docToMarkdown(doc, { frontmatter: true })).toBe('---\ntitle: x\n---\n')
+  })
+
+  it('keeps empty paragraphs after frontmatter', () => {
+    const doc = n.doc({ frontmatter: 'title: x' }, n.paragraph(), n.paragraph(), n.paragraph('a'))
+    expect(docToMarkdown(doc, { frontmatter: true })).toBe('---\ntitle: x\n---\n\n\n\na\n')
+  })
+
+  it('keeps a leading empty paragraph in a blockquote', () => {
+    const doc = n.doc(n.blockquote(n.paragraph(), n.paragraph('a')))
+    expect(docToMarkdown(doc)).toBe('>\n> a\n')
+  })
+
+  it('keeps a trailing empty paragraph in a blockquote', () => {
+    const doc = n.doc(n.blockquote(n.paragraph('a'), n.paragraph()))
+    expect(docToMarkdown(doc)).toBe('> a\n>\n')
+  })
+
+  it('separates a blockquote opening with an empty paragraph from the block above', () => {
+    const doc = n.doc(n.paragraph('x'), n.blockquote(n.paragraph(), n.paragraph('a')))
+    expect(docToMarkdown(doc)).toBe('x\n\n>\n> a\n')
+  })
+
+  it('writes a trailing empty paragraph of a list item after the list', () => {
+    const doc = n.doc(n.list({ kind: 'bullet' }, n.paragraph('x'), n.paragraph()))
+    expect(docToMarkdown(doc)).toBe('- x\n\n')
   })
 
   it('keeps a level-1 heading', () => {

@@ -7,6 +7,10 @@ const EXACT_CASES: string[] = [
   // a plain paragraph
   'hello world',
 
+  // blank lines at the document's edges are empty paragraphs
+  '\n\nhello world\n\n\n',
+  '\n<?\n\n',
+
   // raw HTML is literal text
   '<div class="x">hi</div>',
 
@@ -195,7 +199,6 @@ const NORMALIZING_CASES: string[] = [
   // an unterminated processing instruction runs to the end of the document,
   // the blank lines after it included; an unterminated comment the same
   '<?\n\t',
-  '\n<?\n\n',
   ' <!--',
 
   // an info string that opens with the fence character keeps off the fence

@@ -59,7 +59,12 @@ export function docToMarkdown(node: ProseMirrorNode, options: DocToMarkdownOptio
   if (options.frontmatter) {
     emitFrontmatter(node.attrs.frontmatter as Frontmatter, out)
   }
-  emit(node, out)
+  // A document holds at least one block, so a lone empty paragraph is the
+  // empty document, not a blank line.
+  const child = node.childCount === 1 ? node.child(0) : undefined
+  if (!(child && isNodeOfType(child, 'paragraph') && child.childCount === 0)) {
+    emit(node, out)
+  }
   return out.finish()
 }
 
@@ -145,6 +150,11 @@ class MdOut {
    * "> " prefix).
    */
   private deferredBlankPrefix: string | null = null
+  /**
+   * Length of `parts` when the last line carrying content was closed. Whatever
+   * follows is the blank lines empty blocks wrote, which `finish` keeps.
+   */
+  private contentEnd = 0
 
   /**
    * Write `text`, opening each embedded line with the current line prefix.
@@ -191,20 +201,30 @@ class MdOut {
   }
 
   /**
-   * End a block that owns no line of its own (an empty paragraph): flush the
-   * blank line owed by the previous block now and owe the next block a fresh
-   * one, so each empty block yields one extra blank line. A marker-bearing
-   * block (an empty list item's `- `) still owns its first line and falls
-   * through to `closeBlock`. At the very start of the output there is no
-   * blank line to flush or owe - leading empty blocks vanish, mirroring the
-   * parser, which materializes empty paragraphs only between sibling blocks.
+   * End a block that owns no line of its own (an empty paragraph): it is one
+   * blank line. After another block, the blank line that block owes is this
+   * one, and the next block is owed a fresh one, so each empty block adds a
+   * blank line to the separator. With nothing owed (the start of the output)
+   * the line is written directly and nothing is owed after it: a leading empty
+   * block is a blank line, not a separator. A marker-bearing block (an empty
+   * list item's `- `, an empty quote line's `>`) writes its marker as the line.
    */
   closeEmptyBlock(): void {
-    if (!this.atLineStart || this.pendingFirst !== null) {
+    if (!this.atLineStart) {
       this.closeBlock()
       return
     }
-    if (this.parts.length === 0) return
+    if (this.pendingFirst !== null) {
+      this.emitDeferredBlankLine()
+      const marker = this.pendingFirst
+      this.parts.push(marker.endsWith('] ') ? marker : marker.trimEnd(), '\n')
+      this.pendingFirst = null
+      return
+    }
+    if (this.deferredBlankPrefix === null) {
+      this.parts.push(this.linePrefix.trimEnd(), '\n')
+      return
+    }
     this.emitDeferredBlankLine()
     this.deferredBlankPrefix = this.linePrefix
   }
@@ -225,7 +245,10 @@ class MdOut {
       this.pendingFirst = null
       this.atLineStart = false
     }
-    if (!this.atLineStart) this.parts.push('\n')
+    if (!this.atLineStart) {
+      this.parts.push('\n')
+      this.contentEnd = this.parts.length
+    }
     this.atLineStart = true
     this.deferredBlankPrefix = this.linePrefix
   }
@@ -293,17 +316,19 @@ class MdOut {
   }
 
   finish(): string {
-    // Drop the blank lines the last block left behind and end with exactly one
-    // newline. A blank line is layout; trailing spaces on a line that carries
-    // content are part of that text and stay, so the text survives a round trip.
-    const text = this.parts.join('')
+    // The last line carrying content ends with exactly one newline: the blank
+    // line it owes and the line breaks its text ended with are dropped, while
+    // trailing spaces on the line are part of that text and stay. The blank
+    // lines that empty blocks wrote after it are content and stay too.
+    const text = this.parts.slice(0, this.contentEnd).join('')
     let cut = text.length
     for (let i = text.length - 1; i >= 0; i--) {
       const code = text.charCodeAt(i)
       if (code === CHAR_LINE_FEED) cut = i
       else if (code !== CHAR_SPACE && code !== CHAR_TAB) break
     }
-    return text.slice(0, cut) + '\n'
+    const head = cut === 0 ? '' : text.slice(0, cut) + '\n'
+    return head + this.parts.slice(this.contentEnd).join('') || '\n'
   }
 
   private emitDeferredBlankLine(): void {
