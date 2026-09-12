@@ -924,6 +924,26 @@ describe('escapes and whitespace', () => {
     expect(reparsed.toJSON()).toEqual(doc.toJSON())
   })
 
+  it('keeps a blank-line run between the blocks of a list item', () => {
+    expect(roundtrip('- a\n\n\n\n  b')).toBe('- a\n\n\n\n  b\n')
+  })
+
+  it('keeps a blank-line run before a nested list', () => {
+    expect(roundtrip('- a\n\n\n\n  - b')).toBe('- a\n\n\n\n  - b\n')
+  })
+
+  it('keeps a blank-line run between the blocks of a quoted list item', () => {
+    expect(roundtrip('> - a\n>\n>\n>   b')).toBe('> - a\n>\n>\n>   b\n')
+  })
+
+  it('keeps typed empty paragraphs inside a list item', () => {
+    const doc = n.doc(
+      n.list({ kind: 'bullet', marker: '-' }, n.paragraph('x'), n.paragraph(), n.paragraph('y')),
+    )
+    const reparsed = markdownToDoc(docToMarkdown(doc))
+    expect(reparsed.toJSON()).toEqual(doc.toJSON())
+  })
+
   // A blank line after an item's last line belongs to no item, so the empty
   // paragraph comes back after the list.
   it('moves a trailing empty paragraph out of a list item', () => {

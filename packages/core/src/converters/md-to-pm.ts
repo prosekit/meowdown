@@ -699,7 +699,10 @@ function convertListItem(
   // on top of whatever the enclosing containers already add. Both the marker and
   // the gap are known once the first block after the mark is reached.
   let contentColumn = column + markWidth + markerGap
-  let sawContent = false
+  // The end of the previous block, once the item has one. Blank lines between
+  // an item's blocks are empty paragraphs, as between any siblings; a blank
+  // quote line's `QuoteMark` sits in the gap and is counted through it.
+  let previousTo: number | undefined
 
   if (cursor.firstChild()) {
     do {
@@ -715,8 +718,7 @@ function convertListItem(
         markEndColumn = measureContentColumn(text, cursor.to)
         continue
       }
-      if (!sawContent) {
-        sawContent = true
+      if (previousTo == null) {
         // Only content that opens on the marker's own line measures a gap; an
         // item whose content starts on the next line takes the canonical single
         // space, the column its own continuation lines are indented to.
@@ -724,7 +726,10 @@ function convertListItem(
         const gap = onMarkLine ? measureContentColumn(text, cursor.from) - markEndColumn : 1
         markerGap = gap >= 2 && gap <= 4 ? gap : 1
         contentColumn = column + markWidth + markerGap
+      } else {
+        appendGapParagraphs(content, nodes, text, previousTo, cursor.from)
       }
+      previousTo = cursor.to
       if (kind === 'bullet' && cursor.type.id === LEZER_NODE_IDS.Task) {
         const task = convertTaskItem(nodes, cursor, text, contentColumn)
         taskChecked = task.checked
