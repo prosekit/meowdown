@@ -60,7 +60,7 @@ describe('formatMagicComment / stripMagicComment', () => {
   it('escapes double dashes so the comment survives the inline comment rule', () => {
     const snapshot = { kind: 'x-post', data: { text: 'a -- b ---> c' } }
     const comment = formatMagicComment({ snapshot })
-    expect(comment).not.toContain('--')
+    expect(comment.slice('<!--'.length, -'-->'.length)).not.toContain('--')
     expect(parseMagicComment(comment)).toEqual({ snapshot })
   })
 

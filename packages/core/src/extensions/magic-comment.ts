@@ -53,7 +53,8 @@ export function parseMagicComment(comment: string): MagicComment | undefined {
   const width = toPositiveNumber(data.width)
   const height = toPositiveNumber(data.height)
   const noLink = data.noLink === true ? true : undefined
-  const snapshot = isObject(data.snapshot) ? data.snapshot : undefined
+  const snapshot =
+    isObject(data.snapshot) && !Array.isArray(data.snapshot) ? data.snapshot : undefined
 
   // Not a magic comment unless it carries at least one recognized field.
   if (!width && !height && !noLink && !snapshot) return
