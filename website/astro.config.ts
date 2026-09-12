@@ -30,7 +30,7 @@ export default defineConfig({
     plugins: [tailwindcss()],
     // react-tweet ships CSS modules that Node cannot load unbundled during
     // prerendering.
-    ssr: { noExternal: ['react-tweet'] },
+    resolve: { noExternal: ['react-tweet'] },
     // If the target is below Safari 17.5, Lightning CSS downlevels `light-dark()` to a broken polyfill.
     build: { cssTarget: 'safari17.5' },
     server: {
