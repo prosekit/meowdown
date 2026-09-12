@@ -20,7 +20,7 @@ import {
 } from '../lib/demo-data.ts'
 import { computeTextPatch } from '../lib/text-patch.ts'
 import { useMounted } from '../lib/use-mounted.ts'
-import { resolveXPost, XPostLoaders } from '../lib/x-post.tsx'
+import { resolveXPost } from '../lib/x-post.ts'
 import { getPresetContent } from '../presets/presets.ts'
 
 import { CodeMirrorPane } from './codemirror-pane.tsx'
@@ -227,7 +227,6 @@ function MainEditorDemo() {
           </MeowdownEditor>
         </div>
 
-        <XPostLoaders />
         {showSource && (
           <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto rounded-xl border border-solid border-black/8 bg-white dark:border-white/12 dark:bg-stone-900">
             <CodeMirrorPane
