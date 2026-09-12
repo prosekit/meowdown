@@ -106,7 +106,7 @@ describe('SlashMenu', () => {
     await userEvent.keyboard('{Enter}')
 
     await expect.element(page.locate('.ProseMirror table')).not.toBeInTheDocument()
-    expect(ref.current?.getMarkdown()).toBe('Name // Table\n')
+    expect(ref.current?.getMarkdown()).toBe('Name // Table\n\n')
   })
 
   it('does not select a matching host template from double-slash text', async () => {
@@ -124,7 +124,7 @@ describe('SlashMenu', () => {
     await userEvent.keyboard('{Enter}')
 
     expect(onSelect).not.toHaveBeenCalled()
-    expect(ref.current?.getMarkdown()).toBe('Name // Meeting note\n')
+    expect(ref.current?.getMarkdown()).toBe('Name // Meeting note\n\n')
   })
 
   it('applies the selected block type and removes the query text', async () => {
