@@ -698,13 +698,40 @@
    * ------------------------------------------------------------------------- */
 
   /* The cards are the atom previews whose text is meant to be selected. */
-  .ProseMirror .md-image-view-preview > post-embed-x-post,
-  .ProseMirror .md-image-view-preview > post-embed-youtube-video {
+  .ProseMirror .md-image-view-preview post-embed-x-post,
+  .ProseMirror .md-image-view-preview post-embed-youtube-video {
     display: block;
     max-width: 550px;
 
     -webkit-user-select: text;
     user-select: text;
+  }
+
+  /* A video card wrapped in the resizable root: the root owns the width (the
+   * persisted or dragged one; block-level `width: auto` keeps the default
+   * width when nothing is persisted) and the card fills it. The card's height
+   * is its content's, so the height the root writes while dragging is
+   * overridden. */
+  .ProseMirror .md-embed-resizable {
+    position: relative;
+    display: block;
+    /* New stacking context so the handle's `mix-blend-mode` mixes only with the
+     * card, not the page behind it. */
+    isolation: isolate;
+    max-width: 100%;
+    min-width: 2.5rem;
+    height: auto !important;
+  }
+
+  .ProseMirror .md-embed-resizable post-embed-youtube-video {
+    width: 100%;
+    max-width: none;
+  }
+
+  /* The resize handle tracks pointer moves on `window`; a cross-origin player
+   * iframe would swallow them mid-drag, so mute it while resizing. */
+  .ProseMirror .md-embed-resizable[data-resizing] iframe {
+    pointer-events: none;
   }
 
   /* ---------------------------------------------------------------------------
@@ -970,7 +997,9 @@
     }
 
     .md-image-resizable:hover .md-image-resize-handle,
-    .md-image-resizable[data-resizing] .md-image-resize-handle {
+    .md-image-resizable[data-resizing] .md-image-resize-handle,
+    .md-embed-resizable:hover .md-image-resize-handle,
+    .md-embed-resizable[data-resizing] .md-image-resize-handle {
       opacity: 1;
       transform: scale(1);
       pointer-events: auto;

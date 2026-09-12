@@ -2,6 +2,7 @@ import type { Tweet } from '@post-embed/types'
 import { describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
+import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 import { createTweet } from '../testing/tweet-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
@@ -13,6 +14,7 @@ const xPostEmbed = pmRoot.getByTestId('x-post-embed')
 const xPostCard = xPostEmbed.locate('[data-post-embed="x-post"]')
 const videoEmbed = pmRoot.getByTestId('youtube-video-embed')
 const videoCard = videoEmbed.locate('[data-post-embed="youtube-video"]')
+const videoResizable = videoEmbed.getByTestId('embed-resizable')
 
 const TWEET = '![](https://x.com/jack/status/20)'
 const VIDEO = '![](https://www.youtube.com/watch?v=aqz-KE-bpKQ)'
@@ -93,5 +95,43 @@ describe('YouTube video embed', () => {
     } finally {
       fetchSpy.mockRestore()
     }
+  })
+})
+
+// Releasing a resize rewrites only the trailing `<!-- {"width":N} -->`; the
+// card keeps its content height, so no height is persisted.
+describe('YouTube video resize', () => {
+  const resolveYouTubeVideo = () => createYouTubeVideo()
+
+  function endResize(width: number): void {
+    videoResizable
+      .element()
+      .dispatchEvent(new CustomEvent('resizeEnd', { detail: { width, height: 100 } }))
+  }
+
+  it('applies a persisted width to the card', async () => {
+    using fixture = setup(`${VIDEO}<!-- {"width":320} -->`, { resolveYouTubeVideo })
+    void fixture
+    await expect.element(videoResizable).toHaveAttribute('data-width', '320')
+    await expect.element(videoCard.getByText('Big Buck Bunny')).toBeInTheDocument()
+    expect(getComputedStyle(videoCard.element()).width).toBe('320px')
+  })
+
+  it('writes a width comment when resized', async () => {
+    using fixture = setup(VIDEO, { resolveYouTubeVideo })
+    const { editor } = fixture
+    await expect.element(videoResizable).toBeInTheDocument()
+    endResize(200)
+    await expect.element(videoResizable).toHaveAttribute('data-width', '200')
+    expect(docToMarkdown(editor.state.doc).trim()).toBe(`${VIDEO}<!-- {"width":200} -->`)
+  })
+
+  it('drops a stale height when resized again', async () => {
+    using fixture = setup(`${VIDEO}<!-- {"width":100,"height":75} -->`, { resolveYouTubeVideo })
+    const { editor } = fixture
+    await expect.element(videoResizable).toHaveAttribute('data-width', '100')
+    endResize(320)
+    await expect.element(videoResizable).toHaveAttribute('data-width', '320')
+    expect(docToMarkdown(editor.state.doc).trim()).toBe(`${VIDEO}<!-- {"width":320} -->`)
   })
 })

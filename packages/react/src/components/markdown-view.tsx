@@ -295,10 +295,11 @@ function WikilinkChip(props: {
 function PostEmbed(props: {
   kind: PostEmbedKind
   src: string
+  width: number | null
   resolveXPost: XPostResolver
   resolveYouTubeVideo: YouTubeVideoResolver
 }): ReactElement {
-  const { kind, src, resolveXPost, resolveYouTubeVideo } = props
+  const { kind, src, width, resolveXPost, resolveYouTubeVideo } = props
   // Registration is idempotent and must precede the element so React sets
   // `url` and `resolver` as properties of the upgraded element.
   registerXPost()
@@ -315,6 +316,9 @@ function PostEmbed(props: {
             url: src,
             resolver: resolveYouTubeVideo,
             playback: 'inline',
+            // A persisted width from a resize in the editor; the card's own
+            // 550px cap only applies to the default width.
+            style: width == null ? undefined : { width, maxWidth: 'none' },
           })}
     </span>
   )
@@ -348,6 +352,7 @@ function ImagePreview(props: {
         key={src}
         kind={kind}
         src={src}
+        width={width}
         resolveXPost={resolveXPost ?? defaultResolveXPost}
         resolveYouTubeVideo={resolveYouTubeVideo ?? defaultResolveYouTubeVideo}
       />

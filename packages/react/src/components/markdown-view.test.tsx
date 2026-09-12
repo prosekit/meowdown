@@ -284,6 +284,15 @@ describe('MarkdownView', () => {
     expect(view.locate('iframe').query()).toBeNull()
   })
 
+  it('applies a persisted width to a YouTube video card', async () => {
+    await renderView('![](https://youtu.be/aqz-KE-bpKQ)<!-- {"width":320} -->', {
+      resolveYouTubeVideo: () => createYouTubeVideo(),
+    })
+    const card = view.getByTestId('youtube-video-embed').locate('[data-post-embed="youtube-video"]')
+    await expect.element(card).toMatchTextContent('Big Buck Bunny')
+    expect(getComputedStyle(card.element()).width).toBe('320px')
+  })
+
   it('omits recognized embeds before resolving images when interactive is false', async () => {
     const resolveImageUrl = vi.fn((src: string) => src)
     await renderView('![](https://x.com/jack/status/20)\n\n![](https://youtu.be/dQw4w9WgXcQ)', {

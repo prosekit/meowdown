@@ -165,6 +165,17 @@ function commitImageSize(
   )
 }
 
+/**
+ * Persist a resized width into the trailing magic comment. A card's height is
+ * its content's, so any persisted height is dropped rather than carried over.
+ */
+function commitEmbedWidth(view: EditorView, content: HTMLElement, rawWidth: number): void {
+  const pos = view.posAtDOM(content, 0)
+  const range = getMarkRangeAt(view.state, pos, 'mdImage')
+  if (!range) return
+  rewriteMagicComment(view, range, { width: Math.round(rawWidth), height: undefined }, true)
+}
+
 class ImageMarkView implements MarkView {
   readonly #dom: HTMLElement
   readonly #contentDOM: HTMLElement
@@ -272,7 +283,37 @@ class ImageMarkView implements MarkView {
     element.playback = 'inline'
     element.resolver = this.#resolveYouTubeVideo
     element.url = src
-    return element
+    return this.#buildResizableVideo(element)
+  }
+
+  /**
+   * A resizable video card: the same resizable web component as images, but
+   * only the dragged width is persisted, as `<!-- {"width":N} -->`; the card
+   * keeps its content height.
+   */
+  #buildResizableVideo(element: HTMLElement): HTMLElement {
+    registerResizableRootElement()
+    registerResizableHandleElement()
+
+    const root = document.createElement('prosekit-resizable-root')
+    root.className = 'md-embed-resizable'
+    root.dataset.testid = 'embed-resizable'
+    applySize(root, this.#attrs.width, null)
+    root.appendChild(element)
+
+    const handle = document.createElement('prosekit-resizable-handle')
+    handle.className = 'md-image-resize-handle'
+    handle.setAttribute('position', 'bottom-right')
+    // A click (no drag) on the handle must not bubble to the image-click handler.
+    handle.addEventListener('click', (event) => event.stopPropagation())
+    root.appendChild(handle)
+
+    root.addEventListener('resizeEnd', (event) => {
+      commitEmbedWidth(this.#view, this.#contentDOM, (event as ResizeEndEvent).detail.width)
+    })
+
+    this.#resizableRoot = root
+    return root
   }
 
   /**
