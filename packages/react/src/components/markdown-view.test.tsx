@@ -268,6 +268,25 @@ describe('MarkdownView', () => {
     expect(card.locate('[data-pending]').query()).toBeNull()
   })
 
+  it('renders a saved snapshot in the first frame without calling the resolver', async () => {
+    const resolveXPost = vi.fn(() => createTweet())
+    const comment = `<!-- ${JSON.stringify({ snapshot: { kind: 'x-post', data: createTweet('saved') } })} -->`
+    await renderView(`![](https://x.com/jack/status/20)${comment}`, { resolveXPost })
+    const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
+    await expect.element(card).toMatchTextContent('saved')
+    expect(resolveXPost).not.toHaveBeenCalled()
+    expect(card.locate('[data-fallback]').query()).toBeNull()
+  })
+
+  it('resolves when the saved snapshot does not validate', async () => {
+    await renderView(
+      '![](https://x.com/jack/status/20)<!-- {"snapshot":{"kind":"x-post","data":{"bogus":1}}} -->',
+      { resolveXPost: () => createTweet() },
+    )
+    const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
+    await expect.element(card).toMatchTextContent('just setting up my twttr')
+  })
+
   it('renders the unavailable card without a snapshot', async () => {
     await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => undefined })
     await expect

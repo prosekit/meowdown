@@ -33,6 +33,21 @@ describe('parseMagicComment', () => {
     expect(parseMagicComment('<!-- {bad json} -->')).toBeUndefined()
     expect(parseMagicComment('not a comment')).toBeUndefined()
   })
+
+  it('reads a nested snapshot object and rejects other snapshot values', () => {
+    expect(parseMagicComment('<!-- {"snapshot":{"kind":"x-post","data":{"b":1}}} -->')).toEqual({
+      snapshot: { kind: 'x-post', data: { b: 1 } },
+    })
+    expect(parseMagicComment('<!-- {"snapshot":1} -->')).toBeUndefined()
+    expect(parseMagicComment('<!-- {"snapshot":null} -->')).toBeUndefined()
+    expect(parseMagicComment('<!-- {"snapshot":[]} -->')).toBeUndefined()
+  })
+
+  it('reads the first comment of a stacked run', () => {
+    expect(parseMagicComment('<!-- {"width":100} --><!-- {"width":320} -->')).toEqual({
+      width: 100,
+    })
+  })
 })
 
 describe('formatMagicComment / stripMagicComment', () => {
@@ -42,6 +57,13 @@ describe('formatMagicComment / stripMagicComment', () => {
     expect(parseMagicComment(comment)).toEqual({ width: 320, height: 240 })
   })
 
+  it('escapes double dashes so the comment survives the inline comment rule', () => {
+    const snapshot = { kind: 'x-post', data: { text: 'a -- b ---> c' } }
+    const comment = formatMagicComment({ snapshot })
+    expect(comment).not.toContain('--')
+    expect(parseMagicComment(comment)).toEqual({ snapshot })
+  })
+
   it('strips only a trailing comment', () => {
     expect(stripMagicComment('![a](u)<!-- {"width":320} -->')).toBe('![a](u)')
     expect(stripMagicComment('![a](u)')).toBe('![a](u)')
@@ -49,6 +71,9 @@ describe('formatMagicComment / stripMagicComment', () => {
 
   it('strips a whole stacked run of trailing comments', () => {
     expect(stripMagicComment('![a](u)<!-- {"width":320} --><!-- {"height":240} -->')).toBe(
+      '![a](u)',
+    )
+    expect(stripMagicComment('![a](u)<!-- {"snapshot":{"x":{}}} --><!-- {"width":1} -->')).toBe(
       '![a](u)',
     )
   })

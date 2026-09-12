@@ -741,6 +741,7 @@ function walkImage(
   const title: string = resolution.title
   const width = trailing?.magic.width ?? null
   const height = trailing?.magic.height ?? null
+  const snapshot = trailing?.magic.snapshot ?? null
   const to = trailing?.to ?? node.to
 
   emit(out, node.from, to, [
@@ -752,6 +753,7 @@ function walkImage(
       title,
       width,
       height,
+      snapshot,
       syntax: null,
       wikiTarget: null,
     }),
@@ -850,6 +852,7 @@ function walkWikiEmbed(
         title: '',
         width: embed.width,
         height: embed.height,
+        snapshot: null,
         syntax: 'wikiEmbed',
         wikiTarget: embed.target,
       }),

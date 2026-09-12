@@ -9,7 +9,9 @@ import {
   type FileLinkResolver,
   type InlineMarkOptions,
 } from './inline-text-to-mark-chunks.ts'
+import { formatMagicComment } from './magic-comment.ts'
 import type { MarkChunk } from './mark-chunk.ts'
+import { isMarkOfType } from './mark-names.ts'
 import {
   normalizeReferenceLabel,
   type ReferenceDefinition,
@@ -670,6 +672,17 @@ describe('image', () => {
       [7, 20]
       "
     `)
+  })
+
+  it('folds a trailing snapshot comment into the image attrs', () => {
+    const snapshot = { kind: 'x-post', data: { text: 'a -- b' } }
+    const text = `![](https://x.com/i/status/20)${formatMagicComment({ snapshot })}`
+    const chunks = inlineTextToMarkChunks(getMarkBuilders(), text)
+    const image = chunks
+      .flatMap(([, , marks]) => marks)
+      .find((mark) => isMarkOfType(mark, 'mdImage'))
+    expect(image?.attrs.snapshot).toEqual(snapshot)
+    expect(chunks.at(-1)?.[1]).toBe(text.length)
   })
 
   it('folds a trailing width comment on an image inside a link label', () => {

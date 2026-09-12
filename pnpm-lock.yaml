@@ -81,6 +81,9 @@ importers:
       '@post-embed/elements':
         specifier: ^0.1.0
         version: 0.1.0(typescript@6.0.3)
+      '@post-embed/schema':
+        specifier: ^0.1.0
+        version: 0.1.0(typescript@6.0.3)
       '@post-embed/types':
         specifier: ^0.1.0
         version: 0.1.0
@@ -138,6 +141,9 @@ importers:
       unified:
         specifier: ^11.0.5
         version: 11.0.5
+      valibot:
+        specifier: ^1.4.2
+        version: 1.4.2(typescript@6.0.3)
     devDependencies:
       '@meowdown/vitest':
         specifier: workspace:*

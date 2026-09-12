@@ -31,6 +31,7 @@
     "@meowdown/markdown": "workspace:^",
     "@ocavue/utils": "^1.8.0",
     "@post-embed/elements": "^0.1.0",
+    "@post-embed/schema": "^0.1.0",
     "@post-embed/types": "^0.1.0",
     "@prosekit/core": "^0.13.2",
     "@prosekit/extensions": "^0.18.2",
@@ -49,7 +50,8 @@
     "remark-gfm": "^4.0.1",
     "remark-stringify": "^11.0.0",
     "unicode-by-name": "^0.2.0",
-    "unified": "^11.0.5"
+    "unified": "^11.0.5",
+    "valibot": "^1.4.2"
   },
   "devDependencies": {
     "@meowdown/vitest": "workspace:*",

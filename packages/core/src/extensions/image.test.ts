@@ -3,6 +3,7 @@ import { NodeSelection } from '@prosekit/pm/state'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
+import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { findText } from '../testing/find-text.ts'
 import {
   getSelectionSnapshot,
@@ -329,6 +330,20 @@ describe('image resize', () => {
     using fixture = setupResize('![cat](u)<!-- {"width":200} -->')
     void fixture
     await expect.element(resizable).toHaveAttribute('data-width', '200')
+  })
+
+  // A stacked run reads its first comment and a rewrite folds the run into
+  // one; before, the run failed to parse and the rewrite kept only the patch.
+  it('keeps the fields of the first comment in a stacked run when resized', async () => {
+    const snapshot = '{"snapshot":{"kind":"x-post","data":{"b":1}}}'
+    using fixture = setupResize(`![cat](u)<!-- ${snapshot} --><!-- {"width":100} -->`)
+    const { editor } = fixture
+    await expect.element(resizable).toBeInTheDocument()
+    endResize(200)
+    await expect.element(resizable).toHaveAttribute('data-width', '200')
+    expect(docToMarkdown(editor.state.doc).trim()).toBe(
+      `![cat](u)<!-- {"width":200,"height":100,${snapshot.slice(1)} -->`,
+    )
   })
 
   // A persisted height is applied directly, not recomputed from width: the
