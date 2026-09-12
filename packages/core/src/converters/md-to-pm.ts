@@ -75,7 +75,7 @@ export function markdownToDoc(
 
   const tree = gfmBlockOnlyParser.parse(rest)
   const cursor = tree.cursor()
-  const blocks = collectBlocks(nodes, cursor, rest, 0)
+  const blocks = collectBlocks(nodes, cursor, rest, 0, rest !== markdown)
 
   return nodes.doc(frontmatterBody === undefined ? {} : { frontmatter: frontmatterBody }, blocks)
 }
@@ -100,18 +100,30 @@ function matchFrontmatter(
 }
 
 /**
- * Walk the current node's children, converting each block-level child
- * and flattening any node converter that returns multiple siblings
- * (lists are the main case).
+ * Walk the document's children, converting each block-level child and
+ * flattening any node converter that returns multiple siblings (lists are the
+ * main case). Blank lines before the first block and after the last one are
+ * content too, one empty paragraph each; when a frontmatter block was peeled
+ * off ahead of `text`, the first leading blank line is that block's separator.
  */
 function collectBlocks(
   nodes: TypedNodeBuilders,
   cursor: TreeCursor,
   text: string,
   column: number,
+  afterFrontmatter: boolean,
 ): ProseMirrorNode[] {
   const out: ProseMirrorNode[] = []
-  if (!cursor.firstChild()) return out
+  if (!cursor.firstChild()) {
+    // A document holds at least one block: the empty document is one empty paragraph.
+    appendEmptyParagraphs(out, nodes, Math.max(1, countNewlines(text, 0, text.length)))
+    return out
+  }
+  appendEmptyParagraphs(
+    out,
+    nodes,
+    countNewlines(text, 0, cursor.from) - (afterFrontmatter ? 1 : 0),
+  )
   let previousTo: number | undefined
   do {
     if (previousTo != null) appendGapParagraphs(out, nodes, text, previousTo, cursor.from)
@@ -119,6 +131,9 @@ function collectBlocks(
     appendBlocks(out, nodes, convertBlock(nodes, cursor, text, column))
   } while (cursor.nextSibling())
   cursor.parent()
+  // The last line's own terminator is not a blank line.
+  const end = text.endsWith('\n') ? text.length - 1 : text.length
+  appendEmptyParagraphs(out, nodes, countNewlines(text, previousTo, end))
   return out
 }
 
@@ -166,11 +181,23 @@ function appendGapParagraphs(
   gapFrom: number,
   gapTo: number,
 ): void {
-  let newlineCount = 0
-  for (let i = gapFrom; i < gapTo; i++) {
-    if (text.charCodeAt(i) === CHAR_LINE_FEED) newlineCount++
+  appendEmptyParagraphs(out, nodes, countNewlines(text, gapFrom, gapTo) - 2)
+}
+
+function appendEmptyParagraphs(
+  out: ProseMirrorNode[],
+  nodes: TypedNodeBuilders,
+  count: number,
+): void {
+  for (let i = 0; i < count; i++) out.push(nodes.paragraph())
+}
+
+function countNewlines(text: string, from: number, to: number): number {
+  let count = 0
+  for (let i = from; i < to; i++) {
+    if (text.charCodeAt(i) === CHAR_LINE_FEED) count++
   }
-  for (let i = 2; i < newlineCount; i++) out.push(nodes.paragraph())
+  return count
 }
 
 function convertBlock(
@@ -527,6 +554,11 @@ function convertHTMLComment(
 /**
  * A blockquote's children start at column 0: every column an enclosing container
  * wrote sits in front of the `> ` marker on the line, and comes off with it.
+ *
+ * Blank quote lines before the first block and after the last one are empty
+ * paragraphs, like the document's own edges. The quote's range ends on its last
+ * line rather than after it, so every newline in the trailing slice is a blank
+ * line, and a quote made of markers only has one more line than newlines.
  */
 function convertBlockquote(
   nodes: TypedNodeBuilders,
@@ -534,16 +566,27 @@ function convertBlockquote(
   text: string,
 ): ProseMirrorNode {
   const content: ProseMirrorNode[] = []
+  const from = cursor.from
+  const to = cursor.to
+  let previousTo: number | undefined
   if (cursor.firstChild()) {
-    let previousTo: number | undefined
     do {
       if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) continue
-      if (previousTo != null) appendGapParagraphs(content, nodes, text, previousTo, cursor.from)
+      if (previousTo == null) {
+        appendEmptyParagraphs(content, nodes, countNewlines(text, from, cursor.from))
+      } else {
+        appendGapParagraphs(content, nodes, text, previousTo, cursor.from)
+      }
       previousTo = cursor.to
       appendBlocks(content, nodes, convertBlock(nodes, cursor, text, 0))
     } while (cursor.nextSibling())
     cursor.parent()
   }
+  appendEmptyParagraphs(
+    content,
+    nodes,
+    previousTo == null ? countNewlines(text, from, to) + 1 : countNewlines(text, previousTo, to),
+  )
   return nodes.blockquote(content)
 }
 

@@ -429,10 +429,11 @@ export function ProseKitEditor({
         const doc = markdownToDoc(markdown, { nodes: editor.nodes, frontmatter })
         const currentMarkdown = docToMarkdown(transaction.doc, { frontmatter })
         const nextMarkdown = docToMarkdown(doc, { frontmatter })
-        // Edge-only blank blocks intentionally normalize away in Markdown. An
-        // equivalent host echo must not replace the document and erase that
-        // transient editor structure; refreshMarkdownRendering forces the
-        // replacement when a caller explicitly needs one.
+        // A host echo of equivalent Markdown must not replace the document: the
+        // editor may hold structure Markdown cannot spell (a trailing empty
+        // paragraph inside a list item), and the caret would move.
+        // refreshMarkdownRendering forces the replacement when a caller
+        // explicitly needs one.
         if (forceMarkdown || currentMarkdown !== nextMarkdown) {
           transaction.replaceWith(0, transaction.doc.content.size, doc.content)
         } else if (!selection) {

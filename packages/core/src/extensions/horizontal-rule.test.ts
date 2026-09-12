@@ -50,7 +50,7 @@ describe('horizontal rule input rule in lists', () => {
     await userEvent.keyboard('- ')
     await userEvent.keyboard('---')
     expect(fixture.doc.toJSON()).toEqual(doc2.toJSON())
-    expect(docToMarkdown(fixture.doc)).toBe('---\n')
+    expect(docToMarkdown(fixture.doc)).toBe('---\n\n')
   })
 
   it('replaces an otherwise-empty ordered item typed with `1. `', async () => {
@@ -65,7 +65,7 @@ describe('horizontal rule input rule in lists', () => {
     await userEvent.keyboard('1. ')
     await userEvent.keyboard('---')
     expect(fixture.doc.toJSON()).toEqual(doc2.toJSON())
-    expect(docToMarkdown(fixture.doc)).toBe('---\n')
+    expect(docToMarkdown(fixture.doc)).toBe('---\n\n')
   })
 
   it('replaces an otherwise-empty task item', async () => {
@@ -79,7 +79,7 @@ describe('horizontal rule input rule in lists', () => {
 
     await userEvent.keyboard('---')
     expect(fixture.doc.toJSON()).toEqual(doc2.toJSON())
-    expect(docToMarkdown(fixture.doc)).toBe('---\n')
+    expect(docToMarkdown(fixture.doc)).toBe('---\n\n')
   })
 
   it('replaces only the item under the caret, splitting the list', async () => {
@@ -117,7 +117,7 @@ describe('horizontal rule input rule in lists', () => {
 
     await userEvent.keyboard('---')
     expect(fixture.doc.toJSON()).toEqual(doc2.toJSON())
-    expect(docToMarkdown(fixture.doc)).toBe('- first\n\n  ---\n')
+    expect(docToMarkdown(fixture.doc)).toBe('- first\n\n  ---\n\n')
   })
 
   it('keeps the outer item when a nested empty item gets the `---`', async () => {
@@ -139,7 +139,7 @@ describe('horizontal rule input rule in lists', () => {
 
     await userEvent.keyboard('---')
     expect(fixture.doc.toJSON()).toEqual(doc2.toJSON())
-    expect(docToMarkdown(fixture.doc)).toBe('- foo\n\n  ---\n')
+    expect(docToMarkdown(fixture.doc)).toBe('- foo\n\n  ---\n\n')
   })
 
   it('keeps an item whose paragraph still has text after the caret', async () => {

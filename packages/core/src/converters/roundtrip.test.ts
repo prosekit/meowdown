@@ -319,6 +319,18 @@ describe('blockquotes', () => {
     expect(roundtrip('>')).toBe('>\n')
   })
 
+  it('keeps a run of empty quote markers', () => {
+    expect(roundtrip('>\n>\n>')).toBe('>\n>\n>\n')
+  })
+
+  it('keeps leading blank quote lines', () => {
+    expect(roundtrip('>\n>\n> a')).toBe('>\n>\n> a\n')
+  })
+
+  it('keeps trailing blank quote lines', () => {
+    expect(roundtrip('> a\n>\n>')).toBe('> a\n>\n>\n')
+  })
+
   it('keeps a heading in a quote', () => {
     expect(roundtrip('> # heading')).toBe('> # heading\n')
   })
@@ -882,6 +894,49 @@ describe('escapes and whitespace', () => {
     expect(reparsed.toJSON()).toEqual(doc.toJSON())
   })
 
+  it('keeps leading blank lines', () => {
+    expect(roundtrip('\n\nhello')).toBe('\n\nhello\n')
+  })
+
+  it('keeps trailing blank lines', () => {
+    expect(roundtrip('hello\n\n\n')).toBe('hello\n\n\n')
+  })
+
+  it('keeps a document of blank lines', () => {
+    expect(roundtrip('\n\n\n')).toBe('\n\n\n')
+  })
+
+  it('keeps typed empty paragraphs at both edges', () => {
+    const doc = n.doc(
+      n.paragraph(),
+      n.paragraph(),
+      n.paragraph('Foo'),
+      n.paragraph(),
+      n.paragraph(),
+    )
+    const reparsed = markdownToDoc(docToMarkdown(doc))
+    expect(reparsed.toJSON()).toEqual(doc.toJSON())
+  })
+
+  it('keeps typed empty paragraphs at the edges of a blockquote', () => {
+    const doc = n.doc(n.blockquote(n.paragraph(), n.paragraph('Foo'), n.paragraph()))
+    const reparsed = markdownToDoc(docToMarkdown(doc))
+    expect(reparsed.toJSON()).toEqual(doc.toJSON())
+  })
+
+  // A blank line after an item's last line belongs to no item, so the empty
+  // paragraph comes back after the list.
+  it('moves a trailing empty paragraph out of a list item', () => {
+    const doc = n.doc(n.list({ kind: 'bullet' }, n.paragraph('x'), n.paragraph()))
+    const markdown = docToMarkdown(doc)
+    expect(markdown).toBe('- x\n\n')
+    const reparsed = markdownToDoc(markdown)
+    expect(reparsed.childCount).toBe(2)
+    expect(reparsed.child(0).type.name).toBe('list')
+    expect(reparsed.child(1).toJSON()).toEqual({ type: 'paragraph' })
+    expect(docToMarkdown(reparsed)).toBe(markdown)
+  })
+
   it('keeps YAML frontmatter', () => {
     expect(roundtrip('---\ntitle: x\n---', { frontmatter: true })).toBe('---\ntitle: x\n---\n')
   })
@@ -889,6 +944,17 @@ describe('escapes and whitespace', () => {
   it('keeps YAML frontmatter before content', () => {
     const md = ['---', 'title: x', '---', '', '# heading'].join('\n')
     expect(roundtrip(md, { frontmatter: true })).toBe(md + '\n')
+  })
+
+  it('keeps a blank-line run after YAML frontmatter', () => {
+    const md = ['---', 'title: x', '---', '', '', '', '# heading'].join('\n')
+    expect(roundtrip(md, { frontmatter: true })).toBe(md + '\n')
+  })
+
+  it('keeps blank lines after body-less YAML frontmatter', () => {
+    expect(roundtrip('---\ntitle: x\n---\n\n\n', { frontmatter: true })).toBe(
+      '---\ntitle: x\n---\n\n\n',
+    )
   })
 
   it('normalizes a missing blank line after frontmatter', () => {
@@ -971,8 +1037,13 @@ describe('idempotency', () => {
     expect(roundtrip(once)).toBe(once)
   })
 
-  it('keeps a normalized leading blank line stable', () => {
-    const once = roundtrip('\n\nhello')
+  it('keeps a document of blank lines stable', () => {
+    const once = roundtrip('\n\n')
+    expect(roundtrip(once)).toBe(once)
+  })
+
+  it('keeps a lone blank line stable', () => {
+    const once = roundtrip('\n')
     expect(roundtrip(once)).toBe(once)
   })
 
