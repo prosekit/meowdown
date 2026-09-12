@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.70.0](https://github.com/prosekit/meowdown/compare/v0.69.0...v0.70.0) (2026-09-12)
+
+
+### Features
+
+* **core:** persist post-embed snapshots in the magic comment ([#558](https://github.com/prosekit/meowdown/issues/558)) ([b07990b](https://github.com/prosekit/meowdown/commit/b07990be94303fd13c5bf1819be5e3807bc0a5d6))
+* render X posts and YouTube videos without iframe ([#556](https://github.com/prosekit/meowdown/issues/556)) ([bd59257](https://github.com/prosekit/meowdown/commit/bd592575d91c5b34a66f30ce9975d80f292edfb1))
+* render X posts from the post-embed `XPost` snapshot ([#559](https://github.com/prosekit/meowdown/issues/559)) ([1f453a4](https://github.com/prosekit/meowdown/commit/1f453a4ab4dd1cb6b84a94e178b1597b7d516bd0))
+
 ## [0.69.0](https://github.com/prosekit/meowdown/compare/v0.68.3...v0.69.0) (2026-09-12)
 
 
