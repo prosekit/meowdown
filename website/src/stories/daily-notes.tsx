@@ -6,7 +6,7 @@ import { clsx } from 'clsx/lite'
 import { useCallback, useMemo, useRef } from 'react'
 
 import { useMounted } from '../lib/use-mounted.ts'
-import { resolveXPost } from '../lib/x-post.ts'
+import { resolveXPost, XPostLoaders } from '../lib/x-post.tsx'
 
 const PAST_DAYS = 5
 const FUTURE_DAYS = 1
@@ -114,6 +114,7 @@ export function DailyNotes() {
 
   return (
     <div className="mx-auto max-w-2xl p-4">
+      <XPostLoaders />
       {days.map(({ offset, date }) => (
         <DailyNoteRow
           key={offset}
