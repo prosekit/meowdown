@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.69.0](https://github.com/prosekit/meowdown/compare/v0.68.3...v0.69.0) (2026-09-12)
+
+
+### Features
+
+* keep empty paragraphs inside a list item ([#551](https://github.com/prosekit/meowdown/issues/551)) ([db7087e](https://github.com/prosekit/meowdown/commit/db7087e165e9cf170549d653dc1c05a859609f92))
+* keep leading and trailing empty paragraphs ([#550](https://github.com/prosekit/meowdown/issues/550)) ([6bc4e90](https://github.com/prosekit/meowdown/commit/6bc4e901fd37a841ce62aac61426e3d1ee976aff))
+* **react:** add `CodeBlockView` prop to `MeowdownEditor` ([#548](https://github.com/prosekit/meowdown/issues/548)) ([2f66e5e](https://github.com/prosekit/meowdown/commit/2f66e5eb8a08ab95ff15ed9ab95142c20d6374ae))
+* read a blank-line run between list items as empty paragraphs ([#552](https://github.com/prosekit/meowdown/issues/552)) ([46f7ffd](https://github.com/prosekit/meowdown/commit/46f7ffdbb7fd04b2bb42a56c4fe84cfc1ca8de81))
+
 ## [0.68.3](https://github.com/prosekit/meowdown/compare/v0.68.2...v0.68.3) (2026-09-10)
 
 
