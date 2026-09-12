@@ -246,7 +246,7 @@ describe('MarkdownView', () => {
   it('renders a post card from a synchronous snapshot', async () => {
     await renderView('![](https://x.com/jack/status/20)', { resolvePost: () => createTweet() })
     const card = view.getByTestId('post-embed').locate('[data-post-embed="x-post"]')
-    await expect.element(card).toHaveTextContent(/just setting up my twttr/)
+    await expect.element(card).toMatchTextContent('just setting up my twttr')
     expect(view.getByTestId('tweet-embed').query()).toBeNull()
   })
 
@@ -264,7 +264,7 @@ describe('MarkdownView', () => {
 
     settle(createTweet())
     const card = embed.locate('[data-post-embed="x-post"]')
-    await expect.element(card).toHaveTextContent(/just setting up my twttr/)
+    await expect.element(card).toMatchTextContent('just setting up my twttr')
     await expect.element(embed).not.toHaveAttribute('data-pending')
   })
 
