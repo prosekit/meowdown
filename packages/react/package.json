@@ -24,7 +24,7 @@
     "build": "cmk && tsdown"
   },
   "dependencies": {
-    "@base-ui/react": "^1.7.0",
+    "@base-ui/react": "^1.8.0",
     "@meowdown/core": "workspace:*",
     "@ocavue/utils": "^1.8.0",
     "@post-embed/elements": "^0.2.0",
@@ -64,7 +64,7 @@
     "tsdown": "^0.23.0-rc.1",
     "vitest": "^5.0.0",
     "vitest-browser-commands": "^0.4.1",
-    "vitest-browser-react": "^2.2.0"
+    "vitest-browser-react": "^2.3.0"
   },
   "publishConfig": {
     "exports": {
