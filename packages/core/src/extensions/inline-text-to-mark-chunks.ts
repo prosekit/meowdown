@@ -99,7 +99,7 @@ export type FileLinkResolver = (link: FileLinkPayload) => boolean
 export interface FileLinkOptions {
   /**
    * Claim `[label](url)` links as file attachments; see {@link FileLinkResolver}.
-   * Read once when the editor is created.
+   * Updates existing content when the configured resolver changes.
    */
   resolveFileLink?: FileLinkResolver
 }

@@ -1,3 +1,4 @@
+import { getEditorConfig } from './editor-config.ts'
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
@@ -53,12 +54,14 @@ export type FileClickHandler = (payload: FileClickPayload) => void
  * `href`, `name`, and the originating `MouseEvent`. The host decides what a
  * click does (e.g. open the file in the OS default app).
  */
-export function defineFileClickHandler(onClick: FileClickHandler): PlainExtension {
+export function defineFileClickHandler(onClick?: FileClickHandler): PlainExtension {
   return definePlugin(
     new Plugin({
-      key: fileClickKey,
+      key: onClick ? fileClickKey : new PluginKey('config-onFileClick'),
       props: {
         handleClick: (view, _pos, event) => {
+          const handler = onClick ?? getEditorConfig(view.state).onFileClick
+          if (!handler) return false
           const target = event.target as HTMLElement | null
           const preview = target?.closest?.('.md-file-view-preview')
           if (!preview) return false
@@ -69,7 +72,7 @@ export function defineFileClickHandler(onClick: FileClickHandler): PlainExtensio
           if (!content) return false
           const hit = findFileAt(view.state, view.posAtDOM(content, 0))
           if (!hit) return false
-          onClick({ href: hit.href, name: hit.name, event, mod: isModEvent(event) })
+          handler({ href: hit.href, name: hit.name, event, mod: isModEvent(event) })
           return true
         },
       },

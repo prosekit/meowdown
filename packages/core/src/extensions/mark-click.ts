@@ -19,7 +19,8 @@ export interface MarkClickConfig<Payload> {
   /**
    * Fired when a click lands on the mark.
    */
-  onClick: (payload: Payload, event: MouseEvent) => void
+  onClick: (payload: Payload, event: MouseEvent, state: EditorState) => void
+  enabled?: (state: EditorState) => boolean
   /**
    * Stops native handling (e.g. `<a>` navigation) before firing.
    */
@@ -36,6 +37,7 @@ export function defineMarkClickHandler<Payload>(config: MarkClickConfig<Payload>
       key: config.key,
       props: {
         handleClick: (view, pos, event) => {
+          if (config.enabled && !config.enabled(view.state)) return false
           const target = event.target as HTMLElement | null
           const element = target?.closest?.<HTMLElement>(config.selector)
           if (!element) return false
@@ -44,7 +46,7 @@ export function defineMarkClickHandler<Payload>(config: MarkClickConfig<Payload>
             : config.findPayloadAt(view.state, pos)
           if (payload == null) return false
           if (config.preventDefault) event.preventDefault()
-          config.onClick(payload, event)
+          config.onClick(payload, event, view.state)
           return true
         },
       },

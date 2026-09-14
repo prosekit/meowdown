@@ -1,3 +1,4 @@
+import { equalInlineConfig, getEditorConfig } from './editor-config.ts'
 /**
  * Inline-mark plugin
  *
@@ -128,7 +129,8 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
     readonly chunks: readonly MarkChunk[]
   }
 
-  const chunkCache = new WeakMap<EditorNode, CachedChunks>()
+  let chunkCache = new WeakMap<EditorNode, CachedChunks>()
+  let currentOptions: InlineMarkOptions = options ?? {}
 
   function setsIntersect(left: ReadonlySet<string>, right: ReadonlySet<string>): boolean {
     for (const value of left) {
@@ -168,7 +170,7 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
       relative = inlineTextToMarkChunksWithContext(
         getMarkBuildersForSchema(schema),
         node.textContent,
-        options,
+        currentOptions,
         {
           referenceDefinitions: references.definitions,
           isReferenceDefinition,
@@ -279,13 +281,20 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
       },
     },
     appendTransaction(transactions, oldState, newState) {
+      const nextOptions = options ?? getEditorConfig(newState)
+      const configChanged = !equalInlineConfig(currentOptions, nextOptions)
+      if (configChanged) {
+        currentOptions = nextOptions
+        chunkCache = new WeakMap()
+      }
       // Drop transactions we appended ourselves to avoid recursing.
       for (const tr of transactions) {
-        if (tr.getMeta(META_KEY)) return null
+        if (tr.getMeta(META_KEY) && !configChanged) return null
       }
 
       const restyle = transactions.some((transaction) => transaction.getMeta(RESTYLE_KEY))
       const shouldProcess =
+        configChanged ||
         restyle ||
         transactions.some((transaction) => {
           return transaction.docChanged || transaction.getMeta(TRIGGER_KEY)
@@ -297,11 +306,16 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
       const changedKeys = restyle
         ? (pluginKey.getState(oldState)?.pendingReferenceKeys ?? emptyReferenceKeys)
         : emptyReferenceKeys
-      const range = restyle ? { from: 0, to: 0 } : computeAffectedRange(transactions, newState)
+      const range = configChanged
+        ? { from: 0, to: newState.doc.content.size }
+        : restyle
+          ? { from: 0, to: 0 }
+          : computeAffectedRange(transactions, newState)
       const { chunks, processed } = collectChunks(newState, range, references, changedKeys)
       if (chunks.length === 0) return null
       const tr = newState.tr.step(new BatchSetMarkStep(chunks))
       transferCache(tr.doc, processed)
+      if (tr.doc.eq(newState.doc)) return null
       tr.setMeta(META_KEY, true)
       tr.setMeta('addToHistory', false)
       return tr

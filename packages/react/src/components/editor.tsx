@@ -188,15 +188,14 @@ export interface EditorProps {
    * inline pill (file icon, name, size) instead of a link, behaves as one
    * caret unit, and reports clicks through `onFileClick` instead of
    * `onLinkClick`. The markdown text is untouched. Must be pure (same link,
-   * same answer). Read once when the editor is created: later identity
-   * changes are ignored, like `initialMarkdown`.
+   * same answer). Changing the resolver reparses existing content.
    */
   resolveFileLink?: FileLinkResolver
 
   /**
    * Classifies `![[target]]` as an image, file, or note atom. Return
    * `undefined` for missing or ambiguous targets to leave the source literal
-   * and editable. Must be pure and is read once when the editor is created.
+   * and editable. Must be pure; changing it reparses existing content.
    */
   resolveWikiEmbed?: WikiEmbedResolver
 
@@ -205,8 +204,8 @@ export interface EditorProps {
    * handlers receive and the label its chip shows. Meowdown reads no syntax
    * inside the brackets, so an alias form such as `[[target|alias]]` is
    * split here by the host. Return `undefined` to use the bracketed text as
-   * both; the markdown text is untouched either way. Must be pure and is
-   * read once when the editor is created.
+   * both; the markdown text is untouched either way. Must be pure; changing
+   * it reparses existing content.
    */
   resolveWikilink?: WikilinkResolver
 

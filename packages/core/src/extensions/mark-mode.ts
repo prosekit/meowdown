@@ -28,7 +28,10 @@ function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
     key: markModeKey,
     state: {
       init: () => initialMode,
-      apply: (tr, value) => (tr.getMeta(markModeKey) as MarkMode | undefined) ?? value,
+      apply: (tr, value) =>
+        (tr.getMeta(markModeKey) as MarkMode | undefined) ??
+        (tr.getMeta('meowdown-config-mark-mode') as MarkMode | undefined) ??
+        value,
     },
     props: {
       attributes: (state) => {

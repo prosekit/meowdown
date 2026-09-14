@@ -1,6 +1,6 @@
 import { defineKeymap, isTextSelection, type PlainExtension } from '@prosekit/core'
 import { triggerAutocomplete } from '@prosekit/extensions/autocomplete'
-import { TextSelection, type Command } from '@prosekit/pm/state'
+import { TextSelection, type Command, type EditorState } from '@prosekit/pm/state'
 
 import { cleanTextFromSlice } from '../utils/clean-text.ts'
 
@@ -63,9 +63,12 @@ function openWikilinkMenu({ allowEmpty }: OpenWikilinkMenuOptions): Command {
  * Binds `Mod-Shift-k` to open the wikilink menu, and `[` to wrap a selected
  * phrase into an open wikilink (`[[phrase`) with the menu searching it.
  */
-export function defineWikilinkTrigger(): PlainExtension {
+export function defineWikilinkTrigger(enabled?: (state: EditorState) => boolean): PlainExtension {
   return defineKeymap({
-    'Mod-Shift-k': openWikilinkMenu({ allowEmpty: true }),
-    '[': openWikilinkMenu({ allowEmpty: false }),
+    'Mod-Shift-k': (state, dispatch, view) =>
+      (!enabled || enabled(state)) && openWikilinkMenu({ allowEmpty: true })(state, dispatch, view),
+    '[': (state, dispatch, view) =>
+      (!enabled || enabled(state)) &&
+      openWikilinkMenu({ allowEmpty: false })(state, dispatch, view),
   })
 }

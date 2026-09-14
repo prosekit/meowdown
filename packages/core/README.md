@@ -106,3 +106,38 @@ See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Fcore
 ## License
 
 MIT
+
+## Dynamic configuration
+
+Pass behavior settings to `defineEditorExtension`, then replace them with the same
+configuration shape. Install `defineImage()` and `defineFileView()` when you need
+image and file previews; without explicit options they follow this configuration.
+
+```ts
+import { createEditor } from '@prosekit/core'
+import { defineEditorExtension, replaceEditorConfig } from '@meowdown/core'
+
+const editor = createEditor({
+  extension: defineEditorExtension({ markMode: 'hide', readOnly: true }),
+})
+
+replaceEditorConfig(editor, { markMode: 'show', readOnly: false })
+```
+
+Replacement is complete: omitted fields return to their defaults. Equal field
+values, including a new object containing the same callbacks, do no work.
+Functions compare by identity. Callback and event-time feature changes do not
+replace `EditorState`; parsing and display changes dispatch a configuration
+transaction without adding an undo step. Changing a parse resolver reparses
+existing content while preserving its Markdown text.
+
+`getEditorConfig(editor.state)` reads the current configuration. The controller
+is created in plugin `init`, so editors that share an extension initialize
+independent controllers. `editor.setContent()` creates a new state and resets
+configuration to its initial values when the content or requested selection
+changes. Transaction-based content updates and view remounts preserve it.
+Configuration is a live service: older states expose the latest callbacks too.
+
+Settings default to mark mode `focus`, editable content, and disabled optional
+features. Explicit standalone handler extensions retain their own callbacks;
+use the configuration API as the authority for settings managed by the host.

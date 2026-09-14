@@ -1,3 +1,4 @@
+import { getEditorConfig } from './editor-config.ts'
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
@@ -101,12 +102,14 @@ function isWithinTapTolerance(pending: PendingTap, touch: Touch): boolean {
  * raises the software keyboard before the handler opens its own surface
  * (such as a lightbox).
  */
-export function defineImageClickHandler(onClick: ImageClickHandler): PlainExtension {
+export function defineImageClickHandler(onClick?: ImageClickHandler): PlainExtension {
   const pendingTaps = new WeakMap<EditorView, PendingTap>()
 
   const handleTouchEnd = (view: EditorView, event: TouchEvent): boolean => {
+    const handler = onClick ?? getEditorConfig(view.state).onImageClick
     const pending = pendingTaps.get(view)
     pendingTaps.delete(view)
+    if (!handler) return false
     if (!pending || event.touches.length > 0) return false
     const touch = findTouch(event.changedTouches, pending.identifier)
     if (!touch || !isWithinTapTolerance(pending, touch)) return false
@@ -116,16 +119,17 @@ export function defineImageClickHandler(onClick: ImageClickHandler): PlainExtens
     // handler fires here instead of in handleClick.
     event.preventDefault()
     const hit = findImageForPreview(view, preview)
-    if (hit) onClick({ src: hit.src, alt: hit.alt, event, mod: isModEvent(event) })
+    if (hit) handler({ src: hit.src, alt: hit.alt, event, mod: isModEvent(event) })
     return true
   }
 
   return definePlugin(
     new Plugin({
-      key: imageClickKey,
+      key: onClick ? imageClickKey : new PluginKey('config-onImageClick'),
       props: {
         handleDOMEvents: {
           pointerdown: (view, event) => {
+            if (!(onClick ?? getEditorConfig(view.state).onImageClick)) return false
             if (getClosestImagePreview(event.target) && event.pointerType !== 'mouse') {
               // Clickable image previews live inside the editor contenteditable. On touch surfaces,
               // tapping a rendered image can let the browser focus the editor on pointerdown before
@@ -136,6 +140,7 @@ export function defineImageClickHandler(onClick: ImageClickHandler): PlainExtens
             return false
           },
           touchstart: (view, event) => {
+            if (!(onClick ?? getEditorConfig(view.state).onImageClick)) return false
             pendingTaps.delete(view)
             if (event.touches.length !== 1) return false
             if (!getClosestImagePreview(event.target)) return false
@@ -169,11 +174,13 @@ export function defineImageClickHandler(onClick: ImageClickHandler): PlainExtens
           touchend: handleTouchEnd,
         },
         handleClick: (view, _pos, event) => {
+          const handler = onClick ?? getEditorConfig(view.state).onImageClick
+          if (!handler) return false
           const preview = getClosestImagePreview(event.target)
           if (!preview) return false
           const hit = findImageForPreview(view, preview)
           if (!hit) return false
-          onClick({ src: hit.src, alt: hit.alt, event, mod: isModEvent(event) })
+          handler({ src: hit.src, alt: hit.alt, event, mod: isModEvent(event) })
           return true
         },
       },

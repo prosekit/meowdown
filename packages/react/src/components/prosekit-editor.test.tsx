@@ -1,3 +1,4 @@
+import { getEditorConfig } from '@meowdown/core'
 import '../testing/index.ts'
 
 import { createRef } from 'react'
@@ -146,5 +147,43 @@ describe('ProseKitEditor', () => {
       expect(onDocChange).toHaveBeenCalledTimes(1)
     })
     expect(ref.current?.getMarkdown()).toBe('World!\n')
+  })
+})
+
+describe('reactive editor configuration', () => {
+  it('updates the callback without replacing editor state', async () => {
+    const first = vi.fn()
+    const second = vi.fn()
+    const ref = createRef<EditorHandle>()
+    const screen = await render(
+      <ProseKitEditor ref={ref} initialMarkdown="about #cats" onTagClick={first} />,
+    )
+    await userEvent.click(pmRoot.getByText('#cats'))
+    expect(first).toHaveBeenCalledOnce()
+    const editor = ref.current?.editor
+    expect(editor).toBeDefined()
+    const state = editor?.state
+    await screen.rerender(
+      <ProseKitEditor ref={ref} initialMarkdown="about #cats" onTagClick={second} />,
+    )
+    await vi.waitFor(() => {
+      expect(editor && getEditorConfig(editor.state).onTagClick).toBe(second)
+    })
+    expect(editor?.state).toBe(state)
+    await userEvent.click(pmRoot.getByText('#cats'))
+    expect(first).toHaveBeenCalledOnce()
+    expect(second).toHaveBeenCalledOnce()
+  })
+
+  it('reparses existing file links when a resolver prop changes', async () => {
+    const markdown = '[report.pdf](assets/report.pdf)'
+    const screen = await render(<ProseKitEditor initialMarkdown={markdown} />)
+    await expect.element(pmRoot.getByRole('link', { name: 'report.pdf' })).toBeInTheDocument()
+    await screen.rerender(
+      <ProseKitEditor initialMarkdown={markdown} resolveFileLink={() => true} />,
+    )
+    await expect.element(pmRoot.getByTestId('file-pill')).toBeInTheDocument()
+    await screen.rerender(<ProseKitEditor initialMarkdown={markdown} />)
+    await expect.element(pmRoot.getByRole('link', { name: 'report.pdf' })).toBeInTheDocument()
   })
 })

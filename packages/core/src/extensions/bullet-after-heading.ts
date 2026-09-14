@@ -6,7 +6,7 @@ import {
   type PlainExtension,
 } from '@prosekit/core'
 import type { ListAttrs } from '@prosekit/extensions/list'
-import { TextSelection, type Command } from '@prosekit/pm/state'
+import { TextSelection, type Command, type EditorState } from '@prosekit/pm/state'
 
 import { isNodeOfType, type NodeName } from './node-names.ts'
 
@@ -48,6 +48,14 @@ const bulletAfterHeadingOnEnter: Command = (state, dispatch) => {
  * pressing Enter at the end of the document's first heading (the title line)
  * drops the caret into a fresh empty bullet instead of a plain paragraph.
  */
-export function defineBulletAfterHeading(): PlainExtension {
-  return withPriority(defineKeymap({ Enter: bulletAfterHeadingOnEnter }), Priority.high)
+export function defineBulletAfterHeading(
+  enabled?: (state: EditorState) => boolean,
+): PlainExtension {
+  return withPriority(
+    defineKeymap({
+      Enter: (state, dispatch, view) =>
+        (!enabled || enabled(state)) && bulletAfterHeadingOnEnter(state, dispatch, view),
+    }),
+    Priority.high,
+  )
 }

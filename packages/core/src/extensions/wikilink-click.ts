@@ -1,3 +1,4 @@
+import { getEditorConfig } from './editor-config.ts'
 import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
@@ -64,13 +65,19 @@ export type WikilinkClickHandler = (payload: WikilinkClickPayload) => void
  * `Mod-Enter` with the caret on one. The `event` is the originating
  * `MouseEvent` or `KeyboardEvent`.
  */
-export function defineWikilinkClickHandler(onClick: WikilinkClickHandler): PlainExtension {
+export function defineWikilinkClickHandler(onClick?: WikilinkClickHandler): PlainExtension {
   return defineMarkClickHandler<string>({
-    key: wikilinkClickKey,
+    key: onClick ? wikilinkClickKey : new PluginKey('config-onWikilinkClick'),
+    enabled: (state) => !!(onClick ?? getEditorConfig(state).onWikilinkClick),
     selector: '.md-wikilink-view-preview',
     preventDefault: false,
     findPayloadAt: (state, pos) => findWikilinkAt(state, pos)?.target,
     findPayloadForElement: (view, element) => findWikilinkForElement(view, element)?.target,
-    onClick: (target, event) => onClick({ target, event, mod: isModEvent(event) }),
+    onClick: (target, event, state) =>
+      (onClick ?? getEditorConfig(state).onWikilinkClick)?.({
+        target,
+        event,
+        mod: isModEvent(event),
+      }),
   })
 }

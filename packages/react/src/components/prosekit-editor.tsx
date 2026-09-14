@@ -1,5 +1,8 @@
 import {
   defineEditorExtension,
+  defineImage,
+  defineFileView,
+  type EditorConfig,
   docToMarkdown,
   getSelectedText,
   getTextblockDisplayText,
@@ -211,17 +214,17 @@ export interface ProseKitEditorProps {
   resolveImageUrl?: ImageOptions['resolveImageUrl']
 
   /**
-   * Claims links as file pills. Read once on mount; see `EditorProps.resolveFileLink`.
+   * Claims links as file pills. Updates existing content; see `EditorProps.resolveFileLink`.
    */
   resolveFileLink?: FileLinkResolver
 
   /**
-   * Classifies wiki embeds. Read once on mount; see `EditorProps.resolveWikiEmbed`.
+   * Classifies wiki embeds. Updates existing content; see `EditorProps.resolveWikiEmbed`.
    */
   resolveWikiEmbed?: WikiEmbedResolver
 
   /**
-   * Resolves wikilink targets and labels. Read once on mount; see `EditorProps.resolveWikilink`.
+   * Resolves wikilink targets and labels. Updates existing content; see `EditorProps.resolveWikilink`.
    */
   resolveWikilink?: WikilinkResolver
 
@@ -381,13 +384,56 @@ export function ProseKitEditor({
   ref,
   children,
 }: ProseKitEditorProps): ReactElement {
+  // Set while a programmatic setState/setMarkdown dispatch runs, so the
+  // doc-change handler can ignore it: a host replacing content already knows.
+  const suppressDocChangeRef = useRef(false)
+
+  // Guard the host callback so programmatic setState/setMarkdown stays silent.
+  // Stable per `onDocChange` identity, so equal props keep the same configuration.
+  const handleDocChange = useMemo(() => {
+    if (!onDocChange) return
+    return () => {
+      if (suppressDocChangeRef.current) return
+      onDocChange()
+    }
+  }, [onDocChange])
+
+  const config: EditorConfig = {
+    markMode,
+    resolveFileLink,
+    resolveWikiEmbed,
+    resolveWikilink,
+    onWikilinkClick,
+    onLinkClick,
+    onTagClick,
+    onExitBoundary,
+    resolveImageUrl,
+    resolveFileInfo,
+    resolveXPost,
+    resolveYouTubeVideo,
+    onFileClick,
+    onFilePaste,
+    onFileSaveError,
+    onImageClick,
+    embedPaste,
+    linkPaste,
+    bulletAfterHeading,
+    substitution,
+    placeholder,
+    readOnly,
+    spellCheck,
+    onSearchChange,
+    editorClassName,
+    onDocChange: handleDocChange,
+    wikilinkEnabled: !!onWikilinkSearch,
+  }
+
   const [editor] = useState((): TypedEditor => {
-    const baseExtension: EditorExtension = defineEditorExtension({
-      resolveFileLink,
-      resolveWikiEmbed,
-      resolveWikilink,
-      markMode,
-    })
+    const baseExtension: EditorExtension = union(
+      defineEditorExtension(config),
+      defineImage(),
+      defineFileView(),
+    )
     const extension =
       CodeBlockView === false
         ? baseExtension
@@ -398,10 +444,6 @@ export function ProseKitEditor({
     }
     return editor
   })
-
-  // Set while a programmatic setState/setMarkdown dispatch runs, so the
-  // doc-change handler can ignore it: a host replacing content already knows.
-  const suppressDocChangeRef = useRef(false)
 
   // The selection the menu is open over, captured at open time so it survives
   // focus moving into the menu's filter input. Undefined while closed.
@@ -543,49 +585,13 @@ export function ProseKitEditor({
     }
   }, [editor, frontmatter, hasSelectionMenu, openSelectionMenu])
 
-  // Guard the host callback so programmatic setState/setMarkdown stays silent.
-  // Stable per `onDocChange` identity, so the extension is not rebuilt every render.
-  const handleDocChange = useMemo(() => {
-    if (!onDocChange) return
-    return () => {
-      if (suppressDocChangeRef.current) return
-      onDocChange()
-    }
-  }, [onDocChange])
-
   return (
     <ProseKit editor={editor}>
       {/* Before the editor element, so a document height change below the
           caret cannot move the layer. */}
       <VirtualCaret />
       <div ref={editor.mount}></div>
-      <EditorExtensions
-        markMode={markMode}
-        onDocChange={handleDocChange}
-        onWikilinkClick={onWikilinkClick}
-        onLinkClick={onLinkClick}
-        onTagClick={onTagClick}
-        onExitBoundary={onExitBoundary}
-        resolveImageUrl={resolveImageUrl}
-        resolveFileInfo={resolveFileInfo}
-        resolveXPost={resolveXPost}
-        resolveYouTubeVideo={resolveYouTubeVideo}
-        onFileClick={onFileClick}
-        onFilePaste={onFilePaste}
-        onFileSaveError={onFileSaveError}
-        onImageClick={onImageClick}
-        embedPaste={embedPaste}
-        linkPaste={linkPaste}
-        bulletAfterHeading={bulletAfterHeading}
-        substitution={substitution}
-        placeholder={placeholder}
-        readOnly={readOnly}
-        wikilinkEnabled={!!onWikilinkSearch}
-        spellCheck={spellCheck}
-        searchQuery={searchQuery}
-        onSearchChange={onSearchChange}
-        editorClassName={editorClassName}
-      />
+      <EditorExtensions config={config} searchQuery={searchQuery} />
       {blockHandle && !readOnly && <BlockHandle />}
       {!readOnly && <TableHandle />}
       {blockHandle && !readOnly && <DropIndicator />}

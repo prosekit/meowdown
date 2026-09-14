@@ -1,6 +1,6 @@
 import { getAutolinkHref } from '@meowdown/markdown'
 import { definePlugin, Priority, withPriority, type PlainExtension } from '@prosekit/core'
-import { Plugin, PluginKey } from '@prosekit/pm/state'
+import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
 import { executeCommand } from '../utils/execute-command.ts'
 
@@ -33,13 +33,14 @@ export function detectLinkUrl(text: string): string | undefined {
  * embed. Not part of `defineEditorExtension`; the React package applies it via
  * the `linkPaste` prop (on by default).
  */
-export function defineLinkPaste(): PlainExtension {
+export function defineLinkPaste(enabled?: (state: EditorState) => boolean): PlainExtension {
   return withPriority(
     definePlugin(
       new Plugin({
-        key: linkPasteKey,
+        key: enabled ? new PluginKey('config-defineLinkPaste') : linkPasteKey,
         props: {
           handlePaste: (view, event, slice) => {
+            if (enabled && !enabled(view.state)) return false
             const text = getPastedText(event, slice)
             if (!text) return false
             const href = detectLinkUrl(text)

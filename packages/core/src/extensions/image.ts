@@ -1,3 +1,4 @@
+import { getEditorConfig, subscribeEditorConfig } from './editor-config.ts'
 import { registerXPost, type Resolver } from '@post-embed/elements/x'
 import { registerYouTubeVideo } from '@post-embed/elements/youtube'
 import type { XPost, YouTubeVideo } from '@post-embed/types'
@@ -215,20 +216,23 @@ class ImageMarkView implements MarkView {
   readonly #dom: HTMLElement
   readonly #contentDOM: HTMLElement
   readonly #view: EditorView
-  readonly #resolveImageUrl: ImageUrlResolver | undefined
-  readonly #resolveXPost: XPostResolver
-  readonly #resolveYouTubeVideo: YouTubeVideoResolver
+  #resolveImageUrl: ImageUrlResolver | undefined
+  #resolveXPost: XPostResolver
+  #resolveYouTubeVideo: YouTubeVideoResolver
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
   #destroyed = false
+  #generation = 0
+  #unsubscribe?: VoidFunction
 
-  constructor(mark: Mark, view: EditorView, options: ImageOptions) {
+  constructor(mark: Mark, view: EditorView, options?: ImageOptions) {
     this.#attrs = mark.attrs as MdImageAttrs
     this.#view = view
-    this.#resolveImageUrl = options.resolveImageUrl
-    this.#resolveXPost = options.resolveXPost ?? defaultResolveXPost
-    this.#resolveYouTubeVideo = options.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
+    const initialOptions = options ?? getEditorConfig(view.state)
+    this.#resolveImageUrl = initialOptions.resolveImageUrl
+    this.#resolveXPost = initialOptions.resolveXPost ?? defaultResolveXPost
+    this.#resolveYouTubeVideo = initialOptions.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
 
     this.#dom = document.createElement('span')
     this.#dom.className = 'md-image-view md-atom-view'
@@ -247,6 +251,32 @@ class ImageMarkView implements MarkView {
     }
 
     this.#dom.appendChild(this.#contentDOM)
+    if (!options) {
+      this.#unsubscribe = subscribeEditorConfig(view, (config) => {
+        const resolveXPost = config.resolveXPost ?? defaultResolveXPost
+        const resolveYouTubeVideo = config.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
+        if (
+          this.#resolveImageUrl === config.resolveImageUrl &&
+          this.#resolveXPost === resolveXPost &&
+          this.#resolveYouTubeVideo === resolveYouTubeVideo
+        )
+          return
+        this.#resolveImageUrl = config.resolveImageUrl
+        this.#resolveXPost = resolveXPost
+        this.#resolveYouTubeVideo = resolveYouTubeVideo
+        this.#generation++
+        this.#image = undefined
+        this.#resizableRoot = undefined
+        for (const child of Array.from(this.#dom.children)) {
+          if (child !== this.#contentDOM) child.remove()
+        }
+        const preview = this.#renderPreview()
+        if (preview) {
+          preview.contentEditable = 'false'
+          this.#dom.insertBefore(preview, this.#contentDOM)
+        }
+      })
+    }
   }
 
   get dom(): HTMLElement {
@@ -283,6 +313,7 @@ class ImageMarkView implements MarkView {
 
   destroy(): void {
     this.#destroyed = true
+    this.#unsubscribe?.()
   }
 
   /**
@@ -344,11 +375,12 @@ class ImageMarkView implements MarkView {
     kind: PostEmbedKind,
     resolver: Resolver<T>,
   ): Resolver<T> {
+    const generation = this.#generation
     return (url) => {
       const result = resolver(url)
       void Promise.resolve(result).then(
         (value) => {
-          if (this.#destroyed || value == null) return
+          if (this.#destroyed || generation !== this.#generation || value == null) return
           const snapshot = parsePostEmbedSnapshot({ kind, data: value })
           if (snapshot) commitSnapshot(this.#view, this.#contentDOM, url, snapshot)
         },
@@ -452,7 +484,7 @@ class ImageMarkView implements MarkView {
  * `![alt](src)<!-- {"width":320,"height":240} -->`, which round-trips as
  * plain Markdown.
  */
-export function defineImage(options: ImageOptions = {}): PlainExtension {
+export function defineImage(options?: ImageOptions): PlainExtension {
   return defineMarkView({
     name: 'mdImage' satisfies MarkName,
     constructor: (mark, view) => new ImageMarkView(mark, view, options),

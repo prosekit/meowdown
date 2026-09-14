@@ -38,10 +38,6 @@ interface SubstitutionUndoState {
   after: string
 }
 
-const substitutionUndoKey = new PluginKey<SubstitutionUndoState | null>(
-  'meowdown-substitution-undo',
-)
-
 function isInlineCode(state: EditorState, from: number, to: number): boolean {
   const type = getMarkType(state.schema, 'mdCode' satisfies MarkName)
   return state.doc.rangeHasMark(from, to, type)
@@ -53,13 +49,14 @@ function applySubstitution(
   to: number,
   rule: SubstitutionRule,
   undoText?: string,
+  substitutionUndoKey?: PluginKey<SubstitutionUndoState | null>,
 ): Transaction | null {
   if (isInlineCode(state, from, to)) return null
 
   const [, replacement] = rule
   const text = undoText == null ? replacement : `${replacement} `
   const tr = state.tr.replaceWith(from, to, state.schema.text(text))
-  if (undoText != null) {
+  if (undoText != null && substitutionUndoKey) {
     tr.setMeta(substitutionUndoKey, {
       from,
       to: from + text.length,
@@ -70,20 +67,26 @@ function applySubstitution(
   return tr
 }
 
-function defineSubstitutionInputRules(): PlainExtension {
+function defineSubstitutionInputRules(
+  substitutionUndoKey: PluginKey<SubstitutionUndoState | null>,
+  enabled?: (state: EditorState) => boolean,
+): PlainExtension {
   return union(
     SUBSTITUTION_RULES.map((rule) => {
       const inputRegexp = new RegExp(String.raw`(?:${rule[0].source})\s$`)
       return defineInputRule(
         new InputRule(inputRegexp, (state, match, start, end) => {
-          return applySubstitution(state, start, end, rule, match[0])
+          if (enabled && !enabled(state)) return null
+          return applySubstitution(state, start, end, rule, match[0], substitutionUndoKey)
         }),
       )
     }),
   )
 }
 
-function defineSubstitutionUndoPlugin(): PlainExtension {
+function defineSubstitutionUndoPlugin(
+  substitutionUndoKey: PluginKey<SubstitutionUndoState | null>,
+): PlainExtension {
   return definePlugin(
     new Plugin<SubstitutionUndoState | null>({
       key: substitutionUndoKey,
@@ -113,7 +116,9 @@ function defineSubstitutionUndoPlugin(): PlainExtension {
   )
 }
 
-function defineSubstitutionUndoKeymap(): PlainExtension {
+function defineSubstitutionUndoKeymap(
+  substitutionUndoKey: PluginKey<SubstitutionUndoState | null>,
+): PlainExtension {
   return withPriority(
     defineKeymap({
       Backspace: (state, dispatch) => {
@@ -131,16 +136,22 @@ function defineSubstitutionUndoKeymap(): PlainExtension {
   )
 }
 
-function defineSubstitutionUndo(): PlainExtension {
-  return union(defineSubstitutionUndoPlugin(), defineSubstitutionUndoKeymap())
+function defineSubstitutionUndo(
+  substitutionUndoKey: PluginKey<SubstitutionUndoState | null>,
+): PlainExtension {
+  return union(
+    defineSubstitutionUndoPlugin(substitutionUndoKey),
+    defineSubstitutionUndoKeymap(substitutionUndoKey),
+  )
 }
 
-function defineSubstitutionEnterRules(): PlainExtension {
+function defineSubstitutionEnterRules(enabled?: (state: EditorState) => boolean): PlainExtension {
   return union(
     SUBSTITUTION_RULES.map((rule) => {
       return defineEnterRule({
         regex: new RegExp(`(?:${rule[0].source})$`),
-        handler: ({ state, from, to }) => applySubstitution(state, from, to, rule),
+        handler: ({ state, from, to }) =>
+          enabled && !enabled(state) ? null : applySubstitution(state, from, to, rule),
       })
     }),
   )
@@ -149,10 +160,13 @@ function defineSubstitutionEnterRules(): PlainExtension {
 /**
  * Apply the editor's automatic plain-text substitutions.
  */
-export function defineSubstitution(): PlainExtension {
+export function defineSubstitution(enabled?: (state: EditorState) => boolean): PlainExtension {
+  const substitutionUndoKey = new PluginKey<SubstitutionUndoState | null>(
+    'meowdown-substitution-undo',
+  )
   return union(
-    defineSubstitutionInputRules(),
-    defineSubstitutionUndo(),
-    defineSubstitutionEnterRules(),
+    defineSubstitutionInputRules(substitutionUndoKey, enabled),
+    defineSubstitutionUndo(substitutionUndoKey),
+    defineSubstitutionEnterRules(enabled),
   )
 }

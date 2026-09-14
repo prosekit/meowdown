@@ -1,3 +1,4 @@
+import { getEditorConfig } from './editor-config.ts'
 import { definePlugin, Priority, withPriority, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
@@ -107,21 +108,23 @@ async function insertSavedFiles(
   }
 }
 
-function createFilePastePlugin(options: FilePasteOptions): Plugin {
+function createFilePastePlugin(options?: FilePasteOptions): Plugin {
   return new Plugin({
     key: new PluginKey('file-paste'),
     props: {
       handlePaste: (view, event) => {
-        const files = takePastedFiles(event.clipboardData, options)
+        const currentOptions = options ?? getEditorConfig(view.state)
+        const files = takePastedFiles(event.clipboardData, currentOptions)
         if (files.length === 0) return false
-        void insertSavedFiles(view, files, options)
+        void insertSavedFiles(view, files, currentOptions)
         return true
       },
       handleDrop: (view, event) => {
-        const files = takePastedFiles(event.dataTransfer, options)
+        const currentOptions = options ?? getEditorConfig(view.state)
+        const files = takePastedFiles(event.dataTransfer, currentOptions)
         if (files.length === 0) return false
         const drop = view.posAtCoords({ left: event.clientX, top: event.clientY })
-        void insertSavedFiles(view, files, options, drop?.pos)
+        void insertSavedFiles(view, files, currentOptions, drop?.pos)
         return true
       },
     },
@@ -133,7 +136,7 @@ function createFilePastePlugin(options: FilePasteOptions): Plugin {
  * markdown destination: `![](src)` for an image, a `[name](src)` link for any
  * other file. Multiple files insert one link per line, in DataTransfer order.
  */
-export function defineFilePaste(options: FilePasteOptions = {}): PlainExtension {
+export function defineFilePaste(options?: FilePasteOptions): PlainExtension {
   // High priority so the drop/paste handler runs before ProseKit's
   // drop-indicator plugin.
   return withPriority(definePlugin(createFilePastePlugin(options)), Priority.high)

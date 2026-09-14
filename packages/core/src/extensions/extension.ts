@@ -1,3 +1,18 @@
+import { definePlaceholder } from '@prosekit/extensions/placeholder'
+import { defineEditorConfig, getEditorConfig, type EditorConfig } from './editor-config.ts'
+import { defineBulletAfterHeading } from './bullet-after-heading.ts'
+import { defineEmbedPaste } from './embed-paste.ts'
+import { defineExitBoundaryHandler } from './exit-boundary.ts'
+import { defineFileClickHandler } from './file-click.ts'
+import { defineFilePaste } from './file-paste.ts'
+import { defineFollowLinkHandler } from './follow-link.ts'
+import { defineImageClickHandler } from './image-click.ts'
+import { defineLinkClickHandler } from './link-click.ts'
+import { defineLinkPaste } from './link-paste.ts'
+import { defineSubstitution } from './substitution.ts'
+import { defineTagClickHandler } from './tag-click.ts'
+import { defineWikilinkClickHandler } from './wikilink-click.ts'
+import { defineWikilinkTrigger } from './wikilink-trigger.ts'
 import {
   defineBaseCommands,
   defineBaseKeymap,
@@ -27,11 +42,10 @@ import { defineMeowdownHorizontalRule } from './horizontal-rule.ts'
 import { defineHTMLComment } from './html-comment.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
-import type { InlineMarkOptions } from './inline-text-to-mark-chunks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
 import { defineLinkCommands } from './link-commands.ts'
 import { defineMeowdownList } from './list.ts'
-import { defineMarkMode, type MarkMode } from './mark-mode.ts'
+import { defineMarkMode } from './mark-mode.ts'
 import { ATOM_SOURCE_MARK_NAMES } from './mark-names.ts'
 import { defineMath } from './math.ts'
 import { defineMoveBlock } from './move-block.ts'
@@ -64,6 +78,27 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineInlineMarks(),
 
     // plugins
+    defineEditorConfig(options),
+    defineFileClickHandler(),
+    defineImageClickHandler(),
+    defineWikilinkClickHandler(),
+    defineTagClickHandler(),
+    defineLinkClickHandler(),
+    defineFollowLinkHandler(),
+    defineExitBoundaryHandler(),
+    defineFilePaste(),
+    defineEmbedPaste((state) => !!getEditorConfig(state).embedPaste),
+    defineLinkPaste((state) => !!getEditorConfig(state).linkPaste),
+    defineBulletAfterHeading((state) => !!getEditorConfig(state).bulletAfterHeading),
+    defineSubstitution((state) => !!getEditorConfig(state).substitution),
+    defineWikilinkTrigger((state) => !!getEditorConfig(state).wikilinkEnabled),
+    definePlaceholder({
+      placeholder: (state) => {
+        const placeholder = getEditorConfig(state).placeholder
+        return typeof placeholder === 'function' ? placeholder(state) : (placeholder ?? '')
+      },
+      strategy: 'doc',
+    }),
     defineViewAttributes({ class: 'meowdown-content' }),
     defineCodeBlockSyntaxHighlight(),
     defineCrossEditorDrag(),
@@ -71,7 +106,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineSoftBreak(),
     defineMoveBlock(),
     defineSelectDocBoundary(),
-    defineInlineMarkPlugin(options),
+    defineInlineMarkPlugin(),
     defineInlineToggle(),
     defineLinkCommands(),
     defineWikilink(),
@@ -100,19 +135,8 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
 
 export type EditorExtension = ReturnType<typeof defineEditorExtensionImpl>
 
-/**
- * Options for {@link defineEditorExtension}. Creation-time configuration:
- * `resolveFileLink`, `resolveWikiEmbed`, and `resolveWikilink` are baked into
- * the editor's parse pipeline, so changing them requires rebuilding the
- * editor; `markMode` is only the initial value.
- */
-export type EditorExtensionOptions = InlineMarkOptions & {
-  /**
-   * The initial mark mode, applied from the first paint. Defaults to
-   * `'focus'`. Switch later with the `setMarkMode` command.
-   */
-  markMode?: MarkMode
-}
+/** Initial configuration, replaceable with `replaceEditorConfig`. */
+export type EditorExtensionOptions = EditorConfig
 
 export function defineEditorExtension(options: EditorExtensionOptions = {}): EditorExtension {
   return defineEditorExtensionImpl(options)

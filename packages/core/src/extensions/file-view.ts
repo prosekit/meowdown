@@ -1,3 +1,5 @@
+import { getEditorConfig, subscribeEditorConfig } from './editor-config.ts'
+import type { EditorView } from '@prosekit/pm/view'
 import { defineMarkView, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
 import type { MarkView, ViewMutationRecord } from '@prosekit/pm/view'
@@ -117,8 +119,10 @@ class FileMarkView implements MarkView {
   readonly #sizeElement: HTMLElement
   #attrs: MdFileAttrs
   #destroyed = false
+  #request = 0
+  #unsubscribe?: VoidFunction
 
-  constructor(mark: Mark, options: FileViewOptions) {
+  constructor(mark: Mark, view: EditorView, options?: FileViewOptions) {
     this.#attrs = mark.attrs as MdFileAttrs
 
     this.#dom = document.createElement('span')
@@ -149,7 +153,16 @@ class FileMarkView implements MarkView {
     this.#contentDOM.className = 'md-file-view-content md-atom-view-content'
     this.#dom.appendChild(this.#contentDOM)
 
-    void this.#loadFileInfo(options.resolveFileInfo)
+    let resolver = (options ?? getEditorConfig(view.state)).resolveFileInfo
+    void this.#loadFileInfo(resolver)
+    if (!options) {
+      this.#unsubscribe = subscribeEditorConfig(view, (config) => {
+        if (resolver === config.resolveFileInfo) return
+        resolver = config.resolveFileInfo
+        this.#sizeElement.textContent = ''
+        void this.#loadFileInfo(resolver)
+      })
+    }
   }
 
   get dom(): HTMLElement {
@@ -180,15 +193,16 @@ class FileMarkView implements MarkView {
 
   destroy(): void {
     this.#destroyed = true
+    this.#unsubscribe?.()
   }
 
   /**
    * Fill the size slot once the host resolves it. The `href` of one view
-   * instance never changes (`update` rebuilds on an href change), so at most
-   * one resolve is in flight and `#destroyed` is the only guard a late
-   * result needs.
+   * instance never changes (`update` rebuilds on an href change), and the request counter rejects results from a replaced resolver.
+   * Destruction also prevents a late result from updating the preview.
    */
   async #loadFileInfo(resolveFileInfo: FileInfoResolver | undefined): Promise<void> {
+    const request = ++this.#request
     if (!resolveFileInfo) return
     let info: FileInfo | undefined
     try {
@@ -197,7 +211,7 @@ class FileMarkView implements MarkView {
       console.error('[meowdown] resolveFileInfo failed:', error)
       return
     }
-    if (this.#destroyed || !info) return
+    if (this.#destroyed || request !== this.#request || !info) return
     const { size } = info
     if (size == null || !Number.isFinite(size) || size < 0) return
     this.#sizeElement.textContent = formatFileSize(size)
@@ -210,9 +224,9 @@ class FileMarkView implements MarkView {
  * `resolveFileInfo` supplies it. The pill never loads the file's content;
  * clicks are reported through `defineFileClickHandler`.
  */
-export function defineFileView(options: FileViewOptions = {}): PlainExtension {
+export function defineFileView(options?: FileViewOptions): PlainExtension {
   return defineMarkView({
     name: 'mdFile' satisfies MarkName,
-    constructor: (mark) => new FileMarkView(mark, options),
+    constructor: (mark, view) => new FileMarkView(mark, view, options),
   }) as PlainExtension
 }

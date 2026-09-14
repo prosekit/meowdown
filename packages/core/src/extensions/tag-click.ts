@@ -1,3 +1,4 @@
+import { getEditorConfig } from './editor-config.ts'
 import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 
@@ -51,12 +52,14 @@ export type TagClickHandler = (payload: TagClickPayload) => void
  * `Mod-Enter` with the caret on one. The `tag` is read from the rendered text
  * without the leading `#`.
  */
-export function defineTagClickHandler(onClick: TagClickHandler): PlainExtension {
+export function defineTagClickHandler(onClick?: TagClickHandler): PlainExtension {
   return defineMarkClickHandler<string>({
-    key: tagClickKey,
+    key: onClick ? tagClickKey : new PluginKey('config-onTagClick'),
+    enabled: (state) => !!(onClick ?? getEditorConfig(state).onTagClick),
     selector: '.md-tag',
     preventDefault: false,
     findPayloadAt: (state, pos) => findTagAt(state, pos)?.tag,
-    onClick: (tag, event) => onClick({ tag, event, mod: isModEvent(event) }),
+    onClick: (tag, event, state) =>
+      (onClick ?? getEditorConfig(state).onTagClick)?.({ tag, event, mod: isModEvent(event) }),
   })
 }
