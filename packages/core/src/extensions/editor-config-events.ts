@@ -25,6 +25,7 @@ export function defineEditorConfigEvents(
             ) {
               config.onDocChange?.()
             }
+            // FIXME: do not call onSearchChange maunlly. Just keep using the defineSearchStatusHandler as we did before in master. Notice that we DO NOT need to move all config to the editorConfig
             if (config.onSearchChange) {
               const status = getSearchStatus(currentView.state)
               const previous = getSearchStatus(previousState)
