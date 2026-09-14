@@ -12,9 +12,14 @@ import type { WikilinkClickHandler } from './wikilink-click.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 
-function setup(markdown: string, resolution: WikiEmbedResolution | undefined): Fixture {
+function setup(
+  markdown: string,
+  resolution: WikiEmbedResolution | undefined,
+  options: ImageOptions = {},
+): Fixture {
   const fixture = setupFixture({
     extensionOptions: {
+      ...options,
       markMode: 'hide',
       resolveWikiEmbed: () => resolution,
     },
@@ -33,9 +38,11 @@ describe('wiki embed editor integration', () => {
 
   it('uses image rendering and image click hooks', async () => {
     const onImageClick = vi.fn<ImageClickHandler>()
-    using fixture = setup('![[photo.png|Photo]]', { kind: 'image' })
-    const imageOptions: ImageOptions = { resolveImageUrl: () => 'https://example.com/photo.png' }
-    updateEditorConfig(fixture.editor, imageOptions, true)
+    using fixture = setup(
+      '![[photo.png|Photo]]',
+      { kind: 'image' },
+      { resolveImageUrl: () => 'https://example.com/photo.png' },
+    )
     updateEditorConfig(fixture.editor, { onImageClick })
 
     const image = pmRoot.getByAltText('Photo')

@@ -1,9 +1,9 @@
 import { registerXPost, type Resolver } from '@post-embed/elements/x'
 import { registerYouTubeVideo } from '@post-embed/elements/youtube'
 import type { XPost, YouTubeVideo } from '@post-embed/types'
-import { defineMarkView, definePlugin, union, type PlainExtension } from '@prosekit/core'
+import { defineMarkView, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
-import { Plugin, type EditorState } from '@prosekit/pm/state'
+import type { EditorState } from '@prosekit/pm/state'
 import type { EditorView, MarkView, ViewMutationRecord } from '@prosekit/pm/view'
 import {
   registerResizableHandleElement,
@@ -223,13 +223,10 @@ class ImageMarkView implements MarkView {
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
   #destroyed = false
-  #generation = 0
-  readonly #onDestroy: VoidFunction
 
-  constructor(mark: Mark, view: EditorView, options: ImageOptions, onDestroy: VoidFunction) {
+  constructor(mark: Mark, view: EditorView, options: ImageOptions) {
     this.#attrs = mark.attrs as MdImageAttrs
     this.#view = view
-    this.#onDestroy = onDestroy
     this.#resolveImageUrl = options.resolveImageUrl
     this.#resolveXPost = options.resolveXPost ?? defaultResolveXPost
     this.#resolveYouTubeVideo = options.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
@@ -251,31 +248,6 @@ class ImageMarkView implements MarkView {
     }
 
     this.#dom.appendChild(this.#contentDOM)
-  }
-
-  updateOptions(options: ImageOptions): void {
-    const resolveXPost = options.resolveXPost ?? defaultResolveXPost
-    const resolveYouTubeVideo = options.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
-    if (
-      this.#resolveImageUrl === options.resolveImageUrl &&
-      this.#resolveXPost === resolveXPost &&
-      this.#resolveYouTubeVideo === resolveYouTubeVideo
-    )
-      return
-    this.#resolveImageUrl = options.resolveImageUrl
-    this.#resolveXPost = resolveXPost
-    this.#resolveYouTubeVideo = resolveYouTubeVideo
-    this.#generation++
-    this.#image = undefined
-    this.#resizableRoot = undefined
-    for (const child of Array.from(this.#dom.children)) {
-      if (child !== this.#contentDOM) child.remove()
-    }
-    const preview = this.#renderPreview()
-    if (preview) {
-      preview.contentEditable = 'false'
-      this.#dom.insertBefore(preview, this.#contentDOM)
-    }
   }
 
   get dom(): HTMLElement {
@@ -312,7 +284,6 @@ class ImageMarkView implements MarkView {
 
   destroy(): void {
     this.#destroyed = true
-    this.#onDestroy()
   }
 
   /**
@@ -374,12 +345,11 @@ class ImageMarkView implements MarkView {
     kind: PostEmbedKind,
     resolver: Resolver<T>,
   ): Resolver<T> {
-    const generation = this.#generation
     return (url) => {
       const result = resolver(url)
       void Promise.resolve(result).then(
         (value) => {
-          if (this.#destroyed || generation !== this.#generation || value == null) return
+          if (this.#destroyed || value == null) return
           const snapshot = parsePostEmbedSnapshot({ kind, data: value })
           if (snapshot) commitSnapshot(this.#view, this.#contentDOM, url, snapshot)
         },
@@ -486,33 +456,8 @@ class ImageMarkView implements MarkView {
 export function defineImage(
   getOptions?: (state: EditorState) => ImageOptions | undefined,
 ): PlainExtension {
-  // FIXME: do not use a WeakMap for store all markview. do not call "markView.updateOptions". we do not need to re-trigger image update after the config changed. remove this.#generation. apply this rule to all extensions.
-  const instances = new WeakMap<EditorView, Set<ImageMarkView>>()
-  return union(
-    defineMarkView({
-      name: 'mdImage' satisfies MarkName,
-      constructor: (mark, view) => {
-        let views = instances.get(view)
-        if (!views) {
-          views = new Set()
-          instances.set(view, views)
-        }
-        const markView = new ImageMarkView(mark, view, getOptions?.(view.state) ?? {}, () => {
-          views.delete(markView)
-        })
-        views.add(markView)
-        return markView
-      },
-    }),
-    definePlugin(
-      new Plugin({
-        view: () => ({
-          update: (view) => {
-            const options = getOptions?.(view.state) ?? {}
-            for (const markView of instances.get(view) ?? []) markView.updateOptions(options)
-          },
-        }),
-      }),
-    ),
-  ) as PlainExtension
+  return defineMarkView({
+    name: 'mdImage' satisfies MarkName,
+    constructor: (mark, view) => new ImageMarkView(mark, view, getOptions?.(view.state) ?? {}),
+  }) as PlainExtension
 }

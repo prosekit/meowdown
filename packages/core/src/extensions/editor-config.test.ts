@@ -211,7 +211,7 @@ describe('editor configuration', () => {
     expect(getMarkMode(editor.state)).toBe('hide')
   })
 
-  it('refreshes an existing image only when its resolver changes', async () => {
+  it('keeps the first image resolver for existing views and reads the latest for new views', async () => {
     const firstUrl =
       'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/>'
     const nextUrl =
@@ -219,15 +219,20 @@ describe('editor configuration', () => {
     const resolveImageUrl = () => firstUrl
     using fixture = setupFixture({ extensionOptions: { resolveImageUrl } })
     const { editor, n } = fixture
-    fixture.set(n.doc(n.paragraph('![cat](photo)')))
+    fixture.set(n.doc(n.paragraph('![cat](photo)<a>')))
     const image = pmRoot.getByAltText('cat')
     await expect.element(image).toHaveAttribute('src', firstUrl)
     const element = image.element()
     replaceConfig(editor, { resolveImageUrl, placeholder: 'Write here' }, true)
     expect(image.element()).toBe(element)
-    replaceConfig(editor, { resolveImageUrl: () => nextUrl }, true)
-    await expect.element(image).toHaveAttribute('src', nextUrl)
-    expect(docToMarkdown(editor.state.doc)).toBe('![cat](photo)\n')
+    const state = editor.state
+    replaceConfig(editor, { resolveImageUrl: () => nextUrl })
+    expect(editor.state).toBe(state)
+    await expect.element(image).toHaveAttribute('src', firstUrl)
+    editor.view.focus()
+    await userEvent.keyboard('{End} ![[dog](next) ')
+    await expect.element(pmRoot.getByAltText('dog')).toHaveAttribute('src', nextUrl)
+    await expect.element(image).toHaveAttribute('src', firstUrl)
   })
 
   it('reparses existing wikilinks and wiki embeds', async () => {
