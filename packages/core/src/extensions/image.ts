@@ -52,6 +52,11 @@ export interface ImageOptions {
    * react-tweet's hosted proxy.
    */
   resolveXPost?: XPostResolver
+  // FIXME: `resolveXPost` + `resolveXPostMediaUrl` + `subscribeXPost` are three props threaded
+  // through image.ts, editor.tsx, prosekit-editor.tsx and four layers of markdown-view.tsx, and
+  // reflect builds them from one object anyway (`useXPostResolver()` spread). Pass a single
+  // `xPostHost?: { resolve, subscribe, resolveMediaUrl }` (or drop `resolveMediaUrl` entirely, see
+  // post-embed `media-url.ts`) so each layer forwards one prop.
   resolveXPostMediaUrl?: MediaUrlResolver
   subscribeXPost?: (url: string, notify: () => void) => () => void
   /**

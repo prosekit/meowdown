@@ -138,6 +138,10 @@ describe('snapshot persistence', () => {
     return { markdown, comment, snapshot: parseMagicComment(comment)?.snapshot }
   }
 
+  // FIXME: this test, 'uses the host instead of a source snapshot' and 'resolves host data without
+  // rewriting source comments' all assert the same thing (an X card ignores/does not write the
+  // snapshot comment); fold them into one. The describe is still titled 'snapshot persistence'
+  // although X no longer persists anything.
   it('renders host data while keeping URL-only Markdown', async () => {
     using fixture = setup(TWEET, { resolveXPost: () => Promise.resolve(post) })
     const { editor } = fixture

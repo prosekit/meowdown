@@ -128,6 +128,10 @@ export function parsePostEmbedSnapshot(value: unknown): PostEmbedSnapshot | unde
   return result.success ? result.output : undefined
 }
 
+// FIXME: duplicate of the element's own check (post-embed `x-post.ts` rejects a result whose `id`
+// != `parseXPostId(url)`) and of the `post?.id === id` line added to `defaultResolveXPost` above.
+// Delete this wrapper, its export from index.ts, the `useMemo` in markdown-view.tsx and the wrap in
+// image.ts.
 export function checkedXPostResolver(resolver: XPostResolver): XPostResolver {
   return (url) => {
     if (!parseXPostId(url)) return

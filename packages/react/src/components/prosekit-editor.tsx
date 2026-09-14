@@ -233,6 +233,7 @@ export interface ProseKitEditorProps {
   /**
    * Resolves the data behind an X post URL. See `EditorProps.resolveXPost`.
    */
+  // FIXME: same JSDoc misplacement as editor.tsx.
   resolveXPostMediaUrl?: MediaUrlResolver
   subscribeXPost?: (url: string, notify: () => void) => () => void
   resolveXPost?: XPostResolver

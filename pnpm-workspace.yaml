@@ -32,6 +32,8 @@ allowBuilds:
   esbuild: false
   simple-git-hooks: false
 
+# FIXME: pkg.pr.new overrides are a local testing hack. Restore the commented reference block and
+# remove these (and `blockExoticSubdeps`) before merging.
 blockExoticSubdeps: false
 overrides:
   '@post-embed/types': https://pkg.pr.new/@post-embed/types@7bc1a3259420e2060f3183eec77557183abd7e66

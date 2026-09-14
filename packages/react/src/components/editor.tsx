@@ -225,6 +225,9 @@ export interface EditorProps {
    * which fetches through react-tweet's hosted proxy. Pass a stable function
    * (e.g. from `useCallback`).
    */
+  // FIXME: these two props were inserted between the JSDoc block and `resolveXPost`, so the
+  // 'Resolves the data behind an X post URL' doc now documents `resolveXPostMediaUrl`. Move them
+  // below `resolveXPost` and document them. Same in prosekit-editor.tsx.
   resolveXPostMediaUrl?: MediaUrlResolver
   subscribeXPost?: (url: string, notify: () => void) => () => void
   resolveXPost?: XPostResolver
