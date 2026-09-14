@@ -116,7 +116,6 @@ export {
   matchPostEmbed,
   parsePostEmbedSnapshot,
   parseXPostId,
-  postEmbedPreviewClass,
   type PostEmbedKind,
   type PostEmbedSnapshot,
   type XPostResolver,
