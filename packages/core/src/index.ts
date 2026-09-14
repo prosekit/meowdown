@@ -27,11 +27,9 @@ export {
 } from './extensions/code-block-highlight.ts'
 export { codeBlockLanguages, type LanguageItem } from './extensions/code-block-languages.ts'
 export type { CodeBlockFenceStyle, MeowdownCodeBlockAttrs } from './extensions/code-block.ts'
-export {
-  getEditorConfig,
-  updateEditorConfig,
-  type EditorConfig,
-} from './extensions/editor-config.ts'
+export { getEditorConfig } from './extensions/editor-config-getter.ts'
+export type { EditorConfig } from './extensions/editor-config-types.ts'
+export { updateEditorConfig } from './extensions/editor-config.ts'
 export { defineEmbedPaste } from './extensions/embed-paste.ts'
 export {
   defineExitBoundaryHandler,

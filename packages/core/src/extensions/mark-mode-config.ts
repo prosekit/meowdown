@@ -1,6 +1,6 @@
 import type { EditorState } from '@prosekit/pm/state'
 
-import { getEditorConfig } from './editor-config.ts'
+import { getEditorConfig } from './editor-config-getter.ts'
 import type { MarkMode } from './mark-mode.ts'
 
 /**

@@ -1,32 +1,8 @@
 import { definePlugin, type Editor } from '@prosekit/core'
-import type { PlaceholderOptions } from '@prosekit/extensions/placeholder'
-import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
+import { Plugin } from '@prosekit/pm/state'
 
-import type { ExitBoundaryHandler } from './exit-boundary.ts'
-import type { FilePasteOptions } from './file-paste.ts'
-import type { FileViewOptions } from './file-view.ts'
-import type { FollowLinkHandlers } from './follow-link.ts'
-import type { ImageOptions } from './image.ts'
-import type { InlineMarkOptions } from './inline-text-to-mark-chunks.ts'
-import type { MarkMode } from './mark-mode.ts'
-
-// FIXME: move interface EditorConfig into a new file editor-config-types.ts
-export interface EditorConfig
-  extends InlineMarkOptions, FollowLinkHandlers, FilePasteOptions, FileViewOptions, ImageOptions {
-  markMode?: MarkMode
-  onExitBoundary?: ExitBoundaryHandler
-  embedPaste?: boolean
-  linkPaste?: boolean
-  bulletAfterHeading?: boolean
-  substitution?: boolean
-  wikilinkEnabled?: boolean
-  placeholder?: PlaceholderOptions['placeholder']
-  readOnly?: boolean
-  spellCheck?: boolean
-  editorClassName?: string
-}
-
-const defaultConfig: Readonly<EditorConfig> = Object.freeze({})
+import { configKey } from './editor-config-getter.ts'
+import type { EditorConfig } from './editor-config-types.ts'
 
 class ConfigController {
   config: Readonly<EditorConfig>
@@ -34,16 +10,6 @@ class ConfigController {
   constructor(config: Readonly<EditorConfig>) {
     this.config = config
   }
-}
-
-const configKey = new PluginKey<ConfigController>('meowdown-editor-config')
-
-// FIXME: move getEditorConfig into a new file editor-config-getter.ts
-/**
- * Read the current configuration. Callback values are live, not historical state snapshots.
- */
-export function getEditorConfig(state: EditorState): Readonly<EditorConfig> {
-  return configKey.getState(state)?.config ?? defaultConfig
 }
 
 const refreshKeys = new Set<keyof EditorConfig>([
