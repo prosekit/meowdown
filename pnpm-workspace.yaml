@@ -31,13 +31,3 @@ minimumReleaseAgeExclude:
 allowBuilds:
   esbuild: false
   simple-git-hooks: false
-
-# Development snapshots for the coordinated X archive changes. Replace with released
-# versions when publishing the dependent packages.
-blockExoticSubdeps: false
-overrides:
-  '@post-embed/types': https://pkg.pr.new/@post-embed/types@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
-  '@post-embed/schema': https://pkg.pr.new/@post-embed/schema@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
-  '@post-embed/exporter': https://pkg.pr.new/@post-embed/exporter@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
-  '@post-embed/elements': https://pkg.pr.new/@post-embed/elements@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
-FIX ME: new version of @post-embed/* packages is being released, uncomment the overrides in this file . just use the latest version of @post-embed/* packages in the package.json file . Also double check the reflect-open PR. Ensure that the latest origin/master is merged into the your dev branch
