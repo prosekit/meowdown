@@ -130,7 +130,6 @@ function createInlineMarkPlugin(
   }
 
   const chunkCache = new WeakMap<EditorNode, CachedChunks>()
-  let currentOptions: InlineMarkOptions = {} // FIXME: remove this currentOptions variable.
 
   function setsIntersect(left: ReadonlySet<string>, right: ReadonlySet<string>): boolean {
     for (const value of left) {
@@ -148,11 +147,10 @@ function createInlineMarkPlugin(
   }
 
   function chunksForTextblock(
-    // FIXME: add `options` parameter. Put it in a good position in the parameter list . Think about where it should go. options should have type `InlineMarkOptions | undefined`.
-
     node: EditorNode,
     baseOffset: number,
     schema: Schema,
+    options: InlineMarkOptions | undefined,
     references: ReferenceDefinitionIndex,
     changedKeys: ReadonlySet<string>,
     isReferenceDefinition: boolean,
@@ -172,8 +170,7 @@ function createInlineMarkPlugin(
       relative = inlineTextToMarkChunksWithContext(
         getMarkBuildersForSchema(schema),
         node.textContent,
-        // FIXME: pass `options` to `inlineTextToMarkChunksWithContext` instead of using the `currentOptions` variable.
-        currentOptions,
+        options,
         {
           referenceDefinitions: references.definitions,
           isReferenceDefinition,
@@ -197,6 +194,7 @@ function createInlineMarkPlugin(
   function collectChunks(
     state: EditorState,
     range: PositionRange,
+    options: InlineMarkOptions | undefined,
     references: ReferenceDefinitionIndex,
     changedKeys: ReadonlySet<string>,
   ): {
@@ -220,11 +218,11 @@ function createInlineMarkPlugin(
       const dependsOnChange = cached == null || setsIntersect(cached.referencedKeys, changedKeys)
       if (!touchesRange && !dependsOnChange) return false
 
-      // FIXME: pass `options` to `chunksForTextblock` instead of using the `currentOptions` variable.
       const nodeChunks = chunksForTextblock(
         node,
         pos + 1,
         state.schema,
+        options,
         references,
         changedKeys,
         isReferenceDefinitionNode(node, parent, index),
@@ -303,9 +301,9 @@ function createInlineMarkPlugin(
       const changedKeys = restyle
         ? (pluginKey.getState(oldState)?.pendingReferenceKeys ?? emptyReferenceKeys)
         : emptyReferenceKeys
-      currentOptions = getOptions?.(newState) ?? {} // FIXME: remove this currentOptions variable. add a new `const options: InlineMarkOptions|undefined = getOptions?.(newState)`
+      const options: InlineMarkOptions | undefined = getOptions?.(newState)
       const range = restyle ? { from: 0, to: 0 } : computeAffectedRange(transactions, newState)
-      const { chunks, processed } = collectChunks(newState, range, references, changedKeys) // FIXME: pass `options` to `collectChunks` instead of using the `currentOptions` variable.
+      const { chunks, processed } = collectChunks(newState, range, options, references, changedKeys)
       if (chunks.length === 0) return null
       const tr = newState.tr.step(new BatchSetMarkStep(chunks))
       transferCache(tr.doc, processed)
