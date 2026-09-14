@@ -222,6 +222,8 @@ export interface EditorProps {
    * Host data lookup and trusted media protocols for X cards.
    * Keep the object stable (for example, with `useMemo`). When omitted, public
    * posts use `defaultResolveXPost` through react-tweet's hosted proxy.
+   *
+   * FIXME This used to be `resolveXPost?: XPostResolver` but it's now `xPostHost?: XPostHost`. I do not like `xPostHost?: XPostHost`. I would like to make it two separate properties: `resolveXPost?: XPostResolver` and `mediaUrlProtocols?: string[] | undefined`. This way, we can clearly. I do not like the type `XPostHost` and the variable name `xPostHost`. Ensure you remove completely the `XPostHost` type from all PRs (meowdown and reflect-open)
    */
   xPostHost?: XPostHost
 
