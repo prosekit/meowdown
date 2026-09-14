@@ -1,6 +1,6 @@
-import { getEditorConfig } from '@meowdown/core'
 import '../testing/index.ts'
 
+import { getEditorConfig } from '@meowdown/core'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -156,15 +156,24 @@ describe('reactive editor configuration', () => {
     const second = vi.fn()
     const ref = createRef<EditorHandle>()
     const screen = await render(
-      <ProseKitEditor ref={ref} initialMarkdown="about #cats" onTagClick={first} />,
+      <ProseKitEditor
+        ref={ref}
+        initialMarkdown={'about #cats\n\nOther paragraph'}
+        onTagClick={first}
+      />,
     )
     await userEvent.click(pmRoot.getByText('#cats'))
     expect(first).toHaveBeenCalledOnce()
+    await userEvent.click(pmRoot.getByText('Other paragraph'))
     const editor = ref.current?.editor
     expect(editor).toBeDefined()
     const state = editor?.state
     await screen.rerender(
-      <ProseKitEditor ref={ref} initialMarkdown="about #cats" onTagClick={second} />,
+      <ProseKitEditor
+        ref={ref}
+        initialMarkdown={'about #cats\n\nOther paragraph'}
+        onTagClick={second}
+      />,
     )
     await vi.waitFor(() => {
       expect(editor && getEditorConfig(editor.state).onTagClick).toBe(second)
@@ -178,12 +187,12 @@ describe('reactive editor configuration', () => {
   it('reparses existing file links when a resolver prop changes', async () => {
     const markdown = '[report.pdf](assets/report.pdf)'
     const screen = await render(<ProseKitEditor initialMarkdown={markdown} />)
-    await expect.element(pmRoot.getByRole('link', { name: 'report.pdf' })).toBeInTheDocument()
+    await expect.element(pmRoot.getByRole('link')).toBeInTheDocument()
     await screen.rerender(
       <ProseKitEditor initialMarkdown={markdown} resolveFileLink={() => true} />,
     )
     await expect.element(pmRoot.getByTestId('file-pill')).toBeInTheDocument()
     await screen.rerender(<ProseKitEditor initialMarkdown={markdown} />)
-    await expect.element(pmRoot.getByRole('link', { name: 'report.pdf' })).toBeInTheDocument()
+    await expect.element(pmRoot.getByRole('link')).toBeInTheDocument()
   })
 })

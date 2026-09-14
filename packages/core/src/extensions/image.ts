@@ -1,4 +1,3 @@
-import { getEditorConfig, subscribeEditorConfig } from './editor-config.ts'
 import { registerXPost, type Resolver } from '@post-embed/elements/x'
 import { registerYouTubeVideo } from '@post-embed/elements/youtube'
 import type { XPost, YouTubeVideo } from '@post-embed/types'
@@ -13,6 +12,7 @@ import {
 
 import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
 
+import { getEditorConfig, subscribeEditorConfig } from './editor-config.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import {
   formatMagicComment,

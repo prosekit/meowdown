@@ -2,7 +2,6 @@ import { definePlugin, type Editor } from '@prosekit/core'
 import type { PlaceholderOptions } from '@prosekit/extensions/placeholder'
 import { getSearchStatus, type SearchStatusHandler } from '@prosekit/extensions/search'
 import { Plugin, PluginKey, type EditorState, type Transaction } from '@prosekit/pm/state'
-
 import type { EditorView } from '@prosekit/pm/view'
 
 import type { ExitBoundaryHandler } from './exit-boundary.ts'
@@ -11,7 +10,7 @@ import type { FileViewOptions } from './file-view.ts'
 import type { FollowLinkHandlers } from './follow-link.ts'
 import type { ImageOptions } from './image.ts'
 import type { InlineMarkOptions } from './inline-text-to-mark-chunks.ts'
-import type { MarkMode } from './mark-mode.ts'
+import { MARK_MODE_META, type MarkMode } from './mark-mode.ts'
 
 export interface EditorConfig
   extends InlineMarkOptions, FollowLinkHandlers, FilePasteOptions, FileViewOptions, ImageOptions {
@@ -94,7 +93,9 @@ class ConfigController {
 
 const configKey = new PluginKey<ConfigController>('meowdown-config')
 
-/** Read the current configuration. Callback values are live, not historical state snapshots. */
+/**
+ * Read the current configuration. Callback values are live, not historical state snapshots.
+ */
 export function getEditorConfig(state: EditorState): Readonly<EditorConfig> {
   return configKey.getState(state)?.config ?? defaultConfig
 }
@@ -107,7 +108,10 @@ function getEditorConfigUpdate(transaction: Transaction): Readonly<EditorConfig>
  * Replace the complete configuration. Omitted fields return to their defaults.
  * Equal values do no work; callbacks and event-time flags do not dispatch.
  */
-export function replaceEditorConfig(editor: Editor, config: EditorConfig): void {
+export function replaceEditorConfig(
+  editor: Pick<Editor, 'state' | 'view' | 'mounted' | 'updateState'>,
+  config: EditorConfig,
+): void {
   const controller = configKey.getState(editor.state)
   if (!controller) throw new Error('[meowdown] editor configuration is missing')
   const next = normalizeConfig(config)
@@ -117,8 +121,7 @@ export function replaceEditorConfig(editor: Editor, config: EditorConfig): void 
 
   if (refreshKeys.some((key) => !Object.is(previous[key], next[key]))) {
     const transaction = editor.state.tr.setMeta(configKey, next).setMeta('addToHistory', false)
-    if (previous.markMode !== next.markMode)
-      transaction.setMeta('meowdown-config-mark-mode', next.markMode)
+    if (previous.markMode !== next.markMode) transaction.setMeta(MARK_MODE_META, next.markMode)
     if (editor.mounted) editor.view.dispatch(transaction)
     else editor.updateState(editor.state.apply(transaction))
   } else {
@@ -134,7 +137,11 @@ export function defineEditorConfig(initialConfig: EditorConfig) {
         init: () => new ConfigController(initialConfig),
         apply: (transaction, controller) => {
           const config = getEditorConfigUpdate(transaction)
+          const markMode = transaction.getMeta(MARK_MODE_META) as MarkMode | undefined
           if (config) controller.config = config
+          else if (markMode && markMode !== controller.config.markMode) {
+            controller.config = normalizeConfig({ ...controller.config, markMode })
+          }
           return controller
         },
       },

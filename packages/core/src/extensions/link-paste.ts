@@ -30,8 +30,8 @@ export function detectLinkUrl(text: string): string | undefined {
  * Registered with `Priority.high` so its `handlePaste` runs before
  * `defineEmbedPaste`'s: pasting an embeddable URL (tweet/YouTube) over a
  * selection keeps the selected text as a link instead of discarding it for an
- * embed. Not part of `defineEditorExtension`; the React package applies it via
- * the `linkPaste` prop (on by default).
+ * embed. Enable it through the `linkPaste` configuration or install this
+ * standalone extension. The React prop defaults to enabled.
  */
 export function defineLinkPaste(enabled?: (state: EditorState) => boolean): PlainExtension {
   return withPriority(

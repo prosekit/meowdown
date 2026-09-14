@@ -1,7 +1,8 @@
-import { getEditorConfig } from './editor-config.ts'
 import { definePlugin, Priority, withPriority, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
+
+import { getEditorConfig } from './editor-config.ts'
 
 export type FilePasteHandler = (file: File) => string | undefined | Promise<string | undefined>
 export type FileSaveErrorHandler = (error: unknown, file: File) => void

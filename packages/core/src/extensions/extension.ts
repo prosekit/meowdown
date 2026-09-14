@@ -1,18 +1,3 @@
-import { definePlaceholder } from '@prosekit/extensions/placeholder'
-import { defineEditorConfig, getEditorConfig, type EditorConfig } from './editor-config.ts'
-import { defineBulletAfterHeading } from './bullet-after-heading.ts'
-import { defineEmbedPaste } from './embed-paste.ts'
-import { defineExitBoundaryHandler } from './exit-boundary.ts'
-import { defineFileClickHandler } from './file-click.ts'
-import { defineFilePaste } from './file-paste.ts'
-import { defineFollowLinkHandler } from './follow-link.ts'
-import { defineImageClickHandler } from './image-click.ts'
-import { defineLinkClickHandler } from './link-click.ts'
-import { defineLinkPaste } from './link-paste.ts'
-import { defineSubstitution } from './substitution.ts'
-import { defineTagClickHandler } from './tag-click.ts'
-import { defineWikilinkClickHandler } from './wikilink-click.ts'
-import { defineWikilinkTrigger } from './wikilink-trigger.ts'
 import {
   defineBaseCommands,
   defineBaseKeymap,
@@ -24,26 +9,37 @@ import { defineBlockquote } from '@prosekit/extensions/blockquote'
 import { defineDoc } from '@prosekit/extensions/doc'
 import { defineGapCursor } from '@prosekit/extensions/gap-cursor'
 import { defineModClickPrevention } from '@prosekit/extensions/mod-click-prevention'
+import { definePlaceholder } from '@prosekit/extensions/placeholder'
 import { defineText } from '@prosekit/extensions/text'
 import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineAtomMarkNavigation } from './atom-mark-navigation.ts'
+import { defineBulletAfterHeading } from './bullet-after-heading.ts'
 import { defineClipboard } from './clipboard/clipboard.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineCodeBlock } from './code-block.ts'
 import { defineEditorCommands } from './commands.ts'
 import { defineCrossEditorDrag } from './cross-editor-drag.ts'
+import { defineEditorConfig, getEditorConfig, type EditorConfig } from './editor-config.ts'
+import { defineEmbedPaste } from './embed-paste.ts'
 import { defineEscapeCollapse } from './escape-collapse.ts'
+import { defineExitBoundaryHandler } from './exit-boundary.ts'
+import { defineFileClickHandler } from './file-click.ts'
+import { defineFilePaste } from './file-paste.ts'
 import { defineFind } from './find.ts'
+import { defineFollowLinkHandler } from './follow-link.ts'
 import { defineDocFrontmatterAttr } from './frontmatter.ts'
 import { defineHeading } from './heading.ts'
 import { defineHiddenRunCaret } from './hidden-run-caret.ts'
 import { defineMeowdownHorizontalRule } from './horizontal-rule.ts'
 import { defineHTMLComment } from './html-comment.ts'
+import { defineImageClickHandler } from './image-click.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
+import { defineLinkClickHandler } from './link-click.ts'
 import { defineLinkCommands } from './link-commands.ts'
+import { defineLinkPaste } from './link-paste.ts'
 import { defineMeowdownList } from './list.ts'
 import { defineMarkMode } from './mark-mode.ts'
 import { ATOM_SOURCE_MARK_NAMES } from './mark-names.ts'
@@ -54,9 +50,13 @@ import { definePendingReplacement } from './pending-replacement.ts'
 import { defineScrollToSelection } from './scroll-to-selection.ts'
 import { defineSelectDocBoundary } from './select-doc-boundary.ts'
 import { defineSoftBreak } from './soft-break.ts'
+import { defineSubstitution } from './substitution.ts'
 import { defineSystemSubstitutionGuard } from './system-substitution-guard.ts'
 import { defineTable } from './table.ts'
+import { defineTagClickHandler } from './tag-click.ts'
 import { defineViewAttributes } from './view-attributes.ts'
+import { defineWikilinkClickHandler } from './wikilink-click.ts'
+import { defineWikilinkTrigger } from './wikilink-trigger.ts'
 import { defineWikilink } from './wikilink.ts'
 
 function defineEditorExtensionImpl(options: EditorExtensionOptions) {
@@ -135,7 +135,9 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
 
 export type EditorExtension = ReturnType<typeof defineEditorExtensionImpl>
 
-/** Initial configuration, replaceable with `replaceEditorConfig`. */
+/**
+ * Initial configuration, replaceable with `replaceEditorConfig`.
+ */
 export type EditorExtensionOptions = EditorConfig
 
 export function defineEditorExtension(options: EditorExtensionOptions = {}): EditorExtension {

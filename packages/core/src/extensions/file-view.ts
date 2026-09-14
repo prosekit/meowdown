@@ -1,11 +1,10 @@
-import { getEditorConfig, subscribeEditorConfig } from './editor-config.ts'
-import type { EditorView } from '@prosekit/pm/view'
 import { defineMarkView, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
-import type { MarkView, ViewMutationRecord } from '@prosekit/pm/view'
+import type { EditorView, MarkView, ViewMutationRecord } from '@prosekit/pm/view'
 
 import { formatFileSize } from '../utils/format-file-size.ts'
 
+import { getEditorConfig, subscribeEditorConfig } from './editor-config.ts'
 import type { MdFileAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
 

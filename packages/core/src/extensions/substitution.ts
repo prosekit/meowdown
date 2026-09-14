@@ -150,8 +150,9 @@ function defineSubstitutionEnterRules(enabled?: (state: EditorState) => boolean)
     SUBSTITUTION_RULES.map((rule) => {
       return defineEnterRule({
         regex: new RegExp(`(?:${rule[0].source})$`),
-        handler: ({ state, from, to }) =>
-          enabled && !enabled(state) ? null : applySubstitution(state, from, to, rule),
+        handler: ({ state, from, to }) => {
+          return enabled && !enabled(state) ? null : applySubstitution(state, from, to, rule)
+        },
       })
     }),
   )

@@ -65,10 +65,17 @@ function openWikilinkMenu({ allowEmpty }: OpenWikilinkMenuOptions): Command {
  */
 export function defineWikilinkTrigger(enabled?: (state: EditorState) => boolean): PlainExtension {
   return defineKeymap({
-    'Mod-Shift-k': (state, dispatch, view) =>
-      (!enabled || enabled(state)) && openWikilinkMenu({ allowEmpty: true })(state, dispatch, view),
-    '[': (state, dispatch, view) =>
-      (!enabled || enabled(state)) &&
-      openWikilinkMenu({ allowEmpty: false })(state, dispatch, view),
+    'Mod-Shift-k': (state, dispatch, view) => {
+      return (
+        (!enabled || enabled(state)) &&
+        openWikilinkMenu({ allowEmpty: true })(state, dispatch, view)
+      )
+    },
+    '[': (state, dispatch, view) => {
+      return (
+        (!enabled || enabled(state)) &&
+        openWikilinkMenu({ allowEmpty: false })(state, dispatch, view)
+      )
+    },
   })
 }

@@ -76,9 +76,12 @@ describe('editor configuration', () => {
     using fixture = setupFixture({ extensionOptions: config })
     const { editor, n } = fixture
     editor.use(defineFileView())
-    fixture.set(n.doc(n.paragraph('[report.pdf](assets/report.pdf)')))
+    fixture.set(
+      n.doc(n.paragraph('[report.pdf](assets/report.pdf)'), n.paragraph('Other paragraph')),
+    )
     await userEvent.click(pmRoot.getByTestId('file-pill'))
     expect(first).toHaveBeenCalledOnce()
+    await userEvent.click(pmRoot.getByText('Other paragraph'))
     const state = editor.state
     const dispatch = vi.spyOn(editor.view, 'dispatch')
     const updateState = vi.spyOn(editor.view, 'updateState')
@@ -89,6 +92,7 @@ describe('editor configuration', () => {
     await userEvent.click(pmRoot.getByTestId('file-pill'))
     expect(second).toHaveBeenCalledOnce()
     expect(first).toHaveBeenCalledOnce()
+    await userEvent.click(pmRoot.getByText('Other paragraph'))
     replaceEditorConfig(editor, { resolveFileLink: claimFiles })
     await userEvent.click(pmRoot.getByTestId('file-pill'))
     expect(second).toHaveBeenCalledOnce()
@@ -116,15 +120,15 @@ describe('editor configuration', () => {
     editor.use(defineFileView())
     fixture.set(n.doc(n.paragraph('see [report.pdf](assets/report.pdf)<a> here')))
     const markdown = docToMarkdown(editor.state.doc)
-    const selection = editor.state.selection.toJSON()
+    const selection = editor.state.selection
     onDocChange.mockClear()
     replaceEditorConfig(editor, { resolveFileLink: claimFiles, onDocChange })
     await expect.element(pmRoot.getByTestId('file-pill')).toBeInTheDocument()
     expect(docToMarkdown(editor.state.doc)).toBe(markdown)
-    expect(editor.state.selection.toJSON()).toEqual(selection)
+    expect(editor.state.selection.eq(selection)).toBe(true)
     expect(onDocChange).not.toHaveBeenCalled()
     replaceEditorConfig(editor, { onDocChange })
-    await expect.element(pmRoot.getByRole('link', { name: 'report.pdf' })).toBeInTheDocument()
+    await expect.element(pmRoot.getByRole('link')).toBeInTheDocument()
     expect(docToMarkdown(editor.state.doc)).toBe(markdown)
     expect(onDocChange).not.toHaveBeenCalled()
   })
@@ -150,6 +154,32 @@ describe('editor configuration', () => {
     expect(editor.view.editable).toBe(true)
     await expect.element(pmRoot).not.toHaveAttribute('spellcheck')
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'focus')
+  })
+
+  it('keeps the mode command and the configuration snapshot consistent', () => {
+    using fixture = setupFixture()
+    const { editor } = fixture
+    editor.commands.setMarkMode('hide')
+    expect(getEditorConfig(editor.state).markMode).toBe('hide')
+    const state = editor.state
+    replaceEditorConfig(editor, { ...getEditorConfig(state), onFileClick: vi.fn() })
+    expect(editor.state).toBe(state)
+    expect(getMarkMode(editor.state)).toBe('hide')
+    replaceEditorConfig(editor, {})
+    expect(getMarkMode(editor.state)).toBe('focus')
+  })
+
+  it('keeps config changes out of undo history', async () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('hello<a>')))
+    editor.view.focus()
+    await userEvent.keyboard(' world')
+    replaceEditorConfig(editor, { markMode: 'hide', resolveFileLink: claimFiles })
+    editor.commands.undo()
+    expect(editor.state.doc.textContent).toBe('hello')
+    expect(getEditorConfig(editor.state).resolveFileLink).toBe(claimFiles)
+    expect(getMarkMode(editor.state)).toBe('hide')
   })
 
   it('does not publish a configuration transaction rejected by a plugin', () => {

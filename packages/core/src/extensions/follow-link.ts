@@ -1,4 +1,3 @@
-import { getEditorConfig } from './editor-config.ts'
 import {
   definePlugin,
   Priority,
@@ -12,6 +11,7 @@ import { getIsComposing } from '../utils/composition.ts'
 import { isModEvent } from '../utils/is-mod-event.ts'
 
 import { getSelectedAtomRange } from './atom-mark-navigation.ts'
+import { getEditorConfig } from './editor-config.ts'
 import type { FileClickHandler } from './file-click.ts'
 import { findFileAt } from './file-click.ts'
 import { getLinkUnitAt } from './get-link-unit-at.ts'

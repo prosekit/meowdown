@@ -17,6 +17,8 @@ import { isMarkOfType, type MarkName } from './mark-names.ts'
  */
 export type MarkMode = 'hide' | 'focus' | 'show'
 
+export const MARK_MODE_META = 'meowdown-config-mark-mode'
+
 const markModeKey = new PluginKey<MarkMode>('mark-mode')
 
 function getCurrentMarkMode(state: EditorState): MarkMode | undefined {
@@ -28,10 +30,13 @@ function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
     key: markModeKey,
     state: {
       init: () => initialMode,
-      apply: (tr, value) =>
-        (tr.getMeta(markModeKey) as MarkMode | undefined) ??
-        (tr.getMeta('meowdown-config-mark-mode') as MarkMode | undefined) ??
-        value,
+      apply: (tr, value) => {
+        return (
+          (tr.getMeta(markModeKey) as MarkMode | undefined) ??
+          (tr.getMeta(MARK_MODE_META) as MarkMode | undefined) ??
+          value
+        )
+      },
     },
     props: {
       attributes: (state) => {
@@ -51,7 +56,7 @@ function setMarkMode(mode: MarkMode): Command {
   return (state, dispatch) => {
     if (getMarkMode(state) === mode) return false
     // A meta-only transaction: no doc steps, so undo cannot revert the mode.
-    dispatch?.(state.tr.setMeta(markModeKey, mode))
+    dispatch?.(state.tr.setMeta(MARK_MODE_META, mode))
     return true
   }
 }

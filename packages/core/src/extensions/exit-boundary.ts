@@ -1,4 +1,3 @@
-import { getEditorConfig } from './editor-config.ts'
 import {
   definePlugin,
   isAllSelection,
@@ -9,6 +8,8 @@ import {
 } from '@prosekit/core'
 import { Plugin, PluginKey, Selection, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
+
+import { getEditorConfig } from './editor-config.ts'
 
 const exitBoundaryKey = new PluginKey('meowdown-exit-boundary')
 

@@ -1,9 +1,9 @@
-import { getEditorConfig } from './editor-config.ts'
 import type { PlainExtension } from '@prosekit/core'
 import { PluginKey } from '@prosekit/pm/state'
 
 import { isModEvent } from '../utils/is-mod-event.ts'
 
+import { getEditorConfig } from './editor-config.ts'
 import { getLinkUnitAt } from './get-link-unit-at.ts'
 import { defineMarkClickHandler } from './mark-click.ts'
 
@@ -42,7 +42,12 @@ export function defineLinkClickHandler(onClick?: LinkClickHandler): PlainExtensi
     selector: '.md-link',
     preventDefault: true,
     findPayloadAt: (state, pos) => getLinkUnitAt(state, pos)?.href,
-    onClick: (href, event, state) =>
-      (onClick ?? getEditorConfig(state).onLinkClick)?.({ href, event, mod: isModEvent(event) }),
+    onClick: (href, event, state) => {
+      return (onClick ?? getEditorConfig(state).onLinkClick)?.({
+        href,
+        event,
+        mod: isModEvent(event),
+      })
+    },
   })
 }

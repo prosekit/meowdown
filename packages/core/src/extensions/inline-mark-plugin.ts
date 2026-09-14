@@ -1,4 +1,4 @@
-import { equalInlineConfig, getEditorConfig } from './editor-config.ts'
+import { definePlugin, type PlainExtension } from '@prosekit/core'
 /**
  * Inline-mark plugin
  *
@@ -13,8 +13,6 @@ import { equalInlineConfig, getEditorConfig } from './editor-config.ts'
  *     -> if chunks is non-empty: tr.step(new BatchSetMarkStep(chunks))
  *                                  .setMeta(META_KEY, true)
  */
-
-import { definePlugin, type PlainExtension } from '@prosekit/core'
 import type { EditorNode, Schema } from '@prosekit/pm/model'
 import type { EditorState, Transaction } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
@@ -23,6 +21,7 @@ import type { EditorView } from '@prosekit/pm/view'
 import type { PositionRange } from '../utils/range.ts'
 
 import { BatchSetMarkStep } from './batch-set-mark-step.ts'
+import { equalInlineConfig, getEditorConfig } from './editor-config.ts'
 import {
   inlineTextToMarkChunksWithContext,
   type InlineMarkOptions,

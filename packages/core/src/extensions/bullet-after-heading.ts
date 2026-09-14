@@ -53,8 +53,9 @@ export function defineBulletAfterHeading(
 ): PlainExtension {
   return withPriority(
     defineKeymap({
-      Enter: (state, dispatch, view) =>
-        (!enabled || enabled(state)) && bulletAfterHeadingOnEnter(state, dispatch, view),
+      Enter: (state, dispatch) => {
+        return (!enabled || enabled(state)) && bulletAfterHeadingOnEnter(state, dispatch)
+      },
     }),
     Priority.high,
   )
