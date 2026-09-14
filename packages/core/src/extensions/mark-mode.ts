@@ -45,6 +45,13 @@ function createMarkModePlugin(getMode: MarkModeGetter): Plugin<MarkModeGetter> {
  * `defineMarkMode`, so this is `undefined` only for a state built without it.
  */
 export function getMarkMode(state: EditorState): MarkMode | undefined {
+  // FIXME: we can remove a plguin state and simplify
+  // 1. remove markModeKey
+  // 2. remove state field in createMarkModePlugin
+  // 3. add a new mark-mode-config.ts.
+  // 4. if mark-mode-config.ts, defined a new version of getMarkMode. function getMarkMode(state): {return getEditorConfig(state)?.markMode || "focus"}
+  // 5. remove getMarkMode in mark-mode.ts
+  // 6. in extension.ts, just write defineMarkMode(getMarkMode)
   return markModeKey.getState(state)?.(state)
 }
 
