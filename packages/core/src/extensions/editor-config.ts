@@ -41,6 +41,7 @@ class ConfigController {
 
 const configKey = new PluginKey<ConfigController>('meowdown-editor-config')
 
+// FIXME: move getEditorConfig into a new file editor-config-getter.ts
 /**
  * Read the current configuration. Callback values are live, not historical state snapshots.
  */
