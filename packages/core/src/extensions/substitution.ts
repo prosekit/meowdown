@@ -38,6 +38,10 @@ interface SubstitutionUndoState {
   after: string
 }
 
+const substitutionUndoKey = new PluginKey<SubstitutionUndoState | null>(
+  'meowdown-substitution-undo',
+)
+
 function isInlineCode(state: EditorState, from: number, to: number): boolean {
   const type = getMarkType(state.schema, 'mdCode' satisfies MarkName)
   return state.doc.rangeHasMark(from, to, type)
@@ -49,14 +53,13 @@ function applySubstitution(
   to: number,
   rule: SubstitutionRule,
   undoText?: string,
-  substitutionUndoKey?: PluginKey<SubstitutionUndoState | null>,
 ): Transaction | null {
   if (isInlineCode(state, from, to)) return null
 
   const [, replacement] = rule
   const text = undoText == null ? replacement : `${replacement} `
   const tr = state.tr.replaceWith(from, to, state.schema.text(text))
-  if (undoText != null && substitutionUndoKey) {
+  if (undoText != null) {
     tr.setMeta(substitutionUndoKey, {
       from,
       to: from + text.length,
@@ -67,26 +70,21 @@ function applySubstitution(
   return tr
 }
 
-function defineSubstitutionInputRules(
-  substitutionUndoKey: PluginKey<SubstitutionUndoState | null>,
-  enabled?: (state: EditorState) => boolean,
-): PlainExtension {
+function defineSubstitutionInputRules(enabled?: (state: EditorState) => boolean): PlainExtension {
   return union(
     SUBSTITUTION_RULES.map((rule) => {
       const inputRegexp = new RegExp(String.raw`(?:${rule[0].source})\s$`)
       return defineInputRule(
         new InputRule(inputRegexp, (state, match, start, end) => {
           if (enabled && !enabled(state)) return null
-          return applySubstitution(state, start, end, rule, match[0], substitutionUndoKey)
+          return applySubstitution(state, start, end, rule, match[0])
         }),
       )
     }),
   )
 }
 
-function defineSubstitutionUndoPlugin(
-  substitutionUndoKey: PluginKey<SubstitutionUndoState | null>,
-): PlainExtension {
+function defineSubstitutionUndoPlugin(): PlainExtension {
   return definePlugin(
     new Plugin<SubstitutionUndoState | null>({
       key: substitutionUndoKey,
@@ -116,9 +114,7 @@ function defineSubstitutionUndoPlugin(
   )
 }
 
-function defineSubstitutionUndoKeymap(
-  substitutionUndoKey: PluginKey<SubstitutionUndoState | null>,
-): PlainExtension {
+function defineSubstitutionUndoKeymap(): PlainExtension {
   return withPriority(
     defineKeymap({
       Backspace: (state, dispatch) => {
@@ -136,13 +132,8 @@ function defineSubstitutionUndoKeymap(
   )
 }
 
-function defineSubstitutionUndo(
-  substitutionUndoKey: PluginKey<SubstitutionUndoState | null>,
-): PlainExtension {
-  return union(
-    defineSubstitutionUndoPlugin(substitutionUndoKey),
-    defineSubstitutionUndoKeymap(substitutionUndoKey),
-  )
+function defineSubstitutionUndo(): PlainExtension {
+  return union(defineSubstitutionUndoPlugin(), defineSubstitutionUndoKeymap())
 }
 
 function defineSubstitutionEnterRules(enabled?: (state: EditorState) => boolean): PlainExtension {
@@ -162,12 +153,9 @@ function defineSubstitutionEnterRules(enabled?: (state: EditorState) => boolean)
  * Apply the editor's automatic plain-text substitutions.
  */
 export function defineSubstitution(enabled?: (state: EditorState) => boolean): PlainExtension {
-  const substitutionUndoKey = new PluginKey<SubstitutionUndoState | null>(
-    'meowdown-substitution-undo',
-  )
   return union(
-    defineSubstitutionInputRules(substitutionUndoKey, enabled),
-    defineSubstitutionUndo(substitutionUndoKey),
+    defineSubstitutionInputRules(enabled),
+    defineSubstitutionUndo(),
     defineSubstitutionEnterRules(enabled),
   )
 }
