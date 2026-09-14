@@ -27,7 +27,7 @@ function insertEmbedFromPaste(view: EditorView, url: string): void {
  * Auto-embed a pasted tweet or YouTube link. When the clipboard holds exactly
  * one such URL, the link is rewritten to `![](url)`, which the image pipeline
  * renders as a rich embed. Enable it through the `embedPaste` configuration
- * or install this standalone extension. The React prop defaults to enabled.
+ * or install this standalone extension. The React prop defaults to enabled. // FIXME: do not meantion react in packages/core/
  */
 export function defineEmbedPaste(enabled?: (state: EditorState) => boolean): PlainExtension {
   return definePlugin(
