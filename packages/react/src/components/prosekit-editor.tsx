@@ -395,6 +395,8 @@ export function ProseKitEditor({
     }
   }, [onDocChange])
 
+  const wikilinkEnabled = !!onWikilinkSearch
+
   const config = useMemo<EditorConfig>(
     () => ({
       markMode,
@@ -421,7 +423,7 @@ export function ProseKitEditor({
       readOnly,
       spellCheck,
       editorClassName,
-      wikilinkEnabled: !!onWikilinkSearch,
+      wikilinkEnabled,
     }),
     [
       markMode,
@@ -448,7 +450,7 @@ export function ProseKitEditor({
       readOnly,
       spellCheck,
       editorClassName,
-      onWikilinkSearch,
+      wikilinkEnabled,
     ],
   )
 
