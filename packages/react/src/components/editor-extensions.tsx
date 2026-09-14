@@ -7,6 +7,7 @@ import {
 import { useEditor } from '@prosekit/react'
 import { useDeferredValue, useEffect } from 'react'
 
+// FIXME: refreshKeys has already been defined in core/src/extensions/editor-config.ts. We should remove it from react
 const refreshKeys = [
   'markMode',
   'resolveFileLink',
