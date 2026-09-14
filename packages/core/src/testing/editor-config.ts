@@ -1,5 +1,6 @@
 import { replaceEditorConfig, type EditorConfig } from '../extensions/editor-config.ts'
 
+// FIXME: remove this
 export function updateEditorConfig(
   editor: Parameters<typeof replaceEditorConfig>[0],
   patch: EditorConfig,
