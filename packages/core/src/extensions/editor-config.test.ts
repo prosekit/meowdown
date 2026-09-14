@@ -15,6 +15,7 @@ import { getMarkMode } from './mark-mode-config.ts'
 const pmRoot = page.locate('.ProseMirror')
 const claimFiles = () => true
 
+// FIXME: delete  this function. just use updateEditorConfig directly
 function replaceConfig(
   editor: Parameters<typeof replaceEditorConfig>[0],
   next: EditorConfig,
