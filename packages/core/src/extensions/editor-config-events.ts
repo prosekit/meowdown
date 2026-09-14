@@ -23,6 +23,7 @@ export function defineEditorConfigEvents(
                 parserChanged && currentView.state.doc.textContent === previousState.doc.textContent
               )
             ) {
+              // FIXME: do not call onDocChange maunlly. Just keep using the defineDocChangeHandler as we did before in master. Notice that we DO NOT need to move all config to the editorConfig
               config.onDocChange?.()
             }
             // FIXME: do not call onSearchChange maunlly. Just keep using the defineSearchStatusHandler as we did before in master. Notice that we DO NOT need to move all config to the editorConfig
