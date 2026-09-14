@@ -77,12 +77,3 @@ Import both stylesheets: `@meowdown/core/style.css` (the editor theme and variab
 ## License
 
 MIT
-
-<!--FIXME delete this section -->
-
-Editor behavior props are supplied at creation and synchronized after committed
-renders. Reapplying equal values is a no-op. Callback updates do not replace the
-editor state, while changes to `resolveFileLink`, `resolveWikiEmbed`, and
-`resolveWikilink` reparse existing content. Keep resolvers stable when their
-behavior is unchanged to avoid unnecessary reparsing. Synchronization runs in a
-task outside React's lifecycle so adapter views can update safely.

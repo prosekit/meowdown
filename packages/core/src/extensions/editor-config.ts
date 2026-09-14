@@ -62,11 +62,11 @@ export function replaceEditorConfig(
   if (next === controller.config) return
   controller.config = next
   if (!dispatch) return
-  // FIXME: rename "transaction" to "tr"
-  // FIXME: rename "CONFIG_UPDATED" to "meowdown_editor_config_update"
-  const transaction = editor.state.tr.setMeta('addToHistory', false).setMeta('CONFIG_UPDATED', true)
-  if (editor.mounted) editor.view.dispatch(transaction)
-  else editor.updateState(editor.state.apply(transaction))
+  const tr = editor.state.tr
+    .setMeta('addToHistory', false)
+    .setMeta('meowdown_editor_config_update', true)
+  if (editor.mounted) editor.view.dispatch(tr)
+  else editor.updateState(editor.state.apply(tr))
 }
 
 export function defineEditorConfig(initialConfig: EditorConfig) {
