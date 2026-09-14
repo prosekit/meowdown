@@ -12,7 +12,7 @@ import type {
   LinkPreviewResolver,
   MarkMode,
   PlaceholderOptions,
-  XPostResolver,
+  XPostHost,
   YouTubeVideoResolver,
   SearchStatusHandler,
   StartPendingReplacementOptions,
@@ -21,7 +21,6 @@ import type {
   WikilinkClickHandler,
   WikilinkResolver,
 } from '@meowdown/core'
-import type { MediaUrlResolver } from '@post-embed/types'
 import type { SelectionJSON } from '@prosekit/core'
 import type { ReactNodeViewComponent } from '@prosekit/react'
 import { clsx } from 'clsx/lite'
@@ -220,17 +219,11 @@ export interface EditorProps {
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
 
   /**
-   * Resolves the data behind an X post URL, directly or as a promise; the post
-   * renders as a `post-embed-x-post` card. Defaults to `defaultResolveXPost`,
-   * which fetches through react-tweet's hosted proxy. Pass a stable function
-   * (e.g. from `useCallback`).
+   * Host data lookup, change subscription, and trusted media protocols for X cards.
+   * Keep the object stable (for example, with `useMemo`). When omitted, public
+   * posts use `defaultResolveXPost` through react-tweet's hosted proxy.
    */
-  // FIXME: these two props were inserted between the JSDoc block and `resolveXPost`, so the
-  // 'Resolves the data behind an X post URL' doc now documents `resolveXPostMediaUrl`. Move them
-  // below `resolveXPost` and document them. Same in prosekit-editor.tsx.
-  resolveXPostMediaUrl?: MediaUrlResolver
-  subscribeXPost?: (url: string, notify: () => void) => () => void
-  resolveXPost?: XPostResolver
+  xPostHost?: XPostHost
 
   /**
    * Resolves the data behind a YouTube video URL, directly or as a promise;
@@ -405,9 +398,7 @@ export function MeowdownEditor({
   resolveWikiEmbed,
   resolveWikilink,
   resolveFileInfo,
-  resolveXPost,
-  resolveXPostMediaUrl,
-  subscribeXPost,
+  xPostHost,
   resolveYouTubeVideo,
   onFileClick,
   onFilePaste,
@@ -547,9 +538,7 @@ export function MeowdownEditor({
         resolveWikiEmbed={resolveWikiEmbed}
         resolveWikilink={resolveWikilink}
         resolveFileInfo={resolveFileInfo}
-        resolveXPost={resolveXPost}
-        resolveXPostMediaUrl={resolveXPostMediaUrl}
-        subscribeXPost={subscribeXPost}
+        xPostHost={xPostHost}
         resolveYouTubeVideo={resolveYouTubeVideo}
         onFileClick={onFileClick}
         onFilePaste={onFilePaste}

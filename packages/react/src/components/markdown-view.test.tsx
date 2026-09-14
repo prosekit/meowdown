@@ -254,7 +254,9 @@ describe('MarkdownView', () => {
   })
 
   it('renders an X post card from a synchronous snapshot', async () => {
-    await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => createXPost() })
+    await renderView('![](https://x.com/jack/status/20)', {
+      xPostHost: { resolve: () => createXPost() },
+    })
     const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
   })
@@ -264,7 +266,7 @@ describe('MarkdownView', () => {
     const pending = new Promise<XPost>((resolve) => {
       settle = resolve
     })
-    await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => pending })
+    await renderView('![](https://x.com/jack/status/20)', { xPostHost: { resolve: () => pending } })
     const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card.locate('[data-fallback][data-pending]')).toBeInTheDocument()
 
@@ -276,7 +278,9 @@ describe('MarkdownView', () => {
   it('renders host data even when source contains an old snapshot', async () => {
     const resolveXPost = vi.fn(() => createXPost())
     const comment = `<!-- ${JSON.stringify({ snapshot: { kind: 'x-post', data: createXPost('saved') } })} -->`
-    await renderView(`![](https://x.com/jack/status/20)${comment}`, { resolveXPost })
+    await renderView(`![](https://x.com/jack/status/20)${comment}`, {
+      xPostHost: { resolve: resolveXPost },
+    })
     const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
     expect(resolveXPost).toHaveBeenCalledOnce()
@@ -286,14 +290,16 @@ describe('MarkdownView', () => {
   it('resolves when the saved snapshot does not validate', async () => {
     await renderView(
       '![](https://x.com/jack/status/20)<!-- {"snapshot":{"kind":"x-post","data":{"bogus":1}}} -->',
-      { resolveXPost: () => createXPost() },
+      { xPostHost: { resolve: () => createXPost() } },
     )
     const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
   })
 
   it('renders the unavailable card without a snapshot', async () => {
-    await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => undefined })
+    await renderView('![](https://x.com/jack/status/20)', {
+      xPostHost: { resolve: () => undefined },
+    })
     await expect
       .element(view.getByTestId('x-post-embed').locate('[data-fallback]'))
       .toBeInTheDocument()

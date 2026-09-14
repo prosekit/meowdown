@@ -32,11 +32,11 @@ allowBuilds:
   esbuild: false
   simple-git-hooks: false
 
-# FIXME: pkg.pr.new overrides are a local testing hack. Restore the commented reference block and
-# remove these (and `blockExoticSubdeps`) before merging.
+# Development snapshots for the coordinated X archive changes. Replace with released
+# versions when publishing the dependent packages.
 blockExoticSubdeps: false
 overrides:
-  '@post-embed/types': https://pkg.pr.new/@post-embed/types@7bc1a3259420e2060f3183eec77557183abd7e66
-  '@post-embed/schema': https://pkg.pr.new/@post-embed/schema@7bc1a3259420e2060f3183eec77557183abd7e66
-  '@post-embed/exporter': https://pkg.pr.new/@post-embed/exporter@7bc1a3259420e2060f3183eec77557183abd7e66
-  '@post-embed/elements': https://pkg.pr.new/@post-embed/elements@7bc1a3259420e2060f3183eec77557183abd7e66
+  '@post-embed/types': https://pkg.pr.new/@post-embed/types@1f587bcdd6acd69bd876504a34a28e647603e206
+  '@post-embed/schema': https://pkg.pr.new/@post-embed/schema@1f587bcdd6acd69bd876504a34a28e647603e206
+  '@post-embed/exporter': https://pkg.pr.new/@post-embed/exporter@1f587bcdd6acd69bd876504a34a28e647603e206
+  '@post-embed/elements': https://pkg.pr.new/@post-embed/elements@1f587bcdd6acd69bd876504a34a28e647603e206

@@ -1,6 +1,6 @@
 import { registerXPost, type Resolver } from '@post-embed/elements/x'
 import { registerYouTubeVideo } from '@post-embed/elements/youtube'
-import type { XPost, YouTubeVideo, MediaUrlResolver } from '@post-embed/types'
+import type { XPost, YouTubeVideo } from '@post-embed/types'
 import { defineMarkView, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
@@ -24,13 +24,12 @@ import type { MarkName } from './mark-names.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 import {
   defaultResolveXPost,
-  checkedXPostResolver,
   defaultResolveYouTubeVideo,
   matchPostEmbed,
   parsePostEmbedSnapshot,
   type PostEmbedKind,
   type PostEmbedSnapshot,
-  type XPostResolver,
+  type XPostHost,
   type YouTubeVideoResolver,
 } from './post-embed.ts'
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
@@ -47,18 +46,10 @@ export interface ImageOptions {
    */
   resolveImageUrl?: ImageUrlResolver
   /**
-   * Resolve the data behind an X post URL, rendered as a `post-embed-x-post`
-   * card. Defaults to `defaultResolveXPost`, which fetches through
-   * react-tweet's hosted proxy.
+   * Host data lookup, change subscription, and trusted media protocols for X cards.
+   * When omitted, public posts use `defaultResolveXPost`.
    */
-  resolveXPost?: XPostResolver
-  // FIXME: `resolveXPost` + `resolveXPostMediaUrl` + `subscribeXPost` are three props threaded
-  // through image.ts, editor.tsx, prosekit-editor.tsx and four layers of markdown-view.tsx, and
-  // reflect builds them from one object anyway (`useXPostResolver()` spread). Pass a single
-  // `xPostHost?: { resolve, subscribe, resolveMediaUrl }` (or drop `resolveMediaUrl` entirely, see
-  // post-embed `media-url.ts`) so each layer forwards one prop.
-  resolveXPostMediaUrl?: MediaUrlResolver
-  subscribeXPost?: (url: string, notify: () => void) => () => void
+  xPostHost?: XPostHost
   /**
    * Resolve the data behind a YouTube video URL, rendered as a
    * `post-embed-youtube-video` card. Defaults to `defaultResolveYouTubeVideo`,
@@ -225,10 +216,8 @@ class ImageMarkView implements MarkView {
   readonly #contentDOM: HTMLElement
   readonly #view: EditorView
   #resolveImageUrl: ImageUrlResolver | undefined
-  #resolveXPost: XPostResolver
+  #xPostHost: XPostHost | undefined
   #resolveYouTubeVideo: YouTubeVideoResolver
-  #resolveXPostMediaUrl: MediaUrlResolver | null
-  #subscribeXPost: ((url: string, notify: () => void) => () => void) | undefined
   #unsubscribeXPost: (() => void) | undefined
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
@@ -239,9 +228,7 @@ class ImageMarkView implements MarkView {
     this.#attrs = mark.attrs as MdImageAttrs
     this.#view = view
     this.#resolveImageUrl = options.resolveImageUrl
-    this.#resolveXPost = checkedXPostResolver(options.resolveXPost ?? defaultResolveXPost)
-    this.#resolveXPostMediaUrl = options.resolveXPostMediaUrl ?? null
-    this.#subscribeXPost = options.subscribeXPost
+    this.#xPostHost = options.xPostHost
     this.#resolveYouTubeVideo = options.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
 
     this.#dom = document.createElement('span')
@@ -333,13 +320,16 @@ class ImageMarkView implements MarkView {
       registerXPost()
       const element = document.createElement('post-embed-x-post')
       element.data = null
-      element.resolveMediaUrl = this.#resolveXPostMediaUrl
-      element.resolver = this.#resolveXPost
+      element.mediaUrlProtocols = this.#xPostHost?.mediaUrlProtocols ?? null
+      element.resolver = this.#xPostHost?.resolve ?? defaultResolveXPost
       element.url = src
       let revision = 0
       this.#unsubscribeXPost?.()
-      this.#unsubscribeXPost = this.#subscribeXPost?.(src, () => {
-        // FIXME: it seems that you're using a "revision" key to trigger a "rerender" of a component. Is this realy necessary? Try to add some detailed explanation of why you are using the "revision" key and what specific behavior you are trying to achieve with it as comment and add your
+      this.#unsubscribeXPost = this.#xPostHost?.subscribe?.(src, () => {
+        // The URL and resolver identity stay unchanged when a host archive receives
+        // new text or media. Changing revision invalidates the custom element's
+        // cached fetch, so it calls the host again instead of rendering stale data.
+        // This is a data invalidation signal, not a React remount key.
         element.revision = ++revision
       })
       return element

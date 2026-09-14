@@ -32,7 +32,7 @@ function setup(mode: MarkMode, paragraphs: string[]): Fixture {
     resolveImageUrl: () => getSVGImageURL(24, 24),
     // No snapshot: a resolved one is written back into the source, which
     // would put its JSON into every traced selection below.
-    resolveXPost: () => undefined,
+    xPostHost: { resolve: () => undefined },
     resolveYouTubeVideo: () => undefined,
   }
   const fixture = setupFixture({ extensionOptions: { markMode: mode, ...imageOptions } })

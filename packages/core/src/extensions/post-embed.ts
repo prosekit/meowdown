@@ -1,7 +1,7 @@
 import type { Resolver } from '@post-embed/elements/x'
 import { fromSyndication } from '@post-embed/exporter/x/syndication'
-import { XPostSchema, YouTubeVideoSchema } from '@post-embed/schema'
-import { parseXPostId, type XPost, type YouTubeVideo } from '@post-embed/types'
+import { XPostSchema, YouTubeVideoSchema, parseXPostId } from '@post-embed/schema'
+import type { XPost, YouTubeVideo } from '@post-embed/types'
 import { createLRU } from 'lru.min'
 import * as v from 'valibot'
 
@@ -91,7 +91,7 @@ export const defaultResolveXPost: XPostResolver = cached(async (url) => {
   if (!response.ok) return
   const json = (await response.json()) as { data?: unknown }
   const post = fromSyndication(json.data)
-  return post?.id === id ? post : undefined
+  return post
 })
 
 // YouTube's oEmbed endpoint allows cross-origin requests; the snapshot is its
@@ -128,18 +128,20 @@ export function parsePostEmbedSnapshot(value: unknown): PostEmbedSnapshot | unde
   return result.success ? result.output : undefined
 }
 
-// FIXME: duplicate of the element's own check (post-embed `x-post.ts` rejects a result whose `id`
-// != `parseXPostId(url)`) and of the `post?.id === id` line added to `defaultResolveXPost` above.
-// Delete this wrapper, its export from index.ts, the `useMemo` in markdown-view.tsx and the wrap in
-// image.ts.
-export function checkedXPostResolver(resolver: XPostResolver): XPostResolver {
-  return (url) => {
-    if (!parseXPostId(url)) return
-    const accept = (post: XPost | undefined) => {
-      return post && post.id === parseXPostId(url) ? post : undefined
-    }
-    const result = resolver(url)
-    if (result && 'then' in result) return Promise.resolve(result).then(accept)
-    return accept(result)
-  }
+/**
+ * Host integration for X cards. Keep the object stable between renders.
+ */
+export interface XPostHost {
+  /**
+   * Read a post for its permalink. An absent result shows the unavailable card.
+   */
+  resolve: XPostResolver
+  /**
+   * Notify when resolving the same URL would return updated data.
+   */
+  subscribe?: (url: string, notify: () => void) => () => void
+  /**
+   * Additional trusted protocols for media URLs, such as `reflect-asset:`.
+   */
+  mediaUrlProtocols?: readonly string[]
 }

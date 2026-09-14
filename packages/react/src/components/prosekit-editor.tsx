@@ -26,11 +26,10 @@ import {
   type WikiEmbedResolver,
   type WikilinkClickHandler,
   type WikilinkResolver,
-  type XPostResolver,
+  type XPostHost,
   type YouTubeVideoResolver,
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
-import type { MediaUrlResolver } from '@post-embed/types'
 import { createEditor, union, type SelectionJSON } from '@prosekit/core'
 import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
@@ -231,12 +230,9 @@ export interface ProseKitEditorProps {
    */
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
   /**
-   * Resolves the data behind an X post URL. See `EditorProps.resolveXPost`.
+   * Resolves the data behind an X post URL. See `EditorProps.xPostHost`.
    */
-  // FIXME: same JSDoc misplacement as editor.tsx.
-  resolveXPostMediaUrl?: MediaUrlResolver
-  subscribeXPost?: (url: string, notify: () => void) => () => void
-  resolveXPost?: XPostResolver
+  xPostHost?: XPostHost
   /**
    * Resolves the data behind a YouTube video URL. See `EditorProps.resolveYouTubeVideo`.
    */
@@ -362,9 +358,7 @@ export function ProseKitEditor({
   resolveWikiEmbed,
   resolveWikilink,
   resolveFileInfo,
-  resolveXPost,
-  resolveXPostMediaUrl,
-  subscribeXPost,
+  xPostHost,
   resolveYouTubeVideo,
   onFileClick,
   onFilePaste,
@@ -415,9 +409,7 @@ export function ProseKitEditor({
       onExitBoundary,
       resolveImageUrl,
       resolveFileInfo,
-      resolveXPost,
-      resolveXPostMediaUrl,
-      subscribeXPost,
+      xPostHost,
       resolveYouTubeVideo,
       onFileClick,
       onFilePaste,
@@ -444,9 +436,7 @@ export function ProseKitEditor({
       onExitBoundary,
       resolveImageUrl,
       resolveFileInfo,
-      resolveXPost,
-      resolveXPostMediaUrl,
-      subscribeXPost,
+      xPostHost,
       resolveYouTubeVideo,
       onFileClick,
       onFilePaste,

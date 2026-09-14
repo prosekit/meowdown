@@ -122,6 +122,7 @@ export {
   type PostEmbedKind,
   type PostEmbedSnapshot,
   type XPostResolver,
+  type XPostHost,
   type YouTubeVideoResolver,
 } from './extensions/post-embed.ts'
 export type { ListMarker, MeowdownListAttrs } from './extensions/list.ts'
@@ -197,5 +198,3 @@ export { loadKaTeX, renderMathInto, type KaTeXRender } from './utils/katex.ts'
 export type { PositionRange } from './utils/range.ts'
 export { getSelectedText } from './utils/selected-text.ts'
 export { getVirtualElementFromRange, type VirtualElement } from './utils/virtual-element.ts'
-
-export { checkedXPostResolver } from './extensions/post-embed.ts'
