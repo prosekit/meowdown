@@ -32,11 +32,9 @@ export interface AtomMarkNavigationOptions {
   marks: AtomMarks
 }
 
-// The source marks that act as one atom in `state`'s current mark mode (empty
-// when no mode is applied, which keeps the whole feature inert).
+// The source marks that act as one atom in `state`'s current mark mode.
 function getActiveMarkNames(marks: AtomMarks, state: EditorState): MarkName[] {
   const mode = getMarkMode(state)
-  if (!mode) return []
   return marks.flatMap((mark) => (mark.modes.includes(mode) ? [mark.name] : []))
 }
 
@@ -55,8 +53,7 @@ function getSelectedRange(
 }
 
 /**
- * The atom source unit the selection exactly spans, or undefined. Inert (like
- * the rest of atom navigation) in a state built without a mark mode.
+ * The atom source unit the selection exactly spans, or undefined.
  */
 export function getSelectedAtomRange(state: EditorState): MarkRange | undefined {
   return getSelectedRange(state, ATOM_SOURCE_MARK_NAMES)
