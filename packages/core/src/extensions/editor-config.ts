@@ -81,7 +81,7 @@ const refreshKeys = new Set<keyof EditorConfig>([
   'editorClassName',
 ] as const)
 
-function updateEditorConfig(
+export function updateEditorConfig(
   editor: Pick<Editor, 'state' | 'view' | 'mounted' | 'updateState'>,
   patch: Partial<EditorConfig>,
 ): void {
