@@ -114,6 +114,7 @@ function createFilePastePlugin(options?: FilePasteOptions): Plugin {
     key: new PluginKey('file-paste'),
     props: {
       handlePaste: (view, event) => {
+        // FIXME: try NOT calling getEditorConfig in other extensions. Just write createFilePastePlugin(getOptions?: (state) => FilePasteOptions|undefined). createFilePastePlugin do not need to know the existing of "getEditorConfig". Apply this rule to all other extensions.
         const currentOptions = options ?? getEditorConfig(view.state)
         const files = takePastedFiles(event.clipboardData, currentOptions)
         if (files.length === 0) return false
