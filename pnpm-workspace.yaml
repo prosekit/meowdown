@@ -31,3 +31,7 @@ minimumReleaseAgeExclude:
 allowBuilds:
   esbuild: false
   simple-git-hooks: false
+
+FIXME 1: Compared to the previous master git branch, there were some commented-out lines about "blockExoticSubdeps" and "override." These commented-out lines are useful and should remain as comments. Do not remove them. Better yet, add post-embed-related overrides as comments here as well. This time, also add a comment clarifying that these commented-out lines are still useful and should not be removed.
+
+FIXME 2: Ensure that the latest origin/master branch is merged into your Reflect Open PR.
