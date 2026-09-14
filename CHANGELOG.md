@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.71.0](https://github.com/prosekit/meowdown/compare/v0.70.1...v0.71.0) (2026-09-14)
+
+
+### Features
+
+* render X archives through host resolvers ([#565](https://github.com/prosekit/meowdown/issues/565)) ([7cd9316](https://github.com/prosekit/meowdown/commit/7cd93166cb2f273ab28f08afe3707987a8afce73))
+
 ## [0.70.1](https://github.com/prosekit/meowdown/compare/v0.70.0...v0.70.1) (2026-09-14)
 
 
