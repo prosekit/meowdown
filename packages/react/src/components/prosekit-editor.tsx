@@ -395,6 +395,7 @@ export function ProseKitEditor({
     }
   }, [onDocChange])
 
+  // FIXME: use `useMemo` to wrap the config object.
   const config: EditorConfig = {
     markMode,
     resolveFileLink,
