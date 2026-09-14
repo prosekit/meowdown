@@ -113,6 +113,7 @@ export function replaceEditorConfig(
   config: EditorConfig,
 ): void {
   const controller = configKey.getState(editor.state)
+  // FIXME do not throw new Error here. just return.
   if (!controller) throw new Error('[meowdown] editor configuration is missing')
   const next = normalizeConfig(config)
   const previous = controller.config
