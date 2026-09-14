@@ -155,6 +155,7 @@ class FileMarkView implements MarkView {
     let resolver = (options ?? getEditorConfig(view.state)).resolveFileInfo
     void this.#loadFileInfo(resolver)
     if (!options) {
+      // FIXME, this is too complex. update defineFileView to function defineFileView(getOptions?: (state) => FileViewOptions), and in extensions.ts pass a lambda to it. remove the #unsubscribe logic, we DO NOT require the #sizeElement to be updated if the resolveFileInfo is change. in another word, it's better that the first resolveFileInfo passed into the editor is the correct one.
       this.#unsubscribe = subscribeEditorConfig(view, (config) => {
         if (resolver === config.resolveFileInfo) return
         resolver = config.resolveFileInfo
