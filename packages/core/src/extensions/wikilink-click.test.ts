@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
-import { updateEditorConfig } from '../testing/editor-config.ts'
 import { resolveWikilinkAlias, setupFixture, type Fixture } from '../testing/index.ts'
 
+import { updateEditorConfig } from './editor-config.ts'
 import { findWikilinkAt, type WikilinkClickHandler } from './wikilink-click.ts'
 
 const pmRoot = page.locate('.ProseMirror')
@@ -47,7 +47,7 @@ describe('wikilink click callback', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph(markdown)))
     // After `set`: `setContent` rebuilds the state, resetting the mode.
-    updateEditorConfig(editor, { markMode: 'hide', onWikilinkClick }, true)
+    updateEditorConfig(editor, { markMode: 'hide', onWikilinkClick })
   }
 
   it('fires with the target when the label is clicked', async () => {

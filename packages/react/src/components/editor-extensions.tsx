@@ -1,23 +1,6 @@
-import {
-  getEditorConfig,
-  replaceEditorConfig,
-  type EditorConfig,
-  type EditorExtension,
-} from '@meowdown/core'
+import { updateEditorConfig, type EditorConfig, type EditorExtension } from '@meowdown/core'
 import { useEditor } from '@prosekit/react'
 import { useDeferredValue, useEffect } from 'react'
-
-// FIXME: refreshKeys has already been defined in core/src/extensions/editor-config.ts. We should remove it from react
-const refreshKeys = [
-  'markMode',
-  'resolveFileLink',
-  'resolveWikiEmbed',
-  'resolveWikilink',
-  'placeholder',
-  'readOnly',
-  'spellCheck',
-  'editorClassName',
-] as const satisfies readonly (keyof EditorConfig)[]
 
 interface EditorExtensionsProps {
   config: EditorConfig
@@ -32,24 +15,7 @@ export function EditorExtensions({ config, searchQuery }: EditorExtensionsProps)
   // Initial configuration already belongs to the creation extension. Later
   // updates run outside React's lifecycle because adapter views use flushSync.
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const previous = getEditorConfig(editor.state)
-      const dispatch = refreshKeys.some((key) => !Object.is(previous[key], config[key]))
-      replaceEditorConfig(
-        editor,
-        (current) => {
-          const keys = new Set([
-            ...Object.keys(current),
-            ...Object.keys(config),
-          ] as (keyof EditorConfig)[])
-          for (const key of keys) {
-            if (!Object.is(current[key], config[key])) return config
-          }
-          return current
-        },
-        dispatch,
-      )
-    })
+    const timer = setTimeout(() => updateEditorConfig(editor, config))
     return () => clearTimeout(timer)
   }, [editor, config])
 

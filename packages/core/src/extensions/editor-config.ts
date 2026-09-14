@@ -47,29 +47,6 @@ export function getEditorConfig(state: EditorState): Readonly<EditorConfig> {
   return configKey.getState(state)?.config ?? defaultConfig
 }
 
-/**
- * Return the original configuration to skip an update. Dispatch explicitly
- * when a change must refresh the editor view or state-dependent plugins.
- */
-export function replaceEditorConfig(
-  // FIXME: remove replaceEditorConfig. use the updateEditorConfig below to replace it.
-  editor: Pick<Editor, 'state' | 'view' | 'mounted' | 'updateState'>,
-  updater: (config: Readonly<EditorConfig>) => Readonly<EditorConfig>,
-  dispatch = false,
-): void {
-  const controller = configKey.getState(editor.state)
-  if (!controller) return
-  const next = updater(controller.config)
-  if (next === controller.config) return
-  controller.config = next
-  if (!dispatch) return
-  const tr = editor.state.tr
-    .setMeta('addToHistory', false)
-    .setMeta('meowdown_editor_config_update', true)
-  if (editor.mounted) editor.view.dispatch(tr)
-  else editor.updateState(editor.state.apply(tr))
-}
-
 const refreshKeys = new Set<keyof EditorConfig>([
   'markMode',
   'resolveFileLink',
