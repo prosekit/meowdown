@@ -11,6 +11,7 @@ import type { ImageOptions } from './image.ts'
 import type { InlineMarkOptions } from './inline-text-to-mark-chunks.ts'
 import type { MarkMode } from './mark-mode.ts'
 
+// FIXME: move interface EditorConfig into a new file editor-config-types.ts
 export interface EditorConfig
   extends InlineMarkOptions, FollowLinkHandlers, FilePasteOptions, FileViewOptions, ImageOptions {
   markMode?: MarkMode
