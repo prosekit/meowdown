@@ -22,7 +22,6 @@ import type { PositionRange } from '../utils/range.ts'
 
 import { BatchSetMarkStep } from './batch-set-mark-step.ts'
 import {
-  equalInlineConfig,
   inlineTextToMarkChunksWithContext,
   type InlineMarkOptions,
 } from './inline-text-to-mark-chunks.ts'
@@ -130,7 +129,7 @@ function createInlineMarkPlugin(
     readonly chunks: readonly MarkChunk[]
   }
 
-  let chunkCache = new WeakMap<EditorNode, CachedChunks>()
+  const chunkCache = new WeakMap<EditorNode, CachedChunks>()
   let currentOptions: InlineMarkOptions = {}
 
   function setsIntersect(left: ReadonlySet<string>, right: ReadonlySet<string>): boolean {
@@ -282,20 +281,13 @@ function createInlineMarkPlugin(
       },
     },
     appendTransaction(transactions, oldState, newState) {
-      const nextOptions = getOptions?.(newState) ?? {}
-      const configChanged = !equalInlineConfig(currentOptions, nextOptions)
-      if (configChanged) {
-        currentOptions = nextOptions
-        chunkCache = new WeakMap()
-      }
       // Drop transactions we appended ourselves to avoid recursing.
       for (const tr of transactions) {
-        if (tr.getMeta(META_KEY) && !configChanged) return null
+        if (tr.getMeta(META_KEY)) return null
       }
 
       const restyle = transactions.some((transaction) => transaction.getMeta(RESTYLE_KEY))
       const shouldProcess =
-        configChanged ||
         restyle ||
         transactions.some((transaction) => {
           return transaction.docChanged || transaction.getMeta(TRIGGER_KEY)
@@ -307,11 +299,8 @@ function createInlineMarkPlugin(
       const changedKeys = restyle
         ? (pluginKey.getState(oldState)?.pendingReferenceKeys ?? emptyReferenceKeys)
         : emptyReferenceKeys
-      const range = configChanged
-        ? { from: 0, to: newState.doc.content.size }
-        : restyle
-          ? { from: 0, to: 0 }
-          : computeAffectedRange(transactions, newState)
+      currentOptions = getOptions?.(newState) ?? {}
+      const range = restyle ? { from: 0, to: 0 } : computeAffectedRange(transactions, newState)
       const { chunks, processed } = collectChunks(newState, range, references, changedKeys)
       if (chunks.length === 0) return null
       const tr = newState.tr.step(new BatchSetMarkStep(chunks))

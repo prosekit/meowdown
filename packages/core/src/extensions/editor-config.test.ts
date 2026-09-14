@@ -3,7 +3,6 @@ import { Plugin } from '@prosekit/pm/state'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
-import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture } from '../testing/index.ts'
 
 import { getEditorConfig } from './editor-config-getter.ts'
@@ -115,21 +114,6 @@ describe('editor configuration', () => {
     expect(second).toHaveBeenCalledWith(expect.objectContaining({ href: 'assets/report.pdf' }))
   })
 
-  it('reparses existing links and clears their claims without changing Markdown or selection', async () => {
-    using fixture = setupFixture()
-    const { editor, n } = fixture
-    fixture.set(n.doc(n.paragraph('see [report.pdf](assets/report.pdf)<a> here')))
-    const markdown = docToMarkdown(editor.state.doc)
-    const selection = editor.state.selection
-    updateEditorConfig(editor, { resolveFileLink: claimFiles })
-    await expect.element(pmRoot.getByTestId('file-pill')).toBeInTheDocument()
-    expect(docToMarkdown(editor.state.doc)).toBe(markdown)
-    expect(editor.state.selection.eq(selection)).toBe(true)
-    updateEditorConfig(editor, { resolveFileLink: undefined })
-    await expect.element(pmRoot.getByRole('link')).toBeInTheDocument()
-    expect(docToMarkdown(editor.state.doc)).toBe(markdown)
-  })
-
   it('batches display settings into one dispatch and clears explicitly undefined settings', async () => {
     using fixture = setupFixture()
     const { editor } = fixture
@@ -218,20 +202,6 @@ describe('editor configuration', () => {
     await userEvent.keyboard('{End} ![[dog](next) ')
     await expect.element(pmRoot.getByAltText('dog')).toHaveAttribute('src', nextUrl)
     await expect.element(image).toHaveAttribute('src', firstUrl)
-  })
-
-  it('reparses existing wikilinks and wiki embeds', async () => {
-    using fixture = setupFixture()
-    const { editor, n } = fixture
-    fixture.set(n.doc(n.paragraph('[[Note]] and ![[report.pdf]]')))
-    const markdown = docToMarkdown(editor.state.doc)
-    updateEditorConfig(editor, {
-      resolveWikilink: () => ({ target: 'note-id', display: 'Renamed note' }),
-      resolveWikiEmbed: () => ({ kind: 'file', href: 'assets/report.pdf', name: 'Report' }),
-    })
-    await expect.element(pmRoot.getByTestId('wikilink')).toHaveTextContent('Renamed note')
-    await expect.element(pmRoot.getByTestId('file-pill')).toHaveTextContent('Report')
-    expect(docToMarkdown(editor.state.doc)).toBe(markdown)
   })
 
   it('gates optional typing behavior without a configuration transaction', async () => {

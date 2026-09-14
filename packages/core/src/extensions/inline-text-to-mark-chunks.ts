@@ -898,11 +898,3 @@ function emit(out: MarkChunk[], from: number, to: number, marks: readonly Mark[]
   }
   out.push([from, to, marks])
 }
-
-export function equalInlineConfig(left: InlineMarkOptions, right: InlineMarkOptions): boolean {
-  return (
-    left.resolveFileLink === right.resolveFileLink &&
-    left.resolveWikiEmbed === right.resolveWikiEmbed &&
-    left.resolveWikilink === right.resolveWikilink
-  )
-}

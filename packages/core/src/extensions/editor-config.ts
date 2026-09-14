@@ -14,9 +14,6 @@ class ConfigController {
 
 const refreshKeys = new Set<keyof EditorConfig>([
   'markMode',
-  'resolveFileLink',
-  'resolveWikiEmbed',
-  'resolveWikilink',
   'placeholder',
   'readOnly',
   'spellCheck',
