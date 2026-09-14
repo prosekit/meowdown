@@ -1,7 +1,6 @@
-import type { XMediaUrlPolicy } from '@post-embed/types'
 import { registerXPost, type Resolver } from '@post-embed/elements/x'
 import { registerYouTubeVideo } from '@post-embed/elements/youtube'
-import type { XPost, YouTubeVideo } from '@post-embed/types'
+import type { XPost, YouTubeVideo, MediaUrlResolver } from '@post-embed/types'
 import { defineMarkView, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
@@ -53,7 +52,7 @@ export interface ImageOptions {
    * react-tweet's hosted proxy.
    */
   resolveXPost?: XPostResolver
-  xPostMediaUrlPolicy?: XMediaUrlPolicy
+  resolveXPostMediaUrl?: MediaUrlResolver
   subscribeXPost?: (url: string, notify: () => void) => () => void
   /**
    * Resolve the data behind a YouTube video URL, rendered as a
@@ -223,7 +222,7 @@ class ImageMarkView implements MarkView {
   #resolveImageUrl: ImageUrlResolver | undefined
   #resolveXPost: XPostResolver
   #resolveYouTubeVideo: YouTubeVideoResolver
-  #xPostMediaUrlPolicy: XMediaUrlPolicy | null
+  #resolveXPostMediaUrl: MediaUrlResolver | null
   #subscribeXPost: ((url: string, notify: () => void) => () => void) | undefined
   #unsubscribeXPost: (() => void) | undefined
   #attrs: MdImageAttrs
@@ -236,7 +235,7 @@ class ImageMarkView implements MarkView {
     this.#view = view
     this.#resolveImageUrl = options.resolveImageUrl
     this.#resolveXPost = checkedXPostResolver(options.resolveXPost ?? defaultResolveXPost)
-    this.#xPostMediaUrlPolicy = options.xPostMediaUrlPolicy ?? null
+    this.#resolveXPostMediaUrl = options.resolveXPostMediaUrl ?? null
     this.#subscribeXPost = options.subscribeXPost
     this.#resolveYouTubeVideo = options.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
 
@@ -319,7 +318,9 @@ class ImageMarkView implements MarkView {
     return wrapper
   }
 
-  /** Resolve X cards from their URL; YouTube cards may reuse a saved snapshot. */
+  /**
+   * Resolve X cards from their URL; YouTube cards may reuse a saved snapshot.
+   */
   #buildPostEmbed(kind: PostEmbedKind, src: string): HTMLElement {
     const saved =
       this.#attrs.snapshot == null ? undefined : parsePostEmbedSnapshot(this.#attrs.snapshot)
@@ -327,7 +328,7 @@ class ImageMarkView implements MarkView {
       registerXPost()
       const element = document.createElement('post-embed-x-post')
       element.data = null
-      element.mediaUrlPolicy = this.#xPostMediaUrlPolicy
+      element.resolveMediaUrl = this.#resolveXPostMediaUrl
       element.resolver = this.#resolveXPost
       element.url = src
       let revision = 0

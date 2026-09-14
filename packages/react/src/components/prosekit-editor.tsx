@@ -1,4 +1,3 @@
-import type { XMediaUrlPolicy } from '@post-embed/types'
 import {
   defineEditorExtension,
   docToMarkdown,
@@ -31,6 +30,7 @@ import {
   type YouTubeVideoResolver,
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
+import type { MediaUrlResolver } from '@post-embed/types'
 import { createEditor, union, type SelectionJSON } from '@prosekit/core'
 import type { EditorNode } from '@prosekit/pm/model'
 import { Selection, TextSelection } from '@prosekit/pm/state'
@@ -233,7 +233,7 @@ export interface ProseKitEditorProps {
   /**
    * Resolves the data behind an X post URL. See `EditorProps.resolveXPost`.
    */
-  xPostMediaUrlPolicy?: XMediaUrlPolicy
+  resolveXPostMediaUrl?: MediaUrlResolver
   subscribeXPost?: (url: string, notify: () => void) => () => void
   resolveXPost?: XPostResolver
   /**
@@ -362,7 +362,7 @@ export function ProseKitEditor({
   resolveWikilink,
   resolveFileInfo,
   resolveXPost,
-  xPostMediaUrlPolicy,
+  resolveXPostMediaUrl,
   subscribeXPost,
   resolveYouTubeVideo,
   onFileClick,
@@ -415,7 +415,7 @@ export function ProseKitEditor({
       resolveImageUrl,
       resolveFileInfo,
       resolveXPost,
-      xPostMediaUrlPolicy,
+      resolveXPostMediaUrl,
       subscribeXPost,
       resolveYouTubeVideo,
       onFileClick,
@@ -444,7 +444,7 @@ export function ProseKitEditor({
       resolveImageUrl,
       resolveFileInfo,
       resolveXPost,
-      xPostMediaUrlPolicy,
+      resolveXPostMediaUrl,
       subscribeXPost,
       resolveYouTubeVideo,
       onFileClick,

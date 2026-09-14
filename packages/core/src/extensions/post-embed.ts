@@ -131,8 +131,9 @@ export function parsePostEmbedSnapshot(value: unknown): PostEmbedSnapshot | unde
 export function checkedXPostResolver(resolver: XPostResolver): XPostResolver {
   return (url) => {
     if (!parseXPostId(url)) return
-    const accept = (post: XPost | undefined) =>
-      post && post.id === parseXPostId(url) ? post : undefined
+    const accept = (post: XPost | undefined) => {
+      return post && post.id === parseXPostId(url) ? post : undefined
+    }
     const result = resolver(url)
     if (result && 'then' in result) return Promise.resolve(result).then(accept)
     return accept(result)

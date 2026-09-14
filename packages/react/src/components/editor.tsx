@@ -1,4 +1,3 @@
-import type { XMediaUrlPolicy } from '@post-embed/types'
 import type {
   AcceptPendingReplacementOptions,
   ExitBoundaryHandler,
@@ -22,6 +21,7 @@ import type {
   WikilinkClickHandler,
   WikilinkResolver,
 } from '@meowdown/core'
+import type { MediaUrlResolver } from '@post-embed/types'
 import type { SelectionJSON } from '@prosekit/core'
 import type { ReactNodeViewComponent } from '@prosekit/react'
 import { clsx } from 'clsx/lite'
@@ -225,7 +225,7 @@ export interface EditorProps {
    * which fetches through react-tweet's hosted proxy. Pass a stable function
    * (e.g. from `useCallback`).
    */
-  xPostMediaUrlPolicy?: XMediaUrlPolicy
+  resolveXPostMediaUrl?: MediaUrlResolver
   subscribeXPost?: (url: string, notify: () => void) => () => void
   resolveXPost?: XPostResolver
 
@@ -403,7 +403,7 @@ export function MeowdownEditor({
   resolveWikilink,
   resolveFileInfo,
   resolveXPost,
-  xPostMediaUrlPolicy,
+  resolveXPostMediaUrl,
   subscribeXPost,
   resolveYouTubeVideo,
   onFileClick,
@@ -545,7 +545,7 @@ export function MeowdownEditor({
         resolveWikilink={resolveWikilink}
         resolveFileInfo={resolveFileInfo}
         resolveXPost={resolveXPost}
-        xPostMediaUrlPolicy={xPostMediaUrlPolicy}
+        resolveXPostMediaUrl={resolveXPostMediaUrl}
         subscribeXPost={subscribeXPost}
         resolveYouTubeVideo={resolveYouTubeVideo}
         onFileClick={onFileClick}
