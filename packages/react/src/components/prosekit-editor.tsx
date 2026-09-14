@@ -386,7 +386,7 @@ export function ProseKitEditor({
   const suppressDocChangeRef = useRef(false)
 
   // Guard the host callback so programmatic setState/setMarkdown stays silent.
-  // Stable per `onDocChange` identity, so equal props keep the same configuration.
+  // Stable per `onDocChange` identity, so the extension is not rebuilt every render.
   const handleDocChange = useMemo(() => {
     if (!onDocChange) return
     return () => {
@@ -420,9 +420,7 @@ export function ProseKitEditor({
       placeholder,
       readOnly,
       spellCheck,
-      onSearchChange,
       editorClassName,
-      onDocChange: handleDocChange,
       wikilinkEnabled: !!onWikilinkSearch,
     }),
     [
@@ -449,9 +447,7 @@ export function ProseKitEditor({
       placeholder,
       readOnly,
       spellCheck,
-      onSearchChange,
       editorClassName,
-      handleDocChange,
       onWikilinkSearch,
     ],
   )
@@ -615,7 +611,12 @@ export function ProseKitEditor({
           caret cannot move the layer. */}
       <VirtualCaret />
       <div ref={editor.mount}></div>
-      <EditorExtensions config={config} searchQuery={searchQuery} />
+      <EditorExtensions
+        config={config}
+        searchQuery={searchQuery}
+        onDocChange={handleDocChange}
+        onSearchChange={onSearchChange}
+      />
       {blockHandle && !readOnly && <BlockHandle />}
       {!readOnly && <TableHandle />}
       {blockHandle && !readOnly && <DropIndicator />}
