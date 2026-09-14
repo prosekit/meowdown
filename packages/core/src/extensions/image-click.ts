@@ -16,8 +16,15 @@ interface ImageHit {
   alt: string
 }
 
-function getClosestImagePreview(target: EventTarget | null): HTMLElement | false | null {
-  return target instanceof HTMLElement && target.closest('.md-image-view-preview')
+/**
+ * The image preview wrapper around `target`, or nothing when the wrapper holds
+ * a post-embed card: its links and controls have their own click behavior.
+ */
+function getClosestImagePreview(target: EventTarget | null): HTMLElement | undefined {
+  if (!(target instanceof HTMLElement)) return
+  const preview = target.closest<HTMLElement>('.md-image-view-preview')
+  if (!preview || preview.dataset.postEmbed != null) return
+  return preview
 }
 
 export function findImageAt(state: EditorState, pos: number): ImageHit | undefined {

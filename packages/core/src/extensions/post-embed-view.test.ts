@@ -1,6 +1,6 @@
 import type { XPost } from '@post-embed/types'
 import { describe, expect, it, vi } from 'vitest'
-import { page } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
@@ -8,6 +8,7 @@ import { createTweet } from '../testing/tweet-fixture.ts'
 import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
+import type { EditorExtensionOptions } from './extension.ts'
 import type { ImageOptions } from './image.ts'
 import { formatMagicComment, parseMagicComment } from './magic-comment.ts'
 
@@ -28,6 +29,40 @@ function setup(markdown: string, options: ImageOptions): Fixture {
   fixture.set(n.doc(n.paragraph(markdown)))
   return fixture
 }
+
+describe('post embed clicks', () => {
+  // An editor whose post embeds render from the given resolvers and report
+  // image clicks to `onImageClick`.
+  function setupClickable(markdown: string, options: EditorExtensionOptions): Fixture {
+    const fixture = setupFixture({ extensionOptions: options })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph(markdown)))
+    return fixture
+  }
+
+  it('does not fire the image click handler from an X card', async () => {
+    const onImageClick = vi.fn()
+    using fixture = setupClickable(TWEET, { resolveXPost: () => createXPost(), onImageClick })
+    void fixture
+    const text = xPostCard.getByText('just setting up my twttr')
+    await expect.element(text).toBeInTheDocument()
+    await userEvent.click(text)
+    expect(onImageClick).not.toHaveBeenCalled()
+  })
+
+  it('does not fire the image click handler from a YouTube card', async () => {
+    const onImageClick = vi.fn()
+    using fixture = setupClickable(VIDEO, {
+      resolveYouTubeVideo: () => createYouTubeVideo(),
+      onImageClick,
+    })
+    void fixture
+    const play = videoCard.getByRole('button', { name: /^Play:/ })
+    await expect.element(play).toBeInTheDocument()
+    await userEvent.click(play)
+    expect(onImageClick).not.toHaveBeenCalled()
+  })
+})
 
 describe('X post embed', () => {
   it('passes separate resolver and media protocol options to X cards', async () => {
