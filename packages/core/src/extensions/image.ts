@@ -12,7 +12,8 @@ import {
 
 import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
 
-import { getEditorConfig, subscribeEditorConfig } from './editor-config.ts'
+import { getEditorConfig } from './editor-config.ts'
+import { subscribeEditorConfig } from './editor-config-events.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import {
   formatMagicComment,

@@ -4,11 +4,10 @@ import { userEvent } from 'vitest/browser'
 
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
-import { defineExitBoundaryHandler, type ExitBoundaryHandler } from './exit-boundary.ts'
+import type { ExitBoundaryHandler } from './exit-boundary.ts'
 
 function setup(onExitBoundary: ExitBoundaryHandler): Fixture {
-  const fixture = setupFixture()
-  fixture.editor.use(defineExitBoundaryHandler(onExitBoundary))
+  const fixture = setupFixture({ extensionOptions: { onExitBoundary } })
   return fixture
 }
 

@@ -4,10 +4,10 @@ import { page, userEvent } from 'vitest/browser'
 import { setupFixture, traceKeyAt, traceKeySelection, type Fixture } from '../testing/index.ts'
 import { replaceText } from '../testing/replace-text.ts'
 
-import { defineFileClickHandler, type FileClickHandler } from './file-click.ts'
+import type { FileClickHandler } from './file-click.ts'
 import { defineFileView, type FileInfoResolver } from './file-view.ts'
 import type { FileLinkResolver } from './inline-text-to-mark-chunks.ts'
-import { defineLinkClickHandler, type LinkClickHandler } from './link-click.ts'
+import type { LinkClickHandler } from './link-click.ts'
 import type { MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
@@ -26,7 +26,7 @@ function setup(
     extensionOptions: { resolveFileLink: claimAssets, markMode: mode },
   })
   const { editor, n } = fixture
-  editor.use(defineFileView({ resolveFileInfo }))
+  editor.use(defineFileView(() => ({ resolveFileInfo })))
   fixture.set(n.doc(n.paragraph(markdown)))
   fixture.view.focus()
   return fixture
@@ -206,12 +206,15 @@ describe('file pill click callback', () => {
     onLinkClick?: LinkClickHandler,
   ): Fixture {
     const fixture = setupFixture({
-      extensionOptions: { resolveFileLink: claimAssets, markMode: 'hide' },
+      extensionOptions: {
+        resolveFileLink: claimAssets,
+        markMode: 'hide',
+        onFileClick,
+        onLinkClick,
+      },
     })
     const { editor, n } = fixture
     editor.use(defineFileView())
-    editor.use(defineFileClickHandler(onFileClick))
-    if (onLinkClick) editor.use(defineLinkClickHandler(onLinkClick))
     fixture.set(n.doc(n.paragraph(markdown)))
     return fixture
   }

@@ -1,3 +1,4 @@
+import { updateEditorConfig } from '../testing/editor-config.ts'
 import type { XPost } from '@post-embed/types'
 import { pasteText } from '@prosekit/core/test'
 import { describe, expect, it, vi } from 'vitest'
@@ -9,7 +10,6 @@ import { createTweet } from '../testing/tweet-fixture.ts'
 import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
-import { defineEmbedPaste } from './embed-paste.ts'
 import { defineImage, type ImageOptions } from './image.ts'
 import { formatMagicComment, parseMagicComment } from './magic-comment.ts'
 
@@ -178,8 +178,8 @@ describe('snapshot persistence', () => {
     using fixture = setupFixture()
     const { editor, n, view } = fixture
     editor.use(defineImage({ resolveXPost: () => post }))
-    editor.use(defineEmbedPaste())
     fixture.set(n.doc(n.paragraph('<a>')))
+    updateEditorConfig(editor, { embedPaste: true })
     const url = 'https://x.com/jack/status/20'
     pasteText(view, url)
     await expect.poll(() => docToMarkdown(editor.state.doc)).toContain('"snapshot"')

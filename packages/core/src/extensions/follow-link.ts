@@ -11,7 +11,6 @@ import { getIsComposing } from '../utils/composition.ts'
 import { isModEvent } from '../utils/is-mod-event.ts'
 
 import { getSelectedAtomRange } from './atom-mark-navigation.ts'
-import { getEditorConfig } from './editor-config.ts'
 import type { FileClickHandler } from './file-click.ts'
 import { findFileAt } from './file-click.ts'
 import { getLinkUnitAt } from './get-link-unit-at.ts'
@@ -33,9 +32,9 @@ export interface FollowLinkHandlers {
   onImageClick?: ImageClickHandler
 }
 
-function createFollowLinkPlugin(handlers?: FollowLinkHandlers) {
+function createFollowLinkPlugin(getHandlers?: (state: EditorState) => FollowLinkHandlers) {
   return new Plugin({
-    key: handlers ? followLinkKey : new PluginKey('config-follow-link'),
+    key: followLinkKey,
     props: {
       handleKeyDown: (view, event) => {
         if (getIsComposing() || event.key !== 'Enter' || event.shiftKey) {
@@ -43,7 +42,7 @@ function createFollowLinkPlugin(handlers?: FollowLinkHandlers) {
         }
 
         const { state } = view
-        const currentHandlers = handlers ?? getEditorConfig(state)
+        const currentHandlers = getHandlers?.(state) ?? {}
         const selectedAtom = getSelectedAtomRange(state)
         const mod = isModEvent(event)
 
@@ -141,6 +140,8 @@ function handlerTextMarkTrigger(
  * a caret follow always reports `mod: false`, its mod key being the trigger
  * itself.
  */
-export function defineFollowLinkHandler(handlers?: FollowLinkHandlers): PlainExtension {
-  return withPriority(definePlugin(createFollowLinkPlugin(handlers)), Priority.high)
+export function defineFollowLinkHandler(
+  getHandlers?: (state: EditorState) => FollowLinkHandlers,
+): PlainExtension {
+  return withPriority(definePlugin(createFollowLinkPlugin(getHandlers)), Priority.high)
 }

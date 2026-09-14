@@ -1,9 +1,10 @@
+import { updateEditorConfig } from '../testing/editor-config.ts'
 import { describe, expect, it, vi } from 'vitest'
 import { userEvent } from 'vitest/browser'
 
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
-import { defineExitBoundaryHandler, type ExitBoundaryHandler } from './exit-boundary.ts'
+import type { ExitBoundaryHandler } from './exit-boundary.ts'
 
 function setup(): Fixture {
   return setupFixture({ extensionOptions: { markMode: 'hide' } })
@@ -113,9 +114,9 @@ describe('Meta-ArrowUp / Meta-ArrowDown', () => {
   it('does not fire the exit-boundary handler from the document start', async () => {
     const onExitBoundary = vi.fn<ExitBoundaryHandler>()
     using fixture = setup()
-    fixture.editor.use(defineExitBoundaryHandler(onExitBoundary))
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('<a>alpha'), n.paragraph('beta')))
+    updateEditorConfig(fixture.editor, { onExitBoundary })
     fixture.view.focus()
     await userEvent.keyboard('{Meta>}{ArrowUp}{/Meta}')
     expect(onExitBoundary).not.toHaveBeenCalled()

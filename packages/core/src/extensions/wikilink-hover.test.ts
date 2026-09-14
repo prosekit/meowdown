@@ -1,3 +1,4 @@
+import { updateEditorConfig } from '../testing/editor-config.ts'
 import { describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
@@ -11,7 +12,7 @@ function applyHoverable(markdown: string, onHoverChange: WikilinkHoverHandler) {
   const fixture = setupFixture({ extensionOptions: { resolveWikilink: resolveWikilinkAlias } })
   fixture.editor.use(defineWikilinkHoverHandler(onHoverChange))
   fixture.set(fixture.n.doc(fixture.n.paragraph(markdown)))
-  fixture.editor.commands.setMarkMode('hide')
+  updateEditorConfig(fixture.editor, { markMode: 'hide' }, true)
   return fixture
 }
 

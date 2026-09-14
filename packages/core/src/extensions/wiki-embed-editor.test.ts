@@ -1,14 +1,15 @@
+import { updateEditorConfig } from '../testing/editor-config.ts'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
-import { defineFileClickHandler, type FileClickHandler } from './file-click.ts'
+import type { FileClickHandler } from './file-click.ts'
 import { defineFileView } from './file-view.ts'
-import { defineImageClickHandler, type ImageClickHandler } from './image-click.ts'
+import type { ImageClickHandler } from './image-click.ts'
 import { defineImage } from './image.ts'
 import type { WikiEmbedResolution } from './wiki-embed.ts'
-import { defineWikilinkClickHandler, type WikilinkClickHandler } from './wikilink-click.ts'
+import type { WikilinkClickHandler } from './wikilink-click.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 
@@ -35,7 +36,7 @@ describe('wiki embed editor integration', () => {
     const onImageClick = vi.fn<ImageClickHandler>()
     using fixture = setup('![[photo.png|Photo]]', { kind: 'image' })
     fixture.editor.use(defineImage({ resolveImageUrl: () => 'https://example.com/photo.png' }))
-    fixture.editor.use(defineImageClickHandler(onImageClick))
+    updateEditorConfig(fixture.editor, { onImageClick })
 
     const image = pmRoot.getByAltText('Photo')
     await expect.element(image).toBeInTheDocument()
@@ -49,7 +50,7 @@ describe('wiki embed editor integration', () => {
     const onFileClick = vi.fn<FileClickHandler>()
     using fixture = setup('![[docs/report.pdf|Quarterly]]', { kind: 'file' })
     fixture.editor.use(defineFileView())
-    fixture.editor.use(defineFileClickHandler(onFileClick))
+    updateEditorConfig(fixture.editor, { onFileClick })
 
     const pill = pmRoot.getByTestId('file-pill')
     await expect.element(pill).toHaveTextContent('Quarterly')
@@ -62,7 +63,7 @@ describe('wiki embed editor integration', () => {
   it('uses wikilink chips and wikilink click hooks for note fallbacks', async () => {
     const onWikilinkClick = vi.fn<WikilinkClickHandler>()
     using fixture = setup('![[Projects/Plan|Launch plan]]', { kind: 'note' })
-    fixture.editor.use(defineWikilinkClickHandler(onWikilinkClick))
+    updateEditorConfig(fixture.editor, { onWikilinkClick })
 
     const chip = pmRoot.getByTestId('wikilink')
     await expect.element(chip).toHaveTextContent('Launch plan')

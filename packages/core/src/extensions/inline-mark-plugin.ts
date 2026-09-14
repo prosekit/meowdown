@@ -21,7 +21,8 @@ import type { EditorView } from '@prosekit/pm/view'
 import type { PositionRange } from '../utils/range.ts'
 
 import { BatchSetMarkStep } from './batch-set-mark-step.ts'
-import { equalInlineConfig, getEditorConfig } from './editor-config.ts'
+import { getEditorConfig } from './editor-config.ts'
+import { equalInlineConfig } from './inline-text-to-mark-chunks.ts'
 import {
   inlineTextToMarkChunksWithContext,
   type InlineMarkOptions,

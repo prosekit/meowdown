@@ -1,3 +1,4 @@
+import { updateEditorConfig } from '../testing/editor-config.ts'
 import { isFirefox } from '@meowdown/vitest/helpers'
 import { TextSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
@@ -24,7 +25,7 @@ function renderHTML(mode: MarkMode, text: string): string {
 describe('focus mode', () => {
   it("sets data-mark-mode attribute to 'focus'", async () => {
     using fixture = setupFixture()
-    fixture.editor.commands.setMarkMode('focus')
+    updateEditorConfig(fixture.editor, { markMode: 'focus' }, true)
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'focus')
   })
 
@@ -1351,7 +1352,7 @@ describe('focus mode', () => {
 describe('hide mode', () => {
   it("sets data-mark-mode attribute to 'hide'", async () => {
     using fixture = setupFixture()
-    fixture.editor.commands.setMarkMode('hide')
+    updateEditorConfig(fixture.editor, { markMode: 'hide' }, true)
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'hide')
   })
 
@@ -1434,7 +1435,7 @@ describe('hide mode', () => {
 describe('show mode', () => {
   it("sets data-mark-mode attribute to 'show'", async () => {
     using fixture = setupFixture()
-    fixture.editor.commands.setMarkMode('show')
+    updateEditorConfig(fixture.editor, { markMode: 'show' }, true)
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'show')
   })
 
@@ -1478,11 +1479,11 @@ describe('mark mode lifecycle', () => {
     expect(fixture.dom.getAttribute('data-mark-mode')).toBe('hide')
   })
 
-  it('switches the mode with the setMarkMode command', async () => {
+  it('switches the mode through editor configuration', async () => {
     using fixture = setupFixture()
-    fixture.editor.commands.setMarkMode('hide')
+    updateEditorConfig(fixture.editor, { markMode: 'hide' }, true)
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'hide')
-    fixture.editor.commands.setMarkMode('show')
+    updateEditorConfig(fixture.editor, { markMode: 'show' }, true)
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'show')
   })
 
@@ -1491,7 +1492,7 @@ describe('mark mode lifecycle', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('hello')))
     fixture.view.dispatch(fixture.state.tr.insertText(' world', 6))
-    editor.commands.setMarkMode('hide')
+    updateEditorConfig(editor, { markMode: 'hide' }, true)
     expect(editor.commands.undo()).toBe(true)
     expect(fixture.doc.textContent).toBe('hello')
     expect(fixture.dom.getAttribute('data-mark-mode')).toBe('hide')
@@ -1501,7 +1502,7 @@ describe('mark mode lifecycle', () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('hello')))
-    editor.commands.setMarkMode('hide')
+    updateEditorConfig(editor, { markMode: 'hide' }, true)
     expect(editor.commands.undo()).toBe(false)
     expect(fixture.dom.getAttribute('data-mark-mode')).toBe('hide')
   })

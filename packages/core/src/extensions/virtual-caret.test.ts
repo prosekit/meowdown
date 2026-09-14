@@ -181,7 +181,7 @@ describe('virtual caret next to atom marks', () => {
       },
     })
     const { editor, n } = fixture
-    editor.use(defineFileView({}))
+    editor.use(defineFileView(() => ({})))
     fixture.set(n.doc(n.paragraph(text)))
     fixture.view.focus()
     return fixture

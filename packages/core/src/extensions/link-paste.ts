@@ -37,7 +37,7 @@ export function defineLinkPaste(enabled?: (state: EditorState) => boolean): Plai
   return withPriority(
     definePlugin(
       new Plugin({
-        key: enabled ? new PluginKey('config-defineLinkPaste') : linkPasteKey,
+        key: linkPasteKey,
         props: {
           handlePaste: (view, event, slice) => {
             if (enabled && !enabled(view.state)) return false

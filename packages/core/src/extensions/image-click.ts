@@ -4,7 +4,6 @@ import type { EditorView } from '@prosekit/pm/view'
 
 import { isModEvent } from '../utils/is-mod-event.ts'
 
-import { getEditorConfig } from './editor-config.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 
@@ -102,11 +101,13 @@ function isWithinTapTolerance(pending: PendingTap, touch: Touch): boolean {
  * raises the software keyboard before the handler opens its own surface
  * (such as a lightbox).
  */
-export function defineImageClickHandler(onClick?: ImageClickHandler): PlainExtension {
+export function defineImageClickHandler(
+  getOnClick?: (state: EditorState) => ImageClickHandler | undefined,
+): PlainExtension {
   const pendingTaps = new WeakMap<EditorView, PendingTap>()
 
   const handleTouchEnd = (view: EditorView, event: TouchEvent): boolean => {
-    const handler = onClick ?? getEditorConfig(view.state).onImageClick
+    const handler = getOnClick?.(view.state)
     const pending = pendingTaps.get(view)
     pendingTaps.delete(view)
     if (!handler) return false
@@ -125,12 +126,11 @@ export function defineImageClickHandler(onClick?: ImageClickHandler): PlainExten
 
   return definePlugin(
     new Plugin({
-      // FIXME: do not use this pattern
-      key: onClick ? imageClickKey : new PluginKey('config-onImageClick'),
+      key: imageClickKey,
       props: {
         handleDOMEvents: {
           pointerdown: (view, event) => {
-            if (!(onClick ?? getEditorConfig(view.state).onImageClick)) return false
+            if (!getOnClick?.(view.state)) return false
             if (getClosestImagePreview(event.target) && event.pointerType !== 'mouse') {
               // Clickable image previews live inside the editor contenteditable. On touch surfaces,
               // tapping a rendered image can let the browser focus the editor on pointerdown before
@@ -141,7 +141,7 @@ export function defineImageClickHandler(onClick?: ImageClickHandler): PlainExten
             return false
           },
           touchstart: (view, event) => {
-            if (!(onClick ?? getEditorConfig(view.state).onImageClick)) return false
+            if (!getOnClick?.(view.state)) return false
             pendingTaps.delete(view)
             if (event.touches.length !== 1) return false
             if (!getClosestImagePreview(event.target)) return false
@@ -175,7 +175,7 @@ export function defineImageClickHandler(onClick?: ImageClickHandler): PlainExten
           touchend: handleTouchEnd,
         },
         handleClick: (view, _pos, event) => {
-          const handler = onClick ?? getEditorConfig(view.state).onImageClick
+          const handler = getOnClick?.(view.state)
           if (!handler) return false
           const preview = getClosestImagePreview(event.target)
           if (!preview) return false

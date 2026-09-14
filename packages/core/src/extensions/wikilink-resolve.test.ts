@@ -1,3 +1,4 @@
+import { updateEditorConfig } from '../testing/editor-config.ts'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
@@ -5,7 +6,7 @@ import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { resolveWikilinkAlias, setupFixture, type Fixture } from '../testing/index.ts'
 import { getTextblockDisplayText } from '../utils/display-text.ts'
 
-import { defineWikilinkClickHandler, type WikilinkClickHandler } from './wikilink-click.ts'
+import type { WikilinkClickHandler } from './wikilink-click.ts'
 import type { WikilinkResolver } from './wikilink.ts'
 
 const pmRoot = page.locate('.ProseMirror')
@@ -34,7 +35,7 @@ describe('wikilink resolver', () => {
   it('uses the bracketed text as the label and the target without a resolver', async () => {
     const onWikilinkClick = vi.fn<WikilinkClickHandler>()
     using fixture = setup('[[Note|My Note]]', {})
-    fixture.editor.use(defineWikilinkClickHandler(onWikilinkClick))
+    updateEditorConfig(fixture.editor, { onWikilinkClick })
     await expect.element(label).toHaveTextContent('Note|My Note')
     await userEvent.click(label)
     expect(onWikilinkClick).toHaveBeenCalledWith(
@@ -51,7 +52,7 @@ describe('wikilink resolver', () => {
   it('reports the resolved target on click', async () => {
     const onWikilinkClick = vi.fn<WikilinkClickHandler>()
     using fixture = setup('[[Tim MacCaw // Dad|Dad]]')
-    fixture.editor.use(defineWikilinkClickHandler(onWikilinkClick))
+    updateEditorConfig(fixture.editor, { onWikilinkClick })
     await expect.element(label).toHaveTextContent('Dad')
     await userEvent.click(label)
     expect(onWikilinkClick).toHaveBeenCalledWith(

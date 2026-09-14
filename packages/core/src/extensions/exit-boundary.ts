@@ -9,8 +9,6 @@ import {
 import { Plugin, PluginKey, Selection, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
-import { getEditorConfig } from './editor-config.ts'
-
 const exitBoundaryKey = new PluginKey('meowdown-exit-boundary')
 
 /**
@@ -79,13 +77,14 @@ function canMoveVertically(view: EditorView, direction: 1 | -1): boolean {
   return canMoveBlockwise(state, direction)
 }
 
-function createExitBoundaryPlugin(onExitBoundary?: ExitBoundaryHandler) {
+function createExitBoundaryPlugin(
+  getExitBoundaryHandler?: (state: EditorState) => ExitBoundaryHandler | undefined,
+) {
   return new Plugin({
-    // FIXME: do not write pattern like this. do not create new PluginKey. we can get write createExitBoundaryPlugin(getExitBoundaryHandler?: (state)=>ExitBoundaryHandler|undefined). and later in `handleKeyDown`, handler = getExitBoundaryHandler?.(view.state). and in extensions.ts, we just defineExitBoundaryHandler(state => getEditorConfig(state)?.onExitBoundary)
-    key: onExitBoundary ? exitBoundaryKey : new PluginKey('config-exit-boundary'),
+    key: exitBoundaryKey,
     props: {
       handleKeyDown: (view, event) => {
-        const handler = onExitBoundary ?? getEditorConfig(view.state).onExitBoundary
+        const handler = getExitBoundaryHandler?.(view.state)
         if (!handler) return false
         if (event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) {
           return false
@@ -106,6 +105,8 @@ function createExitBoundaryPlugin(onExitBoundary?: ExitBoundaryHandler) {
 /**
  * Call `onExitBoundary` when an arrow key press would leave the document boundary.
  */
-export function defineExitBoundaryHandler(onExitBoundary?: ExitBoundaryHandler): PlainExtension {
-  return withPriority(definePlugin(createExitBoundaryPlugin(onExitBoundary)), Priority.low)
+export function defineExitBoundaryHandler(
+  getExitBoundaryHandler?: (state: EditorState) => ExitBoundaryHandler | undefined,
+): PlainExtension {
+  return withPriority(definePlugin(createExitBoundaryPlugin(getExitBoundaryHandler)), Priority.low)
 }

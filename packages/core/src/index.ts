@@ -5,7 +5,7 @@ export {
   type CodeBlockAttrs,
 } from '@prosekit/extensions/code-block'
 export { definePlaceholder, type PlaceholderOptions } from '@prosekit/extensions/placeholder'
-export { defineReadonly } from '@prosekit/extensions/readonly'
+export { defineReadonly } from './extensions/readonly.ts'
 export {
   defineSearchStatusHandler,
   getSearchStatus,

@@ -13,7 +13,7 @@ import {
   type Fixture,
 } from '../testing/index.ts'
 
-import { defineImageClickHandler, type ImageClickHandler } from './image-click.ts'
+import type { ImageClickHandler } from './image-click.ts'
 import { defineImage } from './image.ts'
 import type { MarkMode } from './mark-mode.ts'
 
@@ -131,10 +131,9 @@ describe('image selection ring', () => {
 describe('image click callback', () => {
   // Render `markdown` with a click handler attached, showing http(s) images as-is.
   function setupClickable(markdown: string, onImageClick: ImageClickHandler): Fixture {
-    const fixture = setupFixture()
+    const fixture = setupFixture({ extensionOptions: { onImageClick } })
     const { editor, n } = fixture
     editor.use(defineImage({ resolveImageUrl: (src) => src }))
-    editor.use(defineImageClickHandler(onImageClick))
     fixture.set(n.doc(n.paragraph(markdown)))
     return fixture
   }

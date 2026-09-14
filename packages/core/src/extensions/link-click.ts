@@ -1,9 +1,8 @@
 import type { PlainExtension } from '@prosekit/core'
-import { PluginKey } from '@prosekit/pm/state'
+import { PluginKey, type EditorState } from '@prosekit/pm/state'
 
 import { isModEvent } from '../utils/is-mod-event.ts'
 
-import { getEditorConfig } from './editor-config.ts'
 import { getLinkUnitAt } from './get-link-unit-at.ts'
 import { defineMarkClickHandler } from './mark-click.ts'
 
@@ -35,16 +34,17 @@ export type LinkCopyHandler = (payload: LinkCopyPayload) => void
  * (`[text](url)`), or presses `Mod-Enter` with the caret on one. The `event`
  * is the originating `MouseEvent` or `KeyboardEvent`.
  */
-export function defineLinkClickHandler(onClick?: LinkClickHandler): PlainExtension {
+export function defineLinkClickHandler(
+  getOnClick?: (state: EditorState) => LinkClickHandler | undefined,
+): PlainExtension {
   return defineMarkClickHandler<string>({
-    // FIXME: do not use this pattern. defineLinkClickHandler not get a lambda function as arg, this lambda function returns onClick
-    key: onClick ? linkClickKey : new PluginKey('config-onLinkClick'),
-    enabled: (state) => !!(onClick ?? getEditorConfig(state).onLinkClick),
+    key: linkClickKey,
+    enabled: (state) => !!getOnClick?.(state),
     selector: '.md-link',
     preventDefault: true,
     findPayloadAt: (state, pos) => getLinkUnitAt(state, pos)?.href,
     onClick: (href, event, state) => {
-      return (onClick ?? getEditorConfig(state).onLinkClick)?.({
+      return getOnClick?.(state)?.({
         href,
         event,
         mod: isModEvent(event),

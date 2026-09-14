@@ -5,7 +5,7 @@ import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
 import type { FileClickHandler } from './file-click.ts'
-import { defineFollowLinkHandler, type FollowLinkHandlers } from './follow-link.ts'
+import type { FollowLinkHandlers } from './follow-link.ts'
 import type { ImageClickHandler } from './image-click.ts'
 import type { LinkClickHandler } from './link-click.ts'
 import type { TagClickHandler } from './tag-click.ts'
@@ -18,8 +18,7 @@ function pressModShiftEnter() {
 }
 
 function setup(handlers: FollowLinkHandlers): Fixture {
-  const fixture = setupFixture()
-  fixture.editor.use(defineFollowLinkHandler(handlers))
+  const fixture = setupFixture({ extensionOptions: handlers })
   return fixture
 }
 
@@ -65,9 +64,12 @@ describe('defineFollowLinkHandler', () => {
     const onFileClick = vi.fn<FileClickHandler>()
     const onLinkClick = vi.fn<LinkClickHandler>()
     using fixture = setupFixture({
-      extensionOptions: { resolveFileLink: ({ href }) => href.startsWith('assets/') },
+      extensionOptions: {
+        resolveFileLink: ({ href }) => href.startsWith('assets/'),
+        onFileClick,
+        onLinkClick,
+      },
     })
-    fixture.editor.use(defineFollowLinkHandler({ onFileClick, onLinkClick }))
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('see [report.pdf](assets/report.pdf)<a> here')))
     fixture.view.focus()

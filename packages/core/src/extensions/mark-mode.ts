@@ -1,6 +1,6 @@
-import { defineCommands, definePlugin, getMarkRange, union } from '@prosekit/core'
+import { definePlugin, getMarkRange } from '@prosekit/core'
 import type { Mark, ResolvedPos } from '@prosekit/pm/model'
-import type { Command, EditorState } from '@prosekit/pm/state'
+import type { EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
@@ -17,33 +17,21 @@ import { isMarkOfType, type MarkName } from './mark-names.ts'
  */
 export type MarkMode = 'hide' | 'focus' | 'show'
 
-export const MARK_MODE_META = 'meowdown-config-mark-mode'
+type MarkModeGetter = (state: EditorState) => MarkMode
 
-const markModeKey = new PluginKey<MarkMode>('mark-mode')
+const markModeKey = new PluginKey<MarkModeGetter>('mark-mode')
 
-function getCurrentMarkMode(state: EditorState): MarkMode | undefined {
-  return markModeKey.getState(state)
-}
-
-function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
-  return new Plugin<MarkMode>({
+function createMarkModePlugin(getMode: MarkModeGetter): Plugin<MarkModeGetter> {
+  return new Plugin<MarkModeGetter>({
     key: markModeKey,
     state: {
-      init: () => initialMode,
-      apply: (tr, value) => {
-        return (
-          (tr.getMeta(markModeKey) as MarkMode | undefined) ??
-          (tr.getMeta(MARK_MODE_META) as MarkMode | undefined) ??
-          value
-        )
-      },
+      init: () => getMode,
+      apply: (_transaction, value) => value,
     },
     props: {
-      attributes: (state) => {
-        return { 'data-mark-mode': getCurrentMarkMode(state) ?? initialMode }
-      },
+      attributes: (state) => ({ 'data-mark-mode': getMode(state) }),
       decorations: (state) => {
-        const mode = getCurrentMarkMode(state) ?? initialMode
+        const mode = getMode(state)
         return mode === 'focus' || mode === 'hide'
           ? computeRevealDecorations(state, mode)
           : undefined
@@ -52,21 +40,12 @@ function createMarkModePlugin(initialMode: MarkMode): Plugin<MarkMode> {
   })
 }
 
-function setMarkMode(mode: MarkMode): Command {
-  return (state, dispatch) => {
-    if (getMarkMode(state) === mode) return false
-    // A meta-only transaction: no doc steps, so undo cannot revert the mode.
-    dispatch?.(state.tr.setMeta(MARK_MODE_META, mode))
-    return true
-  }
-}
-
 /**
  * The active mark mode. `defineEditorExtension` always applies
  * `defineMarkMode`, so this is `undefined` only for a state built without it.
  */
 export function getMarkMode(state: EditorState): MarkMode | undefined {
-  return markModeKey.getState(state)
+  return markModeKey.getState(state)?.(state)
 }
 
 // The revealable pack touching `$pos` from `direction`: the outermost pack
@@ -134,7 +113,6 @@ function computeRevealDecorations(
   return DecorationSet.create(state.doc, decorations)
 }
 
-export function defineMarkMode(mode: MarkMode) {
-  // FIXME: is "setMarkMode" command used in anywhere? if no, just remove setMarkMode command from the codebase.
-  return union(definePlugin(createMarkModePlugin(mode)), defineCommands({ setMarkMode }))
+export function defineMarkMode(getMode: MarkModeGetter) {
+  return definePlugin(createMarkModePlugin(getMode))
 }

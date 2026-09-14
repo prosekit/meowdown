@@ -32,7 +32,7 @@ function insertEmbedFromPaste(view: EditorView, url: string): void {
 export function defineEmbedPaste(enabled?: (state: EditorState) => boolean): PlainExtension {
   return definePlugin(
     new Plugin({
-      key: enabled ? new PluginKey('config-defineEmbedPaste') : embedPasteKey,
+      key: embedPasteKey,
       props: {
         handlePaste: (view, event, slice) => {
           if (enabled && !enabled(view.state)) return false

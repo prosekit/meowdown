@@ -1,6 +1,25 @@
-import { replaceEditorConfig, type EditorConfig, type EditorExtension } from '@meowdown/core'
+import {
+  getEditorConfig,
+  replaceEditorConfig,
+  type EditorConfig,
+  type EditorExtension,
+} from '@meowdown/core'
 import { useEditor } from '@prosekit/react'
 import { useDeferredValue, useEffect } from 'react'
+
+const refreshKeys = [
+  'markMode',
+  'resolveFileLink',
+  'resolveWikiEmbed',
+  'resolveWikilink',
+  'resolveImageUrl',
+  'resolveXPost',
+  'resolveYouTubeVideo',
+  'placeholder',
+  'readOnly',
+  'spellCheck',
+  'editorClassName',
+] as const satisfies readonly (keyof EditorConfig)[]
 
 interface EditorExtensionsProps {
   config: EditorConfig
@@ -15,7 +34,21 @@ export function EditorExtensions({ config, searchQuery }: EditorExtensionsProps)
   // Initial configuration already belongs to the creation extension. Later
   // updates run outside React's lifecycle because adapter views use flushSync.
   useEffect(() => {
-    const timer = setTimeout(() => replaceEditorConfig(editor, config))
+    const timer = setTimeout(() => {
+      const previous = getEditorConfig(editor.state)
+      const dispatch = refreshKeys.some((key) => !Object.is(previous[key], config[key]))
+      replaceEditorConfig(
+        editor,
+        (current) => {
+          const keys = new Set([
+            ...Object.keys(current),
+            ...Object.keys(config),
+          ] as (keyof EditorConfig)[])
+          return [...keys].every((key) => Object.is(current[key], config[key])) ? current : config
+        },
+        dispatch,
+      )
+    })
     return () => clearTimeout(timer)
   }, [editor, config])
 

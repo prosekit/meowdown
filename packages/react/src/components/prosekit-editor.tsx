@@ -2,6 +2,7 @@ import {
   defineEditorExtension,
   defineImage,
   defineFileView,
+  getEditorConfig,
   type EditorConfig,
   docToMarkdown,
   getSelectedText,
@@ -432,7 +433,7 @@ export function ProseKitEditor({
     const baseExtension: EditorExtension = union(
       defineEditorExtension(config),
       defineImage(),
-      defineFileView(),
+      defineFileView(getEditorConfig),
     )
     const extension =
       CodeBlockView === false

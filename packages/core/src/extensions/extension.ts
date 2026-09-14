@@ -21,6 +21,7 @@ import { defineCodeBlock } from './code-block.ts'
 import { defineEditorCommands } from './commands.ts'
 import { defineCrossEditorDrag } from './cross-editor-drag.ts'
 import { defineEditorConfig, getEditorConfig, type EditorConfig } from './editor-config.ts'
+import { defineEditorConfigEvents } from './editor-config-events.ts'
 import { defineEmbedPaste } from './embed-paste.ts'
 import { defineEscapeCollapse } from './escape-collapse.ts'
 import { defineExitBoundaryHandler } from './exit-boundary.ts'
@@ -47,6 +48,7 @@ import { defineMath } from './math.ts'
 import { defineMoveBlock } from './move-block.ts'
 import { defineMeowdownParagraph } from './paragraph.ts'
 import { definePendingReplacement } from './pending-replacement.ts'
+import { defineReadonly } from './readonly.ts'
 import { defineScrollToSelection } from './scroll-to-selection.ts'
 import { defineSelectDocBoundary } from './select-doc-boundary.ts'
 import { defineSoftBreak } from './soft-break.ts'
@@ -79,13 +81,14 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
 
     // plugins
     defineEditorConfig(options),
-    defineFileClickHandler(),
-    defineImageClickHandler(),
-    defineWikilinkClickHandler(),
-    defineTagClickHandler(),
-    defineLinkClickHandler(),
-    defineFollowLinkHandler(),
-    defineExitBoundaryHandler(),
+    defineEditorConfigEvents(),
+    defineFileClickHandler((state) => getEditorConfig(state).onFileClick),
+    defineImageClickHandler((state) => getEditorConfig(state).onImageClick),
+    defineWikilinkClickHandler((state) => getEditorConfig(state).onWikilinkClick),
+    defineTagClickHandler((state) => getEditorConfig(state).onTagClick),
+    defineLinkClickHandler((state) => getEditorConfig(state).onLinkClick),
+    defineFollowLinkHandler(getEditorConfig),
+    defineExitBoundaryHandler((state) => getEditorConfig(state).onExitBoundary),
     defineFilePaste(),
     defineEmbedPaste((state) => !!getEditorConfig(state).embedPaste),
     defineLinkPaste((state) => !!getEditorConfig(state).linkPaste),
@@ -99,7 +102,14 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
       },
       strategy: 'doc',
     }),
-    defineViewAttributes({ class: 'meowdown-content' }),
+    defineReadonly((state) => !!getEditorConfig(state).readOnly),
+    defineViewAttributes((state) => {
+      const { editorClassName, spellCheck } = getEditorConfig(state)
+      const attributes: Record<string, string> = { class: 'meowdown-content' }
+      if (editorClassName) attributes.class += ` ${editorClassName}`
+      if (spellCheck != null) attributes.spellcheck = String(spellCheck)
+      return attributes
+    }),
     defineCodeBlockSyntaxHighlight(),
     defineCrossEditorDrag(),
     defineEscapeCollapse(),
@@ -111,7 +121,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineLinkCommands(),
     defineWikilink(),
     defineMath(),
-    defineMarkMode(options.markMode ?? 'focus'),
+    defineMarkMode((state) => getEditorConfig(state).markMode ?? 'focus'),
     defineClipboard(),
     defineScrollToSelection(),
     defineHiddenRunCaret(),

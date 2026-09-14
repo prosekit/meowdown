@@ -3,7 +3,6 @@ import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
 import { isModEvent } from '../utils/is-mod-event.ts'
 
-import { getEditorConfig } from './editor-config.ts'
 import type { MdFileAttrs } from './inline-marks.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 
@@ -54,13 +53,15 @@ export type FileClickHandler = (payload: FileClickPayload) => void
  * `href`, `name`, and the originating `MouseEvent`. The host decides what a
  * click does (e.g. open the file in the OS default app).
  */
-export function defineFileClickHandler(onClick?: FileClickHandler): PlainExtension {
+export function defineFileClickHandler(
+  getOnClick?: (state: EditorState) => FileClickHandler | undefined,
+): PlainExtension {
   return definePlugin(
     new Plugin({
-      key: onClick ? fileClickKey : new PluginKey('config-onFileClick'),
+      key: fileClickKey,
       props: {
         handleClick: (view, _pos, event) => {
-          const handler = onClick ?? getEditorConfig(view.state).onFileClick
+          const handler = getOnClick?.(view.state)
           if (!handler) return false
           const target = event.target as HTMLElement | null
           const preview = target?.closest?.('.md-file-view-preview')

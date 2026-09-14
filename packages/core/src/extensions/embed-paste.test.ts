@@ -7,7 +7,7 @@ import { setupFixture, type Fixture } from '../testing/index.ts'
 import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
-import { defineEmbedPaste, detectEmbedUrl } from './embed-paste.ts'
+import { detectEmbedUrl } from './embed-paste.ts'
 import { defineImage } from './image.ts'
 
 const pmRoot = page.locate('.ProseMirror')
@@ -26,7 +26,6 @@ function useEmbedPaste(fixture: Fixture): void {
       resolveYouTubeVideo: () => createYouTubeVideo(),
     }),
   )
-  editor.use(defineEmbedPaste())
 }
 
 describe('detectEmbedUrl', () => {
@@ -59,7 +58,7 @@ describe('detectEmbedUrl', () => {
 
 describe('paste a lone embed link', () => {
   it('embeds a pasted YouTube link', async () => {
-    using fixture = setupFixture()
+    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>')))
@@ -71,7 +70,7 @@ describe('paste a lone embed link', () => {
   })
 
   it('embeds a pasted tweet link', async () => {
-    using fixture = setupFixture()
+    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>')))
@@ -81,7 +80,7 @@ describe('paste a lone embed link', () => {
   })
 
   it('replaces the selected text when pasting onto a selection', async () => {
-    using fixture = setupFixture()
+    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>drop me<b>')))
@@ -91,7 +90,7 @@ describe('paste a lone embed link', () => {
   })
 
   it('leaves a non-embeddable URL as a normal paste', async () => {
-    using fixture = setupFixture()
+    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>')))
@@ -101,7 +100,7 @@ describe('paste a lone embed link', () => {
   })
 
   it('does not embed when the clipboard has text around the URL', async () => {
-    using fixture = setupFixture()
+    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>')))
@@ -111,7 +110,7 @@ describe('paste a lone embed link', () => {
   })
 
   it('does not embed inside a code block', async () => {
-    using fixture = setupFixture()
+    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
     fixture.set(n.doc(n.codeBlock({ language: 'js' }, 'const x = 1<a>')))
@@ -121,7 +120,7 @@ describe('paste a lone embed link', () => {
   })
 
   it('embeds over a selection that spans two blocks', async () => {
-    using fixture = setupFixture()
+    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('one <a>two'), n.paragraph('three<b> four')))
@@ -133,7 +132,7 @@ describe('paste a lone embed link', () => {
 
 describe('undo restores the raw link', () => {
   it('one undo turns the embed back into the link, a second removes it', async () => {
-    using fixture = setupFixture()
+    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>')))
@@ -163,7 +162,7 @@ describe('undo restores the raw link', () => {
   })
 
   it('takes exactly two undo steps (proves the two-transaction split)', () => {
-    using fixture = setupFixture()
+    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>')))
@@ -174,7 +173,7 @@ describe('undo restores the raw link', () => {
   })
 
   it('keeps the surrounding text, removing only the pasted link', () => {
-    using fixture = setupFixture()
+    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('before <a>')))
@@ -187,7 +186,7 @@ describe('undo restores the raw link', () => {
   })
 
   it('reverts via the real Ctrl-z / Cmd-z shortcut', async () => {
-    using fixture = setupFixture()
+    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
     const { editor, n, view } = fixture
     useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>')))
