@@ -32,6 +32,16 @@ allowBuilds:
   esbuild: false
   simple-git-hooks: false
 
-FIXME 1: Compared to the previous master git branch, there were some commented-out lines about "blockExoticSubdeps" and "override." These commented-out lines are useful and should remain as comments. Do not remove them. Better yet, add post-embed-related overrides as comments here as well. This time, also add a comment clarifying that these commented-out lines are still useful and should not be removed.
-
-FIXME 2: Ensure that the latest origin/master branch is merged into your Reflect Open PR.
+# Keep these commented examples for future pkg.pr.new testing; do not remove them.
+# "blockExoticSubdeps" and "overrides" install packages from pkg.pr.new
+# blockExoticSubdeps: false
+# overrides:
+#   '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@7b1d474b13916ed1a34d54a2c9339a95d0c9be6f
+#   '@prosekit/react': https://pkg.pr.new/@prosekit/react@7b1d474b13916ed1a34d54a2c9339a95d0c9be6f
+#   '@prosekit/core': https://pkg.pr.new/@prosekit/core@7b1d474b13916ed1a34d54a2c9339a95d0c9be6f
+#   '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@7b1d474b13916ed1a34d54a2c9339a95d0c9be6f
+#   '@prosekit/web': https://pkg.pr.new/@prosekit/web@7b1d474b13916ed1a34d54a2c9339a95d0c9be6f
+#   '@post-embed/types': https://pkg.pr.new/@post-embed/types@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
+#   '@post-embed/schema': https://pkg.pr.new/@post-embed/schema@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
+#   '@post-embed/exporter': https://pkg.pr.new/@post-embed/exporter@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
+#   '@post-embed/elements': https://pkg.pr.new/@post-embed/elements@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
