@@ -9,7 +9,7 @@ export function createXPost(text = 'just setting up my twttr'): XPost {
     id: '20',
     createdAt: '2006-03-21T20:50:14.000Z',
     lang: 'en',
-    author: { name: 'jack', handle: 'jack', verified: 'blue' },
+    author: { name: 'jack', handle: 'jack' },
     body: text ? [{ type: 'text', text }] : [],
   }
 }
