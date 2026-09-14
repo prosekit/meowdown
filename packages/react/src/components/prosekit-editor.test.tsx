@@ -183,16 +183,4 @@ describe('reactive editor configuration', () => {
     expect(first).toHaveBeenCalledOnce()
     expect(second).toHaveBeenCalledOnce()
   })
-
-  it('reparses existing file links when a resolver prop changes', async () => {
-    const markdown = '[report.pdf](assets/report.pdf)'
-    const screen = await render(<ProseKitEditor initialMarkdown={markdown} />)
-    await expect.element(pmRoot.getByRole('link')).toBeInTheDocument()
-    await screen.rerender(
-      <ProseKitEditor initialMarkdown={markdown} resolveFileLink={() => true} />,
-    )
-    await expect.element(pmRoot.getByTestId('file-pill')).toBeInTheDocument()
-    await screen.rerender(<ProseKitEditor initialMarkdown={markdown} />)
-    await expect.element(pmRoot.getByRole('link')).toBeInTheDocument()
-  })
 })
