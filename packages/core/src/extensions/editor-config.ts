@@ -38,7 +38,7 @@ class ConfigController {
   }
 }
 
-const configKey = new PluginKey<ConfigController>('meowdown-config')
+const configKey = new PluginKey<ConfigController>('meowdown-editor-config')
 
 /**
  * Read the current configuration. Callback values are live, not historical state snapshots.
