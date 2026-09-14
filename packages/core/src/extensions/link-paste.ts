@@ -31,7 +31,7 @@ export function detectLinkUrl(text: string): string | undefined {
  * `defineEmbedPaste`'s: pasting an embeddable URL (tweet/YouTube) over a
  * selection keeps the selected text as a link instead of discarding it for an
  * embed. Enable it through the `linkPaste` configuration or install this
- * standalone extension. The React prop defaults to enabled. // FIXME: do not meantion react in packages/core/
+ * standalone extension.
  */
 export function defineLinkPaste(enabled?: (state: EditorState) => boolean): PlainExtension {
   return withPriority(
