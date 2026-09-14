@@ -36,7 +36,7 @@ allowBuilds:
 # versions when publishing the dependent packages.
 blockExoticSubdeps: false
 overrides:
-  '@post-embed/types': https://pkg.pr.new/@post-embed/types@500e4abb2ab7844355cca53a97fa16369dfef947
-  '@post-embed/schema': https://pkg.pr.new/@post-embed/schema@500e4abb2ab7844355cca53a97fa16369dfef947
-  '@post-embed/exporter': https://pkg.pr.new/@post-embed/exporter@500e4abb2ab7844355cca53a97fa16369dfef947
-  '@post-embed/elements': https://pkg.pr.new/@post-embed/elements@500e4abb2ab7844355cca53a97fa16369dfef947
+  '@post-embed/types': https://pkg.pr.new/@post-embed/types@a195e97acb1b205409cfb2333dc9dbd5c7d903ba
+  '@post-embed/schema': https://pkg.pr.new/@post-embed/schema@a195e97acb1b205409cfb2333dc9dbd5c7d903ba
+  '@post-embed/exporter': https://pkg.pr.new/@post-embed/exporter@a195e97acb1b205409cfb2333dc9dbd5c7d903ba
+  '@post-embed/elements': https://pkg.pr.new/@post-embed/elements@a195e97acb1b205409cfb2333dc9dbd5c7d903ba
