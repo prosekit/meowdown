@@ -938,6 +938,13 @@
       outline-offset: 2px;
     }
 
+    /* The selection outline follows the wrapper's radius, so a card's wrapper
+     * takes the card's own radius. */
+    .md-preview-x-post,
+    .md-preview-youtube-video {
+      border-radius: var(--post-embed-radius, 1rem);
+    }
+
     .md-image-resizable {
       position: relative;
       display: inline-block;

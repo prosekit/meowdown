@@ -10,6 +10,17 @@ export type YouTubeVideoResolver = Resolver<YouTubeVideo>
 
 export type PostEmbedKind = 'x-post' | 'youtube-video'
 
+/**
+ * The class that names a post-embed card's kind on its preview wrapper.
+ */
+export function postEmbedPreviewClass(kind: PostEmbedKind): string | undefined {
+  return kind === 'x-post'
+    ? 'md-preview-x-post'
+    : kind === 'youtube-video'
+      ? 'md-preview-youtube-video'
+      : undefined
+}
+
 const X_POST_HOSTS = /^(?:www\.|mobile\.)?(?:twitter\.com|x\.com)$/i
 const STATUS_ID = /\/status(?:es)?\/(\d+)/
 

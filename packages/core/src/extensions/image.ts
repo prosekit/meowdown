@@ -26,6 +26,7 @@ import {
   defaultResolveYouTubeVideo,
   matchPostEmbed,
   parsePostEmbedSnapshot,
+  postEmbedPreviewClass,
   type PostEmbedKind,
   type PostEmbedSnapshot,
   type XPostResolver,
@@ -296,6 +297,8 @@ class ImageMarkView implements MarkView {
     const kind = matchPostEmbed(src)
     if (kind) {
       wrapper.dataset.testid = `${kind}-embed`
+      const kindClass = postEmbedPreviewClass(kind)
+      if (kindClass) wrapper.classList.add(kindClass)
       wrapper.appendChild(this.#buildPostEmbed(kind, src))
       return wrapper
     }

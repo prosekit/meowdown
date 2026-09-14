@@ -14,6 +14,7 @@ import {
   markdownToDoc,
   matchPostEmbed,
   parsePostEmbedSnapshot,
+  postEmbedPreviewClass,
   type CodeBlockAttrs,
   type CodeToken,
   type FileClickHandler,
@@ -310,7 +311,9 @@ function PostEmbed(props: {
   const saved = snapshot == null ? undefined : parsePostEmbedSnapshot(snapshot)
   return (
     <span
-      className="md-image-view-preview md-atom-view-preview"
+      className={['md-image-view-preview md-atom-view-preview', postEmbedPreviewClass(kind)]
+        .filter(Boolean)
+        .join(' ')}
       contentEditable={false}
       data-testid={`${kind}-embed`}
     >
