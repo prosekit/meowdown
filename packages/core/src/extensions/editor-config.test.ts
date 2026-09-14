@@ -1,10 +1,10 @@
-import { updateEditorConfig } from '../testing/editor-config.ts'
-import { createEditor, definePlugin, type Editor } from '@prosekit/core'
+import { createEditor, definePlugin } from '@prosekit/core'
 import { Plugin } from '@prosekit/pm/state'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
+import { updateEditorConfig } from '../testing/editor-config.ts'
 import { setupFixture } from '../testing/index.ts'
 
 import { getEditorConfig, replaceEditorConfig, type EditorConfig } from './editor-config.ts'
@@ -16,7 +16,11 @@ import { getMarkMode } from './mark-mode.ts'
 const pmRoot = page.locate('.ProseMirror')
 const claimFiles = () => true
 
-function replaceConfig(editor: Editor, next: EditorConfig, dispatch = false): void {
+function replaceConfig(
+  editor: Parameters<typeof replaceEditorConfig>[0],
+  next: EditorConfig,
+  dispatch = false,
+): void {
   replaceEditorConfig(
     editor,
     (config) => {
@@ -281,7 +285,7 @@ describe('editor configuration', () => {
     await expect.element(sizes.first()).toHaveTextContent('1 KB')
     expect(resolveFileInfo).not.toHaveBeenCalled()
     editor.view.focus()
-    await userEvent.keyboard('{End} [next.pdf](assets/next.pdf) ')
+    await userEvent.keyboard('{End} [[next.pdf](assets/next.pdf) ')
     await expect.element(sizes.last()).toHaveTextContent('2 KB')
     await expect.element(sizes.first()).toHaveTextContent('1 KB')
     expect(resolveFileInfo).toHaveBeenCalledWith('assets/next.pdf')

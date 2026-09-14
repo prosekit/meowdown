@@ -20,8 +20,8 @@ import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineCodeBlock } from './code-block.ts'
 import { defineEditorCommands } from './commands.ts'
 import { defineCrossEditorDrag } from './cross-editor-drag.ts'
-import { defineEditorConfig, getEditorConfig, type EditorConfig } from './editor-config.ts'
 import { defineEditorConfigEvents } from './editor-config-events.ts'
+import { defineEditorConfig, getEditorConfig, type EditorConfig } from './editor-config.ts'
 import { defineEmbedPaste } from './embed-paste.ts'
 import { defineEscapeCollapse } from './escape-collapse.ts'
 import { defineExitBoundaryHandler } from './exit-boundary.ts'
@@ -82,6 +82,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     // plugins
     defineEditorConfig(options),
     defineEditorConfigEvents(),
+    defineModClickPrevention(),
     defineFileClickHandler((state) => getEditorConfig(state).onFileClick),
     defineImageClickHandler((state) => getEditorConfig(state).onImageClick),
     defineWikilinkClickHandler((state) => getEditorConfig(state).onWikilinkClick),
@@ -136,7 +137,6 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineHistory(),
     defineGapCursor(),
     defineVirtualSelection(),
-    defineModClickPrevention(),
     defineEditorCommands(),
     definePendingReplacement(),
     defineFind(),

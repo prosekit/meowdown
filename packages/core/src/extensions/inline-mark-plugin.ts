@@ -22,8 +22,8 @@ import type { PositionRange } from '../utils/range.ts'
 
 import { BatchSetMarkStep } from './batch-set-mark-step.ts'
 import { getEditorConfig } from './editor-config.ts'
-import { equalInlineConfig } from './inline-text-to-mark-chunks.ts'
 import {
+  equalInlineConfig,
   inlineTextToMarkChunksWithContext,
   type InlineMarkOptions,
 } from './inline-text-to-mark-chunks.ts'

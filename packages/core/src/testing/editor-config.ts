@@ -1,8 +1,10 @@
-import type { Editor } from '@prosekit/core'
-
 import { replaceEditorConfig, type EditorConfig } from '../extensions/editor-config.ts'
 
-export function updateEditorConfig(editor: Editor, patch: EditorConfig, dispatch = false): void {
+export function updateEditorConfig(
+  editor: Parameters<typeof replaceEditorConfig>[0],
+  patch: EditorConfig,
+  dispatch = false,
+): void {
   replaceEditorConfig(
     editor,
     (config) => {

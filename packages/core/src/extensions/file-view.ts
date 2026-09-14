@@ -1,10 +1,10 @@
 import { defineMarkView, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
+import type { EditorState } from '@prosekit/pm/state'
 import type { MarkView, ViewMutationRecord } from '@prosekit/pm/view'
 
 import { formatFileSize } from '../utils/format-file-size.ts'
 
-import type { EditorState } from '@prosekit/pm/state'
 import type { MdFileAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
 

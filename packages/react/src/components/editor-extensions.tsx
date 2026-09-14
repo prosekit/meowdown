@@ -44,7 +44,10 @@ export function EditorExtensions({ config, searchQuery }: EditorExtensionsProps)
             ...Object.keys(current),
             ...Object.keys(config),
           ] as (keyof EditorConfig)[])
-          return [...keys].every((key) => Object.is(current[key], config[key])) ? current : config
+          for (const key of keys) {
+            if (!Object.is(current[key], config[key])) return config
+          }
+          return current
         },
         dispatch,
       )
