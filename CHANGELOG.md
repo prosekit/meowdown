@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.71.1](https://github.com/prosekit/meowdown/compare/v0.71.0...v0.71.1) (2026-09-14)
+
+
+### Bug Fixes
+
+* keep post-embed card clicks out of `onImageClick` ([#567](https://github.com/prosekit/meowdown/issues/567)) ([333d4d1](https://github.com/prosekit/meowdown/commit/333d4d195d7f39187ab2011834c931aad926e4f0))
+
 ## [0.71.0](https://github.com/prosekit/meowdown/compare/v0.70.1...v0.71.0) (2026-09-14)
 
 
