@@ -20,11 +20,12 @@ export interface MarkClickConfig<Payload> {
    * Fired when a click lands on the mark.
    */
   onClick: (payload: Payload, event: MouseEvent, state: EditorState) => void
-  enabled?: (state: EditorState) => boolean
   /**
    * Stops native handling (e.g. `<a>` navigation) before firing.
    */
   preventDefault: boolean
+
+  enabled?: (state: EditorState) => boolean
 }
 
 /**
