@@ -130,7 +130,7 @@ export function replaceEditorConfig(
     else editor.updateState(editor.state.apply(transaction))
   }
 
-  SO this file doesn't have other businness logic like "MARK_MODE_META", for "mark-mode.ts", just
+  SO this file doesn't have other businness logic like "MARK_MODE_META", for "mark-mode.ts", just write defineMarkMode(getMarkMode: (state): MarkMode)
 
   */
   config: EditorConfig,
