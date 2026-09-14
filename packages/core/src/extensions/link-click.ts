@@ -37,6 +37,7 @@ export type LinkCopyHandler = (payload: LinkCopyPayload) => void
  */
 export function defineLinkClickHandler(onClick?: LinkClickHandler): PlainExtension {
   return defineMarkClickHandler<string>({
+    // FIXME: do not use this pattern. defineLinkClickHandler not get a lambda function as arg, this lambda function returns onClick
     key: onClick ? linkClickKey : new PluginKey('config-onLinkClick'),
     enabled: (state) => !!(onClick ?? getEditorConfig(state).onLinkClick),
     selector: '.md-link',
