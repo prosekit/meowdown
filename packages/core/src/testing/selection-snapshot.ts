@@ -8,7 +8,7 @@ import {
 } from 'unicode-by-name'
 
 import { getCaretTail } from '../extensions/hidden-run.ts'
-import { getMarkMode } from '../extensions/mark-mode.ts'
+import { getMarkMode } from '../extensions/mark-mode-config.ts'
 
 const TEXT_CARET = BOX_DRAWINGS_HEAVY_VERTICAL
 const TEXT_CARET_TAIL_LEFT = RIGHT_SQUARE_BRACKET_LOWER_CORNER

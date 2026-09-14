@@ -3,12 +3,8 @@ import { userEvent } from 'vitest/browser'
 
 import { setupFixture } from '../testing/index.ts'
 
-import { defineSubstitution } from './substitution.ts'
-
 function setup() {
-  const fixture = setupFixture()
-  fixture.editor.use(defineSubstitution())
-  return fixture
+  return setupFixture({ extensionOptions: { substitution: true } })
 }
 
 const REPLACEMENTS = [

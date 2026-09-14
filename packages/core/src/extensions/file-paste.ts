@@ -5,6 +5,8 @@ import type { EditorView } from '@prosekit/pm/view'
 export type FilePasteHandler = (file: File) => string | undefined | Promise<string | undefined>
 export type FileSaveErrorHandler = (error: unknown, file: File) => void
 
+const filePasteKey = new PluginKey('file-paste')
+
 const IMAGE_FILE_EXTENSIONS = new Set(['avif', 'bmp', 'gif', 'jpeg', 'jpg', 'png', 'svg', 'webp'])
 
 /**
@@ -111,7 +113,7 @@ function createFilePastePlugin(
   getOptions?: (state: EditorState) => FilePasteOptions | undefined,
 ): Plugin {
   return new Plugin({
-    key: new PluginKey('file-paste'),
+    key: filePasteKey,
     props: {
       handlePaste: (view, event) => {
         const currentOptions = getOptions?.(view.state) ?? {}

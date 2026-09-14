@@ -4,13 +4,12 @@ import { describe, expect, it, vi } from 'vitest'
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
-import { buildFileMarkdown, defineFilePaste, type FilePasteOptions } from './file-paste.ts'
+import { buildFileMarkdown, type FilePasteOptions } from './file-paste.ts'
 
 // An editor with the file paste extension configured with the given handlers.
 function setup(options: FilePasteOptions, text = ''): Fixture {
-  const fixture = setupFixture()
-  const { editor, n } = fixture
-  editor.use(defineFilePaste(() => options))
+  const fixture = setupFixture({ extensionOptions: options })
+  const { n } = fixture
   fixture.set(n.doc(n.paragraph(text)))
   return fixture
 }

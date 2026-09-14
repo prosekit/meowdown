@@ -11,7 +11,7 @@ import { getEditorConfig, replaceEditorConfig, type EditorConfig } from './edito
 import { defineEditorExtension } from './extension.ts'
 import { defineFileView, type FileInfo } from './file-view.ts'
 import { defineImage } from './image.ts'
-import { getMarkMode } from './mark-mode.ts'
+import { getMarkMode } from './mark-mode-config.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const claimFiles = () => true
