@@ -9,6 +9,7 @@ import { setupFixture } from '../testing/index.ts'
 import { getEditorConfig, replaceEditorConfig, type EditorConfig } from './editor-config.ts'
 import { defineEditorExtension } from './extension.ts'
 import { defineFileView, type FileInfo } from './file-view.ts'
+import { defineImage } from './image.ts'
 import { getMarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
@@ -192,6 +193,56 @@ describe('editor configuration', () => {
     expect(editor.state).toBe(state)
     expect(getEditorConfig(editor.state)).toBe(config)
     expect(getMarkMode(editor.state)).toBe('focus')
+  })
+
+  it('refreshes an existing image only when its resolver changes', async () => {
+    const firstUrl =
+      'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/>'
+    const nextUrl =
+      'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"/>'
+    const resolveImageUrl = () => firstUrl
+    using fixture = setupFixture({ extensionOptions: { resolveImageUrl } })
+    const { editor, n } = fixture
+    editor.use(defineImage())
+    fixture.set(n.doc(n.paragraph('![cat](photo)')))
+    const image = pmRoot.getByAltText('cat')
+    await expect.element(image).toHaveAttribute('src', firstUrl)
+    const element = image.element()
+    replaceEditorConfig(editor, { resolveImageUrl, placeholder: 'Write here' })
+    expect(image.element()).toBe(element)
+    replaceEditorConfig(editor, { resolveImageUrl: () => nextUrl })
+    await expect.element(image).toHaveAttribute('src', nextUrl)
+    expect(docToMarkdown(editor.state.doc)).toBe('![cat](photo)\n')
+  })
+
+  it('reparses existing wikilinks and wiki embeds', async () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    editor.use(defineFileView())
+    fixture.set(n.doc(n.paragraph('[[Note]] and ![[report.pdf]]')))
+    const markdown = docToMarkdown(editor.state.doc)
+    replaceEditorConfig(editor, {
+      resolveWikilink: () => ({ target: 'note-id', display: 'Renamed note' }),
+      resolveWikiEmbed: () => ({ kind: 'file', href: 'assets/report.pdf', name: 'Report' }),
+    })
+    await expect.element(pmRoot.getByTestId('wikilink')).toHaveTextContent('Renamed note')
+    await expect.element(pmRoot.getByTestId('file-pill')).toHaveTextContent('Report')
+    expect(docToMarkdown(editor.state.doc)).toBe(markdown)
+  })
+
+  it('gates optional typing behavior without a configuration transaction', async () => {
+    using fixture = setupFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('<a>')))
+    editor.view.focus()
+    const state = editor.state
+    replaceEditorConfig(editor, { substitution: true })
+    expect(editor.state).toBe(state)
+    await userEvent.keyboard('(c) ')
+    expect(editor.state.doc.textContent).toBe('© ')
+    replaceEditorConfig(editor, {})
+    await userEvent.keyboard('(c) ')
+    expect(editor.state.doc.textContent).toBe('© (c) ')
   })
 
   it('ignores stale file metadata after replacing its resolver', async () => {
