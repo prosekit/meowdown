@@ -172,6 +172,9 @@ describe('host data and snapshot persistence', () => {
     expect(docToMarkdown(editor.state.doc).trim()).toBe(TWEET)
   })
 
+  // FIXME: stale comment, X cards no longer write anything back. The test below only checks that
+  // undoing an embed paste restores the pasted text, which embed-paste.test.ts already covers;
+  // delete the test (or, if kept, replace this comment).
   // The write-back replaces the whole image range, so the undo of the paste
   // that inserted the image maps over it and removes the snapshot too. An
   // insertion at the range end would leave the comment behind as plain text.

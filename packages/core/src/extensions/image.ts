@@ -319,6 +319,7 @@ class ImageMarkView implements MarkView {
     if (kind === 'x-post') {
       registerXPost()
       const element = document.createElement('post-embed-x-post')
+      // FIXME: `null` is the prop default; drop the line.
       element.data = null
       element.mediaUrlProtocols = this.#xPostHost?.mediaUrlProtocols ?? null
       element.resolver = this.#xPostHost?.resolve ?? defaultResolveXPost

@@ -90,6 +90,7 @@ export const defaultResolveXPost: XPostResolver = cached(async (url) => {
   const response = await fetch(X_POST_API + id)
   if (!response.ok) return
   const json = (await response.json()) as { data?: unknown }
+  // FIXME: leftover from removing the id check; `return fromSyndication(json.data)`.
   const post = fromSyndication(json.data)
   return post
 })
