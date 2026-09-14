@@ -577,7 +577,7 @@ describe('X post embed props', () => {
       <MeowdownEditor
         mode="hide"
         initialMarkdown="![](https://x.com/jack/status/20)"
-        xPostHost={{ resolve: () => createXPost() }}
+        resolveXPost={() => createXPost()}
       />,
     )
     const card = pmRoot.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')

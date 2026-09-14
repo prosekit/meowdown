@@ -31,7 +31,6 @@ export type {
   LinkPreview,
   LinkPreviewResolver,
   XPostResolver,
-  XPostHost,
   YouTubeVideoResolver,
 } from '@meowdown/core'
 export { useEditor, useExtension, useKeymap, type ReactNodeViewComponent } from '@prosekit/react'

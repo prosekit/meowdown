@@ -135,7 +135,7 @@ describe('ordering against embed paste', () => {
   function setupEmbedThenLinkPaste(): Fixture {
     const imageOptions: ImageOptions = {
       resolveImageUrl: (src) => src,
-      xPostHost: { resolve: () => createXPost() },
+      resolveXPost: () => createXPost(),
       resolveYouTubeVideo: () => createYouTubeVideo(),
     }
     // Embed paste registered first: without `Priority.high` on link paste,

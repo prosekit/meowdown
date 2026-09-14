@@ -126,17 +126,3 @@ export function parsePostEmbedSnapshot(value: unknown): PostEmbedSnapshot | unde
   const result = v.safeParse(PostEmbedSnapshotSchema, value)
   return result.success ? result.output : undefined
 }
-
-/**
- * Host integration for X cards. Keep the object stable between renders.
- */
-export interface XPostHost {
-  /**
-   * Read a post for its permalink. An absent result shows the unavailable card.
-   */
-  resolve: XPostResolver
-  /**
-   * Additional trusted protocols for media URLs, such as `reflect-asset:`.
-   */
-  mediaUrlProtocols?: readonly string[]
-}

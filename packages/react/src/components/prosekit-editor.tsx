@@ -26,7 +26,7 @@ import {
   type WikiEmbedResolver,
   type WikilinkClickHandler,
   type WikilinkResolver,
-  type XPostHost,
+  type XPostResolver,
   type YouTubeVideoResolver,
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
@@ -230,9 +230,13 @@ export interface ProseKitEditorProps {
    */
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
   /**
-   * Resolves the data behind an X post URL. See `EditorProps.xPostHost`.
+   * Resolves the data behind an X post URL. See `EditorProps.resolveXPost`.
    */
-  xPostHost?: XPostHost
+  resolveXPost?: XPostResolver
+  /**
+   * Additional trusted protocols for X media URLs, such as `reflect-asset:`.
+   */
+  mediaUrlProtocols?: string[]
   /**
    * Resolves the data behind a YouTube video URL. See `EditorProps.resolveYouTubeVideo`.
    */
@@ -358,7 +362,8 @@ export function ProseKitEditor({
   resolveWikiEmbed,
   resolveWikilink,
   resolveFileInfo,
-  xPostHost,
+  resolveXPost,
+  mediaUrlProtocols,
   resolveYouTubeVideo,
   onFileClick,
   onFilePaste,
@@ -409,7 +414,8 @@ export function ProseKitEditor({
       onExitBoundary,
       resolveImageUrl,
       resolveFileInfo,
-      xPostHost,
+      resolveXPost,
+      mediaUrlProtocols,
       resolveYouTubeVideo,
       onFileClick,
       onFilePaste,
@@ -436,7 +442,8 @@ export function ProseKitEditor({
       onExitBoundary,
       resolveImageUrl,
       resolveFileInfo,
-      xPostHost,
+      resolveXPost,
+      mediaUrlProtocols,
       resolveYouTubeVideo,
       onFileClick,
       onFilePaste,

@@ -30,8 +30,23 @@ function setup(markdown: string, options: ImageOptions): Fixture {
 }
 
 describe('X post embed', () => {
+  it('passes separate resolver and media protocol options to X cards', async () => {
+    const post = createXPost()
+    post.media = [
+      { type: 'photo', url: 'reflect-asset://saved/photo.png', width: 100, height: 100 },
+    ]
+    using fixture = setup(TWEET, {
+      resolveXPost: () => post,
+      mediaUrlProtocols: ['reflect-asset:'],
+    })
+    void fixture
+    await expect
+      .element(xPostCard.locate('[data-media] img'))
+      .toHaveAttribute('src', 'reflect-asset://saved/photo.png')
+  })
+
   it('renders the resolved post as a card with selectable text', async () => {
-    using fixture = setup(TWEET, { xPostHost: { resolve: () => createXPost() } })
+    using fixture = setup(TWEET, { resolveXPost: () => createXPost() })
     void fixture
     const text = xPostCard.getByText('just setting up my twttr')
     await expect.element(text).toBeInTheDocument()
@@ -44,7 +59,7 @@ describe('X post embed', () => {
     const pending = new Promise<XPost>((resolve) => {
       settle = resolve
     })
-    using fixture = setup(TWEET, { xPostHost: { resolve: () => pending } })
+    using fixture = setup(TWEET, { resolveXPost: () => pending })
     void fixture
     await expect.element(xPostCard.locate('[data-fallback][data-pending]')).toBeInTheDocument()
 
@@ -53,7 +68,7 @@ describe('X post embed', () => {
   })
 
   it('shows the unavailable card without a snapshot', async () => {
-    using fixture = setup(TWEET, { xPostHost: { resolve: () => undefined } })
+    using fixture = setup(TWEET, { resolveXPost: () => undefined })
     void fixture
     await expect.element(xPostCard.locate('[data-fallback]')).toBeInTheDocument()
     expect(xPostCard.locate('[data-pending]').query()).toBeNull()
@@ -120,7 +135,7 @@ describe('host data and snapshot persistence', () => {
     'renders host data without rewriting source Markdown: %s',
     async (source) => {
       const resolve = vi.fn(() => createXPost('Current host data'))
-      using fixture = setup(source, { xPostHost: { resolve } })
+      using fixture = setup(source, { resolveXPost: resolve })
       const before = docToMarkdown(fixture.editor.state.doc).trim()
       await expect.element(xPostCard.getByText('Current host data')).toBeInTheDocument()
       expect(resolve).toHaveBeenCalledOnce()
@@ -142,7 +157,7 @@ describe('host data and snapshot persistence', () => {
   })
 
   it('writes nothing when the resolver has no snapshot', async () => {
-    using fixture = setup(TWEET, { xPostHost: { resolve: () => undefined } })
+    using fixture = setup(TWEET, { resolveXPost: () => undefined })
     const { editor } = fixture
     await expect.element(xPostCard.locate('[data-fallback]')).toBeInTheDocument()
     expect(docToMarkdown(editor.state.doc).trim()).toBe(TWEET)

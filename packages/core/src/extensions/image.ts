@@ -29,7 +29,7 @@ import {
   parsePostEmbedSnapshot,
   type PostEmbedKind,
   type PostEmbedSnapshot,
-  type XPostHost,
+  type XPostResolver,
   type YouTubeVideoResolver,
 } from './post-embed.ts'
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
@@ -46,10 +46,14 @@ export interface ImageOptions {
    */
   resolveImageUrl?: ImageUrlResolver
   /**
-   * Host data lookup and trusted media protocols for X cards.
+   * Resolve the data behind an X post URL.
    * When omitted, public posts use `defaultResolveXPost`.
    */
-  xPostHost?: XPostHost
+  resolveXPost?: XPostResolver
+  /**
+   * Additional trusted protocols for X media URLs, such as `reflect-asset:`.
+   */
+  mediaUrlProtocols?: string[]
   /**
    * Resolve the data behind a YouTube video URL, rendered as a
    * `post-embed-youtube-video` card. Defaults to `defaultResolveYouTubeVideo`,
@@ -216,7 +220,8 @@ class ImageMarkView implements MarkView {
   readonly #contentDOM: HTMLElement
   readonly #view: EditorView
   #resolveImageUrl: ImageUrlResolver | undefined
-  #xPostHost: XPostHost | undefined
+  #resolveXPost: XPostResolver
+  #mediaUrlProtocols: string[] | undefined
   #resolveYouTubeVideo: YouTubeVideoResolver
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
@@ -227,7 +232,8 @@ class ImageMarkView implements MarkView {
     this.#attrs = mark.attrs as MdImageAttrs
     this.#view = view
     this.#resolveImageUrl = options.resolveImageUrl
-    this.#xPostHost = options.xPostHost
+    this.#resolveXPost = options.resolveXPost ?? defaultResolveXPost
+    this.#mediaUrlProtocols = options.mediaUrlProtocols
     this.#resolveYouTubeVideo = options.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
 
     this.#dom = document.createElement('span')
@@ -317,8 +323,8 @@ class ImageMarkView implements MarkView {
     if (kind === 'x-post') {
       registerXPost()
       const element = document.createElement('post-embed-x-post')
-      element.mediaUrlProtocols = this.#xPostHost?.mediaUrlProtocols ?? null
-      element.resolver = this.#xPostHost?.resolve ?? defaultResolveXPost
+      element.mediaUrlProtocols = this.#mediaUrlProtocols ?? null
+      element.resolver = this.#resolveXPost
       element.url = src
       return element
     }

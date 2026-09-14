@@ -253,9 +253,23 @@ describe('MarkdownView', () => {
     }
   })
 
+  it('accepts separate resolver and media protocol props', async () => {
+    const post = createXPost()
+    post.media = [
+      { type: 'photo', url: 'reflect-asset://saved/photo.png', width: 100, height: 100 },
+    ]
+    await renderView('![](https://x.com/jack/status/20)', {
+      resolveXPost: () => post,
+      mediaUrlProtocols: ['reflect-asset:'],
+    })
+    await expect
+      .element(view.getByTestId('x-post-embed').locate('[data-media] img'))
+      .toHaveAttribute('src', 'reflect-asset://saved/photo.png')
+  })
+
   it('renders an X post card from a synchronous snapshot', async () => {
     await renderView('![](https://x.com/jack/status/20)', {
-      xPostHost: { resolve: () => createXPost() },
+      resolveXPost: () => createXPost(),
     })
     const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
@@ -266,7 +280,7 @@ describe('MarkdownView', () => {
     const pending = new Promise<XPost>((resolve) => {
       settle = resolve
     })
-    await renderView('![](https://x.com/jack/status/20)', { xPostHost: { resolve: () => pending } })
+    await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => pending })
     const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card.locate('[data-fallback][data-pending]')).toBeInTheDocument()
 
@@ -279,7 +293,7 @@ describe('MarkdownView', () => {
     const resolveXPost = vi.fn(() => createXPost())
     const comment = `<!-- ${JSON.stringify({ snapshot: { kind: 'x-post', data: createXPost('saved') } })} -->`
     await renderView(`![](https://x.com/jack/status/20)${comment}`, {
-      xPostHost: { resolve: resolveXPost },
+      resolveXPost,
     })
     const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
@@ -290,7 +304,7 @@ describe('MarkdownView', () => {
   it('resolves when the saved snapshot does not validate', async () => {
     await renderView(
       '![](https://x.com/jack/status/20)<!-- {"snapshot":{"kind":"x-post","data":{"bogus":1}}} -->',
-      { xPostHost: { resolve: () => createXPost() } },
+      { resolveXPost: () => createXPost() },
     )
     const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
@@ -298,7 +312,7 @@ describe('MarkdownView', () => {
 
   it('renders the unavailable card without a snapshot', async () => {
     await renderView('![](https://x.com/jack/status/20)', {
-      xPostHost: { resolve: () => undefined },
+      resolveXPost: () => undefined,
     })
     await expect
       .element(view.getByTestId('x-post-embed').locate('[data-fallback]'))

@@ -122,7 +122,6 @@ export {
   type PostEmbedKind,
   type PostEmbedSnapshot,
   type XPostResolver,
-  type XPostHost,
   type YouTubeVideoResolver,
 } from './extensions/post-embed.ts'
 export type { ListMarker, MeowdownListAttrs } from './extensions/list.ts'

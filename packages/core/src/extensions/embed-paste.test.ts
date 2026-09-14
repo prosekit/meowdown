@@ -20,7 +20,7 @@ const EMBED = `![](${YT})`
 function setupEmbedPaste(): Fixture {
   const imageOptions: ImageOptions = {
     resolveImageUrl: (src) => src,
-    xPostHost: { resolve: () => createXPost() },
+    resolveXPost: () => createXPost(),
     resolveYouTubeVideo: () => createYouTubeVideo(),
   }
   return setupFixture({ extensionOptions: { embedPaste: true, ...imageOptions } })

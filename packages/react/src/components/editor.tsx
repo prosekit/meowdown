@@ -12,7 +12,7 @@ import type {
   LinkPreviewResolver,
   MarkMode,
   PlaceholderOptions,
-  XPostHost,
+  XPostResolver,
   YouTubeVideoResolver,
   SearchStatusHandler,
   StartPendingReplacementOptions,
@@ -219,13 +219,15 @@ export interface EditorProps {
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
 
   /**
-   * Host data lookup and trusted media protocols for X cards.
-   * Keep the object stable (for example, with `useMemo`). When omitted, public
+   * Resolve the data behind an X post URL.
+   * Keep the function stable (for example, with `useCallback`). When omitted, public
    * posts use `defaultResolveXPost` through react-tweet's hosted proxy.
-   *
-   * FIXME This used to be `resolveXPost?: XPostResolver` but it's now `xPostHost?: XPostHost`. I do not like `xPostHost?: XPostHost`. I would like to make it two separate properties: `resolveXPost?: XPostResolver` and `mediaUrlProtocols?: string[] | undefined`. This way, we can clearly. I do not like the type `XPostHost` and the variable name `xPostHost`. Ensure you remove completely the `XPostHost` type from all PRs (meowdown and reflect-open)
    */
-  xPostHost?: XPostHost
+  resolveXPost?: XPostResolver
+  /**
+   * Additional trusted protocols for X media URLs, such as `reflect-asset:`.
+   */
+  mediaUrlProtocols?: string[]
 
   /**
    * Resolves the data behind a YouTube video URL, directly or as a promise;
@@ -400,7 +402,8 @@ export function MeowdownEditor({
   resolveWikiEmbed,
   resolveWikilink,
   resolveFileInfo,
-  xPostHost,
+  resolveXPost,
+  mediaUrlProtocols,
   resolveYouTubeVideo,
   onFileClick,
   onFilePaste,
@@ -540,7 +543,8 @@ export function MeowdownEditor({
         resolveWikiEmbed={resolveWikiEmbed}
         resolveWikilink={resolveWikilink}
         resolveFileInfo={resolveFileInfo}
-        xPostHost={xPostHost}
+        resolveXPost={resolveXPost}
+        mediaUrlProtocols={mediaUrlProtocols}
         resolveYouTubeVideo={resolveYouTubeVideo}
         onFileClick={onFileClick}
         onFilePaste={onFilePaste}

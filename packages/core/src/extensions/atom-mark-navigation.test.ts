@@ -31,7 +31,7 @@ function setup(mode: MarkMode, paragraphs: string[]): Fixture {
   const imageOptions: ImageOptions = {
     resolveImageUrl: () => getSVGImageURL(24, 24),
     // Keep the card unavailable while tracing navigation selections.
-    xPostHost: { resolve: () => undefined },
+    resolveXPost: () => undefined,
     resolveYouTubeVideo: () => undefined,
   }
   const fixture = setupFixture({ extensionOptions: { markMode: mode, ...imageOptions } })
