@@ -45,11 +45,3 @@ allowBuilds:
 #   '@post-embed/schema': https://pkg.pr.new/@post-embed/schema@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
 #   '@post-embed/exporter': https://pkg.pr.new/@post-embed/exporter@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
 #   '@post-embed/elements': https://pkg.pr.new/@post-embed/elements@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
-
-blockExoticSubdeps: false
-
-overrides:
-  '@post-embed/types': https://pkg.pr.new/@post-embed/types@35306dc5032f290f90313274a678494878406b12
-  '@post-embed/schema': https://pkg.pr.new/@post-embed/schema@35306dc5032f290f90313274a678494878406b12
-  '@post-embed/exporter': https://pkg.pr.new/@post-embed/exporter@35306dc5032f290f90313274a678494878406b12
-  '@post-embed/elements': https://pkg.pr.new/@post-embed/elements@35306dc5032f290f90313274a678494878406b12
