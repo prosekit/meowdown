@@ -7,7 +7,7 @@ import { setupFixture, type Fixture } from '../testing/index.ts'
 import type { FileClickHandler } from './file-click.ts'
 import { defineFileView } from './file-view.ts'
 import type { ImageClickHandler } from './image-click.ts'
-import { defineImage } from './image.ts'
+import { defineImage, type ImageOptions } from './image.ts'
 import type { WikiEmbedResolution } from './wiki-embed.ts'
 import type { WikilinkClickHandler } from './wikilink-click.ts'
 
@@ -35,7 +35,8 @@ describe('wiki embed editor integration', () => {
   it('uses image rendering and image click hooks', async () => {
     const onImageClick = vi.fn<ImageClickHandler>()
     using fixture = setup('![[photo.png|Photo]]', { kind: 'image' })
-    fixture.editor.use(defineImage({ resolveImageUrl: () => 'https://example.com/photo.png' }))
+    const imageOptions: ImageOptions = { resolveImageUrl: () => 'https://example.com/photo.png' }
+    fixture.editor.use(defineImage(() => imageOptions))
     updateEditorConfig(fixture.editor, { onImageClick })
 
     const image = pmRoot.getByAltText('Photo')

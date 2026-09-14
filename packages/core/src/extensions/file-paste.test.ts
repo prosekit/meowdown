@@ -10,7 +10,7 @@ import { buildFileMarkdown, defineFilePaste, type FilePasteOptions } from './fil
 function setup(options: FilePasteOptions, text = ''): Fixture {
   const fixture = setupFixture()
   const { editor, n } = fixture
-  editor.use(defineFilePaste(options))
+  editor.use(defineFilePaste(() => options))
   fixture.set(n.doc(n.paragraph(text)))
   return fixture
 }

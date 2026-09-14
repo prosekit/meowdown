@@ -6,7 +6,7 @@ import { setupFixture, type Fixture } from '../testing/index.ts'
 import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
-import { defineImage } from './image.ts'
+import { defineImage, type ImageOptions } from './image.ts'
 import { detectLinkUrl } from './link-paste.ts'
 
 const pmRoot = page.locate('.ProseMirror')
@@ -134,13 +134,12 @@ describe('falls through to a plain paste', () => {
 describe('ordering against embed paste', () => {
   function useEmbedThenLinkPaste(fixture: Fixture): void {
     const { editor } = fixture
-    editor.use(
-      defineImage({
-        resolveImageUrl: (src) => src,
-        resolveXPost: () => createXPost(),
-        resolveYouTubeVideo: () => createYouTubeVideo(),
-      }),
-    )
+    const imageOptions: ImageOptions = {
+      resolveImageUrl: (src) => src,
+      resolveXPost: () => createXPost(),
+      resolveYouTubeVideo: () => createYouTubeVideo(),
+    }
+    editor.use(defineImage(() => imageOptions))
     // Embed paste registered first: without `Priority.high` on link paste,
     // its `handlePaste` would win and the selection would be discarded.
   }

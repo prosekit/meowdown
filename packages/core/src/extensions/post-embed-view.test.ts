@@ -27,7 +27,7 @@ const VIDEO = '![](https://www.youtube.com/watch?v=aqz-KE-bpKQ)'
 function setup(markdown: string, options: ImageOptions): Fixture {
   const fixture = setupFixture()
   const { editor, n } = fixture
-  editor.use(defineImage(options))
+  editor.use(defineImage(() => options))
   fixture.set(n.doc(n.paragraph(markdown)))
   return fixture
 }
@@ -177,7 +177,8 @@ describe('snapshot persistence', () => {
   it('undoing the paste that inserted the image removes the snapshot with it', async () => {
     using fixture = setupFixture()
     const { editor, n, view } = fixture
-    editor.use(defineImage({ resolveXPost: () => post }))
+    const imageOptions: ImageOptions = { resolveXPost: () => post }
+    editor.use(defineImage(() => imageOptions))
     fixture.set(n.doc(n.paragraph('<a>')))
     updateEditorConfig(editor, { embedPaste: true })
     const url = 'https://x.com/jack/status/20'

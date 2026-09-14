@@ -21,7 +21,6 @@ import type { EditorView } from '@prosekit/pm/view'
 import type { PositionRange } from '../utils/range.ts'
 
 import { BatchSetMarkStep } from './batch-set-mark-step.ts'
-import { getEditorConfig } from './editor-config.ts'
 import {
   equalInlineConfig,
   inlineTextToMarkChunksWithContext,
@@ -114,7 +113,9 @@ function computeAffectedRange(
   }
 }
 
-function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin {
+function createInlineMarkPlugin(
+  getOptions?: (state: EditorState) => InlineMarkOptions | undefined,
+): Plugin {
   /**
    * Cache of chunks per textblock node, keyed by the immutable
    * `ProseMirrorNode` instance. Stored chunks are baseOffset-relative
@@ -130,7 +131,7 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
   }
 
   let chunkCache = new WeakMap<EditorNode, CachedChunks>()
-  let currentOptions: InlineMarkOptions = options ?? {}
+  let currentOptions: InlineMarkOptions = {}
 
   function setsIntersect(left: ReadonlySet<string>, right: ReadonlySet<string>): boolean {
     for (const value of left) {
@@ -281,7 +282,7 @@ function createInlineMarkPlugin(options: InlineMarkOptions | undefined): Plugin 
       },
     },
     appendTransaction(transactions, oldState, newState) {
-      const nextOptions = options ?? getEditorConfig(newState)
+      const nextOptions = getOptions?.(newState) ?? {}
       const configChanged = !equalInlineConfig(currentOptions, nextOptions)
       if (configChanged) {
         currentOptions = nextOptions
@@ -393,6 +394,8 @@ function mergeReferenceKeys(
   return merged
 }
 
-export function defineInlineMarkPlugin(options?: InlineMarkOptions): PlainExtension {
-  return definePlugin(createInlineMarkPlugin(options))
+export function defineInlineMarkPlugin(
+  getOptions?: (state: EditorState) => InlineMarkOptions | undefined,
+): PlainExtension {
+  return definePlugin(createInlineMarkPlugin(getOptions))
 }
