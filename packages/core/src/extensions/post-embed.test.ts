@@ -82,11 +82,16 @@ describe('default resolvers', () => {
   it('fetches an X post once through the proxy, converts it, then answers synchronously', async () => {
     const fetchSpy = vi
       .spyOn(globalThis, 'fetch')
-      .mockResolvedValue(new Response(JSON.stringify({ data: createTweet('cached') })))
+      .mockResolvedValue(
+        new Response(JSON.stringify({ data: { ...createTweet('cached'), id_str: '1001' } })),
+      )
     const first = defaultResolveXPost('https://x.com/jack/status/1001')
     expect(first).toBeInstanceOf(Promise)
-    expect(await first).toEqual(createXPost('cached'))
-    expect(defaultResolveXPost('https://x.com/jack/status/1001')).toEqual(createXPost('cached'))
+    expect(await first).toEqual({ ...createXPost('cached'), id: '1001' })
+    expect(defaultResolveXPost('https://x.com/jack/status/1001')).toEqual({
+      ...createXPost('cached'),
+      id: '1001',
+    })
     expect(fetchSpy).toHaveBeenCalledExactlyOnceWith(
       'https://react-tweet.vercel.app/api/tweet/1001',
     )
