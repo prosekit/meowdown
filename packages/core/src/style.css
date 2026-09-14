@@ -942,8 +942,11 @@
       outline-offset: 2px;
     }
 
+    /* The card draws its own corners, shadow, or outline; the wrapper's
+     * rounded clip would cut them off whenever the two radii differ. */
     .md-image-view-preview[data-post-embed] {
       border-radius: var(--post-embed-radius, 1rem);
+      overflow: visible;
     }
 
     .md-image-resizable {
