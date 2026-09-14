@@ -9,8 +9,7 @@ import { setupFixture } from '../testing/index.ts'
 
 import { getEditorConfig, replaceEditorConfig, type EditorConfig } from './editor-config.ts'
 import { defineEditorExtension } from './extension.ts'
-import { defineFileView, type FileInfo } from './file-view.ts'
-import { defineImage } from './image.ts'
+import type { FileInfo } from './file-view.ts'
 import { getMarkMode } from './mark-mode-config.ts'
 
 const pmRoot = page.locate('.ProseMirror')
@@ -92,7 +91,6 @@ describe('editor configuration', () => {
     const config: EditorConfig = { resolveFileLink: claimFiles, onFileClick: first }
     using fixture = setupFixture({ extensionOptions: config })
     const { editor, n } = fixture
-    editor.use(defineFileView(getEditorConfig))
     fixture.set(
       n.doc(n.paragraph('[report.pdf](assets/report.pdf)'), n.paragraph('Other paragraph')),
     )
@@ -134,7 +132,6 @@ describe('editor configuration', () => {
     const onDocChange = vi.fn()
     using fixture = setupFixture({ extensionOptions: { onDocChange } })
     const { editor, n } = fixture
-    editor.use(defineFileView(getEditorConfig))
     fixture.set(n.doc(n.paragraph('see [report.pdf](assets/report.pdf)<a> here')))
     const markdown = docToMarkdown(editor.state.doc)
     const selection = editor.state.selection
@@ -222,7 +219,6 @@ describe('editor configuration', () => {
     const resolveImageUrl = () => firstUrl
     using fixture = setupFixture({ extensionOptions: { resolveImageUrl } })
     const { editor, n } = fixture
-    editor.use(defineImage(getEditorConfig))
     fixture.set(n.doc(n.paragraph('![cat](photo)')))
     const image = pmRoot.getByAltText('cat')
     await expect.element(image).toHaveAttribute('src', firstUrl)
@@ -237,7 +233,6 @@ describe('editor configuration', () => {
   it('reparses existing wikilinks and wiki embeds', async () => {
     using fixture = setupFixture()
     const { editor, n } = fixture
-    editor.use(defineFileView(getEditorConfig))
     fixture.set(n.doc(n.paragraph('[[Note]] and ![[report.pdf]]')))
     const markdown = docToMarkdown(editor.state.doc)
     replaceConfig(
@@ -274,7 +269,6 @@ describe('editor configuration', () => {
       extensionOptions: { resolveFileLink: claimFiles, resolveFileInfo: () => pending.promise },
     })
     const { editor, n } = fixture
-    editor.use(defineFileView(getEditorConfig))
     fixture.set(n.doc(n.paragraph('[report.pdf](assets/report.pdf)<a>')))
     const resolveFileInfo = vi.fn(() => ({ size: 2048 }))
     const state = editor.state

@@ -8,7 +8,7 @@ import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { detectEmbedUrl } from './embed-paste.ts'
-import { defineImage, type ImageOptions } from './image.ts'
+import type { ImageOptions } from './image.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const youtubeEmbed = pmRoot.getByTestId('youtube-video-embed')
@@ -17,14 +17,13 @@ const xPostEmbed = pmRoot.getByTestId('x-post-embed')
 const YT = 'https://youtu.be/aqz-KE-bpKQ'
 const EMBED = `![](${YT})`
 
-function useEmbedPaste(fixture: Fixture): void {
-  const { editor } = fixture
+function setupEmbedPaste(): Fixture {
   const imageOptions: ImageOptions = {
     resolveImageUrl: (src) => src,
     resolveXPost: () => createXPost(),
     resolveYouTubeVideo: () => createYouTubeVideo(),
   }
-  editor.use(defineImage(() => imageOptions))
+  return setupFixture({ extensionOptions: { embedPaste: true, ...imageOptions } })
 }
 
 describe('detectEmbedUrl', () => {
@@ -57,9 +56,8 @@ describe('detectEmbedUrl', () => {
 
 describe('paste a lone embed link', () => {
   it('embeds a pasted YouTube link', async () => {
-    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
+    using fixture = setupEmbedPaste()
     const { editor, n, view } = fixture
-    useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>')))
     pasteText(view, 'https://www.youtube.com/watch?v=aqz-KE-bpKQ')
     expect(docToMarkdown(editor.state.doc).trim()).toBe(
@@ -69,9 +67,8 @@ describe('paste a lone embed link', () => {
   })
 
   it('embeds a pasted tweet link', async () => {
-    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
+    using fixture = setupEmbedPaste()
     const { editor, n, view } = fixture
-    useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>')))
     pasteText(view, 'https://twitter.com/jack/status/20')
     expect(editor.state.doc.textContent).toBe('![](https://twitter.com/jack/status/20)')
@@ -79,9 +76,8 @@ describe('paste a lone embed link', () => {
   })
 
   it('replaces the selected text when pasting onto a selection', async () => {
-    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
+    using fixture = setupEmbedPaste()
     const { editor, n, view } = fixture
-    useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>drop me<b>')))
     pasteText(view, YT)
     expect(editor.state.doc.textContent).toBe(EMBED)
@@ -89,9 +85,8 @@ describe('paste a lone embed link', () => {
   })
 
   it('leaves a non-embeddable URL as a normal paste', async () => {
-    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
+    using fixture = setupEmbedPaste()
     const { editor, n, view } = fixture
-    useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>')))
     pasteText(view, 'https://example.com')
     expect(editor.state.doc.textContent).toBe('https://example.com')
@@ -99,9 +94,8 @@ describe('paste a lone embed link', () => {
   })
 
   it('does not embed when the clipboard has text around the URL', async () => {
-    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
+    using fixture = setupEmbedPaste()
     const { editor, n, view } = fixture
-    useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>')))
     pasteText(view, `see ${YT}`)
     expect(editor.state.doc.textContent).toBe(`see ${YT}`)
@@ -109,9 +103,8 @@ describe('paste a lone embed link', () => {
   })
 
   it('does not embed inside a code block', async () => {
-    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
+    using fixture = setupEmbedPaste()
     const { editor, n, view } = fixture
-    useEmbedPaste(fixture)
     fixture.set(n.doc(n.codeBlock({ language: 'js' }, 'const x = 1<a>')))
     pasteText(view, YT)
     expect(editor.state.doc.textContent).toBe(`const x = 1${YT}`)
@@ -119,9 +112,8 @@ describe('paste a lone embed link', () => {
   })
 
   it('embeds over a selection that spans two blocks', async () => {
-    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
+    using fixture = setupEmbedPaste()
     const { editor, n, view } = fixture
-    useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('one <a>two'), n.paragraph('three<b> four')))
     pasteText(view, YT)
     expect(editor.state.doc.textContent).toBe(`one ${EMBED} four`)
@@ -131,9 +123,8 @@ describe('paste a lone embed link', () => {
 
 describe('undo restores the raw link', () => {
   it('one undo turns the embed back into the link, a second removes it', async () => {
-    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
+    using fixture = setupEmbedPaste()
     const { editor, n, view } = fixture
-    useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>')))
 
     pasteText(view, YT)
@@ -161,9 +152,8 @@ describe('undo restores the raw link', () => {
   })
 
   it('takes exactly two undo steps (proves the two-transaction split)', () => {
-    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
+    using fixture = setupEmbedPaste()
     const { editor, n, view } = fixture
-    useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>')))
     pasteText(view, YT)
     editor.commands.undo()
@@ -172,9 +162,8 @@ describe('undo restores the raw link', () => {
   })
 
   it('keeps the surrounding text, removing only the pasted link', () => {
-    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
+    using fixture = setupEmbedPaste()
     const { editor, n, view } = fixture
-    useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('before <a>')))
     pasteText(view, YT)
     expect(editor.state.doc.textContent).toBe(`before ${EMBED}`)
@@ -185,9 +174,8 @@ describe('undo restores the raw link', () => {
   })
 
   it('reverts via the real Ctrl-z / Cmd-z shortcut', async () => {
-    using fixture = setupFixture({ extensionOptions: { embedPaste: true } })
+    using fixture = setupEmbedPaste()
     const { editor, n, view } = fixture
-    useEmbedPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>')))
     pasteText(view, YT)
     await expect.element(youtubeEmbed).toBeInTheDocument()

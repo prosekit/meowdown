@@ -27,6 +27,7 @@ import { defineEscapeCollapse } from './escape-collapse.ts'
 import { defineExitBoundaryHandler } from './exit-boundary.ts'
 import { defineFileClickHandler } from './file-click.ts'
 import { defineFilePaste } from './file-paste.ts'
+import { defineFileView } from './file-view.ts'
 import { defineFind } from './find.ts'
 import { defineFollowLinkHandler } from './follow-link.ts'
 import { defineDocFrontmatterAttr } from './frontmatter.ts'
@@ -35,6 +36,7 @@ import { defineHiddenRunCaret } from './hidden-run-caret.ts'
 import { defineMeowdownHorizontalRule } from './horizontal-rule.ts'
 import { defineHTMLComment } from './html-comment.ts'
 import { defineImageClickHandler } from './image-click.ts'
+import { defineImage } from './image.ts'
 import { defineInlineMarkPlugin } from './inline-mark-plugin.ts'
 import { defineInlineMarks } from './inline-marks.ts'
 import { defineInlineToggle } from './inline-toggle-commands.ts'
@@ -83,6 +85,8 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     // plugins
     defineEditorConfig(options),
     defineEditorConfigEvents(getEditorConfig),
+    defineImage(getEditorConfig),
+    defineFileView(getEditorConfig),
     defineModClickPrevention(),
     defineFileClickHandler((state) => getEditorConfig(state).onFileClick),
     defineImageClickHandler((state) => getEditorConfig(state).onImageClick),

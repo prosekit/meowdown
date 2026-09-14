@@ -1,9 +1,6 @@
 import {
   defineEditorExtension,
-  defineFileView,
-  defineImage,
   docToMarkdown,
-  getEditorConfig,
   getSelectedText,
   getTextblockDisplayText,
   isNodeOfType,
@@ -430,12 +427,7 @@ export function ProseKitEditor({
   }
 
   const [editor] = useState((): TypedEditor => {
-    const baseExtension: EditorExtension = union(
-      // FIXME: just put defineImage and defineFileView as part of the defineEditorExtension
-      defineEditorExtension(config),
-      defineImage(getEditorConfig),
-      defineFileView(getEditorConfig),
-    )
+    const baseExtension = defineEditorExtension(config)
     const extension =
       CodeBlockView === false
         ? baseExtension

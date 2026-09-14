@@ -5,9 +5,8 @@ import { updateEditorConfig } from '../testing/editor-config.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
 import type { FileClickHandler } from './file-click.ts'
-import { defineFileView } from './file-view.ts'
 import type { ImageClickHandler } from './image-click.ts'
-import { defineImage, type ImageOptions } from './image.ts'
+import type { ImageOptions } from './image.ts'
 import type { WikiEmbedResolution } from './wiki-embed.ts'
 import type { WikilinkClickHandler } from './wikilink-click.ts'
 
@@ -36,7 +35,7 @@ describe('wiki embed editor integration', () => {
     const onImageClick = vi.fn<ImageClickHandler>()
     using fixture = setup('![[photo.png|Photo]]', { kind: 'image' })
     const imageOptions: ImageOptions = { resolveImageUrl: () => 'https://example.com/photo.png' }
-    fixture.editor.use(defineImage(() => imageOptions))
+    updateEditorConfig(fixture.editor, imageOptions, true)
     updateEditorConfig(fixture.editor, { onImageClick })
 
     const image = pmRoot.getByAltText('Photo')
@@ -50,7 +49,6 @@ describe('wiki embed editor integration', () => {
   it('uses file pills and file click hooks', async () => {
     const onFileClick = vi.fn<FileClickHandler>()
     using fixture = setup('![[docs/report.pdf|Quarterly]]', { kind: 'file' })
-    fixture.editor.use(defineFileView())
     updateEditorConfig(fixture.editor, { onFileClick })
 
     const pill = pmRoot.getByTestId('file-pill')

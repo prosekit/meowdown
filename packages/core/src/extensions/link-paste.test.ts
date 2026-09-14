@@ -6,7 +6,7 @@ import { setupFixture, type Fixture } from '../testing/index.ts'
 import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
-import { defineImage, type ImageOptions } from './image.ts'
+import type { ImageOptions } from './image.ts'
 import { detectLinkUrl } from './link-paste.ts'
 
 const pmRoot = page.locate('.ProseMirror')
@@ -132,22 +132,22 @@ describe('falls through to a plain paste', () => {
 })
 
 describe('ordering against embed paste', () => {
-  function useEmbedThenLinkPaste(fixture: Fixture): void {
-    const { editor } = fixture
+  function setupEmbedThenLinkPaste(): Fixture {
     const imageOptions: ImageOptions = {
       resolveImageUrl: (src) => src,
       resolveXPost: () => createXPost(),
       resolveYouTubeVideo: () => createYouTubeVideo(),
     }
-    editor.use(defineImage(() => imageOptions))
     // Embed paste registered first: without `Priority.high` on link paste,
     // its `handlePaste` would win and the selection would be discarded.
+    return setupFixture({
+      extensionOptions: { linkPaste: true, embedPaste: true, ...imageOptions },
+    })
   }
 
   it('an embeddable URL pasted over a selection becomes a link, not an embed', async () => {
-    using fixture = setupFixture({ extensionOptions: { linkPaste: true, embedPaste: true } })
+    using fixture = setupEmbedThenLinkPaste()
     const { editor, n, view } = fixture
-    useEmbedThenLinkPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>talk<b>')))
     pasteText(view, YT)
     expect(editor.state.doc.textContent).toBe(`[talk](${YT})`)
@@ -155,9 +155,8 @@ describe('ordering against embed paste', () => {
   })
 
   it('an embeddable URL pasted at a caret still embeds', async () => {
-    using fixture = setupFixture({ extensionOptions: { linkPaste: true, embedPaste: true } })
+    using fixture = setupEmbedThenLinkPaste()
     const { editor, n, view } = fixture
-    useEmbedThenLinkPaste(fixture)
     fixture.set(n.doc(n.paragraph('<a>')))
     pasteText(view, YT)
     expect(editor.state.doc.textContent).toBe(`![](${YT})`)

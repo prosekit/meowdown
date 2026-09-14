@@ -4,7 +4,6 @@ import { page, userEvent } from 'vitest/browser'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 import { resetIsTouchInputForTest } from '../utils/input-modality.ts'
 
-import { defineFileView } from './file-view.ts'
 import type { MarkMode } from './mark-mode.ts'
 
 const caret = page.getByTestId('virtual-caret')
@@ -181,7 +180,6 @@ describe('virtual caret next to atom marks', () => {
       },
     })
     const { editor, n } = fixture
-    editor.use(defineFileView(() => ({})))
     fixture.set(n.doc(n.paragraph(text)))
     fixture.view.focus()
     return fixture
