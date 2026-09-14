@@ -9,25 +9,7 @@ import {
   defaultResolveYouTubeVideo,
   matchPostEmbed,
   parsePostEmbedSnapshot,
-  parseXPostId,
 } from './post-embed.ts'
-
-// FIXME: `parseXPostId` is now a re-export of `@post-embed/schema`, which tests it in
-// `schema/src/x/url.test.ts` with a superset of these cases; delete this describe block.
-describe('parseXPostId', () => {
-  it('reads the id from twitter.com, x.com, and mobile URLs', () => {
-    expect(parseXPostId('https://twitter.com/jack/status/20')).toBe('20')
-    expect(parseXPostId('https://x.com/jack/status/20')).toBe('20')
-    expect(parseXPostId('https://mobile.twitter.com/jack/status/20')).toBe('20')
-    expect(parseXPostId('https://x.com/i/status/20?s=1')).toBe('20')
-  })
-
-  it('declines profile, foreign, and malformed URLs', () => {
-    expect(parseXPostId('https://twitter.com/jack')).toBeUndefined()
-    expect(parseXPostId('https://example.com/jack/status/20')).toBeUndefined()
-    expect(parseXPostId('x.com/jack/status/20')).toBeUndefined()
-  })
-})
 
 describe('matchPostEmbed', () => {
   it('recognizes X posts', () => {
