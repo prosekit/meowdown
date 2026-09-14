@@ -1,15 +1,15 @@
 import {
   defineEditorExtension,
-  defineImage,
   defineFileView,
-  getEditorConfig,
-  type EditorConfig,
+  defineImage,
   docToMarkdown,
+  getEditorConfig,
   getSelectedText,
   getTextblockDisplayText,
   isNodeOfType,
   markdownToDoc,
   type AcceptPendingReplacementOptions,
+  type EditorConfig,
   type EditorExtension,
   type ExitBoundaryHandler,
   type FileClickHandler,
@@ -23,8 +23,6 @@ import {
   type LinkPreviewResolver,
   type MarkMode,
   type PlaceholderOptions,
-  type XPostResolver,
-  type YouTubeVideoResolver,
   type SearchStatusHandler,
   type StartPendingReplacementOptions,
   type TagClickHandler,
@@ -32,6 +30,8 @@ import {
   type WikiEmbedResolver,
   type WikilinkClickHandler,
   type WikilinkResolver,
+  type XPostResolver,
+  type YouTubeVideoResolver,
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
 import { createEditor, union, type SelectionJSON } from '@prosekit/core'
@@ -431,6 +431,7 @@ export function ProseKitEditor({
 
   const [editor] = useState((): TypedEditor => {
     const baseExtension: EditorExtension = union(
+      // FIXME: just put defineImage and defineFileView as part of the defineEditorExtension
       defineEditorExtension(config),
       defineImage(getEditorConfig),
       defineFileView(getEditorConfig),
