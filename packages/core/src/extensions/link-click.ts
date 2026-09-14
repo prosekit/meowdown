@@ -44,8 +44,8 @@ export function defineLinkClickHandler(
     preventDefault: true,
     findPayloadAt: (state, pos) => getLinkUnitAt(state, pos)?.href,
     onClick: (href, event, state) => {
-      // FIXME: create `onCliek` veriable first, then call onClick
-      return getOnClick?.(state)?.({
+      const onClick = getOnClick?.(state)
+      return onClick?.({
         href,
         event,
         mod: isModEvent(event),

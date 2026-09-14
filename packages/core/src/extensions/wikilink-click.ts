@@ -75,8 +75,8 @@ export function defineWikilinkClickHandler(
     findPayloadAt: (state, pos) => findWikilinkAt(state, pos)?.target,
     findPayloadForElement: (view, element) => findWikilinkForElement(view, element)?.target,
     onClick: (target, event, state) => {
-      // FIXME: create `onCliek` veriable first, then call onClick
-      return getOnClick?.(state)?.({
+      const onClick = getOnClick?.(state)
+      return onClick?.({
         target,
         event,
         mod: isModEvent(event),

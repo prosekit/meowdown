@@ -61,8 +61,8 @@ export function defineTagClickHandler(
     preventDefault: false,
     findPayloadAt: (state, pos) => findTagAt(state, pos)?.tag,
     onClick: (tag, event, state) => {
-      // FIXME: create `onCliek` veriable first, then call onClick
-      return getOnClick?.(state)?.({
+      const onClick = getOnClick?.(state)
+      return onClick?.({
         tag,
         event,
         mod: isModEvent(event),
