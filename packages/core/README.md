@@ -107,7 +107,7 @@ See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Fcore
 
 MIT
 
-## Dynamic configuration
+## Dynamic configuration FIXME: delete this section
 
 Pass behavior settings to `defineEditorExtension`, then replace them with the same
 configuration shape. Install `defineImage()` and `defineFileView()` when you need
