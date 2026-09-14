@@ -27,7 +27,7 @@
     "@base-ui/react": "^1.7.0",
     "@meowdown/core": "workspace:*",
     "@ocavue/utils": "^1.8.0",
-    "@post-embed/elements": "^0.4.1",
+    "@post-embed/elements": "https://pkg.pr.new/@post-embed/elements@50",
     "@post-embed/types": "^0.4.0",
     "@prosekit/core": "^0.13.2",
     "@prosekit/pm": "^0.1.19",
