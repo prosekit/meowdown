@@ -179,7 +179,7 @@ describe('virtual caret next to atom marks', () => {
         markMode: 'hide',
       },
     })
-    const { editor, n } = fixture
+    const { n } = fixture
     fixture.set(n.doc(n.paragraph(text)))
     fixture.view.focus()
     return fixture

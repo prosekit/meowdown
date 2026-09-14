@@ -7,7 +7,6 @@ import {
   markdownToDoc,
   type AcceptPendingReplacementOptions,
   type EditorConfig,
-  type EditorExtension,
   type ExitBoundaryHandler,
   type FileClickHandler,
   type FileLinkResolver,
