@@ -1,3 +1,4 @@
+import type { XMediaUrlPolicy } from '@post-embed/types'
 import { registerXPost, type Resolver } from '@post-embed/elements/x'
 import { registerYouTubeVideo } from '@post-embed/elements/youtube'
 import type { XPost, YouTubeVideo } from '@post-embed/types'
@@ -24,6 +25,7 @@ import type { MarkName } from './mark-names.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 import {
   defaultResolveXPost,
+  checkedXPostResolver,
   defaultResolveYouTubeVideo,
   matchPostEmbed,
   parsePostEmbedSnapshot,
@@ -51,6 +53,8 @@ export interface ImageOptions {
    * react-tweet's hosted proxy.
    */
   resolveXPost?: XPostResolver
+  xPostMediaUrlPolicy?: XMediaUrlPolicy
+  subscribeXPost?: (url: string, notify: () => void) => () => void
   /**
    * Resolve the data behind a YouTube video URL, rendered as a
    * `post-embed-youtube-video` card. Defaults to `defaultResolveYouTubeVideo`,
@@ -219,6 +223,9 @@ class ImageMarkView implements MarkView {
   #resolveImageUrl: ImageUrlResolver | undefined
   #resolveXPost: XPostResolver
   #resolveYouTubeVideo: YouTubeVideoResolver
+  #xPostMediaUrlPolicy: XMediaUrlPolicy | null
+  #subscribeXPost: ((url: string, notify: () => void) => () => void) | undefined
+  #unsubscribeXPost: (() => void) | undefined
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
@@ -228,7 +235,9 @@ class ImageMarkView implements MarkView {
     this.#attrs = mark.attrs as MdImageAttrs
     this.#view = view
     this.#resolveImageUrl = options.resolveImageUrl
-    this.#resolveXPost = options.resolveXPost ?? defaultResolveXPost
+    this.#resolveXPost = checkedXPostResolver(options.resolveXPost ?? defaultResolveXPost)
+    this.#xPostMediaUrlPolicy = options.xPostMediaUrlPolicy ?? null
+    this.#subscribeXPost = options.subscribeXPost
     this.#resolveYouTubeVideo = options.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
 
     this.#dom = document.createElement('span')
@@ -284,6 +293,7 @@ class ImageMarkView implements MarkView {
 
   destroy(): void {
     this.#destroyed = true
+    this.#unsubscribeXPost?.()
   }
 
   /**
@@ -309,22 +319,22 @@ class ImageMarkView implements MarkView {
     return wrapper
   }
 
-  /**
-   * A post-embed card renders a saved snapshot as is. Without one (or with
-   * one that does not validate or names another kind) it loads through the
-   * resolver, rendering its own pending and unavailable states, and the first
-   * answer is written back into the source so the next open renders in the
-   * first frame with no request.
-   */
+  /** Resolve X cards from their URL; YouTube cards may reuse a saved snapshot. */
   #buildPostEmbed(kind: PostEmbedKind, src: string): HTMLElement {
     const saved =
       this.#attrs.snapshot == null ? undefined : parsePostEmbedSnapshot(this.#attrs.snapshot)
     if (kind === 'x-post') {
       registerXPost()
       const element = document.createElement('post-embed-x-post')
-      element.data = saved?.kind === 'x-post' ? saved.data : null
-      element.resolver = this.#persisting(kind, this.#resolveXPost)
+      element.data = null
+      element.mediaUrlPolicy = this.#xPostMediaUrlPolicy
+      element.resolver = this.#resolveXPost
       element.url = src
+      let revision = 0
+      this.#unsubscribeXPost?.()
+      this.#unsubscribeXPost = this.#subscribeXPost?.(src, () => {
+        element.revision = ++revision
+      })
       return element
     }
     registerYouTubeVideo()

@@ -1,3 +1,4 @@
+import type { XMediaUrlPolicy } from '@post-embed/types'
 import {
   defineEditorExtension,
   docToMarkdown,
@@ -232,6 +233,8 @@ export interface ProseKitEditorProps {
   /**
    * Resolves the data behind an X post URL. See `EditorProps.resolveXPost`.
    */
+  xPostMediaUrlPolicy?: XMediaUrlPolicy
+  subscribeXPost?: (url: string, notify: () => void) => () => void
   resolveXPost?: XPostResolver
   /**
    * Resolves the data behind a YouTube video URL. See `EditorProps.resolveYouTubeVideo`.
@@ -359,6 +362,8 @@ export function ProseKitEditor({
   resolveWikilink,
   resolveFileInfo,
   resolveXPost,
+  xPostMediaUrlPolicy,
+  subscribeXPost,
   resolveYouTubeVideo,
   onFileClick,
   onFilePaste,
@@ -410,6 +415,8 @@ export function ProseKitEditor({
       resolveImageUrl,
       resolveFileInfo,
       resolveXPost,
+      xPostMediaUrlPolicy,
+      subscribeXPost,
       resolveYouTubeVideo,
       onFileClick,
       onFilePaste,
@@ -437,6 +444,8 @@ export function ProseKitEditor({
       resolveImageUrl,
       resolveFileInfo,
       resolveXPost,
+      xPostMediaUrlPolicy,
+      subscribeXPost,
       resolveYouTubeVideo,
       onFileClick,
       onFilePaste,

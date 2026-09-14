@@ -1,3 +1,4 @@
+import type { XMediaUrlPolicy } from '@post-embed/types'
 import type {
   AcceptPendingReplacementOptions,
   ExitBoundaryHandler,
@@ -224,6 +225,8 @@ export interface EditorProps {
    * which fetches through react-tweet's hosted proxy. Pass a stable function
    * (e.g. from `useCallback`).
    */
+  xPostMediaUrlPolicy?: XMediaUrlPolicy
+  subscribeXPost?: (url: string, notify: () => void) => () => void
   resolveXPost?: XPostResolver
 
   /**
@@ -400,6 +403,8 @@ export function MeowdownEditor({
   resolveWikilink,
   resolveFileInfo,
   resolveXPost,
+  xPostMediaUrlPolicy,
+  subscribeXPost,
   resolveYouTubeVideo,
   onFileClick,
   onFilePaste,
@@ -540,6 +545,8 @@ export function MeowdownEditor({
         resolveWikilink={resolveWikilink}
         resolveFileInfo={resolveFileInfo}
         resolveXPost={resolveXPost}
+        xPostMediaUrlPolicy={xPostMediaUrlPolicy}
+        subscribeXPost={subscribeXPost}
         resolveYouTubeVideo={resolveYouTubeVideo}
         onFileClick={onFileClick}
         onFilePaste={onFilePaste}

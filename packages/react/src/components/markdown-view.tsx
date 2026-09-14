@@ -1,7 +1,9 @@
+import type { XMediaUrlPolicy } from '@post-embed/types'
 import {
   collectReferenceDefinitions,
   defaultResolveImageUrl,
   defaultResolveXPost,
+  checkedXPostResolver,
   defaultResolveYouTubeVideo,
   formatFileSize,
   getCodeTokens,
@@ -159,6 +161,8 @@ export interface MarkdownViewProps {
    * Resolve the data behind an X post URL, rendered as a `post-embed-x-post`
    * card. Defaults to `defaultResolveXPost`.
    */
+  xPostMediaUrlPolicy?: XMediaUrlPolicy
+  subscribeXPost?: (url: string, notify: () => void) => () => void
   resolveXPost?: XPostResolver
   /**
    * Resolve the data behind a YouTube video URL, rendered as a
@@ -203,6 +207,8 @@ interface BlockContext {
   resolveWikiEmbed?: WikiEmbedResolver
   resolveWikilink?: WikilinkResolver
   resolveFileInfo?: FileInfoResolver
+  xPostMediaUrlPolicy?: XMediaUrlPolicy
+  subscribeXPost?: (url: string, notify: () => void) => () => void
   resolveXPost?: XPostResolver
   resolveYouTubeVideo?: YouTubeVideoResolver
   onWikilinkClick?: WikilinkClickHandler
@@ -298,10 +304,15 @@ function PostEmbed(props: {
   src: string
   width: number | null
   snapshot: object | null
+  xPostMediaUrlPolicy?: XMediaUrlPolicy
+  subscribeXPost?: (url: string, notify: () => void) => () => void
   resolveXPost: XPostResolver
   resolveYouTubeVideo: YouTubeVideoResolver
 }): ReactElement {
-  const { kind, src, width, snapshot, resolveXPost, resolveYouTubeVideo } = props
+  const { kind, src, width, snapshot, resolveXPost, resolveYouTubeVideo, xPostMediaUrlPolicy, subscribeXPost } = props
+  const [revision, setRevision] = useState(0)
+  useEffect(() => kind === 'x-post' ? subscribeXPost?.(src, () => setRevision((value) => value + 1)) : undefined, [kind, src, subscribeXPost])
+  const checkedResolver = useMemo(() => checkedXPostResolver(resolveXPost), [resolveXPost])
   // Registration is idempotent and must precede the element so React sets
   // `data`, `url`, and `resolver` as properties of the upgraded element.
   registerXPost()
@@ -317,9 +328,11 @@ function PostEmbed(props: {
     >
       {kind === 'x-post'
         ? createElement('post-embed-x-post', {
-            data: saved?.kind === 'x-post' ? saved.data : null,
+            data: null,
             url: src,
-            resolver: resolveXPost,
+            resolver: checkedResolver,
+            mediaUrlPolicy: xPostMediaUrlPolicy ?? null,
+            revision,
           })
         : createElement('post-embed-youtube-video', {
             data: saved?.kind === 'youtube-video' ? saved.data : null,
@@ -340,6 +353,8 @@ function ImagePreview(props: {
   width: number | null
   snapshot: object | null
   resolveImageUrl?: (src: string) => string | undefined
+  xPostMediaUrlPolicy?: XMediaUrlPolicy
+  subscribeXPost?: (url: string, notify: () => void) => () => void
   resolveXPost?: XPostResolver
   resolveYouTubeVideo?: YouTubeVideoResolver
   onImageClick?: ImageClickHandler
@@ -352,6 +367,8 @@ function ImagePreview(props: {
     snapshot,
     resolveImageUrl,
     resolveXPost,
+    xPostMediaUrlPolicy,
+    subscribeXPost,
     resolveYouTubeVideo,
     onImageClick,
     interactive,
@@ -367,6 +384,8 @@ function ImagePreview(props: {
         width={width}
         snapshot={snapshot}
         resolveXPost={resolveXPost ?? defaultResolveXPost}
+        xPostMediaUrlPolicy={xPostMediaUrlPolicy}
+        subscribeXPost={subscribeXPost}
         resolveYouTubeVideo={resolveYouTubeVideo ?? defaultResolveYouTubeVideo}
       />
     )
@@ -418,6 +437,8 @@ function ImageView(props: {
         snapshot={snapshot}
         resolveImageUrl={context.resolveImageUrl}
         resolveXPost={context.resolveXPost}
+        xPostMediaUrlPolicy={context.xPostMediaUrlPolicy}
+        subscribeXPost={context.subscribeXPost}
         resolveYouTubeVideo={context.resolveYouTubeVideo}
         onImageClick={context.onImageClick}
         interactive={context.interactive}
@@ -947,6 +968,8 @@ export function MarkdownView({
   resolveWikilink,
   resolveFileInfo,
   resolveXPost,
+  xPostMediaUrlPolicy,
+  subscribeXPost,
   resolveYouTubeVideo,
   onWikilinkClick,
   onLinkClick,
@@ -965,6 +988,8 @@ export function MarkdownView({
       resolveWikilink,
       resolveFileInfo,
       resolveXPost,
+      xPostMediaUrlPolicy,
+      subscribeXPost,
       resolveYouTubeVideo,
       onWikilinkClick: interactive ? onWikilinkClick : undefined,
       onLinkClick: interactive ? onLinkClick : undefined,
@@ -981,6 +1006,8 @@ export function MarkdownView({
       resolveWikilink,
       resolveFileInfo,
       resolveXPost,
+      xPostMediaUrlPolicy,
+      subscribeXPost,
       resolveYouTubeVideo,
       onWikilinkClick,
       onLinkClick,
