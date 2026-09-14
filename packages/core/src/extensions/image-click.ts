@@ -125,6 +125,7 @@ export function defineImageClickHandler(onClick?: ImageClickHandler): PlainExten
 
   return definePlugin(
     new Plugin({
+      // FIXME: do not use this pattern
       key: onClick ? imageClickKey : new PluginKey('config-onImageClick'),
       props: {
         handleDOMEvents: {
