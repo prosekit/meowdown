@@ -130,6 +130,11 @@ export function replaceEditorConfig(
     else editor.updateState(editor.state.apply(transaction))
   }
 
+  also, for every caller that run replaceEditorConfig, it SHOULD return the original config if not change.
+
+  // BAD: replaceEditorConfig(editor, (config) => { return {...config, myKey: newValue} })
+  // GOOD: replaceEditorConfig(editor, (config) => { return config.myKey === newValue ? config : {...config, myKey: newValue} })
+
   SO this file doesn't have other businness logic like "MARK_MODE_META", for "mark-mode.ts", just write defineMarkMode(getMarkMode: (state): MarkMode)
 
   */
