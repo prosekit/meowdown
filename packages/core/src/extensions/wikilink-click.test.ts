@@ -1,7 +1,7 @@
-import { updateEditorConfig } from '../testing/editor-config.ts'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
+import { updateEditorConfig } from '../testing/editor-config.ts'
 import { resolveWikilinkAlias, setupFixture, type Fixture } from '../testing/index.ts'
 
 import { findWikilinkAt, type WikilinkClickHandler } from './wikilink-click.ts'

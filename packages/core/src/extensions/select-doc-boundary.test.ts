@@ -1,7 +1,7 @@
-import { updateEditorConfig } from '../testing/editor-config.ts'
 import { describe, expect, it, vi } from 'vitest'
 import { userEvent } from 'vitest/browser'
 
+import { updateEditorConfig } from '../testing/editor-config.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
 import type { ExitBoundaryHandler } from './exit-boundary.ts'

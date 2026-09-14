@@ -1,9 +1,9 @@
-import { updateEditorConfig } from '../testing/editor-config.ts'
 import { isFirefox } from '@meowdown/vitest/helpers'
 import { TextSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
+import { updateEditorConfig } from '../testing/editor-config.ts'
 import { findText } from '../testing/find-text.ts'
 import { setupFixture, traceKeySelection, traceShiftKeySelection } from '../testing/index.ts'
 
