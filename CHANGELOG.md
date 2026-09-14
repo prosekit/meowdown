@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.70.1](https://github.com/prosekit/meowdown/compare/v0.70.0...v0.70.1) (2026-09-14)
+
+
+### Bug Fixes
+
+* give unsized YouTube previews a default width ([#560](https://github.com/prosekit/meowdown/issues/560)) ([54cb416](https://github.com/prosekit/meowdown/commit/54cb4163f0bfe9930b58607903189536c79aaaef))
+* match the selection outline radius to the post-embed card ([#561](https://github.com/prosekit/meowdown/issues/561)) ([e057cb6](https://github.com/prosekit/meowdown/commit/e057cb6407ab918e9d8c7d2875a2bd39dd4f49b5))
+
 ## [0.70.0](https://github.com/prosekit/meowdown/compare/v0.69.0...v0.70.0) (2026-09-12)
 
 
