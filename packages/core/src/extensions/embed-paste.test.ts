@@ -8,7 +8,7 @@ import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { detectEmbedUrl } from './embed-paste.ts'
-import { defineImage } from './image.ts'
+import { defineImage, type ImageOptions } from './image.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const youtubeEmbed = pmRoot.getByTestId('youtube-video-embed')
@@ -19,13 +19,12 @@ const EMBED = `![](${YT})`
 
 function useEmbedPaste(fixture: Fixture): void {
   const { editor } = fixture
-  editor.use(
-    defineImage({
-      resolveImageUrl: (src) => src,
-      resolveXPost: () => createXPost(),
-      resolveYouTubeVideo: () => createYouTubeVideo(),
-    }),
-  )
+  const imageOptions: ImageOptions = {
+    resolveImageUrl: (src) => src,
+    resolveXPost: () => createXPost(),
+    resolveYouTubeVideo: () => createYouTubeVideo(),
+  }
+  editor.use(defineImage(() => imageOptions))
 }
 
 describe('detectEmbedUrl', () => {

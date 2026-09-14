@@ -432,7 +432,7 @@ export function ProseKitEditor({
   const [editor] = useState((): TypedEditor => {
     const baseExtension: EditorExtension = union(
       defineEditorExtension(config),
-      defineImage(),
+      defineImage(getEditorConfig),
       defineFileView(getEditorConfig),
     )
     const extension =

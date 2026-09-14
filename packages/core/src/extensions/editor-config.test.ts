@@ -222,7 +222,7 @@ describe('editor configuration', () => {
     const resolveImageUrl = () => firstUrl
     using fixture = setupFixture({ extensionOptions: { resolveImageUrl } })
     const { editor, n } = fixture
-    editor.use(defineImage())
+    editor.use(defineImage(getEditorConfig))
     fixture.set(n.doc(n.paragraph('![cat](photo)')))
     const image = pmRoot.getByAltText('cat')
     await expect.element(image).toHaveAttribute('src', firstUrl)

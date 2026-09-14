@@ -12,7 +12,7 @@ import {
   type Fixture,
 } from '../testing/index.ts'
 
-import { defineImage } from './image.ts'
+import { defineImage, type ImageOptions } from './image.ts'
 import type { MarkMode } from './mark-mode.ts'
 
 const YOUTUBE = '![](https://www.youtube.com/watch?v=aqz-KE-bpKQ)'
@@ -30,15 +30,14 @@ function getSVGImageURL(width: number, height: number): string {
 function setup(mode: MarkMode, paragraphs: string[]): Fixture {
   const fixture = setupFixture({ extensionOptions: { markMode: mode } })
   const { editor, n } = fixture
-  editor.use(
-    defineImage({
-      resolveImageUrl: () => getSVGImageURL(24, 24),
-      // No snapshot: a resolved one is written back into the source, which
-      // would put its JSON into every traced selection below.
-      resolveXPost: () => undefined,
-      resolveYouTubeVideo: () => undefined,
-    }),
-  )
+  const imageOptions: ImageOptions = {
+    resolveImageUrl: () => getSVGImageURL(24, 24),
+    // No snapshot: a resolved one is written back into the source, which
+    // would put its JSON into every traced selection below.
+    resolveXPost: () => undefined,
+    resolveYouTubeVideo: () => undefined,
+  }
+  editor.use(defineImage(() => imageOptions))
   fixture.set(n.doc(...paragraphs.map((text) => n.paragraph(text))))
   fixture.view.focus()
   return fixture

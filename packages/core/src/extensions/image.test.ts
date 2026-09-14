@@ -14,7 +14,7 @@ import {
 } from '../testing/index.ts'
 
 import type { ImageClickHandler } from './image-click.ts'
-import { defineImage } from './image.ts'
+import { defineImage, type ImageOptions } from './image.ts'
 import type { MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
@@ -32,7 +32,8 @@ function getSVGImageURL(width: number, height: number): string {
 function setup(mode: MarkMode, text: string): Fixture {
   const fixture = setupFixture({ extensionOptions: { markMode: mode } })
   const { editor, n } = fixture
-  editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(10, 10) }))
+  const imageOptions: ImageOptions = { resolveImageUrl: () => getSVGImageURL(10, 10) }
+  editor.use(defineImage(() => imageOptions))
   fixture.set(n.doc(n.paragraph(text)))
   fixture.view.focus()
   return fixture
@@ -133,7 +134,8 @@ describe('image click callback', () => {
   function setupClickable(markdown: string, onImageClick: ImageClickHandler): Fixture {
     const fixture = setupFixture({ extensionOptions: { onImageClick } })
     const { editor, n } = fixture
-    editor.use(defineImage({ resolveImageUrl: (src) => src }))
+    const imageOptions: ImageOptions = { resolveImageUrl: (src) => src }
+    editor.use(defineImage(() => imageOptions))
     fixture.set(n.doc(n.paragraph(markdown)))
     return fixture
   }
@@ -314,7 +316,8 @@ describe('image resize', () => {
   function setupResize(markdown: string, url = getSVGImageURL(10, 10)): Fixture {
     const fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
     const { editor, n } = fixture
-    editor.use(defineImage({ resolveImageUrl: () => url }))
+    const imageOptions: ImageOptions = { resolveImageUrl: () => url }
+    editor.use(defineImage(() => imageOptions))
     fixture.set(n.doc(n.paragraph(markdown)))
     return fixture
   }
@@ -496,7 +499,8 @@ describe('wiki image resize', () => {
       },
     })
     const { editor, n } = fixture
-    editor.use(defineImage({ resolveImageUrl: () => getSVGImageURL(20, 10) }))
+    const imageOptions: ImageOptions = { resolveImageUrl: () => getSVGImageURL(20, 10) }
+    editor.use(defineImage(() => imageOptions))
     fixture.set(n.doc(n.paragraph(markdown)))
     return fixture
   }

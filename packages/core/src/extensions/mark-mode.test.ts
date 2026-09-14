@@ -7,7 +7,7 @@ import { updateEditorConfig } from '../testing/editor-config.ts'
 import { findText } from '../testing/find-text.ts'
 import { setupFixture, traceKeySelection, traceShiftKeySelection } from '../testing/index.ts'
 
-import { defineImage } from './image.ts'
+import { defineImage, type ImageOptions } from './image.ts'
 import type { MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
@@ -1161,7 +1161,8 @@ describe('focus mode', () => {
 
   it('renders an inline image as an atomic mark view, source kept in its content', () => {
     using fixture = setupFixture({ extensionOptions: { markMode: 'focus' } })
-    fixture.editor.use(defineImage({ resolveImageUrl: () => 'http://x/p.png' }))
+    const imageOptions: ImageOptions = { resolveImageUrl: () => 'http://x/p.png' }
+    fixture.editor.use(defineImage(() => imageOptions))
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('![alt](pic.png)')))
     expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`

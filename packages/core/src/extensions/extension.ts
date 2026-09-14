@@ -81,7 +81,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
 
     // plugins
     defineEditorConfig(options),
-    defineEditorConfigEvents(),
+    defineEditorConfigEvents(getEditorConfig),
     defineModClickPrevention(),
     defineFileClickHandler((state) => getEditorConfig(state).onFileClick),
     defineImageClickHandler((state) => getEditorConfig(state).onImageClick),
@@ -90,7 +90,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineLinkClickHandler((state) => getEditorConfig(state).onLinkClick),
     defineFollowLinkHandler(getEditorConfig),
     defineExitBoundaryHandler((state) => getEditorConfig(state).onExitBoundary),
-    defineFilePaste(),
+    defineFilePaste(getEditorConfig),
     defineEmbedPaste((state) => !!getEditorConfig(state).embedPaste),
     defineLinkPaste((state) => !!getEditorConfig(state).linkPaste),
     defineBulletAfterHeading((state) => !!getEditorConfig(state).bulletAfterHeading),
@@ -117,7 +117,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineSoftBreak(),
     defineMoveBlock(),
     defineSelectDocBoundary(),
-    defineInlineMarkPlugin(),
+    defineInlineMarkPlugin(getEditorConfig),
     defineInlineToggle(),
     defineLinkCommands(),
     defineWikilink(),

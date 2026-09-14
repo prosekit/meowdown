@@ -1,8 +1,9 @@
 import { registerXPost, type Resolver } from '@post-embed/elements/x'
 import { registerYouTubeVideo } from '@post-embed/elements/youtube'
 import type { XPost, YouTubeVideo } from '@post-embed/types'
-import { defineMarkView, type PlainExtension } from '@prosekit/core'
+import { defineMarkView, definePlugin, union, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
+import { Plugin, type EditorState } from '@prosekit/pm/state'
 import type { EditorView, MarkView, ViewMutationRecord } from '@prosekit/pm/view'
 import {
   registerResizableHandleElement,
@@ -12,8 +13,6 @@ import {
 
 import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
 
-import { subscribeEditorConfig } from './editor-config-events.ts'
-import { getEditorConfig } from './editor-config.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import {
   formatMagicComment,
@@ -225,15 +224,15 @@ class ImageMarkView implements MarkView {
   #image: HTMLImageElement | undefined
   #destroyed = false
   #generation = 0
-  #unsubscribe?: VoidFunction
+  readonly #onDestroy: VoidFunction
 
-  constructor(mark: Mark, view: EditorView, options?: ImageOptions) {
+  constructor(mark: Mark, view: EditorView, options: ImageOptions, onDestroy: VoidFunction) {
     this.#attrs = mark.attrs as MdImageAttrs
     this.#view = view
-    const initialOptions = options ?? getEditorConfig(view.state)
-    this.#resolveImageUrl = initialOptions.resolveImageUrl
-    this.#resolveXPost = initialOptions.resolveXPost ?? defaultResolveXPost
-    this.#resolveYouTubeVideo = initialOptions.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
+    this.#onDestroy = onDestroy
+    this.#resolveImageUrl = options.resolveImageUrl
+    this.#resolveXPost = options.resolveXPost ?? defaultResolveXPost
+    this.#resolveYouTubeVideo = options.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
 
     this.#dom = document.createElement('span')
     this.#dom.className = 'md-image-view md-atom-view'
@@ -252,31 +251,30 @@ class ImageMarkView implements MarkView {
     }
 
     this.#dom.appendChild(this.#contentDOM)
-    if (!options) {
-      this.#unsubscribe = subscribeEditorConfig(view, (config) => {
-        const resolveXPost = config.resolveXPost ?? defaultResolveXPost
-        const resolveYouTubeVideo = config.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
-        if (
-          this.#resolveImageUrl === config.resolveImageUrl &&
-          this.#resolveXPost === resolveXPost &&
-          this.#resolveYouTubeVideo === resolveYouTubeVideo
-        )
-          return
-        this.#resolveImageUrl = config.resolveImageUrl
-        this.#resolveXPost = resolveXPost
-        this.#resolveYouTubeVideo = resolveYouTubeVideo
-        this.#generation++
-        this.#image = undefined
-        this.#resizableRoot = undefined
-        for (const child of Array.from(this.#dom.children)) {
-          if (child !== this.#contentDOM) child.remove()
-        }
-        const preview = this.#renderPreview()
-        if (preview) {
-          preview.contentEditable = 'false'
-          this.#dom.insertBefore(preview, this.#contentDOM)
-        }
-      })
+  }
+
+  updateOptions(options: ImageOptions): void {
+    const resolveXPost = options.resolveXPost ?? defaultResolveXPost
+    const resolveYouTubeVideo = options.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
+    if (
+      this.#resolveImageUrl === options.resolveImageUrl &&
+      this.#resolveXPost === resolveXPost &&
+      this.#resolveYouTubeVideo === resolveYouTubeVideo
+    )
+      return
+    this.#resolveImageUrl = options.resolveImageUrl
+    this.#resolveXPost = resolveXPost
+    this.#resolveYouTubeVideo = resolveYouTubeVideo
+    this.#generation++
+    this.#image = undefined
+    this.#resizableRoot = undefined
+    for (const child of Array.from(this.#dom.children)) {
+      if (child !== this.#contentDOM) child.remove()
+    }
+    const preview = this.#renderPreview()
+    if (preview) {
+      preview.contentEditable = 'false'
+      this.#dom.insertBefore(preview, this.#contentDOM)
     }
   }
 
@@ -314,7 +312,7 @@ class ImageMarkView implements MarkView {
 
   destroy(): void {
     this.#destroyed = true
-    this.#unsubscribe?.()
+    this.#onDestroy()
   }
 
   /**
@@ -485,9 +483,35 @@ class ImageMarkView implements MarkView {
  * `![alt](src)<!-- {"width":320,"height":240} -->`, which round-trips as
  * plain Markdown.
  */
-export function defineImage(options?: ImageOptions): PlainExtension {
-  return defineMarkView({
-    name: 'mdImage' satisfies MarkName,
-    constructor: (mark, view) => new ImageMarkView(mark, view, options),
-  }) as PlainExtension
+export function defineImage(
+  getOptions?: (state: EditorState) => ImageOptions | undefined,
+): PlainExtension {
+  const instances = new WeakMap<EditorView, Set<ImageMarkView>>()
+  return union(
+    defineMarkView({
+      name: 'mdImage' satisfies MarkName,
+      constructor: (mark, view) => {
+        let views = instances.get(view)
+        if (!views) {
+          views = new Set()
+          instances.set(view, views)
+        }
+        const markView = new ImageMarkView(mark, view, getOptions?.(view.state) ?? {}, () => {
+          views.delete(markView)
+        })
+        views.add(markView)
+        return markView
+      },
+    }),
+    definePlugin(
+      new Plugin({
+        view: () => ({
+          update: (view) => {
+            const options = getOptions?.(view.state) ?? {}
+            for (const markView of instances.get(view) ?? []) markView.updateOptions(options)
+          },
+        }),
+      }),
+    ),
+  ) as PlainExtension
 }

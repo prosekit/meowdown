@@ -1,8 +1,6 @@
 import { definePlugin, Priority, withPriority, type PlainExtension } from '@prosekit/core'
-import { Plugin, PluginKey } from '@prosekit/pm/state'
+import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
-
-import { getEditorConfig } from './editor-config.ts'
 
 export type FilePasteHandler = (file: File) => string | undefined | Promise<string | undefined>
 export type FileSaveErrorHandler = (error: unknown, file: File) => void
@@ -109,20 +107,21 @@ async function insertSavedFiles(
   }
 }
 
-function createFilePastePlugin(options?: FilePasteOptions): Plugin {
+function createFilePastePlugin(
+  getOptions?: (state: EditorState) => FilePasteOptions | undefined,
+): Plugin {
   return new Plugin({
     key: new PluginKey('file-paste'),
     props: {
       handlePaste: (view, event) => {
-        // FIXME: try NOT calling getEditorConfig in other extensions. Just write createFilePastePlugin(getOptions?: (state) => FilePasteOptions|undefined). createFilePastePlugin do not need to know the existing of "getEditorConfig". Apply this rule to all other extensions.
-        const currentOptions = options ?? getEditorConfig(view.state)
+        const currentOptions = getOptions?.(view.state) ?? {}
         const files = takePastedFiles(event.clipboardData, currentOptions)
         if (files.length === 0) return false
         void insertSavedFiles(view, files, currentOptions)
         return true
       },
       handleDrop: (view, event) => {
-        const currentOptions = options ?? getEditorConfig(view.state)
+        const currentOptions = getOptions?.(view.state) ?? {}
         const files = takePastedFiles(event.dataTransfer, currentOptions)
         if (files.length === 0) return false
         const drop = view.posAtCoords({ left: event.clientX, top: event.clientY })
@@ -138,8 +137,10 @@ function createFilePastePlugin(options?: FilePasteOptions): Plugin {
  * markdown destination: `![](src)` for an image, a `[name](src)` link for any
  * other file. Multiple files insert one link per line, in DataTransfer order.
  */
-export function defineFilePaste(options?: FilePasteOptions): PlainExtension {
+export function defineFilePaste(
+  getOptions?: (state: EditorState) => FilePasteOptions | undefined,
+): PlainExtension {
   // High priority so the drop/paste handler runs before ProseKit's
   // drop-indicator plugin.
-  return withPriority(definePlugin(createFilePastePlugin(options)), Priority.high)
+  return withPriority(definePlugin(createFilePastePlugin(getOptions)), Priority.high)
 }
