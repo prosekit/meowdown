@@ -486,6 +486,7 @@ class ImageMarkView implements MarkView {
 export function defineImage(
   getOptions?: (state: EditorState) => ImageOptions | undefined,
 ): PlainExtension {
+  // FIXME: do not use a WeakMap for store all markview. do not call "markView.updateOptions". we do not need to re-trigger image update after the config changed. remove this.#generation. apply this rule to all extensions.
   const instances = new WeakMap<EditorView, Set<ImageMarkView>>()
   return union(
     defineMarkView({
