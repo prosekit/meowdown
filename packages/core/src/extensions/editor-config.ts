@@ -1,6 +1,5 @@
 import { definePlugin, type Editor } from '@prosekit/core'
 import type { PlaceholderOptions } from '@prosekit/extensions/placeholder'
-import type { SearchStatusHandler } from '@prosekit/extensions/search'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
 import type { ExitBoundaryHandler } from './exit-boundary.ts'
@@ -15,9 +14,7 @@ import type { MarkMode } from './mark-mode.ts'
 export interface EditorConfig
   extends InlineMarkOptions, FollowLinkHandlers, FilePasteOptions, FileViewOptions, ImageOptions {
   markMode?: MarkMode
-  onDocChange?: VoidFunction
   onExitBoundary?: ExitBoundaryHandler
-  onSearchChange?: SearchStatusHandler
   embedPaste?: boolean
   linkPaste?: boolean
   bulletAfterHeading?: boolean

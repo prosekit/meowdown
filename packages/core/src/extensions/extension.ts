@@ -20,7 +20,6 @@ import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineCodeBlock } from './code-block.ts'
 import { defineEditorCommands } from './commands.ts'
 import { defineCrossEditorDrag } from './cross-editor-drag.ts'
-import { defineEditorConfigEvents } from './editor-config-events.ts'
 import { defineEditorConfig, getEditorConfig, type EditorConfig } from './editor-config.ts'
 import { defineEmbedPaste } from './embed-paste.ts'
 import { defineEscapeCollapse } from './escape-collapse.ts'
@@ -84,7 +83,6 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
 
     // plugins
     defineEditorConfig(options),
-    defineEditorConfigEvents(getEditorConfig),
     defineImage(getEditorConfig),
     defineFileView(getEditorConfig),
     defineModClickPrevention(),

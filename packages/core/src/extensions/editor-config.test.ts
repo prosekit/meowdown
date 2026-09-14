@@ -114,22 +114,18 @@ describe('editor configuration', () => {
   })
 
   it('reparses existing links and clears their claims without changing Markdown or selection', async () => {
-    const onDocChange = vi.fn()
-    using fixture = setupFixture({ extensionOptions: { onDocChange } })
+    using fixture = setupFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('see [report.pdf](assets/report.pdf)<a> here')))
     const markdown = docToMarkdown(editor.state.doc)
     const selection = editor.state.selection
-    onDocChange.mockClear()
-    updateEditorConfig(editor, { resolveFileLink: claimFiles, onDocChange })
+    updateEditorConfig(editor, { resolveFileLink: claimFiles })
     await expect.element(pmRoot.getByTestId('file-pill')).toBeInTheDocument()
     expect(docToMarkdown(editor.state.doc)).toBe(markdown)
     expect(editor.state.selection.eq(selection)).toBe(true)
-    expect(onDocChange).not.toHaveBeenCalled()
     updateEditorConfig(editor, { resolveFileLink: undefined })
     await expect.element(pmRoot.getByRole('link')).toBeInTheDocument()
     expect(docToMarkdown(editor.state.doc)).toBe(markdown)
-    expect(onDocChange).not.toHaveBeenCalled()
   })
 
   it('batches display settings into one dispatch and clears explicitly undefined settings', async () => {

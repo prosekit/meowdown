@@ -1,15 +1,29 @@
-import { updateEditorConfig, type EditorConfig, type EditorExtension } from '@meowdown/core'
-import { useEditor } from '@prosekit/react'
-import { useDeferredValue, useEffect } from 'react'
+import {
+  defineSearchStatusHandler,
+  updateEditorConfig,
+  type EditorConfig,
+  type EditorExtension,
+  type SearchStatusHandler,
+} from '@meowdown/core'
+import { defineDocChangeHandler } from '@prosekit/core'
+import { useEditor, useExtension } from '@prosekit/react'
+import { useDeferredValue, useEffect, useMemo } from 'react'
 
 interface EditorExtensionsProps {
   config: EditorConfig
   searchQuery: string
+  onDocChange?: VoidFunction
+  onSearchChange?: SearchStatusHandler
 }
 
 // A leaf that renders nothing and holds reactive configuration effects,
 // so the parent editor keeps its lifecycle work in one place.
-export function EditorExtensions({ config, searchQuery }: EditorExtensionsProps): null {
+export function EditorExtensions({
+  config,
+  searchQuery,
+  onDocChange,
+  onSearchChange,
+}: EditorExtensionsProps): null {
   const editor = useEditor<EditorExtension>()
 
   // Initial configuration already belongs to the creation extension. Later
@@ -27,6 +41,16 @@ export function EditorExtensions({ config, searchQuery }: EditorExtensionsProps)
   useEffect(() => {
     editor.commands.setSearchQuery({ search: deferredSearchQuery, literal: true })
   }, [editor, deferredSearchQuery])
+
+  useExtension(
+    useMemo(() => (onDocChange ? defineDocChangeHandler(onDocChange) : null), [onDocChange]),
+  )
+  useExtension(
+    useMemo(
+      () => (onSearchChange ? defineSearchStatusHandler(onSearchChange) : null),
+      [onSearchChange],
+    ),
+  )
 
   return null
 }
