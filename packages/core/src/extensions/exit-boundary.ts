@@ -81,6 +81,7 @@ function canMoveVertically(view: EditorView, direction: 1 | -1): boolean {
 
 function createExitBoundaryPlugin(onExitBoundary?: ExitBoundaryHandler) {
   return new Plugin({
+    // FIXME: do not write pattern like this. do not create new PluginKey. we can get write createExitBoundaryPlugin(getExitBoundaryHandler?: (state)=>ExitBoundaryHandler|undefined). and later in `handleKeyDown`, handler = getExitBoundaryHandler?.(view.state). and in extensions.ts, we just defineExitBoundaryHandler(state => getEditorConfig(state)?.onExitBoundary)
     key: onExitBoundary ? exitBoundaryKey : new PluginKey('config-exit-boundary'),
     props: {
       handleKeyDown: (view, event) => {
