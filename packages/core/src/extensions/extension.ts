@@ -151,7 +151,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
 export type EditorExtension = ReturnType<typeof defineEditorExtensionImpl>
 
 /**
- * Initial configuration, replaceable with `replaceEditorConfig`.
+ * Initial configuration, updatable with `updateEditorConfig`.
  */
 export type EditorExtensionOptions = EditorConfig
 

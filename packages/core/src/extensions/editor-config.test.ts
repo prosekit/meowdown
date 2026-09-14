@@ -4,10 +4,9 @@ import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
-import { updateEditorConfig } from '../testing/editor-config.ts'
 import { setupFixture } from '../testing/index.ts'
 
-import { getEditorConfig, replaceEditorConfig, type EditorConfig } from './editor-config.ts'
+import { getEditorConfig, updateEditorConfig, type EditorConfig } from './editor-config.ts'
 import { defineEditorExtension } from './extension.ts'
 import type { FileInfo } from './file-view.ts'
 import { getMarkMode } from './mark-mode-config.ts'
@@ -15,32 +14,17 @@ import { getMarkMode } from './mark-mode-config.ts'
 const pmRoot = page.locate('.ProseMirror')
 const claimFiles = () => true
 
-// FIXME: delete  this function. just use updateEditorConfig directly
-function replaceConfig(
-  editor: Parameters<typeof replaceEditorConfig>[0],
-  next: EditorConfig,
-  dispatch = false,
-): void {
-  replaceEditorConfig(
-    editor,
-    (config) => {
-      const keys = new Set([...Object.keys(config), ...Object.keys(next)] as (keyof EditorConfig)[])
-      return [...keys].every((key) => Object.is(config[key], next[key])) ? config : next
-    },
-    dispatch,
-  )
-}
-
 describe('editor configuration', () => {
-  it('does no work for updaters returning the original configuration', () => {
+  it('does no work for empty or equal patches', () => {
     using fixture = setupFixture({ extensionOptions: { markMode: 'hide', readOnly: true } })
     const { editor } = fixture
     const state = editor.state
     const config = getEditorConfig(state)
     const dispatch = vi.spyOn(editor.view, 'dispatch')
     const updateState = vi.spyOn(editor.view, 'updateState')
-    replaceEditorConfig(editor, (current) => current, true)
-    replaceConfig(editor, { ...config, onFileClick: undefined }, true)
+    updateEditorConfig(editor, {})
+    updateEditorConfig(editor, config)
+    updateEditorConfig(editor, { ...config, onFileClick: undefined })
     expect(getEditorConfig(editor.state)).toBe(config)
     expect(editor.state).toBe(state)
     expect(dispatch).not.toHaveBeenCalled()
@@ -52,14 +36,14 @@ describe('editor configuration', () => {
     const first = createEditor({ extension })
     const second = createEditor({ extension })
     const onFileClick = vi.fn()
-    replaceConfig(first, { markMode: 'hide', onFileClick })
+    updateEditorConfig(first, { markMode: 'hide', onFileClick })
     expect(getEditorConfig(first.state).onFileClick).toBe(onFileClick)
     expect(getEditorConfig(second.state).onFileClick).toBeUndefined()
   })
 
   it('reinitializes configuration when setContent creates a new state', () => {
     const editor = createEditor({ extension: defineEditorExtension({ markMode: 'hide' }) })
-    replaceConfig(editor, { markMode: 'show', onFileClick: vi.fn() })
+    updateEditorConfig(editor, { markMode: 'show', onFileClick: vi.fn() })
     editor.setContent(editor.nodes.doc(editor.nodes.paragraph('replacement')))
     expect(getEditorConfig(editor.state).markMode).toBe('hide')
     expect(getEditorConfig(editor.state).onFileClick).toBeUndefined()
@@ -69,7 +53,7 @@ describe('editor configuration', () => {
   it('applies configuration before mount and keeps it across a view remount', () => {
     using fixture = setupFixture({ mount: false })
     const { editor } = fixture
-    replaceConfig(editor, { markMode: 'hide', readOnly: true })
+    updateEditorConfig(editor, { markMode: 'hide', readOnly: true })
     const container = document.createElement('div')
     document.body.appendChild(container)
     try {
@@ -101,7 +85,7 @@ describe('editor configuration', () => {
     const state = editor.state
     const dispatch = vi.spyOn(editor.view, 'dispatch')
     const updateState = vi.spyOn(editor.view, 'updateState')
-    replaceConfig(editor, { ...config, onFileClick: second })
+    updateEditorConfig(editor, { ...config, onFileClick: second })
     expect(editor.state).toBe(state)
     expect(dispatch).not.toHaveBeenCalled()
     expect(updateState).not.toHaveBeenCalled()
@@ -109,7 +93,7 @@ describe('editor configuration', () => {
     expect(second).toHaveBeenCalledOnce()
     expect(first).toHaveBeenCalledOnce()
     await userEvent.click(pmRoot.getByText('Other paragraph'))
-    replaceConfig(editor, { resolveFileLink: claimFiles })
+    updateEditorConfig(editor, { onFileClick: undefined })
     await userEvent.click(pmRoot.getByTestId('file-pill'))
     expect(second).toHaveBeenCalledOnce()
   })
@@ -122,7 +106,7 @@ describe('editor configuration', () => {
     })
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('see [report.pdf](assets/report.pdf)<a> here')))
-    replaceConfig(editor, { resolveFileLink: claimFiles, onFileClick: second })
+    updateEditorConfig(editor, { resolveFileLink: claimFiles, onFileClick: second })
     editor.view.focus()
     await userEvent.keyboard('{ArrowLeft}{ControlOrMeta>}{Enter}{/ControlOrMeta}')
     expect(first).not.toHaveBeenCalled()
@@ -137,39 +121,41 @@ describe('editor configuration', () => {
     const markdown = docToMarkdown(editor.state.doc)
     const selection = editor.state.selection
     onDocChange.mockClear()
-    replaceConfig(editor, { resolveFileLink: claimFiles, onDocChange }, true)
+    updateEditorConfig(editor, { resolveFileLink: claimFiles, onDocChange })
     await expect.element(pmRoot.getByTestId('file-pill')).toBeInTheDocument()
     expect(docToMarkdown(editor.state.doc)).toBe(markdown)
     expect(editor.state.selection.eq(selection)).toBe(true)
     expect(onDocChange).not.toHaveBeenCalled()
-    replaceConfig(editor, { onDocChange }, true)
+    updateEditorConfig(editor, { resolveFileLink: undefined })
     await expect.element(pmRoot.getByRole('link')).toBeInTheDocument()
     expect(docToMarkdown(editor.state.doc)).toBe(markdown)
     expect(onDocChange).not.toHaveBeenCalled()
   })
 
-  it('batches display settings into one dispatch and clears omitted settings', async () => {
+  it('batches display settings into one dispatch and clears explicitly undefined settings', async () => {
     using fixture = setupFixture()
     const { editor } = fixture
     const dispatch = vi.spyOn(editor.view, 'dispatch')
     const plugins = editor.state.plugins
-    replaceConfig(
-      editor,
-      {
-        markMode: 'hide',
-        readOnly: true,
-        spellCheck: false,
-        editorClassName: 'host-editor',
-        placeholder: 'Write here',
-      },
-      true,
-    )
+    updateEditorConfig(editor, {
+      markMode: 'hide',
+      readOnly: true,
+      spellCheck: false,
+      editorClassName: 'host-editor',
+      placeholder: 'Write here',
+    })
     expect(dispatch).toHaveBeenCalledTimes(1)
     expect(editor.state.plugins).toEqual(plugins)
     expect(editor.view.editable).toBe(false)
     await expect.element(pmRoot).toHaveAttribute('spellcheck', 'false')
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'hide')
-    replaceConfig(editor, {}, true)
+    updateEditorConfig(editor, {
+      markMode: undefined,
+      readOnly: undefined,
+      spellCheck: undefined,
+      editorClassName: undefined,
+      placeholder: undefined,
+    })
     expect(editor.view.editable).toBe(true)
     await expect.element(pmRoot).not.toHaveAttribute('spellcheck')
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'focus')
@@ -178,13 +164,13 @@ describe('editor configuration', () => {
   it('reads the current mode after callback-only updates', () => {
     using fixture = setupFixture()
     const { editor } = fixture
-    updateEditorConfig(editor, { markMode: 'hide' }, true)
+    updateEditorConfig(editor, { markMode: 'hide' })
     expect(getEditorConfig(editor.state).markMode).toBe('hide')
     const state = editor.state
-    replaceConfig(editor, { ...getEditorConfig(state), onFileClick: vi.fn() })
+    updateEditorConfig(editor, { ...getEditorConfig(state), onFileClick: vi.fn() })
     expect(editor.state).toBe(state)
     expect(getMarkMode(editor.state)).toBe('hide')
-    replaceConfig(editor, {}, true)
+    updateEditorConfig(editor, { markMode: undefined })
     expect(getMarkMode(editor.state)).toBe('focus')
   })
 
@@ -194,7 +180,7 @@ describe('editor configuration', () => {
     fixture.set(n.doc(n.paragraph('hello<a>')))
     editor.view.focus()
     await userEvent.keyboard(' world')
-    replaceConfig(editor, { markMode: 'hide', resolveFileLink: claimFiles }, true)
+    updateEditorConfig(editor, { markMode: 'hide', resolveFileLink: claimFiles })
     editor.commands.undo()
     expect(editor.state.doc.textContent).toBe('hello')
     expect(getEditorConfig(editor.state).resolveFileLink).toBe(claimFiles)
@@ -206,7 +192,7 @@ describe('editor configuration', () => {
     const { editor } = fixture
     editor.use(definePlugin(new Plugin({ filterTransaction: () => false })))
     const state = editor.state
-    replaceConfig(editor, { markMode: 'hide', onFileClick: vi.fn() }, true)
+    updateEditorConfig(editor, { markMode: 'hide', onFileClick: vi.fn() })
     expect(editor.state).toBe(state)
     expect(getEditorConfig(editor.state).markMode).toBe('hide')
     expect(getMarkMode(editor.state)).toBe('hide')
@@ -224,10 +210,10 @@ describe('editor configuration', () => {
     const image = pmRoot.getByAltText('cat')
     await expect.element(image).toHaveAttribute('src', firstUrl)
     const element = image.element()
-    replaceConfig(editor, { resolveImageUrl, placeholder: 'Write here' }, true)
+    updateEditorConfig(editor, { resolveImageUrl, placeholder: 'Write here' })
     expect(image.element()).toBe(element)
     const state = editor.state
-    replaceConfig(editor, { resolveImageUrl: () => nextUrl })
+    updateEditorConfig(editor, { resolveImageUrl: () => nextUrl })
     expect(editor.state).toBe(state)
     await expect.element(image).toHaveAttribute('src', firstUrl)
     editor.view.focus()
@@ -241,14 +227,10 @@ describe('editor configuration', () => {
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('[[Note]] and ![[report.pdf]]')))
     const markdown = docToMarkdown(editor.state.doc)
-    replaceConfig(
-      editor,
-      {
-        resolveWikilink: () => ({ target: 'note-id', display: 'Renamed note' }),
-        resolveWikiEmbed: () => ({ kind: 'file', href: 'assets/report.pdf', name: 'Report' }),
-      },
-      true,
-    )
+    updateEditorConfig(editor, {
+      resolveWikilink: () => ({ target: 'note-id', display: 'Renamed note' }),
+      resolveWikiEmbed: () => ({ kind: 'file', href: 'assets/report.pdf', name: 'Report' }),
+    })
     await expect.element(pmRoot.getByTestId('wikilink')).toHaveTextContent('Renamed note')
     await expect.element(pmRoot.getByTestId('file-pill')).toHaveTextContent('Report')
     expect(docToMarkdown(editor.state.doc)).toBe(markdown)
@@ -260,11 +242,11 @@ describe('editor configuration', () => {
     fixture.set(n.doc(n.paragraph('<a>')))
     editor.view.focus()
     const state = editor.state
-    replaceConfig(editor, { substitution: true })
+    updateEditorConfig(editor, { substitution: true })
     expect(editor.state).toBe(state)
     await userEvent.keyboard('(c) ')
     expect(editor.state.doc.textContent).toBe('© ')
-    replaceConfig(editor, {})
+    updateEditorConfig(editor, { substitution: undefined })
     await userEvent.keyboard('(c) ')
     expect(editor.state.doc.textContent).toBe('© (c) ')
   })
@@ -278,7 +260,7 @@ describe('editor configuration', () => {
     fixture.set(n.doc(n.paragraph('[report.pdf](assets/report.pdf)<a>')))
     const resolveFileInfo = vi.fn(() => ({ size: 2048 }))
     const state = editor.state
-    replaceConfig(editor, { resolveFileLink: claimFiles, resolveFileInfo })
+    updateEditorConfig(editor, { resolveFileLink: claimFiles, resolveFileInfo })
     expect(editor.state).toBe(state)
     pending.resolve({ size: 1024 })
     const sizes = pmRoot.getByTestId('file-pill-size')
@@ -295,8 +277,9 @@ describe('editor configuration', () => {
     using fixture = setupFixture({ mount: false })
     const { editor } = fixture
     editor.updateState(editor.state.reconfigure({ plugins: [] }))
-    const updater = vi.fn((config: Readonly<EditorConfig>) => config)
-    replaceEditorConfig(editor, updater, true)
-    expect(updater).not.toHaveBeenCalled()
+    const state = editor.state
+    updateEditorConfig(editor, { markMode: 'hide' })
+    expect(editor.state).toBe(state)
+    expect(getEditorConfig(editor.state).markMode).toBeUndefined()
   })
 })

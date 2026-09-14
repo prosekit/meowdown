@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
-import { updateEditorConfig } from '../testing/editor-config.ts'
 import { resolveWikilinkAlias, setupFixture } from '../testing/index.ts'
 
+import { updateEditorConfig } from './editor-config.ts'
 import { defineWikilinkHoverHandler, type WikilinkHoverHandler } from './wikilink-hover.ts'
 
 const pmRoot = page.locate('.ProseMirror')
@@ -12,7 +12,7 @@ function applyHoverable(markdown: string, onHoverChange: WikilinkHoverHandler) {
   const fixture = setupFixture({ extensionOptions: { resolveWikilink: resolveWikilinkAlias } })
   fixture.editor.use(defineWikilinkHoverHandler(onHoverChange))
   fixture.set(fixture.n.doc(fixture.n.paragraph(markdown)))
-  updateEditorConfig(fixture.editor, { markMode: 'hide' }, true)
+  updateEditorConfig(fixture.editor, { markMode: 'hide' })
   return fixture
 }
 

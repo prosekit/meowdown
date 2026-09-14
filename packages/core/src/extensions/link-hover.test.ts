@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
-import { updateEditorConfig } from '../testing/editor-config.ts'
 import { setupFixture } from '../testing/index.ts'
 
+import { updateEditorConfig } from './editor-config.ts'
 import { defineLinkHoverHandler, type LinkHoverHandler } from './link-hover.ts'
 
 const markdownLink = page.locate('.ProseMirror .md-link')
@@ -12,7 +12,7 @@ function applyHoverable(markdown: string, onHoverChange: LinkHoverHandler) {
   const fixture = setupFixture()
   fixture.editor.use(defineLinkHoverHandler(onHoverChange))
   fixture.set(fixture.n.doc(fixture.n.paragraph(markdown)))
-  updateEditorConfig(fixture.editor, { markMode: 'hide' }, true)
+  updateEditorConfig(fixture.editor, { markMode: 'hide' })
   return fixture
 }
 

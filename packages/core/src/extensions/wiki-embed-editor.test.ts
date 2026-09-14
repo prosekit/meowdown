@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
-import { updateEditorConfig } from '../testing/editor-config.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
+import { updateEditorConfig } from './editor-config.ts'
 import type { FileClickHandler } from './file-click.ts'
 import type { ImageClickHandler } from './image-click.ts'
 import type { ImageOptions } from './image.ts'

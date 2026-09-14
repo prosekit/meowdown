@@ -4,12 +4,12 @@ import { describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
-import { updateEditorConfig } from '../testing/editor-config.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 import { createTweet } from '../testing/tweet-fixture.ts'
 import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
+import { updateEditorConfig } from './editor-config.ts'
 import type { ImageOptions } from './image.ts'
 import { formatMagicComment, parseMagicComment } from './magic-comment.ts'
 

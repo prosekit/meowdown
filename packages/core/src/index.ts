@@ -29,7 +29,7 @@ export { codeBlockLanguages, type LanguageItem } from './extensions/code-block-l
 export type { CodeBlockFenceStyle, MeowdownCodeBlockAttrs } from './extensions/code-block.ts'
 export {
   getEditorConfig,
-  replaceEditorConfig,
+  updateEditorConfig,
   type EditorConfig,
 } from './extensions/editor-config.ts'
 export { defineEmbedPaste } from './extensions/embed-paste.ts'
