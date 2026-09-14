@@ -12,6 +12,8 @@ import {
   parseXPostId,
 } from './post-embed.ts'
 
+// FIXME: `parseXPostId` is now a re-export of `@post-embed/schema`, which tests it in
+// `schema/src/x/url.test.ts` with a superset of these cases; delete this describe block.
 describe('parseXPostId', () => {
   it('reads the id from twitter.com, x.com, and mobile URLs', () => {
     expect(parseXPostId('https://twitter.com/jack/status/20')).toBe('20')
