@@ -42,6 +42,7 @@ import { defineLinkClickHandler } from './link-click.ts'
 import { defineLinkCommands } from './link-commands.ts'
 import { defineLinkPaste } from './link-paste.ts'
 import { defineMeowdownList } from './list.ts'
+import { getMarkMode } from './mark-mode-config.ts'
 import { defineMarkMode } from './mark-mode.ts'
 import { ATOM_SOURCE_MARK_NAMES } from './mark-names.ts'
 import { defineMath } from './math.ts'
@@ -122,7 +123,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineLinkCommands(),
     defineWikilink(),
     defineMath(),
-    defineMarkMode((state) => getEditorConfig(state).markMode ?? 'focus'),
+    defineMarkMode(getMarkMode),
     defineClipboard(),
     defineScrollToSelection(),
     defineHiddenRunCaret(),

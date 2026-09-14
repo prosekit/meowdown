@@ -14,7 +14,7 @@ import {
   type CaretRect,
 } from './caret-rect.ts'
 import { getCaretTail, type CaretTail } from './hidden-run.ts'
-import { getMarkMode } from './mark-mode.ts'
+import { getMarkMode } from './mark-mode-config.ts'
 
 const key = new PluginKey('meowdown-virtual-caret')
 

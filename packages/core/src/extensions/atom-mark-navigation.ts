@@ -16,7 +16,8 @@ import { Decoration, DecorationSet } from '@prosekit/pm/view'
 import { getIsComposing } from '../utils/composition.ts'
 import { hasPointerSelectionTransaction } from '../utils/transaction.ts'
 
-import { getMarkMode, type MarkMode } from './mark-mode.ts'
+import { getMarkMode } from './mark-mode-config.ts'
+import type { MarkMode } from './mark-mode.ts'
 import { ATOM_SOURCE_MARK_NAMES, type MarkName } from './mark-names.ts'
 import {
   getMarkRangeAfter,
@@ -58,7 +59,6 @@ function getSelectedRange(
  * the rest of atom navigation) in a state built without a mark mode.
  */
 export function getSelectedAtomRange(state: EditorState): MarkRange | undefined {
-  if (!getMarkMode(state)) return
   return getSelectedRange(state, ATOM_SOURCE_MARK_NAMES)
 }
 

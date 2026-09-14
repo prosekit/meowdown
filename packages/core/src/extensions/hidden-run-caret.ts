@@ -21,7 +21,7 @@ import {
   getRestPosition,
   getUnitMarkerRuns,
 } from './hidden-run.ts'
-import { getMarkMode } from './mark-mode.ts'
+import { getMarkMode } from './mark-mode-config.ts'
 
 const snapKey = new PluginKey('meowdown-hidden-run-snap')
 const beforeInputKey = new PluginKey('meowdown-hidden-run-beforeinput')

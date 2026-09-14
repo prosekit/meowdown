@@ -11,7 +11,7 @@ import {
 import type { MeowdownHeadingAttrs } from '../heading.ts'
 import type { MdWikilinkAttrs } from '../inline-marks.ts'
 import { groupInlineRuns, hasSyntaxMark } from '../inline-runs.ts'
-import { getMarkMode } from '../mark-mode.ts'
+import { getMarkMode } from '../mark-mode-config.ts'
 import { isMarkOfType } from '../mark-names.ts'
 import { isNodeOfType, type NodeName } from '../node-names.ts'
 

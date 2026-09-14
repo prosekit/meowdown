@@ -1,7 +1,7 @@
 import { definePlugin, getMarkRange } from '@prosekit/core'
 import type { Mark, ResolvedPos } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
-import { Plugin, PluginKey } from '@prosekit/pm/state'
+import { Plugin } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
 import type { MdPackAttrs } from './inline-marks.ts'
@@ -19,15 +19,8 @@ export type MarkMode = 'hide' | 'focus' | 'show'
 
 type MarkModeGetter = (state: EditorState) => MarkMode
 
-const markModeKey = new PluginKey<MarkModeGetter>('mark-mode')
-
-function createMarkModePlugin(getMode: MarkModeGetter): Plugin<MarkModeGetter> {
-  return new Plugin<MarkModeGetter>({
-    key: markModeKey,
-    state: {
-      init: () => getMode,
-      apply: (_transaction, value) => value,
-    },
+function createMarkModePlugin(getMode: MarkModeGetter): Plugin {
+  return new Plugin({
     props: {
       attributes: (state) => ({ 'data-mark-mode': getMode(state) }),
       decorations: (state) => {
@@ -38,21 +31,6 @@ function createMarkModePlugin(getMode: MarkModeGetter): Plugin<MarkModeGetter> {
       },
     },
   })
-}
-
-/**
- * The active mark mode. `defineEditorExtension` always applies
- * `defineMarkMode`, so this is `undefined` only for a state built without it.
- */
-export function getMarkMode(state: EditorState): MarkMode | undefined {
-  // FIXME: we can remove a plguin state and simplify
-  // 1. remove markModeKey
-  // 2. remove state field in createMarkModePlugin
-  // 3. add a new mark-mode-config.ts.
-  // 4. if mark-mode-config.ts, defined a new version of getMarkMode. function getMarkMode(state): {return getEditorConfig(state)?.markMode || "focus"}
-  // 5. remove getMarkMode in mark-mode.ts
-  // 6. in extension.ts, just write defineMarkMode(getMarkMode)
-  return markModeKey.getState(state)?.(state)
 }
 
 // The revealable pack touching `$pos` from `direction`: the outermost pack
