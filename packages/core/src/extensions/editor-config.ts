@@ -110,6 +110,29 @@ function getEditorConfigUpdate(transaction: Transaction): Readonly<EditorConfig>
  */
 export function replaceEditorConfig(
   editor: Pick<Editor, 'state' | 'view' | 'mounted' | 'updateState'>,
+  /* FIXME: let's design the API liket this
+
+  function replaceEditorConfig(editor, configUpdater: (config: EditorConfig) => EditorConfig, dispatch = false) {
+    const controller = configKey.getState(editor.state)
+    if (!controller) return
+
+    let oldConfig = controller.config
+    let newConfig = updater(oldConfig)
+    if (oldConfig === newConfig) return
+
+    controller.config = newConfig
+
+    if (!dispath)  return
+
+    const tr = editor.state.tr.setMeta('addToHistory', false)
+    transaction.setMeta("CONFIG_UPDATED", next.markMode)
+    if (editor.mounted) editor.view.dispatch(transaction)
+    else editor.updateState(editor.state.apply(transaction))
+  }
+
+  SO this file doesn't have other businness logic like "MARK_MODE_META", for "mark-mode.ts", just
+
+  */
   config: EditorConfig,
 ): void {
   const controller = configKey.getState(editor.state)

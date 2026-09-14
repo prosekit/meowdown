@@ -135,5 +135,6 @@ function computeRevealDecorations(
 }
 
 export function defineMarkMode(mode: MarkMode) {
+  // FIXME: is "setMarkMode" command used in anywhere? if no, just remove setMarkMode command from the codebase.
   return union(definePlugin(createMarkModePlugin(mode)), defineCommands({ setMarkMode }))
 }
