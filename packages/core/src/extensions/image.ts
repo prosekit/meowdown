@@ -339,6 +339,7 @@ class ImageMarkView implements MarkView {
       let revision = 0
       this.#unsubscribeXPost?.()
       this.#unsubscribeXPost = this.#subscribeXPost?.(src, () => {
+        // FIXME: it seems that you're using a "revision" key to trigger a "rerender" of a component. Is this realy necessary? Try to add some detailed explanation of why you are using the "revision" key and what specific behavior you are trying to achieve with it as comment and add your
         element.revision = ++revision
       })
       return element
