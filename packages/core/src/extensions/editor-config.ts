@@ -146,6 +146,7 @@ export function defineEditorConfig(initialConfig: EditorConfig) {
         },
       },
       props: {
+        // FIXME: Do not inline these logic in this file. Add a new readonly.ts and view-attributes.ts for standalone extensions, and just read config there
         editable: (state) => !getEditorConfig(state).readOnly,
         attributes: (state) => {
           const { editorClassName, spellCheck } = getEditorConfig(state)
