@@ -323,6 +323,12 @@ class ImageMarkView implements MarkView {
       element.mediaUrlProtocols = this.#xPostHost?.mediaUrlProtocols ?? null
       element.resolver = this.#xPostHost?.resolve ?? defaultResolveXPost
       element.url = src
+      // FIXME: the host subscription + `element.revision` bump is being removed; see the FIXME at
+      // the top of reflect-open `apps/desktop/src/editor/use-x-post-resolver.ts` for why the normal
+      // save flow never needs it and which scenarios are given up. Delete `subscribe` from the
+      // `XPostHost` type, `#unsubscribeXPost` and this block here, and the `useState`/`useEffect`
+      // revision pair in `react/src/components/markdown-view.tsx`; keep `resolve` and
+      // `mediaUrlProtocols`.
       let revision = 0
       this.#unsubscribeXPost?.()
       this.#unsubscribeXPost = this.#xPostHost?.subscribe?.(src, () => {

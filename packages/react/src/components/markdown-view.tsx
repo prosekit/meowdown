@@ -302,6 +302,8 @@ function PostEmbed(props: {
   resolveYouTubeVideo: YouTubeVideoResolver
 }): ReactElement {
   const { kind, src, width, snapshot, xPostHost, resolveYouTubeVideo } = props
+  // FIXME: remove this revision state and the subscription; see the FIXME in
+  // `core/src/extensions/image.ts` and reflect-open `use-x-post-resolver.ts`.
   const [revision, setRevision] = useState(0)
   useEffect(() => {
     return kind === 'x-post'
