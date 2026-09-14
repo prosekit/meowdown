@@ -707,6 +707,10 @@
     user-select: text;
   }
 
+  .ProseMirror .md-image-view-preview:has(> .md-embed-resizable:not([data-width])) {
+    width: 550px;
+  }
+
   /* A video card wrapped in the resizable root: the root owns the width (the
    * persisted or dragged one; block-level `width: auto` keeps the default
    * width when nothing is persisted) and the card fills it. The card's height
