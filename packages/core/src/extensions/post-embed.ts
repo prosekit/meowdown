@@ -90,9 +90,7 @@ export const defaultResolveXPost: XPostResolver = cached(async (url) => {
   const response = await fetch(X_POST_API + id)
   if (!response.ok) return
   const json = (await response.json()) as { data?: unknown }
-  // FIXME: leftover from removing the id check; `return fromSyndication(json.data)`.
-  const post = fromSyndication(json.data)
-  return post
+  return fromSyndication(json.data)
 })
 
 // YouTube's oEmbed endpoint allows cross-origin requests; the snapshot is its
@@ -137,10 +135,6 @@ export interface XPostHost {
    * Read a post for its permalink. An absent result shows the unavailable card.
    */
   resolve: XPostResolver
-  /**
-   * Notify when resolving the same URL would return updated data.
-   */
-  subscribe?: (url: string, notify: () => void) => () => void
   /**
    * Additional trusted protocols for media URLs, such as `reflect-asset:`.
    */

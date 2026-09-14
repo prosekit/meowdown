@@ -1,5 +1,4 @@
 import type { XPost } from '@post-embed/types'
-import { pasteText } from '@prosekit/core/test'
 import { describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
@@ -9,7 +8,6 @@ import { createTweet } from '../testing/tweet-fixture.ts'
 import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
-import { updateEditorConfig } from './editor-config.ts'
 import type { ImageOptions } from './image.ts'
 import { formatMagicComment, parseMagicComment } from './magic-comment.ts'
 
@@ -59,28 +57,6 @@ describe('X post embed', () => {
     void fixture
     await expect.element(xPostCard.locate('[data-fallback]')).toBeInTheDocument()
     expect(xPostCard.locate('[data-pending]').query()).toBeNull()
-  })
-
-  it('refreshes host data through its subscription without editing Markdown', async () => {
-    let notify = () => {}
-    let text = 'First archive'
-    const unsubscribe = vi.fn()
-    const fixture = setup(TWEET, {
-      xPostHost: {
-        resolve: () => createXPost(text),
-        subscribe: (_url, listener) => {
-          notify = listener
-          return unsubscribe
-        },
-      },
-    })
-    await expect.element(xPostCard.getByText('First archive')).toBeInTheDocument()
-    text = 'Updated archive'
-    notify()
-    await expect.element(xPostCard.getByText('Updated archive')).toBeInTheDocument()
-    expect(docToMarkdown(fixture.editor.state.doc).trim()).toBe(TWEET)
-    fixture[Symbol.dispose]()
-    expect(unsubscribe).toHaveBeenCalledOnce()
   })
 
   it('fetches through the default resolver when none is configured', async () => {
@@ -170,27 +146,6 @@ describe('host data and snapshot persistence', () => {
     const { editor } = fixture
     await expect.element(xPostCard.locate('[data-fallback]')).toBeInTheDocument()
     expect(docToMarkdown(editor.state.doc).trim()).toBe(TWEET)
-  })
-
-  // FIXME: stale comment, X cards no longer write anything back. The test below only checks that
-  // undoing an embed paste restores the pasted text, which embed-paste.test.ts already covers;
-  // delete the test (or, if kept, replace this comment).
-  // The write-back replaces the whole image range, so the undo of the paste
-  // that inserted the image maps over it and removes the snapshot too. An
-  // insertion at the range end would leave the comment behind as plain text.
-  it('undoing a pasted X card restores its URL', async () => {
-    using fixture = setupFixture({ extensionOptions: { xPostHost: { resolve: () => post } } })
-    const { editor, n, view } = fixture
-    fixture.set(n.doc(n.paragraph('<a>')))
-    updateEditorConfig(editor, { embedPaste: true })
-    const url = 'https://x.com/jack/status/20'
-    pasteText(view, url)
-    await expect.poll(() => docToMarkdown(editor.state.doc).trim()).toBe(TWEET)
-
-    editor.commands.undo()
-    expect(editor.state.doc.textContent).toBe(url)
-    editor.commands.undo()
-    expect(editor.state.doc.textContent).toBe('')
   })
 })
 

@@ -219,7 +219,7 @@ export interface EditorProps {
   resolveFileInfo?: FileViewOptions['resolveFileInfo']
 
   /**
-   * Host data lookup, change subscription, and trusted media protocols for X cards.
+   * Host data lookup and trusted media protocols for X cards.
    * Keep the object stable (for example, with `useMemo`). When omitted, public
    * posts use `defaultResolveXPost` through react-tweet's hosted proxy.
    */

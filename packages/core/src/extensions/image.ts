@@ -46,7 +46,7 @@ export interface ImageOptions {
    */
   resolveImageUrl?: ImageUrlResolver
   /**
-   * Host data lookup, change subscription, and trusted media protocols for X cards.
+   * Host data lookup and trusted media protocols for X cards.
    * When omitted, public posts use `defaultResolveXPost`.
    */
   xPostHost?: XPostHost
@@ -218,7 +218,6 @@ class ImageMarkView implements MarkView {
   #resolveImageUrl: ImageUrlResolver | undefined
   #xPostHost: XPostHost | undefined
   #resolveYouTubeVideo: YouTubeVideoResolver
-  #unsubscribeXPost: (() => void) | undefined
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
@@ -284,7 +283,6 @@ class ImageMarkView implements MarkView {
 
   destroy(): void {
     this.#destroyed = true
-    this.#unsubscribeXPost?.()
   }
 
   /**
@@ -319,26 +317,9 @@ class ImageMarkView implements MarkView {
     if (kind === 'x-post') {
       registerXPost()
       const element = document.createElement('post-embed-x-post')
-      // FIXME: `null` is the prop default; drop the line.
-      element.data = null
       element.mediaUrlProtocols = this.#xPostHost?.mediaUrlProtocols ?? null
       element.resolver = this.#xPostHost?.resolve ?? defaultResolveXPost
       element.url = src
-      // FIXME: the host subscription + `element.revision` bump is being removed; see the FIXME at
-      // the top of reflect-open `apps/desktop/src/editor/use-x-post-resolver.ts` for why the normal
-      // save flow never needs it and which scenarios are given up. Delete `subscribe` from the
-      // `XPostHost` type, `#unsubscribeXPost` and this block here, and the `useState`/`useEffect`
-      // revision pair in `react/src/components/markdown-view.tsx`; keep `resolve` and
-      // `mediaUrlProtocols`.
-      let revision = 0
-      this.#unsubscribeXPost?.()
-      this.#unsubscribeXPost = this.#xPostHost?.subscribe?.(src, () => {
-        // The URL and resolver identity stay unchanged when a host archive receives
-        // new text or media. Changing revision invalidates the custom element's
-        // cached fetch, so it calls the host again instead of rendering stale data.
-        // This is a data invalidation signal, not a React remount key.
-        element.revision = ++revision
-      })
       return element
     }
     registerYouTubeVideo()

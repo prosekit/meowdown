@@ -302,14 +302,6 @@ function PostEmbed(props: {
   resolveYouTubeVideo: YouTubeVideoResolver
 }): ReactElement {
   const { kind, src, width, snapshot, xPostHost, resolveYouTubeVideo } = props
-  // FIXME: remove this revision state and the subscription; see the FIXME in
-  // `core/src/extensions/image.ts` and reflect-open `use-x-post-resolver.ts`.
-  const [revision, setRevision] = useState(0)
-  useEffect(() => {
-    return kind === 'x-post'
-      ? xPostHost?.subscribe?.(src, () => setRevision((value) => value + 1))
-      : undefined
-  }, [kind, src, xPostHost])
   // Registration is idempotent and must precede the element so React sets
   // `data`, `url`, and `resolver` as properties of the upgraded element.
   registerXPost()
@@ -329,7 +321,6 @@ function PostEmbed(props: {
             url: src,
             resolver: xPostHost?.resolve ?? defaultResolveXPost,
             mediaUrlProtocols: xPostHost?.mediaUrlProtocols ?? null,
-            revision,
           })
         : createElement('post-embed-youtube-video', {
             data: saved?.kind === 'youtube-video' ? saved.data : null,
