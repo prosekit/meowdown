@@ -78,6 +78,8 @@ Import both stylesheets: `@meowdown/core/style.css` (the editor theme and variab
 
 MIT
 
+<!--FIXME delete this section -->
+
 Editor behavior props are supplied at creation and synchronized after committed
 renders. Reapplying equal values is a no-op. Callback updates do not replace the
 editor state, while changes to `resolveFileLink`, `resolveWikiEmbed`, and
