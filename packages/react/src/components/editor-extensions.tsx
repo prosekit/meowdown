@@ -43,11 +43,11 @@ export function EditorExtensions({
   }, [editor, deferredSearchQuery])
 
   useExtension(
-    useMemo(() => (onDocChange ? defineDocChangeHandler(onDocChange) : undefined), [onDocChange]),
+    useMemo(() => (onDocChange ? defineDocChangeHandler(onDocChange) : null), [onDocChange]),
   )
   useExtension(
     useMemo(
-      () => (onSearchChange ? defineSearchStatusHandler(onSearchChange) : undefined),
+      () => (onSearchChange ? defineSearchStatusHandler(onSearchChange) : null),
       [onSearchChange],
     ),
   )
