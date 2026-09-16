@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.71.2](https://github.com/prosekit/meowdown/compare/v0.71.1...v0.71.2) (2026-09-16)
+
+
+### Bug Fixes
+
+* stop clipping post-embed cards in the preview wrapper ([#570](https://github.com/prosekit/meowdown/issues/570)) ([85331ba](https://github.com/prosekit/meowdown/commit/85331ba5bdc5ae2882d3ef7207092083184db178))
+
 ## [0.71.1](https://github.com/prosekit/meowdown/compare/v0.71.0...v0.71.1) (2026-09-14)
 
 
