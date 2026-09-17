@@ -26,14 +26,17 @@ function renderBody(hit: WikilinkHoverHit) {
  * Records, in page time, when the pointer first entered each link and every
  * distinct text the card showed after it mounted.
  */
-function observe(alpha: Element, beta: Element) {
+function observe() {
   const enter: { alpha?: number; beta?: number } = {}
-  const onOver = (event: MouseEvent) => {
-    const target = event.target as Node
-    if (enter.alpha == null && alpha.contains(target)) enter.alpha = performance.now()
-    if (enter.beta == null && beta.contains(target)) enter.beta = performance.now()
+  const onMove = (event: MouseEvent) => {
+    const link = (event.target as Element).closest?.('[data-testid="wikilink"]')
+    if (!link) return
+    const label = link.textContent ?? ''
+    if (enter.alpha == null && label.includes('A wide alias')) enter.alpha = performance.now()
+    if (enter.beta == null && label.includes('Another wide alias')) enter.beta = performance.now()
   }
-  document.addEventListener('mouseover', onOver, {capture: true})
+  document.addEventListener('mousemove', onMove, {capture: true})
+  document.addEventListener('mouseover', onMove, {capture: true})
   const shown: { t: number; text: string }[] = []
   const observer = new MutationObserver(() => {
     const element = card.query()
@@ -46,7 +49,8 @@ function observe(alpha: Element, beta: Element) {
     enter,
     shown,
     stop: () => {
-      document.removeEventListener('mouseover', onOver, true)
+      document.removeEventListener('mousemove', onMove, true)
+      document.removeEventListener('mouseover', onMove, true)
       observer.disconnect()
     },
   }
@@ -69,14 +73,14 @@ async function setup(openDelay?: number, onBody?: (hit: WikilinkHoverHit) => voi
   )
   const links = pmRoot.getByTestId('wikilink')
   await expect.element(links.nth(1)).toBeVisible()
-  return { links, alpha: links.nth(0).element(), beta: links.nth(1).element() }
+  return { links }
 }
 
 describe('probe: current test with timestamps', () => {
   for (let i = 0; i < 10; i++) {
     it(`probe #${i}`, { retry: 0 }, async () => {
-      const { links, alpha, beta } = await setup()
-      const rec = observe(alpha, beta)
+      const { links } = await setup()
+      const rec = observe()
       const t0 = performance.now()
       await hover(links.nth(0))
       const t1 = performance.now()
@@ -125,8 +129,8 @@ describe('candidate A: observed targets + in-page timing, 100ms on Alpha', () =>
   for (let i = 0; i < N; i++) {
     it(`candidate A #${i}`, { retry: 0 }, async () => {
       const targets: string[] = []
-      const { links, alpha, beta } = await setup(undefined, (hit) => targets.push(hit.target))
-      const rec = observe(alpha, beta)
+      const { links } = await setup(undefined, (hit) => targets.push(hit.target))
+      const rec = observe()
       await hover(links.nth(0))
       await sleep(100)
       await hover(links.nth(1))

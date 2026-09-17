@@ -52,6 +52,9 @@ export function defineSharedConfig({
           height: 600,
         },
         provider: playwright({
+          // EXPERIMENT: with a provider action timeout, `expect.element` falls back
+          // to the 1s poll default instead of the remaining test deadline.
+          actionTimeout: 5000,
           launchOptions: {
             // Opt into the new Chrome headless mode by using "chromium" channel. Along
             // with `playwright install chromium --no-shell`, we no longer need to
