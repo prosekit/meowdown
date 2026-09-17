@@ -1,5 +1,4 @@
-import { sleep } from '@ocavue/utils'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
 import { resolveWikilinkAlias, setupFixture } from '../testing/index.ts'
@@ -22,6 +21,20 @@ function applyHoverable(
   return fixture
 }
 
+function targets(onHoverChange: ReturnType<typeof vi.fn<WikilinkHoverHandler>>) {
+  return onHoverChange.mock.calls.map(([hit]) => hit?.target)
+}
+
+// Only the timers the hover handler schedules are faked. Playwright's
+// pointer actions poll the page with `requestAnimationFrame`, which stays real.
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+})
+
 describe('wikilink hover callback', () => {
   it('emits one enter while moving among one link label and its children', async () => {
     const onHoverChange = vi.fn<WikilinkHoverHandler>()
@@ -31,7 +44,7 @@ describe('wikilink hover callback', () => {
     const label = preview.locate('.md-wikilink-view-label')
 
     await preview.hover()
-    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
+    vi.advanceTimersByTime(300)
     label.element().dispatchEvent(
       new MouseEvent('mouseover', {
         bubbles: true,
@@ -55,10 +68,10 @@ describe('wikilink hover callback', () => {
     const links = pmRoot.getByTestId('wikilink')
 
     await links.nth(0).hover()
-    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
+    vi.advanceTimersByTime(300)
     await links.nth(1).hover()
 
-    expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Alpha', 'Beta'])
+    expect(targets(onHoverChange)).toEqual(['Alpha', 'Beta'])
   })
 
   it('leaves when the hovered link is deleted without pointer movement', async () => {
@@ -66,10 +79,10 @@ describe('wikilink hover callback', () => {
     using fixture = applyHoverable('before [[Note]] after', onHoverChange)
 
     await pmRoot.getByTestId('wikilink').hover()
-    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
+    vi.advanceTimersByTime(300)
     fixture.set(fixture.n.doc(fixture.n.paragraph('before after')))
 
-    expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note', undefined])
+    expect(targets(onHoverChange)).toEqual(['Note', undefined])
   })
 
   it('leaves when the hovered link is replaced', async () => {
@@ -77,10 +90,10 @@ describe('wikilink hover callback', () => {
     using fixture = applyHoverable('[[Alpha]]', onHoverChange)
 
     await pmRoot.getByTestId('wikilink').hover()
-    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
+    vi.advanceTimersByTime(300)
     fixture.set(fixture.n.doc(fixture.n.paragraph('[[Beta]]')))
 
-    expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Alpha', undefined])
+    expect(targets(onHoverChange)).toEqual(['Alpha', undefined])
   })
 
   it('keeps the same hovered element active through an unrelated transaction', async () => {
@@ -88,10 +101,10 @@ describe('wikilink hover callback', () => {
     using fixture = applyHoverable('before [[Note]]', onHoverChange)
 
     await pmRoot.getByTestId('wikilink').hover()
-    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
+    vi.advanceTimersByTime(300)
     fixture.view.dispatch(fixture.state.tr.insertText('new ', 1))
 
-    expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note'])
+    expect(targets(onHoverChange)).toEqual(['Note'])
   })
 
   it('leaves when the editor is destroyed', async () => {
@@ -100,31 +113,25 @@ describe('wikilink hover callback', () => {
       using fixture = applyHoverable('[[Note]]', onHoverChange)
       void fixture
       await pmRoot.getByTestId('wikilink').hover()
-      await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
+      vi.advanceTimersByTime(300)
     }
 
-    expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note', undefined])
+    expect(targets(onHoverChange)).toEqual(['Note', undefined])
   })
 })
 
 describe('wikilink hover delays', () => {
-  // Park the pointer away from where the previous test left it, so the
-  // first hover below is a real move that fires `mouseover`.
-  beforeEach(async () => {
-    await page.locate('body').hover()
-  })
-
-  it('does not enter before the open delay elapses', async () => {
+  it('enters once the open delay elapses', async () => {
     const onHoverChange = vi.fn<WikilinkHoverHandler>()
-    using fixture = applyHoverable('[[Note]]', onHoverChange, 1000)
+    using fixture = applyHoverable('[[Note]]', onHoverChange)
     void fixture
 
     await pmRoot.getByTestId('wikilink').hover()
-    await sleep(300)
+    vi.advanceTimersByTime(299)
     expect(onHoverChange).not.toHaveBeenCalled()
-    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled(), { timeout: 2000 })
+    vi.advanceTimersByTime(1)
 
-    expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note'])
+    expect(targets(onHoverChange)).toEqual(['Note'])
   })
 
   it('restarts the open delay when the pointer moves to an adjacent link', async () => {
@@ -132,63 +139,83 @@ describe('wikilink hover delays', () => {
     using fixture = applyHoverable(
       '[[Alpha|A wide alias]][[Beta|Another wide alias]]',
       onHoverChange,
-      1000,
     )
     void fixture
     const links = pmRoot.getByTestId('wikilink')
 
     await links.nth(0).hover()
-    await sleep(300)
+    vi.advanceTimersByTime(200)
     await links.nth(1).hover()
-    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled(), { timeout: 2000 })
+    vi.advanceTimersByTime(299)
+    expect(onHoverChange).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(1)
 
-    expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Beta'])
+    expect(targets(onHoverChange)).toEqual(['Beta'])
   })
 
   it('cancels a pending enter when the pointer leaves', async () => {
     const onHoverChange = vi.fn<WikilinkHoverHandler>()
-    using fixture = applyHoverable('[[Note]]', onHoverChange, 300)
+    using fixture = applyHoverable('[[Note]]', onHoverChange)
     void fixture
     const link = pmRoot.getByTestId('wikilink')
 
     await link.hover()
+    vi.advanceTimersByTime(200)
     await link.unhover()
-    await sleep(600)
+    vi.advanceTimersByTime(1000)
 
     expect(onHoverChange).not.toHaveBeenCalled()
   })
 
-  it('leaves after the close delay and not before', async () => {
+  it('leaves once the close delay elapses', async () => {
     const onHoverChange = vi.fn<WikilinkHoverHandler>()
-    using fixture = applyHoverable('[[Note]]', onHoverChange, undefined, 1000)
+    using fixture = applyHoverable('[[Note]]', onHoverChange)
     void fixture
     const link = pmRoot.getByTestId('wikilink')
 
     await link.hover()
-    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
+    vi.advanceTimersByTime(300)
     await link.unhover()
-    await sleep(300)
-    expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note'])
-    await vi.waitFor(
-      () => {
-        expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note', undefined])
-      },
-      { timeout: 2000 },
-    )
+    vi.advanceTimersByTime(99)
+    expect(targets(onHoverChange)).toEqual(['Note'])
+    vi.advanceTimersByTime(1)
+
+    expect(targets(onHoverChange)).toEqual(['Note', undefined])
   })
 
   it('re-enters without a new open delay when returning within the close delay', async () => {
     const onHoverChange = vi.fn<WikilinkHoverHandler>()
-    using fixture = applyHoverable('[[Note]]', onHoverChange, undefined, 1000)
+    using fixture = applyHoverable('[[Note]]', onHoverChange)
     void fixture
     const link = pmRoot.getByTestId('wikilink')
 
     await link.hover()
-    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
+    vi.advanceTimersByTime(300)
     await link.unhover()
+    vi.advanceTimersByTime(50)
     await link.hover()
-    await sleep(1300)
+    vi.advanceTimersByTime(1000)
 
-    expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note'])
+    expect(targets(onHoverChange)).toEqual(['Note'])
+  })
+
+  it('honors custom delays', async () => {
+    const onHoverChange = vi.fn<WikilinkHoverHandler>()
+    using fixture = applyHoverable('[[Note]]', onHoverChange, 50, 20)
+    void fixture
+    const link = pmRoot.getByTestId('wikilink')
+
+    await link.hover()
+    vi.advanceTimersByTime(49)
+    expect(onHoverChange).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(1)
+    expect(targets(onHoverChange)).toEqual(['Note'])
+
+    await link.unhover()
+    vi.advanceTimersByTime(19)
+    expect(targets(onHoverChange)).toEqual(['Note'])
+    vi.advanceTimersByTime(1)
+
+    expect(targets(onHoverChange)).toEqual(['Note', undefined])
   })
 })
