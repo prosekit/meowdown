@@ -26,7 +26,7 @@ function HostPreviewCard() {
 }
 
 describe('WikilinkHoverCard', () => {
-  it('opens after a 300ms dwell and closes on leave', async () => {
+  it('opens after a 300ms delay and closes on leave', async () => {
     await unhover()
     await render(
       <MeowdownEditor initialMarkdown="see [[Note]] here" blockHandle={false}>

@@ -7,13 +7,13 @@ import { findWikilinkAt, findWikilinkForElement, type WikilinkHit } from './wiki
 const wikilinkHoverKey = new PluginKey('meowdown-wikilink-hover')
 
 /**
- * Dwell before a cold hover enters, in ms.
+ * Delay before a cold hover enters, in ms.
  */
 const OPEN_DELAY = 300
 
 /**
  * Grace before a leave fires, in ms. Returning within it re-enters without
- * a new dwell.
+ * a new delay.
  */
 const CLOSE_DELAY = 100
 
@@ -32,30 +32,20 @@ export interface WikilinkHoverHit extends WikilinkHit {
  */
 export type WikilinkHoverHandler = (hit: WikilinkHoverHit | undefined) => void
 
-export interface WikilinkHoverOptions {
-  /**
-   * Dwell before a cold hover enters, in ms. Defaults to 300.
-   */
-  openDelay?: number
-  /**
-   * Grace before a leave fires, in ms. Defaults to 100.
-   */
-  closeDelay?: number
-}
-
 /**
  * Track the wikilink the pointer rests on without attaching per-link
  * listeners.
  *
- * A cold pointer must dwell `openDelay` first. Moving to an adjacent link
- * restarts the dwell, or switches at once when a link is already entered.
- * Leave fires `closeDelay` after the pointer leaves, and immediately when the
- * hovered link is deleted, replaced, or changes target. Moving among
- * descendants of one label is de-duplicated.
+ * A cold pointer must rest on a link for `openDelay` ms before enter fires.
+ * Moving to an adjacent link restarts the delay, or switches at once when a
+ * link is already entered. Leave fires `closeDelay` ms after the pointer
+ * leaves, and immediately when the hovered link is deleted, replaced, or
+ * changes target. Moving among descendants of one label is de-duplicated.
  */
 export function defineWikilinkHoverHandler(
   onHoverChange: WikilinkHoverHandler,
-  { openDelay = OPEN_DELAY, closeDelay = CLOSE_DELAY }: WikilinkHoverOptions = {},
+  openDelay: number = OPEN_DELAY,
+  closeDelay: number = CLOSE_DELAY,
 ): PlainExtension {
   return defineMarkHoverHandler<WikilinkHit>({
     key: wikilinkHoverKey,

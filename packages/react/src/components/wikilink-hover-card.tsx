@@ -31,7 +31,7 @@ export interface WikilinkHoverCardProps {
 
 /**
  * Show host-rendered content for the wiki link the pointer rests on. The
- * dwell and the leave grace live in the core hover handler.
+ * open and close delays live in the core hover handler.
  */
 export function WikilinkHoverCard({ children, className }: WikilinkHoverCardProps): ReactNode {
   const [hit, setHit] = useState<WikilinkHoverHit>()

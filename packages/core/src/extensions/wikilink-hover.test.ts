@@ -1,25 +1,22 @@
 import { sleep } from '@ocavue/utils'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
 import { resolveWikilinkAlias, setupFixture } from '../testing/index.ts'
 
 import { updateEditorConfig } from './editor-config.ts'
-import {
-  defineWikilinkHoverHandler,
-  type WikilinkHoverHandler,
-  type WikilinkHoverOptions,
-} from './wikilink-hover.ts'
+import { defineWikilinkHoverHandler, type WikilinkHoverHandler } from './wikilink-hover.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 
 function applyHoverable(
   markdown: string,
   onHoverChange: WikilinkHoverHandler,
-  options?: WikilinkHoverOptions,
+  openDelay?: number,
+  closeDelay?: number,
 ) {
   const fixture = setupFixture({ extensionOptions: { resolveWikilink: resolveWikilinkAlias } })
-  fixture.editor.use(defineWikilinkHoverHandler(onHoverChange, options))
+  fixture.editor.use(defineWikilinkHoverHandler(onHoverChange, openDelay, closeDelay))
   fixture.set(fixture.n.doc(fixture.n.paragraph(markdown)))
   updateEditorConfig(fixture.editor, { markMode: 'hide' })
   return fixture
@@ -110,10 +107,16 @@ describe('wikilink hover callback', () => {
   })
 })
 
-describe('wikilink hover dwell', () => {
-  it('does not enter before the dwell elapses', async () => {
+describe('wikilink hover delays', () => {
+  // Park the pointer away from where the previous test left it, so the
+  // first hover below is a real move that fires `mouseover`.
+  beforeEach(async () => {
+    await page.locate('body').hover()
+  })
+
+  it('does not enter before the open delay elapses', async () => {
     const onHoverChange = vi.fn<WikilinkHoverHandler>()
-    using fixture = applyHoverable('[[Note]]', onHoverChange, { openDelay: 1000 })
+    using fixture = applyHoverable('[[Note]]', onHoverChange, 1000)
     void fixture
 
     await pmRoot.getByTestId('wikilink').hover()
@@ -124,12 +127,12 @@ describe('wikilink hover dwell', () => {
     expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note'])
   })
 
-  it('restarts the dwell when the pointer moves to an adjacent link', async () => {
+  it('restarts the open delay when the pointer moves to an adjacent link', async () => {
     const onHoverChange = vi.fn<WikilinkHoverHandler>()
     using fixture = applyHoverable(
       '[[Alpha|A wide alias]][[Beta|Another wide alias]]',
       onHoverChange,
-      { openDelay: 1000 },
+      1000,
     )
     void fixture
     const links = pmRoot.getByTestId('wikilink')
@@ -144,7 +147,7 @@ describe('wikilink hover dwell', () => {
 
   it('cancels a pending enter when the pointer leaves', async () => {
     const onHoverChange = vi.fn<WikilinkHoverHandler>()
-    using fixture = applyHoverable('[[Note]]', onHoverChange, { openDelay: 300 })
+    using fixture = applyHoverable('[[Note]]', onHoverChange, 300)
     void fixture
     const link = pmRoot.getByTestId('wikilink')
 
@@ -155,9 +158,9 @@ describe('wikilink hover dwell', () => {
     expect(onHoverChange).not.toHaveBeenCalled()
   })
 
-  it('leaves after the grace and not before', async () => {
+  it('leaves after the close delay and not before', async () => {
     const onHoverChange = vi.fn<WikilinkHoverHandler>()
-    using fixture = applyHoverable('[[Note]]', onHoverChange, { closeDelay: 1000 })
+    using fixture = applyHoverable('[[Note]]', onHoverChange, undefined, 1000)
     void fixture
     const link = pmRoot.getByTestId('wikilink')
 
@@ -174,9 +177,9 @@ describe('wikilink hover dwell', () => {
     )
   })
 
-  it('re-enters without a new dwell when returning within the grace', async () => {
+  it('re-enters without a new open delay when returning within the close delay', async () => {
     const onHoverChange = vi.fn<WikilinkHoverHandler>()
-    using fixture = applyHoverable('[[Note]]', onHoverChange, { closeDelay: 1000 })
+    using fixture = applyHoverable('[[Note]]', onHoverChange, undefined, 1000)
     void fixture
     const link = pmRoot.getByTestId('wikilink')
 
