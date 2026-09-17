@@ -71,6 +71,7 @@ export function collectPostEmbeds(
     enter: (node) => {
       switch (node.type.id) {
         case LEZER_NODE_IDS.LinkReference: {
+          // FIXME: to collect tweet and youtube, we do not need to handle LEZER_NODE_IDS.LinkReference LEZER_NODE_IDS.HTMLBlock LEZER_NODE_IDS.ProcessingInstructionBlock. We can just handle LEZER_NODE_IDS.Image. Just add a collectImage function under @meowdown/markdown
           const definition = parseReferenceDefinition(text.slice(node.from, node.to))
           if (definition != null && !referenceDefinitions.has(definition.key)) {
             referenceDefinitions.set(definition.key, definition)
