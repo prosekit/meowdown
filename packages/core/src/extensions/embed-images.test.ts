@@ -16,6 +16,7 @@ interface Embed {
 
 // FIXME: remove this test file
 // FIXME: merge the latest origin/master into this branch
+// FIXME: based on the latest code in origin/master, add changeset file(s)
 
 describe('collectImages with matchEmbed', () => {
   // The cards a mounted editor asks its resolvers for, in the order it asks.
