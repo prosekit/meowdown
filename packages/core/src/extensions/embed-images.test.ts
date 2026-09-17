@@ -14,6 +14,9 @@ interface Embed {
   url: string
 }
 
+// FIXME: remove this test file
+// FIXME: merge the latest origin/master into this branch
+
 describe('collectImages with matchEmbed', () => {
   // The cards a mounted editor asks its resolvers for, in the order it asks.
   // A trailing card marks the end of rendering.
