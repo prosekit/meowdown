@@ -33,7 +33,7 @@ export interface MarkHoverConfig<Payload> {
    */
   onHoverChange: (hit: MarkHoverHit<Payload> | undefined) => void
   /**
-   * Milliseconds a cold pointer must dwell on the mark before enter fires.
+   * Milliseconds a cold pointer must rest on the mark before enter fires.
    * Switching from another mark, or returning during the leave grace, enters
    * immediately.
    */
@@ -128,7 +128,7 @@ export function defineMarkHoverHandler<Payload>(config: MarkHoverConfig<Payload>
     const payload = findPayloadForElement(view, element)
     if (payload == null) return
     // Switching from another mark, or returning during the leave grace,
-    // skips the dwell.
+    // skips the open delay.
     if (emitted) {
       emit({ payload, element })
       return
@@ -136,7 +136,7 @@ export function defineMarkHoverHandler<Payload>(config: MarkHoverConfig<Payload>
     cancel()
     scheduledElement = element
     timer = setTimeout(() => {
-      // The mark may be gone or rewritten by the time the dwell elapses.
+      // The mark may be gone or rewritten by the time the open delay elapses.
       const fresh = element.isConnected ? findPayloadForElement(view, element) : undefined
       if (fresh == null) {
         cancel()
