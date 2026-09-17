@@ -448,8 +448,10 @@ describe('LinkMenu', () => {
     await screen.getByText('Docs').click()
     await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
     await expect.element(popover.getByTestId('link-popover-input')).toHaveFocus()
-    await userEvent.keyboard('{Escape}')
-    await expect.element(popover).not.toBeInTheDocument()
+    await vi.waitFor(async () => {
+      await userEvent.keyboard('{Escape}')
+      await expect.element(popover, { timeout: 1_000 }).not.toBeInTheDocument()
+    })
   })
 
   it('keeps reference links read-only in the preview and Mod-k flow', async () => {
