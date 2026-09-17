@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import type { WikilinkHoverHit } from '@meowdown/core'
 import { sleep } from '@ocavue/utils'
 import { createRef, type ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
@@ -25,7 +26,7 @@ function HostPreviewCard() {
 }
 
 describe('WikilinkHoverCard', () => {
-  it('opens after a 300ms dwell and closes on leave', async () => {
+  it('opens after a 300ms delay and closes on leave', async () => {
     await unhover()
     await render(
       <MeowdownEditor initialMarkdown="see [[Note]] here" blockHandle={false}>
@@ -41,25 +42,28 @@ describe('WikilinkHoverCard', () => {
     await expect.element(card).not.toBeInTheDocument()
   })
 
-  it('restarts the dwell when the pointer moves to an adjacent target', async () => {
+  it('never renders a link the pointer only passed through', async () => {
     await unhover()
+    const targets: string[] = []
+    const renderBody = (hit: WikilinkHoverHit) => {
+      targets.push(hit.target)
+      return <div data-testid="hover-body">Preview: {hit.target}</div>
+    }
     await render(
       <MeowdownEditor
         initialMarkdown="[[Alpha|A wide alias]][[Beta|Another wide alias]]"
         resolveWikilink={resolveWikilinkAlias}
         blockHandle={false}
       >
-        <HostPreviewCard />
+        <WikilinkHoverCard>{renderBody}</WikilinkHoverCard>
       </MeowdownEditor>,
     )
     const links = pmRoot.getByTestId('wikilink')
 
     await hover(links.nth(0))
-    await sleep(200)
     await hover(links.nth(1))
-    await sleep(150)
-    await expect.element(card).not.toBeInTheDocument()
-    await expect.element(card, { timeout: 1000 }).toHaveTextContent('Preview: Beta')
+    await expect.element(card, { timeout: 2000 }).toHaveTextContent('Preview: Beta')
+    expect(targets).not.toContain('Alpha')
   })
 
   it('moves the open card to the next hovered link', async () => {

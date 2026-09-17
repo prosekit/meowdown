@@ -7,7 +7,7 @@ import { defineMarkHoverHandler, type MarkHoverHit } from './mark-hover.ts'
 const linkHoverKey = new PluginKey('meowdown-link-hover')
 
 /**
- * Dwell before a cold hover enters, in ms.
+ * Delay before a cold hover enters, in ms.
  */
 const OPEN_DELAY = 300
 
@@ -29,7 +29,7 @@ export interface LinkHoverOptions {
 
 /**
  * Track the link under the user's attention: a mouse hover after a short
- * dwell, or a touch tap immediately, since touch has no hover. Without the
+ * delay, or a touch tap immediately, since touch has no hover. Without the
  * tap entry, the popup's preview and actions would stay unreachable on
  * phones, where a tap on a link only places the caret and raises the
  * software keyboard.
