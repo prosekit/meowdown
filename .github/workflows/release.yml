@@ -11,35 +11,30 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  version:
+  release:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
       contents: write
       pull-requests: write
-    steps:
-      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
-        id: release-please
-        with:
-          token: ${{ secrets.BOT_GITHUB_TOKEN }}
-    outputs:
-      releases_created: ${{ steps.release-please.outputs.releases_created }}
-
-  publish:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: [version]
-    permissions:
-      contents: read
       id-token: write
-    if: ${{ needs.version.outputs.releases_created == 'true' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: ./.github/actions/setup
 
       - name: Build
         run: pnpm run build
 
-      - name: Publish to NPM
-        run: pnpm publish -r --no-git-checks
+      - name: Version or publish
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+        with:
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          version-script: pnpm run ci:version
+          publish-script: pnpm run ci:publish
+          commit-message: 'chore: version packages'
+          pr-title: 'chore: version packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}

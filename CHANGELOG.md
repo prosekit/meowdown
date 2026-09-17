@@ -1,5 +1,7 @@
 # Changelog
 
+This file stops at 0.71.2. Later releases are recorded per package: [`@meowdown/core`](packages/core/CHANGELOG.md), [`@meowdown/react`](packages/react/CHANGELOG.md), [`@meowdown/markdown`](packages/markdown/CHANGELOG.md).
+
 ## [0.71.2](https://github.com/prosekit/meowdown/compare/v0.71.1...v0.71.2) (2026-09-16)
 
 
