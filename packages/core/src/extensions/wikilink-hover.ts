@@ -7,6 +7,17 @@ import { findWikilinkAt, findWikilinkForElement, type WikilinkHit } from './wiki
 const wikilinkHoverKey = new PluginKey('meowdown-wikilink-hover')
 
 /**
+ * Dwell before a cold hover enters, in ms.
+ */
+const OPEN_DELAY = 300
+
+/**
+ * Grace before a leave fires, in ms. Returning within it re-enters without
+ * a new dwell.
+ */
+const CLOSE_DELAY = 100
+
+/**
  * A wikilink currently under the pointer.
  */
 export interface WikilinkHoverHit extends WikilinkHit {
@@ -21,21 +32,37 @@ export interface WikilinkHoverHit extends WikilinkHit {
  */
 export type WikilinkHoverHandler = (hit: WikilinkHoverHit | undefined) => void
 
+export interface WikilinkHoverOptions {
+  /**
+   * Dwell before a cold hover enters, in ms. Defaults to 300.
+   */
+  openDelay?: number
+  /**
+   * Grace before a leave fires, in ms. Defaults to 100.
+   */
+  closeDelay?: number
+}
+
 /**
- * Track the wikilink under the pointer without attaching per-link listeners.
+ * Track the wikilink the pointer rests on without attaching per-link
+ * listeners.
  *
- * The handler is revalidated after document transactions and receives leave
- * when the hovered link is deleted, replaced, or changes target. Moving among
+ * A cold pointer must dwell `openDelay` first. Moving to an adjacent link
+ * restarts the dwell, or switches at once when a link is already entered.
+ * Leave fires `closeDelay` after the pointer leaves, and immediately when the
+ * hovered link is deleted, replaced, or changes target. Moving among
  * descendants of one label is de-duplicated.
  */
-export function defineWikilinkHoverHandler(onHoverChange: WikilinkHoverHandler): PlainExtension {
+export function defineWikilinkHoverHandler(
+  onHoverChange: WikilinkHoverHandler,
+  { openDelay = OPEN_DELAY, closeDelay = CLOSE_DELAY }: WikilinkHoverOptions = {},
+): PlainExtension {
   return defineMarkHoverHandler<WikilinkHit>({
     key: wikilinkHoverKey,
     selector: '.md-wikilink-view-preview',
-    // WikilinkHoverCard owns the dwell and grace, and a touch tap must keep
-    // navigating: the card is inert.
-    openDelay: 0,
-    closeDelay: 0,
+    openDelay,
+    closeDelay,
+    // A touch tap must keep navigating: the card is inert.
     tap: false,
     findPayloadAt: findWikilinkAt,
     findPayloadForElement: findWikilinkForElement,

@@ -1,16 +1,25 @@
+import { sleep } from '@ocavue/utils'
 import { describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
 import { resolveWikilinkAlias, setupFixture } from '../testing/index.ts'
 
 import { updateEditorConfig } from './editor-config.ts'
-import { defineWikilinkHoverHandler, type WikilinkHoverHandler } from './wikilink-hover.ts'
+import {
+  defineWikilinkHoverHandler,
+  type WikilinkHoverHandler,
+  type WikilinkHoverOptions,
+} from './wikilink-hover.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 
-function applyHoverable(markdown: string, onHoverChange: WikilinkHoverHandler) {
+function applyHoverable(
+  markdown: string,
+  onHoverChange: WikilinkHoverHandler,
+  options?: WikilinkHoverOptions,
+) {
   const fixture = setupFixture({ extensionOptions: { resolveWikilink: resolveWikilinkAlias } })
-  fixture.editor.use(defineWikilinkHoverHandler(onHoverChange))
+  fixture.editor.use(defineWikilinkHoverHandler(onHoverChange, options))
   fixture.set(fixture.n.doc(fixture.n.paragraph(markdown)))
   updateEditorConfig(fixture.editor, { markMode: 'hide' })
   return fixture
@@ -98,5 +107,85 @@ describe('wikilink hover callback', () => {
     }
 
     expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note', undefined])
+  })
+})
+
+describe('wikilink hover dwell', () => {
+  it('does not enter before the dwell elapses', async () => {
+    const onHoverChange = vi.fn<WikilinkHoverHandler>()
+    using fixture = applyHoverable('[[Note]]', onHoverChange, { openDelay: 1000 })
+    void fixture
+
+    await pmRoot.getByTestId('wikilink').hover()
+    await sleep(300)
+    expect(onHoverChange).not.toHaveBeenCalled()
+    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled(), { timeout: 2000 })
+
+    expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note'])
+  })
+
+  it('restarts the dwell when the pointer moves to an adjacent link', async () => {
+    const onHoverChange = vi.fn<WikilinkHoverHandler>()
+    using fixture = applyHoverable(
+      '[[Alpha|A wide alias]][[Beta|Another wide alias]]',
+      onHoverChange,
+      { openDelay: 1000 },
+    )
+    void fixture
+    const links = pmRoot.getByTestId('wikilink')
+
+    await links.nth(0).hover()
+    await sleep(300)
+    await links.nth(1).hover()
+    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled(), { timeout: 2000 })
+
+    expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Beta'])
+  })
+
+  it('cancels a pending enter when the pointer leaves', async () => {
+    const onHoverChange = vi.fn<WikilinkHoverHandler>()
+    using fixture = applyHoverable('[[Note]]', onHoverChange, { openDelay: 300 })
+    void fixture
+    const link = pmRoot.getByTestId('wikilink')
+
+    await link.hover()
+    await link.unhover()
+    await sleep(600)
+
+    expect(onHoverChange).not.toHaveBeenCalled()
+  })
+
+  it('leaves after the grace and not before', async () => {
+    const onHoverChange = vi.fn<WikilinkHoverHandler>()
+    using fixture = applyHoverable('[[Note]]', onHoverChange, { closeDelay: 1000 })
+    void fixture
+    const link = pmRoot.getByTestId('wikilink')
+
+    await link.hover()
+    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
+    await link.unhover()
+    await sleep(300)
+    expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note'])
+    await vi.waitFor(
+      () => {
+        expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note', undefined])
+      },
+      { timeout: 2000 },
+    )
+  })
+
+  it('re-enters without a new dwell when returning within the grace', async () => {
+    const onHoverChange = vi.fn<WikilinkHoverHandler>()
+    using fixture = applyHoverable('[[Note]]', onHoverChange, { closeDelay: 1000 })
+    void fixture
+    const link = pmRoot.getByTestId('wikilink')
+
+    await link.hover()
+    await vi.waitFor(() => expect(onHoverChange).toHaveBeenCalled())
+    await link.unhover()
+    await link.hover()
+    await sleep(1300)
+
+    expect(onHoverChange.mock.calls.map(([hit]) => hit?.target)).toEqual(['Note'])
   })
 })

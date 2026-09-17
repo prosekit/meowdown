@@ -181,6 +181,7 @@ export {
   defineWikilinkHoverHandler,
   type WikilinkHoverHandler,
   type WikilinkHoverHit,
+  type WikilinkHoverOptions,
 } from './extensions/wikilink-hover.ts'
 export { defineWikilinkTrigger } from './extensions/wikilink-trigger.ts'
 export {
