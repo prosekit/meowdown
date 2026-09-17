@@ -3,7 +3,9 @@ import { parseXPostId } from '@post-embed/schema'
 export type EmbedKind = 'x-post' | 'youtube-video'
 
 const YOUTUBE_HOSTS = /^(?:www\.|m\.)?(?:youtube\.com|youtube-nocookie\.com)$/i
+
 const YOUTU_BE_HOST = /^(?:www\.)?youtu\.be$/i
+
 // A YouTube video id is a 64-bit value encoded as base64url, so it is always
 // 11 characters from the `[A-Za-z0-9_-]` alphabet.
 // Source: https://wiki.archiveteam.org/index.php/YouTube/Technical_details
