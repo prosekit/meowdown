@@ -1,5 +1,7 @@
 import { parseXPostId } from '@post-embed/schema'
 
+import { safeParseURL } from './safe-parse-url.ts'
+
 export type EmbedKind = 'x-post' | 'youtube-video'
 
 const YOUTUBE_HOSTS = /^(?:www\.|m\.)?(?:youtube\.com|youtube-nocookie\.com)$/i
@@ -11,23 +13,13 @@ const YOUTU_BE_HOST = /^(?:www\.)?youtu\.be$/i
 // Source: https://wiki.archiveteam.org/index.php/YouTube/Technical_details
 const VIDEO_ID = /^[\w-]{11}$/
 
-// FIXME: 1. rename this function to safeParseURL
-// FIXME: 2. move it to packages/markdown/src/safe-parse-url.ts
-function parseURL(src: string): URL | undefined {
-  try {
-    return new URL(src)
-  } catch {
-    return undefined
-  }
-}
-
 /**
  * The post id of an X status URL, or `undefined` for any other `src`.
  */
 export { parseXPostId }
 
 function isYouTubeVideo(src: string): boolean {
-  const url = parseURL(src)
+  const url = safeParseURL(src)
   if (!url) return false
   let videoId: string | null = null
   if (YOUTU_BE_HOST.test(url.hostname)) {
