@@ -30,12 +30,20 @@ export interface WikilinkHoverCardProps {
    * Optional class applied to the popup, after the default card surface.
    */
   readonly className?: string
+  /**
+   * EXPERIMENT: dwell in milliseconds before the card opens.
+   */
+  readonly openDelay?: number
 }
 
 /**
  * Show host-rendered content after a 300ms dwell over a rendered wiki link.
  */
-export function WikilinkHoverCard({ children, className }: WikilinkHoverCardProps): ReactNode {
+export function WikilinkHoverCard({
+  children,
+  className,
+  openDelay: dwell = OPEN_DELAY,
+}: WikilinkHoverCardProps): ReactNode {
   const [hit, setHit] = useState<WikilinkHoverHit>()
   const lastRectRef = useRef<DOMRect>(null)
   const [displayed, setDisplayed] = useState<WikilinkHoverHit>()
@@ -98,13 +106,13 @@ export function WikilinkHoverCard({ children, className }: WikilinkHoverCardProp
     }
 
     // An already-open card moves to the next link without a new dwell.
-    const openDelay = hasDisplayed ? 0 : OPEN_DELAY
+    const openDelay = hasDisplayed ? 0 : dwell
     const timer = setTimeout(() => {
       setDisplayed(hit)
       setOpen(true)
     }, openDelay)
     return () => clearTimeout(timer)
-  }, [hit, hasDisplayed, hasBody])
+  }, [hit, hasDisplayed, hasBody, dwell])
 
   return (
     <PreviewCard.Root
