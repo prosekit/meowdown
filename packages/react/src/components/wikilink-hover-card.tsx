@@ -10,9 +10,6 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 
 import styles from './wikilink-hover-card.module.css'
 
-const OPEN_DELAY = 300
-const CLOSE_DELAY = 100
-
 /**
  * Props for {@link WikilinkHoverCard}.
  */
@@ -33,17 +30,24 @@ export interface WikilinkHoverCardProps {
 }
 
 /**
- * Show host-rendered content after a 300ms dwell over a rendered wiki link.
+ * Show host-rendered content for the wiki link the pointer rests on. The
+ * dwell and the leave grace live in the core hover handler.
  */
 export function WikilinkHoverCard({ children, className }: WikilinkHoverCardProps): ReactNode {
   const [hit, setHit] = useState<WikilinkHoverHit>()
   const lastRectRef = useRef<DOMRect>(null)
+  // The last entered link, kept through the close transition so the body
+  // does not vanish mid-animation.
   const [displayed, setDisplayed] = useState<WikilinkHoverHit>()
   const [open, setOpen] = useState(false)
   const [body, setBody] = useState<ReactNode>(null)
 
   const [hoverExtension] = useState(() => {
-    return defineWikilinkHoverHandler((nextHit) => setHit(nextHit))
+    return defineWikilinkHoverHandler((nextHit) => {
+      setHit(nextHit)
+      setOpen(nextHit != null)
+      if (nextHit) setDisplayed(nextHit)
+    })
   })
   useExtension(hoverExtension)
 
@@ -79,32 +83,6 @@ export function WikilinkHoverCard({ children, className }: WikilinkHoverCardProp
       stale = true
     }
   }, [children, displayed])
-
-  const hasDisplayed = !!displayed
-  const hasBody = body != null
-
-  useEffect(() => {
-    if (!hit) {
-      // Without a visible body there is no close animation to preserve; the
-      // request drops right away and the next hover dwells afresh.
-      const timer = setTimeout(
-        () => {
-          setOpen(false)
-          if (!hasBody) setDisplayed(undefined)
-        },
-        hasBody ? CLOSE_DELAY : 0,
-      )
-      return () => clearTimeout(timer)
-    }
-
-    // An already-open card moves to the next link without a new dwell.
-    const openDelay = hasDisplayed ? 0 : OPEN_DELAY
-    const timer = setTimeout(() => {
-      setDisplayed(hit)
-      setOpen(true)
-    }, openDelay)
-    return () => clearTimeout(timer)
-  }, [hit, hasDisplayed, hasBody])
 
   return (
     <PreviewCard.Root
