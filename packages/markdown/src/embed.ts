@@ -9,6 +9,8 @@ const YOUTU_BE_HOST = /^(?:www\.)?youtu\.be$/i
 // Source: https://wiki.archiveteam.org/index.php/YouTube/Technical_details
 const VIDEO_ID = /^[\w-]{11}$/
 
+// FIXME: 1. rename this function to safeParseURL
+// FIXME: 2. move it to packages/markdown/src/safe-parse-url.ts
 function parseURL(src: string): URL | undefined {
   try {
     return new URL(src)
