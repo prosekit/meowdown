@@ -25,7 +25,7 @@ function parseURL(src: string): URL | undefined {
   }
 }
 
-// FIXME: move parseXPostId and  isYouTubeVideo and matchPostEmbed and type PostEmbedKind into @meowdown/markdown
+// FIXME: move parseXPostId and  isYouTubeVideo and matchPostEmbed and type PostEmbedKind into @meowdown/markdown. in @meowdown/markdown, do not use the word "PostEmbed", just use the word "Embed".
 /**
  * The post id of an X status URL, or `undefined` for any other `src`.
  */
