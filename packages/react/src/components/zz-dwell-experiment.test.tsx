@@ -35,8 +35,8 @@ function observe() {
     if (enter.alpha == null && label.includes('A wide alias')) enter.alpha = performance.now()
     if (enter.beta == null && label.includes('Another wide alias')) enter.beta = performance.now()
   }
-  document.addEventListener('mousemove', onMove, {capture: true})
-  document.addEventListener('mouseover', onMove, {capture: true})
+  document.addEventListener('mousemove', onMove, { capture: true })
+  document.addEventListener('mouseover', onMove, { capture: true })
   const shown: { t: number; text: string }[] = []
   const observer = new MutationObserver(() => {
     const element = card.query()
@@ -173,4 +173,26 @@ describe('candidate C: openDelay prop = 1000, current assertions scaled', () => 
       await expect.element(card, { timeout: 2000 }).toHaveTextContent('Preview: Beta')
     })
   }
+})
+
+describe('deadline probe: failing expect.element without explicit timeout', () => {
+  it('reports how long a doomed positive assertion polls', { retry: 0 }, async () => {
+    await render(<div data-testid="present" />)
+    const start = performance.now()
+    try {
+      await expect.element(page.getByTestId('absent')).toBeInTheDocument()
+    } catch {
+      throw new Error(`DEADLINE positive polled ${Math.round(performance.now() - start)}ms`)
+    }
+  })
+
+  it('reports how long a doomed negative assertion polls', { retry: 0 }, async () => {
+    await render(<div data-testid="present" />)
+    const start = performance.now()
+    try {
+      await expect.element(page.getByTestId('present')).not.toBeInTheDocument()
+    } catch {
+      throw new Error(`DEADLINE negative polled ${Math.round(performance.now() - start)}ms`)
+    }
+  })
 })
