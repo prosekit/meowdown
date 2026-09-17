@@ -1,5 +1,6 @@
 import '../testing/index.ts'
 
+import { sleep } from '@ocavue/utils'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -126,7 +127,7 @@ describe('SelectionMenu', () => {
     await pmRoot.click()
     ref.current?.setSelection(HELLO_SELECTION)
     // Give the (absent) affordance delay a chance to elapse.
-    await new Promise((resolve) => setTimeout(resolve, 400))
+    await sleep(400)
     await expect.element(affordance).not.toBeInTheDocument()
   })
 

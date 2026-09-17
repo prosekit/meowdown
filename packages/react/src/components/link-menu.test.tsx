@@ -2,6 +2,7 @@ import '../testing/index.ts'
 
 import type { LinkPreview } from '@meowdown/core'
 import { readClipboard } from '@meowdown/vitest/clipboard'
+import { sleep } from '@ocavue/utils'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -95,7 +96,7 @@ describe('LinkMenu', () => {
     pending.get('https://second.test')?.({ title: 'Second title' })
     await expect.element(popover.getByText('Second title')).toBeVisible()
     pending.get('https://first.test')?.({ title: 'Stale first title' })
-    await new Promise((resolve) => setTimeout(resolve, 50))
+    await sleep(50)
     await expect.element(popover.getByText('Stale first title')).not.toBeInTheDocument()
     await expect.element(popover.getByText('Second title')).toBeVisible()
   })

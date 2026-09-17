@@ -1,4 +1,5 @@
 import { dropFiles, pasteFiles } from '@meowdown/vitest/file-events'
+import { sleep } from '@ocavue/utils'
 import { describe, expect, it, vi } from 'vitest'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
@@ -125,7 +126,7 @@ describe('file drop', () => {
     const event = dropFiles(fixture.view, [pdf('doc.pdf')], 1)
     // Not consumed: the webview's default handling stays in charge.
     expect(event.defaultPrevented).toBe(false)
-    await new Promise((resolve) => setTimeout(resolve, 20))
+    await sleep(20)
     expect(fixture.doc.textContent).toBe('text')
   })
 

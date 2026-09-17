@@ -7,6 +7,7 @@ import {
   type SelectionMenuContext,
   type SelectionMenuSearchHandler,
 } from '@meowdown/react'
+import { sleep } from '@ocavue/utils'
 import { useCallback, useMemo, useRef, useState, type ReactNode, type RefObject } from 'react'
 
 /**
@@ -173,7 +174,7 @@ export function useSelectionDemo(handleRef: RefObject<EditorHandle | null>): Sel
   const onSelectionMenuSearch = useCallback<SelectionMenuSearchHandler>(
     async (query) => {
       // Simulate network latency so the menu's loading state shows up.
-      await new Promise((resolve) => setTimeout(resolve, SEARCH_LATENCY_MS))
+      await sleep(SEARCH_LATENCY_MS)
       const needle = query.trim().toLowerCase()
       const commands = needle
         ? DEMO_COMMANDS.filter((command) => command.label.toLowerCase().includes(needle))

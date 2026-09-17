@@ -1,4 +1,5 @@
 import { dropAt, startBlockDrag, startTextDrag } from '@meowdown/vitest/drag-events'
+import { sleep } from '@ocavue/utils'
 import { isApple } from '@prosekit/core'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -86,7 +87,7 @@ describe('cross editor drag', () => {
     // An empty transfer parses to an empty slice, so nothing lands.
     dropAt(target.view, new DataTransfer(), endOfDoc(target))
 
-    await new Promise((resolve) => setTimeout(resolve, 20))
+    await sleep(20)
     expect(docToMarkdown(source.doc)).toBe('Alpha\n\nBravo\n')
     expect(docToMarkdown(target.doc)).toBe('Charlie\n')
   })
