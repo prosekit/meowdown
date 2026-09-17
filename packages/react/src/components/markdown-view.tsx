@@ -12,7 +12,6 @@ import {
   isNodeOfType,
   isReferenceDefinitionNode,
   markdownToDoc,
-  matchPostEmbed,
   parsePostEmbedSnapshot,
   type CodeBlockAttrs,
   type CodeToken,
@@ -32,7 +31,6 @@ import {
   type MdWikilinkAttrs,
   type MeowdownListAttrs,
   type NodeName,
-  type PostEmbedKind,
   type XPostResolver,
   type YouTubeVideoResolver,
   type ReferenceDefinitions,
@@ -40,6 +38,7 @@ import {
   type WikilinkClickHandler,
   type WikilinkResolver,
 } from '@meowdown/core'
+import { matchEmbed, type EmbedKind } from '@meowdown/markdown'
 import { registerXPost } from '@post-embed/elements/x'
 import { registerYouTubeVideo } from '@post-embed/elements/youtube'
 import type { DOMOutputSpec } from '@prosekit/pm/model'
@@ -302,7 +301,7 @@ function WikilinkChip(props: {
 }
 
 function PostEmbed(props: {
-  kind: PostEmbedKind
+  kind: EmbedKind
   src: string
   width: number | null
   snapshot: object | null
@@ -374,7 +373,7 @@ function ImagePreview(props: {
     onImageClick,
     interactive,
   } = props
-  const kind = matchPostEmbed(src)
+  const kind = matchEmbed(src)
   if (kind) {
     if (!interactive) return null
     return (

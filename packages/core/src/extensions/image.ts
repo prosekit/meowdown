@@ -1,3 +1,4 @@
+import { matchEmbed, type EmbedKind } from '@meowdown/markdown'
 import { registerXPost, type Resolver } from '@post-embed/elements/x'
 import { registerYouTubeVideo } from '@post-embed/elements/youtube'
 import type { XPost, YouTubeVideo } from '@post-embed/types'
@@ -25,9 +26,7 @@ import { getMarkRangeAt } from './mark-range.ts'
 import {
   defaultResolveXPost,
   defaultResolveYouTubeVideo,
-  matchPostEmbed,
   parsePostEmbedSnapshot,
-  type PostEmbedKind,
   type PostEmbedSnapshot,
   type XPostResolver,
   type YouTubeVideoResolver,
@@ -299,7 +298,7 @@ class ImageMarkView implements MarkView {
     const { src } = this.#attrs
     const wrapper = document.createElement('span')
     wrapper.className = 'md-image-view-preview md-atom-view-preview'
-    const kind = matchPostEmbed(src)
+    const kind = matchEmbed(src)
     if (kind) {
       wrapper.dataset.testid = `${kind}-embed`
       wrapper.dataset.postEmbed = kind
@@ -317,7 +316,7 @@ class ImageMarkView implements MarkView {
   /**
    * Resolve X cards from their URL; YouTube cards may reuse a saved snapshot.
    */
-  #buildPostEmbed(kind: PostEmbedKind, src: string): HTMLElement {
+  #buildPostEmbed(kind: EmbedKind, src: string): HTMLElement {
     const saved =
       this.#attrs.snapshot == null ? undefined : parsePostEmbedSnapshot(this.#attrs.snapshot)
     if (kind === 'x-post') {
@@ -342,10 +341,7 @@ class ImageMarkView implements MarkView {
    * post-embed only calls it while `data` is null, and logs a rejection
    * itself.
    */
-  #persisting<T extends XPost | YouTubeVideo>(
-    kind: PostEmbedKind,
-    resolver: Resolver<T>,
-  ): Resolver<T> {
+  #persisting<T extends XPost | YouTubeVideo>(kind: EmbedKind, resolver: Resolver<T>): Resolver<T> {
     return (url) => {
       const result = resolver(url)
       void Promise.resolve(result).then(

@@ -416,7 +416,7 @@ function walkLink(
   options: InlineMarkOptions | undefined,
   context: InlineMarkContext | undefined,
 ): void {
-  const parts = scanLinkParts(node.children)
+  const parts = scanLinkParts(node)
   const resolution = resolveLink(parts, text, context)
   if (resolution == null) {
     walkUnresolvedLink(node, parentMarks, text, marks, out, options, context)
@@ -434,11 +434,6 @@ function walkLink(
   walkResolvedLink(node, parts, resolution, parentMarks, text, marks, out, options, context)
 }
 
-/**
- * A child of a Lezer `Link` or `Image` node, from either a syntax tree or `parseInline`.
- */
-export type LinkChild = Pick<InlineElement, 'type' | 'from' | 'to'>
-
 interface LinkParts {
   /**
    * End of the `[` that opens the label, or -1 when there is no label.
@@ -448,9 +443,9 @@ interface LinkParts {
    * Start of the `]` that closes the label, or -1 when the label never closes.
    */
   labelTo: number
-  urlNode: LinkChild | null
-  titleNode: LinkChild | null
-  referenceLabelNode: LinkChild | null
+  urlNode: InlineElement | null
+  titleNode: InlineElement | null
+  referenceLabelNode: InlineElement | null
   linkMarkCount: number
 }
 
@@ -462,15 +457,15 @@ interface LinkParts {
  * An autolink inside the label also emits a `URL` child, so only a `URL`
  * after the second `LinkMark` (the `]` closing the label) is the destination.
  */
-export function scanLinkParts(children: readonly LinkChild[]): LinkParts {
+function scanLinkParts(node: InlineElement): LinkParts {
   let labelFrom = -1
   let labelTo = -1
-  let urlNode: LinkChild | null = null
-  let titleNode: LinkChild | null = null
-  let referenceLabelNode: LinkChild | null = null
+  let urlNode: InlineElement | null = null
+  let titleNode: InlineElement | null = null
+  let referenceLabelNode: InlineElement | null = null
   let bracketCount = 0
   let linkMarkCount = 0
-  for (const child of children) {
+  for (const child of node.children) {
     const childType = child.type
     if (childType === LEZER_NODE_IDS.LinkMark) {
       linkMarkCount++
@@ -501,7 +496,7 @@ interface ResolvedLink {
   isReference: boolean
 }
 
-export function resolveLink(
+function resolveLink(
   parts: LinkParts,
   text: string,
   context: InlineMarkContext | undefined,
@@ -730,7 +725,7 @@ function walkImage(
   context: InlineMarkContext | undefined,
   trailing?: FoldedMagicComments,
 ): void {
-  const parts = scanLinkParts(node.children)
+  const parts = scanLinkParts(node)
   const resolution = resolveLink(parts, text, context)
   if (resolution == null) {
     walkUnresolvedLink(node, parentMarks, text, marks, out, options, context)

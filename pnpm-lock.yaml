@@ -212,6 +212,9 @@ importers:
       '@lezer/markdown':
         specifier: ^1.7.2
         version: 1.7.2
+      '@post-embed/schema':
+        specifier: ^0.5.0
+        version: 0.5.0(typescript@6.0.3)
     devDependencies:
       '@meowdown/vitest':
         specifier: workspace:*
@@ -237,6 +240,9 @@ importers:
       '@meowdown/core':
         specifier: workspace:*
         version: link:../core
+      '@meowdown/markdown':
+        specifier: workspace:*
+        version: link:../markdown
       '@ocavue/utils':
         specifier: ^1.8.0
         version: 1.8.0

@@ -20,6 +20,9 @@
       "path": "../core/tsconfig.json"
     },
     {
+      "path": "../markdown/tsconfig.json"
+    },
+    {
       "path": "../vitest/tsconfig.json"
     }
   ]

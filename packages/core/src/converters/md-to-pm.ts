@@ -90,7 +90,7 @@ export function markdownToDoc(
  */
 const FRONTMATTER_RE = /^---[ \t]*\r?\n([\s\S]*?\n)?---[ \t]*(?:\r?\n|$)/
 
-export function matchFrontmatter(
+function matchFrontmatter(
   markdown: string,
 ): [body?: string | undefined, matchLength?: number | undefined] {
   const match = FRONTMATTER_RE.exec(markdown)

@@ -1,4 +1,6 @@
 export { getAutolinkHref } from './autolink-tld.ts'
+export { collectImages } from './collect-images.ts'
+export { matchEmbed, parseXPostId, type EmbedKind } from './embed.ts'
 export { collectInlineElements, parseInline, type InlineElement } from './inline.ts'
 export { LEZER_NODE_IDS } from './node-ids.ts'
 export type { LezerNodeName } from './node-names.ts'

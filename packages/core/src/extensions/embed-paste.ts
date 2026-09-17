@@ -1,17 +1,17 @@
+import { matchEmbed } from '@meowdown/markdown'
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { closeHistory } from '@prosekit/pm/history'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
 import { getPastedText } from './paste.ts'
-import { matchPostEmbed } from './post-embed.ts'
 
 const embedPasteKey = new PluginKey('meowdown-embed-paste')
 
 export function detectEmbedUrl(text: string): string | undefined {
   const trimmed = text.trim()
   if (!trimmed || /\s/.test(trimmed)) return undefined
-  return matchPostEmbed(trimmed) ? trimmed : undefined
+  return matchEmbed(trimmed) ? trimmed : undefined
 }
 
 function insertEmbedFromPaste(view: EditorView, url: string): void {

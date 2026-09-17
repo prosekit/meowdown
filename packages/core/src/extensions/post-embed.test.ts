@@ -7,29 +7,8 @@ import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 import {
   defaultResolveXPost,
   defaultResolveYouTubeVideo,
-  matchPostEmbed,
   parsePostEmbedSnapshot,
 } from './post-embed.ts'
-
-describe('matchPostEmbed', () => {
-  it('recognizes X posts', () => {
-    expect(matchPostEmbed('https://x.com/jack/status/20')).toBe('x-post')
-  })
-
-  it('recognizes YouTube watch, short, shorts, embed, and live URLs', () => {
-    expect(matchPostEmbed('https://www.youtube.com/watch?v=aqz-KE-bpKQ')).toBe('youtube-video')
-    expect(matchPostEmbed('https://youtu.be/aqz-KE-bpKQ')).toBe('youtube-video')
-    expect(matchPostEmbed('https://www.youtube.com/shorts/aqz-KE-bpKQ')).toBe('youtube-video')
-    expect(matchPostEmbed('https://www.youtube.com/embed/aqz-KE-bpKQ')).toBe('youtube-video')
-    expect(matchPostEmbed('https://www.youtube.com/live/aqz-KE-bpKQ')).toBe('youtube-video')
-  })
-
-  it('declines plain images and other pages', () => {
-    expect(matchPostEmbed('https://example.com/cat.png')).toBeUndefined()
-    expect(matchPostEmbed('https://www.youtube.com/@Blender')).toBeUndefined()
-    expect(matchPostEmbed('https://www.youtube.com/watch?v=short')).toBeUndefined()
-  })
-})
 
 describe('parsePostEmbedSnapshot', () => {
   it('validates the data against the schema the kind names', () => {
