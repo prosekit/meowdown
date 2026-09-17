@@ -1,7 +1,6 @@
 {
   "name": "meowdown-monorepo",
   "type": "module",
-  "version": "0.71.2",
   "private": true,
   "packageManager": "pnpm@11.22.0",
   "scripts": {
@@ -9,6 +8,9 @@
     "build": "pnpm -r run build",
     "preview": "pnpm run build && pnpm --filter ./website run preview",
     "ci:publish:snapshot": "pkg-pr-new publish --pnpm ./packages/markdown ./packages/core ./packages/react",
+    "change": "changeset",
+    "ci:version": "changeset version && pnpm install --no-frozen-lockfile",
+    "ci:publish": "changeset publish",
     "lint": "pnpm run lint:eslint && pnpm run lint:oxfmt && pnpm run lint:knip",
     "lint:oxfmt": "oxfmt --check",
     "lint:eslint": "eslint --cache --max-warnings 0",
@@ -26,6 +28,8 @@
     "postinstall": "simple-git-hooks"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^1.0.1",
+    "@changesets/cli": "^3.0.3",
     "@meowdown/eslint-rules": "workspace:*",
     "@ocavue/eslint-config": "^4.16.1",
     "@ocavue/tsconfig": "^0.7.1",
