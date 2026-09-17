@@ -124,6 +124,11 @@ export {
   type XPostResolver,
   type YouTubeVideoResolver,
 } from './extensions/post-embed.ts'
+export {
+  collectPostEmbeds,
+  type CollectPostEmbedsOptions,
+  type PostEmbedReference,
+} from './extensions/collect-post-embeds.ts'
 export type { ListMarker, MeowdownListAttrs } from './extensions/list.ts'
 export type { MarkChunk } from './extensions/mark-chunk.ts'
 export type { MarkMode } from './extensions/mark-mode.ts'
