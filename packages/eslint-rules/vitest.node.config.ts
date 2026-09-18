@@ -5,6 +5,6 @@ export default defineProject({
     name: 'eslint-rules-node',
     include: ['src/**/*.test.ts'],
     environment: 'node',
-    sequence: { groupOrder: 100 },
+    sequence: { groupOrder: 200 },
   },
 })
