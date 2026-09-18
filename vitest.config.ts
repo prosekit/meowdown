@@ -12,6 +12,6 @@ export default defineConfig({
       include: ['packages/*/src/**'],
     },
     slowTestThreshold: 10_000,
-    projects: ['./packages/*'],
+    projects: ['./packages/*', './packages/react/vitest.ios.config.ts'],
   },
 })
