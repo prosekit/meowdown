@@ -43,10 +43,21 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Check Cloudflare Workers account ID
+        id: check-account-id
+        run: |
+          if [ -z "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ]; then
+            echo "CLOUDFLARE_ACCOUNT_ID is not set. Skipping deployment."
+            echo "CLOUDFLARE_DEPLOY=false" >> "$GITHUB_ENV"
+          else
+            echo "CLOUDFLARE_ACCOUNT_ID is set. Proceeding with deployment."
+            echo "CLOUDFLARE_DEPLOY=true" >> "$GITHUB_ENV"
+          fi
+
       - name: Deploy to Cloudflare Workers
         id: deploy
         uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
-        if: ${{ env.CLOUDFLARE_ACCOUNT_ID != '' }}
+        if: ${{ env.CLOUDFLARE_DEPLOY == 'true' }}
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -56,7 +67,7 @@ jobs:
         timeout-minutes: 10
 
       - name: Report deployment URL
-        if: ${{ steps.deploy.outputs.deployment-url != '' }}
+        if: ${{ env.CLOUDFLARE_DEPLOY == 'true' && steps.deploy.outputs.deployment-url != '' }}
         run: echo "${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
 
   test:
