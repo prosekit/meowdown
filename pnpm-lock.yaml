@@ -85,8 +85,8 @@ importers:
         specifier: ^1.8.0
         version: 1.8.0
       '@post-embed/elements':
-        specifier: ^0.5.0
-        version: 0.5.0(typescript@6.0.3)
+        specifier: ^0.6.0
+        version: 0.6.0(typescript@6.0.3)
       '@post-embed/exporter':
         specifier: ^0.4.1
         version: 0.4.1(typescript@6.0.3)
@@ -250,8 +250,8 @@ importers:
         specifier: ^1.8.0
         version: 1.8.0
       '@post-embed/elements':
-        specifier: ^0.5.0
-        version: 0.5.0(typescript@6.0.3)
+        specifier: ^0.6.0
+        version: 0.6.0(typescript@6.0.3)
       '@post-embed/types':
         specifier: ^0.4.0
         version: 0.4.0
@@ -2124,8 +2124,8 @@ packages:
   '@poppinss/exception@1.2.3':
     resolution: {integrity: sha512-dCED+QRChTVatE9ibtoaxc+WkdzOSjYTKi/+uacHWIsfodVfpsueo3+DKpgU5Px8qXjgmXkSvhXvSCz3fnP9lw==}
 
-  '@post-embed/elements@0.5.0':
-    resolution: {integrity: sha512-N6kFg+M1rVkgKp0Y0YLW+f2nF9H3h6aURX2qOVvnUSvKB1Q0cIv/kcUwcAp5A2kQIbgacQsw5iNqrrW17RNu4w==}
+  '@post-embed/elements@0.6.0':
+    resolution: {integrity: sha512-Ar0kDGP+cGTuV0vCPsm5SBTwfHrbxBbNxspXUzR8/0d7QACoKAuP0QoJqXm0xgNvnxJggfeDg3K4I+br+IP8rA==}
 
   '@post-embed/exporter@0.4.1':
     resolution: {integrity: sha512-4c6Y2p0CnjgWkiMQQWtfFwbdQJInguJyZmzyb/2dps3ugJFr1b9IW/zcNJ2KIEZCQO/+ZA/kvADL/9ODEMuPlg==}
@@ -7014,7 +7014,7 @@ snapshots:
 
   '@poppinss/exception@1.2.3': {}
 
-  '@post-embed/elements@0.5.0(typescript@6.0.3)':
+  '@post-embed/elements@0.6.0(typescript@6.0.3)':
     dependencies:
       '@aria-ui/core': 0.2.1
       '@post-embed/schema': 0.5.0(typescript@6.0.3)

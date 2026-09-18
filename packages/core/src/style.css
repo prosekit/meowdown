@@ -700,11 +700,15 @@
   /* The cards are the atom previews whose text is meant to be selected. */
   .ProseMirror .md-image-view-preview post-embed-x-post,
   .ProseMirror .md-image-view-preview post-embed-youtube-video {
-    display: block;
-    max-width: 550px;
-
     -webkit-user-select: text;
     user-select: text;
+  }
+
+  /* The X card sizes itself; a `max-width` here would override its own
+   * `max-width: 100%` and let it overflow a narrow editor. */
+  .ProseMirror .md-image-view-preview post-embed-youtube-video {
+    display: block;
+    max-width: 550px;
   }
 
   .ProseMirror .md-image-view-preview:has(> .md-embed-resizable:not([data-width])) {
