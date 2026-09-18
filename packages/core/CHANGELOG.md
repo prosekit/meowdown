@@ -1,5 +1,13 @@
 # @meowdown/core
 
+## 0.72.2
+
+### Patch Changes
+
+- [#590](https://github.com/prosekit/meowdown/pull/590) [`42a1c14`](https://github.com/prosekit/meowdown/commit/42a1c14676a85b5765525e9356a700161abfccb9) Thanks [@ocavue](https://github.com/ocavue)! - Render X post and YouTube video cards with `@meowdown/embed`: the elements are now `<meowdown-embed-x>` and `<meowdown-embed-youtube>`, themed by `--meowdown-embed-*` variables.
+
+- [#588](https://github.com/prosekit/meowdown/pull/588) [`3d36899`](https://github.com/prosekit/meowdown/commit/3d368999ad0226b69be230591accc65c5072b62f) Thanks [@ocavue](https://github.com/ocavue)! - Update `@post-embed/elements` to 0.6.0: X post cards are smaller and shrink with a narrow editor.
+
 ## 0.72.1
 
 ### Patch Changes
