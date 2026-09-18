@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
-import { setupFixture } from '../testing/index.ts'
+import { setupHeadlessFixture } from '../testing/headless.ts'
 
 describe('insertMarkdown', () => {
   it('inserts a lone-paragraph fragment inline at the cursor', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello <a>world')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -26,7 +26,7 @@ describe('insertMarkdown', () => {
   })
 
   it('collapses an active selection instead of deleting it', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('<a>Hello<b> world')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -47,7 +47,7 @@ describe('insertMarkdown', () => {
   })
 
   it('inserts a multi-block fragment as blocks with the cursor at its end', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello<a>'), n.paragraph('World')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -77,7 +77,7 @@ describe('insertMarkdown', () => {
   })
 
   it('undoes an inserted fragment as a single history entry', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello<a>')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -109,7 +109,7 @@ describe('insertMarkdown', () => {
   })
 
   it('ignores an empty or whitespace-only fragment', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello<a>')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -133,7 +133,7 @@ describe('insertMarkdown', () => {
 
 describe('insertTrigger', () => {
   it('inserts the trigger text at the cursor', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello <a>')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -154,7 +154,7 @@ describe('insertTrigger', () => {
   })
 
   it('prefixes a space after a non-space character', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello<a>')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -175,7 +175,7 @@ describe('insertTrigger', () => {
   })
 
   it('does nothing in a code block', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.codeBlock('const a<a>')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -200,7 +200,7 @@ describe('insertTrigger', () => {
   })
 
   it('ignores empty trigger text', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('Hello<a>')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -223,7 +223,7 @@ describe('insertTrigger', () => {
 
 describe('turnIntoText', () => {
   it('turns a heading into a paragraph', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.heading({ level: 1 }, 'He<a>llo')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -244,7 +244,7 @@ describe('turnIntoText', () => {
   })
 
   it('returns false on a plain top-level paragraph', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.paragraph('He<a>llo')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -265,7 +265,7 @@ describe('turnIntoText', () => {
   })
 
   it('unwraps a bullet list item', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('a<a>'))))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -286,7 +286,7 @@ describe('turnIntoText', () => {
   })
 
   it('unwraps only the middle item of three', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(
       n.doc(
@@ -319,7 +319,7 @@ describe('turnIntoText', () => {
   })
 
   it('unwraps a checked task item, dropping the checkbox', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.list({ kind: 'task', checked: true }, n.paragraph('a<a>'))))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -340,7 +340,7 @@ describe('turnIntoText', () => {
   })
 
   it('turns a nested item into a continuation paragraph of its parent', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(
       n.doc(
@@ -372,7 +372,7 @@ describe('turnIntoText', () => {
   })
 
   it('lifts a paragraph out of a blockquote', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.blockquote(n.paragraph('q<a>uote'))))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -393,7 +393,7 @@ describe('turnIntoText', () => {
   })
 
   it('splits the quote when lifting its middle paragraph', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(
       n.doc(n.blockquote(n.paragraph('one'), n.paragraph('t<a>wo'), n.paragraph('three'))),
@@ -424,7 +424,7 @@ describe('turnIntoText', () => {
   })
 
   it('peels a heading inside a list item one layer per call', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.list({ kind: 'bullet' }, n.heading({ level: 1 }, 'foo<a>'))))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -452,7 +452,7 @@ describe('turnIntoText', () => {
   })
 
   it('peels a list inside a blockquote one layer per call', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.blockquote(n.list({ kind: 'bullet' }, n.paragraph('a<a>')))))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
@@ -480,7 +480,7 @@ describe('turnIntoText', () => {
   })
 
   it('keeps the caret in the text', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { editor, n } = fixture
     fixture.set(n.doc(n.heading({ level: 1 }, 'He<a>llo')))
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`

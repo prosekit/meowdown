@@ -1,26 +1,26 @@
 import { describe, expect, it } from 'vitest'
 
-import { setupFixture } from '../testing/index.ts'
+import { setupHeadlessFixture } from '../testing/headless.ts'
 
 import { getSelectedText } from './selected-text.ts'
 
 describe('getSelectedText', () => {
   it('returns bare text for a selection inside one textblock', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('say <a>hello **bold**<b> end')))
     expect(getSelectedText(fixture.state)).toBe('hello **bold**')
   })
 
   it('returns an empty string for an empty selection', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('say <a><b>hello')))
     expect(getSelectedText(fixture.state)).toBe('')
   })
 
   it('keeps block markers for a multi-block selection', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { n } = fixture
     fixture.set(
       n.doc(
@@ -33,7 +33,7 @@ describe('getSelectedText', () => {
   })
 
   it('keeps list markers when the selection spans list items partially', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { n } = fixture
     fixture.set(
       n.doc(

@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { setupFixture } from '../testing/index.ts'
+import { setupHeadlessFixture } from '../testing/headless.ts'
 
 import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
 
-const fixture = setupFixture({ mount: false })
+const fixture = setupHeadlessFixture()
 const { n } = fixture
 
 function roundtrip(markdown: string, options?: { frontmatter?: boolean }): string {

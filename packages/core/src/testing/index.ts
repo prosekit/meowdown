@@ -2,14 +2,13 @@ import '../style.css'
 
 import './locator.ts'
 
-import { createTestEditor } from '@prosekit/core/test'
 import type { EditorNode } from '@prosekit/pm/model'
 import { formatHTML } from 'diffable-html-snapshot'
 
-import { defineEditorExtension, type EditorExtensionOptions } from '../extensions/extension.ts'
+import type { EditorExtensionOptions } from '../extensions/extension.ts'
 import { defineVirtualCaret } from '../extensions/virtual-caret.ts'
 
-import { getSelectionSnapshot } from './selection-snapshot.ts'
+import { setupHeadlessFixture } from './headless.ts'
 
 export { resolveWikilinkAlias } from './resolve-wikilink-alias.ts'
 export { getSelectionSnapshot } from './selection-snapshot.ts'
@@ -40,20 +39,19 @@ export function setupFixture({
   extensionOptions,
   containerId = 'test-container',
 }: SetupFixtureOptions = {}) {
-  const extension = defineEditorExtension(extensionOptions)
-  const editor = createTestEditor({ extension })
-  const n = editor.nodes
-  const m = editor.marks
+  const headless = setupHeadlessFixture(extensionOptions)
+  const { editor, n, m } = headless
 
-  const div = getTestContainer(containerId)
-
-  // Mirror the react host: the caret layer sits right before the editor
-  // element (`mount` turns `div` itself into the editable root).
-  const caretLayer = document.createElement('div')
+  let container: HTMLDivElement | undefined
+  let caretLayer: HTMLDivElement | undefined
 
   if (mount) {
-    editor.mount(div)
-    div.insertAdjacentElement('beforebegin', caretLayer)
+    container = getTestContainer(containerId)
+    // Mirror the react host: the caret layer sits right before the editor
+    // element (`mount` turns `container` itself into the editable root).
+    caretLayer = document.createElement('div')
+    editor.mount(container)
+    container.insertAdjacentElement('beforebegin', caretLayer)
     editor.use(defineVirtualCaret(caretLayer))
   }
 
@@ -61,8 +59,8 @@ export function setupFixture({
     if (mount) {
       editor.unmount()
     }
-    caretLayer.remove()
-    div.remove()
+    caretLayer?.remove()
+    container?.remove()
   }
 
   return {
@@ -71,7 +69,7 @@ export function setupFixture({
     m,
 
     get schema() {
-      return editor.schema
+      return headless.schema
     },
 
     get view() {
@@ -79,11 +77,11 @@ export function setupFixture({
     },
 
     get state() {
-      return editor.view.state
+      return headless.state
     },
 
     get doc() {
-      return editor.view.state.doc
+      return headless.doc
     },
 
     get dom() {
@@ -91,9 +89,7 @@ export function setupFixture({
     },
 
     get selectionSnapshot() {
-      const snapshot = getSelectionSnapshot(editor.view.state)
-      // Wrap the snapshot in newlines if it contains multiple lines, so that snapshot testing is easier to read and diff.
-      return snapshot.includes('\n') ? `\n${snapshot}\n` : snapshot
+      return headless.selectionSnapshot
     },
 
     get htmlSnapshot() {

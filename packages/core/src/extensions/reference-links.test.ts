@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { markdownToDoc } from '../converters/md-to-pm.ts'
-import { setupFixture } from '../testing/index.ts'
+import { setupHeadlessFixture } from '../testing/headless.ts'
 
 import {
   collectReferenceDefinitions,
@@ -138,7 +138,7 @@ describe('collectReferenceDefinitions', () => {
 
 describe('updateReferenceDefinitions', () => {
   it('rebuilds after a list kind AttrStep changes definition eligibility', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { n } = fixture
     fixture.set(n.doc(n.list({ kind: 'task' }, n.paragraph('[doc]: /docs'))))
     const previous = collectReferenceDefinitions(fixture.doc)
@@ -152,7 +152,7 @@ describe('updateReferenceDefinitions', () => {
   })
 
   it('reuses the index after an unrelated list AttrStep', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { n } = fixture
     fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph('[doc]: /docs'))))
     const previous = collectReferenceDefinitions(fixture.doc)

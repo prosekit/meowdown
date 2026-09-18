@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { setupFixture } from '../testing/index.ts'
+import { setupHeadlessFixture } from '../testing/headless.ts'
 
 import { isAtTopLevelBlockEnd, isAtTopLevelBlockStart } from './top-level-block-boundary.ts'
 
 describe('top-level block boundary', () => {
   it('recognizes the start of a top-level textblock', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { n } = fixture
     fixture.set(n.doc(n.heading({ level: 1 }, '<a>a<b>bc')))
 
@@ -15,7 +15,7 @@ describe('top-level block boundary', () => {
   })
 
   it('recognizes the end of a top-level textblock', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { n } = fixture
     fixture.set(n.doc(n.heading({ level: 1 }, 'ab<a>c<b>')))
 
@@ -24,7 +24,7 @@ describe('top-level block boundary', () => {
   })
 
   it('checks every ancestor at the start of a nested textblock', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { n } = fixture
     fixture.set(n.doc(n.blockquote(n.paragraph('<a>one'), n.paragraph('<b>two'))))
 
@@ -33,7 +33,7 @@ describe('top-level block boundary', () => {
   })
 
   it('checks every ancestor at the end of a nested textblock', () => {
-    using fixture = setupFixture()
+    const fixture = setupHeadlessFixture()
     const { n } = fixture
     fixture.set(n.doc(n.blockquote(n.paragraph('one<a>'), n.paragraph('two<b>'))))
 
