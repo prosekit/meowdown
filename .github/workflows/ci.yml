@@ -125,9 +125,7 @@ jobs:
         run: pnpm run test:install:${{ matrix.config.browser }}
 
       - name: Test
-        # The coverage report covers every package, so the entry that uploads it
-        # runs the node projects as well.
-        run: ${{ matrix.config.coverage && 'pnpm run test' || 'pnpm run test:browser' }}
+        run: pnpm run test
         env:
           MEOWDOWN_TEST_BROWSER: ${{ matrix.config.browser }}
           MEOWDOWN_TEST_COVERAGE: ${{ matrix.config.coverage && 'true' || '' }}
@@ -137,28 +135,12 @@ jobs:
         if: ${{ !cancelled() && matrix.config.coverage && github.event_name == 'pull_request' }}
         uses: davelosert/vitest-coverage-report-action@c4bbc33a89b7ace0e63d35f1f7d4bcee31155a73 # v2.13.0
 
-  test-node:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/setup
-
-      - name: Test
-        run: pnpm run test:node
-        env:
-          NO_COLOR: '1'
-
   all-green:
     runs-on: ubuntu-slim
     timeout-minutes: 5
 
     if: always()
-    needs: [lint, build, test, test-node]
+    needs: [lint, build, test]
 
     steps:
       - name: Verify that all jobs succeeded
