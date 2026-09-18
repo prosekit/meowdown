@@ -20,6 +20,8 @@
     "fix:eslint": "eslint --cache --max-warnings 0 --fix",
     "fix:tsconfig": "monorepo-typescript-references fix",
     "test": "vitest",
+    "test:node": "vitest --project='*-node'",
+    "test:browser": "vitest --project='*-browser*'",
     "test:install:chromium": "playwright install chromium --no-shell",
     "test:install:webkit": "playwright install webkit",
     "test:install:firefox": "playwright install firefox",
