@@ -18,7 +18,7 @@ describe('EDITOR_KEY_BINDINGS', () => {
         "Mod-4": "Heading 4",
         "Mod-5": "Heading 5",
         "Mod-6": "Heading 6",
-        "Mod-Enter": "Follow the link under the caret, or cycle a checkbox task",
+        "Mod-Enter": "Follow the link under the caret, leave a code block from its end, or cycle a checkbox task",
         "Mod-Shift-7": "Ordered list",
         "Mod-Shift-8": "Bullet list",
         "Mod-Shift-9": "Checkbox task list",
@@ -30,7 +30,7 @@ describe('EDITOR_KEY_BINDINGS', () => {
         "Mod-e": "Inline code",
         "Mod-i": "Italic",
         "Mod-k": "Link",
-        "Shift-Enter": "Insert a line break",
+        "Shift-Enter": "Insert a line break, or leave a code block from its end",
         "Shift-Meta-ArrowDown": "Select to the document end",
         "Shift-Meta-ArrowUp": "Select to the document start",
       }

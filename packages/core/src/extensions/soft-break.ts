@@ -6,6 +6,7 @@ import { enterCommand } from 'prosemirror-flat-list'
 
 import { isAfterLineBreak } from '../utils/line-break.ts'
 
+import { exitCodeBlockAtEnd } from './code-block.ts'
 import { isNodeOfType } from './node-names.ts'
 
 // Only a paragraph can hold a soft break. A heading ends where its line does
@@ -85,6 +86,6 @@ function insertSoftBreak(): Command {
 export function defineSoftBreak() {
   return union(
     defineCommands({ insertSoftBreak }),
-    defineKeymap({ 'Shift-Enter': softBreakCommand }),
+    defineKeymap({ 'Shift-Enter': chainCommands(exitCodeBlockAtEnd, softBreakCommand) }),
   )
 }
