@@ -109,8 +109,12 @@ function defineDollarFenceEnterRule(): PlainExtension {
  */ FIXME: move this exitCodeBlockAtEnd command to a new file code-block-exit.ts
 export const exitCodeBlockAtEnd: Command = (state, dispatch) => {
   const { $head, empty } = state.selection
+  if (!empty) {
+    return false
+  }
+
   const codeBlock = $head.parent
-  if (!empty || !codeBlock.type.spec.code || $head.parentOffset !== codeBlock.content.size) {
+  if (!codeBlock.type.spec.code || $head.parentOffset !== codeBlock.content.size) {
     return false
   }
 
