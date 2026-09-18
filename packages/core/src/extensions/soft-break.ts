@@ -6,7 +6,7 @@ import { enterCommand } from 'prosemirror-flat-list'
 
 import { isAfterLineBreak } from '../utils/line-break.ts'
 
-import { exitCodeBlockAtEnd } from './code-block.ts'
+import { exitCodeBlockAtEnd } from './code-block-exit.ts'
 import { isNodeOfType } from './node-names.ts'
 
 // Only a paragraph can hold a soft break. A heading ends where its line does

@@ -17,8 +17,8 @@ describe('EDITOR_KEY_BINDINGS', () => {
         "Mod-3": "Heading 3",
         "Mod-4": "Heading 4",
         "Mod-5": "Heading 5",
-        "Mod-6": "Heading 6", FIXME : delete the doc change for Mod-Enter, only keep the doc change for  Shift-Enter
-        "Mod-Enter": "Follow the link under the caret, leave a code block from its end, or cycle a checkbox task",
+        "Mod-6": "Heading 6",
+        "Mod-Enter": "Follow the link under the caret, or cycle a checkbox task",
         "Mod-Shift-7": "Ordered list",
         "Mod-Shift-8": "Bullet list",
         "Mod-Shift-9": "Checkbox task list",

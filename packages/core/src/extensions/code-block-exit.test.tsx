@@ -51,6 +51,16 @@ describe('Mod-Enter at the end of a code block', () => {
     )
   })
 
+  it('adds a paragraph above an empty heading', async () => {
+    using fixture = setupEditor()
+    const { n } = fixture
+    fixture.set(n.doc(n.codeBlock('code<a>'), n.heading({ level: 1 })))
+    await pressModEnter()
+    await userEvent.keyboard('X')
+    const expected = n.doc(n.codeBlock('code'), n.paragraph('X'), n.heading({ level: 1 }))
+    expect(fixture.doc.eq(expected)).toBe(true)
+  })
+
   it('adds a paragraph above a non-empty paragraph', async () => {
     using fixture = setupEditor()
     const { n } = fixture
