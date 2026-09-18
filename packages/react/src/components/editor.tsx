@@ -6,6 +6,7 @@ import type {
   FilePasteOptions,
   FileViewOptions,
   ImageClickHandler,
+  XPostMediaClickHandler,
   ImageOptions,
   LinkClickHandler,
   LinkCopyHandler,
@@ -265,6 +266,15 @@ export interface EditorProps {
   onImageClick?: ImageClickHandler
 
   /**
+   * Called when the user activates a photo or video inside an X post card,
+   * with the item, its siblings, and the rendered thumbnail element. With a
+   * handler the card no longer opens the photo URL or plays the video in
+   * place: show the media yourself, for example in a lightbox. Pass a stable
+   * function (e.g. from `useCallback`).
+   */
+  onXPostMediaClick?: XPostMediaClickHandler
+
+  /**
    * Auto-embeds a pasted tweet or YouTube link as a rich embed; one undo turns
    * the embed back into the raw link. On by default.
    */
@@ -409,6 +419,7 @@ export function MeowdownEditor({
   onFilePaste,
   onFileSaveError,
   onImageClick,
+  onXPostMediaClick,
   embedPaste = true,
   linkPaste = true,
   bulletAfterHeading = false,
@@ -550,6 +561,7 @@ export function MeowdownEditor({
         onFilePaste={onFilePaste}
         onFileSaveError={onFileSaveError}
         onImageClick={onImageClick}
+        onXPostMediaClick={onXPostMediaClick}
         embedPaste={embedPaste}
         linkPaste={linkPaste}
         bulletAfterHeading={bulletAfterHeading}
