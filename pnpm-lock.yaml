@@ -63,9 +63,6 @@ importers:
       vitest:
         specifier: ^5.0.1
         version: 5.0.1(@types/node@24.13.5)(@vitest/browser-playwright@5.0.1)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(vite@8.3.0)
-      wrangler:
-        specifier: ^4.133.0
-        version: 4.133.0(@types/node@24.13.5)
 
   packages/core:
     dependencies:
@@ -437,6 +434,9 @@ importers:
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
+      wrangler:
+        specifier: ^4.133.0
+        version: 4.133.0(@types/node@24.13.5)
 
 packages:
 
