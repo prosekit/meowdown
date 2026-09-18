@@ -45,29 +45,30 @@ jobs:
 
       - name: Check Cloudflare Workers account ID
         id: check-account-id
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          if [ -z "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ]; then
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
             echo "CLOUDFLARE_ACCOUNT_ID is not set. Skipping deployment."
-            echo "CLOUDFLARE_DEPLOY=false" >> "$GITHUB_ENV"
           else
             echo "CLOUDFLARE_ACCOUNT_ID is set. Proceeding with deployment."
-            echo "CLOUDFLARE_DEPLOY=true" >> "$GITHUB_ENV"
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Deploy to Cloudflare Workers
         id: deploy
         uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
-        if: ${{ env.CLOUDFLARE_DEPLOY == 'true' }}
+        if: ${{ steps.check-account-id.outputs.deploy == 'true' }}
+        continue-on-error: true
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           workingDirectory: website
           command: ${{ github.event_name == 'pull_request' && format('versions upload --preview-alias pr-{0}', github.event.pull_request.number) || 'deploy' }}
         timeout-minutes: 10
 
       - name: Report deployment URL
-        if: ${{ env.CLOUDFLARE_DEPLOY == 'true' && steps.deploy.outputs.deployment-url != '' }}
+        if: ${{ steps.deploy.outputs.deployment-url != '' }}
         run: echo "${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
 
   test:
