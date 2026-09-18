@@ -65,6 +65,7 @@ import { defineViewAttributes } from './view-attributes.ts'
 import { defineWikilinkClickHandler } from './wikilink-click.ts'
 import { defineWikilinkTrigger } from './wikilink-trigger.ts'
 import { defineWikilink } from './wikilink.ts'
+import { defineXPostMediaClickHandler } from './x-post-media-click.ts'
 
 function defineEditorExtensionImpl(options: EditorExtensionOptions) {
   return union(
@@ -91,6 +92,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineModClickPrevention(),
     defineFileClickHandler((state) => getEditorConfig(state).onFileClick),
     defineImageClickHandler((state) => getEditorConfig(state).onImageClick),
+    defineXPostMediaClickHandler((state) => getEditorConfig(state).onXPostMediaClick),
     defineWikilinkClickHandler((state) => getEditorConfig(state).onWikilinkClick),
     defineTagClickHandler((state) => getEditorConfig(state).onTagClick),
     defineLinkClickHandler((state) => getEditorConfig(state).onLinkClick),

@@ -194,3 +194,8 @@ export { loadKaTeX, renderMathInto, type KaTeXRender } from './utils/katex.ts'
 export type { PositionRange } from './utils/range.ts'
 export { getSelectedText } from './utils/selected-text.ts'
 export { getVirtualElementFromRange, type VirtualElement } from './utils/virtual-element.ts'
+export {
+  defineXPostMediaClickHandler,
+  type XPostMediaClickHandler,
+  type XPostMediaClickPayload,
+} from './extensions/x-post-media-click.ts'

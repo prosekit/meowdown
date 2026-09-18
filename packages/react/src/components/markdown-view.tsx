@@ -37,8 +37,9 @@ import {
   type WikiEmbedResolver,
   type WikilinkClickHandler,
   type WikilinkResolver,
+  type XPostMediaClickHandler,
 } from '@meowdown/core'
-import { registerXPost } from '@meowdown/embed/x'
+import { registerXPost, type XPostMediaClickEvent } from '@meowdown/embed/x'
 import { registerYouTubeVideo } from '@meowdown/embed/youtube'
 import { matchEmbed, type EmbedKind } from '@meowdown/markdown'
 import type { DOMOutputSpec } from '@prosekit/pm/model'
@@ -49,6 +50,7 @@ import {
   createElement,
   Fragment,
   memo,
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -180,6 +182,11 @@ export interface MarkdownViewProps {
    * Called when a rendered image is clicked. Pass a stable function.
    */
   onImageClick?: ImageClickHandler
+  /**
+   * Called when a photo or video inside an X post card is activated. With a
+   * handler the card no longer opens the photo URL or plays the video in place.
+   */
+  onXPostMediaClick?: XPostMediaClickHandler
   /**
    * Called when a rendered file pill is clicked. Pass a stable function.
    */
@@ -971,6 +978,7 @@ export function MarkdownView({
   onWikilinkClick,
   onLinkClick,
   onImageClick,
+  onXPostMediaClick,
   onFileClick,
   onTaskClick,
   className,
@@ -1022,8 +1030,27 @@ export function MarkdownView({
     }
   }, [markdown, frontmatter])
 
+  // The card's event bubbles, so one listener on the root covers every card.
+  const handleXPostMediaClick = interactive ? onXPostMediaClick : undefined
+  const rootRef = useCallback(
+    (root: HTMLDivElement) => {
+      if (!handleXPostMediaClick) return
+      const listener = (event: XPostMediaClickEvent) => {
+        event.preventDefault()
+        handleXPostMediaClick(event.detail)
+      }
+      root.addEventListener('meowdown-embed-media-click', listener)
+      return () => root.removeEventListener('meowdown-embed-media-click', listener)
+    },
+    [handleXPostMediaClick],
+  )
+
   return (
-    <div className={clsx('ProseMirror', 'meowdown-content', className)} data-mark-mode={markMode}>
+    <div
+      ref={rootRef}
+      className={clsx('ProseMirror', 'meowdown-content', className)}
+      data-mark-mode={markMode}
+    >
       {blocks.map(({ node, taskBase }, index) => (
         <MarkdownBlock
           key={index}
