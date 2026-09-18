@@ -11,6 +11,9 @@
       "path": "../packages/core/tsconfig.json"
     },
     {
+      "path": "../packages/embed/tsconfig.json"
+    },
+    {
       "path": "../packages/react/tsconfig.json"
     }
   ]

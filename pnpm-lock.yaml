@@ -410,6 +410,9 @@ importers:
       '@meowdown/core':
         specifier: workspace:*
         version: link:../packages/core
+      '@meowdown/embed':
+        specifier: workspace:*
+        version: link:../packages/embed
       '@meowdown/react':
         specifier: workspace:*
         version: link:../packages/react
@@ -453,6 +456,9 @@ importers:
       '@ocavue/tsconfig':
         specifier: ^0.7.1
         version: 0.7.1
+      '@post-embed/types':
+        specifier: ^0.4.0
+        version: 0.4.0
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.3.0)
