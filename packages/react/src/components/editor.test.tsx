@@ -580,7 +580,7 @@ describe('X post embed props', () => {
         resolveXPost={() => createXPost()}
       />,
     )
-    const card = pmRoot.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
+    const card = pmRoot.getByTestId('x-post-embed').locate('[data-meowdown-embed="x"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
   })
 })

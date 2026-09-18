@@ -1,5 +1,5 @@
+import type { Resolver } from '@meowdown/embed/x'
 import { parseXPostId } from '@meowdown/markdown'
-import type { Resolver } from '@post-embed/elements/x'
 import { fromSyndication } from '@post-embed/exporter/x/syndication'
 import { XPostSchema, YouTubeVideoSchema } from '@post-embed/schema'
 import type { XPost, YouTubeVideo } from '@post-embed/types'

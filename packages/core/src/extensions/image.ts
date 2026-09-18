@@ -1,6 +1,6 @@
+import { registerXPost, type Resolver } from '@meowdown/embed/x'
+import { registerYouTubeVideo } from '@meowdown/embed/youtube'
 import { matchEmbed, type EmbedKind } from '@meowdown/markdown'
-import { registerXPost, type Resolver } from '@post-embed/elements/x'
-import { registerYouTubeVideo } from '@post-embed/elements/youtube'
 import type { XPost, YouTubeVideo } from '@post-embed/types'
 import { defineMarkView, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
@@ -55,7 +55,7 @@ export interface ImageOptions {
   mediaUrlProtocols?: string[]
   /**
    * Resolve the data behind a YouTube video URL, rendered as a
-   * `post-embed-youtube-video` card. Defaults to `defaultResolveYouTubeVideo`,
+   * `meowdown-embed-youtube` card. Defaults to `defaultResolveYouTubeVideo`,
    * which reads YouTube's oEmbed endpoint.
    */
   resolveYouTubeVideo?: YouTubeVideoResolver
@@ -321,14 +321,14 @@ class ImageMarkView implements MarkView {
       this.#attrs.snapshot == null ? undefined : parsePostEmbedSnapshot(this.#attrs.snapshot)
     if (kind === 'x-post') {
       registerXPost()
-      const element = document.createElement('post-embed-x-post')
+      const element = document.createElement('meowdown-embed-x')
       element.mediaUrlProtocols = this.#mediaUrlProtocols ?? null
       element.resolver = this.#resolveXPost
       element.url = src
       return element
     }
     registerYouTubeVideo()
-    const element = document.createElement('post-embed-youtube-video')
+    const element = document.createElement('meowdown-embed-youtube')
     element.playback = 'inline'
     element.data = saved?.kind === 'youtube-video' ? saved.data : null
     element.resolver = this.#persisting(kind, this.#resolveYouTubeVideo)

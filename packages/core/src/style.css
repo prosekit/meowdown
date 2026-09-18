@@ -2,8 +2,8 @@
 
 @import '@prosekit/pm/view/style/prosemirror.css' layer(meowdown.base);
 @import '@prosekit/extensions/list/style.css' layer(meowdown.base);
-@import '@post-embed/elements/x/theme.css' layer(meowdown.base);
-@import '@post-embed/elements/youtube/theme.css' layer(meowdown.base);
+@import '@meowdown/embed/x/theme.css' layer(meowdown.base);
+@import '@meowdown/embed/youtube/theme.css' layer(meowdown.base);
 
 @layer meowdown.theme {
   /* ---------------------------------------------------------------------------
@@ -698,15 +698,15 @@
    * ------------------------------------------------------------------------- */
 
   /* The cards are the atom previews whose text is meant to be selected. */
-  .ProseMirror .md-image-view-preview post-embed-x-post,
-  .ProseMirror .md-image-view-preview post-embed-youtube-video {
+  .ProseMirror .md-image-view-preview meowdown-embed-x,
+  .ProseMirror .md-image-view-preview meowdown-embed-youtube {
     -webkit-user-select: text;
     user-select: text;
   }
 
   /* The X card sizes itself; a `max-width` here would override its own
    * `max-width: 100%` and let it overflow a narrow editor. */
-  .ProseMirror .md-image-view-preview post-embed-youtube-video {
+  .ProseMirror .md-image-view-preview meowdown-embed-youtube {
     display: block;
     max-width: 550px;
   }
@@ -731,7 +731,7 @@
     height: auto !important;
   }
 
-  .ProseMirror .md-embed-resizable post-embed-youtube-video {
+  .ProseMirror .md-embed-resizable meowdown-embed-youtube {
     width: 100%;
     max-width: none;
   }
@@ -949,7 +949,7 @@
     /* The card draws its own corners, shadow, or outline; the wrapper's
      * rounded clip would cut them off whenever the two radii differ. */
     .md-image-view-preview[data-post-embed] {
-      border-radius: var(--post-embed-radius, 0.75rem);
+      border-radius: var(--meowdown-embed-radius, 0.75rem);
       overflow: visible;
     }
 

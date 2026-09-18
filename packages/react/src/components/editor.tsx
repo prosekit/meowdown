@@ -231,7 +231,7 @@ export interface EditorProps {
 
   /**
    * Resolves the data behind a YouTube video URL, directly or as a promise;
-   * the video renders as a `post-embed-youtube-video` card. Defaults to
+   * the video renders as a `meowdown-embed-youtube` card. Defaults to
    * `defaultResolveYouTubeVideo`, which reads YouTube's oEmbed endpoint. Pass
    * a stable function (e.g. from `useCallback`).
    */

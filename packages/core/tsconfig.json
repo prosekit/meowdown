@@ -7,6 +7,9 @@
   },
   "references": [
     {
+      "path": "../embed/tsconfig.json"
+    },
+    {
       "path": "../markdown/tsconfig.json"
     },
     {

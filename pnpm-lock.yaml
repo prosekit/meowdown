@@ -78,15 +78,15 @@ importers:
       '@lezer/highlight':
         specifier: ^1.2.3
         version: 1.2.3
+      '@meowdown/embed':
+        specifier: workspace:^
+        version: link:../embed
       '@meowdown/markdown':
         specifier: workspace:^
         version: link:../markdown
       '@ocavue/utils':
         specifier: ^1.8.0
         version: 1.8.0
-      '@post-embed/elements':
-        specifier: ^0.6.0
-        version: 0.6.0(typescript@6.0.3)
       '@post-embed/exporter':
         specifier: ^0.4.1
         version: 0.4.1(typescript@6.0.3)
@@ -277,15 +277,15 @@ importers:
       '@meowdown/core':
         specifier: workspace:*
         version: link:../core
+      '@meowdown/embed':
+        specifier: workspace:*
+        version: link:../embed
       '@meowdown/markdown':
         specifier: workspace:*
         version: link:../markdown
       '@ocavue/utils':
         specifier: ^1.8.0
         version: 1.8.0
-      '@post-embed/elements':
-        specifier: ^0.6.0
-        version: 0.6.0(typescript@6.0.3)
       '@post-embed/types':
         specifier: ^0.4.0
         version: 0.4.0
@@ -2157,9 +2157,6 @@ packages:
 
   '@poppinss/exception@1.2.3':
     resolution: {integrity: sha512-dCED+QRChTVatE9ibtoaxc+WkdzOSjYTKi/+uacHWIsfodVfpsueo3+DKpgU5Px8qXjgmXkSvhXvSCz3fnP9lw==}
-
-  '@post-embed/elements@0.6.0':
-    resolution: {integrity: sha512-Ar0kDGP+cGTuV0vCPsm5SBTwfHrbxBbNxspXUzR8/0d7QACoKAuP0QoJqXm0xgNvnxJggfeDg3K4I+br+IP8rA==}
 
   '@post-embed/exporter@0.4.1':
     resolution: {integrity: sha512-4c6Y2p0CnjgWkiMQQWtfFwbdQJInguJyZmzyb/2dps3ugJFr1b9IW/zcNJ2KIEZCQO/+ZA/kvADL/9ODEMuPlg==}
@@ -7047,15 +7044,6 @@ snapshots:
       supports-color: 10.2.2
 
   '@poppinss/exception@1.2.3': {}
-
-  '@post-embed/elements@0.6.0(typescript@6.0.3)':
-    dependencies:
-      '@aria-ui/core': 0.2.1
-      '@post-embed/schema': 0.5.0(typescript@6.0.3)
-      '@post-embed/types': 0.4.0
-      crelt: 1.0.7
-    transitivePeerDependencies:
-      - typescript
 
   '@post-embed/exporter@0.4.1(typescript@6.0.3)':
     dependencies:

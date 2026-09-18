@@ -14,9 +14,9 @@ import { formatMagicComment, parseMagicComment } from './magic-comment.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const xPostEmbed = pmRoot.getByTestId('x-post-embed')
-const xPostCard = xPostEmbed.locate('[data-post-embed="x-post"]')
+const xPostCard = xPostEmbed.locate('[data-meowdown-embed="x"]')
 const videoEmbed = pmRoot.getByTestId('youtube-video-embed')
-const videoCard = videoEmbed.locate('[data-post-embed="youtube-video"]')
+const videoCard = videoEmbed.locate('[data-meowdown-embed="youtube"]')
 const videoResizable = videoEmbed.getByTestId('embed-resizable')
 
 const TWEET = '![](https://x.com/jack/status/20)'

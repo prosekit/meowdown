@@ -243,7 +243,7 @@ describe('MarkdownView', () => {
       )
     try {
       await renderView('![](https://x.com/jack/status/3001)')
-      const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
+      const card = view.getByTestId('x-post-embed').locate('[data-meowdown-embed="x"]')
       await expect.element(card).toMatchTextContent('fetched by default')
       expect(fetchSpy).toHaveBeenCalledExactlyOnceWith(
         'https://react-tweet.vercel.app/api/tweet/3001',
@@ -271,7 +271,7 @@ describe('MarkdownView', () => {
     await renderView('![](https://x.com/jack/status/20)', {
       resolveXPost: () => createXPost(),
     })
-    const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
+    const card = view.getByTestId('x-post-embed').locate('[data-meowdown-embed="x"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
   })
 
@@ -281,7 +281,7 @@ describe('MarkdownView', () => {
       settle = resolve
     })
     await renderView('![](https://x.com/jack/status/20)', { resolveXPost: () => pending })
-    const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
+    const card = view.getByTestId('x-post-embed').locate('[data-meowdown-embed="x"]')
     await expect.element(card.locate('[data-fallback][data-pending]')).toBeInTheDocument()
 
     settle(createXPost())
@@ -295,7 +295,7 @@ describe('MarkdownView', () => {
     await renderView(`![](https://x.com/jack/status/20)${comment}`, {
       resolveXPost,
     })
-    const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
+    const card = view.getByTestId('x-post-embed').locate('[data-meowdown-embed="x"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
     expect(resolveXPost).toHaveBeenCalledOnce()
     expect(card.locate('[data-fallback]').query()).toBeNull()
@@ -306,7 +306,7 @@ describe('MarkdownView', () => {
       '![](https://x.com/jack/status/20)<!-- {"snapshot":{"kind":"x-post","data":{"bogus":1}}} -->',
       { resolveXPost: () => createXPost() },
     )
-    const card = view.getByTestId('x-post-embed').locate('[data-post-embed="x-post"]')
+    const card = view.getByTestId('x-post-embed').locate('[data-meowdown-embed="x"]')
     await expect.element(card).toMatchTextContent('just setting up my twttr')
   })
 
@@ -323,7 +323,7 @@ describe('MarkdownView', () => {
     await renderView('![](https://youtu.be/aqz-KE-bpKQ)', {
       resolveYouTubeVideo: () => createYouTubeVideo(),
     })
-    const card = view.getByTestId('youtube-video-embed').locate('[data-post-embed="youtube-video"]')
+    const card = view.getByTestId('youtube-video-embed').locate('[data-meowdown-embed="youtube"]')
     await expect.element(card).toMatchTextContent('Big Buck Bunny')
     expect(view.locate('iframe').query()).toBeNull()
   })
@@ -332,7 +332,7 @@ describe('MarkdownView', () => {
     await renderView('![](https://youtu.be/aqz-KE-bpKQ)<!-- {"width":320} -->', {
       resolveYouTubeVideo: () => createYouTubeVideo(),
     })
-    const card = view.getByTestId('youtube-video-embed').locate('[data-post-embed="youtube-video"]')
+    const card = view.getByTestId('youtube-video-embed').locate('[data-meowdown-embed="youtube"]')
     await expect.element(card).toMatchTextContent('Big Buck Bunny')
     expect(getComputedStyle(card.element()).width).toBe('320px')
   })

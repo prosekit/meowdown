@@ -38,9 +38,9 @@ import {
   type WikilinkClickHandler,
   type WikilinkResolver,
 } from '@meowdown/core'
+import { registerXPost } from '@meowdown/embed/x'
+import { registerYouTubeVideo } from '@meowdown/embed/youtube'
 import { matchEmbed, type EmbedKind } from '@meowdown/markdown'
-import { registerXPost } from '@post-embed/elements/x'
-import { registerYouTubeVideo } from '@post-embed/elements/youtube'
 import type { DOMOutputSpec } from '@prosekit/pm/model'
 import { Mark, type Node as ProseMirrorNode } from '@prosekit/pm/model'
 import { clsx } from 'clsx/lite'
@@ -155,7 +155,7 @@ export interface MarkdownViewProps {
    */
   resolveFileInfo?: FileInfoResolver
   /**
-   * Resolve the data behind an X post URL, rendered as a `post-embed-x-post`
+   * Resolve the data behind an X post URL, rendered as a `meowdown-embed-x`
    * card. Defaults to `defaultResolveXPost`.
    */
   resolveXPost?: XPostResolver
@@ -165,7 +165,7 @@ export interface MarkdownViewProps {
   mediaUrlProtocols?: string[]
   /**
    * Resolve the data behind a YouTube video URL, rendered as a
-   * `post-embed-youtube-video` card. Defaults to `defaultResolveYouTubeVideo`.
+   * `meowdown-embed-youtube` card. Defaults to `defaultResolveYouTubeVideo`.
    */
   resolveYouTubeVideo?: YouTubeVideoResolver
   /**
@@ -327,13 +327,13 @@ function PostEmbed(props: {
       data-post-embed={kind}
     >
       {kind === 'x-post'
-        ? createElement('post-embed-x-post', {
+        ? createElement('meowdown-embed-x', {
             data: null,
             url: src,
             resolver: resolveXPost ?? defaultResolveXPost,
             mediaUrlProtocols: mediaUrlProtocols ?? null,
           })
-        : createElement('post-embed-youtube-video', {
+        : createElement('meowdown-embed-youtube', {
             data: saved?.kind === 'youtube-video' ? saved.data : null,
             url: src,
             resolver: resolveYouTubeVideo,
