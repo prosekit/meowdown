@@ -15,6 +15,7 @@ import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineAtomMarkNavigation } from './atom-mark-navigation.ts'
 import { defineBulletAfterHeading } from './bullet-after-heading.ts'
+import { defineClickBelow } from './click-below.ts'
 import { defineClipboard } from './clipboard/clipboard.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineCodeBlock } from './code-block.ts'
@@ -118,6 +119,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     }),
     defineCodeBlockSyntaxHighlight(),
     defineCrossEditorDrag(),
+    defineClickBelow(),
     defineEscapeCollapse(),
     defineSoftBreak(),
     defineMoveBlock(),
