@@ -7,7 +7,7 @@
     "dev": "pnpm --filter ./website run dev",
     "build": "pnpm -r run build",
     "preview": "pnpm run build && pnpm --filter ./website run preview",
-    "ci:publish:snapshot": "pkg-pr-new publish --pnpm ./packages/markdown ./packages/core ./packages/react",
+    "ci:publish:snapshot": "pkg-pr-new publish --pnpm ./packages/markdown ./packages/embed ./packages/core ./packages/react",
     "change": "changeset",
     "ci:version": "changeset version && pnpm install --no-frozen-lockfile",
     "ci:publish": "changeset publish",

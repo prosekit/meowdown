@@ -1,0 +1,13 @@
+{
+  "extends": "@ocavue/tsconfig/dom/app.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "erasableSyntaxOnly": true
+  },
+  "references": [
+    {
+      "path": "../vitest/tsconfig.json"
+    }
+  ]
+}

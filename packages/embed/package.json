@@ -1,0 +1,51 @@
+{
+  "name": "@meowdown/embed",
+  "type": "module",
+  "version": "0.0.1",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prosekit/meowdown",
+    "directory": "packages/embed"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    "./x": "./src/x/index.ts",
+    "./x/theme.css": "./src/x/theme.css",
+    "./youtube": "./src/youtube/index.ts",
+    "./youtube/theme.css": "./src/youtube/theme.css"
+  },
+  "files": [
+    "./dist/**/*.js",
+    "./dist/**/*.d.ts",
+    "./dist/**/*.css"
+  ],
+  "scripts": {
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@aria-ui/core": "^0.2.1",
+    "@post-embed/schema": "^0.5.0",
+    "@post-embed/types": "^0.4.0",
+    "crelt": "^1.0.7"
+  },
+  "devDependencies": {
+    "@meowdown/vitest": "workspace:*",
+    "@ocavue/tsconfig": "^0.7.1",
+    "@ocavue/utils": "^1.8.0",
+    "@vitest/browser-playwright": "^5.0.1",
+    "tsdown": "^0.23.0",
+    "vitest": "^5.0.1"
+  },
+  "publishConfig": {
+    "exports": {
+      "./x": "./dist/x/index.js",
+      "./x/theme.css": "./dist/x/theme.css",
+      "./youtube": "./dist/youtube/index.js",
+      "./youtube/theme.css": "./dist/youtube/theme.css"
+    },
+    "access": "public"
+  }
+}

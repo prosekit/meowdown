@@ -1,0 +1,395 @@
+@property --meowdown-embed-color {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-background {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-border-color {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-radius {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-padding {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-muted-color {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-link-color {
+  syntax: '*';
+  inherits: true;
+}
+
+/*
+ * Hard reset. `all: revert` rolls every property on every box inside the card
+ * back to the user-agent default, so a host rule on `p`, `a`, `img`,
+ * `article`, `header`, or `footer` (a prose stylesheet, a CSS reset, an
+ * editor theme) cannot reach in. The reset sits at specificity (0,2,0);
+ * every rule below is more specific and re-applies the card's own values,
+ * including the UA defaults the card does not want (`p` margins, `a` colors).
+ */
+[data-meowdown-embed='x'] [data-root],
+[data-meowdown-embed='x'] [data-root] *,
+[data-meowdown-embed='x'] [data-root] *::before,
+[data-meowdown-embed='x'] [data-root] *::after {
+  all: revert;
+  box-sizing: border-box;
+}
+
+[data-meowdown-embed='x'] {
+  --_hairline: var(
+    --meowdown-embed-border-color,
+    color-mix(in srgb, currentColor 14%, transparent)
+  );
+  --_muted: var(--meowdown-embed-muted-color, color-mix(in srgb, currentColor 55%, transparent));
+  --_link: var(--meowdown-embed-link-color, #1d9bf0);
+  --_tint: color-mix(in srgb, currentColor 5%, transparent);
+
+  display: block;
+  /* As wide as the content, between 18rem and 28rem: a short text post stays
+   * small, while long text and media fill the full width. */
+  width: fit-content;
+  max-width: min(28rem, 100%);
+  font: inherit;
+  color: var(--meowdown-embed-color, inherit);
+  text-decoration-skip-ink: none;
+}
+
+/*
+ * The minimum width. A percentage `min-width` on the host resolves to nothing
+ * inside a shrink-to-fit parent (an inline-block editor wrapper), and a fixed
+ * one overflows a narrow container. A zero-height spacer instead raises the
+ * card's intrinsic width to 18rem and still yields to the host's `max-width`.
+ */
+[data-meowdown-embed='x'] [data-root]::before {
+  content: '';
+  display: block;
+  width: calc(18rem - 2 * var(--meowdown-embed-padding, 0.75rem));
+  max-width: 100%;
+  height: 0;
+}
+
+[data-meowdown-embed='x'] [data-root] {
+  display: block;
+  position: relative;
+  color: var(--meowdown-embed-color, inherit);
+  background: var(--meowdown-embed-background, var(--_tint));
+  border-radius: var(--meowdown-embed-radius, 0.75rem);
+  padding: var(--meowdown-embed-padding, 0.75rem);
+  font-size: 1em;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.45;
+  letter-spacing: normal;
+  text-align: start;
+  text-transform: none;
+  text-indent: 0;
+  text-shadow: none;
+  word-spacing: normal;
+  font-variant: normal;
+  hyphens: manual;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  cursor: auto;
+
+  & [hidden] {
+    display: none !important;
+  }
+  & p {
+    margin: 0;
+  }
+  & a {
+    color: var(--_link);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  & a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  & a:focus-visible {
+    outline: 2px solid var(--_link);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Header */
+  & [data-author] {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  & [data-avatar] {
+    display: block;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    object-fit: cover;
+    border-radius: 50%;
+    background: var(--_tint);
+  }
+  & [data-avatar][data-shape='square'] {
+    border-radius: 0.375rem;
+  }
+  & [data-avatar][data-shape='hexagon'] {
+    clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+  }
+  & [data-author-details] {
+    display: block;
+    min-width: 0;
+    flex: 1;
+    line-height: 1.25;
+  }
+  & [data-author-name] {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    font-weight: 600;
+  }
+  & [data-author-details] > bdi {
+    font-size: 0.875em;
+    color: var(--_muted);
+  }
+  & [data-author-details] > bdi > a {
+    color: inherit;
+  }
+  & [data-date] {
+    display: block;
+    flex: none;
+    align-self: flex-start;
+    padding-inline-start: 0.25rem;
+    font-size: 0.8125em;
+    line-height: 1.25rem;
+    white-space: nowrap;
+    color: var(--_muted);
+  }
+  & [data-date] > a {
+    color: inherit;
+  }
+
+  /* Body */
+  & [data-reply-to] {
+    display: block;
+    margin-block-start: 0.375rem;
+    font-size: 0.8125em;
+    color: var(--_muted);
+  }
+  & [data-body] {
+    display: block;
+    margin-block: 0.625rem 0;
+    font-size: 1em;
+    line-height: 1.5;
+  }
+  & [data-reply-to] + [data-body] {
+    margin-block-start: 0.25rem;
+  }
+  & [data-text] {
+    white-space: pre-wrap;
+  }
+
+  /* Media */
+  & [data-media] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px;
+    margin-block-start: 0.75rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: var(--_hairline);
+  }
+  & [data-media][data-count='1'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  & [data-media-item] {
+    display: block;
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+  }
+  /* A hairline keeps white screenshots from dissolving into the card. */
+  & [data-media-item]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 10%, transparent);
+    pointer-events: none;
+  }
+  & [data-media-item] > a {
+    display: block;
+    height: 100%;
+  }
+  /* A single photo or video fills the width at its own ratio, up to 20rem
+   * tall; taller media is cropped and the photo links to the original. */
+  & [data-media-item] img,
+  & [data-media-item] video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--_ratio, auto);
+    max-height: 20rem;
+    object-fit: cover;
+    background: var(--_tint);
+  }
+  & [data-media-item][data-orientation='portrait'] :is(img, video) {
+    object-position: center 30%;
+  }
+  & [data-media]:not([data-count='1']) [data-media-item] :is(img, video) {
+    height: 100%;
+    aspect-ratio: 3 / 2;
+  }
+  & [data-media][data-count='3'] [data-media-item]:first-child {
+    grid-row: span 2;
+  }
+  & [data-media][data-count='3'] [data-media-item]:first-child :is(img, video) {
+    aspect-ratio: auto;
+  }
+  & [data-media-unavailable],
+  & [data-media-error] {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--_muted);
+    background: var(--_tint);
+  }
+
+  /* Quoted post */
+  & [data-quoted] {
+    display: block;
+    margin-block-start: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: var(--_tint);
+  }
+  & [data-quoted] [data-avatar] {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+  & [data-quoted] [data-author-details] {
+    display: flex;
+    align-items: baseline;
+    gap: 0 0.35rem;
+    line-height: 1.375rem;
+  }
+  & [data-quoted] [data-author-name],
+  & [data-quoted] [data-author-details] > bdi {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  & [data-quoted] [data-author-name] {
+    flex: 0 1 auto;
+  }
+  & [data-quoted] [data-author-details] > bdi {
+    flex: 0 100 auto;
+    min-width: 2.5rem;
+    font-size: 0.9375em;
+  }
+  & [data-quoted] [data-date] {
+    align-self: center;
+  }
+  & [data-quoted] [data-body] {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    margin-block-start: 0.25rem;
+    font-size: 0.9375em;
+  }
+  & [data-quoted] [data-media] {
+    margin-block-start: 0.5rem;
+    border-radius: 0.375rem;
+  }
+  & [data-quoted] [data-media-item] :is(img, video) {
+    max-height: 10rem;
+  }
+  /* Quoted photos shrink to one thumbnail beside the text, with a count
+   * badge; a quoted video or GIF stays below the text so its player works. */
+  & [data-quoted]:has(> [data-media]):not(:has(> [data-media] video)) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'head head'
+      'body media'
+      'foot foot';
+    column-gap: 0.75rem;
+
+    & > [data-author] {
+      grid-area: head;
+    }
+    & > [data-body] {
+      grid-area: body;
+    }
+    & > [data-footer] {
+      grid-area: foot;
+    }
+    & > [data-media] {
+      grid-area: media;
+      position: relative;
+      display: block;
+      width: 4rem;
+      height: 4rem;
+      margin-block-start: 0.375rem;
+    }
+    & > [data-media] > [data-media-item] {
+      width: 100%;
+      height: 100%;
+    }
+    & > [data-media] > [data-media-item]:nth-child(n + 2) {
+      display: none;
+    }
+    & > [data-media] > [data-media-item] img {
+      height: 100%;
+      max-height: none;
+      aspect-ratio: auto;
+    }
+    & > [data-media]:not([data-count='1'])::after {
+      content: attr(data-count);
+      position: absolute;
+      inset: auto 0.25rem 0.25rem auto;
+      min-width: 1.25rem;
+      padding: 0 0.3125rem;
+      border-radius: 0.625rem;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      line-height: 1.25rem;
+      text-align: center;
+      color: #fff;
+      background: rgb(0 0 0 / 0.62);
+      pointer-events: none;
+    }
+  }
+
+  /* Footer: only the edit state; the date lives in the header. */
+  & [data-footer] {
+    display: block;
+    margin-block-start: 0.5rem;
+    font-size: 0.8125em;
+    color: var(--_muted);
+  }
+  & [data-edited] {
+    font-style: normal;
+  }
+
+  /* Fallback */
+  & [data-fallback] [data-body] {
+    color: var(--_muted);
+  }
+}
