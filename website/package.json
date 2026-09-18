@@ -30,6 +30,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "wrangler": "^4.133.0",
     "@egoist/tailwindcss-icons": "^1.9.2",
     "@iconify-json/lucide": "^1.2.133",
     "@iconify-json/simple-icons": "^1.2.96",
