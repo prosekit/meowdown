@@ -106,7 +106,7 @@ function defineDollarFenceEnterRule(): PlainExtension {
 /**
  * With the caret at the end of a code block, move it into the block below when
  * that block is an empty textblock, and into a new default block otherwise.
- */
+ */ FIXME: move this exitCodeBlockAtEnd command to a new file code-block-exit.ts
 export const exitCodeBlockAtEnd: Command = (state, dispatch) => {
   const { $head, empty } = state.selection
   const codeBlock = $head.parent
