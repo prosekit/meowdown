@@ -1,15 +1,12 @@
 import { createStringPicker } from '@meowdown/vitest/random'
-import { isWebKit } from '@prosekit/core'
 import { it } from 'vitest'
-import { requestGC } from 'vitest-browser-commands/playwright'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
 
 // Use a fixed seed from the environment variable for reproducibility, or fallback to a random seed
 const SEED = Number.parseInt(import.meta.env.VITE_FUZZ_SEED || '') || Date.now()
 
-// Reduce the number of samples for WebKit due to memory issues.
-const NUM_SAMPLES = isWebKit ? 2_000 : 100_000
+const NUM_SAMPLES = 50_000
 
 /// keep-sorted
 const TOKENS_NEWLINE: readonly string[] = ['\n']
@@ -147,7 +144,7 @@ for (const [minLength, maxLength] of RANGES) {
     it(
       `finds no lossy input (minLength=${minLength}, maxLength=${maxLength}, pool=${name} samples=${NUM_SAMPLES})`,
       { timeout: 60_000 },
-      async () => {
+      () => {
         const pickString = createStringPicker(SEED, minLength, maxLength, pool)
         for (let sample = 1; sample <= NUM_SAMPLES; sample++) {
           const input = pickString()
@@ -155,9 +152,6 @@ for (const [minLength, maxLength] of RANGES) {
             throw new Error(
               `lossy input (seed=${SEED}, sample=${sample}, input=${JSON.stringify(input)})`,
             )
-          }
-          if (sample % 5_000 === 0) {
-            await requestGC()
           }
         }
       },
