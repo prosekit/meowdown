@@ -33,6 +33,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
+    permissions:
+      contents: read
+      pull-requests: write
+
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -42,6 +47,42 @@ jobs:
 
       - name: Build
         run: pnpm run build
+
+      - name: Check Cloudflare Workers account ID
+        id: check-account-id
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "CLOUDFLARE_ACCOUNT_ID is not set. Skipping deployment."
+          else
+            echo "CLOUDFLARE_ACCOUNT_ID is set. Proceeding with deployment."
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy to Cloudflare Workers
+        id: deploy
+        uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
+        if: ${{ steps.check-account-id.outputs.deploy == 'true' }}
+        continue-on-error: true
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: website
+          command: ${{ github.event_name == 'pull_request' && format('versions upload --preview-alias pr-{0}', github.event.pull_request.number) || 'deploy' }}
+        timeout-minutes: 10
+
+      - name: Report deployment URL
+        if: ${{ steps.deploy.outputs.deployment-url != '' }}
+        run: echo "${{ steps.deploy.outputs.deployment-url }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment preview URL
+        if: ${{ github.event_name == 'pull_request' && steps.deploy.outputs.deployment-url != '' }}
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          header: cloudflare-preview
+          message: |
+            Preview: https://pr-${{ github.event.pull_request.number }}-meowdown.ocavue.workers.dev
 
   test:
     runs-on: ${{ matrix.config.runner }}
