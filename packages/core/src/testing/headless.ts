@@ -6,9 +6,7 @@ import { defineEditorExtension, type EditorExtensionOptions } from '../extension
 import { getSelectionSnapshot } from './selection-snapshot.ts'
 
 /**
- * An editor fixture without a DOM, for tests that only need the document and
- * the state. Import it from `*.test.ts`; `setupFixture` in `./index.ts` mounts
- * a real editor and only works in `*.test.tsx`.
+ * An editor fixture without a DOM, for tests that only need the ProseMirror document and the ProseMirror state.
  */
 export function setupHeadlessFixture(extensionOptions?: EditorExtensionOptions) {
   const extension = defineEditorExtension(extensionOptions)
