@@ -172,7 +172,12 @@ describe('hide mode Enter relocation', () => {
   it('splits before the unit at the opening content edge', async () => {
     using fixture = setupMode('hide', 'foo **<a>bold** bar')
     await userEvent.keyboard('{Enter}')
-    expect(fixture.selectionSnapshot).toMatchInlineSnapshot()
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`
+      "
+      foo 
+      ⎦**bold** bar
+      "
+    `)
   })
 
   it('keeps the unit whole when splitting inside a bullet', async () => {
