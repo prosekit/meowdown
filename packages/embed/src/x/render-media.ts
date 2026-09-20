@@ -3,7 +3,7 @@ import el from 'crelt'
 
 import { renderLink } from '../render-link.ts'
 import { getSafeUrl } from '../safe-url.ts'
-import { toPositiveNumber } from '../utils/to-positive-number.ts'
+import { toPositiveNumber } from '../to-positive-number.ts'
 
 import { dispatchMediaClick } from './media-click.ts'
 import { sortVideoSources } from './sort-video-sources.ts'

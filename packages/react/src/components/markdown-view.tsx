@@ -39,7 +39,7 @@ import {
   type WikilinkResolver,
   type XPostMediaClickHandler,
 } from '@meowdown/core'
-import { registerXPost, type XPostMediaClickEvent } from '@meowdown/embed/x'
+import { registerXPost } from '@meowdown/embed/x'
 import { registerYouTubeVideo } from '@meowdown/embed/youtube'
 import { matchEmbed, type EmbedKind } from '@meowdown/markdown'
 import type { DOMOutputSpec } from '@prosekit/pm/model'
@@ -183,8 +183,9 @@ export interface MarkdownViewProps {
    */
   onImageClick?: ImageClickHandler
   /**
-   * Called when a photo or video inside an X post card is activated. With a
-   * handler the card no longer opens the photo URL or plays the video in place.
+   * Called when a photo or video inside an X post card is activated. Call
+   * `event.preventDefault()` to stop the card from opening the photo URL or
+   * playing the video in place.
    */
   onXPostMediaClick?: XPostMediaClickHandler
   /**
@@ -1035,12 +1036,8 @@ export function MarkdownView({
   const rootRef = useCallback(
     (root: HTMLDivElement) => {
       if (!handleXPostMediaClick) return
-      const listener = (event: XPostMediaClickEvent) => {
-        event.preventDefault()
-        handleXPostMediaClick(event.detail)
-      }
-      root.addEventListener('meowdown-embed-media-click', listener)
-      return () => root.removeEventListener('meowdown-embed-media-click', listener)
+      root.addEventListener('meowdown-embed-media-click', handleXPostMediaClick)
+      return () => root.removeEventListener('meowdown-embed-media-click', handleXPostMediaClick)
     },
     [handleXPostMediaClick],
   )

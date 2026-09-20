@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsdown'
 
 export default defineConfig({
-  entry: ['src/utils/index.ts', 'src/x/index.ts', 'src/youtube/index.ts'],
+  entry: ['src/x/index.ts', 'src/youtube/index.ts'],
   platform: 'neutral',
   sourcemap: 'hidden',
   minify: false,

@@ -266,11 +266,12 @@ export interface EditorProps {
   onImageClick?: ImageClickHandler
 
   /**
-   * Called when the user activates a photo or video inside an X post card,
-   * with the item, its siblings, and the rendered thumbnail element. With a
-   * handler the card no longer opens the photo URL or plays the video in
-   * place: show the media yourself, for example in a lightbox. Pass a stable
-   * function (e.g. from `useCallback`).
+   * Called with the `meowdown-embed-media-click` event when the user
+   * activates a photo or video inside an X post card. Its `detail` holds the
+   * item, its siblings, and the rendered thumbnail element. Call
+   * `event.preventDefault()` to stop the card from opening the photo URL or
+   * playing the video in place, then show the media yourself, for example in
+   * a lightbox. Pass a stable function (e.g. from `useCallback`).
    */
   onXPostMediaClick?: XPostMediaClickHandler
 

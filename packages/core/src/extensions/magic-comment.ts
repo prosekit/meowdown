@@ -1,5 +1,6 @@
-import { toPositiveNumber } from '@meowdown/embed/utils'
 import { isObject } from '@ocavue/utils'
+
+import { toPositiveNumber } from '../utils/to-positive-number.ts'
 
 /**
  * Metadata meowdown stores in a sidecar `<!-- {...} -->` comment.

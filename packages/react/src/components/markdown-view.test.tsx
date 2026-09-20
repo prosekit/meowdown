@@ -1,6 +1,7 @@
 import '../testing/index.ts'
 
 import type { FileClickHandler } from '@meowdown/core'
+import type { XPostMediaClickEvent } from '@meowdown/embed/x'
 import type { XPost } from '@post-embed/types'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -274,7 +275,7 @@ describe('MarkdownView', () => {
   it('reports a clicked X post photo', async () => {
     const post = createXPost()
     post.media = [{ type: 'photo', url: PHOTO_URL, width: 100, height: 100 }]
-    const onXPostMediaClick = vi.fn()
+    const onXPostMediaClick = vi.fn((event: XPostMediaClickEvent) => event.preventDefault())
     await renderView('![](https://x.com/jack/status/20)', {
       resolveXPost: () => post,
       mediaUrlProtocols: ['data:'],
@@ -284,7 +285,7 @@ describe('MarkdownView', () => {
     await expect.element(image).toBeInTheDocument()
     await image.click()
     expect(onXPostMediaClick).toHaveBeenCalledTimes(1)
-    expect(onXPostMediaClick.mock.calls[0][0]).toMatchObject({
+    expect(onXPostMediaClick.mock.calls[0][0].detail).toMatchObject({
       index: 0,
       media: { type: 'photo', url: PHOTO_URL },
     })

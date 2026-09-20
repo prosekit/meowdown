@@ -197,5 +197,4 @@ export { getVirtualElementFromRange, type VirtualElement } from './utils/virtual
 export {
   defineXPostMediaClickHandler,
   type XPostMediaClickHandler,
-  type XPostMediaClickPayload,
 } from './extensions/x-post-media-click.ts'

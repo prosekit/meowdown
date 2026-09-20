@@ -1,22 +1,20 @@
-import type { XPostMediaClickDetail } from '@meowdown/embed/x'
+import type { XPostMediaClickEvent } from '@meowdown/embed/x'
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
 const xPostMediaClickKey = new PluginKey('meowdown-x-post-media-click')
 
 /**
- * Payload for {@link XPostMediaClickHandler}: the activated photo or video of
- * an X post card, its sibling items, and the rendered thumbnail element.
+ * Receives the `meowdown-embed-media-click` event of an X post card. Its
+ * `detail` holds the activated photo or video, its sibling items, and the
+ * rendered thumbnail element. Call `event.preventDefault()` to cancel the
+ * card's own default (open the photo URL, play the video in place).
  */
-export type XPostMediaClickPayload = XPostMediaClickDetail
-
-// FIXME: XPostMediaClickHandler should just accept the whole XPostMediaClickEvent. Some thing to the react prop
-export type XPostMediaClickHandler = (payload: XPostMediaClickPayload) => void
+export type XPostMediaClickHandler = (event: XPostMediaClickEvent) => void
 
 /**
  * Call `onClick` when the user activates a photo or video inside an X post
- * card. With a handler the card's own default (open the photo URL, play the
- * video in place) is cancelled, so the host can show the media itself.
+ * card.
  */
 export function defineXPostMediaClickHandler(
   getOnClick?: (state: EditorState) => XPostMediaClickHandler | undefined,
@@ -29,10 +27,8 @@ export function defineXPostMediaClickHandler(
           'meowdown-embed-media-click': (view, event) => {
             const handler = getOnClick?.(view.state)
             if (!handler) return false
-            // FIXME: 1. the handler should accept the whole event, not just the detail, so it can call preventDefault() itself if it wants to; 2. we should check if the event is already prevented after calling the handler, if so, we should return true to prevent the default behavior, otherwise return false to allow the default behavior.
-            event.preventDefault()
-            handler(event.detail)
-            return true
+            handler(event)
+            return event.defaultPrevented
           },
         },
       },
