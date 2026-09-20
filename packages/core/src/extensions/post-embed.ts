@@ -43,7 +43,12 @@ export const defaultResolveXPost: XPostResolver = cached(async (url) => {
   const response = await fetch(X_POST_API + id)
   if (!response.ok) return
   const json = (await response.json()) as { data?: unknown }
-  return fromSyndication(json.data)
+  const result = fromSyndication(json.data)
+  if (result.issues) {
+    console.warn(`[meowdown] Invalid X post data for ${url}:`, result.issues)
+    return
+  }
+  return result.value
 })
 
 // YouTube's oEmbed endpoint allows cross-origin requests; the snapshot is its
