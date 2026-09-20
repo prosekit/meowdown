@@ -3,8 +3,9 @@ import '../style.css'
 import { sleep } from '@ocavue/utils'
 import { StrictMode, useEffect } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { emulateMedia } from 'vitest-browser-commands/playwright'
 import { render } from 'vitest-browser-react'
-import { commands, page, userEvent } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 
 import {
   useLightbox,
@@ -35,10 +36,13 @@ const VIDEO: LightboxVideoItem = {
   alt: 'Launch',
 }
 
-declare module 'vitest/browser' {
-  interface BrowserCommands {
-    emulateReducedMotion: (reducedMotion: 'reduce' | 'no-preference') => Promise<void>
-  }
+// Every context starts with `prefers-reduced-motion: reduce`.
+async function emulateReducedMotion(reducedMotion: 'reduce' | 'no-preference'): Promise<void> {
+  await emulateMedia({ reducedMotion })
+  // Firefox applies the change slightly after the call resolves.
+  await expect
+    .poll(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+    .toBe(reducedMotion === 'reduce')
 }
 
 let controller: LightboxController
@@ -97,12 +101,12 @@ beforeEach(() => {
 
 afterEach(async () => {
   document.documentElement.style.removeProperty('--meowdown-lightbox-duration')
-  await commands.emulateReducedMotion('reduce')
+  await emulateReducedMotion('reduce')
 })
 
 describe('Lightbox', () => {
   it('zooms from the thumbnail on open and back to it on Escape', async () => {
-    await commands.emulateReducedMotion('no-preference')
+    await emulateReducedMotion('no-preference')
     const thumbnail = appendThumbnail()
     await render(<Host />)
 
@@ -120,7 +124,7 @@ describe('Lightbox', () => {
   })
 
   it('closes without a zoom when asked to close instantly', async () => {
-    await commands.emulateReducedMotion('no-preference')
+    await emulateReducedMotion('no-preference')
     const thumbnail = appendThumbnail()
     await render(<Host />)
 
@@ -151,7 +155,7 @@ describe('Lightbox', () => {
   })
 
   it('zooms again when reopened after a close', async () => {
-    await commands.emulateReducedMotion('no-preference')
+    await emulateReducedMotion('no-preference')
     const thumbnail = appendThumbnail()
     await render(<Host />)
 
@@ -210,7 +214,7 @@ describe('Lightbox', () => {
   })
 
   it('zooms a video from its poster element', async () => {
-    await commands.emulateReducedMotion('no-preference')
+    await emulateReducedMotion('no-preference')
     const thumbnail = appendThumbnail()
     await render(<Host />)
 
@@ -226,7 +230,7 @@ describe('Lightbox', () => {
   })
 
   it('stays open under StrictMode', async () => {
-    await commands.emulateReducedMotion('no-preference')
+    await emulateReducedMotion('no-preference')
     await render(
       <StrictMode>
         <Host />
