@@ -13,6 +13,7 @@ export default defineConfig({
       subpath: '/playground',
       previewSubpath: '/preview',
       title: 'Meowdown',
+      head: './src/components/referrer-head.astro',
       homeContent: {
         title: 'Meowdown',
         version: {
