@@ -103,8 +103,8 @@ importers:
         specifier: ^0.18.2
         version: 0.18.2(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.4.3)(@types/hast@3.0.5)(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)(prosemirror-view@1.42.4)
       '@prosekit/pm':
-        specifier: ^0.1.19
-        version: 0.1.19
+        specifier: ^0.1.20
+        version: 0.1.20
       '@prosekit/web':
         specifier: ^0.9.2
         version: 0.9.2(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.4.3)(@types/hast@3.0.5)(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)(prosemirror-view@1.42.4)
@@ -293,8 +293,8 @@ importers:
         specifier: ^0.13.2
         version: 0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)
       '@prosekit/pm':
-        specifier: ^0.1.19
-        version: 0.1.19
+        specifier: ^0.1.20
+        version: 0.1.20
       '@prosekit/react':
         specifier: ^0.8.2
         version: 0.8.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)(react-dom@19.3.0)(react@19.3.0)
@@ -366,8 +366,8 @@ importers:
         specifier: ^1.8.0
         version: 1.8.0
       '@prosekit/pm':
-        specifier: ^0.1.19
-        version: 0.1.19
+        specifier: ^0.1.20
+        version: 0.1.20
       '@vitest/browser-playwright':
         specifier: ^5.0.1
         version: 5.0.1(playwright@1.63.0)(vite@8.3.0)(vitest@5.0.1)
@@ -2193,8 +2193,8 @@ packages:
       yjs:
         optional: true
 
-  '@prosekit/pm@0.1.19':
-    resolution: {integrity: sha512-isC0J43gxlVwqNQJZv7QPMOTmCH0uy9fqqbxJ+nqMVVnzx8l+gP9D+Xqm7hbI3k7jc5ZdrBa4BoENSK9HiymVg==}
+  '@prosekit/pm@0.1.20':
+    resolution: {integrity: sha512-FAPsThB0K6phnbsFWcFCaZqQ9tuGDPE54STm3Y2/QAnCsa7rXlNXPo3KDphr7yAWPEcDp+x/wfQ7nU/2SvbY9g==}
 
   '@prosekit/react@0.8.2':
     resolution: {integrity: sha512-r63ZxTCj8KDWkxIdKPOQJlZCa/6cPY0icZgpozxEpRrtgq/lVDiGmC/wtTShsVm5farVAEW6SKygjbjHMBAGTA==}
@@ -7077,7 +7077,7 @@ snapshots:
   '@prosekit/core@0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)':
     dependencies:
       '@ocavue/utils': 1.8.0
-      '@prosekit/pm': 0.1.19
+      '@prosekit/pm': 0.1.20
       orderedmap: 2.1.1
       prosemirror-splittable: 1.1.0(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)
       type-fest: 5.9.0
@@ -7090,7 +7090,7 @@ snapshots:
     dependencies:
       '@ocavue/utils': 1.8.0
       '@prosekit/core': 0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)
-      '@prosekit/pm': 0.1.19
+      '@prosekit/pm': 0.1.20
       prosemirror-changeset: 2.4.3
       prosemirror-drop-indicator: 0.1.4
       prosemirror-dropcursor: 1.8.3
@@ -7117,7 +7117,7 @@ snapshots:
       - refractor
       - sugar-high
 
-  '@prosekit/pm@0.1.19':
+  '@prosekit/pm@0.1.20':
     dependencies:
       prosemirror-commands: 1.7.2
       prosemirror-history: 1.5.0
@@ -7131,7 +7131,7 @@ snapshots:
   '@prosekit/react@0.8.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)(react-dom@19.3.0)(react@19.3.0)':
     dependencies:
       '@prosekit/core': 0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)
-      '@prosekit/pm': 0.1.19
+      '@prosekit/pm': 0.1.20
       '@prosekit/web': 0.9.2(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.4.3)(@types/hast@3.0.5)(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)(prosemirror-view@1.42.4)
       '@prosemirror-adapter/core': 0.5.5
       '@prosemirror-adapter/react': 0.5.5(react-dom@19.3.0)(react@19.3.0)
@@ -7165,7 +7165,7 @@ snapshots:
       '@ocavue/utils': 1.8.0
       '@prosekit/core': 0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)
       '@prosekit/extensions': 0.18.2(@lezer/common@1.5.2)(@lezer/highlight@1.2.3)(@shikijs/types@4.4.3)(@types/hast@3.0.5)(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)(prosemirror-view@1.42.4)
-      '@prosekit/pm': 0.1.19
+      '@prosekit/pm': 0.1.20
       prosemirror-tables: 1.8.5
     transitivePeerDependencies:
       - '@lezer/common'
