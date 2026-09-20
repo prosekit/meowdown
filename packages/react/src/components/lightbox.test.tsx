@@ -1,9 +1,10 @@
 import '../style.css'
 
-import { useEffect } from 'react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { sleep } from '@ocavue/utils'
+import { StrictMode, useEffect } from 'react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { page, userEvent } from 'vitest/browser'
+import { commands, page, userEvent } from 'vitest/browser'
 
 import {
   useLightbox,
@@ -34,14 +35,10 @@ const VIDEO: LightboxVideoItem = {
   alt: 'Launch',
 }
 
-// Stubbed so the tests can exercise both motion settings.
-function installMatchMedia(reducedMotion: boolean): void {
-  vi.spyOn(window, 'matchMedia').mockImplementation((query: string) => {
-    return {
-      matches: reducedMotion && query === '(prefers-reduced-motion: reduce)',
-      media: query,
-    } as MediaQueryList
-  })
+declare module 'vitest/browser' {
+  interface BrowserCommands {
+    emulateReducedMotion: (reducedMotion: 'reduce' | 'no-preference') => Promise<void>
+  }
 }
 
 let controller: LightboxController
@@ -91,37 +88,45 @@ const dialog = page.getByRole('dialog', { name: 'Image preview' })
 const videoDialog = page.getByRole('dialog', { name: 'Video preview' })
 const image = dialog.getByRole('img', { name: 'Cat' })
 
-afterEach(() => {
-  vi.restoreAllMocks()
+// A slow zoom and a generous poll keep a busy runner from missing the animation.
+const ZOOM_TIMEOUT = { timeout: 5000 }
+
+beforeEach(() => {
+  document.documentElement.style.setProperty('--meowdown-lightbox-duration', '600ms')
+})
+
+afterEach(async () => {
+  document.documentElement.style.removeProperty('--meowdown-lightbox-duration')
+  await commands.emulateReducedMotion('reduce')
 })
 
 describe('Lightbox', () => {
   it('zooms from the thumbnail on open and back to it on Escape', async () => {
-    installMatchMedia(false)
+    await commands.emulateReducedMotion('no-preference')
     const thumbnail = appendThumbnail()
     await render(<Host />)
 
     controller.open(ITEM, thumbnail)
-    await vi.waitFor(() => expect(isZooming()).toBe(true))
+    await vi.waitFor(() => expect(isZooming()).toBe(true), ZOOM_TIMEOUT)
     await expect.element(dialog).toBeInTheDocument()
-    await vi.waitFor(() => expect(isZooming()).toBe(false))
+    await vi.waitFor(() => expect(isZooming()).toBe(false), ZOOM_TIMEOUT)
     expect(thumbnail.style.viewTransitionName).toBe('')
 
     await userEvent.keyboard('{Escape}')
-    await vi.waitFor(() => expect(isZooming()).toBe(true))
+    await vi.waitFor(() => expect(isZooming()).toBe(true), ZOOM_TIMEOUT)
     await expect.element(dialog).not.toBeInTheDocument()
     await vi.waitFor(() => expect(thumbnail.style.viewTransitionName).toBe(''))
     thumbnail.remove()
   })
 
   it('closes without a zoom when asked to close instantly', async () => {
-    installMatchMedia(false)
+    await commands.emulateReducedMotion('no-preference')
     const thumbnail = appendThumbnail()
     await render(<Host />)
 
     controller.open(ITEM, thumbnail)
     await expect.element(dialog).toBeInTheDocument()
-    await vi.waitFor(() => expect(isZooming()).toBe(false))
+    await vi.waitFor(() => expect(isZooming()).toBe(false), ZOOM_TIMEOUT)
 
     controller.close({ instant: true })
     await expect.element(dialog).not.toBeInTheDocument()
@@ -131,23 +136,42 @@ describe('Lightbox', () => {
   })
 
   it('opens and closes without a zoom under reduced motion', async () => {
-    installMatchMedia(true)
     const thumbnail = appendThumbnail()
     await render(<Host />)
 
     controller.open(ITEM, thumbnail)
     await expect.element(dialog).toBeInTheDocument()
     expect(isZooming()).toBe(false)
-    expect(thumbnail.style.viewTransitionName).toBe('')
 
     await userEvent.keyboard('{Escape}')
     await expect.element(dialog).not.toBeInTheDocument()
     expect(isZooming()).toBe(false)
+    await vi.waitFor(() => expect(thumbnail.style.viewTransitionName).toBe(''))
+    thumbnail.remove()
+  })
+
+  it('zooms again when reopened after a close', async () => {
+    await commands.emulateReducedMotion('no-preference')
+    const thumbnail = appendThumbnail()
+    await render(<Host />)
+
+    controller.open(ITEM, thumbnail)
+    await expect.element(dialog).toBeInTheDocument()
+    await vi.waitFor(() => expect(isZooming()).toBe(false), ZOOM_TIMEOUT)
+    controller.close()
+    await expect.element(dialog).not.toBeInTheDocument()
+    await vi.waitFor(() => expect(thumbnail.style.viewTransitionName).toBe(''))
+
+    controller.open(ITEM, thumbnail)
+    await vi.waitFor(() => expect(isZooming()).toBe(true), ZOOM_TIMEOUT)
+    await expect.element(dialog).toBeInTheDocument()
+    await vi.waitFor(() => expect(isZooming()).toBe(false), ZOOM_TIMEOUT)
+    controller.close()
+    await vi.waitFor(() => expect(isZooming()).toBe(true), ZOOM_TIMEOUT)
     thumbnail.remove()
   })
 
   it('renders the item and keeps host styles on the image', async () => {
-    installMatchMedia(true)
     await render(<Host />)
 
     controller.open(ITEM)
@@ -156,7 +180,6 @@ describe('Lightbox', () => {
   })
 
   it('renders a video item as a player that starts on open', async () => {
-    installMatchMedia(true)
     await render(<Host />)
 
     controller.open(VIDEO)
@@ -176,7 +199,6 @@ describe('Lightbox', () => {
   })
 
   it('plays a GIF item muted, looping, and without controls', async () => {
-    installMatchMedia(true)
     await render(<Host />)
 
     controller.open({ ...VIDEO, gif: true })
@@ -188,23 +210,36 @@ describe('Lightbox', () => {
   })
 
   it('zooms a video from its poster element', async () => {
-    installMatchMedia(false)
+    await commands.emulateReducedMotion('no-preference')
     const thumbnail = appendThumbnail()
     await render(<Host />)
 
     controller.open(VIDEO, thumbnail)
-    await vi.waitFor(() => expect(isZooming()).toBe(true))
+    await vi.waitFor(() => expect(isZooming()).toBe(true), ZOOM_TIMEOUT)
     await expect.element(videoDialog).toBeInTheDocument()
-    await vi.waitFor(() => expect(isZooming()).toBe(false))
+    await vi.waitFor(() => expect(isZooming()).toBe(false), ZOOM_TIMEOUT)
 
     controller.close()
-    await vi.waitFor(() => expect(isZooming()).toBe(true))
+    await vi.waitFor(() => expect(isZooming()).toBe(true), ZOOM_TIMEOUT)
     await expect.element(videoDialog).not.toBeInTheDocument()
     thumbnail.remove()
   })
 
+  it('stays open under StrictMode', async () => {
+    await commands.emulateReducedMotion('no-preference')
+    await render(
+      <StrictMode>
+        <Host />
+      </StrictMode>,
+    )
+
+    controller.open(ITEM)
+    await expect.element(image).toBeVisible()
+    await sleep(300)
+    await expect.element(image).toBeVisible()
+  })
+
   it('closes from host content', async () => {
-    installMatchMedia(true)
     await render(<Host />)
 
     controller.open(ITEM)

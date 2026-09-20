@@ -1,14 +1,4 @@
-import {
-  startTransition,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-
-import { prefersReducedMotion } from '../utils/prefers-reduced-motion.ts'
+import { startTransition, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 /**
  * The `view-transition-name` shared by the opened thumbnail and the lightbox
@@ -79,6 +69,12 @@ export interface LightboxController {
    */
   readonly open: (item: LightboxItem, element?: HTMLElement | null) => void
   readonly close: (options?: LightboxCloseOptions) => void
+  /**
+   * The zoom back to the thumbnail is over.
+   *
+   * @internal
+   */
+  readonly onExited: () => void
 }
 
 function setTransitionName(element: HTMLElement | null, name: string): void {
@@ -102,16 +98,12 @@ export function useLightbox(): LightboxController {
   const open = useCallback((nextItem: LightboxItem, element?: HTMLElement | null) => {
     setTransitionName(sourceRef.current, '')
     sourceRef.current = element ?? null
-    if (prefersReducedMotion()) {
-      setItem(nextItem)
-      return
-    }
     setTransitionName(sourceRef.current, LIGHTBOX_TRANSITION_NAME)
     startTransition(() => setItem(nextItem))
   }, [])
 
   const close = useCallback((options?: LightboxCloseOptions) => {
-    instantRef.current = options?.instant === true || prefersReducedMotion()
+    instantRef.current = options?.instant === true
     if (instantRef.current) {
       setItem(null)
     } else {
@@ -135,13 +127,10 @@ export function useLightbox(): LightboxController {
     }
   }, [isOpen])
 
-  // React holds passive effects back until the View Transition has finished,
-  // so this runs once the zoom back to the thumbnail is over.
-  useEffect(() => {
-    if (isOpen) return
+  const onExited = useCallback(() => {
     setTransitionName(sourceRef.current, '')
     sourceRef.current = null
-  }, [isOpen])
+  }, [])
 
-  return useMemo(() => ({ item, open, close }), [item, open, close])
+  return useMemo(() => ({ item, open, close, onExited }), [item, open, close, onExited])
 }

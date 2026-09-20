@@ -1,9 +1,21 @@
 import { playwright } from '@vitest/browser-playwright'
 import { playwrightCommands } from 'vitest-browser-commands'
 import { defineProject } from 'vitest/config'
+import type { BrowserCommand } from 'vitest/node'
 
 const IS_BOT = !!(process.env.AI_AGENT || process.env.CI)
 const IS_DEBUG = !!process.env.DEBUG
+
+/**
+ * Every context starts with `prefers-reduced-motion: reduce`; this lets a test
+ * that needs real animations switch it for a while.
+ */
+const emulateReducedMotion: BrowserCommand<[reducedMotion: 'reduce' | 'no-preference']> = async (
+  context,
+  reducedMotion,
+) => {
+  await context.page.emulateMedia({ reducedMotion })
+}
 
 function resolveBrowserName() {
   const name = process.env.MEOWDOWN_TEST_BROWSER
@@ -82,6 +94,7 @@ export function defineBrowserConfig({ name, groupOrder }: { name: string; groupO
               browserName === 'chromium' ? ['clipboard-read', 'clipboard-write'] : undefined,
           },
         }),
+        commands: { emulateReducedMotion },
         headless: IS_DEBUG ? false : true,
         ui: false,
         instances: [

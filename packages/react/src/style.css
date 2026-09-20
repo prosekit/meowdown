@@ -8,9 +8,6 @@
   }
 }
 
-/* View Transition pseudo-elements hang off the document root, so a CSS Module
-   class cannot scope them. The transition name is what keeps these rules to
-   the lightbox. */
 ::view-transition-group(meowdown-lightbox) {
   /* The thumbnail is in the old snapshot, so this group is created before the
      dialog's and would paint under its backdrop. */
@@ -24,4 +21,15 @@
   height: 100%;
   object-fit: contain;
   overflow: clip;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(meowdown-lightbox),
+  ::view-transition-old(meowdown-lightbox),
+  ::view-transition-new(meowdown-lightbox),
+  ::view-transition-group(.meowdown-lightbox-dialog),
+  ::view-transition-old(.meowdown-lightbox-dialog),
+  ::view-transition-new(.meowdown-lightbox-dialog) {
+    animation: none;
+  }
 }

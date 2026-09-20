@@ -1,5 +1,6 @@
 import { clsx } from 'clsx/lite'
 import { ViewTransition, type ComponentProps, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 
 import type { LightboxController, LightboxItem } from '../hooks/use-lightbox.ts'
 
@@ -23,8 +24,11 @@ export interface LightboxRootProps extends Omit<
   readonly children: (item: LightboxItem) => ReactNode
 }
 
-function showModal(dialog: HTMLDialogElement | null): void {
-  if (dialog && !dialog.open) dialog.showModal()
+const DIALOG_TRANSITION_CLASS = 'meowdown-lightbox-dialog'
+
+function showModal(dialog: HTMLDialogElement) {
+  dialog.showModal()
+  return () => dialog.close()
 }
 
 /**
@@ -37,11 +41,11 @@ export function LightboxRoot({
   className,
   ...props
 }: LightboxRootProps): ReactNode {
-  const { item, close } = lightbox
+  const { item, close, onExited } = lightbox
   if (!item) return null
 
-  return (
-    <ViewTransition>
+  return createPortal(
+    <ViewTransition default={DIALOG_TRANSITION_CLASS} onExit={() => onExited}>
       <dialog
         aria-label={item.type === 'video' ? 'Video preview' : 'Image preview'}
         {...props}
@@ -51,10 +55,15 @@ export function LightboxRoot({
           event.preventDefault()
           close()
         }}
-        onClose={() => close({ instant: true })}
+        onClose={(event) => {
+          // StrictMode closes and reopens the dialog on mount, and that
+          // close event arrives after it is open again.
+          if (!event.currentTarget.open) close({ instant: true })
+        }}
       >
         {children(item)}
       </dialog>
-    </ViewTransition>
+    </ViewTransition>,
+    document.body,
   )
 }
