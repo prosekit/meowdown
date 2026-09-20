@@ -92,11 +92,12 @@ try {
         )
       }
       // The same origin rejects a document that sends its referrer.
-      await page.route('http://127.0.0.1:4399/referrer-control', (route) => { return route.fulfill({
+      await page.route('http://127.0.0.1:4399/referrer-control', (route) => {
+        return route.fulfill({
           contentType: 'text/html',
           body: `<video controls src="${mediaUrl}"></video>`,
-        }) },
-      )
+        })
+      })
       requests.length = 0
       await page.goto('http://127.0.0.1:4399/referrer-control')
       await page.waitForFunction(() => document.querySelector('video')?.error != null)
