@@ -6,6 +6,7 @@ import { getSafeUrl } from '../safe-url.ts'
 
 import { dispatchMediaClick } from './media-click.ts'
 
+// FIXME: create a draft github PR in the post-embed repo to add some types for photos and videos, and then use them here instead of the `Extract` utility type.
 type Photo = Extract<XPostMedia, { type: 'photo' }>
 type Video = Extract<XPostMedia, { type: 'video' | 'gif' }>
 
