@@ -32,8 +32,16 @@ export function createVideo(gif = false): Extract<XPostMedia, { type: 'video' | 
     height: 400,
     sources: [
       { type: 'application/x-mpegURL', url: 'https://example.com/video.m3u8' },
-      { type: 'video/mp4', bitrate: 200, url: 'https://example.com/high.mp4' },
-      { type: 'video/mp4', bitrate: 100, url: 'https://example.com/low.mp4' },
+      {
+        type: 'video/mp4',
+        bitrate: 200,
+        url: new URL('./motion.mp4?no-inline', import.meta.url).href,
+      },
+      {
+        type: 'video/mp4',
+        bitrate: 100,
+        url: new URL('./motion.mp4?no-inline', import.meta.url).href,
+      },
     ],
   }
 }

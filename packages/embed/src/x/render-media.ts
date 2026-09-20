@@ -76,10 +76,22 @@ function isPlainClick(event: MouseEvent): boolean {
   return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
 }
 
+function getMediaLocation(value: string): string {
+  try {
+    const url = new URL(value)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+      ? url.origin + url.pathname
+      : url.protocol
+  } catch {
+    return '(invalid URL)'
+  }
+}
+
 function renderPhoto(
   media: XPostPhoto,
   error: HTMLElement,
   onClick: (element: HTMLElement) => boolean,
+  permalink?: string,
 ) {
   const image = el('img', {
     src: media.url,
@@ -91,6 +103,12 @@ function renderPhoto(
   })
   const link = el('a', { href: media.url, target: '_blank', rel: 'noopener noreferrer' }, image)
   image.addEventListener('error', () => {
+    if (link.hidden || !image.isConnected) return
+    console.warn('[meowdown] Failed to load post media:', {
+      post: permalink,
+      type: 'photo',
+      source: getMediaLocation(media.url),
+    })
     link.hidden = true
     error.hidden = false
   })
@@ -121,6 +139,18 @@ function renderPlayer(media: XPostVideo, error: HTMLElement, permalink?: string)
   )
   video.muted = gif
   const showError = () => {
+    if (video.hidden || !video.isConnected) return
+    console.warn('[meowdown] Failed to load post media:', {
+      post: permalink,
+      type: media.type,
+      sources: media.sources.map((source, index) => ({
+        index,
+        type: source.type,
+        location: getMediaLocation(source.url),
+      })),
+      code: video.error?.code,
+      reason: video.error ? 'Native media error' : 'All media sources failed',
+    })
     video.hidden = true
     error.hidden = false
   }
@@ -136,7 +166,17 @@ function renderPlayer(media: XPostVideo, error: HTMLElement, permalink?: string)
       { once: true },
     )
   }
-  return video
+  return {
+    video,
+    play: () => {
+      video.play().catch((error: Error) => {
+        if (error.name === 'AbortError' || error.name === 'NotAllowedError' || !video.isConnected)
+          return
+        // Source selection can still recover after a rejected play request.
+        if (video.error || failedSources === sources.length) showError()
+      })
+    },
+  }
 }
 
 /**
@@ -172,11 +212,11 @@ function renderVideo(
   )
   button.addEventListener('click', () => {
     if (!onClick(poster ?? button)) return
-    const video = renderPlayer(media, error, permalink)
+    const { video, play } = renderPlayer(media, error, permalink)
     button.replaceWith(video)
     video.focus()
     // The click is the user gesture that allows playback with sound.
-    video.play().catch(() => {})
+    play()
   })
   return button
 }
@@ -212,7 +252,7 @@ export function renderMedia(
           style: getRatioStyle(item),
         },
         item.type === 'photo'
-          ? renderPhoto(item, error, onClick)
+          ? renderPhoto(item, error, onClick, permalink)
           : renderVideo(item, error, onClick, permalink),
         error,
       )

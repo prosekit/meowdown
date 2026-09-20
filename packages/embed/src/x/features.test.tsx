@@ -69,7 +69,7 @@ describe('Full post snapshots', () => {
     await post.getByRole('button', { name: 'Play GIF' }).click()
     const videos = element.querySelectorAll('video')
     expect(videos).toHaveLength(2)
-    expect(videos[0].querySelector('source')?.src).toBe('https://example.com/high.mp4')
+    expect(videos[0].querySelector('source')?.src).toContain('motion.mp4')
     expect(videos[0].controls).toBe(true)
     expect(videos[0].loop).toBe(false)
     expect(videos[1].loop).toBe(true)
@@ -146,10 +146,10 @@ describe('Full post snapshots', () => {
     expect(element.querySelector('[data-media] img, video, time')).toBeNull()
     expect(element.querySelectorAll('[data-media-unavailable]')).toHaveLength(2)
     expect(warn).toHaveBeenCalledWith('[meowdown] Ignored unsafe media URL: javascript:alert(1)')
-    snapshot.media = [createPhoto()]
+    snapshot.media = [
+      { ...createPhoto(), url: new URL('./testing/missing.jpg', import.meta.url).href },
+    ]
     element.data = { ...snapshot }
-    const image = element.querySelector<HTMLImageElement>('[data-media] img')!
-    image.dispatchEvent(new Event('error'))
     await expect
       .element(post.getByText('Media could not be loaded.', { exact: false }))
       .toBeVisible()
@@ -164,22 +164,47 @@ describe('Full post snapshots', () => {
   })
 
   it('handles video source errors', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const snapshot = createPost()
     snapshot.media = [
       createPhoto(),
       {
         ...createVideo(),
-        sources: [{ type: 'video/mp4', url: 'https://example.com/video.mp4' }],
+        sources: [
+          {
+            type: 'video/mp4',
+            url: new URL('./testing/missing.mp4?token=secret#private', import.meta.url).href,
+          },
+        ],
       },
     ]
     const element = mount(snapshot)
     expect(element.querySelectorAll('[data-media-item]')).toHaveLength(2)
     await post.getByRole('button', { name: 'Play video' }).click()
-    element.querySelector('source')!.dispatchEvent(new Event('error'))
     await expect
       .element(post.getByText('Media could not be loaded.', { exact: false }).nth(1))
       .toBeVisible()
     expect(element.querySelector('video')?.hidden).toBe(true)
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(JSON.stringify(warn.mock.calls)).not.toMatch(/token=secret|#private/)
+  })
+
+  it('plays a later source after an earlier source fails', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const snapshot = createPost()
+    const media = createVideo()
+    media.sources.unshift({
+      type: 'video/mp4',
+      bitrate: 1000,
+      url: new URL('./testing/missing.mp4', import.meta.url).href,
+    })
+    snapshot.media = [media]
+    mount(snapshot)
+    await post.getByRole('button', { name: 'Play video' }).click()
+    const player = post.getByLabelText('Post video')
+    await expect.poll(() => (player.element() as HTMLVideoElement).currentTime).toBeGreaterThan(0)
+    await expect.element(player).toBeVisible()
+    expect(warn).not.toHaveBeenCalled()
   })
 
   it('lets a host take over a media click', async () => {
@@ -199,7 +224,11 @@ describe('Full post snapshots', () => {
     expect(details[1].items).toHaveLength(2)
     expect(details[1].media).toMatchObject({
       type: 'video',
-      sources: [{ url: 'https://example.com/high.mp4' }, {}, {}],
+      sources: [
+        { url: expect.stringContaining('motion.mp4') as string, bitrate: 200 },
+        { bitrate: 100 },
+        { type: 'application/x-mpegURL' },
+      ],
     })
   })
 })
