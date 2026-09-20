@@ -2,7 +2,8 @@ import './stories.css'
 
 import { Transaction } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
-import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
+import type { ImageClickHandler } from '@meowdown/core'
+import { Lightbox, MeowdownEditor, useLightbox, type EditorHandle } from '@meowdown/react'
 import { throttle } from '@ocavue/utils'
 import { useQueryStates } from 'nuqs'
 import { NuqsAdapter } from 'nuqs/adapters/react'
@@ -10,7 +11,6 @@ import { useEffect, useRef, useState } from 'react'
 
 import { WikilinkPreviewCard } from '../components/wikilink-preview-card.tsx'
 import {
-  handleImageClick,
   handleLinkClick,
   handleTagClick,
   handleWikilinkClick,
@@ -160,6 +160,11 @@ function MainEditorDemo() {
     flushToSource()
   }
 
+  const lightbox = useLightbox()
+  const handleImageClick: ImageClickHandler = ({ src, alt, element }) => {
+    lightbox.open({ type: 'image', src, alt }, element)
+  }
+
   const toggleSource = (show: boolean) => {
     if (show) {
       setSourceSeed(editorRef.current?.getMarkdown() ?? '')
@@ -237,6 +242,7 @@ function MainEditorDemo() {
           </div>
         )}
       </div>
+      <Lightbox lightbox={lightbox} />
     </div>
   )
 }

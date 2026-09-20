@@ -21,10 +21,6 @@ export function handleLinkClick({ href }: { href: string }): void {
   confirmAndOpen('this link', href)
 }
 
-export function handleImageClick({ src }: { src: string }): void {
-  confirmAndOpen('this image', src)
-}
-
 export function handleTagClick({ tag }: { tag: string }): void {
   window.alert(`Clicked tag: #${tag}`)
 }

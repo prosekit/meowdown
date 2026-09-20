@@ -27,6 +27,10 @@ function getClosestImagePreview(target: EventTarget | null): HTMLElement | undef
   return preview
 }
 
+function getPreviewImage(preview: HTMLElement): HTMLImageElement | undefined {
+  return preview.querySelector('img') ?? undefined
+}
+
 export function findImageAt(state: EditorState, pos: number): ImageHit | undefined {
   const range = getMarkRangeAt(state, pos, 'mdImage')
   if (!range) return
@@ -63,6 +67,11 @@ export interface ImageClickPayload {
    * from it; a touch surface delivers the `touchend` instead of a click.
    */
   event: MouseEvent | TouchEvent | KeyboardEvent
+  /**
+   * The rendered `<img>` of a click or tap, for example to zoom a lightbox
+   * from. A key press has none.
+   */
+  element?: HTMLImageElement | undefined
   /**
    * Whether the platform's mod key (`Command` on Apple, `Ctrl` elsewhere) was held
    * beyond the gesture that triggered the activation.
@@ -127,7 +136,15 @@ export function defineImageClickHandler(
     // handler fires here instead of in handleClick.
     event.preventDefault()
     const hit = findImageForPreview(view, preview)
-    if (hit) handler({ src: hit.src, alt: hit.alt, event, mod: isModEvent(event) })
+    if (hit) {
+      handler({
+        src: hit.src,
+        alt: hit.alt,
+        event,
+        element: getPreviewImage(preview),
+        mod: isModEvent(event),
+      })
+    }
     return true
   }
 
@@ -188,7 +205,13 @@ export function defineImageClickHandler(
           if (!preview) return false
           const hit = findImageForPreview(view, preview)
           if (!hit) return false
-          handler({ src: hit.src, alt: hit.alt, event, mod: isModEvent(event) })
+          handler({
+            src: hit.src,
+            alt: hit.alt,
+            event,
+            element: getPreviewImage(preview),
+            mod: isModEvent(event),
+          })
           return true
         },
       },

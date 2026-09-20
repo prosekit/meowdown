@@ -400,11 +400,12 @@ function ImagePreview(props: {
   const url = (resolveImageUrl ?? defaultResolveImageUrl)(src)
   if (!url) return null
   const handleClick = onImageClick
-    ? (event: MouseEvent) => {
+    ? (event: MouseEvent<HTMLImageElement>) => {
         return onImageClick({
           src,
           alt,
           event: event.nativeEvent,
+          element: event.currentTarget,
           mod: isModEvent(event),
         })
       }

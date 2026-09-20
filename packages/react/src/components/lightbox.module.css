@@ -1,0 +1,103 @@
+.Dialog {
+  all: revert;
+  position: fixed;
+  inset: 0;
+  box-sizing: border-box;
+  width: 100dvw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  overflow: hidden;
+  padding: var(--meowdown-lightbox-padding, 1.5rem);
+  border: 0;
+  outline: none;
+  background: var(--meowdown-lightbox-backdrop, rgb(0 0 0 / 0.8));
+
+  &::backdrop {
+    background: transparent;
+  }
+
+  &[data-touch] {
+    padding: 0;
+    background: transparent;
+  }
+}
+
+.TouchBackdrop {
+  position: absolute;
+  inset: 0;
+  background: black;
+}
+
+.Corner {
+  position: absolute;
+  top: max(env(safe-area-inset-top), 1rem);
+  z-index: 1;
+  display: flex;
+  gap: 0.5rem;
+
+  &[data-side='start'] {
+    left: max(env(safe-area-inset-left), 1rem);
+  }
+
+  &[data-side='end'] {
+    right: max(env(safe-area-inset-right), 1rem);
+  }
+}
+
+.CloseButton {
+  all: revert;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  color: white;
+  background: rgb(255 255 255 / 0.15);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.1);
+  backdrop-filter: blur(24px);
+  cursor: pointer;
+
+  &:hover {
+    background: rgb(255 255 255 / 0.25);
+  }
+
+  &:active {
+    background: rgb(255 255 255 / 0.2);
+  }
+
+  & svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+.Content {
+  all: revert;
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: inherit;
+  border: 0;
+  background: transparent;
+  cursor: zoom-out;
+
+  [data-touch] > & {
+    touch-action: none;
+  }
+}
+
+.Image {
+  max-width: 100%;
+  max-height: 100%;
+  user-select: none;
+}

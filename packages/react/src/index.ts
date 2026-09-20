@@ -5,10 +5,17 @@ export {
   type TaskClickHandler,
   type TaskClickPayload,
 } from './components/markdown-view.tsx'
+export { Lightbox, type LightboxProps } from './components/lightbox.tsx'
 export {
   WikilinkHoverCard,
   type WikilinkHoverCardProps,
 } from './components/wikilink-hover-card.tsx'
+export {
+  useLightbox,
+  type LightboxCloseOptions,
+  type LightboxController,
+  type LightboxItem,
+} from './hooks/use-lightbox.ts'
 export type { TimeFormat } from './utils/date-format.ts'
 export type {
   EditorHandle,

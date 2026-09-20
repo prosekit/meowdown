@@ -151,6 +151,7 @@ describe('image click callback', () => {
       )
     })
     expect(onImageClick.mock.calls[0][0].event).toBeInstanceOf(MouseEvent)
+    expect(onImageClick.mock.calls[0][0].element).toBe(preview.element().querySelector('img'))
   })
 
   it('prevents non-mouse pointerdown on clickable previews without swallowing click', async () => {

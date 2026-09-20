@@ -1,6 +1,6 @@
 import '../testing/index.ts'
 
-import type { FileClickHandler } from '@meowdown/core'
+import type { FileClickHandler, ImageClickHandler } from '@meowdown/core'
 import type { XPostMediaClickEvent } from '@meowdown/embed/x'
 import type { XPost } from '@post-embed/types'
 import { describe, expect, it, vi } from 'vitest'
@@ -270,6 +270,23 @@ describe('MarkdownView', () => {
     await expect
       .element(view.getByTestId('x-post-embed').locate('[data-media] img'))
       .toHaveAttribute('src', 'reflect-asset://saved/photo.png')
+  })
+
+  it('reports a clicked image with its element', async () => {
+    const onImageClick = vi.fn<ImageClickHandler>()
+    await renderView('![cat](cat.png)', {
+      resolveImageUrl: () => PHOTO_URL,
+      onImageClick,
+    })
+    const image = view.getByTestId('image-preview').locate('img')
+    await expect.element(image).toBeInTheDocument()
+    await image.click()
+    expect(onImageClick).toHaveBeenCalledTimes(1)
+    expect(onImageClick.mock.calls[0][0]).toMatchObject({
+      src: 'cat.png',
+      alt: 'cat',
+      element: image.element(),
+    })
   })
 
   it('reports a clicked X post photo', async () => {
