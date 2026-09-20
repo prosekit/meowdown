@@ -1,4 +1,4 @@
-import type { ExitBoundaryHandler, ImageClickHandler } from '@meowdown/core'
+import type { ExitBoundaryHandler, ImageClickHandler, XPostMediaClickHandler } from '@meowdown/core'
 import {
   Lightbox,
   MarkdownView,
@@ -52,6 +52,16 @@ export function HomeDemo() {
     [openLightbox],
   )
 
+  const handleXPostMediaClick: XPostMediaClickHandler = useCallback(
+    (event) => {
+      const { media, element } = event.detail
+      if (media.type !== 'photo') return
+      event.preventDefault()
+      openLightbox({ type: 'image', src: media.url, alt: media.alt }, element)
+    },
+    [openLightbox],
+  )
+
   const handleExitBoundary: ExitBoundaryHandler = useCallback(({ direction }) => {
     setEdgeFlash({ id: getId(), direction })
   }, [])
@@ -99,6 +109,7 @@ export function HomeDemo() {
               resolveFileInfo={resolveFileInfo}
               onFileClick={handleFileClick}
               onImageClick={handleImageClick}
+              onXPostMediaClick={handleXPostMediaClick}
               onLinkClick={handleLinkClick}
               resolveLinkPreview={resolveLinkPreview}
               onTagClick={handleTagClick}

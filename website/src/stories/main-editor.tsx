@@ -2,7 +2,7 @@ import './stories.css'
 
 import { Transaction } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
-import type { ImageClickHandler } from '@meowdown/core'
+import type { ImageClickHandler, XPostMediaClickHandler } from '@meowdown/core'
 import { Lightbox, MeowdownEditor, useLightbox, type EditorHandle } from '@meowdown/react'
 import { throttle } from '@ocavue/utils'
 import { useQueryStates } from 'nuqs'
@@ -165,6 +165,13 @@ function MainEditorDemo() {
     lightbox.open({ type: 'image', src, alt }, element)
   }
 
+  const handleXPostMediaClick: XPostMediaClickHandler = (event) => {
+    const { media, element } = event.detail
+    if (media.type !== 'photo') return
+    event.preventDefault()
+    lightbox.open({ type: 'image', src: media.url, alt: media.alt }, element)
+  }
+
   const toggleSource = (show: boolean) => {
     if (show) {
       setSourceSeed(editorRef.current?.getMarkdown() ?? '')
@@ -221,6 +228,7 @@ function MainEditorDemo() {
             onTagSearch={searchTags}
             onWikilinkSearch={searchNotes}
             onImageClick={handleImageClick}
+            onXPostMediaClick={handleXPostMediaClick}
             onLinkClick={handleLinkClick}
             resolveLinkPreview={resolveLinkPreview}
             onTagClick={handleTagClick}
