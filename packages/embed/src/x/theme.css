@@ -208,7 +208,6 @@
   & [data-media] {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-auto-rows: minmax(0, 1fr);
     gap: 2px;
     height: var(--_media-height);
     max-width: calc(2 * var(--_media-height));
@@ -237,7 +236,6 @@
     height: 100%;
   }
   & [data-media-item] > [data-poster] {
-    display: block;
     position: relative;
     width: 100%;
     height: 100%;
@@ -407,11 +405,6 @@
     }
     & > [data-media] > [data-media-item]:nth-child(n + 2) {
       display: none;
-    }
-    & > [data-media] > [data-media-item] img {
-      height: 100%;
-      max-height: none;
-      aspect-ratio: auto;
     }
     & > [data-media]:not([data-count='1'])::after {
       content: attr(data-count);
