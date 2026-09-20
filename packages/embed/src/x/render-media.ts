@@ -9,13 +9,12 @@ import { dispatchMediaClick } from './media-click.ts'
 import { sortVideoSources } from './sort-video-sources.ts'
 
 function getSizeAttrs(media: { width: number; height: number }) {
-  const width = toPositiveNumber(media.width)
-  const height = toPositiveNumber(media.height)
-  return {
-    width,
-    height,
-    style: width && height ? `--_ratio: ${width} / ${height}` : undefined,
-  }
+  return { width: toPositiveNumber(media.width), height: toPositiveNumber(media.height) }
+}
+
+function getRatioStyle(media: { width: number; height: number }) {
+  const { width, height } = getSizeAttrs(media)
+  return width && height ? `--_ratio: ${width} / ${height}` : undefined
 }
 
 function getOrientation(media: { width: number; height: number }) {
@@ -167,7 +166,6 @@ function renderVideo(
       'data-poster': '',
       type: 'button',
       'aria-label': gif ? 'Play GIF' : 'Play video',
-      style: getSizeAttrs(media).style,
     },
     poster,
     el('span', { 'data-play': '', 'aria-hidden': 'true' }),
@@ -211,6 +209,7 @@ export function renderMedia(
           'data-media-item': '',
           'data-type': item.type,
           'data-orientation': getOrientation(item),
+          style: getRatioStyle(item),
         },
         item.type === 'photo'
           ? renderPhoto(item, error, onClick)

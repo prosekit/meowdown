@@ -50,6 +50,16 @@ describe('Full post snapshots', () => {
     expect(box.height).toBeCloseTo((box.width * 400) / 640, 0)
   })
 
+  it('grows a video that plays in place', async () => {
+    const snapshot = createPost()
+    snapshot.media = [createVideo()]
+    const element = mount(snapshot)
+    const item = element.querySelector('[data-media-item]')!
+    const posterHeight = item.getBoundingClientRect().height
+    await post.getByRole('button', { name: 'Play video' }).click()
+    expect(item.getBoundingClientRect().height).toBeGreaterThan(posterHeight * 1.5)
+  })
+
   it('plays a video in place after a click on its poster', async () => {
     const snapshot = createPost()
     snapshot.media = [createVideo(), createVideo(true)]
@@ -90,6 +100,15 @@ describe('Full post snapshots', () => {
       .element(post.getByRole('link', { name: 'Replying to @example' }))
       .toHaveAttribute('href', 'https://x.com/example/status/111')
     await expect.element(post.getByRole('link', { name: 'Show more' })).toBeVisible()
+  })
+
+  it('drops blank lines from a quoted post only', () => {
+    const snapshot = createPost('First\n\nSecond')
+    snapshot.quote = { ...createPost('First\n\nSecond'), id: '222' }
+    const element = mount(snapshot)
+    const [body, quoted] = element.querySelectorAll<HTMLElement>('[data-text]')
+    expect(body.innerText).toBe('First\n\nSecond')
+    expect(quoted.innerText).toBe('First\nSecond')
   })
 
   it('renders dates and edits without engagement controls', async () => {
