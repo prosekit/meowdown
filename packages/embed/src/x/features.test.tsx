@@ -92,6 +92,15 @@ describe('Full post snapshots', () => {
     await expect.element(post.getByRole('link', { name: 'Show more' })).toBeVisible()
   })
 
+  it('drops blank lines from a quoted post only', () => {
+    const snapshot = createPost('First\n\nSecond')
+    snapshot.quote = { ...createPost('First\n\nSecond'), id: '222' }
+    const element = mount(snapshot)
+    const [body, quoted] = element.querySelectorAll<HTMLElement>('[data-text]')
+    expect(body.innerText).toBe('First\n\nSecond')
+    expect(quoted.innerText).toBe('First\nSecond')
+  })
+
   it('renders dates and edits without engagement controls', async () => {
     const snapshot = createPost()
     snapshot.author.avatarShape = 'square'
