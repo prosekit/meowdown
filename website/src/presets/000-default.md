@@ -36,7 +36,7 @@ Small images flow inline ![](https://static.photos/yellow/16x16/3)<!--{"width":1
 
 Paste a YouTube or tweet link and it embeds itself. Undo once to get the plain link back:
 
-![](https://www.youtube.com/watch?v=aqz-KE-bpKQ)
+![](https://www.youtube.com/watch?v=aqz-KE-bpKQ)<!-- {"snapshot":{"kind":"youtube-video","data":{"url":"https://www.youtube.com/watch?v=aqz-KE-bpKQ","title":"Big Buck Bunny 60fps 4K - Official Blender Foundation Short Film","author_name":"Blender","author_url":"https://www.youtube.com/@BlenderOfficial","thumbnail_url":"https://i.ytimg.com/vi/aqz-KE-bpKQ/hqdefault.jpg","thumbnail_width":480,"thumbnail_height":360,"width":200,"height":113}}} -->
 
 ![](https://twitter.com/jack/status/20)
 
