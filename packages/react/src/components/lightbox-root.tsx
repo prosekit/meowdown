@@ -26,6 +26,10 @@ export interface LightboxRootProps extends Omit<
 const DIALOG_TRANSITION_CLASS = 'meowdown-lightbox-dialog'
 
 function showModal(dialog: HTMLDialogElement) {
+  // A closing dialog hands focus back, and WebKit scrolls a focused editor to
+  // its caret, away from the thumbnail. An editor without focus is left alone.
+  const active = document.activeElement
+  if (active instanceof HTMLElement && active.isContentEditable) active.blur()
   dialog.showModal()
   return () => dialog.close()
 }

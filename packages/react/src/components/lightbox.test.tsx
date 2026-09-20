@@ -2,7 +2,7 @@ import '../style.css'
 
 import { sleep } from '@ocavue/utils'
 import { StrictMode, useEffect } from 'react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest'
 import { emulateMedia } from 'vitest-browser-commands/playwright'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
@@ -241,6 +241,27 @@ describe('Lightbox', () => {
     await expect.element(image).toBeVisible()
     await sleep(300)
     await expect.element(image).toBeVisible()
+  })
+
+  it('keeps an editor where it was scrolled to', async () => {
+    const scroller = document.createElement('div')
+    scroller.style.cssText = 'height: 200px; overflow-y: auto'
+    const editor = document.createElement('div')
+    editor.contentEditable = 'true'
+    editor.innerHTML = '<p>First line</p><p style="height: 2000px"></p><p>Last line</p>'
+    scroller.append(editor)
+    document.body.append(scroller)
+    onTestFinished(() => scroller.remove())
+    await render(<Host />)
+
+    await userEvent.click(page.getByText('First line'))
+    scroller.scrollTop = 1000
+
+    controller.open(ITEM)
+    await image.click()
+    await expect.element(dialog).not.toBeInTheDocument()
+    await sleep(100)
+    expect(scroller.scrollTop).toBe(1000)
   })
 
   it('closes from host content', async () => {
