@@ -17,12 +17,33 @@ export const LIGHTBOX_TRANSITION_NAME = 'meowdown-lightbox'
 /**
  * Something a lightbox can show.
  */
-export interface LightboxItem {
+export type LightboxItem = LightboxImageItem | LightboxVideoItem
+
+export interface LightboxImageItem {
   type: 'image'
   /**
    * A URL the browser can load, already resolved from the Markdown `src`.
    */
   src: string
+  alt?: string | undefined
+}
+
+export interface LightboxVideoItem {
+  type: 'video'
+  /**
+   * In the order the browser should try them.
+   */
+  sources: Array<{ src: string; type?: string | undefined }>
+  poster?: string | undefined
+  /**
+   * Intrinsic size, so the player has its final box before metadata loads.
+   */
+  width?: number | undefined
+  height?: number | undefined
+  /**
+   * Play like a GIF: muted, looping, without controls.
+   */
+  gif?: boolean | undefined
   alt?: string | undefined
 }
 

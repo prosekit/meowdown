@@ -1,10 +1,10 @@
-import type { ExitBoundaryHandler, ImageClickHandler, XPostMediaClickHandler } from '@meowdown/core'
-import { MarkdownView, MeowdownEditor, useLightbox, type EditorHandle } from '@meowdown/react'
+import type { ExitBoundaryHandler } from '@meowdown/core'
+import { MarkdownView, MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import { getId } from '@ocavue/utils'
 import { clsx } from 'clsx/lite'
 import { useCallback, useRef, useState } from 'react'
 
-import { DemoLightbox } from '../components/demo-lightbox.tsx'
+import { DemoLightbox, useDemoLightbox } from '../components/demo-lightbox.tsx'
 import { SegmentedControl } from '../components/segmented-control.tsx'
 import { WikilinkPreviewCard } from '../components/wikilink-preview-card.tsx'
 import {
@@ -40,22 +40,7 @@ export function HomeDemo() {
   // a top or bottom border inside the editor box. A bumped id remounts the
   // overlay so its one-shot fade restarts on every press.
   const [edgeFlash, setEdgeFlash] = useState<{ id: number; direction: 'up' | 'down' }>()
-  const lightbox = useLightbox()
-  const openLightbox = lightbox.open
-  const handleImageClick: ImageClickHandler = useCallback(
-    ({ src, alt, element }) => openLightbox({ type: 'image', src, alt }, element),
-    [openLightbox],
-  )
-
-  const handleXPostMediaClick: XPostMediaClickHandler = useCallback(
-    (event) => {
-      const { media, element } = event.detail
-      if (media.type !== 'photo') return
-      event.preventDefault()
-      openLightbox({ type: 'image', src: media.url, alt: media.alt }, element)
-    },
-    [openLightbox],
-  )
+  const { lightbox, handleImageClick, handleXPostMediaClick } = useDemoLightbox()
 
   const handleExitBoundary: ExitBoundaryHandler = useCallback(({ direction }) => {
     setEdgeFlash({ id: getId(), direction })

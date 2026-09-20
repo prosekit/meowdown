@@ -8,6 +8,7 @@
 @import '@meowdown/react/style.css';
 @import 'tailwindcss/theme.css';
 @import 'tailwindcss/utilities.css';
+@plugin '@egoist/tailwindcss-icons';
 
 @custom-variant dark (&:where(.dark, .dark *));
 

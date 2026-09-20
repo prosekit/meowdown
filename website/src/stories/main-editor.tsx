@@ -2,14 +2,13 @@ import './stories.css'
 
 import { Transaction } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
-import type { ImageClickHandler, XPostMediaClickHandler } from '@meowdown/core'
-import { MeowdownEditor, useLightbox, type EditorHandle } from '@meowdown/react'
+import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import { throttle } from '@ocavue/utils'
 import { useQueryStates } from 'nuqs'
 import { NuqsAdapter } from 'nuqs/adapters/react'
 import { useEffect, useRef, useState } from 'react'
 
-import { DemoLightbox } from '../components/demo-lightbox.tsx'
+import { DemoLightbox, useDemoLightbox } from '../components/demo-lightbox.tsx'
 import { WikilinkPreviewCard } from '../components/wikilink-preview-card.tsx'
 import {
   handleLinkClick,
@@ -161,17 +160,7 @@ function MainEditorDemo() {
     flushToSource()
   }
 
-  const lightbox = useLightbox()
-  const handleImageClick: ImageClickHandler = ({ src, alt, element }) => {
-    lightbox.open({ type: 'image', src, alt }, element)
-  }
-
-  const handleXPostMediaClick: XPostMediaClickHandler = (event) => {
-    const { media, element } = event.detail
-    if (media.type !== 'photo') return
-    event.preventDefault()
-    lightbox.open({ type: 'image', src: media.url, alt: media.alt }, element)
-  }
+  const { lightbox, handleImageClick, handleXPostMediaClick } = useDemoLightbox()
 
   const toggleSource = (show: boolean) => {
     if (show) {

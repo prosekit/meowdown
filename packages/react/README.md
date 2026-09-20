@@ -49,12 +49,12 @@ export function App() {
 
 ## Components
 
-| Component                        | Description                                                                                                                                                                                             |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MeowdownEditor`                 | The editor. Callbacks and resolvers must be stable; pass them via `useCallback`.                                                                                                                        |
-| `MarkdownView`                   | Read-only Markdown renderer. `interactive={false}` renders passive content for previews.                                                                                                                |
-| `WikilinkHoverCard`              | Mount inside `MeowdownEditor`; renders host content for the hovered wiki link's `target`. Return `null` to render no card.                                                                              |
-| `LightboxRoot` / `LightboxImage` | Full-window image preview driven by `useLightbox()`. Compose your own close controls inside `LightboxRoot`, and call `lightbox.open(item, element)` from `onImageClick` to zoom from the clicked image. |
+| Component                                          | Description                                                                                                                                                                                                                                |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MeowdownEditor`                                   | The editor. Callbacks and resolvers must be stable; pass them via `useCallback`.                                                                                                                                                           |
+| `MarkdownView`                                     | Read-only Markdown renderer. `interactive={false}` renders passive content for previews.                                                                                                                                                   |
+| `WikilinkHoverCard`                                | Mount inside `MeowdownEditor`; renders host content for the hovered wiki link's `target`. Return `null` to render no card.                                                                                                                 |
+| `LightboxRoot` / `LightboxImage` / `LightboxVideo` | Full-window image and video preview driven by `useLightbox()`. Compose your own close controls inside `LightboxRoot`, and call `lightbox.open(item, element)` from `onImageClick` or `onXPostMediaClick` to zoom from the clicked element. |
 
 Common `MeowdownEditor` props:
 

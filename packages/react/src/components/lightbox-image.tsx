@@ -1,7 +1,7 @@
 import { clsx } from 'clsx/lite'
 import type { ComponentProps, ReactNode } from 'react'
 
-import { LIGHTBOX_TRANSITION_NAME, type LightboxItem } from '../hooks/use-lightbox.ts'
+import { LIGHTBOX_TRANSITION_NAME, type LightboxImageItem } from '../hooks/use-lightbox.ts'
 
 import styles from './lightbox.module.css'
 
@@ -9,7 +9,7 @@ import styles from './lightbox.module.css'
  * Props for {@link LightboxImage}. Other props land on the `<img>`.
  */
 export interface LightboxImageProps extends Omit<ComponentProps<'img'>, 'src' | 'alt'> {
-  readonly item: LightboxItem
+  readonly item: LightboxImageItem
 }
 
 /**
