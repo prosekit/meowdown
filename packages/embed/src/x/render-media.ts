@@ -48,6 +48,7 @@ function getDisplayable(
       const url = getSafeUrl(source.url, protocols)
       return url ? [{ ...source, url }] : []
     })
+    // FIXME: extra the sorting logic into a separate function and test it with unit tests and describe its behavior
     .sort((a, b) => {
       return (
         Number(b.type === 'video/mp4') - Number(a.type === 'video/mp4') ||
