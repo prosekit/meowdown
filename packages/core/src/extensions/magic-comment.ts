@@ -63,6 +63,7 @@ export function parseMagicComment(comment: string): MagicComment | undefined {
 }
 
 function toPositiveNumber(value: unknown): number | undefined {
+  // FIXME: is "typeof value === 'number'" this step necessary? if not, remove it.
   if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
     return Math.round(value)
   }
