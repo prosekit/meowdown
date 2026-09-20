@@ -4,8 +4,9 @@ import { getId } from '@ocavue/utils'
 import { clsx } from 'clsx/lite'
 import { useCallback, useRef, useState } from 'react'
 
-import { DemoLightbox, useDemoLightbox } from '../components/demo-lightbox.tsx'
+import { DemoLightbox } from '../components/demo-lightbox.tsx'
 import { SegmentedControl } from '../components/segmented-control.tsx'
+import { useDemoLightbox } from '../components/use-demo-lightbox.ts'
 import { WikilinkPreviewCard } from '../components/wikilink-preview-card.tsx'
 import {
   handleFileClick,

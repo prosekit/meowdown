@@ -8,7 +8,8 @@ import { useQueryStates } from 'nuqs'
 import { NuqsAdapter } from 'nuqs/adapters/react'
 import { useEffect, useRef, useState } from 'react'
 
-import { DemoLightbox, useDemoLightbox } from '../components/demo-lightbox.tsx'
+import { DemoLightbox } from '../components/demo-lightbox.tsx'
+import { useDemoLightbox } from '../components/use-demo-lightbox.ts'
 import { WikilinkPreviewCard } from '../components/wikilink-preview-card.tsx'
 import {
   handleLinkClick,
