@@ -1,7 +1,7 @@
 import { clsx } from 'clsx/lite'
 import type { ComponentProps, ReactNode } from 'react'
 
-import { LIGHTBOX_MEDIA_CLASS, type LightboxVideoItem } from '../hooks/use-lightbox.ts'
+import { LIGHTBOX_TRANSITION_NAME, type LightboxVideoItem } from '../hooks/use-lightbox.ts'
 
 import styles from './lightbox.module.css'
 
@@ -19,7 +19,7 @@ export interface LightboxVideoProps extends Omit<
  * The video of a lightbox. It starts playing as soon as it opens: the click
  * that opened the lightbox is the user gesture that allows sound.
  */
-export function LightboxVideo({ item, className, ...props }: LightboxVideoProps): ReactNode {
+export function LightboxVideo({ item, className, style, ...props }: LightboxVideoProps): ReactNode {
   const gif = item.gif === true
   return (
     <video
@@ -33,7 +33,8 @@ export function LightboxVideo({ item, className, ...props }: LightboxVideoProps)
       poster={item.poster}
       width={item.width}
       height={item.height}
-      className={clsx(styles.Video, LIGHTBOX_MEDIA_CLASS, className)}
+      className={clsx(styles.Video, className)}
+      style={{ ...style, viewTransitionName: LIGHTBOX_TRANSITION_NAME }}
     >
       {item.sources.map((source) => (
         <source key={source.src} src={source.src} type={source.type} />

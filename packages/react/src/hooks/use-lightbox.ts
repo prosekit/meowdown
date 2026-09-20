@@ -1,11 +1,10 @@
 import { startTransition, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 /**
- * The class shared by the opened thumbnail and the lightbox content. The
- * style sheet gives it a `view-transition-name`, so the browser zooms between
- * them.
+ * The `view-transition-name` shared by the opened thumbnail and the lightbox
+ * content, so the browser zooms between them.
  */
-export const LIGHTBOX_MEDIA_CLASS = 'meowdown-lightbox-media'
+export const LIGHTBOX_TRANSITION_NAME = 'meowdown-lightbox-media'
 
 /**
  * Something a lightbox can show.
@@ -78,8 +77,8 @@ export interface LightboxController {
   readonly onExited: () => void
 }
 
-function toggleMediaClass(element: HTMLElement | null, force: boolean): void {
-  element?.classList.toggle(LIGHTBOX_MEDIA_CLASS, force)
+function setTransitionName(element: HTMLElement | null, name: string): void {
+  if (element) element.style.viewTransitionName = name
 }
 
 /**
@@ -88,7 +87,7 @@ function toggleMediaClass(element: HTMLElement | null, force: boolean): void {
  *
  * The thumbnail is not rendered by this hook's component (it may not be
  * rendered by React at all), so its half of the shared transition is set by
- * hand: it carries the class while the browser captures the page without the
+ * hand: it carries the name while the browser captures the page without the
  * lightbox, and loses it while the lightbox is mounted.
  */
 export function useLightbox(): LightboxController {
@@ -97,9 +96,9 @@ export function useLightbox(): LightboxController {
   const instantRef = useRef(false)
 
   const open = useCallback((nextItem: LightboxItem, element?: HTMLElement | null) => {
-    toggleMediaClass(sourceRef.current, false)
+    setTransitionName(sourceRef.current, '')
     sourceRef.current = element ?? null
-    toggleMediaClass(sourceRef.current, true)
+    setTransitionName(sourceRef.current, LIGHTBOX_TRANSITION_NAME)
     startTransition(() => setItem(nextItem))
   }, [])
 
@@ -113,15 +112,15 @@ export function useLightbox(): LightboxController {
   }, [])
 
   // Layout effects run after React mutated the DOM and before the browser
-  // captures the new page, which is when the class has to change sides.
+  // captures the new page, which is when the name has to change sides.
   const isOpen = item != null
   useLayoutEffect(() => {
     if (!isOpen) return
-    toggleMediaClass(sourceRef.current, false)
+    setTransitionName(sourceRef.current, '')
     return () => {
       const source = sourceRef.current
       if (!instantRef.current && source?.isConnected) {
-        toggleMediaClass(source, true)
+        setTransitionName(source, LIGHTBOX_TRANSITION_NAME)
       } else {
         sourceRef.current = null
       }
@@ -129,7 +128,7 @@ export function useLightbox(): LightboxController {
   }, [isOpen])
 
   const onExited = useCallback(() => {
-    toggleMediaClass(sourceRef.current, false)
+    setTransitionName(sourceRef.current, '')
     sourceRef.current = null
   }, [])
 

@@ -114,12 +114,12 @@ describe('Lightbox', () => {
     await vi.waitFor(() => expect(isZooming()).toBe(true), ZOOM_TIMEOUT)
     await expect.element(dialog).toBeInTheDocument()
     await vi.waitFor(() => expect(isZooming()).toBe(false), ZOOM_TIMEOUT)
-    expect(getComputedStyle(thumbnail).viewTransitionName).toBe('none')
+    expect(thumbnail.style.viewTransitionName).toBe('')
 
     await userEvent.keyboard('{Escape}')
     await vi.waitFor(() => expect(isZooming()).toBe(true), ZOOM_TIMEOUT)
     await expect.element(dialog).not.toBeInTheDocument()
-    await vi.waitFor(() => expect(getComputedStyle(thumbnail).viewTransitionName).toBe('none'))
+    await vi.waitFor(() => expect(thumbnail.style.viewTransitionName).toBe(''))
     thumbnail.remove()
   })
 
@@ -135,7 +135,7 @@ describe('Lightbox', () => {
     controller.close({ instant: true })
     await expect.element(dialog).not.toBeInTheDocument()
     expect(isZooming()).toBe(false)
-    expect(getComputedStyle(thumbnail).viewTransitionName).toBe('none')
+    expect(thumbnail.style.viewTransitionName).toBe('')
     thumbnail.remove()
   })
 
@@ -150,7 +150,7 @@ describe('Lightbox', () => {
     await userEvent.keyboard('{Escape}')
     await expect.element(dialog).not.toBeInTheDocument()
     expect(isZooming()).toBe(false)
-    await vi.waitFor(() => expect(getComputedStyle(thumbnail).viewTransitionName).toBe('none'))
+    await vi.waitFor(() => expect(thumbnail.style.viewTransitionName).toBe(''))
     thumbnail.remove()
   })
 
@@ -164,7 +164,7 @@ describe('Lightbox', () => {
     await vi.waitFor(() => expect(isZooming()).toBe(false), ZOOM_TIMEOUT)
     controller.close()
     await expect.element(dialog).not.toBeInTheDocument()
-    await vi.waitFor(() => expect(getComputedStyle(thumbnail).viewTransitionName).toBe('none'))
+    await vi.waitFor(() => expect(thumbnail.style.viewTransitionName).toBe(''))
 
     controller.open(ITEM, thumbnail)
     await vi.waitFor(() => expect(isZooming()).toBe(true), ZOOM_TIMEOUT)
