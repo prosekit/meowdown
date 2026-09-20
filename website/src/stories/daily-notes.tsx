@@ -1,10 +1,12 @@
 import './stories.css'
 
-import type { ExitBoundaryHandler } from '@meowdown/core'
+import type { ExitBoundaryHandler, ImageClickHandler, XPostMediaClickHandler } from '@meowdown/core'
 import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import { clsx } from 'clsx/lite'
 import { useCallback, useMemo, useRef } from 'react'
 
+import { DemoLightbox } from '../components/demo-lightbox.tsx'
+import { useDemoLightbox } from '../components/use-demo-lightbox.ts'
 import { useMounted } from '../lib/use-mounted.ts'
 
 const PAST_DAYS = 5
@@ -32,11 +34,15 @@ function DailyNoteRow({
   date,
   registerHandle,
   focusDay,
+  onImageClick,
+  onXPostMediaClick,
 }: {
   offset: number
   date: Date
   registerHandle: (offset: number, handle: EditorHandle | null) => void
   focusDay: (offset: number, position: 'start' | 'end') => boolean
+  onImageClick: ImageClickHandler
+  onXPostMediaClick: XPostMediaClickHandler
 }) {
   const handleRef = useCallback(
     (handle: EditorHandle | null) => registerHandle(offset, handle),
@@ -72,6 +78,8 @@ function DailyNoteRow({
         handleRef={handleRef}
         editorClassName={offset < 0 ? 'min-h-[100px]' : 'min-h-[40vh]'}
         onExitBoundary={handleExitBoundary}
+        onImageClick={onImageClick}
+        onXPostMediaClick={onXPostMediaClick}
       />
     </section>
   )
@@ -80,6 +88,7 @@ function DailyNoteRow({
 export function DailyNotes() {
   const mounted = useMounted()
   const handlesRef = useRef(new Map<number, EditorHandle>())
+  const { lightbox, handleImageClick, handleXPostMediaClick } = useDemoLightbox()
 
   const days = useMemo(() => {
     const today = new Date()
@@ -119,8 +128,11 @@ export function DailyNotes() {
           date={date}
           registerHandle={registerHandle}
           focusDay={focusDay}
+          onImageClick={handleImageClick}
+          onXPostMediaClick={handleXPostMediaClick}
         />
       ))}
+      <DemoLightbox lightbox={lightbox} />
     </div>
   )
 }
