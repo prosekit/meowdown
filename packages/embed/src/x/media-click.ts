@@ -1,4 +1,5 @@
 import type { XPostMedia } from '@post-embed/types' // FIXME: update all post-embed packages to the latest version. See https://github.com/ocavue/post-embed/pull/65
+// FIXME: also merge the latest origin/master into this branch
 
 export const X_POST_MEDIA_CLICK = 'meowdown-embed-media-click'
 
