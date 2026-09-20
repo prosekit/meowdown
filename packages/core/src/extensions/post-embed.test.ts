@@ -50,6 +50,7 @@ describe('default resolvers', () => {
       )
     const first = defaultResolveXPost('https://x.com/jack/status/1001')
     expect(first).toBeInstanceOf(Promise)
+    expect(defaultResolveXPost('https://x.com/jack/status/1001')).toBe(first)
     expect(await first).toEqual({ ...createXPost('cached'), id: '1001' })
     expect(defaultResolveXPost('https://x.com/jack/status/1001')).toEqual({
       ...createXPost('cached'),
@@ -65,6 +66,19 @@ describe('default resolvers', () => {
       new Response(JSON.stringify({ data: null }), { status: 404 }),
     )
     expect(await defaultResolveXPost('https://x.com/jack/status/1002')).toBeUndefined()
+  })
+
+  it('preserves a quote without thread metadata', async () => {
+    const data = {
+      ...createTweet('Outer'),
+      id_str: '2000',
+      quoted_tweet: { ...createTweet('Quote'), id_str: '3000' },
+    }
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ data })))
+    expect(await defaultResolveXPost('https://x.com/jack/status/2000')).toMatchObject({
+      id: '2000',
+      quote: { id: '3000', body: [{ type: 'text', text: 'Quote' }] },
+    })
   })
 
   it('retries an unavailable X post on a later invocation', async () => {

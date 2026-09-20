@@ -5,6 +5,11 @@ settings:
   dedupePeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@post-embed/exporter': https://pkg.pr.new/@post-embed/exporter@f3ec778
+  '@post-embed/schema': https://pkg.pr.new/@post-embed/schema@f3ec778
+  '@post-embed/types': https://pkg.pr.new/@post-embed/types@f3ec778
+
 importers:
 
   .:
@@ -88,14 +93,14 @@ importers:
         specifier: ^1.8.0
         version: 1.8.0
       '@post-embed/exporter':
-        specifier: ^0.4.1
-        version: 0.4.1(typescript@6.0.3)
+        specifier: https://pkg.pr.new/@post-embed/exporter@f3ec778
+        version: https://pkg.pr.new/@post-embed/exporter@f3ec778(typescript@6.0.3)
       '@post-embed/schema':
-        specifier: ^0.5.1
-        version: 0.5.1(typescript@6.0.3)
+        specifier: https://pkg.pr.new/@post-embed/schema@f3ec778
+        version: https://pkg.pr.new/@post-embed/schema@f3ec778(typescript@6.0.3)
       '@post-embed/types':
-        specifier: ^0.4.1
-        version: 0.4.1
+        specifier: https://pkg.pr.new/@post-embed/types@f3ec778
+        version: https://pkg.pr.new/@post-embed/types@f3ec778
       '@prosekit/core':
         specifier: ^0.13.2
         version: 0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)
@@ -194,11 +199,11 @@ importers:
         specifier: ^0.2.1
         version: 0.2.1
       '@post-embed/schema':
-        specifier: ^0.5.1
-        version: 0.5.1(typescript@6.0.3)
+        specifier: https://pkg.pr.new/@post-embed/schema@f3ec778
+        version: https://pkg.pr.new/@post-embed/schema@f3ec778(typescript@6.0.3)
       '@post-embed/types':
-        specifier: ^0.4.1
-        version: 0.4.1
+        specifier: https://pkg.pr.new/@post-embed/types@f3ec778
+        version: https://pkg.pr.new/@post-embed/types@f3ec778
       crelt:
         specifier: ^1.0.7
         version: 1.0.7
@@ -250,8 +255,8 @@ importers:
         specifier: ^1.7.2
         version: 1.7.2
       '@post-embed/schema':
-        specifier: ^0.5.1
-        version: 0.5.1(typescript@6.0.3)
+        specifier: https://pkg.pr.new/@post-embed/schema@f3ec778
+        version: https://pkg.pr.new/@post-embed/schema@f3ec778(typescript@6.0.3)
     devDependencies:
       '@meowdown/vitest':
         specifier: workspace:*
@@ -287,8 +292,8 @@ importers:
         specifier: ^1.8.0
         version: 1.8.0
       '@post-embed/types':
-        specifier: ^0.4.1
-        version: 0.4.1
+        specifier: https://pkg.pr.new/@post-embed/types@f3ec778
+        version: https://pkg.pr.new/@post-embed/types@f3ec778
       '@prosekit/core':
         specifier: ^0.13.2
         version: 0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)
@@ -457,8 +462,8 @@ importers:
         specifier: ^0.7.1
         version: 0.7.1
       '@post-embed/types':
-        specifier: ^0.4.1
-        version: 0.4.1
+        specifier: https://pkg.pr.new/@post-embed/types@f3ec778
+        version: https://pkg.pr.new/@post-embed/types@f3ec778
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.3.0)
@@ -2164,14 +2169,17 @@ packages:
   '@poppinss/exception@1.2.3':
     resolution: {integrity: sha512-dCED+QRChTVatE9ibtoaxc+WkdzOSjYTKi/+uacHWIsfodVfpsueo3+DKpgU5Px8qXjgmXkSvhXvSCz3fnP9lw==}
 
-  '@post-embed/exporter@0.4.1':
-    resolution: {integrity: sha512-4c6Y2p0CnjgWkiMQQWtfFwbdQJInguJyZmzyb/2dps3ugJFr1b9IW/zcNJ2KIEZCQO/+ZA/kvADL/9ODEMuPlg==}
+  '@post-embed/exporter@https://pkg.pr.new/@post-embed/exporter@f3ec778':
+    resolution: {integrity: sha512-Q9SxmuUSg1AA5tL+DpPyuHE3+vGNh4DDJbR4OQB6GzTO4xHKtPiaJMK1Z67u+ztXpk3CB0RIsfNHWz45onQ8bA==, tarball: https://pkg.pr.new/@post-embed/exporter@f3ec778}
+    version: 0.4.1
 
-  '@post-embed/schema@0.5.1':
-    resolution: {integrity: sha512-LKiPLLEtRcgz0CbrE/WGQriODcd60b6CBrrnxKN+HDV07jZs+PaH/ju4uvfmvIJE98+7tKzPMkcOEeDtbjke/g==}
+  '@post-embed/schema@https://pkg.pr.new/@post-embed/schema@f3ec778':
+    resolution: {integrity: sha512-Fy8Pa2jUJJrIKBOe/38RkyCmSTiRwdWfwq+I15ibMdZguo2Yrwff3Q4BW/bdl18TnqcWAG7IjYcZFMhKSwVWBw==, tarball: https://pkg.pr.new/@post-embed/schema@f3ec778}
+    version: 0.5.1
 
-  '@post-embed/types@0.4.1':
-    resolution: {integrity: sha512-0GZ4kvPvgFKnLPx3G+0nBsHxn5iOqoIph0NAZrNBwSpuro2zNpLHM2K9HR49Kk2DFje88uOLfuU0ev0xSLAj2w==}
+  '@post-embed/types@https://pkg.pr.new/@post-embed/types@f3ec778':
+    resolution: {integrity: sha512-dF96/k/WCf/JR+uH/OxWMer3rgnOpzuJXCRp7w2iLSp73rD4019BAgJht51CmNRbz44MWbN9P7gbuPsMsa6yIQ==, tarball: https://pkg.pr.new/@post-embed/types@f3ec778}
+    version: 0.4.1
 
   '@prosekit/core@0.13.2':
     resolution: {integrity: sha512-0pdKLy442VCo4Pa+5z+pNGhiLAmHgreWHWc2pn2IIbsy4dhchNEQN+ycfCYbjDVHxXfNrGpp1aHSMn5VOhmnhA==}
@@ -7051,11 +7059,12 @@ snapshots:
 
   '@poppinss/exception@1.2.3': {}
 
-  '@post-embed/exporter@0.4.1(typescript@6.0.3)':
+  '@post-embed/exporter@https://pkg.pr.new/@post-embed/exporter@f3ec778(typescript@6.0.3)':
     dependencies:
       '@ocavue/utils': 1.8.0
-      '@post-embed/schema': 0.5.1(typescript@6.0.3)
-      '@post-embed/types': 0.4.1
+      '@post-embed/schema': https://pkg.pr.new/@post-embed/schema@f3ec778(typescript@6.0.3)
+      '@post-embed/types': https://pkg.pr.new/@post-embed/types@f3ec778
+      '@standard-schema/spec': 1.1.0
       birpc: 4.2.0
       entities: 8.1.0
       lru.min: 1.1.5
@@ -7063,15 +7072,15 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@post-embed/schema@0.5.1(typescript@6.0.3)':
+  '@post-embed/schema@https://pkg.pr.new/@post-embed/schema@f3ec778(typescript@6.0.3)':
     dependencies:
-      '@post-embed/types': 0.4.1
+      '@post-embed/types': https://pkg.pr.new/@post-embed/types@f3ec778
       '@standard-schema/spec': 1.1.0
       valibot: 1.5.0(typescript@6.0.3)
     transitivePeerDependencies:
       - typescript
 
-  '@post-embed/types@0.4.1': {}
+  '@post-embed/types@https://pkg.pr.new/@post-embed/types@f3ec778': {}
 
   '@prosekit/core@0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)':
     dependencies:

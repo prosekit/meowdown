@@ -11,7 +11,8 @@ export type YouTubeVideoResolver = Resolver<YouTubeVideo>
 
 /**
  * Wrap a loader in a 64-entry LRU keyed by URL. A settled URL answers
- * synchronously, so a revisited document renders its cards in the first
+ * synchronously after success; failed or empty loads can retry on the next call.
+ * A revisited document renders successfully loaded cards in the first
  * frame; the first visit returns the in-flight load.
  */
 function cached<T>(load: (url: string) => Promise<T | undefined>): Resolver<T> {
@@ -20,7 +21,8 @@ function cached<T>(load: (url: string) => Promise<T | undefined>): Resolver<T> {
     if (cache.has(url)) return cache.get(url)
     const pending = load(url).then(
       (value) => {
-        cache.set(url, value)
+        if (value == null) cache.delete(url)
+        else cache.set(url, value)
         return value
       },
       (error: unknown) => {
@@ -41,9 +43,27 @@ export const defaultResolveXPost: XPostResolver = cached(async (url) => {
   const id = parseXPostId(url)
   if (id === undefined) return
   const response = await fetch(X_POST_API + id)
-  if (!response.ok) return
-  const json = (await response.json()) as { data?: unknown }
-  return fromSyndication(json.data)
+  if (response.status === 404 || response.status === 410) return
+  if (!response.ok) throw new Error(`X post ${id}: HTTP ${response.status}`)
+  const json = (await response.json().catch(() => {
+    throw new Error(`X post ${id}: invalid JSON response`)
+  })) as object
+  if (json == null || typeof json !== 'object' || !('data' in json)) {
+    throw new Error(`X post ${id}: response is missing data`)
+  }
+  if (json.data == null) return
+  const result = fromSyndication(json.data)
+  if (result.issues) {
+    const paths = result.issues.map((issue) => {
+      return (
+        issue.path
+          ?.map((segment) => String(typeof segment === 'object' ? segment.key : segment))
+          .join('.') || '(root)'
+      )
+    })
+    throw new Error(`X post ${id}: invalid data at ${paths.join(', ')}`)
+  }
+  return result.value
 })
 
 // YouTube's oEmbed endpoint allows cross-origin requests; the snapshot is its

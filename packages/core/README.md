@@ -106,3 +106,9 @@ See the full API reference [here](https://npmx.dev/package-docs/@meowdown%2Fcore
 ## License
 
 MIT
+
+## Default post resolver recovery
+
+Default resolvers deduplicate in-flight requests and cache successful results. Empty and rejected loads are removed from the cache, so a later call or document remount can retry the same URL. They do not retry automatically. Invalid X response data rejects with the post ID and validation paths; a not-found response remains an ordinary unavailable result.
+
+For remote X video playback, configure the embedding document's referrer policy or provide archived/proxied media. See the [embed media delivery guidance](../embed/README.md#x-video-delivery).
