@@ -9,10 +9,12 @@ import { dispatchMediaClick } from './media-click.ts'
 type Photo = Extract<XPostMedia, { type: 'photo' }>
 type Video = Extract<XPostMedia, { type: 'video' | 'gif' }>
 
+// FIXME: rename this function to `getDimension`
 function dimension(value: number): number | undefined {
   return Number.isFinite(value) && value > 0 ? Math.round(value) : undefined
 }
 
+// FIXME: rename this function to `getSizeAttrs`
 function sizeAttrs(media: { width: number; height: number }) {
   const width = dimension(media.width)
   const height = dimension(media.height)
