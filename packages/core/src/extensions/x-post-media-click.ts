@@ -1,4 +1,4 @@
-import type { XPostMediaClickEvent } from '@meowdown/embed/x'
+import { X_POST_MEDIA_CLICK, type XPostMediaClickEvent } from '@meowdown/embed/x'
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
@@ -24,8 +24,7 @@ export function defineXPostMediaClickHandler(
       key: xPostMediaClickKey,
       props: {
         handleDOMEvents: {
-          // FIXME: use the "X_POST_MEDIA_CLICK" constant variable
-          'meowdown-embed-media-click': (view, event) => {
+          [X_POST_MEDIA_CLICK]: (view, event) => {
             const handler = getOnClick?.(view.state)
             if (!handler) return false
             handler(event)

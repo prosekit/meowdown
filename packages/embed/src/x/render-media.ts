@@ -203,7 +203,6 @@ export function renderMedia(
           items,
           index: items.indexOf(item),
           element,
-          permalink,
         })
       }
       return el(

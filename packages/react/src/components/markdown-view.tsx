@@ -39,7 +39,7 @@ import {
   type WikilinkResolver,
   type XPostMediaClickHandler,
 } from '@meowdown/core'
-import { registerXPost } from '@meowdown/embed/x'
+import { registerXPost, X_POST_MEDIA_CLICK } from '@meowdown/embed/x'
 import { registerYouTubeVideo } from '@meowdown/embed/youtube'
 import { matchEmbed, type EmbedKind } from '@meowdown/markdown'
 import type { DOMOutputSpec } from '@prosekit/pm/model'
@@ -1036,8 +1036,8 @@ export function MarkdownView({
   const rootRef = useCallback(
     (root: HTMLDivElement) => {
       if (!handleXPostMediaClick) return
-      root.addEventListener('meowdown-embed-media-click', handleXPostMediaClick)
-      return () => root.removeEventListener('meowdown-embed-media-click', handleXPostMediaClick)
+      root.addEventListener(X_POST_MEDIA_CLICK, handleXPostMediaClick)
+      return () => root.removeEventListener(X_POST_MEDIA_CLICK, handleXPostMediaClick)
     },
     [handleXPostMediaClick],
   )
