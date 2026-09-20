@@ -4,7 +4,7 @@ import { startTransition, useCallback, useLayoutEffect, useMemo, useRef, useStat
  * The `view-transition-name` shared by the opened thumbnail and the lightbox
  * content, so the browser zooms between them.
  */
-export const LIGHTBOX_TRANSITION_NAME = 'meowdown-lightbox'
+export const LIGHTBOX_TRANSITION_NAME = 'meowdown-lightbox-media'
 
 /**
  * Something a lightbox can show.

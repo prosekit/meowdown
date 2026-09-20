@@ -79,7 +79,7 @@ function isZooming(): boolean {
     const effect = animation.effect
     return (
       effect instanceof KeyframeEffect &&
-      effect.pseudoElement === '::view-transition-group(meowdown-lightbox)'
+      effect.pseudoElement === '::view-transition-group(meowdown-lightbox-media)'
     )
   })
 }
