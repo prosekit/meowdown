@@ -1,6 +1,6 @@
 # X posts
 
-Every card below is a real post, fetched live. Click a photo to open it in the lightbox.
+Every card below is a real post, fetched live.
 
 ## Text only
 
