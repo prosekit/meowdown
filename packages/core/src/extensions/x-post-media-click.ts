@@ -24,6 +24,7 @@ export function defineXPostMediaClickHandler(
       key: xPostMediaClickKey,
       props: {
         handleDOMEvents: {
+          // FIXME: use the "X_POST_MEDIA_CLICK" constant variable
           'meowdown-embed-media-click': (view, event) => {
             const handler = getOnClick?.(view.state)
             if (!handler) return false

@@ -20,6 +20,7 @@ export interface XPostMediaClickDetail {
    * The rendered thumbnail: the photo `<img>`, or the video poster.
    */
   element: HTMLElement
+  // FIXME: what is permalink? add some docs. Remove it if it is not needed.
   permalink?: string | undefined
 }
 
