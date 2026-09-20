@@ -47,6 +47,7 @@ function getDisplayable(
   const sources = media.sources
     .flatMap((source) => {
       const url = getSafeUrl(source.url, protocols)
+      // FIXME: print console.warn when url is not safe.
       return url ? [{ ...source, url }] : []
     })
     // FIXME: extra the sorting logic into a separate function and test it with unit tests and describe its behavior
