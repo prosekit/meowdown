@@ -10,7 +10,7 @@ import { dispatchMediaClick } from './media-click.ts'
 type Photo = Extract<XPostMedia, { type: 'photo' }>
 type Video = Extract<XPostMedia, { type: 'video' | 'gif' }>
 
-// FIXME: rename this function to `getDimension`
+// FIXME: this is already a "toPositiveNumber" utility function. move it to a shared utils file and use it in the magic comment parser as well.
 function dimension(value: number): number | undefined {
   return Number.isFinite(value) && value > 0 ? Math.round(value) : undefined
 }
