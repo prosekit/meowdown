@@ -15,7 +15,7 @@ import {
 export const LIGHTBOX_TRANSITION_NAME = 'meowdown-lightbox'
 
 /**
- * Something a {@link Lightbox} can show.
+ * Something a lightbox can show.
  */
 export interface LightboxItem {
   type: 'image'
@@ -35,7 +35,7 @@ export interface LightboxCloseOptions {
 }
 
 /**
- * State and commands for a {@link Lightbox}, from {@link useLightbox}.
+ * State and commands for a {@link LightboxRoot}, from {@link useLightbox}.
  */
 export interface LightboxController {
   readonly item: LightboxItem | null
@@ -56,8 +56,8 @@ function setTransitionName(element: HTMLElement | null, name: string): void {
 }
 
 /**
- * Owns which item a {@link Lightbox} shows. Opening and closing run as React
- * transitions, so the `<ViewTransition>` inside the lightbox animates them.
+ * Owns which item a {@link LightboxRoot} shows. Opening and closing run as
+ * React transitions, so the `<ViewTransition>` inside the root animates them.
  *
  * The thumbnail is not rendered by this hook's component (it may not be
  * rendered by React at all), so its half of the shared transition is set by

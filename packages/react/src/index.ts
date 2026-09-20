@@ -5,7 +5,8 @@ export {
   type TaskClickHandler,
   type TaskClickPayload,
 } from './components/markdown-view.tsx'
-export { Lightbox, type LightboxProps } from './components/lightbox.tsx'
+export { LightboxImage, type LightboxImageProps } from './components/lightbox-image.tsx'
+export { LightboxRoot, type LightboxRootProps } from './components/lightbox-root.tsx'
 export {
   WikilinkHoverCard,
   type WikilinkHoverCardProps,

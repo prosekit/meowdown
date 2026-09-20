@@ -3,12 +3,13 @@ import './stories.css'
 import { Transaction } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
 import type { ImageClickHandler, XPostMediaClickHandler } from '@meowdown/core'
-import { Lightbox, MeowdownEditor, useLightbox, type EditorHandle } from '@meowdown/react'
+import { MeowdownEditor, useLightbox, type EditorHandle } from '@meowdown/react'
 import { throttle } from '@ocavue/utils'
 import { useQueryStates } from 'nuqs'
 import { NuqsAdapter } from 'nuqs/adapters/react'
 import { useEffect, useRef, useState } from 'react'
 
+import { DemoLightbox } from '../components/demo-lightbox.tsx'
 import { WikilinkPreviewCard } from '../components/wikilink-preview-card.tsx'
 import {
   handleLinkClick,
@@ -250,7 +251,7 @@ function MainEditorDemo() {
           </div>
         )}
       </div>
-      <Lightbox lightbox={lightbox} />
+      <DemoLightbox lightbox={lightbox} />
     </div>
   )
 }

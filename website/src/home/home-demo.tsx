@@ -1,15 +1,10 @@
 import type { ExitBoundaryHandler, ImageClickHandler, XPostMediaClickHandler } from '@meowdown/core'
-import {
-  Lightbox,
-  MarkdownView,
-  MeowdownEditor,
-  useLightbox,
-  type EditorHandle,
-} from '@meowdown/react'
+import { MarkdownView, MeowdownEditor, useLightbox, type EditorHandle } from '@meowdown/react'
 import { getId } from '@ocavue/utils'
 import { clsx } from 'clsx/lite'
 import { useCallback, useRef, useState } from 'react'
 
+import { DemoLightbox } from '../components/demo-lightbox.tsx'
 import { SegmentedControl } from '../components/segmented-control.tsx'
 import { WikilinkPreviewCard } from '../components/wikilink-preview-card.tsx'
 import {
@@ -124,7 +119,7 @@ export function HomeDemo() {
         </div>
 
         {findDemo.bar}
-        <Lightbox lightbox={lightbox} />
+        <DemoLightbox lightbox={lightbox} />
 
         {edgeFlash && (
           <div
