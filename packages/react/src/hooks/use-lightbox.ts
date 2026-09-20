@@ -68,6 +68,7 @@ export interface LightboxController {
   readonly close: (options?: LightboxCloseOptions) => void
 }
 
+// FIXME: move this function to packages/react/src/utils and also wrap it with try catch (error) {console.warn}
 function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
