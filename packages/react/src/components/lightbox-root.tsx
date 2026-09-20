@@ -1,6 +1,5 @@
 import { clsx } from 'clsx/lite'
 import { ViewTransition, type ComponentProps, type ReactNode } from 'react'
-import { createPortal } from 'react-dom'
 
 import type { LightboxController, LightboxItem } from '../hooks/use-lightbox.ts'
 
@@ -44,7 +43,7 @@ export function LightboxRoot({
   const { item, close, onExited } = lightbox
   if (!item) return null
 
-  return createPortal(
+  return (
     <ViewTransition default={DIALOG_TRANSITION_CLASS} onExit={() => onExited}>
       <dialog
         aria-label={item.type === 'video' ? 'Video preview' : 'Image preview'}
@@ -63,7 +62,6 @@ export function LightboxRoot({
       >
         {children(item)}
       </dialog>
-    </ViewTransition>,
-    document.body,
+    </ViewTransition>
   )
 }
