@@ -34,9 +34,11 @@ export interface LightboxVideoItem {
    * In the order the browser should try them.
    */
   sources: Array<{ src: string; type?: string | undefined }>
+  // FIXME: what's poster? is it a URL? make the doc clearer.
   poster?: string | undefined
   /**
    * Intrinsic size, so the player has its final box before metadata loads.
+   * FIXME: the size in which unit? make the doc clearer.
    */
   width?: number | undefined
   height?: number | undefined
@@ -63,6 +65,8 @@ export interface LightboxController {
   /**
    * Show `item`, zooming from `element` (usually the clicked thumbnail) when
    * the browser supports View Transitions.
+   *
+   * FIXME:
    */
   readonly open: (item: LightboxItem, element?: HTMLElement | null) => void
   readonly close: (options?: LightboxCloseOptions) => void
