@@ -67,6 +67,48 @@ describe('default resolvers', () => {
     expect(await defaultResolveXPost('https://x.com/jack/status/1002')).toBeUndefined()
   })
 
+  it('retries an unavailable X post on a later invocation', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(JSON.stringify({ data: null }), { status: 404 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ data: { ...createTweet('Recovered'), id_str: '2001' } })))
+    const url = 'https://x.com/jack/status/2001'
+    expect(await defaultResolveXPost(url)).toBeUndefined()
+    expect(await defaultResolveXPost(url)).toMatchObject({ id: '2001' })
+    expect(fetchSpy).toHaveBeenCalledTimes(2)
+  })
+
+  it('reports transient HTTP errors and retries the same URL', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response('', { status: 503 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ data: { ...createTweet(), id_str: '2002' } })))
+    const url = 'https://x.com/jack/status/2002'
+    await expect(defaultResolveXPost(url)).rejects.toThrow('503')
+    expect(await defaultResolveXPost(url)).toMatchObject({ id: '2002' })
+  })
+
+  it('reports raw validation paths and retries rejected data', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(JSON.stringify({ data: { ...createTweet(), user: null } })))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ data: { ...createTweet(), id_str: '2003' } })))
+    const url = 'https://x.com/jack/status/2003'
+    await expect(defaultResolveXPost(url)).rejects.toThrow('user')
+    expect(await defaultResolveXPost(url)).toMatchObject({ id: '2003' })
+  })
+
+  it('rejects a malformed response envelope', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}'))
+    await expect(defaultResolveXPost('https://x.com/jack/status/2004')).rejects.toThrow('data')
+  })
+
+  it('retries an unavailable YouTube video', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response('', { status: 404 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ title: 'Recovered' })))
+    const url = 'https://www.youtube.com/watch?v=retry'
+    expect(await defaultResolveYouTubeVideo(url)).toBeUndefined()
+    expect(await defaultResolveYouTubeVideo(url)).toMatchObject({ title: 'Recovered' })
+  })
+
   it('reads a YouTube video from oEmbed and keeps the URL on the snapshot', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(

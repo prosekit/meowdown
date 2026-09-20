@@ -135,12 +135,22 @@ jobs:
         if: ${{ !cancelled() && matrix.config.coverage && github.event_name == 'pull_request' }}
         uses: davelosert/vitest-coverage-report-action@c4bbc33a89b7ace0e63d35f1f7d4bcee31155a73 # v2.13.0
 
+  media-playback:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: ./.github/actions/setup
+      - run: pnpm run build
+      - run: pnpm exec playwright install chromium webkit
+      - run: node website/scripts/check-media-playback.mjs
+
   all-green:
     runs-on: ubuntu-slim
     timeout-minutes: 5
 
     if: always()
-    needs: [lint, build, test]
+    needs: [lint, build, test, media-playback]
 
     steps:
       - name: Verify that all jobs succeeded
