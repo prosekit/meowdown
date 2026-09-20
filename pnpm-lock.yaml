@@ -91,11 +91,11 @@ importers:
         specifier: ^0.4.1
         version: 0.4.1(typescript@6.0.3)
       '@post-embed/schema':
-        specifier: ^0.5.0
-        version: 0.5.0(typescript@6.0.3)
+        specifier: ^0.5.1
+        version: 0.5.1(typescript@6.0.3)
       '@post-embed/types':
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.4.1
+        version: 0.4.1
       '@prosekit/core':
         specifier: ^0.13.2
         version: 0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)
@@ -194,11 +194,11 @@ importers:
         specifier: ^0.2.1
         version: 0.2.1
       '@post-embed/schema':
-        specifier: ^0.5.0
-        version: 0.5.0(typescript@6.0.3)
+        specifier: ^0.5.1
+        version: 0.5.1(typescript@6.0.3)
       '@post-embed/types':
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.4.1
+        version: 0.4.1
       crelt:
         specifier: ^1.0.7
         version: 1.0.7
@@ -250,8 +250,8 @@ importers:
         specifier: ^1.7.2
         version: 1.7.2
       '@post-embed/schema':
-        specifier: ^0.5.0
-        version: 0.5.0(typescript@6.0.3)
+        specifier: ^0.5.1
+        version: 0.5.1(typescript@6.0.3)
     devDependencies:
       '@meowdown/vitest':
         specifier: workspace:*
@@ -287,8 +287,8 @@ importers:
         specifier: ^1.8.0
         version: 1.8.0
       '@post-embed/types':
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.4.1
+        version: 0.4.1
       '@prosekit/core':
         specifier: ^0.13.2
         version: 0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)
@@ -457,8 +457,8 @@ importers:
         specifier: ^0.7.1
         version: 0.7.1
       '@post-embed/types':
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.4.1
+        version: 0.4.1
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.3.0)
@@ -2167,11 +2167,11 @@ packages:
   '@post-embed/exporter@0.4.1':
     resolution: {integrity: sha512-4c6Y2p0CnjgWkiMQQWtfFwbdQJInguJyZmzyb/2dps3ugJFr1b9IW/zcNJ2KIEZCQO/+ZA/kvADL/9ODEMuPlg==}
 
-  '@post-embed/schema@0.5.0':
-    resolution: {integrity: sha512-ErtsyXf6LEdu2E2IUmMGu5CcR1UpxTj94529isRVYqcp9YVUZvT81PRXCL/05t61YaR1imnJr/5e2CIGYXBvlg==}
+  '@post-embed/schema@0.5.1':
+    resolution: {integrity: sha512-LKiPLLEtRcgz0CbrE/WGQriODcd60b6CBrrnxKN+HDV07jZs+PaH/ju4uvfmvIJE98+7tKzPMkcOEeDtbjke/g==}
 
-  '@post-embed/types@0.4.0':
-    resolution: {integrity: sha512-mOpgMA9i4Zvpnx08T/oaS9vKSdRFctIcT0lqZwVkiX+sJGwd8yeb5g5OURU+99maEVyWrtSGGj5BsXwlkRzNyw==}
+  '@post-embed/types@0.4.1':
+    resolution: {integrity: sha512-0GZ4kvPvgFKnLPx3G+0nBsHxn5iOqoIph0NAZrNBwSpuro2zNpLHM2K9HR49Kk2DFje88uOLfuU0ev0xSLAj2w==}
 
   '@prosekit/core@0.13.2':
     resolution: {integrity: sha512-0pdKLy442VCo4Pa+5z+pNGhiLAmHgreWHWc2pn2IIbsy4dhchNEQN+ycfCYbjDVHxXfNrGpp1aHSMn5VOhmnhA==}
@@ -7054,8 +7054,8 @@ snapshots:
   '@post-embed/exporter@0.4.1(typescript@6.0.3)':
     dependencies:
       '@ocavue/utils': 1.8.0
-      '@post-embed/schema': 0.5.0(typescript@6.0.3)
-      '@post-embed/types': 0.4.0
+      '@post-embed/schema': 0.5.1(typescript@6.0.3)
+      '@post-embed/types': 0.4.1
       birpc: 4.2.0
       entities: 8.1.0
       lru.min: 1.1.5
@@ -7063,15 +7063,15 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@post-embed/schema@0.5.0(typescript@6.0.3)':
+  '@post-embed/schema@0.5.1(typescript@6.0.3)':
     dependencies:
-      '@post-embed/types': 0.4.0
+      '@post-embed/types': 0.4.1
       '@standard-schema/spec': 1.1.0
       valibot: 1.5.0(typescript@6.0.3)
     transitivePeerDependencies:
       - typescript
 
-  '@post-embed/types@0.4.0': {}
+  '@post-embed/types@0.4.1': {}
 
   '@prosekit/core@0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)':
     dependencies:

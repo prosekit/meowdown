@@ -36,7 +36,7 @@
     "@iconify-json/lucide": "^1.2.133",
     "@iconify-json/simple-icons": "^1.2.96",
     "@ocavue/tsconfig": "^0.7.1",
-    "@post-embed/types": "^0.4.0",
+    "@post-embed/types": "^0.4.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",

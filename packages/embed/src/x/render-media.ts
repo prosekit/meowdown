@@ -1,4 +1,4 @@
-import type { XPostMedia } from '@post-embed/types'
+import type { XPostMedia, XPostPhoto, XPostVideo } from '@post-embed/types'
 import el from 'crelt'
 
 import { renderLink } from '../render-link.ts'
@@ -7,10 +7,6 @@ import { toPositiveNumber } from '../to-positive-number.ts'
 
 import { dispatchMediaClick } from './media-click.ts'
 import { sortVideoSources } from './sort-video-sources.ts'
-
-// TODO: use `XPostPhoto` and `XPostVideo` once https://github.com/ocavue/post-embed/pull/63 is released.
-type Photo = Extract<XPostMedia, { type: 'photo' }>
-type Video = Extract<XPostMedia, { type: 'video' | 'gif' }>
 
 function getSizeAttrs(media: { width: number; height: number }) {
   const width = toPositiveNumber(media.width)
@@ -81,7 +77,11 @@ function isPlainClick(event: MouseEvent): boolean {
   return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
 }
 
-function renderPhoto(media: Photo, error: HTMLElement, onClick: (element: HTMLElement) => boolean) {
+function renderPhoto(
+  media: XPostPhoto,
+  error: HTMLElement,
+  onClick: (element: HTMLElement) => boolean,
+) {
   const image = el('img', {
     src: media.url,
     alt: media.alt || 'Post image',
@@ -102,7 +102,7 @@ function renderPhoto(media: Photo, error: HTMLElement, onClick: (element: HTMLEl
   return link
 }
 
-function renderPlayer(media: Video, error: HTMLElement, permalink?: string) {
+function renderPlayer(media: XPostVideo, error: HTMLElement, permalink?: string) {
   const gif = media.type === 'gif'
   const sources = media.sources.map((source) => {
     return el('source', { src: source.url, type: source.type })
@@ -145,7 +145,7 @@ function renderPlayer(media: Video, error: HTMLElement, permalink?: string) {
  * `meowdown-embed-media-click` listener takes over.
  */
 function renderVideo(
-  media: Video,
+  media: XPostVideo,
   error: HTMLElement,
   onClick: (element: HTMLElement) => boolean,
   permalink?: string,
