@@ -282,11 +282,9 @@ describe('MarkdownView', () => {
     await expect.element(image).toBeInTheDocument()
     await image.click()
     expect(onImageClick).toHaveBeenCalledTimes(1)
-    expect(onImageClick.mock.calls[0][0]).toMatchObject({
-      src: 'cat.png',
-      alt: 'cat',
-      element: image.element(),
-    })
+    const payload = onImageClick.mock.calls[0][0]
+    expect(payload).toMatchObject({ src: 'cat.png', alt: 'cat' })
+    expect(payload.element).toBe(image.element())
   })
 
   it('reports a clicked X post photo', async () => {
