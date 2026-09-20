@@ -88,6 +88,7 @@ function isZooming(): boolean {
 }
 
 const dialog = page.getByRole('dialog', { name: 'Image preview' })
+const videoDialog = page.getByRole('dialog', { name: 'Video preview' })
 const image = dialog.getByRole('img', { name: 'Cat' })
 
 afterEach(() => {
@@ -159,8 +160,8 @@ describe('Lightbox', () => {
     await render(<Host />)
 
     controller.open(VIDEO)
-    await expect.element(dialog).toBeInTheDocument()
-    const video = dialog.element().querySelector('video')!
+    await expect.element(videoDialog).toBeInTheDocument()
+    const video = videoDialog.element().querySelector('video')!
     expect(video.controls).toBe(true)
     expect(video.autoplay).toBe(true)
     expect(video.muted).toBe(false)
@@ -179,8 +180,8 @@ describe('Lightbox', () => {
     await render(<Host />)
 
     controller.open({ ...VIDEO, gif: true })
-    await expect.element(dialog).toBeInTheDocument()
-    const video = dialog.element().querySelector('video')!
+    await expect.element(videoDialog).toBeInTheDocument()
+    const video = videoDialog.element().querySelector('video')!
     expect(video.controls).toBe(false)
     expect(video.muted).toBe(true)
     expect(video.loop).toBe(true)
@@ -193,12 +194,12 @@ describe('Lightbox', () => {
 
     controller.open(VIDEO, thumbnail)
     await vi.waitFor(() => expect(isZooming()).toBe(true))
-    await expect.element(dialog).toBeInTheDocument()
+    await expect.element(videoDialog).toBeInTheDocument()
     await vi.waitFor(() => expect(isZooming()).toBe(false))
 
     controller.close()
     await vi.waitFor(() => expect(isZooming()).toBe(true))
-    await expect.element(dialog).not.toBeInTheDocument()
+    await expect.element(videoDialog).not.toBeInTheDocument()
     thumbnail.remove()
   })
 

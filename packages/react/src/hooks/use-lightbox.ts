@@ -8,6 +8,8 @@ import {
   useState,
 } from 'react'
 
+import { prefersReducedMotion } from '../utils/prefers-reduced-motion.ts'
+
 /**
  * The `view-transition-name` shared by the opened thumbnail and the lightbox
  * content, so the browser zooms between them.
@@ -34,13 +36,19 @@ export interface LightboxVideoItem {
    * In the order the browser should try them.
    */
   sources: Array<{ src: string; type?: string | undefined }>
-  // FIXME: what's poster? is it a URL? make the doc clearer.
+  /**
+   * URL of the image the player shows until the first video frame is ready.
+   */
   poster?: string | undefined
   /**
-   * Intrinsic size, so the player has its final box before metadata loads.
-   * FIXME: the size in which unit? make the doc clearer.
+   * Width of the video itself, in pixels (not the size it is displayed at).
+   * With `height` it gives the player its aspect ratio before the video's
+   * metadata loads, so the open zoom ends on the right box.
    */
   width?: number | undefined
+  /**
+   * Height of the video itself, in pixels.
+   */
   height?: number | undefined
   /**
    * Play like a GIF: muted, looping, without controls.
@@ -63,18 +71,14 @@ export interface LightboxCloseOptions {
 export interface LightboxController {
   readonly item: LightboxItem | null
   /**
-   * Show `item`, zooming from `element` (usually the clicked thumbnail) when
-   * the browser supports View Transitions.
-   *
-   * FIXME:
+   * Show `item`. Pass the clicked thumbnail as `element` to zoom the lightbox
+   * out of it, and back into it on close. The element only has to be in the
+   * document; React does not need to render it. Without an element, in a
+   * browser without View Transitions, or under reduced motion, the lightbox
+   * opens and closes without the zoom.
    */
   readonly open: (item: LightboxItem, element?: HTMLElement | null) => void
   readonly close: (options?: LightboxCloseOptions) => void
-}
-
-// FIXME: move this function to packages/react/src/utils and also wrap it with try catch (error) {console.warn}
-function prefersReducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
 function setTransitionName(element: HTMLElement | null, name: string): void {
