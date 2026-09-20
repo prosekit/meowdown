@@ -68,9 +68,12 @@ describe('default resolvers', () => {
   })
 
   it('retries an unavailable X post on a later invocation', async () => {
-    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(new Response(JSON.stringify({ data: null }), { status: 404 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ data: { ...createTweet('Recovered'), id_str: '2001' } })))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ data: { ...createTweet('Recovered'), id_str: '2001' } })),
+      )
     const url = 'https://x.com/jack/status/2001'
     expect(await defaultResolveXPost(url)).toBeUndefined()
     expect(await defaultResolveXPost(url)).toMatchObject({ id: '2001' })
@@ -80,7 +83,9 @@ describe('default resolvers', () => {
   it('reports transient HTTP errors and retries the same URL', async () => {
     vi.spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(new Response('', { status: 503 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ data: { ...createTweet(), id_str: '2002' } })))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ data: { ...createTweet(), id_str: '2002' } })),
+      )
     const url = 'https://x.com/jack/status/2002'
     await expect(defaultResolveXPost(url)).rejects.toThrow('503')
     expect(await defaultResolveXPost(url)).toMatchObject({ id: '2002' })
@@ -88,8 +93,12 @@ describe('default resolvers', () => {
 
   it('reports raw validation paths and retries rejected data', async () => {
     vi.spyOn(globalThis, 'fetch')
-      .mockResolvedValueOnce(new Response(JSON.stringify({ data: { ...createTweet(), user: null } })))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ data: { ...createTweet(), id_str: '2003' } })))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ data: { ...createTweet(), user: null } })),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ data: { ...createTweet(), id_str: '2003' } })),
+      )
     const url = 'https://x.com/jack/status/2003'
     await expect(defaultResolveXPost(url)).rejects.toThrow('user')
     expect(await defaultResolveXPost(url)).toMatchObject({ id: '2003' })
