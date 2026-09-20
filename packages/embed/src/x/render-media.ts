@@ -3,22 +3,18 @@ import el from 'crelt'
 
 import { renderLink } from '../render-link.ts'
 import { getSafeUrl } from '../safe-url.ts'
+import { toPositiveNumber } from '../utils/to-positive-number.ts'
 
 import { dispatchMediaClick } from './media-click.ts'
+import { sortVideoSources } from './sort-video-sources.ts'
 
-// FIXME: create a draft github PR in the post-embed repo to add some types for photos and videos, and then use them here instead of the `Extract` utility type.
+// TODO: use `XPostPhoto` and `XPostVideo` once https://github.com/ocavue/post-embed/pull/63 is released.
 type Photo = Extract<XPostMedia, { type: 'photo' }>
 type Video = Extract<XPostMedia, { type: 'video' | 'gif' }>
 
-// FIXME: this is already a "toPositiveNumber" utility function. move it to a shared utils file and use it in the magic comment parser as well.
-function dimension(value: number): number | undefined {
-  return Number.isFinite(value) && value > 0 ? Math.round(value) : undefined
-}
-
-// FIXME: rename this function to `getSizeAttrs`
-function sizeAttrs(media: { width: number; height: number }) {
-  const width = dimension(media.width)
-  const height = dimension(media.height)
+function getSizeAttrs(media: { width: number; height: number }) {
+  const width = toPositiveNumber(media.width)
+  const height = toPositiveNumber(media.height)
   return {
     width,
     height,
@@ -27,10 +23,16 @@ function sizeAttrs(media: { width: number; height: number }) {
 }
 
 function getOrientation(media: { width: number; height: number }) {
-  const width = dimension(media.width)
-  const height = dimension(media.height)
+  const width = toPositiveNumber(media.width)
+  const height = toPositiveNumber(media.height)
   if (!width || !height) return
   return height > width * 1.1 ? 'portrait' : width > height * 1.1 ? 'landscape' : 'square'
+}
+
+function getSafeMediaUrl(value: string, protocols: readonly string[] | null): string | undefined {
+  const url = getSafeUrl(value, protocols)
+  if (!url) console.warn(`[meowdown] Ignored unsafe media URL: ${value}`)
+  return url
 }
 
 /**
@@ -43,25 +45,17 @@ function getDisplayable(
 ): XPostMedia | undefined {
   if (media.unavailable) return
   if (media.type === 'photo') {
-    const url = getSafeUrl(media.url, protocols)
-    // FIXME: print console.warn when url is not safe.
+    const url = getSafeMediaUrl(media.url, protocols)
     return url ? { ...media, url } : undefined
   }
-  const sources = media.sources
-    .flatMap((source) => {
-      const url = getSafeUrl(source.url, protocols)
-      // FIXME: print console.warn when url is not safe.
+  const sources = sortVideoSources(
+    media.sources.flatMap((source) => {
+      const url = getSafeMediaUrl(source.url, protocols)
       return url ? [{ ...source, url }] : []
-    })
-    // FIXME: extra the sorting logic into a separate function and test it with unit tests and describe its behavior
-    .sort((a, b) => {
-      return (
-        Number(b.type === 'video/mp4') - Number(a.type === 'video/mp4') ||
-        (b.bitrate || 0) - (a.bitrate || 0)
-      )
-    })
+    }),
+  )
   if (sources.length === 0) return
-  const poster = media.poster && getSafeUrl(media.poster, protocols)
+  const poster = media.poster && getSafeMediaUrl(media.poster, protocols)
   return { ...media, sources, poster }
 }
 
@@ -91,7 +85,7 @@ function renderPhoto(media: Photo, error: HTMLElement, onClick: (element: HTMLEl
   const image = el('img', {
     src: media.url,
     alt: media.alt || 'Post image',
-    ...sizeAttrs(media),
+    ...getSizeAttrs(media),
     loading: 'lazy',
     decoding: 'async',
     referrerpolicy: 'no-referrer',
@@ -120,7 +114,7 @@ function renderPlayer(media: Video, error: HTMLElement, permalink?: string) {
       playsInline: true,
       'aria-label': gif ? 'Animated GIF' : 'Post video',
       poster: media.poster,
-      ...sizeAttrs(media),
+      ...getSizeAttrs(media),
       loop: gif,
     },
     sources,
@@ -161,7 +155,7 @@ function renderVideo(
     ? el('img', {
         src: media.poster,
         alt: '',
-        ...sizeAttrs(media),
+        ...getSizeAttrs(media),
         loading: 'lazy',
         decoding: 'async',
         referrerpolicy: 'no-referrer',
@@ -173,7 +167,7 @@ function renderVideo(
       'data-poster': '',
       type: 'button',
       'aria-label': gif ? 'Play GIF' : 'Play video',
-      style: sizeAttrs(media).style,
+      style: getSizeAttrs(media).style,
     },
     poster,
     el('span', { 'data-play': '', 'aria-hidden': 'true' }),

@@ -108,7 +108,9 @@ describe('X post media clicks', () => {
   })
 
   it('keeps the card default without a handler', async () => {
-    using fixture = setupFixture({ extensionOptions: { resolveXPost: createMediaPost } })
+    using fixture = setupFixture({
+      extensionOptions: { resolveXPost: createMediaPost, mediaUrlProtocols: ['data:'] },
+    })
     fixture.set(fixture.n.doc(fixture.n.paragraph(TWEET)))
     await userEvent.click(xPostCard.getByRole('button', { name: 'Play video' }))
     await expect.element(xPostCard.locate('video')).toBeInTheDocument()

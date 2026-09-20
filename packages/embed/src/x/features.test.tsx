@@ -116,6 +116,7 @@ describe('Full post snapshots', () => {
   })
 
   it('rejects unsafe media URLs and survives missing media and invalid dates', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const snapshot = createPost()
     snapshot.createdAt = 'bad-date'
     snapshot.media = [
@@ -125,6 +126,7 @@ describe('Full post snapshots', () => {
     const element = mount(snapshot)
     expect(element.querySelector('[data-media] img, video, time')).toBeNull()
     expect(element.querySelectorAll('[data-media-unavailable]')).toHaveLength(2)
+    expect(warn).toHaveBeenCalledWith('[meowdown] Ignored unsafe media URL: javascript:alert(1)')
     snapshot.media = [createPhoto()]
     element.data = { ...snapshot }
     const image = element.querySelector<HTMLImageElement>('[data-media] img')!

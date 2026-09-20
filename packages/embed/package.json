@@ -12,6 +12,7 @@
     "**/*.css"
   ],
   "exports": {
+    "./utils": "./src/utils/index.ts",
     "./x": "./src/x/index.ts",
     "./x/theme.css": "./src/x/theme.css",
     "./youtube": "./src/youtube/index.ts",
@@ -41,6 +42,7 @@
   },
   "publishConfig": {
     "exports": {
+      "./utils": "./dist/utils/index.js",
       "./x": "./dist/x/index.js",
       "./x/theme.css": "./dist/x/theme.css",
       "./youtube": "./dist/youtube/index.js",

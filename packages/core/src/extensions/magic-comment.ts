@@ -1,3 +1,4 @@
+import { toPositiveNumber } from '@meowdown/embed/utils'
 import { isObject } from '@ocavue/utils'
 
 /**
@@ -60,13 +61,6 @@ export function parseMagicComment(comment: string): MagicComment | undefined {
   if (!width && !height && !noLink && !snapshot) return
 
   return { width, height, noLink, snapshot }
-}
-
-function toPositiveNumber(value: unknown): number | undefined {
-  // FIXME: is "typeof value === 'number'" this step necessary? if not, remove it.
-  if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
-    return Math.round(value)
-  }
 }
 
 /**
