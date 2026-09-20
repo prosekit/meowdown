@@ -10,6 +10,7 @@ const xPostMediaClickKey = new PluginKey('meowdown-x-post-media-click')
  */
 export type XPostMediaClickPayload = XPostMediaClickDetail
 
+// FIXME: XPostMediaClickHandler should just accept the whole XPostMediaClickEvent. Some thing to the react prop
 export type XPostMediaClickHandler = (payload: XPostMediaClickPayload) => void
 
 /**
@@ -28,6 +29,7 @@ export function defineXPostMediaClickHandler(
           'meowdown-embed-media-click': (view, event) => {
             const handler = getOnClick?.(view.state)
             if (!handler) return false
+            // FIXME: 1. the handler should accept the whole event, not just the detail, so it can call preventDefault() itself if it wants to; 2. we should check if the event is already prevented after calling the handler, if so, we should return true to prevent the default behavior, otherwise return false to allow the default behavior.
             event.preventDefault()
             handler(event.detail)
             return true
