@@ -33,7 +33,7 @@
     "@changesets/changelog-github": "^1.0.1",
     "@changesets/cli": "^3.0.3",
     "@meowdown/eslint-rules": "workspace:*",
-    "@ocavue/eslint-config": "^4.17.0",
+    "@ocavue/eslint-config": "^4.18.0",
     "@ocavue/tsconfig": "^0.7.1",
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^5.0.1",
