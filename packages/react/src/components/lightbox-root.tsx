@@ -43,7 +43,7 @@ export function LightboxRoot({
   return (
     <ViewTransition>
       <dialog
-        aria-label="Image preview"
+        aria-label="Image preview" // FIXME: is this correct?
         {...props}
         ref={showModal}
         className={clsx(styles.Dialog, className)}
