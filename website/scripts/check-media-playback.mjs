@@ -9,6 +9,11 @@ import { chromium, webkit } from 'playwright'
 const bytes = await readFile(new URL('../public/embed/media/motion.mp4', import.meta.url))
 const requests = []
 const mediaServer = createServer((request, response) => {
+  if (request.url === '/control') {
+    response.writeHead(200, { 'Content-Type': 'text/html', 'Referrer-Policy': 'origin' })
+    response.end('<video controls src="/motion.mp4?control"></video>')
+    return
+  }
   requests.push(request.headers.referer)
   if (request.headers.referer) {
     response.writeHead(403).end()
@@ -28,7 +33,12 @@ const mediaServer = createServer((request, response) => {
 })
 await new Promise((resolve) => mediaServer.listen(0, '127.0.0.1', resolve))
 const mediaUrl = `http://127.0.0.1:${mediaServer.address().port}/motion.mp4`
-const server = spawn('pnpm', ['exec', 'wrangler', 'dev', '--port', '4399'], {
+const portServer = createServer()
+await new Promise((resolve) => portServer.listen(0, '127.0.0.1', resolve))
+const port = portServer.address().port
+await new Promise((resolve) => portServer.close(resolve))
+const origin = `http://127.0.0.1:${port}`
+const server = spawn('pnpm', ['exec', 'wrangler', 'dev', '--port', String(port)], {
   cwd: new URL('..', import.meta.url),
   stdio: 'inherit',
   shell: process.platform === 'win32',
@@ -37,7 +47,7 @@ try {
   let ready = false
   for (let attempt = 0; attempt < 60; attempt++) {
     try {
-      if ((await fetch('http://127.0.0.1:4399/')).ok) {
+      if ((await fetch(origin)).ok) {
         ready = true
         break
       }
@@ -72,12 +82,12 @@ try {
       })
       for (const path of ['dashboard', 'preview']) {
         const response = await page.goto(
-          `http://127.0.0.1:4399/playground/${path}/meowdown/main-editor/?doc=008-x-post`,
+          `${origin}/playground/${path}/meowdown/main-editor/?doc=008-x-post`,
         )
         assert.equal(response.headers()['referrer-policy'], 'no-referrer')
         requests.length = 0
         await page.getByRole('button', { name: 'Play video', exact: true }).first().click()
-        const player = page.getByRole('video').or(page.locator('video')).first()
+        const player = page.locator('video').first()
         await page.waitForFunction(() => document.querySelector('video')?.currentTime > 0.1)
         assert.ok(requests.length > 0, 'No media request observed')
         assert.ok(
@@ -91,15 +101,8 @@ try {
           before,
         )
       }
-      // The same origin rejects a document that sends its referrer.
-      await page.route('http://127.0.0.1:4399/referrer-control', (route) => {
-        return route.fulfill({
-          contentType: 'text/html',
-          body: `<video controls src="${mediaUrl}"></video>`,
-        })
-      })
       requests.length = 0
-      await page.goto('http://127.0.0.1:4399/referrer-control')
+      await page.goto(new URL('/control', mediaUrl).href)
       await page.waitForFunction(() => document.querySelector('video')?.error != null)
       assert.ok(requests.some(Boolean), 'Negative control did not send Referer')
     } finally {

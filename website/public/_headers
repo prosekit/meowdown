@@ -1,0 +1,5 @@
+/playground
+  Referrer-Policy: no-referrer
+
+/playground/*
+  Referrer-Policy: no-referrer
