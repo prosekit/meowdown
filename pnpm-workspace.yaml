@@ -27,7 +27,7 @@ minimumReleaseAgeExclude:
   - '@post-embed/*'
   - prosemirror-view
   - eslint-plugin-ocavue
-  - lucide-react@1.47.0
+  - vitest-browser-commands
 
 allowBuilds:
   esbuild: false

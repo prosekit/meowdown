@@ -88,14 +88,14 @@ importers:
         specifier: ^1.8.0
         version: 1.8.0
       '@post-embed/exporter':
-        specifier: ^0.4.1
-        version: 0.4.1(typescript@6.0.3)
+        specifier: ^0.5.0
+        version: 0.5.0(typescript@6.0.3)
       '@post-embed/schema':
-        specifier: ^0.5.1
-        version: 0.5.1(typescript@6.0.3)
+        specifier: ^0.5.2
+        version: 0.5.2(typescript@6.0.3)
       '@post-embed/types':
-        specifier: ^0.4.1
-        version: 0.4.1
+        specifier: ^0.5.0
+        version: 0.5.0
       '@prosekit/core':
         specifier: ^0.13.2
         version: 0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)
@@ -194,11 +194,11 @@ importers:
         specifier: ^0.2.1
         version: 0.2.1
       '@post-embed/schema':
-        specifier: ^0.5.1
-        version: 0.5.1(typescript@6.0.3)
+        specifier: ^0.5.2
+        version: 0.5.2(typescript@6.0.3)
       '@post-embed/types':
-        specifier: ^0.4.1
-        version: 0.4.1
+        specifier: ^0.5.0
+        version: 0.5.0
       crelt:
         specifier: ^1.0.7
         version: 1.0.7
@@ -250,8 +250,8 @@ importers:
         specifier: ^1.7.2
         version: 1.7.2
       '@post-embed/schema':
-        specifier: ^0.5.1
-        version: 0.5.1(typescript@6.0.3)
+        specifier: ^0.5.2
+        version: 0.5.2(typescript@6.0.3)
     devDependencies:
       '@meowdown/vitest':
         specifier: workspace:*
@@ -287,8 +287,8 @@ importers:
         specifier: ^1.8.0
         version: 1.8.0
       '@post-embed/types':
-        specifier: ^0.4.1
-        version: 0.4.1
+        specifier: ^0.5.0
+        version: 0.5.0
       '@prosekit/core':
         specifier: ^0.13.2
         version: 0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)
@@ -351,8 +351,8 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(@types/node@24.13.5)(@vitest/browser-playwright@5.0.1)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(vite@8.3.0)
       vitest-browser-commands:
-        specifier: ^0.4.1
-        version: 0.4.1(@vitest/browser-playwright@5.0.1)(@vitest/browser@5.0.1)(playwright@1.63.0)(vite@8.3.0)(vitest@5.0.1)
+        specifier: ^0.5.0
+        version: 0.5.0(@vitest/browser-playwright@5.0.1)(@vitest/browser@5.0.1)(playwright@1.63.0)(vite@8.3.0)(vitest@5.0.1)
       vitest-browser-react:
         specifier: ^2.3.0
         version: 2.3.0(@types/react-dom@19.3.0)(@types/react@19.3.0)(react-dom@19.3.0)(react@19.3.0)(vitest@5.0.1)
@@ -378,8 +378,8 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(@types/node@24.13.5)(@vitest/browser-playwright@5.0.1)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(vite@8.3.0)
       vitest-browser-commands:
-        specifier: ^0.4.1
-        version: 0.4.1(@vitest/browser-playwright@5.0.1)(@vitest/browser@5.0.1)(playwright@1.63.0)(vite@8.3.0)(vitest@5.0.1)
+        specifier: ^0.5.0
+        version: 0.5.0(@vitest/browser-playwright@5.0.1)(@vitest/browser@5.0.1)(playwright@1.63.0)(vite@8.3.0)(vitest@5.0.1)
 
   website:
     dependencies:
@@ -457,8 +457,8 @@ importers:
         specifier: ^0.7.1
         version: 0.7.1
       '@post-embed/types':
-        specifier: ^0.4.1
-        version: 0.4.1
+        specifier: ^0.5.0
+        version: 0.5.0
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.3.0)
@@ -2164,14 +2164,14 @@ packages:
   '@poppinss/exception@1.2.3':
     resolution: {integrity: sha512-dCED+QRChTVatE9ibtoaxc+WkdzOSjYTKi/+uacHWIsfodVfpsueo3+DKpgU5Px8qXjgmXkSvhXvSCz3fnP9lw==}
 
-  '@post-embed/exporter@0.4.1':
-    resolution: {integrity: sha512-4c6Y2p0CnjgWkiMQQWtfFwbdQJInguJyZmzyb/2dps3ugJFr1b9IW/zcNJ2KIEZCQO/+ZA/kvADL/9ODEMuPlg==}
+  '@post-embed/exporter@0.5.0':
+    resolution: {integrity: sha512-3FPERb5BfyV1BQGhJtNA2hz+xWSHEnXHyVPC8vOkQ6Xz2gjxXng0bnZpNWpwKXfXGTLxC4dgyFtQ9Hi5QuBicg==}
 
-  '@post-embed/schema@0.5.1':
-    resolution: {integrity: sha512-LKiPLLEtRcgz0CbrE/WGQriODcd60b6CBrrnxKN+HDV07jZs+PaH/ju4uvfmvIJE98+7tKzPMkcOEeDtbjke/g==}
+  '@post-embed/schema@0.5.2':
+    resolution: {integrity: sha512-Q8vHpn9x+ajyqph6Iwcno3Mye7m/tesZb41HiakL2oxWbN57zBZJ2fXPGEQFF5b9A76Y1LdXx+6ZrlA0hZ08Dg==}
 
-  '@post-embed/types@0.4.1':
-    resolution: {integrity: sha512-0GZ4kvPvgFKnLPx3G+0nBsHxn5iOqoIph0NAZrNBwSpuro2zNpLHM2K9HR49Kk2DFje88uOLfuU0ev0xSLAj2w==}
+  '@post-embed/types@0.5.0':
+    resolution: {integrity: sha512-q7SB/h99W/g7fdu0dZH1CiMARsJv7Yofy7xJ1LBFtn96UJzIgK9L+jpYbQ215yJ2O9BFSY34TpEqj9ZktGfkhw==}
 
   '@prosekit/core@0.13.2':
     resolution: {integrity: sha512-0pdKLy442VCo4Pa+5z+pNGhiLAmHgreWHWc2pn2IIbsy4dhchNEQN+ycfCYbjDVHxXfNrGpp1aHSMn5VOhmnhA==}
@@ -5156,8 +5156,8 @@ packages:
       vite:
         optional: true
 
-  vitest-browser-commands@0.4.1:
-    resolution: {integrity: sha512-tDDmSe8T//anin03G4sGNSOttozSaiO9105nYh8wh4gv8R5vAxiYvj7faSx+g0yg1jMtKzyQPDbUFoRYwJx7Hg==}
+  vitest-browser-commands@0.5.0:
+    resolution: {integrity: sha512-KwoXqnSd0g42lxCSwmbxemw673KF4/GIsRBpTlnc2V9f4zZ0VJEJABy7MAyq1f9zLN+kflyjY3mLOLPI0xX7Yg==}
     peerDependencies:
       '@vitest/browser': ^4.0.0 || ^5.0.0-beta.7
       '@vitest/browser-playwright': ^4.0.3 || ^5.0.0-beta.7
@@ -7051,11 +7051,12 @@ snapshots:
 
   '@poppinss/exception@1.2.3': {}
 
-  '@post-embed/exporter@0.4.1(typescript@6.0.3)':
+  '@post-embed/exporter@0.5.0(typescript@6.0.3)':
     dependencies:
       '@ocavue/utils': 1.8.0
-      '@post-embed/schema': 0.5.1(typescript@6.0.3)
-      '@post-embed/types': 0.4.1
+      '@post-embed/schema': 0.5.2(typescript@6.0.3)
+      '@post-embed/types': 0.5.0
+      '@standard-schema/spec': 1.1.0
       birpc: 4.2.0
       entities: 8.1.0
       lru.min: 1.1.5
@@ -7063,15 +7064,15 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  '@post-embed/schema@0.5.1(typescript@6.0.3)':
+  '@post-embed/schema@0.5.2(typescript@6.0.3)':
     dependencies:
-      '@post-embed/types': 0.4.1
+      '@post-embed/types': 0.5.0
       '@standard-schema/spec': 1.1.0
       valibot: 1.5.0(typescript@6.0.3)
     transitivePeerDependencies:
       - typescript
 
-  '@post-embed/types@0.4.1': {}
+  '@post-embed/types@0.5.0': {}
 
   '@prosekit/core@0.13.2(prosemirror-model@1.25.11)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.1)':
     dependencies:
@@ -10402,7 +10403,7 @@ snapshots:
     optionalDependencies:
       vite: 8.3.0(@types/node@24.13.5)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
 
-  vitest-browser-commands@0.4.1(@vitest/browser-playwright@5.0.1)(@vitest/browser@5.0.1)(playwright@1.63.0)(vite@8.3.0)(vitest@5.0.1):
+  vitest-browser-commands@0.5.0(@vitest/browser-playwright@5.0.1)(@vitest/browser@5.0.1)(playwright@1.63.0)(vite@8.3.0)(vitest@5.0.1):
     optionalDependencies:
       '@vitest/browser': 5.0.1(vite@8.3.0)(vitest@5.0.1)
       '@vitest/browser-playwright': 5.0.1(playwright@1.63.0)(vite@8.3.0)(vitest@5.0.1)
