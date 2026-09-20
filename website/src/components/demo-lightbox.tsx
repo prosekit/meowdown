@@ -8,12 +8,13 @@ export function DemoLightbox({ lightbox }: { lightbox: LightboxController }) {
 
   return (
     <LightboxRoot lightbox={lightbox}>
-      {(item) => { return item.type === 'image' ? (
+      {(item) => {
+        return item.type === 'image' ? (
           <DemoLightboxImage item={item} onClose={close} />
         ) : (
           <DemoLightboxVideo item={item} onClose={close} />
-        ) }
-      }
+        )
+      }}
     </LightboxRoot>
   )
 }
