@@ -41,6 +41,7 @@ function getDisplayable(
   if (media.unavailable) return
   if (media.type === 'photo') {
     const url = getSafeUrl(media.url, protocols)
+    // FIXME: print console.warn when url is not safe.
     return url ? { ...media, url } : undefined
   }
   const sources = media.sources
