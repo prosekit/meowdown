@@ -1,5 +1,15 @@
 # @meowdown/embed
 
+## 0.2.0
+
+### Minor Changes
+
+- [#602](https://github.com/prosekit/meowdown/pull/602) [`c6fadae`](https://github.com/prosekit/meowdown/commit/c6fadaea4f982241f4e5e8201a442c1b6f4cffb3) Thanks [@ocavue](https://github.com/ocavue)! - Add `onYouTubeVideoClick`: the YouTube card dispatches a cancelable `meowdown-embed-youtube-click` event when its poster is clicked.
+
+### Patch Changes
+
+- [#601](https://github.com/prosekit/meowdown/pull/601) [`1182619`](https://github.com/prosekit/meowdown/commit/11826190926d4ffc9bfeb9fd9e90d572b75ad483) Thanks [@ocavue](https://github.com/ocavue)! - The unavailable X post card now links to the post.
+
 ## 0.1.0
 
 ### Minor Changes
