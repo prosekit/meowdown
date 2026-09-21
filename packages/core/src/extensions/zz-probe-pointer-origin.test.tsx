@@ -26,6 +26,16 @@ interface Sample {
     origin: string | null
   }>
   clickRoundTrip: number
+  // Event Timing entries (times relative to the click call start).
+  events: Array<{
+    name: string
+    start: number
+    processingStart: number
+    processingEnd: number
+    duration: number
+  }>
+  // Long tasks and long animation frames that overlap the click.
+  longTasks: Array<{ type: string; start: number; duration: number; renderStart?: number }>
 }
 
 interface ViewInput {
@@ -55,6 +65,8 @@ async function runOnce(
     selectionchange: [],
     dispatches: [],
     clickRoundTrip: 0,
+    events: [],
+    longTasks: [],
   }
 
   let t0 = 0
@@ -78,6 +90,20 @@ async function runOnce(
     originalDispatch(tr)
   }
 
+  const perfEntries: PerformanceEntry[] = []
+  const perfObserver = new PerformanceObserver((list) => perfEntries.push(...list.getEntries()))
+  for (const type of ['event', 'longtask', 'long-animation-frame']) {
+    try {
+      perfObserver.observe({
+        type,
+        durationThreshold: 16,
+        buffered: false,
+      } as PerformanceObserverInit)
+    } catch {
+      // The entry type is not supported in this browser.
+    }
+  }
+
   try {
     const pos = findText(fixture.doc, 'bold')
     const coords = side === 'left' ? view.coordsAtPos(pos, 1) : view.coordsAtPos(pos + 4, -1)
@@ -92,7 +118,32 @@ async function runOnce(
       side === 'left'
         ? sample.snapshot === 'foo ⎦**bold** bar'
         : sample.snapshot === 'foo **bold**⎣ bar'
+    // Performance entries arrive after the next paint.
+    await new Promise((resolve) => setTimeout(resolve, 120))
+    perfEntries.push(...perfObserver.takeRecords())
+    for (const entry of perfEntries) {
+      if (entry.entryType === 'event') {
+        const timing = entry as PerformanceEventTiming
+        if (!/^(pointerdown|mousedown|pointerup|mouseup|click)$/.test(timing.name)) continue
+        sample.events.push({
+          name: timing.name,
+          start: timing.startTime - t0,
+          processingStart: timing.processingStart - t0,
+          processingEnd: timing.processingEnd - t0,
+          duration: timing.duration,
+        })
+      } else {
+        const renderStart = (entry as unknown as { renderStart?: number }).renderStart
+        sample.longTasks.push({
+          type: entry.entryType,
+          start: entry.startTime - t0,
+          duration: entry.duration,
+          renderStart: renderStart ? renderStart - t0 : undefined,
+        })
+      }
+    }
   } finally {
+    perfObserver.disconnect()
     window.removeEventListener('mousedown', onDown, true)
     window.removeEventListener('mouseup', onUp, true)
     document.removeEventListener('selectionchange', onSel, true)

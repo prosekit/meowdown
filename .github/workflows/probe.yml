@@ -10,19 +10,19 @@ permissions:
 jobs:
   probe:
     runs-on: ${{ matrix.config.runner }}
-    name: probe-${{ matrix.config.os }}-${{ matrix.config.browser }}-${{ matrix.config.label }}
+    name: probe-${{ matrix.config.os }}-${{ matrix.config.browser }}-${{ matrix.config.label }}-${{ matrix.replica }}
     timeout-minutes: 20
 
     strategy:
       fail-fast: false
       matrix:
+        replica: [1, 2]
         config:
           - { os: mac, runner: macos-latest, browser: chromium, label: c153 }
           - { os: mac, runner: macos-latest, browser: chromium, label: c151, revision: '1234' }
-          - { os: linux, runner: ubuntu-latest, browser: chromium, label: c153 }
-          - { os: linux, runner: ubuntu-latest, browser: chromium, label: c151, revision: '1234' }
-          - { os: windows, runner: windows-latest, browser: chromium, label: c153 }
-          - { os: mac, runner: macos-latest, browser: webkit, label: default }
+          - { os: mac, runner: macos-latest, browser: chromium, label: c153-disable-gpu, args: '--disable-gpu' }
+          - { os: mac, runner: macos-latest, browser: chromium, label: c153-headless-shell, channel: none }
+          - { os: mac, runner: macos-15, browser: chromium, label: c153-macos-15 }
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -33,6 +33,10 @@ jobs:
 
       - name: Install
         run: pnpm run test:install:${{ matrix.config.browser }}
+
+      - name: Install the headless shell
+        if: ${{ matrix.config.channel == 'none' }}
+        run: pnpm exec playwright install chromium --only-shell
 
       - name: Install the previous Chromium build
         if: ${{ matrix.config.revision }}
@@ -47,6 +51,8 @@ jobs:
         env:
           MEOWDOWN_TEST_BROWSER: ${{ matrix.config.browser }}
           PROBE_RETRY: '0'
+          PROBE_CHROMIUM_ARGS: ${{ matrix.config.args }}
+          PROBE_CHROMIUM_CHANNEL: ${{ matrix.config.channel }}
           NO_COLOR: '1'
 
       - name: Print probe output

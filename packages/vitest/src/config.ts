@@ -71,7 +71,10 @@ export function defineBrowserConfig({ name, groupOrder }: { name: string; groupO
             // with `playwright install chromium --no-shell`, we no longer need to
             // download two copies of Chromium anymore.
             // See https://playwright.dev/docs/browsers#chromium-new-headless-mode
-            channel: browserName === 'chromium' ? 'chromium' : undefined,
+            channel:
+              browserName === 'chromium' && process.env.PROBE_CHROMIUM_CHANNEL !== 'none'
+                ? 'chromium'
+                : undefined,
             executablePath: process.env.PROBE_CHROMIUM_PATH || undefined,
             args: process.env.PROBE_CHROMIUM_ARGS
               ? process.env.PROBE_CHROMIUM_ARGS.split(' ')
