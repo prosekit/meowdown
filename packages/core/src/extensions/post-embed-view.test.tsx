@@ -142,7 +142,8 @@ describe('YouTube video clicks', () => {
     using fixture = setupFixture({
       extensionOptions: { resolveYouTubeVideo: () => createYouTubeVideo(), onYouTubeVideoClick },
     })
-    fixture.set(fixture.n.doc(fixture.n.paragraph(VIDEO)))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph(VIDEO)))
     await userEvent.click(play)
     expect(onYouTubeVideoClick).toHaveBeenCalledTimes(1)
     expect(onYouTubeVideoClick.mock.calls[0][0].detail).toMatchObject({
@@ -158,7 +159,8 @@ describe('YouTube video clicks', () => {
     using fixture = setupFixture({
       extensionOptions: { resolveYouTubeVideo: () => createYouTubeVideo(), onYouTubeVideoClick },
     })
-    fixture.set(fixture.n.doc(fixture.n.paragraph(VIDEO)))
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph(VIDEO)))
     await userEvent.click(play)
     expect(onYouTubeVideoClick).toHaveBeenCalledTimes(1)
     await expect.element(videoCard.locate('iframe')).toBeInTheDocument()
