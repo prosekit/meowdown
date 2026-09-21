@@ -5,6 +5,7 @@ export {
   type TaskClickHandler,
   type TaskClickPayload,
 } from './components/markdown-view.tsx'
+export { LightboxFrame, type LightboxFrameProps } from './components/lightbox-frame.tsx'
 export { LightboxImage, type LightboxImageProps } from './components/lightbox-image.tsx'
 export { LightboxRoot, type LightboxRootProps } from './components/lightbox-root.tsx'
 export { LightboxVideo, type LightboxVideoProps } from './components/lightbox-video.tsx'
@@ -16,6 +17,7 @@ export {
   useLightbox,
   type LightboxCloseOptions,
   type LightboxController,
+  type LightboxFrameItem,
   type LightboxImageItem,
   type LightboxItem,
   type LightboxVideoItem,

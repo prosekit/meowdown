@@ -41,7 +41,8 @@ export function HomeDemo() {
   // a top or bottom border inside the editor box. A bumped id remounts the
   // overlay so its one-shot fade restarts on every press.
   const [edgeFlash, setEdgeFlash] = useState<{ id: number; direction: 'up' | 'down' }>()
-  const { lightbox, handleImageClick, handleXPostMediaClick } = useDemoLightbox()
+  const { lightbox, handleImageClick, handleXPostMediaClick, handleYouTubeVideoClick } =
+    useDemoLightbox()
 
   const handleExitBoundary: ExitBoundaryHandler = useCallback(({ direction }) => {
     setEdgeFlash({ id: getId(), direction })
@@ -91,6 +92,7 @@ export function HomeDemo() {
               onFileClick={handleFileClick}
               onImageClick={handleImageClick}
               onXPostMediaClick={handleXPostMediaClick}
+              onYouTubeVideoClick={handleYouTubeVideoClick}
               onLinkClick={handleLinkClick}
               resolveLinkPreview={resolveLinkPreview}
               onTagClick={handleTagClick}

@@ -1,4 +1,8 @@
-import type { ImageClickHandler, XPostMediaClickHandler } from '@meowdown/core'
+import type {
+  ImageClickHandler,
+  XPostMediaClickHandler,
+  YouTubeVideoClickHandler,
+} from '@meowdown/core'
 import { useLightbox, type LightboxItem } from '@meowdown/react'
 import type { XPostMedia } from '@post-embed/types'
 import { useCallback } from 'react'
@@ -38,5 +42,25 @@ export function useDemoLightbox() {
     [open],
   )
 
-  return { lightbox, handleImageClick, handleXPostMediaClick }
+  const handleYouTubeVideoClick: YouTubeVideoClickHandler = useCallback(
+    (event) => {
+      // Without this the card plays the video in place.
+      event.preventDefault()
+      const { video, short, embedUrl, element } = event.detail
+      open(
+        {
+          type: 'frame',
+          src: embedUrl,
+          title: video.title || 'YouTube video',
+          poster: video.thumbnail_url,
+          width: short ? 9 : 16,
+          height: short ? 16 : 9,
+        },
+        element,
+      )
+    },
+    [open],
+  )
+
+  return { lightbox, handleImageClick, handleXPostMediaClick, handleYouTubeVideoClick }
 }

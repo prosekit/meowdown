@@ -1,11 +1,11 @@
-import { LightboxVideo, type LightboxVideoItem } from '@meowdown/react'
+import { LightboxFrame, LightboxVideo, type LightboxItem } from '@meowdown/react'
 import type { MouseEvent } from 'react'
 
 export function DemoLightboxVideo({
   item,
   onClose,
 }: {
-  item: LightboxVideoItem
+  item: Exclude<LightboxItem, { type: 'image' }>
   onClose: () => void
 }) {
   // A click on the dimmed area around the player closes; one on the player
@@ -19,7 +19,7 @@ export function DemoLightboxVideo({
       className="absolute inset-0 flex items-center justify-center p-[inherit]"
       onClick={handleBackgroundClick}
     >
-      <LightboxVideo item={item} />
+      {item.type === 'video' ? <LightboxVideo item={item} /> : <LightboxFrame item={item} />}
       <button
         type="button"
         aria-label="Close"

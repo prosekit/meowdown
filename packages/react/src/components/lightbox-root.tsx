@@ -17,7 +17,7 @@ export interface LightboxRootProps extends Omit<
    */
   readonly lightbox: LightboxController
   /**
-   * Render the open item. Put a {@link LightboxImage} somewhere inside, along
+   * Render the open item. Put a {@link LightboxImage}, {@link LightboxVideo}, or {@link LightboxFrame} somewhere inside, along
    * with whatever closes the lightbox.
    */
   readonly children: (item: LightboxItem) => ReactNode
@@ -50,7 +50,7 @@ export function LightboxRoot({
   return (
     <ViewTransition default={DIALOG_TRANSITION_CLASS} onExit={() => onExited}>
       <dialog
-        aria-label={item.type === 'video' ? 'Video preview' : 'Image preview'}
+        aria-label={item.type === 'image' ? 'Image preview' : 'Video preview'}
         {...props}
         ref={showModal}
         className={clsx(styles.Dialog, className)}

@@ -1,6 +1,11 @@
 import './stories.css'
 
-import type { ExitBoundaryHandler, ImageClickHandler, XPostMediaClickHandler } from '@meowdown/core'
+import type {
+  ExitBoundaryHandler,
+  ImageClickHandler,
+  XPostMediaClickHandler,
+  YouTubeVideoClickHandler,
+} from '@meowdown/core'
 import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import { clsx } from 'clsx/lite'
 import { useCallback, useMemo, useRef } from 'react'
@@ -36,6 +41,7 @@ function DailyNoteRow({
   focusDay,
   onImageClick,
   onXPostMediaClick,
+  onYouTubeVideoClick,
 }: {
   offset: number
   date: Date
@@ -43,6 +49,7 @@ function DailyNoteRow({
   focusDay: (offset: number, position: 'start' | 'end') => boolean
   onImageClick: ImageClickHandler
   onXPostMediaClick: XPostMediaClickHandler
+  onYouTubeVideoClick: YouTubeVideoClickHandler
 }) {
   const handleRef = useCallback(
     (handle: EditorHandle | null) => registerHandle(offset, handle),
@@ -80,6 +87,7 @@ function DailyNoteRow({
         onExitBoundary={handleExitBoundary}
         onImageClick={onImageClick}
         onXPostMediaClick={onXPostMediaClick}
+        onYouTubeVideoClick={onYouTubeVideoClick}
       />
     </section>
   )
@@ -88,7 +96,8 @@ function DailyNoteRow({
 export function DailyNotes() {
   const mounted = useMounted()
   const handlesRef = useRef(new Map<number, EditorHandle>())
-  const { lightbox, handleImageClick, handleXPostMediaClick } = useDemoLightbox()
+  const { lightbox, handleImageClick, handleXPostMediaClick, handleYouTubeVideoClick } =
+    useDemoLightbox()
 
   const days = useMemo(() => {
     const today = new Date()
@@ -130,6 +139,7 @@ export function DailyNotes() {
           focusDay={focusDay}
           onImageClick={handleImageClick}
           onXPostMediaClick={handleXPostMediaClick}
+          onYouTubeVideoClick={handleYouTubeVideoClick}
         />
       ))}
       <DemoLightbox lightbox={lightbox} />

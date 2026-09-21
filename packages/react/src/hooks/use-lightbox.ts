@@ -9,7 +9,7 @@ export const LIGHTBOX_TRANSITION_NAME = 'meowdown-lightbox-media'
 /**
  * Something a lightbox can show.
  */
-export type LightboxItem = LightboxImageItem | LightboxVideoItem
+export type LightboxItem = LightboxImageItem | LightboxVideoItem | LightboxFrameItem
 
 export interface LightboxImageItem {
   type: 'image'
@@ -45,6 +45,27 @@ export interface LightboxVideoItem {
    */
   gif?: boolean | undefined
   alt?: string | undefined
+}
+
+export interface LightboxFrameItem {
+  type: 'frame'
+  /**
+   * The page the `<iframe>` loads, for example a video player.
+   */
+  src: string
+  /**
+   * The accessible name of the `<iframe>`.
+   */
+  title: string
+  /**
+   * URL of the image the frame shows until its page has painted.
+   */
+  poster?: string | undefined
+  /**
+   * With `height`, the aspect ratio of the frame. 16:9 when either is missing.
+   */
+  width?: number | undefined
+  height?: number | undefined
 }
 
 export interface LightboxCloseOptions {

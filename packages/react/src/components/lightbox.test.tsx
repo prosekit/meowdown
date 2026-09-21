@@ -10,10 +10,12 @@ import { page, userEvent } from 'vitest/browser'
 import {
   useLightbox,
   type LightboxController,
+  type LightboxFrameItem,
   type LightboxImageItem,
   type LightboxVideoItem,
 } from '../hooks/use-lightbox.ts'
 
+import { LightboxFrame } from './lightbox-frame.tsx'
 import { LightboxImage } from './lightbox-image.tsx'
 import { LightboxRoot } from './lightbox-root.tsx'
 import { LightboxVideo } from './lightbox-video.tsx'
@@ -36,6 +38,13 @@ const VIDEO: LightboxVideoItem = {
   alt: 'Launch',
 }
 
+const FRAME: LightboxFrameItem = {
+  type: 'frame',
+  src: 'about:blank',
+  title: 'Launch player',
+  poster: ITEM.src,
+}
+
 // Every context starts with `prefers-reduced-motion: reduce`.
 async function emulateReducedMotion(reducedMotion: 'reduce' | 'no-preference'): Promise<void> {
   await emulateMedia({ reducedMotion })
@@ -54,15 +63,19 @@ function Host() {
   })
   return (
     <LightboxRoot lightbox={lightbox}>
-      {(item) => (
-        <button type="button" onClick={() => lightbox.close()}>
-          {item.type === 'image' ? (
-            <LightboxImage item={item} style={{ opacity: 0.5 }} />
-          ) : (
-            <LightboxVideo item={item} style={{ opacity: 0.5 }} />
-          )}
-        </button>
-      )}
+      {(item) => {
+        return item.type === 'frame' ? (
+          <LightboxFrame item={item} style={{ opacity: 0.5 }} />
+        ) : (
+          <button type="button" onClick={() => lightbox.close()}>
+            {item.type === 'image' ? (
+              <LightboxImage item={item} style={{ opacity: 0.5 }} />
+            ) : (
+              <LightboxVideo item={item} style={{ opacity: 0.5 }} />
+            )}
+          </button>
+        )
+      }}
     </LightboxRoot>
   )
 }
@@ -219,6 +232,70 @@ describe('Lightbox', () => {
     await render(<Host />)
 
     controller.open(VIDEO, thumbnail)
+    await vi.waitFor(() => expect(isZooming()).toBe(true), ZOOM_TIMEOUT)
+    await expect.element(videoDialog).toBeInTheDocument()
+    await vi.waitFor(() => expect(isZooming()).toBe(false), ZOOM_TIMEOUT)
+
+    controller.close()
+    await vi.waitFor(() => expect(isZooming()).toBe(true), ZOOM_TIMEOUT)
+    await expect.element(videoDialog).not.toBeInTheDocument()
+    thumbnail.remove()
+  })
+
+  it('renders a frame item as an iframe over its poster', async () => {
+    await render(<Host />)
+
+    controller.open(FRAME)
+    await expect.element(videoDialog).toBeInTheDocument()
+    const frame = videoDialog.element().querySelector('iframe')!
+    expect(frame.getAttribute('src')).toBe('about:blank')
+    expect(frame.title).toBe('Launch player')
+    expect(frame.allow).toContain('autoplay')
+    expect(frame.allowFullscreen).toBe(true)
+    expect(frame.style.opacity).toBe('0.5')
+    expect(getComputedStyle(frame).backgroundImage).toContain('data:image/svg+xml')
+
+    controller.close()
+    await expect.element(videoDialog).not.toBeInTheDocument()
+  })
+
+  // The largest box of `ratio` inside the dialog's padding: it fits on both
+  // axes and touches the padding on one.
+  async function expectFrameToFit(ratio: number): Promise<void> {
+    await expect.element(videoDialog).toBeInTheDocument()
+    await vi.waitFor(() => {
+      const box = videoDialog.element()
+      const frame = box.querySelector('iframe')!.getBoundingClientRect()
+      const padding = Number.parseFloat(getComputedStyle(box).paddingLeft)
+      const maxWidth = box.clientWidth - padding * 2
+      const maxHeight = box.clientHeight - padding * 2
+      expect(frame.width / frame.height).toBeCloseTo(ratio, 1)
+      expect(frame.width).toBeLessThanOrEqual(maxWidth + 1)
+      expect(frame.height).toBeLessThanOrEqual(maxHeight + 1)
+      expect(Math.min(maxWidth - frame.width, maxHeight - frame.height)).toBeLessThan(1)
+    })
+  }
+
+  it('fits a frame without a size inside the padding at 16:9', async () => {
+    await render(<Host />)
+
+    controller.open(FRAME)
+    await expectFrameToFit(16 / 9)
+  })
+
+  it('fits a portrait frame inside the padding at its ratio', async () => {
+    await render(<Host />)
+
+    controller.open({ ...FRAME, width: 9, height: 16 })
+    await expectFrameToFit(9 / 16)
+  })
+
+  it('zooms a frame from its poster element', async () => {
+    await emulateReducedMotion('no-preference')
+    const thumbnail = appendThumbnail()
+    await render(<Host />)
+
+    controller.open(FRAME, thumbnail)
     await vi.waitFor(() => expect(isZooming()).toBe(true), ZOOM_TIMEOUT)
     await expect.element(videoDialog).toBeInTheDocument()
     await vi.waitFor(() => expect(isZooming()).toBe(false), ZOOM_TIMEOUT)

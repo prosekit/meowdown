@@ -13,6 +13,8 @@
   border: 0;
   outline: none;
   background: var(--meowdown-lightbox-backdrop, rgb(0 0 0 / 0.8));
+  /* Lets the frame size itself against the space inside the padding. */
+  container-type: size;
 
   &::backdrop {
     background: transparent;
@@ -31,4 +33,12 @@
   max-width: 100%;
   height: auto;
   max-height: 100%;
+}
+
+.Frame {
+  display: block;
+  width: min(100cqw, 100cqh * var(--meowdown-lightbox-frame-ratio));
+  aspect-ratio: var(--meowdown-lightbox-frame-ratio);
+  border: 0;
+  background: #000 center / cover no-repeat;
 }

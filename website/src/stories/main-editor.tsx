@@ -161,7 +161,8 @@ function MainEditorDemo() {
     flushToSource()
   }
 
-  const { lightbox, handleImageClick, handleXPostMediaClick } = useDemoLightbox()
+  const { lightbox, handleImageClick, handleXPostMediaClick, handleYouTubeVideoClick } =
+    useDemoLightbox()
 
   const toggleSource = (show: boolean) => {
     if (show) {
@@ -220,6 +221,7 @@ function MainEditorDemo() {
             onWikilinkSearch={searchNotes}
             onImageClick={handleImageClick}
             onXPostMediaClick={handleXPostMediaClick}
+            onYouTubeVideoClick={handleYouTubeVideoClick}
             onLinkClick={handleLinkClick}
             resolveLinkPreview={resolveLinkPreview}
             onTagClick={handleTagClick}
