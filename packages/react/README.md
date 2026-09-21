@@ -58,16 +58,16 @@ export function App() {
 
 Common `MeowdownEditor` props:
 
-| Prop                                                                                                          | What it does                                                                       |
-| ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `mode`                                                                                                        | `'focus'` (default), `'show'`, or `'hide'`: how much Markdown syntax stays in view |
-| `searchQuery` / `onSearchChange`                                                                              | Find in document, with `EditorHandle.findNext()` / `findPrevious()`                |
-| `onWikilinkClick` / `onLinkClick` / `onTagClick` / `onImageClick` / `onFileClick` / `onXPostMediaClick`       | Click handling for the rendered atoms                                              |
-| `resolveImageUrl` / `resolveWikiEmbed` / `resolveWikilink` / `resolveFileLink` / `resolveFileInfo`            | Resolve and classify local content                                                 |
-| `onFilePaste`                                                                                                 | Persist pasted or dropped files                                                    |
-| `onSlashMenuSearch` / `onTagSearch` / `onWikilinkSearch` / `onSelectionMenuSearch`                            | Search menus for `/`, `#`, `[[`, and selection commands                            |
-| `readOnly` / `placeholder` / `blockHandle` / `caretGlide` / `embedPaste` / `linkPaste` / `bulletAfterHeading` | Behavior toggles                                                                   |
-| `CodeBlockView`                                                                                               | Custom React node view component for code blocks                                   |
+| Prop                                                                                                                            | What it does                                                                       |
+| ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `mode`                                                                                                                          | `'focus'` (default), `'show'`, or `'hide'`: how much Markdown syntax stays in view |
+| `searchQuery` / `onSearchChange`                                                                                                | Find in document, with `EditorHandle.findNext()` / `findPrevious()`                |
+| `onWikilinkClick` / `onLinkClick` / `onTagClick` / `onImageClick` / `onFileClick` / `onXPostMediaClick` / `onYouTubeVideoClick` | Click handling for the rendered atoms                                              |
+| `resolveImageUrl` / `resolveWikiEmbed` / `resolveWikilink` / `resolveFileLink` / `resolveFileInfo`                              | Resolve and classify local content                                                 |
+| `onFilePaste`                                                                                                                   | Persist pasted or dropped files                                                    |
+| `onSlashMenuSearch` / `onTagSearch` / `onWikilinkSearch` / `onSelectionMenuSearch`                                              | Search menus for `/`, `#`, `[[`, and selection commands                            |
+| `readOnly` / `placeholder` / `blockHandle` / `caretGlide` / `embedPaste` / `linkPaste` / `bulletAfterHeading`                   | Behavior toggles                                                                   |
+| `CodeBlockView`                                                                                                                 | Custom React node view component for code blocks                                   |
 
 Every prop, callback, and `EditorHandle` method is documented in the [API reference](https://npmx.dev/package-docs/@meowdown%2Freact/).
 

@@ -38,9 +38,10 @@ import {
   type WikilinkClickHandler,
   type WikilinkResolver,
   type XPostMediaClickHandler,
+  type YouTubeVideoClickHandler,
 } from '@meowdown/core'
 import { registerXPost, X_POST_MEDIA_CLICK } from '@meowdown/embed/x'
-import { registerYouTubeVideo } from '@meowdown/embed/youtube'
+import { registerYouTubeVideo, YOUTUBE_VIDEO_CLICK } from '@meowdown/embed/youtube'
 import { matchEmbed, type EmbedKind } from '@meowdown/markdown'
 import type { DOMOutputSpec } from '@prosekit/pm/model'
 import { Mark, type Node as ProseMirrorNode } from '@prosekit/pm/model'
@@ -188,6 +189,11 @@ export interface MarkdownViewProps {
    * playing the video in place.
    */
   onXPostMediaClick?: XPostMediaClickHandler
+  /**
+   * Called when the poster of a YouTube card is activated. Call
+   * `event.preventDefault()` to stop the card from playing the video in place.
+   */
+  onYouTubeVideoClick?: YouTubeVideoClickHandler
   /**
    * Called when a rendered file pill is clicked. Pass a stable function.
    */
@@ -981,6 +987,7 @@ export function MarkdownView({
   onLinkClick,
   onImageClick,
   onXPostMediaClick,
+  onYouTubeVideoClick,
   onFileClick,
   onTaskClick,
   className,
@@ -1032,15 +1039,27 @@ export function MarkdownView({
     }
   }, [markdown, frontmatter])
 
-  // The card's event bubbles, so one listener on the root covers every card.
+  // The cards' events bubble, so one listener each on the root covers every card.
   const handleXPostMediaClick = interactive ? onXPostMediaClick : undefined
+  const handleYouTubeVideoClick = interactive ? onYouTubeVideoClick : undefined
   const rootRef = useCallback(
     (root: HTMLDivElement) => {
-      if (!handleXPostMediaClick) return
-      root.addEventListener(X_POST_MEDIA_CLICK, handleXPostMediaClick)
-      return () => root.removeEventListener(X_POST_MEDIA_CLICK, handleXPostMediaClick)
+      if (handleXPostMediaClick) {
+        root.addEventListener(X_POST_MEDIA_CLICK, handleXPostMediaClick)
+      }
+      if (handleYouTubeVideoClick) {
+        root.addEventListener(YOUTUBE_VIDEO_CLICK, handleYouTubeVideoClick)
+      }
+      return () => {
+        if (handleXPostMediaClick) {
+          root.removeEventListener(X_POST_MEDIA_CLICK, handleXPostMediaClick)
+        }
+        if (handleYouTubeVideoClick) {
+          root.removeEventListener(YOUTUBE_VIDEO_CLICK, handleYouTubeVideoClick)
+        }
+      }
     },
-    [handleXPostMediaClick],
+    [handleXPostMediaClick, handleYouTubeVideoClick],
   )
 
   return (

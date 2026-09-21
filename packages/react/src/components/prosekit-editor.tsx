@@ -14,6 +14,7 @@ import {
   type FileViewOptions,
   type ImageClickHandler,
   type XPostMediaClickHandler,
+  type YouTubeVideoClickHandler,
   type ImageOptions,
   type LinkClickHandler,
   type LinkCopyHandler,
@@ -269,6 +270,11 @@ export interface ProseKitEditorProps {
   onXPostMediaClick?: XPostMediaClickHandler
 
   /**
+   * Called on click of a YouTube card's poster. See `EditorProps.onYouTubeVideoClick`.
+   */
+  onYouTubeVideoClick?: YouTubeVideoClickHandler
+
+  /**
    * Auto-embeds a pasted tweet/YouTube link. See `EditorProps.embedPaste`.
    */
   embedPaste?: boolean
@@ -376,6 +382,7 @@ export function ProseKitEditor({
   onFileSaveError,
   onImageClick,
   onXPostMediaClick,
+  onYouTubeVideoClick,
   embedPaste,
   linkPaste,
   bulletAfterHeading,
@@ -429,6 +436,7 @@ export function ProseKitEditor({
       onFileSaveError,
       onImageClick,
       onXPostMediaClick,
+      onYouTubeVideoClick,
       embedPaste,
       linkPaste,
       bulletAfterHeading,
@@ -458,6 +466,7 @@ export function ProseKitEditor({
       onFileSaveError,
       onImageClick,
       onXPostMediaClick,
+      onYouTubeVideoClick,
       embedPaste,
       linkPaste,
       bulletAfterHeading,

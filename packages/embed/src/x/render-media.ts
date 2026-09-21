@@ -1,6 +1,7 @@
 import type { XPostMedia, XPostPhoto, XPostVideo } from '@post-embed/types'
 import el from 'crelt'
 
+import { isPlainClick } from '../is-plain-click.ts'
 import { renderLink } from '../render-link.ts'
 import { getSafeUrl } from '../safe-url.ts'
 import { toPositiveNumber } from '../to-positive-number.ts'
@@ -70,10 +71,6 @@ function renderError(permalink?: string) {
     'Media could not be loaded. ',
     renderLink('View on X', permalink),
   )
-}
-
-function isPlainClick(event: MouseEvent): boolean {
-  return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey
 }
 
 function renderPhoto(

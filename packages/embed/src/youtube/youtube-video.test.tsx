@@ -6,7 +6,11 @@ import { page, userEvent } from 'vitest/browser'
 
 import { createVideo } from './testing/fixtures.ts'
 
-import { registerYouTubeVideo, type YouTubeVideoElement } from './index.ts'
+import {
+  registerYouTubeVideo,
+  type YouTubeVideoClickEvent,
+  type YouTubeVideoElement,
+} from './index.ts'
 
 beforeAll(() => {
   registerYouTubeVideo()
@@ -68,6 +72,54 @@ describe('YouTube video', () => {
     expect(element.querySelector('button')).toBeNull()
     await expect.poll(() => document.activeElement).toBe(element.querySelector('iframe'))
     await expect.element(video.getByRole('link', { name: 'Big Buck Bunny' })).toBeVisible()
+  })
+
+  it('reports a click on the inline poster and lets a listener cancel the player', async () => {
+    const element = mount()
+    element.playback = 'inline'
+    const onClick = vi.fn((event: YouTubeVideoClickEvent) => event.preventDefault())
+    document.body.addEventListener('meowdown-embed-youtube-click', onClick)
+    try {
+      await userEvent.click(video.getByRole('button', { name: 'Play: Big Buck Bunny' }))
+    } finally {
+      document.body.removeEventListener('meowdown-embed-youtube-click', onClick)
+    }
+    expect(onClick).toHaveBeenCalledTimes(1)
+    expect(onClick.mock.calls[0][0].detail).toMatchObject({
+      video: { title: 'Big Buck Bunny' },
+      videoId: 'aqz-KE-bpKQ',
+      startSeconds: 90,
+      short: false,
+      embedUrl:
+        'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ?autoplay=1&playsinline=1&start=90',
+      element: element.querySelector('[data-poster] img'),
+    })
+    expect(element.querySelector('iframe')).toBeNull()
+    await expect.element(video.getByRole('button', { name: 'Play: Big Buck Bunny' })).toBeVisible()
+  })
+
+  it('lets a listener cancel the watch link', async () => {
+    const element = mount()
+    await expect.element(video.getByRole('link', { name: 'Big Buck Bunny' })).toBeVisible()
+    const poster = element.querySelector('a[data-poster]')
+    if (!poster) throw new Error('Missing poster link')
+    const onClick = vi.fn((event: YouTubeVideoClickEvent) => event.preventDefault())
+    const clicks: boolean[] = []
+    const onNativeClick = (event: MouseEvent) => {
+      clicks.push(event.defaultPrevented)
+      event.preventDefault()
+    }
+    element.addEventListener('meowdown-embed-youtube-click', onClick)
+    document.body.addEventListener('click', onNativeClick)
+    try {
+      await userEvent.click(poster)
+      element.removeEventListener('meowdown-embed-youtube-click', onClick)
+      await userEvent.click(poster)
+    } finally {
+      document.body.removeEventListener('click', onNativeClick)
+    }
+    expect(onClick).toHaveBeenCalledTimes(1)
+    expect(clicks).toEqual([true, false])
   })
 
   it('reads playback from the attribute', async () => {

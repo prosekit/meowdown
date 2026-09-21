@@ -66,6 +66,7 @@ import { defineWikilinkClickHandler } from './wikilink-click.ts'
 import { defineWikilinkTrigger } from './wikilink-trigger.ts'
 import { defineWikilink } from './wikilink.ts'
 import { defineXPostMediaClickHandler } from './x-post-media-click.ts'
+import { defineYouTubeVideoClickHandler } from './youtube-video-click.ts'
 
 function defineEditorExtensionImpl(options: EditorExtensionOptions) {
   return union(
@@ -93,6 +94,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineFileClickHandler((state) => getEditorConfig(state).onFileClick),
     defineImageClickHandler((state) => getEditorConfig(state).onImageClick),
     defineXPostMediaClickHandler((state) => getEditorConfig(state).onXPostMediaClick),
+    defineYouTubeVideoClickHandler((state) => getEditorConfig(state).onYouTubeVideoClick),
     defineWikilinkClickHandler((state) => getEditorConfig(state).onWikilinkClick),
     defineTagClickHandler((state) => getEditorConfig(state).onTagClick),
     defineLinkClickHandler((state) => getEditorConfig(state).onLinkClick),

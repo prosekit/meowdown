@@ -1,4 +1,5 @@
 import type { XPostMediaClickEvent } from '@meowdown/embed/x'
+import type { YouTubeVideoClickEvent } from '@meowdown/embed/youtube'
 import type { XPost } from '@post-embed/types'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
@@ -130,6 +131,37 @@ describe('X post media clicks', () => {
     fixture.set(fixture.n.doc(fixture.n.paragraph(TWEET)))
     await userEvent.click(xPostCard.getByRole('button', { name: 'Play video' }))
     await expect.element(xPostCard.locate('video')).toBeInTheDocument()
+  })
+})
+
+describe('YouTube video clicks', () => {
+  const play = videoCard.getByRole('button', { name: 'Play: Big Buck Bunny' })
+
+  it('reports a clicked poster instead of playing in the card', async () => {
+    const onYouTubeVideoClick = vi.fn((event: YouTubeVideoClickEvent) => event.preventDefault())
+    using fixture = setupFixture({
+      extensionOptions: { resolveYouTubeVideo: () => createYouTubeVideo(), onYouTubeVideoClick },
+    })
+    fixture.set(fixture.n.doc(fixture.n.paragraph(VIDEO)))
+    await userEvent.click(play)
+    expect(onYouTubeVideoClick).toHaveBeenCalledTimes(1)
+    expect(onYouTubeVideoClick.mock.calls[0][0].detail).toMatchObject({
+      videoId: 'aqz-KE-bpKQ',
+      embedUrl: 'https://www.youtube-nocookie.com/embed/aqz-KE-bpKQ?autoplay=1&playsinline=1',
+      element: play.element(),
+    })
+    expect(pmRoot.locate('iframe').query()).toBeNull()
+  })
+
+  it('keeps the card default when the handler does not prevent it', async () => {
+    const onYouTubeVideoClick = vi.fn()
+    using fixture = setupFixture({
+      extensionOptions: { resolveYouTubeVideo: () => createYouTubeVideo(), onYouTubeVideoClick },
+    })
+    fixture.set(fixture.n.doc(fixture.n.paragraph(VIDEO)))
+    await userEvent.click(play)
+    expect(onYouTubeVideoClick).toHaveBeenCalledTimes(1)
+    await expect.element(videoCard.locate('iframe')).toBeInTheDocument()
   })
 })
 

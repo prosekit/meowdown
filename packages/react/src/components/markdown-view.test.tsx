@@ -2,6 +2,7 @@ import '../testing/index.ts'
 
 import type { FileClickHandler, ImageClickHandler } from '@meowdown/core'
 import type { XPostMediaClickEvent } from '@meowdown/embed/x'
+import type { YouTubeVideoClickEvent } from '@meowdown/embed/youtube'
 import type { XPost } from '@post-embed/types'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -364,6 +365,18 @@ describe('MarkdownView', () => {
     })
     const card = view.getByTestId('youtube-video-embed').locate('[data-meowdown-embed="youtube"]')
     await expect.element(card).toMatchTextContent('Big Buck Bunny')
+    expect(view.locate('iframe').query()).toBeNull()
+  })
+
+  it('reports a clicked YouTube poster instead of playing in the card', async () => {
+    const onYouTubeVideoClick = vi.fn((event: YouTubeVideoClickEvent) => event.preventDefault())
+    await renderView('![](https://youtu.be/aqz-KE-bpKQ)<!-- {"width":320} -->', {
+      resolveYouTubeVideo: () => createYouTubeVideo(),
+      onYouTubeVideoClick,
+    })
+    await view.getByRole('button', { name: 'Play: Big Buck Bunny' }).click()
+    expect(onYouTubeVideoClick).toHaveBeenCalledTimes(1)
+    expect(onYouTubeVideoClick.mock.calls[0][0].detail).toMatchObject({ videoId: 'aqz-KE-bpKQ' })
     expect(view.locate('iframe').query()).toBeNull()
   })
 

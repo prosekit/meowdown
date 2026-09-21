@@ -7,6 +7,7 @@ import type {
   FileViewOptions,
   ImageClickHandler,
   XPostMediaClickHandler,
+  YouTubeVideoClickHandler,
   ImageOptions,
   LinkClickHandler,
   LinkCopyHandler,
@@ -276,6 +277,16 @@ export interface EditorProps {
   onXPostMediaClick?: XPostMediaClickHandler
 
   /**
+   * Called with the `meowdown-embed-youtube-click` event when the user
+   * activates the poster of a YouTube card. Its `detail` holds the video, the
+   * player URL, and the rendered thumbnail element. Call
+   * `event.preventDefault()` to stop the card from playing the video in
+   * place, then play it yourself, for example in a lightbox. Pass a stable
+   * function (e.g. from `useCallback`).
+   */
+  onYouTubeVideoClick?: YouTubeVideoClickHandler
+
+  /**
    * Auto-embeds a pasted tweet or YouTube link as a rich embed; one undo turns
    * the embed back into the raw link. On by default.
    */
@@ -421,6 +432,7 @@ export function MeowdownEditor({
   onFileSaveError,
   onImageClick,
   onXPostMediaClick,
+  onYouTubeVideoClick,
   embedPaste = true,
   linkPaste = true,
   bulletAfterHeading = false,
@@ -563,6 +575,7 @@ export function MeowdownEditor({
         onFileSaveError={onFileSaveError}
         onImageClick={onImageClick}
         onXPostMediaClick={onXPostMediaClick}
+        onYouTubeVideoClick={onYouTubeVideoClick}
         embedPaste={embedPaste}
         linkPaste={linkPaste}
         bulletAfterHeading={bulletAfterHeading}

@@ -198,3 +198,7 @@ export {
   defineXPostMediaClickHandler,
   type XPostMediaClickHandler,
 } from './extensions/x-post-media-click.ts'
+export {
+  defineYouTubeVideoClickHandler,
+  type YouTubeVideoClickHandler,
+} from './extensions/youtube-video-click.ts'
