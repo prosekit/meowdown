@@ -10,6 +10,7 @@ import type { XPost as XPostSnapshot } from '@post-embed/types'
 import el from 'crelt'
 
 import { type FetchProps, useFetch } from '../fetch.ts'
+import { renderLink } from '../render-link.ts'
 import { getRootContainer } from '../root.ts'
 
 import { renderPost } from './render-post.ts'
@@ -39,20 +40,29 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
     const value = result && !result.issues ? result.value : undefined
     // Validate that resolver output belongs to the requested permalink.
     const valid = value && (props.data.get() != null || !url || parseXPostId(url) === value.id)
-    container.replaceChildren(valid ? renderPost(value, protocols) : renderFallback(pending.get()))
+    container.replaceChildren(
+      valid ? renderPost(value, protocols) : renderFallback(pending.get(), url),
+    )
     return () => {
       for (const video of container.querySelectorAll('video')) video.pause()
     }
   })
 }
 
-function renderFallback(pending: boolean): HTMLElement {
+function renderFallback(pending: boolean, url: string | null): HTMLElement {
+  const permalink = url != null && parseXPostId(url) ? url : undefined
   return el(
     'article',
     pending ? { 'data-fallback': '', 'data-pending': '' } : { 'data-fallback': '' },
     el('header', { 'data-author': '' }, el('bdi', {}, 'X post')),
     el('p', { 'data-body': '' }, pending ? 'Loading this post…' : 'This post is unavailable.'),
-    pending ? null : el('footer', { 'data-footer': '' }, 'No saved post could be displayed.'),
+    pending
+      ? null
+      : el(
+          'footer',
+          { 'data-footer': '' },
+          permalink ? renderLink('View on X', permalink) : 'No saved post could be displayed.',
+        ),
   )
 }
 
