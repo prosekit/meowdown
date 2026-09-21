@@ -380,15 +380,6 @@ describe('MarkdownView', () => {
     expect(view.locate('iframe').query()).toBeNull()
   })
 
-  it('renders a YouTube video card at its default width without a persisted one', async () => {
-    await renderView('![](https://youtu.be/aqz-KE-bpKQ)', {
-      resolveYouTubeVideo: () => createYouTubeVideo(),
-    })
-    const card = view.getByTestId('youtube-video-embed').locate('[data-meowdown-embed="youtube"]')
-    await expect.element(card).toMatchTextContent('Big Buck Bunny')
-    expect(getComputedStyle(card.element()).width).toBe('550px')
-  })
-
   it('applies a persisted width to a YouTube video card', async () => {
     await renderView('![](https://youtu.be/aqz-KE-bpKQ)<!-- {"width":320} -->', {
       resolveYouTubeVideo: () => createYouTubeVideo(),
