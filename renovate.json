@@ -1,3 +1,9 @@
 {
-  "extends": ["github>ocavue/config-renovate"]
+  "extends": ["github>ocavue/config-renovate"],
+  "packageRules": [
+    {
+      "matchPackageNames": ["playwright"],
+      "enabled": false
+    }
+  ]
 }
