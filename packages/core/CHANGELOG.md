@@ -1,5 +1,11 @@
 # @meowdown/core
 
+## 0.74.1
+
+### Patch Changes
+
+- [#606](https://github.com/prosekit/meowdown/pull/606) [`e6b58eb`](https://github.com/prosekit/meowdown/commit/e6b58eb348b8c90e3b7bd02550717681f5e1f171) Thanks [@ocavue](https://github.com/ocavue)! - Fix a YouTube card collapsing in `MarkdownView` when the image has no persisted width.
+
 ## 0.74.0
 
 ### Minor Changes
