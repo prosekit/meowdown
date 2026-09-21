@@ -270,6 +270,11 @@ describe('X post fetch', () => {
     expect(error).not.toHaveBeenCalled()
   })
 
+  it('links the fallback to the post', async () => {
+    mountRemote(() => Promise.resolve(undefined))
+    await expect.element(post.getByRole('link', { name: 'View on X' })).toHaveAttribute('href', url)
+  })
+
   it('logs a rejected fetch and shows the fallback', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {})
     const element = mountRemote(() => Promise.reject(new Error('offline')))
