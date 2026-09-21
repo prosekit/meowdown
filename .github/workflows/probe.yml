@@ -1,0 +1,61 @@
+name: Probe
+
+on:
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ${{ matrix.config.runner }}
+    name: probe-${{ matrix.config.os }}-${{ matrix.config.browser }}-${{ matrix.config.label }}
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { os: mac, runner: macos-latest, browser: chromium, label: c153 }
+          - { os: mac, runner: macos-latest, browser: chromium, label: c151, revision: '1234' }
+          - { os: linux, runner: ubuntu-latest, browser: chromium, label: c153 }
+          - { os: linux, runner: ubuntu-latest, browser: chromium, label: c151, revision: '1234' }
+          - { os: windows, runner: windows-latest, browser: chromium, label: c153 }
+          - { os: mac, runner: macos-latest, browser: webkit, label: default }
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+
+      - name: Install
+        run: pnpm run test:install:${{ matrix.config.browser }}
+
+      - name: Install the previous Chromium build
+        if: ${{ matrix.config.revision }}
+        shell: bash
+        run: |
+          pnpm dlx playwright@1.62.1 install chromium --no-shell
+          node .github/scripts/find-chromium.mjs "${{ matrix.config.revision }}" >> "$GITHUB_ENV"
+
+      - name: Probe
+        shell: bash
+        run: pnpm vitest run --project '*-browser' zz-probe table-handle.test block-handle.test
+        env:
+          MEOWDOWN_TEST_BROWSER: ${{ matrix.config.browser }}
+          PROBE_RETRY: '0'
+          NO_COLOR: '1'
+
+      - name: Print probe output
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          echo "PROBE_CHROMIUM_PATH=${PROBE_CHROMIUM_PATH:-}"
+          for file in packages/*/probe-output/*.json; do
+            echo "=== ${file}"
+            cat "${file}"
+            echo
+          done

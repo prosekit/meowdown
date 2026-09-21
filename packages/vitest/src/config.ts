@@ -57,7 +57,7 @@ export function defineBrowserConfig({ name, groupOrder }: { name: string; groupO
       setupFiles,
       snapshotSerializers: ['@meowdown/vitest/custom-string-serializer'],
       sequence: { groupOrder },
-      retry: IS_BOT ? 3 : 0,
+      retry: process.env.PROBE_RETRY ? Number(process.env.PROBE_RETRY) : IS_BOT ? 3 : 0,
       fileParallelism: false,
       browser: {
         enabled: true,
@@ -72,6 +72,10 @@ export function defineBrowserConfig({ name, groupOrder }: { name: string; groupO
             // download two copies of Chromium anymore.
             // See https://playwright.dev/docs/browsers#chromium-new-headless-mode
             channel: browserName === 'chromium' ? 'chromium' : undefined,
+            executablePath: process.env.PROBE_CHROMIUM_PATH || undefined,
+            args: process.env.PROBE_CHROMIUM_ARGS
+              ? process.env.PROBE_CHROMIUM_ARGS.split(' ')
+              : undefined,
           },
           contextOptions: {
             reducedMotion: 'reduce',
