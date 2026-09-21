@@ -1,11 +1,16 @@
-import { LightboxFrame, LightboxVideo, type LightboxItem } from '@meowdown/react'
+import {
+  LightboxFrame,
+  LightboxVideo,
+  type LightboxFrameItem,
+  type LightboxVideoItem,
+} from '@meowdown/react'
 import type { MouseEvent } from 'react'
 
 export function DemoLightboxVideo({
   item,
   onClose,
 }: {
-  item: Exclude<LightboxItem, { type: 'image' }>
+  item: LightboxVideoItem | LightboxFrameItem
   onClose: () => void
 }) {
   // A click on the dimmed area around the player closes; one on the player
