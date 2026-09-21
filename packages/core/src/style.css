@@ -711,7 +711,11 @@
     max-width: 550px;
   }
 
-  .ProseMirror .md-image-view-preview:has(> .md-embed-resizable:not([data-width])) {
+  /* The card's poster is absolutely positioned, so nothing gives the
+   * shrink-to-fit preview an intrinsic width. `MarkdownView` renders the card
+   * without the resizable root and writes a persisted width as inline style. */
+  .ProseMirror .md-image-view-preview:has(> .md-embed-resizable:not([data-width])),
+  .ProseMirror .md-image-view-preview:has(> meowdown-embed-youtube:not([style])) {
     width: 550px;
   }
 
