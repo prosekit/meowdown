@@ -33,7 +33,14 @@ interface ViewInput {
   lastSelectionOrigin: string | null
 }
 
-async function runOnce(i: number, side: 'left' | 'right'): Promise<Sample> {
+async function runOnce(
+  i: number,
+  side: 'left' | 'right',
+  screenshotFirst = false,
+): Promise<Sample> {
+  // A failed attempt ends with a failure screenshot, and the retry starts
+  // right after it. Mimic that to see whether it slows the next click.
+  if (screenshotFirst) await page.screenshot({ save: false })
   using fixture = setupFixture({ extensionOptions: { markMode: 'hide' } })
   const { n } = fixture
   fixture.set(n.doc(n.paragraph('foo **bold** bar')))
@@ -155,4 +162,21 @@ describe('probe: pointer origin window', () => {
     )
     expect(samples.length).toBe(ITERATIONS * 2)
   })
+
+  it(
+    'collects click timings right after a screenshot',
+    { timeout: 600_000, retry: 0 },
+    async () => {
+      const samples: Sample[] = []
+      for (let i = 0; i < ITERATIONS; i++) {
+        samples.push(await runOnce(i, 'left', true))
+        samples.push(await runOnce(i, 'right', true))
+      }
+      await commands.writeFile(
+        `${OUTPUT_DIR}/pointer-origin-after-screenshot.json`,
+        JSON.stringify({ userAgent: navigator.userAgent, samples }),
+      )
+      expect(samples.length).toBe(ITERATIONS * 2)
+    },
+  )
 })
