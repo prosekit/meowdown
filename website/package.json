@@ -10,7 +10,7 @@
     "deploy:preview": "wrangler versions upload"
   },
   "dependencies": {
-    "@astrojs/react": "^6.0.6",
+    "@astrojs/react": "^7.0.0",
     "@base-ui/react": "^1.8.0",
     "@codemirror/commands": "^6.11.1",
     "@codemirror/lang-markdown": "^6.5.2",
