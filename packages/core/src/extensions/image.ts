@@ -214,23 +214,35 @@ function commitSnapshot(
   )
 }
 
+/**
+ * The live image mark views of each editor view, so {@link refreshImages} can
+ * reach them without a document change. Views register on construction and
+ * leave on destroy.
+ */
+const liveImageViews = new WeakMap<EditorView, Set<ImageMarkView>>()
+
 class ImageMarkView implements MarkView {
   readonly #dom: HTMLElement
   readonly #contentDOM: HTMLElement
   readonly #view: EditorView
-  #resolveImageUrl: ImageUrlResolver | undefined
+  readonly #getOptions: () => ImageOptions
   #resolveXPost: XPostResolver
   #mediaUrlProtocols: string[] | undefined
   #resolveYouTubeVideo: YouTubeVideoResolver
   #attrs: MdImageAttrs
+  #preview: HTMLElement | undefined
+  // The resolved URL the `<img>` preview shows; undefined for a post-embed
+  // card or when the resolver skipped the image.
+  #url: string | undefined
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
   #destroyed = false
 
-  constructor(mark: Mark, view: EditorView, options: ImageOptions) {
+  constructor(mark: Mark, view: EditorView, getOptions: () => ImageOptions) {
+    const options = getOptions()
     this.#attrs = mark.attrs as MdImageAttrs
     this.#view = view
-    this.#resolveImageUrl = options.resolveImageUrl
+    this.#getOptions = getOptions
     this.#resolveXPost = options.resolveXPost ?? defaultResolveXPost
     this.#mediaUrlProtocols = options.mediaUrlProtocols
     this.#resolveYouTubeVideo = options.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
@@ -245,13 +257,15 @@ class ImageMarkView implements MarkView {
       this.#contentDOM.setAttribute(name, value)
     }
 
-    const preview = this.#renderPreview()
-    if (preview) {
-      preview.contentEditable = 'false'
-      this.#dom.appendChild(preview)
-    }
-
     this.#dom.appendChild(this.#contentDOM)
+    this.#mountPreview()
+
+    let views = liveImageViews.get(view)
+    if (!views) {
+      views = new Set()
+      liveImageViews.set(view, views)
+    }
+    views.add(this)
   }
 
   get dom(): HTMLElement {
@@ -288,6 +302,38 @@ class ImageMarkView implements MarkView {
 
   destroy(): void {
     this.#destroyed = true
+    liveImageViews.get(this.#view)?.delete(this)
+  }
+
+  /**
+   * Re-resolve the image through the current `resolveImageUrl` and rebuild the
+   * preview only when the URL changed, so an unchanged image keeps its loaded
+   * `<img>`. A post-embed card never consults the resolver and is left alone.
+   */
+  refresh(): void {
+    if (matchEmbed(this.#attrs.src)) return
+    if (this.#resolveUrl() === this.#url) return
+    this.#preview?.remove()
+    this.#preview = undefined
+    this.#url = undefined
+    this.#resizableRoot = undefined
+    this.#image = undefined
+    this.#mountPreview()
+  }
+
+  #resolveUrl(): string | undefined {
+    return (this.#getOptions().resolveImageUrl ?? defaultResolveImageUrl)(this.#attrs.src)
+  }
+
+  /**
+   * Render the preview, if any, in front of the source.
+   */
+  #mountPreview(): void {
+    const preview = this.#renderPreview()
+    if (!preview) return
+    preview.contentEditable = 'false'
+    this.#dom.insertBefore(preview, this.#contentDOM)
+    this.#preview = preview
   }
 
   /**
@@ -306,8 +352,9 @@ class ImageMarkView implements MarkView {
       return wrapper
     }
 
-    const url = (this.#resolveImageUrl ?? defaultResolveImageUrl)(src)
+    const url = this.#resolveUrl()
     if (!url) return undefined
+    this.#url = url
     wrapper.dataset.testid = 'image-preview'
     wrapper.appendChild(this.#buildResizableImage(url))
     return wrapper
@@ -455,6 +502,21 @@ export function defineImage(
 ): PlainExtension {
   return defineMarkView({
     name: 'mdImage' satisfies MarkName,
-    constructor: (mark, view) => new ImageMarkView(mark, view, getOptions?.(view.state) ?? {}),
+    constructor: (mark, view) => {
+      return new ImageMarkView(mark, view, () => getOptions?.(view.state) ?? {})
+    },
   }) as PlainExtension
+}
+
+/**
+ * Re-resolve every rendered image in `view` through the editor's current
+ * `resolveImageUrl`, rebuilding only the previews whose URL changed. The
+ * document, selection, and undo history are untouched. Hosts call this when
+ * data a stable resolver consults changes out of band, such as an attachment
+ * catalog that finishes loading after the document rendered.
+ */
+export function refreshImages(view: EditorView): void {
+  for (const imageView of liveImageViews.get(view) ?? []) {
+    imageView.refresh()
+  }
 }
