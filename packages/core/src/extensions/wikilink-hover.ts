@@ -1,10 +1,10 @@
 import type { PlainExtension } from '@prosekit/core'
 import { PluginKey } from '@prosekit/pm/state'
 
-import { defineMarkHoverHandler } from './mark-hover.ts'
+import { defineMarkHoverHandler, type HoverTracker } from './mark-hover.ts'
 import { findWikilinkAt, findWikilinkForElement, type WikilinkHit } from './wikilink-click.ts'
 
-const wikilinkHoverKey = new PluginKey('meowdown-wikilink-hover')
+const wikilinkHoverKey = new PluginKey<HoverTracker>('meowdown-wikilink-hover')
 
 /**
  * Delay before a cold hover enters, in ms.

@@ -2,6 +2,7 @@ import { Popover } from '@base-ui/react/popover'
 import {
   defineLinkEditKeymap,
   defineLinkHoverHandler,
+  dismissLinkHover,
   getLinkText,
   getVirtualElementFromRange,
   isLinkTextForHref,
@@ -19,9 +20,18 @@ import {
 } from '@meowdown/core'
 import { useEditor, useExtension } from '@prosekit/react'
 import { Globe2Icon, PencilIcon, SparklesIcon, UnlinkIcon } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 
 import { CopyButton } from './copy-button.tsx'
+import { getLinkMenuView, LINK_MENU_IDLE, reduceLinkMenu } from './link-menu-state.ts'
 import styles from './link-menu.module.css'
 
 export interface LinkMenuProps {
@@ -398,31 +408,18 @@ export function LinkMenu({
   readOnly = false,
 }: LinkMenuProps): ReactNode {
   const editor: TypedEditor = useEditor<EditorExtension>()
-  const [infoOpen, setInfoOpen] = useState(false)
-  const [editOpen, setEditOpen] = useState(false)
-  const [link, setLink] = useState<LinkUnit | undefined>()
-  const [edit, setEdit] = useState<LinkEditOptions | undefined>()
+  const [state, dispatch] = useReducer(reduceLinkMenu, LINK_MENU_IDLE)
   const isPointerOverPopupRef = useRef(false)
 
-  const linkHoverExtension = useMemo(() => {
-    return defineLinkHoverHandler(
-      (nextHit) => {
-        setInfoOpen(nextHit != null)
-        if (nextHit) setLink(nextHit.payload)
-      },
-      { canLeave: () => !isPointerOverPopupRef.current },
-    )
-  }, [])
+  const [linkHoverExtension] = useState(() => {
+    return defineLinkHoverHandler((hit) => dispatch({ type: 'hover', link: hit?.payload }), {
+      canLeave: () => !isPointerOverPopupRef.current,
+    })
+  })
   useExtension(linkHoverExtension)
 
   const linkEditExtension = useMemo(() => {
-    return readOnly
-      ? null
-      : defineLinkEditKeymap((options) => {
-          setEdit(options)
-          setEditOpen(true)
-          setInfoOpen(false)
-        })
+    return readOnly ? null : defineLinkEditKeymap((edit) => dispatch({ type: 'edit', edit }))
   }, [readOnly])
   useExtension(linkEditExtension)
 
@@ -430,20 +427,20 @@ export function LinkMenu({
     isPointerOverPopupRef.current = over
   }, [])
 
-  const closeInfo = useCallback(() => {
+  const close = useCallback(() => {
     isPointerOverPopupRef.current = false
-    setInfoOpen(false)
-  }, [])
+    dismissLinkHover(editor.state)
+    dispatch({ type: 'close' })
+  }, [editor])
 
-  const closeEdit = useCallback(() => {
-    setEditOpen(false)
-    closeInfo()
-  }, [closeInfo])
+  const view = getLinkMenuView(state)
+  const edit = view?.kind === 'edit' ? view.edit : undefined
+  const link = view?.kind === 'preview' ? view.link : undefined
 
   const handleEditRemove = useCallback(() => {
     editor.commands.removeLink()
-    closeEdit()
-  }, [editor, closeEdit])
+    close()
+  }, [editor, close])
 
   const handleEditSubmit = useCallback(
     (text: string, href: string) => {
@@ -459,9 +456,9 @@ export function LinkMenu({
       } else {
         editor.commands.insertLink({ text, href })
       }
-      closeEdit()
+      close()
     },
-    [edit, editor, closeEdit],
+    [edit, editor, close],
   )
 
   const mutable = link != null && !readOnly && link.form !== 'reference'
@@ -471,31 +468,27 @@ export function LinkMenu({
   const editLink = useCallback(() => {
     if (!link) return
     selectLinkUnit(editor, link)
-    setEdit({
-      from: link.unit.from,
-      to: link.unit.to,
-      link,
-      text: linkText,
+    dispatch({
+      type: 'edit',
+      edit: { from: link.unit.from, to: link.unit.to, link, text: linkText },
     })
-    setEditOpen(true)
-    closeInfo()
-  }, [link, editor, linkText, closeInfo])
+  }, [link, editor, linkText])
 
   const removeLink = useCallback(() => {
     if (!link) return
     selectLinkUnit(editor, link)
     editor.commands.removeLink()
-    closeInfo()
-  }, [link, editor, closeInfo])
+    close()
+  }, [link, editor, close])
 
   const handleUseTitle = useMemo(() => {
     if (!link || !mutable || !isLinkTextForHref(linkText, link.href)) return
     return (title: string) => {
       selectLinkUnit(editor, link)
       editor.commands.updateLink({ text: title })
-      closeInfo()
+      close()
     }
-  }, [link, editor, closeInfo, linkText, mutable])
+  }, [link, editor, close, linkText, mutable])
 
   const previewState = useLinkPreview(link?.href, resolveLinkPreview)
   const range = edit ? (edit.link?.text ?? edit) : link?.text
@@ -504,25 +497,20 @@ export function LinkMenu({
     return getVirtualElementFromRange(editor.view, range)
   }, [range, editor])
 
-  const editing = edit != null && !readOnly
-
   return (
     <LinkPopover
       anchor={anchor}
-      open={editing ? editOpen : infoOpen}
-      onClose={editing ? closeEdit : closeInfo}
+      open={state.kind === 'preview' || state.kind === 'edit'}
+      onClose={close}
       onCloseComplete={() => {
-        if (editing) {
-          setEdit(undefined)
-          editor.focus()
-        } else if (!infoOpen) {
-          setLink(undefined)
-        }
+        if (edit) editor.focus()
+        dispatch({ type: 'closed' })
       }}
       onPopupHover={handlePointerHover}
     >
-      {editing ? (
+      {edit ? (
         <LinkEditContent
+          key={`${edit.from}:${edit.to}`}
           edit={edit}
           resolveLinkPreview={resolveLinkPreview}
           onRemove={edit.link ? handleEditRemove : undefined}

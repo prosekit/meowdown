@@ -8,8 +8,26 @@ export interface MarkHoverHit<Payload> {
   element: HTMLElement
 }
 
+/**
+ * The hover state machine of one editor, stored as the plugin state.
+ */
+export interface HoverTracker {
+  readonly handleOver: (view: EditorView, event: MouseEvent) => void
+  readonly handleOut: (event: MouseEvent) => void
+  readonly handlePointerDown: (event: PointerEvent) => void
+  readonly handleMouseDown: (event: MouseEvent) => boolean
+  readonly handleClick: (view: EditorView, event: MouseEvent) => boolean
+  readonly update: (view: EditorView) => void
+  /**
+   * The UI opened by this hover was dismissed by the user. The mark under the
+   * pointer stays silent until the pointer leaves it. A tap still enters.
+   */
+  readonly dismiss: () => void
+  readonly destroy: () => void
+}
+
 export interface MarkHoverConfig<Payload> {
-  key: PluginKey
+  key: PluginKey<HoverTracker>
   /**
    * The hovered target must sit inside this selector, tested via `closest`.
    */
@@ -57,32 +75,55 @@ export interface MarkHoverConfig<Payload> {
   canLeave?: () => boolean
 }
 
-/**
- * Delegate hover tracking for a rendered mark to the editor root.
- *
- * Movement within a mark is de-duplicated. The active hit is also revalidated
- * after every editor update, so deleting, replacing, or rewriting a hovered
- * mark emits leave even when the pointer itself never moves. Destroying the
- * editor or removing the extension emits leave as well.
- *
- * With `tap`, a touch tap enters too. The browser is the tap recognizer:
- * only a recognized stationary single-finger tap synthesizes the
- * compatibility mouse events and the trailing `click`; scrolls, drags,
- * long-presses, and multi-finger gestures never produce them.
- */
-export function defineMarkHoverHandler<Payload>(config: MarkHoverConfig<Payload>): PlainExtension {
-  const { openDelay, closeDelay, tap } = config
+type HoverPhase<Payload> =
+  | { readonly kind: 'idle' }
+  /**
+   * The pointer rests on `element`; the open delay is running.
+   */
+  | { readonly kind: 'pending'; readonly element: HTMLElement; readonly view: EditorView }
+  /**
+   * Enter was reported and the pointer is on the mark.
+   */
+  | { readonly kind: 'active'; readonly hit: MarkHoverHit<Payload> }
+  /**
+   * Enter was reported and the pointer left; the close delay is running.
+   */
+  | { readonly kind: 'leaving'; readonly hit: MarkHoverHit<Payload> }
+  /**
+   * The user dismissed the UI; `element` stays silent until the pointer
+   * leaves it.
+   */
+  | { readonly kind: 'dismissed'; readonly element: HTMLElement }
 
+const IDLE = { kind: 'idle' } as const
+
+function getHit<Payload>(phase: HoverPhase<Payload>): MarkHoverHit<Payload> | undefined {
+  return phase.kind === 'active' || phase.kind === 'leaving' ? phase.hit : undefined
+}
+
+/**
+ * The tracked element the pointer is on, if any.
+ */
+function getPointerElement<Payload>(phase: HoverPhase<Payload>): HTMLElement | undefined {
+  switch (phase.kind) {
+    case 'pending':
+    case 'dismissed':
+      return phase.element
+    case 'active':
+      return phase.hit.element
+    default:
+      return undefined
+  }
+}
+
+function createHoverTracker<Payload>(config: MarkHoverConfig<Payload>): HoverTracker {
+  const { openDelay, closeDelay } = config
+
+  let phase: HoverPhase<Payload> = IDLE
   /**
-   * What `onHoverChange` last received, while that is a hit.
+   * Runs exactly while the phase is `pending` or `leaving`.
    */
-  let emitted: MarkHoverHit<Payload> | undefined
   let timer: ReturnType<typeof setTimeout> | undefined
-  /**
-   * The element of a scheduled enter, `null` for a scheduled leave,
-   * `undefined` when nothing is scheduled.
-   */
-  let scheduledElement: HTMLElement | null | undefined
   /**
    * The type of the pointer that spawned the current event sequence:
    * compatibility mouse events carry no pointer type of their own.
@@ -99,138 +140,196 @@ export function defineMarkHoverHandler<Payload>(config: MarkHoverConfig<Payload>
       : config.findPayloadAt(view.state, view.posAtDOM(element, 0))
   }
 
-  const cancel = (): void => {
+  /**
+   * The only transition. It restarts the timer the next phase needs and
+   * reports a change of the hit element.
+   */
+  const go = (next: HoverPhase<Payload>): void => {
     clearTimeout(timer)
-    scheduledElement = undefined
+    const previousHit = getHit(phase)
+    phase = next
+    if (next.kind === 'pending') timer = setTimeout(finishOpen, openDelay)
+    if (next.kind === 'leaving') timer = setTimeout(finishLeave, closeDelay)
+    const hit = getHit(next)
+    if (hit?.element !== previousHit?.element) config.onHoverChange(hit)
   }
 
-  const emit = (hit: MarkHoverHit<Payload> | undefined): void => {
-    cancel()
-    if (!hit && !emitted) return
-    emitted = hit
-    config.onHoverChange(hit)
+  const finishOpen = (): void => {
+    if (phase.kind !== 'pending') return
+    const { element, view } = phase
+    // The mark may be gone or rewritten by the time the open delay elapses.
+    const payload = element.isConnected ? findPayloadForElement(view, element) : undefined
+    go(payload == null ? IDLE : { kind: 'active', hit: { payload, element } })
   }
 
-  const scheduleLeave = (): void => {
-    cancel()
-    scheduledElement = null
-    const fire = (): void => {
-      if (config.canLeave?.() === false) {
-        timer = setTimeout(fire, closeDelay)
-        return
-      }
-      emit(undefined)
-    }
-    timer = setTimeout(fire, closeDelay)
+  const finishLeave = (): void => {
+    if (phase.kind !== 'leaving') return
+    go(config.canLeave?.() === false ? phase : IDLE)
   }
 
-  const enter = (view: EditorView, element: HTMLElement): void => {
-    const payload = findPayloadForElement(view, element)
-    if (payload == null) return
-    // Switching from another mark, or returning during the leave grace,
-    // skips the open delay.
-    if (emitted) {
-      emit({ payload, element })
-      return
-    }
-    cancel()
-    scheduledElement = element
-    timer = setTimeout(() => {
-      // The mark may be gone or rewritten by the time the open delay elapses.
-      const fresh = element.isConnected ? findPayloadForElement(view, element) : undefined
-      if (fresh == null) {
-        cancel()
-        return
-      }
-      emit({ payload: fresh, element })
-    }, openDelay)
+  const startPending = (view: EditorView, element: HTMLElement): void => {
+    if (findPayloadForElement(view, element) == null) return
+    go({ kind: 'pending', element, view })
   }
 
   const handleOver = (view: EditorView, event: MouseEvent): void => {
     const element = findClosestMark(event.target)
     if (!element || !view.dom.contains(element)) return
-    if (element === emitted?.element) {
-      // Back on the active mark: void any pending leave.
-      if (scheduledElement === null) cancel()
-      return
+    switch (phase.kind) {
+      case 'idle':
+        return startPending(view, element)
+      case 'pending':
+      case 'dismissed':
+        if (element !== phase.element) startPending(view, element)
+        return
+      case 'active':
+      case 'leaving': {
+        // Switching from another mark, or returning during the leave grace,
+        // skips the open delay.
+        if (element === phase.hit.element) return go({ kind: 'active', hit: phase.hit })
+        const payload = findPayloadForElement(view, element)
+        if (payload != null) go({ kind: 'active', hit: { payload, element } })
+        return
+      }
     }
-    if (element === scheduledElement) return
-    enter(view, element)
   }
 
   const handleOut = (event: MouseEvent): void => {
-    const active = emitted?.element ?? scheduledElement
-    if (!active) return
+    const element = getPointerElement(phase)
+    if (!element) return
     // `mouseout` also fires when moving onto a child of the same mark; ignore it.
     const related = event.relatedTarget
-    if (related instanceof Node && active.contains(related)) return
-    if (emitted) scheduleLeave()
-    else cancel()
+    if (related instanceof Node && element.contains(related)) return
+    go(phase.kind === 'active' ? { kind: 'leaving', hit: phase.hit } : IDLE)
   }
 
+  const handlePointerDown = (event: PointerEvent): void => {
+    lastPointerType = event.pointerType
+  }
+
+  // Cancelling a tap's compatibility `mousedown` suppresses focus,
+  // caret placement, and the software keyboard, and returning
+  // `true` keeps ProseMirror's own mousedown handling (and with it
+  // `handleClick`) away from the tap.
+  const handleMouseDown = (event: MouseEvent): boolean => {
+    if (lastPointerType !== 'touch' || !findClosestMark(event.target)) return false
+    event.preventDefault()
+    return true
+  }
+
+  // The tap's activation event. On the mark, consume it either
+  // way: the caret was already suppressed, and a native `<a>` must
+  // not navigate. Elsewhere in the editor, a tap dismisses.
+  const handleClick = (view: EditorView, event: MouseEvent): boolean => {
+    if (lastPointerType !== 'touch') return false
+    const element = findClosestMark(event.target)
+    if (!element || !view.dom.contains(element)) {
+      go(IDLE)
+      return false
+    }
+    event.preventDefault()
+    const payload = findPayloadForElement(view, element)
+    if (payload != null) go({ kind: 'active', hit: { payload, element } })
+    return true
+  }
+
+  const update = (view: EditorView): void => {
+    if (phase.kind === 'dismissed') {
+      if (!view.dom.contains(phase.element)) go(IDLE)
+      return
+    }
+    if (phase.kind !== 'active' && phase.kind !== 'leaving') return
+    const { element } = phase.hit
+    if (!element.isConnected || !view.dom.contains(element)) return go(IDLE)
+    const payload = findPayloadForElement(view, element)
+    if (payload == null || !config.isSamePayload(phase.hit.payload, payload)) return go(IDLE)
+    // A refresh is not a transition: it must not restart the leave grace.
+    phase = { kind: phase.kind, hit: { payload, element } }
+  }
+
+  const dismiss = (): void => {
+    switch (phase.kind) {
+      case 'pending':
+        return go({ kind: 'dismissed', element: phase.element })
+      case 'active':
+        return go({ kind: 'dismissed', element: phase.hit.element })
+      case 'leaving':
+        return go(IDLE)
+    }
+  }
+
+  return {
+    handleOver,
+    handleOut,
+    handlePointerDown,
+    handleMouseDown,
+    handleClick,
+    update,
+    dismiss,
+    destroy: () => go(IDLE),
+  }
+}
+
+/**
+ * Delegate hover tracking for a rendered mark to the editor root.
+ *
+ * Movement within a mark is de-duplicated. The active hit is also revalidated
+ * after every editor update, so deleting, replacing, or rewriting a hovered
+ * mark emits leave even when the pointer itself never moves. Destroying the
+ * editor or removing the extension emits leave as well.
+ *
+ * With `tap`, a touch tap enters too. The browser is the tap recognizer:
+ * only a recognized stationary single-finger tap synthesizes the
+ * compatibility mouse events and the trailing `click`; scrolls, drags,
+ * long-presses, and multi-finger gestures never produce them.
+ *
+ * The tracker lives in the plugin state, so `key.getState(state)?.dismiss()`
+ * reaches the one tracking that editor.
+ */
+export function defineMarkHoverHandler<Payload>(config: MarkHoverConfig<Payload>): PlainExtension {
+  const { key } = config
+
   return definePlugin(
-    new Plugin({
-      key: config.key,
+    new Plugin<HoverTracker>({
+      key,
+      state: {
+        init: () => createHoverTracker(config),
+        apply: (_tr, tracker) => tracker,
+      },
       props: {
         handleDOMEvents: {
           mouseover: (view, event) => {
-            handleOver(view, event)
+            key.getState(view.state)?.handleOver(view, event)
             return false
           },
-          mouseout: (_view, event) => {
-            handleOut(event)
+          mouseout: (view, event) => {
+            key.getState(view.state)?.handleOut(event)
             return false
           },
-          ...(tap && {
-            pointerdown: (_view, event) => {
-              lastPointerType = event.pointerType
+          ...(config.tap && {
+            pointerdown: (view, event) => {
+              key.getState(view.state)?.handlePointerDown(event)
               return false
             },
-            // Cancelling a tap's compatibility `mousedown` suppresses focus,
-            // caret placement, and the software keyboard, and returning
-            // `true` keeps ProseMirror's own mousedown handling (and with it
-            // `handleClick`) away from the tap.
-            mousedown: (_view, event) => {
-              if (lastPointerType !== 'touch' || !findClosestMark(event.target)) {
-                return false
-              }
-              event.preventDefault()
-              return true
+            mousedown: (view, event) => {
+              return key.getState(view.state)?.handleMouseDown(event) ?? false
             },
-            // The tap's activation event. On the mark, consume it either
-            // way: the caret was already suppressed, and a native `<a>` must
-            // not navigate. Elsewhere in the editor, a tap dismisses.
             click: (view, event) => {
-              if (lastPointerType !== 'touch') return false
-              const element = findClosestMark(event.target)
-              if (!element || !view.dom.contains(element)) {
-                emit(undefined)
-                return false
-              }
-              event.preventDefault()
-              const payload = findPayloadForElement(view, element)
-              if (payload != null) emit({ payload, element })
-              return true
+              return key.getState(view.state)?.handleClick(view, event) ?? false
             },
           }),
         },
       },
-      view: () => ({
-        update: (view) => {
-          if (!emitted) return
-          if (!emitted.element.isConnected || !view.dom.contains(emitted.element)) {
-            emit(undefined)
-            return
-          }
-          const payload = findPayloadForElement(view, emitted.element)
-          if (payload == null || !config.isSamePayload(emitted.payload, payload)) {
-            emit(undefined)
-            return
-          }
-          emitted = { ...emitted, payload }
-        },
-        destroy: () => emit(undefined),
-      }),
+      view: (view) => {
+        // `reconfigure` keeps this tracker but rebuilds plugin views, and
+        // `EditorState.create` makes a new one: each view owns the tracker
+        // it was created with.
+        const tracker = key.getState(view.state)
+        return {
+          update: (view) => tracker?.update(view),
+          destroy: () => tracker?.destroy(),
+        }
+      },
     }),
   )
 }

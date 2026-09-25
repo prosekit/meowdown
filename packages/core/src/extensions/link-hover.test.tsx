@@ -1,10 +1,10 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
 import { setupFixture } from '../testing/index.ts'
 
 import { updateEditorConfig } from './editor-config.ts'
-import { defineLinkHoverHandler, type LinkHoverHandler } from './link-hover.ts'
+import { defineLinkHoverHandler, dismissLinkHover, type LinkHoverHandler } from './link-hover.ts'
 
 const markdownLink = page.locate('.ProseMirror .md-link')
 
@@ -86,6 +86,77 @@ describe('Markdown-link hover callback', () => {
     expect(onHoverChange.mock.calls.map(([hit]) => hit?.payload.href)).toEqual([
       'https://example.com',
       undefined,
+    ])
+  })
+})
+
+describe('dismissLinkHover', () => {
+  // Only the timers the hover handler schedules are faked. Playwright's
+  // pointer actions poll the page with `requestAnimationFrame`, which stays real.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('cancels a pending enter while the pointer stays', async () => {
+    const onHoverChange = vi.fn<LinkHoverHandler>()
+    using fixture = applyHoverable('[Docs](https://example.com)', onHoverChange)
+
+    await markdownLink.hover()
+    vi.advanceTimersByTime(100)
+    dismissLinkHover(fixture.state)
+    vi.advanceTimersByTime(1000)
+
+    expect(onHoverChange).not.toHaveBeenCalled()
+  })
+
+  it('leaves an entered link and keeps it silent while the pointer stays', async () => {
+    const onHoverChange = vi.fn<LinkHoverHandler>()
+    using fixture = applyHoverable('[Docs](https://example.com)', onHoverChange)
+
+    await markdownLink.hover()
+    vi.advanceTimersByTime(300)
+    dismissLinkHover(fixture.state)
+    vi.advanceTimersByTime(1000)
+
+    expect(onHoverChange.mock.calls.map(([hit]) => hit?.payload.href)).toEqual([
+      'https://example.com',
+      undefined,
+    ])
+  })
+
+  it('enters again after the pointer leaves and returns', async () => {
+    const onHoverChange = vi.fn<LinkHoverHandler>()
+    using fixture = applyHoverable('[Docs](https://example.com)', onHoverChange)
+
+    await markdownLink.hover()
+    vi.advanceTimersByTime(100)
+    dismissLinkHover(fixture.state)
+    await markdownLink.unhover()
+    await markdownLink.hover()
+    vi.advanceTimersByTime(299)
+    expect(onHoverChange).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(1)
+
+    expect(onHoverChange.mock.calls.map(([hit]) => hit?.payload.href)).toEqual([
+      'https://example.com',
+    ])
+  })
+
+  it('lets a tap enter a dismissed link', async () => {
+    const onHoverChange = vi.fn<LinkHoverHandler>()
+    using fixture = applyHoverable('[Docs](https://example.com)', onHoverChange)
+
+    await markdownLink.hover()
+    vi.advanceTimersByTime(100)
+    dismissLinkHover(fixture.state)
+    dispatchTap(markdownLink.element())
+
+    expect(onHoverChange.mock.calls.map(([hit]) => hit?.payload.href)).toEqual([
+      'https://example.com',
     ])
   })
 })
