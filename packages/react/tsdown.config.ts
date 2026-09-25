@@ -1,3 +1,5 @@
+import pluginBabel from '@rolldown/plugin-babel'
+import { reactCompilerPreset } from '@vitejs/plugin-react'
 import { defineConfig } from 'tsdown'
 
 export default defineConfig({
@@ -11,4 +13,5 @@ export default defineConfig({
       generateScopedName: 'meow_[local]_[hash]',
     },
   },
+  plugins: [pluginBabel({ presets: [reactCompilerPreset()] })],
 })
