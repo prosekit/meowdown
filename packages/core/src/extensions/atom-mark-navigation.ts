@@ -258,11 +258,10 @@ function createCaretSnapPlugin(marks: AtomMarks): Plugin {
       if (markNames.length === 0) return null
       const selection = newState.selection
       if (!isTextSelection(selection)) return null
-      const isPointer = hasPointerSelectionTransaction(transactions)
       if (!selection.empty) {
         // Only a dragged range grows to whole units. Find deliberately selects
         // text inside a unit's source so it can highlight and replace it.
-        if (!isPointer) return null
+        if (!hasPointerSelectionTransaction(transactions)) return null
         const from =
           getMarkRangeStrictlyAround(newState, selection.from, markNames)?.from ?? selection.from
         const to = getMarkRangeStrictlyAround(newState, selection.to, markNames)?.to ?? selection.to
@@ -273,6 +272,7 @@ function createCaretSnapPlugin(marks: AtomMarks): Plugin {
       }
       const range = getMarkRangeStrictlyAround(newState, selection.head, markNames)
       if (!range) return null
+      const isPointer = hasPointerSelectionTransaction(transactions)
       const head = getUnitEdge(range, oldState.selection.head, selection.head, isPointer)
       return newState.tr.setSelection(TextSelection.create(newState.doc, head))
     },

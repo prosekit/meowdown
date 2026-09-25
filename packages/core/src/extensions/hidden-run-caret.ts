@@ -39,8 +39,8 @@ function createSnapPlugin(): Plugin {
       if (getMarkMode(newState) !== 'hide') return null
       const selection = newState.selection
       if (!isTextSelection(selection)) return null
-      const isPointer = hasPointerSelectionTransaction(transactions)
       if (selection.empty) {
+        const isPointer = hasPointerSelectionTransaction(transactions)
         const next = getRestPosition(newState, oldState.selection.head, selection.head, isPointer)
         if (next === selection.head) return null
         return newState.tr.setSelection(TextSelection.create(newState.doc, next))

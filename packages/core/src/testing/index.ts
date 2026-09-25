@@ -7,6 +7,7 @@ import { formatHTML } from 'diffable-html-snapshot'
 
 import type { EditorExtensionOptions } from '../extensions/extension.ts'
 import { defineVirtualCaret } from '../extensions/virtual-caret.ts'
+import { resetInputModalityForTest } from '../utils/input-modality.ts'
 
 import { setupHeadlessFixture } from './headless.ts'
 
@@ -39,6 +40,7 @@ export function setupFixture({
   extensionOptions,
   containerId = 'test-container',
 }: SetupFixtureOptions = {}) {
+  resetInputModalityForTest()
   const headless = setupHeadlessFixture(extensionOptions)
   const { editor, n, m } = headless
 

@@ -1,6 +1,6 @@
 import { TextSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
-import { userEvent } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { findText } from '../testing/find-text.ts'
@@ -14,6 +14,8 @@ import {
 
 import type { ImageOptions } from './image.ts'
 import type { MarkMode } from './mark-mode.ts'
+
+const pmRoot = page.locate('.ProseMirror')
 
 const YOUTUBE = '![](https://www.youtube.com/watch?v=aqz-KE-bpKQ)'
 const TWEET = '![](https://twitter.com/jack/status/20)'
@@ -42,18 +44,24 @@ function setup(mode: MarkMode, paragraphs: string[]): Fixture {
 }
 
 // Drop the caret at `pos` through a dispatched transaction: what a host
-// command, an undo remap or (with `isPointer`) the browser's own hit testing
-// does. `pointer` is the meta prosemirror-view puts on pointer selections.
-function dropCaret(fixture: Fixture, pos: number, isPointer = false): void {
-  const tr = fixture.state.tr.setSelection(TextSelection.create(fixture.doc, pos))
-  fixture.view.dispatch(isPointer ? tr.setMeta('pointer', true) : tr)
+// command, an undo remap or, after `pressEditor`, the browser's own hit
+// testing does.
+function dropCaret(fixture: Fixture, pos: number): void {
+  fixture.view.dispatch(fixture.state.tr.setSelection(TextSelection.create(fixture.doc, pos)))
 }
 
-// Drop a range selection the same way, from `anchor` to `head`. A drag arrives
-// exactly like this, `pointer` meta included.
-function dropRange(fixture: Fixture, anchor: number, head: number, isPointer = false): void {
-  const tr = fixture.state.tr.setSelection(TextSelection.create(fixture.doc, anchor, head))
-  fixture.view.dispatch(isPointer ? tr.setMeta('pointer', true) : tr)
+// Drop a range selection the same way, from `anchor` to `head`. After
+// `pressEditor`, a drag arrives exactly like this.
+function dropRange(fixture: Fixture, anchor: number, head: number): void {
+  fixture.view.dispatch(
+    fixture.state.tr.setSelection(TextSelection.create(fixture.doc, anchor, head)),
+  )
+}
+
+// Press the pointer inside the editor, so the selections dropped next read as
+// pointer-made until a key is pressed.
+async function pressEditor(): Promise<void> {
+  await userEvent.click(pmRoot, { position: { x: 1, y: 1 } })
 }
 
 async function walkKey(fixture: Fixture, key: string, times: number): Promise<string> {
@@ -446,12 +454,13 @@ describe('caret snapping out of hidden atom source', () => {
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ┃[[Aaa]] here"`)
   })
 
-  it('focus: a pointer caret inside the source takes the edge it landed nearest', () => {
+  it('focus: a pointer caret inside the source takes the edge it landed nearest', async () => {
     using fixture = setup('focus', ['see [[Aaa]] here'])
-    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 1, true)
+    await pressEditor()
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 1)
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ┃[[Aaa]] here"`)
 
-    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 6, true)
+    dropCaret(fixture, findText(fixture.doc, '[[Aaa]]') + 6)
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see [[Aaa]]┃ here"`)
   })
 
@@ -549,34 +558,33 @@ describe('caret snapping out of hidden atom source', () => {
 })
 
 describe('dragged selections growing to whole atom units', () => {
-  it('focus: a drag ending inside the source swallows the unit whole', () => {
+  it('focus: a drag ending inside the source swallows the unit whole', async () => {
     using fixture = setup('focus', ['see [[Aaa]] here'])
-    dropRange(fixture, 1, findText(fixture.doc, '[[Aaa]]') + 4, true)
+    await pressEditor()
+    dropRange(fixture, 1, findText(fixture.doc, '[[Aaa]]') + 4)
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"❰see [[Aaa]]❱ here"`)
   })
 
-  it('focus: a drag starting inside the source swallows the unit whole', () => {
+  it('focus: a drag starting inside the source swallows the unit whole', async () => {
     using fixture = setup('focus', ['see [[Aaa]] here'])
-    dropRange(
-      fixture,
-      findText(fixture.doc, '[[Aaa]]') + 4,
-      findText(fixture.doc, ' here') + 5,
-      true,
-    )
+    await pressEditor()
+    dropRange(fixture, findText(fixture.doc, '[[Aaa]]') + 4, findText(fixture.doc, ' here') + 5)
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Aaa]] here❱"`)
   })
 
-  it('focus: a backwards drag keeps its direction while growing', () => {
+  it('focus: a backwards drag keeps its direction while growing', async () => {
     using fixture = setup('focus', ['see [[Aaa]] here'])
+    await pressEditor()
     const head = findText(fixture.doc, '[[Aaa]]') + 4
-    dropRange(fixture, findText(fixture.doc, ' here') + 5, head, true)
+    dropRange(fixture, findText(fixture.doc, ' here') + 5, head)
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"see ❰[[Aaa]] here❱"`)
     expect(fixture.state.selection.head).toBe(findText(fixture.doc, '[[Aaa]]'))
   })
 
   it('focus: typing over a drag that cut the source keeps the unit whole', async () => {
     using fixture = setup('focus', ['see [[Aaa]] here'])
-    dropRange(fixture, 1, findText(fixture.doc, '[[Aaa]]') + 4, true)
+    await pressEditor()
+    dropRange(fixture, 1, findText(fixture.doc, '[[Aaa]]') + 4)
     await userEvent.keyboard('X')
     expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
       """
@@ -586,9 +594,10 @@ describe('dragged selections growing to whole atom units', () => {
     `)
   })
 
-  it('focus: a drag inside plain text is left alone', () => {
+  it('focus: a drag inside plain text is left alone', async () => {
     using fixture = setup('focus', ['see [[Aaa]] here'])
-    dropRange(fixture, 1, 3, true)
+    await pressEditor()
+    dropRange(fixture, 1, 3)
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"❰se❱e [[Aaa]] here"`)
   })
 
@@ -598,9 +607,10 @@ describe('dragged selections growing to whole atom units', () => {
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"❰see [[Aa❱a]] here"`)
   })
 
-  it('focus: a drag ending inside an image source swallows the image whole', () => {
+  it('focus: a drag ending inside an image source swallows the image whole', async () => {
     using fixture = setup('focus', ['see ![a](one.png) here'])
-    dropRange(fixture, 1, findText(fixture.doc, '![a](one.png)') + 5, true)
+    await pressEditor()
+    dropRange(fixture, 1, findText(fixture.doc, '![a](one.png)') + 5)
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"❰see ![a](one.png)❱ here"`)
   })
 })
