@@ -634,12 +634,19 @@ export function ProseKitEditor({
     }
   }, [editor, frontmatter, hasSelectionMenu, openSelectionMenu])
 
+  const mount = useCallback(
+    (element: HTMLDivElement | null) => {
+      return editor.mount(element)
+    },
+    [editor],
+  )
+
   return (
     <ProseKit editor={editor}>
       {/* Before the editor element, so a document height change below the
           caret cannot move the layer. */}
       <VirtualCaret />
-      <div ref={editor.mount}></div>
+      <div ref={mount}></div>
       <EditorExtensions
         config={config}
         searchQuery={searchQuery}
