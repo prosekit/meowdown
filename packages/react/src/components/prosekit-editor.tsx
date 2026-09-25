@@ -5,6 +5,7 @@ import {
   getTextblockDisplayText,
   isNodeOfType,
   markdownToDoc,
+  refreshImages as refreshImageViews,
   type AcceptPendingReplacementOptions,
   type EditorConfig,
   type ExitBoundaryHandler,
@@ -560,9 +561,15 @@ export function ProseKitEditor({
     function setMarkdown(markdown: string): void {
       setState(markdown)
     }
+    function refreshImages(): void {
+      if (editor.mounted) refreshImageViews(editor.view)
+    }
     function refreshMarkdownRendering(): void {
       const [markdown, selection] = getState()
       replaceState(markdown, selection, false, true)
+      // The replacement reuses every image whose Markdown is unchanged, and an
+      // image view resolves its URL only on creation.
+      refreshImages()
     }
     function insertMarkdown(markdown: string): void {
       editor.commands.insertMarkdown(markdown)
@@ -615,6 +622,7 @@ export function ProseKitEditor({
       getState,
       setState,
       refreshMarkdownRendering,
+      refreshImages,
       getSelection,
       setSelection,
       focus,

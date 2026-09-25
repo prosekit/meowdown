@@ -61,10 +61,20 @@ export interface EditorHandle {
 
   /**
    * Reparse the current Markdown with the editor's creation-time resolvers,
-   * preserving the selection without adding an undo-history entry. Hosts use
+   * preserving the selection without adding an undo-history entry, then
+   * re-resolve images as {@link EditorHandle.refreshImages} does. Hosts use
    * this when data consulted by a stable resolver changes out of band.
    */
   refreshMarkdownRendering: () => void
+
+  /**
+   * Re-resolve every rendered image through `resolveImageUrl`, rebuilding only
+   * the images whose URL changed. The document, selection, and undo history
+   * are untouched, so it is safe mid-typing. Hosts use this when data consulted
+   * by a stable `resolveImageUrl` changes out of band, such as an attachment
+   * catalog that loads after the document rendered.
+   */
+  refreshImages: () => void
 
   /**
    * Returns the current selection.

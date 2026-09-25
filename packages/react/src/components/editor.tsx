@@ -474,6 +474,9 @@ export function MeowdownEditor({
     function refreshMarkdownRendering(): void {
       childRef.current?.refreshMarkdownRendering()
     }
+    function refreshImages(): void {
+      childRef.current?.refreshImages()
+    }
     function getSelection(): SelectionJSON {
       return childRef.current?.getSelection() ?? { type: 'text', anchor: 0, head: 0 }
     }
@@ -520,6 +523,7 @@ export function MeowdownEditor({
       getState,
       setState,
       refreshMarkdownRendering,
+      refreshImages,
       getSelection,
       setSelection,
       focus,

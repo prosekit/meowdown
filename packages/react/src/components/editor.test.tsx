@@ -571,6 +571,49 @@ describe('MeowdownEditor', () => {
   })
 })
 
+describe('image refresh', () => {
+  it('re-resolves images without changing Markdown or selection', async () => {
+    const ref = createRef<EditorHandle>()
+    let resolved = false
+    await render(
+      <MeowdownEditor
+        handleRef={ref}
+        initialMarkdown="before ![photo](photo.png) after"
+        resolveImageUrl={(src) => (resolved ? `https://cdn.example/${src}` : undefined)}
+      />,
+    )
+    ref.current?.setSelection({ type: 'text', anchor: 3, head: 3 })
+    const before = ref.current?.getState()
+    const image = page.getByAltText('photo')
+    await expect.element(image).not.toBeInTheDocument()
+
+    resolved = true
+    ref.current?.refreshImages()
+
+    await expect.element(image).toHaveAttribute('src', 'https://cdn.example/photo.png')
+    expect(ref.current?.getState()).toEqual(before)
+  })
+
+  it('re-resolves unchanged Markdown images on refreshMarkdownRendering', async () => {
+    const ref = createRef<EditorHandle>()
+    let resolved = false
+    await render(
+      <MeowdownEditor
+        handleRef={ref}
+        initialMarkdown="before ![photo](photo.png) after"
+        resolveImageUrl={(src) => (resolved ? `https://cdn.example/${src}` : undefined)}
+      />,
+    )
+    const image = page.getByAltText('photo')
+    await expect.element(image).not.toBeInTheDocument()
+
+    resolved = true
+    ref.current?.refreshMarkdownRendering()
+
+    await expect.element(image).toBeInTheDocument()
+  })
+})
+
 describe('X post embed props', () => {
   it('renders a saved tweet as an X post card', async () => {
     await render(

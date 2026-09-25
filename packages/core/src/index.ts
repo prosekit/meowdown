@@ -69,7 +69,12 @@ export {
   type ImageClickHandler,
   type ImageClickPayload,
 } from './extensions/image-click.ts'
-export { defaultResolveImageUrl, defineImage, type ImageOptions } from './extensions/image.ts'
+export {
+  defaultResolveImageUrl,
+  defineImage,
+  refreshImages,
+  type ImageOptions,
+} from './extensions/image.ts'
 export type {
   MdFileAttrs,
   MdImageAttrs,

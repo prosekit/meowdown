@@ -14,6 +14,7 @@ import {
 } from '../testing/index.ts'
 
 import type { ImageClickHandler } from './image-click.ts'
+import { refreshImages } from './image.ts'
 import type { MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
@@ -570,6 +571,75 @@ describe('image mark view update', () => {
     await expect.element(image2).toBeInTheDocument()
     const image2Element = image2.element()
     expect(image2Element).toBe(image1Element)
+  })
+})
+
+// A host's resolver can consult data that arrives after the document rendered
+// (an attachment catalog); refreshImages re-resolves in place.
+describe('refreshImages', () => {
+  function setupWithResolver(text: string, resolve: (src: string) => string | undefined): Fixture {
+    const fixture = setupFixture({
+      extensionOptions: { markMode: 'hide', resolveImageUrl: (src) => resolve(src) },
+    })
+    fixture.set(fixture.n.doc(fixture.n.paragraph(text)))
+    return fixture
+  }
+
+  it('renders an image the resolver starts resolving, leaving the document alone', async () => {
+    const url = getSVGImageURL(10, 10)
+    let resolved = false
+    using fixture = setupWithResolver('ABC![img](photo.png)DEF', () => (resolved ? url : undefined))
+    await expect.element(preview).not.toBeInTheDocument()
+    const doc = fixture.doc
+
+    resolved = true
+    refreshImages(fixture.view)
+
+    await expect.element(pmRoot.getByAltText('img')).toHaveAttribute('src', url)
+    expect(fixture.doc).toBe(doc)
+  })
+
+  it('keeps the same img element when the resolved URL is unchanged', async () => {
+    const url = getSVGImageURL(10, 10)
+    using fixture = setupWithResolver('ABC![img](photo.png)DEF', () => url)
+    const image = pmRoot.getByAltText('img')
+    await expect.element(image).toBeInTheDocument()
+    const imageElement = image.element()
+
+    refreshImages(fixture.view)
+
+    expect(image.element()).toBe(imageElement)
+  })
+
+  it('swaps the image when the resolved URL changes and drops it when unresolved', async () => {
+    let url: string | undefined = getSVGImageURL(10, 10)
+    using fixture = setupWithResolver('ABC![img](photo.png)DEF', () => url)
+    await expect.element(pmRoot.getByAltText('img')).toHaveAttribute('src', url)
+
+    url = getSVGImageURL(20, 20)
+    refreshImages(fixture.view)
+    await expect.element(pmRoot.getByAltText('img')).toHaveAttribute('src', url)
+    expect(pmRoot.getByTestId('image-preview').elements()).toHaveLength(1)
+
+    url = undefined
+    refreshImages(fixture.view)
+    await expect.element(preview).not.toBeInTheDocument()
+    expect(fixture.doc.textContent).toBe('ABC![img](photo.png)DEF')
+  })
+
+  it('re-resolves each image by its own src', async () => {
+    const resolved = new Set<string>(['a.png'])
+    using fixture = setupWithResolver('![a](a.png) and ![b](b.png)', (src) => {
+      return resolved.has(src) ? getSVGImageURL(10, 10) : undefined
+    })
+    await expect.element(pmRoot.getByAltText('a')).toBeInTheDocument()
+    await expect.element(pmRoot.getByAltText('b')).not.toBeInTheDocument()
+
+    resolved.add('b.png')
+    refreshImages(fixture.view)
+
+    await expect.element(pmRoot.getByAltText('b')).toBeInTheDocument()
+    expect(pmRoot.getByTestId('image-preview').elements()).toHaveLength(2)
   })
 })
 
