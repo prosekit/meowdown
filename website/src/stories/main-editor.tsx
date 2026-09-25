@@ -101,7 +101,9 @@ function MainEditorDemo() {
   const [sourceSeed, setSourceSeed] = useState(initialMarkdown)
 
   // Both sync directions are created once; they close over the two stable
-  // refs, so they never need to be re-created.
+  // refs, so they never need to be re-created. The website is not built with
+  // React Compiler, so the render-time ref capture it would reject is fine here.
+  // eslint-disable-next-line react-hooks/refs
   const [{ handleRichChange, handleSourceChange, flushToSource }] = useState(() => {
     // nuqs' setter is referentially stable for a module-level key map, so
     // capturing it once here is safe. Only the two throttled ticks call this,

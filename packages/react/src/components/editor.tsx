@@ -513,7 +513,7 @@ export function MeowdownEditor({
     function findPrevious(): void {
       childRef.current?.findPrevious()
     }
-    return {
+    const handle: Omit<EditorHandle, 'editor'> = {
       getMarkdown,
       setMarkdown,
       insertMarkdown,
@@ -533,10 +533,14 @@ export function MeowdownEditor({
       discardPendingReplacement,
       findNext,
       findPrevious,
-      get editor() {
-        return childRef.current?.editor
-      },
     }
+    // A getter in an object literal is not supported by React Compiler yet, so
+    // the live `editor` accessor is defined on the finished object instead.
+    Object.defineProperty(handle, 'editor', {
+      get: () => childRef.current?.editor,
+      enumerable: true,
+    })
+    return handle as EditorHandle
   }, [])
 
   return (

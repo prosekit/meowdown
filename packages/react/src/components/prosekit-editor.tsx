@@ -548,11 +548,14 @@ export function ProseKitEditor({
         transaction.setMeta('addToHistory', false)
       }
       suppressDocChangeRef.current = true
+      // `try/finally` without a `catch` is not supported by React Compiler yet.
       try {
         editor.view.dispatch(transaction)
-      } finally {
+      } catch (error) {
         suppressDocChangeRef.current = false
+        throw error
       }
+      suppressDocChangeRef.current = false
     }
     function setState(markdown?: string, selection?: SelectionHint): void {
       replaceState(markdown, selection)
@@ -637,7 +640,9 @@ export function ProseKitEditor({
       {/* Before the editor element, so a document height change below the
           caret cannot move the layer. */}
       <VirtualCaret />
-      <div ref={editor.mount}></div>
+      {/* Passing `editor.mount` directly makes React Compiler treat `editor`
+          as a ref and skip this component. */}
+      <div ref={(element) => editor.mount(element)}></div>
       <EditorExtensions
         config={config}
         searchQuery={searchQuery}

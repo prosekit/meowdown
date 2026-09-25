@@ -25,5 +25,15 @@ export default defineESLintConfig(
       'max-statements': ['error', { max: 40 }],
     },
   },
+  {
+    // React Compiler skips any component or hook that trips one of these. Keep
+    // the published @meowdown/react fully compiled by surfacing them in lint.
+    // `refs` is off in @ocavue/eslint-config and `todo` is in no preset.
+    files: ['**/*.tsx'],
+    rules: {
+      'react-hooks/refs': 'error',
+      'react-hooks/todo': 'error',
+    },
+  },
   meowdownConfig,
 )
