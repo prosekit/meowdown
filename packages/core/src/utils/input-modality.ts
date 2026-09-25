@@ -28,7 +28,7 @@ function setIsTouchInput(isTouchInput: boolean): void {
 
 function handlePointerDown(event: PointerEvent): void {
   const target = event.target
-  lastIsPointerSelection = target instanceof Element && target.closest('.ProseMirror') != null
+  lastIsPointerSelection = target instanceof Element && !!target.closest('.ProseMirror')
   const pointerType = event.pointerType
   if (pointerType === 'mouse') {
     setIsTouchInput(false)
