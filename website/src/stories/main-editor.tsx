@@ -6,7 +6,7 @@ import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import { throttle } from '@ocavue/utils'
 import { useQueryStates } from 'nuqs'
 import { NuqsAdapter } from 'nuqs/adapters/react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { DemoLightbox } from '../components/demo-lightbox.tsx'
 import { useDemoLightbox } from '../components/use-demo-lightbox.ts'
@@ -131,25 +131,30 @@ function MainEditorDemo() {
     [shareMarkdown],
   )
 
-  const pushToSource = useMemo(() => {
-    return throttle(writeSourceText, SYNC_THROTTLE_MS, { leading: false })
+  const pushToSourceRef = useRef<() => void>(null)
+  useEffect(() => {
+    pushToSourceRef.current = throttle(writeSourceText, SYNC_THROTTLE_MS, { leading: false })
+    return () => {
+      pushToSourceRef.current = null
+    }
   }, [writeSourceText])
-  const pullFromSource = useMemo(() => {
-    return throttle(writeRichText, SYNC_THROTTLE_MS, { leading: false })
+  const pullFromSourceRef = useRef<(markdown: string) => void>(null)
+  useEffect(() => {
+    pullFromSourceRef.current = throttle(writeRichText, SYNC_THROTTLE_MS, { leading: false })
+    return () => {
+      pullFromSourceRef.current = null
+    }
   }, [writeRichText])
 
   const handleRichChange = useCallback(() => {
     setSyncStatus('editing')
-    pushToSource()
-  }, [pushToSource])
+    pushToSourceRef.current?.()
+  }, [])
 
-  const handleSourceChange = useCallback(
-    (markdown: string) => {
-      setSyncStatus('editing')
-      pullFromSource(markdown)
-    },
-    [pullFromSource],
-  )
+  const handleSourceChange = useCallback((markdown: string) => {
+    setSyncStatus('editing')
+    pullFromSourceRef.current?.(markdown)
+  }, [])
   // Focus is about to land in the source pane, or a preset was picked: make
   // the source text current before anything is typed into stale text.
   const flushToSource = writeSourceText
