@@ -2,19 +2,18 @@
 #
 # Compare the package dist output of the current branch against origin/master.
 #
-# Usage: run it on a pull request branch with a clean working tree.
+# Run it on a branch with a clean working tree:
 #
 #   ./scripts/inspect-dist.sh
 #
 # It builds `origin/master` and commits its dist output to this branch, then
-# builds this branch and commits its dist output on top. The last commit
-# removes dist again, so the branch content is unchanged. Open the pull
-# request's commit list on GitHub and read the `[dev] .js`, `[dev] .d.ts` and
-# `[dev] .css` commits to see how the published files changed.
+# builds this branch and commits its dist output on top, one commit per file
+# type. The last commit removes dist again, so the branch content is
+# unchanged. Read the `[dev]` commits to see how the published files changed.
 #
-# Both revisions are built in this directory, not in a worktree: the CSS
-# module class hashes depend on the absolute file path, so building master
-# elsewhere would rename every class and bury the real diff.
+# Both revisions are built in this directory. The CSS module class hashes
+# depend on the absolute file path, so building master elsewhere would rename
+# every class.
 set -ex
 
 export SKIP_SIMPLE_GIT_HOOKS=1
@@ -40,8 +39,7 @@ build_and_commit() {
   # Remove source maps
   find packages/*/dist -name "*.map" -delete 2>/dev/null || true
 
-  # Stage each file type separately for clearer diffs. Clearing the index
-  # entries first captures deletions, since `git add` skips ignored paths.
+  # Unstage each file type before staging it, so deletions are captured too.
   git rm -r -q --cached 'packages/*/dist/*.d.ts' 2>/dev/null || true
   git add --force 'packages/*/dist/*.d.ts' 2>/dev/null || true
   git commit --allow-empty -m "chore: ${label} .d.ts"
@@ -58,8 +56,8 @@ build_and_commit() {
   git add --force 'packages/*/dist/*' 2>/dev/null || true
   git commit --allow-empty -m "chore: ${label} other"
 
-  # Drop everything else the build touched, e.g. the `*.module.d.css.ts`
-  # files that `cmk` rewrites, so the next checkout starts clean.
+  # Discard other files the build touched, e.g. the `*.module.d.css.ts` files
+  # that `cmk` rewrites.
   git checkout -- .
 }
 
@@ -68,7 +66,7 @@ git fetch origin master
 git checkout -b "$TEMP_BRANCH" origin/master
 build_and_commit "[master]"
 
-# Bring the master dist commits onto the dev branch
+# Cherry-pick the master dist commits onto the dev branch
 git checkout "$DEV_BRANCH"
 git cherry-pick --allow-empty "origin/master..${TEMP_BRANCH}"
 git branch -D "$TEMP_BRANCH"
