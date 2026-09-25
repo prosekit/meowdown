@@ -74,6 +74,7 @@ export function TagMenu({ onTagSearch }: TagMenuProps): ReactElement {
           {items.map((item) => (
             <AutocompleteItem
               key={item.tag}
+              value={item.tag}
               className={styles.Item}
               onSelect={() => {
                 editor.commands.insertText({ text: `#${item.tag} ` })
