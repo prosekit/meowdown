@@ -1,5 +1,19 @@
 # @meowdown/react
 
+## 0.74.0
+
+### Minor Changes
+
+- [#624](https://github.com/prosekit/meowdown/pull/624) [`39f6f3c`](https://github.com/prosekit/meowdown/commit/39f6f3c7f2badf093610e140f20c998bac6a1236) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Rename `EditorHandle.editor` to `getEditor()`.
+
+### Patch Changes
+
+- [#617](https://github.com/prosekit/meowdown/pull/617) [`6fefe3d`](https://github.com/prosekit/meowdown/commit/6fefe3d867971c824d4844f795bdeddf9dd4564e) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Keep the link preview closed after the link editor or preview is dismissed, until the pointer leaves the link.
+
+- [#614](https://github.com/prosekit/meowdown/pull/614) [`f8b093f`](https://github.com/prosekit/meowdown/commit/f8b093fd4b04cab2284fd6b174e044d2aed57ab6) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Key wikilink and tag menu rows by `target` and `tag`, so rows with the same visible text highlight and select independently.
+- Updated dependencies [[`ac3268d`](https://github.com/prosekit/meowdown/commit/ac3268d4999637fe67d91cd3b37757ac960755ec), [`6fefe3d`](https://github.com/prosekit/meowdown/commit/6fefe3d867971c824d4844f795bdeddf9dd4564e), [`84d0577`](https://github.com/prosekit/meowdown/commit/84d05779109e9dce9bc15ac2c1a8b2f4c1386415)]:
+  - @meowdown/core@0.74.2
+
 ## 0.73.1
 
 ### Patch Changes
