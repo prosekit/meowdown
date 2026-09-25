@@ -1,6 +1,7 @@
 {
   "extends": "@ocavue/tsconfig/es/app.json",
   "compilerOptions": {
+    "customConditions": ["development"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "erasableSyntaxOnly": true

@@ -1,6 +1,7 @@
 {
   "extends": "@ocavue/tsconfig/dom/app.json",
   "compilerOptions": {
+    "customConditions": ["development"],
     "jsx": "react-jsx",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
