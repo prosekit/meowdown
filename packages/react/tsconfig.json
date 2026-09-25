@@ -12,9 +12,14 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "allowArbitraryExtensions": true,
-    "erasableSyntaxOnly": true
+    "erasableSyntaxOnly": true,
+    "customConditions": ["development"]
   },
-  "cmkOptions": { "enabled": true, "dtsOutDir": ".", "arbitraryExtensions": true },
+  "cmkOptions": {
+    "enabled": true,
+    "dtsOutDir": ".",
+    "arbitraryExtensions": true
+  },
   "references": [
     {
       "path": "../core/tsconfig.json"

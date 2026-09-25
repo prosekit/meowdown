@@ -12,10 +12,24 @@
     "**/*.css"
   ],
   "exports": {
-    "./x": "./src/x/index.ts",
-    "./x/theme.css": "./src/x/theme.css",
-    "./youtube": "./src/youtube/index.ts",
-    "./youtube/theme.css": "./src/youtube/theme.css"
+    "./x": {
+      "development": "./src/x/index.ts",
+      "types": "./dist/x/index.d.ts",
+      "default": "./dist/x/index.js"
+    },
+    "./x/theme.css": {
+      "development": "./src/x/theme.css",
+      "default": "./dist/x/theme.css"
+    },
+    "./youtube": {
+      "development": "./src/youtube/index.ts",
+      "types": "./dist/youtube/index.d.ts",
+      "default": "./dist/youtube/index.js"
+    },
+    "./youtube/theme.css": {
+      "development": "./src/youtube/theme.css",
+      "default": "./dist/youtube/theme.css"
+    }
   },
   "files": [
     "./dist/**/*.js",

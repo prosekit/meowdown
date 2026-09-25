@@ -4,7 +4,8 @@
     "jsx": "react-jsx",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "erasableSyntaxOnly": true
+    "erasableSyntaxOnly": true,
+    "customConditions": ["development"]
   },
   "references": [
     {
