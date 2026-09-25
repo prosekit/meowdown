@@ -1,10 +1,10 @@
 import type { PlainExtension } from '@prosekit/core'
-import { PluginKey } from '@prosekit/pm/state'
+import { PluginKey, type EditorState } from '@prosekit/pm/state'
 
 import { getLinkUnitAt, type LinkUnit } from './get-link-unit-at.ts'
-import { defineMarkHoverHandler, type MarkHoverHit } from './mark-hover.ts'
+import { defineMarkHoverHandler, type HoverTracker, type MarkHoverHit } from './mark-hover.ts'
 
-const linkHoverKey = new PluginKey('meowdown-link-hover')
+const linkHoverKey = new PluginKey<HoverTracker>('meowdown-link-hover')
 
 /**
  * Delay before a cold hover enters, in ms.
@@ -53,4 +53,13 @@ export function defineLinkHoverHandler(
     },
     onHoverChange,
   })
+}
+
+/**
+ * Tell the link hover handler that the user dismissed the UI it opened. The
+ * link under the pointer stays silent until the pointer leaves it, so a
+ * pending hover cannot reopen the UI.
+ */
+export function dismissLinkHover(state: EditorState): void {
+  linkHoverKey.getState(state)?.dismiss()
 }

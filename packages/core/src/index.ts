@@ -108,6 +108,7 @@ export {
 export type { LinkEditHandler, LinkEditOptions } from './extensions/link-commands.ts'
 export {
   defineLinkHoverHandler,
+  dismissLinkHover,
   type LinkHoverHandler,
   type LinkHoverOptions,
 } from './extensions/link-hover.ts'
