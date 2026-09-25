@@ -411,10 +411,12 @@ export function LinkMenu({
   const [state, dispatch] = useReducer(reduceLinkMenu, LINK_MENU_IDLE)
   const isPointerOverPopupRef = useRef(false)
 
-  function canLeave = useCallback((): boolean => !isPointerOverPopupRef.current, [])
+  const canLeave = useCallback(() => {
+    return !isPointerOverPopupRef.current
+  }, [])
   const [linkHoverExtension] = useState(() => {
     return defineLinkHoverHandler((hit) => dispatch({ type: 'hover', link: hit?.payload }), {
-      canLeave
+      canLeave,
     })
   })
   useExtension(linkHoverExtension)
