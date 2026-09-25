@@ -448,10 +448,57 @@ describe('LinkMenu', () => {
     await screen.getByText('Docs').click()
     await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
     await expect.element(popover.getByTestId('link-popover-input')).toHaveFocus()
-    await vi.waitFor(async () => {
-      await userEvent.keyboard('{Escape}')
-      await expect.element(popover, { timeout: 1_000 }).not.toBeInTheDocument()
-    })
+    await userEvent.keyboard('{Escape}')
+    await expect.element(popover.getByTestId('link-popover-edit')).not.toBeInTheDocument()
+    // The pointer still rests on the link: outlast its hover open delay.
+    await sleep(400)
+    await expect.element(popover).not.toBeInTheDocument()
+  })
+
+  it('does not reopen the preview after saving with the pointer on the link', async () => {
+    const ref = createRef<EditorHandle>()
+    const screen = await render(
+      <MeowdownEditor handleRef={ref} initialMarkdown="[Docs](https://old.test)" />,
+    )
+    await screen.getByText('Docs').click()
+    await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
+    await expect.element(popover.getByTestId('link-popover-input')).toHaveFocus()
+    await userEvent.keyboard('{Enter}')
+    await expect.element(popover.getByTestId('link-popover-edit')).not.toBeInTheDocument()
+    await sleep(400)
+    await expect.element(popover).not.toBeInTheDocument()
+    expect(ref.current?.getMarkdown()).toBe('[Docs](https://old.test)\n')
+  })
+
+  it('reopens a dismissed preview once the pointer leaves and returns', async () => {
+    const screen = await render(
+      <MeowdownEditor initialMarkdown="a [Docs](https://example.com) b" />,
+    )
+    const label = screen.getByText('Docs', { exact: false })
+    await hover(label)
+    await expect.element(popover.getByTestId('link-popover-info')).toBeVisible()
+    await userEvent.keyboard('{Escape}')
+    await expect.element(popover).not.toBeInTheDocument()
+    await unhover()
+    await hover(label)
+    await expect.element(popover.getByTestId('link-popover-info')).toBeVisible()
+  })
+
+  it('does not resolve previews of links hovered while editing', async () => {
+    const resolver = vi.fn(() => ({ title: 'Resolved title' }))
+    await render(
+      <MeowdownEditor
+        initialMarkdown="[Docs](https://docs.test) and [Blog](https://blog.test)"
+        resolveLinkPreview={resolver}
+      />,
+    )
+    await pmRoot.getByRole('link', { name: 'Docs', exact: false }).click()
+    await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
+    await expect.element(popover.getByTestId('link-popover-edit')).toBeVisible()
+    await hover(pmRoot.getByRole('link', { name: 'Blog', exact: false }))
+    await sleep(400)
+    await expect.element(popover.getByTestId('link-popover-edit')).toBeVisible()
+    expect(resolver).not.toHaveBeenCalledWith('https://blog.test')
   })
 
   it('keeps reference links read-only in the preview and Mod-k flow', async () => {
