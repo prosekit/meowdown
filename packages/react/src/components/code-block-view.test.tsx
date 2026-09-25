@@ -272,7 +272,7 @@ describe('typing over code block selections', () => {
     )
     // The bug only triggers once highlight token spans wrap the code text.
     await expect.element(tokens.first(), { timeout: 15000 }).toBeInTheDocument()
-    const view = ref.current?.editor?.view
+    const view = ref.current?.getEditor()?.view
     if (!view) throw new Error('editor not mounted')
     const codeStart = 1
     const codeEnd = codeStart + view.state.doc.child(0).content.size

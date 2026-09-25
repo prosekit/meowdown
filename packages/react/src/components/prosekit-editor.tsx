@@ -630,7 +630,7 @@ export function ProseKitEditor({
       discardPendingReplacement,
       findNext,
       findPrevious,
-      editor,
+      getEditor: () => editor,
     }
   }, [editor, frontmatter, hasSelectionMenu, openSelectionMenu])
 

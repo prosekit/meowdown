@@ -338,7 +338,7 @@ describe('SlashMenu', () => {
     const ref = createRef<EditorHandle>()
     await render(<ProseKitEditor ref={ref} />)
     await pmRoot.click()
-    ref.current?.editor?.commands.insertTrigger('/')
+    ref.current?.getEditor()?.commands.insertTrigger('/')
     await expect.element(menu).toBeVisible()
     expect(ref.current?.getMarkdown()).toBe('/\n')
   })
@@ -348,7 +348,7 @@ describe('SlashMenu', () => {
     await render(<ProseKitEditor ref={ref} />)
     await pmRoot.click()
     await userEvent.keyboard('Hello')
-    ref.current?.editor?.commands.insertTrigger('/')
+    ref.current?.getEditor()?.commands.insertTrigger('/')
     await expect.element(menu).toBeVisible()
     expect(ref.current?.getMarkdown()).toBe('Hello /\n')
   })
@@ -377,7 +377,7 @@ describe('SlashMenu', () => {
     await render(<ProseKitEditor ref={ref} initialMarkdown={'| a | b |\n| --- | --- |\n|  |  |'} />)
     await pmRoot.click()
 
-    const view = ref.current?.editor?.view
+    const view = ref.current?.getEditor()?.view
     if (!view) throw new Error('editor not mounted')
     view.dispatch(
       view.state.tr.setSelection(

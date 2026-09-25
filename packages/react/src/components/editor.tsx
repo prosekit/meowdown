@@ -15,6 +15,7 @@ import type {
   SearchStatusHandler,
   StartPendingReplacementOptions,
   TagClickHandler,
+  TypedEditor,
   WikiEmbedResolver,
   WikilinkClickHandler,
   WikilinkResolver,
@@ -513,6 +514,9 @@ export function MeowdownEditor({
     function findPrevious(): void {
       childRef.current?.findPrevious()
     }
+    function getEditor(): TypedEditor | undefined {
+      return childRef.current?.getEditor()
+    }
     return {
       getMarkdown,
       setMarkdown,
@@ -533,9 +537,7 @@ export function MeowdownEditor({
       discardPendingReplacement,
       findNext,
       findPrevious,
-      get editor() {
-        return childRef.current?.editor
-      },
+      getEditor,
     }
   }, [])
 

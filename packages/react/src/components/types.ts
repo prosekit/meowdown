@@ -144,7 +144,7 @@ export interface EditorHandle {
    * Escape hatch: the underlying ProseKit editor, or `undefined` when the
    * handle does not wrap one.
    */
-  readonly editor: TypedEditor | undefined
+  getEditor: () => TypedEditor | undefined
 }
 
 /**
