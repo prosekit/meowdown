@@ -17,6 +17,7 @@ import { defineAtomMarkNavigation } from './atom-mark-navigation.ts'
 import { defineBulletAfterHeading } from './bullet-after-heading.ts'
 import { defineClickBelow } from './click-below.ts'
 import { defineClipboard } from './clipboard/clipboard.ts'
+import { defineCodeBlockEnterGuard } from './code-block-enter-guard.ts'
 import { defineCodeBlockSyntaxHighlight } from './code-block-highlight.ts'
 import { defineCodeBlock } from './code-block.ts'
 import { defineEditorCommands } from './commands.ts'
@@ -138,6 +139,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineScrollToSelection(),
     defineHiddenRunCaret(),
     defineSystemSubstitutionGuard(),
+    defineCodeBlockEnterGuard(),
     defineAtomMarkNavigation({
       marks: ATOM_SOURCE_MARK_NAMES.map((name) => ({ name, modes: ['hide', 'focus', 'show'] })),
     }),
