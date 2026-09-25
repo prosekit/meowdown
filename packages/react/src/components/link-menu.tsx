@@ -412,7 +412,6 @@ export function LinkMenu({
   const isPointerOverPopupRef = useRef(false)
 
   function canLeave = useCallback((): boolean => !isPointerOverPopupRef.current, [])
-
   const [linkHoverExtension] = useState(() => {
     return defineLinkHoverHandler((hit) => dispatch({ type: 'hover', link: hit?.payload }), {
       canLeave
