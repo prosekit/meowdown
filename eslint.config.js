@@ -25,5 +25,14 @@ export default defineESLintConfig(
       'max-statements': ['error', { max: 40 }],
     },
   },
+  {
+    files: ['**/*.tsx'],
+    rules: {
+      // https://react.dev/reference/eslint-plugin-react-hooks/lints/refs
+      'react-hooks/refs': 'error',
+      // https://github.com/facebook/react/blob/d083ec1da1e5252abd3ddfdde6dfbc09701a2c51/compiler/packages/babel-plugin-react-compiler/src/CompilerError.ts#L981-L988
+      'react-hooks/todo': 'error',
+    },
+  },
   meowdownConfig,
 )

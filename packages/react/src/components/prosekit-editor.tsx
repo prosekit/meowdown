@@ -13,8 +13,6 @@ import {
   type FilePasteOptions,
   type FileViewOptions,
   type ImageClickHandler,
-  type XPostMediaClickHandler,
-  type YouTubeVideoClickHandler,
   type ImageOptions,
   type LinkClickHandler,
   type LinkCopyHandler,
@@ -28,7 +26,9 @@ import {
   type WikiEmbedResolver,
   type WikilinkClickHandler,
   type WikilinkResolver,
+  type XPostMediaClickHandler,
   type XPostResolver,
+  type YouTubeVideoClickHandler,
   type YouTubeVideoResolver,
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
@@ -550,8 +550,10 @@ export function ProseKitEditor({
       suppressDocChangeRef.current = true
       try {
         editor.view.dispatch(transaction)
-      } finally {
         suppressDocChangeRef.current = false
+      } catch (error) {
+        suppressDocChangeRef.current = false
+        throw error
       }
     }
     function setState(markdown?: string, selection?: SelectionHint): void {
@@ -632,12 +634,19 @@ export function ProseKitEditor({
     }
   }, [editor, frontmatter, hasSelectionMenu, openSelectionMenu])
 
+  const mount = useCallback(
+    (element: HTMLDivElement | null) => {
+      return editor.mount(element)
+    },
+    [editor],
+  )
+
   return (
     <ProseKit editor={editor}>
       {/* Before the editor element, so a document height change below the
           caret cannot move the layer. */}
       <VirtualCaret />
-      <div ref={editor.mount}></div>
+      <div ref={mount}></div>
       <EditorExtensions
         config={config}
         searchQuery={searchQuery}
