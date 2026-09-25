@@ -3,6 +3,8 @@ import type { ProseMirrorNode } from '@prosekit/pm/model'
 import { Plugin, PluginKey, TextSelection } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
+import { isNodeOfType } from './node-names.ts'
+
 const clickBelowKey = new PluginKey('meowdown-click-below')
 
 // A plain textblock already takes the caret from a click below it.
@@ -21,6 +23,11 @@ function handleMouseDown(view: EditorView, event: MouseEvent): boolean {
   const lastBlock = doc.lastChild
   if (!lastBlock || acceptsCaretAtEnd(lastBlock)) return false
 
+  // An empty bottom line, such as a fresh bullet, already takes the native caret.
+  let bottom: ProseMirrorNode | null = lastBlock
+  while (bottom && !bottom.isTextblock && !isNodeOfType(bottom, 'table')) bottom = bottom.lastChild
+  if (bottom && bottom.content.size === 0 && acceptsCaretAtEnd(bottom)) return false
+
   const lastBlockDOM = view.nodeDOM(doc.content.size - lastBlock.nodeSize)
   if (!(lastBlockDOM instanceof HTMLElement)) return false
   if (event.clientY <= lastBlockDOM.getBoundingClientRect().bottom) return false
@@ -38,7 +45,8 @@ function handleMouseDown(view: EditorView, event: MouseEvent): boolean {
 
 /**
  * A press below the last block appends an empty paragraph and puts the caret
- * in it, when that block would otherwise keep the caret inside itself.
+ * in it, when that block would otherwise keep the caret inside itself and
+ * does not end in an empty line.
  */
 export function defineClickBelow(): PlainExtension {
   return definePlugin(

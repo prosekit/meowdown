@@ -39,3 +39,103 @@ describe('a click below the last block', () => {
     expect(fixture.doc.eq(expected)).toBe(true)
   })
 })
+
+describe('a click below an empty bottom line', () => {
+  it('puts the caret in an empty bullet', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'bullet' }, n.paragraph())))
+    await clickBelowLastBlock()
+    await userEvent.keyboard('X')
+    expect(fixture.doc.eq(n.doc(n.list({ kind: 'bullet' }, n.paragraph('X'))))).toBe(true)
+  })
+
+  it('puts the caret in an empty last item', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.list({ kind: 'bullet' }, n.paragraph('a')),
+        n.list({ kind: 'bullet' }, n.paragraph()),
+      ),
+    )
+    await clickBelowLastBlock()
+    await userEvent.keyboard('X')
+    const expected = n.doc(
+      n.list({ kind: 'bullet' }, n.paragraph('a')),
+      n.list({ kind: 'bullet' }, n.paragraph('X')),
+    )
+    expect(fixture.doc.eq(expected)).toBe(true)
+  })
+
+  it('puts the caret in an empty nested item', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.list({ kind: 'bullet' }, n.paragraph('a'), n.list({ kind: 'bullet' }, n.paragraph())),
+      ),
+    )
+    await clickBelowLastBlock()
+    await userEvent.keyboard('X')
+    const expected = n.doc(
+      n.list({ kind: 'bullet' }, n.paragraph('a'), n.list({ kind: 'bullet' }, n.paragraph('X'))),
+    )
+    expect(fixture.doc.eq(expected)).toBe(true)
+  })
+
+  it('puts the caret in an empty task', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.list({ kind: 'task' }, n.paragraph())))
+    await clickBelowLastBlock()
+    await userEvent.keyboard('X')
+    expect(fixture.doc.eq(n.doc(n.list({ kind: 'task' }, n.paragraph('X'))))).toBe(true)
+  })
+
+  it('puts the caret on an empty last line of a blockquote', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(n.doc(n.blockquote(n.paragraph('quote'), n.paragraph())))
+    await clickBelowLastBlock()
+    await userEvent.keyboard('X')
+    const expected = n.doc(n.blockquote(n.paragraph('quote'), n.paragraph('X')))
+    expect(fixture.doc.eq(expected)).toBe(true)
+  })
+
+  it('keeps the caret visible when the empty line is folded away', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.list(
+          { kind: 'bullet', collapsed: true },
+          n.paragraph('a'),
+          n.list({ kind: 'bullet' }, n.paragraph()),
+        ),
+      ),
+    )
+    await clickBelowLastBlock()
+    await userEvent.keyboard('X')
+    const expected = n.doc(
+      n.list(
+        { kind: 'bullet', collapsed: true },
+        n.paragraph('aX'),
+        n.list({ kind: 'bullet' }, n.paragraph()),
+      ),
+    )
+    expect(fixture.doc.eq(expected)).toBe(true)
+  })
+
+  it('adds a paragraph below a table with an empty last cell', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const table = n.table(
+      n.tableRow(n.tableHeaderCell(n.paragraph('a')), n.tableHeaderCell(n.paragraph('b'))),
+      n.tableRow(n.tableCell(n.paragraph('1')), n.tableCell(n.paragraph())),
+    )
+    fixture.set(n.doc(table))
+    await clickBelowLastBlock()
+    expect(fixture.doc.eq(n.doc(table, n.paragraph()))).toBe(true)
+  })
+})
