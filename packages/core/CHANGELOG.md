@@ -1,5 +1,15 @@
 # @meowdown/core
 
+## 0.74.2
+
+### Patch Changes
+
+- [#616](https://github.com/prosekit/meowdown/pull/616) [`ac3268d`](https://github.com/prosekit/meowdown/commit/ac3268d4999637fe67d91cd3b37757ac960755ec) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Clicking below the last block now puts the caret on an existing empty line at the bottom, such as an empty bullet, instead of adding a paragraph after it.
+
+- [#617](https://github.com/prosekit/meowdown/pull/617) [`6fefe3d`](https://github.com/prosekit/meowdown/commit/6fefe3d867971c824d4844f795bdeddf9dd4564e) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Keep the link preview closed after the link editor or preview is dismissed, until the pointer leaves the link.
+
+- [#613](https://github.com/prosekit/meowdown/pull/613) [`84d0577`](https://github.com/prosekit/meowdown/commit/84d05779109e9dce9bc15ac2c1a8b2f4c1386415) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Keep a click or tap at the edge of hidden syntax outside the syntax, even when the browser reads the selection late.
+
 ## 0.74.1
 
 ### Patch Changes
