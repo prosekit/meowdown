@@ -106,7 +106,7 @@ describe('ProseKitEditor', () => {
     )
 
     const handle = ref.current
-    const editor = handle?.editor
+    const editor = handle?.getEditor()
     if (!handle || !editor) throw new Error('editor not mounted')
     handle.setSelection('start')
     handle.focus()
@@ -165,7 +165,7 @@ describe('reactive editor configuration', () => {
     await userEvent.click(pmRoot.getByText('#cats'))
     expect(first).toHaveBeenCalledOnce()
     await userEvent.click(pmRoot.getByText('Other paragraph'))
-    const editor = ref.current?.editor
+    const editor = ref.current?.getEditor()
     expect(editor).toBeDefined()
     const state = editor?.state
     await screen.rerender(
