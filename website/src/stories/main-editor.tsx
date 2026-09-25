@@ -6,7 +6,7 @@ import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
 import { throttle } from '@ocavue/utils'
 import { useQueryStates } from 'nuqs'
 import { NuqsAdapter } from 'nuqs/adapters/react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { DemoLightbox } from '../components/demo-lightbox.tsx'
 import { useDemoLightbox } from '../components/use-demo-lightbox.ts'
@@ -100,54 +100,59 @@ function MainEditorDemo() {
   // The seed of the source pane, refreshed whenever the pane is toggled on.
   const [sourceSeed, setSourceSeed] = useState(initialMarkdown)
 
-  // Both sync directions are created once; they close over the two stable
-  // refs, so they never need to be re-created.
-  const [{ handleRichChange, handleSourceChange, flushToSource }] = useState(() => {
-    // nuqs' setter is referentially stable for a module-level key map, so
-    // capturing it once here is safe. Only the two throttled ticks call this,
-    // and both run after a user edit; a preset switch clears `content` instead.
-    const shareMarkdown = (markdown: string) => {
+  const shareMarkdown = useCallback(
+    (markdown: string) => {
       setSyncStatus('saved')
       void setParams({ content: markdown })
-    }
+    },
+    [setParams],
+  )
 
-    // ProseMirror -> CodeMirror, as the smallest patch that gets there, so the
-    // source caret and scroll position survive. The `remote` annotation is what
-    // stops the write from coming straight back as a user edit.
-    const writeSourceText = () => {
-      const view = sourceViewRef.current
-      const markdown = editorRef.current?.getMarkdown()
-      shareMarkdown(markdown || '')
-      if (!view || markdown == null) return
-      const patch = computeTextPatch(view.state.doc.toString(), markdown)
-      if (!patch) return
-      view.dispatch({ changes: patch, annotations: Transaction.remote.of(true) })
-    }
+  // ProseMirror -> CodeMirror, as the smallest patch that gets there, so the
+  // source caret and scroll position survive. The `remote` annotation is what
+  // stops the write from coming straight back as a user edit.
+  const writeSourceText = useCallback(() => {
+    const view = sourceViewRef.current
+    const markdown = editorRef.current?.getMarkdown()
+    shareMarkdown(markdown || '')
+    if (!view || markdown == null) return
+    const patch = computeTextPatch(view.state.doc.toString(), markdown)
+    if (!patch) return
+    view.dispatch({ changes: patch, annotations: Transaction.remote.of(true) })
+  }, [shareMarkdown])
 
-    // CodeMirror -> ProseMirror. setMarkdown no-ops on equivalent markdown and
-    // stays silent to onDocChange, so neither direction echoes.
-    const writeRichText = (markdown: string) => {
+  // CodeMirror -> ProseMirror. setMarkdown no-ops on equivalent markdown and
+  // stays silent to onDocChange, so neither direction echoes.
+  const writeRichText = useCallback(
+    (markdown: string) => {
       shareMarkdown(markdown)
       editorRef.current?.setMarkdown(markdown)
-    }
+    },
+    [shareMarkdown],
+  )
 
-    const pushToSource = throttle(writeSourceText, SYNC_THROTTLE_MS, { leading: false })
-    const pullFromSource = throttle(writeRichText, SYNC_THROTTLE_MS, { leading: false })
+  const pushToSource = useMemo(() => {
+    return throttle(writeSourceText, SYNC_THROTTLE_MS, { leading: false })
+  }, [writeSourceText])
+  const pullFromSource = useMemo(() => {
+    return throttle(writeRichText, SYNC_THROTTLE_MS, { leading: false })
+  }, [writeRichText])
 
-    return {
-      handleRichChange: () => {
-        setSyncStatus('editing')
-        pushToSource()
-      },
-      handleSourceChange: (markdown: string) => {
-        setSyncStatus('editing')
-        pullFromSource(markdown)
-      },
-      // Focus is about to land in the source pane, or a preset was picked: make
-      // the source text current before anything is typed into stale text.
-      flushToSource: writeSourceText,
-    }
-  })
+  const handleRichChange = useCallback(() => {
+    setSyncStatus('editing')
+    pushToSource()
+  }, [pushToSource])
+
+  const handleSourceChange = useCallback(
+    (markdown: string) => {
+      setSyncStatus('editing')
+      pullFromSource(markdown)
+    },
+    [pullFromSource],
+  )
+  // Focus is about to land in the source pane, or a preset was picked: make
+  // the source text current before anything is typed into stale text.
+  const flushToSource = writeSourceText
 
   useEffect(() => {
     if (syncStatus !== 'saved') return
