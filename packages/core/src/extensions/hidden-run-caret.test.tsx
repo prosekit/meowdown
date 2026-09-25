@@ -121,6 +121,26 @@ describe('hide mode pointer snapping', () => {
     await clickAt(fixture, coords.right - 1, (coords.top + coords.bottom) / 2)
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo **bold**⎣ bar"`)
   })
+
+  it('lands at the unit outer edge when the selection is read late', async () => {
+    using fixture = setupMode('hide', 'foo **bold** bar')
+    const stall = () => {
+      const until = performance.now() + 80
+      while (performance.now() < until) {
+        // Busy main thread: the selection read misses prosemirror-view's pointer window.
+      }
+    }
+    window.addEventListener('mousedown', stall)
+    window.addEventListener('mouseup', stall)
+    try {
+      const coords = fixture.view.coordsAtPos(findText(fixture.doc, 'bold'), 1)
+      await clickAt(fixture, coords.left + 1, (coords.top + coords.bottom) / 2)
+    } finally {
+      window.removeEventListener('mousedown', stall)
+      window.removeEventListener('mouseup', stall)
+    }
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo ⎦**bold** bar"`)
+  })
 })
 
 describe('hide mode selection extension', () => {
