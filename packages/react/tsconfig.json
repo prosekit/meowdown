@@ -8,12 +8,12 @@
     "./*.ts"
   ],
   "compilerOptions": {
+    "customConditions": ["development"],
     "jsx": "react-jsx",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "allowArbitraryExtensions": true,
-    "erasableSyntaxOnly": true,
-    "customConditions": ["development"]
+    "erasableSyntaxOnly": true
   },
   "cmkOptions": {
     "enabled": true,
