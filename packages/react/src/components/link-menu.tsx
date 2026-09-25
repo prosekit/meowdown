@@ -18,7 +18,7 @@ import {
   type TypedEditor,
   type VirtualElement,
 } from '@meowdown/core'
-import { useEditor, useExtension } from '@prosekit/react'
+import { useEditor } from '@prosekit/react'
 import { Globe2Icon, PencilIcon, SparklesIcon, UnlinkIcon } from 'lucide-react'
 import {
   useCallback,
@@ -411,20 +411,20 @@ export function LinkMenu({
   const [state, dispatch] = useReducer(reduceLinkMenu, LINK_MENU_IDLE)
   const isPointerOverPopupRef = useRef(false)
 
-  const canLeave = useCallback(() => {
-    return !isPointerOverPopupRef.current
-  }, [])
-  const [linkHoverExtension] = useState(() => {
-    return defineLinkHoverHandler((hit) => dispatch({ type: 'hover', link: hit?.payload }), {
-      canLeave,
-    })
-  })
-  useExtension(linkHoverExtension)
+  useEffect(() => {
+    const canLeave = (): boolean => !isPointerOverPopupRef.current
+    const linkHoverExtension = defineLinkHoverHandler(
+      (hit) => dispatch({ type: 'hover', link: hit?.payload }),
+      { canLeave },
+    )
+    return editor.use(linkHoverExtension)
+  }, [editor])
 
-  const linkEditExtension = useMemo(() => {
-    return readOnly ? null : defineLinkEditKeymap((edit) => dispatch({ type: 'edit', edit }))
-  }, [readOnly])
-  useExtension(linkEditExtension)
+  useEffect(() => {
+    if (readOnly) return
+    const linkEditExtension = defineLinkEditKeymap((edit) => dispatch({ type: 'edit', edit }))
+    return editor.use(linkEditExtension)
+  }, [editor, readOnly])
 
   const handlePointerHover = useCallback((over: boolean) => {
     isPointerOverPopupRef.current = over
