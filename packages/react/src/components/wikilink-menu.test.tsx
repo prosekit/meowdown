@@ -221,6 +221,23 @@ describe('WikilinkMenu', () => {
     expect(onSelect).toHaveBeenCalled()
   })
 
+  it('reaches rows that share a label with the keyboard', async () => {
+    const ref = createRef<EditorHandle>()
+    const sameLabelSearch = (): WikilinkItem[] => [
+      { target: 'notes/plan', label: 'Plan' },
+      { target: 'notes/plan-2', label: 'Plan' },
+    ]
+    await render(<ProseKitEditor ref={ref} onWikilinkSearch={sameLabelSearch} />)
+    await pmRoot.click()
+    await userEvent.keyboard(TWO_BRACKETS)
+    await expect.element(menu.getByText('Plan').nth(1)).toBeVisible()
+    await expect.poll(() => menu.element().querySelectorAll('[data-highlighted]').length).toBe(1)
+
+    await userEvent.keyboard('{ArrowDown}{Enter}')
+    await expect.element(menu).not.toBeVisible()
+    expect(ref.current?.getMarkdown()).toContain('[[notes/plan-2]]')
+  })
+
   it('keeps long rows within the menu width', async () => {
     const longTitle = 'A very long note title '.repeat(12)
     const richSearch = (): WikilinkItem[] => [

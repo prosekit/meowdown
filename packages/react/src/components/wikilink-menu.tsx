@@ -88,6 +88,7 @@ export function WikilinkMenu({ onWikilinkSearch }: WikilinkMenuProps): ReactElem
           {items.map((item) => (
             <AutocompleteItem
               key={item.target}
+              value={item.target}
               className={styles.Item}
               onSelect={() => {
                 editor.commands.insertText({ text: `[[${item.target}]]` })
