@@ -28,10 +28,11 @@ export default defineESLintConfig(
   {
     // React Compiler skips any component or hook that trips one of these. Keep
     // the published @meowdown/react fully compiled by surfacing them in lint.
-    // `refs` is off in @ocavue/eslint-config and `todo` is in no preset.
     files: ['**/*.tsx'],
     rules: {
+      // https://react.dev/reference/eslint-plugin-react-hooks/lints/refs
       'react-hooks/refs': 'error',
+      // https://react.dev/reference/eslint-plugin-react-hooks/lints/todo
       'react-hooks/todo': 'error',
     },
   },

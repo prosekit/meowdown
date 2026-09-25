@@ -411,17 +411,12 @@ export function LinkMenu({
   const [state, dispatch] = useReducer(reduceLinkMenu, LINK_MENU_IDLE)
   const isPointerOverPopupRef = useRef(false)
 
-  // The hover handler closes over a ref, so it is created in an effect rather
-  // than during render (`useState(() => ...)` would make React Compiler skip
-  // this component). It is a plain plugin without node views, so `editor.use`
-  // is safe to call from an effect.
-  useEffect(() => {
-    return editor.use(
-      defineLinkHoverHandler((hit) => dispatch({ type: 'hover', link: hit?.payload }), {
-        canLeave: () => !isPointerOverPopupRef.current,
-      }),
-    )
-  }, [editor])
+  const [linkHoverExtension] = useState(() => {
+    return defineLinkHoverHandler((hit) => dispatch({ type: 'hover', link: hit?.payload }), {
+      canLeave: () => !isPointerOverPopupRef.current,
+    })
+  })
+  useExtension(linkHoverExtension)
 
   const linkEditExtension = useMemo(() => {
     return readOnly ? null : defineLinkEditKeymap((edit) => dispatch({ type: 'edit', edit }))
