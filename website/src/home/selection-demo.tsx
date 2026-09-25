@@ -195,7 +195,8 @@ export function useSelectionDemo(handleRef: RefObject<EditorHandle | null>): Sel
     if (!run || !handle) return
     // Restage over the current staged range: it tracks edits made while the
     // text streamed, so the offsets captured at menu-open time may be stale.
-    const staged = handle.editor ? getPendingReplacement(handle.editor.state) : null
+    const editor = handle.getEditor()
+    const staged = editor ? getPendingReplacement(editor.state) : null
     const range = staged ?? run.context
     if (
       !handle.startPendingReplacement({ from: range.from, to: range.to, mode: run.command.mode })

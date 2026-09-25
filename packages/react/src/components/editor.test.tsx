@@ -246,7 +246,7 @@ describe('MeowdownEditor', () => {
       />,
     )
     await pmRoot.click()
-    const view = ref.current?.editor?.view
+    const view = ref.current?.getEditor()?.view
     if (!view) throw new Error('editor not mounted')
     pasteText(view, 'https://www.youtube.com/watch?v=aqz-KE-bpKQ')
     await expect
@@ -261,7 +261,7 @@ describe('MeowdownEditor', () => {
       <MeowdownEditor handleRef={ref} resolveImageUrl={(src) => src} embedPaste={false} />,
     )
     await pmRoot.click()
-    const view = ref.current?.editor?.view
+    const view = ref.current?.getEditor()?.view
     if (!view) throw new Error('editor not mounted')
     pasteText(view, url)
     await expect.element(screen.getByText(url)).toBeInTheDocument()
@@ -272,7 +272,7 @@ describe('MeowdownEditor', () => {
     const ref = createRef<EditorHandle>()
     await render(<MeowdownEditor handleRef={ref} bulletAfterHeading initialMarkdown="# Title" />)
     await pmRoot.click()
-    const view = ref.current?.editor?.view
+    const view = ref.current?.getEditor()?.view
     if (!view) throw new Error('editor not mounted')
     const headingEnd = view.state.doc.child(0).nodeSize - 1
     view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, headingEnd)))
@@ -294,7 +294,7 @@ describe('MeowdownEditor', () => {
     )
     await expect.element(screen.getByText('Drop zone')).toBeInTheDocument()
 
-    const view = ref.current?.editor?.view
+    const view = ref.current?.getEditor()?.view
     if (!view) throw new Error('editor not mounted')
     // Simulate a Finder drop: a synthetic `drop` carrying an image File, aimed
     // at the paragraph so ProseKit's drop-indicator also claims the position.
@@ -342,8 +342,8 @@ describe('MeowdownEditor', () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Hi" />)
     await expect.element(screen.getByText('Hi')).toBeInTheDocument()
-    expect(ref.current?.editor).toBeTruthy()
-    expect(ref.current?.editor?.state.doc.textContent).toBe('Hi')
+    expect(ref.current?.getEditor()).toBeTruthy()
+    expect(ref.current?.getEditor()?.state.doc.textContent).toBe('Hi')
   })
 
   it('applies editorClassName and wrapperClassName', async () => {
@@ -515,7 +515,7 @@ describe('MeowdownEditor', () => {
     )
 
     expect(ref.current?.revealHeading('#target%20heading')).toBe(true)
-    const editor = ref.current?.editor
+    const editor = ref.current?.getEditor()
     if (!editor) throw new Error('editor not mounted')
     expect(editor.state.selection.$from.parent.type.name).toBe('heading')
     expect(editor.state.selection.$from.parent.textContent).toBe('**Target Heading**')
@@ -531,7 +531,7 @@ describe('MeowdownEditor', () => {
     )
 
     expect(ref.current?.revealHeading('#target-heading-1')).toBe(true)
-    const editor = ref.current?.editor
+    const editor = ref.current?.getEditor()
     if (!editor) throw new Error('editor not mounted')
     expect(editor.state.selection.$from.parent.type.name).toBe('heading')
     expect(editor.state.selection.$from.before()).toBe(
@@ -620,7 +620,7 @@ describe('file pill props', () => {
         onFilePaste={(file) => `assets/${file.name}`}
       />,
     )
-    const view = ref.current!.editor!.view
+    const view = ref.current!.getEditor()!.view
     dropFiles(view, [new File(['%PDF'], 'report.pdf', { type: 'application/pdf' })], 1)
     await expect.element(pmRoot.getByTestId('file-pill')).toHaveTextContent('report.pdf')
     expect(ref.current!.getMarkdown()).toBe('[report.pdf](assets/report.pdf)\n')
