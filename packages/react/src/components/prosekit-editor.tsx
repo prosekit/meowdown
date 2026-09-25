@@ -13,8 +13,6 @@ import {
   type FilePasteOptions,
   type FileViewOptions,
   type ImageClickHandler,
-  type XPostMediaClickHandler,
-  type YouTubeVideoClickHandler,
   type ImageOptions,
   type LinkClickHandler,
   type LinkCopyHandler,
@@ -28,7 +26,9 @@ import {
   type WikiEmbedResolver,
   type WikilinkClickHandler,
   type WikilinkResolver,
+  type XPostMediaClickHandler,
   type XPostResolver,
+  type YouTubeVideoClickHandler,
   type YouTubeVideoResolver,
 } from '@meowdown/core'
 import { clamp } from '@ocavue/utils'
@@ -550,8 +550,10 @@ export function ProseKitEditor({
       suppressDocChangeRef.current = true
       try {
         editor.view.dispatch(transaction)
-      } finally {
         suppressDocChangeRef.current = false
+      } catch (error) {
+        suppressDocChangeRef.current = false
+        throw error
       }
     }
     function setState(markdown?: string, selection?: SelectionHint): void {
