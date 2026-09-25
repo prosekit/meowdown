@@ -6,16 +6,12 @@ import type {
   FilePasteOptions,
   FileViewOptions,
   ImageClickHandler,
-  XPostMediaClickHandler,
-  YouTubeVideoClickHandler,
   ImageOptions,
   LinkClickHandler,
   LinkCopyHandler,
   LinkPreviewResolver,
   MarkMode,
   PlaceholderOptions,
-  XPostResolver,
-  YouTubeVideoResolver,
   SearchStatusHandler,
   StartPendingReplacementOptions,
   TagClickHandler,
@@ -23,6 +19,10 @@ import type {
   WikiEmbedResolver,
   WikilinkClickHandler,
   WikilinkResolver,
+  XPostMediaClickHandler,
+  XPostResolver,
+  YouTubeVideoClickHandler,
+  YouTubeVideoResolver,
 } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
 import type { ReactNodeViewComponent } from '@prosekit/react'
