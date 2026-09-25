@@ -32,7 +32,9 @@ export default defineESLintConfig(
     rules: {
       // https://react.dev/reference/eslint-plugin-react-hooks/lints/refs
       'react-hooks/refs': 'error',
-      // https://react.dev/reference/eslint-plugin-react-hooks/lints/todo
+      // No page on react.dev for this one (the URL in the rule's metadata is a
+      // 404). It reports syntax React Compiler has not implemented yet; see
+      // https://github.com/facebook/react/blob/d083ec1da1e5252abd3ddfdde6dfbc09701a2c51/compiler/packages/babel-plugin-react-compiler/src/CompilerError.ts#L981-L988
       'react-hooks/todo': 'error',
     },
   },
