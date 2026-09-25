@@ -1,8 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
 import { setupFixture, type Fixture } from '../testing/index.ts'
-import { resetIsTouchInputForTest } from '../utils/input-modality.ts'
 
 import type { MarkMode } from './mark-mode.ts'
 
@@ -419,14 +418,6 @@ describe('virtual caret under touch input', () => {
   function touchTheScreen(): void {
     window.dispatchEvent(new PointerEvent('pointerdown', { pointerType: 'touch' }))
   }
-
-  beforeEach(() => {
-    resetIsTouchInputForTest()
-  })
-
-  afterEach(() => {
-    resetIsTouchInputForTest()
-  })
 
   it('keeps the virtual caret before any touch arrives', async () => {
     using fixture = setupMode('hide', 'hello <a>world')

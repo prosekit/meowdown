@@ -16,6 +16,7 @@ const KEYBOARD_MODALITY_KEYS = new Set([
 ])
 
 let lastIsTouchInput = false
+let lastIsPointerSelection = false
 
 const listeners = new Set<() => void>()
 
@@ -26,6 +27,8 @@ function setIsTouchInput(isTouchInput: boolean): void {
 }
 
 function handlePointerDown(event: PointerEvent): void {
+  const target = event.target
+  lastIsPointerSelection = target instanceof Element && target.closest('.ProseMirror') != null
   const pointerType = event.pointerType
   if (pointerType === 'mouse') {
     setIsTouchInput(false)
@@ -38,6 +41,7 @@ function handleKeyDown(event: KeyboardEvent): void {
   if (getIsComposing() || event.isComposing) {
     return
   }
+  lastIsPointerSelection = false
   if (KEYBOARD_MODALITY_KEYS.has(event.key) || event.metaKey || event.ctrlKey) {
     setIsTouchInput(false)
   }
@@ -65,6 +69,14 @@ export function getIsTouchInput(): boolean {
 }
 
 /**
+ * Whether the next selection change in an editor comes from a pointer: the
+ * last `pointerdown` landed inside an editor and no key was pressed since.
+ */
+export function getIsPointerSelection(): boolean {
+  return lastIsPointerSelection
+}
+
+/**
  * Calls `listener` whenever {@link getIsTouchInput} may report a new value.
  */
 export function onIsTouchInputChange(listener: () => void): () => void {
@@ -77,6 +89,7 @@ export function onIsTouchInputChange(listener: () => void): () => void {
 /**
  * @internal
  */
-export function resetIsTouchInputForTest(): void {
+export function resetInputModalityForTest(): void {
   lastIsTouchInput = false
+  lastIsPointerSelection = false
 }

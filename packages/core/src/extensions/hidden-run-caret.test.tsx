@@ -115,7 +115,7 @@ describe('hide mode pointer snapping', () => {
     expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"foo ⎦**bold** bar"`)
   })
 
-  it('lands after the unit when clicking at the right edge of a word', { retry: 5 }, async () => {
+  it('lands after the unit when clicking at the right edge of a word', async () => {
     using fixture = setupMode('hide', 'foo **bold** bar')
     const coords = fixture.view.coordsAtPos(findText(fixture.doc, 'bold') + 4, -1)
     await clickAt(fixture, coords.right - 1, (coords.top + coords.bottom) / 2)
