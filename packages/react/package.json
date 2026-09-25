@@ -68,7 +68,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
     "@vitest/browser-playwright": "^5.0.1",
-    "babel-plugin-react-compiler": "^1.0.0",
+    "babel-plugin-react-compiler": "0.0.0-experimental-a1856f3-20260507",
     "dedent": "^1.7.2",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
