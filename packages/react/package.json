@@ -12,8 +12,15 @@
     "**/*.css"
   ],
   "exports": {
-    ".": "./src/index.ts",
-    "./style.css": "./src/style.css"
+    ".": {
+      "development": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./style.css": {
+      "development": "./src/style.css",
+      "default": "./dist/style.css"
+    }
   },
   "files": [
     "./dist/**/*.js",
