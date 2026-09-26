@@ -181,8 +181,10 @@ export interface EditorProps {
 
   /**
    * Maps an image `src` to a displayable URL, or `undefined` to skip that image.
-   * Defaults to showing http(s) URLs as-is. Pass a stable function (e.g. from
-   * `useCallback`).
+   * May return a `Promise` when the answer depends on data that has not loaded
+   * yet; the image appears once it resolves, in a box of its persisted size
+   * when one exists. Defaults to showing http(s) URLs as-is. Pass a stable
+   * function (e.g. from `useCallback`).
    */
   resolveImageUrl?: ImageOptions['resolveImageUrl']
 

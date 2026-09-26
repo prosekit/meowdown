@@ -19,6 +19,7 @@ import {
   type FileInfoResolver,
   type FileLinkResolver,
   type ImageClickHandler,
+  type ImageUrlResolver,
   type LinkClickHandler,
   type ListMarker,
   type MarkChunk,
@@ -62,6 +63,7 @@ import {
 
 import { useBeautifulMermaid } from '../hooks/use-beautiful-mermaid.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
+import { useMaybePromise } from '../hooks/use-maybe-promise.ts'
 
 import { attributesToProps } from './attributes-to-props.ts'
 import styles from './code-block-view.module.css'
@@ -136,9 +138,11 @@ export interface MarkdownViewProps {
    */
   expandCollapsed?: boolean
   /**
-   * Map an image `src` to a displayable URL, or `undefined` to skip it.
+   * Map an image `src` to a displayable URL, or `undefined` to skip it. May
+   * return a `Promise`; the image appears once it resolves, in a box of its
+   * persisted size when both dimensions are known.
    */
-  resolveImageUrl?: (src: string) => string | undefined
+  resolveImageUrl?: ImageUrlResolver
   /**
    * Claim a `[label](url)` link as a file pill instead of a regular link.
    * Must be pure; return `false` for links that should render normally.
@@ -215,7 +219,7 @@ export interface MarkdownViewProps {
 interface BlockContext {
   interactive: boolean
   expandCollapsed: boolean
-  resolveImageUrl?: (src: string) => string | undefined
+  resolveImageUrl?: ImageUrlResolver
   resolveFileLink?: FileLinkResolver
   resolveWikiEmbed?: WikiEmbedResolver
   resolveWikilink?: WikilinkResolver
@@ -364,8 +368,9 @@ function ImagePreview(props: {
   src: string
   alt: string
   width: number | null
+  height: number | null
   snapshot: object | null
-  resolveImageUrl?: (src: string) => string | undefined
+  resolveImageUrl?: ImageUrlResolver
   resolveXPost?: XPostResolver
   /**
    * Additional trusted protocols for X media URLs, such as `reflect-asset:`.
@@ -379,6 +384,7 @@ function ImagePreview(props: {
     src,
     alt,
     width,
+    height,
     snapshot,
     resolveImageUrl,
     resolveXPost,
@@ -388,6 +394,13 @@ function ImagePreview(props: {
     interactive,
   } = props
   const kind = matchEmbed(src)
+  // Resolved before the embed branch so the hook count is stable; an embed
+  // never consults the resolver, so it is not called for one.
+  const resolved = useMemo(
+    () => (kind ? undefined : (resolveImageUrl ?? defaultResolveImageUrl)(src)),
+    [kind, resolveImageUrl, src],
+  )
+  const url = useMaybePromise(resolved)
   if (kind) {
     if (!interactive) return null
     return (
@@ -403,8 +416,27 @@ function ImagePreview(props: {
       />
     )
   }
-  const url = (resolveImageUrl ?? defaultResolveImageUrl)(src)
-  if (!url) return null
+  if (!url) {
+    // A pending resolver with a persisted size reserves the box, so the image
+    // does not shift the layout when it arrives.
+    if (resolved instanceof Promise && width != null && height != null) {
+      return (
+        <span
+          className="md-image-view-preview md-atom-view-preview"
+          data-testid="image-preview"
+          contentEditable={false}
+        >
+          <span
+            className="md-image-resizable"
+            data-testid="image-resizable"
+            data-loading=""
+            style={{ width: `${width}px`, height: `${height}px` }}
+          />
+        </span>
+      )
+    }
+    return null
+  }
   const handleClick = onImageClick
     ? (event: MouseEvent<HTMLImageElement>) => {
         return onImageClick({
@@ -437,17 +469,19 @@ function ImageView(props: {
   src: string
   alt: string
   width: number | null
+  height: number | null
   snapshot: object | null
   context: RenderContext
   children: ReactNode
 }): ReactElement {
-  const { src, alt, width, snapshot, context, children } = props
+  const { src, alt, width, height, snapshot, context, children } = props
   return (
     <span className="md-image-view md-atom-view">
       <ImagePreview
         src={src}
         alt={alt}
         width={width}
+        height={height}
         snapshot={snapshot}
         resolveImageUrl={context.resolveImageUrl}
         resolveXPost={context.resolveXPost}
@@ -560,26 +594,12 @@ function renderTokens(code: string, tokens: readonly CodeToken[]): ReactNode {
 
 function CodeBlock({ code, language }: { code: string; language: string }): ReactElement {
   // Synchronous tokens when the grammar is already loaded (the common path);
-  // `null` means a grammar must load, which the effect awaits.
-  const syncTokens = useMemo<readonly CodeToken[] | null>(() => {
-    const result = getCodeTokens(code, language)
-    return Array.isArray(result) ? result : null
-  }, [code, language])
-  const [asyncTokens, setAsyncTokens] = useState<readonly CodeToken[] | null>(null)
-  useEffect(() => {
-    if (syncTokens) return
-    let active = true
-    const result = getCodeTokens(code, language)
-    if (!Array.isArray(result)) {
-      void result.then((loaded) => {
-        if (active) setAsyncTokens(loaded)
-      })
-    }
-    return () => {
-      active = false
-    }
-  }, [code, language, syncTokens])
-  const tokens = syncTokens ?? asyncTokens ?? []
+  // a Promise means a grammar must load, and the code renders plain until then.
+  const result = useMemo<CodeToken[] | Promise<CodeToken[]>>(
+    () => getCodeTokens(code, language),
+    [code, language],
+  )
+  const tokens = useMaybePromise(result) ?? []
   return (
     <pre data-language={language || undefined}>
       <code>{tokens.length > 0 ? renderTokens(code, tokens) : code}</code>
@@ -665,6 +685,7 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
           src={attrs.src}
           alt={attrs.alt}
           width={attrs.width}
+          height={attrs.height}
           snapshot={attrs.snapshot}
           context={context}
         >
