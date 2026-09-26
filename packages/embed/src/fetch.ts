@@ -47,6 +47,9 @@ export function useFetch<T>(
   props: State<FetchProps<T>>,
   label: string,
 ): FetchState<T> {
+  // This is an `@aria-ui/core` hook that runs outside of React rendering. Keep
+  // React Compiler from treating it as a React hook because of its `use` prefix.
+  'use no memo'
   const fetched = createSignal<T | null>(null)
   const pending = createSignal(false)
 
