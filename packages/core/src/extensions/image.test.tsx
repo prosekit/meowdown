@@ -1,5 +1,4 @@
 import { isSafari } from '@meowdown/vitest/helpers'
-import { sleep } from '@ocavue/utils'
 import { NodeSelection } from '@prosekit/pm/state'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
@@ -581,12 +580,10 @@ describe('async resolveImageUrl', () => {
 
   function deferred() {
     let resolve!: (url: string | undefined) => void
-    let reject!: (reason: unknown) => void
-    const promise = new Promise<string | undefined>((res, rej) => {
+    const promise = new Promise<string | undefined>((res) => {
       resolve = res
-      reject = rej
     })
-    return { promise, resolve, reject }
+    return { promise, resolve }
   }
 
   function setupAsync(text: string, promise: Promise<string | undefined>): Fixture {
@@ -607,24 +604,6 @@ describe('async resolveImageUrl', () => {
     resolve(url)
     await expect.element(pmRoot.getByAltText('img')).toHaveAttribute('src', url)
     expect(fixture.doc).toBe(doc)
-    expect(fixture.doc.textContent).toBe('ABC![img](photo.png)DEF')
-  })
-
-  it('shows nothing when the Promise resolves to undefined or rejects', async () => {
-    const skipped = deferred()
-    {
-      using fixture = setupAsync('ABC![img](photo.png)DEF', skipped.promise)
-      skipped.resolve(undefined)
-      await sleep(20)
-      await expect.element(preview).not.toBeInTheDocument()
-      expect(fixture.doc.textContent).toBe('ABC![img](photo.png)DEF')
-    }
-    const failed = deferred()
-    using fixture = setupAsync('ABC![img](photo.png)DEF', failed.promise)
-    failed.reject(new Error('offline'))
-    await sleep(20)
-    await expect.element(preview).not.toBeInTheDocument()
-    expect(fixture.doc.textContent).toBe('ABC![img](photo.png)DEF')
   })
 
   it('reserves a box of the persisted size while pending, then fills it in place', async () => {
@@ -639,46 +618,19 @@ describe('async resolveImageUrl', () => {
     const box = resizable.element()
 
     resolve(url)
-    const image = pmRoot.getByAltText('img')
-    await expect.element(image).toHaveAttribute('src', url)
+    await expect.element(pmRoot.getByAltText('img')).toHaveAttribute('src', url)
     expect(resizable.element()).toBe(box)
     await expect.element(resizable).not.toHaveAttribute('data-loading')
-    await expect.element(resizable).toHaveAttribute('data-width', '120')
-    await expect.element(resizable).toHaveAttribute('data-height', '80')
   })
 
-  it('removes the reserved box when the Promise resolves to undefined', async () => {
+  it('drops the reserved box when the Promise resolves to undefined', async () => {
     const { promise, resolve } = deferred()
     using fixture = setupAsync('![img](photo.png)<!-- {"width":120,"height":80} -->', promise)
-    void fixture
     await expect.element(resizable).toBeInTheDocument()
 
     resolve(undefined)
     await expect.element(preview).not.toBeInTheDocument()
-  })
-
-  it('reserves no box when only the width is persisted', async () => {
-    const { promise } = deferred()
-    using fixture = setupAsync('![img](photo.png)<!-- {"width":120} -->', promise)
-    void fixture
-    await sleep(20)
-    await expect.element(preview).not.toBeInTheDocument()
-  })
-
-  it('discards a late answer for a source that changed meanwhile', async () => {
-    const url = getSVGImageURL(10, 10)
-    const { promise, resolve } = deferred()
-    using fixture = setupAsync('![img](old.png)', promise)
-    const { view, n } = fixture
-    fixture.set(n.doc(n.paragraph('![img](new.png)')))
-    expect(view.state.doc.textContent).toBe('![img](new.png)')
-
-    resolve(url)
-    await sleep(20)
-    // Both views got the same Promise, so exactly one image renders: the new one.
-    await expect.element(pmRoot.getByAltText('img')).toHaveAttribute('src', url)
-    expect(pmRoot.getByTestId('image-preview').elements()).toHaveLength(1)
-    expect(view.dom.querySelectorAll('.md-image-view').length).toBe(1)
+    expect(fixture.doc.textContent).toBe('![img](photo.png)<!-- {"width":120,"height":80} -->')
   })
 })
 

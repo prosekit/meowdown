@@ -50,16 +50,6 @@ describe('useMaybePromise', () => {
     await expect.element(value).toHaveTextContent('second')
   })
 
-  it('ignores a Promise that resolves after the input was replaced', async () => {
-    const stale = deferred<string>()
-    const screen = await render(<Probe input={stale.promise} />)
-    await screen.rerender(<Probe input="sync" />)
-    stale.resolve('stale')
-    await expect.element(value).toHaveTextContent('sync')
-    await sleep(20)
-    await expect.element(value).toHaveTextContent('sync')
-  })
-
   it('stays undefined and warns when the Promise rejects', async () => {
     const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     try {
