@@ -68,7 +68,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "@vitest/browser-playwright": "^5.0.1",
     "dedent": "^1.7.2",
-    "oxc-transform-react": "~0.145.0",
+    "oxc-transform-react": "^0.145.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "tsdown": "^0.23.0",
