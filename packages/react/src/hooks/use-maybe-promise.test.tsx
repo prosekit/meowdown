@@ -1,5 +1,5 @@
 import { sleep } from '@ocavue/utils'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 
@@ -60,11 +60,18 @@ describe('useMaybePromise', () => {
     await expect.element(value).toHaveTextContent('sync')
   })
 
-  it('stays undefined when the Promise rejects', async () => {
-    const { promise, reject } = deferred<string>()
-    await render(<Probe input={promise} />)
-    reject(new Error('nope'))
-    await sleep(20)
-    await expect.element(value).toHaveTextContent('(pending)')
+  it('stays undefined and warns when the Promise rejects', async () => {
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    try {
+      const { promise, reject } = deferred<string>()
+      const error = new Error('nope')
+      await render(<Probe input={promise} />)
+      reject(error)
+      await sleep(20)
+      await expect.element(value).toHaveTextContent('(pending)')
+      expect(consoleWarn).toHaveBeenCalledWith('[meowdown] useMaybePromise input rejected:', error)
+    } finally {
+      consoleWarn.mockRestore()
+    }
   })
 })
