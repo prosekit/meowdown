@@ -1,4 +1,5 @@
 import { isSafari } from '@meowdown/vitest/helpers'
+import { sleep } from '@ocavue/utils'
 import { NodeSelection } from '@prosekit/pm/state'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
@@ -614,14 +615,14 @@ describe('async resolveImageUrl', () => {
     {
       using fixture = setupAsync('ABC![img](photo.png)DEF', skipped.promise)
       skipped.resolve(undefined)
-      await new Promise((done) => setTimeout(done, 20))
+      await sleep(20)
       await expect.element(preview).not.toBeInTheDocument()
       expect(fixture.doc.textContent).toBe('ABC![img](photo.png)DEF')
     }
     const failed = deferred()
     using fixture = setupAsync('ABC![img](photo.png)DEF', failed.promise)
     failed.reject(new Error('offline'))
-    await new Promise((done) => setTimeout(done, 20))
+    await sleep(20)
     await expect.element(preview).not.toBeInTheDocument()
     expect(fixture.doc.textContent).toBe('ABC![img](photo.png)DEF')
   })
@@ -660,7 +661,7 @@ describe('async resolveImageUrl', () => {
     const { promise } = deferred()
     using fixture = setupAsync('![img](photo.png)<!-- {"width":120} -->', promise)
     void fixture
-    await new Promise((done) => setTimeout(done, 20))
+    await sleep(20)
     await expect.element(preview).not.toBeInTheDocument()
   })
 
@@ -673,7 +674,7 @@ describe('async resolveImageUrl', () => {
     expect(view.state.doc.textContent).toBe('![img](new.png)')
 
     resolve(url)
-    await new Promise((done) => setTimeout(done, 20))
+    await sleep(20)
     // Both views got the same Promise, so exactly one image renders: the new one.
     await expect.element(pmRoot.getByAltText('img')).toHaveAttribute('src', url)
     expect(pmRoot.getByTestId('image-preview').elements()).toHaveLength(1)

@@ -1,3 +1,4 @@
+import { sleep } from '@ocavue/utils'
 import { describe, expect, it } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
@@ -55,7 +56,7 @@ describe('useMaybePromise', () => {
     await screen.rerender(<Probe input="sync" />)
     stale.resolve('stale')
     await expect.element(value).toHaveTextContent('sync')
-    await new Promise((done) => setTimeout(done, 20))
+    await sleep(20)
     await expect.element(value).toHaveTextContent('sync')
   })
 
@@ -63,7 +64,7 @@ describe('useMaybePromise', () => {
     const { promise, reject } = deferred<string>()
     await render(<Probe input={promise} />)
     reject(new Error('nope'))
-    await new Promise((done) => setTimeout(done, 20))
+    await sleep(20)
     await expect.element(value).toHaveTextContent('(pending)')
   })
 })
