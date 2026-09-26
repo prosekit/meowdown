@@ -10,6 +10,7 @@ import el from "crelt";
 * @internal
 */
 function useFetch(host, props, label) {
+	"use no memo";
 	const fetched = createSignal(null);
 	const pending = createSignal(false);
 	useEffect(host, () => {

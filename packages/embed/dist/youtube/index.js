@@ -1,4 +1,4 @@
-import { a as useFetch, i as getSafeUrl, n as getRootContainer, r as renderLink, t as isPlainClick } from "../is-plain-click-QDpLdFP7.js";
+import { a as useFetch, i as getSafeUrl, n as getRootContainer, r as renderLink, t as isPlainClick } from "../is-plain-click-Dt8iswO8.js";
 import { defineCustomElement, defineProps, registerCustomElement, useEffect } from "@aria-ui/core";
 import { parseYouTubeVideo } from "@post-embed/schema";
 import el from "crelt";
