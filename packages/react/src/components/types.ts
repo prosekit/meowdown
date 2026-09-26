@@ -3,6 +3,7 @@ import type {
   PendingReplacement,
   PendingReplacementOutcome,
   StartPendingReplacementOptions,
+  InsertMarkdownOptions,
   TypedEditor,
 } from '@meowdown/core'
 import type { SelectionJSON } from '@prosekit/core'
@@ -40,11 +41,12 @@ export interface EditorHandle {
    * undoable edit. An active selection collapses first and is never
    * deleted - this is a host-initiated insert, not a paste. A lone paragraph is
    * inserted inline at the cursor; anything else is inserted as blocks. The
-   * cursor lands at the end of the inserted content. An empty or
+   * cursor lands at the end of the inserted content, or in the following
+   * paragraph when `options.selection` is `'after-block'`. An empty or
    * whitespace-only string is a no-op. Unlike `setMarkdown`, it fires
    * `onDocChange`: the host cannot know the resulting document.
    */
-  insertMarkdown: (markdown: string) => void
+  insertMarkdown: (markdown: string, options?: InsertMarkdownOptions) => void
 
   /**
    * Returns the current Markdown and selection.

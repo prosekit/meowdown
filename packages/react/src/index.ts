@@ -1,4 +1,5 @@
 export { MeowdownEditor, type EditorMode, type EditorProps } from './components/editor.tsx'
+export type { CodeBlockRenderer, CodeBlockRenderOptions } from './components/code-block-view.tsx'
 export {
   MarkdownView,
   type MarkdownViewProps,

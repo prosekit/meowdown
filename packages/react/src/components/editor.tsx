@@ -7,6 +7,7 @@ import type {
   FileViewOptions,
   ImageClickHandler,
   ImageOptions,
+  InsertMarkdownOptions,
   LinkClickHandler,
   LinkCopyHandler,
   LinkPreviewResolver,
@@ -38,6 +39,7 @@ import {
 
 import type { TimeFormat } from '../utils/date-format.ts'
 
+import type { CodeBlockRenderer } from './code-block-view.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
 import type {
   EditorHandle,
@@ -72,6 +74,14 @@ export interface EditorProps {
    * `setState` on the handle do not fire it.
    */
   onDocChange?: VoidFunction
+
+  /**
+   * Renders host-owned content for selected fenced code blocks. Return null
+   * to keep the built-in source, toolbar, and preview. Ignored when
+   * `CodeBlockView` replaces the built-in view. Read each time that view
+   * renders; pass a stable function.
+   */
+  renderCodeBlock?: CodeBlockRenderer
 
   /**
    * Searches host items for the slash menu, which opens when typing `/`.
@@ -409,6 +419,7 @@ export function MeowdownEditor({
   mode = 'focus',
   initialMarkdown,
   onDocChange,
+  renderCodeBlock,
   onSlashMenuSearch,
   onTagSearch,
   onWikilinkSearch,
@@ -465,8 +476,8 @@ export function MeowdownEditor({
     function setMarkdown(markdown: string): void {
       childRef.current?.setMarkdown(markdown)
     }
-    function insertMarkdown(markdown: string): void {
-      childRef.current?.insertMarkdown(markdown)
+    function insertMarkdown(markdown: string, options?: InsertMarkdownOptions): void {
+      childRef.current?.insertMarkdown(markdown, options)
     }
     function getState(): EditorStateSnapshot {
       return childRef.current?.getState() ?? ['', { type: 'text', anchor: 0, head: 0 }]
@@ -553,6 +564,7 @@ export function MeowdownEditor({
         markMode={mode}
         initialMarkdown={initialMarkdown}
         onDocChange={onDocChange}
+        renderCodeBlock={renderCodeBlock}
         onSlashMenuSearch={onSlashMenuSearch}
         onTagSearch={onTagSearch}
         onWikilinkSearch={onWikilinkSearch}

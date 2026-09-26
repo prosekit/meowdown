@@ -2,13 +2,28 @@ import { defineCommands, isTextSelection, setBlockType } from '@prosekit/core'
 import { triggerAutocomplete } from '@prosekit/extensions/autocomplete'
 import { unwrapList } from '@prosekit/extensions/list'
 import { chainCommands, lift } from '@prosekit/pm/commands'
-import { Slice, type ResolvedPos } from '@prosekit/pm/model'
-import { TextSelection, type Command } from '@prosekit/pm/state'
+import { Slice, type Fragment, type ResolvedPos } from '@prosekit/pm/model'
+import { TextSelection, type Command, type Transaction } from '@prosekit/pm/state'
 
 import { markdownToDoc } from '../converters/md-to-pm.ts'
 
+import { insertDefaultBlockAt } from './code-block-exit.ts'
 import { isNodeOfType, type NodeName } from './node-names.ts'
 import { getNodeBuildersForSchema } from './schema.ts'
+
+/**
+ * Where `insertMarkdown` leaves the caret.
+ */
+export interface InsertMarkdownOptions {
+  /**
+   * `end` (the default) leaves the caret at the end of the inserted fragment.
+   * `after-block` closes the fragment so a paragraph suffix stays outside the
+   * block, then places the caret in the following paragraph. A missing
+   * paragraph is created with {@link insertDefaultBlockAt}, the same block
+   * `exitCodeBlockAtEnd` inserts.
+   */
+  selection?: 'end' | 'after-block'
+}
 
 function selectText(anchor: number, head?: number): Command {
   return (state, dispatch) => {
@@ -32,24 +47,73 @@ function selectTextBetween($anchor: ResolvedPos, $head: ResolvedPos, bias?: numb
   }
 }
 
-function insertMarkdown(markdown: string): Command {
+function markdownSlice(content: Fragment, options: InsertMarkdownOptions): Slice {
+  const isSingleParagraph = content.childCount === 1 && isNodeOfType(content.child(0), 'paragraph')
+  if (isSingleParagraph) return new Slice(content, 1, 1)
+  if (options.selection === 'after-block') return new Slice(content, 0, 0)
+  return new Slice(content, 0, Slice.maxOpen(content).openEnd)
+}
+
+/**
+ * Put the caret in the paragraph after the code block that the closed slice
+ * just inserted. Reuses a paragraph that already follows it.
+ */
+function placeCaretAfterInsertedCodeBlock(transaction: Transaction): void {
+  const located = locateInsertedCodeBlock(transaction)
+  if (!located) return
+  const { after, followedByParagraph } = located
+  if (followedByParagraph) {
+    transaction.setSelection(TextSelection.near(transaction.doc.resolve(after), 1))
+    return
+  }
+  insertDefaultBlockAt(transaction, after)
+}
+
+function locateInsertedCodeBlock(
+  transaction: Transaction,
+): { after: number; followedByParagraph: boolean } | null {
+  const $from = transaction.selection.$from
+  for (let depth = $from.depth; depth > 0; depth -= 1) {
+    if (!isNodeOfType($from.node(depth), 'codeBlock')) continue
+    return codeBlockBoundary(transaction, $from.after(depth))
+  }
+  if ($from.depth === 0) return null
+  const container = $from.node(-1)
+  const index = $from.index(-1)
+  const previous = index > 0 ? container.child(index - 1) : null
+  if (!previous || !isNodeOfType(previous, 'codeBlock')) return null
+  return codeBlockBoundary(transaction, $from.before())
+}
+
+function codeBlockBoundary(
+  transaction: Transaction,
+  after: number,
+): { after: number; followedByParagraph: boolean } {
+  const nodeAfter = transaction.doc.resolve(after).nodeAfter
+  return {
+    after,
+    followedByParagraph: nodeAfter !== null && isNodeOfType(nodeAfter, 'paragraph'),
+  }
+}
+
+function insertMarkdown(markdown: string, options: InsertMarkdownOptions = {}): Command {
   return (state, dispatch) => {
     if (!markdown.trim()) return false
     const nodes = getNodeBuildersForSchema(state.schema)
     const content = markdownToDoc(markdown, { nodes }).content
     if (content.childCount === 0) return false
-    const isSingleParagraph =
-      content.childCount === 1 && isNodeOfType(content.child(0), 'paragraph')
-    const slice = isSingleParagraph
-      ? new Slice(content, 1, 1)
-      : new Slice(content, 0, Slice.maxOpen(content).openEnd)
+    const slice = markdownSlice(content, options)
     if (dispatch) {
-      const tr = state.tr
-      const selection = tr.selection
+      const transaction = state.tr
+      const selection = transaction.selection
       if (!isTextSelection(selection) || !selection.empty) {
-        tr.setSelection(TextSelection.near(selection.$from))
+        transaction.setSelection(TextSelection.near(selection.$from))
       }
-      dispatch(tr.replaceSelection(slice).scrollIntoView())
+      transaction.replaceSelection(slice)
+      if (options.selection === 'after-block') {
+        placeCaretAfterInsertedCodeBlock(transaction)
+      }
+      dispatch(transaction.scrollIntoView())
     }
     return true
   }
