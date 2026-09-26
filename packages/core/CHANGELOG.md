@@ -1,5 +1,11 @@
 # @meowdown/core
 
+## 0.75.0
+
+### Minor Changes
+
+- [#628](https://github.com/prosekit/meowdown/pull/628) [`b09d2b2`](https://github.com/prosekit/meowdown/commit/b09d2b28495e00dc4a05e2eeda4927dddbf09cf0) Thanks [@ocavuebot](https://github.com/ocavuebot)! - `resolveImageUrl` may return a `Promise<string | undefined>`. The image appears once it resolves; while it is pending, an image with a persisted `width` and `height` reserves a box of that size so the resolved image does not shift the layout. This applies to the editor and to `MarkdownView`.
+
 ## 0.74.2
 
 ### Patch Changes
