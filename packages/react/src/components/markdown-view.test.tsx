@@ -446,10 +446,9 @@ describe('MarkdownView', () => {
     await renderView('![cat](cat.png)', { resolveImageUrl: () => promise })
     await expect.element(view.getByTestId('image-preview')).not.toBeInTheDocument()
     resolve(PHOTO_URL)
-    await expect.element(view.getByTestId('image-preview').locate('img')).toHaveAttribute(
-      'src',
-      PHOTO_URL,
-    )
+    await expect
+      .element(view.getByTestId('image-preview').locate('img'))
+      .toHaveAttribute('src', PHOTO_URL)
   })
 
   it('reserves a sized box while an async resolver is pending', async () => {
@@ -465,10 +464,9 @@ describe('MarkdownView', () => {
     await expect.element(box).toHaveStyle({ width: '120px', height: '80px' })
     expect(box.locate('img').elements()).toHaveLength(0)
     resolve(PHOTO_URL)
-    await expect.element(view.getByTestId('image-preview').locate('img')).toHaveAttribute(
-      'src',
-      PHOTO_URL,
-    )
+    await expect
+      .element(view.getByTestId('image-preview').locate('img'))
+      .toHaveAttribute('src', PHOTO_URL)
   })
 
   it('highlights a code block with syntax tokens', async () => {
