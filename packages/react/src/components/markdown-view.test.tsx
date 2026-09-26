@@ -438,6 +438,25 @@ describe('MarkdownView', () => {
     expect(onTaskClick).not.toHaveBeenCalled()
   })
 
+  it('reserves a sized box for an async image resolver, then renders the image', async () => {
+    let resolve!: (url: string) => void
+    const promise = new Promise<string>((res) => {
+      resolve = res
+    })
+    await renderView('![cat](cat.png)<!-- {"width":120,"height":80} -->', {
+      resolveImageUrl: () => promise,
+    })
+    const box = view.getByTestId('image-resizable')
+    await expect.element(box).toHaveAttribute('data-loading', '')
+    await expect.element(box).toHaveStyle({ width: '120px', height: '80px' })
+    expect(box.locate('img').elements()).toHaveLength(0)
+
+    resolve(PHOTO_URL)
+    await expect
+      .element(view.getByTestId('image-preview').locate('img'))
+      .toHaveAttribute('src', PHOTO_URL)
+  })
+
   it('highlights a code block with syntax tokens', async () => {
     await renderView('```rust\nfn main() {}\n```')
     await expect

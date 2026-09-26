@@ -33,7 +33,13 @@ import {
 } from './post-embed.ts'
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
 
-type ImageUrlResolver = (src: string) => string | undefined
+/**
+ * Maps a markdown `src` to a displayable URL, or `undefined` to skip rendering
+ * that image. May return a `Promise` when the answer needs data that is not
+ * loaded yet: the image appears once it resolves, and a rejection or an
+ * `undefined` result leaves the source without a preview.
+ */
+export type ImageUrlResolver = (src: string) => string | undefined | Promise<string | undefined>
 
 /**
  * Options for {@link defineImage}.
@@ -41,7 +47,10 @@ type ImageUrlResolver = (src: string) => string | undefined
 export interface ImageOptions {
   /**
    * Map a markdown `src` to a displayable URL, or `undefined` to skip rendering
-   * that image. Defaults to `defaultResolveImageUrl`.
+   * that image. May return a `Promise`; while it is pending, an image whose
+   * `width` and `height` are both persisted shows a sized placeholder so the
+   * resolved image does not shift the layout. Defaults to
+   * `defaultResolveImageUrl`.
    */
   resolveImageUrl?: ImageUrlResolver
   /**
@@ -245,13 +254,8 @@ class ImageMarkView implements MarkView {
       this.#contentDOM.setAttribute(name, value)
     }
 
-    const preview = this.#renderPreview()
-    if (preview) {
-      preview.contentEditable = 'false'
-      this.#dom.appendChild(preview)
-    }
-
     this.#dom.appendChild(this.#contentDOM)
+    this.#mountPreview()
   }
 
   get dom(): HTMLElement {
@@ -291,23 +295,81 @@ class ImageMarkView implements MarkView {
   }
 
   /**
-   * Build the inline preview for the image `src`: a post-embed card or a
-   * resizable `<img>`.
+   * Mount the inline preview for the image `src`, if any: a post-embed card, a
+   * resizable `<img>`, or, while an asynchronous resolver is pending and the
+   * size is persisted, an empty box of that size that the image later fills.
    */
-  #renderPreview(): HTMLElement | undefined {
+  #mountPreview(): void {
     const { src } = this.#attrs
-    const wrapper = document.createElement('span')
-    wrapper.className = 'md-image-view-preview md-atom-view-preview'
     const kind = matchEmbed(src)
     if (kind) {
+      const wrapper = this.#createWrapper()
       wrapper.dataset.testid = `${kind}-embed`
       wrapper.dataset.postEmbed = kind
       wrapper.appendChild(this.#buildPostEmbed(kind, src))
-      return wrapper
+      this.#insertPreview(wrapper)
+      return
     }
 
-    const url = (this.#resolveImageUrl ?? defaultResolveImageUrl)(src)
-    if (!url) return undefined
+    const resolved = (this.#resolveImageUrl ?? defaultResolveImageUrl)(src)
+    if (resolved instanceof Promise) {
+      // Only a fully persisted size can reserve the box; a lone width cannot
+      // tell the height before the image loads.
+      const placeholder = this.#hasPersistedSize() ? this.#renderImage(null) : undefined
+      if (placeholder) this.#insertPreview(placeholder)
+      void resolved.then(
+        (url) => this.#settle(placeholder, url),
+        () => this.#settle(placeholder, undefined),
+      )
+      return
+    }
+    if (resolved) this.#insertPreview(this.#renderImage(resolved))
+  }
+
+  #hasPersistedSize(): boolean {
+    return this.#attrs.width != null && this.#attrs.height != null
+  }
+
+  /**
+   * Apply a resolver's asynchronous answer: fill the placeholder with the
+   * image, mount the image from scratch, or drop the placeholder when there is
+   * nothing to show. A view destroyed in the meantime (its `src` changed, or it
+   * left the document) ignores the answer.
+   */
+  #settle(placeholder: HTMLElement | undefined, url: string | undefined): void {
+    if (this.#destroyed) return
+    if (!url) {
+      placeholder?.remove()
+      this.#resizableRoot = undefined
+      return
+    }
+    if (placeholder && this.#resizableRoot) {
+      this.#attachImage(this.#resizableRoot, url)
+    } else {
+      this.#insertPreview(this.#renderImage(url))
+    }
+  }
+
+  #createWrapper(): HTMLElement {
+    const wrapper = document.createElement('span')
+    wrapper.className = 'md-image-view-preview md-atom-view-preview'
+    return wrapper
+  }
+
+  /**
+   * Insert a preview in front of the source text.
+   */
+  #insertPreview(preview: HTMLElement): void {
+    preview.contentEditable = 'false'
+    this.#dom.insertBefore(preview, this.#contentDOM)
+  }
+
+  /**
+   * The resizable image preview. `null` builds the sized box without its
+   * `<img>`, for an asynchronous resolver to fill through `#attachImage`.
+   */
+  #renderImage(url: string | null): HTMLElement {
+    const wrapper = this.#createWrapper()
     wrapper.dataset.testid = 'image-preview'
     wrapper.appendChild(this.#buildResizableImage(url))
     return wrapper
@@ -393,7 +455,7 @@ class ImageMarkView implements MarkView {
    * the inline-mark plugin re-derives back into the mark's `width`/`height`
    * attributes.
    */
-  #buildResizableImage(url: string): HTMLElement {
+  #buildResizableImage(url: string | null): HTMLElement {
     registerResizableRootElement()
     registerResizableHandleElement()
 
@@ -403,27 +465,11 @@ class ImageMarkView implements MarkView {
     // Show a placeholder background until the image paints, so a freshly dropped,
     // not-yet-loaded image still fills a visible box. Removed on load/error.
     root.setAttribute('data-loading', '')
-
-    const image = document.createElement('img')
-    image.src = url
-    image.alt = this.#attrs.alt
-    image.draggable = false
     // A persisted size is known up front, so seed both dimensions before the
-    // image loads. This gives the box its final dimensions immediately, with no
-    // layout shift when the natural size arrives.
-    applyImageDisplaySize(root, image, this.#attrs.width, this.#attrs.height)
-    image.addEventListener('load', () => {
-      root.removeAttribute('data-loading')
-      const ratio = image.naturalWidth / image.naturalHeight
-      if (!Number.isFinite(ratio) || ratio <= 0) return
-      root.setAttribute('data-aspect-ratio', String(ratio))
-      // Reread the attrs: an update() may have landed while the image was loading.
-      applyImageDisplaySize(root, image, this.#attrs.width, this.#attrs.height)
-    })
-    image.addEventListener('error', () => {
-      root.removeAttribute('data-loading')
-    })
-    root.appendChild(image)
+    // image loads (or before there is an image at all). This gives the box its
+    // final dimensions immediately, with no layout shift when the natural size
+    // arrives.
+    applySize(root, this.#attrs.width, this.#attrs.height)
 
     const handle = document.createElement('prosekit-resizable-handle')
     handle.className = 'md-image-resize-handle'
@@ -438,8 +484,33 @@ class ImageMarkView implements MarkView {
     })
 
     this.#resizableRoot = root
-    this.#image = image
+    if (url != null) this.#attachImage(root, url)
     return root
+  }
+
+  /**
+   * Put the `<img>` for `url` into a resizable root built by
+   * `#buildResizableImage`, in front of its handle.
+   */
+  #attachImage(root: HTMLElement, url: string): void {
+    const image = document.createElement('img')
+    image.src = url
+    image.alt = this.#attrs.alt
+    image.draggable = false
+    applyImageDisplaySize(root, image, this.#attrs.width, this.#attrs.height)
+    image.addEventListener('load', () => {
+      root.removeAttribute('data-loading')
+      const ratio = image.naturalWidth / image.naturalHeight
+      if (!Number.isFinite(ratio) || ratio <= 0) return
+      root.setAttribute('data-aspect-ratio', String(ratio))
+      // Reread the attrs: an update() may have landed while the image was loading.
+      applyImageDisplaySize(root, image, this.#attrs.width, this.#attrs.height)
+    })
+    image.addEventListener('error', () => {
+      root.removeAttribute('data-loading')
+    })
+    root.prepend(image)
+    this.#image = image
   }
 }
 

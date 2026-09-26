@@ -573,6 +573,67 @@ describe('image mark view update', () => {
   })
 })
 
+// A host's resolver may need data that is not loaded yet (an attachment
+// catalog); it returns a Promise and the image appears once it resolves.
+describe('async resolveImageUrl', () => {
+  const resizable = pmRoot.getByTestId('image-resizable')
+
+  function deferred() {
+    let resolve!: (url: string | undefined) => void
+    const promise = new Promise<string | undefined>((res) => {
+      resolve = res
+    })
+    return { promise, resolve }
+  }
+
+  function setupAsync(text: string, promise: Promise<string | undefined>): Fixture {
+    const fixture = setupFixture({
+      extensionOptions: { markMode: 'hide', resolveImageUrl: () => promise },
+    })
+    fixture.set(fixture.n.doc(fixture.n.paragraph(text)))
+    return fixture
+  }
+
+  it('renders the image once the Promise resolves, leaving the document alone', async () => {
+    const url = getSVGImageURL(10, 10)
+    const { promise, resolve } = deferred()
+    using fixture = setupAsync('ABC![img](photo.png)DEF', promise)
+    const doc = fixture.doc
+    await expect.element(preview).not.toBeInTheDocument()
+
+    resolve(url)
+    await expect.element(pmRoot.getByAltText('img')).toHaveAttribute('src', url)
+    expect(fixture.doc).toBe(doc)
+  })
+
+  it('reserves a box of the persisted size while pending, then fills it in place', async () => {
+    const url = getSVGImageURL(10, 10)
+    const { promise, resolve } = deferred()
+    using fixture = setupAsync('![img](photo.png)<!-- {"width":120,"height":80} -->', promise)
+    void fixture
+    await expect.element(resizable).toHaveAttribute('data-loading', '')
+    await expect.element(resizable).toHaveAttribute('data-width', '120')
+    await expect.element(resizable).toHaveAttribute('data-height', '80')
+    expect(resizable.locate('img').elements()).toHaveLength(0)
+    const box = resizable.element()
+
+    resolve(url)
+    await expect.element(pmRoot.getByAltText('img')).toHaveAttribute('src', url)
+    expect(resizable.element()).toBe(box)
+    await expect.element(resizable).not.toHaveAttribute('data-loading')
+  })
+
+  it('drops the reserved box when the Promise resolves to undefined', async () => {
+    const { promise, resolve } = deferred()
+    using fixture = setupAsync('![img](photo.png)<!-- {"width":120,"height":80} -->', promise)
+    await expect.element(resizable).toBeInTheDocument()
+
+    resolve(undefined)
+    await expect.element(preview).not.toBeInTheDocument()
+    expect(fixture.doc.textContent).toBe('![img](photo.png)<!-- {"width":120,"height":80} -->')
+  })
+})
+
 describe('image source spellcheck exemption', () => {
   const imageSource = pmRoot.getByTestId('image-source')
 
