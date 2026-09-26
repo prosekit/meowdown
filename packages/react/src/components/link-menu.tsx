@@ -19,6 +19,7 @@ import {
   type VirtualElement,
 } from '@meowdown/core'
 import { useEditor } from '@prosekit/react'
+import { queueExtension } from '@prosekit/web'
 import { Globe2Icon, PencilIcon, SparklesIcon, UnlinkIcon } from 'lucide-react'
 import {
   useCallback,
@@ -417,13 +418,13 @@ export function LinkMenu({
       (hit) => dispatch({ type: 'hover', link: hit?.payload }),
       { canLeave },
     )
-    return editor.use(linkHoverExtension)
+    return queueExtension(editor, linkHoverExtension)
   }, [editor])
 
   useEffect(() => {
     if (readOnly) return
     const linkEditExtension = defineLinkEditKeymap((edit) => dispatch({ type: 'edit', edit }))
-    return editor.use(linkEditExtension)
+    return queueExtension(editor, linkEditExtension)
   }, [editor, readOnly])
 
   const handlePointerHover = useCallback((over: boolean) => {
