@@ -314,6 +314,12 @@ describe('Max height', () => {
     })
   })
 
+  // Fails once Firefox ships scroll-driven animations; then `clipSupported`
+  // and the fallback test can go.
+  it.runIf(server.browser === 'firefox')('has no clip support in Firefox', () => {
+    expect(clipSupported).toBe(false)
+  })
+
   it.runIf(!clipSupported)('shows the whole card without clip support', async () => {
     const { card, toggle } = mountLimited(createPost(longText))
     await expect.element(post.getByText(/Line 20/)).toBeVisible()
