@@ -79,10 +79,10 @@ importers:
         specifier: ^1.2.3
         version: 1.2.3
       '@meowdown/embed':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../embed
       '@meowdown/markdown':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../markdown
       '@ocavue/utils':
         specifier: ^1.8.0
