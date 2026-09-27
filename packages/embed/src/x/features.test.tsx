@@ -196,6 +196,41 @@ describe('Full post snapshots', () => {
   })
 })
 
+describe('Width', () => {
+  const longText = 'A long single line of text that is much wider than the widest card can be.'
+
+  function mountInWrapper(text: string, containerWidth: string) {
+    const container = document.createElement('div')
+    container.style.width = containerWidth
+    const wrapper = document.createElement('span')
+    wrapper.style.cssText = 'display: inline-block; max-width: 100%'
+    container.append(wrapper)
+    document.body.append(container)
+    const element = mount(createPost(text))
+    wrapper.append(element)
+    const widthOf = (node: Element) => node.getBoundingClientRect().width
+    return { wrapper: widthOf(wrapper), card: widthOf(element) }
+  }
+
+  it('keeps a shrink-to-fit parent as wide as a long card', () => {
+    const { wrapper, card } = mountInWrapper(longText, '720px')
+    expect(card).toBeCloseTo(448, 0)
+    expect(wrapper).toBeCloseTo(card, 0)
+  })
+
+  it('keeps a shrink-to-fit parent as wide as a short card', () => {
+    const { wrapper, card } = mountInWrapper('Short', '720px')
+    expect(card).toBeCloseTo(288, 0)
+    expect(wrapper).toBeCloseTo(card, 0)
+  })
+
+  it('shrinks the card to a narrow container', () => {
+    const { wrapper, card } = mountInWrapper(longText, '250px')
+    expect(card).toBeCloseTo(250, 0)
+    expect(wrapper).toBeCloseTo(card, 0)
+  })
+})
+
 // Clipping needs scroll-driven animations; without them the whole card shows.
 const clipSupported = CSS.supports('animation-timeline: scroll()')
 

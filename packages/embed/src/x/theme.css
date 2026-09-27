@@ -77,12 +77,13 @@
   --_tint: color-mix(in srgb, currentColor 5%, transparent);
   --_media-height: 7.5rem;
   --_show-more-height: 2rem;
+  --_max-width: 28rem;
 
   display: block;
   /* As wide as the content, between 18rem and 28rem: a short text post stays
    * small, while long text and media fill the full width. */
   width: fit-content;
-  max-width: min(28rem, 100%);
+  max-width: min(var(--_max-width), 100%);
   font: inherit;
   color: var(--meowdown-embed-color, inherit);
   text-decoration-skip-ink: none;
@@ -105,6 +106,11 @@
 [data-meowdown-embed='x'] [data-root] {
   display: block;
   position: relative;
+  /* The host's percentage `max-width` counts as `none` when a shrink-to-fit
+   * parent (an inline-block editor wrapper) measures the card, so long text
+   * would widen that parent to its own limit. A fixed cap here keeps the
+   * card's intrinsic width at 28rem. */
+  max-width: var(--_max-width);
   color: var(--meowdown-embed-color, inherit);
   background: var(--meowdown-embed-background, transparent);
   border: 1px solid var(--_hairline);
