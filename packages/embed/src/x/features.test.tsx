@@ -316,8 +316,12 @@ describe('Max height', () => {
 
   // Fails once Firefox ships scroll-driven animations; then `clipSupported`
   // and the fallback test can go.
-  it.runIf(server.browser === 'firefox')('has no clip support in Firefox', () => {
-    expect(clipSupported).toBe(false)
+  it('supports clipping everywhere but Firefox', () => {
+    if (server.browser === 'firefox') {
+      expect(clipSupported).toBe(false)
+    } else {
+      expect(clipSupported).toBe(true)
+    }
   })
 
   it.runIf(!clipSupported)('shows the whole card without clip support', async () => {
