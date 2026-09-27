@@ -1,5 +1,11 @@
 # @meowdown/embed
 
+## 0.3.1
+
+### Patch Changes
+
+- [#635](https://github.com/prosekit/meowdown/pull/635) [`7cee54a`](https://github.com/prosekit/meowdown/commit/7cee54a55320323d73ab6a73239f35a0118736d3) Thanks [@ocavuebot](https://github.com/ocavuebot)! - A long X post card no longer stretches its shrink-to-fit parent wider than the card.
+
 ## 0.3.0
 
 ### Minor Changes

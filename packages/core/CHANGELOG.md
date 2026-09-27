@@ -1,5 +1,13 @@
 # @meowdown/core
 
+## 0.75.2
+
+### Patch Changes
+
+- [#637](https://github.com/prosekit/meowdown/pull/637) [`577e704`](https://github.com/prosekit/meowdown/commit/577e7046686a34b4bf3e3244dd72310e2364218f) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Table columns now size to their content, so a column with long text gets more width and wide tables are much shorter.
+- Updated dependencies [[`7cee54a`](https://github.com/prosekit/meowdown/commit/7cee54a55320323d73ab6a73239f35a0118736d3)]:
+  - @meowdown/embed@0.3.1
+
 ## 0.75.1
 
 ### Patch Changes
