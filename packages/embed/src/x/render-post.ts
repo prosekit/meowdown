@@ -7,7 +7,7 @@ import { renderAuthor } from './render-author.ts'
 import { renderMedia } from './render-media.ts'
 import { getPermalink, renderDate } from './render-shared.ts'
 
-function renderBody(post: XPostBase, collapseBlankLines = false) {
+function renderBody(post: XPostBase) {
   const permalink = getPermalink(post)
   return el(
     'p',
@@ -18,7 +18,7 @@ function renderBody(post: XPostBase, collapseBlankLines = false) {
       post.body.map((segment) => {
         return segment.type === 'link'
           ? renderLink(segment.text, segment.url)
-          : segment.text.split(collapseBlankLines ? /\n+/ : '\n').map((line, index) => {
+          : segment.text.split('\n').map((line, index) => {
               return [index ? el('br', {}) : undefined, line]
             })
       }),
@@ -47,7 +47,7 @@ function renderQuoted(post: XPostBase, protocols: readonly string[] | null) {
     'article',
     { 'data-quoted': '', 'aria-label': 'Quoted post' },
     renderAuthor(post.author, protocols, renderDate(post)),
-    renderBody(post, true),
+    renderBody(post),
     renderMedia(post.media, protocols, getPermalink(post)),
     renderEdit(post),
   )
