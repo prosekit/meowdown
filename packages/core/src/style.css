@@ -603,7 +603,13 @@
     width: 100%;
     overflow: hidden;
     border-collapse: collapse;
-    table-layout: fixed;
+  }
+
+  /* An unbreakable token (an email in code, a URL) sets its column's
+   * min-content width and would push the table wider than the editor, so let
+   * it break anywhere. */
+  .ProseMirror :is(td, th) :is(code, .md-link, .md-link-uri) {
+    overflow-wrap: anywhere;
   }
 
   .ProseMirror td,
