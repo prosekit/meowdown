@@ -62,13 +62,20 @@ export function renderPost(post: XPost, protocols: readonly string[] | null = nu
   return el(
     'article',
     {},
-    renderAuthor(post.author, protocols, renderDate(post)),
-    reply
-      ? el('div', { 'data-reply-to': '' }, renderLink(`Replying to @${reply.handle}`, replyUrl))
-      : undefined,
-    renderBody(post),
-    renderMedia(post.media, protocols, getPermalink(post)),
-    post.quote ? renderQuoted(post.quote, protocols) : undefined,
-    renderEdit(post),
+    el(
+      'div',
+      { 'data-content': '' },
+      renderAuthor(post.author, protocols, renderDate(post)),
+      reply
+        ? el('div', { 'data-reply-to': '' }, renderLink(`Replying to @${reply.handle}`, replyUrl))
+        : undefined,
+      renderBody(post),
+      renderMedia(post.media, protocols, getPermalink(post)),
+      post.quote ? renderQuoted(post.quote, protocols) : undefined,
+      renderEdit(post),
+    ),
+    // The stylesheet shows this toggle only while the card is clipped, and
+    // writes its label.
+    el('details', { 'data-show-more': '' }, el('summary', {})),
   )
 }

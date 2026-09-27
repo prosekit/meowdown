@@ -205,69 +205,85 @@ describe('Full post snapshots', () => {
   })
 })
 
+// Clipping needs scroll-driven animations; without them the whole card shows.
+const clipSupported = CSS.supports('animation-timeline: scroll()')
+
 describe('Max height', () => {
   const longText = Array.from({ length: 20 }, (_, index) => `Line ${index + 1}`).join('\n')
 
-  function mountLimited(snapshot: XPost, width?: string) {
+  function mountLimited(snapshot: XPost, width?: string, parent: HTMLElement = document.body) {
     delete snapshot.author.avatar
     const element = document.createElement('meowdown-embed-x')
     element.dataset.testid = 'feature-post'
     element.style.setProperty('--meowdown-embed-max-height', '300px')
     if (width) element.style.width = width
     element.data = snapshot
-    document.body.append(element)
-    return { element, card: element.querySelector<HTMLElement>('[data-root]')! }
+    parent.append(element)
+    const toggle = element.querySelector<HTMLDetailsElement>('[data-show-more]')!
+    return {
+      element,
+      card: element.querySelector<HTMLElement>('[data-root]')!,
+      toggle,
+      summary: page.elementLocator(toggle.querySelector('summary')!),
+    }
   }
 
   const heightOf = (card: HTMLElement) => card.getBoundingClientRect().height
+  // The label is generated content, which text locators cannot see.
+  function isShown(element: Element): boolean {
+    return element.checkVisibility() && element.getBoundingClientRect().height > 0
+  }
 
-  it('clips a card taller than the max height behind Show more', async () => {
-    const { card } = mountLimited(createPost(longText))
-    const showMore = post.getByRole('button', { name: 'Show more' })
-    await expect.element(showMore).toHaveAttribute('aria-expanded', 'false')
+  it.runIf(clipSupported)('clips a card taller than the max height behind Show more', async () => {
+    const { card, toggle } = mountLimited(createPost(longText))
     await vi.waitFor(() => expect(heightOf(card)).toBeCloseTo(300, 0))
+    await vi.waitFor(() => expect(isShown(toggle)).toBe(true))
+    expect(toggle.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      card.getBoundingClientRect().bottom,
+    )
   })
 
-  it('expands and collapses a clipped card', async () => {
-    const { card } = mountLimited(createPost(longText))
-    await post.getByRole('button', { name: 'Show more' }).click()
-    const showLess = post.getByRole('button', { name: 'Show less' })
-    await expect.element(showLess).toHaveAttribute('aria-expanded', 'true')
+  it.runIf(clipSupported)('expands and collapses a clipped card', async () => {
+    const { card, toggle, summary } = mountLimited(createPost(longText))
+    await vi.waitFor(() => expect(isShown(toggle)).toBe(true))
+    await summary.click()
+    expect(toggle.open).toBe(true)
     await vi.waitFor(() => expect(heightOf(card)).toBeGreaterThan(400))
-    await showLess.click()
-    await expect.element(post.getByRole('button', { name: 'Show more' })).toBeVisible()
+    await summary.click()
+    expect(toggle.open).toBe(false)
     await vi.waitFor(() => expect(heightOf(card)).toBeCloseTo(300, 0))
   })
 
-  it('clips a card made tall by media rather than text', async () => {
+  it.runIf(clipSupported)('clips a card made tall by media rather than text', async () => {
     const snapshot = createPost('Four pictures and a quote')
     snapshot.media = Array.from({ length: 4 }, createPhoto)
     snapshot.quote = { ...createPost('Quoted'), id: '222', media: [createPhoto()] }
-    const { card } = mountLimited(snapshot)
-    await expect.element(post.getByRole('button', { name: 'Show more' })).toBeVisible()
+    const { card, toggle } = mountLimited(snapshot)
     await vi.waitFor(() => expect(heightOf(card)).toBeCloseTo(300, 0))
+    await vi.waitFor(() => expect(isShown(toggle)).toBe(true))
   })
 
-  it('clips a card that grows taller after a resize', async () => {
+  it.runIf(clipSupported)('clips a card that grows taller after a resize', async () => {
     const text = Array.from(
       { length: 7 },
       () => 'A sentence that wraps once the card gets narrow.',
     ).join(' ')
-    const { element, card } = mountLimited(createPost(text), '28rem')
+    const { element, card, toggle } = mountLimited(createPost(text), '28rem')
     await expect.element(post.getByText(/^A sentence/)).toBeVisible()
     await new Promise((resolve) => requestAnimationFrame(resolve))
     await new Promise((resolve) => requestAnimationFrame(resolve))
-    expect(element.querySelector('[data-show-more]')).toBeNull()
+    expect(isShown(toggle)).toBe(false)
+    expect(heightOf(card)).toBeLessThan(300)
     element.style.width = '12rem'
-    await expect.element(post.getByRole('button', { name: 'Show more' })).toBeVisible()
+    await vi.waitFor(() => expect(isShown(toggle)).toBe(true))
     await vi.waitFor(() => expect(heightOf(card)).toBeCloseTo(300, 0))
   })
 
-  it('expands when keyboard focus reaches a clipped link', async () => {
+  it.runIf(clipSupported)('expands while keyboard focus is inside the card', async () => {
     const snapshot = createPost(`${longText}\n`)
     snapshot.body.push({ type: 'link', text: 'Clipped link', url: 'https://example.com/' })
-    const { element } = mountLimited(snapshot)
-    await expect.element(post.getByRole('button', { name: 'Show more' })).toBeVisible()
+    const { element, card, toggle } = mountLimited(snapshot)
+    await vi.waitFor(() => expect(isShown(toggle)).toBe(true))
     const link = element.querySelector<HTMLAnchorElement>('[data-body] a')!
     for (let i = 0; i < 10 && document.activeElement !== link; i++) {
       if (server.browser === 'webkit' && navigator.platform.includes('Mac')) {
@@ -277,24 +293,31 @@ describe('Max height', () => {
       }
     }
     expect(document.activeElement).toBe(link)
-    await expect
-      .element(post.getByRole('button', { name: 'Show less' }))
-      .toHaveAttribute('aria-expanded', 'true')
+    await vi.waitFor(() => expect(heightOf(card)).toBeGreaterThan(400))
+    expect(link.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      card.getBoundingClientRect().bottom,
+    )
   })
 
-  it('keeps Show less in view while the expanded card scrolls', async () => {
+  it.runIf(clipSupported)('keeps Show less in view while the expanded card scrolls', async () => {
     const scroller = document.createElement('div')
     scroller.style.cssText = 'height: 240px; overflow: auto'
-    const { element } = mountLimited(createPost(longText))
-    scroller.append(element)
     document.body.append(scroller)
-    await post.getByRole('button', { name: 'Show more' }).click()
+    const { toggle, summary } = mountLimited(createPost(longText), undefined, scroller)
+    await vi.waitFor(() => expect(isShown(toggle)).toBe(true))
+    await summary.click()
     scroller.scrollTop = 0
-    const showLess = element.querySelector<HTMLButtonElement>('[data-show-more]')!
     await vi.waitFor(() => {
-      expect(showLess.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      expect(toggle.getBoundingClientRect().bottom).toBeLessThanOrEqual(
         scroller.getBoundingClientRect().bottom,
       )
     })
+  })
+
+  it.runIf(!clipSupported)('shows the whole card without clip support', async () => {
+    const { card, toggle } = mountLimited(createPost(longText))
+    await expect.element(post.getByText(/Line 20/)).toBeVisible()
+    expect(heightOf(card)).toBeGreaterThan(400)
+    expect(isShown(toggle)).toBe(false)
   })
 })

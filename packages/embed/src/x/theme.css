@@ -38,11 +38,17 @@
   inherits: true;
 }
 
-/* Registered so `getComputedStyle` resolves it to pixels for `max-height.ts`. */
-@property --_body-limit {
-  syntax: '<length>';
-  inherits: false;
-  initial-value: 0px;
+@property --_overflowing {
+  syntax: '<integer>';
+  inherits: true;
+  initial-value: 0;
+}
+
+@keyframes meowdown-embed-overflowing {
+  from,
+  to {
+    --_overflowing: 1;
+  }
 }
 
 /*
@@ -197,60 +203,109 @@
     color: inherit;
   }
 
-  /* Max height. `--_body-limit` is the tallest article that keeps the card
-   * within `--meowdown-embed-max-height`; `max-height.ts` compares the
-   * article's full height with it. A taller card is clipped to the limit,
-   * "Show more" included. `clip` (not `hidden`) keeps focus and find in page
-   * from scrolling the clipped article. */
+  /* Max height. The article is clipped to `--_body-limit`, the tallest
+   * article that keeps the card within `--meowdown-embed-max-height`. As a
+   * scroll container it has a scroll timeline only while the clip hides
+   * content, so the animation on that timeline sets `--_overflowing` exactly
+   * when the card is too tall. Then the article gives up one row, which the
+   * "Show more" toggle takes, so the whole card is exactly the limit. The
+   * toggle is anchored to the card's padding box, out of the article's clip.
+   * Browsers without scroll-driven animations show the whole card. */
   & > article {
+    /* Room inside the clip for focus rings at the article's edges. */
+    --_clip-gutter: 4px;
     --_body-limit: calc(
-      var(--meowdown-embed-max-height, 400px) - 2 * var(--meowdown-embed-padding, 1rem) - 2px
+      var(--meowdown-embed-max-height, 400px) - 2 * var(--meowdown-embed-padding, 1rem) - 2px + 2 *
+        var(--_clip-gutter)
     );
   }
-  &[data-overflowing]:not([data-expanded]) > article {
-    max-height: calc(var(--_body-limit) - var(--_show-more-height));
-    overflow: clip;
-    mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+  & > article > [data-show-more] {
+    display: none;
   }
-  & > [data-show-more] {
+  & > article > [data-show-more] > summary {
     display: block;
-    height: var(--_show-more-height);
-    padding: 0;
-    border: 0;
-    background: none;
-    font: inherit;
+    width: fit-content;
     font-size: 0.9375em;
+    line-height: var(--_show-more-height);
     color: var(--_link);
+    list-style: none;
     cursor: pointer;
   }
-  & > [data-show-more]:hover {
+  & > article > [data-show-more] > summary::-webkit-details-marker {
+    display: none;
+  }
+  & > article > [data-show-more] > summary::before {
+    content: 'Show more';
+  }
+  & > article > [data-show-more][open] > summary::before {
+    content: 'Show less';
+  }
+  & > article > [data-show-more] > summary:hover {
     text-decoration: underline;
     text-underline-offset: 0.15em;
   }
-  & > [data-show-more]:focus-visible {
+  & > article > [data-show-more] > summary:focus-visible {
     outline: 2px solid var(--_link);
     outline-offset: 2px;
     border-radius: 4px;
   }
-  /* Expanded, "Show less" sticks to the bottom of the scrollport until the
-   * card's end scrolls into view, so it can be collapsed from anywhere. */
-  &[data-expanded] > [data-show-more] {
-    position: sticky;
-    bottom: 0.75rem;
-    z-index: 1;
-    height: auto;
-    margin: 0.5rem auto 0;
-    padding: 0.375rem 0.875rem;
-    border: 1px solid var(--_hairline);
-    border-radius: 999px;
-    background: var(--meowdown-embed-background, Canvas);
-    box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
-    font-size: 0.875em;
-    font-weight: 500;
-  }
-  &[data-expanded] > [data-show-more]:hover {
-    text-decoration: none;
-    background: color-mix(in srgb, var(--_link) 8%, var(--meowdown-embed-background, Canvas));
+  @supports (animation-timeline: scroll()) {
+    & > article {
+      max-height: calc(var(--_body-limit) - var(--_overflowing) * var(--_show-more-height));
+      overflow: hidden;
+      padding: var(--_clip-gutter);
+      margin: calc(-1 * var(--_clip-gutter));
+      margin-block-end: calc(var(--_overflowing) * var(--_show-more-height) - var(--_clip-gutter));
+      animation: meowdown-embed-overflowing linear both;
+      animation-timeline: scroll(self);
+    }
+    /* Opened, or holding keyboard focus that the clip could hide. */
+    & > article:has(> [data-show-more][open]),
+    & > article:has(:focus-visible:not(summary)) {
+      max-height: none;
+      overflow: visible;
+      margin-block-end: calc(-1 * var(--_clip-gutter));
+    }
+    @container style(--_overflowing: 1) {
+      /* On the content, not the article: a mask on the article would also
+       * hide the toggle below it. */
+      & > article > [data-content] {
+        mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+        mask-size: 100%
+          calc(var(--_body-limit) - var(--_show-more-height) - 2 * var(--_clip-gutter));
+        mask-repeat: no-repeat;
+      }
+      & > article > [data-show-more] {
+        display: block;
+        position: absolute;
+        inset-inline-start: var(--meowdown-embed-padding, 1rem);
+        bottom: var(--meowdown-embed-padding, 1rem);
+      }
+    }
+    /* Opened, "Show less" sticks to the bottom of the scrollport until the
+     * card's end scrolls into view. */
+    & > article > [data-show-more][open] {
+      display: block;
+      position: sticky;
+      bottom: 0.75rem;
+      z-index: 1;
+      width: fit-content;
+      margin: 0.5rem auto 0;
+    }
+    & > article > [data-show-more][open] > summary {
+      padding: 0.375rem 0.875rem;
+      border: 1px solid var(--_hairline);
+      border-radius: 999px;
+      background: var(--meowdown-embed-background, Canvas);
+      box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
+      font-size: 0.875em;
+      font-weight: 500;
+      line-height: normal;
+    }
+    & > article > [data-show-more][open] > summary:hover {
+      text-decoration: none;
+      background: color-mix(in srgb, var(--_link) 8%, var(--meowdown-embed-background, Canvas));
+    }
   }
 
   /* Body */
