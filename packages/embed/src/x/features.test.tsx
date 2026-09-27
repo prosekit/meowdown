@@ -1,7 +1,8 @@
 import './theme.css'
 
+import type { XPost } from '@post-embed/types'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
-import { page } from 'vitest/browser'
+import { page, server, userEvent } from 'vitest/browser'
 
 import type { XPostMediaClickDetail } from './media-click.ts'
 import { createPhoto, createPost, createVideo } from './testing/fixtures.ts'
@@ -200,6 +201,100 @@ describe('Full post snapshots', () => {
     expect(details[1].media).toMatchObject({
       type: 'video',
       sources: [{ url: 'https://example.com/high.mp4' }, {}, {}],
+    })
+  })
+})
+
+describe('Max height', () => {
+  const longText = Array.from({ length: 20 }, (_, index) => `Line ${index + 1}`).join('\n')
+
+  function mountLimited(snapshot: XPost, width?: string) {
+    delete snapshot.author.avatar
+    const element = document.createElement('meowdown-embed-x')
+    element.dataset.testid = 'feature-post'
+    element.style.setProperty('--meowdown-embed-max-height', '300px')
+    if (width) element.style.width = width
+    element.data = snapshot
+    document.body.append(element)
+    return { element, card: element.querySelector<HTMLElement>('[data-root]')! }
+  }
+
+  const heightOf = (card: HTMLElement) => card.getBoundingClientRect().height
+
+  it('clips a card taller than the max height behind Show more', async () => {
+    const { card } = mountLimited(createPost(longText))
+    const showMore = post.getByRole('button', { name: 'Show more' })
+    await expect.element(showMore).toHaveAttribute('aria-expanded', 'false')
+    await vi.waitFor(() => expect(heightOf(card)).toBeCloseTo(300, 0))
+  })
+
+  it('expands and collapses a clipped card', async () => {
+    const { card } = mountLimited(createPost(longText))
+    await post.getByRole('button', { name: 'Show more' }).click()
+    const showLess = post.getByRole('button', { name: 'Show less' })
+    await expect.element(showLess).toHaveAttribute('aria-expanded', 'true')
+    await vi.waitFor(() => expect(heightOf(card)).toBeGreaterThan(400))
+    await showLess.click()
+    await expect.element(post.getByRole('button', { name: 'Show more' })).toBeVisible()
+    await vi.waitFor(() => expect(heightOf(card)).toBeCloseTo(300, 0))
+  })
+
+  it('clips a card made tall by media rather than text', async () => {
+    const snapshot = createPost('Four pictures and a quote')
+    snapshot.media = Array.from({ length: 4 }, createPhoto)
+    snapshot.quote = { ...createPost('Quoted'), id: '222', media: [createPhoto()] }
+    const { card } = mountLimited(snapshot)
+    await expect.element(post.getByRole('button', { name: 'Show more' })).toBeVisible()
+    await vi.waitFor(() => expect(heightOf(card)).toBeCloseTo(300, 0))
+  })
+
+  it('clips a card that grows taller after a resize', async () => {
+    const text = Array.from(
+      { length: 7 },
+      () => 'A sentence that wraps once the card gets narrow.',
+    ).join(' ')
+    const { element, card } = mountLimited(createPost(text), '28rem')
+    await expect.element(post.getByText(/^A sentence/)).toBeVisible()
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    expect(element.querySelector('[data-show-more]')).toBeNull()
+    element.style.width = '12rem'
+    await expect.element(post.getByRole('button', { name: 'Show more' })).toBeVisible()
+    await vi.waitFor(() => expect(heightOf(card)).toBeCloseTo(300, 0))
+  })
+
+  it('expands when keyboard focus reaches a clipped link', async () => {
+    const snapshot = createPost(`${longText}\n`)
+    snapshot.body.push({ type: 'link', text: 'Clipped link', url: 'https://example.com/' })
+    const { element } = mountLimited(snapshot)
+    await expect.element(post.getByRole('button', { name: 'Show more' })).toBeVisible()
+    const link = element.querySelector<HTMLAnchorElement>('[data-body] a')!
+    for (let i = 0; i < 10 && document.activeElement !== link; i++) {
+      if (server.browser === 'webkit' && navigator.platform.includes('Mac')) {
+        await userEvent.keyboard('{Alt>}{Tab}{/Alt}')
+      } else {
+        await userEvent.tab()
+      }
+    }
+    expect(document.activeElement).toBe(link)
+    await expect
+      .element(post.getByRole('button', { name: 'Show less' }))
+      .toHaveAttribute('aria-expanded', 'true')
+  })
+
+  it('keeps Show less in view while the expanded card scrolls', async () => {
+    const scroller = document.createElement('div')
+    scroller.style.cssText = 'height: 240px; overflow: auto'
+    const { element } = mountLimited(createPost(longText))
+    scroller.append(element)
+    document.body.append(scroller)
+    await post.getByRole('button', { name: 'Show more' }).click()
+    scroller.scrollTop = 0
+    const showLess = element.querySelector<HTMLButtonElement>('[data-show-more]')!
+    await vi.waitFor(() => {
+      expect(showLess.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+        scroller.getBoundingClientRect().bottom,
+      )
     })
   })
 })

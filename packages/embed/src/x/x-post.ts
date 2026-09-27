@@ -13,6 +13,7 @@ import { type FetchProps, useFetch } from '../fetch.ts'
 import { renderLink } from '../render-link.ts'
 import { getRootContainer } from '../root.ts'
 
+import { setupMaxHeight } from './max-height.ts'
 import { renderPost } from './render-post.ts'
 
 export interface XPostProps extends FetchProps<XPostSnapshot> {
@@ -43,7 +44,9 @@ export function useXPost(host: HostElement, props: State<XPostProps>): void {
     container.replaceChildren(
       valid ? renderPost(value, protocols) : renderFallback(pending.get(), url),
     )
+    const stopMaxHeight = setupMaxHeight(container)
     return () => {
+      stopMaxHeight?.()
       for (const video of container.querySelectorAll('video')) video.pause()
     }
   })

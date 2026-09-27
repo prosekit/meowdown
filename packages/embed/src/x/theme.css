@@ -33,6 +33,18 @@
   inherits: true;
 }
 
+@property --meowdown-embed-max-height {
+  syntax: '*';
+  inherits: true;
+}
+
+/* Registered so `getComputedStyle` resolves it to pixels for `max-height.ts`. */
+@property --_body-limit {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
 /*
  * Hard reset. `all: revert` rolls every property on every box inside the card
  * back to the user-agent default, so a host rule on `p`, `a`, `img`,
@@ -58,6 +70,7 @@
   --_link: var(--meowdown-embed-link-color, #1d9bf0);
   --_tint: color-mix(in srgb, currentColor 5%, transparent);
   --_media-height: 7.5rem;
+  --_show-more-height: 2rem;
 
   display: block;
   /* As wide as the content, between 18rem and 28rem: a short text post stays
@@ -182,6 +195,62 @@
   }
   & [data-date] > a {
     color: inherit;
+  }
+
+  /* Max height. `--_body-limit` is the tallest article that keeps the card
+   * within `--meowdown-embed-max-height`; `max-height.ts` compares the
+   * article's full height with it. A taller card is clipped to the limit,
+   * "Show more" included. `clip` (not `hidden`) keeps focus and find in page
+   * from scrolling the clipped article. */
+  & > article {
+    --_body-limit: calc(
+      var(--meowdown-embed-max-height, 400px) - 2 * var(--meowdown-embed-padding, 1rem) - 2px
+    );
+  }
+  &[data-overflowing]:not([data-expanded]) > article {
+    max-height: calc(var(--_body-limit) - var(--_show-more-height));
+    overflow: clip;
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+  }
+  & > [data-show-more] {
+    display: block;
+    height: var(--_show-more-height);
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.9375em;
+    color: var(--_link);
+    cursor: pointer;
+  }
+  & > [data-show-more]:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  & > [data-show-more]:focus-visible {
+    outline: 2px solid var(--_link);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  /* Expanded, "Show less" sticks to the bottom of the scrollport until the
+   * card's end scrolls into view, so it can be collapsed from anywhere. */
+  &[data-expanded] > [data-show-more] {
+    position: sticky;
+    bottom: 0.75rem;
+    z-index: 1;
+    height: auto;
+    margin: 0.5rem auto 0;
+    padding: 0.375rem 0.875rem;
+    border: 1px solid var(--_hairline);
+    border-radius: 999px;
+    background: var(--meowdown-embed-background, Canvas);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
+    font-size: 0.875em;
+    font-weight: 500;
+  }
+  &[data-expanded] > [data-show-more]:hover {
+    text-decoration: none;
+    background: color-mix(in srgb, var(--_link) 8%, var(--meowdown-embed-background, Canvas));
   }
 
   /* Body */

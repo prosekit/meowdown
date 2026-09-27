@@ -170,6 +170,26 @@ export function createXSamples(origin: string): XSample[] {
       }),
     },
     {
+      name: 'Four photos + quote',
+      post: post(
+        trail,
+        'The whole ridge in one morning, from the first light on the eastern slope to the mint-green meadow at noon, plus the post that sent me there.',
+        {
+          media: [
+            photo('landscape-1.svg', 1600, 900, 'Dawn'),
+            photo('landscape-2.svg', 1600, 900, 'Day'),
+            photo('landscape-3.svg', 1600, 900, 'Dusk'),
+            photo('landscape-4.svg', 1600, 900, 'Mint'),
+          ],
+          quote: post(
+            mira,
+            'If you only hike one trail this year, make it the ridge loop. Go early, the light is unreal.',
+            { media: [photo('portrait-1.svg', 900, 1200, 'Hills at dusk')] },
+          ),
+        },
+      ),
+    },
+    {
       name: 'Text quote',
       post: post(kai, 'Worth reading twice.', {
         quote: post(
