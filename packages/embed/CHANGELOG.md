@@ -1,5 +1,11 @@
 # @meowdown/embed
 
+## 0.3.0
+
+### Minor Changes
+
+- [#633](https://github.com/prosekit/meowdown/pull/633) [`7081039`](https://github.com/prosekit/meowdown/commit/708103975ce99b0b8980a9f96ef1d281dbd2e4e0) Thanks [@ocavuebot](https://github.com/ocavuebot)! - X post cards taller than `--meowdown-embed-max-height` (256px by default) are clipped behind a "Show more" toggle, in pure CSS; browsers without scroll-driven animations show the whole card.
+
 ## 0.2.0
 
 ### Minor Changes

@@ -1,5 +1,12 @@
 # @meowdown/core
 
+## 0.75.1
+
+### Patch Changes
+
+- Updated dependencies [[`7081039`](https://github.com/prosekit/meowdown/commit/708103975ce99b0b8980a9f96ef1d281dbd2e4e0)]:
+  - @meowdown/embed@0.3.0
+
 ## 0.75.0
 
 ### Minor Changes
