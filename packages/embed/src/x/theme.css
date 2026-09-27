@@ -215,7 +215,7 @@
     /* Room inside the clip for focus rings at the article's edges. */
     --_clip-gutter: 4px;
     --_body-limit: calc(
-      var(--meowdown-embed-max-height, 400px) - 2 * var(--meowdown-embed-padding, 1rem) - 2px + 2 *
+      var(--meowdown-embed-max-height, 256px) - 2 * var(--meowdown-embed-padding, 1rem) - 2px + 2 *
         var(--_clip-gutter)
     );
   }
