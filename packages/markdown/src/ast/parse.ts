@@ -37,12 +37,13 @@ export interface ParseMarkdownAstOptions {
 }
 
 /**
- * Parse Markdown blocks, retaining inline syntax as literal strings.
+ * Parse Markdown blocks, retaining inline syntax as literal strings and normalizing line endings.
  */
 export function parseMarkdownAst(
   markdown: string,
   options: ParseMarkdownAstOptions = {},
 ): MarkdownDocument {
+  markdown = markdown.replaceAll(/\r\n?/g, '\n')
   let frontmatterBody: string | undefined
   let rest = markdown
   if (options.frontmatter) {
