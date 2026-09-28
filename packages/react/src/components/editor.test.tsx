@@ -38,10 +38,10 @@ describe('MeowdownEditor', () => {
       <MeowdownEditor handleRef={ref} singleParagraph initialMarkdown={'# literal\n**bold**'} />,
     )
     expect(ref.current?.getMarkdown()).toBe('# literal\n**bold**')
-    expect(ref.current?.getEditor().state.doc.child(0).type.name).toBe('paragraph')
+    expect(ref.current?.getEditor()?.state.doc.child(0).type.name).toBe('paragraph')
     ref.current?.setMarkdown('+ literal\nnext')
     expect(ref.current?.getMarkdown()).toBe('+ literal\nnext')
-    expect(ref.current?.getEditor().state.doc.childCount).toBe(1)
+    expect(ref.current?.getEditor()?.state.doc.childCount).toBe(1)
   })
 
   it('keeps the ProseKit editor instance when switching among rich modes', async () => {
