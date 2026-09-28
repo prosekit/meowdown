@@ -130,12 +130,12 @@ const backspaceUnsetHeading: Command = (state, dispatch, view) => {
 
 function defineHeadingKeymap(): PlainExtension {
   return defineKeymap({
-    'Mod-1': toggleHeading(1),
-    'Mod-2': toggleHeading(2),
-    'Mod-3': toggleHeading(3),
-    'Mod-4': toggleHeading(4),
-    'Mod-5': toggleHeading(5),
-    'Mod-6': toggleHeading(6),
+    'Mod-Alt-1': toggleHeading(1),
+    'Mod-Alt-2': toggleHeading(2),
+    'Mod-Alt-3': toggleHeading(3),
+    'Mod-Alt-4': toggleHeading(4),
+    'Mod-Alt-5': toggleHeading(5),
+    'Mod-Alt-6': toggleHeading(6),
     Backspace: backspaceUnsetHeading,
   })
 }

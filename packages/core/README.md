@@ -53,12 +53,12 @@ the current block to that level (or back to a paragraph).
 | `Mod-Shift-H`          | Highlight                                                 | `==highlight==`     |
 | `Mod-K`                | Link                                                      | `[text](url)`       |
 | `Mod-Shift-K`          | Insert a wikilink                                         | `[[target]]`        |
-| `Mod-1`                | Heading 1                                                 | `# heading`         |
-| `Mod-2`                | Heading 2                                                 | `## heading`        |
-| `Mod-3`                | Heading 3                                                 | `### heading`       |
-| `Mod-4`                | Heading 4                                                 | `#### heading`      |
-| `Mod-5`                | Heading 5                                                 | `##### heading`     |
-| `Mod-6`                | Heading 6                                                 | `###### heading`    |
+| `Mod-Alt-1`            | Heading 1                                                 | `# heading`         |
+| `Mod-Alt-2`            | Heading 2                                                 | `## heading`        |
+| `Mod-Alt-3`            | Heading 3                                                 | `### heading`       |
+| `Mod-Alt-4`            | Heading 4                                                 | `#### heading`      |
+| `Mod-Alt-5`            | Heading 5                                                 | `##### heading`     |
+| `Mod-Alt-6`            | Heading 6                                                 | `###### heading`    |
 | `Mod-.`                | Fold or unfold a bullet                                   |                     |
 | `Shift-Enter`          | Insert a line break                                       |                     |
 | `Mod-Enter`            | Follow the link under the caret, or cycle a checkbox task | `- [ ]` / `- [x]`   |
