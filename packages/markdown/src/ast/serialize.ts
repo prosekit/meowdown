@@ -67,7 +67,7 @@ export function serializeMarkdownAst(
   // A document holds at least one block, so a lone empty paragraph is the
   // empty document, not a blank line.
   const child = node.children?.length === 1 ? node.children[0] : undefined
-  if (!(node.type === 'document' && child?.type === 'paragraph' && !hasInlineContent(child))) {
+  if (!(child?.type === 'paragraph' && !hasInlineContent(child))) {
     emit(node, out)
   }
   return out.finish()
