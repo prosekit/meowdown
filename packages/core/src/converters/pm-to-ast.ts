@@ -106,14 +106,13 @@ function readInline(node: ProseMirrorNode): MarkdownInline {
   if (count === 0) return { value: '', segments: undefined }
   const first = node.child(0)
   if (count === 1 && first.isText) return { value: first.text ?? '', segments: undefined }
-  const chunks: Array<string | undefined> = new Array<string | undefined>(count)
-  let value = ''
-  for (let i = 0; i < count; i++) {
-    const child = node.content.content[i]
-    chunks.push(text)
-    if (text) value += text
-  })
-  return { value, segments: { value, chunks, textContent: node.textContent } }
+  const chunks: Array<string> = []
+  for (const child of node.content.content) {
+    if (child.isText) {
+      chunks.push(child.text ?? '')
+    }
+  }
+  return { value: chunks.join(''), segments: undefined }
 }
 
 function readTable(node: ProseMirrorNode): MarkdownTable {
