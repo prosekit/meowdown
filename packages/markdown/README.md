@@ -74,3 +74,12 @@ inline values to retain text-boundary-sensitive continuation behavior. Changing 
 value invalidates those recorded segments. Unsupported editor blocks use `ignored`
 nodes, which emit nothing but keep list-run boundaries; standalone editor text uses
 `text`. The Markdown parser itself produces neither type.
+
+## Structural editing
+
+`walkMarkdownAst(document)` yields `{ node, parent, index, path }` in depth-first
+order, including the root at `[]`. `resolveMarkdownAstPath(document, path)` returns
+the same shape or `undefined` for an invalid address. Paths count every child,
+including paragraphs and table cells. They belong to one document revision, not
+to a persistent identity. Resolve every target before changing sibling arrays;
+then edit node references and traverse again to obtain the new paths.

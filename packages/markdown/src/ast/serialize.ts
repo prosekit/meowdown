@@ -67,7 +67,7 @@ export function serializeMarkdownAst(
   // A document holds at least one block, so a lone empty paragraph is the
   // empty document, not a blank line.
   const child = node.children?.length === 1 ? node.children[0] : undefined
-  if (!(child?.type === 'paragraph' && !hasInlineContent(child))) {
+  if (!(node.type === 'document' && child?.type === 'paragraph' && !hasInlineContent(child))) {
     emit(node, out)
   }
   return out.finish()
@@ -156,10 +156,14 @@ class MdOut {
    */
   private deferredBlankPrefix: string | null = null
   /**
-   * Length of `parts` when the last line carrying content was closed. Whatever
+   * Characters written when the last line carrying content was closed. Whatever
    * follows is the blank lines empty blocks wrote, which `finish` keeps.
    */
-  private contentEnd = 0
+  private contentLength = 0
+  /**
+   * Characters in `parts`, kept current so `closeBlock` needs no recount.
+   */
+  private length = 0
 
   /**
    * Write `text`, opening each embedded line with the current line prefix.
@@ -182,14 +186,14 @@ class MdOut {
       if (this.pendingFirst !== null && isThematicBreak(this.pendingFirst + text)) {
         this.breakMarkerLine()
       }
-      this.parts.push(this.pendingFirst ?? this.linePrefix)
+      this.push(this.pendingFirst ?? this.linePrefix)
       this.pendingFirst = null
       this.atLineStart = false
     }
     // Fast path: most writes are single-line markers or text. Only split
     // when content has embedded newlines (code block content, etc).
     if (!text.includes('\n')) {
-      this.parts.push(text)
+      this.push(text)
       return
     }
     const lines = text.split('\n')
@@ -199,10 +203,21 @@ class MdOut {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
       if (i > 0) {
-        this.parts.push('\n', lazy ? continuationPrefix(line, this.linePrefix) : this.linePrefix)
+        this.push('\n')
+        this.push(lazy ? continuationPrefix(line, this.linePrefix) : this.linePrefix)
       }
-      if (line !== '') this.parts.push(line)
+      this.push(line)
     }
+  }
+
+  /**
+   * Append one part. An empty string (the top level's line prefix, an empty
+   * line) is skipped: it would only lengthen the final join.
+   */
+  private push(text: string): void {
+    if (text === '') return
+    this.parts.push(text)
+    this.length += text.length
   }
 
   /**
@@ -222,12 +237,14 @@ class MdOut {
     if (this.pendingFirst !== null) {
       this.emitDeferredBlankLine()
       const marker = this.pendingFirst
-      this.parts.push(marker.endsWith('] ') ? marker : marker.trimEnd(), '\n')
+      this.push(marker.endsWith('] ') ? marker : marker.trimEnd())
+      this.push('\n')
       this.pendingFirst = null
       return
     }
     if (this.deferredBlankPrefix === null) {
-      this.parts.push(this.linePrefix.trimEnd(), '\n')
+      this.push(this.linePrefix.trimEnd())
+      this.push('\n')
       return
     }
     this.emitDeferredBlankLine()
@@ -246,13 +263,13 @@ class MdOut {
     if (this.atLineStart && this.pendingFirst !== null) {
       this.emitDeferredBlankLine()
       const marker = this.pendingFirst
-      this.parts.push(marker.endsWith('] ') ? marker : marker.trimEnd())
+      this.push(marker.endsWith('] ') ? marker : marker.trimEnd())
       this.pendingFirst = null
       this.atLineStart = false
     }
     if (!this.atLineStart) {
-      this.parts.push('\n')
-      this.contentEnd = this.parts.length
+      this.push('\n')
+      this.contentLength = this.length
     }
     this.atLineStart = true
     this.deferredBlankPrefix = this.linePrefix
@@ -266,7 +283,8 @@ class MdOut {
   private breakMarkerLine(): void {
     if (this.pendingFirst === null) return
     this.emitDeferredBlankLine()
-    this.parts.push(this.pendingFirst.trimEnd(), '\n')
+    this.push(this.pendingFirst.trimEnd())
+    this.push('\n')
     this.pendingFirst = null
     this.atLineStart = true
   }
@@ -325,15 +343,17 @@ class MdOut {
     // line it owes and the line breaks its text ended with are dropped, while
     // trailing spaces on the line are part of that text and stay. The blank
     // lines that empty blocks wrote after it are content and stay too.
-    const text = this.parts.slice(0, this.contentEnd).join('')
-    let cut = text.length
-    for (let i = text.length - 1; i >= 0; i--) {
-      const code = text.charCodeAt(i)
+    // One join of the whole buffer; the content / trailing split is a string
+    // slice, which V8 shares with the joined string instead of copying.
+    const output = this.parts.join('')
+    let cut = this.contentLength
+    for (let i = cut - 1; i >= 0; i--) {
+      const code = output.charCodeAt(i)
       if (code === CHAR_LINE_FEED) cut = i
       else if (code !== CHAR_SPACE && code !== CHAR_TAB) break
     }
-    const head = cut === 0 ? '' : text.slice(0, cut) + '\n'
-    return head + this.parts.slice(this.contentEnd).join('') || '\n'
+    const head = cut === 0 ? '' : output.slice(0, cut) + '\n'
+    return head + output.slice(this.contentLength) || '\n'
   }
 
   private emitDeferredBlankLine(): void {
@@ -343,7 +363,8 @@ class MdOut {
     // "  " continuation becomes an empty line (the following indent is what
     // keeps the item together), while a blockquote's "> " stays ">" - the
     // bare marker is required to hold the quote across the blank line.
-    this.parts.push(prefix.trimEnd(), '\n')
+    this.push(prefix.trimEnd())
+    this.push('\n')
     this.deferredBlankPrefix = null
   }
 }
