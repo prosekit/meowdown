@@ -1,5 +1,11 @@
 # @meowdown/core
 
+## 0.77.0
+
+### Minor Changes
+
+- [#642](https://github.com/prosekit/meowdown/pull/642) [`00fbbcd`](https://github.com/prosekit/meowdown/commit/00fbbcd7d4cc04fd466b0233690e644da6e95da5) Thanks [@ocavuebot](https://github.com/ocavuebot)! - The document start and end shortcuts move from `Meta-ArrowUp` / `Meta-ArrowDown` (and their Shift variants) to `Mod-ArrowUp` / `Mod-ArrowDown`, so they are ⌘ on macOS and Ctrl on Windows and Linux.
+
 ## 0.76.0
 
 ### Minor Changes
