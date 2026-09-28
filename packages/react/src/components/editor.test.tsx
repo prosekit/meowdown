@@ -32,6 +32,18 @@ describe('MeowdownEditor', () => {
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'focus')
   })
 
+  it('keeps block-looking source in one paragraph through the handle', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(
+      <MeowdownEditor handleRef={ref} singleParagraph initialMarkdown={'# literal\n**bold**'} />,
+    )
+    expect(ref.current?.getMarkdown()).toBe('# literal\n**bold**')
+    expect(ref.current?.getEditor().state.doc.child(0).type.name).toBe('paragraph')
+    ref.current?.setMarkdown('+ literal\nnext')
+    expect(ref.current?.getMarkdown()).toBe('+ literal\nnext')
+    expect(ref.current?.getEditor().state.doc.childCount).toBe(1)
+  })
+
   it('keeps the ProseKit editor instance when switching among rich modes', async () => {
     const screen = await render(<MeowdownEditor mode="focus" />)
 

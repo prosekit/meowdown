@@ -489,10 +489,9 @@ export function ProseKitEditor({
   )
 
   const [editor] = useState((): TypedEditor => {
-    const baseExtension = union(
-      defineEditorExtension(config),
-      singleParagraph ? defineSingleParagraph() : union(),
-    )
+    const baseExtension = singleParagraph
+      ? union(defineEditorExtension(config), defineSingleParagraph())
+      : defineEditorExtension(config)
     const extension =
       CodeBlockView === false
         ? baseExtension
