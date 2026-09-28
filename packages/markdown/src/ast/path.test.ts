@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  getTaskParagraph,
   parseMarkdownAst,
   resolveMarkdownAstPath,
   serializeMarkdownAst,
@@ -69,15 +68,6 @@ describe('AST paths', () => {
     expect(entry?.path).toEqual([0])
   })
 
-  it('does not substitute a later paragraph for a malformed task first block', () => {
-    const item = task('later')
-    item.children.unshift({ type: 'heading', level: 2, value: 'first' })
-    expect(getTaskParagraph(item)).toBeUndefined()
-    expect(getTaskParagraph({ ...item, kind: 'bullet' } satisfies MarkdownListItem)).toBeUndefined()
-    expect(getTaskParagraph({ ...item, children: [] })).toBeUndefined()
-    expect(getTaskParagraph(parseMarkdownAst('text'))).toBeUndefined()
-  })
-
   it('edits node references after earlier siblings move', () => {
     const document = parseMarkdownAst('+ [ ] first\n+ [ ] duplicate\n+ [ ] duplicate\n')
     const second = resolveMarkdownAstPath(document, [1])?.node
@@ -85,8 +75,8 @@ describe('AST paths', () => {
     if (second?.type !== 'listItem' || third?.type !== 'listItem') throw new Error('Expected tasks')
     document.children.shift()
     third.checked = true
-    const paragraph = getTaskParagraph(second)
-    if (!paragraph) throw new Error('Expected paragraph')
+    const paragraph = second.children[0]
+    if (!paragraph || paragraph.type !== 'paragraph') throw new Error('Expected paragraph')
     paragraph.value = 'changed'
     expect(serializeMarkdownAst(document)).toBe('+ [ ] changed\n+ [x] duplicate\n')
     expect(resolveMarkdownAstPath(document, [1])?.node).toBe(third)
@@ -97,7 +87,6 @@ describe('AST paths', () => {
     document.children.push(task(''))
     const output = serializeMarkdownAst(document)
     expect(output).toBe('# Tasks\n\n+ [ ] \n')
-    expect(getTaskParagraph(parseMarkdownAst(output).children[1])?.value).toBe('')
     expect(serializeMarkdownAst(task(''))).toBe('+ [ ] \n')
   })
 

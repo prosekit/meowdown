@@ -83,28 +83,3 @@ the same shape or `undefined` for an invalid address. Paths count every child,
 including paragraphs and table cells. They belong to one document revision, not
 to a persistent identity. Resolve every target before changing sibling arrays;
 then edit node references and traverse again to obtain the new paths.
-
-`getTaskParagraph(item)` returns the first paragraph of a task, or `undefined`
-when it is not a task or its first child is another block. It never substitutes
-a later paragraph. Edit `paragraph.value` and `item.checked` directly; insert,
-remove, or promote blocks using the appropriate parent's `children` array.
-
-```ts
-import {
-  getTaskParagraph,
-  parseMarkdownAst,
-  resolveMarkdownAstPath,
-  serializeMarkdownAst,
-} from '@meowdown/markdown'
-
-const document = parseMarkdownAst('+ [ ] Buy **milk**\n')
-const entry = resolveMarkdownAstPath(document, [0])
-if (entry?.node.type === 'listItem') {
-  const paragraph = getTaskParagraph(entry.node)
-  if (paragraph) {
-    paragraph.value = 'Buy **bread**'
-    entry.node.checked = true
-  }
-}
-const markdown = serializeMarkdownAst(document)
-```

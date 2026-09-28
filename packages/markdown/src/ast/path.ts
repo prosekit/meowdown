@@ -1,4 +1,4 @@
-import type { MarkdownNode, MarkdownParagraph } from './types.ts'
+import type { MarkdownNode } from './types.ts'
 
 /**
  * Child indexes from the document root. Valid only for the tree that produced them.
@@ -59,13 +59,4 @@ export function resolveMarkdownAstPath(
     node = child
   }
   return { node, parent, index, path: [...path] }
-}
-
-/**
- * Read only the first child of a task item; a later paragraph is not its editable first paragraph.
- */
-export function getTaskParagraph(node: MarkdownNode): MarkdownParagraph | undefined {
-  if (node.type !== 'listItem' || node.kind !== 'task') return
-  const paragraph = node.children[0]
-  return paragraph?.type === 'paragraph' ? paragraph : undefined
 }
