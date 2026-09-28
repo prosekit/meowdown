@@ -36,25 +36,28 @@ export function docToAst(node: ProseMirrorNode): MarkdownNode {
 }
 
 function readBlocks(node: ProseMirrorNode): MarkdownBlock[] {
-  const children: MarkdownBlock[] = []
-  node.forEach((child) => {
-    children.push(readBlock(child))
-  })
+  const count = node.childCount
+  const children: MarkdownBlock[] = new Array<MarkdownBlock>(count)
+  for (let i = 0; i < count; i++) children[i] = readBlock(node.child(i))
   return children
 }
 
 function readBlock(node: ProseMirrorNode): MarkdownBlock {
   switch (node.type.name as NodeName) {
-    case 'paragraph':
-      return { type: 'paragraph', ...readInline(node) }
+    case 'paragraph': {
+      const inline = readInline(node)
+      return { type: 'paragraph', value: inline.value, segments: inline.segments }
+    }
     case 'heading': {
       const attrs = node.attrs as MeowdownHeadingAttrs
+      const inline = readInline(node)
       return {
         type: 'heading',
         level: attrs.level,
         setextUnderline: attrs.setextUnderline ?? undefined,
         closingHashes: attrs.closingHashes ?? undefined,
-        ...readInline(node),
+        value: inline.value,
+        segments: inline.segments,
       }
     }
     case 'blockquote':
@@ -91,10 +94,9 @@ function readBlock(node: ProseMirrorNode): MarkdownBlock {
     case 'htmlComment':
       return { type: 'htmlComment', value: (node.attrs as MeowdownHTMLCommentAttrs).content }
     case 'table': {
-      const children: MarkdownTableRow[] = []
-      node.forEach((row) => {
-        children.push(readTableRow(row))
-      })
+      const count = node.childCount
+      const children: MarkdownTableRow[] = new Array<MarkdownTableRow>(count)
+      for (let i = 0; i < count; i++) children[i] = readTableRow(node.child(i))
       return { type: 'table', children }
     }
     case 'text':
@@ -119,10 +121,9 @@ function readInline(node: ProseMirrorNode): MarkdownInline {
 }
 
 function readTableRow(node: ProseMirrorNode): MarkdownTableRow {
-  const children: MarkdownTableCell[] = []
-  node.forEach((cell) => {
-    children.push(readTableCell(cell))
-  })
+  const count = node.childCount
+  const children: MarkdownTableCell[] = new Array<MarkdownTableCell>(count)
+  for (let i = 0; i < count; i++) children[i] = readTableCell(node.child(i))
   return { type: 'tableRow', children }
 }
 
