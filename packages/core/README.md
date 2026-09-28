@@ -44,35 +44,35 @@ const markdown = docToMarkdown(editor.state.doc)
 the literal Markdown delimiters around the selection; heading shortcuts toggle
 the current block to that level (or back to a paragraph).
 
-| Key                    | Action                                                    | Markdown            |
-| ---------------------- | --------------------------------------------------------- | ------------------- |
-| `Mod-B`                | Bold                                                      | `**bold**`          |
-| `Mod-I`                | Italic                                                    | `*italic*`          |
-| `Mod-E`                | Inline code                                               | `` `code` ``        |
-| `Mod-Shift-X`          | Strikethrough                                             | `~~strikethrough~~` |
-| `Mod-Shift-H`          | Highlight                                                 | `==highlight==`     |
-| `Mod-K`                | Link                                                      | `[text](url)`       |
-| `Mod-Shift-K`          | Insert a wikilink                                         | `[[target]]`        |
-| `Mod-Alt-1`            | Heading 1                                                 | `# heading`         |
-| `Mod-Alt-2`            | Heading 2                                                 | `## heading`        |
-| `Mod-Alt-3`            | Heading 3                                                 | `### heading`       |
-| `Mod-Alt-4`            | Heading 4                                                 | `#### heading`      |
-| `Mod-Alt-5`            | Heading 5                                                 | `##### heading`     |
-| `Mod-Alt-6`            | Heading 6                                                 | `###### heading`    |
-| `Mod-.`                | Fold or unfold a bullet                                   |                     |
-| `Shift-Enter`          | Insert a line break                                       |                     |
-| `Mod-Enter`            | Follow the link under the caret, or cycle a checkbox task | `- [ ]` / `- [x]`   |
-| `Mod-Shift-Enter`      | Cycle a circle checkbox task                              | `+ [ ]` / `+ [x]`   |
-| `Mod-Shift-7`          | Ordered list                                              | `1. item`           |
-| `Mod-Shift-8`          | Bullet list                                               | `- item`            |
-| `Mod-Shift-9`          | Checkbox task list                                        | `- [ ] item`        |
-| `Alt-ArrowUp`          | Move the block or list item up                            |                     |
-| `Alt-ArrowDown`        | Move the block or list item down                          |                     |
-| `Mod-ArrowUp`          | Move the caret to the document start                      |                     |
-| `Mod-ArrowDown`        | Move the caret to the document end                        |                     |
-| `Mod-Shift-ArrowUp`    | Select to the document start                              |                     |
-| `Mod-Shift-ArrowDown`  | Select to the document end                                |                     |
-| `Escape`               | Collapse the selection                                    |                     |
+| Key                   | Action                                                    | Markdown            |
+| --------------------- | --------------------------------------------------------- | ------------------- |
+| `Mod-B`               | Bold                                                      | `**bold**`          |
+| `Mod-I`               | Italic                                                    | `*italic*`          |
+| `Mod-E`               | Inline code                                               | `` `code` ``        |
+| `Mod-Shift-X`         | Strikethrough                                             | `~~strikethrough~~` |
+| `Mod-Shift-H`         | Highlight                                                 | `==highlight==`     |
+| `Mod-K`               | Link                                                      | `[text](url)`       |
+| `Mod-Shift-K`         | Insert a wikilink                                         | `[[target]]`        |
+| `Mod-Alt-1`           | Heading 1                                                 | `# heading`         |
+| `Mod-Alt-2`           | Heading 2                                                 | `## heading`        |
+| `Mod-Alt-3`           | Heading 3                                                 | `### heading`       |
+| `Mod-Alt-4`           | Heading 4                                                 | `#### heading`      |
+| `Mod-Alt-5`           | Heading 5                                                 | `##### heading`     |
+| `Mod-Alt-6`           | Heading 6                                                 | `###### heading`    |
+| `Mod-.`               | Fold or unfold a bullet                                   |                     |
+| `Shift-Enter`         | Insert a line break                                       |                     |
+| `Mod-Enter`           | Follow the link under the caret, or cycle a checkbox task | `- [ ]` / `- [x]`   |
+| `Mod-Shift-Enter`     | Cycle a circle checkbox task                              | `+ [ ]` / `+ [x]`   |
+| `Mod-Shift-7`         | Ordered list                                              | `1. item`           |
+| `Mod-Shift-8`         | Bullet list                                               | `- item`            |
+| `Mod-Shift-9`         | Checkbox task list                                        | `- [ ] item`        |
+| `Alt-ArrowUp`         | Move the block or list item up                            |                     |
+| `Alt-ArrowDown`       | Move the block or list item down                          |                     |
+| `Mod-ArrowUp`         | Move the caret to the document start                      |                     |
+| `Mod-ArrowDown`       | Move the caret to the document end                        |                     |
+| `Mod-Shift-ArrowUp`   | Select to the document start                              |                     |
+| `Mod-Shift-ArrowDown` | Select to the document end                                |                     |
+| `Escape`              | Collapse the selection                                    |                     |
 
 `Mod-Shift-7/8/9` wrap the current block, convert a list of a different kind in
 place, and unwrap a list of the same kind back to a paragraph. `Alt-ArrowUp` /
