@@ -11,6 +11,7 @@ import type {
   LinkCopyHandler,
   LinkPreviewResolver,
   MarkMode,
+  EditorConfig,
   PlaceholderOptions,
   SearchStatusHandler,
   StartPendingReplacementOptions,
@@ -66,6 +67,16 @@ export interface EditorProps {
    * first render is used; later changes are ignored.
    */
   initialMarkdown?: string
+
+  /**
+   * Edit a single paragraph of inline Markdown. Read on mount.
+   */
+  singleParagraph?: boolean
+
+  /**
+   * Definitions supplied by the containing document.
+   */
+  referenceDefinitions?: EditorConfig['referenceDefinitions']
 
   /**
    * Called on every user-driven document change. Programmatic `setMarkdown` and
@@ -408,6 +419,8 @@ export interface EditorProps {
 export function MeowdownEditor({
   mode = 'focus',
   initialMarkdown,
+  singleParagraph,
+  referenceDefinitions,
   onDocChange,
   onSlashMenuSearch,
   onTagSearch,
@@ -552,6 +565,8 @@ export function MeowdownEditor({
         ref={childRef}
         markMode={mode}
         initialMarkdown={initialMarkdown}
+        singleParagraph={singleParagraph}
+        referenceDefinitions={referenceDefinitions}
         onDocChange={onDocChange}
         onSlashMenuSearch={onSlashMenuSearch}
         onTagSearch={onTagSearch}

@@ -1,5 +1,8 @@
 import {
   defineEditorExtension,
+  defineSingleParagraph,
+  paragraphMarkdownToDoc,
+  docToParagraphMarkdown,
   docToMarkdown,
   getSelectedText,
   getTextblockDisplayText,
@@ -136,6 +139,8 @@ export interface ProseKitEditorProps {
    * first render is used; later changes are ignored.
    */
   initialMarkdown?: string
+  singleParagraph?: boolean
+  referenceDefinitions?: EditorConfig['referenceDefinitions']
 
   /**
    * Called on every user-driven document change, not on programmatic setState.
@@ -355,6 +360,8 @@ export interface ProseKitEditorProps {
 export function ProseKitEditor({
   markMode = 'focus',
   initialMarkdown,
+  singleParagraph = false,
+  referenceDefinitions,
   onDocChange,
   onSlashMenuSearch,
   onTagSearch,
@@ -446,6 +453,7 @@ export function ProseKitEditor({
       spellCheck,
       editorClassName,
       wikilinkEnabled,
+      referenceDefinitions,
     }),
     [
       markMode,
@@ -476,18 +484,26 @@ export function ProseKitEditor({
       spellCheck,
       editorClassName,
       wikilinkEnabled,
+      referenceDefinitions,
     ],
   )
 
   const [editor] = useState((): TypedEditor => {
-    const baseExtension = defineEditorExtension(config)
+    const baseExtension = union(
+      defineEditorExtension(config),
+      singleParagraph ? defineSingleParagraph() : union(),
+    )
     const extension =
       CodeBlockView === false
         ? baseExtension
         : union(baseExtension, defineCodeBlockView(CodeBlockView))
     const editor: TypedEditor = createEditor({ extension })
-    if (initialMarkdown) {
-      editor.setContent(markdownToDoc(initialMarkdown, { nodes: editor.nodes, frontmatter }))
+    if (initialMarkdown || singleParagraph) {
+      editor.setContent(
+        singleParagraph
+          ? paragraphMarkdownToDoc(initialMarkdown ?? '', editor.nodes)
+          : markdownToDoc(initialMarkdown ?? '', { nodes: editor.nodes, frontmatter }),
+      )
     }
     return editor
   })
@@ -510,7 +526,9 @@ export function ProseKitEditor({
 
   useImperativeHandle(ref, () => {
     function getMarkdown(): string {
-      return docToMarkdown(editor.state.doc, { frontmatter })
+      return singleParagraph
+        ? docToParagraphMarkdown(editor.state.doc)
+        : docToMarkdown(editor.state.doc, { frontmatter })
     }
     function getSelection(): SelectionJSON {
       return editor.state.selection.toJSON() as SelectionJSON
@@ -527,7 +545,9 @@ export function ProseKitEditor({
       if (markdown == null && !selection) return
       const transaction = editor.state.tr
       if (markdown != null) {
-        const doc = markdownToDoc(markdown, { nodes: editor.nodes, frontmatter })
+        const doc = singleParagraph
+          ? paragraphMarkdownToDoc(markdown, editor.nodes)
+          : markdownToDoc(markdown, { nodes: editor.nodes, frontmatter })
         const currentMarkdown = docToMarkdown(transaction.doc, { frontmatter })
         const nextMarkdown = docToMarkdown(doc, { frontmatter })
         // A host echo of equivalent Markdown must not replace the document: the
@@ -632,7 +652,7 @@ export function ProseKitEditor({
       findPrevious,
       getEditor: () => editor,
     }
-  }, [editor, frontmatter, hasSelectionMenu, openSelectionMenu])
+  }, [editor, frontmatter, hasSelectionMenu, openSelectionMenu, singleParagraph])
 
   const mount = useCallback(
     (element: HTMLDivElement | null) => {
