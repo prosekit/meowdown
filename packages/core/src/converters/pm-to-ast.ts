@@ -110,8 +110,9 @@ function readInline(node: ProseMirrorNode): MarkdownInline {
 
   const chunks: Array<string | undefined> = new Array<string | undefined>(count)
   let value = ''
+  const content = node.content.content
   for (let i = 0; i < count; i++) {
-    const child = node.child(i)
+    const child = content[i]
     const text = child.isText ? child.text : undefined
     chunks[i] = text
     if (text) value += text
