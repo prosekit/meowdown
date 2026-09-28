@@ -68,10 +68,10 @@ the current block to that level (or back to a paragraph).
 | `Mod-Shift-9`          | Checkbox task list                                        | `- [ ] item`        |
 | `Alt-ArrowUp`          | Move the block or list item up                            |                     |
 | `Alt-ArrowDown`        | Move the block or list item down                          |                     |
-| `Meta-ArrowUp`         | Move the caret to the document start                      |                     |
-| `Meta-ArrowDown`       | Move the caret to the document end                        |                     |
-| `Shift-Meta-ArrowUp`   | Select to the document start                              |                     |
-| `Shift-Meta-ArrowDown` | Select to the document end                                |                     |
+| `Mod-ArrowUp`          | Move the caret to the document start                      |                     |
+| `Mod-ArrowDown`        | Move the caret to the document end                        |                     |
+| `Mod-Shift-ArrowUp`    | Select to the document start                              |                     |
+| `Mod-Shift-ArrowDown`  | Select to the document end                                |                     |
 | `Escape`               | Collapse the selection                                    |                     |
 
 `Mod-Shift-7/8/9` wrap the current block, convert a list of a different kind in

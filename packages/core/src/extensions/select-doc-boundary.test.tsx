@@ -10,7 +10,7 @@ function setup(): Fixture {
   return setupFixture({ extensionOptions: { markMode: 'hide' } })
 }
 
-describe('Meta-ArrowUp / Meta-ArrowDown', () => {
+describe('Mod-ArrowUp / Mod-ArrowDown', () => {
   it('moves the caret to the document start when the document begins with a task list', async () => {
     using fixture = setup()
     const { n } = fixture
@@ -22,7 +22,7 @@ describe('Meta-ArrowUp / Meta-ArrowDown', () => {
       ),
     )
     fixture.view.focus()
-    await userEvent.keyboard('{Meta>}{ArrowUp}{/Meta}')
+    await userEvent.keyboard('{ControlOrMeta>}{ArrowUp}{/ControlOrMeta}')
     const selection = fixture.state.selection
     expect(selection.empty).toBe(true)
     expect(selection.$head.parent.textContent).toBe('todo one')
@@ -40,7 +40,7 @@ describe('Meta-ArrowUp / Meta-ArrowDown', () => {
       ),
     )
     fixture.view.focus()
-    await userEvent.keyboard('{Meta>}{ArrowUp}{/Meta}')
+    await userEvent.keyboard('{ControlOrMeta>}{ArrowUp}{/ControlOrMeta}')
     const selection = fixture.state.selection
     expect(selection.empty).toBe(true)
     expect(selection.$head.parent.textContent).toBe('bullet one')
@@ -52,7 +52,7 @@ describe('Meta-ArrowUp / Meta-ArrowDown', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('alpha'), n.paragraph('beta<a>')))
     fixture.view.focus()
-    await userEvent.keyboard('{Meta>}{ArrowUp}{/Meta}')
+    await userEvent.keyboard('{ControlOrMeta>}{ArrowUp}{/ControlOrMeta}')
     const selection = fixture.state.selection
     expect(selection.empty).toBe(true)
     expect(selection.head).toBe(1)
@@ -63,7 +63,7 @@ describe('Meta-ArrowUp / Meta-ArrowDown', () => {
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('**bold** first'), n.paragraph('tail<a>')))
     fixture.view.focus()
-    await userEvent.keyboard('{Meta>}{ArrowUp}{/Meta}')
+    await userEvent.keyboard('{ControlOrMeta>}{ArrowUp}{/ControlOrMeta}')
     const selection = fixture.state.selection
     expect(selection.empty).toBe(true)
     expect(selection.head).toBe(1)
@@ -80,32 +80,32 @@ describe('Meta-ArrowUp / Meta-ArrowDown', () => {
       ),
     )
     fixture.view.focus()
-    await userEvent.keyboard('{Meta>}{ArrowDown}{/Meta}')
+    await userEvent.keyboard('{ControlOrMeta>}{ArrowDown}{/ControlOrMeta}')
     const selection = fixture.state.selection
     expect(selection.empty).toBe(true)
     expect(selection.$head.parent.textContent).toBe('todo two')
     expect(selection.$head.parentOffset).toBe(selection.$head.parent.content.size)
   })
 
-  it('extends the selection to the document start on Shift-Meta-ArrowUp', async () => {
+  it('extends the selection to the document start on Mod-Shift-ArrowUp', async () => {
     using fixture = setup()
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('alpha'), n.paragraph('beta<a>')))
     fixture.view.focus()
     const anchor = fixture.state.selection.anchor
-    await userEvent.keyboard('{Shift>}{Meta>}{ArrowUp}{/Meta}{/Shift}')
+    await userEvent.keyboard('{Shift>}{ControlOrMeta>}{ArrowUp}{/ControlOrMeta}{/Shift}')
     const selection = fixture.state.selection
     expect(selection.anchor).toBe(anchor)
     expect(selection.head).toBe(1)
   })
 
-  it('extends the selection to the document end on Shift-Meta-ArrowDown', async () => {
+  it('extends the selection to the document end on Mod-Shift-ArrowDown', async () => {
     using fixture = setup()
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('<a>alpha'), n.paragraph('beta')))
     fixture.view.focus()
     const anchor = fixture.state.selection.anchor
-    await userEvent.keyboard('{Shift>}{Meta>}{ArrowDown}{/Meta}{/Shift}')
+    await userEvent.keyboard('{Shift>}{ControlOrMeta>}{ArrowDown}{/ControlOrMeta}{/Shift}')
     const selection = fixture.state.selection
     expect(selection.anchor).toBe(anchor)
     expect(selection.head).toBe(fixture.doc.content.size - 1)
@@ -118,7 +118,7 @@ describe('Meta-ArrowUp / Meta-ArrowDown', () => {
     fixture.set(n.doc(n.paragraph('<a>alpha'), n.paragraph('beta')))
     updateEditorConfig(fixture.editor, { onExitBoundary })
     fixture.view.focus()
-    await userEvent.keyboard('{Meta>}{ArrowUp}{/Meta}')
+    await userEvent.keyboard('{ControlOrMeta>}{ArrowUp}{/ControlOrMeta}')
     expect(onExitBoundary).not.toHaveBeenCalled()
     expect(fixture.state.selection.head).toBe(1)
   })

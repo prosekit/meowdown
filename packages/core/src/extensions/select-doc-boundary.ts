@@ -15,7 +15,7 @@ function selectDocBoundary(direction: -1 | 1, extend: boolean): Command {
 }
 
 /**
- * Binds the macOS document-boundary motions (`Meta-ArrowUp` / `Meta-ArrowDown`
+ * Binds the document-boundary motions (`Mod-ArrowUp` / `Mod-ArrowDown`
  * move the caret to the document start / end; the Shift variants extend the
  * selection there). Bound explicitly instead of relying on the browser's
  * native handling: WebKit gives up the native move when the document starts
@@ -25,9 +25,9 @@ function selectDocBoundary(direction: -1 | 1, extend: boolean): Command {
  */
 export function defineSelectDocBoundary(): PlainExtension {
   return defineKeymap({
-    'Meta-ArrowUp': selectDocBoundary(-1, false),
-    'Meta-ArrowDown': selectDocBoundary(1, false),
-    'Shift-Meta-ArrowUp': selectDocBoundary(-1, true),
-    'Shift-Meta-ArrowDown': selectDocBoundary(1, true),
+    'Mod-ArrowUp': selectDocBoundary(-1, false),
+    'Mod-ArrowDown': selectDocBoundary(1, false),
+    'Mod-Shift-ArrowUp': selectDocBoundary(-1, true),
+    'Mod-Shift-ArrowDown': selectDocBoundary(1, true),
   })
 }

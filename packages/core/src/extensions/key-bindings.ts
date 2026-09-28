@@ -24,9 +24,9 @@ export const EDITOR_KEY_BINDINGS = {
   'Mod-Shift-9': 'Checkbox task list',
   'Alt-ArrowUp': 'Move the block or list item up',
   'Alt-ArrowDown': 'Move the block or list item down',
-  'Meta-ArrowUp': 'Move the caret to the document start',
-  'Meta-ArrowDown': 'Move the caret to the document end',
-  'Shift-Meta-ArrowUp': 'Select to the document start',
-  'Shift-Meta-ArrowDown': 'Select to the document end',
+  'Mod-ArrowUp': 'Move the caret to the document start',
+  'Mod-ArrowDown': 'Move the caret to the document end',
+  'Mod-Shift-ArrowUp': 'Select to the document start',
+  'Mod-Shift-ArrowDown': 'Select to the document end',
   Escape: 'Collapse the selection',
 } as const
