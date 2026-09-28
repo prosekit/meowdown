@@ -28,6 +28,8 @@ export interface MarkdownInline {
      */
     textContent?: string
   }
+
+  children?: undefined
 }
 
 export interface MarkdownParagraph extends MarkdownInline {
@@ -90,6 +92,8 @@ export interface MarkdownCodeBlock {
    * Minimum opening fence width; content can require a wider fence.
    */
   fenceLength?: number
+
+  children?: undefined
 }
 
 export interface MarkdownHorizontalRule {
@@ -98,6 +102,8 @@ export interface MarkdownHorizontalRule {
    * Original spelling, defaulting to '---'.
    */
   marker?: string
+
+  children?: undefined
 }
 
 export interface MarkdownHTMLComment {
@@ -106,6 +112,8 @@ export interface MarkdownHTMLComment {
    * Includes the comment delimiters.
    */
   value: string
+
+  children?: undefined
 }
 
 export interface MarkdownTable {
@@ -138,6 +146,8 @@ export interface MarkdownIgnored {
    * Whether the original node contains children.
    */
   hasContent: boolean
+
+  children?: undefined
 }
 
 /**
@@ -146,6 +156,7 @@ export interface MarkdownIgnored {
 export interface MarkdownText {
   type: 'text'
   value: string
+  children?: undefined
 }
 
 export type MarkdownBlock =

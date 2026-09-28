@@ -1,5 +1,4 @@
 import {
-  isSpaceChar,
   CHAR_ASTERISK,
   CHAR_BACKTICK,
   CHAR_DIGIT_ONE,
@@ -17,6 +16,7 @@ import {
   CHAR_TAB,
   CHAR_TILDE,
   CHAR_UNDERSCORE,
+  isSpaceChar,
 } from '../unicode.ts'
 
 import { canIndentCode, minFenceLength } from './code.ts'
@@ -66,7 +66,7 @@ export function serializeMarkdownAst(
   }
   // A document holds at least one block, so a lone empty paragraph is the
   // empty document, not a blank line.
-  const child = 'children' in node && node.children.length === 1 ? node.children[0] : undefined
+  const child = node.children?.length === 1 ? node.children[0] : undefined
   if (!(child?.type === 'paragraph' && !hasInlineContent(child))) {
     emit(node, out)
   }
@@ -734,7 +734,7 @@ function hasInlineContent(node: MarkdownInline): boolean {
 }
 
 function hasBlockContent(node: MarkdownBlock): boolean {
-  if ('children' in node) return node.children.length > 0
+  if (node.children) return node.children.length > 0
   if (node.type === 'ignored') return node.hasContent
   if (node.type === 'paragraph' || node.type === 'heading') return hasInlineContent(node)
   return node.type === 'codeBlock' && node.value !== ''
@@ -951,7 +951,7 @@ function extractCellText(cell: MarkdownTableCell): string {
  * Descendant text; comments and other leaf blocks have no text content.
  */
 function collectText(node: MarkdownNode): string {
-  if ('children' in node) return node.children.map(collectText).join('')
+  if (node.children) return node.children.map(collectText).join('')
   if (node.type === 'htmlComment' || node.type === 'horizontalRule') return ''
   if (
     (node.type === 'paragraph' || node.type === 'heading') &&
