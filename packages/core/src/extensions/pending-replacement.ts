@@ -19,7 +19,6 @@ import { markdownToDoc } from '../converters/md-to-pm.ts'
 import type { PositionRange } from '../utils/range.ts'
 
 import { isNodeOfType } from './node-names.ts'
-import { getNodeBuildersForSchema } from './schema.ts'
 
 /**
  * Where an accepted replacement lands relative to the source range.
@@ -199,8 +198,7 @@ function acceptPendingReplacement(options: AcceptPendingReplacementOptions = {})
     if (!pending || !pending.text.trim()) return false
     if (dispatch) {
       const mode = options.mode ?? pending.mode
-      const nodes = getNodeBuildersForSchema(state.schema)
-      const parsed = markdownToDoc(pending.text, { nodes })
+      const parsed = markdownToDoc(pending.text, { schema: state.schema })
       const tr = state.tr
       tr.setMeta(pendingReplacementKey, { type: 'accept' } satisfies PendingReplacementMeta)
 

@@ -1,5 +1,5 @@
 import { parseMarkdownAst } from '@meowdown/markdown'
-import type { ProseMirrorNode } from '@prosekit/pm/model'
+import type { ProseMirrorNode, Schema } from '@prosekit/pm/model'
 
 import type { TypedNodeBuilders } from '../extensions/schema.ts'
 
@@ -10,7 +10,13 @@ import { astToDoc } from './ast-to-pm.ts'
  */
 export interface MarkdownToDocOptions {
   /**
-   * Node builders to build the document with. Defaults to the shared schema's builders.
+   * The schema to build the document with. Defaults to the shared schema.
+   */
+  schema?: Schema
+
+  /**
+   * Node builders whose schema builds the document. `schema` is the direct
+   * spelling; this one remains for callers that hold an editor's `nodes`.
    */
   nodes?: TypedNodeBuilders
 
@@ -23,10 +29,10 @@ export interface MarkdownToDocOptions {
 /**
  * Convert a markdown string into a ProseMirror document node.
  *
- * By default the document is built with the shared schema's node builders, so
- * no editor is required. When the result will be loaded into a specific editor,
- * pass that editor's `nodes` so the document uses the editor's own schema
- * instance and can be inserted without a JSON round trip.
+ * By default the document is built with the shared schema, so no editor is
+ * required. When the result will be loaded into a specific editor, pass that
+ * editor's `schema` so the document uses the editor's own schema instance and
+ * can be inserted without a JSON round trip.
  *
  * The output follows the extension set defined in `../extensions/extension.ts`
  * (doc, paragraph, text, heading, blockquote, list, codeBlock, table, tableRow,
@@ -38,5 +44,6 @@ export function markdownToDoc(
   markdown: string,
   options: MarkdownToDocOptions = {},
 ): ProseMirrorNode {
-  return astToDoc(parseMarkdownAst(markdown, options), options.nodes)
+  const schema = options.schema ?? (options.nodes ? options.nodes.doc().type.schema : undefined)
+  return astToDoc(parseMarkdownAst(markdown, options), schema)
 }

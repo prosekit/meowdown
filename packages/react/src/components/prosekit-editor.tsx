@@ -487,7 +487,7 @@ export function ProseKitEditor({
         : union(baseExtension, defineCodeBlockView(CodeBlockView))
     const editor: TypedEditor = createEditor({ extension })
     if (initialMarkdown) {
-      editor.setContent(markdownToDoc(initialMarkdown, { nodes: editor.nodes, frontmatter }))
+      editor.setContent(markdownToDoc(initialMarkdown, { schema: editor.schema, frontmatter }))
     }
     return editor
   })
@@ -527,7 +527,7 @@ export function ProseKitEditor({
       if (markdown == null && !selection) return
       const transaction = editor.state.tr
       if (markdown != null) {
-        const doc = markdownToDoc(markdown, { nodes: editor.nodes, frontmatter })
+        const doc = markdownToDoc(markdown, { schema: editor.schema, frontmatter })
         const currentMarkdown = docToMarkdown(transaction.doc, { frontmatter })
         const nextMarkdown = docToMarkdown(doc, { frontmatter })
         // A host echo of equivalent Markdown must not replace the document: the

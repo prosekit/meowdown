@@ -5,7 +5,6 @@ import { Plugin, PluginKey } from '@prosekit/pm/state'
 
 import { markdownToDoc } from '../../converters/md-to-pm.ts'
 import type { NodeName } from '../node-names.ts'
-import { getNodeBuildersForSchema } from '../schema.ts'
 
 /**
  * Parse pasted plain text as markdown: `- [ ] task`, `# heading`, fenced code
@@ -20,8 +19,7 @@ function plainTextToSlice(schema: Schema, raw: string): Slice {
   const trimmed = text.replace(/^\n+/, '').replace(/\n+$/, '')
   if (!trimmed) return Slice.empty
 
-  const nodes = getNodeBuildersForSchema(schema)
-  const doc = markdownToDoc(trimmed, { nodes })
+  const doc = markdownToDoc(trimmed, { schema })
   const paragraph = getNodeType(schema, 'paragraph' satisfies NodeName)
   const openStart = doc.childCount > 0 && doc.child(0).type === paragraph ? 1 : 0
   const openEnd = doc.childCount > 0 && doc.child(doc.childCount - 1).type === paragraph ? 1 : 0

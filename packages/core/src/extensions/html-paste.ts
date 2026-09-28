@@ -7,7 +7,6 @@ import { markdownToDoc } from '../converters/md-to-pm.ts'
 import { CHAR_LINE_FEED } from '../unicode.ts'
 
 import { getSemanticDOMSerializer } from './clipboard/clipboard-serializer.ts'
-import { getNodeBuildersForSchema } from './schema.ts'
 
 const htmlPasteKey = new PluginKey('meowdown-html-paste')
 
@@ -152,8 +151,7 @@ export function defineHTMLPaste(): PlainExtension {
           const markdown = extractStyledPlainText(html) ?? htmlToMarkdown(html)
           if (!markdown.trim()) return html
 
-          const nodes = getNodeBuildersForSchema(view.state.schema)
-          const doc = markdownToDoc(markdown, { nodes })
+          const doc = markdownToDoc(markdown, { schema: view.state.schema })
           const serializer = getSemanticDOMSerializer(view.state.schema)
           const container = document.createElement('div')
           container.append(serializer.serializeFragment(doc.content))

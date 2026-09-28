@@ -15,7 +15,7 @@ export type TypedMarkBuilders = ExtractMarkBuilders<EditorExtension>
 /**
  * The schema shared by every parser and serializer, built once and cached.
  */
-const getSharedSchema: () => Schema = /* @__PURE__ */ once(() => {
+export const getSharedSchema: () => Schema = /* @__PURE__ */ once(() => {
   const schema = defineEditorExtension().schema
   if (schema == null) {
     throw new Error('Unexpected empty schema')

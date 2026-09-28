@@ -1,34 +1,46 @@
 import type { MarkdownNode } from '@meowdown/markdown'
-import type { ProseMirrorNode } from '@prosekit/pm/model'
+import { getNodeType } from '@prosekit/core'
+import type { Attrs, NodeType, ProseMirrorNode, Schema } from '@prosekit/pm/model'
 
-import { getNodeBuilders, type TypedNodeBuilders } from '../extensions/schema.ts'
+import type { NodeName } from '../extensions/node-names.ts'
+import { getSharedSchema } from '../extensions/schema.ts'
 
 /**
  * Build nodes with the caller's schema; Markdown inline syntax remains literal text.
+ *
+ * Nodes are created with `NodeType.create` rather than the typed builders: the
+ * AST already has the shape the schema wants, so the builders' argument
+ * normalization and `createAndFill` content matching are pure overhead here.
+ * Only a container with no children is filled, so an empty list item or cell
+ * still gets the paragraph the schema requires.
  */
-export function astToDoc(
-  node: MarkdownNode,
-  nodes: TypedNodeBuilders = getNodeBuilders(),
-): ProseMirrorNode {
-  const children = node.children?.map((child) => astToDoc(child, nodes)) || []
+export function astToDoc(node: MarkdownNode, schema: Schema = getSharedSchema()): ProseMirrorNode {
   switch (node.type) {
     case 'document':
-      return nodes.doc(node.frontmatter == null ? {} : { frontmatter: node.frontmatter }, children)
+      return createContainer(
+        nodeTypeOf(schema, 'doc'),
+        node.frontmatter == null ? null : { frontmatter: node.frontmatter },
+        node.children,
+        schema,
+      )
     case 'paragraph':
-      return nodes.paragraph(node.value)
+      return createTextblock(nodeTypeOf(schema, 'paragraph'), null, node.value, schema)
     case 'heading':
-      return nodes.heading(
+      return createTextblock(
+        nodeTypeOf(schema, 'heading'),
         {
           level: node.level,
           setextUnderline: node.setextUnderline ?? null,
           closingHashes: node.closingHashes ?? null,
         },
         node.value,
+        schema,
       )
     case 'blockquote':
-      return nodes.blockquote(children)
+      return createContainer(nodeTypeOf(schema, 'blockquote'), null, node.children, schema)
     case 'listItem':
-      return nodes.list(
+      return createContainer(
+        nodeTypeOf(schema, 'list'),
         {
           kind: node.kind,
           order: node.order ?? null,
@@ -38,32 +50,68 @@ export function astToDoc(
           taskMarker: node.taskMarker,
           markerGap: node.markerGap,
         },
-        children,
+        node.children,
+        schema,
       )
     case 'codeBlock':
-      return nodes.codeBlock(
+      return createTextblock(
+        nodeTypeOf(schema, 'codeBlock'),
         {
           language: node.language,
           fenceStyle: node.fenceStyle ?? null,
           fenceLength: node.fenceLength ?? null,
         },
         node.value,
+        schema,
       )
     case 'horizontalRule':
-      return nodes.horizontalRule({ marker: node.marker ?? null })
+      return nodeTypeOf(schema, 'horizontalRule').create({ marker: node.marker ?? null })
     case 'htmlComment':
-      return nodes.htmlComment({ content: node.value })
+      return nodeTypeOf(schema, 'htmlComment').create({ content: node.value })
     case 'table':
-      return nodes.table(children)
+      return createContainer(nodeTypeOf(schema, 'table'), null, node.children, schema)
     case 'tableRow':
-      return nodes.tableRow(children)
+      return createContainer(nodeTypeOf(schema, 'tableRow'), null, node.children, schema)
     case 'tableCell':
-      return node.header
-        ? nodes.tableHeaderCell({ align: node.align ?? null }, children)
-        : nodes.tableCell({ align: node.align ?? null }, children)
+      return createContainer(
+        nodeTypeOf(schema, node.header ? 'tableHeaderCell' : 'tableCell'),
+        { align: node.align ?? null },
+        node.children,
+        schema,
+      )
     case 'text':
-      return nodes.text(node.value)
+      return schema.text(node.value)
     case 'ignored':
       throw new Error('Cannot reconstruct an unsupported editor node from Markdown')
   }
+}
+
+function nodeTypeOf(schema: Schema, name: NodeName): NodeType {
+  return getNodeType(schema, name)
+}
+
+function createTextblock(
+  type: NodeType,
+  attrs: Attrs | null,
+  value: string,
+  schema: Schema,
+): ProseMirrorNode {
+  return type.create(attrs, value === '' ? null : schema.text(value))
+}
+
+function createContainer(
+  type: NodeType,
+  attrs: Attrs | null,
+  children: MarkdownNode[],
+  schema: Schema,
+): ProseMirrorNode {
+  if (children.length === 0) {
+    const filled = type.createAndFill(attrs)
+    if (filled == null) throw new Error(`Cannot fill an empty ${type.name} node`)
+    return filled
+  }
+  const count = children.length
+  const content: ProseMirrorNode[] = new Array<ProseMirrorNode>(count)
+  for (let i = 0; i < count; i++) content[i] = astToDoc(children[i], schema)
+  return type.create(attrs, content)
 }

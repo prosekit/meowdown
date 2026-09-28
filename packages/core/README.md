@@ -20,7 +20,7 @@ import { createEditor } from '@prosekit/core'
 import { defineEditorExtension, docToMarkdown, markdownToDoc } from '@meowdown/core'
 
 const editor = createEditor({ extension: defineEditorExtension() })
-editor.setContent(markdownToDoc('# Hello', { nodes: editor.nodes }))
+editor.setContent(markdownToDoc('# Hello', { schema: editor.schema }))
 editor.mount(document.querySelector<HTMLElement>('#editor')!)
 
 // Serialize the current document back to Markdown at any time.

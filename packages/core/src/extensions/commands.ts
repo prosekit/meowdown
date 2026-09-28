@@ -8,7 +8,6 @@ import { TextSelection, type Command } from '@prosekit/pm/state'
 import { markdownToDoc } from '../converters/md-to-pm.ts'
 
 import { isNodeOfType, type NodeName } from './node-names.ts'
-import { getNodeBuildersForSchema } from './schema.ts'
 
 function selectText(anchor: number, head?: number): Command {
   return (state, dispatch) => {
@@ -35,8 +34,7 @@ function selectTextBetween($anchor: ResolvedPos, $head: ResolvedPos, bias?: numb
 function insertMarkdown(markdown: string): Command {
   return (state, dispatch) => {
     if (!markdown.trim()) return false
-    const nodes = getNodeBuildersForSchema(state.schema)
-    const content = markdownToDoc(markdown, { nodes }).content
+    const content = markdownToDoc(markdown, { schema: state.schema }).content
     if (content.childCount === 0) return false
     const isSingleParagraph =
       content.childCount === 1 && isNodeOfType(content.child(0), 'paragraph')
