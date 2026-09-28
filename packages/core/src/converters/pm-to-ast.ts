@@ -36,25 +36,28 @@ export function docToAst(node: ProseMirrorNode): MarkdownNode {
 }
 
 function readBlocks(node: ProseMirrorNode): MarkdownBlock[] {
-  const children: MarkdownBlock[] = []
-  node.forEach((child) => {
-    children.push(readBlock(child))
-  })
+  const count = node.childCount
+  const children: MarkdownBlock[] = new Array<MarkdownBlock>(count)
+  for (let i = 0; i < count; i++) children[i] = readBlock(node.child(i))
   return children
 }
 
 function readBlock(node: ProseMirrorNode): MarkdownBlock {
   switch (node.type.name as NodeName) {
-    case 'paragraph':
-      return { type: 'paragraph', ...readInline(node) }
+    case 'paragraph': {
+      const inline = readInline(node)
+      return { type: 'paragraph', value: inline.value, segments: inline.segments }
+    }
     case 'heading': {
       const attrs = node.attrs as MeowdownHeadingAttrs
+      const inline = readInline(node)
       return {
         type: 'heading',
         level: attrs.level,
         setextUnderline: attrs.setextUnderline ?? undefined,
         closingHashes: attrs.closingHashes ?? undefined,
-        ...readInline(node),
+        value: inline.value,
+        segments: inline.segments,
       }
     }
     case 'blockquote':
@@ -91,10 +94,9 @@ function readBlock(node: ProseMirrorNode): MarkdownBlock {
     case 'htmlComment':
       return { type: 'htmlComment', value: (node.attrs as MeowdownHTMLCommentAttrs).content }
     case 'table': {
-      const children: MarkdownTableRow[] = []
-      node.forEach((row) => {
-        children.push(readTableRow(row))
-      })
+      const count = node.childCount
+      const children: MarkdownTableRow[] = new Array<MarkdownTableRow>(count)
+      for (let i = 0; i < count; i++) children[i] = readTableRow(node.child(i))
       return { type: 'table', children }
     }
     case 'text':
@@ -104,25 +106,34 @@ function readBlock(node: ProseMirrorNode): MarkdownBlock {
   }
 }
 
+/**
+ * A textblock's literal Markdown plus its text boundaries. `textContent` walks
+ * the node again and only a table cell reads it, so it is computed only when an
+ * inline atom makes it differ from `value`.
+ */
 function readInline(node: ProseMirrorNode): MarkdownInline {
-  if (node.childCount === 0) return { value: '' }
+  const count = node.childCount
+  if (count === 0) return { value: '', segments: undefined }
   const first = node.child(0)
-  if (node.childCount === 1 && first.isText) return { value: first.text ?? '' }
-  const chunks: Array<string | undefined> = []
+  if (count === 1 && first.isText) return { value: first.text ?? '', segments: undefined }
+  const chunks: Array<string | undefined> = new Array<string | undefined>(count)
   let value = ''
-  node.forEach((child) => {
+  let hasAtom = false
+  for (let i = 0; i < count; i++) {
+    const child = node.child(i)
     const text = child.isText ? child.text : undefined
-    chunks.push(text)
+    if (text == null) hasAtom = true
+    chunks[i] = text
     if (text) value += text
-  })
-  return { value, segments: { value, chunks, textContent: node.textContent } }
+  }
+  const textContent = hasAtom ? node.textContent : undefined
+  return { value, segments: { value, chunks, textContent } }
 }
 
 function readTableRow(node: ProseMirrorNode): MarkdownTableRow {
-  const children: MarkdownTableCell[] = []
-  node.forEach((cell) => {
-    children.push(readTableCell(cell))
-  })
+  const count = node.childCount
+  const children: MarkdownTableCell[] = new Array<MarkdownTableCell>(count)
+  for (let i = 0; i < count; i++) children[i] = readTableCell(node.child(i))
   return { type: 'tableRow', children }
 }
 
