@@ -56,7 +56,7 @@ export type ListMarker = '.' | ')' | '-' | '*' | '+' | null
  * GFM marks a box checked with either `x` or `X`. Defaults to null, which the
  * serializer emits as the canonical lowercase `x`.
  */
-export type TaskMarker = 'x' | 'X' | null
+type TaskMarker = 'x' | 'X' | null
 
 export interface MeowdownListAttrs extends ListAttrs {
   marker?: ListMarker

@@ -28,7 +28,9 @@ rules as the editor's `markdownToDoc` and `docToMarkdown`.
 ```ts
 import { parseMarkdownAst, serializeMarkdownAst } from '@meowdown/markdown'
 
-const document = parseMarkdownAst('+ [ ] **buy** milk\n')
+const document = parseMarkdownAst(
+  '+ [ ] **buy** milk\n\n  > Remember the discount\n\n  - [ ] Check stock\n',
+)
 const item = document.children[0]
 if (item.type === 'listItem') {
   item.checked = true
@@ -37,7 +39,12 @@ if (item.type === 'listItem') {
     firstParagraph.value = '**buy** bread'
   }
 }
-const markdown = serializeMarkdownAst(document) // '+ [x] **buy** bread\n'
+const markdown = serializeMarkdownAst(document)
+// + [x] **buy** bread
+//
+//   > Remember the discount
+//
+//   - [ ] Check stock
 ```
 
 The discriminated `MarkdownNode` union covers documents, paragraphs, headings,

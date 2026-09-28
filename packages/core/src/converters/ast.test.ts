@@ -82,4 +82,24 @@ describe('Markdown AST adapters', () => {
     )
     expect(docToMarkdown(doc)).toBe('- one\n\n- two\n')
   })
+  it('retains empty headings and containers created by the editor', () => {
+    const nodes = getNodeBuilders()
+    expect(docToMarkdown(nodes.doc(nodes.heading({ level: 2, setextUnderline: 3 })))).toBe('##\n')
+    expect(docToMarkdown(nodes.doc(nodes.list()))).toBe('-\n')
+    expect(docToMarkdown(nodes.doc(nodes.table()))).toBe('\n')
+    expect(docToMarkdown(nodes.doc(nodes.table(nodes.tableRow())))).toBe('\n')
+  })
+
+  it('keeps the heading prefix when an inline atom emits no text', () => {
+    const schema = new Schema({
+      nodes: shared.spec.nodes.addBefore('text', 'mention', {
+        inline: true,
+        group: 'inline',
+        atom: true,
+      }),
+    })
+    const nodes = getNodeBuildersForSchema(schema)
+    const heading = nodes.heading({ level: 2, setextUnderline: 3 }, schema.node('mention'))
+    expect(docToMarkdown(nodes.doc(heading))).toBe('\n---\n')
+  })
 })

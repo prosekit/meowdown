@@ -4,6 +4,9 @@ export const CHAR_LOWERCASE_A = 97 /* a */
 export const CHAR_UPPERCASE_Z = 90 /* Z */
 export const CHAR_LOWERCASE_Z = 122 /* z */
 
+export const CHAR_LOWERCASE_X = 120 /* x */
+export const CHAR_UPPERCASE_X = 88 /* X */
+
 // Non-alphabetic chars.
 export const CHAR_BACKWARD_SLASH = 92 /* \ */
 export const CHAR_UNDERSCORE = 95 /* _ */
@@ -19,9 +22,20 @@ export const CHAR_HYPHEN_MINUS = 45 /* - */
 export const CHAR_EQUAL = 61 /* = */
 export const CHAR_DOLLAR = 36 /* $ */
 
+export const CHAR_DOT = 46 /* . */
+export const CHAR_PLUS = 43 /* + */
+export const CHAR_ASTERISK = 42 /* * */
+export const CHAR_RIGHT_PARENTHESIS = 41 /* ) */
+export const CHAR_BACKTICK = 96 /* ` */
+export const CHAR_TILDE = 126 /* ~ */
+export const CHAR_GREATER_THAN = 62 /* > */
+export const CHAR_LESS_THAN = 60 /* < */
+
 // Digits
 export const CHAR_0 = 48 /* 0 */
 export const CHAR_9 = 57 /* 9 */
+
+export const CHAR_DIGIT_ONE = 49 /* 1 */
 
 // Boundaries.
 export const CHAR_MAX_ASCII = 127
@@ -39,25 +53,3 @@ export function isSpaceChar(char: number): boolean {
     char === CHAR_CARRIAGE_RETURN
   )
 }
-
-export const CHAR_LOWERCASE_X = 120 /* x */
-
-export const CHAR_UPPERCASE_X = 88 /* X */
-
-export const CHAR_DOT = 46 /* . */
-
-export const CHAR_PLUS = 43 /* + */
-
-export const CHAR_ASTERISK = 42 /* * */
-
-export const CHAR_RIGHT_PARENTHESIS = 41 /* ) */
-
-export const CHAR_BACKTICK = 96 /* ` */
-
-export const CHAR_TILDE = 126 /* ~ */
-
-export const CHAR_GREATER_THAN = 62 /* > */
-
-export const CHAR_LESS_THAN = 60 /* < */
-
-export const CHAR_DIGIT_ONE = 49 /* 1 */
