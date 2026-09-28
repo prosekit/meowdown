@@ -37,7 +37,9 @@ export function docToAst(node: ProseMirrorNode): MarkdownNode {
 
 function readBlocks(node: ProseMirrorNode): MarkdownBlock[] {
   const children: MarkdownBlock[] = []
-  node.forEach((child) => { children.push(readBlock(child)) })
+  node.forEach((child) => {
+    children.push(readBlock(child))
+  })
   return children
 }
 
@@ -90,7 +92,9 @@ function readBlock(node: ProseMirrorNode): MarkdownBlock {
       return { type: 'htmlComment', value: (node.attrs as MeowdownHTMLCommentAttrs).content }
     case 'table': {
       const children: MarkdownTableRow[] = []
-      node.forEach((row) => { children.push(readTableRow(row)) })
+      node.forEach((row) => {
+        children.push(readTableRow(row))
+      })
       return { type: 'table', children }
     }
     case 'text':
@@ -116,7 +120,9 @@ function readInline(node: ProseMirrorNode): MarkdownInline {
 
 function readTableRow(node: ProseMirrorNode): MarkdownTableRow {
   const children: MarkdownTableCell[] = []
-  node.forEach((cell) => { children.push(readTableCell(cell)) })
+  node.forEach((cell) => {
+    children.push(readTableCell(cell))
+  })
   return { type: 'tableRow', children }
 }
 
