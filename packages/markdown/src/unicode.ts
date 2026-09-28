@@ -39,3 +39,25 @@ export function isSpaceChar(char: number): boolean {
     char === CHAR_CARRIAGE_RETURN
   )
 }
+
+export const CHAR_LOWERCASE_X = 120 /* x */
+
+export const CHAR_UPPERCASE_X = 88 /* X */
+
+export const CHAR_DOT = 46 /* . */
+
+export const CHAR_PLUS = 43 /* + */
+
+export const CHAR_ASTERISK = 42 /* * */
+
+export const CHAR_RIGHT_PARENTHESIS = 41 /* ) */
+
+export const CHAR_BACKTICK = 96 /* ` */
+
+export const CHAR_TILDE = 126 /* ~ */
+
+export const CHAR_GREATER_THAN = 62 /* > */
+
+export const CHAR_LESS_THAN = 60 /* < */
+
+export const CHAR_DIGIT_ONE = 49 /* 1 */

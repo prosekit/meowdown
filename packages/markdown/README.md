@@ -18,3 +18,52 @@ const tree = gfmParser.parse('Meeting with [[Ada Lovelace|Ada]]')
 - `parseInline` / `collectInlineElements`: low-level inline syntax parsing
 - `getAutolinkHref`: bare-domain autolink matching against the TLD allowlist
 - `LEZER_NODE_IDS`: the node id table shared with `@meowdown/core`
+
+## Block AST
+
+`parseMarkdownAst` and `serializeMarkdownAst` work in Node or the browser without
+ProseMirror, an editor, or a DOM. They use the same block parsing and serialization
+rules as the editor's `markdownToDoc` and `docToMarkdown`.
+
+```ts
+import { parseMarkdownAst, serializeMarkdownAst } from '@meowdown/markdown'
+
+const document = parseMarkdownAst('+ [ ] **buy** milk\n')
+const item = document.children[0]
+if (item.type === 'listItem') {
+  item.checked = true
+  const firstParagraph = item.children[0]
+  if (firstParagraph.type === 'paragraph') {
+    firstParagraph.value = '**buy** bread'
+  }
+}
+const markdown = serializeMarkdownAst(document) // '+ [x] **buy** bread\n'
+```
+
+The discriminated `MarkdownNode` union covers documents, paragraphs, headings,
+blockquotes, list items, code/math blocks, thematic breaks, HTML comments, and
+tables with rows and cells. Inline `value` strings retain literal Markdown such as
+`**bold**`, `_italic_`, links, and soft line breaks. They are not rendered text or
+an inline formatting tree. Raw HTML and reference definitions remain paragraphs.
+
+A `listItem` represents one item. Adjacent siblings form a list run; nested items
+live in `children`. Items can contain multiple blocks, and their first block need
+not be a paragraph. Formatting fields retain marker spelling, checkbox case,
+marker spacing, heading style, code fences, and table alignment. Optional fields
+use `undefined` for the default spelling. Leading, trailing, and repeated blank
+lines use empty paragraphs.
+
+Pass `{ frontmatter: true }` to both functions to read/write YAML frontmatter.
+The document's `frontmatter` is the body without fences; `undefined` means absent
+and `''` means an empty frontmatter block.
+
+The serializer normalizes the whole document using existing editor rules. It is
+**not a lossless source printer**: it can normalize whitespace, indentation, fence
+widths, and table layout. The AST provides no source positions or stable item IDs.
+
+The editor adapters are internal persistence projections, not a way to preserve
+arbitrary ProseMirror marks and extension nodes. They can attach `segments` to raw
+inline values to retain text-boundary-sensitive continuation behavior. Changing a
+value invalidates those recorded segments. Unsupported editor blocks use `ignored`
+nodes, which emit nothing but keep list-run boundaries; standalone editor text uses
+`text`. The Markdown parser itself produces neither type.
