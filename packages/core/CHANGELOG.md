@@ -1,5 +1,11 @@
 # @meowdown/core
 
+## 0.76.0
+
+### Minor Changes
+
+- [#639](https://github.com/prosekit/meowdown/pull/639) [`6a30723`](https://github.com/prosekit/meowdown/commit/6a307230c944ad57af6ccad3ea3e73b21f512116) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Heading shortcuts move from `Mod-1`–`Mod-6` to `Mod-Alt-1`–`Mod-Alt-6`, so apps can bind `Mod-1`–`Mod-9` to their own commands.
+
 ## 0.75.2
 
 ### Patch Changes
