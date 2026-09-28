@@ -5,7 +5,6 @@ export {
   type CodeBlockAttrs,
 } from '@prosekit/extensions/code-block'
 export { definePlaceholder, type PlaceholderOptions } from '@prosekit/extensions/placeholder'
-export { defineReadonly } from './extensions/readonly.ts'
 export {
   defineSearchStatusHandler,
   getSearchStatus,
@@ -103,8 +102,8 @@ export {
   defineLinkCommands,
   defineLinkEditKeymap,
   getLinkText,
-  isLinkTextForHref,
   insertLink,
+  isLinkTextForHref,
   normalizeHref,
   removeLink,
   updateLink,
@@ -119,14 +118,6 @@ export {
 } from './extensions/link-hover.ts'
 export { defineLinkPaste } from './extensions/link-paste.ts'
 export type { LinkPreview, LinkPreviewResolver } from './extensions/link-preview.ts'
-export {
-  defaultResolveXPost,
-  defaultResolveYouTubeVideo,
-  parsePostEmbedSnapshot,
-  type PostEmbedSnapshot,
-  type XPostResolver,
-  type YouTubeVideoResolver,
-} from './extensions/post-embed.ts'
 export type { ListMarker, MeowdownListAttrs } from './extensions/list.ts'
 export type { MarkChunk } from './extensions/mark-chunk.ts'
 export type { MarkMode } from './extensions/mark-mode.ts'
@@ -144,6 +135,15 @@ export {
   type PendingReplacementOutcome,
   type StartPendingReplacementOptions,
 } from './extensions/pending-replacement.ts'
+export {
+  defaultResolveXPost,
+  defaultResolveYouTubeVideo,
+  parsePostEmbedSnapshot,
+  type PostEmbedSnapshot,
+  type XPostResolver,
+  type YouTubeVideoResolver,
+} from './extensions/post-embed.ts'
+export { defineReadonly } from './extensions/readonly.ts'
 export {
   collectReferenceDefinitions,
   isReferenceDefinitionNode,
@@ -192,14 +192,6 @@ export {
   type WikilinkResolution,
   type WikilinkResolver,
 } from './extensions/wikilink.ts'
-export { getIsComposing } from './utils/composition.ts'
-export { getTextblockDisplayText } from './utils/display-text.ts'
-export { formatFileSize } from './utils/format-file-size.ts'
-export { isModEvent } from './utils/is-mod-event.ts'
-export { loadKaTeX, renderMathInto, type KaTeXRender } from './utils/katex.ts'
-export type { PositionRange } from './utils/range.ts'
-export { getSelectedText } from './utils/selected-text.ts'
-export { getVirtualElementFromRange, type VirtualElement } from './utils/virtual-element.ts'
 export {
   defineXPostMediaClickHandler,
   type XPostMediaClickHandler,
@@ -208,3 +200,14 @@ export {
   defineYouTubeVideoClickHandler,
   type YouTubeVideoClickHandler,
 } from './extensions/youtube-video-click.ts'
+export { getIsComposing } from './utils/composition.ts'
+export { getTextblockDisplayText } from './utils/display-text.ts'
+export { formatFileSize } from './utils/format-file-size.ts'
+export { isModEvent } from './utils/is-mod-event.ts'
+export { loadKaTeX, renderMathInto, type KaTeXRender } from './utils/katex.ts'
+export type { PositionRange } from './utils/range.ts'
+export { getSelectedText } from './utils/selected-text.ts'
+export { getVirtualElementFromRange, type VirtualElement } from './utils/virtual-element.ts'
+
+export { docToParagraphMarkdown, paragraphMarkdownToDoc } from './converters/paragraph.ts'
+export { defineSingleParagraph } from './extensions/single-paragraph.ts'

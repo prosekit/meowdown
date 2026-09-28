@@ -14,6 +14,7 @@ class ConfigController {
 
 const refreshKeys = new Set<keyof EditorConfig>([
   'markMode',
+  'referenceDefinitions',
   'placeholder',
   'readOnly',
   'spellCheck',

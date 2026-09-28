@@ -107,7 +107,14 @@ export interface FileLinkOptions {
 /**
  * Host options that influence source-backed inline atom parsing.
  */
-export type InlineMarkOptions = FileLinkOptions & WikiEmbedOptions & WikilinkOptions
+export type InlineMarkOptions = FileLinkOptions &
+  WikiEmbedOptions &
+  WikilinkOptions & {
+    /**
+     * Definitions supplied by the containing document.
+     */
+    referenceDefinitions?: ReferenceDefinitions
+  }
 
 export interface InlineMarkContext {
   /**

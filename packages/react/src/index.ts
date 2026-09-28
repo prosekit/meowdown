@@ -1,6 +1,8 @@
 export { MeowdownEditor, type EditorMode, type EditorProps } from './components/editor.tsx'
 export {
   MarkdownView,
+  MarkdownInlineView,
+  type MarkdownInlineViewProps,
   type MarkdownViewProps,
   type TaskClickHandler,
   type TaskClickPayload,
