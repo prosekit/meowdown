@@ -102,7 +102,8 @@ function readBlock(node: ProseMirrorNode): MarkdownBlock {
 }
 
 function readInline(node: ProseMirrorNode): MarkdownInline {
-  const count = node.childCount
+  const content = node.content.content
+  const count = content.length
   if (count === 0) return { value: '', segments: undefined }
 
   const first = node.child(0)
@@ -110,7 +111,6 @@ function readInline(node: ProseMirrorNode): MarkdownInline {
 
   const chunks: Array<string | undefined> = new Array<string | undefined>(count)
   let value = ''
-  const content = node.content.content
   for (let i = 0; i < count; i++) {
     const child = content[i]
     const text = child.isText ? child.text : undefined
