@@ -499,6 +499,11 @@ export function MeowdownEditor({
     function focus(): void {
       childRef.current?.focus()
     }
+    function isAtTextblockBoundary(
+      direction: Parameters<EditorHandle['isAtTextblockBoundary']>[0],
+    ): boolean {
+      return childRef.current?.isAtTextblockBoundary(direction) ?? false
+    }
     function scrollIntoView(): void {
       childRef.current?.scrollIntoView()
     }
@@ -542,6 +547,7 @@ export function MeowdownEditor({
       getSelection,
       setSelection,
       focus,
+      isAtTextblockBoundary,
       scrollIntoView,
       revealHeading,
       getSelectedText,

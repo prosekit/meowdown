@@ -594,6 +594,11 @@ export function ProseKitEditor({
     function focus(): void {
       editor.focus()
     }
+    function isAtTextblockBoundary(
+      direction: Parameters<EditorHandle['isAtTextblockBoundary']>[0],
+    ): boolean {
+      return editor.mounted && editor.view.endOfTextblock(direction)
+    }
     function scrollIntoView(): void {
       editor.commands.scrollIntoView()
     }
@@ -639,6 +644,7 @@ export function ProseKitEditor({
       getSelection,
       setSelection,
       focus,
+      isAtTextblockBoundary,
       scrollIntoView,
       revealHeading,
       getSelectedText: getSelectedTextFromState,

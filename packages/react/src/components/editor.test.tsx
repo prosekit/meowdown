@@ -653,3 +653,19 @@ describe('spellCheck prop', () => {
     await expect.element(pmRoot).toHaveAttribute('spellcheck', 'false')
   })
 })
+
+it('queries visual textblock boundaries through the editor handle', async () => {
+  const ref = createRef<EditorHandle>()
+  const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown={'first\nsecond'} />)
+  await expect.element(screen.getByText('first', { exact: false })).toBeInTheDocument()
+  await vi.waitFor(() => expect(ref.current?.getEditor()?.mounted).toBe(true))
+  ref.current?.setSelection('start')
+  expect(ref.current?.isAtTextblockBoundary('up')).toBe(true)
+  expect(ref.current?.isAtTextblockBoundary('down')).toBe(false)
+  ref.current?.setSelection('end')
+  expect(ref.current?.isAtTextblockBoundary('down')).toBe(true)
+  expect(ref.current?.isAtTextblockBoundary('up')).toBe(false)
+  const handle = ref.current
+  await screen.unmount()
+  expect(handle?.isAtTextblockBoundary('up')).toBe(false)
+})
