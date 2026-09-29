@@ -4,7 +4,8 @@ import { expect, it } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 
-import { MarkdownInlineView, MarkdownView } from './markdown-view.tsx'
+import { MarkdownInlineView } from './markdown-inline-view.tsx'
+import { MarkdownView } from './markdown-view.tsx'
 
 it('renders paragraph marks with external reference definitions', async () => {
   await render(

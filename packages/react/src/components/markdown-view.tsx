@@ -1119,15 +1119,3 @@ export function MarkdownView({
     </div>
   )
 }
-
-export type MarkdownInlineViewProps = Omit<
-  MarkdownViewProps,
-  'inline' | 'frontmatter' | 'onTaskClick'
->
-
-/**
- * Render paragraph content using the shared inline marks and link handlers.
- */
-export function MarkdownInlineView(props: MarkdownInlineViewProps): ReactElement {
-  return <MarkdownView {...props} inline />
-}
