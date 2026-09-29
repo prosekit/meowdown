@@ -1,5 +1,11 @@
 # @meowdown/markdown
 
+## 0.73.0
+
+### Minor Changes
+
+- [#644](https://github.com/prosekit/meowdown/pull/644) [`851fc06`](https://github.com/prosekit/meowdown/commit/851fc06f061061f8649142876a498f7de822300e) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Add a standalone Markdown block AST parser and serializer shared with the editor.
+
 ## 0.72.0
 
 ### Minor Changes

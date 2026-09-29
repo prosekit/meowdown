@@ -1,5 +1,16 @@
 # @meowdown/core
 
+## 0.78.0
+
+### Minor Changes
+
+- [#651](https://github.com/prosekit/meowdown/pull/651) [`fd16964`](https://github.com/prosekit/meowdown/commit/fd1696493f33c9c1826208fd63af09d0b89a3b88) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Add single-paragraph editing and inline Markdown previews with reference context.
+
+### Patch Changes
+
+- Updated dependencies [[`851fc06`](https://github.com/prosekit/meowdown/commit/851fc06f061061f8649142876a498f7de822300e)]:
+  - @meowdown/markdown@0.73.0
+
 ## 0.77.0
 
 ### Minor Changes
