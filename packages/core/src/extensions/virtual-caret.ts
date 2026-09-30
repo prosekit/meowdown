@@ -63,6 +63,7 @@ class VirtualCaretView implements PluginView {
   #lastTail: CaretTail | undefined
   #blinkIndex = 0
   #repositionRequested = false
+  #pointerSelection = false
 
   constructor(view: EditorView, layer: HTMLElement) {
     this.#view = view
@@ -74,6 +75,8 @@ class VirtualCaretView implements PluginView {
     this.#caret.dataset.testid = 'virtual-caret'
     this.#document.addEventListener('selectionchange', this.#requestReposition)
     this.#unsubscribeModality = onIsTouchInputChange(this.#requestReposition)
+    view.dom.addEventListener('pointerdown', this.#handlePointerDown)
+    view.dom.addEventListener('keydown', this.#handleKeyDown)
     view.dom.addEventListener('focus', this.#handleFocus)
     view.dom.addEventListener('blur', this.#handleBlur)
     if (typeof ResizeObserver !== 'undefined') {
@@ -92,6 +95,8 @@ class VirtualCaretView implements PluginView {
   destroy() {
     this.#document.removeEventListener('selectionchange', this.#requestReposition)
     this.#unsubscribeModality()
+    this.#view.dom.removeEventListener('pointerdown', this.#handlePointerDown)
+    this.#view.dom.removeEventListener('keydown', this.#handleKeyDown)
     this.#view.dom.removeEventListener('focus', this.#handleFocus)
     this.#view.dom.removeEventListener('blur', this.#handleBlur)
     this.#resizeObserver?.disconnect()
@@ -99,6 +104,14 @@ class VirtualCaretView implements PluginView {
     this.#layer.classList.remove('md-virtual-caret-layer')
     delete this.#layer.dataset.focused
     this.#view.dom.removeAttribute(DATA_ATTRIBUTE)
+  }
+
+  readonly #handlePointerDown = (): void => {
+    this.#pointerSelection = true
+  }
+
+  readonly #handleKeyDown = (): void => {
+    this.#pointerSelection = false
   }
 
   readonly #handleFocus = (): void => {
@@ -192,14 +205,15 @@ class VirtualCaretView implements PluginView {
       return
     }
 
-    // A reappearing caret must not glide in from its stale position.
-    if (wasHidden) this.#caret.style.transitionProperty = 'none'
+    // Pointer placement and a reappearing caret must reach their target immediately.
+    const skipGlide = wasHidden || this.#pointerSelection
+    if (skipGlide) this.#caret.style.transitionProperty = 'none'
     this.#caret.style.visibility = ''
     this.#caret.style.left = `${rect.left}px`
     this.#caret.style.top = `${rect.top}px`
     this.#caret.style.height = `${rect.height}px`
     view.dom.setAttribute(DATA_ATTRIBUTE, '')
-    if (wasHidden) {
+    if (skipGlide) {
       forceReflow(this.#caret)
       this.#caret.style.transitionProperty = ''
     }
