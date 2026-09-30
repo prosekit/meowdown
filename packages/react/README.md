@@ -68,6 +68,7 @@ Common `MeowdownEditor` props:
 | `onSlashMenuSearch` / `onTagSearch` / `onWikilinkSearch` / `onSelectionMenuSearch`                                              | Search menus for `/`, `#`, `[[`, and selection commands                            |
 | `readOnly` / `placeholder` / `blockHandle` / `caretGlide` / `embedPaste` / `linkPaste` / `bulletAfterHeading`                   | Behavior toggles                                                                   |
 | `CodeBlockView`                                                                                                                 | Custom React node view component for code blocks                                   |
+| `renderCodeBlock`                                                                                                               | Host content for selected code blocks, or null to keep the built-in view          |
 
 Every prop, callback, and `EditorHandle` method is documented in the [API reference](https://npmx.dev/package-docs/@meowdown%2Freact/).
 

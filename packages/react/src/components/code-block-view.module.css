@@ -10,6 +10,23 @@
   display: none;
 }
 
+.Root[data-custom] pre {
+  display: none;
+}
+
+/* Host widgets own their list layout. Keep the outer editor's prose list
+ * rules out, while a Markdown view nested inside the widget remains styled by
+ * its own `.ProseMirror` surface. */
+.Root .CustomContent ul:not(.CustomContent :global(.ProseMirror) ul),
+.Root .CustomContent ol:not(.CustomContent :global(.ProseMirror) ol) {
+  padding-left: 0;
+  list-style: none;
+}
+
+.Root .CustomContent li:not(.CustomContent :global(.ProseMirror) li) {
+  margin-top: 0;
+}
+
 .Root[data-preview] .Toolbar {
   display: none;
 }
