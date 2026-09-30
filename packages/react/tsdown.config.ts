@@ -1,3 +1,4 @@
+import react from '@vitejs/plugin-react'
 import { defineConfig } from 'tsdown'
 
 export default defineConfig({
@@ -11,4 +12,12 @@ export default defineConfig({
       generateScopedName: 'meow_[local]_[hash]',
     },
   },
+  plugins: [
+    react({
+      compiler: true,
+      // The default filter also matches the generated `.d.ts` files, which
+      // turns `dist/index.d.ts` into an empty `export {}` without any error.
+      exclude: [/node_modules/, /\.d\.ts$/],
+    }),
+  ],
 })
