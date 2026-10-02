@@ -43,7 +43,6 @@ describe('AST paths', () => {
     expect(resolveMarkdownAstPath(document, [0, 1, 0, 0])?.node).toEqual({
       type: 'paragraph',
       value: 'c',
-      position: { from: 30, to: 31 },
     })
     for (const entry of walkMarkdownAst(document)) {
       expect(resolveMarkdownAstPath(document, entry.path)?.node).toBe(entry.node)

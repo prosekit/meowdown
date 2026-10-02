@@ -1,28 +1,24 @@
 import { commonmark } from 'commonmark.json'
 import { describe, expect, it } from 'vitest'
 
-import { parseMarkdownAst, walkMarkdownAst } from '../index.ts'
+import { getMarkdownAstPosition, parseMarkdownAst, walkMarkdownAst } from '../index.ts'
 
-import type {
-  MarkdownDocument,
-  MarkdownNode,
-  MarkdownPosition,
-  MarkdownPositioned,
-} from './types.ts'
+import type { MarkdownDocument, MarkdownNode, MarkdownPosition } from './types.ts'
 
 function positionsOf(document: MarkdownDocument): Array<[string, number, number]> {
   const out: Array<[string, number, number]> = []
   for (const { node } of walkMarkdownAst(document)) {
-    if (!('position' in node)) continue
-    expect(node.position).toBeDefined()
-    if (node.position) out.push([node.type, node.position.from, node.position.to])
+    if (node.type === 'document') continue
+    const position = requirePosition(node)
+    out.push([node.type, position.from, position.to])
   }
   return out
 }
 
-function requirePosition(node: MarkdownPositioned): MarkdownPosition {
-  if (!node.position) throw new Error('Expected a position')
-  return node.position
+function requirePosition(node: MarkdownNode): MarkdownPosition {
+  const position = getMarkdownAstPosition(node)
+  if (!position) throw new Error(`Expected a position on ${node.type}`)
+  return position
 }
 
 /**
@@ -32,20 +28,39 @@ function requirePosition(node: MarkdownPositioned): MarkdownPosition {
 function checkNesting(node: MarkdownNode, bounds: MarkdownPosition, label: string): void {
   let previousTo = bounds.from
   for (const child of node.children ?? []) {
-    let childBounds = bounds
-    if ('position' in child) {
-      const position = requirePosition(child)
-      expect(position.from, label).toBeGreaterThanOrEqual(previousTo)
-      expect(position.to, label).toBeGreaterThanOrEqual(position.from)
-      expect(position.to, label).toBeLessThanOrEqual(bounds.to)
-      previousTo = position.to
-      childBounds = position
-    }
-    checkNesting(child, childBounds, label)
+    const position = requirePosition(child)
+    expect(position.from, label).toBeGreaterThanOrEqual(previousTo)
+    expect(position.to, label).toBeGreaterThanOrEqual(position.from)
+    expect(position.to, label).toBeLessThanOrEqual(bounds.to)
+    previousTo = position.to
+    checkNesting(child, position, label)
   }
 }
 
 describe('Markdown AST positions', () => {
+  it('keeps positions out of the node objects', () => {
+    const document = parseMarkdownAst('# a\n\n- b\n')
+    expect(JSON.stringify(document)).toBe(
+      JSON.stringify({
+        type: 'document',
+        children: [
+          { type: 'heading', level: 1, value: 'a' },
+          {
+            type: 'listItem',
+            children: [{ type: 'paragraph', value: 'b' }],
+            kind: 'bullet',
+            checked: false,
+            collapsed: false,
+            marker: '-',
+            markerGap: 1,
+          },
+        ],
+      }),
+    )
+    expect(getMarkdownAstPosition(document)).toBeUndefined()
+    expect(getMarkdownAstPosition({ type: 'paragraph', value: 'b' })).toBeUndefined()
+  })
+
   it('covers each block with its own syntax', () => {
     const document = parseMarkdownAst(
       '# Title\n\npara\nmore\n\n```js\nx\n```\n\n---\n\n<!-- c -->\n\n| a |\n| - |\n',
@@ -210,10 +225,9 @@ describe('Markdown AST positions', () => {
       expect(crlfEntries.length, label).toBe(entries.length)
       for (let i = 0; i < entries.length; i++) {
         const node = entries[i].node
-        const crlfNode = crlfEntries[i].node
-        if (!('position' in node) || !('position' in crlfNode)) continue
+        if (node.type === 'document') continue
         const position = requirePosition(node)
-        const crlfPosition = requirePosition(crlfNode)
+        const crlfPosition = requirePosition(crlfEntries[i].node)
         expect(crlf.slice(crlfPosition.from, crlfPosition.to).replaceAll('\r\n', '\n'), label).toBe(
           markdown.slice(position.from, position.to),
         )

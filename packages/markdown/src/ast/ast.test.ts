@@ -1,15 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { parseMarkdownAst, serializeMarkdownAst, walkMarkdownAst } from '../index.ts'
+import { parseMarkdownAst, serializeMarkdownAst } from '../index.ts'
 
 import type { MarkdownDocument } from './types.ts'
-
-function withoutPositions(document: MarkdownDocument): MarkdownDocument {
-  for (const { node } of walkMarkdownAst(document)) {
-    if ('position' in node) delete node.position
-  }
-  return document
-}
 
 describe('Markdown AST', () => {
   it('edits a task without dropping its other blocks or inline Markdown', () => {
@@ -41,7 +34,7 @@ describe('Markdown AST', () => {
     firstParagraph.value = '**buy** _bread_'
     const output = serializeMarkdownAst(ast)
     expect(output).toContain('+   [ ] **buy** _bread_')
-    expect(withoutPositions(parseMarkdownAst(output))).toEqual(withoutPositions(ast))
+    expect(parseMarkdownAst(output)).toEqual(ast)
   })
 
   it('supports inserting and removing whole block subtrees', () => {
@@ -127,8 +120,7 @@ describe('Markdown AST', () => {
         collapsed: false,
         marker: '-',
         markerGap: 1,
-        children: [{ type: 'paragraph', value: '', position: { from: 1, to: 1 } }],
-        position: { from: 0, to: 1 },
+        children: [{ type: 'paragraph', value: '' }],
       },
     ])
     expect(serializeMarkdownAst(ast)).toBe('-\n')

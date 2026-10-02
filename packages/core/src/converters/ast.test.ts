@@ -1,9 +1,4 @@
-import {
-  parseMarkdownAst,
-  serializeMarkdownAst,
-  walkMarkdownAst,
-  type MarkdownDocument,
-} from '@meowdown/markdown'
+import { parseMarkdownAst, serializeMarkdownAst } from '@meowdown/markdown'
 import { Schema } from '@prosekit/pm/model'
 import { describe, expect, it } from 'vitest'
 
@@ -15,13 +10,6 @@ import { docToAst } from './pm-to-ast.ts'
 import { docToMarkdown } from './pm-to-md.ts'
 
 const shared = getNodeBuilders().doc().type.schema
-
-function withoutPositions(document: MarkdownDocument): MarkdownDocument {
-  for (const { node } of walkMarkdownAst(document)) {
-    if ('position' in node) delete node.position
-  }
-  return document
-}
 
 describe('Markdown AST adapters', () => {
   it('uses the supplied schema for every node', () => {
@@ -39,7 +27,7 @@ describe('Markdown AST adapters', () => {
     const source = '---\nname: test\n---\n\n- [X] **raw**\n\n| a | b |\n| :-- | --: |\n| c | d |\n'
     const ast = parseMarkdownAst(source, { frontmatter: true })
     const doc = astToDoc(ast)
-    expect(docToAst(doc)).toEqual(withoutPositions(ast))
+    expect(docToAst(doc)).toEqual(ast)
     expect(docToMarkdown(doc, { frontmatter: true })).toBe(
       serializeMarkdownAst(ast, { frontmatter: true }),
     )

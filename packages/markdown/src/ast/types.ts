@@ -14,7 +14,7 @@ export interface MarkdownDocument {
  * Offsets into the source given to `parseMarkdownAst`: from the node's first
  * character to its last, markers and fences included. A blank line is an empty
  * paragraph whose `from` and `to` both sit at the end of that line; an empty
- * table cell sits at the pipe that closes it.
+ * table cell sits at the pipe that closes it. Read with `getMarkdownAstPosition`.
  */
 export interface MarkdownPosition {
   from: number
@@ -22,17 +22,9 @@ export interface MarkdownPosition {
 }
 
 /**
- * Every block, table row, and table cell from the parser has a position. Nodes
- * built by the editor or by hand have none.
- */
-export interface MarkdownPositioned {
-  position?: MarkdownPosition
-}
-
-/**
  * Raw inline Markdown. Changing `value` invalidates an adapter's recorded segments.
  */
-export interface MarkdownInline extends MarkdownPositioned {
+export interface MarkdownInline {
   value: string
   /**
    * Optional editor text boundaries. Undefined chunks are non-text inline nodes,
@@ -68,7 +60,7 @@ export interface MarkdownHeading extends MarkdownInline {
   closingHashes?: number
 }
 
-export interface MarkdownBlockquote extends MarkdownPositioned {
+export interface MarkdownBlockquote {
   type: 'blockquote'
   children: MarkdownBlock[]
 }
@@ -78,7 +70,7 @@ export interface MarkdownBlockquote extends MarkdownPositioned {
  * For `+   [X] **buy**`, kind is task, marker is '+', markerGap is 3,
  * checked is true, taskMarker is 'X', and the first paragraph's value is '**buy**'.
  */
-export interface MarkdownListItem extends MarkdownPositioned {
+export interface MarkdownListItem {
   type: 'listItem'
   kind: 'bullet' | 'ordered' | 'task'
   /**
@@ -102,7 +94,7 @@ export interface MarkdownListItem extends MarkdownPositioned {
   children: MarkdownBlock[]
 }
 
-export interface MarkdownCodeBlock extends MarkdownPositioned {
+export interface MarkdownCodeBlock {
   type: 'codeBlock'
   value: string
   language: string
@@ -118,7 +110,7 @@ export interface MarkdownCodeBlock extends MarkdownPositioned {
   children?: undefined
 }
 
-export interface MarkdownHorizontalRule extends MarkdownPositioned {
+export interface MarkdownHorizontalRule {
   type: 'horizontalRule'
   /**
    * Original spelling, defaulting to '---'.
@@ -128,7 +120,7 @@ export interface MarkdownHorizontalRule extends MarkdownPositioned {
   children?: undefined
 }
 
-export interface MarkdownHTMLComment extends MarkdownPositioned {
+export interface MarkdownHTMLComment {
   type: 'htmlComment'
   /**
    * Includes the comment delimiters.
@@ -138,17 +130,17 @@ export interface MarkdownHTMLComment extends MarkdownPositioned {
   children?: undefined
 }
 
-export interface MarkdownTable extends MarkdownPositioned {
+export interface MarkdownTable {
   type: 'table'
   children: MarkdownTableRow[]
 }
 
-export interface MarkdownTableRow extends MarkdownPositioned {
+export interface MarkdownTableRow {
   type: 'tableRow'
   children: MarkdownTableCell[]
 }
 
-export interface MarkdownTableCell extends MarkdownPositioned {
+export interface MarkdownTableCell {
   type: 'tableCell'
   header: boolean
   align?: 'left' | 'center' | 'right'
@@ -158,7 +150,7 @@ export interface MarkdownTableCell extends MarkdownPositioned {
 /**
  * An unsupported editor block: omitted from output, but separates list runs.
  */
-export interface MarkdownIgnored extends MarkdownPositioned {
+export interface MarkdownIgnored {
   type: 'ignored'
   /**
    * Descendant text, used if the node occurs inside a table cell.
@@ -175,7 +167,7 @@ export interface MarkdownIgnored extends MarkdownPositioned {
 /**
  * A standalone editor text node. Block parsers never produce this type.
  */
-export interface MarkdownText extends MarkdownPositioned {
+export interface MarkdownText {
   type: 'text'
   value: string
   children?: undefined

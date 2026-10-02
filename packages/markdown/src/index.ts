@@ -14,7 +14,11 @@ export {
   type CheckRoundTripOptions,
   type RoundTripFidelity,
 } from './ast/check-roundtrip.ts'
-export { parseMarkdownAst, type ParseMarkdownAstOptions } from './ast/parse.ts'
+export {
+  getMarkdownAstPosition,
+  parseMarkdownAst,
+  type ParseMarkdownAstOptions,
+} from './ast/parse.ts'
 export { serializeMarkdownAst, type SerializeMarkdownAstOptions } from './ast/serialize.ts'
 export type {
   MarkdownBlock,
@@ -30,7 +34,6 @@ export type {
   MarkdownNode,
   MarkdownParagraph,
   MarkdownPosition,
-  MarkdownPositioned,
   MarkdownTable,
   MarkdownTableCell,
   MarkdownTableRow,
