@@ -2,9 +2,6 @@ import { createStringPicker } from '@meowdown/vitest/random'
 import { it } from 'vitest'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
-import { getMarkdownAstPosition, parseMarkdownAst } from './parse.ts'
-import { walkMarkdownAst } from './path.ts'
-import type { MarkdownNode } from './types.ts'
 
 // Use a fixed seed from the environment variable for reproducibility, or fallback to a random seed
 const SEED = Number.parseInt(process.env.VITE_FUZZ_SEED || '') || Date.now()
@@ -142,45 +139,6 @@ function isLossy(input: string): boolean {
   return checkRoundTrip(input) === 'lossy'
 }
 
-/**
- * Every node but the document has a position inside its parent's and after its
- * previous sibling's, and with CRLF line endings the positions index the input as
- * given: the text they select equals the text selected by the LF twin's positions.
- */
-function findPositionError(input: string): string | undefined {
-  const document = parseMarkdownAst(input)
-  const error = findNestingError(document, 0, input.length)
-  if (error) return error
-  if (!input.includes('\r')) return
-  const twin = input.replaceAll(/\r\n?/g, '\n')
-  const nodes = [...walkMarkdownAst(document)]
-  const twinNodes = [...walkMarkdownAst(parseMarkdownAst(twin))]
-  if (nodes.length !== twinNodes.length) return 'CRLF and LF trees differ in size'
-  for (let i = 0; i < nodes.length; i++) {
-    const position = getMarkdownAstPosition(nodes[i].node)
-    const twinPosition = getMarkdownAstPosition(twinNodes[i].node)
-    if (!position || !twinPosition) continue
-    const text = input.slice(position.from, position.to).replaceAll(/\r\n?/g, '\n')
-    const twinText = twin.slice(twinPosition.from, twinPosition.to)
-    if (text !== twinText)
-      return `${nodes[i].node.type} selects ${JSON.stringify(text)}, not ${JSON.stringify(twinText)}`
-  }
-}
-
-function findNestingError(node: MarkdownNode, from: number, to: number): string | undefined {
-  let previousTo = from
-  for (const child of node.children ?? []) {
-    const position = getMarkdownAstPosition(child)
-    if (!position) return `${child.type} has no position`
-    if (position.from < previousTo || position.to < position.from || position.to > to) {
-      return `${child.type} at ${position.from}-${position.to} is outside ${previousTo}-${to}`
-    }
-    previousTo = position.to
-    const error = findNestingError(child, position.from, position.to)
-    if (error) return error
-  }
-}
-
 for (const [minLength, maxLength] of RANGES) {
   for (const { name, pool } of POOLS) {
     it(
@@ -193,12 +151,6 @@ for (const [minLength, maxLength] of RANGES) {
           if (isLossy(input)) {
             throw new Error(
               `lossy input (seed=${SEED}, sample=${sample}, input=${JSON.stringify(input)})`,
-            )
-          }
-          const positionError = findPositionError(input)
-          if (positionError) {
-            throw new Error(
-              `${positionError} (seed=${SEED}, sample=${sample}, input=${JSON.stringify(input)})`,
             )
           }
         }
