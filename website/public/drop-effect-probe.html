@@ -303,36 +303,56 @@
       document.getElementById('env').textContent = envText
 
       // --- Channel between windows ---------------------------------------
+      // Two transports: BroadcastChannel and the localStorage `storage` event.
       const channelElement = document.getElementById('channel')
-      const peers = new Set()
+      const STORAGE_KEY = 'drop-effect-probe-message'
+      const peers = { broadcast: new Set(), storage: new Set() }
+      const seenMessages = new Set()
       let channel = null
       function renderChannel() {
-        if (!channel) {
-          channelElement.innerHTML = '<span class="bad">BroadcastChannel is not available.</span>'
-          return
-        }
+        const describe = (name, set, available) =>
+          !available
+            ? `<span class="bad">${name}: not available.</span>`
+            : set.size > 0
+              ? `<span class="ok">${name} works:</span> ${set.size} other window(s) answered.`
+              : `${name}: no other window has answered yet.`
         channelElement.innerHTML =
-          peers.size > 0
-            ? `<span class="ok">BroadcastChannel works:</span> ${peers.size} other window(s) answered (${[...peers].join(', ')}).`
-            : 'BroadcastChannel: no other window has answered yet. Open a second window.'
+          describe('BroadcastChannel', peers.broadcast, !!channel) +
+          ' ' +
+          describe('storage event', peers.storage, true)
+      }
+      function send(message) {
+        message = { ...message, from: windowId, id: Math.random().toString(36).slice(2) }
+        if (channel) channel.postMessage({ ...message, via: 'broadcast' })
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...message, via: 'storage' }))
+        } catch {}
+      }
+      function receive(message) {
+        if (!message || message.from === windowId) return
+        if (message.type === 'hello' || message.type === 'hello-back') {
+          peers[message.via].add(message.from)
+          renderChannel()
+          if (message.type === 'hello') send({ type: 'hello-back' })
+        } else if (message.type === 'drop') {
+          if (seenMessages.has(message.id)) return
+          seenMessages.add(message.id)
+          applyDropReport(message.report, `other window (via ${message.via})`)
+        }
       }
       try {
         channel = new BroadcastChannel('drop-effect-probe')
-        channel.onmessage = (event) => {
-          const message = event.data
-          if (message.from === windowId) return
-          if (message.type === 'hello' || message.type === 'hello-back') {
-            peers.add(message.from)
-            renderChannel()
-            if (message.type === 'hello') channel.postMessage({ type: 'hello-back', from: windowId })
-          } else if (message.type === 'drop') {
-            applyDropReport(message.report, 'other window')
-          }
-        }
-        channel.postMessage({ type: 'hello', from: windowId })
+        channel.onmessage = (event) => receive(event.data)
       } catch {
         channel = null
       }
+      window.addEventListener('storage', (event) => {
+        if (event.key !== STORAGE_KEY || !event.newValue) return
+        try {
+          receive(JSON.parse(event.newValue))
+        } catch {}
+      })
+      send({ type: 'hello' })
       renderChannel()
 
       document.getElementById('open-window').addEventListener('click', () => {
@@ -465,7 +485,7 @@
             time: Date.now(),
           }
           applyDropReport(report, 'this window')
-          if (channel) channel.postMessage({ type: 'drop', from: windowId, report })
+          send({ type: 'drop', report })
         })
       }
 
@@ -532,7 +552,8 @@
             userAgent: navigator.userAgent,
             platform: navigator.platform,
             origin: location.origin,
-            broadcastChannel: channel ? `available, ${peers.size} peer(s) answered` : 'not available',
+            broadcastChannel: channel ? `available, ${peers.broadcast.size} peer(s) answered` : 'not available',
+            storageEvent: `${peers.storage.size} peer(s) answered`,
             rows: rows.map(plain),
           },
           null,
