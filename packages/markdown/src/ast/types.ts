@@ -11,24 +11,28 @@ export interface MarkdownDocument {
 }
 
 /**
- * Offsets into the source given to `parseMarkdownAst`: from the block's first
+ * Offsets into the source given to `parseMarkdownAst`: from the node's first
  * character to its last, markers and fences included. A blank line is an empty
- * paragraph whose `from` and `to` both sit at the end of that line. Blocks built
- * by the editor or by hand have no position.
+ * paragraph whose `from` and `to` both sit at the end of that line; an empty
+ * table cell sits at the pipe that closes it.
  */
 export interface MarkdownPosition {
   from: number
   to: number
 }
 
-export interface MarkdownBlockBase {
+/**
+ * Every block, table row, and table cell from the parser has a position. Nodes
+ * built by the editor or by hand have none.
+ */
+export interface MarkdownPositioned {
   position?: MarkdownPosition
 }
 
 /**
  * Raw inline Markdown. Changing `value` invalidates an adapter's recorded segments.
  */
-export interface MarkdownInline extends MarkdownBlockBase {
+export interface MarkdownInline extends MarkdownPositioned {
   value: string
   /**
    * Optional editor text boundaries. Undefined chunks are non-text inline nodes,
@@ -64,7 +68,7 @@ export interface MarkdownHeading extends MarkdownInline {
   closingHashes?: number
 }
 
-export interface MarkdownBlockquote extends MarkdownBlockBase {
+export interface MarkdownBlockquote extends MarkdownPositioned {
   type: 'blockquote'
   children: MarkdownBlock[]
 }
@@ -74,7 +78,7 @@ export interface MarkdownBlockquote extends MarkdownBlockBase {
  * For `+   [X] **buy**`, kind is task, marker is '+', markerGap is 3,
  * checked is true, taskMarker is 'X', and the first paragraph's value is '**buy**'.
  */
-export interface MarkdownListItem extends MarkdownBlockBase {
+export interface MarkdownListItem extends MarkdownPositioned {
   type: 'listItem'
   kind: 'bullet' | 'ordered' | 'task'
   /**
@@ -98,7 +102,7 @@ export interface MarkdownListItem extends MarkdownBlockBase {
   children: MarkdownBlock[]
 }
 
-export interface MarkdownCodeBlock extends MarkdownBlockBase {
+export interface MarkdownCodeBlock extends MarkdownPositioned {
   type: 'codeBlock'
   value: string
   language: string
@@ -114,7 +118,7 @@ export interface MarkdownCodeBlock extends MarkdownBlockBase {
   children?: undefined
 }
 
-export interface MarkdownHorizontalRule extends MarkdownBlockBase {
+export interface MarkdownHorizontalRule extends MarkdownPositioned {
   type: 'horizontalRule'
   /**
    * Original spelling, defaulting to '---'.
@@ -124,7 +128,7 @@ export interface MarkdownHorizontalRule extends MarkdownBlockBase {
   children?: undefined
 }
 
-export interface MarkdownHTMLComment extends MarkdownBlockBase {
+export interface MarkdownHTMLComment extends MarkdownPositioned {
   type: 'htmlComment'
   /**
    * Includes the comment delimiters.
@@ -134,17 +138,17 @@ export interface MarkdownHTMLComment extends MarkdownBlockBase {
   children?: undefined
 }
 
-export interface MarkdownTable extends MarkdownBlockBase {
+export interface MarkdownTable extends MarkdownPositioned {
   type: 'table'
   children: MarkdownTableRow[]
 }
 
-export interface MarkdownTableRow {
+export interface MarkdownTableRow extends MarkdownPositioned {
   type: 'tableRow'
   children: MarkdownTableCell[]
 }
 
-export interface MarkdownTableCell {
+export interface MarkdownTableCell extends MarkdownPositioned {
   type: 'tableCell'
   header: boolean
   align?: 'left' | 'center' | 'right'
@@ -154,7 +158,7 @@ export interface MarkdownTableCell {
 /**
  * An unsupported editor block: omitted from output, but separates list runs.
  */
-export interface MarkdownIgnored extends MarkdownBlockBase {
+export interface MarkdownIgnored extends MarkdownPositioned {
   type: 'ignored'
   /**
    * Descendant text, used if the node occurs inside a table cell.
@@ -171,7 +175,7 @@ export interface MarkdownIgnored extends MarkdownBlockBase {
 /**
  * A standalone editor text node. Block parsers never produce this type.
  */
-export interface MarkdownText extends MarkdownBlockBase {
+export interface MarkdownText extends MarkdownPositioned {
   type: 'text'
   value: string
   children?: undefined

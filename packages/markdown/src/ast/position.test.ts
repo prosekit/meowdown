@@ -3,7 +3,12 @@ import { describe, expect, it } from 'vitest'
 
 import { parseMarkdownAst, walkMarkdownAst } from '../index.ts'
 
-import type { MarkdownBlock, MarkdownDocument, MarkdownNode, MarkdownPosition } from './types.ts'
+import type {
+  MarkdownDocument,
+  MarkdownNode,
+  MarkdownPosition,
+  MarkdownPositioned,
+} from './types.ts'
 
 function positionsOf(document: MarkdownDocument): Array<[string, number, number]> {
   const out: Array<[string, number, number]> = []
@@ -15,22 +20,21 @@ function positionsOf(document: MarkdownDocument): Array<[string, number, number]
   return out
 }
 
-function blockPosition(block: MarkdownBlock): MarkdownPosition {
-  if (!block.position) throw new Error(`Expected a position on ${block.type}`)
-  return block.position
+function requirePosition(node: MarkdownPositioned): MarkdownPosition {
+  if (!node.position) throw new Error('Expected a position')
+  return node.position
 }
 
 /**
- * Every block has a position, inside its nearest positioned ancestor, after its
- * previous sibling. Table rows and cells carry none; their cells' paragraphs sit
- * inside the table.
+ * Every node but the document has a position, inside its parent's, after its
+ * previous sibling's.
  */
 function checkNesting(node: MarkdownNode, bounds: MarkdownPosition, label: string): void {
   let previousTo = bounds.from
   for (const child of node.children ?? []) {
     let childBounds = bounds
     if ('position' in child) {
-      const position = blockPosition(child)
+      const position = requirePosition(child)
       expect(position.from, label).toBeGreaterThanOrEqual(previousTo)
       expect(position.to, label).toBeGreaterThanOrEqual(position.from)
       expect(position.to, label).toBeLessThanOrEqual(bounds.to)
@@ -53,6 +57,8 @@ describe('Markdown AST positions', () => {
       ['horizontalRule', 33, 36],
       ['htmlComment', 38, 48],
       ['table', 50, 61],
+      ['tableRow', 50, 55],
+      ['tableCell', 52, 53],
       ['paragraph', 52, 53],
     ])
   })
@@ -136,17 +142,29 @@ describe('Markdown AST positions', () => {
   it('positions an empty table cell at the pipe that closes it', () => {
     expect(positionsOf(parseMarkdownAst('| a |  | c |\n| - | - | - |\n| d |\n'))).toEqual([
       ['table', 0, 32],
+      ['tableRow', 0, 12],
+      ['tableCell', 2, 3],
       ['paragraph', 2, 3],
+      ['tableCell', 7, 7],
       ['paragraph', 7, 7],
+      ['tableCell', 9, 10],
       ['paragraph', 9, 10],
+      ['tableRow', 27, 32],
+      ['tableCell', 29, 30],
       ['paragraph', 29, 30],
+      ['tableCell', 32, 32],
       ['paragraph', 32, 32],
+      ['tableCell', 32, 32],
       ['paragraph', 32, 32],
     ])
     expect(positionsOf(parseMarkdownAst('a | | b\n--|--|--\n'))).toEqual([
       ['table', 0, 16],
+      ['tableRow', 0, 7],
+      ['tableCell', 0, 1],
       ['paragraph', 0, 1],
+      ['tableCell', 4, 4],
       ['paragraph', 4, 4],
+      ['tableCell', 6, 7],
       ['paragraph', 6, 7],
     ])
   })
@@ -166,6 +184,8 @@ describe('Markdown AST positions', () => {
       ['paragraph', 7, 7],
       ['paragraph', 9, 13],
       ['table', 17, 29],
+      ['tableRow', 17, 22],
+      ['tableCell', 19, 20],
       ['paragraph', 19, 20],
     ])
     expect(document.children.map((block) => ('value' in block ? block.value : undefined))).toEqual([
@@ -192,8 +212,8 @@ describe('Markdown AST positions', () => {
         const node = entries[i].node
         const crlfNode = crlfEntries[i].node
         if (!('position' in node) || !('position' in crlfNode)) continue
-        const position = blockPosition(node)
-        const crlfPosition = blockPosition(crlfNode)
+        const position = requirePosition(node)
+        const crlfPosition = requirePosition(crlfNode)
         expect(crlf.slice(crlfPosition.from, crlfPosition.to).replaceAll('\r\n', '\n'), label).toBe(
           markdown.slice(position.from, position.to),
         )

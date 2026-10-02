@@ -94,8 +94,10 @@ function relocatePositions(
 ): void {
   for (const { node } of walkMarkdownAst(document)) {
     if (!('position' in node) || !node.position) continue
-    node.position.from = toSourceOffset(node.position.from + base, dropped)
-    node.position.to = toSourceOffset(node.position.to + base, dropped)
+    node.position = {
+      from: toSourceOffset(node.position.from + base, dropped),
+      to: toSourceOffset(node.position.to + base, dropped),
+    }
   }
 }
 
@@ -931,34 +933,42 @@ function convertTable(cursor: TreeCursor, text: string): MarkdownTable {
   // GFM drops the excess; widening the table instead keeps that text, and every
   // row is built to the same width so the table stays rectangular.
   // A column the row never wrote is an empty cell at the end of the row's line.
-  const rows: Array<{ isHeader: boolean; cells: MarkdownParagraph[]; end: number }> = []
+  const rows: Array<{ header: boolean; cells: MarkdownTableCell[]; position: MarkdownPosition }> =
+    []
   let columnCount = aligns.length
   if (cursor.firstChild()) {
     do {
       const id = cursor.type.id
       if (id !== LEZER_NODE_IDS.TableHeader && id !== LEZER_NODE_IDS.TableRow) continue
-      const cells = readTableCells(cursor, text)
+      const header = id === LEZER_NODE_IDS.TableHeader
+      const cells = readTableCells(cursor, text, header)
       if (cells.length > columnCount) columnCount = cells.length
-      rows.push({ isHeader: id === LEZER_NODE_IDS.TableHeader, cells, end: cursor.to })
+      rows.push({ header, cells, position: positionOf(cursor) })
     } while (cursor.nextSibling())
     cursor.parent()
   }
 
   return {
     type: 'table',
-    children: rows.map(({ isHeader, cells, end }) => {
+    children: rows.map(({ header, cells, position: rowPosition }) => {
       const built: MarkdownTableCell[] = []
       for (let column = 0; column < columnCount; column++) {
-        built.push({
-          type: 'tableCell',
-          header: isHeader,
-          align: aligns[column],
-          children: [cells[column] ?? buildEmptyParagraph(end)],
-        })
+        const cell = cells[column] ?? buildEmptyTableCell(header, rowPosition.to)
+        cell.align = aligns[column]
+        built.push(cell)
       }
-      return { type: 'tableRow', children: built }
+      return { type: 'tableRow', children: built, position: rowPosition }
     }),
     position,
+  }
+}
+
+function buildEmptyTableCell(header: boolean, offset: number): MarkdownTableCell {
+  return {
+    type: 'tableCell',
+    header,
+    children: [buildEmptyParagraph(offset)],
+    position: { from: offset, to: offset },
   }
 }
 
@@ -978,18 +988,18 @@ function parseDelimiterAligns(separator: string): Array<MarkdownTableCell['align
 }
 
 /**
- * A row's cells as paragraphs, indexed by column. `@lezer/markdown` emits no
- * `TableCell` for an empty cell, so an empty cell is recognized by the pipe that
- * closes its column, and positioned there.
+ * A row's cells, indexed by column, without alignment. `@lezer/markdown` emits
+ * no `TableCell` for an empty cell, so an empty cell is recognized by the pipe
+ * that closes its column, and positioned there.
  */
-function readTableCells(cursor: TreeCursor, text: string): MarkdownParagraph[] {
-  const cells: MarkdownParagraph[] = []
+function readTableCells(cursor: TreeCursor, text: string, header: boolean): MarkdownTableCell[] {
+  const cells: MarkdownTableCell[] = []
   if (!cursor.firstChild()) return cells
   // The column the next pipe closes; a leading pipe closes none.
   let column = cursor.type.id === LEZER_NODE_IDS.TableDelimiter ? -1 : 0
   do {
     if (cursor.type.id === LEZER_NODE_IDS.TableDelimiter) {
-      if (cells.length === column) cells.push(buildEmptyParagraph(cursor.from))
+      if (cells.length === column) cells.push(buildEmptyTableCell(header, cursor.from))
       column++
       continue
     }
@@ -999,7 +1009,12 @@ function readTableCells(cursor: TreeCursor, text: string): MarkdownParagraph[] {
       .slice(cursor.from, cursor.to)
       .trim()
       .replaceAll(String.raw`\|`, '|')
-    cells.push({ type: 'paragraph', value, position: positionOf(cursor) })
+    cells.push({
+      type: 'tableCell',
+      header,
+      children: [{ type: 'paragraph', value, position: positionOf(cursor) }],
+      position: positionOf(cursor),
+    })
   } while (cursor.nextSibling())
   cursor.parent()
   return cells
