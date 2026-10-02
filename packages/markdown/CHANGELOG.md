@@ -1,5 +1,15 @@
 # @meowdown/markdown
 
+## 0.74.0
+
+### Minor Changes
+
+- [#659](https://github.com/prosekit/meowdown/pull/659) [`775e240`](https://github.com/prosekit/meowdown/commit/775e2406c1000bff334b22fae25b9b156beaecc0) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Move `checkRoundTrip` to `@meowdown/markdown`. `@meowdown/core` still re-exports it.
+
+### Patch Changes
+
+- [#658](https://github.com/prosekit/meowdown/pull/658) [`516f2d0`](https://github.com/prosekit/meowdown/commit/516f2d0ed22c26d5d686fc66bf8e3be39cd92221) Thanks [@ocavuebot](https://github.com/ocavuebot)! - A `MarkdownListItem` returned by `parseMarkdownAst` now always has at least one child: an item with nothing after its marker (`-` alone on a line) holds one empty paragraph, so `serializeMarkdownAst` writes the marker instead of dropping the line.
+
 ## 0.73.0
 
 ### Minor Changes

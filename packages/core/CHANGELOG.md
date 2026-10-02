@@ -1,5 +1,13 @@
 # @meowdown/core
 
+## 0.78.1
+
+### Patch Changes
+
+- [#659](https://github.com/prosekit/meowdown/pull/659) [`775e240`](https://github.com/prosekit/meowdown/commit/775e2406c1000bff334b22fae25b9b156beaecc0) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Move `checkRoundTrip` to `@meowdown/markdown`. `@meowdown/core` still re-exports it.
+- Updated dependencies [[`516f2d0`](https://github.com/prosekit/meowdown/commit/516f2d0ed22c26d5d686fc66bf8e3be39cd92221), [`775e240`](https://github.com/prosekit/meowdown/commit/775e2406c1000bff334b22fae25b9b156beaecc0)]:
+  - @meowdown/markdown@0.74.0
+
 ## 0.78.0
 
 ### Minor Changes
