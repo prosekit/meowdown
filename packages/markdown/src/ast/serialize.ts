@@ -39,6 +39,10 @@ export interface SerializeMarkdownAstOptions {
    * Whether to serialize the doc's `frontmatter` attribute as a leading `---` block. Off by default.
    */
   frontmatter?: boolean
+  /**
+   * The line ending to write. `\n` by default, whatever the parsed source used.
+   */
+  lineEnding?: '\n' | '\r\n'
 }
 
 /**
@@ -70,7 +74,8 @@ export function serializeMarkdownAst(
   if (!(node.type === 'document' && child?.type === 'paragraph' && !hasInlineContent(child))) {
     emit(node, out)
   }
-  return out.finish()
+  const markdown = out.finish()
+  return options.lineEnding === '\r\n' ? markdown.replaceAll(/\r?\n/g, '\r\n') : markdown
 }
 
 /**

@@ -126,6 +126,18 @@ describe('Markdown AST', () => {
     expect(serializeMarkdownAst(ast)).toBe('-\n')
   })
 
+  it('writes the requested line ending', () => {
+    const ast = parseMarkdownAst('---\nk: v\n---\n\n# a\n\nb\nc\n', { frontmatter: true })
+    const options = { frontmatter: true, lineEnding: '\r\n' } as const
+    expect(serializeMarkdownAst(ast, options)).toBe(
+      '---\r\nk: v\r\n---\r\n\r\n# a\r\n\r\nb\r\nc\r\n',
+    )
+    expect(serializeMarkdownAst(parseMarkdownAst('a\r\nb\r\n'), { lineEnding: '\r\n' })).toBe(
+      'a\r\nb\r\n',
+    )
+    expect(serializeMarkdownAst(parseMarkdownAst('a\r\nb\r\n'))).toBe('a\nb\n')
+  })
+
   it('round-trips empty list items between siblings', () => {
     const roundTrip = (markdown: string) => serializeMarkdownAst(parseMarkdownAst(markdown))
     expect(roundTrip('- a\n-\n- b\n')).toBe('- a\n-\n- b\n')
