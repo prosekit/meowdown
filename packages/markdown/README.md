@@ -64,6 +64,9 @@ Pass `{ frontmatter: true }` to both functions to read/write YAML frontmatter.
 The document's `frontmatter` is the body without fences; `undefined` means absent
 and `''` means an empty frontmatter block.
 
+The parser accepts `\n`, `\r\n`, and `\r` line endings and stores `\n` in every
+`value`. The serializer writes `\n`; pass `{ lineEnding: '\r\n' }` to write CRLF.
+
 The serializer normalizes the whole document using existing editor rules. It is
 **not a lossless source printer**: it can normalize whitespace, indentation, fence
 widths, and table layout. The AST provides no source positions or stable item IDs.
