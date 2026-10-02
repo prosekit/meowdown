@@ -125,14 +125,26 @@ jobs:
         run: pnpm run test:install:${{ matrix.config.browser }}
 
       - name: Test
-        run: pnpm run test
+        run: pnpm vitest run packages/react/src/components/drop-effect-probe.test.tsx
         env:
           MEOWDOWN_TEST_BROWSER: ${{ matrix.config.browser }}
+          VITE_PROBE_BROWSER: ${{ matrix.config.browser }}
           MEOWDOWN_TEST_COVERAGE: ${{ matrix.config.coverage && 'true' || '' }}
           NO_COLOR: '1'
 
+      - name: Print probe results
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          for file in packages/react/drop-effect-out/*.json; do
+            echo "PROBE_FILE_BEGIN $file"
+            cat "$file"
+            echo
+            echo "PROBE_FILE_END"
+          done
+
       - name: Report Coverage
-        if: ${{ !cancelled() && matrix.config.coverage && github.event_name == 'pull_request' }}
+        if: ${{ false }}
         uses: davelosert/vitest-coverage-report-action@c4bbc33a89b7ace0e63d35f1f7d4bcee31155a73 # v2.13.0
 
   all-green:

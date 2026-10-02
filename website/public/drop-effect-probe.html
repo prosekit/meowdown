@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>dropEffect probe</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font:
+          14px/1.45 -apple-system,
+          'Segoe UI',
+          system-ui,
+          sans-serif;
+        margin: 0;
+        padding: 16px 20px 60px;
+        color: #1c1c1e;
+        background: #f6f6f7;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0 0 4px;
+      }
+      h2 {
+        font-size: 14px;
+        margin: 20px 0 8px;
+      }
+      code {
+        font:
+          12px ui-monospace,
+          Menlo,
+          Consolas,
+          monospace;
+        background: #e9e9ec;
+        padding: 1px 4px;
+        border-radius: 3px;
+      }
+      .env {
+        color: #555;
+        font-size: 12px;
+        word-break: break-all;
+      }
+      .columns {
+        display: grid;
+        grid-template-columns: minmax(260px, 1fr) minmax(300px, 1.3fr);
+        gap: 16px;
+        align-items: start;
+      }
+      .panel {
+        background: #fff;
+        border: 1px solid #dcdce0;
+        border-radius: 8px;
+        padding: 12px;
+      }
+      .source {
+        display: inline-block;
+        padding: 10px 14px;
+        margin: 4px 8px 4px 0;
+        background: #4338ca;
+        color: #fff;
+        border-radius: 6px;
+        cursor: grab;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .source small {
+        display: block;
+        opacity: 0.8;
+      }
+      .zone {
+        margin: 6px 0;
+        padding: 10px 12px;
+        border: 2px dashed #9a9aa2;
+        border-radius: 6px;
+        background: #fafafb;
+        min-height: 42px;
+      }
+      .zone.over {
+        border-color: #4338ca;
+        background: #eef;
+      }
+      .zone small {
+        display: block;
+        color: #666;
+      }
+      textarea.zone,
+      input.zone {
+        width: 100%;
+        font: inherit;
+        display: block;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 12px;
+        background: #fff;
+      }
+      th,
+      td {
+        border: 1px solid #dcdce0;
+        padding: 4px 6px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #efeff2;
+        position: sticky;
+        top: 0;
+      }
+      .move {
+        background: #fde2e2;
+        font-weight: 600;
+      }
+      .copy {
+        background: #e2f0fd;
+      }
+      .none {
+        background: #eee;
+      }
+      button {
+        font: inherit;
+        padding: 5px 10px;
+        border-radius: 6px;
+        border: 1px solid #b9b9c0;
+        background: #fff;
+        cursor: pointer;
+      }
+      select,
+      input[type='text'] {
+        font: inherit;
+        padding: 4px 6px;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin: 8px 0;
+      }
+      ol {
+        margin: 4px 0;
+        padding-left: 20px;
+      }
+      .channel {
+        font-size: 12px;
+        color: #555;
+      }
+      .ok {
+        color: #0a7a2f;
+        font-weight: 600;
+      }
+      .bad {
+        color: #b00020;
+        font-weight: 600;
+      }
+      @media (max-width: 760px) {
+        .columns {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>dropEffect probe</h1>
+    <div class="env" id="env"></div>
+    <div class="channel" id="channel"></div>
+
+    <h2>How to use</h2>
+    <ol>
+      <li>
+        Open this page in <b>two windows</b> of the same browser (<button id="open-window">Open a second window</button>)
+        and put them side by side.
+      </li>
+      <li>Pick a scenario below, then drag a purple source onto a target. Every drag adds one row to the log.</li>
+      <li>
+        Do the scenarios in the checklist: inside one window, then from one window to the other, then with the copy
+        modifier held until you release the mouse.
+      </li>
+      <li>Press <b>Copy results</b> in the window where you <b>started</b> the drags, and paste the text back.</li>
+    </ol>
+
+    <div class="columns">
+      <div>
+        <div class="panel">
+          <h2 style="margin-top: 0">Sources</h2>
+          <div class="controls">
+            <label
+              >effectAllowed
+              <select id="effect-allowed">
+                <option value="copyMove" selected>copyMove (ProseMirror)</option>
+                <option value="">not set (uninitialized)</option>
+                <option value="move">move</option>
+                <option value="copy">copy</option>
+                <option value="all">all</option>
+              </select>
+            </label>
+          </div>
+          <div class="source" draggable="true" id="source">
+            Drag me
+            <small>draggable element</small>
+          </div>
+          <p style="margin: 8px 0 0">
+            Selected text: <span id="text-source" style="background: #ffe9a8">select this sentence and drag it</span>
+          </p>
+        </div>
+
+        <div class="panel" style="margin-top: 12px">
+          <h2 style="margin-top: 0">Scenario for the next drag</h2>
+          <div class="controls">
+            <select id="scenario">
+              <option value="">(auto: detected from the drop)</option>
+              <option>Dropped on another app</option>
+              <option>Dropped on the desktop / outside any window</option>
+              <option>Canceled with Escape</option>
+              <option>Dropped on the browser toolbar / tab strip</option>
+            </select>
+            <input type="text" id="note" placeholder="optional note" size="18" />
+          </div>
+          <h2>Checklist</h2>
+          <ol id="checklist">
+            <li>Same window: source to Zone 1, 2, 3, 4</li>
+            <li>Other window: source to Zone 1, 2, 3, 4</li>
+            <li>Other window, copy modifier held: Zone 1 and Zone 2</li>
+            <li>Other window: Zone 5, 6, 7 (native text fields)</li>
+            <li>Start a drag, press Escape (set the scenario first)</li>
+            <li>Drop on another app, with and without the copy modifier (set the scenario first)</li>
+            <li>Drop outside any window (set the scenario first)</li>
+          </ol>
+          <div class="env">
+            Copy modifier: <b>Option (⌥)</b> on macOS, <b>Ctrl</b> on Windows and Linux. Hold it until after you
+            release the mouse.
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 style="margin-top: 0">Targets</h2>
+        <div class="zone" data-zone="1 preventDefault only" data-mode="default">
+          Zone 1: <code>preventDefault()</code> only
+          <small>What a ProseMirror editor does today.</small>
+        </div>
+        <div class="zone" data-zone="2 dropEffect=move" data-mode="move">
+          Zone 2: sets <code>dropEffect = 'move'</code>
+        </div>
+        <div class="zone" data-zone="3 dropEffect=copy" data-mode="copy">
+          Zone 3: sets <code>dropEffect = 'copy'</code>
+        </div>
+        <div class="zone" data-zone="4 rejects" data-mode="reject">
+          Zone 4: no <code>preventDefault()</code>
+          <small>The drop is rejected.</small>
+        </div>
+        <textarea class="zone" data-zone="5 textarea" data-mode="native" placeholder="Zone 5: native textarea"></textarea>
+        <input class="zone" data-zone="6 input" data-mode="native" placeholder="Zone 6: native input" />
+        <div class="zone" data-zone="7 contenteditable" data-mode="native" contenteditable="true">
+          Zone 7: native contenteditable
+        </div>
+      </div>
+    </div>
+
+    <h2>Log</h2>
+    <div class="controls">
+      <button id="copy-results">Copy results</button>
+      <button id="clear">Clear</button>
+      <span id="copy-status" class="env"></span>
+    </div>
+    <div style="overflow-x: auto">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Source</th>
+            <th>effectAllowed</th>
+            <th>Target</th>
+            <th>Where</th>
+            <th>Modifiers at drop</th>
+            <th>Modifiers seen by source</th>
+            <th>dropEffect in <code>drop</code></th>
+            <th>dropEffect in <code>dragend</code></th>
+            <th>Order</th>
+            <th>Token readable</th>
+            <th>Scenario / note</th>
+          </tr>
+        </thead>
+        <tbody id="log"></tbody>
+      </table>
+    </div>
+    <p class="env">
+      A red <code>move</code> in the <code>dragend</code> column means a source that trusts <code>dropEffect</code> would
+      delete the dragged content.
+    </p>
+    <textarea id="results-text" style="width: 100%; height: 120px; display: none" readonly></textarea>
+
+    <script>
+      const TOKEN_TYPE = 'application/x-probe-token'
+      const windowId = Math.random().toString(36).slice(2, 8)
+      const rows = []
+      let currentRow = null
+
+      const envText = `window ${windowId} | ${navigator.userAgent} | platform: ${navigator.platform} | origin: ${location.origin}`
+      document.getElementById('env').textContent = envText
+
+      // --- Channel between windows ---------------------------------------
+      // Two transports: BroadcastChannel and the localStorage `storage` event.
+      const channelElement = document.getElementById('channel')
+      const STORAGE_KEY = 'drop-effect-probe-message'
+      const peers = { broadcast: new Set(), storage: new Set() }
+      const seenMessages = new Set()
+      let channel = null
+      function renderChannel() {
+        const describe = (name, set, available) =>
+          !available
+            ? `<span class="bad">${name}: not available.</span>`
+            : set.size > 0
+              ? `<span class="ok">${name} works:</span> ${set.size} other window(s) answered.`
+              : `${name}: no other window has answered yet.`
+        channelElement.innerHTML =
+          describe('BroadcastChannel', peers.broadcast, !!channel) +
+          ' ' +
+          describe('storage event', peers.storage, true)
+      }
+      function send(message) {
+        message = { ...message, from: windowId, id: Math.random().toString(36).slice(2) }
+        if (channel) channel.postMessage({ ...message, via: 'broadcast' })
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...message, via: 'storage' }))
+        } catch {}
+      }
+      function receive(message) {
+        if (!message || message.from === windowId) return
+        if (message.type === 'hello' || message.type === 'hello-back') {
+          peers[message.via].add(message.from)
+          renderChannel()
+          if (message.type === 'hello') send({ type: 'hello-back' })
+        } else if (message.type === 'drop') {
+          if (seenMessages.has(message.id)) return
+          seenMessages.add(message.id)
+          applyDropReport(message.report, `other window (via ${message.via})`)
+        }
+      }
+      try {
+        channel = new BroadcastChannel('drop-effect-probe')
+        channel.onmessage = (event) => receive(event.data)
+      } catch {
+        channel = null
+      }
+      window.addEventListener('storage', (event) => {
+        if (event.key !== STORAGE_KEY || !event.newValue) return
+        try {
+          receive(JSON.parse(event.newValue))
+        } catch {}
+      })
+      send({ type: 'hello' })
+      renderChannel()
+
+      document.getElementById('open-window').addEventListener('click', () => {
+        window.open(location.href, '_blank', 'width=900,height=800')
+      })
+
+      // --- Helpers ---------------------------------------------------------
+      function modifiersOf(event) {
+        const names = []
+        if (event.altKey) names.push('Alt')
+        if (event.ctrlKey) names.push('Ctrl')
+        if (event.metaKey) names.push('Meta')
+        if (event.shiftKey) names.push('Shift')
+        return names.join('+') || '-'
+      }
+
+      function applyDropReport(report, where) {
+        const row = rows.find((candidate) => candidate.token === report.token)
+        if (!row) {
+          if (where === 'this window') {
+            rows.push({
+              index: rows.length + 1,
+              source: 'external (not from this page)',
+              effectAllowed: report.effectAllowed,
+              target: report.zone,
+              where: 'this window',
+              dropModifiers: report.modifiers,
+              dropEffectInDrop: report.dropEffect,
+              dropTime: report.time,
+              tokenReadable: report.tokenReadable,
+              types: report.types,
+              scenario: '',
+            })
+            render()
+          }
+          return
+        }
+        row.target = report.zone
+        row.where = where
+        row.dropModifiers = report.modifiers
+        row.dropEffectInDrop = report.dropEffect
+        row.dropTime = report.time
+        row.tokenReadable = report.tokenReadable
+        row.types = report.types
+        render()
+      }
+
+      // --- Source side -----------------------------------------------------
+      function handleDragStart(event, sourceName) {
+        const token = `${windowId}-${Date.now().toString(36)}`
+        const effectAllowed = document.getElementById('effect-allowed').value
+        if (sourceName === 'draggable element') {
+          event.dataTransfer.setData('text/plain', `probe payload ${token}`)
+        }
+        try {
+          event.dataTransfer.setData(TOKEN_TYPE, token)
+        } catch {}
+        if (effectAllowed) event.dataTransfer.effectAllowed = effectAllowed
+        currentRow = {
+          index: rows.length + 1,
+          token,
+          source: sourceName,
+          effectAllowed: event.dataTransfer.effectAllowed,
+          startTime: Date.now(),
+          sourceModifiers: new Set(),
+          scenario: [document.getElementById('scenario').value, document.getElementById('note').value]
+            .filter(Boolean)
+            .join(' / '),
+        }
+        rows.push(currentRow)
+        render()
+      }
+
+      const source = document.getElementById('source')
+      source.addEventListener('dragstart', (event) => handleDragStart(event, 'draggable element'))
+      document.addEventListener('dragstart', (event) => {
+        if (event.target === source) return
+        const node = event.target.nodeType === 3 ? event.target.parentElement : event.target
+        if (node && node.closest && node.closest('#text-source')) handleDragStart(event, 'selected text')
+      })
+
+      document.addEventListener('drag', (event) => {
+        if (!currentRow) return
+        const modifiers = modifiersOf(event)
+        if (modifiers !== '-') currentRow.sourceModifiers.add(modifiers)
+      })
+
+      document.addEventListener('dragend', (event) => {
+        if (!currentRow) return
+        const row = currentRow
+        currentRow = null
+        row.dropEffectInDragend = event.dataTransfer ? event.dataTransfer.dropEffect : '(no dataTransfer)'
+        row.dragendTime = Date.now()
+        const modifiers = modifiersOf(event)
+        if (modifiers !== '-') row.sourceModifiers.add(`${modifiers} (dragend)`)
+        render()
+        // A drop report from another window can arrive after dragend.
+        setTimeout(render, 500)
+      })
+
+      // --- Target side -----------------------------------------------------
+      for (const zone of document.querySelectorAll('.zone')) {
+        const mode = zone.dataset.mode
+        zone.addEventListener('dragenter', () => zone.classList.add('over'))
+        zone.addEventListener('dragleave', () => zone.classList.remove('over'))
+        zone.addEventListener('dragover', (event) => {
+          if (mode === 'default' || mode === 'move' || mode === 'copy') event.preventDefault()
+          if (mode === 'move' || mode === 'copy') event.dataTransfer.dropEffect = mode
+        })
+        zone.addEventListener('drop', (event) => {
+          zone.classList.remove('over')
+          if (mode !== 'native') event.preventDefault()
+          let token = ''
+          try {
+            token = event.dataTransfer.getData(TOKEN_TYPE)
+          } catch {}
+          const tokenReadable = !!token
+          if (!token) {
+            const match = /probe payload (\S+)/.exec(event.dataTransfer.getData('text/plain') || '')
+            if (match) token = match[1]
+          }
+          const report = {
+            token,
+            tokenReadable,
+            zone: zone.dataset.zone,
+            modifiers: modifiersOf(event),
+            dropEffect: event.dataTransfer.dropEffect,
+            effectAllowed: event.dataTransfer.effectAllowed,
+            types: [...event.dataTransfer.types],
+            time: Date.now(),
+          }
+          applyDropReport(report, 'this window')
+          send({ type: 'drop', report })
+        })
+      }
+
+      // --- Rendering -------------------------------------------------------
+      function orderOf(row) {
+        if (row.dropTime == null && row.dragendTime == null) return ''
+        if (row.dropTime == null) return 'dragend only (no drop seen)'
+        if (row.dragendTime == null) return 'drop only'
+        const delta = row.dragendTime - row.dropTime
+        return delta >= 0 ? `drop, then dragend (+${delta}ms)` : `dragend, then drop (+${-delta}ms)`
+      }
+
+      function plain(row) {
+        return {
+          index: row.index,
+          source: row.source,
+          effectAllowed: row.effectAllowed,
+          target: row.target ?? '(no drop reported)',
+          where: row.where ?? '',
+          modifiersAtDrop: row.dropModifiers ?? '',
+          modifiersSeenBySource: row.sourceModifiers ? [...row.sourceModifiers].join(', ') || '-' : '',
+          dropEffectInDrop: row.dropEffectInDrop ?? '',
+          dropEffectInDragend: row.dropEffectInDragend ?? '',
+          order: orderOf(row),
+          tokenReadable: row.tokenReadable == null ? '' : row.tokenReadable ? 'yes' : 'no',
+          types: row.types ?? [],
+          scenario: row.scenario ?? '',
+        }
+      }
+
+      function render() {
+        const body = document.getElementById('log')
+        body.textContent = ''
+        for (const row of rows) {
+          const data = plain(row)
+          const cells = [
+            data.index,
+            data.source,
+            data.effectAllowed,
+            data.target,
+            data.where,
+            data.modifiersAtDrop,
+            data.modifiersSeenBySource,
+            data.dropEffectInDrop,
+            data.dropEffectInDragend,
+            data.order,
+            data.tokenReadable,
+            data.scenario,
+          ]
+          const tr = document.createElement('tr')
+          cells.forEach((value, cellIndex) => {
+            const td = document.createElement('td')
+            td.textContent = String(value)
+            if (cellIndex === 8 && ['move', 'copy', 'none'].includes(String(value))) td.className = String(value)
+            tr.append(td)
+          })
+          body.append(tr)
+        }
+      }
+
+      function resultsText() {
+        return JSON.stringify(
+          {
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            origin: location.origin,
+            broadcastChannel: channel ? `available, ${peers.broadcast.size} peer(s) answered` : 'not available',
+            storageEvent: `${peers.storage.size} peer(s) answered`,
+            rows: rows.map(plain),
+          },
+          null,
+          1,
+        )
+      }
+
+      document.getElementById('copy-results').addEventListener('click', async () => {
+        const text = resultsText()
+        const status = document.getElementById('copy-status')
+        const fallback = document.getElementById('results-text')
+        try {
+          await navigator.clipboard.writeText(text)
+          status.textContent = 'Copied.'
+        } catch {
+          fallback.style.display = 'block'
+          fallback.value = text
+          fallback.select()
+          status.textContent = 'Clipboard is not available. Copy the text below.'
+        }
+      })
+
+      document.getElementById('clear').addEventListener('click', () => {
+        rows.length = 0
+        render()
+      })
+    </script>
+  </body>
+</html>
