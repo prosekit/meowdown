@@ -20,11 +20,14 @@ import {
 } from '../unicode.ts'
 
 import { canIndentCode, minFenceLength } from './code.ts'
+import { walkMarkdownAst } from './path.ts'
 import type {
   MarkdownBlock,
   MarkdownCodeBlock,
   MarkdownDocument,
   MarkdownListItem,
+  MarkdownParagraph,
+  MarkdownPosition,
   MarkdownTable,
   MarkdownTableCell,
 } from './types.ts'
@@ -37,26 +40,79 @@ export interface ParseMarkdownAstOptions {
 }
 
 /**
- * Parse Markdown blocks, retaining inline syntax as literal strings and normalizing line endings.
+ * Parse Markdown blocks, retaining inline syntax as literal strings. Values use
+ * `\n` line endings; positions index `markdown` as given.
  */
 export function parseMarkdownAst(
   markdown: string,
   options: ParseMarkdownAstOptions = {},
 ): MarkdownDocument {
-  markdown = markdown.replaceAll(/\r\n?/g, '\n')
+  const droppedCarriageReturns: number[] = []
+  markdown = normalizeLineEndings(markdown, droppedCarriageReturns)
   let frontmatterBody: string | undefined
-  let rest = markdown
+  let base = 0
   if (options.frontmatter) {
     const [body, matchLength] = matchFrontmatter(markdown)
     frontmatterBody = body
-    if (matchLength) rest = markdown.slice(matchLength)
+    base = matchLength ?? 0
   }
+  const rest = base ? markdown.slice(base) : markdown
   const tree = gfmBlockOnlyParser.parse(rest)
-  return {
+  const document: MarkdownDocument = {
     type: 'document',
     frontmatter: frontmatterBody,
-    children: collectBlocks(tree.cursor(), rest, 0, rest !== markdown),
+    children: collectBlocks(tree.cursor(), rest, 0, base > 0),
   }
+  if (base || droppedCarriageReturns.length > 0) {
+    relocatePositions(document, base, droppedCarriageReturns)
+  }
+  return document
+}
+
+/**
+ * Lezer reads `\r\n` as a line ending in most places but not in a GFM table, so
+ * the blocks are parsed from `\n`-only text. `dropped` receives, in order, the
+ * normalized offset of every `\n` whose `\r` was removed, so positions can be
+ * mapped back onto the source.
+ */
+function normalizeLineEndings(markdown: string, dropped: number[]): string {
+  if (!markdown.includes('\r')) return markdown
+  return markdown.replaceAll(/\r\n?/g, (match: string, offset: number) => {
+    if (match.length === 2) dropped.push(offset - dropped.length)
+    return '\n'
+  })
+}
+
+/**
+ * Positions are measured in the parsed text: the normalized source minus its
+ * frontmatter. Move them onto the source as given.
+ */
+function relocatePositions(
+  document: MarkdownDocument,
+  base: number,
+  dropped: readonly number[],
+): void {
+  for (const { node } of walkMarkdownAst(document)) {
+    if (!('position' in node) || !node.position) continue
+    node.position.from = toSourceOffset(node.position.from + base, dropped)
+    node.position.to = toSourceOffset(node.position.to + base, dropped)
+  }
+}
+
+/**
+ * A normalized offset moves right by one for every `\r` dropped in front of it.
+ * The `\r` of the line ending at `offset` itself is not in front of it: a block
+ * ends before its line ending, and so does its position.
+ */
+function toSourceOffset(offset: number, dropped: readonly number[]): number {
+  let low = 0
+  let high = dropped.length
+  while (low < high) {
+    const middle = (low + high) >> 1
+    if (dropped[middle] < offset) low = middle + 1
+    else high = middle
+  }
+  return offset + low
 }
 
 /**
@@ -94,10 +150,11 @@ function collectBlocks(
   const out: MarkdownBlock[] = []
   if (!cursor.firstChild()) {
     // A document holds at least one block: the empty document is one empty paragraph.
-    appendEmptyParagraphs(out, Math.max(1, countNewlines(text, 0, text.length)))
+    appendBlankLineParagraphs(out, text, 0, text.length, 0, false)
+    if (out.length === 0) out.push(buildEmptyParagraph(lineEndAt(text, 0)))
     return out
   }
-  appendEmptyParagraphs(out, countNewlines(text, 0, cursor.from) - (afterFrontmatter ? 1 : 0))
+  appendBlankLineParagraphs(out, text, 0, cursor.from, afterFrontmatter ? 1 : 0, false)
   let previousTo: number | undefined
   do {
     if (previousTo != null) appendGapParagraphs(out, text, previousTo, cursor.from)
@@ -107,7 +164,7 @@ function collectBlocks(
   cursor.parent()
   // The last line's own terminator is not a blank line.
   const end = text.endsWith('\n') ? text.length - 1 : text.length
-  appendEmptyParagraphs(out, countNewlines(text, previousTo, end))
+  appendBlankLineParagraphs(out, text, previousTo, end, 1, true)
   return out
 }
 
@@ -143,19 +200,48 @@ function appendGapParagraphs(
   gapFrom: number,
   gapTo: number,
 ): void {
-  appendEmptyParagraphs(out, countNewlines(text, gapFrom, gapTo) - 2)
+  appendBlankLineParagraphs(out, text, gapFrom, gapTo, 2, false)
 }
 
-function appendEmptyParagraphs(out: MarkdownBlock[], count: number): void {
-  for (let i = 0; i < count; i++) out.push({ type: 'paragraph', value: '' })
-}
-
-function countNewlines(text: string, from: number, to: number): number {
+/**
+ * One empty paragraph per blank line, positioned at the end of its line. Every
+ * newline inside `from`..`to` ends a line; the first `skip` of them end lines
+ * that are not blank lines of their own (a block's last line, the separator
+ * before the next block). The line `to` is on has no newline inside the slice:
+ * `openLast` counts it as a blank line too, provided the slice held the lines
+ * it was asked to skip.
+ */
+function appendBlankLineParagraphs(
+  out: MarkdownBlock[],
+  text: string,
+  from: number,
+  to: number,
+  skip: number,
+  openLast: boolean,
+): void {
   let count = 0
-  for (let i = from; i < to; i++) {
-    if (text.charCodeAt(i) === CHAR_LINE_FEED) count++
+  for (let index = from; index < to; index++) {
+    if (text.charCodeAt(index) !== CHAR_LINE_FEED) continue
+    count++
+    if (count > skip) out.push(buildEmptyParagraph(index))
   }
-  return count
+  if (openLast && count >= skip) out.push(buildEmptyParagraph(lineEndAt(text, to)))
+}
+
+function buildEmptyParagraph(offset: number): MarkdownParagraph {
+  return { type: 'paragraph', value: '', position: { from: offset, to: offset } }
+}
+
+/**
+ * The end of the line `offset` is on: its newline, or the end of the text.
+ */
+function lineEndAt(text: string, offset: number): number {
+  const end = text.indexOf('\n', offset)
+  return end < 0 ? text.length : end
+}
+
+function positionOf(cursor: TreeCursor): MarkdownPosition {
+  return { from: cursor.from, to: cursor.to }
 }
 
 function convertBlock(cursor: TreeCursor, text: string, column: number): MarkdownBlock[] {
@@ -206,7 +292,13 @@ function convertBlock(cursor: TreeCursor, text: string, column: number): Markdow
       // Keep the source marker (`***`, `___`, `- - -`, ...); `---` is canonical
       // and stays undefined. Trailing spaces are insignificant, so drop them.
       const marker = text.slice(cursor.from, cursor.to).trimEnd()
-      return [{ type: 'horizontalRule', marker: marker === '---' ? undefined : marker }]
+      return [
+        {
+          type: 'horizontalRule',
+          marker: marker === '---' ? undefined : marker,
+          position: positionOf(cursor),
+        },
+      ]
     }
     case LEZER_NODE_IDS.Table:
       return [convertTable(cursor, text)]
@@ -239,6 +331,7 @@ function convertHeading(
   // style. A setext heading's only HeaderMark is the trailing underline, so
   // guard on the mark starting at the heading's left edge before treating it as
   // the opening mark.
+  const position = positionOf(cursor)
   const headingFrom = cursor.from
   let contentStart = cursor.from
   let contentEnd = cursor.to
@@ -285,7 +378,7 @@ function convertHeading(
     !isSetext && trailingMarkFrom >= 0
       ? countHashChars(text, trailingMarkFrom, trailingMarkTo) || undefined
       : undefined
-  return { type: 'heading', level, setextUnderline, closingHashes, value: content }
+  return { type: 'heading', level, setextUnderline, closingHashes, value: content, position }
 }
 
 /**
@@ -467,12 +560,17 @@ function trimTrailingBlankLines(content: string): string {
  * the serializer's own line prefix does not double the indent. A soft line break
  * stays a literal `\n` in the paragraph value.
  */
-function buildParagraph(content: string, column: number): MarkdownBlock {
-  return { type: 'paragraph', value: dedentContinuation(content, column) }
+function buildParagraph(
+  content: string,
+  column: number,
+  position: MarkdownPosition,
+): MarkdownBlock {
+  return { type: 'paragraph', value: dedentContinuation(content, column), position }
 }
 
 function convertParagraph(cursor: TreeCursor, text: string, column: number): MarkdownBlock {
-  return buildParagraph(readLeafText(cursor, text, cursor.from, cursor.to), column)
+  const content = readLeafText(cursor, text, cursor.from, cursor.to)
+  return buildParagraph(content, column, positionOf(cursor))
 }
 
 /**
@@ -483,7 +581,7 @@ function convertParagraph(cursor: TreeCursor, text: string, column: number): Mar
  */
 function convertHTMLComment(cursor: TreeCursor, text: string, column: number): MarkdownBlock {
   const content = dedentContinuation(readLeafText(cursor, text, cursor.from, cursor.to), column)
-  return { type: 'htmlComment', value: content }
+  return { type: 'htmlComment', value: content, position: positionOf(cursor) }
 }
 
 /**
@@ -497,6 +595,7 @@ function convertHTMLComment(cursor: TreeCursor, text: string, column: number): M
  */
 function convertBlockquote(cursor: TreeCursor, text: string): MarkdownBlock {
   const content: MarkdownBlock[] = []
+  const position = positionOf(cursor)
   const from = cursor.from
   const to = cursor.to
   let previousTo: number | undefined
@@ -504,7 +603,7 @@ function convertBlockquote(cursor: TreeCursor, text: string): MarkdownBlock {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) continue
       if (previousTo == null) {
-        appendEmptyParagraphs(content, countNewlines(text, from, cursor.from))
+        appendBlankLineParagraphs(content, text, from, cursor.from, 0, false)
       } else {
         appendGapParagraphs(content, text, previousTo, cursor.from)
       }
@@ -513,11 +612,12 @@ function convertBlockquote(cursor: TreeCursor, text: string): MarkdownBlock {
     } while (cursor.nextSibling())
     cursor.parent()
   }
-  appendEmptyParagraphs(
-    content,
-    previousTo == null ? countNewlines(text, from, to) + 1 : countNewlines(text, previousTo, to),
-  )
-  return { type: 'blockquote', children: content }
+  if (previousTo == null) {
+    appendBlankLineParagraphs(content, text, from, to, 0, true)
+  } else {
+    appendBlankLineParagraphs(content, text, previousTo, to, 1, true)
+  }
+  return { type: 'blockquote', children: content, position }
 }
 
 function convertList(
@@ -609,11 +709,11 @@ function convertTaskItem(
     cursor.parent()
   }
   // Skip the single separating whitespace after `[ ]` / `[x]`
-  if (isSpaceChar(text.charCodeAt(taskStart))) taskStart += 1
+  if (taskStart < taskEnd && isSpaceChar(text.charCodeAt(taskStart))) taskStart += 1
   const taskText = readLeafText(cursor, text, taskStart, taskEnd)
   // The checkbox sits on the first line only: the serializer indents the task's
   // continuation lines to the item's own column, not past `[ ] `.
-  const paragraph = buildParagraph(taskText, column)
+  const paragraph = buildParagraph(taskText, column, { from: taskStart, to: taskEnd })
   return { checked, taskMarker, paragraph }
 }
 
@@ -694,11 +794,7 @@ function convertListItem(
     } while (cursor.nextSibling())
     cursor.parent()
   }
-  // An item with nothing after its marker (`-` alone on a line) still owns that
-  // line. Give it the empty paragraph the editor's schema forces on it, so the
-  // AST matches what the editor reads back and the serializer writes the marker
-  // instead of dropping the item.
-  if (content.length === 0) content.push({ type: 'paragraph', value: '' })
+  const itemEnd = closeListItem(content, lineEndAt(text, markTo ?? cursor.from))
 
   // A bullet whose marker is `+` is a collapsed item (`-`/`*` are expanded). The
   // marker is normalized to undefined so an expanded item later serializes as `-`. A
@@ -716,12 +812,28 @@ function convertListItem(
     marker: collapsed ? undefined : marker,
     taskMarker,
     markerGap,
+    position: { from: cursor.from, to: itemEnd },
   }
   return [item, previousTo ?? cursor.to]
 }
 
+/**
+ * An item with nothing after its marker (`-` alone on a line) still owns that
+ * line. Give it the empty paragraph the editor's schema forces on it, so the
+ * AST matches what the editor reads back and the serializer writes the marker
+ * instead of dropping the item. Returns where the item ends: at its last block,
+ * not at the lezer range, which in a blockquote swallows the `>` of the blank
+ * lines after the item.
+ */
+function closeListItem(content: MarkdownBlock[], lineEnd: number): number {
+  const last = content.at(-1)
+  if (!last) content.push(buildEmptyParagraph(lineEnd))
+  return last?.position?.to ?? lineEnd
+}
+
 function convertCodeBlock(cursor: TreeCursor, text: string): MarkdownBlock {
   const indented = cursor.type.id === LEZER_NODE_IDS.CodeBlock
+  const position = positionOf(cursor)
   const blockTo = cursor.to
   let language = ''
   let code = ''
@@ -763,7 +875,7 @@ function convertCodeBlock(cursor: TreeCursor, text: string): MarkdownBlock {
   if (fenceLength != null && fenceLength <= minFenceLength(code, fenceStyle === 'tilde')) {
     fenceLength = undefined
   }
-  return { type: 'codeBlock', language, fenceStyle, fenceLength, value: code }
+  return { type: 'codeBlock', language, fenceStyle, fenceLength, value: code, position }
 }
 
 /**
@@ -785,6 +897,7 @@ function uncoveredCode(text: string, from: number, to: number): string {
  * `dollar` fence style makes it serialize back to `$$` fences.
  */
 function convertBlockMath(cursor: TreeCursor, text: string): MarkdownBlock {
+  const position = positionOf(cursor)
   let code = ''
   if (cursor.firstChild()) {
     do {
@@ -794,7 +907,7 @@ function convertBlockMath(cursor: TreeCursor, text: string): MarkdownBlock {
     } while (cursor.nextSibling())
     cursor.parent()
   }
-  return { type: 'codeBlock', language: 'math', fenceStyle: 'dollar', value: code }
+  return { type: 'codeBlock', language: 'math', fenceStyle: 'dollar', value: code, position }
 }
 
 function convertTable(cursor: TreeCursor, text: string): MarkdownTable {
@@ -803,6 +916,7 @@ function convertTable(cursor: TreeCursor, text: string): MarkdownTable {
   // column count and the column alignment. `@lezer/markdown` emits no
   // `TableCell` for an empty cell, so counting per-row cells would drop empty
   // columns and misalign the rest.
+  const position = positionOf(cursor)
   let aligns: Array<MarkdownTableCell['align']> = []
   if (cursor.firstChild()) {
     do {
@@ -816,7 +930,8 @@ function convertTable(cursor: TreeCursor, text: string): MarkdownTable {
   // A row may still carry more cells than the delimiter row declares columns.
   // GFM drops the excess; widening the table instead keeps that text, and every
   // row is built to the same width so the table stays rectangular.
-  const rows: Array<{ isHeader: boolean; cells: string[] }> = []
+  // A column the row never wrote is an empty cell at the end of the row's line.
+  const rows: Array<{ isHeader: boolean; cells: MarkdownParagraph[]; end: number }> = []
   let columnCount = aligns.length
   if (cursor.firstChild()) {
     do {
@@ -824,25 +939,26 @@ function convertTable(cursor: TreeCursor, text: string): MarkdownTable {
       if (id !== LEZER_NODE_IDS.TableHeader && id !== LEZER_NODE_IDS.TableRow) continue
       const cells = readTableCells(cursor, text)
       if (cells.length > columnCount) columnCount = cells.length
-      rows.push({ isHeader: id === LEZER_NODE_IDS.TableHeader, cells })
+      rows.push({ isHeader: id === LEZER_NODE_IDS.TableHeader, cells, end: cursor.to })
     } while (cursor.nextSibling())
     cursor.parent()
   }
 
   return {
     type: 'table',
-    children: rows.map(({ isHeader, cells }) => {
+    children: rows.map(({ isHeader, cells, end }) => {
       const built: MarkdownTableCell[] = []
       for (let column = 0; column < columnCount; column++) {
         built.push({
           type: 'tableCell',
           header: isHeader,
           align: aligns[column],
-          children: [{ type: 'paragraph', value: cells[column] ?? '' }],
+          children: [cells[column] ?? buildEmptyParagraph(end)],
         })
       }
       return { type: 'tableRow', children: built }
     }),
+    position,
   }
 }
 
@@ -862,30 +978,29 @@ function parseDelimiterAligns(separator: string): Array<MarkdownTableCell['align
 }
 
 /**
- * A row's cell texts, indexed by column. `@lezer/markdown` emits no `TableCell`
- * for an empty cell, so the column comes from the pipes counted so far, not
- * from the cells seen so far.
+ * A row's cells as paragraphs, indexed by column. `@lezer/markdown` emits no
+ * `TableCell` for an empty cell, so an empty cell is recognized by the pipe that
+ * closes its column, and positioned there.
  */
-function readTableCells(cursor: TreeCursor, text: string): string[] {
-  const cellTexts: string[] = []
-  if (!cursor.firstChild()) return cellTexts
-  const hasLeadingPipe = cursor.type.id === LEZER_NODE_IDS.TableDelimiter
-  let delimiterCount = 0
+function readTableCells(cursor: TreeCursor, text: string): MarkdownParagraph[] {
+  const cells: MarkdownParagraph[] = []
+  if (!cursor.firstChild()) return cells
+  // The column the next pipe closes; a leading pipe closes none.
+  let column = cursor.type.id === LEZER_NODE_IDS.TableDelimiter ? -1 : 0
   do {
     if (cursor.type.id === LEZER_NODE_IDS.TableDelimiter) {
-      delimiterCount++
+      if (cells.length === column) cells.push(buildEmptyParagraph(cursor.from))
+      column++
       continue
     }
     if (cursor.type.id !== LEZER_NODE_IDS.TableCell) continue
-    const column = delimiterCount - (hasLeadingPipe ? 1 : 0)
-    if (column < 0) continue
-    while (cellTexts.length <= column) cellTexts.push('')
     // Unescape `\|` to a logical `|`; the serializer re-escapes it.
-    cellTexts[column] = text
+    const value = text
       .slice(cursor.from, cursor.to)
       .trim()
       .replaceAll(String.raw`\|`, '|')
+    cells.push({ type: 'paragraph', value, position: positionOf(cursor) })
   } while (cursor.nextSibling())
   cursor.parent()
-  return cellTexts
+  return cells
 }

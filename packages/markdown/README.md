@@ -64,9 +64,16 @@ Pass `{ frontmatter: true }` to both functions to read/write YAML frontmatter.
 The document's `frontmatter` is the body without fences; `undefined` means absent
 and `''` means an empty frontmatter block.
 
+Every block from `parseMarkdownAst` carries a `position`: `{ from, to }` offsets
+into the source string as given, with `\r\n` line endings and frontmatter
+counted. The range covers the block's own syntax (list markers, `#`, fences), and
+a blank line is an empty paragraph whose `from` and `to` both sit at the end of
+that line. Positions describe one parse of one string: editing a `value` or the
+tree does not move them, and blocks built by hand or by the editor have none.
+
 The serializer normalizes the whole document using existing editor rules. It is
 **not a lossless source printer**: it can normalize whitespace, indentation, fence
-widths, and table layout. The AST provides no source positions or stable item IDs.
+widths, and table layout. The AST provides no stable item IDs.
 
 The editor adapters are internal persistence projections, not a way to preserve
 arbitrary ProseMirror marks and extension nodes. They can attach `segments` to raw

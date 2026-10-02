@@ -18,6 +18,7 @@ export { parseMarkdownAst, type ParseMarkdownAstOptions } from './ast/parse.ts'
 export { serializeMarkdownAst, type SerializeMarkdownAstOptions } from './ast/serialize.ts'
 export type {
   MarkdownBlock,
+  MarkdownBlockBase,
   MarkdownBlockquote,
   MarkdownCodeBlock,
   MarkdownDocument,
@@ -29,6 +30,7 @@ export type {
   MarkdownListItem,
   MarkdownNode,
   MarkdownParagraph,
+  MarkdownPosition,
   MarkdownTable,
   MarkdownTableCell,
   MarkdownTableRow,
