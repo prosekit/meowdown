@@ -77,6 +77,9 @@ export interface MarkdownListItem {
    * Spaces after the list marker, clamped to 1–4 when serialized.
    */
   markerGap?: number
+  /**
+   * Never empty: an item with no content holds one empty paragraph.
+   */
   children: MarkdownBlock[]
 }
 

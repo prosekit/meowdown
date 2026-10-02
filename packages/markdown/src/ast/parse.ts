@@ -694,6 +694,11 @@ function convertListItem(
     } while (cursor.nextSibling())
     cursor.parent()
   }
+  // An item with nothing after its marker (`-` alone on a line) still owns that
+  // line. Give it the empty paragraph the editor's schema forces on it, so the
+  // AST matches what the editor reads back and the serializer writes the marker
+  // instead of dropping the item.
+  if (content.length === 0) content.push({ type: 'paragraph', value: '' })
 
   // A bullet whose marker is `+` is a collapsed item (`-`/`*` are expanded). The
   // marker is normalized to undefined so an expanded item later serializes as `-`. A

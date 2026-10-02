@@ -109,4 +109,28 @@ describe('Markdown AST', () => {
     paragraph.value = 'changed'
     expect(serializeMarkdownAst(ast)).toBe('> changed\n')
   })
+
+  it('keeps an empty list item as an item with one empty paragraph', () => {
+    const ast = parseMarkdownAst('-\n')
+    expect(ast.children).toEqual([
+      {
+        type: 'listItem',
+        kind: 'bullet',
+        checked: false,
+        collapsed: false,
+        marker: '-',
+        markerGap: 1,
+        children: [{ type: 'paragraph', value: '' }],
+      },
+    ])
+    expect(serializeMarkdownAst(ast)).toBe('-\n')
+  })
+
+  it('round-trips empty list items between siblings', () => {
+    const roundTrip = (markdown: string) => serializeMarkdownAst(parseMarkdownAst(markdown))
+    expect(roundTrip('- a\n-\n- b\n')).toBe('- a\n-\n- b\n')
+    expect(roundTrip('* a\n*\n* c\n')).toBe('* a\n*\n* c\n')
+    expect(roundTrip('1. a\n2.\n3. b\n')).toBe('1. a\n2.\n3. b\n')
+    expect(roundTrip('> -\n')).toBe('> -\n')
+  })
 })
