@@ -17,6 +17,7 @@ type Modifier = 'none' | 'Alt' | 'Control' | 'Meta' | 'Shift'
 interface DragEventRecord {
   type: string
   target: string
+  hasDataTransfer: boolean
   dropEffect: string | undefined
   effectAllowed: string | undefined
   altKey: boolean
@@ -30,17 +31,20 @@ function recordDragEvents(): { events: DragEventRecord[]; stop: VoidFunction } {
   const listener = (event: Event) => {
     const dragEvent = event as DragEvent
     const target = event.target as HTMLElement
+    const record: DragEventRecord = {
+      type: event.type,
+      target: target.dataset?.testid ?? target.nodeName,
+      hasDataTransfer: !!dragEvent.dataTransfer,
+      dropEffect: dragEvent.dataTransfer?.dropEffect,
+      effectAllowed: dragEvent.dataTransfer?.effectAllowed,
+      altKey: dragEvent.altKey,
+      ctrlKey: dragEvent.ctrlKey,
+      defaultPrevented: false,
+    }
+    events.push(record)
     // Read after the other listeners ran.
     queueMicrotask(() => {
-      events.push({
-        type: event.type,
-        target: target.dataset?.testid ?? target.nodeName,
-        dropEffect: dragEvent.dataTransfer?.dropEffect,
-        effectAllowed: dragEvent.dataTransfer?.effectAllowed,
-        altKey: dragEvent.altKey,
-        ctrlKey: dragEvent.ctrlKey,
-        defaultPrevented: event.defaultPrevented,
-      })
+      record.defaultPrevented = event.defaultPrevented
     })
   }
   for (const type of types) document.addEventListener(type, listener, true)
