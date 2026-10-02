@@ -1,5 +1,13 @@
 # @meowdown/core
 
+## 0.78.2
+
+### Patch Changes
+
+- [#665](https://github.com/prosekit/meowdown/pull/665) [`f76eb39`](https://github.com/prosekit/meowdown/commit/f76eb39322269478447d9b9d37c4288774424376) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Dragging a block into an editor in another window or tab now moves it instead of copying it.
+- Updated dependencies [[`0c695e7`](https://github.com/prosekit/meowdown/commit/0c695e7c45f776f924e406fa945a95516e833f1d)]:
+  - @meowdown/markdown@0.75.0
+
 ## 0.78.1
 
 ### Patch Changes

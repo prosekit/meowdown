@@ -1,5 +1,11 @@
 # @meowdown/markdown
 
+## 0.75.0
+
+### Minor Changes
+
+- [#662](https://github.com/prosekit/meowdown/pull/662) [`0c695e7`](https://github.com/prosekit/meowdown/commit/0c695e7c45f776f924e406fa945a95516e833f1d) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Every block, table row, and table cell returned by `parseMarkdownAst` now carries a `position` with `from` and `to` offsets into the source string.
+
 ## 0.74.0
 
 ### Minor Changes
