@@ -86,8 +86,5 @@ then edit node references and traverse again to obtain the new paths.
 
 ## Round-trip fidelity
 
-`checkRoundTrip(markdown)` reports how faithfully Markdown survives
-`serializeMarkdownAst(parseMarkdownAst(markdown))`: `'exact'` (byte-identical
-apart from the trailing newline), `'normalizing'` (only layout changed and every
-content line survived), or `'lossy'` (content changed). Pass
-`{ frontmatter: true }` to carry a leading `---` block through the trip.
+`checkRoundTrip(markdown)` reports how faithfully Markdown survives a
+parse-then-serialize round trip: `'exact'`, `'normalizing'`, or `'lossy'`.
