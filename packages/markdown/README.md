@@ -83,3 +83,11 @@ the same shape or `undefined` for an invalid address. Paths count every child,
 including paragraphs and table cells. They belong to one document revision, not
 to a persistent identity. Resolve every target before changing sibling arrays;
 then edit node references and traverse again to obtain the new paths.
+
+## Round-trip fidelity
+
+`checkRoundTrip(markdown)` reports how faithfully Markdown survives
+`serializeMarkdownAst(parseMarkdownAst(markdown))`: `'exact'` (byte-identical
+apart from the trailing newline), `'normalizing'` (only layout changed and every
+content line survived), or `'lossy'` (content changed). Pass
+`{ frontmatter: true }` to carry a leading `---` block through the trip.

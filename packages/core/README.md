@@ -83,7 +83,7 @@ literal object for host settings UIs.
 
 ## Round-trip fidelity
 
-[`checkRoundTrip(markdown)`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-checkRoundTrip) reports how faithfully Markdown survives a parse-then-serialize round trip: `'exact'`, `'normalizing'`, or `'lossy'`.
+[`checkRoundTrip(markdown)`](https://npmx.dev/package-docs/@meowdown%2Fmarkdown#function-checkRoundTrip) reports how faithfully Markdown survives a parse-then-serialize round trip: `'exact'`, `'normalizing'`, or `'lossy'`. It is implemented in `@meowdown/markdown` and re-exported here.
 
 ## Styling
 

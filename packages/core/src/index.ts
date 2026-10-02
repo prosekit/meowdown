@@ -1,3 +1,8 @@
+export {
+  checkRoundTrip,
+  type CheckRoundTripOptions,
+  type RoundTripFidelity,
+} from '@meowdown/markdown'
 export { Priority, withPriority } from '@prosekit/core'
 export {
   defineCodeBlockPreviewPlugin,
@@ -11,11 +16,6 @@ export {
   type SearchStatus,
   type SearchStatusHandler,
 } from '@prosekit/extensions/search'
-export {
-  checkRoundTrip,
-  type CheckRoundTripOptions,
-  type RoundTripFidelity,
-} from './converters/check-roundtrip.ts'
 export { markdownToDoc, type MarkdownToDocOptions } from './converters/md-to-pm.ts'
 export { docToMarkdown, type DocToMarkdownOptions } from './converters/pm-to-md.ts'
 export { defineBulletAfterHeading } from './extensions/bullet-after-heading.ts'

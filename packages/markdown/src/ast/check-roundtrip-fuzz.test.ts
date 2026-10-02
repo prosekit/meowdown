@@ -4,7 +4,7 @@ import { it } from 'vitest'
 import { checkRoundTrip } from './check-roundtrip.ts'
 
 // Use a fixed seed from the environment variable for reproducibility, or fallback to a random seed
-const SEED = Number.parseInt(import.meta.env.VITE_FUZZ_SEED || '') || Date.now()
+const SEED = Number.parseInt(process.env.VITE_FUZZ_SEED || '') || Date.now()
 
 const NUM_SAMPLES = 50_000
 
