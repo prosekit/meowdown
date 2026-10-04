@@ -93,6 +93,10 @@ jobs:
       contents: read
       pull-requests: write
 
+    env:
+      # The release PR only bumps versions and changelogs, so its tests are skipped.
+      IS_RELEASE_PR: ${{ github.head_ref == 'changeset-release/master' && github.event.pull_request.head.repo.full_name == github.repository }}
+
     strategy:
       fail-fast: false
       matrix:
@@ -122,9 +126,11 @@ jobs:
       - uses: ./.github/actions/setup
 
       - name: Install
+        if: ${{ env.IS_RELEASE_PR != 'true' }}
         run: pnpm run test:install:${{ matrix.config.browser }}
 
       - name: Test
+        if: ${{ env.IS_RELEASE_PR != 'true' }}
         run: pnpm run test
         env:
           MEOWDOWN_TEST_BROWSER: ${{ matrix.config.browser }}
@@ -132,7 +138,7 @@ jobs:
           NO_COLOR: '1'
 
       - name: Report Coverage
-        if: ${{ !cancelled() && matrix.config.coverage && github.event_name == 'pull_request' }}
+        if: ${{ !cancelled() && matrix.config.coverage && github.event_name == 'pull_request' && env.IS_RELEASE_PR != 'true' }}
         uses: davelosert/vitest-coverage-report-action@c4bbc33a89b7ace0e63d35f1f7d4bcee31155a73 # v2.13.0
 
   all-green:
