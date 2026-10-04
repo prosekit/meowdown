@@ -40,15 +40,15 @@ export interface ParseMarkdownAstOptions {
 }
 
 /**
- * Parse Markdown blocks, retaining inline syntax as literal strings. Values use
- * `\n` line endings; positions index `markdown` as given.
+ * Parse Markdown blocks, retaining inline syntax as literal strings. `\r\n` and
+ * `\r` are read as `\n`, and positions index the text with `\n` line endings.
  */
 export function parseMarkdownAst(
   markdown: string,
   options: ParseMarkdownAstOptions = {},
 ): MarkdownDocument {
-  const droppedCarriageReturns: number[] = []
-  markdown = normalizeLineEndings(markdown, droppedCarriageReturns)
+  // Lezer does not recognize a GFM table in `\r\n` text.
+  if (markdown.includes('\r')) markdown = markdown.replaceAll(/\r\n?/g, '\n')
   let frontmatterBody: string | undefined
   let base = 0
   if (options.frontmatter) {
@@ -63,58 +63,19 @@ export function parseMarkdownAst(
     frontmatter: frontmatterBody,
     children: collectBlocks(tree.cursor(), rest, 0, base > 0),
   }
-  if (base || droppedCarriageReturns.length > 0) {
-    relocatePositions(document, base, droppedCarriageReturns)
-  }
+  if (base) relocatePositions(document, base)
   return document
 }
 
 /**
- * Lezer reads `\r\n` as a line ending in most places but not in a GFM table, so
- * the blocks are parsed from `\n`-only text. `dropped` receives, in order, the
- * normalized offset of every `\n` whose `\r` was removed, so positions can be
- * mapped back onto the source.
+ * Positions are measured in the parsed text: the source minus its frontmatter.
+ * Move them onto the source.
  */
-function normalizeLineEndings(markdown: string, dropped: number[]): string {
-  if (!markdown.includes('\r')) return markdown
-  return markdown.replaceAll(/\r\n?/g, (match: string, offset: number) => {
-    if (match.length === 2) dropped.push(offset - dropped.length)
-    return '\n'
-  })
-}
-
-/**
- * Positions are measured in the parsed text: the normalized source minus its
- * frontmatter. Move them onto the source as given.
- */
-function relocatePositions(
-  document: MarkdownDocument,
-  base: number,
-  dropped: readonly number[],
-): void {
+function relocatePositions(document: MarkdownDocument, base: number): void {
   for (const { node } of walkMarkdownAst(document)) {
     if (!('position' in node) || !node.position) continue
-    node.position = {
-      from: toSourceOffset(node.position.from + base, dropped),
-      to: toSourceOffset(node.position.to + base, dropped),
-    }
+    node.position = { from: node.position.from + base, to: node.position.to + base }
   }
-}
-
-/**
- * A normalized offset moves right by one for every `\r` dropped in front of it.
- * The `\r` of the line ending at `offset` itself is not in front of it: a block
- * ends before its line ending, and so does its position.
- */
-function toSourceOffset(offset: number, dropped: readonly number[]): number {
-  let low = 0
-  let high = dropped.length
-  while (low < high) {
-    const middle = (low + high) >> 1
-    if (dropped[middle] < offset) low = middle + 1
-    else high = middle
-  }
-  return offset + low
 }
 
 /**
@@ -125,14 +86,14 @@ function toSourceOffset(offset: number, dropped: readonly number[]): number {
  * region, or undefined when there is no terminated frontmatter block (a lone `---`
  * with no closing fence stays a thematic break).
  */
-const FRONTMATTER_RE = /^---[ \t]*\r?\n([\s\S]*?\n)?---[ \t]*(?:\r?\n|$)/
+const FRONTMATTER_RE = /^---[ \t]*\n([\s\S]*?\n)?---[ \t]*(?:\n|$)/
 
 function matchFrontmatter(
   markdown: string,
 ): [body?: string | undefined, matchLength?: number | undefined] {
   const match = FRONTMATTER_RE.exec(markdown)
   if (!match) return []
-  const body = (match[1] ?? '').replace(/\r?\n$/, '')
+  const body = (match[1] ?? '').replace(/\n$/, '')
   return [body, match[0].length]
 }
 

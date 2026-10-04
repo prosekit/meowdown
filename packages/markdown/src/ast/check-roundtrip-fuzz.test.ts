@@ -3,7 +3,6 @@ import { it } from 'vitest'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
 import { parseMarkdownAst } from './parse.ts'
-import { walkMarkdownAst } from './path.ts'
 import type { MarkdownNode } from './types.ts'
 
 // Use a fixed seed from the environment variable for reproducibility, or fallback to a random seed
@@ -144,31 +143,15 @@ function isLossy(input: string): boolean {
 
 /**
  * Every node but the document has a position inside its parent's and after its
- * previous sibling's, and with CRLF line endings the positions index the input as
- * given: the text they select equals the text selected by the LF twin's positions.
+ * previous sibling's, and CRLF line endings parse to the same tree as LF ones.
  */
 function findPositionError(input: string): string | undefined {
   const document = parseMarkdownAst(input)
   const error = findNestingError(document, 0, input.length)
   if (error) return error
   if (!input.includes('\r')) return
-  const twin = input.replaceAll(/\r\n?/g, '\n')
-  const nodes = [...walkMarkdownAst(document)]
-  const twinNodes = [...walkMarkdownAst(parseMarkdownAst(twin))]
-  if (nodes.length !== twinNodes.length) return 'CRLF and LF trees differ in size'
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i].node
-    const twinNode = twinNodes[i].node
-    if (!('position' in node) || !('position' in twinNode)) continue
-    const position = node.position
-    const twinPosition = twinNode.position
-    if (!position || !twinPosition) continue
-    const text = input.slice(position.from, position.to).replaceAll(/\r\n?/g, '\n')
-    const twinText = twin.slice(twinPosition.from, twinPosition.to)
-    if (text !== twinText) {
-      return `${node.type} selects ${JSON.stringify(text)}, not ${JSON.stringify(twinText)}`
-    }
-  }
+  const twin = parseMarkdownAst(input.replaceAll(/\r\n?/g, '\n'))
+  if (JSON.stringify(document) !== JSON.stringify(twin)) return 'CRLF and LF trees differ'
 }
 
 function findNestingError(node: MarkdownNode, from: number, to: number): string | undefined {

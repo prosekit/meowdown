@@ -177,16 +177,16 @@ describe('Markdown AST positions', () => {
     ])
   })
 
-  it('indexes the source as given when line endings are CRLF', () => {
+  it('indexes the text with LF line endings when the source uses CRLF', () => {
     const document = parseMarkdownAst('# h\r\n\r\n\r\npara\r\n\r\n| a |\r\n| - |\r\n')
     expect(positionsOf(document)).toEqual([
       ['heading', 0, 3],
-      ['paragraph', 7, 7],
-      ['paragraph', 9, 13],
-      ['table', 17, 29],
-      ['tableRow', 17, 22],
-      ['tableCell', 19, 20],
-      ['paragraph', 19, 20],
+      ['paragraph', 5, 5],
+      ['paragraph', 6, 10],
+      ['table', 12, 23],
+      ['tableRow', 12, 17],
+      ['tableCell', 14, 15],
+      ['paragraph', 14, 15],
     ])
     expect(document.children.map((block) => ('value' in block ? block.value : undefined))).toEqual([
       'h',
@@ -203,21 +203,7 @@ describe('Markdown AST positions', () => {
       const markdown = example.markdown
       const document = parseMarkdownAst(markdown)
       checkNesting(document, { from: 0, to: markdown.length }, label)
-      const crlf = markdown.replaceAll('\n', '\r\n')
-      const crlfDocument = parseMarkdownAst(crlf)
-      const entries = [...walkMarkdownAst(document)]
-      const crlfEntries = [...walkMarkdownAst(crlfDocument)]
-      expect(crlfEntries.length, label).toBe(entries.length)
-      for (let i = 0; i < entries.length; i++) {
-        const node = entries[i].node
-        const crlfNode = crlfEntries[i].node
-        if (!('position' in node) || !('position' in crlfNode)) continue
-        const position = requirePosition(node)
-        const crlfPosition = requirePosition(crlfNode)
-        expect(crlf.slice(crlfPosition.from, crlfPosition.to).replaceAll('\r\n', '\n'), label).toBe(
-          markdown.slice(position.from, position.to),
-        )
-      }
+      expect(parseMarkdownAst(markdown.replaceAll('\n', '\r\n')), label).toEqual(document)
     }
   })
 })
