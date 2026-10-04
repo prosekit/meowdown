@@ -65,8 +65,9 @@ The document's `frontmatter` is the body without fences; `undefined` means absen
 and `''` means an empty frontmatter block.
 
 Every block, table row, and table cell from `parseMarkdownAst` carries a
-`position`: `{ from, to }` offsets into the source string as given, with `\r\n`
-line endings and frontmatter counted. The range covers the node's own syntax (list
+`position`: `{ from, to }` offsets into the source string, frontmatter counted.
+`\r\n` and `\r` are read as `\n`, and the offsets index the text with `\n` line
+endings. The range covers the node's own syntax (list
 markers, `#`, fences); a blank line is an empty paragraph whose `from` and `to`
 both sit at the end of that line. Positions describe one parse of one string:
 editing a `value` or the tree does not move them, and nodes built by hand or by

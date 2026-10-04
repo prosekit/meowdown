@@ -35,8 +35,5 @@ export function docToParagraphMarkdown(doc: ProseMirrorNode): string {
     paragraphs.push(node.textContent)
     return false
   })
-  return paragraphs
-    .join('\n')
-    .replaceAll(/\r\n?/g, '\n')
-    .replaceAll(/\n[ \t]*\n+/g, '\n')
+  return paragraphs.join('\n').replaceAll(/\n[ \t]*\n+/g, '\n')
 }
