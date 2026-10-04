@@ -95,7 +95,7 @@ jobs:
 
     env:
       # The release PR only bumps versions and changelogs, so its tests are skipped.
-      IS_RELEASE_PR: ${{ github.head_ref == 'changeset-release/master' && github.event.pull_request.head.repo.full_name == github.repository }}
+      IS_RELEASE_PR: ${{ github.event_name == 'pull_request' && github.head_ref == 'changeset-release/master' && github.event.pull_request.head.repo.full_name == github.repository }}
 
     strategy:
       fail-fast: false
