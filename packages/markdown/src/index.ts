@@ -14,7 +14,7 @@ export {
   type CheckRoundTripOptions,
   type RoundTripFidelity,
 } from './ast/check-roundtrip.ts'
-export { isMarkdownAstEqual, type IsMarkdownAstEqualOptions } from './ast/equal.ts'
+export { isMarkdownAstEqual } from './ast/equal.ts'
 export { parseMarkdownAst, type ParseMarkdownAstOptions } from './ast/parse.ts'
 export { serializeMarkdownAst, type SerializeMarkdownAstOptions } from './ast/serialize.ts'
 export type {

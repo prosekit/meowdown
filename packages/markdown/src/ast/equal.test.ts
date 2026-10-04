@@ -38,24 +38,14 @@ describe('isMarkdownAstEqual', () => {
     ).toBe(true)
   })
 
-  it('ignores positions by default', () => {
-    const tight = parseMarkdownAst('- a\n  - b\n')
-    const wide = parseMarkdownAst('- a\n    - b\n')
-    expect(isMarkdownAstEqual(tight, wide)).toBe(true)
-    expect(isMarkdownAstEqual(tight, wide, { position: true })).toBe(false)
-    expect(isMarkdownAstEqual(tight, parseMarkdownAst('- a\n  - b\n'), { position: true })).toBe(
-      true,
-    )
-  })
-
-  it('treats a node without a position as different from one with a position', () => {
-    const parsed = parseMarkdownAst('a\n')
+  it('ignores positions', () => {
+    const parsed = parseMarkdownAst('- a\n  - b\n')
+    expect(isMarkdownAstEqual(parsed, parseMarkdownAst('- a\n    - b\n'))).toBe(true)
     const built: MarkdownDocument = {
       type: 'document',
       children: [{ type: 'paragraph', value: 'a' }],
     }
-    expect(isMarkdownAstEqual(parsed, built)).toBe(true)
-    expect(isMarkdownAstEqual(parsed, built, { position: true })).toBe(false)
+    expect(isMarkdownAstEqual(parseMarkdownAst('a\n'), built)).toBe(true)
   })
 
   it('finds a changed field', () => {

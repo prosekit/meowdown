@@ -73,7 +73,7 @@ editing a `value` or the tree does not move them, and nodes built by hand or by
 the editor have none.
 
 `isMarkdownAstEqual(a, b)` tells whether two trees hold the same nodes and fields.
-It ignores `position` unless you pass `{ position: true }`.
+It does not compare `position`.
 
 The serializer normalizes the whole document using existing editor rules. It is
 **not a lossless source printer**: it can normalize whitespace, indentation, fence

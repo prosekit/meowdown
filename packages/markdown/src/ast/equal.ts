@@ -7,29 +7,15 @@ import type {
 } from './types.ts'
 
 /**
- * Options for {@link isMarkdownAstEqual}.
- */
-export interface IsMarkdownAstEqualOptions {
-  /**
-   * Whether two nodes must also have the same `position`. Off by default.
-   */
-  position?: boolean
-}
-
-/**
  * Whether two trees hold the same nodes with the same fields, level by level.
- * An absent optional field equals one set to `undefined`.
+ * An absent optional field equals one set to `undefined`. Positions are not
+ * compared.
  */
-export function isMarkdownAstEqual(
-  a: MarkdownNode,
-  b: MarkdownNode,
-  options: IsMarkdownAstEqualOptions = {},
-): boolean {
+export function isMarkdownAstEqual(a: MarkdownNode, b: MarkdownNode): boolean {
   const queue: Array<[MarkdownNode, MarkdownNode]> = [[a, b]]
   for (let i = 0; i < queue.length; i++) {
     const [left, right] = queue[i]
     if (!isNodeEqual(left, right)) return false
-    if (options.position && !isPositionEqual(left, right)) return false
     const leftChildren = left.children
     const rightChildren = right.children
     if (leftChildren?.length !== rightChildren?.length) return false
@@ -39,12 +25,6 @@ export function isMarkdownAstEqual(
     }
   }
   return true
-}
-
-function isPositionEqual(a: MarkdownNode, b: MarkdownNode): boolean {
-  const left = a.type === 'document' ? undefined : a.position
-  const right = b.type === 'document' ? undefined : b.position
-  return left?.from === right?.from && left?.to === right?.to
 }
 
 function isInlineEqual(a: MarkdownInline, b: MarkdownInline): boolean {
