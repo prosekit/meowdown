@@ -1,5 +1,13 @@
 # @meowdown/markdown
 
+## 0.76.0
+
+### Minor Changes
+
+- [#668](https://github.com/prosekit/meowdown/pull/668) [`1202aa5`](https://github.com/prosekit/meowdown/commit/1202aa5c41c02e77f55f386b795810fe9f25f609) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Add `isMarkdownAstEqual`, which compares two Markdown AST trees without their `position` fields.
+
+- [#667](https://github.com/prosekit/meowdown/pull/667) [`7eb8d75`](https://github.com/prosekit/meowdown/commit/7eb8d75e0b9bf2c05a4c8ddb93eadcb24a8e95fc) Thanks [@ocavuebot](https://github.com/ocavuebot)! - `parseMarkdownAst` positions now index the text with `\n` line endings: a source with `\r\n` line endings is read as `\n` text, and the offsets are no longer mapped back onto the `\r\n` source.
+
 ## 0.75.0
 
 ### Minor Changes

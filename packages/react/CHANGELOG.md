@@ -1,5 +1,13 @@
 # @meowdown/react
 
+## 0.76.3
+
+### Patch Changes
+
+- Updated dependencies [[`1202aa5`](https://github.com/prosekit/meowdown/commit/1202aa5c41c02e77f55f386b795810fe9f25f609), [`7eb8d75`](https://github.com/prosekit/meowdown/commit/7eb8d75e0b9bf2c05a4c8ddb93eadcb24a8e95fc)]:
+  - @meowdown/markdown@0.76.0
+  - @meowdown/core@0.78.3
+
 ## 0.76.2
 
 ### Patch Changes
