@@ -2,7 +2,7 @@
   "name": "meowdown-monorepo",
   "type": "module",
   "private": true,
-  "packageManager": "pnpm@11.27.0",
+  "packageManager": "pnpm@11.28.4",
   "scripts": {
     "dev": "pnpm --filter ./website run dev",
     "build": "pnpm -r run build",
@@ -41,7 +41,7 @@
     "knip": "^6.36.0",
     "monorepo-typescript-references": "^1.1.2",
     "nano-staged": "^1.0.2",
-    "oxfmt": "^0.68.0",
+    "oxfmt": "^0.71.0",
     "pkg-pr-new": "^0.0.88",
     "playwright": "^1.63.0",
     "simple-git-hooks": "^2.14.0",
