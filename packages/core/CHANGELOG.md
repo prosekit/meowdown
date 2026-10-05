@@ -1,5 +1,11 @@
 # @meowdown/core
 
+## 0.78.4
+
+### Patch Changes
+
+- [#654](https://github.com/prosekit/meowdown/pull/654) [`d5378c4`](https://github.com/prosekit/meowdown/commit/d5378c4ad647079244f4f00b8d47b257f1a11cf2) Thanks [@mariomile](https://github.com/mariomile)! - Place the caret immediately after pointer clicks while preserving keyboard caret animations.
+
 ## 0.78.3
 
 ### Patch Changes
