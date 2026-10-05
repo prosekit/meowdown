@@ -495,11 +495,11 @@ describe('toMeowdownUnsafe', () => {
           "inConstruct": "autolink",
         },
         {
-          "character": "",
+          "character": "\u{B}",
           "inConstruct": "autolink",
         },
         {
-          "character": "",
+          "character": "\u{C}",
           "inConstruct": "autolink",
         },
         {
@@ -1007,11 +1007,11 @@ describe('toMeowdownUnsafe', () => {
           "inConstruct": "autolink",
         },
         {
-          "character": "",
+          "character": "\u{B}",
           "inConstruct": "autolink",
         },
         {
-          "character": "",
+          "character": "\u{C}",
           "inConstruct": "autolink",
         },
         {
