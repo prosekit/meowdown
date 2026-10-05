@@ -191,6 +191,30 @@ describe('toMeowdownUnsafe', () => {
           ],
         },
         {
+          "before": "[\\r\\n]",
+          "character": "
+      ",
+          "inConstruct": "phrasing",
+        },
+        {
+          "after": "\\r",
+          "character": "
+      ",
+          "inConstruct": "phrasing",
+        },
+        {
+          "before": "\\n",
+          "character": "
+      ",
+          "inConstruct": "phrasing",
+        },
+        {
+          "after": "[\\r\\n]",
+          "character": "
+      ",
+          "inConstruct": "phrasing",
+        },
+        {
           "after": "[\\r\\n]",
           "character": " ",
           "inConstruct": "phrasing",
@@ -412,6 +436,152 @@ describe('toMeowdownUnsafe', () => {
         {
           "atBreak": true,
           "character": "~",
+        },
+        {
+          "character": "<",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": ">",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": " ",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "	",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "
+      ",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "
+      ",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": " ",
+          "inConstruct": "autolink",
         },
         {
           "after": "[\\-.\\w]",
@@ -549,6 +719,30 @@ describe('toMeowdownUnsafe', () => {
           ],
         },
         {
+          "before": "[\\r\\n]",
+          "character": "
+      ",
+          "inConstruct": "phrasing",
+        },
+        {
+          "after": "\\r",
+          "character": "
+      ",
+          "inConstruct": "phrasing",
+        },
+        {
+          "before": "\\n",
+          "character": "
+      ",
+          "inConstruct": "phrasing",
+        },
+        {
+          "after": "[\\r\\n]",
+          "character": "
+      ",
+          "inConstruct": "phrasing",
+        },
+        {
           "after": "[\\r\\n]",
           "character": " ",
           "inConstruct": "phrasing",
@@ -754,6 +948,152 @@ describe('toMeowdownUnsafe', () => {
         {
           "atBreak": true,
           "character": "~",
+        },
+        {
+          "character": "<",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": ">",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": " ",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "	",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "
+      ",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "
+      ",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": "",
+          "inConstruct": "autolink",
+        },
+        {
+          "character": " ",
+          "inConstruct": "autolink",
         },
         {
           "after": "[\\-.\\w]",
