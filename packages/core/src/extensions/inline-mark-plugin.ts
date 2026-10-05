@@ -35,6 +35,7 @@ import {
   type ReferenceDefinitions,
 } from './reference-links.ts'
 import { getMarkBuildersForSchema } from './schema.ts'
+import { singleParagraphPluginKey } from './single-paragraph.ts'
 
 const META_KEY = 'inline-marks-applied'
 const TRIGGER_KEY = 'inline-marks-trigger'
@@ -42,6 +43,7 @@ const RESTYLE_KEY = 'inline-marks-restyle'
 const RESTYLE_DEBOUNCE_MS = 200
 
 interface InlineMarkPluginState {
+  readonly externalDefinitions: ReferenceDefinitions | undefined
   readonly references: ReferenceDefinitionIndex
   readonly pendingReferenceKeys: ReadonlySet<string>
 }
@@ -225,7 +227,7 @@ function createInlineMarkPlugin(
         options,
         references,
         changedKeys,
-        isReferenceDefinitionNode(node, parent, index),
+        !singleParagraphPluginKey.get(state) && isReferenceDefinitionNode(node, parent, index),
       )
       if (nodeChunks.length > 0) chunks.push(...nodeChunks)
       const updated = chunkCache.get(node)
@@ -251,32 +253,61 @@ function createInlineMarkPlugin(
     }
   }
 
+  function collectReferences(
+    doc: EditorNode,
+    external: ReferenceDefinitions | undefined,
+    state: EditorState,
+  ): ReferenceDefinitionIndex {
+    const local = singleParagraphPluginKey.get(state)
+      ? { nodes: new Set<EditorNode>(), definitions: new Map() }
+      : collectReferenceDefinitions(doc)
+    return external
+      ? { nodes: local.nodes, definitions: new Map([...external, ...local.definitions]) }
+      : local
+  }
+
   return new Plugin<InlineMarkPluginState>({
     key: pluginKey,
     state: {
       init(_config, state) {
         return {
-          references: collectReferenceDefinitions(state.doc),
+          externalDefinitions: getOptions?.(state)?.referenceDefinitions,
+          references: collectReferences(
+            state.doc,
+            getOptions?.(state)?.referenceDefinitions,
+            state,
+          ),
           pendingReferenceKeys: emptyReferenceKeys,
         }
       },
-      apply(transaction, value, _oldState, newState) {
+      apply(transaction, value, oldState, newState) {
         if (transaction.getMeta(RESTYLE_KEY) === true) {
           return value.pendingReferenceKeys.size === 0
             ? value
-            : { references: value.references, pendingReferenceKeys: emptyReferenceKeys }
+            : { ...value, pendingReferenceKeys: emptyReferenceKeys }
         }
         if (transaction.getMeta(META_KEY)) return value
-        const references = updateReferenceDefinitions(value.references, transaction, newState.doc)
+        const externalDefinitions = getOptions?.(oldState)?.referenceDefinitions
+        const references =
+          singleParagraphPluginKey.get(oldState) ||
+          externalDefinitions !== value.externalDefinitions ||
+          (externalDefinitions && transaction.docChanged)
+            ? collectReferences(newState.doc, externalDefinitions, newState)
+            : updateReferenceDefinitions(value.references, transaction, newState.doc)
         if (references === value.references) return value
         const changedKeys = getChangedReferenceKeys(
           value.references.definitions,
           references.definitions,
         )
         if (changedKeys.size === 0) {
-          return { references, pendingReferenceKeys: value.pendingReferenceKeys }
+          return {
+            externalDefinitions,
+            references,
+            pendingReferenceKeys: value.pendingReferenceKeys,
+          }
         }
         return {
+          externalDefinitions,
           references,
           pendingReferenceKeys: mergeReferenceKeys(value.pendingReferenceKeys, changedKeys),
         }

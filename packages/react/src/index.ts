@@ -1,3 +1,7 @@
+export {
+  MarkdownInlineView,
+  type MarkdownInlineViewProps,
+} from './components/markdown-inline-view.tsx'
 export { MeowdownEditor, type EditorMode, type EditorProps } from './components/editor.tsx'
 export {
   MarkdownView,

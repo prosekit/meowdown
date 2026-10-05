@@ -49,9 +49,9 @@
     "@meowdown/vitest": "workspace:*",
     "@ocavue/tsconfig": "^0.7.1",
     "@ocavue/utils": "^1.8.0",
-    "@vitest/browser-playwright": "^5.0.1",
+    "@vitest/browser-playwright": "^5.0.3",
     "tsdown": "^0.23.0",
-    "vitest": "^5.0.1"
+    "vitest": "^5.0.3"
   },
   "publishConfig": {
     "exports": {

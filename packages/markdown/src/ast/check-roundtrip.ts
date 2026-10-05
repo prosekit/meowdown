@@ -1,7 +1,7 @@
 import { CHAR_LINE_FEED } from '../unicode.ts'
 
-import { markdownToDoc } from './md-to-pm.ts'
-import { docToMarkdown } from './pm-to-md.ts'
+import { parseMarkdownAst } from './parse.ts'
+import { serializeMarkdownAst } from './serialize.ts'
 
 /**
  * How faithfully markdown survives a parse-then-serialize round trip:
@@ -32,15 +32,17 @@ export interface CheckRoundTripOptions {
 }
 
 /**
- * Classify how `markdown` survives the editor's parse-then-serialize round trip.
+ * Classify how `markdown` survives the parse-then-serialize round trip. The
+ * editor reads and writes through the same two functions, so this is also how
+ * faithfully it would save the text back.
  */
 export function checkRoundTrip(
   markdown: string,
   options: CheckRoundTripOptions = {},
 ): RoundTripFidelity {
   const { frontmatter } = options
-  const doc = markdownToDoc(markdown, { frontmatter })
-  let serialized = docToMarkdown(doc, { frontmatter })
+  const ast = parseMarkdownAst(markdown, { frontmatter })
+  let serialized = serializeMarkdownAst(ast, { frontmatter })
 
   if (markdown === serialized) {
     return 'exact'

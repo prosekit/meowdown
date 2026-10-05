@@ -64,9 +64,21 @@ Pass `{ frontmatter: true }` to both functions to read/write YAML frontmatter.
 The document's `frontmatter` is the body without fences; `undefined` means absent
 and `''` means an empty frontmatter block.
 
+Every block, table row, and table cell from `parseMarkdownAst` carries a
+`position`: `{ from, to }` offsets into the source string, frontmatter counted.
+`\r\n` and `\r` are read as `\n`, and the offsets index the text with `\n` line
+endings. The range covers the node's own syntax (list
+markers, `#`, fences); a blank line is an empty paragraph whose `from` and `to`
+both sit at the end of that line. Positions describe one parse of one string:
+editing a `value` or the tree does not move them, and nodes built by hand or by
+the editor have none.
+
+`isMarkdownAstEqual(a, b)` tells whether two trees hold the same nodes and fields.
+It does not compare `position`.
+
 The serializer normalizes the whole document using existing editor rules. It is
 **not a lossless source printer**: it can normalize whitespace, indentation, fence
-widths, and table layout. The AST provides no source positions or stable item IDs.
+widths, and table layout. The AST provides no stable item IDs.
 
 The editor adapters are internal persistence projections, not a way to preserve
 arbitrary ProseMirror marks and extension nodes. They can attach `segments` to raw
@@ -83,3 +95,8 @@ the same shape or `undefined` for an invalid address. Paths count every child,
 including paragraphs and table cells. They belong to one document revision, not
 to a persistent identity. Resolve every target before changing sibling arrays;
 then edit node references and traverse again to obtain the new paths.
+
+## Round-trip fidelity
+
+`checkRoundTrip(markdown)` reports how faithfully Markdown survives a
+parse-then-serialize round trip: `'exact'`, `'normalizing'`, or `'lossy'`.

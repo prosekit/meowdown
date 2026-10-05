@@ -81,10 +81,6 @@ over a selection wraps it into an open wikilink (`[[selection`) with the
 wikilink menu searching it. `EDITOR_KEY_BINDINGS` exports this table as a
 literal object for host settings UIs.
 
-## Round-trip fidelity
-
-[`checkRoundTrip(markdown)`](https://npmx.dev/package-docs/@meowdown%2Fcore#function-checkRoundTrip) reports how faithfully Markdown survives a parse-then-serialize round trip: `'exact'`, `'normalizing'`, or `'lossy'`.
-
 ## Styling
 
 `@meowdown/core/style.css` ships a default theme. Colors use `light-dark()`, so they follow the page's `color-scheme` (set `color-scheme: light dark` on `:root` for automatic dark mode). Override the `--meowdown-*` variables on `:root` or any ancestor; the full list, with a one-line description and default for each, lives in the commented `:root` block at the top of `style.css`, which is the single source of truth.

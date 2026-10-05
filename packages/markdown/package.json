@@ -1,7 +1,7 @@
 {
   "name": "@meowdown/markdown",
   "type": "module",
-  "version": "0.72.0",
+  "version": "0.76.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -31,9 +31,10 @@
   "devDependencies": {
     "@meowdown/vitest": "workspace:*",
     "@ocavue/tsconfig": "^0.7.1",
+    "commonmark.json": "^0.31.0",
     "dedent": "^1.7.2",
     "tsdown": "^0.23.0",
-    "vitest": "^5.0.1"
+    "vitest": "^5.0.3"
   },
   "publishConfig": {
     "exports": {

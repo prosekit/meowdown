@@ -2,9 +2,11 @@ import { createStringPicker } from '@meowdown/vitest/random'
 import { it } from 'vitest'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
+import { parseMarkdownAst } from './parse.ts'
+import type { MarkdownNode } from './types.ts'
 
 // Use a fixed seed from the environment variable for reproducibility, or fallback to a random seed
-const SEED = Number.parseInt(import.meta.env.VITE_FUZZ_SEED || '') || Date.now()
+const SEED = Number.parseInt(process.env.VITE_FUZZ_SEED || '') || Date.now()
 
 const NUM_SAMPLES = 50_000
 
@@ -139,6 +141,33 @@ function isLossy(input: string): boolean {
   return checkRoundTrip(input) === 'lossy'
 }
 
+/**
+ * Every node but the document has a position inside its parent's and after its
+ * previous sibling's, and CRLF line endings parse to the same tree as LF ones.
+ */
+function findPositionError(input: string): string | undefined {
+  const document = parseMarkdownAst(input)
+  const error = findNestingError(document, 0, input.length)
+  if (error) return error
+  if (!input.includes('\r')) return
+  const twin = parseMarkdownAst(input.replaceAll(/\r\n?/g, '\n'))
+  if (JSON.stringify(document) !== JSON.stringify(twin)) return 'CRLF and LF trees differ'
+}
+
+function findNestingError(node: MarkdownNode, from: number, to: number): string | undefined {
+  let previousTo = from
+  for (const child of node.children ?? []) {
+    const position = child.position
+    if (!position) return `${child.type} has no position`
+    if (position.from < previousTo || position.to < position.from || position.to > to) {
+      return `${child.type} at ${position.from}-${position.to} is outside ${previousTo}-${to}`
+    }
+    previousTo = position.to
+    const error = findNestingError(child, position.from, position.to)
+    if (error) return error
+  }
+}
+
 for (const [minLength, maxLength] of RANGES) {
   for (const { name, pool } of POOLS) {
     it(
@@ -151,6 +180,12 @@ for (const [minLength, maxLength] of RANGES) {
           if (isLossy(input)) {
             throw new Error(
               `lossy input (seed=${SEED}, sample=${sample}, input=${JSON.stringify(input)})`,
+            )
+          }
+          const positionError = findPositionError(input)
+          if (positionError) {
+            throw new Error(
+              `${positionError} (seed=${SEED}, sample=${sample}, input=${JSON.stringify(input)})`,
             )
           }
         }

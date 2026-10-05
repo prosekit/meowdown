@@ -1,20 +1,20 @@
+import { checkRoundTrip } from '@meowdown/markdown'
 import { createEditor, type NodeJSON } from '@prosekit/core'
 import { test } from 'vitest'
 
 import { defineEditorExtension } from '../extensions/extension.ts'
 
-import { checkRoundTrip } from './check-roundtrip.ts'
 import { docToMarkdown } from './pm-to-md.ts'
 import { sampleContent } from './sample-content.ts'
 
 // Run with:  pnpm bench
 //
-// Latest results (chromium, M2 MacBook):
-//   sampleMarkdown  10,358 hz    0.0965 ms mean
-//   largeMarkdown       57 hz   17.6069 ms mean
+// Latest results (chromium, M5 Max MacBook):
+//   sampleMarkdown  49,800 hz    0.0172 ms mean
+//   largeMarkdown      323 hz    3.1 ms mean
 //
-// Two markdown parses and one serialization account for roughly 14 of those 18
-// ms, so the line comparison is the only part worth tuning here.
+// Two markdown parses and one serialization are nearly all of that time, so
+// the line comparison is the only part worth tuning here.
 
 const editor = createEditor({ extension: defineEditorExtension() })
 

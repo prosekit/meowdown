@@ -12,6 +12,7 @@ import {
   isNodeOfType,
   isReferenceDefinitionNode,
   markdownToDoc,
+  paragraphMarkdownToDoc,
   parsePostEmbedSnapshot,
   type CodeBlockAttrs,
   type CodeToken,
@@ -116,6 +117,14 @@ export interface MarkdownViewProps {
    */
   markdown: string
   /**
+   * Interpret content as one paragraph, without block syntax.
+   */
+  inline?: boolean
+  /**
+   * Reference definitions available outside this fragment.
+   */
+  referenceDefinitions?: ReferenceDefinitions
+  /**
    * Mark mode for the read-only view. Defaults to `'hide'`.
    */
   markMode?: MarkMode
@@ -217,6 +226,7 @@ export interface MarkdownViewProps {
  * block's `memo` comparator can test it by identity.
  */
 interface BlockContext {
+  inline: boolean
   interactive: boolean
   expandCollapsed: boolean
   resolveImageUrl?: ImageUrlResolver
@@ -843,7 +853,7 @@ function renderBlock(
   parent: ProseMirrorNode | null,
   index: number,
 ): ReactNode {
-  if (isReferenceDefinitionNode(node, parent, index)) return null
+  if (!context.inline && isReferenceDefinitionNode(node, parent, index)) return null
 
   const key = context.keyCounter.value++
   const typeName = node.type.name as NodeName
@@ -992,6 +1002,8 @@ const MarkdownBlock = memo(
  */
 export function MarkdownView({
   markdown,
+  inline = false,
+  referenceDefinitions: suppliedDefinitions,
   markMode = 'hide',
   frontmatter = false,
   interactive = true,
@@ -1015,6 +1027,7 @@ export function MarkdownView({
 }: MarkdownViewProps): ReactElement {
   const context = useMemo<BlockContext>(
     () => ({
+      inline,
       interactive,
       expandCollapsed,
       resolveImageUrl,
@@ -1032,6 +1045,7 @@ export function MarkdownView({
       onTaskClick: interactive ? onTaskClick : undefined,
     }),
     [
+      inline,
       interactive,
       expandCollapsed,
       resolveImageUrl,
@@ -1051,14 +1065,17 @@ export function MarkdownView({
   )
 
   const { blocks, referenceDefinitions, definitionsKey } = useMemo(() => {
-    const doc = markdownToDoc(markdown, { frontmatter })
-    const referenceDefinitions = collectReferenceDefinitions(doc).definitions
+    const doc = inline ? paragraphMarkdownToDoc(markdown) : markdownToDoc(markdown, { frontmatter })
+    const localDefinitions = inline ? new Map() : collectReferenceDefinitions(doc).definitions
+    const referenceDefinitions = suppliedDefinitions
+      ? new Map([...suppliedDefinitions, ...localDefinitions])
+      : localDefinitions
     return {
       blocks: splitBlocks(doc),
       referenceDefinitions,
       definitionsKey: definitionsSignature(referenceDefinitions),
     }
-  }, [markdown, frontmatter])
+  }, [markdown, frontmatter, inline, suppliedDefinitions])
 
   // The cards' events bubble, so one listener each on the root covers every card.
   const handleXPostMediaClick = interactive ? onXPostMediaClick : undefined

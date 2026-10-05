@@ -35,7 +35,13 @@ export interface AtomMarkNavigationOptions {
 // The source marks that act as one atom in `state`'s current mark mode.
 function getActiveMarkNames(marks: AtomMarks, state: EditorState): MarkName[] {
   const mode = getMarkMode(state)
-  return marks.flatMap((mark) => (mark.modes.includes(mode) ? [mark.name] : []))
+  const result: MarkName[] = []
+  for (const mark of marks) {
+    if (mark.modes.includes(mode)) {
+      result.push(mark.name)
+    }
+  }
+  return result
 }
 
 // The unit range a non-empty selection exactly spans, or undefined.

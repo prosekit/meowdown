@@ -4,8 +4,7 @@ import type { EditorView } from '@prosekit/pm/view'
 
 /**
  * Serialize `slice` onto a real `DataTransfer` and leave `view.dragging` on the
- * source view, the way `handlers.dragstart` does. Returns the transfer for
- * `dropAt`.
+ * source view, the way `handlers.dragstart` does.
  */
 function startDrag(view: EditorView, slice: Slice, node?: NodeSelection): DataTransfer {
   const serialized = view.serializeForClipboard(slice)
@@ -43,26 +42,4 @@ export function startBlockDrag(view: EditorView, pos: number): DataTransfer {
 export function startTextDrag(view: EditorView, from: number, to: number): DataTransfer {
   view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, from, to)))
   return startDrag(view, view.state.selection.content())
-}
-
-/**
- * Dispatch a `drop` carrying `dataTransfer` at the document position `pos`.
- */
-export function dropAt(
-  view: EditorView,
-  dataTransfer: DataTransfer,
-  pos: number,
-  init: DragEventInit = {},
-): DragEvent {
-  const coords = view.coordsAtPos(pos)
-  const event = new DragEvent('drop', {
-    dataTransfer,
-    clientX: coords.left,
-    clientY: (coords.top + coords.bottom) / 2,
-    bubbles: true,
-    cancelable: true,
-    ...init,
-  })
-  view.dom.dispatchEvent(event)
-  return event
 }

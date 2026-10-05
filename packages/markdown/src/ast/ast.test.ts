@@ -1,8 +1,15 @@
 import { describe, expect, it } from 'vitest'
 
-import { parseMarkdownAst, serializeMarkdownAst } from '../index.ts'
+import { parseMarkdownAst, serializeMarkdownAst, walkMarkdownAst } from '../index.ts'
 
 import type { MarkdownDocument } from './types.ts'
+
+function withoutPositions(document: MarkdownDocument): MarkdownDocument {
+  for (const { node } of walkMarkdownAst(document)) {
+    if ('position' in node) delete node.position
+  }
+  return document
+}
 
 describe('Markdown AST', () => {
   it('edits a task without dropping its other blocks or inline Markdown', () => {
@@ -34,7 +41,7 @@ describe('Markdown AST', () => {
     firstParagraph.value = '**buy** _bread_'
     const output = serializeMarkdownAst(ast)
     expect(output).toContain('+   [ ] **buy** _bread_')
-    expect(parseMarkdownAst(output)).toEqual(ast)
+    expect(withoutPositions(parseMarkdownAst(output))).toEqual(withoutPositions(ast))
   })
 
   it('supports inserting and removing whole block subtrees', () => {
@@ -108,5 +115,30 @@ describe('Markdown AST', () => {
     if (paragraph.type !== 'paragraph') throw new Error('Expected a paragraph')
     paragraph.value = 'changed'
     expect(serializeMarkdownAst(ast)).toBe('> changed\n')
+  })
+
+  it('keeps an empty list item as an item with one empty paragraph', () => {
+    const ast = parseMarkdownAst('-\n')
+    expect(ast.children).toEqual([
+      {
+        type: 'listItem',
+        kind: 'bullet',
+        checked: false,
+        collapsed: false,
+        marker: '-',
+        markerGap: 1,
+        children: [{ type: 'paragraph', value: '', position: { from: 1, to: 1 } }],
+        position: { from: 0, to: 1 },
+      },
+    ])
+    expect(serializeMarkdownAst(ast)).toBe('-\n')
+  })
+
+  it('round-trips empty list items between siblings', () => {
+    const roundTrip = (markdown: string) => serializeMarkdownAst(parseMarkdownAst(markdown))
+    expect(roundTrip('- a\n-\n- b\n')).toBe('- a\n-\n- b\n')
+    expect(roundTrip('* a\n*\n* c\n')).toBe('* a\n*\n* c\n')
+    expect(roundTrip('1. a\n2.\n3. b\n')).toBe('1. a\n2.\n3. b\n')
+    expect(roundTrip('> -\n')).toBe('> -\n')
   })
 })

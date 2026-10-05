@@ -32,6 +32,18 @@ describe('MeowdownEditor', () => {
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'focus')
   })
 
+  it('keeps block-looking source in one paragraph through the handle', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(
+      <MeowdownEditor handleRef={ref} singleParagraph initialMarkdown={'# literal\n**bold**'} />,
+    )
+    expect(ref.current?.getMarkdown()).toBe('# literal\n**bold**')
+    expect(ref.current?.getEditor()?.state.doc.child(0).type.name).toBe('paragraph')
+    ref.current?.setMarkdown('+ literal\nnext')
+    expect(ref.current?.getMarkdown()).toBe('+ literal\nnext')
+    expect(ref.current?.getEditor()?.state.doc.childCount).toBe(1)
+  })
+
   it('keeps the ProseKit editor instance when switching among rich modes', async () => {
     const screen = await render(<MeowdownEditor mode="focus" />)
 
@@ -640,4 +652,20 @@ describe('spellCheck prop', () => {
     await screen.rerender(<MeowdownEditor spellCheck={false} />)
     await expect.element(pmRoot).toHaveAttribute('spellcheck', 'false')
   })
+})
+
+it('queries visual textblock boundaries through the editor handle', async () => {
+  const ref = createRef<EditorHandle>()
+  const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown={'first\nsecond'} />)
+  await expect.element(screen.getByText('first', { exact: false })).toBeInTheDocument()
+  await vi.waitFor(() => expect(ref.current?.getEditor()?.mounted).toBe(true))
+  ref.current?.setSelection('start')
+  expect(ref.current?.isAtTextblockBoundary('up')).toBe(true)
+  expect(ref.current?.isAtTextblockBoundary('down')).toBe(false)
+  ref.current?.setSelection('end')
+  expect(ref.current?.isAtTextblockBoundary('down')).toBe(true)
+  expect(ref.current?.isAtTextblockBoundary('up')).toBe(false)
+  const handle = ref.current
+  await screen.unmount()
+  expect(handle?.isAtTextblockBoundary('up')).toBe(false)
 })

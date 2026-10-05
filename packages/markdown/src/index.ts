@@ -9,6 +9,12 @@ export { gfmBlockOnlyParser, gfmParser } from './parser.ts'
 export type { MarkdownParser } from './parser.ts'
 export { isSpaceChar } from './unicode.ts'
 
+export {
+  checkRoundTrip,
+  type CheckRoundTripOptions,
+  type RoundTripFidelity,
+} from './ast/check-roundtrip.ts'
+export { isMarkdownAstEqual } from './ast/equal.ts'
 export { parseMarkdownAst, type ParseMarkdownAstOptions } from './ast/parse.ts'
 export { serializeMarkdownAst, type SerializeMarkdownAstOptions } from './ast/serialize.ts'
 export type {
@@ -24,6 +30,8 @@ export type {
   MarkdownListItem,
   MarkdownNode,
   MarkdownParagraph,
+  MarkdownPosition,
+  MarkdownPositioned,
   MarkdownTable,
   MarkdownTableCell,
   MarkdownTableRow,

@@ -82,6 +82,13 @@ export interface EditorHandle {
   focus: () => void
 
   /**
+   * Whether the selection is at the textblock boundary in this direction; false before mount or after unmount.
+   */
+  isAtTextblockBoundary: (
+    direction: 'up' | 'down' | 'left' | 'right' | 'forward' | 'backward',
+  ) => boolean
+
+  /**
    * Scrolls the selection into view.
    */
   scrollIntoView: () => void

@@ -1,5 +1,43 @@
 # @meowdown/react
 
+## 0.76.3
+
+### Patch Changes
+
+- Updated dependencies [[`1202aa5`](https://github.com/prosekit/meowdown/commit/1202aa5c41c02e77f55f386b795810fe9f25f609), [`7eb8d75`](https://github.com/prosekit/meowdown/commit/7eb8d75e0b9bf2c05a4c8ddb93eadcb24a8e95fc)]:
+  - @meowdown/markdown@0.76.0
+  - @meowdown/core@0.78.3
+
+## 0.76.2
+
+### Patch Changes
+
+- Updated dependencies [[`f76eb39`](https://github.com/prosekit/meowdown/commit/f76eb39322269478447d9b9d37c4288774424376), [`0c695e7`](https://github.com/prosekit/meowdown/commit/0c695e7c45f776f924e406fa945a95516e833f1d)]:
+  - @meowdown/core@0.78.2
+  - @meowdown/markdown@0.75.0
+
+## 0.76.1
+
+### Patch Changes
+
+- Updated dependencies [[`516f2d0`](https://github.com/prosekit/meowdown/commit/516f2d0ed22c26d5d686fc66bf8e3be39cd92221), [`775e240`](https://github.com/prosekit/meowdown/commit/775e2406c1000bff334b22fae25b9b156beaecc0)]:
+  - @meowdown/markdown@0.74.0
+  - @meowdown/core@0.78.1
+
+## 0.76.0
+
+### Minor Changes
+
+- [#655](https://github.com/prosekit/meowdown/pull/655) [`b955880`](https://github.com/prosekit/meowdown/commit/b95588035d0f6cb71234b9b16bc736456ff02cd5) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Expose `EditorHandle.isAtTextblockBoundary` for direction-aware caret navigation.
+
+- [#651](https://github.com/prosekit/meowdown/pull/651) [`fd16964`](https://github.com/prosekit/meowdown/commit/fd1696493f33c9c1826208fd63af09d0b89a3b88) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Add single-paragraph editing and inline Markdown previews with reference context.
+
+### Patch Changes
+
+- Updated dependencies [[`851fc06`](https://github.com/prosekit/meowdown/commit/851fc06f061061f8649142876a498f7de822300e), [`fd16964`](https://github.com/prosekit/meowdown/commit/fd1696493f33c9c1826208fd63af09d0b89a3b88)]:
+  - @meowdown/markdown@0.73.0
+  - @meowdown/core@0.78.0
+
 ## 0.75.4
 
 ### Patch Changes
