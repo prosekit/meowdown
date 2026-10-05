@@ -5,8 +5,7 @@ import { setupHeadlessFixture } from '../testing/headless.ts'
 import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
 
-const fixture = setupHeadlessFixture()
-const { n } = fixture
+const { n } = setupHeadlessFixture()
 
 function roundtrip(markdown: string, options?: { frontmatter?: boolean }): string {
   return docToMarkdown(markdownToDoc(markdown, options), options)

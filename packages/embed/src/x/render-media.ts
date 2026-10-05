@@ -1,3 +1,4 @@
+import { isNotNullish } from '@ocavue/utils'
 import type { XPostMedia, XPostPhoto, XPostVideo } from '@post-embed/types'
 import el from 'crelt'
 
@@ -45,10 +46,12 @@ function getDisplayable(
     return url ? { ...media, url } : undefined
   }
   const sources = sortVideoSources(
-    media.sources.flatMap((source) => {
-      const url = getSafeMediaUrl(source.url, protocols)
-      return url ? [{ ...source, url }] : []
-    }),
+    media.sources
+      .map((source) => {
+        const url = getSafeMediaUrl(source.url, protocols)
+        return url ? { ...source, url } : null
+      })
+      .filter(isNotNullish),
   )
   if (sources.length === 0) return
   const poster = media.poster && getSafeMediaUrl(media.poster, protocols)

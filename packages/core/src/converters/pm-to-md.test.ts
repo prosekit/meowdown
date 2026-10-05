@@ -7,8 +7,7 @@ import { markdownToDoc } from './md-to-pm.ts'
 import { docToMarkdown } from './pm-to-md.ts'
 import { sampleContent, sampleContentMarkdown } from './sample-content.ts'
 
-const fixture = setupHeadlessFixture()
-const { n, schema } = fixture
+const { n, schema } = setupHeadlessFixture()
 
 describe('docToMarkdown', () => {
   it('keeps a paragraph', () => {
