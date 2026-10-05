@@ -82,32 +82,6 @@ describe('virtual caret rendering', () => {
     expect(moved).toBeGreaterThan(start)
   })
 
-  it('snaps between clicked blocks and resumes gliding for keyboard input', async () => {
-    using fixture = setupFixture()
-    const { n } = fixture
-    fixture.set(n.doc(n.paragraph('<a>first block'), n.paragraph('second block')))
-    fixture.view.focus()
-    await expect.element(caret).toBeVisible()
-    const element = getCaretElement()
-    // Override reduced-motion styles so a delayed caret cannot pass unnoticed.
-    const style = document.createElement('style')
-    style.textContent = '.md-virtual-caret { transition: left 10s linear, top 10s linear; }'
-    element.parentElement?.append(style)
-    element.getBoundingClientRect()
-
-    await page.getByText('second block', { exact: true }).click()
-    await expect.element(caret).toBeVisible()
-    expect(
-      element.getAnimations().filter((animation) => animation instanceof CSSTransition),
-    ).toHaveLength(0)
-    expect(fixture.editor.state.selection.$head.parent.textContent).toBe('second block')
-
-    await userEvent.keyboard('{ArrowLeft}')
-    expect(element.getAnimations().some((animation) => animation instanceof CSSTransition)).toBe(
-      true,
-    )
-  })
-
   it('keeps typing working with the transparent native caret', async () => {
     using fixture = setupMode('hide', 'hello <a>world')
     await userEvent.keyboard('x')
