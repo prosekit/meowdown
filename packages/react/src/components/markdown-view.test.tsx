@@ -592,7 +592,7 @@ describe('MarkdownView', () => {
 
   it('renders paragraph marks with external reference definitions', async () => {
     await renderView('# **first\nsecond** [link][ref]', {
-      inline: true,
+      singleParagraph: true,
       referenceDefinitions: new Map([
         ['REF', { key: 'REF', href: 'https://example.com', title: '' }],
       ]),
@@ -603,7 +603,7 @@ describe('MarkdownView', () => {
   })
 
   it('keeps definition-looking paragraph content visible', async () => {
-    await renderView('[ref]: https://example.com', { inline: true })
+    await renderView('[ref]: https://example.com', { singleParagraph: true })
     await expect.element(view.locate('p')).toHaveTextContent('[ref]: https://example.com')
   })
 
@@ -620,7 +620,7 @@ describe('MarkdownView', () => {
 
   it('refreshes inline links when the containing note definitions change', async () => {
     const screen = await renderView('[label][ref]', {
-      inline: true,
+      singleParagraph: true,
       referenceDefinitions: new Map([
         ['REF', { key: 'REF', href: 'https://example.com/old', title: '' }],
       ]),
@@ -630,7 +630,7 @@ describe('MarkdownView', () => {
       <div data-testid="markdown-view">
         <MarkdownView
           markdown="[label][ref]"
-          inline
+          singleParagraph
           referenceDefinitions={
             new Map([['REF', { key: 'REF', href: 'https://example.com/new', title: '' }]])
           }
