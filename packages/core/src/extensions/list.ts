@@ -379,24 +379,16 @@ function toggleListCollapsed(): Command {
   return createToggleCollapsedCommand({ isToggleable: isCollapsibleBullet })
 }
 
-/**
- * List commands run in flat-list's strict mode: a block is never more than
- * one level deeper than the block before it, so no list node ends up with a
- * hidden marker. Such a node serializes as `+ [ ] + [ ] text`, which
- * CommonMark reads back as one task with literal text.
- */
-const strictListOptions = { strict: true }
-
 function indentList(options?: IndentListOptions): Command {
-  return createIndentListCommand({ ...strictListOptions, ...options })
+  return createIndentListCommand({ strict: true, ...options })
 }
 
 function dedentList(options?: DedentListOptions): Command {
-  return createDedentListCommand({ ...strictListOptions, ...options })
+  return createDedentListCommand({ strict: true, ...options })
 }
 
 function splitList(options?: SplitListOptions): Command {
-  return createSplitListCommand({ ...strictListOptions, ...options })
+  return createSplitListCommand({ strict: true, ...options })
 }
 
 function defineMeowdownListCommands() {
@@ -406,8 +398,6 @@ function defineMeowdownListCommands() {
     wrapInCircleTask,
     wrapInSquareTask,
     toggleListCollapsed,
-    // Hosts read `canExec()` for toolbar buttons, so these follow the strict
-    // rule of the keymap too.
     indentList,
     dedentList,
     splitList,
@@ -503,12 +493,6 @@ function defineMeowdownListPlugins(): PlainExtension {
   ])
 }
 
-/**
- * The list keymap, built from flat-list's commands instead of prosekit's
- * `defineListKeymap`, so indent, dedent and Enter run in strict mode. The
- * Backspace chain mirrors prosekit's: the rest of flat-list's
- * `backspaceCommand` lives in `defineBaseKeymap`.
- */
 function defineMeowdownListKeymap(): PlainExtension {
   return defineKeymap({
     Enter: chainCommands(protectCollapsed, splitList()),
