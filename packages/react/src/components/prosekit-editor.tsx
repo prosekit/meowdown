@@ -295,6 +295,12 @@ export interface ProseKitEditorProps {
   bulletAfterHeading?: boolean
 
   /**
+   * Deletes an empty first paragraph on Backspace. See
+   * `EditorProps.backspaceDeletesEmptyFirstBlock`.
+   */
+  backspaceDeletesEmptyFirstBlock?: boolean
+
+  /**
    * Replaces typed sequences like `->` with `→`. See `EditorProps.substitution`.
    */
   substitution?: boolean
@@ -393,6 +399,7 @@ export function ProseKitEditor({
   embedPaste,
   linkPaste,
   bulletAfterHeading,
+  backspaceDeletesEmptyFirstBlock,
   substitution = true,
   frontmatter = false,
   blockHandle = true,
@@ -447,6 +454,7 @@ export function ProseKitEditor({
       embedPaste,
       linkPaste,
       bulletAfterHeading,
+      backspaceDeletesEmptyFirstBlock,
       substitution,
       placeholder,
       readOnly,
@@ -478,6 +486,7 @@ export function ProseKitEditor({
       embedPaste,
       linkPaste,
       bulletAfterHeading,
+      backspaceDeletesEmptyFirstBlock,
       substitution,
       placeholder,
       readOnly,

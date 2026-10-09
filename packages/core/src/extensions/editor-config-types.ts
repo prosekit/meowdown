@@ -19,6 +19,7 @@ export interface EditorConfig
   embedPaste?: boolean
   linkPaste?: boolean
   bulletAfterHeading?: boolean
+  backspaceDeletesEmptyFirstBlock?: boolean
   substitution?: boolean
   wikilinkEnabled?: boolean
   placeholder?: PlaceholderOptions['placeholder']

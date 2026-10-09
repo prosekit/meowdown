@@ -14,6 +14,7 @@ import { defineText } from '@prosekit/extensions/text'
 import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineAtomMarkNavigation } from './atom-mark-navigation.ts'
+import { defineBackspaceEmptyFirstBlock } from './backspace-empty-first-block.ts'
 import { defineBulletAfterHeading } from './bullet-after-heading.ts'
 import { defineClickBelow } from './click-below.ts'
 import { defineClipboard } from './clipboard/clipboard.ts'
@@ -104,6 +105,9 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineEmbedPaste((state) => !!getEditorConfig(state).embedPaste),
     defineLinkPaste((state) => !!getEditorConfig(state).linkPaste),
     defineBulletAfterHeading((state) => !!getEditorConfig(state).bulletAfterHeading),
+    defineBackspaceEmptyFirstBlock(
+      (state) => !!getEditorConfig(state).backspaceDeletesEmptyFirstBlock,
+    ),
     defineSubstitution((state) => !!getEditorConfig(state).substitution),
     defineWikilinkTrigger((state) => !!getEditorConfig(state).wikilinkEnabled),
     definePlaceholder({

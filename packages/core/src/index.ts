@@ -18,6 +18,7 @@ export {
 } from '@prosekit/extensions/search'
 export { markdownToDoc, type MarkdownToDocOptions } from './converters/md-to-pm.ts'
 export { docToMarkdown, type DocToMarkdownOptions } from './converters/pm-to-md.ts'
+export { defineBackspaceEmptyFirstBlock } from './extensions/backspace-empty-first-block.ts'
 export { defineBulletAfterHeading } from './extensions/bullet-after-heading.ts'
 export {
   defineCodeBlockSyntaxHighlight,

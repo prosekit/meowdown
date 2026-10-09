@@ -293,6 +293,20 @@ describe('MarkdownEditor', () => {
     await expect.element(pmRoot.locate('[data-list-kind="bullet"]')).toBeInTheDocument()
   })
 
+  it('deletes an empty first paragraph on Backspace when backspaceDeletesEmptyFirstBlock is on', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(
+      <MarkdownEditor handleRef={ref} backspaceDeletesEmptyFirstBlock initialMarkdown="foo" />,
+    )
+    await pmRoot.click()
+    const view = ref.current?.getEditor()?.view
+    if (!view) throw new Error('editor not mounted')
+    view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, 1)))
+    view.focus()
+    await userEvent.keyboard('{Enter}{ArrowUp}{Backspace}')
+    expect(ref.current?.getMarkdown()).toBe('foo\n')
+  })
+
   it('uploads and inserts an image dropped from outside the editor', async () => {
     const onFilePaste = vi.fn(() => 'https://cdn/cat.png')
     const ref = createRef<EditorHandle>()
