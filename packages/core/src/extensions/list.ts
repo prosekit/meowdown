@@ -12,35 +12,28 @@ import {
 } from '@prosekit/core'
 import { defineInputRule } from '@prosekit/extensions/input-rule'
 import {
+  createListKeymap,
   defineListCommands,
   defineListDropIndicator,
-  defineListKeymap,
   defineListSpec,
   toggleList,
   wrapInList,
   type ListAttrs,
 } from '@prosekit/extensions/list'
-import { chainCommands } from '@prosekit/pm/commands'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin } from '@prosekit/pm/state'
 import {
-  createDedentListCommand,
-  createIndentListCommand,
   createListRenderingPlugin,
   createSafariInputMethodWorkaroundPlugin,
-  createSplitListCommand,
   createToggleCollapsedCommand,
   defaultAttributesGetter,
   findCheckboxInListItem,
   handleListMarkerMouseDown,
   joinListElements,
   listToDOM,
-  protectCollapsed,
   unwrapListSlice,
   wrappingListInputRule,
-  type DedentListOptions,
-  type IndentListOptions,
   type ListClickHandler,
 } from 'prosemirror-flat-list'
 
@@ -377,18 +370,12 @@ function toggleListCollapsed(): Command {
 }
 
 /**
- * Indent and dedent run in flat-list's strict mode: a block is never more
- * than one level deeper than the block before it, so no list node ends up
- * with a hidden marker. Such a node serializes as `+ [ ] + [ ] text`, which
+ * List commands run in flat-list's strict mode: a block is never more than
+ * one level deeper than the block before it, so no list node ends up with a
+ * hidden marker. Such a node serializes as `+ [ ] + [ ] text`, which
  * CommonMark reads back as one task with literal text.
  */
-function indentList(options?: IndentListOptions): Command {
-  return createIndentListCommand({ ...options, strict: true })
-}
-
-function dedentList(options?: DedentListOptions): Command {
-  return createDedentListCommand({ ...options, strict: true })
-}
+const strictListOptions = { strict: true }
 
 function isInsideList(state: EditorState): boolean {
   const { $from } = state.selection
@@ -398,17 +385,6 @@ function isInsideList(state: EditorState): boolean {
   return false
 }
 
-/**
- * Tab inside a list never leaves the editor. When strict mode refuses the
- * indent (the item has nothing above it to nest under), the key is swallowed
- * instead of falling through to prosekit's non-strict binding or to the
- * browser's focus change.
- */
-function indentListOrStay(): Command {
-  const indent = indentList()
-  return (state, dispatch, view) => indent(state, dispatch, view) || isInsideList(state)
-}
-
 function defineMeowdownListCommands() {
   return defineCommands({
     cycleCheckableList,
@@ -416,8 +392,6 @@ function defineMeowdownListCommands() {
     wrapInCircleTask,
     wrapInSquareTask,
     toggleListCollapsed,
-    indentList,
-    dedentList,
   })
 }
 
@@ -511,14 +485,13 @@ function defineMeowdownListPlugins(): PlainExtension {
 }
 
 function defineMeowdownListKeymap(): PlainExtension {
+  const listKeymap = createListKeymap(strictListOptions)
   return defineKeymap({
-    // These shadow prosekit's `defineListKeymap` bindings, which run flat-list
-    // in its default mode. A later keymap in the union wins.
-    Tab: indentListOrStay(),
-    'Shift-Tab': dedentList(),
-    'Mod-]': indentList(),
-    'Mod-[': dedentList(),
-    Enter: chainCommands(protectCollapsed, createSplitListCommand({ strict: true })),
+    ...listKeymap,
+    // Tab inside a list never leaves the editor. When strict mode refuses the
+    // indent (the item has nothing above it to nest under), the key is
+    // swallowed instead of moving focus out of the editor.
+    Tab: (state, dispatch, view) => listKeymap.Tab(state, dispatch, view) || isInsideList(state),
     'Mod-Enter': rotateSquareTask(),
     'Mod-Shift-Enter': rotateCircleTask(),
     'Mod-.': createToggleCollapsedCommand({ isToggleable: isCollapsibleBullet }),
@@ -538,8 +511,7 @@ export function defineMeowdownList() {
   return union(
     defineListSpec(),
     defineMeowdownListPlugins(),
-    defineListKeymap(),
-    defineListCommands(),
+    defineListCommands(strictListOptions),
     defineMeowdownListSerializer(),
     defineListDropIndicator(),
 
