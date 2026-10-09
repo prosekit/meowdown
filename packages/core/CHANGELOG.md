@@ -1,5 +1,11 @@
 # @meowdown/core
 
+## 0.80.0
+
+### Minor Changes
+
+- [#685](https://github.com/prosekit/meowdown/pull/685) [`810377a`](https://github.com/prosekit/meowdown/commit/810377a97a5f7eb43de0c10463e700e94d8337a9) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Single-paragraph editing is now the `singleParagraph` editor config option: block input rules and enter rules stay quiet while it is set, so typed `# `, `> `, `- ` and fences stay literal while the `[[` and `#` menus and substitutions keep working. `defineSingleParagraph` is no longer exported from `@meowdown/core`; `MarkdownEditor`'s `singleParagraph` prop sets the option.
+
 ## 0.79.0
 
 ### Minor Changes
