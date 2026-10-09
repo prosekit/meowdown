@@ -303,7 +303,11 @@ describe('MarkdownEditor', () => {
     if (!view) throw new Error('editor not mounted')
     view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, 1)))
     view.focus()
-    await userEvent.keyboard('{Enter}{ArrowUp}{Backspace}')
+    await userEvent.keyboard('{Enter}')
+    // Not ArrowUp: a native caret move reaches the editor state one
+    // `selectionchange` later, which an immediate Backspace would outrun.
+    view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, 1)))
+    await userEvent.keyboard('{Backspace}')
     expect(ref.current?.getMarkdown()).toBe('foo\n')
   })
 
