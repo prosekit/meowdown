@@ -12,8 +12,8 @@ import {
 } from '@prosekit/core'
 import {
   defineHeadingCommands,
-  defineHeadingInputRule,
   defineHeadingSpec,
+  headingInputRule,
   type HeadingAttrs,
 } from '@prosekit/extensions/heading'
 import type { ProseMirrorNode, TagParseRule } from '@prosekit/pm/model'
@@ -21,6 +21,7 @@ import type { Command } from '@prosekit/pm/state'
 
 import { parsePositiveInteger } from '../utils/parse-integer.ts'
 
+import { defineBlockTextBlockInputRule } from './block-rule.ts'
 import { createSourceTextRule, semanticTextblockDOM } from './clipboard/semantic-inline.ts'
 import { isNodeOfType, type NodeName } from './node-names.ts'
 
@@ -146,7 +147,7 @@ export function defineHeading() {
     defineHeadingWhitespace(),
     defineSetextUnderlineAttr(),
     defineHeadingClosingHashesAttr(),
-    defineHeadingInputRule(),
+    defineBlockTextBlockInputRule(headingInputRule),
     defineHeadingCommands(),
     defineHeadingKeymap(),
   )

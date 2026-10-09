@@ -93,6 +93,13 @@ describe('WikilinkMenu', () => {
     })
   })
 
+  it('opens in a single-paragraph editor', async () => {
+    await render(<ProseKitEditor singleParagraph onWikilinkSearch={searchNotes} />)
+    await pmRoot.click()
+    await userEvent.keyboard(TWO_BRACKETS)
+    await expect.element(menu).toBeVisible()
+  })
+
   it('does not open on a single "["', async () => {
     await render(<ProseKitEditor onWikilinkSearch={searchNotes} />)
     await pmRoot.click()

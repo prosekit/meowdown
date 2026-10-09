@@ -211,4 +211,3 @@ export { getSelectedText } from './utils/selected-text.ts'
 export { getVirtualElementFromRange, type VirtualElement } from './utils/virtual-element.ts'
 
 export { docToParagraphMarkdown, paragraphMarkdownToDoc } from './converters/paragraph.ts'
-export { defineSingleParagraph } from './extensions/single-paragraph.ts'

@@ -36,6 +36,13 @@ describe('TagMenu', () => {
     await expect.element(menu.getByText('#book')).not.toBeInTheDocument()
   })
 
+  it('opens in a single-paragraph editor', async () => {
+    await render(<ProseKitEditor singleParagraph onTagSearch={searchTags} />)
+    await pmRoot.click()
+    await userEvent.keyboard('#m')
+    await expect.element(menu).toBeVisible()
+  })
+
   it('does not open while typing a heading', async () => {
     await render(<ProseKitEditor onTagSearch={searchTags} />)
     await pmRoot.click()

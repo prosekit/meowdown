@@ -21,6 +21,13 @@ export interface EditorConfig
   bulletAfterHeading?: boolean
   backspaceDeletesEmptyFirstBlock?: boolean
   substitution?: boolean
+  /**
+   * Keep the document to one paragraph of inline Markdown: typed block
+   * prefixes (`# `, `> `, `- `, ```` ``` ````) stay literal and pasted blocks
+   * flatten into soft lines. Seed the editor with `paragraphMarkdownToDoc` and
+   * read it with `docToParagraphMarkdown`.
+   */
+  singleParagraph?: boolean
   wikilinkEnabled?: boolean
   placeholder?: PlaceholderOptions['placeholder']
   readOnly?: boolean

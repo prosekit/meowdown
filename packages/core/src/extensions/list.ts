@@ -10,7 +10,6 @@ import {
   type Extension,
   type PlainExtension,
 } from '@prosekit/core'
-import { defineInputRule } from '@prosekit/extensions/input-rule'
 import {
   defineListCommands,
   defineListDropIndicator,
@@ -47,6 +46,7 @@ import {
   type SplitListOptions,
 } from 'prosemirror-flat-list'
 
+import { defineBlockInputRule } from './block-rule.ts'
 import { isNodeOfType, type NodeName } from './node-names.ts'
 
 /**
@@ -286,7 +286,7 @@ const listInputRules = [
 ]
 
 function defineMeowdownListInputRules(): PlainExtension {
-  return union(listInputRules.map(defineInputRule))
+  return union(listInputRules.map(defineBlockInputRule))
 }
 
 /**
