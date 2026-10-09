@@ -21,7 +21,6 @@ import type { EditorView } from '@prosekit/pm/view'
 import type { PositionRange } from '../utils/range.ts'
 
 import { BatchSetMarkStep } from './batch-set-mark-step.ts'
-import { getEditorConfig } from './editor-config-getter.ts'
 import {
   inlineTextToMarkChunksWithContext,
   type InlineMarkOptions,
@@ -36,6 +35,7 @@ import {
   type ReferenceDefinitions,
 } from './reference-links.ts'
 import { getMarkBuildersForSchema } from './schema.ts'
+import { isSingleParagraph } from './single-paragraph.ts'
 
 const META_KEY = 'inline-marks-applied'
 const TRIGGER_KEY = 'inline-marks-trigger'
@@ -227,7 +227,7 @@ function createInlineMarkPlugin(
         options,
         references,
         changedKeys,
-        !getEditorConfig(state).singleParagraph && isReferenceDefinitionNode(node, parent, index),
+        !isSingleParagraph(state) && isReferenceDefinitionNode(node, parent, index),
       )
       if (nodeChunks.length > 0) chunks.push(...nodeChunks)
       const updated = chunkCache.get(node)
@@ -258,7 +258,7 @@ function createInlineMarkPlugin(
     external: ReferenceDefinitions | undefined,
     state: EditorState,
   ): ReferenceDefinitionIndex {
-    const local = getEditorConfig(state).singleParagraph
+    const local = isSingleParagraph(state)
       ? { nodes: new Set<EditorNode>(), definitions: new Map() }
       : collectReferenceDefinitions(doc)
     return external
@@ -289,7 +289,7 @@ function createInlineMarkPlugin(
         if (transaction.getMeta(META_KEY)) return value
         const externalDefinitions = getOptions?.(oldState)?.referenceDefinitions
         const references =
-          getEditorConfig(oldState).singleParagraph ||
+          isSingleParagraph(oldState) ||
           externalDefinitions !== value.externalDefinitions ||
           (externalDefinitions && transaction.docChanged)
             ? collectReferences(newState.doc, externalDefinitions, newState)

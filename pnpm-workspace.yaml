@@ -50,8 +50,8 @@ allowBuilds:
 
 blockExoticSubdeps: false
 overrides:
-  '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@1799
-  '@prosekit/react': https://pkg.pr.new/@prosekit/react@1799
-  '@prosekit/core': https://pkg.pr.new/@prosekit/core@1799
-  '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@1799
-  '@prosekit/web': https://pkg.pr.new/@prosekit/web@1799
+  '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@8223e744f42c350a51d27cba25f9f79a29a0e2f7
+  '@prosekit/react': https://pkg.pr.new/@prosekit/react@8223e744f42c350a51d27cba25f9f79a29a0e2f7
+  '@prosekit/core': https://pkg.pr.new/@prosekit/core@8223e744f42c350a51d27cba25f9f79a29a0e2f7
+  '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@8223e744f42c350a51d27cba25f9f79a29a0e2f7
+  '@prosekit/web': https://pkg.pr.new/@prosekit/web@8223e744f42c350a51d27cba25f9f79a29a0e2f7

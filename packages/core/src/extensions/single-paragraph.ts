@@ -1,6 +1,5 @@
 import { definePlugin, Priority, withPriority, type PlainExtension } from '@prosekit/core'
-import { undoInputRule } from '@prosekit/pm/inputrules'
-import { Plugin, PluginKey, TextSelection, type Transaction } from '@prosekit/pm/state'
+import { Plugin, PluginKey, TextSelection, type EditorState } from '@prosekit/pm/state'
 
 import { docToParagraphMarkdown, paragraphMarkdownToDoc } from '../converters/paragraph.ts'
 
@@ -11,11 +10,18 @@ import { getNodeBuildersForSchema } from './schema.ts'
 const singleParagraphPluginKey = new PluginKey('single-paragraph')
 
 /**
- * Keep the document to one paragraph while `singleParagraph` is set in the
- * editor config. A block input rule that just fired is undone the way
- * Backspace undoes it, so the typed prefix stays as text. Anything else that
- * arrives as blocks (a paste, a command) flattens into paragraph text
- * separated by soft lines.
+ * Whether the editor holds one paragraph of inline Markdown (the
+ * `singleParagraph` editor config option).
+ */
+export function isSingleParagraph(state: EditorState): boolean {
+  return !!getEditorConfig(state).singleParagraph
+}
+
+/**
+ * Keep the document to one paragraph while `singleParagraph` is set. Input
+ * rules and enter rules that open a block stay inert on their own (see
+ * `block-rule.ts`); this flattens what still arrives as blocks, such as a
+ * paste or a command, into paragraph text separated by soft lines.
  */
 export function defineSingleParagraph(): PlainExtension {
   return withPriority(
@@ -23,7 +29,7 @@ export function defineSingleParagraph(): PlainExtension {
       new Plugin({
         key: singleParagraphPluginKey,
         appendTransaction(transactions, _oldState, state) {
-          if (!getEditorConfig(state).singleParagraph) return
+          if (!isSingleParagraph(state)) return
           if (!transactions.some((transaction) => transaction.docChanged)) return
           const markdown = docToParagraphMarkdown(state.doc)
           if (
@@ -32,8 +38,6 @@ export function defineSingleParagraph(): PlainExtension {
             state.doc.child(0).textContent === markdown
           )
             return
-          let undone: Transaction | undefined
-          if (undoInputRule(state, (transaction) => (undone = transaction))) return undone
           const doc = paragraphMarkdownToDoc(markdown, getNodeBuildersForSchema(state.schema))
           const position = Math.min(state.selection.head, doc.content.size - 1)
           const transaction = state.tr.replaceWith(0, state.doc.content.size, doc.content)

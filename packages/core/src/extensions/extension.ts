@@ -5,7 +5,6 @@ import {
   union,
   type Editor,
 } from '@prosekit/core'
-import { defineBlockquote } from '@prosekit/extensions/blockquote'
 import { defineDoc } from '@prosekit/extensions/doc'
 import { defineGapCursor } from '@prosekit/extensions/gap-cursor'
 import { defineModClickPrevention } from '@prosekit/extensions/mod-click-prevention'
@@ -15,6 +14,7 @@ import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineAtomMarkNavigation } from './atom-mark-navigation.ts'
 import { defineBackspaceEmptyFirstBlock } from './backspace-empty-first-block.ts'
+import { defineMeowdownBlockquote } from './blockquote.ts'
 import { defineBulletAfterHeading } from './bullet-after-heading.ts'
 import { defineClickBelow } from './click-below.ts'
 import { defineClipboard } from './clipboard/clipboard.ts'
@@ -77,7 +77,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineDoc(),
     defineDocFrontmatterAttr(),
     defineText(),
-    defineBlockquote(),
+    defineMeowdownBlockquote(),
     defineMeowdownList(),
     defineHeading(),
     defineTable(),

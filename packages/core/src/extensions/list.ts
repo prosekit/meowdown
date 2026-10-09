@@ -10,7 +10,7 @@ import {
   type Extension,
   type PlainExtension,
 } from '@prosekit/core'
-import { defineInputRule } from '@prosekit/extensions/input-rule'
+import type { InputRuleHandler } from '@prosekit/extensions/input-rule'
 import {
   defineListCommands,
   defineListDropIndicator,
@@ -23,6 +23,7 @@ import { chainCommands, deleteSelection } from '@prosekit/pm/commands'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin } from '@prosekit/pm/state'
+import { findWrapping } from '@prosekit/pm/transform'
 import {
   createDedentListCommand,
   createIndentListCommand,
@@ -40,13 +41,15 @@ import {
   listToDOM,
   protectCollapsed,
   unwrapListSlice,
-  wrappingListInputRule,
+  getListType,
+  isListNode,
   type DedentListOptions,
   type IndentListOptions,
   type ListClickHandler,
   type SplitListOptions,
 } from 'prosemirror-flat-list'
 
+import { defineBlockInputRule } from './block-rule.ts'
 import { isNodeOfType, type NodeName } from './node-names.ts'
 
 /**
@@ -252,41 +255,73 @@ function normalizeTaskList(node: Element): void {
   textBlock.prepend(checkbox)
 }
 
-const listInputRules = [
-  wrappingListInputRule<MeowdownListAttrs>(/^\s?([*-])\s$/, {
-    kind: 'bullet',
-    collapsed: false,
-  }),
-  wrappingListInputRule<MeowdownListAttrs>(/^\s?(\d+)\.\s$/, ({ match }) => {
-    const text = match[1]
-    const num = text ? parseInt(text, 10) : undefined
-    return {
-      kind: 'ordered',
-      collapsed: false,
-      order: num && num >= 2 && Number.isSafeInteger(num) ? num : null,
+type ListInputRuleAttrs =
+  | MeowdownListAttrs
+  | ((options: { match: RegExpMatchArray; attributes?: MeowdownListAttrs }) => MeowdownListAttrs)
+
+/**
+ * Wrap the textblock in a list with `getAttrs`, or update the attributes of
+ * the list item the textblock already starts. The body of
+ * prosemirror-flat-list's `wrappingListInputRule`, as a handler so a rule can
+ * check the editor state before it runs.
+ */
+function createListInputRuleHandler(getAttrs: ListInputRuleAttrs): InputRuleHandler {
+  return (state, match, start, end) => {
+    const tr = state.tr
+    tr.deleteRange(start, end)
+    const $pos = tr.selection.$from
+    const listNode = $pos.index(-1) === 0 ? $pos.node(-1) : undefined
+    if (listNode && isListNode(listNode)) {
+      const oldAttrs = listNode.attrs as MeowdownListAttrs
+      const newAttrs =
+        typeof getAttrs === 'function' ? getAttrs({ match, attributes: oldAttrs }) : getAttrs
+      const entries = Object.entries(newAttrs).filter(
+        ([key, value]) => oldAttrs[key as keyof MeowdownListAttrs] !== value,
+      )
+      if (entries.length === 0) return null
+      const pos = $pos.before(-1)
+      for (const [key, value] of entries) tr.setNodeAttribute(pos, key, value)
+      return tr
     }
-  }),
-  wrappingListInputRule<MeowdownListAttrs>(/^\s?\[([\sX]?)\]\s$/i, ({ match }) => {
-    return {
-      kind: 'task',
-      checked: ['x', 'X'].includes(match[1]),
-      collapsed: false,
-    }
-  }),
-  /**
-   * `+ ` at the start of a block wraps it into an unchecked circle checkbox task.
-   * The square checkbox task keeps ProseKit's default `[ ] ` / `[x] ` input rule.
-   */
-  wrappingListInputRule<MeowdownListAttrs>(/^\s?\+\s$/, {
-    kind: 'task',
-    marker: '+',
-    checked: false,
-    collapsed: false,
-  }),
+    const range = tr.doc.resolve(start).blockRange()
+    if (!range) return null
+    const newAttrs = typeof getAttrs === 'function' ? getAttrs({ match }) : getAttrs
+    const wrapping = findWrapping(range, getListType(state.schema), newAttrs)
+    if (!wrapping) return null
+    return tr.wrap(range, wrapping)
+  }
+}
+
+// Every marker opens a list item; in a single paragraph each stays typed text.
+const listInputRules: [RegExp, ListInputRuleAttrs][] = [
+  [/^\s?([*-])\s$/, { kind: 'bullet', collapsed: false }],
+  [
+    /^\s?(\d+)\.\s$/,
+    ({ match }) => {
+      const text = match[1]
+      const num = text ? parseInt(text, 10) : undefined
+      return {
+        kind: 'ordered',
+        collapsed: false,
+        order: num && num >= 2 && Number.isSafeInteger(num) ? num : null,
+      }
+    },
+  ],
+  [
+    /^\s?\[([\sX]?)\]\s$/i,
+    ({ match }) => ({ kind: 'task', checked: ['x', 'X'].includes(match[1]), collapsed: false }),
+  ],
+  // `+ ` at the start of a block wraps it into an unchecked circle checkbox task.
+  // The square checkbox task keeps ProseKit's default `[ ] ` / `[x] ` pattern.
+  [/^\s?\+\s$/, { kind: 'task', marker: '+', checked: false, collapsed: false }],
 ]
 
 function defineMeowdownListInputRules(): PlainExtension {
-  return union(listInputRules.map(defineInputRule))
+  return union(
+    listInputRules.map(([regex, attrs]) => {
+      return defineBlockInputRule(regex, createListInputRuleHandler(attrs))
+    }),
+  )
 }
 
 /**
