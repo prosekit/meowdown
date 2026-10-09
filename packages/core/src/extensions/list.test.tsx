@@ -333,6 +333,19 @@ describe('commands', () => {
       """
     `)
   })
+
+  it('indentList.canExec is false on a first list item', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.list({ kind: 'bullet' }, n.paragraph('first<a>')),
+        n.list({ kind: 'bullet' }, n.paragraph('second')),
+      ),
+    )
+    expect(fixture.editor.commands.indentList.canExec()).toBe(false)
+    expect(fixture.editor.commands.dedentList.canExec()).toBe(true)
+  })
 })
 
 describe('keymap', () => {
@@ -666,9 +679,7 @@ describe('keymap', () => {
       """
     `)
   })
-})
 
-describe('strict depth', () => {
   it('Tab on a first circle checkbox task does nothing and keeps focus', async () => {
     using fixture = setupFixture()
     const { n } = fixture
@@ -727,18 +738,5 @@ describe('strict depth', () => {
 
       """
     `)
-  })
-
-  it('indentList.canExec is false on a first list item', () => {
-    using fixture = setupFixture()
-    const { n } = fixture
-    fixture.set(
-      n.doc(
-        n.list({ kind: 'bullet' }, n.paragraph('first<a>')),
-        n.list({ kind: 'bullet' }, n.paragraph('second')),
-      ),
-    )
-    expect(fixture.editor.commands.indentList.canExec()).toBe(false)
-    expect(fixture.editor.commands.dedentList.canExec()).toBe(true)
   })
 })
