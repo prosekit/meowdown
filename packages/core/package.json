@@ -51,6 +51,7 @@
     "mdast-util-to-markdown": "^2.2.0",
     "micromark-util-decode-string": "^2.0.1",
     "micromark-util-normalize-identifier": "^2.0.1",
+    "prosemirror-enter-rules": "^0.1.6",
     "prosemirror-flat-list": "^0.7.2",
     "prosemirror-highlight": "^0.16.0",
     "rehype-parse": "^9.0.0",

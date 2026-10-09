@@ -1,16 +1,17 @@
 import { defineNodeAttr, union, type Extension, type PlainExtension } from '@prosekit/core'
 import {
   codeBlockEnterRule,
-  codeBlockInputRule,
   defineCodeBlockCommands,
+  defineCodeBlockInputRule,
   defineCodeBlockKeymap,
   defineCodeBlockSpec,
   type CodeBlockAttrs,
 } from '@prosekit/extensions/code-block'
+import { defineTextBlockInputRule } from '@prosekit/extensions/input-rule'
 
 import { parseInteger } from '../utils/parse-integer.ts'
 
-import { defineBlockEnterRule, defineBlockTextBlockInputRule } from './block-rule.ts'
+import { defineBlockEnterRule } from './block-enter-rule.ts'
 import { defineCodeBlockExitKeymap } from './code-block-exit.ts'
 import type { NodeName } from './node-names.ts'
 
@@ -76,7 +77,7 @@ function getTildeFenceAttrs(match: RegExpMatchArray): MeowdownCodeBlockAttrs {
 }
 
 function defineTildeFenceInputRule(): PlainExtension {
-  return defineBlockTextBlockInputRule({
+  return defineTextBlockInputRule({
     regex: /^~~~(\S*)\s$/,
     type: 'codeBlock' satisfies NodeName,
     attrs: getTildeFenceAttrs,
@@ -102,10 +103,10 @@ function defineDollarFenceEnterRule(): PlainExtension {
 export function defineCodeBlock() {
   return union(
     defineCodeBlockSpec(),
+    defineCodeBlockInputRule(),
+    defineBlockEnterRule(codeBlockEnterRule),
     defineCodeBlockKeymap(),
     defineCodeBlockCommands(),
-    defineBlockTextBlockInputRule(codeBlockInputRule),
-    defineBlockEnterRule(codeBlockEnterRule),
     defineFenceStyleAttr(),
     defineFenceLengthAttr(),
     defineTildeFenceInputRule(),
