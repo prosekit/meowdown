@@ -55,3 +55,4 @@ overrides:
   '@prosekit/core': https://pkg.pr.new/@prosekit/core@6783000d48b06bf1e907f2bb53675306b215f994
   '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@6783000d48b06bf1e907f2bb53675306b215f994
   '@prosekit/web': https://pkg.pr.new/@prosekit/web@6783000d48b06bf1e907f2bb53675306b215f994
+  'prosemirror-flat-list': https://pkg.pr.new/prosemirror-flat-list@b49fc2d7b9d328e9a69b5d566ba6d5e88901d511

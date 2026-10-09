@@ -11,6 +11,7 @@ overrides:
   '@prosekit/core': https://pkg.pr.new/@prosekit/core@6783000d48b06bf1e907f2bb53675306b215f994
   '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@6783000d48b06bf1e907f2bb53675306b215f994
   '@prosekit/web': https://pkg.pr.new/@prosekit/web@6783000d48b06bf1e907f2bb53675306b215f994
+  prosemirror-flat-list: https://pkg.pr.new/prosemirror-flat-list@b49fc2d7b9d328e9a69b5d566ba6d5e88901d511
 
 importers:
 
@@ -137,8 +138,8 @@ importers:
         specifier: ^0.1.6
         version: 0.1.6
       prosemirror-flat-list:
-        specifier: ^0.7.2
-        version: 0.7.2
+        specifier: https://pkg.pr.new/prosemirror-flat-list@b49fc2d7b9d328e9a69b5d566ba6d5e88901d511
+        version: https://pkg.pr.new/prosemirror-flat-list@b49fc2d7b9d328e9a69b5d566ba6d5e88901d511
       prosemirror-highlight:
         specifier: ^0.16.0
         version: 0.16.0(@lezer/common@1.5.3)(@lezer/highlight@1.2.5)(@shikijs/types@4.4.3)(@types/hast@3.0.5)(prosemirror-model@1.25.12)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.2)(prosemirror-view@1.42.6)
@@ -4489,8 +4490,9 @@ packages:
   prosemirror-enter-rules@0.1.6:
     resolution: {integrity: sha512-l/mddqScZT0FICDNu6Kijs6zpAPRnMZG4pZAlCHIl7uVg26kLSK+NM3JuKkFKBN1Zs2l1Qi/SYc2Z6dmA4elPQ==}
 
-  prosemirror-flat-list@0.7.2:
-    resolution: {integrity: sha512-gKFdGfWhZz/D8MwlIN1JnUT2InjAiOI5sC11g/B4I+vxeK5hzbyjHYgyY14gvfV9TRgKFtcD0jI7fFBxF2erpQ==}
+  prosemirror-flat-list@https://pkg.pr.new/prosemirror-flat-list@b49fc2d7b9d328e9a69b5d566ba6d5e88901d511:
+    resolution: {integrity: sha512-Oyc2hmxZDkjEhH6tTPKctE6Y0sBnDbhE2xBdX+JWIbvRUMJwL/1kFJEwRwiqEuI5rEKgyy3ExCdr2LSUGfS8fQ==, tarball: https://pkg.pr.new/prosemirror-flat-list@b49fc2d7b9d328e9a69b5d566ba6d5e88901d511}
+    version: 0.7.2
 
   prosemirror-gapcursor@1.4.1:
     resolution: {integrity: sha512-pMdYaEnjNMSwl11yjEGtgTmLkR08m/Vl+Jj443167p9eB3HVQKhYCc4gmHVDsLPODfZfjr/MmirsdyZziXbQKw==}
@@ -7135,7 +7137,7 @@ snapshots:
       prosemirror-drop-indicator: 0.1.4
       prosemirror-dropcursor: 1.8.4
       prosemirror-enter-rules: 0.1.6
-      prosemirror-flat-list: 0.7.2
+      prosemirror-flat-list: https://pkg.pr.new/prosemirror-flat-list@b49fc2d7b9d328e9a69b5d566ba6d5e88901d511
       prosemirror-gapcursor: 1.4.1
       prosemirror-highlight: 0.16.0(@lezer/common@1.5.3)(@lezer/highlight@1.2.5)(@shikijs/types@4.5.0)(@types/hast@3.0.5)(prosemirror-model@1.25.12)(prosemirror-state@1.4.4)(prosemirror-transform@1.12.2)(prosemirror-view@1.42.6)
       prosemirror-math: 0.2.2
@@ -9769,7 +9771,7 @@ snapshots:
       prosemirror-state: 1.4.4
       prosemirror-view: 1.42.6
 
-  prosemirror-flat-list@0.7.2:
+  prosemirror-flat-list@https://pkg.pr.new/prosemirror-flat-list@b49fc2d7b9d328e9a69b5d566ba6d5e88901d511:
     dependencies:
       prosemirror-commands: 1.7.2
       prosemirror-inputrules: 1.5.1
