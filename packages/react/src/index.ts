@@ -1,9 +1,5 @@
 import { MarkdownEditor } from './components/editor.tsx'
 
-export {
-  MarkdownInlineView,
-  type MarkdownInlineViewProps,
-} from './components/markdown-inline-view.tsx'
 export { MarkdownEditor, type EditorMode, type EditorProps } from './components/editor.tsx'
 
 /**
