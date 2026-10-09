@@ -43,6 +43,7 @@ import {
   createListInputRuleHandler,
   orderedListInputRule,
   taskListInputRule,
+  type ListAttributes,
   type ListInputRuleOptions,
   type DedentListOptions,
   type IndentListOptions,
@@ -263,19 +264,20 @@ const circleTaskListInputRule: ListInputRuleOptions<MeowdownListAttrs> = {
   getAttrs: { kind: 'task', marker: '+', checked: false, collapsed: false },
 }
 
-// Every marker opens a list item; in a single paragraph each stays typed text.
-const listInputRules: ListInputRuleOptions[] = [
-  bulletListInputRule,
-  orderedListInputRule,
-  taskListInputRule,
-  circleTaskListInputRule,
-]
+// A marker opens a list item; in a single paragraph it stays typed text.
+function defineListInputRule<T extends ListAttributes>({
+  regexp,
+  getAttrs,
+}: ListInputRuleOptions<T>): PlainExtension {
+  return defineBlockInputRule(regexp, createListInputRuleHandler(getAttrs))
+}
 
 function defineMeowdownListInputRules(): PlainExtension {
   return union(
-    listInputRules.map(({ regexp, getAttrs }) => {
-      return defineBlockInputRule(regexp, createListInputRuleHandler(getAttrs))
-    }),
+    defineListInputRule(bulletListInputRule),
+    defineListInputRule(orderedListInputRule),
+    defineListInputRule(taskListInputRule),
+    defineListInputRule(circleTaskListInputRule),
   )
 }
 
