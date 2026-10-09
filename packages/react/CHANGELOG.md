@@ -1,5 +1,18 @@
 # @meowdown/react
 
+## 0.78.0
+
+### Minor Changes
+
+- [#682](https://github.com/prosekit/meowdown/pull/682) [`b099aae`](https://github.com/prosekit/meowdown/commit/b099aaecacd1580b8548d1f28bdfc9e97dc7e1fe) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Add the `backspaceDeletesEmptyFirstBlock` option. When it is on, Backspace in an empty paragraph that is the document's first block deletes that paragraph and keeps the block after it unchanged.
+
+- [#680](https://github.com/prosekit/meowdown/pull/680) [`abb36fd`](https://github.com/prosekit/meowdown/commit/abb36fd72dd53a5e25dbcb92533ea652e3048389) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Rename the `inline` prop of `MarkdownView` to `singleParagraph`, matching `MarkdownEditor`.
+
+### Patch Changes
+
+- Updated dependencies [[`b099aae`](https://github.com/prosekit/meowdown/commit/b099aaecacd1580b8548d1f28bdfc9e97dc7e1fe), [`a4fc5c6`](https://github.com/prosekit/meowdown/commit/a4fc5c6c28e407736873cd2132f518b0c4f493c4)]:
+  - @meowdown/core@0.79.0
+
 ## 0.77.0
 
 ### Minor Changes
