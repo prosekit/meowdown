@@ -12,7 +12,6 @@ import {
 } from '@prosekit/core'
 import { defineInputRule } from '@prosekit/extensions/input-rule'
 import {
-  createListKeymap,
   defineListCommands,
   defineListDropIndicator,
   defineListSpec,
@@ -20,21 +19,32 @@ import {
   wrapInList,
   type ListAttrs,
 } from '@prosekit/extensions/list'
+import { chainCommands, deleteSelection } from '@prosekit/pm/commands'
 import type { ProseMirrorNode } from '@prosekit/pm/model'
 import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin } from '@prosekit/pm/state'
 import {
+  createDedentListCommand,
+  createIndentListCommand,
   createListRenderingPlugin,
   createSafariInputMethodWorkaroundPlugin,
+  createSplitListCommand,
   createToggleCollapsedCommand,
   defaultAttributesGetter,
+  deleteCommand,
   findCheckboxInListItem,
   handleListMarkerMouseDown,
+  joinCollapsedListBackward,
   joinListElements,
+  joinListUp,
   listToDOM,
+  protectCollapsed,
   unwrapListSlice,
   wrappingListInputRule,
+  type DedentListOptions,
+  type IndentListOptions,
   type ListClickHandler,
+  type SplitListOptions,
 } from 'prosemirror-flat-list'
 
 import { isNodeOfType, type NodeName } from './node-names.ts'
@@ -377,12 +387,16 @@ function toggleListCollapsed(): Command {
  */
 const strictListOptions = { strict: true }
 
-function isInsideList(state: EditorState): boolean {
-  const { $from } = state.selection
-  for (let depth = $from.depth; depth > 0; depth--) {
-    if (isNodeOfType($from.node(depth), 'list')) return true
-  }
-  return false
+function indentList(options?: IndentListOptions): Command {
+  return createIndentListCommand({ ...strictListOptions, ...options })
+}
+
+function dedentList(options?: DedentListOptions): Command {
+  return createDedentListCommand({ ...strictListOptions, ...options })
+}
+
+function splitList(options?: SplitListOptions): Command {
+  return createSplitListCommand({ ...strictListOptions, ...options })
 }
 
 function defineMeowdownListCommands() {
@@ -392,6 +406,11 @@ function defineMeowdownListCommands() {
     wrapInCircleTask,
     wrapInSquareTask,
     toggleListCollapsed,
+    // Hosts read `canExec()` for toolbar buttons, so these follow the strict
+    // rule of the keymap too.
+    indentList,
+    dedentList,
+    splitList,
   })
 }
 
@@ -484,14 +503,26 @@ function defineMeowdownListPlugins(): PlainExtension {
   ])
 }
 
+/**
+ * The list keymap, built from flat-list's commands instead of prosekit's
+ * `defineListKeymap`, so indent, dedent and Enter run in strict mode. The
+ * Backspace chain mirrors prosekit's: the rest of flat-list's
+ * `backspaceCommand` lives in `defineBaseKeymap`.
+ */
 function defineMeowdownListKeymap(): PlainExtension {
-  const listKeymap = createListKeymap(strictListOptions)
   return defineKeymap({
-    ...listKeymap,
-    // Tab inside a list never leaves the editor. When strict mode refuses the
-    // indent (the item has nothing above it to nest under), the key is
-    // swallowed instead of moving focus out of the editor.
-    Tab: (state, dispatch, view) => listKeymap.Tab(state, dispatch, view) || isInsideList(state),
+    Enter: chainCommands(protectCollapsed, splitList()),
+    Backspace: chainCommands(
+      protectCollapsed,
+      deleteSelection,
+      joinListUp,
+      joinCollapsedListBackward,
+    ),
+    Delete: deleteCommand,
+    Tab: indentList(),
+    'Shift-Tab': dedentList(),
+    'Mod-]': indentList(),
+    'Mod-[': dedentList(),
     'Mod-Enter': rotateSquareTask(),
     'Mod-Shift-Enter': rotateCircleTask(),
     'Mod-.': createToggleCollapsedCommand({ isToggleable: isCollapsibleBullet }),
@@ -511,7 +542,7 @@ export function defineMeowdownList() {
   return union(
     defineListSpec(),
     defineMeowdownListPlugins(),
-    defineListCommands(strictListOptions),
+    defineListCommands(),
     defineMeowdownListSerializer(),
     defineListDropIndicator(),
 

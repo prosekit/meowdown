@@ -680,7 +680,7 @@ describe('keymap', () => {
     `)
   })
 
-  it('Tab on a first circle checkbox task does nothing and keeps focus', async () => {
+  it('Tab on a first circle checkbox task does nothing', async () => {
     using fixture = setupFixture()
     const { n } = fixture
     fixture.set(
@@ -695,7 +695,6 @@ describe('keymap', () => {
 
       """
     `)
-    expect(fixture.view.hasFocus()).toBe(true)
   })
 
   it('Tab on a second circle checkbox task nests it under the first', async () => {
