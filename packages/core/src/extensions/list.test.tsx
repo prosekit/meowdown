@@ -667,3 +667,78 @@ describe('keymap', () => {
     `)
   })
 })
+
+describe('strict depth', () => {
+  it('Tab on a first circle checkbox task does nothing and keeps focus', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(n.list({ kind: 'task', marker: '+', checked: false }, n.paragraph('todo<a>'))),
+    )
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Tab}')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [ ] todo
+
+      """
+    `)
+    expect(fixture.view.hasFocus()).toBe(true)
+  })
+
+  it('Tab on a second circle checkbox task nests it under the first', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.list({ kind: 'task', marker: '+', checked: false }, n.paragraph('first')),
+        n.list({ kind: 'task', marker: '+', checked: false }, n.paragraph('second<a>')),
+      ),
+    )
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Tab}')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [ ] first
+        + [ ] second
+
+      """
+    `)
+  })
+
+  it('Shift-Tab moves a subtask and the next sibling up together', async () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    const task = (text: string, ...rest: ReturnType<typeof n.list>[]) => {
+      return n.list({ kind: 'task', marker: '+', checked: false }, n.paragraph(text), ...rest)
+    }
+    fixture.set(n.doc(task('a', task('b<a>', task('c')), task('d'))))
+    fixture.view.focus()
+
+    await userEvent.keyboard('{Shift>}{Tab}{/Shift}')
+    expect(docToMarkdown(fixture.doc)).toMatchInlineSnapshot(`
+      """
+      + [ ] a
+      + [ ] b
+        + [ ] c
+        + [ ] d
+
+      """
+    `)
+  })
+
+  it('indentList.canExec is false on a first list item', () => {
+    using fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.list({ kind: 'bullet' }, n.paragraph('first<a>')),
+        n.list({ kind: 'bullet' }, n.paragraph('second')),
+      ),
+    )
+    expect(fixture.editor.commands.indentList.canExec()).toBe(false)
+    expect(fixture.editor.commands.dedentList.canExec()).toBe(true)
+  })
+})
