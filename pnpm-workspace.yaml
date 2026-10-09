@@ -47,12 +47,3 @@ allowBuilds:
 #   '@post-embed/types': https://pkg.pr.new/@post-embed/types@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
 #   '@post-embed/schema': https://pkg.pr.new/@post-embed/schema@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
 #   '@post-embed/exporter': https://pkg.pr.new/@post-embed/exporter@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
-
-blockExoticSubdeps: false
-overrides:
-  '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@6783000d48b06bf1e907f2bb53675306b215f994
-  '@prosekit/react': https://pkg.pr.new/@prosekit/react@6783000d48b06bf1e907f2bb53675306b215f994
-  '@prosekit/core': https://pkg.pr.new/@prosekit/core@6783000d48b06bf1e907f2bb53675306b215f994
-  '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@6783000d48b06bf1e907f2bb53675306b215f994
-  '@prosekit/web': https://pkg.pr.new/@prosekit/web@6783000d48b06bf1e907f2bb53675306b215f994
-  'prosemirror-flat-list': https://pkg.pr.new/prosemirror-flat-list@b49fc2d7b9d328e9a69b5d566ba6d5e88901d511
