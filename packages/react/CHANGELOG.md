@@ -1,5 +1,13 @@
 # @meowdown/react
 
+## 0.77.0
+
+### Minor Changes
+
+- [#677](https://github.com/prosekit/meowdown/pull/677) [`6e1bc35`](https://github.com/prosekit/meowdown/commit/6e1bc350b5d66f4b587ef33077e7c041557796fa) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Rename `MeowdownEditor` to `MarkdownEditor`.
+
+- [#678](https://github.com/prosekit/meowdown/pull/678) [`bdab0a1`](https://github.com/prosekit/meowdown/commit/bdab0a11542e89ff5255f5a1cd3250e0c6fbc2ba) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Remove `MarkdownInlineView`; use `<MarkdownView inline />` instead.
+
 ## 0.76.4
 
 ### Patch Changes
