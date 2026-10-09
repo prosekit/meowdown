@@ -24,8 +24,8 @@
     "build": "tsdown"
   },
   "dependencies": {
-    "@lezer/common": "^1.5.2",
-    "@lezer/markdown": "^1.7.2",
+    "@lezer/common": "^1.5.3",
+    "@lezer/markdown": "^1.8.0",
     "@post-embed/schema": "^0.5.2"
   },
   "devDependencies": {
