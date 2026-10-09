@@ -589,6 +589,56 @@ describe('MarkdownView', () => {
     )
     await expect.element(view).toHaveTextContent('second')
   })
+
+  it('renders paragraph marks with external reference definitions', async () => {
+    await renderView('# **first\nsecond** [link][ref]', {
+      inline: true,
+      referenceDefinitions: new Map([
+        ['REF', { key: 'REF', href: 'https://example.com', title: '' }],
+      ]),
+    })
+    await expect.element(view.locate('p')).toHaveTextContent('# **first second** [link][ref]')
+    await expect.element(view.locate('strong')).toHaveTextContent('**first second**')
+    await expect.element(view.getByRole('link')).toHaveAttribute('href', 'https://example.com')
+  })
+
+  it('keeps definition-looking paragraph content visible', async () => {
+    await renderView('[ref]: https://example.com', { inline: true })
+    await expect.element(view.locate('p')).toHaveTextContent('[ref]: https://example.com')
+  })
+
+  it('keeps local definitions ahead of supplied context in a full document', async () => {
+    await renderView('[ref]: https://example.com/local\n\n[label][ref]', {
+      referenceDefinitions: new Map([
+        ['REF', { key: 'REF', href: 'https://example.com/external', title: '' }],
+      ]),
+    })
+    await expect
+      .element(view.getByRole('link'))
+      .toHaveAttribute('href', 'https://example.com/local')
+  })
+
+  it('refreshes inline links when the containing note definitions change', async () => {
+    const screen = await renderView('[label][ref]', {
+      inline: true,
+      referenceDefinitions: new Map([
+        ['REF', { key: 'REF', href: 'https://example.com/old', title: '' }],
+      ]),
+    })
+    await expect.element(view.getByRole('link')).toHaveAttribute('href', 'https://example.com/old')
+    await screen.rerender(
+      <div data-testid="markdown-view">
+        <MarkdownView
+          markdown="[label][ref]"
+          inline
+          referenceDefinitions={
+            new Map([['REF', { key: 'REF', href: 'https://example.com/new', title: '' }]])
+          }
+        />
+      </div>,
+    )
+    await expect.element(view.getByRole('link')).toHaveAttribute('href', 'https://example.com/new')
+  })
 })
 
 describe('MarkdownView block memoization', () => {
