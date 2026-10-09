@@ -17,17 +17,17 @@ Import both stylesheets and render the editor:
 ```tsx
 import '@meowdown/core/style.css'
 import '@meowdown/react/style.css'
-import { MeowdownEditor } from '@meowdown/react'
+import { MarkdownEditor } from '@meowdown/react'
 
 export function App() {
-  return <MeowdownEditor initialMarkdown="# Hello" />
+  return <MarkdownEditor initialMarkdown="# Hello" />
 }
 ```
 
 ## Usage
 
 ```tsx
-import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
+import { MarkdownEditor, type EditorHandle } from '@meowdown/react'
 import { useRef, useCallback } from 'react'
 
 export function App() {
@@ -37,7 +37,7 @@ export function App() {
   }, [])
 
   return (
-    <MeowdownEditor
+    <MarkdownEditor
       handleRef={ref}
       mode="focus"
       initialMarkdown="# Hello"
@@ -51,12 +51,12 @@ export function App() {
 
 | Component                                                            | Description                                                                                                                                                                                                                                                                          |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `MeowdownEditor`                                                     | The editor. Callbacks and resolvers must be stable; pass them via `useCallback`.                                                                                                                                                                                                     |
+| `MarkdownEditor`                                                     | The editor. Callbacks and resolvers must be stable; pass them via `useCallback`.                                                                                                                                                                                                     |
 | `MarkdownView`                                                       | Read-only Markdown renderer. `interactive={false}` renders passive content for previews.                                                                                                                                                                                             |
-| `WikilinkHoverCard`                                                  | Mount inside `MeowdownEditor`; renders host content for the hovered wiki link's `target`. Return `null` to render no card.                                                                                                                                                           |
+| `WikilinkHoverCard`                                                  | Mount inside `MarkdownEditor`; renders host content for the hovered wiki link's `target`. Return `null` to render no card.                                                                                                                                                           |
 | `LightboxRoot` / `LightboxImage` / `LightboxVideo` / `LightboxFrame` | Full-window image, video, and embedded player preview driven by `useLightbox()`. Compose your own close controls inside `LightboxRoot`, and call `lightbox.open(item, element)` from `onImageClick`, `onXPostMediaClick`, or `onYouTubeVideoClick` to zoom from the clicked element. |
 
-Common `MeowdownEditor` props:
+Common `MarkdownEditor` props:
 
 | Prop                                                                                                                            | What it does                                                                       |
 | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |

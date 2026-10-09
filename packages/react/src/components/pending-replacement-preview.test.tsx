@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 
-import { MeowdownEditor } from './editor.tsx'
+import { MarkdownEditor } from './editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle } from './types.ts'
 
@@ -94,7 +94,7 @@ describe('PendingReplacementPreview', () => {
   it('renders host actions in the footer', async () => {
     const ref = createRef<EditorHandle>()
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         handleRef={ref}
         initialMarkdown="say hello end"
         pendingReplacementActions={<button type="button">Retry</button>}

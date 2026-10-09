@@ -1,7 +1,7 @@
 import './stories.css'
 
 import { Priority } from '@meowdown/core'
-import { MarkdownView, MeowdownEditor, useKeymap, type EditorHandle } from '@meowdown/react'
+import { MarkdownView, MarkdownEditor, useKeymap, type EditorHandle } from '@meowdown/react'
 import { clsx } from 'clsx/lite'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
@@ -25,7 +25,7 @@ const INITIAL_TASKS: Task[] = [
   { id: 4, text: 'Ship [[Daily notes]] to #beta', done: false },
 ]
 
-// Children of MeowdownEditor render inside the ProseKit context, which is what
+// Children of MarkdownEditor render inside the ProseKit context, which is what
 // lets useKeymap claim keys; high priority outranks the editor's own bindings.
 function TaskKeymap({
   onCommit,
@@ -92,14 +92,14 @@ function TaskEditor({
 
   return (
     <div className={taskContentClass}>
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown={task.text}
         mode="hide"
         blockHandle={false}
         handleRef={attachHandle}
       >
         <TaskKeymap onCommit={commit} onCancel={onCancel} onMove={move} />
-      </MeowdownEditor>
+      </MarkdownEditor>
     </div>
   )
 }

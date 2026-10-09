@@ -8,7 +8,7 @@ rendered in place as rich content.
 ## Packages
 
 - [**@meowdown/core**](https://www.npmjs.com/package/@meowdown/core): the framework-free editor engine (parsing, serializing, shortcuts, styling)
-- [**@meowdown/react**](https://www.npmjs.com/package/@meowdown/react): React components (`MeowdownEditor`, `MarkdownView`, `WikilinkHoverCard`)
+- [**@meowdown/react**](https://www.npmjs.com/package/@meowdown/react): React components (`MarkdownEditor`, `MarkdownView`, `WikilinkHoverCard`)
 - [**@meowdown/markdown**](https://www.npmjs.com/package/@meowdown/markdown): the Lezer grammar for meowdown's Markdown dialect
 
 ## License

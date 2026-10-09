@@ -2,7 +2,7 @@ import './stories.css'
 
 import { Transaction } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
-import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
+import { MarkdownEditor, type EditorHandle } from '@meowdown/react'
 import { throttle } from '@ocavue/utils'
 import { useQueryStates } from 'nuqs'
 import { NuqsAdapter } from 'nuqs/adapters/react'
@@ -219,7 +219,7 @@ function MainEditorDemo() {
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 lg:flex-row">
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto rounded-xl border border-solid border-black/8 bg-white dark:border-white/12 dark:bg-stone-900">
-          <MeowdownEditor
+          <MarkdownEditor
             mode={mode}
             spellCheck={spellcheck === 'default' ? undefined : spellcheck === 'on'}
             readOnly={readOnly}
@@ -239,7 +239,7 @@ function MainEditorDemo() {
             onWikilinkClick={handleWikilinkClick}
           >
             <WikilinkPreviewCard />
-          </MeowdownEditor>
+          </MarkdownEditor>
         </div>
 
         {showSource && (

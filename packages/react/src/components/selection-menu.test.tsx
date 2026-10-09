@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
-import { MeowdownEditor } from './editor.tsx'
+import { MarkdownEditor } from './editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle, SelectionMenuContext, SelectionMenuItem } from './types.ts'
 
@@ -139,10 +139,10 @@ describe('SelectionMenu', () => {
     await expect.element(menu).not.toBeInTheDocument()
   })
 
-  it('passes onSelectionMenuSearch through <MeowdownEditor>', async () => {
+  it('passes onSelectionMenuSearch through <MarkdownEditor>', async () => {
     const ref = createRef<EditorHandle>()
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         handleRef={ref}
         initialMarkdown="say hello end"
         onSelectionMenuSearch={searchItems}

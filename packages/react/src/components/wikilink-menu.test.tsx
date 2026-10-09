@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
-import { MeowdownEditor } from './editor.tsx'
+import { MarkdownEditor } from './editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle, WikilinkItem } from './types.ts'
 
@@ -367,8 +367,8 @@ describe('WikilinkMenu', () => {
     await expect.element(menu).not.toBeInTheDocument()
   })
 
-  it('passes onWikilinkSearch through <MeowdownEditor>', async () => {
-    await render(<MeowdownEditor onWikilinkSearch={searchNotes} />)
+  it('passes onWikilinkSearch through <MarkdownEditor>', async () => {
+    await render(<MarkdownEditor onWikilinkSearch={searchNotes} />)
     await pmRoot.click()
     await userEvent.keyboard(`${TWO_BRACKETS}cat`)
     await expect.element(menu.getByText('Cat naps')).toBeVisible()

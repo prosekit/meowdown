@@ -6,7 +6,7 @@ import type {
   XPostMediaClickHandler,
   YouTubeVideoClickHandler,
 } from '@meowdown/core'
-import { MeowdownEditor, type EditorHandle } from '@meowdown/react'
+import { MarkdownEditor, type EditorHandle } from '@meowdown/react'
 import { clsx } from 'clsx/lite'
 import { useCallback, useMemo, useRef } from 'react'
 
@@ -80,7 +80,7 @@ function DailyNoteRow({
       >
         {formatDayLabel(offset, date)}
       </h2>
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown={DAY_SEEDS[offset] ?? ''}
         handleRef={handleRef}
         editorClassName={offset < 0 ? 'min-h-[100px]' : 'min-h-[40vh]'}

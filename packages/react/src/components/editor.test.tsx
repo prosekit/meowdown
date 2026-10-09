@@ -13,7 +13,7 @@ import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
 import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
-import { MeowdownEditor } from './editor.tsx'
+import { MarkdownEditor } from './editor.tsx'
 import type { EditorHandle } from './types.ts'
 
 const pmRoot = page.locate('.ProseMirror')
@@ -25,9 +25,9 @@ function EditorProbe() {
   return <span data-testid="probe">{editor ? 'has-editor' : 'no-editor'}</span>
 }
 
-describe('MeowdownEditor', () => {
+describe('MarkdownEditor', () => {
   it('renders a ProseKit editor in focus mode by default', async () => {
-    const screen = await render(<MeowdownEditor initialMarkdown="Hello" />)
+    const screen = await render(<MarkdownEditor initialMarkdown="Hello" />)
     await expect.element(screen.getByText('Hello')).toBeInTheDocument()
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'focus')
   })
@@ -35,7 +35,7 @@ describe('MeowdownEditor', () => {
   it('keeps block-looking source in one paragraph through the handle', async () => {
     const ref = createRef<EditorHandle>()
     await render(
-      <MeowdownEditor handleRef={ref} singleParagraph initialMarkdown={'# literal\n**bold**'} />,
+      <MarkdownEditor handleRef={ref} singleParagraph initialMarkdown={'# literal\n**bold**'} />,
     )
     expect(ref.current?.getMarkdown()).toBe('# literal\n**bold**')
     expect(ref.current?.getEditor()?.state.doc.child(0).type.name).toBe('paragraph')
@@ -45,12 +45,12 @@ describe('MeowdownEditor', () => {
   })
 
   it('keeps the ProseKit editor instance when switching among rich modes', async () => {
-    const screen = await render(<MeowdownEditor mode="focus" />)
+    const screen = await render(<MarkdownEditor mode="focus" />)
 
     await pmRoot.click()
     await userEvent.keyboard('abc')
 
-    await screen.rerender(<MeowdownEditor mode="show" />)
+    await screen.rerender(<MarkdownEditor mode="show" />)
     await expect.element(screen.getByText('abc')).toBeInTheDocument()
     await expect.element(pmRoot).toHaveAttribute('data-mark-mode', 'show')
   })
@@ -59,7 +59,7 @@ describe('MeowdownEditor', () => {
     const onDocChange = vi.fn()
     const ref = createRef<EditorHandle>()
     const screen = await render(
-      <MeowdownEditor
+      <MarkdownEditor
         handleRef={ref}
         mode="focus"
         initialMarkdown="Hello"
@@ -81,7 +81,7 @@ describe('MeowdownEditor', () => {
     const onDocChange = vi.fn()
     const ref = createRef<EditorHandle>()
     const screen = await render(
-      <MeowdownEditor handleRef={ref} initialMarkdown="Old text" onDocChange={onDocChange} />,
+      <MarkdownEditor handleRef={ref} initialMarkdown="Old text" onDocChange={onDocChange} />,
     )
     await expect.element(screen.getByText('Old text')).toBeInTheDocument()
 
@@ -94,7 +94,7 @@ describe('MeowdownEditor', () => {
 
   it('reports the document and selection via getState', async () => {
     const ref = createRef<EditorHandle>()
-    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Hello" />)
+    const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown="Hello" />)
     await expect.element(screen.getByText('Hello')).toBeInTheDocument()
 
     await pmRoot.click()
@@ -106,7 +106,7 @@ describe('MeowdownEditor', () => {
 
   it('applies markdown and a selection hint via setState', async () => {
     const ref = createRef<EditorHandle>()
-    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="hello" />)
+    const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown="hello" />)
     await expect.element(screen.getByText('hello')).toBeInTheDocument()
 
     await pmRoot.click()
@@ -119,7 +119,7 @@ describe('MeowdownEditor', () => {
 
   it('moves the cursor via a selection-only setState', async () => {
     const ref = createRef<EditorHandle>()
-    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="ac" />)
+    const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown="ac" />)
     await expect.element(screen.getByText('ac')).toBeInTheDocument()
 
     await pmRoot.click()
@@ -131,7 +131,7 @@ describe('MeowdownEditor', () => {
 
   it('reads and writes the selection via getSelection and setSelection', async () => {
     const ref = createRef<EditorHandle>()
-    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="ac" />)
+    const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown="ac" />)
     await expect.element(screen.getByText('ac')).toBeInTheDocument()
 
     await pmRoot.click()
@@ -144,7 +144,7 @@ describe('MeowdownEditor', () => {
 
   it('supports start and end selection hints', async () => {
     const ref = createRef<EditorHandle>()
-    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Hi" />)
+    const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown="Hi" />)
     await expect.element(screen.getByText('Hi')).toBeInTheDocument()
 
     await pmRoot.click()
@@ -159,7 +159,7 @@ describe('MeowdownEditor', () => {
 
   it('clamps out-of-range selection hints without throwing', async () => {
     const ref = createRef<EditorHandle>()
-    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Hi" />)
+    const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown="Hi" />)
     await expect.element(screen.getByText('Hi')).toBeInTheDocument()
 
     await pmRoot.click()
@@ -174,7 +174,7 @@ describe('MeowdownEditor', () => {
 
   it('round-trips the editor state through getState and setState', async () => {
     const ref = createRef<EditorHandle>()
-    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="# Title" />)
+    const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown="# Title" />)
     await expect.element(screen.getByText('Title')).toBeInTheDocument()
 
     const state = ref.current?.getState()
@@ -188,7 +188,7 @@ describe('MeowdownEditor', () => {
       '[doc]: https://example.com/docs "Plan"\n\nRead [the plan][doc] and ![diagram][asset].\n\n[asset]: https://example.com/diagram.png'
     const ref = createRef<EditorHandle>()
     await render(
-      <MeowdownEditor handleRef={ref} initialMarkdown={markdown} resolveImageUrl={(src) => src} />,
+      <MarkdownEditor handleRef={ref} initialMarkdown={markdown} resolveImageUrl={(src) => src} />,
     )
 
     await expect
@@ -203,7 +203,7 @@ describe('MeowdownEditor', () => {
 
   it('renders an image when resolveImageUrl returns a url', async () => {
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown="![pic](a.png)"
         resolveImageUrl={(src) => `https://cdn/${src}`}
       />,
@@ -213,7 +213,7 @@ describe('MeowdownEditor', () => {
 
   it('does not render an image when resolveImageUrl returns undefined', async () => {
     await render(
-      <MeowdownEditor initialMarkdown="![pic](a.png)" resolveImageUrl={() => undefined} />,
+      <MarkdownEditor initialMarkdown="![pic](a.png)" resolveImageUrl={() => undefined} />,
     )
     await expect.element(page.getByAltText('pic')).not.toBeInTheDocument()
   })
@@ -223,7 +223,7 @@ describe('MeowdownEditor', () => {
       return target === 'photo.png' ? ({ kind: 'image' } as const) : undefined
     }
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown={'![[photo.png|Photo]] ![[ambiguous.png]]'}
         resolveWikiEmbed={resolveWikiEmbed}
         resolveImageUrl={(src) => `https://cdn/${src}`}
@@ -235,7 +235,7 @@ describe('MeowdownEditor', () => {
 
   it('resolves wikilink targets and labels through the host resolver', async () => {
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         mode="hide"
         initialMarkdown="[[Tim MacCaw // Dad]] [[Tim MacCaw // Dad|Dad]]"
         resolveWikilink={(link) => {
@@ -251,7 +251,7 @@ describe('MeowdownEditor', () => {
   it('embeds a pasted YouTube link by default', async () => {
     const ref = createRef<EditorHandle>()
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         handleRef={ref}
         resolveImageUrl={(src) => src}
         resolveYouTubeVideo={() => createYouTubeVideo()}
@@ -270,7 +270,7 @@ describe('MeowdownEditor', () => {
     const url = 'https://www.youtube.com/watch?v=aqz-KE-bpKQ'
     const ref = createRef<EditorHandle>()
     const screen = await render(
-      <MeowdownEditor handleRef={ref} resolveImageUrl={(src) => src} embedPaste={false} />,
+      <MarkdownEditor handleRef={ref} resolveImageUrl={(src) => src} embedPaste={false} />,
     )
     await pmRoot.click()
     const view = ref.current?.getEditor()?.view
@@ -282,7 +282,7 @@ describe('MeowdownEditor', () => {
 
   it('starts a bullet on Enter after a heading when bulletAfterHeading is on', async () => {
     const ref = createRef<EditorHandle>()
-    await render(<MeowdownEditor handleRef={ref} bulletAfterHeading initialMarkdown="# Title" />)
+    await render(<MarkdownEditor handleRef={ref} bulletAfterHeading initialMarkdown="# Title" />)
     await pmRoot.click()
     const view = ref.current?.getEditor()?.view
     if (!view) throw new Error('editor not mounted')
@@ -297,7 +297,7 @@ describe('MeowdownEditor', () => {
     const onFilePaste = vi.fn(() => 'https://cdn/cat.png')
     const ref = createRef<EditorHandle>()
     const screen = await render(
-      <MeowdownEditor
+      <MarkdownEditor
         handleRef={ref}
         initialMarkdown="Drop zone"
         resolveImageUrl={(src) => src}
@@ -319,7 +319,7 @@ describe('MeowdownEditor', () => {
 
   it('shows placeholder text in an empty editor and hides it once typed', async () => {
     const placeholder = page.locate('.prosekit-placeholder')
-    await render(<MeowdownEditor placeholder="Write something" />)
+    await render(<MarkdownEditor placeholder="Write something" />)
     await expect.element(placeholder).toHaveAttribute('data-placeholder', 'Write something')
 
     await pmRoot.click()
@@ -330,7 +330,7 @@ describe('MeowdownEditor', () => {
   it('does not show the placeholder when the document is not empty', async () => {
     const placeholder = page.locate('.prosekit-placeholder')
     const screen = await render(
-      <MeowdownEditor placeholder="Write something" initialMarkdown="hello" />,
+      <MarkdownEditor placeholder="Write something" initialMarkdown="hello" />,
     )
     await expect.element(screen.getByText('hello')).toBeInTheDocument()
     await expect.element(placeholder).not.toBeInTheDocument()
@@ -338,13 +338,13 @@ describe('MeowdownEditor', () => {
 
   it('makes the rich editor read-only and restores it when toggled off', async () => {
     const ref = createRef<EditorHandle>()
-    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Hi" readOnly />)
+    const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown="Hi" readOnly />)
     await expect.element(screen.getByText('Hi')).toBeInTheDocument()
     await pmRoot.click()
     await userEvent.keyboard('X')
     expect(ref.current?.getMarkdown()).toBe('Hi\n')
 
-    await screen.rerender(<MeowdownEditor handleRef={ref} initialMarkdown="Hi" readOnly={false} />)
+    await screen.rerender(<MarkdownEditor handleRef={ref} initialMarkdown="Hi" readOnly={false} />)
     await pmRoot.click()
     await userEvent.keyboard('Y')
     expect(ref.current?.getMarkdown()).toContain('Y')
@@ -352,7 +352,7 @@ describe('MeowdownEditor', () => {
 
   it('exposes the underlying editor on the handle', async () => {
     const ref = createRef<EditorHandle>()
-    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Hi" />)
+    const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown="Hi" />)
     await expect.element(screen.getByText('Hi')).toBeInTheDocument()
     expect(ref.current?.getEditor()).toBeTruthy()
     expect(ref.current?.getEditor()?.state.doc.textContent).toBe('Hi')
@@ -360,7 +360,7 @@ describe('MeowdownEditor', () => {
 
   it('applies editorClassName and wrapperClassName', async () => {
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown="Hi"
         editorClassName="test-editable"
         wrapperClassName="test-wrap"
@@ -375,12 +375,12 @@ describe('MeowdownEditor', () => {
   // silently unstyling the whole editor until it remounts.
   it('keeps the ProseMirror class when editorClassName changes', async () => {
     const screen = await render(
-      <MeowdownEditor initialMarkdown="A [[link]]" editorClassName="first" />,
+      <MarkdownEditor initialMarkdown="A [[link]]" editorClassName="first" />,
     )
     await expect.element(pmRoot).toHaveClass('meowdown-content')
     await expect.element(pmRoot).toHaveClass('first')
 
-    await screen.rerender(<MeowdownEditor initialMarkdown="A [[link]]" editorClassName="second" />)
+    await screen.rerender(<MarkdownEditor initialMarkdown="A [[link]]" editorClassName="second" />)
 
     await expect.element(pmRoot).toHaveClass('ProseMirror')
     await expect.element(pmRoot).toHaveClass('meowdown-content')
@@ -393,12 +393,12 @@ describe('MeowdownEditor', () => {
   it('keeps wikilink source hidden across an editorClassName change', async () => {
     const source = page.locate('.md-atom-view-content')
     const screen = await render(
-      <MeowdownEditor initialMarkdown="A [[link]]" mode="hide" editorClassName="first" />,
+      <MarkdownEditor initialMarkdown="A [[link]]" mode="hide" editorClassName="first" />,
     )
     await expect.element(source).toHaveStyle({ fontSize: '0px' })
 
     await screen.rerender(
-      <MeowdownEditor initialMarkdown="A [[link]]" mode="hide" editorClassName="second" />,
+      <MarkdownEditor initialMarkdown="A [[link]]" mode="hide" editorClassName="second" />,
     )
     await expect.element(source).toHaveStyle({ fontSize: '0px' })
   })
@@ -407,7 +407,7 @@ describe('MeowdownEditor', () => {
   // caret transition outright, so assert the `--meowdown-caret-glide` variable
   // the transition reads instead of the transition itself.
   it('disables the caret glide with caretGlide={false}', async () => {
-    const screen = await render(<MeowdownEditor initialMarkdown="Hi" />)
+    const screen = await render(<MarkdownEditor initialMarkdown="Hi" />)
     await pmRoot.click()
     const caret = page.getByTestId('virtual-caret')
     await expect.element(caret).toBeVisible()
@@ -416,15 +416,15 @@ describe('MeowdownEditor', () => {
     }
     expect(caretGlideValue()).toBe('80ms')
 
-    await screen.rerender(<MeowdownEditor initialMarkdown="Hi" caretGlide={false} />)
+    await screen.rerender(<MarkdownEditor initialMarkdown="Hi" caretGlide={false} />)
     expect(caretGlideValue()).toBe('0ms')
   })
 
   it('renders children inside the ProseKit context in rich modes', async () => {
     await render(
-      <MeowdownEditor initialMarkdown="Hi">
+      <MarkdownEditor initialMarkdown="Hi">
         <EditorProbe />
-      </MeowdownEditor>,
+      </MarkdownEditor>,
     )
     await expect.element(page.getByTestId('probe')).toHaveTextContent('has-editor')
   })
@@ -432,7 +432,7 @@ describe('MeowdownEditor', () => {
   it('calls onWikilinkClick when a rendered wiki link is clicked', async () => {
     const onWikilinkClick = vi.fn()
     const screen = await render(
-      <MeowdownEditor initialMarkdown="see [[Note]] here" onWikilinkClick={onWikilinkClick} />,
+      <MarkdownEditor initialMarkdown="see [[Note]] here" onWikilinkClick={onWikilinkClick} />,
     )
     await screen.getByTestId('wikilink').click()
     await vi.waitFor(() => {
@@ -443,7 +443,7 @@ describe('MeowdownEditor', () => {
   it('calls onImageClick when a rendered image is clicked', async () => {
     const onImageClick = vi.fn()
     const screen = await render(
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown="![pic](https://example.com/a.png)"
         resolveImageUrl={(src) => src}
         onImageClick={onImageClick}
@@ -460,7 +460,7 @@ describe('MeowdownEditor', () => {
   it('calls onLinkClick when a rendered Markdown link is clicked', async () => {
     const onLinkClick = vi.fn()
     const screen = await render(
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown="see [Docs](https://example.com) here"
         onLinkClick={onLinkClick}
       />,
@@ -476,7 +476,7 @@ describe('MeowdownEditor', () => {
   it('calls onTagClick when a rendered tag is clicked', async () => {
     const onTagClick = vi.fn()
     const screen = await render(
-      <MeowdownEditor initialMarkdown="see #hello here" onTagClick={onTagClick} />,
+      <MarkdownEditor initialMarkdown="see #hello here" onTagClick={onTagClick} />,
     )
     await screen.getByText('#hello').click()
     await vi.waitFor(() => {
@@ -487,7 +487,7 @@ describe('MeowdownEditor', () => {
   it('calls onExitBoundary with "up" when ArrowUp is pressed at the top', async () => {
     const onExitBoundary = vi.fn()
     const screen = await render(
-      <MeowdownEditor initialMarkdown="only line" onExitBoundary={onExitBoundary} />,
+      <MarkdownEditor initialMarkdown="only line" onExitBoundary={onExitBoundary} />,
     )
     await screen.getByText('only line').click()
     await userEvent.keyboard('{ArrowUp}')
@@ -499,7 +499,7 @@ describe('MeowdownEditor', () => {
   it('does not call onExitBoundary from a middle paragraph', async () => {
     const onExitBoundary = vi.fn()
     const screen = await render(
-      <MeowdownEditor initialMarkdown={'one\n\ntwo\n\nthree'} onExitBoundary={onExitBoundary} />,
+      <MarkdownEditor initialMarkdown={'one\n\ntwo\n\nthree'} onExitBoundary={onExitBoundary} />,
     )
     await screen.getByText('two').click()
     await userEvent.keyboard('{ArrowUp}')
@@ -508,7 +508,7 @@ describe('MeowdownEditor', () => {
 
   it('focuses and scrolls via the handle', async () => {
     const ref = createRef<EditorHandle>()
-    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Hi" />)
+    const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown="Hi" />)
     await expect.element(screen.getByText('Hi')).toBeInTheDocument()
 
     ref.current?.focus()
@@ -520,7 +520,7 @@ describe('MeowdownEditor', () => {
   it('reveals a URL-decoded heading through the handle', async () => {
     const ref = createRef<EditorHandle>()
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         handleRef={ref}
         initialMarkdown={'# First\n\nBody\n\n## **Target Heading**\n\nTail'}
       />,
@@ -536,7 +536,7 @@ describe('MeowdownEditor', () => {
   it('reveals GitHub-style heading slugs, including duplicate suffixes', async () => {
     const ref = createRef<EditorHandle>()
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         handleRef={ref}
         initialMarkdown={'## Target Heading!\n\nBody\n\n## Target Heading!'}
       />,
@@ -553,7 +553,7 @@ describe('MeowdownEditor', () => {
 
   it('reports a missing heading without moving the selection', async () => {
     const ref = createRef<EditorHandle>()
-    await render(<MeowdownEditor handleRef={ref} initialMarkdown={'# First\n\nBody'} />)
+    await render(<MarkdownEditor handleRef={ref} initialMarkdown={'# First\n\nBody'} />)
     const before = ref.current?.getSelection()
     expect(ref.current?.revealHeading('#Missing')).toBe(false)
     expect(ref.current?.getSelection()).toEqual(before)
@@ -563,7 +563,7 @@ describe('MeowdownEditor', () => {
     const ref = createRef<EditorHandle>()
     let resolved = false
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         handleRef={ref}
         initialMarkdown="before ![[photo.png]] after"
         resolveWikiEmbed={() => (resolved ? { kind: 'image' } : undefined)}
@@ -586,7 +586,7 @@ describe('MeowdownEditor', () => {
 describe('X post embed props', () => {
   it('renders a saved tweet as an X post card', async () => {
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         mode="hide"
         initialMarkdown="![](https://x.com/jack/status/20)"
         resolveXPost={() => createXPost()}
@@ -603,7 +603,7 @@ describe('file pill props', () => {
   it('renders a claimed link as a pill with its resolved size and reports clicks', async () => {
     const onFileClick = vi.fn()
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         mode="hide"
         initialMarkdown="[report.pdf](assets/report.pdf)"
         resolveFileLink={claimAssets}
@@ -625,7 +625,7 @@ describe('file pill props', () => {
   it('renders a pasted file as a pill once onFilePaste persists it', async () => {
     const ref = createRef<EditorHandle>()
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         handleRef={ref}
         mode="hide"
         resolveFileLink={claimAssets}
@@ -639,7 +639,7 @@ describe('file pill props', () => {
   })
 
   it('leaves links as links without resolveFileLink', async () => {
-    await render(<MeowdownEditor mode="hide" initialMarkdown="[report.pdf](assets/report.pdf)" />)
+    await render(<MarkdownEditor mode="hide" initialMarkdown="[report.pdf](assets/report.pdf)" />)
     await expect.element(pmRoot.getByRole('link')).toBeInTheDocument()
     expect(pmRoot.getByTestId('file-pill').query()).toBeNull()
   })
@@ -647,16 +647,16 @@ describe('file pill props', () => {
 
 describe('spellCheck prop', () => {
   it('applies and updates the spellCheck prop on the editor root', async () => {
-    const screen = await render(<MeowdownEditor spellCheck />)
+    const screen = await render(<MarkdownEditor spellCheck />)
     await expect.element(pmRoot).toHaveAttribute('spellcheck', 'true')
-    await screen.rerender(<MeowdownEditor spellCheck={false} />)
+    await screen.rerender(<MarkdownEditor spellCheck={false} />)
     await expect.element(pmRoot).toHaveAttribute('spellcheck', 'false')
   })
 })
 
 it('queries visual textblock boundaries through the editor handle', async () => {
   const ref = createRef<EditorHandle>()
-  const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown={'first\nsecond'} />)
+  const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown={'first\nsecond'} />)
   await expect.element(screen.getByText('first', { exact: false })).toBeInTheDocument()
   await vi.waitFor(() => expect(ref.current?.getEditor()?.mounted).toBe(true))
   ref.current?.setSelection('start')

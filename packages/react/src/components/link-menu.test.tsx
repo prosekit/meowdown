@@ -10,7 +10,7 @@ import { page, userEvent } from 'vitest/browser'
 
 import { hover, unhover } from '../testing/mouse.ts'
 
-import { MeowdownEditor } from './editor.tsx'
+import { MarkdownEditor } from './editor.tsx'
 import type { EditorHandle } from './types.ts'
 
 const pmRoot = page.locate('.ProseMirror')
@@ -25,7 +25,7 @@ describe('LinkMenu', () => {
       })
     })
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown="[https://example.com](https://example.com)"
         resolveLinkPreview={resolver}
       />,
@@ -50,7 +50,7 @@ describe('LinkMenu', () => {
 
   it('silently falls back to the URL and actions when metadata fails', async () => {
     const screen = await render(
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown="[Docs](https://example.com)"
         resolveLinkPreview={() => Promise.reject(new Error('offline'))}
       />,
@@ -66,7 +66,7 @@ describe('LinkMenu', () => {
   it('keeps non-web destinations actions-only without resolving metadata', async () => {
     const resolver = vi.fn(() => ({ title: 'Never used' }))
     await render(
-      <MeowdownEditor initialMarkdown="[File](file:///tmp/a.txt)" resolveLinkPreview={resolver} />,
+      <MarkdownEditor initialMarkdown="[File](file:///tmp/a.txt)" resolveLinkPreview={resolver} />,
     )
 
     await hover(pmRoot.getByRole('link', { name: 'File', exact: false }))
@@ -80,7 +80,7 @@ describe('LinkMenu', () => {
       return new Promise<LinkPreview | undefined>((resolve) => pending.set(href, resolve))
     }
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown="[First](https://first.test) and [Second](https://second.test)"
         resolveLinkPreview={resolver}
       />,
@@ -105,7 +105,7 @@ describe('LinkMenu', () => {
     const ref = createRef<EditorHandle>()
     let resolvePreview: (preview: LinkPreview | undefined) => void = () => undefined
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         handleRef={ref}
         initialMarkdown="[https://example.com](https://example.com)"
         resolveLinkPreview={() => {
@@ -127,7 +127,7 @@ describe('LinkMenu', () => {
   it('does not offer title replacement for an intentional label', async () => {
     let resolvePreview: (preview: LinkPreview | undefined) => void = () => undefined
     const screen = await render(
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown="[My label](https://example.com)"
         resolveLinkPreview={() => {
           return new Promise((resolve) => {
@@ -148,7 +148,7 @@ describe('LinkMenu', () => {
   it('shows the read preview on hover and copies the href', async () => {
     const onLinkCopy = vi.fn()
     const screen = await render(
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown="see [Docs](https://example.com) here"
         onLinkCopy={onLinkCopy}
       />,
@@ -170,7 +170,7 @@ describe('LinkMenu', () => {
     // and used to collapse to a zero rect at the viewport origin.
     const label = 'export-Meters-1780294218812-20260601.xlsx'
     const screen = await render(
-      <MeowdownEditor initialMarkdown={`[${label}](assets/export.xlsx)`} />,
+      <MarkdownEditor initialMarkdown={`[${label}](assets/export.xlsx)`} />,
     )
     const link = screen.getByText(label)
     await hover(link)
@@ -191,7 +191,7 @@ describe('LinkMenu', () => {
   it('anchors the preview to an angle autolink mid-line', async () => {
     // `<`/`>` are hidden syntax: a whole-unit anchor measures the collapsed
     // glyphs and sits on the baseline instead of the text box.
-    await render(<MeowdownEditor initialMarkdown="see <https://www.example.com> here" />)
+    await render(<MarkdownEditor initialMarkdown="see <https://www.example.com> here" />)
     const link = pmRoot.getByText('https://www.example.com')
     await hover(link)
     await expect.element(popover.getByTestId('link-popover-info')).toBeVisible()
@@ -212,7 +212,7 @@ describe('LinkMenu', () => {
     // initial caret at doc start sits inside the autolink and focus mode
     // reveals the brackets, masking the bug.
     await render(
-      <MeowdownEditor initialMarkdown={'<https://www.example.com>\n\npark the caret here'} />,
+      <MarkdownEditor initialMarkdown={'<https://www.example.com>\n\npark the caret here'} />,
     )
     await pmRoot.getByText('park the caret here').click()
     const link = pmRoot.getByText('https://www.example.com')
@@ -234,7 +234,7 @@ describe('LinkMenu', () => {
     // no visible glyph to measure on either side.
     // Wide enough for the popup to center on the pill without being pushed
     // aside by the viewport edge.
-    await render(<MeowdownEditor initialMarkdown="[[A rather long note title for the anchor]]" />)
+    await render(<MarkdownEditor initialMarkdown="[[A rather long note title for the anchor]]" />)
     const wikilink = pmRoot.getByTestId('wikilink')
     await wikilink.click()
     await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}')
@@ -257,7 +257,7 @@ describe('LinkMenu', () => {
     // raw-selection end edge has no visible glyph on either side; the anchor
     // must fall back to the last visible glyph before the run.
     await render(
-      <MeowdownEditor initialMarkdown="read the [long linked documentation](https://example.com)" />,
+      <MarkdownEditor initialMarkdown="read the [long linked documentation](https://example.com)" />,
     )
     const label = pmRoot.getByText('long linked documentation', { exact: false })
     await label.click()
@@ -284,7 +284,7 @@ describe('LinkMenu', () => {
 
   it('creates a link from a selection with Mod-k', async () => {
     const ref = createRef<EditorHandle>()
-    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Docs" />)
+    const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown="Docs" />)
     await screen.getByText('Docs').click()
     await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}')
     await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
@@ -297,7 +297,7 @@ describe('LinkMenu', () => {
 
   it('takes the destination typed straight after Mod-k on a selection', async () => {
     const ref = createRef<EditorHandle>()
-    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Docs" />)
+    const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown="Docs" />)
     await screen.getByText('Docs').click()
     await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}')
     await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
@@ -311,7 +311,7 @@ describe('LinkMenu', () => {
 
   it('keeps Save disabled until the destination is filled', async () => {
     const ref = createRef<EditorHandle>()
-    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown="Docs" />)
+    const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown="Docs" />)
     await screen.getByText('Docs').click()
     await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}')
     await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
@@ -326,7 +326,7 @@ describe('LinkMenu', () => {
   it('selects the destination when editing an existing link', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(
-      <MeowdownEditor handleRef={ref} initialMarkdown="[Docs](https://old.test)" />,
+      <MarkdownEditor handleRef={ref} initialMarkdown="[Docs](https://old.test)" />,
     )
     await hover(screen.getByText('Docs'))
     await popover.getByRole('button', { name: 'Edit link' }).click()
@@ -338,7 +338,7 @@ describe('LinkMenu', () => {
   it('removes a link from the read preview', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(
-      <MeowdownEditor handleRef={ref} initialMarkdown="a [Docs](https://example.com) b" />,
+      <MarkdownEditor handleRef={ref} initialMarkdown="a [Docs](https://example.com) b" />,
     )
     await hover(screen.getByText('Docs', { exact: false }))
     await popover.getByRole('button', { name: 'Remove link' }).click()
@@ -351,7 +351,7 @@ describe('LinkMenu', () => {
   it('edits a link href from the read preview', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(
-      <MeowdownEditor handleRef={ref} initialMarkdown="[Docs](https://old.test)" />,
+      <MarkdownEditor handleRef={ref} initialMarkdown="[Docs](https://old.test)" />,
     )
     await hover(screen.getByText('Docs'))
     await popover.getByRole('button', { name: 'Edit link' }).click()
@@ -365,7 +365,7 @@ describe('LinkMenu', () => {
   it('keeps an authored Markdown label on a URL-only edit', async () => {
     const ref = createRef<EditorHandle>()
     await render(
-      <MeowdownEditor handleRef={ref} initialMarkdown="[**bold** docs](https://old.test)" />,
+      <MarkdownEditor handleRef={ref} initialMarkdown="[**bold** docs](https://old.test)" />,
     )
     await hover(pmRoot.getByRole('link', { name: 'docs', exact: false }))
     await popover.getByRole('button', { name: 'Edit link' }).click()
@@ -378,7 +378,7 @@ describe('LinkMenu', () => {
   it('edits visible text while preserving the hidden CommonMark tooltip', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(
-      <MeowdownEditor handleRef={ref} initialMarkdown={'[Docs](https://old.test "Tooltip")'} />,
+      <MarkdownEditor handleRef={ref} initialMarkdown={'[Docs](https://old.test "Tooltip")'} />,
     )
     await hover(screen.getByText('Docs'))
     await popover.getByRole('button', { name: 'Edit link' }).click()
@@ -392,7 +392,7 @@ describe('LinkMenu', () => {
   it('offers page-title replacement from the keyboard edit form', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(
-      <MeowdownEditor
+      <MarkdownEditor
         handleRef={ref}
         initialMarkdown="https://example.com"
         resolveLinkPreview={() => ({ title: 'Example Domain' })}
@@ -410,7 +410,7 @@ describe('LinkMenu', () => {
   it('previews a bare host in the edit form via its normalized URL', async () => {
     const resolver = vi.fn(() => ({ title: 'Example Domain' }))
     await render(
-      <MeowdownEditor initialMarkdown="[example.com](example.com)" resolveLinkPreview={resolver} />,
+      <MarkdownEditor initialMarkdown="[example.com](example.com)" resolveLinkPreview={resolver} />,
     )
     await pmRoot.getByRole('link', { name: 'example.com', exact: false }).click()
     await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
@@ -421,7 +421,7 @@ describe('LinkMenu', () => {
   it('debounces preview resolution while editing the destination', async () => {
     const resolver = vi.fn(() => ({ title: 'Resolved title' }))
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown="[https://old.test](https://old.test)"
         resolveLinkPreview={resolver}
       />,
@@ -444,7 +444,7 @@ describe('LinkMenu', () => {
   })
 
   it('focuses Link on Mod-k and dismisses with Escape', async () => {
-    const screen = await render(<MeowdownEditor initialMarkdown="[Docs](https://example.com)" />)
+    const screen = await render(<MarkdownEditor initialMarkdown="[Docs](https://example.com)" />)
     await screen.getByText('Docs').click()
     await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
     await expect.element(popover.getByTestId('link-popover-input')).toHaveFocus()
@@ -458,7 +458,7 @@ describe('LinkMenu', () => {
   it('does not reopen the preview after saving with the pointer on the link', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(
-      <MeowdownEditor handleRef={ref} initialMarkdown="[Docs](https://old.test)" />,
+      <MarkdownEditor handleRef={ref} initialMarkdown="[Docs](https://old.test)" />,
     )
     await screen.getByText('Docs').click()
     await userEvent.keyboard('{ControlOrMeta>}k{/ControlOrMeta}')
@@ -472,7 +472,7 @@ describe('LinkMenu', () => {
 
   it('reopens a dismissed preview once the pointer leaves and returns', async () => {
     const screen = await render(
-      <MeowdownEditor initialMarkdown="a [Docs](https://example.com) b" />,
+      <MarkdownEditor initialMarkdown="a [Docs](https://example.com) b" />,
     )
     const label = screen.getByText('Docs', { exact: false })
     await hover(label)
@@ -487,7 +487,7 @@ describe('LinkMenu', () => {
   it('does not resolve previews of links hovered while editing', async () => {
     const resolver = vi.fn(() => ({ title: 'Resolved title' }))
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown="[Docs](https://docs.test) and [Blog](https://blog.test)"
         resolveLinkPreview={resolver}
       />,
@@ -504,7 +504,7 @@ describe('LinkMenu', () => {
   it('keeps reference links read-only in the preview and Mod-k flow', async () => {
     const ref = createRef<EditorHandle>()
     const markdown = '[Docs][doc]\n\n[doc]: https://example.com'
-    const screen = await render(<MeowdownEditor handleRef={ref} initialMarkdown={markdown} />)
+    const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown={markdown} />)
     const label = screen.getByText('Docs')
 
     await hover(label)
@@ -524,7 +524,7 @@ describe('LinkMenu', () => {
   it('keeps preview and copy available in a read-only editor', async () => {
     const onLinkCopy = vi.fn()
     const screen = await render(
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown="[Docs](https://example.com)"
         readOnly
         onLinkCopy={onLinkCopy}

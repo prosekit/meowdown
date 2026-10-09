@@ -10,7 +10,7 @@ import { page } from 'vitest/browser'
 import { hover, unhover } from '../testing/mouse.ts'
 import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
 
-import { MeowdownEditor } from './editor.tsx'
+import { MarkdownEditor } from './editor.tsx'
 import type { EditorHandle } from './types.ts'
 import { WikilinkHoverCard } from './wikilink-hover-card.tsx'
 
@@ -29,9 +29,9 @@ describe('WikilinkHoverCard', () => {
   it('opens after a 300ms delay and closes on leave', async () => {
     await unhover()
     await render(
-      <MeowdownEditor initialMarkdown="see [[Note]] here" blockHandle={false}>
+      <MarkdownEditor initialMarkdown="see [[Note]] here" blockHandle={false}>
         <HostPreviewCard />
-      </MeowdownEditor>,
+      </MarkdownEditor>,
     )
 
     await hover(pmRoot.getByTestId('wikilink'))
@@ -50,13 +50,13 @@ describe('WikilinkHoverCard', () => {
       return <div data-testid="hover-body">Preview: {hit.target}</div>
     }
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         initialMarkdown="[[Alpha|A wide alias]][[Beta|Another wide alias]]"
         resolveWikilink={resolveWikilinkAlias}
         blockHandle={false}
       >
         <WikilinkHoverCard>{renderBody}</WikilinkHoverCard>
-      </MeowdownEditor>,
+      </MarkdownEditor>,
     )
     const links = pmRoot.getByTestId('wikilink')
 
@@ -69,9 +69,9 @@ describe('WikilinkHoverCard', () => {
   it('moves the open card to the next hovered link', async () => {
     await unhover()
     await render(
-      <MeowdownEditor initialMarkdown="[[Alpha]] and [[Beta]]" blockHandle={false}>
+      <MarkdownEditor initialMarkdown="[[Alpha]] and [[Beta]]" blockHandle={false}>
         <HostPreviewCard />
-      </MeowdownEditor>,
+      </MarkdownEditor>,
     )
     const links = pmRoot.getByTestId('wikilink')
 
@@ -85,11 +85,11 @@ describe('WikilinkHoverCard', () => {
   it('renders no card when the render prop returns null for the target', async () => {
     await unhover()
     await render(
-      <MeowdownEditor initialMarkdown="[[Missing]] then [[Known]]" blockHandle={false}>
+      <MarkdownEditor initialMarkdown="[[Missing]] then [[Known]]" blockHandle={false}>
         <WikilinkHoverCard>
           {(hit) => (hit.target === 'Known' ? <div>Preview: {hit.target}</div> : null)}
         </WikilinkHoverCard>
-      </MeowdownEditor>,
+      </MarkdownEditor>,
     )
     const links = pmRoot.getByTestId('wikilink')
 
@@ -104,14 +104,14 @@ describe('WikilinkHoverCard', () => {
   it('opens with the resolved body of an async render function', async () => {
     await unhover()
     await render(
-      <MeowdownEditor initialMarkdown="see [[Note]] here" blockHandle={false}>
+      <MarkdownEditor initialMarkdown="see [[Note]] here" blockHandle={false}>
         <WikilinkHoverCard>
           {async (hit) => {
             await sleep(50)
             return <div>Async preview: {hit.target}</div>
           }}
         </WikilinkHoverCard>
-      </MeowdownEditor>,
+      </MarkdownEditor>,
     )
 
     await hover(pmRoot.getByTestId('wikilink'))
@@ -122,14 +122,14 @@ describe('WikilinkHoverCard', () => {
   it('renders no card when the promise resolves to null', async () => {
     await unhover()
     await render(
-      <MeowdownEditor initialMarkdown="see [[Missing]] here" blockHandle={false}>
+      <MarkdownEditor initialMarkdown="see [[Missing]] here" blockHandle={false}>
         <WikilinkHoverCard>
           {async () => {
             await sleep(50)
             return null
           }}
         </WikilinkHoverCard>
-      </MeowdownEditor>,
+      </MarkdownEditor>,
     )
 
     await hover(pmRoot.getByTestId('wikilink'))
@@ -141,14 +141,14 @@ describe('WikilinkHoverCard', () => {
     await unhover()
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     await render(
-      <MeowdownEditor initialMarkdown="see [[Broken]] here" blockHandle={false}>
+      <MarkdownEditor initialMarkdown="see [[Broken]] here" blockHandle={false}>
         <WikilinkHoverCard>
           {async () => {
             await sleep(50)
             throw new Error('load failed')
           }}
         </WikilinkHoverCard>
-      </MeowdownEditor>,
+      </MarkdownEditor>,
     )
 
     await hover(pmRoot.getByTestId('wikilink'))
@@ -165,7 +165,7 @@ describe('WikilinkHoverCard', () => {
     await unhover()
     let resolveBody: ((node: ReactNode) => void) | undefined
     await render(
-      <MeowdownEditor initialMarkdown="see [[Note]] here" blockHandle={false}>
+      <MarkdownEditor initialMarkdown="see [[Note]] here" blockHandle={false}>
         <WikilinkHoverCard>
           {() => {
             return new Promise<ReactNode>((resolve) => {
@@ -173,7 +173,7 @@ describe('WikilinkHoverCard', () => {
             })
           }}
         </WikilinkHoverCard>
-      </MeowdownEditor>,
+      </MarkdownEditor>,
     )
 
     await hover(pmRoot.getByTestId('wikilink'))
@@ -188,7 +188,7 @@ describe('WikilinkHoverCard', () => {
     await unhover()
     const resolvers = new Map<string, (node: ReactNode) => void>()
     await render(
-      <MeowdownEditor initialMarkdown="[[Alpha]] and [[Beta]]" blockHandle={false}>
+      <MarkdownEditor initialMarkdown="[[Alpha]] and [[Beta]]" blockHandle={false}>
         <WikilinkHoverCard>
           {(hit) => {
             return new Promise<ReactNode>((resolve) => {
@@ -196,7 +196,7 @@ describe('WikilinkHoverCard', () => {
             })
           }}
         </WikilinkHoverCard>
-      </MeowdownEditor>,
+      </MarkdownEditor>,
     )
     const links = pmRoot.getByTestId('wikilink')
 
@@ -217,13 +217,13 @@ describe('WikilinkHoverCard', () => {
     await unhover()
     const handleRef = createRef<EditorHandle>()
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         handleRef={handleRef}
         initialMarkdown="before [[Note]] after"
         blockHandle={false}
       >
         <HostPreviewCard />
-      </MeowdownEditor>,
+      </MarkdownEditor>,
     )
 
     await hover(pmRoot.getByTestId('wikilink'))
@@ -237,13 +237,13 @@ describe('WikilinkHoverCard', () => {
     await unhover()
     const handleRef = createRef<EditorHandle>()
     await render(
-      <MeowdownEditor
+      <MarkdownEditor
         handleRef={handleRef}
         initialMarkdown="before [[Note]] after"
         blockHandle={false}
       >
         <HostPreviewCard />
-      </MeowdownEditor>,
+      </MarkdownEditor>,
     )
     handleRef.current?.setSelection({ type: 'text', anchor: 2, head: 2 })
     handleRef.current?.focus()
@@ -262,9 +262,9 @@ describe('WikilinkHoverCard', () => {
     await unhover()
     await render(
       <div style={{ position: 'fixed', right: 0, bottom: 0, width: 180 }}>
-        <MeowdownEditor initialMarkdown="[[Edge]]" blockHandle={false}>
+        <MarkdownEditor initialMarkdown="[[Edge]]" blockHandle={false}>
           <HostPreviewCard />
-        </MeowdownEditor>
+        </MarkdownEditor>
       </div>,
     )
 

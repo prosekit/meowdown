@@ -1,5 +1,5 @@
 import type { ExitBoundaryHandler } from '@meowdown/core'
-import { MarkdownView, MeowdownEditor, type EditorHandle } from '@meowdown/react'
+import { MarkdownView, MarkdownEditor, type EditorHandle } from '@meowdown/react'
 import { getId } from '@ocavue/utils'
 import { clsx } from 'clsx/lite'
 import { useCallback, useRef, useState } from 'react'
@@ -75,7 +75,7 @@ export function HomeDemo() {
             </div>
           )}
           {mounted && (
-            <MeowdownEditor
+            <MarkdownEditor
               mode={mode}
               searchQuery={findDemo.query}
               onSearchChange={findDemo.onSearchChange}
@@ -102,7 +102,7 @@ export function HomeDemo() {
               <SelectionMenuShortcut onTrigger={selectionDemo.openMenu} />
               <FindShortcut onTrigger={findDemo.openBar} />
               <WikilinkPreviewCard />
-            </MeowdownEditor>
+            </MarkdownEditor>
           )}
         </div>
 
