@@ -39,11 +39,11 @@ allowBuilds:
 # "blockExoticSubdeps" and "overrides" install packages from pkg.pr.new
 blockExoticSubdeps: false
 overrides:
-  '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@a2e028f66ac6e33cb9eb1ccfa8afea71c0455395
-  '@prosekit/react': https://pkg.pr.new/@prosekit/react@a2e028f66ac6e33cb9eb1ccfa8afea71c0455395
-  '@prosekit/core': https://pkg.pr.new/@prosekit/core@a2e028f66ac6e33cb9eb1ccfa8afea71c0455395
-  '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@a2e028f66ac6e33cb9eb1ccfa8afea71c0455395
-  '@prosekit/web': https://pkg.pr.new/@prosekit/web@a2e028f66ac6e33cb9eb1ccfa8afea71c0455395
+  '@prosekit/pm': https://pkg.pr.new/@prosekit/pm@1794
+  '@prosekit/react': https://pkg.pr.new/@prosekit/react@1794
+  '@prosekit/core': https://pkg.pr.new/@prosekit/core@1794
+  '@prosekit/extensions': https://pkg.pr.new/@prosekit/extensions@1794
+  '@prosekit/web': https://pkg.pr.new/@prosekit/web@1794
 #   '@post-embed/types': https://pkg.pr.new/@post-embed/types@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
 #   '@post-embed/schema': https://pkg.pr.new/@post-embed/schema@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
 #   '@post-embed/exporter': https://pkg.pr.new/@post-embed/exporter@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
