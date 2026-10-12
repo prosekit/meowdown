@@ -1,3 +1,4 @@
+import { debounce } from '@ocavue/utils'
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 /**
  * Inline-mark plugin
@@ -349,30 +350,23 @@ function createInlineMarkPlugin(
       // a no-op tr on mount to wake the plugin up.
       view.dispatch(triggerInlineMarks(view.state))
 
-      let timer: ReturnType<typeof setTimeout> | undefined
+      const controller = new AbortController()
 
       const flush = (currentView: EditorView): void => {
-        timer = undefined
         if (currentView.isDestroyed) return
         if ((pluginKey.getState(currentView.state)?.pendingReferenceKeys.size ?? 0) === 0) return
         currentView.dispatch(currentView.state.tr.setMeta(RESTYLE_KEY, true))
       }
+      const scheduleFlush = debounce(flush, RESTYLE_DEBOUNCE_MS, { signal: controller.signal })
 
       return {
         update(currentView, previousState) {
           const current = pluginKey.getState(currentView.state)
-          if ((current?.pendingReferenceKeys.size ?? 0) === 0) {
-            if (timer != null) clearTimeout(timer)
-            timer = undefined
-            return
-          }
-          if (timer == null || pluginKey.getState(previousState) !== current) {
-            if (timer != null) clearTimeout(timer)
-            timer = setTimeout(() => flush(currentView), RESTYLE_DEBOUNCE_MS)
-          }
+          if ((current?.pendingReferenceKeys.size ?? 0) === 0) return
+          if (pluginKey.getState(previousState) !== current) scheduleFlush(currentView)
         },
         destroy() {
-          if (timer != null) clearTimeout(timer)
+          controller.abort()
         },
       }
     },
