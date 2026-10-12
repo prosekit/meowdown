@@ -6,7 +6,7 @@ export interface MarkdownDocument {
   /**
    * YAML body without fences. Undefined means absent; an empty string is an empty block.
    */
-  frontmatter?: string
+  frontmatter?: string | undefined
   children: MarkdownBlock[]
 }
 
@@ -26,7 +26,7 @@ export interface MarkdownPosition {
  * built by the editor or by hand have none.
  */
 export interface MarkdownPositioned {
-  position?: MarkdownPosition
+  position?: MarkdownPosition | undefined
 }
 
 /**
@@ -39,14 +39,16 @@ export interface MarkdownInline extends MarkdownPositioned {
    * which emit no text but can prevent an empty block or an HTML continuation.
    * Used only while `value` equals the recorded value; parsers need not supply it.
    */
-  segments?: {
-    value: string
-    chunks: Array<string | undefined>
-    /**
-     * Descendant text, including inline atoms, for table cell serialization.
-     */
-    textContent?: string
-  }
+  segments?:
+    | {
+        value: string
+        chunks: Array<string | undefined>
+        /**
+         * Descendant text, including inline atoms, for table cell serialization.
+         */
+        textContent?: string | undefined
+      }
+    | undefined
 
   children?: undefined
 }
@@ -61,11 +63,11 @@ export interface MarkdownHeading extends MarkdownInline {
   /**
    * Length of the setext underline; absent for ATX headings.
    */
-  setextUnderline?: number
+  setextUnderline?: number | undefined
   /**
    * Number of optional closing ATX hashes.
    */
-  closingHashes?: number
+  closingHashes?: number | undefined
 }
 
 export interface MarkdownBlockquote extends MarkdownPositioned {
@@ -84,18 +86,18 @@ export interface MarkdownListItem extends MarkdownPositioned {
   /**
    * Number of an ordered item, defaulting to 1.
    */
-  order?: number
+  order?: number | undefined
   checked: boolean
   /**
    * A folded bullet emits '+'. Task folding is not persisted.
    */
   collapsed: boolean
-  marker?: '.' | ')' | '-' | '*' | '+'
-  taskMarker?: 'x' | 'X'
+  marker?: '.' | ')' | '-' | '*' | '+' | undefined
+  taskMarker?: 'x' | 'X' | undefined
   /**
    * Spaces after the list marker, clamped to 1–4 when serialized.
    */
-  markerGap?: number
+  markerGap?: number | undefined
   /**
    * Never empty: an item with no content holds one empty paragraph.
    */
@@ -109,11 +111,11 @@ export interface MarkdownCodeBlock extends MarkdownPositioned {
   /**
    * Absent means backticks. Dollar fences require language 'math'.
    */
-  fenceStyle?: 'tilde' | 'indented' | 'dollar'
+  fenceStyle?: 'tilde' | 'indented' | 'dollar' | undefined
   /**
    * Minimum opening fence width; content can require a wider fence.
    */
-  fenceLength?: number
+  fenceLength?: number | undefined
 
   children?: undefined
 }
@@ -123,7 +125,7 @@ export interface MarkdownHorizontalRule extends MarkdownPositioned {
   /**
    * Original spelling, defaulting to '---'.
    */
-  marker?: string
+  marker?: string | undefined
 
   children?: undefined
 }
@@ -151,7 +153,7 @@ export interface MarkdownTableRow extends MarkdownPositioned {
 export interface MarkdownTableCell extends MarkdownPositioned {
   type: 'tableCell'
   header: boolean
-  align?: 'left' | 'center' | 'right'
+  align?: 'left' | 'center' | 'right' | undefined
   children: MarkdownBlock[]
 }
 

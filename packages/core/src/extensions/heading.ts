@@ -86,7 +86,7 @@ export function headingFromDOM(): TagParseRule[] {
 }
 
 type SetextUnderlineExtension = Extension<{
-  Nodes: { heading: { setextUnderline?: number | null } }
+  Nodes: { heading: { setextUnderline?: number | null | undefined } }
 }>
 
 function defineSetextUnderlineAttr(): SetextUnderlineExtension {
@@ -102,7 +102,7 @@ function defineSetextUnderlineAttr(): SetextUnderlineExtension {
 }
 
 type ClosingHashesExtension = Extension<{
-  Nodes: { heading: { closingHashes?: number | null } }
+  Nodes: { heading: { closingHashes?: number | null | undefined } }
 }>
 
 function defineHeadingClosingHashesAttr(): ClosingHashesExtension {

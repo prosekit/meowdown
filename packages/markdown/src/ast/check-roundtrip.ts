@@ -28,7 +28,7 @@ export interface CheckRoundTripOptions {
   /**
    * Whether to handle a leading `---` frontmatter block. Off by default.
    */
-  frontmatter?: boolean
+  frontmatter?: boolean | undefined
 }
 
 /**

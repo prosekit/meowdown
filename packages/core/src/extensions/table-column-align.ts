@@ -31,7 +31,7 @@ export interface MeowdownTableCellAttrs {
    * renders with the default left alignment and serializes the delimiter
    * column as `---`.
    */
-  align?: TableColumnAlign | null
+  align?: TableColumnAlign | null | undefined
 }
 
 type TableCellAlignExtension = Extension<{

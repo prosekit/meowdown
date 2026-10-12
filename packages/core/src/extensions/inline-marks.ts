@@ -266,24 +266,24 @@ function defineMdMath() {
 export type MdPackAttrs =
   | {
       key: 'italic' | 'bold' | 'code' | 'del' | 'highlight'
-      data?: null
-      slot?: 1 | null
+      data?: null | undefined
+      slot?: 1 | null | undefined
       revealInFocus: true
-      revealInHide?: null
+      revealInHide?: null | undefined
     }
   | {
       key: 'link-inline' | 'link-reference'
       data: { href: string; title: string }
-      slot?: 1 | null
+      slot?: 1 | null | undefined
       revealInFocus: true
-      revealInHide?: null
+      revealInHide?: null | undefined
     }
   | {
       key: 'link-angle'
       data: { href: string }
-      slot?: 1 | null
+      slot?: 1 | null | undefined
       revealInFocus: true
-      revealInHide?: null
+      revealInHide?: null | undefined
     }
   | {
       // A bare autolink (`https://a.com`, `www.a.com`, `a@b.com`) is all
@@ -291,9 +291,9 @@ export type MdPackAttrs =
       // pack only carries the resolved `href`.
       key: 'link-bare'
       data: { href: string }
-      slot?: 1 | null
-      revealInFocus?: null
-      revealInHide?: null
+      slot?: 1 | null | undefined
+      revealInFocus?: null | undefined
+      revealInHide?: null | undefined
     }
   | {
       // A URL opted out of autolinking by a trailing `<!-- {"noLink":true} -->`
@@ -301,18 +301,18 @@ export type MdPackAttrs =
       // text, and the comment is hidden syntax revealed in focus so it can be
       // edited in place.
       key: 'noLink'
-      data?: null
-      slot?: 1 | null
+      data?: null | undefined
+      slot?: 1 | null | undefined
       revealInFocus: true
-      revealInHide?: null
+      revealInHide?: null | undefined
     }
   | {
       // Math hides the formula source (not just syntax) behind its preview,
       // so it also reveals in hide mode; otherwise it could not be edited in
       // place there.
       key: 'math'
-      data?: null
-      slot?: 1 | null
+      data?: null | undefined
+      slot?: 1 | null | undefined
       revealInFocus: true
       revealInHide: true
     }
@@ -320,10 +320,10 @@ export type MdPackAttrs =
       // A preview unit reveals in no mode: its source hides behind the
       // preview, so revealing it would change nothing visible.
       key: 'wikilink' | 'image' | 'file'
-      data?: null
-      slot?: 1 | null
-      revealInFocus?: null
-      revealInHide?: null
+      data?: null | undefined
+      slot?: 1 | null | undefined
+      revealInFocus?: null | undefined
+      revealInHide?: null | undefined
     }
 
 /**

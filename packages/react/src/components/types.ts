@@ -161,7 +161,7 @@ export interface SlashMenuItem {
   /**
    * Stable row key; defaults to `label`.
    */
-  id?: string
+  id?: string | undefined
   /**
    * Display text, matched against the typed query like the built-in items.
    */
@@ -169,11 +169,11 @@ export interface SlashMenuItem {
   /**
    * Extra match terms beyond the label; never displayed.
    */
-  keywords?: string[]
+  keywords?: string[] | undefined
   /**
    * Secondary text shown beside the label.
    */
-  detail?: string
+  detail?: string | undefined
   /**
    * Runs after the menu closes and the typed `/query` text is removed.
    */
@@ -198,15 +198,15 @@ export interface TagItem {
   /**
    * Display text; defaults to `#tag`.
    */
-  label?: string
+  label?: string | undefined
   /**
    * Secondary text shown beside the label.
    */
-  detail?: string
+  detail?: string | undefined
   /**
    * Side effect run after the tag is inserted (e.g. create the tag).
    */
-  onSelect?: () => void
+  onSelect?: (() => void) | undefined
 }
 
 /**
@@ -227,15 +227,15 @@ export interface WikilinkItem {
   /**
    * Display text; defaults to `target`.
    */
-  label?: string
+  label?: string | undefined
   /**
    * Secondary text shown beside the label.
    */
-  detail?: string
+  detail?: string | undefined
   /**
    * Side effect run after the link is inserted (e.g. create the note).
    */
-  onSelect?: () => void
+  onSelect?: (() => void) | undefined
 }
 
 /**
@@ -279,7 +279,7 @@ export interface SelectionMenuItem {
   /**
    * Secondary text shown beside the label.
    */
-  detail?: string
+  detail?: string | undefined
   /**
    * Runs when the row is picked, with the selection the menu was opened over.
    */

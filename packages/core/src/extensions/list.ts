@@ -74,9 +74,9 @@ export type ListMarker = '.' | ')' | '-' | '*' | '+' | null
 type TaskMarker = 'x' | 'X' | null
 
 export interface MeowdownListAttrs extends ListAttrs {
-  marker?: ListMarker
-  taskMarker?: TaskMarker
-  markerGap?: number
+  marker?: ListMarker | undefined
+  taskMarker?: TaskMarker | undefined
+  markerGap?: number | undefined
 }
 
 // Each attr persists only its non-canonical values (`.`, `-`, `x`, and a gap
@@ -95,7 +95,7 @@ function serializeMarkerGap(value: number | null | undefined): string | undefine
   return isValidMarkerGap(value) ? String(value) : undefined
 }
 
-type ListMarkerExtension = Extension<{ Nodes: { list: { marker?: ListMarker } } }>
+type ListMarkerExtension = Extension<{ Nodes: { list: { marker?: ListMarker | undefined } } }>
 
 function defineListMarkerAttr(): ListMarkerExtension {
   return defineNodeAttr<'list', 'marker', ListMarker>({
@@ -119,7 +119,9 @@ function defineListMarkerAttr(): ListMarkerExtension {
   })
 }
 
-type ListTaskMarkerExtension = Extension<{ Nodes: { list: { taskMarker?: TaskMarker } } }>
+type ListTaskMarkerExtension = Extension<{
+  Nodes: { list: { taskMarker?: TaskMarker | undefined } }
+}>
 
 function defineListTaskMarkerAttr(): ListTaskMarkerExtension {
   return defineNodeAttr<'list', 'taskMarker', TaskMarker>({
@@ -138,7 +140,7 @@ function defineListTaskMarkerAttr(): ListTaskMarkerExtension {
   })
 }
 
-type ListMarkerGapExtension = Extension<{ Nodes: { list: { markerGap?: number } } }>
+type ListMarkerGapExtension = Extension<{ Nodes: { list: { markerGap?: number | undefined } } }>
 
 function isValidMarkerGap(value: number | null | undefined): value is 2 | 3 | 4 {
   return value === 2 || value === 3 || value === 4

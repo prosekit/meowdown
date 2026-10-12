@@ -101,7 +101,7 @@ export interface FileLinkOptions {
    * Claim `[label](url)` links as file attachments; see {@link FileLinkResolver}.
    * Updates existing content when the configured resolver changes.
    */
-  resolveFileLink?: FileLinkResolver
+  resolveFileLink?: FileLinkResolver | undefined
 }
 
 /**
@@ -113,22 +113,22 @@ export type InlineMarkOptions = FileLinkOptions &
     /**
      * Definitions supplied by the containing document.
      */
-    referenceDefinitions?: ReferenceDefinitions
+    referenceDefinitions?: ReferenceDefinitions | undefined
   }
 
 export interface InlineMarkContext {
   /**
    * Effective document-wide definitions, keyed by normalized reference label.
    */
-  referenceDefinitions?: ReferenceDefinitions
+  referenceDefinitions?: ReferenceDefinitions | undefined
   /**
    * Prevent this definition block's own label from resolving as a shortcut reference.
    */
-  isReferenceDefinition?: boolean
+  isReferenceDefinition?: boolean | undefined
   /**
    * Receives every normalized key read by this block, including unresolved references.
    */
-  referencedKeys?: Set<string>
+  referencedKeys?: Set<string> | undefined
 }
 
 /**

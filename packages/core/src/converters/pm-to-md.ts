@@ -10,7 +10,7 @@ export interface DocToMarkdownOptions {
   /**
    * Whether to serialize the doc's `frontmatter` attribute as a leading `---` block. Off by default.
    */
-  frontmatter?: boolean
+  frontmatter?: boolean | undefined
 }
 
 /**

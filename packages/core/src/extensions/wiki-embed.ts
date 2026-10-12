@@ -29,37 +29,37 @@ export type WikiEmbedResolution =
       /**
        * Source passed to `resolveImageUrl` and image click handlers. Defaults to `target`.
        */
-      src?: string
+      src?: string | undefined
       /**
        * Image alt text. Defaults to the alias or target basename.
        */
-      alt?: string
+      alt?: string | undefined
     }
   | {
       kind: 'file'
       /**
        * Destination passed to file metadata and click handlers. Defaults to `target`.
        */
-      href?: string
+      href?: string | undefined
       /**
        * File pill label. Defaults to the alias or target basename.
        */
-      name?: string
+      name?: string | undefined
       /**
        * Optional file title.
        */
-      title?: string
+      title?: string | undefined
     }
   | {
       kind: 'note'
       /**
        * Target passed to wikilink click handlers. Defaults to the source target.
        */
-      target?: string
+      target?: string | undefined
       /**
        * Chip label. Defaults to the source alias or resolved target.
        */
-      display?: string
+      display?: string | undefined
     }
 
 /**
@@ -73,7 +73,7 @@ export type WikiEmbedResolver = (embed: ParsedWikiEmbed) => WikiEmbedResolution 
  * Host options for wiki-embed parsing.
  */
 export interface WikiEmbedOptions {
-  resolveWikiEmbed?: WikiEmbedResolver
+  resolveWikiEmbed?: WikiEmbedResolver | undefined
 }
 
 const WIKI_EMBED_SIZE = /^(\d+)(?:x(\d+))?$/i

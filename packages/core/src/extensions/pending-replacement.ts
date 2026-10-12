@@ -190,7 +190,7 @@ export interface AcceptPendingReplacementOptions {
   /**
    * Overrides the staged mode for this accept (e.g. "Insert below" on a replace stage).
    */
-  mode?: PendingReplacementMode
+  mode?: PendingReplacementMode | undefined
 }
 
 function acceptPendingReplacement(options: AcceptPendingReplacementOptions = {}): Command {

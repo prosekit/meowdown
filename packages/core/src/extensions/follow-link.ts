@@ -25,11 +25,11 @@ import { findWikilinkAt } from './wikilink-click.ts'
 const followLinkKey = new PluginKey('meowdown-follow-link')
 
 export interface FollowLinkHandlers {
-  onWikilinkClick?: WikilinkClickHandler
-  onTagClick?: TagClickHandler
-  onFileClick?: FileClickHandler
-  onLinkClick?: LinkClickHandler
-  onImageClick?: ImageClickHandler
+  onWikilinkClick?: WikilinkClickHandler | undefined
+  onTagClick?: TagClickHandler | undefined
+  onFileClick?: FileClickHandler | undefined
+  onLinkClick?: LinkClickHandler | undefined
+  onImageClick?: ImageClickHandler | undefined
 }
 
 function createFollowLinkPlugin(getHandlers?: (state: EditorState) => FollowLinkHandlers) {

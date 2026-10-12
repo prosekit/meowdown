@@ -12,12 +12,12 @@ export interface MarkdownToDocOptions {
   /**
    * Node builders to build the document with. Defaults to the shared schema's builders.
    */
-  nodes?: TypedNodeBuilders
+  nodes?: TypedNodeBuilders | undefined
 
   /**
    * Whether to peel a leading `---` frontmatter block onto the doc's `frontmatter` attribute. Off by default.
    */
-  frontmatter?: boolean
+  frontmatter?: boolean | undefined
 }
 
 /**

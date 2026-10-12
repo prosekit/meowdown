@@ -17,9 +17,9 @@ import { trimRange } from './inline-toggle.ts'
 import { formatMagicComment } from './magic-comment.ts'
 
 export interface LinkAttrs {
-  href?: string
-  title?: string
-  text?: string
+  href?: string | undefined
+  title?: string | undefined
+  text?: string | undefined
 }
 
 /**
@@ -104,10 +104,10 @@ function getWrapRange(state: EditorState): undefined | PositionRange {
 }
 
 export interface InsertLinkOptions {
-  href?: string
-  title?: string
-  text?: string
-  wrapText?: boolean
+  href?: string | undefined
+  title?: string | undefined
+  text?: string | undefined
+  wrapText?: boolean | undefined
 }
 
 export function insertLink({

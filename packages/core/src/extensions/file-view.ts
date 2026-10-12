@@ -15,7 +15,7 @@ export interface FileInfo {
   /**
    * File size in bytes, shown as a human-readable suffix (e.g. `1.4 MB`).
    */
-  size?: number
+  size?: number | undefined
 }
 
 /**
@@ -36,7 +36,7 @@ export interface FileViewOptions {
   /**
    * Resolve the metadata (file size) shown on a pill. Omit to show none.
    */
-  resolveFileInfo?: FileInfoResolver
+  resolveFileInfo?: FileInfoResolver | undefined
 }
 
 /**

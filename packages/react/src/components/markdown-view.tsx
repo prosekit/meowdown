@@ -119,106 +119,106 @@ export interface MarkdownViewProps {
   /**
    * Interpret content as one paragraph, without block syntax.
    */
-  singleParagraph?: boolean
+  singleParagraph?: boolean | undefined
   /**
    * Reference definitions available outside this fragment.
    */
-  referenceDefinitions?: ReferenceDefinitions
+  referenceDefinitions?: ReferenceDefinitions | undefined
   /**
    * Mark mode for the read-only view. Defaults to `'hide'`.
    */
-  markMode?: MarkMode
+  markMode?: MarkMode | undefined
   /**
    * Peel a leading YAML frontmatter block before rendering. Off by default.
    */
-  frontmatter?: boolean
+  frontmatter?: boolean | undefined
   /**
    * Whether rendered links, images, file pills, and task checkboxes can be activated.
    * Defaults to `true`. When `false`, callbacks are ignored, the rendered tree
    * contains no anchors or focusable task controls, and recognized tweet and
    * YouTube embeds are omitted before any image resolver runs.
    */
-  interactive?: boolean
+  interactive?: boolean | undefined
   /**
    * Render collapsed (`+`) bullets expanded, ignoring their fold state at any
    * depth. Off by default. For views that show slices of a note (e.g. a
    * backlinks panel), where the source's fold state must not hide the content
    * the view exists to show.
    */
-  expandCollapsed?: boolean
+  expandCollapsed?: boolean | undefined
   /**
    * Map an image `src` to a displayable URL, or `undefined` to skip it. May
    * return a `Promise`; the image appears once it resolves, in a box of its
    * persisted size when both dimensions are known.
    */
-  resolveImageUrl?: ImageUrlResolver
+  resolveImageUrl?: ImageUrlResolver | undefined
   /**
    * Claim a `[label](url)` link as a file pill instead of a regular link.
    * Must be pure; return `false` for links that should render normally.
    */
-  resolveFileLink?: FileLinkResolver
+  resolveFileLink?: FileLinkResolver | undefined
   /**
    * Classify `![[target]]` as an image, file, or note; unresolved source stays literal.
    */
-  resolveWikiEmbed?: WikiEmbedResolver
+  resolveWikiEmbed?: WikiEmbedResolver | undefined
   /**
    * Resolve a `[[...]]` wikilink into its target and chip label; the bracketed
    * text is both by default. Must be pure.
    */
-  resolveWikilink?: WikilinkResolver
+  resolveWikilink?: WikilinkResolver | undefined
   /**
    * Resolve metadata shown on a file pill.
    */
-  resolveFileInfo?: FileInfoResolver
+  resolveFileInfo?: FileInfoResolver | undefined
   /**
    * Resolve the data behind an X post URL, rendered as a `meowdown-embed-x`
    * card. Defaults to `defaultResolveXPost`.
    */
-  resolveXPost?: XPostResolver
+  resolveXPost?: XPostResolver | undefined
   /**
    * Additional trusted protocols for X media URLs, such as `reflect-asset:`.
    */
-  mediaUrlProtocols?: string[]
+  mediaUrlProtocols?: string[] | undefined
   /**
    * Resolve the data behind a YouTube video URL, rendered as a
    * `meowdown-embed-youtube` card. Defaults to `defaultResolveYouTubeVideo`.
    */
-  resolveYouTubeVideo?: YouTubeVideoResolver
+  resolveYouTubeVideo?: YouTubeVideoResolver | undefined
   /**
    * Called when a rendered wikilink is clicked. Pass a stable function.
    */
-  onWikilinkClick?: WikilinkClickHandler
+  onWikilinkClick?: WikilinkClickHandler | undefined
   /**
    * Called when a rendered Markdown link is clicked. Pass a stable function.
    */
-  onLinkClick?: LinkClickHandler
+  onLinkClick?: LinkClickHandler | undefined
   /**
    * Called when a rendered image is clicked. Pass a stable function.
    */
-  onImageClick?: ImageClickHandler
+  onImageClick?: ImageClickHandler | undefined
   /**
    * Called when a photo or video inside an X post card is activated. Call
    * `event.preventDefault()` to stop the card from opening the photo URL or
    * playing the video in place.
    */
-  onXPostMediaClick?: XPostMediaClickHandler
+  onXPostMediaClick?: XPostMediaClickHandler | undefined
   /**
    * Called when the poster of a YouTube card is activated. Call
    * `event.preventDefault()` to stop the card from playing the video in place.
    */
-  onYouTubeVideoClick?: YouTubeVideoClickHandler
+  onYouTubeVideoClick?: YouTubeVideoClickHandler | undefined
   /**
    * Called when a rendered file pill is clicked. Pass a stable function.
    */
-  onFileClick?: FileClickHandler
+  onFileClick?: FileClickHandler | undefined
   /**
    * Called when a rendered task checkbox is clicked. Pass a stable function.
    */
-  onTaskClick?: TaskClickHandler
+  onTaskClick?: TaskClickHandler | undefined
   /**
    * Extra class on the content root (alongside `ProseMirror meowdown-content`).
    */
-  className?: string
+  className?: string | undefined
 }
 
 /**

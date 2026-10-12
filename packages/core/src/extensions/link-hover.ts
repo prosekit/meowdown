@@ -24,7 +24,7 @@ export interface LinkHoverOptions {
    * Return `false` while the pointer is on the popup the link opened: a
    * pending leave then re-checks later instead of firing.
    */
-  canLeave?: () => boolean
+  canLeave?: (() => boolean) | undefined
 }
 
 /**

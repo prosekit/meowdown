@@ -26,7 +26,7 @@ export interface WikilinkHoverCardProps {
   /**
    * Optional class applied to the popup, after the default card surface.
    */
-  readonly className?: string
+  readonly className?: string | undefined
 }
 
 /**

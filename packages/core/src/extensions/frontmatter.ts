@@ -12,7 +12,9 @@ import type { NodeName } from './node-names.ts'
  */
 export type Frontmatter = string | null
 
-type DocFrontmatterExtension = Extension<{ Nodes: { doc: { frontmatter?: Frontmatter } } }>
+type DocFrontmatterExtension = Extension<{
+  Nodes: { doc: { frontmatter?: Frontmatter | undefined } }
+}>
 
 /**
  * Stores YAML frontmatter as a non-rendered attribute on the root `doc` node.

@@ -3,8 +3,8 @@
  */
 export interface LinkPreview {
   readonly title: string
-  readonly description?: string
-  readonly iconSrc?: string
+  readonly description?: string | undefined
+  readonly iconSrc?: string | undefined
 }
 
 /**

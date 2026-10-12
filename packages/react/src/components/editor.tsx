@@ -60,29 +60,29 @@ export interface EditorProps {
    * The editor mode ('focus', 'show', 'hide'), controlling how much Markdown
    * syntax stays in view. Defaults to 'focus'.
    */
-  mode?: EditorMode
+  mode?: EditorMode | undefined
 
   /**
    * The initial Markdown text of the editor. Only the value provided on the
    * first render is used; later changes are ignored.
    */
-  initialMarkdown?: string
+  initialMarkdown?: string | undefined
 
   /**
    * Edit a single paragraph of inline Markdown. Read on mount.
    */
-  singleParagraph?: boolean
+  singleParagraph?: boolean | undefined
 
   /**
    * Definitions supplied by the containing document.
    */
-  referenceDefinitions?: EditorConfig['referenceDefinitions']
+  referenceDefinitions?: EditorConfig['referenceDefinitions'] | undefined
 
   /**
    * Called on every user-driven document change. Programmatic `setMarkdown` and
    * `setState` on the handle do not fire it.
    */
-  onDocChange?: VoidFunction
+  onDocChange?: VoidFunction | undefined
 
   /**
    * Searches host items for the slash menu, which opens when typing `/`.
@@ -93,7 +93,7 @@ export interface EditorProps {
    * handle's `insertMarkdown`). Pass a stable function (e.g. from
    * `useCallback`). Omit to show only the built-in items.
    */
-  onSlashMenuSearch?: SlashMenuSearchHandler
+  onSlashMenuSearch?: SlashMenuSearchHandler | undefined
 
   /**
    * Searches tags for the tag menu, which opens when typing `#` followed by
@@ -101,7 +101,7 @@ export interface EditorProps {
    * tags to show, synchronously or as a promise. Pass a stable function (e.g.
    * from `useCallback`). Omit to disable the tag menu.
    */
-  onTagSearch?: TagSearchHandler
+  onTagSearch?: TagSearchHandler | undefined
 
   /**
    * Searches notes for the wikilink menu, which opens as soon as `[[` or `@`
@@ -110,7 +110,7 @@ export interface EditorProps {
    * or as a promise. Pass a stable function (e.g. from `useCallback`). Omit to
    * disable the wikilink menu.
    */
-  onWikilinkSearch?: WikilinkSearchHandler
+  onWikilinkSearch?: WikilinkSearchHandler | undefined
 
   /**
    * Searches commands for the selection menu, which opens over a non-empty
@@ -121,48 +121,48 @@ export interface EditorProps {
    * re-sort. Pass a stable function (e.g. from `useCallback`). Omit to disable
    * the selection menu.
    */
-  onSelectionMenuSearch?: SelectionMenuSearchHandler
+  onSelectionMenuSearch?: SelectionMenuSearchHandler | undefined
 
   /**
    * Shows a small floating button on a non-empty text selection that opens the
    * selection menu. On by default; only relevant when `onSelectionMenuSearch`
    * is set. Ignored when `readOnly` is set.
    */
-  selectionMenuAffordance?: boolean
+  selectionMenuAffordance?: boolean | undefined
 
   /**
    * Extra controls rendered in the pending-replacement preview footer, next to
    * the built-in accept ("Replace selection" / "Insert below", per the staged
    * mode) and Discard buttons (e.g. a retry button).
    */
-  pendingReplacementActions?: ReactNode
+  pendingReplacementActions?: ReactNode | undefined
 
   /**
    * Called when a pending replacement ends, with the outcome ('accepted' or
    * 'discarded') and the final staged value. Use it to stop a stream that is
    * still appending. Pass a stable function (e.g. from `useCallback`).
    */
-  onPendingReplacementResolve?: PendingReplacementResolveHandler
+  onPendingReplacementResolve?: PendingReplacementResolveHandler | undefined
 
   /**
    * Called with the link target on click of a rendered wiki link, or on
    * `Mod-Enter` with the caret on one. Pass a stable function (e.g. from
    * `useCallback`).
    */
-  onWikilinkClick?: WikilinkClickHandler
+  onWikilinkClick?: WikilinkClickHandler | undefined
 
   /**
    * Called with the link `href` on click of a rendered Markdown link
    * (`[text](url)`), or on `Mod-Enter` with the caret on one. Pass a stable
    * function (e.g. from `useCallback`).
    */
-  onLinkClick?: LinkClickHandler
+  onLinkClick?: LinkClickHandler | undefined
 
   /**
    * Called after a link is copied from the link menu, with its `href`. Useful
    * for a toast. Pass a stable function (e.g. from `useCallback`).
    */
-  onLinkCopy?: LinkCopyHandler
+  onLinkCopy?: LinkCopyHandler | undefined
 
   /**
    * Resolves optional display metadata for the link popup. Failures should be
@@ -170,14 +170,14 @@ export interface EditorProps {
    * May be called repeatedly for the same `href`, so cache expensive work in
    * the host. Pass a stable function (e.g. from `useCallback`).
    */
-  resolveLinkPreview?: LinkPreviewResolver
+  resolveLinkPreview?: LinkPreviewResolver | undefined
 
   /**
    * Called with the tag name (without the leading `#`) on click of a rendered
    * `#tag`, or on `Mod-Enter` with the caret on one. Pass a stable function
    * (e.g. from `useCallback`).
    */
-  onTagClick?: TagClickHandler
+  onTagClick?: TagClickHandler | undefined
 
   /**
    * Called when the caret can move no further in the pressed arrow direction
@@ -188,7 +188,7 @@ export interface EditorProps {
    * editor handle the key normally; any other return value consumes it. Pass a
    * stable function (e.g. from `useCallback`).
    */
-  onExitBoundary?: ExitBoundaryHandler
+  onExitBoundary?: ExitBoundaryHandler | undefined
 
   /**
    * Maps an image `src` to a displayable URL, or `undefined` to skip that image.
@@ -197,7 +197,7 @@ export interface EditorProps {
    * when one exists. Defaults to showing http(s) URLs as-is. Pass a stable
    * function (e.g. from `useCallback`).
    */
-  resolveImageUrl?: ImageOptions['resolveImageUrl']
+  resolveImageUrl?: ImageOptions['resolveImageUrl'] | undefined
 
   /**
    * Claims a `[label](url)` link as a file: a claimed link renders as an
@@ -206,14 +206,14 @@ export interface EditorProps {
    * `onLinkClick`. The markdown text is untouched. Must be pure (same link,
    * same answer). Changing the resolver reparses existing content.
    */
-  resolveFileLink?: FileLinkResolver
+  resolveFileLink?: FileLinkResolver | undefined
 
   /**
    * Classifies `![[target]]` as an image, file, or note atom. Return
    * `undefined` for missing or ambiguous targets to leave the source literal
    * and editable. Must be pure; changing it reparses existing content.
    */
-  resolveWikiEmbed?: WikiEmbedResolver
+  resolveWikiEmbed?: WikiEmbedResolver | undefined
 
   /**
    * Resolves a `[[...]]` wikilink into the target its click and hover
@@ -223,7 +223,7 @@ export interface EditorProps {
    * both; the markdown text is untouched either way. Must be pure; changing
    * it reparses existing content.
    */
-  resolveWikilink?: WikilinkResolver
+  resolveWikilink?: WikilinkResolver | undefined
 
   /**
    * Resolves the metadata (file size in bytes) shown on a file pill, directly
@@ -232,18 +232,18 @@ export interface EditorProps {
    * cache in the host when resolving is expensive. Pass a stable function
    * (e.g. from `useCallback`).
    */
-  resolveFileInfo?: FileViewOptions['resolveFileInfo']
+  resolveFileInfo?: FileViewOptions['resolveFileInfo'] | undefined
 
   /**
    * Resolve the data behind an X post URL.
    * Keep the function stable (for example, with `useCallback`). When omitted, public
    * posts use `defaultResolveXPost` through react-tweet's hosted proxy.
    */
-  resolveXPost?: XPostResolver
+  resolveXPost?: XPostResolver | undefined
   /**
    * Additional trusted protocols for X media URLs, such as `reflect-asset:`.
    */
-  mediaUrlProtocols?: string[]
+  mediaUrlProtocols?: string[] | undefined
 
   /**
    * Resolves the data behind a YouTube video URL, directly or as a promise;
@@ -251,7 +251,7 @@ export interface EditorProps {
    * `defaultResolveYouTubeVideo`, which reads YouTube's oEmbed endpoint. Pass
    * a stable function (e.g. from `useCallback`).
    */
-  resolveYouTubeVideo?: YouTubeVideoResolver
+  resolveYouTubeVideo?: YouTubeVideoResolver | undefined
 
   /**
    * Called when the user clicks a rendered file pill (or presses `Mod-Enter`
@@ -259,26 +259,26 @@ export interface EditorProps {
    * event. The host decides what a click does (e.g. open the file in the OS
    * default app). Pass a stable function (e.g. from `useCallback`).
    */
-  onFileClick?: FileClickHandler
+  onFileClick?: FileClickHandler | undefined
 
   /**
    * Persists a pasted/dropped file and returns its markdown destination,
    * inserted as `![](src)` for an image and as a `[name](src)` link for any
    * other file. Return `undefined` to decline. Pass a stable function.
    */
-  onFilePaste?: FilePasteOptions['onFilePaste']
+  onFilePaste?: FilePasteOptions['onFilePaste'] | undefined
 
   /**
    * Called when persisting a pasted/dropped file throws.
    */
-  onFileSaveError?: FilePasteOptions['onFileSaveError']
+  onFileSaveError?: FilePasteOptions['onFileSaveError'] | undefined
 
   /**
    * Called when the user clicks a rendered image (or presses `Enter` on a
    * selected one), with its markdown `src`, `alt`, and the originating event.
    * Pass a stable function (e.g. from `useCallback`).
    */
-  onImageClick?: ImageClickHandler
+  onImageClick?: ImageClickHandler | undefined
 
   /**
    * Called with the `meowdown-embed-media-click` event when the user
@@ -288,7 +288,7 @@ export interface EditorProps {
    * playing the video in place, then show the media yourself, for example in
    * a lightbox. Pass a stable function (e.g. from `useCallback`).
    */
-  onXPostMediaClick?: XPostMediaClickHandler
+  onXPostMediaClick?: XPostMediaClickHandler | undefined
 
   /**
    * Called with the `meowdown-embed-youtube-click` event when the user
@@ -298,44 +298,44 @@ export interface EditorProps {
    * place, then play it yourself, for example in a lightbox. Pass a stable
    * function (e.g. from `useCallback`).
    */
-  onYouTubeVideoClick?: YouTubeVideoClickHandler
+  onYouTubeVideoClick?: YouTubeVideoClickHandler | undefined
 
   /**
    * Auto-embeds a pasted tweet or YouTube link as a rich embed; one undo turns
    * the embed back into the raw link. On by default.
    */
-  embedPaste?: boolean
+  embedPaste?: boolean | undefined
 
   /**
    * Pasting a URL over selected text wraps the selection as a Markdown link
    * `[selected text](url)`; one undo restores the plain text. On by default.
    */
-  linkPaste?: boolean
+  linkPaste?: boolean | undefined
 
   /**
    * Pressing Enter at the end of the document's first heading (the title line)
    * starts a fresh empty bullet on the next line instead of a plain paragraph.
    * Off by default.
    */
-  bulletAfterHeading?: boolean
+  bulletAfterHeading?: boolean | undefined
 
   /**
    * Pressing Backspace in an empty paragraph that is the document's first
    * block deletes that paragraph, so the rest of the document moves up one
    * line. The block after it keeps its type. Off by default.
    */
-  backspaceDeletesEmptyFirstBlock?: boolean
+  backspaceDeletesEmptyFirstBlock?: boolean | undefined
 
   /**
    * Replaces typed character sequences with their typographic equivalents,
    * e.g. `->` with `→` and `(c)` with `©`. On by default.
    */
-  substitution?: boolean
+  substitution?: boolean | undefined
 
   /**
    * Handles a leading `---` frontmatter block (off by default).
    */
-  frontmatter?: boolean
+  frontmatter?: boolean | undefined
 
   /**
    * Shows the per-block gutter handle: a drag grip for reordering blocks and a
@@ -344,31 +344,31 @@ export interface EditorProps {
    * affordance entirely, e.g. when the host does not want block reordering.
    * Ignored when `readOnly` is set.
    */
-  blockHandle?: boolean
+  blockHandle?: boolean | undefined
 
   /**
    * Glides the caret between positions instead of jumping instantly. On by
    * default. Set to `false` to disable the movement animation; equivalent to
    * setting the `--meowdown-caret-glide` CSS variable to `0ms`.
    */
-  caretGlide?: boolean
+  caretGlide?: boolean | undefined
 
   /**
    * Placeholder text shown when the whole document is empty. A function
    * receives the editor state. Pass a stable function.
    */
-  placeholder?: PlaceholderOptions['placeholder']
+  placeholder?: PlaceholderOptions['placeholder'] | undefined
 
   /**
    * Makes the editor read-only.
    */
-  readOnly?: boolean
+  readOnly?: boolean | undefined
 
   /**
    * Enables the browser's native spell checking. Defaults to the browser's
    * behavior.
    */
-  spellCheck?: boolean
+  spellCheck?: boolean | undefined
 
   /**
    * The search query. Every match is highlighted, and the first match at or
@@ -376,29 +376,29 @@ export interface EditorProps {
    * (the default) clears the highlights and leaves the selection alone. A match
    * that the current mode hides reveals itself while it is the selected one.
    */
-  searchQuery?: string
+  searchQuery?: string | undefined
 
   /**
    * Called when the number of matches or the selected match changes. Pass a
    * stable function (e.g. from `useCallback`).
    */
-  onSearchChange?: SearchStatusHandler
+  onSearchChange?: SearchStatusHandler | undefined
 
   /**
    * Clock format the `/now` slash command inserts: '12' for "3:45pm" or '24'
    * for "15:45". Defaults to '12'.
    */
-  timeFormat?: TimeFormat
+  timeFormat?: TimeFormat | undefined
 
   /**
    * Class on the editable root (the contenteditable).
    */
-  editorClassName?: string
+  editorClassName?: string | undefined
 
   /**
    * Class on the outer `.meowdown` wrapper div.
    */
-  wrapperClassName?: string
+  wrapperClassName?: string | undefined
 
   /**
    * React component that renders code blocks in place of the built-in one.
@@ -409,12 +409,12 @@ export interface EditorProps {
   /**
    * Imperative handle for the editor.
    */
-  handleRef?: Ref<EditorHandle>
+  handleRef?: Ref<EditorHandle> | undefined
 
   /**
    * Nodes rendered inside the editor's ProseKit context.
    */
-  children?: ReactNode
+  children?: ReactNode | undefined
 }
 
 /**

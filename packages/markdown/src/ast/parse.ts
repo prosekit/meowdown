@@ -36,7 +36,7 @@ export interface ParseMarkdownAstOptions {
   /**
    * Extract a leading YAML frontmatter block. Off by default.
    */
-  frontmatter?: boolean
+  frontmatter?: boolean | undefined
 }
 
 /**

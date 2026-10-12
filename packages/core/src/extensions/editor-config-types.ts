@@ -12,25 +12,25 @@ import type { YouTubeVideoClickHandler } from './youtube-video-click.ts'
 
 export interface EditorConfig
   extends InlineMarkOptions, FollowLinkHandlers, FilePasteOptions, FileViewOptions, ImageOptions {
-  markMode?: MarkMode
-  onExitBoundary?: ExitBoundaryHandler
-  onXPostMediaClick?: XPostMediaClickHandler
-  onYouTubeVideoClick?: YouTubeVideoClickHandler
-  embedPaste?: boolean
-  linkPaste?: boolean
-  bulletAfterHeading?: boolean
-  backspaceDeletesEmptyFirstBlock?: boolean
-  substitution?: boolean
+  markMode?: MarkMode | undefined
+  onExitBoundary?: ExitBoundaryHandler | undefined
+  onXPostMediaClick?: XPostMediaClickHandler | undefined
+  onYouTubeVideoClick?: YouTubeVideoClickHandler | undefined
+  embedPaste?: boolean | undefined
+  linkPaste?: boolean | undefined
+  bulletAfterHeading?: boolean | undefined
+  backspaceDeletesEmptyFirstBlock?: boolean | undefined
+  substitution?: boolean | undefined
   /**
    * Keep the document to one paragraph of inline Markdown: typed block
    * prefixes (`# `, `> `, `- `, ```` ``` ````) stay literal and pasted blocks
    * flatten into soft lines. Seed the editor with `paragraphMarkdownToDoc` and
    * read it with `docToParagraphMarkdown`.
    */
-  singleParagraph?: boolean
-  wikilinkEnabled?: boolean
-  placeholder?: PlaceholderOptions['placeholder']
-  readOnly?: boolean
-  spellCheck?: boolean
-  editorClassName?: string
+  singleParagraph?: boolean | undefined
+  wikilinkEnabled?: boolean | undefined
+  placeholder?: PlaceholderOptions['placeholder'] | undefined
+  readOnly?: boolean | undefined
+  spellCheck?: boolean | undefined
+  editorClassName?: string | undefined
 }

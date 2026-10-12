@@ -27,18 +27,18 @@ export interface MeowdownCodeBlockAttrs extends CodeBlockAttrs {
    * default) is a backtick fence, so a block created in the editor serializes
    * to the canonical form.
    */
-  fenceStyle?: CodeBlockFenceStyle | null
+  fenceStyle?: CodeBlockFenceStyle | null | undefined
 
   /**
    * The number of characters in the opening fence, kept only when it exceeds
    * CommonMark's three-character minimum. `null` (the default) lets the
    * serializer pick the shortest fence the content allows.
    */
-  fenceLength?: number | null
+  fenceLength?: number | null | undefined
 }
 
 type FenceStyleExtension = Extension<{
-  Nodes: { codeBlock: { fenceStyle?: CodeBlockFenceStyle | null } }
+  Nodes: { codeBlock: { fenceStyle?: CodeBlockFenceStyle | null | undefined } }
 }>
 
 function defineFenceStyleAttr(): FenceStyleExtension {
@@ -57,7 +57,7 @@ function defineFenceStyleAttr(): FenceStyleExtension {
 }
 
 type FenceLengthExtension = Extension<{
-  Nodes: { codeBlock: { fenceLength?: number | null } }
+  Nodes: { codeBlock: { fenceLength?: number | null | undefined } }
 }>
 
 function defineFenceLengthAttr(): FenceLengthExtension {

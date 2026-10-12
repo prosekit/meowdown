@@ -15,7 +15,7 @@ export interface MeowdownHorizontalRuleAttrs {
    * The literal markdown marker of a thematic break, e.g. `***`, `___`, or
    * `- - -`. Defaults to null, which the serializer emits as the canonical `---`.
    */
-  marker?: string | null
+  marker?: string | null | undefined
 }
 
 type HorizontalRuleMarkerExtension = Extension<{

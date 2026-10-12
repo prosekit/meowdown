@@ -19,11 +19,11 @@ export interface FilePasteOptions {
    * An image (`image/*` MIME type or a recognized image filename extension)
    * inserts `![](src)`; any other file inserts a `[name](src)` link.
    */
-  onFilePaste?: FilePasteHandler
+  onFilePaste?: FilePasteHandler | undefined
   /**
    * Called when persisting a pasted/dropped file throws. Defaults to `console.error`.
    */
-  onFileSaveError?: FileSaveErrorHandler
+  onFileSaveError?: FileSaveErrorHandler | undefined
 }
 
 function isImageFile(file: { name: string; type?: string }): boolean {
@@ -44,7 +44,7 @@ function isImageFile(file: { name: string; type?: string }): boolean {
  * attach-file picker) produces markdown byte-identical to a paste/drop.
  */
 export function buildFileMarkdown(
-  file: { name: string; type?: string },
+  file: { name: string; type?: string | undefined },
   destination: string,
 ): string {
   return isImageFile(file)
