@@ -133,15 +133,25 @@ function MainEditorDemo() {
 
   const pushToSourceRef = useRef<() => void>(null)
   useEffect(() => {
-    pushToSourceRef.current = throttle(writeSourceText, SYNC_THROTTLE_MS, { leading: false })
+    const controller = new AbortController()
+    pushToSourceRef.current = throttle(writeSourceText, SYNC_THROTTLE_MS, {
+      leading: false,
+      signal: controller.signal,
+    })
     return () => {
+      controller.abort()
       pushToSourceRef.current = null
     }
   }, [writeSourceText])
   const pullFromSourceRef = useRef<(markdown: string) => void>(null)
   useEffect(() => {
-    pullFromSourceRef.current = throttle(writeRichText, SYNC_THROTTLE_MS, { leading: false })
+    const controller = new AbortController()
+    pullFromSourceRef.current = throttle(writeRichText, SYNC_THROTTLE_MS, {
+      leading: false,
+      signal: controller.signal,
+    })
     return () => {
+      controller.abort()
       pullFromSourceRef.current = null
     }
   }, [writeRichText])
