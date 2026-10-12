@@ -222,6 +222,7 @@ describe('WikilinkMenu', () => {
     await userEvent.keyboard(TWO_BRACKETS)
     await expect.element(menu.getByText('June 15')).toBeVisible()
     await expect.element(menu.getByText('daily')).toBeVisible()
+    await expect.element(menu.getByText('daily')).toHaveAttribute('title', 'daily')
 
     await menu.getByText('June 15').click()
     expect(ref.current?.getMarkdown()).toContain('[[2026-06-15]]')

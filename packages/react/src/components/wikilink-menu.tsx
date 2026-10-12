@@ -96,7 +96,11 @@ export function WikilinkMenu({ onWikilinkSearch }: WikilinkMenuProps): ReactElem
               }}
             >
               <span className={styles.Label}>{item.label ?? item.target}</span>
-              {item.detail ? <span className={styles.Detail}>{item.detail}</span> : null}
+              {item.detail ? (
+                <span className={styles.Detail} title={item.detail}>
+                  {item.detail}
+                </span>
+              ) : null}
             </AutocompleteItem>
           ))}
           <AutocompleteEmpty className={styles.Item}>
