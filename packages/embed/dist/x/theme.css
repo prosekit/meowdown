@@ -1,0 +1,566 @@
+@property --meowdown-embed-color {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-background {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-border-color {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-radius {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-padding {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-muted-color {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-link-color {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-max-height {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --_overflowing {
+  syntax: '<integer>';
+  inherits: true;
+  initial-value: 0;
+}
+
+@keyframes meowdown-embed-overflowing {
+  from,
+  to {
+    --_overflowing: 1;
+  }
+}
+
+/*
+ * Hard reset. `all: revert` rolls every property on every box inside the card
+ * back to the user-agent default, so a host rule on `p`, `a`, `img`,
+ * `article`, `header`, or `footer` (a prose stylesheet, a CSS reset, an
+ * editor theme) cannot reach in. The reset sits at specificity (0,2,0);
+ * every rule below is more specific and re-applies the card's own values,
+ * including the UA defaults the card does not want (`p` margins, `a` colors).
+ */
+[data-meowdown-embed='x'] [data-root],
+[data-meowdown-embed='x'] [data-root] *,
+[data-meowdown-embed='x'] [data-root] *::before,
+[data-meowdown-embed='x'] [data-root] *::after {
+  all: revert;
+  box-sizing: border-box;
+}
+
+[data-meowdown-embed='x'] {
+  --_hairline: var(
+    --meowdown-embed-border-color,
+    color-mix(in srgb, currentColor 14%, transparent)
+  );
+  --_muted: var(--meowdown-embed-muted-color, color-mix(in srgb, currentColor 55%, transparent));
+  --_link: var(--meowdown-embed-link-color, #1d9bf0);
+  --_tint: color-mix(in srgb, currentColor 5%, transparent);
+  --_media-height: 7.5rem;
+  --_show-more-height: 2rem;
+  --_max-width: 28rem;
+
+  display: block;
+  /* As wide as the content, between 18rem and 28rem: a short text post stays
+   * small, while long text and media fill the full width. */
+  width: fit-content;
+  max-width: min(var(--_max-width), 100%);
+  font: inherit;
+  color: var(--meowdown-embed-color, inherit);
+  text-decoration-skip-ink: none;
+}
+
+/*
+ * The minimum width. A percentage `min-width` on the host resolves to nothing
+ * inside a shrink-to-fit parent (an inline-block editor wrapper), and a fixed
+ * one overflows a narrow container. A zero-height spacer instead raises the
+ * card's intrinsic width to 18rem and still yields to the host's `max-width`.
+ */
+[data-meowdown-embed='x'] [data-root]::before {
+  content: '';
+  display: block;
+  width: calc(18rem - 2 * var(--meowdown-embed-padding, 1rem) - 2px);
+  max-width: 100%;
+  height: 0;
+}
+
+[data-meowdown-embed='x'] [data-root] {
+  display: block;
+  position: relative;
+  /* The host's percentage `max-width` counts as `none` when a shrink-to-fit
+   * parent (an inline-block editor wrapper) measures the card, so long text
+   * would widen that parent to its own limit. A fixed cap here keeps the
+   * card's intrinsic width at 28rem. */
+  max-width: var(--_max-width);
+  color: var(--meowdown-embed-color, inherit);
+  background: var(--meowdown-embed-background, transparent);
+  border: 1px solid var(--_hairline);
+  border-radius: var(--meowdown-embed-radius, 0.75rem);
+  padding: var(--meowdown-embed-padding, 1rem);
+  font-size: 1em;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.45;
+  letter-spacing: normal;
+  text-align: start;
+  text-transform: none;
+  text-indent: 0;
+  text-shadow: none;
+  word-spacing: normal;
+  font-variant: normal;
+  hyphens: manual;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  cursor: auto;
+
+  & [hidden] {
+    display: none !important;
+  }
+  & p {
+    margin: 0;
+  }
+  & a {
+    color: var(--_link);
+    text-decoration: none;
+    cursor: pointer;
+  }
+  & a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  & a:focus-visible {
+    outline: 2px solid var(--_link);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Header */
+  & [data-author] {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-width: 0;
+  }
+  & [data-avatar] {
+    display: block;
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    object-fit: cover;
+    border-radius: 50%;
+    background: var(--_tint);
+  }
+  & [data-avatar][data-shape='square'] {
+    border-radius: 0.375rem;
+  }
+  & [data-avatar][data-shape='hexagon'] {
+    clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+  }
+  & [data-author-details] {
+    display: block;
+    min-width: 0;
+    flex: 1;
+    line-height: 1.3;
+  }
+  & [data-author-name] {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    font-weight: 600;
+  }
+  & [data-author-details] > bdi {
+    font-size: 0.9375em;
+    color: var(--_muted);
+  }
+  & [data-author-details] > bdi > a {
+    color: inherit;
+  }
+  & [data-date] {
+    display: block;
+    flex: none;
+    align-self: flex-start;
+    padding-inline-start: 0.25rem;
+    font-size: 0.8125em;
+    line-height: 1.3rem;
+    white-space: nowrap;
+    color: var(--_muted);
+  }
+  & [data-date] > a {
+    color: inherit;
+  }
+
+  /* Max height. The article is clipped to `--_body-limit`, the tallest
+   * article that keeps the card within `--meowdown-embed-max-height`. As a
+   * scroll container it has a scroll timeline only while the clip hides
+   * content, so the animation on that timeline sets `--_overflowing` exactly
+   * when the card is too tall. Then the article gives up one row, which the
+   * "Show more" toggle takes, so the whole card is exactly the limit. The
+   * toggle is anchored to the card's padding box, out of the article's clip.
+   * Browsers without scroll-driven animations show the whole card. */
+  & > article {
+    /* Room inside the clip for focus rings at the article's edges. */
+    --_clip-gutter: 4px;
+    --_body-limit: calc(
+      var(--meowdown-embed-max-height, 256px) - 2 * var(--meowdown-embed-padding, 1rem) - 2px + 2 *
+        var(--_clip-gutter)
+    );
+  }
+  & > article > [data-show-more] {
+    display: none;
+  }
+  & > article > [data-show-more] > summary {
+    display: block;
+    width: fit-content;
+    font-size: 0.9375em;
+    line-height: var(--_show-more-height);
+    color: var(--_link);
+    list-style: none;
+    cursor: pointer;
+  }
+  & > article > [data-show-more] > summary::-webkit-details-marker {
+    display: none;
+  }
+  & > article > [data-show-more] > summary::before {
+    content: 'Show more';
+  }
+  & > article > [data-show-more][open] > summary::before {
+    content: 'Show less';
+  }
+  & > article > [data-show-more] > summary:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  & > article > [data-show-more] > summary:focus-visible {
+    outline: 2px solid var(--_link);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  @supports (animation-timeline: scroll()) {
+    & > article {
+      max-height: calc(var(--_body-limit) - var(--_overflowing) * var(--_show-more-height));
+      overflow: hidden;
+      padding: var(--_clip-gutter);
+      margin: calc(-1 * var(--_clip-gutter));
+      margin-block-end: calc(var(--_overflowing) * var(--_show-more-height) - var(--_clip-gutter));
+      animation: meowdown-embed-overflowing linear both;
+      animation-timeline: scroll(self);
+    }
+    /* Opened, or holding keyboard focus that the clip could hide. */
+    & > article:has(> [data-show-more][open]),
+    & > article:has(:focus-visible:not(summary)) {
+      max-height: none;
+      overflow: visible;
+      margin-block-end: calc(-1 * var(--_clip-gutter));
+    }
+    @container style(--_overflowing: 1) {
+      /* On the content, not the article: a mask on the article would also
+       * hide the toggle below it. */
+      & > article > [data-content] {
+        mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+        mask-size: 100%
+          calc(var(--_body-limit) - var(--_show-more-height) - 2 * var(--_clip-gutter));
+        mask-repeat: no-repeat;
+      }
+      & > article > [data-show-more] {
+        display: block;
+        position: absolute;
+        inset-inline-start: var(--meowdown-embed-padding, 1rem);
+        bottom: var(--meowdown-embed-padding, 1rem);
+      }
+    }
+    /* Opened, "Show less" sticks to the bottom of the scrollport until the
+     * card's end scrolls into view. */
+    & > article > [data-show-more][open] {
+      display: block;
+      position: sticky;
+      bottom: 0.75rem;
+      z-index: 1;
+      width: fit-content;
+      margin: 0.5rem auto 0;
+    }
+    & > article > [data-show-more][open] > summary {
+      padding: 0.375rem 0.875rem;
+      border: 1px solid var(--_hairline);
+      border-radius: 999px;
+      background: var(--meowdown-embed-background, Canvas);
+      box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
+      font-size: 0.875em;
+      font-weight: 500;
+      line-height: normal;
+    }
+    & > article > [data-show-more][open] > summary:hover {
+      text-decoration: none;
+      background: color-mix(in srgb, var(--_link) 8%, var(--meowdown-embed-background, Canvas));
+    }
+  }
+
+  /* Body */
+  & [data-reply-to] {
+    display: block;
+    margin-block-start: 0.625rem;
+    font-size: 0.875em;
+    color: var(--_muted);
+  }
+  & [data-body] {
+    display: block;
+    margin-block: 0.75rem 0;
+    font-size: 1em;
+    line-height: 1.5;
+  }
+  & [data-reply-to] + [data-body] {
+    margin-block-start: 0.375rem;
+  }
+  & [data-text] {
+    white-space: pre-wrap;
+  }
+
+  /* Media */
+  & [data-media] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px;
+    height: var(--_media-height);
+    max-width: calc(2 * var(--_media-height));
+    margin-block-start: 0.75rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: var(--_hairline);
+  }
+  & [data-media-item] {
+    display: block;
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+  }
+  /* A hairline keeps white screenshots from dissolving into the card. */
+  & [data-media-item]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 10%, transparent);
+    pointer-events: none;
+  }
+  & [data-media-item] > a {
+    display: block;
+    height: 100%;
+  }
+  & [data-media-item] > [data-poster] {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: var(--_tint);
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+  & [data-play] {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 2.25rem;
+    height: 2.25rem;
+    translate: -50% -50%;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 60%);
+  }
+  & [data-play]::after {
+    content: '';
+    position: absolute;
+    inset: 50% auto auto 54%;
+    translate: -50% -50%;
+    border-block: 0.375rem solid transparent;
+    border-inline-start: 0.6rem solid #fff;
+  }
+  & [data-media-item] img,
+  & [data-media-item] video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: var(--_tint);
+  }
+  & [data-media-item][data-orientation='portrait'] :is(img, video) {
+    object-position: center 30%;
+  }
+  & [data-media][data-count='3'] [data-media-item]:first-child {
+    grid-row: span 2;
+  }
+  /* A single photo or video is a thumbnail of fixed height and its own ratio,
+   * never cropped; media wider than the card shrinks to fit. A video playing
+   * in place grows, and turns a grid into a stack so its player has room. */
+  & [data-media]:is([data-count='1'], :has(video)) {
+    display: block;
+    height: auto;
+    max-width: none;
+    border-radius: 0;
+    overflow: visible;
+    background: none;
+  }
+  & [data-media]:is([data-count='1'], :has(video)) > [data-media-item] {
+    width: calc(var(--_media-height) * (var(--_ratio, 16 / 9)));
+    max-width: 100%;
+    aspect-ratio: var(--_ratio, 16 / 9);
+    border-radius: 0.5rem;
+  }
+  & [data-media]:has(video) > [data-media-item] + [data-media-item] {
+    margin-block-start: 0.375rem;
+  }
+  & [data-media-item]:has(> video) {
+    --_media-height: 20rem;
+  }
+  & [data-media-item]:has(> [data-media-error]:not([hidden])) {
+    width: auto;
+    aspect-ratio: auto;
+  }
+  & [data-media-unavailable],
+  & [data-media-error] {
+    display: block;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: var(--_muted);
+    background: var(--_tint);
+  }
+
+  /* Quoted post */
+  & [data-quoted] {
+    --_media-height: 5rem;
+
+    display: block;
+    margin-block-start: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid var(--_hairline);
+    border-radius: 0.5rem;
+  }
+  & [data-quoted] [data-avatar] {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+  & [data-quoted] [data-author-details] {
+    display: flex;
+    align-items: baseline;
+    gap: 0 0.35rem;
+    line-height: 1.375rem;
+  }
+  & [data-quoted] [data-author-name],
+  & [data-quoted] [data-author-details] > bdi {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  & [data-quoted] [data-author-name] {
+    flex: 0 1 auto;
+  }
+  & [data-quoted] [data-author-details] > bdi {
+    flex: 0 100 auto;
+    min-width: 2.5rem;
+    font-size: 0.9375em;
+  }
+  & [data-quoted] [data-date] {
+    align-self: center;
+  }
+  & [data-quoted] [data-body] {
+    margin-block-start: 0.25rem;
+    font-size: 0.9375em;
+  }
+  & [data-quoted] [data-media] {
+    margin-block-start: 0.5rem;
+    border-radius: 0.375rem;
+  }
+  & [data-quoted] [data-play] {
+    scale: 0.75;
+  }
+  /* Quoted photos shrink to one thumbnail beside the text, with a count
+   * badge; a quoted video or GIF stays below the text so its player works. */
+  &
+    [data-quoted]:has(> [data-media]):not(
+      :has(> [data-media] [data-poster], > [data-media] video)
+    ) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'head head'
+      'body media'
+      'foot foot';
+    column-gap: 0.75rem;
+
+    & > [data-author] {
+      grid-area: head;
+    }
+    & > [data-body] {
+      grid-area: body;
+    }
+    & > [data-footer] {
+      grid-area: foot;
+    }
+    & > [data-media] {
+      grid-area: media;
+      position: relative;
+      display: block;
+      width: 4rem;
+      height: 4rem;
+      margin-block-start: 0.375rem;
+    }
+    & > [data-media] > [data-media-item] {
+      width: 100%;
+      height: 100%;
+    }
+    & > [data-media] > [data-media-item]:nth-child(n + 2) {
+      display: none;
+    }
+    & > [data-media]:not([data-count='1'])::after {
+      content: attr(data-count);
+      position: absolute;
+      inset: auto 0.25rem 0.25rem auto;
+      min-width: 1.25rem;
+      padding: 0 0.3125rem;
+      border-radius: 0.625rem;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      line-height: 1.25rem;
+      text-align: center;
+      color: #fff;
+      background: rgb(0 0 0 / 0.62);
+      pointer-events: none;
+    }
+  }
+
+  /* Footer: only the edit state; the date lives in the header. */
+  & [data-footer] {
+    display: block;
+    margin-block-start: 0.5rem;
+    font-size: 0.8125em;
+    color: var(--_muted);
+  }
+  & [data-edited] {
+    font-style: normal;
+  }
+
+  /* Fallback */
+  & [data-fallback] [data-body] {
+    color: var(--_muted);
+  }
+}
