@@ -141,4 +141,34 @@ describe('Markdown AST', () => {
     expect(roundTrip('1. a\n2.\n3. b\n')).toBe('1. a\n2.\n3. b\n')
     expect(roundTrip('> -\n')).toBe('> -\n')
   })
+
+  it('keeps the number of an ordered item only when it starts a list', () => {
+    const orders = (markdown: string) =>
+      parseMarkdownAst(markdown).children.map((child) =>
+        child.type === 'listItem' ? child.order : child.type,
+      )
+    expect(orders('1. a\n2. b\n3. c\n')).toEqual([1, undefined, undefined])
+    expect(orders('3. a\n3. b\n')).toEqual([3, undefined])
+    expect(orders('1. a\n2. b\n4) c\n5) d\n')).toEqual([1, undefined, 4, undefined])
+    expect(orders('1. a\n\n\n4. b\n')).toEqual([1, 'paragraph', 4])
+  })
+
+  it('numbers the items of an ordered list in sequence', () => {
+    const roundTrip = (markdown: string) => serializeMarkdownAst(parseMarkdownAst(markdown))
+    expect(roundTrip('1. a\n1. b\n1. c\n')).toBe('1. a\n2. b\n3. c\n')
+    expect(roundTrip('3. a\n3. b\n')).toBe('3. a\n4. b\n')
+    expect(roundTrip('1. a\n4. b\n1. c\n')).toBe('1. a\n2. b\n3. c\n')
+    expect(roundTrip('1. a\n   1. x\n   1. y\n1. b\n')).toBe('1. a\n   1. x\n   2. y\n2. b\n')
+    expect(roundTrip('> 1. a\n> 1. b\n')).toBe('> 1. a\n> 2. b\n')
+    expect(roundTrip('1. a\n- b\n1. c\n')).toBe('1. a\n- b\n1. c\n')
+    expect(roundTrip('1. a\n\n\n4. b\n')).toBe('1. a\n\n\n4. b\n')
+  })
+
+  it('numbers ordered items that carry no number', () => {
+    const ast = parseMarkdownAst('5. a\n5. b\n5. c\n')
+    for (const child of ast.children) {
+      if (child.type === 'listItem') child.order = undefined
+    }
+    expect(serializeMarkdownAst(ast)).toBe('1. a\n2. b\n3. c\n')
+  })
 })

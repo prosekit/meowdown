@@ -54,6 +54,12 @@ export function checkRoundTrip(
     return 'exact'
   }
 
+  markdown = removeListNumbers(markdown)
+  serialized = removeListNumbers(serialized)
+  if (markdown === serialized) {
+    return 'normalizing'
+  }
+
   markdown = removeMarkdownStructure(markdown)
   serialized = removeMarkdownStructure(serialized)
   if (markdown === serialized) {
@@ -73,6 +79,11 @@ export function checkRoundTrip(
   }
 
   return 'lossy'
+}
+
+// "1. a\n1. b" and "1. a\n2. b" should be treated as equivalent
+function removeListNumbers(markdown: string) {
+  return markdown.replaceAll(/\d{1,9}(?=[.)])/gu, '')
 }
 
 // Removes all markdown structure characters

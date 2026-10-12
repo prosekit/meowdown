@@ -116,7 +116,7 @@ describe('a second press splits the block', () => {
     fixture.set(n.doc(n.list({ kind: 'ordered', order: 1 }, n.paragraph('foo<a>bar'))))
     await pressShiftEnter()
     await pressShiftEnter()
-    expect(docToMarkdown(fixture.doc)).toBe('1. foo\n1. bar\n')
+    expect(docToMarkdown(fixture.doc)).toBe('1. foo\n2. bar\n')
   })
 
   it('keeps a nested item at its own depth', async () => {

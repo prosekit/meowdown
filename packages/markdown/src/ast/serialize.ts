@@ -394,7 +394,7 @@ function emit(node: MarkdownNode, out: MdOut): void {
       out.closeBlock()
       return
     case 'listItem':
-      emitList(node, out, isTightItem(node))
+      emitList(node, out, isTightItem(node), node.order ?? 1)
       return
     case 'codeBlock':
       emitCodeBlock(node, out)
@@ -443,6 +443,7 @@ function emitBlockChildren(children: MarkdownBlock[], out: MdOut, tightItem = fa
     let runEnd = index + 1
     while (runEnd < count && children[runEnd].type === 'listItem') runEnd++
     const tightRun = isTightRun(children, index, runEnd)
+    let order = 1
     for (let item = index; item < runEnd; item++) {
       const child = children[item]
       if (child.type !== 'listItem') continue
@@ -453,7 +454,10 @@ function emitBlockChildren(children: MarkdownBlock[], out: MdOut, tightItem = fa
       // follows - which is a paragraph whenever the blank is being dropped.
       const carriesOn = !isRunStart && listMarkerChar(children[item - 1]) === listMarkerChar(child)
       if (tight && (carriesOn || canInterruptParagraph(child))) out.suppressBlank()
-      emitList(child, out, tightRun)
+      // Only the first item of an ordered list sets its number; the items
+      // after it count up, as a Markdown renderer numbers them.
+      order = carriesOn ? Math.min(order + 1, MAX_LIST_ORDER) : (child.order ?? 1)
+      emitList(child, out, tightRun, order)
     }
     index = runEnd
   }
@@ -765,8 +769,11 @@ function hasBlockContent(node: MarkdownBlock): boolean {
 // List
 // ─────────────────────────────────────────────────────────────────────
 
-function emitList(node: MarkdownListItem, out: MdOut, tight: boolean): void {
-  const { kind, order, taskMarker, markerGap, checked } = node
+// An ordered list marker holds at most nine digits.
+const MAX_LIST_ORDER = 999_999_999
+
+function emitList(node: MarkdownListItem, out: MdOut, tight: boolean, order: number): void {
+  const { kind, taskMarker, markerGap, checked } = node
   // A bullet records its fold state in the marker: `+` is collapsed, `-`/`*` are
   // expanded. A task uses `+` for the circle shape, independent of collapse (a
   // task's fold is view-state and never written to Markdown).
@@ -774,7 +781,7 @@ function emitList(node: MarkdownListItem, out: MdOut, tight: boolean): void {
   const checkMark = taskMarker === 'X' ? 'X' : 'x'
   // The delimiter plus its original gap (1-4 spaces).
   const gap = Math.min(Math.max(markerGap ?? 1, 1), 4)
-  const delimiter = kind === 'ordered' ? `${order ?? 1}${markerChar}` : markerChar
+  const delimiter = kind === 'ordered' ? `${order}${markerChar}` : markerChar
   const prefix = `${delimiter}${' '.repeat(gap)}`
   const outputMarker = kind === 'task' ? `${prefix}[${checked ? checkMark : ' '}] ` : prefix
   const continuation = ' '.repeat(prefix.length)

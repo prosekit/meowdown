@@ -26,6 +26,7 @@ import type {
   MarkdownCodeBlock,
   MarkdownDocument,
   MarkdownListItem,
+  MarkdownNode,
   MarkdownParagraph,
   MarkdownPosition,
   MarkdownTable,
@@ -64,7 +65,32 @@ export function parseMarkdownAst(
     children: collectBlocks(tree.cursor(), rest, 0, base > 0),
   }
   if (base) relocatePositions(document, base)
+  clearContinuedOrders(document)
   return document
+}
+
+/**
+ * Only the first item of an ordered list sets its number, so the number on an
+ * item that continues the list above it carries no meaning and is dropped.
+ */
+function clearContinuedOrders(document: MarkdownDocument): void {
+  for (const { node } of walkMarkdownAst(document)) {
+    if (!('children' in node) || !node.children) continue
+    const children: readonly MarkdownNode[] = node.children
+    for (let i = children.length - 1; i > 0; i--) {
+      const child = children[i]
+      const previous = children[i - 1]
+      if (
+        child.type === 'listItem' &&
+        child.kind === 'ordered' &&
+        previous.type === 'listItem' &&
+        previous.kind === 'ordered' &&
+        (child.marker === ')') === (previous.marker === ')')
+      ) {
+        child.order = undefined
+      }
+    }
+  }
 }
 
 /**

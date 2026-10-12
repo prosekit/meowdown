@@ -84,7 +84,8 @@ export interface MarkdownListItem extends MarkdownPositioned {
   type: 'listItem'
   kind: 'bullet' | 'ordered' | 'task'
   /**
-   * Number of an ordered item, defaulting to 1.
+   * The number an ordered list starts at, defaulting to 1. Only the first item
+   * of a list carries it: the items after it count up from there.
    */
   order?: number | undefined
   checked: boolean

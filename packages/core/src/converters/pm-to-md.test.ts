@@ -127,13 +127,13 @@ describe('docToMarkdown', () => {
     expect(markdown).toBe('- one\n- two\n')
   })
 
-  it('keeps an ordered start number', () => {
+  it('numbers ordered items from the start number of the first one', () => {
     const doc = n.doc(
       n.list({ kind: 'ordered', order: 5 }, n.paragraph('five')),
       n.list({ kind: 'ordered', order: 5 }, n.paragraph('six')),
     )
     const markdown = docToMarkdown(doc)
-    expect(markdown).toBe('5. five\n5. six\n')
+    expect(markdown).toBe('5. five\n6. six\n')
   })
 
   it('writes a collapsed bullet with `+`', () => {

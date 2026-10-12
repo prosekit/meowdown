@@ -142,7 +142,7 @@ export const sampleContent: NodeJSON = {
       type: 'list',
       attrs: {
         kind: 'ordered',
-        order: 2,
+        order: null,
         checked: false,
         collapsed: false,
         marker: '.',

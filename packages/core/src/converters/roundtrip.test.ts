@@ -499,8 +499,8 @@ describe('ordered lists', () => {
     expect(roundtrip('1. a\n   1. nested')).toBe('1. a\n   1. nested\n')
   })
 
-  it('keeps repeated 1. numbering', () => {
-    expect(roundtrip('1. one\n1. two')).toBe('1. one\n1. two\n')
+  it('numbers repeated 1. items in sequence', () => {
+    expect(roundtrip('1. one\n1. two')).toBe('1. one\n2. two\n')
   })
 
   it('keeps sequential numbers', () => {

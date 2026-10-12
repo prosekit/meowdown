@@ -127,6 +127,10 @@ const NORMALIZING_CASES: string[] = [
   // a loose list serializes tight
   '- a\n\n- b',
 
+  // the items of an ordered list are numbered in sequence
+  '1. a\n1. b\n1. c',
+  '3) a\n7) b',
+
   // a blockquote gains an empty `>` line before a following list
   '> text\n> - item',
   '> a\n> - x\n> - y',
