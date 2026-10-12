@@ -1,5 +1,17 @@
 # @meowdown/core
 
+## 0.81.0
+
+### Minor Changes
+
+- [#690](https://github.com/prosekit/meowdown/pull/690) [`3b1fbb5`](https://github.com/prosekit/meowdown/commit/3b1fbb5ce224f0280e6aa4f19acaddf08034d338) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Remove the `checkRoundTrip` re-export. Import it from `@meowdown/markdown`.
+
+### Patch Changes
+
+- [#688](https://github.com/prosekit/meowdown/pull/688) [`3673523`](https://github.com/prosekit/meowdown/commit/3673523c6ce760b46c2de5ae0871c4a5806e1bf0) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Optional properties in public types now accept an explicit `undefined`, so they work under [`exactOptionalPropertyTypes`](https://www.typescriptlang.org/tsconfig/#exactOptionalPropertyTypes).
+- Updated dependencies [[`3673523`](https://github.com/prosekit/meowdown/commit/3673523c6ce760b46c2de5ae0871c4a5806e1bf0)]:
+  - @meowdown/markdown@0.76.1
+
 ## 0.80.0
 
 ### Minor Changes

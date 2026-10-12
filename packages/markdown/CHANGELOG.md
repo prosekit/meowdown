@@ -1,5 +1,11 @@
 # @meowdown/markdown
 
+## 0.76.1
+
+### Patch Changes
+
+- [#688](https://github.com/prosekit/meowdown/pull/688) [`3673523`](https://github.com/prosekit/meowdown/commit/3673523c6ce760b46c2de5ae0871c4a5806e1bf0) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Optional properties in public types now accept an explicit `undefined`, so they work under [`exactOptionalPropertyTypes`](https://www.typescriptlang.org/tsconfig/#exactOptionalPropertyTypes).
+
 ## 0.76.0
 
 ### Minor Changes
