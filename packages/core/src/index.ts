@@ -1,8 +1,3 @@
-export {
-  checkRoundTrip,
-  type CheckRoundTripOptions,
-  type RoundTripFidelity,
-} from '@meowdown/markdown'
 export { Priority, withPriority } from '@prosekit/core'
 export {
   defineCodeBlockPreviewPlugin,
