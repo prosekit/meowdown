@@ -1,5 +1,13 @@
 # @meowdown/core
 
+## 0.81.1
+
+### Patch Changes
+
+- [#695](https://github.com/prosekit/meowdown/pull/695) [`ab56a0b`](https://github.com/prosekit/meowdown/commit/ab56a0be47d711e61ea9a4b1e1ae600affec5d61) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Number the items of an ordered list in sequence when writing Markdown, so `1.`, `1.`, `1.` becomes `1.`, `2.`, `3.`. Only the first item of a list now carries `order`, its start number.
+- Updated dependencies [[`ab56a0b`](https://github.com/prosekit/meowdown/commit/ab56a0be47d711e61ea9a4b1e1ae600affec5d61)]:
+  - @meowdown/markdown@0.77.0
+
 ## 0.81.0
 
 ### Minor Changes
