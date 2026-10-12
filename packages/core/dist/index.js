@@ -3,7 +3,7 @@ import { Priority, Priority as Priority$1, createMarkBuilders, createNodeBuilder
 import { codeBlockEnterRule, codeBlockInputRule, defineCodeBlockCommands, defineCodeBlockHighlight, defineCodeBlockKeymap, defineCodeBlockPreviewPlugin, defineCodeBlockSpec, isCodeBlockPreviewHiddenDecoration } from "@prosekit/extensions/code-block";
 import { definePlaceholder, definePlaceholder as definePlaceholder$1 } from "@prosekit/extensions/placeholder";
 import { defineSearchCommands, defineSearchQuery, defineSearchStatusHandler, getSearchStatus, getSearchStatus as getSearchStatus$1 } from "@prosekit/extensions/search";
-import { isElementLike, isHTMLElement, isObject, once } from "@ocavue/utils";
+import { debounce, isElementLike, isHTMLElement, isObject, once } from "@ocavue/utils";
 import { defineDoc } from "@prosekit/extensions/doc";
 import { defineGapCursor } from "@prosekit/extensions/gap-cursor";
 import { defineModClickPrevention } from "@prosekit/extensions/mod-click-prevention";
@@ -4824,28 +4824,21 @@ function createInlineMarkPlugin(getOptions) {
 		},
 		view(view) {
 			view.dispatch(triggerInlineMarks(view.state));
-			let timer;
+			const controller = new AbortController();
 			const flush = (currentView) => {
-				timer = void 0;
 				if (currentView.isDestroyed) return;
 				if ((pluginKey.getState(currentView.state)?.pendingReferenceKeys.size ?? 0) === 0) return;
 				currentView.dispatch(currentView.state.tr.setMeta(RESTYLE_KEY, true));
 			};
+			const scheduleFlush = debounce(flush, RESTYLE_DEBOUNCE_MS, { signal: controller.signal });
 			return {
 				update(currentView, previousState) {
 					const current = pluginKey.getState(currentView.state);
-					if ((current?.pendingReferenceKeys.size ?? 0) === 0) {
-						if (timer != null) clearTimeout(timer);
-						timer = void 0;
-						return;
-					}
-					if (timer == null || pluginKey.getState(previousState) !== current) {
-						if (timer != null) clearTimeout(timer);
-						timer = setTimeout(() => flush(currentView), RESTYLE_DEBOUNCE_MS);
-					}
+					if ((current?.pendingReferenceKeys.size ?? 0) === 0) return;
+					if (pluginKey.getState(previousState) !== current) scheduleFlush(currentView);
 				},
 				destroy() {
-					if (timer != null) clearTimeout(timer);
+					controller.abort();
 				}
 			};
 		}

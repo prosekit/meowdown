@@ -38,7 +38,7 @@ function renderAuthor(author, protocols, date) {
 }
 
 //#endregion
-//#region ../../node_modules/.pnpm/@ocavue+utils@1.8.0/node_modules/@ocavue/utils/dist/index.js
+//#region ../../node_modules/.pnpm/@ocavue+utils@1.9.0/node_modules/@ocavue/utils/dist/index.js
 /**
 * Returns true if the given value is not null or undefined.
 */
