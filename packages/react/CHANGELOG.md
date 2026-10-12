@@ -1,5 +1,11 @@
 # @meowdown/react
 
+## 0.80.1
+
+### Patch Changes
+
+- [#692](https://github.com/prosekit/meowdown/pull/692) [`3d2b519`](https://github.com/prosekit/meowdown/commit/3d2b5193dfa27abfef43d6ad6cbcb7278e69b521) Thanks [@ocavuebot](https://github.com/ocavuebot)! - The wikilink menu now shows the full `detail` text of a row in a tooltip on hover, so a truncated detail can still be read.
+
 ## 0.80.0
 
 ### Minor Changes
