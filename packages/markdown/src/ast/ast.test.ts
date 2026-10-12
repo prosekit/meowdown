@@ -143,10 +143,8 @@ describe('Markdown AST', () => {
   })
 
   it('keeps the number of an ordered item only when it starts a list', () => {
-    const orders = (markdown: string) =>
-      parseMarkdownAst(markdown).children.map((child) =>
-        child.type === 'listItem' ? child.order : child.type,
-      )
+    const orders = (markdown: string) => { return parseMarkdownAst(markdown).children.map((child) => { return child.type === 'listItem' ? child.order : child.type },
+      ) }
     expect(orders('1. a\n2. b\n3. c\n')).toEqual([1, undefined, undefined])
     expect(orders('3. a\n3. b\n')).toEqual([3, undefined])
     expect(orders('1. a\n2. b\n4) c\n5) d\n')).toEqual([1, undefined, 4, undefined])
