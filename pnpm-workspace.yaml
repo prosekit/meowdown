@@ -29,6 +29,8 @@ minimumReleaseAgeExclude:
   - eslint-plugin-ocavue
   - vitest-browser-commands
   - prosemirror-flat-list
+  - playwright-core@1.65.0-alpha-2026-10-13
+  - playwright@1.65.0-alpha-2026-10-13
 
 allowBuilds:
   esbuild: false

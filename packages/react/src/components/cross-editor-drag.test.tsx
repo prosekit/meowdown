@@ -4,7 +4,7 @@ import { createRef, type ReactNode, type Ref } from 'react'
 import { describe, expect, it } from 'vitest'
 import { mouse } from 'vitest-browser-commands/playwright'
 import { render } from 'vitest-browser-react'
-import { page, server, type Locator } from 'vitest/browser'
+import { page, type Locator } from 'vitest/browser'
 
 import { hover, unhover } from '../testing/mouse.ts'
 
@@ -48,9 +48,7 @@ async function drop() {
     .not.toHaveAttribute('data-dragging')
 }
 
-// Playwright's WebKit reports the wrong `dropEffect` on `dragend`.
-// https://github.com/microsoft/playwright/issues/43082
-describe.skipIf(server.browser === 'webkit')('cross editor block drag', () => {
+describe('cross editor block drag', () => {
   it('moves the block into the other editor', async () => {
     const from = createRef<EditorHandle>()
     const to = createRef<EditorHandle>()
