@@ -1,5 +1,11 @@
 # @meowdown/react
 
+## 0.80.3
+
+### Patch Changes
+
+- [#698](https://github.com/prosekit/meowdown/pull/698) [`ff21b6c`](https://github.com/prosekit/meowdown/commit/ff21b6c3ff647faefd211d6b27babcf4810a4560) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Show the node selection outline on code blocks, including math and Mermaid previews, when they are selected with the block handle.
+
 ## 0.80.2
 
 ### Patch Changes
