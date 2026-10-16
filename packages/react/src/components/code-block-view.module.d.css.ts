@@ -3,6 +3,8 @@ declare const styles = {
   'Root': '' as string,
   'Root': '' as string,
   'Root': '' as string,
+  'Root': '' as string,
+  'Root': '' as string,
   'Toolbar': '' as string,
   'Preview': '' as string,
   'MermaidPreview': '' as string,
