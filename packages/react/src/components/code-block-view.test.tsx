@@ -8,7 +8,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
-import { hover } from '../testing/mouse.ts'
+import { hover, unhover } from '../testing/mouse.ts'
 
 import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle } from './types.ts'
@@ -261,6 +261,33 @@ describe('code block Mermaid preview', () => {
     await expect.element(mermaidPreview.locate('script')).not.toBeInTheDocument()
     await expect.element(mermaidPreview.locate('img')).not.toBeInTheDocument()
     await expect.element(mermaidPreview.locate('[onerror]')).not.toBeInTheDocument()
+  })
+})
+
+describe('code block node selection', () => {
+  const codeBlock = page.getByTestId('code-block')
+  const dragHandle = page.getByTestId('block-handle-drag')
+
+  it('outlines a math block selected with the block handle', async () => {
+    await unhover()
+    await render(<ProseKitEditor initialMarkdown={MATH_BLOCK_MD} />)
+    await expect.element(mathPreview.locate('.katex')).toBeInTheDocument()
+
+    await hover(mathPreview)
+    await dragHandle.click()
+
+    await expect.element(codeBlock).toHaveStyle({ outlineStyle: 'solid' })
+  })
+
+  it('outlines a Mermaid block selected with the block handle', async () => {
+    await unhover()
+    await render(<ProseKitEditor initialMarkdown={MERMAID_BLOCK_MD} />)
+    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+
+    await hover(mermaidPreview)
+    await dragHandle.click()
+
+    await expect.element(codeBlock).toHaveStyle({ outlineStyle: 'solid' })
   })
 })
 

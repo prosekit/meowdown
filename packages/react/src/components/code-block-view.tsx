@@ -70,7 +70,12 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
   )
 
   return (
-    <div className={styles.Root} data-preview={previewOnly || undefined}>
+    <div
+      className={styles.Root}
+      data-preview={previewOnly || undefined}
+      data-selected={selected || undefined}
+      data-testid="code-block"
+    >
       <pre ref={contentRef} data-language={language} {...NON_PROSE_PROPS}></pre>
       {
         /* Skip rendering the toolbar during dragging to improve the performance of rendering the drag preview image in Safari */

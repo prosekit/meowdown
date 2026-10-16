@@ -2,6 +2,18 @@
   position: relative;
 }
 
+/* The node view replaces prosemirror-view's `selectNode`, so the root never
+ * gets `ProseMirror-selectednode`. Mirror the core node selection style. */
+.Root[data-selected] {
+  border-radius: 0.6rem;
+  outline: 1px solid var(--meowdown-node-outline);
+  background: var(--meowdown-node-selection);
+}
+
+:global(.prosekit-dragging) .Root[data-selected] {
+  background: transparent;
+}
+
 /* Preview-only state: the caret is outside a rendered block, so the source and
  * its toolbar give way to the rendered formula. The caret can never sit in
  * the hidden source (entering it flips the state back), so the missing box
