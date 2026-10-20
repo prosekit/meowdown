@@ -1,4 +1,5 @@
 import {
+  canUseRegexLookbehind,
   defineKeymap,
   definePlugin,
   getMarkType,
@@ -19,7 +20,7 @@ type SubstitutionRule = [regexp: RegExp, replacement: string]
 const SUBSTITUTION_RULES: SubstitutionRule[] = [
   [/<-/, '←'],
   // `-->` is Markdown's HTML comment closing delimiter.
-  [/(?<!-)->/, '→'],
+  [new RegExp((canUseRegexLookbehind() ? '(?<!-)' : '') + '->'), '→'],
   [/\(c\)/, '©'],
   [/\(r\)/, '®'],
   [/1\/2/, '½'],
@@ -28,7 +29,7 @@ const SUBSTITUTION_RULES: SubstitutionRule[] = [
   [/<</, '«'],
   [/>>/, '»'],
   // Keep HTML comment openers and thematic-break markers literal.
-  [/(?<!<!)(?<!^(?:-[ \t]*)+)--/, '—'],
+  [new RegExp((canUseRegexLookbehind() ? String.raw`(?<!<!)(?<!^(?:-[ \t]*)+)` : '') + '--'), '—'],
 ]
 
 interface SubstitutionUndoState {
