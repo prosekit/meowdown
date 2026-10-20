@@ -6,6 +6,7 @@ import { useCallback, useRef, useState } from 'react'
 
 import { DemoLightbox } from '../components/demo-lightbox.tsx'
 import { SegmentedControl } from '../components/segmented-control.tsx'
+import { SelectionMenuShortcut, useSelectionDemo } from '../components/selection-demo.tsx'
 import { useDemoLightbox } from '../components/use-demo-lightbox.ts'
 import { WikilinkPreviewCard } from '../components/wikilink-preview-card.tsx'
 import {
@@ -24,7 +25,6 @@ import { useMounted } from '../lib/use-mounted.ts'
 import INITIAL_CONTENT from '../presets/000-default.md?raw'
 
 import { FindShortcut, useFindDemo } from './find-demo.tsx'
-import { SelectionMenuShortcut, useSelectionDemo } from './selection-demo.tsx'
 import { MODES, useEditorMode } from './use-editor-mode.ts'
 
 export function HomeDemo() {

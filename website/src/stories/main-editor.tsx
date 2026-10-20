@@ -9,6 +9,7 @@ import { NuqsAdapter } from 'nuqs/adapters/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { DemoLightbox } from '../components/demo-lightbox.tsx'
+import { SelectionMenuShortcut, useSelectionDemo } from '../components/selection-demo.tsx'
 import { useDemoLightbox } from '../components/use-demo-lightbox.ts'
 import { WikilinkPreviewCard } from '../components/wikilink-preview-card.tsx'
 import {
@@ -92,6 +93,7 @@ function MainEditorDemo() {
   const { mode, doc, spellcheck, readOnly, blockHandle, caretGlide, source: showSource } = params
 
   const editorRef = useRef<EditorHandle>(null)
+  const selectionDemo = useSelectionDemo(editorRef)
   const sourceViewRef = useRef<EditorView>(null)
   const [syncStatus, setSyncStatus] = useState<SyncStatus>()
   // The document both panes are created with: the shared content when the link
@@ -240,6 +242,9 @@ function MainEditorDemo() {
             onDocChange={handleRichChange}
             onTagSearch={searchTags}
             onWikilinkSearch={searchNotes}
+            onSelectionMenuSearch={selectionDemo.onSelectionMenuSearch}
+            pendingReplacementActions={selectionDemo.pendingReplacementActions}
+            onPendingReplacementResolve={selectionDemo.onPendingReplacementResolve}
             onImageClick={handleImageClick}
             onXPostMediaClick={handleXPostMediaClick}
             onYouTubeVideoClick={handleYouTubeVideoClick}
@@ -248,6 +253,7 @@ function MainEditorDemo() {
             onTagClick={handleTagClick}
             onWikilinkClick={handleWikilinkClick}
           >
+            <SelectionMenuShortcut onTrigger={selectionDemo.openMenu} />
             <WikilinkPreviewCard />
           </MarkdownEditor>
         </div>
