@@ -9,16 +9,21 @@ import { NuqsAdapter } from 'nuqs/adapters/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { DemoLightbox } from '../components/demo-lightbox.tsx'
+import { FindShortcut, useFindDemo } from '../components/find-demo.tsx'
 import { SelectionMenuShortcut, useSelectionDemo } from '../components/selection-demo.tsx'
 import { useDemoLightbox } from '../components/use-demo-lightbox.ts'
 import { WikilinkPreviewCard } from '../components/wikilink-preview-card.tsx'
 import {
+  handleFileClick,
   handleLinkClick,
   handleTagClick,
   handleWikilinkClick,
+  resolveFileInfo,
+  resolveFileLink,
   resolveLinkPreview,
   searchNotes,
   searchTags,
+  uploadAndTrackFile,
 } from '../lib/demo-data.ts'
 import { computeTextPatch } from '../lib/text-patch.ts'
 import { useMounted } from '../lib/use-mounted.ts'
@@ -94,6 +99,7 @@ function MainEditorDemo() {
 
   const editorRef = useRef<EditorHandle>(null)
   const selectionDemo = useSelectionDemo(editorRef)
+  const findDemo = useFindDemo(editorRef)
   const sourceViewRef = useRef<EditorView>(null)
   const [syncStatus, setSyncStatus] = useState<SyncStatus>()
   // The document both panes are created with: the shared content when the link
@@ -230,32 +236,42 @@ function MainEditorDemo() {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col gap-3 lg:flex-row">
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto rounded-xl border border-solid border-black/8 bg-white dark:border-white/12 dark:bg-stone-900">
-          <MarkdownEditor
-            mode={mode}
-            spellCheck={spellcheck === 'default' ? undefined : spellcheck === 'on'}
-            readOnly={readOnly}
-            blockHandle={blockHandle}
-            caretGlide={caretGlide}
-            initialMarkdown={initialMarkdown}
-            handleRef={editorRef}
-            onDocChange={handleRichChange}
-            onTagSearch={searchTags}
-            onWikilinkSearch={searchNotes}
-            onSelectionMenuSearch={selectionDemo.onSelectionMenuSearch}
-            pendingReplacementActions={selectionDemo.pendingReplacementActions}
-            onPendingReplacementResolve={selectionDemo.onPendingReplacementResolve}
-            onImageClick={handleImageClick}
-            onXPostMediaClick={handleXPostMediaClick}
-            onYouTubeVideoClick={handleYouTubeVideoClick}
-            onLinkClick={handleLinkClick}
-            resolveLinkPreview={resolveLinkPreview}
-            onTagClick={handleTagClick}
-            onWikilinkClick={handleWikilinkClick}
-          >
-            <SelectionMenuShortcut onTrigger={selectionDemo.openMenu} />
-            <WikilinkPreviewCard />
-          </MarkdownEditor>
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto rounded-xl border border-solid border-black/8 bg-white dark:border-white/12 dark:bg-stone-900">
+            <MarkdownEditor
+              mode={mode}
+              spellCheck={spellcheck === 'default' ? undefined : spellcheck === 'on'}
+              readOnly={readOnly}
+              blockHandle={blockHandle}
+              caretGlide={caretGlide}
+              searchQuery={findDemo.query}
+              onSearchChange={findDemo.onSearchChange}
+              initialMarkdown={initialMarkdown}
+              handleRef={editorRef}
+              onDocChange={handleRichChange}
+              onTagSearch={searchTags}
+              onWikilinkSearch={searchNotes}
+              onSelectionMenuSearch={selectionDemo.onSelectionMenuSearch}
+              pendingReplacementActions={selectionDemo.pendingReplacementActions}
+              onPendingReplacementResolve={selectionDemo.onPendingReplacementResolve}
+              onFilePaste={uploadAndTrackFile}
+              resolveFileLink={resolveFileLink}
+              resolveFileInfo={resolveFileInfo}
+              onFileClick={handleFileClick}
+              onImageClick={handleImageClick}
+              onXPostMediaClick={handleXPostMediaClick}
+              onYouTubeVideoClick={handleYouTubeVideoClick}
+              onLinkClick={handleLinkClick}
+              resolveLinkPreview={resolveLinkPreview}
+              onTagClick={handleTagClick}
+              onWikilinkClick={handleWikilinkClick}
+            >
+              <SelectionMenuShortcut onTrigger={selectionDemo.openMenu} />
+              <FindShortcut onTrigger={findDemo.openBar} />
+              <WikilinkPreviewCard />
+            </MarkdownEditor>
+          </div>
+          {findDemo.bar}
         </div>
 
         {showSource && (
