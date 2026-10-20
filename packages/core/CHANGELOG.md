@@ -1,5 +1,15 @@
 # @meowdown/core
 
+## 0.81.2
+
+### Patch Changes
+
+- [#702](https://github.com/prosekit/meowdown/pull/702) [`9ba79c9`](https://github.com/prosekit/meowdown/commit/9ba79c99e177c1cda9d478abc8114456e6323aab) Thanks [@ocavue](https://github.com/ocavue)! - Update virtual caret margin.
+
+- [#704](https://github.com/prosekit/meowdown/pull/704) [`e1e0e2f`](https://github.com/prosekit/meowdown/commit/e1e0e2fc38bff102ff4b5eb0bb23a6846a258e66) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Keep menus next to the selection while the editor scrolls.
+
+- [#700](https://github.com/prosekit/meowdown/pull/700) [`318b69f`](https://github.com/prosekit/meowdown/commit/318b69fac1c664e5771070a4c81e30f349771589) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Avoid regex lookbehind literals so the editor loads on Safari before 16.4.
+
 ## 0.81.1
 
 ### Patch Changes
