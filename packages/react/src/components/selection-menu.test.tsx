@@ -27,6 +27,24 @@ function searchItems(query: string): SelectionMenuItem[] {
 // The doc is one paragraph 'say hello end'; 'hello' spans positions 5..10.
 const HELLO_SELECTION = { type: 'text', anchor: 5, head: 10 } as const
 
+// Base UI keeps the positioner transparent until it has placed the menu.
+function getPlacedMenuRect(): DOMRect {
+  const popup = menu.element()
+  expect(popup.parentElement && getComputedStyle(popup.parentElement).opacity).toBe('1')
+  return popup.getBoundingClientRect()
+}
+
+// Paragraphs that wrap across the editor's width: 'line 01 word word ...'.
+// Each holds 107 characters, so paragraph `n` (1-based) spans positions
+// 109n - 108 .. 109n - 1.
+function createParagraphs(count: number): string {
+  const words = 'word '.repeat(20).trim()
+  return Array.from(
+    { length: count },
+    (_, i) => `line ${String(i + 1).padStart(2, '0')} ${words}`,
+  ).join('\n\n')
+}
+
 describe('SelectionMenu', () => {
   it('opens over a selection via the handle and lists the items', async () => {
     const ref = createRef<EditorHandle>()
@@ -137,6 +155,34 @@ describe('SelectionMenu', () => {
     ref.current?.setSelection(HELLO_SELECTION)
     ref.current?.openSelectionMenu()
     await expect.element(menu).not.toBeInTheDocument()
+  })
+
+  it('moves with the selection when the editor scroll container scrolls', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(
+      <div data-testid="scroller" style={{ height: 300, overflowY: 'auto' }}>
+        <ProseKitEditor
+          ref={ref}
+          initialMarkdown={createParagraphs(30)}
+          onSelectionMenuSearch={searchItems}
+        />
+      </div>,
+    )
+    const scroller = page.getByTestId('scroller')
+    const line = pmRoot.element().children[3]
+    const getGap = () => getPlacedMenuRect().top - line.getBoundingClientRect().top
+    ref.current?.setSelection({ type: 'text', anchor: 328, head: 335 })
+    expect(ref.current?.getSelectedText()).toBe('line 04')
+    ref.current?.openSelectionMenu()
+    await expect.element(menu.getByText('Fix grammar')).toBeVisible()
+    await vi.waitFor(() => expect(getGap()).toBeGreaterThan(0))
+    const gap = getGap()
+
+    await userEvent.wheel(scroller, { delta: { y: 40 } })
+    await vi.waitFor(() => {
+      expect(scroller.element().scrollTop).toBeGreaterThan(0)
+      expect(getGap()).toBeCloseTo(gap, 0)
+    })
   })
 
   it('passes onSelectionMenuSearch through <MarkdownEditor>', async () => {

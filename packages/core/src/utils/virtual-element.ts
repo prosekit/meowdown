@@ -62,5 +62,6 @@ export function getVirtualElementFromRange(view: EditorView, range: PositionRang
   return {
     getBoundingClientRect,
     getClientRects: () => [getBoundingClientRect()],
+    contextElement: view.dom,
   }
 }
