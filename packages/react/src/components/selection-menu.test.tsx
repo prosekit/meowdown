@@ -157,6 +157,37 @@ describe('SelectionMenu', () => {
     await expect.element(menu).not.toBeInTheDocument()
   })
 
+  it('stays on screen for a selection taller than a third of the viewport', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(
+      <ProseKitEditor
+        ref={ref}
+        initialMarkdown={createParagraphs(12)}
+        onSelectionMenuSearch={searchItems}
+      />,
+    )
+    const { innerWidth, innerHeight } = window
+    // A phone-sized viewport: no room beside the text, and the tenth paragraph
+    // ends just above the bottom edge.
+    await page.viewport(400, innerHeight)
+    const height = Math.round(pmRoot.element().children[9].getBoundingClientRect().bottom + 60)
+    await page.viewport(400, height)
+    try {
+      // From the start of the first paragraph to the end of the tenth.
+      ref.current?.setSelection({ type: 'text', anchor: 1, head: 1089 })
+      expect(ref.current?.getSelectedText()).toMatch(/^line 01 [\s\S]* word$/)
+      ref.current?.openSelectionMenu()
+      await expect.element(menu.getByText('Fix grammar')).toBeVisible()
+      await vi.waitFor(() => {
+        const rect = getPlacedMenuRect()
+        expect(rect.top).toBeGreaterThan(0)
+        expect(rect.bottom).toBeLessThanOrEqual(height)
+      })
+    } finally {
+      await page.viewport(innerWidth, innerHeight)
+    }
+  })
+
   it('moves with the selection when the editor scroll container scrolls', async () => {
     const ref = createRef<EditorHandle>()
     await render(

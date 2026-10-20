@@ -9,6 +9,7 @@
   flex-direction: column;
   box-sizing: border-box;
   width: 100%;
+  max-height: var(--available-height);
   padding: 0.25rem;
   font-size: 0.875rem;
   border: 1px solid var(--meowdown-border);
@@ -20,6 +21,7 @@
 }
 
 .Input {
+  flex: none;
   box-sizing: border-box;
   width: 100%;
   padding: 0.375rem 0.5rem;
@@ -39,6 +41,9 @@
 .List {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
+  /* A floor keeps the menu from shrinking onto a side with room for only one row. */
+  min-height: 6rem;
   max-height: 16rem;
   overflow-y: auto;
 }
