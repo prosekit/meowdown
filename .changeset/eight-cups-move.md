@@ -1,5 +1,5 @@
 ---
-"@meowdown/core": patch
+'@meowdown/core': patch
 ---
 
 Update virtual caret margin.
