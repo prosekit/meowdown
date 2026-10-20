@@ -9,6 +9,7 @@ import { TextSelection } from '@prosekit/pm/state'
 import type { ReactNodeViewProps } from '@prosekit/react'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
 import {
+  use,
   useCallback,
   useDeferredValue,
   useMemo,
@@ -22,6 +23,7 @@ import { useKaTeX } from '../hooks/use-katex.ts'
 import { NON_PROSE_PROPS } from '../utils/non-prose-props.ts'
 
 import styles from './code-block-view.module.css'
+import { CollisionBoundaryContext } from './collision-boundary.ts'
 import { CopyButton } from './copy-button.tsx'
 import { MathRender } from './math-render.tsx'
 import { MermaidRender } from './mermaid-render.tsx'
@@ -113,6 +115,7 @@ interface CodeBlockToolbarProps {
 }
 
 function CodeBlockToolbar({ code, language, setLanguage }: CodeBlockToolbarProps) {
+  const collisionBoundary = use(CollisionBoundaryContext)
   // Fall back to the raw value so an alias or unknown language still shows in
   // the trigger instead of looking empty.
   const selected = useMemo<LanguageItem>(() => {
@@ -163,7 +166,11 @@ function CodeBlockToolbar({ code, language, setLanguage }: CodeBlockToolbarProps
           </Combobox.Icon>
         </Combobox.Trigger>
         <Combobox.Portal>
-          <Combobox.Positioner className={styles.Positioner} sideOffset={4}>
+          <Combobox.Positioner
+            className={styles.Positioner}
+            sideOffset={4}
+            collisionBoundary={collisionBoundary}
+          >
             <Combobox.Popup className={styles.Popup}>
               <div className={styles.SearchRow}>
                 <Combobox.Input

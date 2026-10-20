@@ -8,11 +8,12 @@ import {
   AutocompletePositioner,
   AutocompleteRoot,
 } from '@prosekit/react/autocomplete'
-import { useCallback, useEffect, useState, type ReactElement } from 'react'
+import { use, useCallback, useEffect, useState, type ReactElement } from 'react'
 
 import { returnsTrue } from '../utils/returns-true.ts'
 
 import styles from './autocomplete-menu.module.css'
+import { CollisionBoundaryContext, toFloatingBoundary } from './collision-boundary.ts'
 import type { TagItem, TagSearchHandler } from './types.ts'
 
 // Match "#tag" with at least one character, so typing a heading ("# ") never
@@ -31,6 +32,7 @@ interface TagMenuProps {
 
 export function TagMenu({ onTagSearch }: TagMenuProps): ReactElement {
   const editor = useEditor<EditorExtension>()
+  const collisionBoundary = use(CollisionBoundaryContext)
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [items, setItems] = useState<TagItem[]>([])
@@ -69,7 +71,10 @@ export function TagMenu({ onTagSearch }: TagMenuProps): ReactElement {
       onOpenChange={(event) => setOpen(event.detail)}
       onQueryChange={(event) => setQuery(event.detail)}
     >
-      <AutocompletePositioner className={styles.Positioner}>
+      <AutocompletePositioner
+        className={styles.Positioner}
+        boundary={toFloatingBoundary(collisionBoundary)}
+      >
         <AutocompletePopup className={styles.Popup} data-testid="tag-menu">
           {items.map((item) => (
             <AutocompleteItem

@@ -11,6 +11,7 @@ import type { EditorView } from '@prosekit/pm/view'
 import { useEditor, useExtension } from '@prosekit/react'
 import { SparklesIcon } from 'lucide-react'
 import {
+  use,
   useCallback,
   useEffect,
   useMemo,
@@ -21,6 +22,7 @@ import {
 
 import { useDelayedFlag } from '../hooks/use-delayed-flag.ts'
 
+import { CollisionBoundaryContext } from './collision-boundary.ts'
 import styles from './selection-menu.module.css'
 import type {
   SelectionMenuContext,
@@ -71,6 +73,7 @@ export function SelectionMenu({
   affordance = true,
 }: SelectionMenuProps): ReactNode {
   const editor = useEditor<EditorExtension>()
+  const collisionBoundary = use(CollisionBoundaryContext)
   const [selection, setSelection] = useState<SelectionSnapshot>()
 
   // Tracks the live selection for the affordance. A pending replacement, a
@@ -131,6 +134,7 @@ export function SelectionMenu({
             anchor={menuAnchor}
             side="bottom"
             sideOffset={8}
+            collisionBoundary={collisionBoundary}
             className={styles.Positioner}
           >
             <Popover.Popup className={styles.Popup} data-testid="selection-menu" finalFocus={false}>
@@ -154,6 +158,7 @@ export function SelectionMenu({
             anchor={affordanceAnchor}
             side="bottom"
             sideOffset={4}
+            collisionBoundary={collisionBoundary}
             className={styles.AffordancePositioner}
           >
             <Popover.Popup

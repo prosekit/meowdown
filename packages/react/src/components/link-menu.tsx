@@ -22,6 +22,7 @@ import { useEditor } from '@prosekit/react'
 import { queueExtension } from '@prosekit/web'
 import { Globe2Icon, PencilIcon, SparklesIcon, UnlinkIcon } from 'lucide-react'
 import {
+  use,
   useCallback,
   useEffect,
   useMemo,
@@ -31,6 +32,7 @@ import {
   type ReactNode,
 } from 'react'
 
+import { CollisionBoundaryContext } from './collision-boundary.ts'
 import { CopyButton } from './copy-button.tsx'
 import { getLinkMenuView, LINK_MENU_IDLE, reduceLinkMenu } from './link-menu-state.ts'
 import styles from './link-menu.module.css'
@@ -113,6 +115,7 @@ function LinkPopover({
   onPopupHover?: (over: boolean) => void
   children: ReactNode
 }) {
+  const collisionBoundary = use(CollisionBoundaryContext)
   return (
     <Popover.Root
       open={open}
@@ -128,6 +131,7 @@ function LinkPopover({
           anchor={anchor}
           side="bottom"
           sideOffset={8}
+          collisionBoundary={collisionBoundary}
           className={styles.Positioner}
         >
           <Popover.Popup

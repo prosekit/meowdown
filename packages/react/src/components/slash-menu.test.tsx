@@ -8,6 +8,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
+import { setupCollisionBoundary } from '../testing/collision-boundary.ts'
+
 import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle, SlashMenuItem } from './types.ts'
 
@@ -41,6 +43,23 @@ describe('SlashMenu', () => {
     for (const label of LABELS) {
       await expect.element(menu.getByText(label, { exact: true })).toBeVisible()
     }
+  })
+
+  it('stays inside the collision boundary', async () => {
+    using boundary = setupCollisionBoundary(300)
+    await render(
+      <div style={{ paddingTop: 200 }}>
+        <ProseKitEditor collisionBoundary={boundary.element} />
+      </div>,
+    )
+    await pmRoot.click()
+    await userEvent.keyboard('/')
+    await expect.element(menu).toBeVisible()
+    await vi.waitFor(() => {
+      const rect = menu.element().getBoundingClientRect()
+      expect(rect.top).toBeGreaterThan(0)
+      expect(rect.bottom).toBeLessThanOrEqual(300)
+    })
   })
 
   it('filters the items by the query', async () => {

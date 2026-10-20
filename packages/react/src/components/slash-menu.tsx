@@ -16,6 +16,7 @@ import {
   AutocompleteRoot,
 } from '@prosekit/react/autocomplete'
 import {
+  use,
   useCallback,
   useEffect,
   useRef,
@@ -27,6 +28,7 @@ import {
 import { formatNowTime, type TimeFormat } from '../utils/date-format.ts'
 
 import styles from './autocomplete-menu.module.css'
+import { CollisionBoundaryContext, toFloatingBoundary } from './collision-boundary.ts'
 import type { SlashMenuItem, SlashMenuSearchHandler } from './types.ts'
 
 // Match inputs like "/", "/table", "/heading 1" etc. Do not match "/ heading"
@@ -97,6 +99,7 @@ export function SlashMenu({
   onFileSaveError,
 }: SlashMenuProps): ReactElement {
   const editor = useEditor<EditorExtension>()
+  const collisionBoundary = use(CollisionBoundaryContext)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // A table cell holds inline content only, so the block-creating items below
@@ -174,7 +177,10 @@ export function SlashMenu({
           onChange={handleFileInputChange}
         />
       ) : null}
-      <AutocompletePositioner className={styles.Positioner}>
+      <AutocompletePositioner
+        className={styles.Positioner}
+        boundary={toFloatingBoundary(collisionBoundary)}
+      >
         <AutocompletePopup className={styles.Popup} data-testid="slash-menu">
           {!inTableCell && (
             <>

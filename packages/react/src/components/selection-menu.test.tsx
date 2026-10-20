@@ -6,6 +6,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
+import { setupCollisionBoundary } from '../testing/collision-boundary.ts'
+
 import { MarkdownEditor } from './editor.tsx'
 import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle, SelectionMenuContext, SelectionMenuItem } from './types.ts'
@@ -155,6 +157,29 @@ describe('SelectionMenu', () => {
     ref.current?.setSelection(HELLO_SELECTION)
     ref.current?.openSelectionMenu()
     await expect.element(menu).not.toBeInTheDocument()
+  })
+
+  it('stays inside the collision boundary', async () => {
+    using boundary = setupCollisionBoundary(300)
+    const ref = createRef<EditorHandle>()
+    await render(
+      <div style={{ paddingTop: 200 }}>
+        <ProseKitEditor
+          ref={ref}
+          initialMarkdown="say hello end"
+          onSelectionMenuSearch={searchItems}
+          collisionBoundary={boundary.element}
+        />
+      </div>,
+    )
+    ref.current?.setSelection(HELLO_SELECTION)
+    ref.current?.openSelectionMenu()
+    await expect.element(menu.getByText('Fix grammar')).toBeVisible()
+    await vi.waitFor(() => {
+      const rect = getPlacedMenuRect()
+      expect(rect.top).toBeGreaterThan(0)
+      expect(rect.bottom).toBeLessThanOrEqual(300)
+    })
   })
 
   it('stays on screen for a selection taller than a third of the viewport', async () => {

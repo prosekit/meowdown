@@ -1,3 +1,4 @@
+export type { CollisionBoundary } from './components/collision-boundary.ts'
 export { MarkdownEditor, type EditorMode, type EditorProps } from './components/editor.tsx'
 
 export {
