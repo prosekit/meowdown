@@ -146,31 +146,9 @@ function TableMenuAlignItems({ editor }: { editor: TypedEditor }) {
 }
 function TableMenuAlign({ editor }: { editor: TypedEditor }): ReactNode {
   const canExec = useEditorDerivedValue(canAlign)
-  const activeAlign = useEditorDerivedValue(getActiveAlign)
   if (!canExec) return null
   return (
-    <>
-      <TableMenuAlignItem
-        align="left"
-        label="Align Left"
-        editor={editor}
-        activeAlign={activeAlign}
-      />
-
-      <TableMenuAlignItem
-        align="center"
-        label="Align Center"
-        editor={editor}
-        activeAlign={activeAlign}
-      />
-
-      <TableMenuAlignItem
-        align="right"
-        label="Align Right"
-        editor={editor}
-        activeAlign={activeAlign}
-      />
-    </>
+    <TableMenuAlignItems editor={editor} />
   )
 }
 
