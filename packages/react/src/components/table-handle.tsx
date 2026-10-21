@@ -31,6 +31,19 @@ const COLUMN_ALIGN_LABELS: Record<TableColumnAlign, string> = {
   right: 'Align Right',
 }
 
+function TableHandleItem({
+  children,
+  onSelect, testid, active = false }: {children:ReactNode, onSelect: VoidFunction, testid: string, active?: boolean }): ReactNode {
+  return  <MenuItem
+    className={styles.MenuItem}
+    data-testid={testid}
+    data-active={active ? '' : undefined}
+    onSelect={onSelect}
+  >
+    {children}
+  </MenuItem>
+}
+
 // Insert Left
 function canInsertLeft(editor: TypedEditor): boolean {
   return editor.commands.addTableColumnBefore.canExec()
@@ -93,15 +106,14 @@ function TableMenuAlignItem({
 
   const active = columnAlign === align
   return (
-    <MenuItem
-      className={styles.MenuItem}
-      data-testid={`table-align-${align}`}
-      data-active={active ? '' : undefined}
+    <TableHandleItem
+      testid={`table-align-${align}`}
+      active={active}
       onSelect={handler}
     >
       <span>{COLUMN_ALIGN_LABELS[align]}</span>
       {active && <CheckIcon />}
-    </MenuItem>
+    </TableHandleItem>
   )
 }
 function TableMenuAlign({ editor }: { editor: TypedEditor }): ReactNode {
