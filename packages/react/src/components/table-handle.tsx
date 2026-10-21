@@ -63,11 +63,11 @@ function TableMenuInsertLeft({ editor }: { editor: TypedEditor }): ReactNode {
   const handler = useCallback(() => runInsertLeft(editor), [editor])
 
   // FIXME: do not use <MenuItem> directly, try to use <TableHandleItem>
-  return canExec && (
-    <TableHandleItem  testid="table-insert-left" onSelect={handler}>
+  return canExec ? (
+    <TableHandleItem testid="table-insert-left" onSelect={handler}>
       <span>Insert Left</span>
     </TableHandleItem>
-  )
+  ) : null
 }
 
 // Insert Right
