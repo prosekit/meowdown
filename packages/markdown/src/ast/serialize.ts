@@ -20,7 +20,7 @@ import {
 } from '../unicode.ts'
 
 import { canIndentCode, minFenceLength } from './code.ts'
-import { canJoinTight, hasInlineContent, listMarkerChar } from './gap.ts'
+import { canJoinTight, hasInlineContent, listMarkerChar, opensHTMLBlock } from './gap.ts'
 import type {
   MarkdownBlock,
   MarkdownCodeBlock,
@@ -586,37 +586,6 @@ function dedentKeepsLine(line: string, column: number): boolean {
     } else {
       return true
     }
-  }
-  return false
-}
-
-/**
- * The line patterns that open an HTML block, the openers of `HTMLBlockStyle`
- * in `@lezer/markdown`: script/pre/style, a comment, a processing instruction,
- * a declaration, CDATA, a known block-level tag, and a complete tag alone on
- * its line. Leading whitespace is stripped before matching.
- */
-const HTML_BLOCK_OPEN = [
-  /^<(?:script|pre|style)(?:\s|>|$)/i,
-  /^<!--/,
-  /^<\?/,
-  /^<![A-Z]/,
-  /^<!\[CDATA\[/,
-  /^<\/?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h1|h2|h3|h4|h5|h6|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|nav|noframes|ol|optgroup|option|p|param|section|source|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul)(?:\s|\/?>|$)/i,
-  /^(?:<\/[a-z][\w-]*\s*>|<[a-z][\w-]*(\s+[a-z:_][\w.-]*(?:\s*=\s*(?:[^\s"'=<>`]+|'[^']*'|"[^"]*"))?)*\s*>)\s*$/i,
-]
-
-/**
- * Whether `text`'s first line opens an HTML block. The last pattern (a
- * complete tag) cannot interrupt a paragraph, but a lazy spelling of such a
- * line round-trips all the same, so one check serves both callers.
- */
-function opensHTMLBlock(text: string): boolean {
-  if (text.charCodeAt(0) !== CHAR_LESS_THAN) return false
-  const lineEnd = text.indexOf('\n')
-  const line = lineEnd < 0 ? text : text.slice(0, lineEnd)
-  for (const pattern of HTML_BLOCK_OPEN) {
-    if (pattern.test(line)) return true
   }
   return false
 }
