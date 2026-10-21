@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@lezer/common": "^1.5.3",
-    "@lezer/markdown": "^1.8.0",
+    "@lezer/markdown": "^1.8.1",
     "@post-embed/schema": "^0.5.2"
   },
   "devDependencies": {
