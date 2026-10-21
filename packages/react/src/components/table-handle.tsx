@@ -120,7 +120,7 @@ function TableMenuAlignItem({
     </TableHandleItem>
   )
 }
-function TableMenuAlignItems({ editor }: { editor: TypedEditor }) {
+function TableMenuAlignItems({ editor }: { editor: TypedEditor }): ReactNode {
   const activeAlign = useEditorDerivedValue(getActiveAlign)
   return (
     <>
