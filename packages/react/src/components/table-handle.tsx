@@ -30,13 +30,13 @@ function TableHandleItem({
   onSelect,
   testid,
   active = false,
-  danger= false,
+  danger = false,
 }: {
   children: ReactNode
   onSelect: VoidFunction
   testid: string
-    active?: boolean
-    danger?: boolean
+  active?: boolean
+  danger?: boolean
 }): ReactNode {
   return (
     <MenuItem
@@ -65,9 +65,9 @@ function TableMenuInsertLeft({ editor }: { editor: TypedEditor }): ReactNode {
   // FIXME: do not use <MenuItem> directly, try to use <TableHandleItem>
   if (!canExec) return null
   return (
-    <MenuItem className={styles.MenuItem} data-testid="table-insert-left" onSelect={handler}>
+    <TableHandleItem  testid="table-insert-left" onSelect={handler}>
       <span>Insert Left</span>
-    </MenuItem>
+    </TableHandleItem>
   )
 }
 
