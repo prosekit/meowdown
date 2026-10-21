@@ -151,9 +151,7 @@ function collectBlocks(
     const blankLines =
       previousTo == null ? Infinity : appendGapParagraphs(out, text, previousTo, cursor.from)
     previousTo = cursor.to
-    const blocks = convertBlock(cursor, text, column)
-    markBlankBefore(out.at(-1), blocks[0], blankLines)
-    appendBlocks(out, blocks)
+    appendBlocks(out, convertBlock(cursor, text, column), blankLines)
   } while (cursor.nextSibling())
   cursor.parent()
   // The last line's own terminator is not a blank line.
@@ -166,8 +164,11 @@ function collectBlocks(
  * Append `blocks`, dropping the indented spelling from a code block that lands
  * right after a list: four columns of indentation would put it inside the item
  * above instead of after it, so it can only be written as a fence.
+ * `blankLines` counts the blank lines between `out`'s last block and the first
+ * of `blocks`.
  */
-function appendBlocks(out: MarkdownBlock[], blocks: MarkdownBlock[]): void {
+function appendBlocks(out: MarkdownBlock[], blocks: MarkdownBlock[], blankLines: number): void {
+  markBlankBefore(out.at(-1), blocks[0], blankLines)
   for (const block of blocks) {
     if (
       block.type === 'codeBlock' &&
@@ -632,9 +633,7 @@ function convertBlockquote(cursor: TreeCursor, text: string): MarkdownBlock {
         blankLines = appendGapParagraphs(content, text, previousTo, cursor.from)
       }
       previousTo = cursor.to
-      const blocks = convertBlock(cursor, text, 0)
-      markBlankBefore(content.at(-1), blocks[0], blankLines)
-      appendBlocks(content, blocks)
+      appendBlocks(content, convertBlock(cursor, text, 0), blankLines)
     } while (cursor.nextSibling())
     cursor.parent()
   }
@@ -804,12 +803,11 @@ function convertListItem(
         markEndColumn = measureContentColumn(text, cursor.to)
         continue
       }
-      let blankLines = Infinity
+      const blankLines =
+        previousTo == null ? Infinity : appendGapParagraphs(content, text, previousTo, cursor.from)
       if (previousTo == null) {
         markerGap = measureMarkerGap(text, cursor.from, markTo, markEndColumn)
         contentColumn = column + markWidth + markerGap
-      } else {
-        blankLines = appendGapParagraphs(content, text, previousTo, cursor.from)
       }
       previousTo = cursor.to
       if (kind === 'bullet' && cursor.type.id === LEZER_NODE_IDS.Task) {
@@ -819,9 +817,7 @@ function convertListItem(
         content.push(task.paragraph)
         continue
       }
-      const blocks = convertBlock(cursor, text, contentColumn)
-      markBlankBefore(content.at(-1), blocks[0], blankLines)
-      appendBlocks(content, blocks)
+      appendBlocks(content, convertBlock(cursor, text, contentColumn), blankLines)
     } while (cursor.nextSibling())
     cursor.parent()
   }
