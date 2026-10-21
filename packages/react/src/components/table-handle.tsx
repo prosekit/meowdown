@@ -119,7 +119,6 @@ function TableMenuAlignItem({
 }
 function TableMenuAlignItems({ editor }: { editor: TypedEditor }) {
   const activeAlign = useEditorDerivedValue(getActiveAlign)
-  if (!canExec) return null
   return (
     <>
       <TableMenuAlignItem
