@@ -16,6 +16,7 @@ import {
   AutocompleteRoot,
 } from '@prosekit/react/autocomplete'
 import {
+  memo,
   use,
   useCallback,
   useEffect,
@@ -92,6 +93,119 @@ function selectionInTableCell(editor: TypedEditor): boolean {
   return isSelectionInTableCell(editor.state)
 }
 
+interface BuiltinSlashMenuItemsProps {
+  editor: TypedEditor
+  timeFormat: TimeFormat
+  /**
+   * Opens the file picker. The "Attach file" item is hidden when undefined.
+   */
+  onAttachFile: VoidFunction | undefined
+}
+
+function BuiltinSlashMenuItems({
+  editor,
+  timeFormat,
+  onAttachFile,
+}: BuiltinSlashMenuItemsProps): ReactElement {
+  // A table cell holds inline content only, so the block-creating items below
+  // are no-ops there. Hide them and offer only inline items.
+  const inTableCell = useEditorDerivedValue(selectionInTableCell)
+
+  return (
+    <>
+      {!inTableCell && (
+        <>
+          <SlashMenuItem
+            label="Text"
+            keywords={['paragraph', 'plain']}
+            onSelect={() => editor.commands.turnIntoText()}
+          />
+          <SlashMenuItem
+            label="Heading 1"
+            keywords={['h1']}
+            kbd="#"
+            onSelect={() => editor.commands.setHeading({ level: 1 })}
+          />
+          <SlashMenuItem
+            label="Heading 2"
+            keywords={['h2']}
+            kbd="##"
+            onSelect={() => editor.commands.setHeading({ level: 2 })}
+          />
+          <SlashMenuItem
+            label="Heading 3"
+            keywords={['h3']}
+            kbd="###"
+            onSelect={() => editor.commands.setHeading({ level: 3 })}
+          />
+          <SlashMenuItem
+            label="Heading 4"
+            keywords={['h4']}
+            kbd="####"
+            onSelect={() => editor.commands.setHeading({ level: 4 })}
+          />
+          <SlashMenuItem
+            label="Blockquote"
+            kbd=">"
+            onSelect={() => editor.commands.setBlockquote()}
+          />
+          <SlashMenuItem
+            label="Bullet list"
+            kbd="-"
+            onSelect={() => editor.commands.wrapInList({ kind: 'bullet' })}
+          />
+          <SlashMenuItem
+            label="Ordered list"
+            kbd="1."
+            onSelect={() => editor.commands.wrapInList({ kind: 'ordered' })}
+          />
+          {/* The user-facing copy ("Task list" / "Checkbox list") intentionally
+              differs from the internal command names (`wrapInCircleTask` /
+              `wrapInSquareTask`, "circle / square checkbox task"). */}
+          <SlashMenuItem
+            label="Task list"
+            kbd="+ [ ] "
+            onSelect={() => editor.commands.wrapInCircleTask()}
+          />
+          <SlashMenuItem
+            label="Checkbox list"
+            kbd="- [ ] "
+            onSelect={() => editor.commands.wrapInSquareTask()}
+          />
+          <SlashMenuItem
+            label="Code block"
+            kbd="```"
+            onSelect={() => editor.commands.setCodeBlock()}
+          />
+          <SlashMenuItem
+            label="Math"
+            keywords={['latex']}
+            kbd="```math"
+            onSelect={() => editor.commands.insertMarkdown('```math\n```')}
+          />
+          <SlashMenuItem
+            label="Table"
+            onSelect={() => editor.commands.insertTable({ row: 3, col: 3, header: true })}
+          />
+        </>
+      )}
+      <SlashMenuItem
+        label="Now"
+        onSelect={() => editor.commands.insertText({ text: formatNowTime(timeFormat) })}
+      />
+      {onAttachFile ? (
+        <SlashMenuItem
+          label="Attach file"
+          keywords={['attachment', 'file', 'upload']}
+          onSelect={onAttachFile}
+        />
+      ) : null}
+    </>
+  )
+}
+
+const BuiltinSlashMenuItemsMemo = /* @__PURE__ */ memo(BuiltinSlashMenuItems)
+
 export function SlashMenu({
   timeFormat = '12',
   onSlashMenuSearch,
@@ -101,10 +215,6 @@ export function SlashMenu({
   const editor = useEditor<EditorExtension>()
   const collisionBoundary = use(CollisionBoundaryContext)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  // A table cell holds inline content only, so the block-creating items below
-  // are no-ops there. Hide them and offer only inline items.
-  const inTableCell = useEditorDerivedValue(selectionInTableCell)
 
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -182,93 +292,11 @@ export function SlashMenu({
         boundary={toFloatingBoundary(collisionBoundary)}
       >
         <AutocompletePopup className={styles.Popup} data-testid="slash-menu">
-          {!inTableCell && (
-            <>
-              <SlashMenuItem
-                label="Text"
-                keywords={['paragraph', 'plain']}
-                onSelect={() => editor.commands.turnIntoText()}
-              />
-              <SlashMenuItem
-                label="Heading 1"
-                keywords={['h1']}
-                kbd="#"
-                onSelect={() => editor.commands.setHeading({ level: 1 })}
-              />
-              <SlashMenuItem
-                label="Heading 2"
-                keywords={['h2']}
-                kbd="##"
-                onSelect={() => editor.commands.setHeading({ level: 2 })}
-              />
-              <SlashMenuItem
-                label="Heading 3"
-                keywords={['h3']}
-                kbd="###"
-                onSelect={() => editor.commands.setHeading({ level: 3 })}
-              />
-              <SlashMenuItem
-                label="Heading 4"
-                keywords={['h4']}
-                kbd="####"
-                onSelect={() => editor.commands.setHeading({ level: 4 })}
-              />
-              <SlashMenuItem
-                label="Blockquote"
-                kbd=">"
-                onSelect={() => editor.commands.setBlockquote()}
-              />
-              <SlashMenuItem
-                label="Bullet list"
-                kbd="-"
-                onSelect={() => editor.commands.wrapInList({ kind: 'bullet' })}
-              />
-              <SlashMenuItem
-                label="Ordered list"
-                kbd="1."
-                onSelect={() => editor.commands.wrapInList({ kind: 'ordered' })}
-              />
-              {/* The user-facing copy ("Task list" / "Checkbox list") intentionally
-                  differs from the internal command names (`wrapInCircleTask` /
-                  `wrapInSquareTask`, "circle / square checkbox task"). */}
-              <SlashMenuItem
-                label="Task list"
-                kbd="+ [ ] "
-                onSelect={() => editor.commands.wrapInCircleTask()}
-              />
-              <SlashMenuItem
-                label="Checkbox list"
-                kbd="- [ ] "
-                onSelect={() => editor.commands.wrapInSquareTask()}
-              />
-              <SlashMenuItem
-                label="Code block"
-                kbd="```"
-                onSelect={() => editor.commands.setCodeBlock()}
-              />
-              <SlashMenuItem
-                label="Math"
-                keywords={['latex']}
-                kbd="```math"
-                onSelect={() => editor.commands.insertMarkdown('```math\n```')}
-              />
-              <SlashMenuItem
-                label="Table"
-                onSelect={() => editor.commands.insertTable({ row: 3, col: 3, header: true })}
-              />
-            </>
-          )}
-          <SlashMenuItem
-            label="Now"
-            onSelect={() => editor.commands.insertText({ text: formatNowTime(timeFormat) })}
+          <BuiltinSlashMenuItemsMemo
+            editor={editor}
+            timeFormat={timeFormat}
+            onAttachFile={onFilePaste ? openFilePicker : undefined}
           />
-          {onFilePaste ? (
-            <SlashMenuItem
-              label="Attach file"
-              keywords={['attachment', 'file', 'upload']}
-              onSelect={openFilePicker}
-            />
-          ) : null}
           {hostItems.map((item) => (
             <SlashMenuItem
               key={item.id ?? item.label}
