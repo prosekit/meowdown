@@ -55,6 +55,16 @@ describe('TableHandle', () => {
     expect(ref.current?.getMarkdown()).toBe('| a |  | b |\n| --- | --- | --- |\n| 1 |  | 2 |\n')
   })
 
+  it('mounts the menu items only while the menu is open', async () => {
+    await renderEditor()
+    await hover(firstBodyCell())
+    await expect.element(columnMenu.getByTestId('table-insert-left')).not.toBeInTheDocument()
+    await columnHandle.click()
+    await expect.element(columnMenu.getByTestId('table-insert-left')).toBeVisible()
+    await userEvent.keyboard('{Escape}')
+    await expect.element(columnMenu.getByTestId('table-insert-left')).not.toBeInTheDocument()
+  })
+
   it('selects a menu item with the keyboard', async () => {
     const ref = createRef<EditorHandle>()
     await renderEditor(ref)
