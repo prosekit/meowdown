@@ -30,18 +30,21 @@ function TableHandleItem({
   onSelect,
   testid,
   active = false,
+  danger= false,
 }: {
   children: ReactNode
   onSelect: VoidFunction
   testid: string
-  active?: boolean
+    active?: boolean
+    danger?: boolean
 }): ReactNode {
   return (
     <MenuItem
       className={styles.MenuItem}
+      onSelect={onSelect}
       data-testid={testid}
       data-active={active ? '' : undefined}
-      onSelect={onSelect}
+      data-danger={danger ? '' : undefined}
     >
       {children}
     </MenuItem>
