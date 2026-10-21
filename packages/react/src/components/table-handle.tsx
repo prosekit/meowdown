@@ -62,7 +62,6 @@ function TableMenuInsertLeft({ editor }: { editor: TypedEditor }): ReactNode {
   const canExec = useEditorDerivedValue(canInsertLeft)
   const handler = useCallback(() => runInsertLeft(editor), [editor])
 
-  // FIXME: do not use <MenuItem> directly, try to use <TableHandleItem> , use this one as an example
   return canExec ? (
     <TableHandleItem testid="table-insert-left" onSelect={handler}>
       <span>Insert Left</span>
@@ -81,12 +80,11 @@ function TableMenuInsertRight({ editor }: { editor: TypedEditor }): ReactNode {
   const canExec = useEditorDerivedValue(canInsertRight)
   const handler = useCallback(() => runInsertRight(editor), [editor])
 
-  if (!canExec) return null
-  return (
-    <MenuItem className={styles.MenuItem} data-testid="table-insert-right" onSelect={handler}>
+  return canExec ? (
+    <TableHandleItem testid="table-insert-right" onSelect={handler}>
       <span>Insert Right</span>
-    </MenuItem>
-  )
+    </TableHandleItem>
+  ) : null
 }
 
 // Align
@@ -159,22 +157,20 @@ function runClearContents(editor: TypedEditor): void {
 }
 function TableMenuClearContents({
   editor,
-  testId,
+  testid,
 }: {
   editor: TypedEditor
-  testId: string
+  testid: string
 }): ReactNode {
   const canExec = useEditorDerivedValue(canClearContents)
   const handler = useCallback(() => runClearContents(editor), [editor])
 
-  if (!canExec) return null
-  // FIXME: do not use <MenuItem> directly, try to use <TableHandleItem>
-  return (
-    <MenuItem className={styles.MenuItem} data-testid={testId} onSelect={handler}>
+  return canExec ? (
+    <TableHandleItem testid={testid} onSelect={handler}>
       <span>Clear Contents</span>
       <kbd>Del</kbd>
-    </MenuItem>
-  )
+    </TableHandleItem>
+  ) : null
 }
 
 // Delete Column
@@ -188,12 +184,11 @@ function TableMenuDeleteColumn({ editor }: { editor: TypedEditor }): ReactNode {
   const canExec = useEditorDerivedValue(canDeleteColumn)
   const handler = useCallback(() => runDeleteColumn(editor), [editor])
 
-  if (!canExec) return null
-  return (
-    <MenuItem className={styles.MenuItem} data-testid="table-delete-column" onSelect={handler}>
+  return canExec ? (
+    <TableHandleItem testid="table-delete-column" onSelect={handler}>
       <span>Delete Column</span>
-    </MenuItem>
-  )
+    </TableHandleItem>
+  ) : null
 }
 
 // Insert Above
@@ -207,12 +202,11 @@ function TableMenuInsertAbove({ editor }: { editor: TypedEditor }): ReactNode {
   const canExec = useEditorDerivedValue(canInsertAbove)
   const handler = useCallback(() => runInsertAbove(editor), [editor])
 
-  if (!canExec) return null
-  return (
-    <MenuItem className={styles.MenuItem} data-testid="table-insert-above" onSelect={handler}>
+  return canExec ? (
+    <TableHandleItem testid="table-insert-above" onSelect={handler}>
       <span>Insert Above</span>
-    </MenuItem>
-  )
+    </TableHandleItem>
+  ) : null
 }
 
 // Insert Below
@@ -226,12 +220,11 @@ function TableMenuInsertBelow({ editor }: { editor: TypedEditor }): ReactNode {
   const canExec = useEditorDerivedValue(canInsertBelow)
   const handler = useCallback(() => runInsertBelow(editor), [editor])
 
-  if (!canExec) return null
-  return (
-    <MenuItem className={styles.MenuItem} data-testid="table-insert-below" onSelect={handler}>
+  return canExec ? (
+    <TableHandleItem testid="table-insert-below" onSelect={handler}>
       <span>Insert Below</span>
-    </MenuItem>
-  )
+    </TableHandleItem>
+  ) : null
 }
 
 // Delete Row
@@ -245,12 +238,11 @@ function TableMenuDeleteRow({ editor }: { editor: TypedEditor }): ReactNode {
   const canExec = useEditorDerivedValue(canDeleteRow)
   const handler = useCallback(() => runDeleteRow(editor), [editor])
 
-  if (!canExec) return null
-  return (
-    <MenuItem className={styles.MenuItem} data-testid="table-delete-row" onSelect={handler}>
+  return canExec ? (
+    <TableHandleItem testid="table-delete-row" onSelect={handler}>
       <span>Delete Row</span>
-    </MenuItem>
-  )
+    </TableHandleItem>
+  ) : null
 }
 
 // Delete Table
@@ -262,20 +254,19 @@ function runDeleteTable(editor: TypedEditor): void {
 }
 function TableMenuDeleteTable({
   editor,
-  testId,
+  testid,
 }: {
   editor: TypedEditor
-  testId: string
+  testid: string
 }): ReactNode {
   const canExec = useEditorDerivedValue(canDeleteTable)
   const handler = useCallback(() => runDeleteTable(editor), [editor])
 
-  if (!canExec) return null
-  return (
-    <MenuItem className={styles.MenuItem} data-danger="" data-testid={testId} onSelect={handler}>
+  return canExec ? (
+    <TableHandleItem testid={testid} danger onSelect={handler}>
       <span>Delete Table</span>
-    </MenuItem>
-  )
+    </TableHandleItem>
+  ) : null
 }
 
 export function TableHandle(): ReactElement {
@@ -300,9 +291,9 @@ export function TableHandle(): ReactElement {
                 <TableMenuInsertLeft editor={editor} />
                 <TableMenuInsertRight editor={editor} />
                 <TableMenuAlign editor={editor} />
-                <TableMenuClearContents editor={editor} testId="table-clear-column" />
+                <TableMenuClearContents editor={editor} testid="table-clear-column" />
                 <TableMenuDeleteColumn editor={editor} />
-                <TableMenuDeleteTable editor={editor} testId="table-delete-table-column" />
+                <TableMenuDeleteTable editor={editor} testid="table-delete-table-column" />
               </MenuPopup>
             </MenuPositioner>
           </TableHandleColumnMenuRoot>
@@ -319,9 +310,9 @@ export function TableHandle(): ReactElement {
               <MenuPopup className={styles.MenuPopup} data-testid="table-handle-row-menu">
                 <TableMenuInsertAbove editor={editor} />
                 <TableMenuInsertBelow editor={editor} />
-                <TableMenuClearContents editor={editor} testId="table-clear-row" />
+                <TableMenuClearContents editor={editor} testid="table-clear-row" />
                 <TableMenuDeleteRow editor={editor} />
-                <TableMenuDeleteTable editor={editor} testId="table-delete-table-row" />
+                <TableMenuDeleteTable editor={editor} testid="table-delete-table-row" />
               </MenuPopup>
             </MenuPositioner>
           </TableHandleRowMenuRoot>
