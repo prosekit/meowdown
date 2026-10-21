@@ -25,11 +25,7 @@ import { useCallback } from 'react'
 
 import styles from './table-handle.module.css'
 
-const COLUMN_ALIGN_LABELS: Record<TableColumnAlign, string> = {
-  left: 'Align Left',
-  center: 'Align Center',
-  right: 'Align Right',
-}
+
 
 function TableHandleItem({
   children,
@@ -86,45 +82,65 @@ function TableMenuInsertRight({ editor }: { editor: TypedEditor }): ReactNode {
 function canAlign(editor: TypedEditor): boolean {
   return editor.commands.setTableColumnAlign.canExec('left')
 }
-function getColumnAlign(editor: TypedEditor): TableColumnAlign | undefined {
+function getActiveAlign(editor: TypedEditor): TableColumnAlign | undefined {
   return getTableColumnAlign(editor.state)
 }
-function runAlign(editor: TypedEditor, align: TableColumnAlign): void {
+function runAlign(editor: TypedEditor, align: TableColumnAlign, active: boolean): void {
   // Selecting the current alignment again clears it back to `---`.
-  const columnAlign = getTableColumnAlign(editor.state)
-  editor.commands.setTableColumnAlign(columnAlign === align ? null : align)
+  editor.commands.setTableColumnAlign(active ? null : align)
 }
 function TableMenuAlignItem({
-  editor,
-  align,
+  label,
+editor,
+align,
+activeAlign,
 }: {
+  label: string,
   editor: TypedEditor
-  align: TableColumnAlign
+    align: TableColumnAlign
+    activeAlign?: TableColumnAlign
 }): ReactNode {
-  const columnAlign = useEditorDerivedValue(getColumnAlign)
-  const handler = useCallback(() => runAlign(editor, align), [editor, align])
-
-  const active = columnAlign === align
+  const active = activeAlign === align
+  const handler = useCallback(() => runAlign(editor, align, active), [editor, align, active])
   return (
     <TableHandleItem
       testid={`table-align-${align}`}
       active={active}
       onSelect={handler}
     >
-      <span>{COLUMN_ALIGN_LABELS[align]}</span>
+      <span>{label}</span>
       {active && <CheckIcon />}
     </TableHandleItem>
   )
 }
+
+
 function TableMenuAlign({ editor }: { editor: TypedEditor }): ReactNode {
   const canExec = useEditorDerivedValue(canAlign)
-
+  const activeAlign = useEditorDerivedValue(getActiveAlign)
   if (!canExec) return null
   return (
     <>
-      <TableMenuAlignItem editor={editor} align="left" />
-      <TableMenuAlignItem editor={editor} align="center" />
-      <TableMenuAlignItem editor={editor} align="right" />
+      <TableMenuAlignItem
+        align="left"
+        label="Align Left"
+        editor={editor}
+        activeAlign={ activeAlign}
+      />
+
+      <TableMenuAlignItem
+        align="center"
+        label="Align Center"
+        editor={editor}
+        activeAlign={ activeAlign}
+      />
+
+      <TableMenuAlignItem
+        align="right"
+        label="Align Right"
+        editor={editor}
+        activeAlign={ activeAlign}
+      />
     </>
   )
 }
