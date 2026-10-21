@@ -53,10 +53,6 @@ interface SelectionMenuProps {
 interface SelectionSnapshot {
   from: number
   to: number
-  /**
-   * Whether a floating affordance may anchor to this selection.
-   */
-  anchorable: boolean
 }
 
 /**
@@ -78,7 +74,8 @@ export function SelectionMenu({
 
   // Tracks the live selection for the affordance. A pending replacement, a
   // non-text selection (e.g. a selected image), or a find match sitting under
-  // the selection never shows the button.
+  // the selection never shows the button. Undefined while the selection cannot
+  // anchor the button, so typing and caret moves do not re-render.
   useExtension(
     useMemo(() => {
       return defineUpdateHandler((view) => {
@@ -89,14 +86,9 @@ export function SelectionMenu({
           !getPendingReplacement(view.state) &&
           getSearchStatus(view.state).active === 0
         setSelection((previous) => {
-          if (
-            previous?.from === from &&
-            previous?.to === to &&
-            previous?.anchorable === anchorable
-          ) {
-            return previous
-          }
-          return { from, to, anchorable }
+          if (!anchorable) return
+          if (previous?.from === from && previous?.to === to) return previous
+          return { from, to }
         })
       })
     }, []),
@@ -113,7 +105,7 @@ export function SelectionMenu({
   }, [context, editor])
 
   const open = !!context
-  const showAffordance = affordance && !open && !!selection?.anchorable
+  const showAffordance = affordance && !open && !!selection
   const affordanceVisible = useDelayedFlag(showAffordance, 250, 0)
 
   const affordanceAnchor: VirtualElement | undefined = useMemo(() => {
