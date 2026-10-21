@@ -1,4 +1,4 @@
-import { defineNodeAttr, type Extension } from '@prosekit/core'
+import { defineNodeAttr, union, type Extension } from '@prosekit/core'
 
 import type { NodeName } from './node-names.ts'
 
@@ -13,16 +13,24 @@ import type { NodeName } from './node-names.ts'
 export type Frontmatter = string | null
 
 type DocFrontmatterExtension = Extension<{
-  Nodes: { doc: { frontmatter?: Frontmatter | undefined } }
+  Nodes: { doc: { frontmatter?: Frontmatter | undefined; frontmatterTight?: boolean | undefined } }
 }>
 
 /**
- * Stores YAML frontmatter as a non-rendered attribute on the root `doc` node.
+ * Stores YAML frontmatter as a non-rendered attribute on the root `doc` node,
+ * plus whether the first block starts right under its closing fence.
  */
 export function defineDocFrontmatterAttr(): DocFrontmatterExtension {
-  return defineNodeAttr<'doc', 'frontmatter', Frontmatter>({
-    type: 'doc' satisfies NodeName,
-    attr: 'frontmatter',
-    default: null,
-  })
+  return union(
+    defineNodeAttr<'doc', 'frontmatter', Frontmatter>({
+      type: 'doc' satisfies NodeName,
+      attr: 'frontmatter',
+      default: null,
+    }),
+    defineNodeAttr<'doc', 'frontmatterTight', boolean>({
+      type: 'doc' satisfies NodeName,
+      attr: 'frontmatterTight',
+      default: false,
+    }),
+  )
 }

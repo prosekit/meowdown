@@ -62,6 +62,7 @@ export function parseMarkdownAst(
   const document: MarkdownDocument = {
     type: 'document',
     frontmatter: frontmatterBody,
+    frontmatterTight: base > 0 && !isBlankLine(rest, 0) ? true : undefined,
     children: collectBlocks(tree.cursor(), rest, 0, base > 0),
   }
   if (base) relocatePositions(document, base)
@@ -215,6 +216,19 @@ function appendBlankLineParagraphs(
     if (count > skip) out.push(buildEmptyParagraph(index))
   }
   if (openLast && count >= skip) out.push(buildEmptyParagraph(lineEndAt(text, to)))
+}
+
+/**
+ * Whether the line starting at `offset` holds only spaces and tabs. The end of
+ * the text counts as a blank line.
+ */
+function isBlankLine(text: string, offset: number): boolean {
+  for (let index = offset; index < text.length; index++) {
+    const code = text.charCodeAt(index)
+    if (code === CHAR_LINE_FEED) return true
+    if (code !== CHAR_SPACE && code !== CHAR_TAB) return false
+  }
+  return true
 }
 
 function buildEmptyParagraph(offset: number): MarkdownParagraph {

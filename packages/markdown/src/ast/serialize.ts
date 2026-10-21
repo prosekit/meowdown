@@ -61,8 +61,18 @@ export function serializeMarkdownAst(
   options: SerializeMarkdownAstOptions = {},
 ): string {
   const out = new MdOut()
-  if (options.frontmatter) {
-    emitFrontmatter(node.type === 'document' ? node.frontmatter : undefined, out)
+  if (options.frontmatter && node.type === 'document') {
+    emitFrontmatter(node.frontmatter, out)
+    // An empty first paragraph is a blank line of its own, so a tight join
+    // would read back as one blank line fewer.
+    const first = node.children[0]
+    if (
+      node.frontmatterTight &&
+      first != null &&
+      (first.type !== 'paragraph' || hasInlineContent(first))
+    ) {
+      out.suppressBlank()
+    }
   }
   // A document holds at least one block, so a lone empty paragraph is the
   // empty document, not a blank line.

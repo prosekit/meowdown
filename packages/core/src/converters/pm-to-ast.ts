@@ -27,6 +27,7 @@ export function docToAst(node: ProseMirrorNode): MarkdownNode {
     return {
       type: 'document',
       frontmatter: frontmatter ?? undefined,
+      frontmatterTight: node.attrs.frontmatterTight ? true : undefined,
       children: readBlocks(node),
     } satisfies MarkdownDocument
   }

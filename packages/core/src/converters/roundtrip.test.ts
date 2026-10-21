@@ -1009,10 +1009,19 @@ describe('escapes and whitespace', () => {
     )
   })
 
-  it('normalizes a missing blank line after frontmatter', () => {
-    expect(roundtrip('---\ntitle: x\n---\n# heading', { frontmatter: true })).toBe(
-      ['---', 'title: x', '---', '', '# heading', ''].join('\n'),
-    )
+  it('keeps a heading right under frontmatter', () => {
+    const md = ['---', 'title: x', '---', '# heading'].join('\n')
+    expect(roundtrip(md, { frontmatter: true })).toBe(md + '\n')
+  })
+
+  it('keeps a paragraph right under frontmatter', () => {
+    const md = ['---', 'title: x', '---', 'text'].join('\n')
+    expect(roundtrip(md, { frontmatter: true })).toBe(md + '\n')
+  })
+
+  it('keeps a list right under frontmatter', () => {
+    const md = ['---', 'title: x', '---', '- a'].join('\n')
+    expect(roundtrip(md, { frontmatter: true })).toBe(md + '\n')
   })
 
   it('renders a frontmatter block as content when frontmatter is off (default)', () => {
