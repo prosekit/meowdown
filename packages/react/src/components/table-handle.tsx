@@ -167,6 +167,7 @@ function TableMenuClearContents({
   const handler = useCallback(() => runClearContents(editor), [editor])
 
   if (!canExec) return null
+  // FIXME: do not use <MenuItem> directly, try to use <TableHandleItem>
   return (
     <MenuItem className={styles.MenuItem} data-testid={testId} onSelect={handler}>
       <span>Clear Contents</span>
