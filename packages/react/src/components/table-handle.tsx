@@ -300,7 +300,7 @@ export function TableHandle(): ReactElement {
         </TableHandleColumnPopup>
       </TableHandleColumnPositioner>
 
-      <TableHandleRowPositioner placement="left" className={styles.Positioner}>
+      <TableHandleRowPositioner className={styles.Positioner}>
         <TableHandleRowPopup className={styles.RowPopup}>
           <TableHandleRowMenuRoot>
             <TableHandleRowMenuTrigger className={styles.Trigger} data-testid="table-handle-row">
