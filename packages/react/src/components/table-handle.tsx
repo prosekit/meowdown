@@ -59,6 +59,7 @@ function TableMenuInsertLeft({ editor }: { editor: TypedEditor }): ReactNode {
   const canExec = useEditorDerivedValue(canInsertLeft)
   const handler = useCallback(() => runInsertLeft(editor), [editor])
 
+  // FIXME: do not use <MenuItem> directly, try to use <TableHandleItem>
   if (!canExec) return null
   return (
     <MenuItem className={styles.MenuItem} data-testid="table-insert-left" onSelect={handler}>
