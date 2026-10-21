@@ -20,6 +20,7 @@ import {
 } from '../unicode.ts'
 
 import { canIndentCode, minFenceLength } from './code.ts'
+import { canJoinTight, hasInlineContent, listMarkerChar } from './gap.ts'
 import type {
   MarkdownBlock,
   MarkdownCodeBlock,
@@ -457,13 +458,8 @@ function emitBlockChildren(children: MarkdownBlock[], out: MdOut, tightItem = fa
     for (let item = index; item < runEnd; item++) {
       const child = children[item]
       if (child.type !== 'listItem') continue
-      const isRunStart = item === index
-      const tight = isRunStart ? tightItem && index > 0 : tightRun
-      // An item that carries on the list above it needs no blank line. One that
-      // opens a new list does, unless its own marker can interrupt what it
-      // follows - which is a paragraph whenever the blank is being dropped.
-      const carriesOn = !isRunStart && listMarkerChar(children[item - 1]) === listMarkerChar(child)
-      if (tight && (carriesOn || canInterruptParagraph(child))) out.suppressBlank()
+      if (isTightBefore(children, item, index, tightItem, tightRun)) out.suppressBlank()
+      const carriesOn = item > index && listMarkerChar(children[item - 1]) === listMarkerChar(child)
       // Only the first item of an ordered list sets its number; the items
       // after it count up, as a Markdown renderer numbers them.
       order = carriesOn ? Math.min(order + 1, MAX_LIST_ORDER) : (child.order ?? 1)
@@ -474,30 +470,27 @@ function emitBlockChildren(children: MarkdownBlock[], out: MdOut, tightItem = fa
 }
 
 /**
- * Whether `list`'s marker line still opens an item when the line above it is a
- * paragraph. CommonMark lets a list interrupt a paragraph only when the item
- * carries content and, if ordered, is numbered 1; anything else reads as more of
- * the paragraph, so the blank line before it is what keeps it a list at all.
+ * Whether the list item at `item` starts on the line right under its previous
+ * sibling. A recorded gap wins. An item the editor created has none, and takes
+ * the gap above it in the same run, or else the run's own tightness.
  */
-function canInterruptParagraph(list: MarkdownListItem): boolean {
-  const attrs = list
-  if (attrs.kind === 'ordered' && (attrs.order ?? 1) !== 1) return false
-  // An empty item writes a bare marker, and a bare marker interrupts nothing.
-  // A task always writes its `[ ]`, which is content enough.
-  return attrs.kind === 'task' || (list.children.length > 0 && hasBlockContent(list.children[0]))
-}
-
-/**
- * The character a list item's marker ends with: the bullet itself, or the
- * delimiter after an ordered item's number. A markdown list runs for as long as
- * this stays the same, and a different one opens a new list.
- */
-function listMarkerChar(node: MarkdownBlock): string {
-  if (node.type !== 'listItem') return ''
-  const { kind, marker, collapsed } = node
-  if (kind === 'ordered') return marker === ')' ? ')' : '.'
-  if (kind === 'task') return marker === '+' ? '+' : marker === '*' ? '*' : '-'
-  return collapsed ? '+' : marker === '*' ? '*' : '-'
+function isTightBefore(
+  children: MarkdownBlock[],
+  item: number,
+  runStart: number,
+  tightItem: boolean,
+  tightRun: boolean,
+): boolean {
+  if (item === 0) return false
+  const child = children[item]
+  const previous = children[item - 1]
+  if (child.type !== 'listItem') return false
+  let blankBefore = child.blankBefore
+  if (blankBefore == null && item - 1 > runStart && previous.type === 'listItem') {
+    blankBefore = previous.blankBefore
+  }
+  const tight = blankBefore == null ? (item === runStart ? tightItem : tightRun) : !blankBefore
+  return tight && canJoinTight(previous, child)
 }
 
 /**
@@ -762,17 +755,6 @@ function emitInlineChildren(node: MarkdownInline, out: MdOut): void {
   } else if (node.value) {
     out.write(node.value, lazy)
   }
-}
-
-function hasInlineContent(node: MarkdownInline): boolean {
-  return node.segments?.value === node.value ? node.segments.chunks.length > 0 : node.value !== ''
-}
-
-function hasBlockContent(node: MarkdownBlock): boolean {
-  if (node.children) return node.children.length > 0
-  if (node.type === 'ignored') return node.hasContent
-  if (node.type === 'paragraph' || node.type === 'heading') return hasInlineContent(node)
-  return node.type === 'codeBlock' && node.value !== ''
 }
 
 // ─────────────────────────────────────────────────────────────────────

@@ -105,6 +105,11 @@ export interface MarkdownListItem extends MarkdownPositioned {
    */
   markerGap?: number | undefined
   /**
+   * Whether one blank line separates this item from the sibling before it.
+   * Undefined leaves the choice to the serializer.
+   */
+  blankBefore?: boolean | undefined
+  /**
    * Never empty: an item with no content holds one empty paragraph.
    */
   children: MarkdownBlock[]
