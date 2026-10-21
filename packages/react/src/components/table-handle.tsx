@@ -145,8 +145,7 @@ function TableMenuAlignItems({ editor }: { editor: TypedEditor }) {
 }
 function TableMenuAlign({ editor }: { editor: TypedEditor }): ReactNode {
   const canExec = useEditorDerivedValue(canAlign)
-  if (!canExec) return null
-  return <TableMenuAlignItems editor={editor} />
+  return canExec ? <TableMenuAlignItems editor={editor} /> : null
 }
 
 // Clear Contents
