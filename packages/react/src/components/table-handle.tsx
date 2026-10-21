@@ -1,6 +1,11 @@
-import { getTableColumnAlign, type EditorExtension, type TableColumnAlign } from '@meowdown/core'
+import {
+  getTableColumnAlign,
+  type EditorExtension,
+  type TableColumnAlign,
+  type TypedEditor,
+} from '@meowdown/core'
 import type { Editor } from '@prosekit/core'
-import { useEditorDerivedValue } from '@prosekit/react'
+import { useEditor, useEditorDerivedValue } from '@prosekit/react'
 import { MenuItem, MenuPopup, MenuPositioner } from '@prosekit/react/menu'
 import {
   TableHandleColumnMenuRoot,
@@ -16,7 +21,8 @@ import {
   TableHandleRowPositioner,
 } from '@prosekit/react/table-handle'
 import { CheckIcon, GripHorizontalIcon, GripVerticalIcon } from 'lucide-react'
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
+import { useCallback } from 'react'
 
 import styles from './table-handle.module.css'
 
@@ -96,8 +102,49 @@ function ColumnAlignMenuItem({
   )
 }
 
+// Insert Left
+function canInsertLeft(editor: TypedEditor): boolean {
+  return editor.commands.addTableColumnBefore.canExec()
+}
+function runInsertLeft(editor: TypedEditor): void {
+  editor.commands.addTableColumnBefore()
+}
+function TableMenuInsertLeft({ editor }: { editor: TypedEditor }): ReactNode {
+  const canExec = useEditorDerivedValue(canInsertLeft)
+  const handler = useCallback(() => runInsertLeft(editor), [editor])
+
+  if (!canExec) return null
+  return (
+    <MenuItem className={styles.MenuItem} data-testid="table-insert-right" onSelect={handler}>
+      <span>Insert Right</span>
+    </MenuItem>
+  )
+}
+
+// Insert Right
+function canInsertRight(editor: TypedEditor): boolean {
+  return editor.commands.addTableColumnAfter.canExec()
+}
+function runInsertRight(editor: TypedEditor): void {
+  editor.commands.addTableColumnAfter()
+}
+function TableMenuInsertRight({ editor }: { editor: TypedEditor }): ReactNode {
+  const canExec = useEditorDerivedValue(canInsertRight)
+  const handler = useCallback(() => runInsertRight(editor), [editor])
+
+  if (!canExec) return null
+  return (
+    <MenuItem className={styles.MenuItem} data-testid="table-insert-right" onSelect={handler}>
+      <span>Insert Right</span>
+    </MenuItem>
+  )
+}
+
 export function TableHandle(): ReactElement {
+  // TODO: in the end, we want to remove this `state` variable
   const state = useEditorDerivedValue(getTableHandleState)
+
+  const editor = useEditor<EditorExtension>()
 
   return (
     <TableHandleRoot>
@@ -115,24 +162,8 @@ export function TableHandle(): ReactElement {
             </TableHandleColumnMenuTrigger>
             <MenuPositioner className={styles.MenuPositioner}>
               <MenuPopup className={styles.MenuPopup} data-testid="table-handle-column-menu">
-                {state.addTableColumnBefore.canExec && (
-                  <MenuItem
-                    className={styles.MenuItem}
-                    data-testid="table-insert-left"
-                    onSelect={state.addTableColumnBefore.command}
-                  >
-                    <span>Insert Left</span>
-                  </MenuItem>
-                )}
-                {state.addTableColumnAfter.canExec && (
-                  <MenuItem
-                    className={styles.MenuItem}
-                    data-testid="table-insert-right"
-                    onSelect={state.addTableColumnAfter.command}
-                  >
-                    <span>Insert Right</span>
-                  </MenuItem>
-                )}
+                <TableMenuInsertLeft editor={editor} />
+                <TableMenuInsertRight editor={editor} />
                 {state.setTableColumnAlign.canExec && (
                   <>
                     <ColumnAlignMenuItem
