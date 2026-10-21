@@ -1,0 +1,173 @@
+@property --meowdown-embed-color {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-background {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-border-color {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-radius {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-padding {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-muted-color {
+  syntax: '*';
+  inherits: true;
+}
+
+@property --meowdown-embed-link-color {
+  syntax: '*';
+  inherits: true;
+}
+
+@layer meowdown-embed {
+  :where([data-meowdown-embed='youtube']) {
+    --_hairline: var(
+      --meowdown-embed-border-color,
+      color-mix(in srgb, currentColor 15%, transparent)
+    );
+    --_muted: var(--meowdown-embed-muted-color, color-mix(in srgb, currentColor 58%, transparent));
+    --_link: var(--meowdown-embed-link-color, #1d9bf0);
+    --_radius: var(--meowdown-embed-radius, 1rem);
+    --_page: var(--meowdown-embed-background, Canvas);
+    --_play: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 68 48'%3E%3Cpath d='M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55C3.97 2.33 2.27 4.81 1.48 7.74.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24S67.94 13.05 66.52 7.74z' fill='%23f00'/%3E%3Cpath d='M45 24 27 14v20z' fill='%23fff'/%3E%3C/svg%3E");
+
+    display: block;
+    font: inherit;
+    color: var(--meowdown-embed-color, inherit);
+
+    :where([data-root]) {
+      overflow-wrap: anywhere;
+      line-height: 1.35;
+    }
+    :where([hidden]) {
+      display: none !important;
+    }
+    :where(a) {
+      color: var(--_link);
+      text-decoration: none;
+    }
+    :where(a:hover) {
+      text-decoration: underline;
+      text-underline-offset: 0.15em;
+    }
+    :where(a:focus-visible, button:focus-visible) {
+      outline: 2px solid var(--_link);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    /* The card is the poster. The article is the positioned box that the
+     * details overlay hangs from. */
+    :where(article) {
+      position: relative;
+      max-width: 100%;
+    }
+    :where([data-orientation='portrait']) {
+      max-width: 22rem;
+      margin-inline: auto;
+    }
+    :where([data-poster], iframe) {
+      position: relative;
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border: 0;
+      border-radius: var(--_radius);
+      overflow: hidden;
+      background: color-mix(in srgb, currentColor 6%, transparent);
+    }
+    :where([data-orientation='portrait'] [data-poster], [data-orientation='portrait'] iframe) {
+      aspect-ratio: 9 / 16;
+    }
+    :where(button[data-poster]) {
+      padding: 0;
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+    }
+    :where([data-poster] img) {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    /* YouTube's own large play button: the 68x48 shape from the embedded
+     * player, red with a white triangle. */
+    :where([data-play]) {
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: 68px;
+      height: 48px;
+      translate: -50% -50%;
+      background: var(--_play) center / contain no-repeat;
+    }
+
+    /* Details: absolutely positioned over the top of the poster by default.
+     * Variants move or restyle it. */
+    :where([data-details]) {
+      position: absolute;
+      inset: 0 0 auto 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.125rem;
+      pointer-events: none;
+    }
+    :where([data-details] a, [data-details] span) {
+      pointer-events: auto;
+    }
+    :where([data-title]) {
+      font-size: 1.0625em;
+      font-weight: 700;
+      color: inherit;
+    }
+    :where([data-details] > a:has([data-author]), [data-author]) {
+      font-size: 0.875em;
+      color: inherit;
+    }
+    /* Fallback and pending states keep a plain bordered box. */
+    :where([data-fallback]) {
+      border: 1px solid var(--_hairline);
+      border-radius: var(--_radius);
+      padding: var(--meowdown-embed-padding, 1rem);
+    }
+    :where([data-fallback] [data-details]) {
+      position: static;
+    }
+    :where([data-body]) {
+      margin-block: 0.5rem 0;
+      color: var(--_muted);
+    }
+    :where([data-footer]) {
+      display: block;
+      margin-block-start: 0.75rem;
+      font-size: 0.9375em;
+      color: var(--_muted);
+    }
+
+    :where([data-details]) {
+      padding: 0.875rem 1rem 2.5rem;
+      border-radius: var(--_radius) var(--_radius) 0 0;
+      background: linear-gradient(rgb(0 0 0 / 0.72), rgb(0 0 0 / 0));
+      color: #fff;
+    }
+    :where([data-details] > a:has([data-author]), [data-author]) {
+      color: rgb(255 255 255 / 0.82);
+    }
+  }
+}
