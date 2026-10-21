@@ -10,7 +10,7 @@
     "deploy:preview": "wrangler versions upload"
   },
   "dependencies": {
-    "@astrojs/react": "^7.0.1",
+    "@astrojs/react": "^7.1.0",
     "@base-ui/react": "^1.9.0",
     "@codemirror/commands": "^6.11.1",
     "@codemirror/lang-markdown": "^6.5.2",
@@ -22,7 +22,7 @@
     "@meowdown/embed": "workspace:*",
     "@meowdown/react": "workspace:*",
     "@ocavue/utils": "^1.9.0",
-    "astro": "^7.3.4",
+    "astro": "^7.4.1",
     "astro-theme-toggle": "^0.8.2",
     "astrobook": "^0.13.3",
     "clsx": "^2.1.1",
