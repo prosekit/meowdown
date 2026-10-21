@@ -34,6 +34,7 @@ describe('defineEditorExtension', () => {
         "content": [
           {
             "attrs": {
+              "blankBefore": null,
               "closingHashes": null,
               "level": 1,
               "setextUnderline": null,
@@ -47,6 +48,9 @@ describe('defineEditorExtension', () => {
             "type": "heading",
           },
           {
+            "attrs": {
+              "blankBefore": null,
+            },
             "content": [
               {
                 "text": "A paragraph.",
@@ -56,8 +60,14 @@ describe('defineEditorExtension', () => {
             "type": "paragraph",
           },
           {
+            "attrs": {
+              "blankBefore": null,
+            },
             "content": [
               {
+                "attrs": {
+                  "blankBefore": null,
+                },
                 "content": [
                   {
                     "text": "A quote.",
@@ -82,6 +92,9 @@ describe('defineEditorExtension', () => {
             },
             "content": [
               {
+                "attrs": {
+                  "blankBefore": null,
+                },
                 "content": [
                   {
                     "text": "A bullet item.",
@@ -106,6 +119,9 @@ describe('defineEditorExtension', () => {
             },
             "content": [
               {
+                "attrs": {
+                  "blankBefore": null,
+                },
                 "content": [
                   {
                     "text": "An ordered item.",
@@ -130,6 +146,9 @@ describe('defineEditorExtension', () => {
             },
             "content": [
               {
+                "attrs": {
+                  "blankBefore": null,
+                },
                 "content": [
                   {
                     "text": "A task item.",
@@ -143,6 +162,7 @@ describe('defineEditorExtension', () => {
           },
           {
             "attrs": {
+              "blankBefore": null,
               "fenceLength": null,
               "fenceStyle": null,
               "language": "ts",
@@ -168,6 +188,9 @@ describe('defineEditorExtension', () => {
                     },
                     "content": [
                       {
+                        "attrs": {
+                          "blankBefore": null,
+                        },
                         "content": [
                           {
                             "text": "H1",
@@ -188,6 +211,9 @@ describe('defineEditorExtension', () => {
                     },
                     "content": [
                       {
+                        "attrs": {
+                          "blankBefore": null,
+                        },
                         "content": [
                           {
                             "text": "H2",
@@ -213,6 +239,9 @@ describe('defineEditorExtension', () => {
                     },
                     "content": [
                       {
+                        "attrs": {
+                          "blankBefore": null,
+                        },
                         "content": [
                           {
                             "text": "A1",
@@ -233,6 +262,9 @@ describe('defineEditorExtension', () => {
                     },
                     "content": [
                       {
+                        "attrs": {
+                          "blankBefore": null,
+                        },
                         "content": [
                           {
                             "text": "B1",
@@ -252,12 +284,14 @@ describe('defineEditorExtension', () => {
           },
           {
             "attrs": {
+              "blankBefore": null,
               "marker": null,
             },
             "type": "horizontalRule",
           },
           {
             "attrs": {
+              "blankBefore": null,
               "content": "<!-- a comment -->",
             },
             "type": "htmlComment",
