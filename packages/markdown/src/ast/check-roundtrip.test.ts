@@ -139,6 +139,17 @@ const NORMALIZING_CASES: string[] = [
   '- [ ] todo\neen voorlopig idee',
   '- item\nlazy line',
 
+  // a nested item's indent normalizes to the parent's content column
+  '- a\n    - deep',
+
+  // an empty container line drops its trailing whitespace
+  '> ',
+  '- ',
+  '- a\n- \n- b',
+
+  // a whitespace-only line is an empty paragraph
+  '   ',
+
   // a double space after the ATX marker collapses to one
   '#  Journal',
 
