@@ -9,6 +9,7 @@ import { TextSelection } from '@prosekit/pm/state'
 import type { ReactNodeViewProps } from '@prosekit/react'
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
 import {
+  memo,
   use,
   useCallback,
   useDeferredValue,
@@ -115,6 +116,41 @@ interface CodeBlockToolbarProps {
 }
 
 function CodeBlockToolbar({ code, language, setLanguage }: CodeBlockToolbarProps) {
+  // Keep the toolbar shown until the popup finishes its closing animation
+  const [comboboxOpen, setComboboxOpen] = useState(false)
+
+  return (
+    <div className={styles.Toolbar} contentEditable={false} data-open={comboboxOpen || undefined}>
+      <CodeBlockLanguagePickerMemo
+        language={language}
+        setLanguage={setLanguage}
+        onShownChange={setComboboxOpen}
+      />
+      <CopyButton
+        getText={() => code}
+        label="Copy code"
+        className={styles.CopyButton}
+        data-testid="code-block-copy"
+      />
+    </div>
+  )
+}
+
+interface CodeBlockLanguagePickerProps {
+  language: string
+  setLanguage: (language: string) => void
+  /**
+   * Called with `true` when the popup opens and with `false` once its closing
+   * animation finishes.
+   */
+  onShownChange: (shown: boolean) => void
+}
+
+function CodeBlockLanguagePicker({
+  language,
+  setLanguage,
+  onShownChange,
+}: CodeBlockLanguagePickerProps): ReactElement {
   const collisionBoundary = use(CollisionBoundaryContext)
   // Fall back to the raw value so an alias or unknown language still shows in
   // the trigger instead of looking empty.
@@ -129,9 +165,6 @@ function CodeBlockToolbar({ code, language, setLanguage }: CodeBlockToolbarProps
 
   const [query, setQuery] = useState('')
 
-  // Keep the toolbar shown until the popup finishes its closing animation
-  const [comboboxOpen, setComboboxOpen] = useState(false)
-
   // Offer the typed value as an option when it doesn't match a known one.
   const itemsForView = useMemo<readonly LanguageItem[]>(() => {
     const value = query.trim()
@@ -144,62 +177,56 @@ function CodeBlockToolbar({ code, language, setLanguage }: CodeBlockToolbarProps
   }, [query])
 
   return (
-    <div className={styles.Toolbar} contentEditable={false} data-open={comboboxOpen || undefined}>
-      <Combobox.Root
-        items={itemsForView}
-        value={selected}
-        onValueChange={(item) => setLanguage(item?.value ?? '')}
-        inputValue={query}
-        onInputValueChange={setQuery}
-        onOpenChange={(open) => {
-          if (open) setComboboxOpen(true)
-          else setQuery('')
-        }}
-        onOpenChangeComplete={(open) => {
-          if (!open) setComboboxOpen(false)
-        }}
-      >
-        <Combobox.Trigger className={styles.Trigger} data-testid="code-block-language">
-          <Combobox.Value placeholder="Plain Text" />
-          <Combobox.Icon className={styles.TriggerIcon}>
-            <ChevronsUpDownIcon />
-          </Combobox.Icon>
-        </Combobox.Trigger>
-        <Combobox.Portal>
-          <Combobox.Positioner
-            className={styles.Positioner}
-            sideOffset={4}
-            collisionBoundary={collisionBoundary}
-          >
-            <Combobox.Popup className={styles.Popup}>
-              <div className={styles.SearchRow}>
-                <Combobox.Input
-                  className={styles.Search}
-                  placeholder="Search or type a language"
-                  data-testid="code-block-language-search"
-                />
-              </div>
-              <Combobox.Empty className={styles.Empty}>No languages found.</Combobox.Empty>
-              <Combobox.List className={styles.List}>
-                {(item: LanguageItem) => (
-                  <Combobox.Item key={item.label} value={item} className={styles.Item}>
-                    <Combobox.ItemIndicator className={styles.ItemIndicator}>
-                      <CheckIcon />
-                    </Combobox.ItemIndicator>
-                    <span className={styles.ItemText}>{item.label}</span>
-                  </Combobox.Item>
-                )}
-              </Combobox.List>
-            </Combobox.Popup>
-          </Combobox.Positioner>
-        </Combobox.Portal>
-      </Combobox.Root>
-      <CopyButton
-        getText={() => code}
-        label="Copy code"
-        className={styles.CopyButton}
-        data-testid="code-block-copy"
-      />
-    </div>
+    <Combobox.Root
+      items={itemsForView}
+      value={selected}
+      onValueChange={(item) => setLanguage(item?.value ?? '')}
+      inputValue={query}
+      onInputValueChange={setQuery}
+      onOpenChange={(open) => {
+        if (open) onShownChange(true)
+        else setQuery('')
+      }}
+      onOpenChangeComplete={(open) => {
+        if (!open) onShownChange(false)
+      }}
+    >
+      <Combobox.Trigger className={styles.Trigger} data-testid="code-block-language">
+        <Combobox.Value placeholder="Plain Text" />
+        <Combobox.Icon className={styles.TriggerIcon}>
+          <ChevronsUpDownIcon />
+        </Combobox.Icon>
+      </Combobox.Trigger>
+      <Combobox.Portal>
+        <Combobox.Positioner
+          className={styles.Positioner}
+          sideOffset={4}
+          collisionBoundary={collisionBoundary}
+        >
+          <Combobox.Popup className={styles.Popup}>
+            <div className={styles.SearchRow}>
+              <Combobox.Input
+                className={styles.Search}
+                placeholder="Search or type a language"
+                data-testid="code-block-language-search"
+              />
+            </div>
+            <Combobox.Empty className={styles.Empty}>No languages found.</Combobox.Empty>
+            <Combobox.List className={styles.List}>
+              {(item: LanguageItem) => (
+                <Combobox.Item key={item.label} value={item} className={styles.Item}>
+                  <Combobox.ItemIndicator className={styles.ItemIndicator}>
+                    <CheckIcon />
+                  </Combobox.ItemIndicator>
+                  <span className={styles.ItemText}>{item.label}</span>
+                </Combobox.Item>
+              )}
+            </Combobox.List>
+          </Combobox.Popup>
+        </Combobox.Positioner>
+      </Combobox.Portal>
+    </Combobox.Root>
   )
 }
+
+const CodeBlockLanguagePickerMemo = /* @__PURE__ */ memo(CodeBlockLanguagePicker)
