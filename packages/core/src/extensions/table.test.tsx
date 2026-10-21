@@ -75,6 +75,106 @@ describe('table', () => {
   })
 })
 
+describe('table commands outside a table', () => {
+  // Each command is unavailable with the caret outside a table and available
+  // once a column or row of the table is selected.
+  function setupCaretOutsideTable() {
+    const fixture = setupFixture()
+    const { n } = fixture
+    fixture.set(
+      n.doc(
+        n.paragraph('<a>before'),
+        n.table(
+          n.tableRow(n.tableHeaderCell(n.paragraph('a')), n.tableHeaderCell(n.paragraph('b'))),
+          n.tableRow(n.tableCell(n.paragraph('1')), n.tableCell(n.paragraph('2'))),
+        ),
+      ),
+    )
+    fixture.view.focus()
+    return fixture
+  }
+
+  function selectFirstDataColumn(fixture: ReturnType<typeof setupFixture>) {
+    fixture.editor.commands.selectTableColumn({ head: getFirstDataCellPos(fixture.doc) })
+  }
+
+  function selectFirstDataRow(fixture: ReturnType<typeof setupFixture>) {
+    fixture.editor.commands.selectTableRow({ head: getFirstDataCellPos(fixture.doc) })
+  }
+
+  it('addTableColumnBefore', () => {
+    using fixture = setupCaretOutsideTable()
+    const { commands } = fixture.editor
+    expect(commands.addTableColumnBefore.canExec()).toBe(false)
+    selectFirstDataColumn(fixture)
+    expect(commands.addTableColumnBefore.canExec()).toBe(true)
+  })
+
+  it('addTableColumnAfter', () => {
+    using fixture = setupCaretOutsideTable()
+    const { commands } = fixture.editor
+    expect(commands.addTableColumnAfter.canExec()).toBe(false)
+    selectFirstDataColumn(fixture)
+    expect(commands.addTableColumnAfter.canExec()).toBe(true)
+  })
+
+  it('setTableColumnAlign', () => {
+    using fixture = setupCaretOutsideTable()
+    const { commands } = fixture.editor
+    expect(commands.setTableColumnAlign.canExec('left')).toBe(false)
+    selectFirstDataColumn(fixture)
+    expect(commands.setTableColumnAlign.canExec('left')).toBe(true)
+  })
+
+  it('deleteCellSelection', () => {
+    using fixture = setupCaretOutsideTable()
+    const { commands } = fixture.editor
+    expect(commands.deleteCellSelection.canExec()).toBe(false)
+    selectFirstDataColumn(fixture)
+    expect(commands.deleteCellSelection.canExec()).toBe(true)
+  })
+
+  it('deleteTableColumn', () => {
+    using fixture = setupCaretOutsideTable()
+    const { commands } = fixture.editor
+    expect(commands.deleteTableColumn.canExec()).toBe(false)
+    selectFirstDataColumn(fixture)
+    expect(commands.deleteTableColumn.canExec()).toBe(true)
+  })
+
+  it('addTableRowAbove', () => {
+    using fixture = setupCaretOutsideTable()
+    const { commands } = fixture.editor
+    expect(commands.addTableRowAbove.canExec()).toBe(false)
+    selectFirstDataRow(fixture)
+    expect(commands.addTableRowAbove.canExec()).toBe(true)
+  })
+
+  it('addTableRowBelow', () => {
+    using fixture = setupCaretOutsideTable()
+    const { commands } = fixture.editor
+    expect(commands.addTableRowBelow.canExec()).toBe(false)
+    selectFirstDataRow(fixture)
+    expect(commands.addTableRowBelow.canExec()).toBe(true)
+  })
+
+  it('deleteTableRow', () => {
+    using fixture = setupCaretOutsideTable()
+    const { commands } = fixture.editor
+    expect(commands.deleteTableRow.canExec()).toBe(false)
+    selectFirstDataRow(fixture)
+    expect(commands.deleteTableRow.canExec()).toBe(true)
+  })
+
+  it('deleteTable', () => {
+    using fixture = setupCaretOutsideTable()
+    const { commands } = fixture.editor
+    expect(commands.deleteTable.canExec()).toBe(false)
+    selectFirstDataColumn(fixture)
+    expect(commands.deleteTable.canExec()).toBe(true)
+  })
+})
+
 describe('table cell is inline-only', () => {
   it('cell schema forbids block children', () => {
     using fixture = setupFixture()
@@ -262,4 +362,17 @@ function getTablePos(doc: EditorNode): number {
     if (isNodeOfType(node, 'table')) tablePos = offset
   })
   return tablePos
+}
+
+function getFirstDataCellPos(doc: EditorNode): number {
+  let cellPos = -1
+  doc.descendants((node, pos) => {
+    if (cellPos > -1) return false
+    if (isNodeOfType(node, 'tableCell')) {
+      cellPos = pos
+      return false
+    }
+    return true
+  })
+  return cellPos
 }
