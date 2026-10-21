@@ -4,7 +4,6 @@ import {
   type TableColumnAlign,
   type TypedEditor,
 } from '@meowdown/core'
-import type { Editor } from '@prosekit/core'
 import { useEditor, useEditorDerivedValue } from '@prosekit/react'
 import { MenuItem, MenuPopup, MenuPositioner } from '@prosekit/react/menu'
 import {
@@ -26,80 +25,10 @@ import { useCallback } from 'react'
 
 import styles from './table-handle.module.css'
 
-function getTableHandleState(editor: Editor<EditorExtension>) {
-  const commands = editor.commands
-  const columnAlign = getTableColumnAlign(editor.state)
-  return {
-    columnAlign,
-    setTableColumnAlign: {
-      canExec: commands.setTableColumnAlign.canExec('left'),
-      // Selecting the current alignment again clears it back to `---`.
-      command: (align: TableColumnAlign) => {
-        return commands.setTableColumnAlign(columnAlign === align ? null : align)
-      },
-    },
-    addTableColumnBefore: {
-      canExec: commands.addTableColumnBefore.canExec(),
-      command: () => commands.addTableColumnBefore(),
-    },
-    addTableColumnAfter: {
-      canExec: commands.addTableColumnAfter.canExec(),
-      command: () => commands.addTableColumnAfter(),
-    },
-    addTableRowAbove: {
-      canExec: commands.addTableRowAbove.canExec(),
-      command: () => commands.addTableRowAbove(),
-    },
-    addTableRowBelow: {
-      canExec: commands.addTableRowBelow.canExec(),
-      command: () => commands.addTableRowBelow(),
-    },
-    deleteCellSelection: {
-      canExec: commands.deleteCellSelection.canExec(),
-      command: () => commands.deleteCellSelection(),
-    },
-    deleteTableColumn: {
-      canExec: commands.deleteTableColumn.canExec(),
-      command: () => commands.deleteTableColumn(),
-    },
-    deleteTableRow: {
-      canExec: commands.deleteTableRow.canExec(),
-      command: () => commands.deleteTableRow(),
-    },
-    deleteTable: {
-      canExec: commands.deleteTable.canExec(),
-      command: () => commands.deleteTable(),
-    },
-  }
-}
-
 const COLUMN_ALIGN_LABELS: Record<TableColumnAlign, string> = {
   left: 'Align Left',
   center: 'Align Center',
   right: 'Align Right',
-}
-
-function ColumnAlignMenuItem({
-  align,
-  columnAlign,
-  onSelect,
-}: {
-  align: TableColumnAlign
-  columnAlign: TableColumnAlign | undefined
-  onSelect: () => void
-}) {
-  const active = columnAlign === align
-  return (
-    <MenuItem
-      className={styles.MenuItem}
-      data-testid={`table-align-${align}`}
-      data-active={active ? '' : undefined}
-      onSelect={onSelect}
-    >
-      <span>{COLUMN_ALIGN_LABELS[align]}</span>
-      {active && <CheckIcon />}
-    </MenuItem>
-  )
 }
 
 // Insert Left
@@ -115,8 +44,8 @@ function TableMenuInsertLeft({ editor }: { editor: TypedEditor }): ReactNode {
 
   if (!canExec) return null
   return (
-    <MenuItem className={styles.MenuItem} data-testid="table-insert-right" onSelect={handler}>
-      <span>Insert Right</span>
+    <MenuItem className={styles.MenuItem} data-testid="table-insert-left" onSelect={handler}>
+      <span>Insert Left</span>
     </MenuItem>
   )
 }
@@ -140,10 +69,182 @@ function TableMenuInsertRight({ editor }: { editor: TypedEditor }): ReactNode {
   )
 }
 
-export function TableHandle(): ReactElement {
-  // TODO: in the end, we want to remove this `state` variable
-  const state = useEditorDerivedValue(getTableHandleState)
+// Align
+function canAlign(editor: TypedEditor): boolean {
+  return editor.commands.setTableColumnAlign.canExec('left')
+}
+function getColumnAlign(editor: TypedEditor): TableColumnAlign | undefined {
+  return getTableColumnAlign(editor.state)
+}
+function runAlign(editor: TypedEditor, align: TableColumnAlign): void {
+  // Selecting the current alignment again clears it back to `---`.
+  const columnAlign = getTableColumnAlign(editor.state)
+  editor.commands.setTableColumnAlign(columnAlign === align ? null : align)
+}
+function TableMenuAlignItem({
+  editor,
+  align,
+}: {
+  editor: TypedEditor
+  align: TableColumnAlign
+}): ReactNode {
+  const columnAlign = useEditorDerivedValue(getColumnAlign)
+  const handler = useCallback(() => runAlign(editor, align), [editor, align])
 
+  const active = columnAlign === align
+  return (
+    <MenuItem
+      className={styles.MenuItem}
+      data-testid={`table-align-${align}`}
+      data-active={active ? '' : undefined}
+      onSelect={handler}
+    >
+      <span>{COLUMN_ALIGN_LABELS[align]}</span>
+      {active && <CheckIcon />}
+    </MenuItem>
+  )
+}
+function TableMenuAlign({ editor }: { editor: TypedEditor }): ReactNode {
+  const canExec = useEditorDerivedValue(canAlign)
+
+  if (!canExec) return null
+  return (
+    <>
+      <TableMenuAlignItem editor={editor} align="left" />
+      <TableMenuAlignItem editor={editor} align="center" />
+      <TableMenuAlignItem editor={editor} align="right" />
+    </>
+  )
+}
+
+// Clear Contents
+function canClearContents(editor: TypedEditor): boolean {
+  return editor.commands.deleteCellSelection.canExec()
+}
+function runClearContents(editor: TypedEditor): void {
+  editor.commands.deleteCellSelection()
+}
+function TableMenuClearContents({
+  editor,
+  testId,
+}: {
+  editor: TypedEditor
+  testId: string
+}): ReactNode {
+  const canExec = useEditorDerivedValue(canClearContents)
+  const handler = useCallback(() => runClearContents(editor), [editor])
+
+  if (!canExec) return null
+  return (
+    <MenuItem className={styles.MenuItem} data-testid={testId} onSelect={handler}>
+      <span>Clear Contents</span>
+      <kbd>Del</kbd>
+    </MenuItem>
+  )
+}
+
+// Delete Column
+function canDeleteColumn(editor: TypedEditor): boolean {
+  return editor.commands.deleteTableColumn.canExec()
+}
+function runDeleteColumn(editor: TypedEditor): void {
+  editor.commands.deleteTableColumn()
+}
+function TableMenuDeleteColumn({ editor }: { editor: TypedEditor }): ReactNode {
+  const canExec = useEditorDerivedValue(canDeleteColumn)
+  const handler = useCallback(() => runDeleteColumn(editor), [editor])
+
+  if (!canExec) return null
+  return (
+    <MenuItem className={styles.MenuItem} data-testid="table-delete-column" onSelect={handler}>
+      <span>Delete Column</span>
+    </MenuItem>
+  )
+}
+
+// Insert Above
+function canInsertAbove(editor: TypedEditor): boolean {
+  return editor.commands.addTableRowAbove.canExec()
+}
+function runInsertAbove(editor: TypedEditor): void {
+  editor.commands.addTableRowAbove()
+}
+function TableMenuInsertAbove({ editor }: { editor: TypedEditor }): ReactNode {
+  const canExec = useEditorDerivedValue(canInsertAbove)
+  const handler = useCallback(() => runInsertAbove(editor), [editor])
+
+  if (!canExec) return null
+  return (
+    <MenuItem className={styles.MenuItem} data-testid="table-insert-above" onSelect={handler}>
+      <span>Insert Above</span>
+    </MenuItem>
+  )
+}
+
+// Insert Below
+function canInsertBelow(editor: TypedEditor): boolean {
+  return editor.commands.addTableRowBelow.canExec()
+}
+function runInsertBelow(editor: TypedEditor): void {
+  editor.commands.addTableRowBelow()
+}
+function TableMenuInsertBelow({ editor }: { editor: TypedEditor }): ReactNode {
+  const canExec = useEditorDerivedValue(canInsertBelow)
+  const handler = useCallback(() => runInsertBelow(editor), [editor])
+
+  if (!canExec) return null
+  return (
+    <MenuItem className={styles.MenuItem} data-testid="table-insert-below" onSelect={handler}>
+      <span>Insert Below</span>
+    </MenuItem>
+  )
+}
+
+// Delete Row
+function canDeleteRow(editor: TypedEditor): boolean {
+  return editor.commands.deleteTableRow.canExec()
+}
+function runDeleteRow(editor: TypedEditor): void {
+  editor.commands.deleteTableRow()
+}
+function TableMenuDeleteRow({ editor }: { editor: TypedEditor }): ReactNode {
+  const canExec = useEditorDerivedValue(canDeleteRow)
+  const handler = useCallback(() => runDeleteRow(editor), [editor])
+
+  if (!canExec) return null
+  return (
+    <MenuItem className={styles.MenuItem} data-testid="table-delete-row" onSelect={handler}>
+      <span>Delete Row</span>
+    </MenuItem>
+  )
+}
+
+// Delete Table
+function canDeleteTable(editor: TypedEditor): boolean {
+  return editor.commands.deleteTable.canExec()
+}
+function runDeleteTable(editor: TypedEditor): void {
+  editor.commands.deleteTable()
+}
+function TableMenuDeleteTable({
+  editor,
+  testId,
+}: {
+  editor: TypedEditor
+  testId: string
+}): ReactNode {
+  const canExec = useEditorDerivedValue(canDeleteTable)
+  const handler = useCallback(() => runDeleteTable(editor), [editor])
+
+  if (!canExec) return null
+  return (
+    <MenuItem className={styles.MenuItem} data-danger="" data-testid={testId} onSelect={handler}>
+      <span>Delete Table</span>
+    </MenuItem>
+  )
+}
+
+export function TableHandle(): ReactElement {
   const editor = useEditor<EditorExtension>()
 
   return (
@@ -164,54 +265,10 @@ export function TableHandle(): ReactElement {
               <MenuPopup className={styles.MenuPopup} data-testid="table-handle-column-menu">
                 <TableMenuInsertLeft editor={editor} />
                 <TableMenuInsertRight editor={editor} />
-                {state.setTableColumnAlign.canExec && (
-                  <>
-                    <ColumnAlignMenuItem
-                      align="left"
-                      columnAlign={state.columnAlign}
-                      onSelect={() => state.setTableColumnAlign.command('left')}
-                    />
-                    <ColumnAlignMenuItem
-                      align="center"
-                      columnAlign={state.columnAlign}
-                      onSelect={() => state.setTableColumnAlign.command('center')}
-                    />
-                    <ColumnAlignMenuItem
-                      align="right"
-                      columnAlign={state.columnAlign}
-                      onSelect={() => state.setTableColumnAlign.command('right')}
-                    />
-                  </>
-                )}
-                {state.deleteCellSelection.canExec && (
-                  <MenuItem
-                    className={styles.MenuItem}
-                    data-testid="table-clear-column"
-                    onSelect={state.deleteCellSelection.command}
-                  >
-                    <span>Clear Contents</span>
-                    <kbd>Del</kbd>
-                  </MenuItem>
-                )}
-                {state.deleteTableColumn.canExec && (
-                  <MenuItem
-                    className={styles.MenuItem}
-                    data-testid="table-delete-column"
-                    onSelect={state.deleteTableColumn.command}
-                  >
-                    <span>Delete Column</span>
-                  </MenuItem>
-                )}
-                {state.deleteTable.canExec && (
-                  <MenuItem
-                    className={styles.MenuItem}
-                    data-danger=""
-                    data-testid="table-delete-table-column"
-                    onSelect={state.deleteTable.command}
-                  >
-                    <span>Delete Table</span>
-                  </MenuItem>
-                )}
+                <TableMenuAlign editor={editor} />
+                <TableMenuClearContents editor={editor} testId="table-clear-column" />
+                <TableMenuDeleteColumn editor={editor} />
+                <TableMenuDeleteTable editor={editor} testId="table-delete-table-column" />
               </MenuPopup>
             </MenuPositioner>
           </TableHandleColumnMenuRoot>
@@ -226,53 +283,11 @@ export function TableHandle(): ReactElement {
             </TableHandleRowMenuTrigger>
             <MenuPositioner className={styles.MenuPositioner}>
               <MenuPopup className={styles.MenuPopup} data-testid="table-handle-row-menu">
-                {state.addTableRowAbove.canExec && (
-                  <MenuItem
-                    className={styles.MenuItem}
-                    data-testid="table-insert-above"
-                    onSelect={state.addTableRowAbove.command}
-                  >
-                    <span>Insert Above</span>
-                  </MenuItem>
-                )}
-                {state.addTableRowBelow.canExec && (
-                  <MenuItem
-                    className={styles.MenuItem}
-                    data-testid="table-insert-below"
-                    onSelect={state.addTableRowBelow.command}
-                  >
-                    <span>Insert Below</span>
-                  </MenuItem>
-                )}
-                {state.deleteCellSelection.canExec && (
-                  <MenuItem
-                    className={styles.MenuItem}
-                    data-testid="table-clear-row"
-                    onSelect={state.deleteCellSelection.command}
-                  >
-                    <span>Clear Contents</span>
-                    <kbd>Del</kbd>
-                  </MenuItem>
-                )}
-                {state.deleteTableRow.canExec && (
-                  <MenuItem
-                    className={styles.MenuItem}
-                    data-testid="table-delete-row"
-                    onSelect={state.deleteTableRow.command}
-                  >
-                    <span>Delete Row</span>
-                  </MenuItem>
-                )}
-                {state.deleteTable.canExec && (
-                  <MenuItem
-                    className={styles.MenuItem}
-                    data-danger=""
-                    data-testid="table-delete-table-row"
-                    onSelect={state.deleteTable.command}
-                  >
-                    <span>Delete Table</span>
-                  </MenuItem>
-                )}
+                <TableMenuInsertAbove editor={editor} />
+                <TableMenuInsertBelow editor={editor} />
+                <TableMenuClearContents editor={editor} testId="table-clear-row" />
+                <TableMenuDeleteRow editor={editor} />
+                <TableMenuDeleteTable editor={editor} testId="table-delete-table-row" />
               </MenuPopup>
             </MenuPositioner>
           </TableHandleRowMenuRoot>
