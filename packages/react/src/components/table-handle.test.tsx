@@ -4,7 +4,7 @@ import dedent from 'dedent'
 import { createRef, type Ref } from 'react'
 import { describe, expect, it } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { page } from 'vitest/browser'
+import { page, userEvent } from 'vitest/browser'
 
 import { hover, unhover } from '../testing/mouse.ts'
 
@@ -52,6 +52,22 @@ describe('TableHandle', () => {
     await hover(firstBodyCell())
     await columnHandle.click()
     await columnMenu.getByTestId('table-insert-right').click()
+    expect(ref.current?.getMarkdown()).toBe('| a |  | b |\n| --- | --- | --- |\n| 1 |  | 2 |\n')
+  })
+
+  it('selects a menu item with the keyboard', async () => {
+    const ref = createRef<EditorHandle>()
+    await renderEditor(ref)
+    await hover(firstBodyCell())
+    await columnHandle.click()
+    await expect
+      .element(columnMenu.getByTestId('table-insert-left'))
+      .toHaveAttribute('data-highlighted')
+    await userEvent.keyboard('{ArrowDown}')
+    await expect
+      .element(columnMenu.getByTestId('table-insert-right'))
+      .toHaveAttribute('data-highlighted')
+    await userEvent.keyboard('{Enter}')
     expect(ref.current?.getMarkdown()).toBe('| a |  | b |\n| --- | --- | --- |\n| 1 |  | 2 |\n')
   })
 
