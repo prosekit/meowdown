@@ -25,19 +25,27 @@ import { useCallback } from 'react'
 
 import styles from './table-handle.module.css'
 
-
-
 function TableHandleItem({
   children,
-  onSelect, testid, active = false }: {children:ReactNode, onSelect: VoidFunction, testid: string, active?: boolean }): ReactNode {
-  return  <MenuItem
-    className={styles.MenuItem}
-    data-testid={testid}
-    data-active={active ? '' : undefined}
-    onSelect={onSelect}
-  >
-    {children}
-  </MenuItem>
+  onSelect,
+  testid,
+  active = false,
+}: {
+  children: ReactNode
+  onSelect: VoidFunction
+  testid: string
+  active?: boolean
+}): ReactNode {
+  return (
+    <MenuItem
+      className={styles.MenuItem}
+      data-testid={testid}
+      data-active={active ? '' : undefined}
+      onSelect={onSelect}
+    >
+      {children}
+    </MenuItem>
+  )
 }
 
 // Insert Left
@@ -91,29 +99,24 @@ function runAlign(editor: TypedEditor, align: TableColumnAlign, active: boolean)
 }
 function TableMenuAlignItem({
   label,
-editor,
-align,
-activeAlign,
+  editor,
+  align,
+  activeAlign,
 }: {
-  label: string,
+  label: string
   editor: TypedEditor
-    align: TableColumnAlign
-    activeAlign?: TableColumnAlign
+  align: TableColumnAlign
+  activeAlign?: TableColumnAlign
 }): ReactNode {
   const active = activeAlign === align
   const handler = useCallback(() => runAlign(editor, align, active), [editor, align, active])
   return (
-    <TableHandleItem
-      testid={`table-align-${align}`}
-      active={active}
-      onSelect={handler}
-    >
+    <TableHandleItem testid={`table-align-${align}`} active={active} onSelect={handler}>
       <span>{label}</span>
       {active && <CheckIcon />}
     </TableHandleItem>
   )
 }
-
 
 function TableMenuAlign({ editor }: { editor: TypedEditor }): ReactNode {
   const canExec = useEditorDerivedValue(canAlign)
@@ -125,21 +128,21 @@ function TableMenuAlign({ editor }: { editor: TypedEditor }): ReactNode {
         align="left"
         label="Align Left"
         editor={editor}
-        activeAlign={ activeAlign}
+        activeAlign={activeAlign}
       />
 
       <TableMenuAlignItem
         align="center"
         label="Align Center"
         editor={editor}
-        activeAlign={ activeAlign}
+        activeAlign={activeAlign}
       />
 
       <TableMenuAlignItem
         align="right"
         label="Align Right"
         editor={editor}
-        activeAlign={ activeAlign}
+        activeAlign={activeAlign}
       />
     </>
   )
