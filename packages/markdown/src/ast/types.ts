@@ -35,9 +35,21 @@ export interface MarkdownPositioned {
 }
 
 /**
+ * Fields every block carries.
+ */
+interface MarkdownBlockBase extends MarkdownPositioned {
+  /**
+   * Whether one blank line separates this block from the sibling before it.
+   * Undefined leaves the choice to the serializer. The parser records `false`
+   * only where the serializer can write the two blocks on adjacent lines.
+   */
+  blankBefore?: boolean | undefined
+}
+
+/**
  * Raw inline Markdown. Changing `value` invalidates an adapter's recorded segments.
  */
-export interface MarkdownInline extends MarkdownPositioned {
+export interface MarkdownInline extends MarkdownBlockBase {
   value: string
   /**
    * Optional editor text boundaries. Undefined chunks are non-text inline nodes,
@@ -75,7 +87,7 @@ export interface MarkdownHeading extends MarkdownInline {
   closingHashes?: number | undefined
 }
 
-export interface MarkdownBlockquote extends MarkdownPositioned {
+export interface MarkdownBlockquote extends MarkdownBlockBase {
   type: 'blockquote'
   children: MarkdownBlock[]
 }
@@ -85,7 +97,7 @@ export interface MarkdownBlockquote extends MarkdownPositioned {
  * For `+   [X] **buy**`, kind is task, marker is '+', markerGap is 3,
  * checked is true, taskMarker is 'X', and the first paragraph's value is '**buy**'.
  */
-export interface MarkdownListItem extends MarkdownPositioned {
+export interface MarkdownListItem extends MarkdownBlockBase {
   type: 'listItem'
   kind: 'bullet' | 'ordered' | 'task'
   /**
@@ -105,17 +117,12 @@ export interface MarkdownListItem extends MarkdownPositioned {
    */
   markerGap?: number | undefined
   /**
-   * Whether one blank line separates this item from the sibling before it.
-   * Undefined leaves the choice to the serializer.
-   */
-  blankBefore?: boolean | undefined
-  /**
    * Never empty: an item with no content holds one empty paragraph.
    */
   children: MarkdownBlock[]
 }
 
-export interface MarkdownCodeBlock extends MarkdownPositioned {
+export interface MarkdownCodeBlock extends MarkdownBlockBase {
   type: 'codeBlock'
   value: string
   language: string
@@ -131,7 +138,7 @@ export interface MarkdownCodeBlock extends MarkdownPositioned {
   children?: undefined
 }
 
-export interface MarkdownHorizontalRule extends MarkdownPositioned {
+export interface MarkdownHorizontalRule extends MarkdownBlockBase {
   type: 'horizontalRule'
   /**
    * Original spelling, defaulting to '---'.
@@ -141,7 +148,7 @@ export interface MarkdownHorizontalRule extends MarkdownPositioned {
   children?: undefined
 }
 
-export interface MarkdownHTMLComment extends MarkdownPositioned {
+export interface MarkdownHTMLComment extends MarkdownBlockBase {
   type: 'htmlComment'
   /**
    * Includes the comment delimiters.
@@ -151,7 +158,7 @@ export interface MarkdownHTMLComment extends MarkdownPositioned {
   children?: undefined
 }
 
-export interface MarkdownTable extends MarkdownPositioned {
+export interface MarkdownTable extends MarkdownBlockBase {
   type: 'table'
   children: MarkdownTableRow[]
 }
@@ -171,7 +178,7 @@ export interface MarkdownTableCell extends MarkdownPositioned {
 /**
  * An unsupported editor block: omitted from output, but separates list runs.
  */
-export interface MarkdownIgnored extends MarkdownPositioned {
+export interface MarkdownIgnored extends MarkdownBlockBase {
   type: 'ignored'
   /**
    * Descendant text, used if the node occurs inside a table cell.
@@ -188,7 +195,7 @@ export interface MarkdownIgnored extends MarkdownPositioned {
 /**
  * A standalone editor text node. Block parsers never produce this type.
  */
-export interface MarkdownText extends MarkdownPositioned {
+export interface MarkdownText extends MarkdownBlockBase {
   type: 'text'
   value: string
   children?: undefined

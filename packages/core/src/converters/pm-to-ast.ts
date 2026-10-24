@@ -42,6 +42,13 @@ function readBlocks(node: ProseMirrorNode): MarkdownBlock[] {
 }
 
 function readBlock(node: ProseMirrorNode): MarkdownBlock {
+  const block = readBlockFields(node)
+  const blankBefore = node.attrs.blankBefore as boolean | null | undefined
+  if (blankBefore != null) block.blankBefore = blankBefore
+  return block
+}
+
+function readBlockFields(node: ProseMirrorNode): MarkdownBlock {
   switch (node.type.name as NodeName) {
     case 'paragraph': {
       const inline = readInline(node)
@@ -72,7 +79,6 @@ function readBlock(node: ProseMirrorNode): MarkdownBlock {
         marker: attrs.marker ?? undefined,
         taskMarker: attrs.taskMarker ?? undefined,
         markerGap: attrs.markerGap,
-        blankBefore: attrs.blankBefore ?? undefined,
         children: readBlocks(node),
       }
     }

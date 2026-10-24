@@ -446,7 +446,13 @@ function emitBlockChildren(children: MarkdownBlock[], out: MdOut, tightItem = fa
   while (index < count) {
     const child = children[index]
     if (child.type !== 'listItem') {
-      if (tightItem && index > 0) out.suppressBlank()
+      const previous = children[index - 1]
+      if (
+        previous != null &&
+        (tightItem || (child.blankBefore === false && canJoinTight(previous, child)))
+      ) {
+        out.suppressBlank()
+      }
       emit(child, out)
       index++
       continue

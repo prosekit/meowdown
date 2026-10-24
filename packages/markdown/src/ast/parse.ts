@@ -199,18 +199,22 @@ function appendGapParagraphs(
 }
 
 /**
- * Record whether the one optional blank line was written before a list item.
- * Two or more blank lines are empty paragraphs, which say it already.
+ * Record whether the one optional blank line was written before `block`. Two
+ * or more blank lines are empty paragraphs, which say it already. Outside a
+ * list a blank line is what the serializer writes anyway, so only its absence
+ * is recorded.
  */
 function markBlankBefore(
   previous: MarkdownBlock | undefined,
   block: MarkdownBlock | undefined,
   blankLines: number,
 ): void {
-  if (block?.type !== 'listItem' || previous == null || blankLines > 1) return
+  if (block == null || previous == null || blankLines > 1) return
   // A tight gap the serializer cannot write goes out with its blank line, so
   // record that blank line now and the tree reads back the same.
-  block.blankBefore = !(blankLines === 0 && canJoinTight(previous, block))
+  const tight = blankLines === 0 && canJoinTight(previous, block)
+  if (tight) block.blankBefore = false
+  else if (block.type === 'listItem') block.blankBefore = true
 }
 
 /**
