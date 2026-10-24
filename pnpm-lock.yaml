@@ -49,8 +49,8 @@ importers:
         specifier: ^0.0.91
         version: 0.0.91
       playwright:
-        specifier: ^1.64.1
-        version: 1.64.1
+        specifier: ^1.65.0-alpha-2026-10-22
+        version: 1.65.0-alpha-2026-10-22
       simple-git-hooks:
         specifier: ^2.14.0
         version: 2.14.0
@@ -174,7 +174,7 @@ importers:
         version: 4.0.4
       '@vitest/browser-playwright':
         specifier: ^5.0.5
-        version: 5.0.5(playwright@1.64.1)(vite@8.3.4)(vitest@5.0.5)
+        version: 5.0.5(playwright@1.65.0-alpha-2026-10-22)(vite@8.3.4)(vitest@5.0.5)
       dedent:
         specifier: ^1.7.2
         version: 1.7.2
@@ -214,7 +214,7 @@ importers:
         version: 1.9.0
       '@vitest/browser-playwright':
         specifier: ^5.0.5
-        version: 5.0.5(playwright@1.64.1)(vite@8.3.4)(vitest@5.0.5)
+        version: 5.0.5(playwright@1.65.0-alpha-2026-10-22)(vite@8.3.4)(vitest@5.0.5)
       tsdown:
         specifier: ^0.23.1
         version: 0.23.1(@tsdown/css@0.23.1)(oxc-resolver@11.24.2)(typescript@6.0.3)
@@ -340,7 +340,7 @@ importers:
         version: 19.3.0(@types/react@19.3.0)
       '@vitest/browser-playwright':
         specifier: ^5.0.5
-        version: 5.0.5(playwright@1.64.1)(vite@8.3.4)(vitest@5.0.5)
+        version: 5.0.5(playwright@1.65.0-alpha-2026-10-22)(vite@8.3.4)(vitest@5.0.5)
       dedent:
         specifier: ^1.7.2
         version: 1.7.2
@@ -358,7 +358,7 @@ importers:
         version: 5.0.5(@types/node@24.19.2)(@vitest/browser-playwright@5.0.5)(@vitest/coverage-v8@5.0.5)(@vitest/ui@5.0.5)(vite@8.3.4)
       vitest-browser-commands:
         specifier: ^0.5.0
-        version: 0.5.0(@vitest/browser-playwright@5.0.5)(@vitest/browser@5.0.5)(playwright@1.64.1)(vite@8.3.4)(vitest@5.0.5)
+        version: 0.5.0(@vitest/browser-playwright@5.0.5)(@vitest/browser@5.0.5)(playwright@1.65.0-alpha-2026-10-22)(vite@8.3.4)(vitest@5.0.5)
       vitest-browser-react:
         specifier: ^2.3.0
         version: 2.3.0(@types/react-dom@19.3.0)(@types/react@19.3.0)(react-dom@19.3.1)(react@19.3.1)(vitest@5.0.5)
@@ -376,7 +376,7 @@ importers:
         version: 0.1.20
       '@vitest/browser-playwright':
         specifier: ^5.0.5
-        version: 5.0.5(playwright@1.64.1)(vite@8.3.4)(vitest@5.0.5)
+        version: 5.0.5(playwright@1.65.0-alpha-2026-10-22)(vite@8.3.4)(vitest@5.0.5)
       pure-rand:
         specifier: ^8.4.2
         version: 8.4.2
@@ -385,7 +385,7 @@ importers:
         version: 5.0.5(@types/node@24.19.2)(@vitest/browser-playwright@5.0.5)(@vitest/coverage-v8@5.0.5)(@vitest/ui@5.0.5)(vite@8.3.4)
       vitest-browser-commands:
         specifier: ^0.5.0
-        version: 0.5.0(@vitest/browser-playwright@5.0.5)(@vitest/browser@5.0.5)(playwright@1.64.1)(vite@8.3.4)(vitest@5.0.5)
+        version: 0.5.0(@vitest/browser-playwright@5.0.5)(@vitest/browser@5.0.5)(playwright@1.65.0-alpha-2026-10-22)(vite@8.3.4)(vitest@5.0.5)
 
   website:
     dependencies:
@@ -4164,13 +4164,13 @@ packages:
     resolution: {integrity: sha512-FQPmjspKRKYV4MlHQnun9snJqlYm6Yhmo12x1O3pgE2Akim/y/BZjMOppK//BFdh222WOj6WGqlmeZfrtUtfgQ==}
     hasBin: true
 
-  playwright-core@1.64.1:
-    resolution: {integrity: sha512-BC4s8y6SEVA6Q1rSxZTto8hI1KUI3xXlHGZgvGqP4IqPdI/a6FX9H29IDNz7vKo9l21b6LfYosScPL6M3xxyDQ==}
+  playwright-core@1.65.0-alpha-2026-10-22:
+    resolution: {integrity: sha512-Lx4H/EYdLxMoIRBBcybc5FBOGCJJy+ZU2RCsBeD0IxW/1pE/nxlZSYcrppdg0Ovna6jvEDiMrOiEg/4W6pbPSg==}
     engines: {node: '>=20'}
     hasBin: true
 
-  playwright@1.64.1:
-    resolution: {integrity: sha512-HCrVhHr5QQuwYoswEUGTb7gGp522yflbv/ST8nF4sFWGuLjQCt17Q/EubpGGSNKYn1tsTCPZxqHhHCfVURu7UA==}
+  playwright@1.65.0-alpha-2026-10-22:
+    resolution: {integrity: sha512-TsN5F+pWgLwST8r7gRNHIgSjPGkmE/Cmh1THxGTzfx14G9QF6VPDbPHK6/DqoLHB+IBnRgKm2jcEKrosjsSYLQ==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -7319,11 +7319,11 @@ snapshots:
       '@rolldown/pluginutils': 1.0.1
       vite: 8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
 
-  '@vitest/browser-playwright@5.0.5(playwright@1.64.1)(vite@8.3.4)(vitest@5.0.5)':
+  '@vitest/browser-playwright@5.0.5(playwright@1.65.0-alpha-2026-10-22)(vite@8.3.4)(vitest@5.0.5)':
     dependencies:
       '@vitest/browser': 5.0.5(vite@8.3.4)(vitest@5.0.5)
       '@vitest/mocker': 5.0.5(vite@8.3.4)
-      playwright: 1.64.1
+      playwright: 1.65.0-alpha-2026-10-22
       tinyrainbow: 3.2.0
       vitest: 5.0.5(@types/node@24.19.2)(@vitest/browser-playwright@5.0.5)(@vitest/coverage-v8@5.0.5)(@vitest/ui@5.0.5)(vite@8.3.4)
     transitivePeerDependencies:
@@ -9300,11 +9300,11 @@ snapshots:
 
   pkg-pr-new@0.0.91: {}
 
-  playwright-core@1.64.1: {}
+  playwright-core@1.65.0-alpha-2026-10-22: {}
 
-  playwright@1.64.1:
+  playwright@1.65.0-alpha-2026-10-22:
     dependencies:
-      playwright-core: 1.64.1
+      playwright-core: 1.65.0-alpha-2026-10-22
 
   pluralize@8.0.0: {}
 
@@ -10041,11 +10041,11 @@ snapshots:
     optionalDependencies:
       vite: 8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
 
-  vitest-browser-commands@0.5.0(@vitest/browser-playwright@5.0.5)(@vitest/browser@5.0.5)(playwright@1.64.1)(vite@8.3.4)(vitest@5.0.5):
+  vitest-browser-commands@0.5.0(@vitest/browser-playwright@5.0.5)(@vitest/browser@5.0.5)(playwright@1.65.0-alpha-2026-10-22)(vite@8.3.4)(vitest@5.0.5):
     optionalDependencies:
       '@vitest/browser': 5.0.5(vite@8.3.4)(vitest@5.0.5)
-      '@vitest/browser-playwright': 5.0.5(playwright@1.64.1)(vite@8.3.4)(vitest@5.0.5)
-      playwright: 1.64.1
+      '@vitest/browser-playwright': 5.0.5(playwright@1.65.0-alpha-2026-10-22)(vite@8.3.4)(vitest@5.0.5)
+      playwright: 1.65.0-alpha-2026-10-22
       vite: 8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
       vitest: 5.0.5(@types/node@24.19.2)(@vitest/browser-playwright@5.0.5)(@vitest/coverage-v8@5.0.5)(@vitest/ui@5.0.5)(vite@8.3.4)
 
@@ -10076,7 +10076,7 @@ snapshots:
       why-is-node-running: 3.2.1
     optionalDependencies:
       '@types/node': 24.19.2
-      '@vitest/browser-playwright': 5.0.5(playwright@1.64.1)(vite@8.3.4)(vitest@5.0.5)
+      '@vitest/browser-playwright': 5.0.5(playwright@1.65.0-alpha-2026-10-22)(vite@8.3.4)(vitest@5.0.5)
       '@vitest/coverage-v8': 5.0.5(@vitest/browser@5.0.5)(vitest@5.0.5)
       '@vitest/ui': 5.0.5(vitest@5.0.5)
     transitivePeerDependencies:
