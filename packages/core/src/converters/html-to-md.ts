@@ -1,5 +1,6 @@
 import { once } from '@ocavue/utils'
-import type { Element } from 'hast'
+import type { Element, Root } from 'hast'
+import { fromDom } from 'hast-util-from-dom'
 import { defaultHandlers, type Handle as HastToMdastHandle } from 'hast-util-to-mdast'
 import type { Parent, PhrasingContent, Text } from 'mdast'
 import {
@@ -7,7 +8,6 @@ import {
   type Handle as MdastToMarkdownHandle,
   type Unsafe,
 } from 'mdast-util-to-markdown'
-import rehypeParse from 'rehype-parse'
 import rehypeRemark from 'rehype-remark'
 import remarkGfm from 'remark-gfm'
 import remarkStringify from 'remark-stringify'
@@ -170,7 +170,6 @@ const textToMarkdown: MdastToMarkdownHandle = (node, parent, state, info) => {
 
 function createProcessor() {
   return unified()
-    .use(rehypeParse)
     .use(rehypeRemark, { handlers: { mark: markToHighlight, li: taskAwareListItem } })
     .use(remarkGfm)
     .use(remarkStringify, {
@@ -193,5 +192,8 @@ const getProcessor = once(createProcessor)
  * Convert HTML into Markdown text.
  */
 export function htmlToMarkdown(html: string): string {
-  return String(getProcessor().processSync(html))
+  const processor = getProcessor()
+  // A `Document` always converts to a hast `root`.
+  const hast = fromDom(new window.DOMParser().parseFromString(html, 'text/html')) as Root
+  return processor.stringify(processor.runSync(hast))
 }
