@@ -1,5 +1,11 @@
 # @meowdown/core
 
+## 0.81.3
+
+### Patch Changes
+
+- [#725](https://github.com/prosekit/meowdown/pull/725) [`630cd4e`](https://github.com/prosekit/meowdown/commit/630cd4ec512033adf8e755af225dec617dc3064e) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Parse pasted HTML with the browser's `DOMParser`, which removes `parse5` from the bundle.
+
 ## 0.81.2
 
 ### Patch Changes
