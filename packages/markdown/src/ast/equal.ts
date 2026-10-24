@@ -57,7 +57,8 @@ function isListItemEqual(a: MarkdownListItem, b: MarkdownListItem): boolean {
     a.collapsed === b.collapsed &&
     a.marker === b.marker &&
     a.taskMarker === b.taskMarker &&
-    a.markerGap === b.markerGap
+    a.markerGap === b.markerGap &&
+    a.blankBefore === b.blankBefore
   )
 }
 
