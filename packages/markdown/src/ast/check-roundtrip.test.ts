@@ -312,4 +312,16 @@ describe('checkRoundTrip', () => {
   it.each(LOSSY_CASES)('reports lossy for %j', (markdown) => {
     expect(checkRoundTrip(markdown)).toBe('lossy')
   })
+
+  it.each([
+    '---\nid: x\n---\nText',
+    '---\nid: x\n---\n\nText',
+    '---\nid: x\n---\n\n\nText',
+    '---\n---\n# h',
+    '---\nid: x\n---\n- a',
+    '---\nid: x\n---',
+    '---\nid: x\n---\n',
+  ])('reports exact after frontmatter for %j', (markdown) => {
+    expect(checkRoundTrip(markdown, { frontmatter: true })).toBe('exact')
+  })
 })

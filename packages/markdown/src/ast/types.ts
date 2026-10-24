@@ -7,6 +7,11 @@ export interface MarkdownDocument {
    * YAML body without fences. Undefined means absent; an empty string is an empty block.
    */
   frontmatter?: string | undefined
+  /**
+   * Whether the first block starts right under the closing `---`, with no
+   * blank line between them.
+   */
+  frontmatterTight?: boolean | undefined
   children: MarkdownBlock[]
 }
 

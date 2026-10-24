@@ -29,6 +29,7 @@ describe('defineEditorExtension', () => {
       {
         "attrs": {
           "frontmatter": null,
+          "frontmatterTight": false,
         },
         "content": [
           {

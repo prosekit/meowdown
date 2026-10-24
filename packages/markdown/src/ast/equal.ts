@@ -76,7 +76,11 @@ function isCodeBlockEqual(a: MarkdownCodeBlock, b: MarkdownCodeBlock): boolean {
 function isNodeEqual(a: MarkdownNode, b: MarkdownNode): boolean {
   switch (a.type) {
     case 'document':
-      return b.type === a.type && a.frontmatter === b.frontmatter
+      return (
+        b.type === a.type &&
+        a.frontmatter === b.frontmatter &&
+        !!a.frontmatterTight === !!b.frontmatterTight
+      )
     case 'paragraph':
       return b.type === a.type && isInlineEqual(a, b)
     case 'heading':

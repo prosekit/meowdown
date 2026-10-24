@@ -13,7 +13,10 @@ export function astToDoc(
   const children = node.children?.map((child) => astToDoc(child, nodes)) || []
   switch (node.type) {
     case 'document':
-      return nodes.doc(node.frontmatter == null ? {} : { frontmatter: node.frontmatter }, children)
+      return nodes.doc(
+        { frontmatter: node.frontmatter ?? null, frontmatterTight: !!node.frontmatterTight },
+        children,
+      )
     case 'paragraph':
       return nodes.paragraph(node.value)
     case 'heading':
