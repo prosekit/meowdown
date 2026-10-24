@@ -193,9 +193,9 @@ const getProcessor = once(createProcessor)
  */
 export function htmlToMarkdown(html: string, parser?: DOMParser): string {
   const processor = getProcessor()
+  const domParser: DOMParser = parser ?? new window.DOMParser()
+  const domDoc: Document = domParser.parseFromString(html, 'text/html')
   // A `Document` always converts to a hast `root`.
-  const domParser = parser ?? new window.DOMParser()
-  const domDoc = domParser.parseFromString(html, 'text/html')
   const hast = fromDom(domDoc) as Root
   return processor.stringify(processor.runSync(hast))
 }
