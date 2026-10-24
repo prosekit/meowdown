@@ -347,8 +347,8 @@ describe('blockquotes', () => {
     expect(roundtrip('> [[note]] quoted')).toBe('> [[note]] quoted\n')
   })
 
-  it.fails('keeps a trailing space after the marker', () => {
-    expect(roundtrip('> ')).toBe('> \n')
+  it('drops the trailing space after an empty quote marker', () => {
+    expect(roundtrip('> ')).toBe('>\n')
   })
 
   it('keeps a two-line quote', () => {
@@ -404,12 +404,12 @@ describe('bullet lists', () => {
     expect(roundtrip(md)).toBe(md + '\n')
   })
 
-  it.fails('keeps a lazy continuation', () => {
+  it('re-indents a lazy continuation to the content column', () => {
     // A line written flush under an item is a CommonMark lazy continuation: it
     // joins the item's paragraph, but the model cannot tell it from a properly
     // indented continuation, so the serializer re-indents it to the canonical
     // column. The change is semantically lossless and idempotent.
-    expect(roundtrip('- item\nlazy line')).toBe('- item\nlazy line\n')
+    expect(roundtrip('- item\nlazy line')).toBe('- item\n  lazy line\n')
   })
 
   it('keeps a bare empty bullet', () => {
@@ -449,8 +449,8 @@ describe('bullet lists', () => {
     expect(roundtrip(out)).toBe(out)
   })
 
-  it.fails('keeps a 4-space nested indent', () => {
-    expect(roundtrip('- a\n    - deep')).toBe('- a\n    - deep\n')
+  it('re-indents a 4-space nested item to the content column', () => {
+    expect(roundtrip('- a\n    - deep')).toBe('- a\n  - deep\n')
   })
 
   it.fails('keeps a loose list', () => {
@@ -458,12 +458,22 @@ describe('bullet lists', () => {
     expect(roundtrip(md)).toBe(md + '\n')
   })
 
-  it.fails('keeps a trailing space after the marker', () => {
-    expect(roundtrip('- ')).toBe('- \n')
+  it('drops the trailing space after an empty bullet marker', () => {
+    expect(roundtrip('- ')).toBe('-\n')
   })
 
-  it.fails('keeps a trailing space on an empty item', () => {
-    expect(roundtrip('- a\n- \n- b')).toBe('- a\n- \n- b\n')
+  it('drops the trailing space on an empty middle item', () => {
+    expect(roundtrip('- a\n- \n- b')).toBe('- a\n-\n- b\n')
+  })
+
+  it.fails('keeps a tight sibling after a two-block item', () => {
+    const md = ['- a', '', '  b', '- c'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
+  })
+
+  it.fails('keeps a nested list right under its paragraph in a loose list', () => {
+    const md = ['- a', '', '  b', '- c', '  - d'].join('\n')
+    expect(roundtrip(md)).toBe(md + '\n')
   })
 })
 
@@ -579,10 +589,10 @@ describe('task lists', () => {
     expect(roundtrip('- [ ] <!--\n=')).toBe('- [ ] <!--\n=\n')
   })
 
-  it.fails('keeps a lazy continuation in a task', () => {
+  it('re-indents a lazy continuation in a task to the content column', () => {
     // Same lazy-continuation limitation as bullet lists; the flush line is
     // re-indented to the task's content column on serialize.
-    expect(roundtrip('- [ ] todo\neen voorlopig idee')).toBe('- [ ] todo\neen voorlopig idee\n')
+    expect(roundtrip('- [ ] todo\neen voorlopig idee')).toBe('- [ ] todo\n  een voorlopig idee\n')
   })
 
   it('keeps a tag in a task', () => {
@@ -872,8 +882,8 @@ describe('escapes and whitespace', () => {
     expect(roundtrip('')).toBe('\n')
   })
 
-  it.fails('keeps a whitespace-only line', () => {
-    expect(roundtrip('   ')).toBe('   \n')
+  it('drops the spaces of a whitespace-only line', () => {
+    expect(roundtrip('   ')).toBe('\n')
   })
 
   it('keeps internal blank-line runs', () => {
@@ -1050,6 +1060,14 @@ describe('mixed structures', () => {
 
   it.fails('keeps stacked headings tight', () => {
     expect(roundtrip('# h1\n## h2\n### h3')).toBe('# h1\n## h2\n### h3\n')
+  })
+
+  it.fails('keeps a list right under a paragraph', () => {
+    expect(roundtrip('para\n- a')).toBe('para\n- a\n')
+  })
+
+  it.fails('keeps a paragraph right under a heading', () => {
+    expect(roundtrip('## Text\ncontent')).toBe('## Text\ncontent\n')
   })
 
   it('keeps ordered numbers before a paragraph', () => {
