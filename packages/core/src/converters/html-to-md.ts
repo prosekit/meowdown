@@ -191,9 +191,11 @@ const getProcessor = once(createProcessor)
 /**
  * Convert HTML into Markdown text.
  */
-export function htmlToMarkdown(html: string): string {
+export function htmlToMarkdown(html: string, parser?: DOMParser): string {
   const processor = getProcessor()
   // A `Document` always converts to a hast `root`.
-  const hast = fromDom(new window.DOMParser().parseFromString(html, 'text/html')) as Root
+  const domParser = parser ?? new window.DOMParser()
+  const domDoc = domParser.parseFromString(html, 'text/html')
+  const hast = fromDom(domDoc) as Root
   return processor.stringify(processor.runSync(hast))
 }
