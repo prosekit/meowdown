@@ -120,10 +120,11 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     }),
     defineReadonly((state) => !!getEditorConfig(state).readOnly),
     defineViewAttributes((state) => {
-      const { editorClassName, spellCheck } = getEditorConfig(state)
+      const { editorClassName, spellCheck, writingSuggestions } = getEditorConfig(state)
       const attributes: Record<string, string> = { class: 'meowdown-content' }
       if (editorClassName) attributes.class += ` ${editorClassName}`
       if (spellCheck != null) attributes.spellcheck = String(spellCheck)
+      if (writingSuggestions != null) attributes.writingsuggestions = String(writingSuggestions)
       return attributes
     }),
     defineCodeBlockSyntaxHighlight(),

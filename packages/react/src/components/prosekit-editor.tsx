@@ -341,6 +341,11 @@ export interface ProseKitEditorProps {
   spellCheck?: boolean
 
   /**
+   * Enables or disables the system's writing suggestions in the editor.
+   */
+  writingSuggestions?: boolean
+
+  /**
    * The search query. See `EditorProps.searchQuery`.
    */
   searchQuery?: string
@@ -417,6 +422,7 @@ export function ProseKitEditor({
   placeholder,
   readOnly,
   spellCheck,
+  writingSuggestions,
   searchQuery = '',
   onSearchChange,
   timeFormat,
@@ -471,6 +477,7 @@ export function ProseKitEditor({
       placeholder,
       readOnly,
       spellCheck,
+      writingSuggestions,
       editorClassName,
       wikilinkEnabled,
       referenceDefinitions,
@@ -504,6 +511,7 @@ export function ProseKitEditor({
       placeholder,
       readOnly,
       spellCheck,
+      writingSuggestions,
       editorClassName,
       wikilinkEnabled,
       referenceDefinitions,

@@ -379,6 +379,12 @@ export interface EditorProps {
   spellCheck?: boolean | undefined
 
   /**
+   * Enables the system's writing suggestions, such as inline predictions and
+   * the macOS "Write with Siri" prompt. Defaults to the browser's behavior.
+   */
+  writingSuggestions?: boolean | undefined
+
+  /**
    * The search query. Every match is highlighted, and the first match at or
    * after the caret is selected whenever the query changes. An empty string
    * (the default) clears the highlights and leaves the selection alone. A match
@@ -476,6 +482,7 @@ export function MarkdownEditor({
   placeholder,
   readOnly,
   spellCheck,
+  writingSuggestions,
   searchQuery,
   onSearchChange,
   timeFormat,
@@ -629,6 +636,7 @@ export function MarkdownEditor({
         placeholder={placeholder}
         readOnly={readOnly}
         spellCheck={spellCheck}
+        writingSuggestions={writingSuggestions}
         searchQuery={searchQuery}
         onSearchChange={onSearchChange}
         timeFormat={timeFormat}

@@ -672,6 +672,15 @@ describe('spellCheck prop', () => {
   })
 })
 
+describe('writingSuggestions prop', () => {
+  it('applies and updates the writingSuggestions prop on the editor root', async () => {
+    const screen = await render(<MarkdownEditor writingSuggestions={false} />)
+    await expect.element(pmRoot).toHaveAttribute('writingsuggestions', 'false')
+    await screen.rerender(<MarkdownEditor />)
+    await expect.element(pmRoot).not.toHaveAttribute('writingsuggestions')
+  })
+})
+
 it('queries visual textblock boundaries through the editor handle', async () => {
   const ref = createRef<EditorHandle>()
   const screen = await render(<MarkdownEditor handleRef={ref} initialMarkdown={'first\nsecond'} />)

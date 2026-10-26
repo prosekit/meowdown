@@ -18,6 +18,7 @@ const refreshKeys = new Set<keyof EditorConfig>([
   'placeholder',
   'readOnly',
   'spellCheck',
+  'writingSuggestions',
   'editorClassName',
 ] as const)
 

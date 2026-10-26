@@ -32,5 +32,6 @@ export interface EditorConfig
   placeholder?: PlaceholderOptions['placeholder'] | undefined
   readOnly?: boolean | undefined
   spellCheck?: boolean | undefined
+  writingSuggestions?: boolean | undefined
   editorClassName?: string | undefined
 }
