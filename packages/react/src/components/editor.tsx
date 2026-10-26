@@ -373,14 +373,16 @@ export interface EditorProps {
   readOnly?: boolean | undefined
 
   /**
-   * Enables the browser's native spell checking. Defaults to the browser's
-   * behavior.
+   * Whether to enable spell checking. Defaults to the browser's behavior.
+   *
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/spellcheck
    */
   spellCheck?: boolean | undefined
 
   /**
-   * Enables the system's writing suggestions, such as inline predictions and
-   * the macOS "Write with Siri" prompt. Defaults to the browser's behavior.
+   * Whether to enable writing suggestions. Defaults to the browser's behavior.
+   *
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/writingsuggestions
    */
   writingSuggestions?: boolean | undefined
 
