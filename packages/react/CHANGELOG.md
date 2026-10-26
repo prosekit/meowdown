@@ -1,5 +1,16 @@
 # @meowdown/react
 
+## 0.82.0
+
+### Minor Changes
+
+- [#729](https://github.com/prosekit/meowdown/pull/729) [`e7a1843`](https://github.com/prosekit/meowdown/commit/e7a1843ad7722a4dedc6b6d3c69526c3b9a6eccf) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Add `MarkdownEditor` props for more HTML attributes on the editor root.
+
+### Patch Changes
+
+- Updated dependencies [[`e7a1843`](https://github.com/prosekit/meowdown/commit/e7a1843ad7722a4dedc6b6d3c69526c3b9a6eccf)]:
+  - @meowdown/core@0.82.0
+
 ## 0.81.2
 
 ### Patch Changes
