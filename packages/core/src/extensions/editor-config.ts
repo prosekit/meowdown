@@ -19,6 +19,12 @@ const refreshKeys = new Set<keyof EditorConfig>([
   'readOnly',
   'spellCheck',
   'writingSuggestions',
+  'autoCorrect',
+  'autoCapitalize',
+  'enterKeyHint',
+  'dir',
+  'lang',
+  'ariaLabel',
   'editorClassName',
 ] as const)
 

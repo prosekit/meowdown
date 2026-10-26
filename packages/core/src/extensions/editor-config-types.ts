@@ -33,5 +33,11 @@ export interface EditorConfig
   readOnly?: boolean | undefined
   spellCheck?: boolean | undefined
   writingSuggestions?: boolean | undefined
+  autoCorrect?: boolean | undefined
+  autoCapitalize?: 'off' | 'sentences' | 'words' | 'characters' | undefined
+  enterKeyHint?: 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send' | undefined
+  dir?: 'ltr' | 'rtl' | 'auto' | undefined
+  lang?: string | undefined
+  ariaLabel?: string | undefined
   editorClassName?: string | undefined
 }
