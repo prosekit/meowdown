@@ -260,7 +260,17 @@ describe('toMeowdownUnsafe', () => {
         {
           "after": "[#A-Za-z]",
           "character": "&",
-          "inConstruct": "phrasing",
+          "inConstruct": [
+            "codeFencedLangGraveAccent",
+            "codeFencedLangTilde",
+            "codeFencedMetaGraveAccent",
+            "codeFencedMetaTilde",
+            "destinationLiteral",
+            "destinationRaw",
+            "phrasing",
+            "titleApostrophe",
+            "titleQuote",
+          ],
         },
         {
           "character": "'",
@@ -495,11 +505,11 @@ describe('toMeowdownUnsafe', () => {
           "inConstruct": "autolink",
         },
         {
-          "character": "\u{B}",
+          "character": "",
           "inConstruct": "autolink",
         },
         {
-          "character": "\u{C}",
+          "character": "",
           "inConstruct": "autolink",
         },
         {
@@ -788,7 +798,17 @@ describe('toMeowdownUnsafe', () => {
         {
           "after": "[#A-Za-z]",
           "character": "&",
-          "inConstruct": "phrasing",
+          "inConstruct": [
+            "codeFencedLangGraveAccent",
+            "codeFencedLangTilde",
+            "codeFencedMetaGraveAccent",
+            "codeFencedMetaTilde",
+            "destinationLiteral",
+            "destinationRaw",
+            "phrasing",
+            "titleApostrophe",
+            "titleQuote",
+          ],
         },
         {
           "character": "'",
@@ -1007,11 +1027,11 @@ describe('toMeowdownUnsafe', () => {
           "inConstruct": "autolink",
         },
         {
-          "character": "\u{B}",
+          "character": "",
           "inConstruct": "autolink",
         },
         {
-          "character": "\u{C}",
+          "character": "",
           "inConstruct": "autolink",
         },
         {
