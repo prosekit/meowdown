@@ -45,7 +45,7 @@ function getDoc(handle: EditorHandle): EditorNode {
 
 /**
  * The position before each cell, by row and column.
- */
+ */ // FIXME: move helpful functions like this into packages/react/src/testing/visual.tsx
 function getCellPositions(doc: EditorNode): number[][] {
   const rows: number[][] = []
   doc.descendants((node, pos) => {
