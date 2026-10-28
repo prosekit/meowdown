@@ -799,7 +799,7 @@
     border-top: 1px double var(--meowdown-node-outline);
   }
 
-  .ProseMirror :is(tr:last-child, tr:has(+ tr:not(:has(.selectedCell)))) > .selectedCell {
+  .ProseMirror tr:not(:has(+ tr > .selectedCell)) > .selectedCell {
     border-bottom: 1px double var(--meowdown-node-outline);
   }
 
