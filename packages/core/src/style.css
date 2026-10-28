@@ -761,17 +761,46 @@
     text-align: right;
   }
 
-  .ProseMirror table.ProseMirror-selectednode td,
-  .ProseMirror table.ProseMirror-selectednode th {
-    border-color: var(--meowdown-node-outline);
+  /* A selected table draws its outline over its outer border, and tints every
+   * cell instead of the table: header cells paint their own background over
+   * the table's. */
+  .ProseMirror table.ProseMirror-selectednode {
+    outline-offset: -1px;
+    background: none;
+  }
+
+  .ProseMirror table.ProseMirror-selectednode :is(td, th),
+  .ProseMirror .selectedCell {
+    background-image: linear-gradient(
+      var(--meowdown-node-selection),
+      var(--meowdown-node-selection)
+    );
   }
 
   .ProseMirror .selectedCell {
-    /* `double` wins the collapsed-border conflict against the solid borders of
-     * unselected neighbors, so the whole selection perimeter recolors. */
-    border: 1px double var(--meowdown-node-outline);
-    background: var(--meowdown-node-selection);
     caret-color: transparent;
+  }
+
+  /* Color only the outer edges of a cell selection. Cells are always 1x1 and a
+   * cell selection is a rectangle, so a side is an edge when its neighbor
+   * there is missing or unselected. `double` wins the collapsed-border
+   * conflict against the neighbor's solid border. */
+  .ProseMirror tr > .selectedCell:first-child,
+  .ProseMirror :not(.selectedCell) + .selectedCell {
+    border-left: 1px double var(--meowdown-node-outline);
+  }
+
+  .ProseMirror tr > .selectedCell:last-child,
+  .ProseMirror .selectedCell:has(+ :not(.selectedCell)) {
+    border-right: 1px double var(--meowdown-node-outline);
+  }
+
+  .ProseMirror :is(tr:first-child, tr:not(:has(.selectedCell)) + tr) > .selectedCell {
+    border-top: 1px double var(--meowdown-node-outline);
+  }
+
+  .ProseMirror :is(tr:last-child, tr:has(+ tr:not(:has(.selectedCell)))) > .selectedCell {
+    border-bottom: 1px double var(--meowdown-node-outline);
   }
 
   /* ---------------------------------------------------------------------------
@@ -806,9 +835,12 @@
 
   /* While dragging via the block handle, keep only the outline on the
    * source block so it does not sit tinted under the drag preview. */
-  .ProseMirror.prosekit-dragging .ProseMirror-selectednode,
-  .ProseMirror.prosekit-dragging .selectedCell {
+  .ProseMirror.prosekit-dragging .ProseMirror-selectednode {
     background: transparent;
+  }
+
+  .ProseMirror.prosekit-dragging :is(table.ProseMirror-selectednode :is(td, th), .selectedCell) {
+    background-image: none;
   }
 
   /* ---------------------------------------------------------------------------
