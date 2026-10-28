@@ -9,6 +9,8 @@ import type { EditorHandle } from '../components/types.ts'
 
 import { unhover } from './mouse.ts'
 
+// FIXME: put "visual-frame" as a variable
+
 const frame = page.getByTestId('visual-frame')
 const pmRoot = page.locate('.ProseMirror')
 
