@@ -73,8 +73,7 @@ const SCENARIOS: Scenario[] = [
     name: 'code-block',
     markdown: dedent`
       \`\`\`ts
-      export function greet(name: string): string {
-        // Say hello
+      function greet(name: string): string | undefined | null | Promise<string> | Promise<undefined> | Promise<null> {
         return \`Hello, \${name}!\`
       }
       \`\`\`
