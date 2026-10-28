@@ -1,6 +1,6 @@
 import { playwright } from '@vitest/browser-playwright'
 import { playwrightCommands } from 'vitest-browser-commands'
-import { defineProject } from 'vitest/config'
+import { defineProject, type UserWorkspaceConfig } from 'vitest/config'
 
 const IS_BOT = !!(process.env.AI_AGENT || process.env.CI)
 const IS_DEBUG = !!process.env.DEBUG
@@ -40,10 +40,12 @@ export function defineBrowserConfig({
   name,
   groupOrder,
   visual = false,
+  plugins,
 }: {
   name: string
   groupOrder: number
   visual?: boolean
+  plugins?: UserWorkspaceConfig['plugins']
 }) {
   const browserName = resolveBrowserName()
 
@@ -53,7 +55,7 @@ export function defineBrowserConfig({
   }
 
   return defineProject({
-    plugins: [playwrightCommands()],
+    plugins: [playwrightCommands(), ...(plugins ?? [])],
     oxc:
       browserName === 'webkit'
         ? // WebKit's JavaScriptCore can't parse `using` declarations; lower them
