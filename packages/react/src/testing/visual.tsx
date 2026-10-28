@@ -56,7 +56,7 @@ export async function expectScreenshots(name: string): Promise<void> {
       }
       for (const theme of THEMES) {
         root.style.colorScheme = theme
-        await expect.element(frame).toMatchScreenshot(`${name}-${viewport.name}-${theme}`)
+        await expect.element(frame).toMatchScreenshot(`${name}_${viewport.name}_${theme}`) // FIXME: use _ insteal of - to separate the name, viewport and theme.
       }
     }
   } finally {
