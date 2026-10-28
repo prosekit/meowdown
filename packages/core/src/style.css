@@ -170,6 +170,10 @@
      * pointer events on the editor element, so a handle outside the padding closes
      * before it can be clicked. Keep it >= 3.5rem. */
     --meowdown-gutter: 3.5rem;
+
+    /* Vertical padding of a paragraph. Two neighbors add up, so the gap between
+     * paragraphs is twice this at every nesting depth. */
+    --meowdown-block-padding: 0.3em;
   }
 }
 
@@ -307,13 +311,10 @@
     padding-left: var(--meowdown-gutter);
   }
 
-  .ProseMirror > * + * {
-    margin-top: 0.85em;
-  }
-
   /* Render soft line breaks (a literal `\n` kept by the paragraph's
    * `whitespace: 'pre'` spec) as line breaks, while still wrapping long lines. */
   .ProseMirror p {
+    padding-block: var(--meowdown-block-padding);
     white-space: pre-wrap;
   }
 
@@ -327,9 +328,15 @@
     line-height: 1.25;
     letter-spacing: -0.01em;
     color: var(--meowdown-heading);
+    padding-top: 0.8em;
+    padding-bottom: 0.2em;
     /* Render a multi-line setext heading's soft break (kept by the heading's
      * `whitespace: 'pre'` spec) as a line break, while still wrapping long lines. */
     white-space: pre-wrap;
+
+    &:first-child {
+      padding-top: 0;
+    }
   }
 
   .ProseMirror h1 {
@@ -422,6 +429,31 @@
   .ProseMirror .prosemirror-flat-list > .list-marker {
     -webkit-user-select: none;
     user-select: none;
+  }
+
+  /* The marker (and the ordered number, a `::before`) is one body line tall
+   * at the top of the item; move it down to the first line of the item's
+   * first block. */
+  .ProseMirror .prosemirror-flat-list {
+    & > .list-marker,
+    &::before {
+      top: var(--meowdown-block-padding);
+    }
+
+    &:has(> .list-content > :first-child pre) {
+      & > .list-marker,
+      &::before {
+        /* `pre` margin and padding, then center on a code line (0.9em × 1.5). */
+        top: calc(var(--meowdown-block-padding) * 0.9 + 0.9rem + (1.35em - 1lh) / 2);
+      }
+    }
+
+    &:has(> .list-content > :is(h1, h2, h3, h4, h5, h6):first-child) {
+      & > .list-marker,
+      &::before {
+        top: 0;
+      }
+    }
   }
 
   /* The bullet dot is painted as a radial-gradient on the (1lh square)
@@ -537,6 +569,7 @@
   }
 
   .ProseMirror pre {
+    margin-block: var(--meowdown-block-padding);
     padding: 0.9rem 1rem;
     border-radius: 0.6rem;
     overflow-x: auto;
@@ -620,6 +653,7 @@
    * Tables
    * ------------------------------------------------------------------------- */
   .ProseMirror table {
+    margin-block: var(--meowdown-block-padding);
     width: 100%;
     overflow: hidden;
     border-collapse: collapse;
