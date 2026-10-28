@@ -186,9 +186,9 @@
     /* Heading line height. */
     --meowdown-heading-line-height: 1.25;
 
-    /* Code block font size (a fraction of the body size), line height,
-     * vertical padding, and vertical margin. */
-    --meowdown-code-block-font-scale: 0.9;
+    /* Code block font size, line height, vertical padding, and vertical
+     * margin. */
+    --meowdown-code-block-font-size: 0.9rem;
     --meowdown-code-block-line-height: 1.5;
     --meowdown-code-block-padding-block: 0.9rem;
     --meowdown-code-block-margin-block: 0.3rem;
@@ -475,7 +475,7 @@
         var(--meowdown-code-block-margin-block) + var(--meowdown-code-block-padding-block)
       );
       --meowdown-list-first-line-height: calc(
-        var(--meowdown-code-block-line-height) * var(--meowdown-code-block-font-scale) * 1em
+        var(--meowdown-code-block-line-height) * var(--meowdown-code-block-font-size)
       );
     }
 
@@ -645,7 +645,7 @@
     overflow-x: auto;
     background: var(--meowdown-code-bg);
     font-family: var(--meowdown-font-mono);
-    font-size: calc(var(--meowdown-code-block-font-scale) * 1em);
+    font-size: var(--meowdown-code-block-font-size);
     line-height: var(--meowdown-code-block-line-height);
   }
   .ProseMirror pre code {
