@@ -74,18 +74,6 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ steps.compare.outcome == 'failure' }}
         with:
-          name: screenshot-diff-${{ matrix.config.os }}-${{ matrix.config.browser }}
-          # Skips the hash-named copies that Vitest also writes for each attachment.
-          path: |
-            .vitest/attachments/
-            !.vitest/attachments/*.png
-            packages/*/src/**/__visual__/**/*-${{ matrix.config.browser }}-${{ matrix.config.platform }}.png
-          include-hidden-files: true
-          retention-days: 7
-
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: ${{ steps.compare.outcome == 'failure' }}
-        with:
           name: screenshot-report-${{ matrix.config.os }}-${{ matrix.config.browser }}
           path: .vitest/report/index.html
           include-hidden-files: true
