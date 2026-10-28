@@ -60,8 +60,7 @@ jobs:
         run: pnpm run test:install:${{ matrix.config.browser }}
 
       # Compares first, so a mismatch leaves its actual and diff screenshots in
-      # `.vitest/attachments` and an HTML report in `.vitest/report`;
-      # `--update` only rewrites the references.
+      # `.vitest/attachments`; `--update` only rewrites the references.
       - name: Compare screenshots
         id: compare
         continue-on-error: true
@@ -80,14 +79,6 @@ jobs:
             .vitest/attachments/
             !.vitest/attachments/*.png
             packages/*/src/**/__visual__/**/*-${{ matrix.config.browser }}-${{ matrix.config.platform }}.png
-          include-hidden-files: true
-          retention-days: 7
-
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: ${{ steps.compare.outcome == 'failure' }}
-        with:
-          name: screenshot-report-${{ matrix.config.os }}-${{ matrix.config.browser }}
-          path: .vitest/report/index.html
           include-hidden-files: true
           retention-days: 7
 
