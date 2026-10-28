@@ -449,59 +449,80 @@
     user-select: none;
   }
 
-  /* The marker (and the ordered number, a `::before`) is one body line tall
-   * at the top of the item; move it down to the first line of the item's
-   * first block. */
+  /* Vertically center the list marker (and the ordered number, a `::before`)
+   * on the first line of the item's first block. The marker is one body line
+   * (`1lh`) tall and sits `top` below the item's top edge:
+   *
+   *   top = first line top + (first line height - 1lh) / 2
+   *
+   * Each kind of first block sets the two inputs:
+   * - `--meowdown-list-first-line-top`: the distance from the item's top edge
+   *   to the top of the block's first line (its margin-top plus padding-top).
+   * - `--meowdown-list-first-line-height`: the height of that line.
+   *
+   * Both resolve on the marker, so `em` and `lh` there mean the body font size
+   * and line height. To support another kind of first block, add a rule that
+   * sets both inputs. */
   .ProseMirror .prosemirror-flat-list {
-    --meowdown-list-marker-top: var(--meowdown-block-padding);
+    /* Paragraph: its padding-top, then one body line. */
+    --meowdown-list-first-line-top: var(--meowdown-block-padding);
+    --meowdown-list-first-line-height: 1lh;
 
+    /* Code block: the `pre` margin-top and padding-top, then one code line
+     * (the code line height times the code font size). */
     &:has(> .list-content > [data-code-block]:first-child) {
-      /* `pre` margin and padding, then center on a code line. */
-      --meowdown-list-marker-top: calc(
-        var(--meowdown-code-block-margin-block) + var(--meowdown-code-block-padding-block) +
-          (
-            var(--meowdown-code-block-line-height) * var(--meowdown-code-block-font-scale) * 1em -
-              1lh
-          ) /
-          2
+      --meowdown-list-first-line-top: calc(
+        var(--meowdown-code-block-margin-block) + var(--meowdown-code-block-padding-block)
+      );
+      --meowdown-list-first-line-height: calc(
+        var(--meowdown-code-block-line-height) * var(--meowdown-code-block-font-scale) * 1em
       );
     }
 
-    /* Center on the heading's first line. */
+    /* Heading: no padding-top as a first child, then one heading line (the
+     * heading line height times the heading font size). */
     &:has(> .list-content > h1:first-child) {
-      --meowdown-list-marker-top: calc(
-        var(--meowdown-heading-line-height) * var(--meowdown-h1-size) / 2 - 0.5lh
+      --meowdown-list-first-line-top: 0px;
+      --meowdown-list-first-line-height: calc(
+        var(--meowdown-heading-line-height) * var(--meowdown-h1-size)
       );
     }
     &:has(> .list-content > h2:first-child) {
-      --meowdown-list-marker-top: calc(
-        var(--meowdown-heading-line-height) * var(--meowdown-h2-size) / 2 - 0.5lh
+      --meowdown-list-first-line-top: 0px;
+      --meowdown-list-first-line-height: calc(
+        var(--meowdown-heading-line-height) * var(--meowdown-h2-size)
       );
     }
     &:has(> .list-content > h3:first-child) {
-      --meowdown-list-marker-top: calc(
-        var(--meowdown-heading-line-height) * var(--meowdown-h3-size) / 2 - 0.5lh
+      --meowdown-list-first-line-top: 0px;
+      --meowdown-list-first-line-height: calc(
+        var(--meowdown-heading-line-height) * var(--meowdown-h3-size)
       );
     }
     &:has(> .list-content > h4:first-child) {
-      --meowdown-list-marker-top: calc(
-        var(--meowdown-heading-line-height) * var(--meowdown-h4-size) / 2 - 0.5lh
+      --meowdown-list-first-line-top: 0px;
+      --meowdown-list-first-line-height: calc(
+        var(--meowdown-heading-line-height) * var(--meowdown-h4-size)
       );
     }
     &:has(> .list-content > h5:first-child) {
-      --meowdown-list-marker-top: calc(
-        var(--meowdown-heading-line-height) * var(--meowdown-h5-size) / 2 - 0.5lh
+      --meowdown-list-first-line-top: 0px;
+      --meowdown-list-first-line-height: calc(
+        var(--meowdown-heading-line-height) * var(--meowdown-h5-size)
       );
     }
     &:has(> .list-content > h6:first-child) {
-      --meowdown-list-marker-top: calc(
-        var(--meowdown-heading-line-height) * var(--meowdown-h6-size) / 2 - 0.5lh
+      --meowdown-list-first-line-top: 0px;
+      --meowdown-list-first-line-height: calc(
+        var(--meowdown-heading-line-height) * var(--meowdown-h6-size)
       );
     }
 
     & > .list-marker,
     &::before {
-      top: var(--meowdown-list-marker-top);
+      top: calc(
+        var(--meowdown-list-first-line-top) + (var(--meowdown-list-first-line-height) - 1lh) / 2
+      );
     }
   }
 
