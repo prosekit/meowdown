@@ -93,9 +93,8 @@ export function defineBrowserConfig({
             // See https://playwright.dev/docs/api/class-browsercontext#browser-context-grant-permissions
             permissions:
               browserName === 'chromium' ? ['clipboard-read', 'clipboard-write'] : undefined,
-            // Dates in screenshots must not depend on the runner.
-            locale: visual ? 'en-US' : undefined,
-            timezoneId: visual ? 'UTC' : undefined,
+            locale: 'en-US',
+            timezoneId: 'UTC',
           },
         }),
         headless: IS_DEBUG ? false : true,
