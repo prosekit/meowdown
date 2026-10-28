@@ -34,7 +34,10 @@ export function defineNodeConfig({ name, groupOrder }: { name: string; groupOrde
 }
 
 /**
- * A project for tests that need a real browser. It only picks up `*.test.tsx`.
+ * A project for tests that need a real browser. It only picks up `*.test.tsx`,
+ * or with `visual`, only the screenshot tests in `*.visual.tsx`. Their
+ * reference screenshots are committed under `__visual__`, one per browser and
+ * platform.
  */
 export function defineBrowserConfig({
   name,

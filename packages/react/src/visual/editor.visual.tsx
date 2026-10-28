@@ -66,6 +66,10 @@ interface Scenario {
 /// keep-sorted { "keys": ["name"] }
 const SCENARIOS: Scenario[] = [
   {
+    name: 'blockquote',
+    markdown: '> A blockquote that is long enough to wrap onto a second line on a narrow screen.',
+  },
+  {
     name: 'code-block',
     markdown: dedent`
       \`\`\`ts
@@ -95,8 +99,6 @@ const SCENARIOS: Scenario[] = [
       ##### Heading 5
 
       ###### Heading 6
-
-      > A blockquote that is long enough to wrap onto a second line on a narrow screen.
     `,
   },
   {
