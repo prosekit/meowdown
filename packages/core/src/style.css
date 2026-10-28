@@ -662,10 +662,7 @@
   }
 
   /* prosemirror-view adds `ProseMirror-hideselection` whenever the selection is
-   * not "visible" (a node selection). Its own `caret-color: transparent` sits
-   * in `meowdown.base` and loses to the `.ProseMirror` rule above. Without it,
-   * a selected node with no selectable content (a rendered Mermaid or math
-   * preview) shows a native caret at the next text position. */
+   * not "visible" (a node selection). */
   .ProseMirror.ProseMirror-hideselection {
     caret-color: transparent;
   }
