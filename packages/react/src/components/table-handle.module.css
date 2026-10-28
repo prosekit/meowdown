@@ -1,3 +1,10 @@
+/* Clear the UA `[popover]` box. */
+.MenuPositioner {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
 .Positioner,
 .MenuPositioner {
   display: block;

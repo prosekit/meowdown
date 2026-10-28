@@ -14,7 +14,10 @@ describe('defineCodeBlockSyntaxHighlight', () => {
     await expect.element(locator, { timeout: 15000 }).toBeInTheDocument()
     expect(formatHTML(fixture.dom.innerHTML)).toMatchInlineSnapshot(`
       "
-      <pre data-language="js">
+      <pre
+        data-code-block
+        data-language="js"
+      >
         <code class="language-js">
           <span class="tok-keyword">
             const

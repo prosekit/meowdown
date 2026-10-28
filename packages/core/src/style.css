@@ -5,6 +5,18 @@
 @import '@meowdown/embed/x/theme.css' layer(meowdown.base);
 @import '@meowdown/embed/youtube/theme.css' layer(meowdown.base);
 
+/* Spacing and tabs must not depend on the host's CSS reset. Zero specificity,
+ * so `meowdown.editor` rules and host styles override it. */
+@layer meowdown.base {
+  :where(.ProseMirror) {
+    tab-size: 4;
+  }
+
+  :where(.ProseMirror) :where(p, h1, h2, h3, h4, h5, h6, blockquote, pre, ul, ol, figure, hr) {
+    margin: 0;
+  }
+}
+
 @layer meowdown.theme {
   /* ---------------------------------------------------------------------------
    * Default theme: the themeable `--meowdown-*` variables and their defaults.
@@ -158,6 +170,27 @@
      * pointer events on the editor element, so a handle outside the padding closes
      * before it can be clicked. Keep it >= 3.5rem. */
     --meowdown-gutter: 3.5rem;
+
+    /* Vertical padding of a paragraph. */
+    --meowdown-block-padding: 0.3em;
+
+    /* Heading font sizes. */
+    --meowdown-h1-size: 1.75rem;
+    --meowdown-h2-size: 1.4rem;
+    --meowdown-h3-size: 1.2rem;
+    --meowdown-h4-size: 1.1rem;
+    --meowdown-h5-size: 1rem;
+    --meowdown-h6-size: 0.95rem;
+
+    /* Heading line height. */
+    --meowdown-heading-line-height: 1.25;
+
+    /* Code block font size, line height, vertical padding, and vertical
+     * margin. */
+    --meowdown-code-block-font-size: 0.9rem;
+    --meowdown-code-block-line-height: 1.5;
+    --meowdown-code-block-padding-block: 0.9rem;
+    --meowdown-code-block-margin-block: 0.3rem;
   }
 }
 
@@ -295,13 +328,10 @@
     padding-left: var(--meowdown-gutter);
   }
 
-  .ProseMirror > * + * {
-    margin-top: 0.85em;
-  }
-
   /* Render soft line breaks (a literal `\n` kept by the paragraph's
    * `whitespace: 'pre'` spec) as line breaks, while still wrapping long lines. */
   .ProseMirror p {
+    padding-block: var(--meowdown-block-padding);
     white-space: pre-wrap;
   }
 
@@ -312,31 +342,37 @@
   .ProseMirror h5,
   .ProseMirror h6 {
     font-weight: 600;
-    line-height: 1.25;
+    line-height: var(--meowdown-heading-line-height);
     letter-spacing: -0.01em;
     color: var(--meowdown-heading);
+    padding-top: 0.8em;
+    padding-bottom: 0.2em;
     /* Render a multi-line setext heading's soft break (kept by the heading's
      * `whitespace: 'pre'` spec) as a line break, while still wrapping long lines. */
     white-space: pre-wrap;
+
+    &:first-child {
+      padding-top: 0;
+    }
   }
 
   .ProseMirror h1 {
-    font-size: 1.75rem;
+    font-size: var(--meowdown-h1-size);
   }
   .ProseMirror h2 {
-    font-size: 1.4rem;
+    font-size: var(--meowdown-h2-size);
   }
   .ProseMirror h3 {
-    font-size: 1.2rem;
+    font-size: var(--meowdown-h3-size);
   }
   .ProseMirror h4 {
-    font-size: 1.1rem;
+    font-size: var(--meowdown-h4-size);
   }
   .ProseMirror h5 {
-    font-size: 1rem;
+    font-size: var(--meowdown-h5-size);
   }
   .ProseMirror h6 {
-    font-size: 0.95rem;
+    font-size: var(--meowdown-h6-size);
   }
 
   .ProseMirror .md-link {
@@ -394,6 +430,14 @@
     margin-top: 0.25em;
   }
 
+  /* WebKit fills selection gaps (line ends, half-leading strips) inside every
+   * positioned block flow, which draws strips beside unselected text in a list
+   * item. It skips flex containers. */
+  .ProseMirror .prosemirror-flat-list {
+    display: flex;
+    flex-direction: column;
+  }
+
   /* A caret must never land inside the marker. iOS trackpad mode otherwise
    * bounces between the marker and the previous block on every touch move
    * (WebKit accepts an empty non-editable block as a caret position; UIKit
@@ -402,6 +446,83 @@
   .ProseMirror .prosemirror-flat-list > .list-marker {
     -webkit-user-select: none;
     user-select: none;
+  }
+
+  /* Vertically center the list marker (and the ordered number, a `::before`)
+   * on the first line of the item's first block. The marker is one body line
+   * (`1lh`) tall and sits `top` below the item's top edge:
+   *
+   *   top = first line top + (first line height - 1lh) / 2
+   *
+   * Each kind of first block sets the two inputs:
+   * - `--meowdown-list-first-line-top`: the distance from the item's top edge
+   *   to the top of the block's first line (its margin-top plus padding-top).
+   * - `--meowdown-list-first-line-height`: the height of that line.
+   *
+   * Both resolve on the marker, so `em` and `lh` there mean the body font size
+   * and line height. To support another kind of first block, add a rule that
+   * sets both inputs. */
+  .ProseMirror .prosemirror-flat-list {
+    /* Paragraph: its padding-top, then one body line. */
+    --meowdown-list-first-line-top: var(--meowdown-block-padding);
+    --meowdown-list-first-line-height: 1lh;
+
+    /* Code block: the `pre` margin-top and padding-top, then one code line
+     * (the code line height times the code font size). */
+    &:has(> .list-content > [data-code-block]:first-child) {
+      --meowdown-list-first-line-top: calc(
+        var(--meowdown-code-block-margin-block) + var(--meowdown-code-block-padding-block)
+      );
+      --meowdown-list-first-line-height: calc(
+        var(--meowdown-code-block-line-height) * var(--meowdown-code-block-font-size)
+      );
+    }
+
+    /* Heading: no padding-top as a first child, then one heading line (the
+     * heading line height times the heading font size). */
+    &:has(> .list-content > h1:first-child) {
+      --meowdown-list-first-line-top: 0px;
+      --meowdown-list-first-line-height: calc(
+        var(--meowdown-heading-line-height) * var(--meowdown-h1-size)
+      );
+    }
+    &:has(> .list-content > h2:first-child) {
+      --meowdown-list-first-line-top: 0px;
+      --meowdown-list-first-line-height: calc(
+        var(--meowdown-heading-line-height) * var(--meowdown-h2-size)
+      );
+    }
+    &:has(> .list-content > h3:first-child) {
+      --meowdown-list-first-line-top: 0px;
+      --meowdown-list-first-line-height: calc(
+        var(--meowdown-heading-line-height) * var(--meowdown-h3-size)
+      );
+    }
+    &:has(> .list-content > h4:first-child) {
+      --meowdown-list-first-line-top: 0px;
+      --meowdown-list-first-line-height: calc(
+        var(--meowdown-heading-line-height) * var(--meowdown-h4-size)
+      );
+    }
+    &:has(> .list-content > h5:first-child) {
+      --meowdown-list-first-line-top: 0px;
+      --meowdown-list-first-line-height: calc(
+        var(--meowdown-heading-line-height) * var(--meowdown-h5-size)
+      );
+    }
+    &:has(> .list-content > h6:first-child) {
+      --meowdown-list-first-line-top: 0px;
+      --meowdown-list-first-line-height: calc(
+        var(--meowdown-heading-line-height) * var(--meowdown-h6-size)
+      );
+    }
+
+    & > .list-marker,
+    &::before {
+      top: calc(
+        var(--meowdown-list-first-line-top) + (var(--meowdown-list-first-line-height) - 1lh) / 2
+      );
+    }
   }
 
   /* The bullet dot is painted as a radial-gradient on the (1lh square)
@@ -517,18 +638,20 @@
   }
 
   .ProseMirror pre {
-    padding: 0.9rem 1rem;
+    margin-block: var(--meowdown-code-block-margin-block);
+    padding: var(--meowdown-code-block-padding-block) 1rem;
     border-radius: 0.6rem;
     overflow-x: auto;
     background: var(--meowdown-code-bg);
     font-family: var(--meowdown-font-mono);
-    font-size: 0.9em;
-    line-height: 1.5;
+    font-size: var(--meowdown-code-block-font-size);
+    line-height: var(--meowdown-code-block-line-height);
   }
   .ProseMirror pre code {
     padding: 0;
     background: none;
     color: inherit;
+    font-size: inherit;
   }
 
   /* Lezer syntax highlighting. `prosemirror-highlight` tags tokens with the
@@ -600,6 +723,7 @@
    * Tables
    * ------------------------------------------------------------------------- */
   .ProseMirror table {
+    margin-block: var(--meowdown-block-padding);
     width: 100%;
     overflow: hidden;
     border-collapse: collapse;

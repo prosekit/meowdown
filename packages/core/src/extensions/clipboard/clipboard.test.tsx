@@ -104,6 +104,7 @@ describe('clipboard HTML', () => {
         </li>
       </ul>
       <pre
+        data-code-block
         data-language="js"
         data-meowdown
       >

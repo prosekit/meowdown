@@ -1,4 +1,10 @@
-import { defineNodeAttr, union, type Extension, type PlainExtension } from '@prosekit/core'
+import {
+  defineNodeAttr,
+  defineNodeSpec,
+  union,
+  type Extension,
+  type PlainExtension,
+} from '@prosekit/core'
 import {
   codeBlockEnterRule,
   codeBlockInputRule,
@@ -75,6 +81,27 @@ function defineFenceLengthAttr(): FenceLengthExtension {
   })
 }
 
+type CodeBlockDOMExtension = Extension<{
+  Nodes: { codeBlock: CodeBlockAttrs }
+}>
+
+/**
+ * Re-declare the code block `toDOM` with a `data-code-block` root attribute.
+ */
+function defineCodeBlockDOM(): CodeBlockDOMExtension {
+  return defineNodeSpec<'codeBlock', CodeBlockAttrs>({
+    name: 'codeBlock' satisfies NodeName,
+    toDOM: (node) => {
+      const { language } = node.attrs as CodeBlockAttrs
+      return [
+        'pre',
+        { 'data-code-block': '', 'data-language': language || undefined },
+        ['code', { class: language ? `language-${language}` : undefined }, 0],
+      ]
+    },
+  })
+}
+
 function getTildeFenceAttrs(match: RegExpMatchArray): MeowdownCodeBlockAttrs {
   return { language: match[1] || '', fenceStyle: 'tilde' }
 }
@@ -104,6 +131,7 @@ function defineDollarFenceEnterRule(): PlainExtension {
 export function defineCodeBlock() {
   return union(
     defineCodeBlockSpec(),
+    defineCodeBlockDOM(),
     defineCodeBlockKeymap(),
     defineCodeBlockCommands(),
     defineBlockInputRule(
