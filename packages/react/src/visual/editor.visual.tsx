@@ -63,6 +63,7 @@ interface Scenario {
   prepare?: (handle: EditorHandle) => void | Promise<void>
 }
 
+/// keep-sorted { "keys": ["name"] }
 const SCENARIOS: Scenario[] = [
   {
     name: 'paragraph',
