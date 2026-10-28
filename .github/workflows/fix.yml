@@ -90,16 +90,24 @@ jobs:
       # stores the browser's PNG bytes, which oxipng shrinks by about half.
       - name: Compress changed screenshots
         run: |
-          git ls-files --modified --others --exclude-standard -z -- '*/__visual__/*.png' > "$RUNNER_TEMP/changed"
-          if [ ! -s "$RUNNER_TEMP/changed" ]; then
+          changed=$(git ls-files --modified --others --exclude-standard -- '*/__visual__/*.png')
+          echo "Changed screenshots:"
+          echo "$changed"
+          if [ -z "$changed" ]; then
             exit 0
           fi
+
+          echo "Installing oxipng..."
           # The Ubuntu image ships Homebrew outside `PATH`.
           if [ "$RUNNER_OS" = Linux ]; then
             eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           fi
           brew install oxipng
+
+          echo "oxipng version:"
           oxipng --version
-          xargs -0 oxipng --opt max --strip safe < "$RUNNER_TEMP/changed"
+
+          echo "Compressing changed screenshots..."
+          oxipng --opt max --strip safe $changed
 
       - uses: autofix-ci/action@c5b2d67aa2274e7b5a18224e8171550871fc7e4a # v1.3.4
