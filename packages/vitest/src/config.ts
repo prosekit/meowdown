@@ -36,27 +36,14 @@ export function defineNodeConfig({ name, groupOrder }: { name: string; groupOrde
 /**
  * A project for tests that need a real browser. It only picks up `*.test.tsx`.
  */
-export function defineBrowserConfig({ name, groupOrder }: { name: string; groupOrder: number }) {
-  return defineBrowserProject({ name, groupOrder, visual: false })
-}
-
-/**
- * A project for screenshot tests. It only picks up `*.visual.tsx`. Their
- * reference screenshots are committed under `__visual__`, one per browser and
- * platform.
- */
-export function defineVisualConfig({ name, groupOrder }: { name: string; groupOrder: number }) {
-  return defineBrowserProject({ name, groupOrder, visual: true })
-}
-
-function defineBrowserProject({
+export function defineBrowserConfig({
   name,
   groupOrder,
-  visual,
+  visual = false,
 }: {
   name: string
   groupOrder: number
-  visual: boolean
+  visual?: boolean
 }) {
   const browserName = resolveBrowserName()
 
