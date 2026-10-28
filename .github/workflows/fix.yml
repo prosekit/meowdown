@@ -111,6 +111,7 @@ jobs:
             eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           fi
           brew install oxipng
-          xargs -0 oxipng -o 4 --strip safe < "$RUNNER_TEMP/changed"
+          oxipng --version
+          xargs -0 oxipng --opt max --strip safe < "$RUNNER_TEMP/changed"
 
       - uses: autofix-ci/action@c5b2d67aa2274e7b5a18224e8171550871fc7e4a # v1.3.4
