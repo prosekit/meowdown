@@ -19,9 +19,10 @@ import {
   TableHandleRowPopup,
   TableHandleRowPositioner,
 } from '@prosekit/react/table-handle'
+import type { MenuRootEvents } from '@prosekit/web/menu'
 import { CheckIcon, GripHorizontalIcon, GripVerticalIcon } from 'lucide-react'
 import type { ReactElement, ReactNode } from 'react'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 import styles from './table-handle.module.css'
 
@@ -269,8 +270,60 @@ function TableMenuDeleteTable({
   ) : null
 }
 
+function TableColumnMenuItems({ editor }: { editor: TypedEditor }): ReactNode {
+  return (
+    <>
+      <TableMenuInsertLeft editor={editor} />
+      <TableMenuInsertRight editor={editor} />
+      <TableMenuAlign editor={editor} />
+      <TableMenuClearContents editor={editor} testId="table-clear-column" />
+      <TableMenuDeleteColumn editor={editor} />
+      <TableMenuDeleteTable editor={editor} testId="table-delete-table-column" />
+    </>
+  )
+}
+
+function TableRowMenuItems({ editor }: { editor: TypedEditor }): ReactNode {
+  return (
+    <>
+      <TableMenuInsertAbove editor={editor} />
+      <TableMenuInsertBelow editor={editor} />
+      <TableMenuClearContents editor={editor} testId="table-clear-row" />
+      <TableMenuDeleteRow editor={editor} />
+      <TableMenuDeleteTable editor={editor} testId="table-delete-table-row" />
+    </>
+  )
+}
+
+/**
+ * Mounts a menu's items only while the menu is shown, so a closed menu holds no
+ * editor subscriptions. Opening is canceled and replayed through `open`, so the
+ * items mount in the same commit that opens the menu. Closing keeps the items
+ * until the close animation finishes.
+ */
+function useLazyMenu() {
+  const [open, setOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  const onOpenChange = (event: MenuRootEvents['openChange']) => {
+    if (event.detail) {
+      event.preventDefault()
+      setMounted(true)
+    }
+    setOpen(event.detail)
+  }
+
+  const onOpenChangeComplete = (event: MenuRootEvents['openChangeComplete']) => {
+    if (!event.detail) setMounted(false)
+  }
+
+  return { open, mounted, onOpenChange, onOpenChangeComplete }
+}
+
 export function TableHandle(): ReactElement {
   const editor = useEditor<EditorExtension>()
+  const columnMenu = useLazyMenu()
+  const rowMenu = useLazyMenu()
 
   return (
     <TableHandleRoot>
@@ -279,7 +332,11 @@ export function TableHandle(): ReactElement {
 
       <TableHandleColumnPositioner className={styles.Positioner}>
         <TableHandleColumnPopup className={styles.ColumnPopup}>
-          <TableHandleColumnMenuRoot>
+          <TableHandleColumnMenuRoot
+            open={columnMenu.open}
+            onOpenChange={columnMenu.onOpenChange}
+            onOpenChangeComplete={columnMenu.onOpenChangeComplete}
+          >
             <TableHandleColumnMenuTrigger
               className={styles.Trigger}
               data-testid="table-handle-column"
@@ -288,12 +345,7 @@ export function TableHandle(): ReactElement {
             </TableHandleColumnMenuTrigger>
             <MenuPositioner className={styles.MenuPositioner}>
               <MenuPopup className={styles.MenuPopup} data-testid="table-handle-column-menu">
-                <TableMenuInsertLeft editor={editor} />
-                <TableMenuInsertRight editor={editor} />
-                <TableMenuAlign editor={editor} />
-                <TableMenuClearContents editor={editor} testId="table-clear-column" />
-                <TableMenuDeleteColumn editor={editor} />
-                <TableMenuDeleteTable editor={editor} testId="table-delete-table-column" />
+                {columnMenu.mounted && <TableColumnMenuItems editor={editor} />}
               </MenuPopup>
             </MenuPositioner>
           </TableHandleColumnMenuRoot>
@@ -302,17 +354,17 @@ export function TableHandle(): ReactElement {
 
       <TableHandleRowPositioner className={styles.Positioner}>
         <TableHandleRowPopup className={styles.RowPopup}>
-          <TableHandleRowMenuRoot>
+          <TableHandleRowMenuRoot
+            open={rowMenu.open}
+            onOpenChange={rowMenu.onOpenChange}
+            onOpenChangeComplete={rowMenu.onOpenChangeComplete}
+          >
             <TableHandleRowMenuTrigger className={styles.Trigger} data-testid="table-handle-row">
               <GripVerticalIcon />
             </TableHandleRowMenuTrigger>
             <MenuPositioner className={styles.MenuPositioner}>
               <MenuPopup className={styles.MenuPopup} data-testid="table-handle-row-menu">
-                <TableMenuInsertAbove editor={editor} />
-                <TableMenuInsertBelow editor={editor} />
-                <TableMenuClearContents editor={editor} testId="table-clear-row" />
-                <TableMenuDeleteRow editor={editor} />
-                <TableMenuDeleteTable editor={editor} testId="table-delete-table-row" />
+                {rowMenu.mounted && <TableRowMenuItems editor={editor} />}
               </MenuPopup>
             </MenuPositioner>
           </TableHandleRowMenuRoot>
