@@ -1,5 +1,6 @@
 // @ts-nocheck
 declare const styles = {
+  'MenuPositioner': '' as string,
   'Positioner': '' as string,
   'MenuPositioner': '' as string,
   'ColumnPopup': '' as string,
