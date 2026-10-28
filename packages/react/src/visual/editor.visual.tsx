@@ -7,11 +7,12 @@ import { page, userEvent } from 'vitest/browser'
 
 import { MarkdownEditor } from '../components/editor.tsx'
 import type { EditorHandle } from '../components/types.ts'
-import { hover, unhover } from '../testing/mouse.ts'
+import { unhover } from '../testing/mouse.ts'
 import {
   createImageUrl,
   expectScreenshots,
   renderVisual,
+  selectBlock,
   selectCells,
   selectText,
 } from '../testing/visual.tsx'
@@ -43,6 +44,30 @@ const TABLE_MARKDOWN = dedent`
   Some text below the table.
 `
 
+const CODE_BLOCK_MARKDOWN = dedent`
+  \`\`\`ts
+  function greet(name: string): string | undefined | null | Promise<string> | Promise<undefined> | Promise<null> {
+    return \`Hello, \${name}!\`
+  }
+  \`\`\`
+`
+
+const X_POST_MARKDOWN = '![](https://x.com/jack/status/20)'
+
+const YOUTUBE_MARKDOWN = '![](https://www.youtube.com/watch?v=aqz-KE-bpKQ)'
+
+const TEXT_IMAGE_MARKDOWN = 'Text before the image ![landscape](landscape.svg) and text after it.'
+
+const IMAGE_ONLY_MARKDOWN = '![landscape](landscape.svg)'
+
+/**
+ * Puts `block` between two paragraphs, so a selection outline shows against
+ * its neighbors.
+ */
+function surround(block: string): string {
+  return `Some text above.\n\n${block}\n\nSome text below.`
+}
+
 async function waitForImages(count: number) {
   const images = pmRoot.locate('img')
   await expect.poll(() => images.elements().length).toBe(count)
@@ -50,6 +75,34 @@ async function waitForImages(count: number) {
     .elements()
     .filter((element): element is HTMLImageElement => element instanceof HTMLImageElement)
   await Promise.all(elements.map((image) => image.decode()))
+}
+
+async function waitForCodeTokens() {
+  await expect
+    .element(pmRoot.locate('pre code [class*="tok-"]').first(), { timeout: 15000 })
+    .toBeInTheDocument()
+}
+
+async function waitForXPost() {
+  await expect
+    .element(pmRoot.getByTestId('x-post-embed'))
+    .toMatchTextContent('just setting up my twttr')
+}
+
+async function waitForYouTube() {
+  await expect
+    .element(pmRoot.getByTestId('youtube-video-embed'))
+    .toMatchTextContent('Big Buck Bunny')
+}
+
+/**
+ * Selects the whole landscape image source the way a user does: a caret before
+ * it, then ArrowRight.
+ */
+async function selectImage(handle: EditorHandle) {
+  await waitForImages(1)
+  selectText(handle, '![landscape]', '![landscape]')
+  await userEvent.keyboard('{ArrowRight}')
 }
 
 interface Scenario {
@@ -72,18 +125,8 @@ const SCENARIOS: Scenario[] = [
   },
   {
     name: 'code-block',
-    markdown: dedent`
-      \`\`\`ts
-      function greet(name: string): string | undefined | null | Promise<string> | Promise<undefined> | Promise<null> {
-        return \`Hello, \${name}!\`
-      }
-      \`\`\`
-    `,
-    prepare: async () => {
-      await expect
-        .element(pmRoot.locate('pre code [class*="tok-"]').first(), { timeout: 15000 })
-        .toBeInTheDocument()
-    },
+    markdown: CODE_BLOCK_MARKDOWN,
+    prepare: waitForCodeTokens,
   },
   {
     name: 'headings',
@@ -100,6 +143,16 @@ const SCENARIOS: Scenario[] = [
 
       ###### Heading 6
     `,
+  },
+  {
+    name: 'image-select-only',
+    markdown: IMAGE_ONLY_MARKDOWN,
+    prepare: selectImage,
+  },
+  {
+    name: 'image-select',
+    markdown: TEXT_IMAGE_MARKDOWN,
+    prepare: selectImage,
   },
   {
     name: 'lists-mixed',
@@ -133,8 +186,77 @@ const SCENARIOS: Scenario[] = [
     `,
   },
   {
+    name: 'node-select-blockquote',
+    markdown: surround('> A blockquote that is selected as a whole.'),
+    prepare: () => selectBlock(pmRoot.locate('blockquote')),
+  },
+  {
+    name: 'node-select-code-block',
+    markdown: surround(CODE_BLOCK_MARKDOWN),
+    prepare: async () => {
+      await waitForCodeTokens()
+      await selectBlock(pmRoot.locate('pre'))
+    },
+  },
+  {
+    name: 'node-select-heading',
+    markdown: surround('## A selected heading'),
+    prepare: () => selectBlock(pmRoot.locate('h2')),
+  },
+  {
+    name: 'node-select-horizontal-rule',
+    markdown: surround('---'),
+    prepare: () => selectBlock(pmRoot.locate('hr')),
+  },
+  {
+    name: 'node-select-math',
+    markdown: surround('```math\nE = mc^2\n```'),
+    prepare: async () => {
+      const preview = pmRoot.getByTestId('code-block-math-preview')
+      await expect.element(preview.locate('.katex')).toBeInTheDocument()
+      await selectBlock(preview)
+    },
+  },
+  {
+    name: 'node-select-paragraph-image-only',
+    markdown: surround(IMAGE_ONLY_MARKDOWN),
+    prepare: async () => {
+      await waitForImages(1)
+      await selectBlock(pmRoot.locate('p').nth(1))
+    },
+  },
+  {
+    name: 'node-select-paragraph-text-image',
+    markdown: surround(TEXT_IMAGE_MARKDOWN),
+    prepare: async () => {
+      await waitForImages(1)
+      await selectBlock(pmRoot.locate('p').nth(1))
+    },
+  },
+  {
+    name: 'node-select-paragraph',
+    markdown: surround('A paragraph that is selected as a whole.'),
+    prepare: () => selectBlock(pmRoot.getByText('A paragraph that is selected as a whole.')),
+  },
+  {
+    name: 'node-select-x-post',
+    markdown: surround(X_POST_MARKDOWN),
+    prepare: async () => {
+      await waitForXPost()
+      await selectBlock(pmRoot.getByTestId('x-post-embed'))
+    },
+  },
+  {
+    name: 'node-select-youtube',
+    markdown: surround(YOUTUBE_MARKDOWN),
+    prepare: async () => {
+      await waitForYouTube()
+      await selectBlock(pmRoot.getByTestId('youtube-video-embed'))
+    },
+  },
+  {
     name: 'paragraph-image-only',
-    markdown: '![landscape](landscape.svg)',
+    markdown: IMAGE_ONLY_MARKDOWN,
     prepare: () => waitForImages(1),
   },
   {
@@ -148,7 +270,7 @@ const SCENARIOS: Scenario[] = [
   },
   {
     name: 'paragraph-text-image',
-    markdown: 'Text before the image ![landscape](landscape.svg) and text after it.',
+    markdown: TEXT_IMAGE_MARKDOWN,
     prepare: () => waitForImages(1),
   },
   {
@@ -185,11 +307,7 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'table-select-node',
     markdown: TABLE_MARKDOWN,
-    prepare: async () => {
-      await hover(pmRoot.locate('table'))
-      await page.getByTestId('block-handle-drag').click()
-      await expect.element(pmRoot.locate('table.ProseMirror-selectednode')).toBeInTheDocument()
-    },
+    prepare: () => selectBlock(pmRoot.locate('table')),
   },
   {
     name: 'table-select-row',
@@ -236,21 +354,13 @@ const SCENARIOS: Scenario[] = [
   },
   {
     name: 'x-post',
-    markdown: 'An X post:\n\n![](https://x.com/jack/status/20)',
-    prepare: async () => {
-      await expect
-        .element(pmRoot.getByTestId('x-post-embed'))
-        .toMatchTextContent('just setting up my twttr')
-    },
+    markdown: `An X post:\n\n${X_POST_MARKDOWN}`,
+    prepare: waitForXPost,
   },
   {
     name: 'youtube',
-    markdown: 'A YouTube video:\n\n![](https://www.youtube.com/watch?v=aqz-KE-bpKQ)',
-    prepare: async () => {
-      await expect
-        .element(pmRoot.getByTestId('youtube-video-embed'))
-        .toMatchTextContent('Big Buck Bunny')
-    },
+    markdown: `A YouTube video:\n\n${YOUTUBE_MARKDOWN}`,
+    prepare: waitForYouTube,
   },
 ]
 

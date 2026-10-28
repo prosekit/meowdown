@@ -3,11 +3,11 @@ import type { EditorNode } from '@prosekit/pm/model'
 import type { ReactNode } from 'react'
 import { expect } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { page } from 'vitest/browser'
+import { page, type Locator } from 'vitest/browser'
 
 import type { EditorHandle } from '../components/types.ts'
 
-import { unhover } from './mouse.ts'
+import { hover, unhover } from './mouse.ts'
 
 const FRAME_TEST_ID = 'visual-frame'
 
@@ -142,4 +142,16 @@ export function selectText(handle: EditorHandle, from: string, to: string): void
     anchor: getTextPosition(doc, from),
     head: getTextPosition(doc, to),
   })
+}
+
+/**
+ * Node-selects the block under `target` by clicking its block handle.
+ */
+export async function selectBlock(target: Locator): Promise<void> {
+  await hover(target)
+  await page.getByTestId('block-handle-drag').click()
+  // A React node view marks its selection with `data-selected` instead.
+  await expect
+    .element(pmRoot.locate('.ProseMirror-selectednode, [data-selected]'))
+    .toBeInTheDocument()
 }
