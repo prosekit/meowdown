@@ -394,6 +394,28 @@
     margin-top: 0.25em;
   }
 
+  /* WebKit fills selection gaps (line ends, half-leading strips) inside every
+   * positioned block flow, which draws strips beside unselected text in a list
+   * item. It skips flex containers. Margins do not collapse through a flex
+   * container, so the content's outer margins (down to a code block's `pre`)
+   * are trimmed to keep the text level with the marker. */
+  .ProseMirror .prosemirror-flat-list {
+    display: flex;
+    flex-direction: column;
+
+    & > .list-content > :first-child,
+    & > .list-content > :first-child > :first-child,
+    & > .list-content > :first-child > :first-child > :first-child {
+      margin-top: 0;
+    }
+
+    & > .list-content > :last-child,
+    & > .list-content > :last-child > :last-child,
+    & > .list-content > :last-child > :last-child > :last-child {
+      margin-bottom: 0;
+    }
+  }
+
   /* A caret must never land inside the marker. iOS trackpad mode otherwise
    * bounces between the marker and the previous block on every touch move
    * (WebKit accepts an empty non-editable block as a caret position; UIKit
