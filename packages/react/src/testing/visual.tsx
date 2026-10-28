@@ -136,15 +136,11 @@ export async function selectCells(
   await expect.element(pmRoot.locate('.selectedCell').first()).toBeInTheDocument()
 }
 
-async function waitForDOMSelection(): Promise<void> {
-  await expect.poll(() => document.getSelection()?.isCollapsed).toBe(false)
-}
-
 /**
  * Focuses the editor and selects from the start of the first text match of
  * `from` to the start of the first text match of `to`.
  */
-export async function selectText(handle: EditorHandle, from: string, to: string): Promise<void> {
+export function selectText(handle: EditorHandle, from: string, to: string): void {
   const doc = getDoc(handle)
   handle.focus()
   handle.setSelection({
@@ -152,17 +148,15 @@ export async function selectText(handle: EditorHandle, from: string, to: string)
     anchor: getTextPosition(doc, from),
     head: getTextPosition(doc, to),
   })
-  await waitForDOMSelection()
 }
 
 /**
  * Focuses the editor and selects the first text match of `text`.
  */
-export async function selectTextMatch(handle: EditorHandle, text: string): Promise<void> {
+export function selectTextMatch(handle: EditorHandle, text: string): void {
   const anchor = getTextPosition(getDoc(handle), text)
   handle.focus()
   handle.setSelection({ type: 'text', anchor, head: anchor + text.length })
-  await waitForDOMSelection()
 }
 
 /**

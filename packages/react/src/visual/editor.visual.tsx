@@ -94,13 +94,13 @@ async function waitForYouTube() {
  */
 async function selectImage(handle: EditorHandle) {
   await waitForImages(1)
-  await selectTextMatch(handle, '![landscape](landscape.svg)')
+  selectTextMatch(handle, '![landscape](landscape.svg)')
 }
 
 interface Scenario {
   name: string
   markdown: string
-  prepare?: (handle: EditorHandle) => Promise<void>
+  prepare?: (handle: EditorHandle) => void | Promise<void>
 }
 
 // Names are `<subject>` or `<subject>-<state>`, so keep-sorted puts every state
@@ -281,8 +281,8 @@ const SCENARIOS: Scenario[] = [
 
       A paragraph after the list.
     `,
-    prepare: async (handle) => {
-      await selectText(handle, 'task', 'after')
+    prepare: (handle) => {
+      selectText(handle, 'task', 'after')
     },
   },
   {
@@ -323,8 +323,8 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'paragraph-text-selected',
     markdown: 'Meowdown is a hybrid live-preview Markdown editor with **bold** and *italic* text.',
-    prepare: async (handle) => {
-      await selectText(handle, 'live-preview', ' editor')
+    prepare: (handle) => {
+      selectText(handle, 'live-preview', ' editor')
     },
   },
   {
