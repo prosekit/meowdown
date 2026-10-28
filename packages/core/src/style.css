@@ -171,8 +171,7 @@
      * before it can be clicked. Keep it >= 3.5rem. */
     --meowdown-gutter: 3.5rem;
 
-    /* Vertical padding of a paragraph. Two neighbors add up, so the gap between
-     * paragraphs is twice this at every nesting depth. */
+    /* Vertical padding of a paragraph. */
     --meowdown-block-padding: 0.3em;
 
     /* Heading font sizes. */
