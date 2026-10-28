@@ -65,13 +65,13 @@
   "devDependencies": {
     "@meowdown/vitest": "workspace:*",
     "@ocavue/tsconfig": "^0.7.1",
-    "@tsdown/css": "^0.23.1",
+    "@tsdown/css": "^0.23.2",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "@vitest/browser-playwright": "^5.0.5",
     "dedent": "^1.7.2",
     "diffable-html-snapshot": "^0.4.0",
-    "tsdown": "^0.23.1",
+    "tsdown": "^0.23.2",
     "vitest": "^5.0.5"
   },
   "publishConfig": {
