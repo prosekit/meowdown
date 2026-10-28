@@ -15,6 +15,7 @@ import {
   selectBlock,
   selectCells,
   selectText,
+  selectTextMatch,
 } from '../testing/visual.tsx'
 import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
@@ -91,13 +92,11 @@ async function waitForYouTube() {
 }
 
 /**
- * Selects the whole landscape image source the way a user does: a caret before
- * it, then ArrowRight.
+ * Selects the whole landscape image source, which rings its preview.
  */
 async function selectImage(handle: EditorHandle) {
   await waitForImages(1)
-  selectText(handle, '![landscape]', '![landscape]')
-  await userEvent.keyboard('{ArrowRight}')
+  selectTextMatch(handle, '![landscape](landscape.svg)')
 }
 
 interface Scenario {
@@ -177,70 +176,70 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'node-select-blockquote',
     markdown: surround('> A blockquote that is selected as a whole.'),
-    prepare: () => selectBlock(pmRoot.locate('blockquote')),
+    prepare: (handle) => selectBlock(handle, 1),
   },
   {
     name: 'node-select-code-block',
     markdown: surround(CODE_BLOCK_MARKDOWN),
-    prepare: async () => {
+    prepare: async (handle) => {
       await waitForCodeTokens()
-      await selectBlock(pmRoot.locate('pre'))
+      await selectBlock(handle, 1)
     },
   },
   {
     name: 'node-select-heading',
     markdown: surround('## A selected heading'),
-    prepare: () => selectBlock(pmRoot.locate('h2')),
+    prepare: (handle) => selectBlock(handle, 1),
   },
   {
     name: 'node-select-horizontal-rule',
     markdown: surround('---'),
-    prepare: () => selectBlock(pmRoot.locate('hr')),
+    prepare: (handle) => selectBlock(handle, 1),
   },
   {
     name: 'node-select-math',
     markdown: surround('```math\nE = mc^2\n```'),
-    prepare: async () => {
+    prepare: async (handle) => {
       const preview = pmRoot.getByTestId('code-block-math-preview')
       await expect.element(preview.locate('.katex')).toBeInTheDocument()
-      await selectBlock(preview)
+      await selectBlock(handle, 1)
     },
   },
   {
     name: 'node-select-paragraph-image-only',
     markdown: surround(IMAGE_ONLY_MARKDOWN),
-    prepare: async () => {
+    prepare: async (handle) => {
       await waitForImages(1)
-      await selectBlock(pmRoot.locate('p').nth(1))
+      await selectBlock(handle, 1)
     },
   },
   {
     name: 'node-select-paragraph-text-image',
     markdown: surround(TEXT_IMAGE_MARKDOWN),
-    prepare: async () => {
+    prepare: async (handle) => {
       await waitForImages(1)
-      await selectBlock(pmRoot.locate('p').nth(1))
+      await selectBlock(handle, 1)
     },
   },
   {
     name: 'node-select-paragraph',
     markdown: surround('A paragraph that is selected as a whole.'),
-    prepare: () => selectBlock(pmRoot.getByText('A paragraph that is selected as a whole.')),
+    prepare: (handle) => selectBlock(handle, 1),
   },
   {
     name: 'node-select-x-post',
     markdown: surround(X_POST_MARKDOWN),
-    prepare: async () => {
+    prepare: async (handle) => {
       await waitForXPost()
-      await selectBlock(pmRoot.getByTestId('x-post-embed'))
+      await selectBlock(handle, 1)
     },
   },
   {
     name: 'node-select-youtube',
     markdown: surround(YOUTUBE_MARKDOWN),
-    prepare: async () => {
+    prepare: async (handle) => {
       await waitForYouTube()
-      await selectBlock(pmRoot.getByTestId('youtube-video-embed'))
+      await selectBlock(handle, 1)
     },
   },
   {
@@ -294,7 +293,7 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'table-select-node',
     markdown: `select table node\n\n${TABLE_MARKDOWN}`,
-    prepare: () => selectBlock(pmRoot.locate('table')),
+    prepare: (handle) => selectBlock(handle, 1),
   },
   {
     name: 'table-select-row',

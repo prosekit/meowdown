@@ -3,11 +3,11 @@ import type { EditorNode } from '@prosekit/pm/model'
 import type { ReactNode } from 'react'
 import { expect } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { page, type Locator } from 'vitest/browser'
+import { page } from 'vitest/browser'
 
 import type { EditorHandle } from '../components/types.ts'
 
-import { hover, unhover } from './mouse.ts'
+import { unhover } from './mouse.ts'
 
 const FRAME_TEST_ID = 'visual-frame'
 
@@ -145,11 +145,26 @@ export function selectText(handle: EditorHandle, from: string, to: string): void
 }
 
 /**
- * Node-selects the block under `target` by clicking its block handle.
+ * Focuses the editor and selects the first text match of `text`.
  */
-export async function selectBlock(target: Locator): Promise<void> {
-  await hover(target)
-  await page.getByTestId('block-handle-drag').click()
+export function selectTextMatch(handle: EditorHandle, text: string): void {
+  const anchor = getTextPosition(getDoc(handle), text)
+  handle.focus()
+  handle.setSelection({ type: 'text', anchor, head: anchor + text.length })
+}
+
+/**
+ * Focuses the editor and node-selects the top-level block at `index`.
+ */
+export async function selectBlock(handle: EditorHandle, index: number): Promise<void> {
+  const doc = getDoc(handle)
+  let anchor = 0
+  for (let i = 0; i < index; i++) {
+    anchor += doc.child(i).nodeSize
+  }
+  handle.focus()
+  // `NodeSelection.fromJSON` reads only `anchor`.
+  handle.setSelection({ type: 'node', anchor, head: anchor })
   // A React node view marks its selection with `data-selected` instead.
   await expect
     .element(pmRoot.locate('.ProseMirror-selectednode, [data-selected]'))
