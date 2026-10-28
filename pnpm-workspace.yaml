@@ -25,6 +25,12 @@ minimumReleaseAgeExclude:
   - vitest-browser-commands
   - prosemirror-flat-list
   - mdast-util-to-markdown@2.2.1
+  - '@tsdown/css@0.23.3'
+  - tsdown@0.23.3
+
+peerDependencyRules:
+  allowedVersions:
+    oxc-transform-react: 0.x
 
 allowBuilds:
   esbuild: false

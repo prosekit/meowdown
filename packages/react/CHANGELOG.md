@@ -1,5 +1,11 @@
 # @meowdown/react
 
+## 0.82.1
+
+### Patch Changes
+
+- [#739](https://github.com/prosekit/meowdown/pull/739) [`3e84fdd`](https://github.com/prosekit/meowdown/commit/3e84fddb5232cf7cccd718b65947beb24f2d3947) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Precompile components and hooks with React Compiler.
+
 ## 0.82.0
 
 ### Minor Changes
