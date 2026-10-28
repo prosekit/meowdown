@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   fix:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -28,5 +28,86 @@ jobs:
 
       - name: Fix
         run: pnpm run fix
+
+      - uses: autofix-ci/action@c5b2d67aa2274e7b5a18224e8171550871fc7e4a # v1.3.4
+
+  visual:
+    runs-on: ${{ matrix.config.runner }}
+    name: visual-${{ matrix.config.os }}-${{ matrix.config.browser }}
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: linux
+            platform: linux
+            runner: ubuntu-26.04
+            browser: chromium
+          - os: mac
+            platform: darwin
+            runner: macos-26
+            browser: webkit
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+
+      - name: Install
+        run: pnpm run test:install:${{ matrix.config.browser }}
+
+      # Compares first, so a mismatch leaves its actual and diff screenshots in
+      # `.vitest/attachments` and an HTML report in `.vitest/report`;
+      # `--update` only rewrites the references.
+      - name: Compare screenshots
+        id: compare
+        continue-on-error: true
+        run: pnpm run test
+        env:
+          MEOWDOWN_TEST_VISUAL: 'true'
+          MEOWDOWN_TEST_BROWSER: ${{ matrix.config.browser }}
+          NO_COLOR: '1'
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ steps.compare.outcome == 'failure' }}
+        with:
+          name: screenshot-report-${{ matrix.config.os }}-${{ matrix.config.browser }}
+          path: .vitest/report/
+          include-hidden-files: true
+          retention-days: 7
+
+      - name: Update screenshots
+        run: pnpm run test --update
+        env:
+          MEOWDOWN_TEST_VISUAL: 'true'
+          MEOWDOWN_TEST_BROWSER: ${{ matrix.config.browser }}
+          NO_COLOR: '1'
+
+      # Losslessly recompresses only the screenshots `--update` wrote. Vitest
+      # stores the browser's PNG bytes, which oxipng shrinks by about half.
+      - name: Compress changed screenshots
+        run: |
+          changed=$(git ls-files --modified --others --exclude-standard -- '*/__visual__/*.png')
+          echo "Changed screenshots:"
+          echo "$changed"
+          if [ -z "$changed" ]; then
+            exit 0
+          fi
+
+          echo "Installing oxipng..."
+          # The Ubuntu image ships Homebrew outside `PATH`.
+          if [ "$RUNNER_OS" = Linux ]; then
+            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          fi
+          brew install oxipng
+
+          echo "oxipng version:"
+          oxipng --version
+
+          echo "Compressing changed screenshots..."
+          oxipng --opt max --strip safe $changed
 
       - uses: autofix-ci/action@c5b2d67aa2274e7b5a18224e8171550871fc7e4a # v1.3.4

@@ -1,6 +1,6 @@
 import { playwright } from '@vitest/browser-playwright'
 import { playwrightCommands } from 'vitest-browser-commands'
-import { defineProject } from 'vitest/config'
+import { defineProject, type UserWorkspaceConfig } from 'vitest/config'
 
 const IS_BOT = !!(process.env.AI_AGENT || process.env.CI)
 const IS_DEBUG = !!process.env.DEBUG
@@ -34,9 +34,22 @@ export function defineNodeConfig({ name, groupOrder }: { name: string; groupOrde
 }
 
 /**
- * A project for tests that need a real browser. It only picks up `*.test.tsx`.
+ * A project for tests that need a real browser. It only picks up `*.test.tsx`,
+ * or with `visual`, only the screenshot tests in `*.visual.tsx`. Their
+ * reference screenshots are committed under `__visual__`, one per browser and
+ * platform.
  */
-export function defineBrowserConfig({ name, groupOrder }: { name: string; groupOrder: number }) {
+export function defineBrowserConfig({
+  name,
+  groupOrder,
+  visual = false,
+  plugins,
+}: {
+  name: string
+  groupOrder: number
+  visual?: boolean
+  plugins?: UserWorkspaceConfig['plugins']
+}) {
   const browserName = resolveBrowserName()
 
   const setupFiles = ['@meowdown/vitest/setup-console']
@@ -45,7 +58,7 @@ export function defineBrowserConfig({ name, groupOrder }: { name: string; groupO
   }
 
   return defineProject({
-    plugins: [playwrightCommands()],
+    plugins: [playwrightCommands(), ...(plugins ?? [])],
     oxc:
       browserName === 'webkit'
         ? // WebKit's JavaScriptCore can't parse `using` declarations; lower them
@@ -53,11 +66,11 @@ export function defineBrowserConfig({ name, groupOrder }: { name: string; groupO
         : undefined,
     test: {
       name,
-      include: ['src/**/*.test.tsx'],
+      include: [visual ? 'src/**/*.visual.tsx' : 'src/**/*.test.tsx'],
       setupFiles,
       snapshotSerializers: ['@meowdown/vitest/custom-string-serializer'],
       sequence: { groupOrder },
-      retry: IS_BOT ? 3 : 0,
+      retry: IS_BOT && !visual ? 3 : 0,
       fileParallelism: false,
       browser: {
         enabled: true,
@@ -80,10 +93,14 @@ export function defineBrowserConfig({ name, groupOrder }: { name: string; groupO
             // See https://playwright.dev/docs/api/class-browsercontext#browser-context-grant-permissions
             permissions:
               browserName === 'chromium' ? ['clipboard-read', 'clipboard-write'] : undefined,
+            locale: 'en-US',
+            timezoneId: 'UTC',
           },
         }),
         headless: IS_DEBUG ? false : true,
         ui: false,
+        screenshotFailures: !visual,
+        expect: visual ? { toMatchScreenshot: { screenshotDirectory: '__visual__' } } : undefined,
         instances: [
           {
             browser: browserName,

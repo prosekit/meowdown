@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -31,7 +31,7 @@ jobs:
         run: pnpm run lint
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
 
     permissions:
@@ -102,20 +102,20 @@ jobs:
       matrix:
         config:
           - os: linux
-            runner: ubuntu-latest
+            runner: ubuntu-26.04
             browser: chromium
             coverage: true
           - os: linux
-            runner: ubuntu-latest
+            runner: ubuntu-26.04
             browser: firefox
           - os: mac
-            runner: macos-latest
+            runner: macos-26
             browser: chromium
           - os: mac
-            runner: macos-latest
+            runner: macos-26
             browser: webkit
           - os: windows
-            runner: windows-latest
+            runner: windows-2025-vs2026
             browser: chromium
 
     steps:
@@ -156,7 +156,7 @@ jobs:
           exit 1
 
   publish-snapshot:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
 
     needs: [build]
