@@ -92,7 +92,7 @@ function defineCodeBlockDOM(): CodeBlockDOMExtension {
   return defineNodeSpec<'codeBlock', CodeBlockAttrs>({
     name: 'codeBlock' satisfies NodeName,
     toDOM: (node) => {
-      const { language } = node.attrs
+      const { language } = node.attrs as CodeBlockAttrs
       return [
         'pre',
         { 'data-code-block': '', 'data-language': language || undefined },
