@@ -1,9 +1,11 @@
 import { playwright } from '@vitest/browser-playwright'
 import { playwrightCommands } from 'vitest-browser-commands'
-import { defineProject } from 'vitest/config'
+import { configDefaults, defineProject } from 'vitest/config'
 
 const IS_BOT = !!(process.env.AI_AGENT || process.env.CI)
 const IS_DEBUG = !!process.env.DEBUG
+
+const VISUAL_TEST_PATTERN = 'src/**/*.visual.test.tsx'
 
 function resolveBrowserName() {
   const name = process.env.MEOWDOWN_TEST_BROWSER
@@ -34,9 +36,47 @@ export function defineNodeConfig({ name, groupOrder }: { name: string; groupOrde
 }
 
 /**
- * A project for tests that need a real browser. It only picks up `*.test.tsx`.
+ * A project for tests that need a real browser. It only picks up `*.test.tsx`,
+ * except the screenshot tests.
  */
 export function defineBrowserConfig({ name, groupOrder }: { name: string; groupOrder: number }) {
+  return defineBrowserProject({
+    name,
+    groupOrder,
+    include: ['src/**/*.test.tsx'],
+    exclude: [...configDefaults.exclude, VISUAL_TEST_PATTERN],
+    visual: false,
+  })
+}
+
+/**
+ * A project for screenshot tests. It only picks up `*.visual.test.tsx`. Their
+ * reference screenshots are committed under `__visual__`, one per browser and
+ * platform.
+ */
+export function defineVisualConfig({ name, groupOrder }: { name: string; groupOrder: number }) {
+  return defineBrowserProject({
+    name,
+    groupOrder,
+    include: [VISUAL_TEST_PATTERN],
+    exclude: configDefaults.exclude,
+    visual: true,
+  })
+}
+
+function defineBrowserProject({
+  name,
+  groupOrder,
+  include,
+  exclude,
+  visual,
+}: {
+  name: string
+  groupOrder: number
+  include: string[]
+  exclude: string[]
+  visual: boolean
+}) {
   const browserName = resolveBrowserName()
 
   const setupFiles = ['@meowdown/vitest/setup-console']
@@ -53,11 +93,12 @@ export function defineBrowserConfig({ name, groupOrder }: { name: string; groupO
         : undefined,
     test: {
       name,
-      include: ['src/**/*.test.tsx'],
+      include,
+      exclude,
       setupFiles,
       snapshotSerializers: ['@meowdown/vitest/custom-string-serializer'],
       sequence: { groupOrder },
-      retry: IS_BOT ? 3 : 0,
+      retry: IS_BOT && !visual ? 3 : 0,
       fileParallelism: false,
       browser: {
         enabled: true,
@@ -80,10 +121,15 @@ export function defineBrowserConfig({ name, groupOrder }: { name: string; groupO
             // See https://playwright.dev/docs/api/class-browsercontext#browser-context-grant-permissions
             permissions:
               browserName === 'chromium' ? ['clipboard-read', 'clipboard-write'] : undefined,
+            // Dates in screenshots must not depend on the runner.
+            locale: visual ? 'en-US' : undefined,
+            timezoneId: visual ? 'UTC' : undefined,
           },
         }),
         headless: IS_DEBUG ? false : true,
         ui: false,
+        screenshotFailures: !visual,
+        expect: visual ? { toMatchScreenshot: { screenshotDirectory: '__visual__' } } : undefined,
         instances: [
           {
             browser: browserName,

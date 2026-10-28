@@ -22,6 +22,7 @@
     "test": "vitest",
     "test:node": "vitest --project='!*-browser*'",
     "test:browser": "vitest --project='*-browser*'",
+    "test:visual": "vitest --config vitest.visual.config.ts",
     "test:install:chromium": "playwright install chromium --no-shell",
     "test:install:webkit": "playwright install webkit",
     "test:install:firefox": "playwright install firefox",

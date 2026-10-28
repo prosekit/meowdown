@@ -13,9 +13,56 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Updates the reference screenshots. autofix.ci takes one call per workflow
+  # run, so each job hands its changed screenshots to `fix` as an artifact.
+  visual:
+    runs-on: ${{ matrix.config.runner }}
+    name: visual-${{ matrix.config.os }}-${{ matrix.config.browser }}
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: linux
+            runner: ubuntu-latest
+            browser: chromium
+          - os: mac
+            runner: macos-latest
+            browser: webkit
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+
+      - name: Install
+        run: pnpm run test:install:${{ matrix.config.browser }}
+
+      - name: Test
+        run: pnpm run test:visual --update
+        env:
+          MEOWDOWN_TEST_BROWSER: ${{ matrix.config.browser }}
+          NO_COLOR: '1'
+
+      - name: Pack changed screenshots
+        run: git ls-files --modified --others --exclude-standard -z -- '*/__visual__/*' | tar --null -cvf "$RUNNER_TEMP/visual-${{ matrix.config.os }}-${{ matrix.config.browser }}.tar" -T -
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: visual-${{ matrix.config.os }}-${{ matrix.config.browser }}
+          path: ${{ runner.temp }}/visual-${{ matrix.config.os }}-${{ matrix.config.browser }}.tar
+          retention-days: 1
+
   fix:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
+    needs: [visual]
+    if: ${{ !cancelled() }}
+
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -28,5 +75,16 @@ jobs:
 
       - name: Fix
         run: pnpm run fix
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: ${{ needs.visual.result == 'success' }}
+        with:
+          pattern: visual-*
+          path: ${{ runner.temp }}/visual
+          merge-multiple: true
+
+      - name: Unpack changed screenshots
+        if: ${{ needs.visual.result == 'success' }}
+        run: for archive in "$RUNNER_TEMP"/visual/*.tar; do tar -xvf "$archive"; done
 
       - uses: autofix-ci/action@c5b2d67aa2274e7b5a18224e8171550871fc7e4a # v1.3.4
