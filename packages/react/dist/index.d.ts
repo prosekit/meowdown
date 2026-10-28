@@ -3,17 +3,12 @@ import { AcceptPendingReplacementOptions, EditorConfig, ExitBoundaryHandler, Fil
 import { SelectionJSON, SelectionJSON as SelectionJSON$1 } from "@prosekit/core";
 import { ReactNodeViewComponent, ReactNodeViewComponent as ReactNodeViewComponent$1, useEditor, useExtension, useKeymap } from "@prosekit/react";
 import { Popover } from "@base-ui/react/popover";
-//#region src/components/collision-boundary.d.ts
 /**
  * The area the editor's floating menus and popovers stay inside. Same as the
  * `collisionBoundary` prop of Base UI positioners.
  */
 type CollisionBoundary = NonNullable<Popover.Positioner.Props['collisionBoundary']>;
-//#endregion
-//#region src/utils/date-format.d.ts
 type TimeFormat = '12' | '24';
-//#endregion
-//#region src/components/types.d.ts
 /**
  * A selection to restore: an exact JSON selection, or a document edge.
  */
@@ -270,8 +265,6 @@ type SelectionMenuSearchHandler = (query: string, context: SelectionMenuContext)
  * Reports how a pending replacement ended and its final staged value.
  */
 type PendingReplacementResolveHandler = (outcome: PendingReplacementOutcome, pending: PendingReplacement) => void;
-//#endregion
-//#region src/components/editor.d.ts
 type EditorMode = MarkMode;
 interface EditorProps {
   /**
@@ -641,8 +634,6 @@ interface EditorProps {
  * Callbacks and resolvers should be stable; pass them via `useCallback`.
  */
 export declare function MarkdownEditor({ mode, initialMarkdown, singleParagraph, referenceDefinitions, onDocChange, onSlashMenuSearch, onTagSearch, onWikilinkSearch, onSelectionMenuSearch, selectionMenuAffordance, collisionBoundary, pendingReplacementActions, onPendingReplacementResolve, onWikilinkClick, onLinkClick, onLinkCopy, resolveLinkPreview, onTagClick, onExitBoundary, resolveImageUrl, resolveFileLink, resolveWikiEmbed, resolveWikilink, resolveFileInfo, resolveXPost, mediaUrlProtocols, resolveYouTubeVideo, onFileClick, onFilePaste, onFileSaveError, onImageClick, onXPostMediaClick, onYouTubeVideoClick, embedPaste, linkPaste, bulletAfterHeading, backspaceDeletesEmptyFirstBlock, substitution, frontmatter, blockHandle, caretGlide, placeholder, readOnly, spellCheck, writingSuggestions, autoCorrect, autoCapitalize, enterKeyHint, dir, lang, ariaLabel, searchQuery, onSearchChange, timeFormat, editorClassName, wrapperClassName, CodeBlockView, handleRef, children }: EditorProps): ReactElement;
-//#endregion
-//#region src/components/markdown-view.d.ts
 /**
  * Payload for {@link TaskClickHandler}.
  */
@@ -801,8 +792,6 @@ interface MarkdownViewProps {
  * `useCallback` to avoid re-rendering the whole tree.
  */
 export declare function MarkdownView({ markdown, singleParagraph, referenceDefinitions: suppliedDefinitions, markMode, frontmatter, interactive, expandCollapsed, resolveImageUrl, resolveFileLink, resolveWikiEmbed, resolveWikilink, resolveFileInfo, resolveXPost, mediaUrlProtocols, resolveYouTubeVideo, onWikilinkClick, onLinkClick, onImageClick, onXPostMediaClick, onYouTubeVideoClick, onFileClick, onTaskClick, className }: MarkdownViewProps): ReactElement;
-//#endregion
-//#region src/hooks/use-lightbox.d.ts
 /**
  * Something a lightbox can show.
  */
@@ -902,8 +891,6 @@ interface LightboxController {
  * lightbox, and loses it while the lightbox is mounted.
  */
 export declare function useLightbox(): LightboxController;
-//#endregion
-//#region src/components/lightbox-frame.d.ts
 /**
  * Props for {@link LightboxFrame}. Other props land on the `<iframe>`.
  */
@@ -915,8 +902,6 @@ interface LightboxFrameProps extends Omit<ComponentProps<'iframe'>, 'src' | 'tit
  * the item's aspect ratio that fits.
  */
 export declare function LightboxFrame({ item, className, style, ...props }: LightboxFrameProps): ReactNode;
-//#endregion
-//#region src/components/lightbox-image.d.ts
 /**
  * Props for {@link LightboxImage}. Other props land on the `<img>`.
  */
@@ -927,8 +912,6 @@ interface LightboxImageProps extends Omit<ComponentProps<'img'>, 'src' | 'alt'> 
  * The image of a lightbox. It is the element the opened thumbnail zooms into.
  */
 export declare function LightboxImage({ item, className, style, ...props }: LightboxImageProps): ReactNode;
-//#endregion
-//#region src/components/lightbox-root.d.ts
 /**
  * Props for {@link LightboxRoot}. Other props land on the `<dialog>`.
  */
@@ -948,8 +931,6 @@ interface LightboxRootProps extends Omit<ComponentProps<'dialog'>, 'children' | 
  * is open, and `Escape` closes it.
  */
 export declare function LightboxRoot({ lightbox, children, className, ...props }: LightboxRootProps): ReactNode;
-//#endregion
-//#region src/components/lightbox-video.d.ts
 /**
  * Props for {@link LightboxVideo}. Other props land on the `<video>`.
  */
@@ -961,8 +942,6 @@ interface LightboxVideoProps extends Omit<ComponentProps<'video'>, 'src' | 'post
  * that opened the lightbox is the user gesture that allows sound.
  */
 export declare function LightboxVideo({ item, className, style, ...props }: LightboxVideoProps): ReactNode;
-//#endregion
-//#region src/components/wikilink-hover-card.d.ts
 /**
  * Props for {@link WikilinkHoverCard}.
  */
@@ -986,5 +965,4 @@ interface WikilinkHoverCardProps {
  * open and close delays live in the core hover handler.
  */
 export declare function WikilinkHoverCard({ children, className }: WikilinkHoverCardProps): ReactNode;
-//#endregion
 export { type CollisionBoundary, type EditorHandle, type EditorMode, type EditorProps, type EditorStateSnapshot, type LightboxCloseOptions, type LightboxController, type LightboxFrameItem, type LightboxFrameProps, type LightboxImageItem, type LightboxImageProps, type LightboxItem, type LightboxRootProps, type LightboxVideoItem, type LightboxVideoProps, type LinkPreview, type LinkPreviewResolver, type MarkdownViewProps, type PendingReplacementResolveHandler, type ReactNodeViewComponent, type SelectionHint, type SelectionJSON, type SelectionMenuContext, type SelectionMenuItem, type SelectionMenuSearchHandler, type SlashMenuItem, type SlashMenuSearchHandler, type TagItem, type TagSearchHandler, type TaskClickHandler, type TaskClickPayload, type TimeFormat, type WikilinkHoverCardProps, type WikilinkItem, type WikilinkSearchHandler, type XPostResolver, type YouTubeVideoResolver, useEditor, useExtension, useKeymap };

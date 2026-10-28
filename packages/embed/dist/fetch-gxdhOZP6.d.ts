@@ -1,5 +1,4 @@
 import { HostElement, State } from "@aria-ui/core";
-//#region src/fetch.d.ts
 /**
  * Loads the snapshot for `url`. Return `undefined` when nothing was found.
  */
@@ -18,5 +17,4 @@ interface FetchProps<T> {
    */
   resolver: Resolver<T> | null;
 }
-//#endregion
 export { Resolver as n, FetchProps as t };

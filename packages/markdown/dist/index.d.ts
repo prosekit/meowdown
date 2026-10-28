@@ -1,7 +1,6 @@
 import { MarkdownParser } from "@lezer/markdown";
 import { parseXPostId } from "@post-embed/schema";
 import { SyntaxNode, Tree, TreeCursor } from "@lezer/common";
-//#region src/autolink-tld.d.ts
 /**
  * Derive the `href` for an autolink from its visible text:
  *
@@ -12,22 +11,16 @@ import { SyntaxNode, Tree, TreeCursor } from "@lezer/common";
  * - anything else returns `undefined`
  */
 export declare function getAutolinkHref(urlText: string): string | undefined;
-//#endregion
-//#region src/collect-images.d.ts
 /**
  * The destinations of the inline `![alt](src)` images in `markdown`, in
  * document order. Reference images are not resolved.
  */
 export declare function collectImages(markdown: string): string[];
-//#endregion
-//#region src/embed.d.ts
 type EmbedKind = 'x-post' | 'youtube-video';
 /**
  * The embed card an image `src` renders as, or `undefined` for a plain image.
  */
 export declare function matchEmbed(src: string): EmbedKind | undefined;
-//#endregion
-//#region src/inline.d.ts
 /**
  * Narrow shape for `parser.parseInline()`'s returned elements.
  *
@@ -53,8 +46,6 @@ export declare function parseInline(text: string): readonly InlineElement[];
  * Depth-first list of every element matching `test`.
  */
 export declare function collectInlineElements(nodes: readonly InlineElement[], test: (node: InlineElement) => boolean, out?: InlineElement[]): InlineElement[];
-//#endregion
-//#region src/node-names.d.ts
 /**
  * Every `@lezer/markdown` node name `gfmParser` knows about. A unit test pins
  * this list against the parser's `nodeSet` so a `@lezer/ markdown` upgrade that
@@ -62,14 +53,10 @@ export declare function collectInlineElements(nodes: readonly InlineElement[], t
  */
 declare const LEZER_NODE_NAMES: readonly ["Document", "Paragraph", "Blockquote", "BulletList", "OrderedList", "ListItem", "FencedCode", "CodeBlock", "HorizontalRule", "ATXHeading1", "ATXHeading2", "ATXHeading3", "ATXHeading4", "ATXHeading5", "ATXHeading6", "SetextHeading1", "SetextHeading2", "HTMLBlock", "HTMLTag", "CommentBlock", "Comment", "ProcessingInstructionBlock", "ProcessingInstruction", "LinkReference", "LinkLabel", "LinkTitle", "HeaderMark", "QuoteMark", "ListMark", "CodeMark", "CodeInfo", "CodeText", "Table", "TableHeader", "TableRow", "TableCell", "TableDelimiter", "Task", "TaskMarker", "Emphasis", "StrongEmphasis", "InlineCode", "Strikethrough", "Link", "Image", "URL", "Autolink", "Escape", "Entity", "HardBreak", "EmphasisMark", "LinkMark", "StrikethroughMark", "Hashtag", "WikiEmbed", "WikiEmbedMark", "Wikilink", "WikilinkMark", "Highlight", "HighlightMark", "InlineMath", "InlineMathMark", "BlockMath", "BlockMathMark"];
 type LezerNodeName = (typeof LEZER_NODE_NAMES)[number];
-//#endregion
-//#region src/node-ids.d.ts
 /**
  * Cached node name -> node id lookup for the project-wide `gfmParser`.
  */
 export declare const LEZER_NODE_IDS: Readonly<Record<LezerNodeName, number>>;
-//#endregion
-//#region src/parser.d.ts
 /**
  * `@lezer/markdown` parser configured with GFM (table, strikethrough,
  * task list, autolink) plus meowdown's `Hashtag`, `Wikilink`, bare
@@ -86,16 +73,12 @@ export declare const gfmParser: MarkdownParser;
  * InlineCode etc. nodes are ever created.
  */
 export declare const gfmBlockOnlyParser: MarkdownParser;
-//#endregion
-//#region src/unicode.d.ts
 /**
  * Check if a char code is a space character.
  *
  * Ported from https://github.com/lezer-parser/markdown/blob/1.6.3/src/markdown.ts#L233
  */
 export declare function isSpaceChar(char: number): boolean;
-//#endregion
-//#region src/ast/check-roundtrip.d.ts
 /**
  * How faithfully markdown survives a parse-then-serialize round trip:
  * - `exact`: byte-identical (modulo the trailing newline).
@@ -122,8 +105,6 @@ interface CheckRoundTripOptions {
  * faithfully it would save the text back.
  */
 export declare function checkRoundTrip(markdown: string, options?: CheckRoundTripOptions): RoundTripFidelity;
-//#endregion
-//#region src/ast/types.d.ts
 /**
  * A block tree whose inline values contain literal Markdown, including marks.
  */
@@ -289,16 +270,12 @@ interface MarkdownText extends MarkdownPositioned {
 }
 type MarkdownBlock = MarkdownParagraph | MarkdownHeading | MarkdownBlockquote | MarkdownListItem | MarkdownCodeBlock | MarkdownHorizontalRule | MarkdownHTMLComment | MarkdownTable | MarkdownIgnored | MarkdownText;
 type MarkdownNode = MarkdownDocument | MarkdownBlock | MarkdownTableRow | MarkdownTableCell;
-//#endregion
-//#region src/ast/equal.d.ts
 /**
  * Whether two trees hold the same nodes with the same fields, level by level.
  * An absent optional field equals one set to `undefined`. Positions are not
  * compared.
  */
 export declare function isMarkdownAstEqual(a: MarkdownNode, b: MarkdownNode): boolean;
-//#endregion
-//#region src/ast/parse.d.ts
 interface ParseMarkdownAstOptions {
   /**
    * Extract a leading YAML frontmatter block. Off by default.
@@ -310,8 +287,6 @@ interface ParseMarkdownAstOptions {
  * `\r` are read as `\n`, and positions index the text with `\n` line endings.
  */
 export declare function parseMarkdownAst(markdown: string, options?: ParseMarkdownAstOptions): MarkdownDocument;
-//#endregion
-//#region src/ast/serialize.d.ts
 /**
  * Options for {@link serializeMarkdownAst}.
  */
@@ -337,8 +312,6 @@ interface SerializeMarkdownAstOptions {
  *   regex on the hot path.
  */
 export declare function serializeMarkdownAst(node: MarkdownNode, options?: SerializeMarkdownAstOptions): string;
-//#endregion
-//#region src/ast/path.d.ts
 /**
  * Child indexes from the document root. Valid only for the tree that produced them.
  */
@@ -364,5 +337,4 @@ export declare function walkMarkdownAst(root: MarkdownNode): Generator<MarkdownA
  * Resolve an address against its original tree; malformed or missing addresses return undefined.
  */
 export declare function resolveMarkdownAstPath(root: MarkdownNode, path: MarkdownAstPath): MarkdownAstEntry | undefined;
-//#endregion
 export { type CheckRoundTripOptions, type EmbedKind, type InlineElement, type LezerNodeName, type MarkdownAstEntry, type MarkdownAstPath, type MarkdownBlock, type MarkdownBlockquote, type MarkdownCodeBlock, type MarkdownDocument, type MarkdownHTMLComment, type MarkdownHeading, type MarkdownHorizontalRule, type MarkdownIgnored, type MarkdownInline, type MarkdownListItem, type MarkdownNode, type MarkdownParagraph, type MarkdownParser, type MarkdownPosition, type MarkdownPositioned, type MarkdownTable, type MarkdownTableCell, type MarkdownTableRow, type MarkdownText, type ParseMarkdownAstOptions, type RoundTripFidelity, type SerializeMarkdownAstOptions, type SyntaxNode, type Tree, type TreeCursor, parseXPostId };

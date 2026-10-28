@@ -1,7 +1,6 @@
-import { n as Resolver, t as FetchProps } from "../fetch-Djnul03u.js";
+import { n as Resolver, t as FetchProps } from "../fetch-gxdhOZP6.js";
 import { HostElement, State } from "@aria-ui/core";
 import { YouTubeVideo } from "@post-embed/types";
-//#region src/youtube/video-click.d.ts
 export declare const YOUTUBE_VIDEO_CLICK = "meowdown-embed-youtube-click";
 interface YouTubeVideoClickDetail {
   /**
@@ -28,8 +27,6 @@ interface YouTubeVideoClickDetail {
   element: HTMLElement;
 }
 type YouTubeVideoClickEvent = CustomEvent<YouTubeVideoClickDetail>;
-//#endregion
-//#region src/youtube/youtube-video.d.ts
 interface YouTubeVideoProps extends FetchProps<YouTubeVideo> {
   /**
    * `link` (default) opens the watch page; `inline` swaps in the YouTube
@@ -40,11 +37,7 @@ interface YouTubeVideoProps extends FetchProps<YouTubeVideo> {
 interface YouTubeVideoElement extends HTMLElement, YouTubeVideoProps {}
 /** @internal */
 export declare function useYouTubeVideo(host: HostElement, props: State<YouTubeVideoProps>): void;
-//#endregion
-//#region src/youtube/register.d.ts
 export declare function registerYouTubeVideo(name?: string): void;
-//#endregion
-//#region src/youtube/index.d.ts
 declare global {
   interface HTMLElementTagNameMap {
     'meowdown-embed-youtube': YouTubeVideoElement;
@@ -53,5 +46,4 @@ declare global {
     'meowdown-embed-youtube-click': YouTubeVideoClickEvent;
   }
 }
-//#endregion
 export type { Resolver, YouTubeVideoClickDetail, YouTubeVideoClickEvent, YouTubeVideoElement, YouTubeVideoProps };

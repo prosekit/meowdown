@@ -13,7 +13,6 @@ import "prosemirror-flat-list";
 import { render } from "katex";
 import { XPost, YouTubeVideo } from "@post-embed/types";
 import { VirtualElement } from "@floating-ui/dom";
-//#region src/extensions/frontmatter.d.ts
 /**
  * The raw YAML frontmatter body, stored verbatim (the text between the opening
  * and closing `---` fences, without a trailing newline).
@@ -23,8 +22,6 @@ import { VirtualElement } from "@floating-ui/dom";
  * - any other string is the body, which may contain newlines.
  */
 type Frontmatter = string | null;
-//#endregion
-//#region src/extensions/list.d.ts
 /**
  * The marker for a list item.
  *
@@ -47,8 +44,6 @@ interface MeowdownListAttrs extends ListAttrs {
   taskMarker?: TaskMarker | undefined;
   markerGap?: number | undefined;
 }
-//#endregion
-//#region src/extensions/table-column-align.d.ts
 /**
  * Column alignment of a GFM table, encoded by the delimiter row: `:--` for
  * left, `:-:` for center, `--:` for right.
@@ -84,8 +79,6 @@ type TableColumnAlignCommandsExtension = Extension<{
   };
 }>;
 type TableColumnAlignExtension = Union<[TableCellAlignExtension, TableHeaderCellAlignExtension, PlainExtension, TableColumnAlignCommandsExtension]>;
-//#endregion
-//#region src/extensions/code-block.d.ts
 type CodeBlockFenceStyle = 'tilde' | 'indented' | 'dollar';
 interface MeowdownCodeBlockAttrs extends CodeBlockAttrs$1 {
   /**
@@ -102,8 +95,6 @@ interface MeowdownCodeBlockAttrs extends CodeBlockAttrs$1 {
    */
   fenceLength?: number | null | undefined;
 }
-//#endregion
-//#region src/extensions/horizontal-rule.d.ts
 interface MeowdownHorizontalRuleAttrs {
   /**
    * The literal markdown marker of a thematic break, e.g. `***`, `___`, or
@@ -117,8 +108,6 @@ type HorizontalRuleMarkerExtension = Extension<{
   };
 }>;
 type MeowdownHorizontalRuleExtension = Union<[HorizontalRuleSpecExtension, HorizontalRuleCommandsExtension, HorizontalRuleMarkerExtension]>;
-//#endregion
-//#region src/extensions/html-comment.d.ts
 interface MeowdownHTMLCommentAttrs {
   /**
    * The literal markdown comment, including its delimiters, e.g.
@@ -152,8 +141,6 @@ type HTMLCommentExtension = Extension<{
  * invisible marker the cursor steps over rather than a block the user edits.
  */
 export declare function defineHTMLComment(): HTMLCommentExtension;
-//#endregion
-//#region src/extensions/inline-marks.d.ts
 /**
  * Attributes of the `mdImage` mark, derived from either `![alt](src "title")`
  * (plus an optional trailing size comment) or a resolved wiki image embed.
@@ -298,14 +285,10 @@ type MdPackAttrs = {
   revealInFocus?: null | undefined;
   revealInHide?: null | undefined;
 };
-//#endregion
-//#region src/utils/range.d.ts
 interface PositionRange {
   from: number;
   to: number;
 }
-//#endregion
-//#region src/extensions/get-link-unit-at.d.ts
 interface LinkUnitBase {
   state: EditorState;
   /**
@@ -357,8 +340,6 @@ type LinkUnit = (LinkUnitBase & {
  * the `mdLinkUri` run locates the `( )` body.
  */
 export declare function getLinkUnitAt(state: EditorState, pos: number): LinkUnit | undefined;
-//#endregion
-//#region src/extensions/link-commands.d.ts
 interface LinkAttrs {
   href?: string | undefined;
   title?: string | undefined;
@@ -407,8 +388,6 @@ interface LinkEditOptions {
 }
 type LinkEditHandler = (options: LinkEditOptions) => void;
 export declare function defineLinkEditKeymap(onLinkEdit: LinkEditHandler): PlainExtension;
-//#endregion
-//#region src/extensions/pending-replacement.d.ts
 /**
  * Where an accepted replacement lands relative to the source range.
  */
@@ -476,8 +455,6 @@ type PendingReplacementHandler = (event: PendingReplacementEvent) => void;
  * render the preview and know whether the stage was accepted or discarded.
  */
 export declare function definePendingReplacementHandler(handler: PendingReplacementHandler): PlainExtension;
-//#endregion
-//#region src/extensions/exit-boundary.d.ts
 /**
  * Payload for {@link ExitBoundaryHandler}.
  */
@@ -501,8 +478,6 @@ type ExitBoundaryHandler = (options: ExitBoundaryOptions) => boolean | void;
  * Call `onExitBoundary` when an arrow key press would leave the document boundary.
  */
 export declare function defineExitBoundaryHandler(getExitBoundaryHandler?: (state: EditorState) => ExitBoundaryHandler | undefined): PlainExtension;
-//#endregion
-//#region src/extensions/file-paste.d.ts
 type FilePasteHandler = (file: File) => string | undefined | Promise<string | undefined>;
 type FileSaveErrorHandler = (error: unknown, file: File) => void;
 /**
@@ -538,8 +513,6 @@ export declare function buildFileMarkdown(file: {
  * other file. Multiple files insert one link per line, in DataTransfer order.
  */
 export declare function defineFilePaste(getOptions?: (state: EditorState) => FilePasteOptions | undefined): PlainExtension;
-//#endregion
-//#region src/extensions/file-view.d.ts
 /**
  * Metadata a host resolves for one file link, shown on its pill.
  */
@@ -577,8 +550,6 @@ export declare function getFileKind(href: string): string;
  * clicks are reported through `defineFileClickHandler`.
  */
 export declare function defineFileView(getOptions?: (state: EditorState) => FileViewOptions): PlainExtension;
-//#endregion
-//#region src/extensions/file-click.d.ts
 /**
  * Payload for {@link FileClickHandler}.
  */
@@ -609,8 +580,6 @@ type FileClickHandler = (payload: FileClickPayload) => void;
  * click does (e.g. open the file in the OS default app).
  */
 export declare function defineFileClickHandler(getOnClick?: (state: EditorState) => FileClickHandler | undefined): PlainExtension;
-//#endregion
-//#region src/extensions/image-click.d.ts
 /**
  * Payload for {@link ImageClickHandler}.
  */
@@ -653,8 +622,6 @@ type ImageClickHandler = (payload: ImageClickPayload) => void;
  * (such as a lightbox).
  */
 export declare function defineImageClickHandler(getOnClick?: (state: EditorState) => ImageClickHandler | undefined): PlainExtension;
-//#endregion
-//#region src/extensions/link-click.d.ts
 interface LinkClickPayload {
   href: string;
   /**
@@ -678,8 +645,6 @@ type LinkCopyHandler = (payload: LinkCopyPayload) => void;
  * is the originating `MouseEvent` or `KeyboardEvent`.
  */
 export declare function defineLinkClickHandler(getOnClick?: (state: EditorState) => LinkClickHandler | undefined): PlainExtension;
-//#endregion
-//#region src/extensions/tag-click.d.ts
 interface TagClickPayload {
   /**
    * The tag name, without the leading `#`.
@@ -703,8 +668,6 @@ type TagClickHandler = (payload: TagClickPayload) => void;
  * without the leading `#`.
  */
 export declare function defineTagClickHandler(getOnClick?: (state: EditorState) => TagClickHandler | undefined): PlainExtension;
-//#endregion
-//#region src/extensions/wikilink-click.d.ts
 interface WikilinkHit {
   from: number;
   to: number;
@@ -729,8 +692,6 @@ type WikilinkClickHandler = (payload: WikilinkClickPayload) => void;
  * `MouseEvent` or `KeyboardEvent`.
  */
 export declare function defineWikilinkClickHandler(getOnClick?: (state: EditorState) => WikilinkClickHandler | undefined): PlainExtension;
-//#endregion
-//#region src/extensions/follow-link.d.ts
 interface FollowLinkHandlers {
   onWikilinkClick?: WikilinkClickHandler | undefined;
   onTagClick?: TagClickHandler | undefined;
@@ -754,8 +715,6 @@ interface FollowLinkHandlers {
  * itself.
  */
 export declare function defineFollowLinkHandler(getHandlers?: (state: EditorState) => FollowLinkHandlers): PlainExtension;
-//#endregion
-//#region src/extensions/post-embed.d.ts
 type XPostResolver = Resolver<XPost>;
 type YouTubeVideoResolver = Resolver<YouTubeVideo>;
 export declare const defaultResolveXPost: XPostResolver;
@@ -778,8 +737,6 @@ type PostEmbedSnapshot = {
  * snapshot is exactly what the card needs.
  */
 export declare function parsePostEmbedSnapshot(value: unknown): PostEmbedSnapshot | undefined;
-//#endregion
-//#region src/extensions/image.d.ts
 /**
  * Maps a markdown `src` to a displayable URL, or `undefined` to skip rendering
  * that image. May return a `Promise` when the answer needs data that is not
@@ -827,14 +784,10 @@ export declare function defaultResolveImageUrl(src: string): string | undefined;
  * plain Markdown.
  */
 export declare function defineImage(getOptions?: (state: EditorState) => ImageOptions | undefined): PlainExtension;
-//#endregion
-//#region src/extensions/mark-chunk.d.ts
 /**
  * Contiguous range with a uniform inline-mark set.
  */
 type MarkChunk = readonly [from: number, to: number, marks: readonly Mark[]];
-//#endregion
-//#region src/extensions/reference-links.d.ts
 interface ReferenceDefinition {
   key: string;
   href: string;
@@ -847,8 +800,6 @@ interface ReferenceDefinitionIndex {
 }
 export declare function isReferenceDefinitionNode(node: EditorNode, parent: EditorNode | null, index: number): boolean;
 export declare function collectReferenceDefinitions(doc: EditorNode): ReferenceDefinitionIndex;
-//#endregion
-//#region src/extensions/wiki-embed.d.ts
 /**
  * The parsed source payload of an Obsidian-style `![[target]]` embed.
  */
@@ -932,8 +883,6 @@ export declare function formatSizedWikiEmbed(target: string, width: number, heig
  * Last path component of a target, with a note heading/block fragment removed.
  */
 export declare function wikiEmbedBasename(target: string): string;
-//#endregion
-//#region src/extensions/wikilink.d.ts
 /**
  * What {@link WikilinkResolver} sees for one `[[...]]` wikilink.
  */
@@ -971,8 +920,6 @@ type WikilinkResolver = (link: WikilinkPayload) => WikilinkResolution | undefine
 interface WikilinkOptions {
   resolveWikilink?: WikilinkResolver | undefined;
 }
-//#endregion
-//#region src/extensions/inline-text-to-mark-chunks.d.ts
 /**
  * What {@link FileLinkResolver} sees for one `[label](url)` link.
  */
@@ -1050,8 +997,6 @@ text: string,
  */
 options?: InlineMarkOptions): MarkChunk[];
 export declare function inlineTextToMarkChunksWithContext(marks: TypedMarkBuilders, text: string, options?: InlineMarkOptions, context?: InlineMarkContext): MarkChunk[];
-//#endregion
-//#region src/extensions/mark-mode.d.ts
 /**
  * Controls how markdown syntax characters are rendered and how the clipboard's
  * `text/plain` treats the inline layer (see `definePlainTextSerializer`).
@@ -1061,8 +1006,6 @@ export declare function inlineTextToMarkChunksWithContext(marks: TypedMarkBuilde
  * - 'show':  syntax chars always visible (dim grey); copy keeps them.
  */
 type MarkMode = 'hide' | 'focus' | 'show';
-//#endregion
-//#region src/extensions/x-post-media-click.d.ts
 /**
  * Receives the `meowdown-embed-media-click` event of an X post card. Its
  * `detail` holds the activated photo or video, its sibling items, and the
@@ -1075,8 +1018,6 @@ type XPostMediaClickHandler = (event: XPostMediaClickEvent) => void;
  * card.
  */
 export declare function defineXPostMediaClickHandler(getOnClick?: (state: EditorState) => XPostMediaClickHandler | undefined): PlainExtension;
-//#endregion
-//#region src/extensions/youtube-video-click.d.ts
 /**
  * Receives the `meowdown-embed-youtube-click` event of a YouTube card. Its
  * `detail` holds the video, the player URL, and the rendered thumbnail
@@ -1088,8 +1029,6 @@ type YouTubeVideoClickHandler = (event: YouTubeVideoClickEvent) => void;
  * Call `onClick` when the user activates the poster of a YouTube card.
  */
 export declare function defineYouTubeVideoClickHandler(getOnClick?: (state: EditorState) => YouTubeVideoClickHandler | undefined): PlainExtension;
-//#endregion
-//#region src/extensions/editor-config-types.d.ts
 interface EditorConfig extends InlineMarkOptions, FollowLinkHandlers, FilePasteOptions, FileViewOptions, ImageOptions {
   markMode?: MarkMode | undefined;
   onExitBoundary?: ExitBoundaryHandler | undefined;
@@ -1144,8 +1083,6 @@ interface EditorConfig extends InlineMarkOptions, FollowLinkHandlers, FilePasteO
   ariaLabel?: string | undefined;
   editorClassName?: string | undefined;
 }
-//#endregion
-//#region src/extensions/extension.d.ts
 declare function defineEditorExtensionImpl(options: EditorExtensionOptions): import("@prosekit/core").Union<readonly [import("@prosekit/core").Extension<{
   Nodes: import("@prosekit/core").SimplifyDeeper<{
     paragraph: import("@prosekit/pm/model").Attrs;
@@ -1331,16 +1268,12 @@ type EditorExtension = ReturnType<typeof defineEditorExtensionImpl>;
 type EditorExtensionOptions = EditorConfig;
 export declare function defineEditorExtension(options?: EditorExtensionOptions): EditorExtension;
 type TypedEditor = Editor<EditorExtension>;
-//#endregion
-//#region src/extensions/schema.d.ts
 type TypedNodeBuilders = ExtractNodeBuilders<EditorExtension>;
 type TypedMarkBuilders = ExtractMarkBuilders<EditorExtension>;
 /**
  * Typed mark builders bound to the shared schema.
  */
 export declare const getMarkBuilders: () => TypedMarkBuilders;
-//#endregion
-//#region src/converters/md-to-pm.d.ts
 /**
  * Options for {@link markdownToDoc}.
  */
@@ -1369,8 +1302,6 @@ interface MarkdownToDocOptions {
  * inline-code characters survive verbatim.
  */
 export declare function markdownToDoc(markdown: string, options?: MarkdownToDocOptions): ProseMirrorNode;
-//#endregion
-//#region src/converters/pm-to-md.d.ts
 /**
  * Options for {@link docToMarkdown}.
  */
@@ -1384,8 +1315,6 @@ interface DocToMarkdownOptions {
  * Convert persisted editor content to Markdown through the shared block serializer.
  */
 export declare function docToMarkdown(node: ProseMirrorNode, options?: DocToMarkdownOptions): string;
-//#endregion
-//#region src/extensions/backspace-empty-first-block.d.ts
 /**
  * Nothing sits before the document's first block, so Backspace in an empty
  * first paragraph has nothing to join and does nothing. When this extension is
@@ -1393,16 +1322,12 @@ export declare function docToMarkdown(node: ProseMirrorNode, options?: DocToMark
  * the document moves up one line.
  */
 export declare function defineBackspaceEmptyFirstBlock(enabled?: (state: EditorState) => boolean): PlainExtension;
-//#endregion
-//#region src/extensions/bullet-after-heading.d.ts
 /**
  * "Type a title, press Return, start bullets." When this extension is applied,
  * pressing Enter at the end of the document's first heading (the title line)
  * drops the caret into a fresh empty bullet instead of a plain paragraph.
  */
 export declare function defineBulletAfterHeading(enabled?: (state: EditorState) => boolean): PlainExtension;
-//#endregion
-//#region src/extensions/code-block-highlight.d.ts
 /**
  * Adds syntax highlighting to `codeBlock` nodes, parsing each block with the
  * matching CodeMirror/Lezer grammar (loaded on demand from
@@ -1421,8 +1346,6 @@ type CodeToken = readonly [from: number, to: number, classes: string];
  * must load on demand. Returns `[]` for an empty or unsupported language.
  */
 export declare function getCodeTokens(code: string, language: string): CodeToken[] | Promise<CodeToken[]>;
-//#endregion
-//#region src/extensions/code-block-languages.d.ts
 type LanguageItem = {
   label: string;
   value: string;
@@ -1431,17 +1354,11 @@ type LanguageItem = {
  * A list of languages for code block syntax-highlight.
  */
 export declare const codeBlockLanguages: ReadonlyArray<LanguageItem>;
-//#endregion
-//#region src/extensions/editor-config-getter.d.ts
 /**
  * Read the current configuration. Callback values are live, not historical state snapshots.
  */
 export declare function getEditorConfig(state: EditorState): Readonly<EditorConfig>;
-//#endregion
-//#region src/extensions/editor-config.d.ts
 export declare function updateEditorConfig(editor: Pick<Editor, 'state' | 'view' | 'mounted' | 'updateState'>, patch: Partial<EditorConfig>): void;
-//#endregion
-//#region src/extensions/embed-paste.d.ts
 /**
  * Auto-embed a pasted tweet or YouTube link. When the clipboard holds exactly
  * one such URL, the link is rewritten to `![](url)`, which the image pipeline
@@ -1449,8 +1366,6 @@ export declare function updateEditorConfig(editor: Pick<Editor, 'state' | 'view'
  * or install this standalone extension.
  */
 export declare function defineEmbedPaste(enabled?: (state: EditorState) => boolean): PlainExtension;
-//#endregion
-//#region src/extensions/key-bindings.d.ts
 /**
  * Human-readable descriptions of the editor's formatting and heading shortcuts.
  */
@@ -1483,14 +1398,10 @@ export declare const EDITOR_KEY_BINDINGS: {
   readonly 'Mod-Shift-ArrowDown': "Select to the document end";
   readonly Escape: "Collapse the selection";
 };
-//#endregion
-//#region src/extensions/mark-hover.d.ts
 interface MarkHoverHit<Payload> {
   payload: Payload;
   element: HTMLElement;
 }
-//#endregion
-//#region src/extensions/link-hover.d.ts
 type LinkHoverHandler = (hit: MarkHoverHit<LinkUnit> | undefined) => void;
 interface LinkHoverOptions {
   /**
@@ -1513,8 +1424,6 @@ export declare function defineLinkHoverHandler(onHoverChange: LinkHoverHandler, 
  * pending hover cannot reopen the UI.
  */
 export declare function dismissLinkHover(state: EditorState): void;
-//#endregion
-//#region src/extensions/link-paste.d.ts
 /**
  * Paste a URL over selected text to wrap the selection as a Markdown link
  * `[selected text](url)`. Only fires when the clipboard holds exactly one URL
@@ -1529,8 +1438,6 @@ export declare function dismissLinkHover(state: EditorState): void;
  * standalone extension.
  */
 export declare function defineLinkPaste(enabled?: (state: EditorState) => boolean): PlainExtension;
-//#endregion
-//#region src/extensions/link-preview.d.ts
 /**
  * Metadata a host application can supply for a web link.
  */
@@ -1545,43 +1452,29 @@ interface LinkPreview {
  * instead of cancelling in-flight work.
  */
 type LinkPreviewResolver = (href: string) => LinkPreview | undefined | Promise<LinkPreview | undefined>;
-//#endregion
-//#region src/extensions/mark-names.d.ts
 declare const MARK_NAMES: readonly ["mdWikilink", "mdImage", "mdFile", "mdMath", "mdMark", "mdEm", "mdStrong", "mdCode", "mdLinkText", "mdLinkUri", "mdLinkTitle", "mdDel", "mdHighlight", "mdTag", "mdPack"];
 type MarkName = (typeof MARK_NAMES)[number];
 export declare function isMarkOfType(mark: Mark, name: MarkName): boolean;
-//#endregion
-//#region src/extensions/math.d.ts
 /**
  * Inline math rendering: a KaTeX preview on the `mdMath` mark.
  */
 export declare function defineMath(): PlainExtension;
-//#endregion
-//#region src/extensions/node-names.d.ts
 /**
  * Every ProseMirror node name the editor schema knows about.
  */
 declare const NODE_NAMES: readonly ["doc", "text", "paragraph", "heading", "blockquote", "list", "codeBlock", "horizontalRule", "htmlComment", "table", "tableRow", "tableCell", "tableHeaderCell"];
 type NodeName = (typeof NODE_NAMES)[number];
 export declare function isNodeOfType(node: ProseMirrorNode, name: NodeName): boolean;
-//#endregion
-//#region src/extensions/readonly.d.ts
 export declare function defineReadonly(getReadonly?: (state: EditorState) => boolean): PlainExtension;
-//#endregion
-//#region src/extensions/substitution.d.ts
 /**
  * Apply the editor's automatic plain-text substitutions.
  */
 export declare function defineSubstitution(enabled?: (state: EditorState) => boolean): PlainExtension;
-//#endregion
-//#region src/extensions/table.d.ts
 /**
  * Whether the selection sits inside a table cell (data or header). Useful for
  * gating block-creating UI, since cells hold inline content only.
  */
 export declare function isSelectionInTableCell(state: EditorState): boolean;
-//#endregion
-//#region src/extensions/view-attributes.d.ts
 /**
  * Add DOM attributes to the editable root. `class` and `style` values from
  * every such extension are combined, so applying this more than once adds
@@ -1592,8 +1485,6 @@ export declare function defineViewAttributes(attributes: {
 } | ((state: EditorState) => {
   [name: string]: string;
 })): PlainExtension;
-//#endregion
-//#region src/extensions/virtual-caret.d.ts
 /**
  * Draws the caret as an overlay element and hides the native caret via CSS
  * (`caret-color: transparent`). The native DOM selection stays fully alive,
@@ -1611,8 +1502,6 @@ export declare function defineViewAttributes(attributes: {
  * content.
  */
 export declare function defineVirtualCaret(layer: HTMLElement): PlainExtension;
-//#endregion
-//#region src/extensions/wikilink-hover.d.ts
 /**
  * A wikilink currently under the pointer.
  */
@@ -1637,32 +1526,22 @@ type WikilinkHoverHandler = (hit: WikilinkHoverHit | undefined) => void;
  * changes target. Moving among descendants of one label is de-duplicated.
  */
 export declare function defineWikilinkHoverHandler(onHoverChange: WikilinkHoverHandler, openDelay?: number, closeDelay?: number): PlainExtension;
-//#endregion
-//#region src/extensions/wikilink-trigger.d.ts
 /**
  * Binds `Mod-Shift-k` to open the wikilink menu, and `[` to wrap a selected
  * phrase into an open wikilink (`[[phrase`) with the menu searching it.
  */
 export declare function defineWikilinkTrigger(enabled?: (state: EditorState) => boolean): PlainExtension;
-//#endregion
-//#region src/utils/composition.d.ts
 export declare function getIsComposing(): boolean;
-//#endregion
-//#region src/utils/display-text.d.ts
 /**
  * The textblock as its live-preview marks display it: syntax runs are
  * omitted and each atom unit is replaced by its display text.
  */
 export declare function getTextblockDisplayText(textblock: ProseMirrorNode): string;
-//#endregion
-//#region src/utils/format-file-size.d.ts
 /**
  * Format a byte count for display on a file pill: decimal units (1 KB =
  * 1000 B, matching macOS Finder), one decimal below 10, integers otherwise.
  */
 export declare function formatFileSize(bytes: number): string;
-//#endregion
-//#region src/utils/is-mod-event.d.ts
 /**
  * Whether the platform's mod key is held on `event`: `Command` on Apple, `Ctrl` elsewhere.
  */
@@ -1670,11 +1549,7 @@ export declare function isModEvent(event: MouseEvent | KeyboardEvent | TouchEven
   metaKey: boolean;
   ctrlKey: boolean;
 }): boolean;
-//#endregion
-//#region src/utils/katex-chunk.d.ts
 type KaTeXRender = typeof render;
-//#endregion
-//#region src/utils/katex.d.ts
 /**
  * Load KaTeX's render function on first use and cache it. Most documents
  * contain no math, so the library stays out of the initial bundle.
@@ -1687,8 +1562,6 @@ export declare function loadKaTeX(): Promise<KaTeXRender>;
  * render.
  */
 export declare function renderMathInto(katexRender: KaTeXRender, element: HTMLElement, formula: string, displayMode: boolean): void;
-//#endregion
-//#region src/utils/selected-text.d.ts
 /**
  * The current selection as Markdown: block structure (list markers, headings,
  * blockquotes) is serialized, and inline Markdown syntax is already literal
@@ -1697,8 +1570,6 @@ export declare function renderMathInto(katexRender: KaTeXRender, element: HTMLEl
  * consumers (e.g. an AI prompt) see the same Markdown the user would.
  */
 export declare function getSelectedText(state: EditorState): string;
-//#endregion
-//#region src/utils/virtual-element.d.ts
 /**
  * Returns a Floating-UI virtual element tracking a document range.
  *
@@ -1707,8 +1578,6 @@ export declare function getSelectedText(state: EditorState): string;
  * no longer resolves; those return the last known rect instead of throwing.
  */
 export declare function getVirtualElementFromRange(view: EditorView, range: PositionRange): VirtualElement;
-//#endregion
-//#region src/converters/paragraph.d.ts
 /**
  * Build one paragraph without interpreting block-opening Markdown.
  */
@@ -1717,5 +1586,4 @@ export declare function paragraphMarkdownToDoc(markdown: string, nodes?: TypedNo
  * Flatten textblocks into one paragraph's source content.
  */
 export declare function docToParagraphMarkdown(doc: ProseMirrorNode): string;
-//#endregion
 export { type AcceptPendingReplacementOptions, type CodeBlockAttrs, type CodeBlockFenceStyle, type CodeToken, type DocToMarkdownOptions, type EditorConfig, type EditorExtension, type EditorExtensionOptions, type ExitBoundaryHandler, type ExitBoundaryOptions, type FileClickHandler, type FileClickPayload, type FileInfo, type FileInfoResolver, type FileLinkOptions, type FileLinkPayload, type FileLinkResolver, type FilePasteHandler, type FilePasteOptions, type FileSaveErrorHandler, type FileViewOptions, type FollowLinkHandlers, type ImageClickHandler, type ImageClickPayload, type ImageOptions, type ImageUrlResolver, type InlineMarkContext, type InlineMarkOptions, type KaTeXRender, type LanguageItem, type LinkAttrs, type LinkClickHandler, type LinkClickPayload, type LinkCopyHandler, type LinkCopyPayload, type LinkEditHandler, type LinkEditOptions, type LinkHoverHandler, type LinkHoverOptions, type LinkPreview, type LinkPreviewResolver, type LinkUnit, type ListMarker, type MarkChunk, type MarkMode, type MarkName, type MarkdownToDocOptions, type MdFileAttrs, type MdImageAttrs, type MdLinkTextAttrs, type MdMathAttrs, type MdWikilinkAttrs, type MeowdownCodeBlockAttrs, type MeowdownHTMLCommentAttrs, type MeowdownListAttrs, type MeowdownTableCellAttrs, type NodeName, type ParsedWikiEmbed, type PendingReplacement, type PendingReplacementEvent, type PendingReplacementHandler, type PendingReplacementMode, type PendingReplacementOutcome, type PlaceholderOptions, type PositionRange, type PostEmbedSnapshot, Priority, type ReferenceDefinition, type ReferenceDefinitionIndex, type ReferenceDefinitions, type SearchStatus, type SearchStatusHandler, type StartPendingReplacementOptions, type TableColumnAlign, type TagClickHandler, type TagClickPayload, type TypedEditor, type TypedMarkBuilders, type VirtualElement, type WikiEmbedOptions, type WikiEmbedResolution, type WikiEmbedResolver, type WikilinkClickHandler, type WikilinkClickPayload, type WikilinkHoverHandler, type WikilinkHoverHit, type WikilinkOptions, type WikilinkPayload, type WikilinkResolution, type WikilinkResolver, type XPostMediaClickHandler, type XPostResolver, type YouTubeVideoClickHandler, type YouTubeVideoResolver, defineCodeBlockPreviewPlugin, definePlaceholder, defineSearchStatusHandler, getSearchStatus, isCodeBlockPreviewHiddenDecoration, withPriority };

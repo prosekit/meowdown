@@ -1,7 +1,6 @@
-import { n as Resolver, t as FetchProps } from "../fetch-Djnul03u.js";
+import { n as Resolver, t as FetchProps } from "../fetch-gxdhOZP6.js";
 import { HostElement, State } from "@aria-ui/core";
 import { XPost, XPostMedia } from "@post-embed/types";
-//#region src/x/media-click.d.ts
 export declare const X_POST_MEDIA_CLICK = "meowdown-embed-media-click";
 interface XPostMediaClickDetail {
   /**
@@ -23,19 +22,13 @@ interface XPostMediaClickDetail {
   element: HTMLElement;
 }
 type XPostMediaClickEvent = CustomEvent<XPostMediaClickDetail>;
-//#endregion
-//#region src/x/x-post.d.ts
 interface XPostProps extends FetchProps<XPost> {
   mediaUrlProtocols: readonly string[] | null;
 }
 interface XPostElement extends HTMLElement, XPostProps {}
 /** @internal */
 export declare function useXPost(host: HostElement, props: State<XPostProps>): void;
-//#endregion
-//#region src/x/register.d.ts
 export declare function registerXPost(name?: string): void;
-//#endregion
-//#region src/x/index.d.ts
 declare global {
   interface HTMLElementTagNameMap {
     'meowdown-embed-x': XPostElement;
@@ -44,5 +37,4 @@ declare global {
     'meowdown-embed-media-click': XPostMediaClickEvent;
   }
 }
-//#endregion
 export type { Resolver, XPostElement, XPostMediaClickDetail, XPostMediaClickEvent, XPostProps };
