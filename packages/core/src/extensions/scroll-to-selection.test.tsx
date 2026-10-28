@@ -32,11 +32,19 @@ function dispatchScrollIntoView(fixture: Fixture): void {
 
 // Vertical containment within the scroller's client box (the same bounds the
 // scroll algorithm works against), with a little slack for fractional pixels.
-function expectVisibleIn(element: Element, scroller: HTMLElement): void {
-  const rect = element.getBoundingClientRect()
+function expectVisibleIn(rect: DOMRect, scroller: HTMLElement): void {
   const bounds = scroller.getBoundingClientRect()
   expect(rect.top).toBeGreaterThanOrEqual(bounds.top - 1)
   expect(rect.bottom).toBeLessThanOrEqual(bounds.top + scroller.clientHeight + 1)
+}
+
+// The glyph box of the last paragraph's text. Scrolling targets the caret's
+// glyph box, and the line box extends past it by the half-leading.
+function getLastTextRect(fixture: Fixture): DOMRect {
+  const paragraphs = fixture.dom.querySelectorAll('p')
+  const range = document.createRange()
+  range.selectNodeContents(paragraphs[paragraphs.length - 1])
+  return range.getBoundingClientRect()
 }
 
 function wikilinkPreview(fixture: Fixture): Element {
@@ -53,7 +61,7 @@ describe.each(ALL_MODES)('scroll to an atom mark boundary in %s mode', (mode) =>
     scroller.scrollTop = 0
     dispatchScrollIntoView(fixture)
     expect(scroller.scrollTop).toBeGreaterThan(0)
-    expectVisibleIn(wikilinkPreview(fixture), scroller)
+    expectVisibleIn(wikilinkPreview(fixture).getBoundingClientRect(), scroller)
   })
 
   it('scrolls to the caret before a leading wikilink', () => {
@@ -63,7 +71,7 @@ describe.each(ALL_MODES)('scroll to an atom mark boundary in %s mode', (mode) =>
     scroller.scrollTop = 0
     dispatchScrollIntoView(fixture)
     expect(scroller.scrollTop).toBeGreaterThan(0)
-    expectVisibleIn(wikilinkPreview(fixture), scroller)
+    expectVisibleIn(wikilinkPreview(fixture).getBoundingClientRect(), scroller)
   })
 
   it('scrolls to the head of a selection that swallowed a wikilink', () => {
@@ -73,7 +81,7 @@ describe.each(ALL_MODES)('scroll to an atom mark boundary in %s mode', (mode) =>
     scroller.scrollTop = 0
     dispatchScrollIntoView(fixture)
     expect(scroller.scrollTop).toBeGreaterThan(0)
-    expectVisibleIn(wikilinkPreview(fixture), scroller)
+    expectVisibleIn(wikilinkPreview(fixture).getBoundingClientRect(), scroller)
   })
 
   it('does not scroll while the caret is already visible', () => {
@@ -99,8 +107,7 @@ describe('scroll to a hidden run boundary in hide mode', () => {
     scroller.scrollTop = 0
     dispatchScrollIntoView(fixture)
     expect(scroller.scrollTop).toBeGreaterThan(0)
-    const paragraphs = fixture.dom.querySelectorAll('p')
-    expectVisibleIn(paragraphs[paragraphs.length - 1], scroller)
+    expectVisibleIn(getLastTextRect(fixture), scroller)
   })
 })
 
@@ -112,8 +119,7 @@ describe('the default scroll path', () => {
     scroller.scrollTop = 0
     dispatchScrollIntoView(fixture)
     expect(scroller.scrollTop).toBeGreaterThan(0)
-    const paragraphs = fixture.dom.querySelectorAll('p')
-    expectVisibleIn(paragraphs[paragraphs.length - 1], scroller)
+    expectVisibleIn(getLastTextRect(fixture), scroller)
   })
 })
 
