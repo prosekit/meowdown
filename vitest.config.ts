@@ -14,8 +14,6 @@ export default defineConfig({
       include: ['packages/*/src/**'],
     },
     slowTestThreshold: 10_000,
-    // Screenshot tests run only in the autofix.ci workflow, which commits the
-    // updated reference screenshots back to the pull request.
     projects: isVisual
       ? ['./packages/*/vitest.visual.config.ts']
       : ['./packages/*/vitest.node.config.ts', './packages/*/vitest.browser.config.ts'],
