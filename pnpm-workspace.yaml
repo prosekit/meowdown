@@ -29,6 +29,7 @@ minimumReleaseAgeExclude:
   - eslint-plugin-ocavue
   - vitest-browser-commands
   - prosemirror-flat-list
+  - mdast-util-to-markdown@2.2.1
 
 allowBuilds:
   esbuild: false
