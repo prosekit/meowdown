@@ -59,6 +59,7 @@ jobs:
         run: pnpm run test:install:${{ matrix.config.browser }}
 
       - name: Update screenshots
+        # FIXME: remove "test:visual". use env variable to set visual mode;
         run: pnpm run test:visual --update
         env:
           MEOWDOWN_TEST_BROWSER: ${{ matrix.config.browser }}
