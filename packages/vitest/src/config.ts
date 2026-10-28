@@ -1,11 +1,9 @@
 import { playwright } from '@vitest/browser-playwright'
 import { playwrightCommands } from 'vitest-browser-commands'
-import { configDefaults, defineProject } from 'vitest/config'
+import { defineProject } from 'vitest/config'
 
 const IS_BOT = !!(process.env.AI_AGENT || process.env.CI)
 const IS_DEBUG = !!process.env.DEBUG
-
-const VISUAL_TEST_PATTERN = 'src/**/*.visual.test.tsx'
 
 function resolveBrowserName() {
   const name = process.env.MEOWDOWN_TEST_BROWSER
@@ -36,45 +34,28 @@ export function defineNodeConfig({ name, groupOrder }: { name: string; groupOrde
 }
 
 /**
- * A project for tests that need a real browser. It only picks up `*.test.tsx`,
- * except the screenshot tests.
+ * A project for tests that need a real browser. It only picks up `*.test.tsx`.
  */
 export function defineBrowserConfig({ name, groupOrder }: { name: string; groupOrder: number }) {
-  return defineBrowserProject({
-    name,
-    groupOrder,
-    include: ['src/**/*.test.tsx'],
-    exclude: [...configDefaults.exclude, VISUAL_TEST_PATTERN],
-    visual: false,
-  })
+  return defineBrowserProject({ name, groupOrder, visual: false })
 }
 
 /**
- * A project for screenshot tests. It only picks up `*.visual.test.tsx`. Their
+ * A project for screenshot tests. It only picks up `*.visual.tsx`. Their
  * reference screenshots are committed under `__visual__`, one per browser and
  * platform.
  */
 export function defineVisualConfig({ name, groupOrder }: { name: string; groupOrder: number }) {
-  return defineBrowserProject({
-    name,
-    groupOrder,
-    include: [VISUAL_TEST_PATTERN],
-    exclude: configDefaults.exclude,
-    visual: true,
-  })
+  return defineBrowserProject({ name, groupOrder, visual: true })
 }
 
 function defineBrowserProject({
   name,
   groupOrder,
-  include,
-  exclude,
   visual,
 }: {
   name: string
   groupOrder: number
-  include: string[]
-  exclude: string[]
   visual: boolean
 }) {
   const browserName = resolveBrowserName()
@@ -93,8 +74,7 @@ function defineBrowserProject({
         : undefined,
     test: {
       name,
-      include,
-      exclude,
+      include: [visual ? 'src/**/*.visual.tsx' : 'src/**/*.test.tsx'],
       setupFiles,
       snapshotSerializers: ['@meowdown/vitest/custom-string-serializer'],
       sequence: { groupOrder },
