@@ -31,17 +31,12 @@ function resolveImageUrl(src: string): string {
   return IMAGE_URLS[src] ?? src
 }
 
-// FIXME: 1: 删除 Some text above the table 和 Some text below the table
 const TABLE_MARKDOWN = dedent`
-  Some text above the table.
-
   | Name | Kind | Price |
-  | --- | --- | --- |
+  | :--- | :---: | ---: |
   | Apple | Fruit | 1.20 |
   | Carrot | Vegetable | 0.80 |
-  | Rice | Grain | 2.50 |
-
-  Some text below the table.
+  | A long cell that wraps onto more lines | Other | 12.00 |
 `
 
 const CODE_BLOCK_MARKDOWN = dedent`
@@ -106,14 +101,8 @@ async function selectImage(handle: EditorHandle) {
 }
 
 interface Scenario {
-  /**
-   * The screenshot name.// FIXME: delete this comment
-   */
   name: string
   markdown: string
-  /**
-   * Waits for async content, or moves the editor into the state to capture.// FIXME: delete this comment
-   */
   prepare?: (handle: EditorHandle) => void | Promise<void>
 }
 
@@ -289,41 +278,32 @@ const SCENARIOS: Scenario[] = [
   },
   {
     name: 'table-select-all-cells',
-    // FIXME: "select all cells\n\n" + TABLE_MARKDOWN
-    markdown: TABLE_MARKDOWN,
+    markdown: `select all cells\n\n${TABLE_MARKDOWN}`,
     prepare: (handle) => selectCells(handle, [0, 0], [3, 2]),
   },
   {
     name: 'table-select-block',
-    // FIXME: "select table block\n\n" + TABLE_MARKDOWN ... same FIXME below
-    markdown: TABLE_MARKDOWN,
+    markdown: `select table block\n\n${TABLE_MARKDOWN}`,
     prepare: (handle) => selectCells(handle, [1, 1], [2, 2]),
   },
   {
     name: 'table-select-column',
-    markdown: TABLE_MARKDOWN,
+    markdown: `select table column\n\n${TABLE_MARKDOWN}`,
     prepare: (handle) => selectCells(handle, [0, 1], [3, 1]),
   },
   {
     name: 'table-select-node',
-    markdown: TABLE_MARKDOWN,
+    markdown: `select table node\n\n${TABLE_MARKDOWN}`,
     prepare: () => selectBlock(pmRoot.locate('table')),
   },
   {
     name: 'table-select-row',
-    markdown: TABLE_MARKDOWN,
+    markdown: `select table row\n\n${TABLE_MARKDOWN}`,
     prepare: (handle) => selectCells(handle, [2, 0], [2, 2]),
   },
   {
     name: 'table',
-    // FIXME: use TABLE_MARKDOWN here
-    markdown: dedent`
-      | Name | Kind | Price |
-      | :--- | :---: | ---: |
-      | Apple | Fruit | 1.20 |
-      | Carrot | Vegetable | 0.80 |
-      | A long cell that wraps onto more lines | Other | 12.00 |
-    `,
+    markdown: TABLE_MARKDOWN,
   },
   {
     name: 'task-lists',
