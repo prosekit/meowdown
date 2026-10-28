@@ -30,6 +30,7 @@ function resolveImageUrl(src: string): string {
   return IMAGE_URLS[src] ?? src
 }
 
+// FIXME: 1: 删除 Some text above the table 和 Some text below the table
 const TABLE_MARKDOWN = dedent`
   Some text above the table.
 
@@ -166,11 +167,13 @@ const SCENARIOS: Scenario[] = [
   },
   {
     name: 'table-select-all-cells',
+    // FIXME: "select all cells\n\n" + TABLE_MARKDOWN
     markdown: TABLE_MARKDOWN,
     prepare: (handle) => selectCells(handle, [0, 0], [3, 2]),
   },
   {
     name: 'table-select-block',
+    // FIXME: "select table block\n\n" + TABLE_MARKDOWN ... same FIXME below
     markdown: TABLE_MARKDOWN,
     prepare: (handle) => selectCells(handle, [1, 1], [2, 2]),
   },
@@ -195,6 +198,7 @@ const SCENARIOS: Scenario[] = [
   },
   {
     name: 'table',
+    // FIXME: use TABLE_MARKDOWN here
     markdown: dedent`
       | Name | Kind | Price |
       | :--- | :---: | ---: |
