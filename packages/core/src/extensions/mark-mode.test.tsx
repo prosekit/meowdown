@@ -1149,7 +1149,7 @@ describe('focus mode', () => {
     fixture.set(n.doc(n.codeBlock({ language: '' }, '*not<a> italic*')))
     expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
       "
-      <pre>
+      <pre data-code-block>
         <code>
           *not italic*
         </code>

@@ -8,6 +8,7 @@ export function defineCodeBlockView(component: ReactNodeViewComponent = CodeBloc
   return union(
     defineReactNodeView({
       name: 'codeBlock',
+      as: createCodeBlockRoot,
       contentAs: 'code',
       component,
     }),
@@ -15,4 +16,10 @@ export function defineCodeBlockView(component: ReactNodeViewComponent = CodeBloc
     // decide whether the preview shows alone or below the source.
     defineCodeBlockPreviewPlugin(),
   )
+}
+
+function createCodeBlockRoot(): HTMLElement {
+  const element = document.createElement('div')
+  element.dataset.codeBlock = ''
+  return element
 }

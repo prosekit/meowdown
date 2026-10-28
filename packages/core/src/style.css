@@ -186,11 +186,12 @@
     /* Heading line height. */
     --meowdown-heading-line-height: 1.25;
 
-    /* Code block font size (a fraction of the body size), line height, and
-     * vertical padding. */
+    /* Code block font size (a fraction of the body size), line height,
+     * vertical padding, and vertical margin. */
     --meowdown-code-block-font-scale: 0.9;
     --meowdown-code-block-line-height: 1.5;
     --meowdown-code-block-padding-block: 0.9rem;
+    --meowdown-code-block-margin-block: 0.3rem;
   }
 }
 
@@ -454,11 +455,10 @@
   .ProseMirror .prosemirror-flat-list {
     --meowdown-list-marker-top: var(--meowdown-block-padding);
 
-    &:has(> .list-content > :first-child pre) {
+    &:has(> .list-content > [data-code-block]:first-child) {
       /* `pre` margin and padding, then center on a code line. */
       --meowdown-list-marker-top: calc(
-        var(--meowdown-block-padding) * var(--meowdown-code-block-font-scale) +
-          var(--meowdown-code-block-padding-block) +
+        var(--meowdown-code-block-margin-block) + var(--meowdown-code-block-padding-block) +
           (
             var(--meowdown-code-block-line-height) * var(--meowdown-code-block-font-scale) * 1em -
               1lh
@@ -618,7 +618,7 @@
   }
 
   .ProseMirror pre {
-    margin-block: var(--meowdown-block-padding);
+    margin-block: var(--meowdown-code-block-margin-block);
     padding: var(--meowdown-code-block-padding-block) 1rem;
     border-radius: 0.6rem;
     overflow-x: auto;
