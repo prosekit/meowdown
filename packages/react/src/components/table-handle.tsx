@@ -305,17 +305,17 @@ function useLazyMenu() {
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  const onOpenChange = useCallback((event: MenuRootEvents['openChange']) => {
+  const onOpenChange = (event: MenuRootEvents['openChange']) => {
     if (event.detail) {
       event.preventDefault()
       setMounted(true)
     }
     setOpen(event.detail)
-  }, [])
+  }
 
-  const onOpenChangeComplete = useCallback((event: MenuRootEvents['openChangeComplete']) => {
+  const onOpenChangeComplete = (event: MenuRootEvents['openChangeComplete']) => {
     if (!event.detail) setMounted(false)
-  }, [])
+  }
 
   return { open, mounted, onOpenChange, onOpenChangeComplete }
 }
