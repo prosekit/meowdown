@@ -175,8 +175,7 @@
      * paragraphs is twice this at every nesting depth. */
     --meowdown-block-padding: 0.3em;
 
-    /* Heading font sizes. A list item that starts with a heading reads them to
-     * center its marker on the heading's first line. */
+    /* Heading font sizes. */
     --meowdown-h1-size: 1.75rem;
     --meowdown-h2-size: 1.4rem;
     --meowdown-h3-size: 1.2rem;
