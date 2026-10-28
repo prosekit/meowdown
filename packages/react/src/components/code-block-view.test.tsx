@@ -300,6 +300,11 @@ describe('code block node selection', () => {
     await dragHandle.click()
 
     await expect.element(codeBlock).toHaveStyle({ outlineStyle: 'solid' })
+    for (const delay of [0, 100, 500]) {
+      await new Promise((resolve) => setTimeout(resolve, delay))
+      const sel = getSelection()
+      console.warn('[meowdown] DEBUG', delay, JSON.stringify({ cls: pmRoot.element().className, caret: getComputedStyle(pmRoot.element()).caretColor, active: document.activeElement?.className || document.activeElement?.tagName, focus: document.hasFocus(), type: sel?.type, anchor: sel?.anchorNode?.nodeName, anchorOffset: sel?.anchorOffset, focusNode: sel?.focusNode?.nodeName, focusOffset: sel?.focusOffset }))
+    }
     expect(getComputedStyle(pmRoot.element()).caretColor).toBe('rgba(0, 0, 0, 0)')
   })
 })
