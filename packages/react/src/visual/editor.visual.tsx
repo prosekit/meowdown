@@ -176,25 +176,30 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'node-select-blockquote',
     markdown: surround('> A blockquote that is selected as a whole.'),
-    prepare: (handle) => selectBlock(handle, 1),
+    prepare: (handle) => selectBlock(handle, [1]),
   },
   {
     name: 'node-select-code-block',
     markdown: surround(CODE_BLOCK_MARKDOWN),
     prepare: async (handle) => {
       await waitForCodeTokens()
-      await selectBlock(handle, 1)
+      await selectBlock(handle, [1])
     },
   },
   {
     name: 'node-select-heading',
     markdown: surround('## A selected heading'),
-    prepare: (handle) => selectBlock(handle, 1),
+    prepare: (handle) => selectBlock(handle, [1]),
   },
   {
     name: 'node-select-horizontal-rule',
     markdown: surround('---'),
-    prepare: (handle) => selectBlock(handle, 1),
+    prepare: (handle) => selectBlock(handle, [1]),
+  },
+  {
+    name: 'node-select-list-item',
+    markdown: surround('- First item\n- Second item\n- Third item'),
+    prepare: (handle) => selectBlock(handle, [2]),
   },
   {
     name: 'node-select-math',
@@ -202,15 +207,22 @@ const SCENARIOS: Scenario[] = [
     prepare: async (handle) => {
       const preview = pmRoot.getByTestId('code-block-math-preview')
       await expect.element(preview.locate('.katex')).toBeInTheDocument()
-      await selectBlock(handle, 1)
+      await selectBlock(handle, [1])
     },
+  },
+  {
+    name: 'node-select-nested-list-item',
+    markdown: surround(
+      '- First item\n- Second item\n  - Nested item\n  - Another nested item\n- Third item',
+    ),
+    prepare: (handle) => selectBlock(handle, [2, 1]),
   },
   {
     name: 'node-select-paragraph-image-only',
     markdown: surround(IMAGE_ONLY_MARKDOWN),
     prepare: async (handle) => {
       await waitForImages(1)
-      await selectBlock(handle, 1)
+      await selectBlock(handle, [1])
     },
   },
   {
@@ -218,20 +230,25 @@ const SCENARIOS: Scenario[] = [
     markdown: surround(TEXT_IMAGE_MARKDOWN),
     prepare: async (handle) => {
       await waitForImages(1)
-      await selectBlock(handle, 1)
+      await selectBlock(handle, [1])
     },
   },
   {
     name: 'node-select-paragraph',
     markdown: surround('A paragraph that is selected as a whole.'),
-    prepare: (handle) => selectBlock(handle, 1),
+    prepare: (handle) => selectBlock(handle, [1]),
+  },
+  {
+    name: 'node-select-task-item',
+    markdown: surround('- [ ] First task\n- [x] Second task\n- [ ] Third task'),
+    prepare: (handle) => selectBlock(handle, [2]),
   },
   {
     name: 'node-select-x-post',
     markdown: surround(X_POST_MARKDOWN),
     prepare: async (handle) => {
       await waitForXPost()
-      await selectBlock(handle, 1)
+      await selectBlock(handle, [1])
     },
   },
   {
@@ -239,7 +256,7 @@ const SCENARIOS: Scenario[] = [
     markdown: surround(YOUTUBE_MARKDOWN),
     prepare: async (handle) => {
       await waitForYouTube()
-      await selectBlock(handle, 1)
+      await selectBlock(handle, [1])
     },
   },
   {
@@ -293,7 +310,7 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'table-select-node',
     markdown: `select table node\n\n${TABLE_MARKDOWN}`,
-    prepare: (handle) => selectBlock(handle, 1),
+    prepare: (handle) => selectBlock(handle, [1]),
   },
   {
     name: 'table-select-row',

@@ -60,7 +60,13 @@ export async function expectScreenshots(name: string): Promise<void> {
         await page.viewport(variant.width, contentHeight)
       }
       root.style.colorScheme = variant.theme
-      await expect.element(frame).toMatchScreenshot(`${name}/${variant.viewport}-${variant.theme}`)
+      await expect
+        .element(frame)
+        .toMatchScreenshot(`${name}/${variant.viewport}-${variant.theme}`, {
+          // Playwright's default `caret: 'hide'` makes Chromium turn a node
+          // selection of a list item into a text selection of its content.
+          screenshotOptions: { caret: 'initial' },
+        })
     }
   } finally {
     root.style.colorScheme = ''
@@ -154,13 +160,20 @@ export function selectTextMatch(handle: EditorHandle, text: string): void {
 }
 
 /**
- * Focuses the editor and node-selects the top-level block at `index`.
+ * Focuses the editor and node-selects the block at `path`: one child index per
+ * level, starting from the doc.
  */
-export async function selectBlock(handle: EditorHandle, index: number): Promise<void> {
-  const doc = getDoc(handle)
+export async function selectBlock(handle: EditorHandle, path: number[]): Promise<void> {
+  let parent = getDoc(handle)
+  let contentStart = 0
   let anchor = 0
-  for (let i = 0; i < index; i++) {
-    anchor += doc.child(i).nodeSize
+  for (const index of path) {
+    anchor = contentStart
+    for (let i = 0; i < index; i++) {
+      anchor += parent.child(i).nodeSize
+    }
+    parent = parent.child(index)
+    contentStart = anchor + 1
   }
   handle.focus()
   // `NodeSelection.fromJSON` reads only `anchor`.
