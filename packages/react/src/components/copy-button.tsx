@@ -37,13 +37,14 @@ export function CopyButton({
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(getText())
-      setCopied(true)
-      clearTimeout(resetTimerRef.current)
-      resetTimerRef.current = setTimeout(() => setCopied(false), COPIED_RESET_MS)
-      onCopy?.()
     } catch (error) {
       console.warn('[meowdown] Failed to copy:', error)
+      return
     }
+    setCopied(true)
+    clearTimeout(resetTimerRef.current)
+    resetTimerRef.current = setTimeout(() => setCopied(false), COPIED_RESET_MS)
+    onCopy?.()
   }
 
   return (

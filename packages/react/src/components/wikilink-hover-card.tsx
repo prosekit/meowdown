@@ -70,7 +70,7 @@ export function WikilinkHoverCard({ children, className }: WikilinkHoverCardProp
     let stale = false
     const resolveBody = async () => {
       try {
-        const resolved = await (displayed ? children(displayed) : null)
+        const resolved = await resolveHoverBody(children, displayed)
         if (!stale) setBody(resolved)
       } catch (error) {
         if (stale) return
@@ -116,4 +116,11 @@ export function WikilinkHoverCard({ children, className }: WikilinkHoverCardProp
       )}
     </PreviewCard.Root>
   )
+}
+
+async function resolveHoverBody(
+  children: WikilinkHoverCardProps['children'],
+  hit: WikilinkHoverHit | undefined,
+): Promise<ReactNode> {
+  return hit ? await children(hit) : null
 }
