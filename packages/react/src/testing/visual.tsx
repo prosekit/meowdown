@@ -46,6 +46,7 @@ export async function expectScreenshots(name: string): Promise<void> {
   const root = document.documentElement
   await unhover()
   try {
+    // FIXME: notice that we do not need to have all viewports * all themes. We can just pick some of them.  try to reduce the total number of images
     for (const viewport of VIEWPORTS) {
       await page.viewport(viewport.width, viewport.height)
       // A screenshot cannot reach below the viewport, so grow it to the content.
