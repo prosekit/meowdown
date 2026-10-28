@@ -77,7 +77,7 @@ jobs:
           name: screenshot-report-${{ matrix.config.os }}-${{ matrix.config.browser }}
           path: .vitest/report/
           include-hidden-files: true
-          retention-days: 7
+          retention-days: 3
 
       - name: Update screenshots
         run: pnpm run test --update
