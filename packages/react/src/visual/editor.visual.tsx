@@ -90,6 +90,12 @@ const SCENARIOS: Scenario[] = [
 
       ### Heading 3
 
+      #### Heading 4
+
+      ##### Heading 5
+
+      ###### Heading 6
+
       > A blockquote that is long enough to wrap onto a second line on a narrow screen.
     `,
   },
