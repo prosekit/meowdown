@@ -9,9 +9,9 @@ import type { EditorHandle } from '../components/types.ts'
 
 import { unhover } from './mouse.ts'
 
-// FIXME: put "visual-frame" as a variable
+const FRAME_TEST_ID = 'visual-frame'
 
-const frame = page.getByTestId('visual-frame')
+const frame = page.getByTestId(FRAME_TEST_ID)
 const pmRoot = page.locate('.ProseMirror')
 
 // Each viewport and each color scheme appears once, so two screenshots cover
@@ -29,7 +29,7 @@ export async function renderVisual(element: ReactNode) {
   document.body.style.margin = '0'
   return await render(
     <div
-      data-testid="visual-frame"
+      data-testid={FRAME_TEST_ID}
       style={{
         boxSizing: 'border-box',
         minHeight: '100vh',
