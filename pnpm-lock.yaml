@@ -164,8 +164,8 @@ importers:
         specifier: ^0.7.1
         version: 0.7.1
       '@tsdown/css':
-        specifier: ^0.23.2
-        version: 0.23.2(jiti@2.7.0)(postcss@8.5.31)(tsdown@0.23.2)(yaml@2.9.1)
+        specifier: ^0.23.3
+        version: 0.23.3(jiti@2.7.0)(postcss@8.5.31)(tsdown@0.23.3)(yaml@2.9.1)
       '@types/hast':
         specifier: ^3.0.5
         version: 3.0.5
@@ -182,8 +182,8 @@ importers:
         specifier: ^0.4.0
         version: 0.4.0
       tsdown:
-        specifier: ^0.23.2
-        version: 0.23.2(@tsdown/css@0.23.2)(oxc-resolver@11.24.2)(typescript@6.0.3)
+        specifier: ^0.23.3
+        version: 0.23.3(@tsdown/css@0.23.3)(oxc-resolver@11.24.2)(typescript@6.0.3)
       vitest:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@24.19.2)(@vitest/browser-playwright@5.0.5)(@vitest/coverage-v8@5.0.5)(@vitest/ui@5.0.5)(vite@8.3.5)
@@ -216,8 +216,8 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(playwright@1.65.0-alpha-2026-10-26)(vite@8.3.5)(vitest@5.0.5)
       tsdown:
-        specifier: ^0.23.2
-        version: 0.23.2(@tsdown/css@0.23.2)(oxc-resolver@11.24.2)(typescript@6.0.3)
+        specifier: ^0.23.3
+        version: 0.23.3(@tsdown/css@0.23.3)(oxc-resolver@11.24.2)(typescript@6.0.3)
       vitest:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@24.19.2)(@vitest/browser-playwright@5.0.5)(@vitest/coverage-v8@5.0.5)(@vitest/ui@5.0.5)(vite@8.3.5)
@@ -266,8 +266,8 @@ importers:
         specifier: ^1.7.2
         version: 1.7.2
       tsdown:
-        specifier: ^0.23.2
-        version: 0.23.2(@tsdown/css@0.23.2)(oxc-resolver@11.24.2)(typescript@6.0.3)
+        specifier: ^0.23.3
+        version: 0.23.3(@tsdown/css@0.23.3)(oxc-resolver@11.24.2)(typescript@6.0.3)
       vitest:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@24.19.2)(@vitest/browser-playwright@5.0.5)(@vitest/coverage-v8@5.0.5)(@vitest/ui@5.0.5)(vite@8.3.5)
@@ -330,8 +330,8 @@ importers:
         specifier: ^0.7.1
         version: 0.7.1
       '@tsdown/css':
-        specifier: ^0.23.2
-        version: 0.23.2(jiti@2.7.0)(postcss@8.5.31)(tsdown@0.23.2)(yaml@2.9.1)
+        specifier: ^0.23.3
+        version: 0.23.3(jiti@2.7.0)(postcss@8.5.31)(tsdown@0.23.3)(yaml@2.9.1)
       '@types/react':
         specifier: ^19.3.0
         version: 19.3.0
@@ -357,8 +357,8 @@ importers:
         specifier: ^19.3.0
         version: 19.3.1(react@19.3.1)
       tsdown:
-        specifier: ^0.23.2
-        version: 0.23.2(@tsdown/css@0.23.2)(oxc-resolver@11.24.2)(typescript@6.0.3)
+        specifier: ^0.23.3
+        version: 0.23.3(@tsdown/css@0.23.3)(oxc-resolver@11.24.2)(typescript@6.0.3)
       vitest:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@24.19.2)(@vitest/browser-playwright@5.0.5)(@vitest/coverage-v8@5.0.5)(@vitest/ui@5.0.5)(vite@8.3.5)
@@ -397,7 +397,7 @@ importers:
     dependencies:
       '@astrojs/react':
         specifier: ^7.1.1
-        version: 7.1.1(@types/node@24.19.2)(@types/react-dom@19.3.0)(@types/react@19.3.0)(esbuild@0.28.2)(jiti@2.7.0)(react-dom@19.3.1)(react@19.3.1)(yaml@2.9.1)
+        version: 7.1.1(@types/node@24.19.2)(@types/react-dom@19.3.0)(@types/react@19.3.0)(esbuild@0.28.2)(jiti@2.7.0)(oxc-transform-react@0.152.0)(react-dom@19.3.1)(react@19.3.1)(yaml@2.9.1)
       '@base-ui/react':
         specifier: ^1.9.0
         version: 1.9.0(@types/react@19.3.0)(react-dom@19.3.1)(react@19.3.1)
@@ -2487,8 +2487,8 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
-  '@tsdown/css@0.23.2':
-    resolution: {integrity: sha512-/g3suzAD7kRLpguMTjScPHfduefpQTc7YqLCJvMJ5cZ8s+viVgpLxsM12J97ym8aN7JY3yQsDZHifvA/fD+GPg==}
+  '@tsdown/css@0.23.3':
+    resolution: {integrity: sha512-cQ1MIWt85eBZDxG/y0qYytK1wJTHml2BANuUH7ATmY5qUA3GlR2zt6ds3rW9IWkVDZDkfFj1ZNJLYiRMZKuoPw==}
     engines: {node: ^22.18.0 || ^24.11.0 || >=26.0.0}
     peerDependencies:
       postcss: ^8.4.0
@@ -2496,7 +2496,7 @@ packages:
       postcss-modules: ^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0
       sass: '*'
       sass-embedded: '*'
-      tsdown: 0.23.2
+      tsdown: 0.23.3
     peerDependenciesMeta:
       postcss:
         optional: true
@@ -4585,16 +4585,19 @@ packages:
   retext-smartypants@6.2.0:
     resolution: {integrity: sha512-kk0jOU7+zGv//kfjXEBjdIryL1Acl4i9XNkHxtM7Tm5lFiCog576fjNC9hjoR7LTKQ0DsPWy09JummSsH1uqfQ==}
 
-  rolldown-plugin-dts@0.29.0-beta.2:
-    resolution: {integrity: sha512-0NT4q7HMRIpQv47+SfZB5IhEWJh0gp2rDEZPu2ry+LeJFb9tlMB08Sy+sl1+cqcCXnHpkd9dvBy3rZDCBF1JIg==}
+  rolldown-plugin-dts@0.28.8:
+    resolution: {integrity: sha512-FVhfqxorCWcc20BVT5eVRfRjzLLl6mgzjcMR4gSBf0K4oQMXT0qoHhhzfXy0L7y83fQy7Ug5ZDNk90xM3/LiCQ==}
     engines: {node: ^22.18.0 || ^24.11.0 || >=26.0.0}
     peerDependencies:
+      '@typescript/native-preview': '*'
       '@volar/typescript': ~2.4.0
       '@vue/language-core': ~3.2.0 || ~3.3.0
       rolldown: ^1.2.0
-      typescript: ^5.0.0 || ^6.0.0 || ~7.0.0 || ~7.1.0-0
+      typescript: ^5.0.0 || ^6.0.0 || ~7.0.0
       vue-tsc: ~3.2.0 || ~3.3.0
     peerDependenciesMeta:
+      '@typescript/native-preview':
+        optional: true
       '@volar/typescript':
         optional: true
       '@vue/language-core':
@@ -4820,14 +4823,14 @@ packages:
   ts-pattern@5.9.2:
     resolution: {integrity: sha512-qAf+7M7Jjk7uebZeIo9uEzyintfuRtgHdzM9dqxRKcMi2dt76Ec+FH2wW3bnU9TuGLkZIJLoLs7cCQnU7Tu8ig==}
 
-  tsdown@0.23.2:
-    resolution: {integrity: sha512-om1OoDykFlv07uM98WAX3ZNmu02FBmHqZYLW1hm+IMktb92r7VMNKgQ/G8dknECI1Q2huPrFJ+sggdYk8efsQg==}
+  tsdown@0.23.3:
+    resolution: {integrity: sha512-yAju1F5b7GDEPCLl4ewM3g54lq0NyyYpFnK2lh/ax7/uznmsn4wBOS9/49pI3cGvxtj2LoOjBUtzaT17UEQkhQ==}
     engines: {node: ^22.18.0 || ^24.11.0 || >=26.0.0}
     hasBin: true
     peerDependencies:
       '@arethetypeswrong/core': ^0.18.1
-      '@tsdown/css': 0.23.2
-      '@tsdown/exe': 0.23.2
+      '@tsdown/css': 0.23.3
+      '@tsdown/exe': 0.23.3
       '@vitejs/devtools': '*'
       publint: ^0.3.8
       tsx: '*'
@@ -5440,7 +5443,7 @@ snapshots:
     dependencies:
       prismjs: 1.30.0
 
-  '@astrojs/react@7.1.1(@types/node@24.19.2)(@types/react-dom@19.3.0)(@types/react@19.3.0)(esbuild@0.28.2)(jiti@2.7.0)(react-dom@19.3.1)(react@19.3.1)(yaml@2.9.1)':
+  '@astrojs/react@7.1.1(@types/node@24.19.2)(@types/react-dom@19.3.0)(@types/react@19.3.0)(esbuild@0.28.2)(jiti@2.7.0)(oxc-transform-react@0.152.0)(react-dom@19.3.1)(react@19.3.1)(yaml@2.9.1)':
     dependencies:
       '@astrojs/internal-helpers': 0.13.0
       '@types/react': 19.3.0
@@ -5451,6 +5454,8 @@ snapshots:
       react-dom: 19.3.1(react@19.3.1)
       ultrahtml: 1.7.0
       vite: 8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
+    optionalDependencies:
+      oxc-transform-react: 0.152.0
     transitivePeerDependencies:
       - '@rolldown/plugin-babel'
       - '@types/node'
@@ -7327,12 +7332,12 @@ snapshots:
       tailwindcss: 4.3.3
       vite: 8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
 
-  '@tsdown/css@0.23.2(jiti@2.7.0)(postcss@8.5.31)(tsdown@0.23.2)(yaml@2.9.1)':
+  '@tsdown/css@0.23.3(jiti@2.7.0)(postcss@8.5.31)(tsdown@0.23.3)(yaml@2.9.1)':
     dependencies:
       lightningcss: 1.33.0
       postcss-load-config: 6.0.1(jiti@2.7.0)(postcss@8.5.31)(yaml@2.9.1)
       rolldown: 1.2.15
-      tsdown: 0.23.2(@tsdown/css@0.23.2)(oxc-resolver@11.24.2)(typescript@6.0.3)
+      tsdown: 0.23.3(@tsdown/css@0.23.3)(oxc-resolver@11.24.2)(typescript@6.0.3)
     optionalDependencies:
       postcss: 8.5.31
     transitivePeerDependencies:
@@ -9807,7 +9812,7 @@ snapshots:
       nlcst-to-string: 4.0.0
       unist-util-visit: 5.1.0
 
-  rolldown-plugin-dts@0.29.0-beta.2(oxc-resolver@11.24.2)(rolldown@1.2.15)(typescript@6.0.3):
+  rolldown-plugin-dts@0.28.8(oxc-resolver@11.24.2)(rolldown@1.2.15)(typescript@6.0.3):
     dependencies:
       dts-resolver: 3.0.0(oxc-resolver@11.24.2)
       get-tsconfig: 5.0.0-beta.6
@@ -10061,7 +10066,7 @@ snapshots:
 
   ts-pattern@5.9.2: {}
 
-  tsdown@0.23.2(@tsdown/css@0.23.2)(oxc-resolver@11.24.2)(typescript@6.0.3):
+  tsdown@0.23.3(@tsdown/css@0.23.3)(oxc-resolver@11.24.2)(typescript@6.0.3):
     dependencies:
       cac: 7.1.0
       defu: 6.1.7
@@ -10071,16 +10076,17 @@ snapshots:
       obug: 3.0.0
       picomatch: 4.0.7
       rolldown: 1.2.15
-      rolldown-plugin-dts: 0.29.0-beta.2(oxc-resolver@11.24.2)(rolldown@1.2.15)(typescript@6.0.3)
+      rolldown-plugin-dts: 0.28.8(oxc-resolver@11.24.2)(rolldown@1.2.15)(typescript@6.0.3)
       tinyexec: 1.3.1
       tinyglobby: 0.2.17
       tree-kill: 1.2.2
       unconfig-core: 7.5.0
       verkit: 0.5.0
     optionalDependencies:
-      '@tsdown/css': 0.23.2(jiti@2.7.0)(postcss@8.5.31)(tsdown@0.23.2)(yaml@2.9.1)
+      '@tsdown/css': 0.23.3(jiti@2.7.0)(postcss@8.5.31)(tsdown@0.23.3)(yaml@2.9.1)
       typescript: 6.0.3
     transitivePeerDependencies:
+      - '@typescript/native-preview'
       - '@volar/typescript'
       - '@vue/language-core'
       - oxc-resolver
