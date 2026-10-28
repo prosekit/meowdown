@@ -40,6 +40,12 @@ const TABLE_MARKDOWN = dedent`
   | A long cell that wraps onto more lines | Other | 12.00 |
 `
 
+const PARAGRAPH_MARKDOWN =
+  'Meowdown is a hybrid live-preview Markdown editor. It keeps **bold**, *italic*, `code`, ~~strike~~, ==highlight==, [links](https://example.com) and [[wikilinks]] readable while you write.'
+
+const BLOCKQUOTE_MARKDOWN =
+  '> A blockquote that is long enough to wrap onto a second line on a narrow screen.'
+
 const CODE_BLOCK_MARKDOWN = dedent`
   \`\`\`ts
   function greet(name: string): string | undefined | null | Promise<string> | Promise<undefined> | Promise<null> {
@@ -55,14 +61,6 @@ const YOUTUBE_MARKDOWN = '![](https://www.youtube.com/watch?v=aqz-KE-bpKQ)'
 const TEXT_IMAGE_MARKDOWN = 'Text before the image ![landscape](landscape.svg) and text after it.'
 
 const IMAGE_ONLY_MARKDOWN = '![landscape](landscape.svg)'
-
-/**
- * Puts `block` between two paragraphs, so a selection outline shows against
- * its neighbors.
- */
-function surround(block: string): string {
-  return `Some text above.\n\n${block}\n\nSome text below.`
-}
 
 async function waitForImages(count: number) {
   const images = pmRoot.locate('img')
@@ -105,16 +103,47 @@ interface Scenario {
   prepare?: (handle: EditorHandle) => void | Promise<void>
 }
 
+// Names are `<subject>` or `<subject>-<state>`, so keep-sorted puts every state
+// of one subject together.
 /// keep-sorted { "keys": ["name"] }
 const SCENARIOS: Scenario[] = [
   {
+    name: 'blockquote-node-selected',
+    markdown: BLOCKQUOTE_MARKDOWN,
+    prepare: (handle) => selectBlock(handle, [0]),
+  },
+  {
     name: 'blockquote',
-    markdown: '> A blockquote that is long enough to wrap onto a second line on a narrow screen.',
+    markdown: BLOCKQUOTE_MARKDOWN,
+  },
+  {
+    name: 'code-block-node-selected',
+    markdown: CODE_BLOCK_MARKDOWN,
+    prepare: async (handle) => {
+      await waitForCodeTokens()
+      await selectBlock(handle, [0])
+    },
   },
   {
     name: 'code-block',
     markdown: CODE_BLOCK_MARKDOWN,
     prepare: waitForCodeTokens,
+  },
+  {
+    name: 'heading-node-selected-between',
+    markdown: dedent`
+      Some text above.
+
+      ## A selected heading
+
+      Some text below.
+    `,
+    prepare: (handle) => selectBlock(handle, [1]),
+  },
+  {
+    name: 'heading-node-selected',
+    markdown: '## A selected heading',
+    prepare: (handle) => selectBlock(handle, [0]),
   },
   {
     name: 'headings',
@@ -133,17 +162,66 @@ const SCENARIOS: Scenario[] = [
     `,
   },
   {
-    name: 'image-select-only',
-    markdown: IMAGE_ONLY_MARKDOWN,
-    prepare: selectImage,
+    name: 'horizontal-rule-node-selected',
+    markdown: '---',
+    prepare: (handle) => selectBlock(handle, [0]),
   },
   {
-    name: 'image-select',
+    name: 'image-in-text-image-selected',
     markdown: TEXT_IMAGE_MARKDOWN,
     prepare: selectImage,
   },
   {
-    name: 'lists-mixed',
+    name: 'image-in-text-node-selected',
+    markdown: TEXT_IMAGE_MARKDOWN,
+    prepare: async (handle) => {
+      await waitForImages(1)
+      await selectBlock(handle, [0])
+    },
+  },
+  {
+    name: 'image-in-text',
+    markdown: TEXT_IMAGE_MARKDOWN,
+    prepare: () => waitForImages(1),
+  },
+  {
+    name: 'image-only-image-selected',
+    markdown: IMAGE_ONLY_MARKDOWN,
+    prepare: selectImage,
+  },
+  {
+    name: 'image-only-node-selected',
+    markdown: IMAGE_ONLY_MARKDOWN,
+    prepare: async (handle) => {
+      await waitForImages(1)
+      await selectBlock(handle, [0])
+    },
+  },
+  {
+    name: 'image-only',
+    markdown: IMAGE_ONLY_MARKDOWN,
+    prepare: () => waitForImages(1),
+  },
+  {
+    name: 'images',
+    markdown: dedent`
+      ![portrait](portrait.svg) ![square](square.svg)
+
+      ![landscape](landscape.svg) ![portrait](portrait.svg) ![square](square.svg)
+    `,
+    prepare: () => waitForImages(5),
+  },
+  {
+    name: 'list-item-node-selected',
+    markdown: dedent`
+      - First item
+      - Second item
+      - Third item
+    `,
+    prepare: (handle) => selectBlock(handle, [1]),
+  },
+  {
+    name: 'list-mixed',
     markdown: dedent`
       - Bullet
         1. Ordered inside a bullet
@@ -159,7 +237,30 @@ const SCENARIOS: Scenario[] = [
     `,
   },
   {
-    name: 'lists',
+    name: 'list-nested-item-node-selected',
+    markdown: dedent`
+      - First item
+      - Second item
+        - Nested item
+        - Another nested item
+      - Third item
+    `,
+    prepare: (handle) => selectBlock(handle, [1, 1]),
+  },
+  {
+    name: 'list-text-selected',
+    markdown: dedent`
+      - [ ] First task
+      - [x] Second task
+        - [ ] Nested task
+      - Bullet item
+
+      A paragraph after the list.
+    `,
+    prepare: (handle) => selectText(handle, 'task', 'after'),
+  },
+  {
+    name: 'list',
     markdown: dedent`
       - Bullet item
       - A bullet item that is long enough to wrap onto a second line on a narrow screen
@@ -174,114 +275,31 @@ const SCENARIOS: Scenario[] = [
     `,
   },
   {
-    name: 'node-select-blockquote',
-    markdown: surround('> A blockquote that is selected as a whole.'),
-    prepare: (handle) => selectBlock(handle, [1]),
-  },
-  {
-    name: 'node-select-code-block',
-    markdown: surround(CODE_BLOCK_MARKDOWN),
-    prepare: async (handle) => {
-      await waitForCodeTokens()
-      await selectBlock(handle, [1])
-    },
-  },
-  {
-    name: 'node-select-heading',
-    markdown: surround('## A selected heading'),
-    prepare: (handle) => selectBlock(handle, [1]),
-  },
-  {
-    name: 'node-select-horizontal-rule',
-    markdown: surround('---'),
-    prepare: (handle) => selectBlock(handle, [1]),
-  },
-  {
-    name: 'node-select-list-item',
-    markdown: surround('- First item\n- Second item\n- Third item'),
-    prepare: (handle) => selectBlock(handle, [2]),
-  },
-  {
-    name: 'node-select-math',
-    markdown: surround('```math\nE = mc^2\n```'),
+    name: 'math-node-selected',
+    markdown: dedent`
+      \`\`\`math
+      E = mc^2
+      \`\`\`
+    `,
     prepare: async (handle) => {
       const preview = pmRoot.getByTestId('code-block-math-preview')
       await expect.element(preview.locate('.katex')).toBeInTheDocument()
-      await selectBlock(handle, [1])
+      await selectBlock(handle, [0])
     },
   },
   {
-    name: 'node-select-nested-list-item',
-    markdown: surround(
-      '- First item\n- Second item\n  - Nested item\n  - Another nested item\n- Third item',
-    ),
-    prepare: (handle) => selectBlock(handle, [2, 1]),
+    name: 'paragraph-node-selected',
+    markdown: PARAGRAPH_MARKDOWN,
+    prepare: (handle) => selectBlock(handle, [0]),
   },
   {
-    name: 'node-select-paragraph-image-only',
-    markdown: surround(IMAGE_ONLY_MARKDOWN),
-    prepare: async (handle) => {
-      await waitForImages(1)
-      await selectBlock(handle, [1])
-    },
-  },
-  {
-    name: 'node-select-paragraph-text-image',
-    markdown: surround(TEXT_IMAGE_MARKDOWN),
-    prepare: async (handle) => {
-      await waitForImages(1)
-      await selectBlock(handle, [1])
-    },
-  },
-  {
-    name: 'node-select-paragraph',
-    markdown: surround('A paragraph that is selected as a whole.'),
-    prepare: (handle) => selectBlock(handle, [1]),
-  },
-  {
-    name: 'node-select-task-item',
-    markdown: surround('- [ ] First task\n- [x] Second task\n- [ ] Third task'),
-    prepare: (handle) => selectBlock(handle, [2]),
-  },
-  {
-    name: 'node-select-x-post',
-    markdown: surround(X_POST_MARKDOWN),
-    prepare: async (handle) => {
-      await waitForXPost()
-      await selectBlock(handle, [1])
-    },
-  },
-  {
-    name: 'node-select-youtube',
-    markdown: surround(YOUTUBE_MARKDOWN),
-    prepare: async (handle) => {
-      await waitForYouTube()
-      await selectBlock(handle, [1])
-    },
-  },
-  {
-    name: 'paragraph-image-only',
-    markdown: IMAGE_ONLY_MARKDOWN,
-    prepare: () => waitForImages(1),
-  },
-  {
-    name: 'paragraph-images',
-    markdown: dedent`
-      ![portrait](portrait.svg) ![square](square.svg)
-
-      ![landscape](landscape.svg) ![portrait](portrait.svg) ![square](square.svg)
-    `,
-    prepare: () => waitForImages(5),
-  },
-  {
-    name: 'paragraph-text-image',
-    markdown: TEXT_IMAGE_MARKDOWN,
-    prepare: () => waitForImages(1),
+    name: 'paragraph-text-selected',
+    markdown: 'Meowdown is a hybrid live-preview Markdown editor with **bold** and *italic* text.',
+    prepare: (handle) => selectText(handle, 'live-preview', ' editor'),
   },
   {
     name: 'paragraph',
-    markdown:
-      'Meowdown is a hybrid live-preview Markdown editor. It keeps **bold**, *italic*, `code`, ~~strike~~, ==highlight==, [links](https://example.com) and [[wikilinks]] readable while you write.',
+    markdown: PARAGRAPH_MARKDOWN,
   },
   {
     name: 'slash-menu',
@@ -293,36 +311,45 @@ const SCENARIOS: Scenario[] = [
     },
   },
   {
-    name: 'table-select-all-cells',
+    name: 'table-cells-all-selected',
     markdown: `select all cells\n\n${TABLE_MARKDOWN}`,
     prepare: (handle) => selectCells(handle, [0, 0], [3, 2]),
   },
   {
-    name: 'table-select-block',
+    name: 'table-cells-block-selected',
     markdown: `select table block\n\n${TABLE_MARKDOWN}`,
     prepare: (handle) => selectCells(handle, [1, 1], [2, 2]),
   },
   {
-    name: 'table-select-column',
+    name: 'table-cells-column-selected',
     markdown: `select table column\n\n${TABLE_MARKDOWN}`,
     prepare: (handle) => selectCells(handle, [0, 1], [3, 1]),
   },
   {
-    name: 'table-select-node',
-    markdown: `select table node\n\n${TABLE_MARKDOWN}`,
-    prepare: (handle) => selectBlock(handle, [1]),
-  },
-  {
-    name: 'table-select-row',
+    name: 'table-cells-row-selected',
     markdown: `select table row\n\n${TABLE_MARKDOWN}`,
     prepare: (handle) => selectCells(handle, [2, 0], [2, 2]),
+  },
+  {
+    name: 'table-node-selected',
+    markdown: `select table node\n\n${TABLE_MARKDOWN}`,
+    prepare: (handle) => selectBlock(handle, [1]),
   },
   {
     name: 'table',
     markdown: TABLE_MARKDOWN,
   },
   {
-    name: 'task-lists',
+    name: 'task-list-item-node-selected',
+    markdown: dedent`
+      - [ ] First task
+      - [x] Second task
+      - [ ] Third task
+    `,
+    prepare: (handle) => selectBlock(handle, [1]),
+  },
+  {
+    name: 'task-list',
     markdown: dedent`
       - [ ] Open task
       - [x] Done task
@@ -332,30 +359,37 @@ const SCENARIOS: Scenario[] = [
     `,
   },
   {
-    name: 'text-select-lists',
-    markdown: dedent`
-      - [ ] First task
-      - [x] Second task
-        - [ ] Nested task
-      - Bullet item
-
-      A paragraph after the list.
-    `,
-    prepare: (handle) => selectText(handle, 'task', 'after'),
-  },
-  {
-    name: 'text-select-paragraph',
-    markdown: 'Meowdown is a hybrid live-preview Markdown editor with **bold** and *italic* text.',
-    prepare: (handle) => selectText(handle, 'live-preview', ' editor'),
+    name: 'x-post-node-selected',
+    markdown: X_POST_MARKDOWN,
+    prepare: async (handle) => {
+      await waitForXPost()
+      await selectBlock(handle, [0])
+    },
   },
   {
     name: 'x-post',
-    markdown: `An X post:\n\n${X_POST_MARKDOWN}`,
+    markdown: dedent`
+      An X post:
+
+      ${X_POST_MARKDOWN}
+    `,
     prepare: waitForXPost,
   },
   {
+    name: 'youtube-node-selected',
+    markdown: YOUTUBE_MARKDOWN,
+    prepare: async (handle) => {
+      await waitForYouTube()
+      await selectBlock(handle, [0])
+    },
+  },
+  {
     name: 'youtube',
-    markdown: `A YouTube video:\n\n${YOUTUBE_MARKDOWN}`,
+    markdown: dedent`
+      A YouTube video:
+
+      ${YOUTUBE_MARKDOWN}
+    `,
     prepare: waitForYouTube,
   },
 ]
