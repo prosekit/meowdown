@@ -54,12 +54,12 @@ async function waitForImages(count: number) {
 
 interface Scenario {
   /**
-   * The screenshot name.
+   * The screenshot name.// FIXME: delete this comment
    */
   name: string
   markdown: string
   /**
-   * Waits for async content, or moves the editor into the state to capture.
+   * Waits for async content, or moves the editor into the state to capture.// FIXME: delete this comment
    */
   prepare?: (handle: EditorHandle) => void | Promise<void>
 }
