@@ -5,6 +5,18 @@
 @import '@meowdown/embed/x/theme.css' layer(meowdown.base);
 @import '@meowdown/embed/youtube/theme.css' layer(meowdown.base);
 
+/* Spacing and tabs must not depend on the host's CSS reset. Zero specificity,
+ * so `meowdown.editor` rules and host styles override it. */
+@layer meowdown.base {
+  :where(.ProseMirror) {
+    tab-size: 4;
+  }
+
+  :where(.ProseMirror) :where(p, h1, h2, h3, h4, h5, h6, blockquote, pre, ul, ol, figure, hr) {
+    margin: 0;
+  }
+}
+
 @layer meowdown.theme {
   /* ---------------------------------------------------------------------------
    * Default theme: the themeable `--meowdown-*` variables and their defaults.

@@ -2,6 +2,10 @@
  * positioner's viewport-fitting logic writes here when space is short; a
  * block child would keep its own 25rem cap and overflow the viewport. */
 .Positioner {
+  /* Clear the UA `[popover]` box. */
+  margin: 0;
+  padding: 0;
+  border: 0;
   display: flex;
   flex-direction: column;
   z-index: 50;
