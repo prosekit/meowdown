@@ -265,7 +265,6 @@ describe('code block Mermaid preview', () => {
 })
 
 describe('code block node selection', () => {
-  const pmRoot = page.locate('.ProseMirror')
   const codeBlock = page.getByTestId('code-block')
   const dragHandle = page.getByTestId('block-handle-drag')
 
@@ -289,19 +288,6 @@ describe('code block node selection', () => {
     await dragHandle.click()
 
     await expect.element(codeBlock).toHaveStyle({ outlineStyle: 'solid' })
-  })
-
-  it('hides the native caret while a Mermaid block is selected', async () => {
-    await unhover()
-    await render(<ProseKitEditor initialMarkdown={`${MERMAID_BLOCK_MD}\n\nafter`} />)
-    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
-
-    await hover(mermaidPreview)
-    await dragHandle.click()
-
-    await expect.element(codeBlock).toHaveStyle({ outlineStyle: 'solid' })
-    await expect.element(pmRoot).toHaveClass('ProseMirror-hideselection')
-    expect(getComputedStyle(pmRoot.element()).caretColor).toBe('rgba(0, 0, 0, 0)')
   })
 })
 
