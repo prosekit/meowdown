@@ -769,6 +769,8 @@
     background: none;
   }
 
+  /* A one-color gradient is an image layer, so the tint paints over a cell's
+   * own `background-color` (the header fill) instead of replacing it. */
   .ProseMirror table.ProseMirror-selectednode :is(td, th),
   .ProseMirror .selectedCell {
     background-image: linear-gradient(
