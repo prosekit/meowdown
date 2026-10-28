@@ -60,7 +60,7 @@ export async function expectScreenshots(name: string): Promise<void> {
         await page.viewport(variant.width, contentHeight)
       }
       root.style.colorScheme = variant.theme
-      await expect.element(frame).toMatchScreenshot(`${name}_${variant.viewport}_${variant.theme}`)
+      await expect.element(frame).toMatchScreenshot(`${name}/${variant.viewport}-${variant.theme}`)
     }
   } finally {
     root.style.colorScheme = ''
