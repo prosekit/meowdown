@@ -94,13 +94,13 @@ async function waitForYouTube() {
  */
 async function selectImage(handle: EditorHandle) {
   await waitForImages(1)
-  selectTextMatch(handle, '![landscape](landscape.svg)')
+  await selectTextMatch(handle, '![landscape](landscape.svg)')
 }
 
 interface Scenario {
   name: string
   markdown: string
-  prepare?: (handle: EditorHandle) => void | Promise<void>
+  prepare?: (handle: EditorHandle) => Promise<void>
 }
 
 // Names are `<subject>` or `<subject>-<state>`, so keep-sorted puts every state
@@ -110,7 +110,9 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'blockquote-node-selected',
     markdown: BLOCKQUOTE_MARKDOWN,
-    prepare: (handle) => selectBlock(handle, [0]),
+    prepare: async (handle) => {
+      await selectBlock(handle, [0])
+    },
   },
   {
     name: 'blockquote',
@@ -127,7 +129,9 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'code-block',
     markdown: CODE_BLOCK_MARKDOWN,
-    prepare: waitForCodeTokens,
+    prepare: async () => {
+      await waitForCodeTokens()
+    },
   },
   {
     name: 'heading-node-selected-between',
@@ -138,12 +142,16 @@ const SCENARIOS: Scenario[] = [
 
       Some text below.
     `,
-    prepare: (handle) => selectBlock(handle, [1]),
+    prepare: async (handle) => {
+      await selectBlock(handle, [1])
+    },
   },
   {
     name: 'heading-node-selected',
     markdown: '## A selected heading',
-    prepare: (handle) => selectBlock(handle, [0]),
+    prepare: async (handle) => {
+      await selectBlock(handle, [0])
+    },
   },
   {
     name: 'headings',
@@ -164,12 +172,16 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'horizontal-rule-node-selected',
     markdown: '---',
-    prepare: (handle) => selectBlock(handle, [0]),
+    prepare: async (handle) => {
+      await selectBlock(handle, [0])
+    },
   },
   {
     name: 'image-in-text-image-selected',
     markdown: TEXT_IMAGE_MARKDOWN,
-    prepare: selectImage,
+    prepare: async (handle) => {
+      await selectImage(handle)
+    },
   },
   {
     name: 'image-in-text-node-selected',
@@ -182,12 +194,16 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'image-in-text',
     markdown: TEXT_IMAGE_MARKDOWN,
-    prepare: () => waitForImages(1),
+    prepare: async () => {
+      await waitForImages(1)
+    },
   },
   {
     name: 'image-only-image-selected',
     markdown: IMAGE_ONLY_MARKDOWN,
-    prepare: selectImage,
+    prepare: async (handle) => {
+      await selectImage(handle)
+    },
   },
   {
     name: 'image-only-node-selected',
@@ -200,7 +216,9 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'image-only',
     markdown: IMAGE_ONLY_MARKDOWN,
-    prepare: () => waitForImages(1),
+    prepare: async () => {
+      await waitForImages(1)
+    },
   },
   {
     name: 'images',
@@ -209,7 +227,9 @@ const SCENARIOS: Scenario[] = [
 
       ![landscape](landscape.svg) ![portrait](portrait.svg) ![square](square.svg)
     `,
-    prepare: () => waitForImages(5),
+    prepare: async () => {
+      await waitForImages(5)
+    },
   },
   {
     name: 'list-item-node-selected',
@@ -218,7 +238,9 @@ const SCENARIOS: Scenario[] = [
       - Second item
       - Third item
     `,
-    prepare: (handle) => selectBlock(handle, [1]),
+    prepare: async (handle) => {
+      await selectBlock(handle, [1])
+    },
   },
   {
     name: 'list-mixed',
@@ -245,7 +267,9 @@ const SCENARIOS: Scenario[] = [
         - Another nested item
       - Third item
     `,
-    prepare: (handle) => selectBlock(handle, [1, 1]),
+    prepare: async (handle) => {
+      await selectBlock(handle, [1, 1])
+    },
   },
   {
     name: 'list-text-selected',
@@ -257,7 +281,9 @@ const SCENARIOS: Scenario[] = [
 
       A paragraph after the list.
     `,
-    prepare: (handle) => selectText(handle, 'task', 'after'),
+    prepare: async (handle) => {
+      await selectText(handle, 'task', 'after')
+    },
   },
   {
     name: 'list',
@@ -290,12 +316,16 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'paragraph-node-selected',
     markdown: PARAGRAPH_MARKDOWN,
-    prepare: (handle) => selectBlock(handle, [0]),
+    prepare: async (handle) => {
+      await selectBlock(handle, [0])
+    },
   },
   {
     name: 'paragraph-text-selected',
     markdown: 'Meowdown is a hybrid live-preview Markdown editor with **bold** and *italic* text.',
-    prepare: (handle) => selectText(handle, 'live-preview', ' editor'),
+    prepare: async (handle) => {
+      await selectText(handle, 'live-preview', ' editor')
+    },
   },
   {
     name: 'paragraph',
@@ -313,27 +343,37 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'table-cells-all-selected',
     markdown: `select all cells\n\n${TABLE_MARKDOWN}`,
-    prepare: (handle) => selectCells(handle, [0, 0], [3, 2]),
+    prepare: async (handle) => {
+      await selectCells(handle, [0, 0], [3, 2])
+    },
   },
   {
     name: 'table-cells-block-selected',
     markdown: `select table block\n\n${TABLE_MARKDOWN}`,
-    prepare: (handle) => selectCells(handle, [1, 1], [2, 2]),
+    prepare: async (handle) => {
+      await selectCells(handle, [1, 1], [2, 2])
+    },
   },
   {
     name: 'table-cells-column-selected',
     markdown: `select table column\n\n${TABLE_MARKDOWN}`,
-    prepare: (handle) => selectCells(handle, [0, 1], [3, 1]),
+    prepare: async (handle) => {
+      await selectCells(handle, [0, 1], [3, 1])
+    },
   },
   {
     name: 'table-cells-row-selected',
     markdown: `select table row\n\n${TABLE_MARKDOWN}`,
-    prepare: (handle) => selectCells(handle, [2, 0], [2, 2]),
+    prepare: async (handle) => {
+      await selectCells(handle, [2, 0], [2, 2])
+    },
   },
   {
     name: 'table-node-selected',
     markdown: `select table node\n\n${TABLE_MARKDOWN}`,
-    prepare: (handle) => selectBlock(handle, [1]),
+    prepare: async (handle) => {
+      await selectBlock(handle, [1])
+    },
   },
   {
     name: 'table',
@@ -346,7 +386,9 @@ const SCENARIOS: Scenario[] = [
       - [x] Second task
       - [ ] Third task
     `,
-    prepare: (handle) => selectBlock(handle, [1]),
+    prepare: async (handle) => {
+      await selectBlock(handle, [1])
+    },
   },
   {
     name: 'task-list',
@@ -373,7 +415,9 @@ const SCENARIOS: Scenario[] = [
 
       ${X_POST_MARKDOWN}
     `,
-    prepare: waitForXPost,
+    prepare: async () => {
+      await waitForXPost()
+    },
   },
   {
     name: 'youtube-node-selected',
@@ -390,7 +434,9 @@ const SCENARIOS: Scenario[] = [
 
       ${YOUTUBE_MARKDOWN}
     `,
-    prepare: waitForYouTube,
+    prepare: async () => {
+      await waitForYouTube()
+    },
   },
 ]
 
