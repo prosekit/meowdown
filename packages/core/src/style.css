@@ -174,6 +174,15 @@
     /* Vertical padding of a paragraph. Two neighbors add up, so the gap between
      * paragraphs is twice this at every nesting depth. */
     --meowdown-block-padding: 0.3em;
+
+    /* Heading font sizes. A list item that starts with a heading reads them to
+     * center its marker on the heading's first line. */
+    --meowdown-h1-size: 1.75rem;
+    --meowdown-h2-size: 1.4rem;
+    --meowdown-h3-size: 1.2rem;
+    --meowdown-h4-size: 1.1rem;
+    --meowdown-h5-size: 1rem;
+    --meowdown-h6-size: 0.95rem;
   }
 }
 
@@ -340,22 +349,22 @@
   }
 
   .ProseMirror h1 {
-    font-size: 1.75rem;
+    font-size: var(--meowdown-h1-size);
   }
   .ProseMirror h2 {
-    font-size: 1.4rem;
+    font-size: var(--meowdown-h2-size);
   }
   .ProseMirror h3 {
-    font-size: 1.2rem;
+    font-size: var(--meowdown-h3-size);
   }
   .ProseMirror h4 {
-    font-size: 1.1rem;
+    font-size: var(--meowdown-h4-size);
   }
   .ProseMirror h5 {
-    font-size: 1rem;
+    font-size: var(--meowdown-h5-size);
   }
   .ProseMirror h6 {
-    font-size: 0.95rem;
+    font-size: var(--meowdown-h6-size);
   }
 
   .ProseMirror .md-link {
@@ -451,8 +460,27 @@
     &:has(> .list-content > :is(h1, h2, h3, h4, h5, h6):first-child) {
       & > .list-marker,
       &::before {
-        top: 0;
+        /* Center on the heading's first line (line-height 1.25). */
+        top: calc(1.25 * var(--meowdown-list-heading-size) / 2 - 0.5lh);
       }
+    }
+    &:has(> .list-content > h1:first-child) {
+      --meowdown-list-heading-size: var(--meowdown-h1-size);
+    }
+    &:has(> .list-content > h2:first-child) {
+      --meowdown-list-heading-size: var(--meowdown-h2-size);
+    }
+    &:has(> .list-content > h3:first-child) {
+      --meowdown-list-heading-size: var(--meowdown-h3-size);
+    }
+    &:has(> .list-content > h4:first-child) {
+      --meowdown-list-heading-size: var(--meowdown-h4-size);
+    }
+    &:has(> .list-content > h5:first-child) {
+      --meowdown-list-heading-size: var(--meowdown-h5-size);
+    }
+    &:has(> .list-content > h6:first-child) {
+      --meowdown-list-heading-size: var(--meowdown-h6-size);
     }
   }
 
