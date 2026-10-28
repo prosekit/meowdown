@@ -8,3 +8,5 @@ export default defineConfig({
     projects: ['./packages/*/vitest.visual.config.ts'],
   },
 })
+
+// FIXME: delete vitest.visual.config.ts
