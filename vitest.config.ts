@@ -14,7 +14,8 @@ export default defineConfig({
       include: ['packages/*/src/**'],
     },
     slowTestThreshold: 10_000,
-    // FIXME: delete vitest.visual.config.ts, just use the isVisual flag to determine which config to use
+    // Screenshot tests run only in the autofix.ci workflow, which commits the
+    // updated reference screenshots back to the pull request.
     projects: isVisual
       ? ['./packages/*/vitest.visual.config.ts']
       : ['./packages/*/vitest.node.config.ts', './packages/*/vitest.browser.config.ts'],

@@ -5,6 +5,11 @@
   "workspaces": {
     "website": {
       "entry": ["src/stories/*.stories.{ts,tsx}"]
+    },
+    "packages/react": {
+      "vitest": {
+        "config": ["vitest.*.config.ts"]
+      }
     }
   }
 }

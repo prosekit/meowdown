@@ -34,8 +34,7 @@ jobs:
   visual:
     runs-on: ${{ matrix.config.runner }}
     name: visual-${{ matrix.config.os }}-${{ matrix.config.browser }}
-    timeout-minutes: 15
-    # FIXME: timeout-minutes: 15; change to 20;
+    timeout-minutes: 20
 
     strategy:
       fail-fast: false
@@ -59,9 +58,9 @@ jobs:
         run: pnpm run test:install:${{ matrix.config.browser }}
 
       - name: Update screenshots
-        # FIXME: remove "test:visual". use env variable to set visual mode;
-        run: pnpm run test:visual --update
+        run: pnpm run test --update
         env:
+          MEOWDOWN_TEST_VISUAL: 'true'
           MEOWDOWN_TEST_BROWSER: ${{ matrix.config.browser }}
           NO_COLOR: '1'
 

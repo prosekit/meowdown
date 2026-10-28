@@ -1,7 +1,5 @@
 import '../testing/index.ts'
 
-import { isNodeOfType } from '@meowdown/core'
-import type { EditorNode } from '@prosekit/pm/model'
 import dedent from 'dedent'
 import { createRef } from 'react'
 import { describe, expect, it } from 'vitest'
@@ -10,7 +8,7 @@ import { page, userEvent } from 'vitest/browser'
 import { MarkdownEditor } from '../components/editor.tsx'
 import type { EditorHandle } from '../components/types.ts'
 import { hover, unhover } from '../testing/mouse.ts'
-import { expectScreenshots, renderVisual } from '../testing/visual.tsx'
+import { expectScreenshots, renderVisual, selectCells, selectText } from '../testing/visual.tsx'
 
 const pmRoot = page.locate('.ProseMirror')
 const slashMenu = page.getByTestId('slash-menu')
@@ -35,56 +33,6 @@ async function setupEditor(markdown: string) {
   const handle = ref.current
   if (!handle) throw new Error('editor not mounted')
   return handle
-}
-
-function getDoc(handle: EditorHandle): EditorNode {
-  const editor = handle.getEditor()
-  if (!editor) throw new Error('editor not mounted')
-  return editor.state.doc
-}
-
-/**
- * The position before each cell, by row and column.
- */ // FIXME: move helpful functions like this into packages/react/src/testing/visual.tsx
-function getCellPositions(doc: EditorNode): number[][] {
-  const rows: number[][] = []
-  doc.descendants((node, pos) => {
-    if (isNodeOfType(node, 'tableRow')) {
-      rows.push([])
-    } else if (isNodeOfType(node, 'tableCell') || isNodeOfType(node, 'tableHeaderCell')) {
-      rows.at(-1)?.push(pos)
-      return false
-    }
-    return true
-  })
-  return rows
-}
-
-function getTextPosition(doc: EditorNode, query: string): number {
-  let found = -1
-  doc.descendants((node, pos) => {
-    if (found >= 0) return false
-    const index = node.isText ? (node.text ?? '').indexOf(query) : -1
-    if (index >= 0) found = pos + index
-    return true
-  })
-  if (found < 0) throw new Error(`text not found: ${query}`)
-  return found
-}
-
-async function selectCells(
-  handle: EditorHandle,
-  [anchorRow, anchorColumn]: [number, number],
-  [headRow, headColumn]: [number, number],
-) {
-  const cells = getCellPositions(getDoc(handle))
-  handle.focus()
-  handle.setSelection({
-    type: 'cell',
-    anchor: cells[anchorRow][anchorColumn],
-    head: cells[headRow][headColumn],
-  })
-  await expect.element(pmRoot.locate('.selectedCell').first()).toBeInTheDocument()
 }
 
 describe('table selection', () => {
@@ -127,13 +75,7 @@ describe('text selection', () => {
     const handle = await setupEditor(
       'Meowdown is a hybrid live-preview Markdown editor with **bold** and *italic* text.',
     )
-    const doc = getDoc(handle)
-    handle.focus()
-    handle.setSelection({
-      type: 'text',
-      anchor: getTextPosition(doc, 'live-preview'),
-      head: getTextPosition(doc, ' editor'),
-    })
+    selectText(handle, 'live-preview', ' editor')
     await expectScreenshots('text-select-paragraph')
   })
 
@@ -146,13 +88,7 @@ describe('text selection', () => {
 
       A paragraph after the list.
     `)
-    const doc = getDoc(handle)
-    handle.focus()
-    handle.setSelection({
-      type: 'text',
-      anchor: getTextPosition(doc, 'task'),
-      head: getTextPosition(doc, 'after'),
-    })
+    selectText(handle, 'task', 'after')
     await expectScreenshots('text-select-lists')
   })
 })
