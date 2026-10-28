@@ -1,7 +1,7 @@
 {
   "name": "@meowdown/react",
   "type": "module",
-  "version": "0.82.0",
+  "version": "0.82.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -66,8 +66,10 @@
     "@tsdown/css": "^0.23.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
     "@vitest/browser-playwright": "^5.0.5",
     "dedent": "^1.7.2",
+    "oxc-transform-react": "^0.152.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "tsdown": "^0.23.2",

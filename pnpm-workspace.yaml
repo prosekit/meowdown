@@ -26,6 +26,10 @@ minimumReleaseAgeExclude:
   - prosemirror-flat-list
   - mdast-util-to-markdown@2.2.1
 
+peerDependencyRules:
+  allowedVersions:
+    oxc-transform-react: 0.x
+
 allowBuilds:
   esbuild: false
   simple-git-hooks: false

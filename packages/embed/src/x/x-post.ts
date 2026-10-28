@@ -23,6 +23,8 @@ export interface XPostElement extends HTMLElement, XPostProps {}
 
 /** @internal */
 export function useXPost(host: HostElement, props: State<XPostProps>): void {
+  // An aria-ui host hook, not a React hook.
+  'use no memo'
   const { fetched, pending } = useFetch(host, props, 'X post')
 
   useHostEffect(host, () => {
