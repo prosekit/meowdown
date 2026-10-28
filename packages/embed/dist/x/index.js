@@ -1,9 +1,9 @@
-import { a as useFetch, i as getSafeUrl, n as getRootContainer, r as renderLink, t as isPlainClick } from "../is-plain-click-QDpLdFP7.js";
+import { a as useFetch, i as getSafeUrl, n as getRootContainer, r as renderLink, t as isPlainClick } from "../is-plain-click-CvDb-mN4.js";
 import { defineCustomElement, defineProps, registerCustomElement, useEffect } from "@aria-ui/core";
 import { parseXPost, parseXPostId } from "@post-embed/schema";
 import el from "crelt";
 
-//#region src/x/media-click.ts
+// src/x/media-click.ts
 const X_POST_MEDIA_CLICK = "meowdown-embed-media-click";
 /**
 * Returns false when a listener called `preventDefault()`: the host shows the
@@ -18,8 +18,7 @@ function dispatchMediaClick(target, detail) {
 	}));
 }
 
-//#endregion
-//#region src/x/render-author.ts
+// src/x/render-author.ts
 function renderAuthor(author, protocols, date) {
 	if (!author.name && !author.handle) return;
 	const validHandle = /^\w{1,15}$/.test(author.handle);
@@ -37,8 +36,7 @@ function renderAuthor(author, protocols, date) {
 	}) : void 0, el("div", { "data-author-details": "" }, el("div", { "data-author-name": "" }, el("bdi", {}, author.name || author.handle)), author.handle ? el("bdi", {}, renderLink(`@${author.handle}`, validHandle ? `https://x.com/${author.handle}` : void 0)) : void 0), date ? el("span", { "data-date": "" }, date) : void 0);
 }
 
-//#endregion
-//#region ../../node_modules/.pnpm/@ocavue+utils@1.9.0/node_modules/@ocavue/utils/dist/index.js
+// ../../node_modules/.pnpm/@ocavue+utils@1.9.0/node_modules/@ocavue/utils/dist/index.js
 /**
 * Returns true if the given value is not null or undefined.
 */
@@ -46,8 +44,7 @@ function isNotNullish(value) {
 	return value != null;
 }
 
-//#endregion
-//#region src/to-positive-number.ts
+// src/to-positive-number.ts
 /**
 * The value rounded to an integer, or nothing unless it is a finite number
 * above zero.
@@ -56,8 +53,7 @@ function toPositiveNumber(value) {
 	if (typeof value === "number" && Number.isFinite(value) && value > 0) return Math.round(value);
 }
 
-//#endregion
-//#region src/x/sort-video-sources.ts
+// src/x/sort-video-sources.ts
 /**
 * Orders the sources the way a `<video>` should try them: it plays the first
 * `<source>` it supports, so MP4 files come before HLS playlists (which only
@@ -70,8 +66,7 @@ function sortVideoSources(sources) {
 	});
 }
 
-//#endregion
-//#region src/x/render-media.ts
+// src/x/render-media.ts
 function getSizeAttrs(media) {
 	return {
 		width: toPositiveNumber(media.width),
@@ -240,8 +235,7 @@ function renderMedia(media, protocols, permalink) {
 	}));
 }
 
-//#endregion
-//#region src/x/render-shared.ts
+// src/x/render-shared.ts
 function getPermalink(post) {
 	return /^\w{1,15}$/.test(post.author.handle) && /^\d+$/.test(post.id) ? `https://x.com/${post.author.handle}/status/${post.id}` : void 0;
 }
@@ -266,8 +260,7 @@ function renderDate(post) {
 	}).format(date)), getPermalink(post));
 }
 
-//#endregion
-//#region src/x/render-post.ts
+// src/x/render-post.ts
 function renderBody(post) {
 	const permalink = getPermalink(post);
 	return el("p", {
@@ -296,8 +289,7 @@ function renderPost(post, protocols = null) {
 	return el("article", {}, el("div", { "data-content": "" }, renderAuthor(post.author, protocols, renderDate(post)), reply ? el("div", { "data-reply-to": "" }, renderLink(`Replying to @${reply.handle}`, replyUrl)) : void 0, renderBody(post), renderMedia(post.media, protocols, getPermalink(post)), post.quote ? renderQuoted(post.quote, protocols) : void 0, renderEdit(post)), el("details", { "data-show-more": "" }, el("summary", {})));
 }
 
-//#endregion
-//#region src/x/x-post.ts
+// src/x/x-post.ts
 /** @internal */
 function useXPost(host, props) {
 	const { fetched, pending } = useFetch(host, props, "X post");
@@ -343,11 +335,9 @@ const XPost = defineCustomElement(useXPost, defineProps({
 	}
 }));
 
-//#endregion
-//#region src/x/register.ts
+// src/x/register.ts
 function registerXPost(name = "meowdown-embed-x") {
 	registerCustomElement(name, class extends XPost {});
 }
 
-//#endregion
 export { X_POST_MEDIA_CLICK, registerXPost, useXPost };

@@ -23,7 +23,7 @@ import { Mark } from "@prosekit/pm/model";
 import { BOOLEAN, OVERLOADED_BOOLEAN, getPropertyInfo, possibleStandardNames } from "react-property";
 import { PreviewCard } from "@base-ui/react/preview-card";
 
-//#region src/hooks/use-beautiful-mermaid.ts
+// src/hooks/use-beautiful-mermaid.ts
 let beautifulMermaidPromise;
 function loadBeautifulMermaid() {
 	beautifulMermaidPromise ??= import("./beautiful-mermaid-chunk-Cc6FHgAa.js").then((module) => module.renderMermaidSVG).catch((error) => {
@@ -47,8 +47,7 @@ function useBeautifulMermaid(enabled) {
 	return renderer;
 }
 
-//#endregion
-//#region src/hooks/use-katex.ts
+// src/hooks/use-katex.ts
 /**
 * The lazily loaded KaTeX render function, or `undefined` while it loads (or when
 * `enabled` is false, so a document without math never loads it).
@@ -68,8 +67,7 @@ function useKaTeX(enabled) {
 	return katex;
 }
 
-//#endregion
-//#region src/utils/non-prose-props.ts
+// src/utils/non-prose-props.ts
 const NON_PROSE_PROPS = {
 	spellCheck: false,
 	autoCorrect: "off",
@@ -77,8 +75,7 @@ const NON_PROSE_PROPS = {
 	writingsuggestions: "false"
 };
 
-//#endregion
-//#region src/components/code-block-view.module.css
+// src/components/code-block-view.module.css
 var code_block_view_module_default = {
 	"CopyButton": "meow_CopyButton_U9Fqfa",
 	"Empty": "meow_Empty_U9Fqfa",
@@ -98,8 +95,7 @@ var code_block_view_module_default = {
 	"TriggerIcon": "meow_TriggerIcon_U9Fqfa"
 };
 
-//#endregion
-//#region src/components/collision-boundary.ts
+// src/components/collision-boundary.ts
 /**
 * See `EditorProps.collisionBoundary`.
 */
@@ -112,8 +108,7 @@ function toFloatingBoundary(boundary) {
 	return boundary === "clipping-ancestors" ? "clippingAncestors" : boundary;
 }
 
-//#endregion
-//#region src/components/copy-button.tsx
+// src/components/copy-button.tsx
 const COPIED_RESET_MS = 1500;
 /**
 * A copy-to-clipboard button with "copied" feedback. Shared by the code block
@@ -146,8 +141,7 @@ function CopyButton({ getText, label, onCopy, className, ...rest }) {
 	});
 }
 
-//#endregion
-//#region src/components/math-render.tsx
+// src/components/math-render.tsx
 /**
 * KaTeX output rendered into a real element, the same way the editor's
 * `MathMarkView` does. A span host matches KaTeX's own output shape; display
@@ -174,8 +168,7 @@ function MathRender(props) {
 	});
 }
 
-//#endregion
-//#region src/components/mermaid-render.tsx
+// src/components/mermaid-render.tsx
 const MERMAID_OPTIONS = {
 	bg: "var(--meowdown-mermaid-bg)",
 	fg: "var(--meowdown-mermaid-fg)",
@@ -224,8 +217,7 @@ function MermaidRender(props) {
 	}, "svg");
 }
 
-//#endregion
-//#region src/components/code-block-view.tsx
+// src/components/code-block-view.tsx
 function CodeBlockView(props) {
 	const { node, view, getPos, decorations, selected, setAttrs, contentRef } = props;
 	const language = node.attrs.language || "";
@@ -381,8 +373,7 @@ function CodeBlockLanguagePicker({ language, setLanguage, onShownChange }) {
 }
 const CodeBlockLanguagePickerMemo = /* @__PURE__ */ memo(CodeBlockLanguagePicker);
 
-//#endregion
-//#region src/extensions/code-block-view.ts
+// src/extensions/code-block-view.ts
 function defineCodeBlockView(component = CodeBlockView) {
 	return union(defineReactNodeView({
 		name: "codeBlock",
@@ -391,16 +382,14 @@ function defineCodeBlockView(component = CodeBlockView) {
 	}), defineCodeBlockPreviewPlugin());
 }
 
-//#endregion
-//#region src/components/block-handle.module.css
+// src/components/block-handle.module.css
 var block_handle_module_default = {
 	"Draggable": "meow_Draggable_3uJCGG",
 	"Popup": "meow_Popup_3uJCGG",
 	"Positioner": "meow_Positioner_3uJCGG"
 };
 
-//#endregion
-//#region src/components/block-handle.tsx
+// src/components/block-handle.tsx
 function BlockHandle() {
 	return /* @__PURE__ */ jsx(BlockHandleRoot, { children: /* @__PURE__ */ jsx(BlockHandlePositioner, {
 		className: block_handle_module_default.Positioner,
@@ -416,12 +405,10 @@ function BlockHandle() {
 	}) });
 }
 
-//#endregion
-//#region src/components/drop-indicator.module.css
+// src/components/drop-indicator.module.css
 var drop_indicator_module_default = { "DropIndicator": "meow_DropIndicator_dZ-6sG" };
 
-//#endregion
-//#region src/components/drop-indicator.tsx
+// src/components/drop-indicator.tsx
 function DropIndicator$1() {
 	return /* @__PURE__ */ jsx(DropIndicator, {
 		className: drop_indicator_module_default.DropIndicator,
@@ -429,8 +416,7 @@ function DropIndicator$1() {
 	});
 }
 
-//#endregion
-//#region src/components/editor-extensions.tsx
+// src/components/editor-extensions.tsx
 function EditorExtensions({ config, searchQuery, onDocChange, onSearchChange }) {
 	const editor = useEditor$1();
 	useEffect(() => {
@@ -449,8 +435,7 @@ function EditorExtensions({ config, searchQuery, onDocChange, onSearchChange }) 
 	return null;
 }
 
-//#endregion
-//#region src/components/link-menu-state.ts
+// src/components/link-menu-state.ts
 const LINK_MENU_IDLE = { kind: "idle" };
 /**
 * What the popup renders: the open view, or the closing one during the exit
@@ -487,8 +472,7 @@ function reduceLinkMenu(state, event) {
 	}
 }
 
-//#endregion
-//#region src/components/link-menu.module.css
+// src/components/link-menu.module.css
 var link_menu_module_default = {
 	"Actions": "meow_Actions_0GRvpq",
 	"Button": "meow_Button_0GRvpq",
@@ -517,8 +501,7 @@ var link_menu_module_default = {
 	"UseTitleButton": "meow_UseTitleButton_0GRvpq"
 };
 
-//#endregion
-//#region src/components/link-menu.tsx
+// src/components/link-menu.tsx
 function useLinkPreview(href, resolveLinkPreview) {
 	const [settled, setSettled] = useState();
 	useEffect(() => {
@@ -927,8 +910,7 @@ function LinkMenu({ onLinkClick, onLinkCopy, resolveLinkPreview, readOnly = fals
 	});
 }
 
-//#endregion
-//#region src/components/pending-replacement-preview.module.css
+// src/components/pending-replacement-preview.module.css
 var pending_replacement_preview_module_default = {
 	"AcceptButton": "meow_AcceptButton_xfEgeG",
 	"Button": "meow_Button_xfEgeG",
@@ -940,8 +922,7 @@ var pending_replacement_preview_module_default = {
 	"Waiting": "meow_Waiting_xfEgeG"
 };
 
-//#endregion
-//#region src/components/pending-replacement-preview.tsx
+// src/components/pending-replacement-preview.tsx
 /**
 * Vertical room (px) the popover needs under its anchor: the text area's
 * 14rem max-height plus the footer, borders, and the anchor offset.
@@ -1068,8 +1049,7 @@ function PendingReplacementPreview({ actions, onResolve }) {
 	});
 }
 
-//#endregion
-//#region src/hooks/use-delayed-flag.ts
+// src/hooks/use-delayed-flag.ts
 /**
 * Delay before the flag opens, in ms.
 */
@@ -1099,8 +1079,7 @@ function useDelayedFlag(value, openDelay = OPEN_DELAY, closeDelay = CLOSE_DELAY)
 	return flag;
 }
 
-//#endregion
-//#region src/components/selection-menu.module.css
+// src/components/selection-menu.module.css
 var selection_menu_module_default = {
 	"AffordanceButton": "meow_AffordanceButton_PMURHG",
 	"AffordancePopup": "meow_AffordancePopup_PMURHG",
@@ -1115,8 +1094,7 @@ var selection_menu_module_default = {
 	"Positioner": "meow_Positioner_PMURHG"
 };
 
-//#endregion
-//#region src/components/selection-menu.tsx
+// src/components/selection-menu.tsx
 /**
 * A command menu over the current selection: a popover with a filter input and
 * host-supplied rows, anchored to the selected range. Opened imperatively (via
@@ -1314,8 +1292,7 @@ function SelectionMenuPopup({ onSelectionMenuSearch, context, onClose }) {
 	})] });
 }
 
-//#endregion
-//#region src/utils/date-format.ts
+// src/utils/date-format.ts
 /**
 * Formats the current wall-clock time for the `/now` slash command.
 */
@@ -1335,8 +1312,7 @@ function formatTime24(date) {
 	return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
 }
 
-//#endregion
-//#region src/components/autocomplete-menu.module.css
+// src/components/autocomplete-menu.module.css
 var autocomplete_menu_module_default = {
 	"Detail": "meow_Detail_ZNR7tq",
 	"Item": "meow_Item_ZNR7tq",
@@ -1345,8 +1321,7 @@ var autocomplete_menu_module_default = {
 	"Positioner": "meow_Positioner_ZNR7tq"
 };
 
-//#endregion
-//#region src/components/slash-menu.tsx
+// src/components/slash-menu.tsx
 const regex$2 = new RegExp((canUseRegexLookbehind() ? String.raw`(?<!\S)` : "") + String.raw`\/(?!\/)(\S.*)?$`, "u");
 const defaultOnFileSaveError = (error) => {
 	console.error("[meowdown] failed to save attached file:", error);
@@ -1556,8 +1531,7 @@ function SlashMenu({ timeFormat = "12", onSlashMenuSearch, onFilePaste, onFileSa
 	});
 }
 
-//#endregion
-//#region src/components/table-handle.module.css
+// src/components/table-handle.module.css
 var table_handle_module_default = {
 	"ColumnPopup": "meow_ColumnPopup_IPrN6a",
 	"MenuItem": "meow_MenuItem_IPrN6a",
@@ -1568,8 +1542,7 @@ var table_handle_module_default = {
 	"Trigger": "meow_Trigger_IPrN6a"
 };
 
-//#endregion
-//#region src/components/table-handle.tsx
+// src/components/table-handle.tsx
 function TableHandleItem({ children, onSelect, testId, active = false, danger = false }) {
 	return /* @__PURE__ */ jsx(MenuItem, {
 		className: table_handle_module_default.MenuItem,
@@ -1819,14 +1792,12 @@ function TableHandle() {
 	] });
 }
 
-//#endregion
-//#region src/utils/returns-true.ts
+// src/utils/returns-true.ts
 function returnsTrue() {
 	return true;
 }
 
-//#endregion
-//#region src/components/tag-menu.tsx
+// src/components/tag-menu.tsx
 const regex$1 = new RegExp((canUseRegexLookbehind() ? String.raw`(?<!\S)` : "") + String.raw`#[\da-z]+$`, "iu");
 function TagMenu({ onTagSearch }) {
 	const editor = useEditor$1();
@@ -1891,16 +1862,14 @@ function TagMenu({ onTagSearch }) {
 	});
 }
 
-//#endregion
-//#region src/components/virtual-caret.tsx
+// src/components/virtual-caret.tsx
 function VirtualCaret() {
 	const [layer, setLayer] = useState(null);
 	useExtension$1(useMemo(() => layer == null ? null : defineVirtualCaret(layer), [layer]));
 	return /* @__PURE__ */ jsx("div", { ref: setLayer });
 }
 
-//#endregion
-//#region src/components/wikilink-menu.tsx
+// src/components/wikilink-menu.tsx
 const regex = new RegExp(String.raw`(?:\[\[[^[\]]*|` + (canUseRegexLookbehind() ? String.raw`(?<!\S)` : "") + String.raw`@(?:[^[\]\s][^[\]]*)?)$`, "u");
 function queryFromRegexMatch(match) {
 	return match[0].replace(/^(?:\[\[|@)/, "").trim();
@@ -1971,8 +1940,7 @@ function WikilinkMenu({ onWikilinkSearch }) {
 	});
 }
 
-//#endregion
-//#region src/components/prosekit-editor.tsx
+// src/components/prosekit-editor.tsx
 function resolveSelection(doc, selection) {
 	if (selection === "start") return Selection.atStart(doc);
 	if (selection === "end") return Selection.atEnd(doc);
@@ -2301,8 +2269,7 @@ function ProseKitEditor({ markMode = "focus", initialMarkdown, singleParagraph =
 	});
 }
 
-//#endregion
-//#region src/components/editor.tsx
+// src/components/editor.tsx
 const CARET_GLIDE_OFF = { "--meowdown-caret-glide": "0ms" };
 /**
 * A hybrid live-preview Markdown editor: the document stays Markdown text,
@@ -2473,8 +2440,7 @@ function MarkdownEditor({ mode = "focus", initialMarkdown, singleParagraph, refe
 	});
 }
 
-//#endregion
-//#region src/hooks/use-maybe-promise.ts
+// src/hooks/use-maybe-promise.ts
 /**
 * The settled value of `input`: `input` itself when it is not a `Promise`,
 * otherwise `undefined` until it resolves. A rejection stays `undefined` and is
@@ -2504,8 +2470,7 @@ function useMaybePromise(input) {
 	return settled?.input === input ? settled.value : void 0;
 }
 
-//#endregion
-//#region src/components/attributes-to-props.ts
+// src/components/attributes-to-props.ts
 const UNCONTROLLED_COMPONENT_ATTRIBUTES = ["checked", "value"];
 const UNCONTROLLED_COMPONENT_NAMES = [
 	"input",
@@ -2558,8 +2523,7 @@ function getPropName(attributeName) {
 	return possibleStandardNames[attributeName];
 }
 
-//#endregion
-//#region src/components/dom-output-spec.tsx
+// src/components/dom-output-spec.tsx
 function normalizeDOMOutputSpec(domSpec) {
 	const spec = domSpec;
 	if (!spec || !Array.isArray(spec)) return;
@@ -2579,8 +2543,7 @@ function normalizeDOMOutputSpec(domSpec) {
 	];
 }
 
-//#endregion
-//#region src/components/markdown-view.tsx
+// src/components/markdown-view.tsx
 /**
 * Convert a ProseMirror `DOMOutputSpec` into a React node, substituting `content`
 * for the spec's content hole (`0`). Reused for every node/mark spec the static
@@ -3195,8 +3158,7 @@ function MarkdownView({ markdown, singleParagraph = false, referenceDefinitions:
 	});
 }
 
-//#endregion
-//#region src/hooks/use-lightbox.ts
+// src/hooks/use-lightbox.ts
 /**
 * The `view-transition-name` shared by the opened thumbnail and the lightbox
 * content, so the browser zooms between them.
@@ -3256,8 +3218,7 @@ function useLightbox() {
 	]);
 }
 
-//#endregion
-//#region src/components/lightbox.module.css
+// src/components/lightbox.module.css
 var lightbox_module_default = {
 	"Dialog": "meow_Dialog_U_12Ra",
 	"Frame": "meow_Frame_U_12Ra",
@@ -3265,8 +3226,7 @@ var lightbox_module_default = {
 	"Video": "meow_Video_U_12Ra"
 };
 
-//#endregion
-//#region src/components/lightbox-frame.tsx
+// src/components/lightbox-frame.tsx
 /**
 * The embedded page of a lightbox, such as a video player: the largest box of
 * the item's aspect ratio that fits.
@@ -3291,8 +3251,7 @@ function LightboxFrame({ item, className, style, ...props }) {
 	});
 }
 
-//#endregion
-//#region src/components/lightbox-image.tsx
+// src/components/lightbox-image.tsx
 /**
 * The image of a lightbox. It is the element the opened thumbnail zooms into.
 */
@@ -3310,8 +3269,7 @@ function LightboxImage({ item, className, style, ...props }) {
 	});
 }
 
-//#endregion
-//#region src/components/lightbox-root.tsx
+// src/components/lightbox-root.tsx
 const DIALOG_TRANSITION_CLASS = "meowdown-lightbox-dialog";
 function showModal(dialog) {
 	const active = document.activeElement;
@@ -3346,8 +3304,7 @@ function LightboxRoot({ lightbox, children, className, ...props }) {
 	});
 }
 
-//#endregion
-//#region src/components/lightbox-video.tsx
+// src/components/lightbox-video.tsx
 /**
 * The video of a lightbox. It starts playing as soon as it opens: the click
 * that opened the lightbox is the user gesture that allows sound.
@@ -3377,16 +3334,14 @@ function LightboxVideo({ item, className, style, ...props }) {
 	});
 }
 
-//#endregion
-//#region src/components/wikilink-hover-card.module.css
+// src/components/wikilink-hover-card.module.css
 var wikilink_hover_card_module_default = {
 	"Popup": "meow_Popup_bcjyia",
 	"Positioner": "meow_Positioner_bcjyia",
 	"Viewport": "meow_Viewport_bcjyia"
 };
 
-//#endregion
-//#region src/components/wikilink-hover-card.tsx
+// src/components/wikilink-hover-card.tsx
 /**
 * Show host-rendered content for the wiki link the pointer rests on. The
 * open and close delays live in the core hover handler.
@@ -3458,5 +3413,4 @@ function WikilinkHoverCard({ children, className }) {
 	});
 }
 
-//#endregion
 export { LightboxFrame, LightboxImage, LightboxRoot, LightboxVideo, MarkdownEditor, MarkdownView, WikilinkHoverCard, useEditor, useExtension, useKeymap, useLightbox };

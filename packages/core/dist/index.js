@@ -49,7 +49,7 @@ import { normalizeIdentifier } from "micromark-util-normalize-identifier";
 import { bulletListInputRule, createDedentListCommand, createIndentListCommand, createListInputRuleHandler, createListRenderingPlugin, createSafariInputMethodWorkaroundPlugin, createSplitListCommand, createToggleCollapsedCommand, defaultAttributesGetter, deleteCommand, enterCommand, findCheckboxInListItem, handleListMarkerMouseDown, joinCollapsedListBackward, joinListElements, joinListUp, listToDOM, orderedListInputRule, protectCollapsed, taskListInputRule, unwrapListSlice } from "prosemirror-flat-list";
 import { defineTableCellSpec, defineTableCommands, defineTableDropIndicator, defineTableEditingPlugin, defineTableHeaderCellSpec, defineTableRowSpec, defineTableSpec, deleteTable, isCellSelection } from "@prosekit/extensions/table";
 
-//#region src/utils/composition.ts
+// src/utils/composition.ts
 const COMPOSITION_TAIL_MS = 50;
 let compositionEndedAt = -1;
 let isComposing = false;
@@ -72,8 +72,7 @@ function getIsComposing() {
 	return isComposing || compositionEndedAt > 0 && Date.now() - compositionEndedAt <= COMPOSITION_TAIL_MS;
 }
 
-//#endregion
-//#region src/utils/input-modality.ts
+// src/utils/input-modality.ts
 const KEYBOARD_MODALITY_KEYS = /* @__PURE__ */ new Set([
 	"ArrowLeft",
 	"ArrowRight",
@@ -146,8 +145,7 @@ function onIsTouchInputChange(listener) {
 	};
 }
 
-//#endregion
-//#region src/utils/transaction.ts
+// src/utils/transaction.ts
 /**
 * Whether any of the given transactions are selection transactions directly caused by mouse or touch input.
 */
@@ -155,8 +153,7 @@ function hasPointerSelectionTransaction(transactions) {
 	return getIsPointerSelection() && transactions.some((tr) => tr.selectionSet && !tr.docChanged);
 }
 
-//#endregion
-//#region src/extensions/editor-config-getter.ts
+// src/extensions/editor-config-getter.ts
 const defaultConfig = Object.freeze({});
 const configKey = new PluginKey("meowdown-editor-config");
 /**
@@ -166,8 +163,7 @@ function getEditorConfig(state) {
 	return configKey.getState(state)?.config ?? defaultConfig;
 }
 
-//#endregion
-//#region src/extensions/mark-mode-config.ts
+// src/extensions/mark-mode-config.ts
 /**
 * The active mark mode, defaulting to focus when no configuration is provided.
 */
@@ -175,8 +171,7 @@ function getMarkMode(state) {
 	return getEditorConfig(state).markMode ?? "focus";
 }
 
-//#endregion
-//#region src/extensions/mark-names.ts
+// src/extensions/mark-names.ts
 function isMarkOfType(mark, name) {
 	return mark.type.name === name;
 }
@@ -200,8 +195,7 @@ const ATOM_SOURCE_MARK_NAMES = [
 	"mdFile"
 ];
 
-//#endregion
-//#region src/extensions/hidden-run.ts
+// src/extensions/hidden-run.ts
 function getCharMarks(state, pos) {
 	if (pos < 0 || pos + 1 > state.doc.content.size) return;
 	const $pos = state.doc.resolve(pos);
@@ -341,8 +335,7 @@ function getUnitMarkerRuns(state, charPos) {
 	return runs;
 }
 
-//#endregion
-//#region src/extensions/mark-range.ts
+// src/extensions/mark-range.ts
 /**
 * Returns the resolved position, or `undefined` when it falls outside the
 * document or in a place that carries no inline marks: marks describe inline
@@ -425,8 +418,7 @@ function getMarkRangeStrictlyAround(state, pos, markNames) {
 	}
 }
 
-//#endregion
-//#region src/extensions/atom-mark-navigation.ts
+// src/extensions/atom-mark-navigation.ts
 function getActiveMarkNames(marks, state) {
 	const mode = getMarkMode(state);
 	const result = [];
@@ -624,14 +616,12 @@ function defineAtomMarkNavigation({ marks }) {
 	}), Priority$1.high), definePlugin(createCaretSnapPlugin(marks)), definePlugin(createSelectionPlugin(marks)));
 }
 
-//#endregion
-//#region src/extensions/node-names.ts
+// src/extensions/node-names.ts
 function isNodeOfType(node, name) {
 	return node.type.name === name;
 }
 
-//#endregion
-//#region src/extensions/backspace-empty-first-block.ts
+// src/extensions/backspace-empty-first-block.ts
 /**
 * Claim Backspace only when the selection is an empty caret in an empty
 * paragraph that is the document's first block and has a block after it.
@@ -662,8 +652,7 @@ function defineBackspaceEmptyFirstBlock(enabled) {
 	} }), Priority$1.lowest);
 }
 
-//#endregion
-//#region src/converters/paragraph.ts
+// src/converters/paragraph.ts
 /**
 * Build one paragraph without interpreting block-opening Markdown.
 */
@@ -689,8 +678,7 @@ function docToParagraphMarkdown(doc) {
 	return paragraphs.join("\n").replaceAll(/\n[ \t]*\n+/g, "\n");
 }
 
-//#endregion
-//#region src/extensions/single-paragraph.ts
+// src/extensions/single-paragraph.ts
 const singleParagraphPluginKey = new PluginKey("single-paragraph");
 /**
 * Whether the editor holds one paragraph of inline Markdown (the
@@ -721,8 +709,7 @@ function defineSingleParagraph() {
 	})), Priority$1.highest);
 }
 
-//#endregion
-//#region src/extensions/block-rule.ts
+// src/extensions/block-rule.ts
 /**
 * An input rule whose match turns the textblock into, or wraps it in, a block
 * node. In a single paragraph the match is left as typed text: there is no
@@ -747,14 +734,12 @@ function defineBlockEnterRule(options) {
 	});
 }
 
-//#endregion
-//#region src/extensions/blockquote.ts
+// src/extensions/blockquote.ts
 function defineMeowdownBlockquote() {
 	return union(defineBlockquoteSpec(), defineBlockquoteCommands(), defineBlockquoteKeymap(), defineBlockInputRule(blockquoteInputRule.regex, createWrappingInputRuleHandler(blockquoteInputRule)));
 }
 
-//#endregion
-//#region src/extensions/bullet-after-heading.ts
+// src/extensions/bullet-after-heading.ts
 /**
 * Claim Enter only when the selection is an empty caret at the very end of the
 * document's first heading (the note's title line). Every other Enter (a later
@@ -788,8 +773,7 @@ function defineBulletAfterHeading(enabled) {
 	} }), Priority$1.high);
 }
 
-//#endregion
-//#region src/extensions/click-below.ts
+// src/extensions/click-below.ts
 const clickBelowKey = new PluginKey("meowdown-click-below");
 function acceptsCaretAtEnd(node) {
 	return node.isTextblock && !node.type.spec.code;
@@ -827,8 +811,7 @@ function defineClickBelow() {
 	}));
 }
 
-//#endregion
-//#region src/converters/html-to-md.ts
+// src/converters/html-to-md.ts
 /**
 * Convert a `<mark>` element into a `highlight` node. There is no built-in
 * `hast-util-to-mdast` handler for `<mark>`, so without this the highlight is
@@ -974,8 +957,7 @@ function htmlToMarkdown(html, parser) {
 	return processor.stringify(processor.runSync(hast));
 }
 
-//#endregion
-//#region src/utils/parse-integer.ts
+// src/utils/parse-integer.ts
 function parseInteger(raw) {
 	if (raw == null) return void 0;
 	const value = Number.parseInt(raw, 10);
@@ -986,8 +968,7 @@ function parsePositiveInteger(raw) {
 	return value != null && value > 0 ? value : void 0;
 }
 
-//#endregion
-//#region src/extensions/inline-runs.ts
+// src/extensions/inline-runs.ts
 function findAtomMark(marks) {
 	return marks.find((mark) => isMarkOfTypes(mark, ATOM_MARK_NAMES));
 }
@@ -1029,8 +1010,7 @@ function groupInlineRuns(textblock) {
 	return runs;
 }
 
-//#endregion
-//#region src/extensions/clipboard/semantic-inline.ts
+// src/extensions/clipboard/semantic-inline.ts
 const SEMANTIC_TAGS = {
 	mdStrong: "strong",
 	mdEm: "em",
@@ -1134,8 +1114,7 @@ function atomUnitToDOM(atom, sourceText) {
 	}
 }
 
-//#endregion
-//#region src/extensions/heading.ts
+// src/extensions/heading.ts
 /**
 * Merge `whitespace: 'pre'` onto the base heading spec. A multi-line setext
 * heading keeps a soft line break as a literal `\n`; without `whitespace: 'pre'`
@@ -1222,8 +1201,7 @@ function defineHeading() {
 	return union(defineHeadingSpec(), defineHeadingWhitespace(), defineSetextUnderlineAttr(), defineHeadingClosingHashesAttr(), defineBlockInputRule(headingInputRule.regex, createTextBlockInputRuleHandler(headingInputRule)), defineHeadingCommands(), defineHeadingKeymap());
 }
 
-//#endregion
-//#region src/extensions/paragraph.ts
+// src/extensions/paragraph.ts
 function defineMeowdownParagraphSpec() {
 	return defineNodeSpec({
 		name: "paragraph",
@@ -1252,8 +1230,7 @@ function defineMeowdownParagraph() {
 	return union(withPriority$1(defineMeowdownParagraphSpec(), Priority$1.highest), defineParagraphCommands(), defineParagraphKeymap());
 }
 
-//#endregion
-//#region src/extensions/clipboard/clipboard-serializer.ts
+// src/extensions/clipboard/clipboard-serializer.ts
 function withSemanticTextblocks(nodes) {
 	return {
 		...nodes,
@@ -1297,8 +1274,7 @@ function getSemanticDOMSerializer(schema) {
 	return serializer;
 }
 
-//#endregion
-//#region src/extensions/html-paste.ts
+// src/extensions/html-paste.ts
 const htmlPasteKey = new PluginKey("meowdown-html-paste");
 /**
 * meowdown's own clipboard HTML, which must skip the markdown conversion and
@@ -1422,8 +1398,7 @@ function defineHTMLPaste() {
 	}));
 }
 
-//#endregion
-//#region src/extensions/clipboard/clipboard-parser.ts
+// src/extensions/clipboard/clipboard-parser.ts
 /**
 * The clipboard parser: schema rules plus the `data-md` rules that restore a
 * textblock's source text from meowdown's own clipboard HTML. Registered as
@@ -1446,8 +1421,7 @@ function defineClipboardParser() {
 	});
 }
 
-//#endregion
-//#region src/extensions/clipboard/plain-paste.ts
+// src/extensions/clipboard/plain-paste.ts
 /**
 * Parse pasted plain text as markdown: `- [ ] task`, `# heading`, fenced code
 * and the other block constructs become real nodes, while inline syntax stays
@@ -1504,8 +1478,7 @@ function definePlainTextPaste() {
 	}));
 }
 
-//#endregion
-//#region src/converters/pm-to-ast.ts
+// src/converters/pm-to-ast.ts
 /**
 * Read persisted block data. Editor marks do not add Markdown delimiters.
 */
@@ -1642,8 +1615,7 @@ function readTableCell(node) {
 	};
 }
 
-//#endregion
-//#region src/converters/pm-to-md.ts
+// src/converters/pm-to-md.ts
 /**
 * Convert persisted editor content to Markdown through the shared block serializer.
 */
@@ -1651,8 +1623,7 @@ function docToMarkdown(node, options = {}) {
 	return serializeMarkdownAst(docToAst(node), options);
 }
 
-//#endregion
-//#region src/utils/top-level-block-boundary.ts
+// src/utils/top-level-block-boundary.ts
 function isAtTopLevelBlockStart($pos) {
 	if ($pos.depth === 0) return true;
 	if ($pos.parentOffset !== 0) return false;
@@ -1666,8 +1637,7 @@ function isAtTopLevelBlockEnd($pos) {
 	return true;
 }
 
-//#endregion
-//#region src/extensions/clipboard/plain-text.ts
+// src/extensions/clipboard/plain-text.ts
 /**
 * Serialize a slice to Markdown. A block whose content start is not selected is
 * flattened so its opening markers are not synthesized. Incomplete fenced code
@@ -1783,8 +1753,7 @@ function filterTextblock(textblock) {
 	return textblock.copy(Fragment.from(parts));
 }
 
-//#endregion
-//#region src/extensions/clipboard/clipboard.ts
+// src/extensions/clipboard/clipboard.ts
 /**
 * The clipboard pipeline: semantic HTML with `data-md` round-trip attributes
 * plus a markdown-shaped `text/plain` on copy; the matching `data-md` parser,
@@ -1795,8 +1764,7 @@ function defineClipboard() {
 	return union(defineSemanticClipboardSerializer(), definePlainTextSerializer(), defineClipboardParser(), defineHTMLPaste(), definePlainTextPaste());
 }
 
-//#endregion
-//#region src/extensions/code-block-highlight.ts
+// src/extensions/code-block-highlight.ts
 const supportCache = /* @__PURE__ */ new Map();
 const parserCache = /* @__PURE__ */ new Map();
 const LANGUAGE_ALIASES = { math: "latex" };
@@ -1876,8 +1844,7 @@ function getCodeTokens(code, language) {
 	return loadLanguageSupport(trimmed).then((loaded) => loaded ? tokenize(code, loaded) : []);
 }
 
-//#endregion
-//#region src/extensions/code-block-exit.ts
+// src/extensions/code-block-exit.ts
 /**
 * With the caret at the end of a code block, move it into the block below when
 * that block is an empty paragraph, and into a new default block otherwise.
@@ -1908,8 +1875,7 @@ function defineCodeBlockExitKeymap() {
 	return defineKeymap({ "Mod-Enter": exitCodeBlockAtEnd });
 }
 
-//#endregion
-//#region src/extensions/code-block.ts
+// src/extensions/code-block.ts
 function defineFenceStyleAttr() {
 	return defineNodeAttr({
 		type: "codeBlock",
@@ -1966,8 +1932,7 @@ function defineCodeBlock() {
 	return union(defineCodeBlockSpec(), defineCodeBlockKeymap(), defineCodeBlockCommands(), defineBlockInputRule(codeBlockInputRule.regex, createTextBlockInputRuleHandler(codeBlockInputRule)), defineBlockEnterRule(codeBlockEnterRule), defineFenceStyleAttr(), defineFenceLengthAttr(), defineBlockInputRule(tildeFenceInputRule.regex, createTextBlockInputRuleHandler(tildeFenceInputRule)), defineTildeFenceEnterRule(), defineDollarFenceEnterRule(), defineCodeBlockExitKeymap());
 }
 
-//#endregion
-//#region src/extensions/commands.ts
+// src/extensions/commands.ts
 function selectText(anchor, head) {
 	return (state, dispatch) => {
 		if (dispatch) {
@@ -2052,8 +2017,7 @@ function defineEditorCommands() {
 	});
 }
 
-//#endregion
-//#region src/extensions/cross-editor-drag.ts
+// src/extensions/cross-editor-drag.ts
 function deleteDraggedContent(view, dragging) {
 	const tr = view.state.tr;
 	if (dragging.node) {
@@ -2100,8 +2064,7 @@ function defineCrossEditorDrag() {
 	return definePlugin(createCrossEditorDragPlugin());
 }
 
-//#endregion
-//#region src/extensions/editor-config.ts
+// src/extensions/editor-config.ts
 var ConfigController = class {
 	constructor(config) {
 		this.config = config;
@@ -2158,16 +2121,14 @@ function defineEditorConfig(initialConfig) {
 	}));
 }
 
-//#endregion
-//#region src/extensions/paste.ts
+// src/extensions/paste.ts
 function getPastedText(event, slice) {
 	const fromClipboard = event.clipboardData?.getData("text/plain");
 	if (fromClipboard) return fromClipboard;
 	return slice.content.textBetween(0, slice.content.size, "\n");
 }
 
-//#endregion
-//#region src/extensions/embed-paste.ts
+// src/extensions/embed-paste.ts
 const embedPasteKey = new PluginKey("meowdown-embed-paste");
 function detectEmbedUrl(text) {
 	const trimmed = text.trim();
@@ -2203,8 +2164,7 @@ function defineEmbedPaste(enabled) {
 	}));
 }
 
-//#endregion
-//#region src/extensions/escape-collapse.ts
+// src/extensions/escape-collapse.ts
 /**
 * Collapses a non-empty selection to a caret at its head. Leaves an empty
 * selection alone so Escape can serve whoever binds it next.
@@ -2224,8 +2184,7 @@ function defineEscapeCollapse() {
 	return withPriority$1(defineKeymap({ Escape: collapseSelection }), Priority$1.low);
 }
 
-//#endregion
-//#region src/extensions/exit-boundary.ts
+// src/extensions/exit-boundary.ts
 const exitBoundaryKey = new PluginKey("meowdown-exit-boundary");
 function canMoveBlockwise(state, direction) {
 	const { $anchor, $head } = state.selection;
@@ -2266,8 +2225,7 @@ function defineExitBoundaryHandler(getExitBoundaryHandler) {
 	return withPriority$1(definePlugin(createExitBoundaryPlugin(getExitBoundaryHandler)), Priority$1.low);
 }
 
-//#endregion
-//#region src/utils/is-mod-event.ts
+// src/utils/is-mod-event.ts
 /**
 * Whether the platform's mod key is held on `event`: `Command` on Apple, `Ctrl` elsewhere.
 */
@@ -2275,8 +2233,7 @@ function isModEvent(event) {
 	return isApple ? event.metaKey : event.ctrlKey;
 }
 
-//#endregion
-//#region src/extensions/file-click.ts
+// src/extensions/file-click.ts
 const fileClickKey = new PluginKey("meowdown-file-click");
 function findFileAt(state, pos) {
 	const range = getMarkRangeAt(state, pos, "mdFile");
@@ -2317,8 +2274,7 @@ function defineFileClickHandler(getOnClick) {
 	}));
 }
 
-//#endregion
-//#region src/extensions/file-paste.ts
+// src/extensions/file-paste.ts
 const filePasteKey = new PluginKey("file-paste");
 const IMAGE_FILE_EXTENSIONS = /* @__PURE__ */ new Set([
 	"avif",
@@ -2421,8 +2377,7 @@ function defineFilePaste(getOptions) {
 	return withPriority$1(definePlugin(createFilePastePlugin(getOptions)), Priority$1.high);
 }
 
-//#endregion
-//#region src/utils/format-file-size.ts
+// src/utils/format-file-size.ts
 const UNITS = [
 	"KB",
 	"MB",
@@ -2445,8 +2400,7 @@ function formatFileSize(bytes) {
 	return `${value < 9.95 ? Math.round(value * 10) / 10 : Math.round(value)} ${unit}`;
 }
 
-//#endregion
-//#region src/extensions/file-view.ts
+// src/extensions/file-view.ts
 /**
 * `data-file-kind` values by file extension, for host CSS theming.
 */
@@ -2600,8 +2554,7 @@ function defineFileView(getOptions) {
 	});
 }
 
-//#endregion
-//#region src/extensions/find.ts
+// src/extensions/find.ts
 const revealActiveMatch = new Plugin({ props: { decorations: (state) => {
 	const { from, to, empty } = state.selection;
 	if (empty || getSearchStatus$1(state).active === 0) return;
@@ -2617,8 +2570,7 @@ function defineFind() {
 	return union(defineSearchQuery(), defineSearchCommands(), definePlugin(revealActiveMatch));
 }
 
-//#endregion
-//#region src/extensions/get-link-unit-at.ts
+// src/extensions/get-link-unit-at.ts
 /**
 * The last text run carrying `markName` inside `range`. "Last" so a linked
 * image's inner url/title (which comes first) never shadows the link's own.
@@ -2712,8 +2664,7 @@ function getLinkUnitAt(state, pos) {
 	}
 }
 
-//#endregion
-//#region src/extensions/image-click.ts
+// src/extensions/image-click.ts
 const imageClickKey = new PluginKey("meowdown-image-click");
 /**
 * The image preview wrapper around `target`, or nothing when the wrapper holds
@@ -2850,8 +2801,7 @@ function defineImageClickHandler(getOnClick) {
 	}));
 }
 
-//#endregion
-//#region src/extensions/mark-click.ts
+// src/extensions/mark-click.ts
 /**
 * Shared click plumbing for text-backed marks (wikilinks, Markdown links, tags):
 * a click anywhere on the rendered mark fires `onClick`.
@@ -2872,8 +2822,7 @@ function defineMarkClickHandler(config) {
 	}));
 }
 
-//#endregion
-//#region src/extensions/tag-click.ts
+// src/extensions/tag-click.ts
 const tagClickKey = new PluginKey("meowdown-tag-click");
 /**
 * The tag covering `pos`, found via the `mdTag` run. The tag name is read from
@@ -2914,8 +2863,7 @@ function defineTagClickHandler(getOnClick) {
 	});
 }
 
-//#endregion
-//#region src/extensions/wikilink-click.ts
+// src/extensions/wikilink-click.ts
 const wikilinkClickKey = new PluginKey("meowdown-wikilink-click");
 /**
 * Exported for tests.
@@ -2966,8 +2914,7 @@ function defineWikilinkClickHandler(getOnClick) {
 	});
 }
 
-//#endregion
-//#region src/extensions/follow-link.ts
+// src/extensions/follow-link.ts
 const followLinkKey = new PluginKey("meowdown-follow-link");
 function createFollowLinkPlugin(getHandlers) {
 	return new Plugin({
@@ -3059,8 +3006,7 @@ function defineFollowLinkHandler(getHandlers) {
 	return withPriority$1(definePlugin(createFollowLinkPlugin(getHandlers)), Priority$1.high);
 }
 
-//#endregion
-//#region src/extensions/frontmatter.ts
+// src/extensions/frontmatter.ts
 /**
 * Stores YAML frontmatter as a non-rendered attribute on the root `doc` node.
 */
@@ -3072,14 +3018,12 @@ function defineDocFrontmatterAttr() {
 	});
 }
 
-//#endregion
-//#region src/utils/execute-command.ts
+// src/utils/execute-command.ts
 function executeCommand(view, command) {
 	return command(view.state, view.dispatch, view);
 }
 
-//#endregion
-//#region src/extensions/hidden-run-caret.ts
+// src/extensions/hidden-run-caret.ts
 const snapKey = new PluginKey("meowdown-hidden-run-snap");
 const beforeInputKey = new PluginKey("meowdown-hidden-run-beforeinput");
 function createSnapPlugin() {
@@ -3155,8 +3099,7 @@ function defineHiddenRunCaret() {
 	}), Priority$1.highest));
 }
 
-//#endregion
-//#region src/extensions/horizontal-rule.ts
+// src/extensions/horizontal-rule.ts
 function defineHorizontalRuleMarkerAttr() {
 	return defineNodeAttr({
 		type: "horizontalRule",
@@ -3170,8 +3113,7 @@ function defineMeowdownHorizontalRule() {
 	return union(defineHorizontalRuleSpec(), defineHorizontalRuleCommands(), defineHorizontalRuleMarkerAttr(), defineBlockInputRule(horizontalRuleInputRule.regex, horizontalRuleInputRule.handler));
 }
 
-//#endregion
-//#region src/utils/non-prose-attrs.ts
+// src/utils/non-prose-attrs.ts
 const NON_PROSE_ATTRS = {
 	spellcheck: "false",
 	autocorrect: "off",
@@ -3179,8 +3121,7 @@ const NON_PROSE_ATTRS = {
 	writingsuggestions: "false"
 };
 
-//#endregion
-//#region src/extensions/html-comment.ts
+// src/extensions/html-comment.ts
 /**
 * A block-level HTML comment (`<!-- ... -->`) as an invisible, atomic node.
 *
@@ -3219,8 +3160,7 @@ function defineHTMLComment() {
 	});
 }
 
-//#endregion
-//#region src/utils/to-positive-number.ts
+// src/utils/to-positive-number.ts
 /**
 * The value rounded to an integer, or nothing unless it is a finite number
 * above zero.
@@ -3229,8 +3169,7 @@ function toPositiveNumber(value) {
 	if (typeof value === "number" && Number.isFinite(value) && value > 0) return Math.round(value);
 }
 
-//#endregion
-//#region src/extensions/magic-comment.ts
+// src/extensions/magic-comment.ts
 const MAGIC_COMMENT_RE = /^<!--\s*(\{[\s\S]*?\})\s*-->/;
 const TRAILING_MAGIC_COMMENT_RE = /(?:<!--\s*\{[\s\S]*?\}\s*-->)+$/;
 /**
@@ -3277,8 +3216,7 @@ function stripMagicComment(source) {
 	return source.replace(TRAILING_MAGIC_COMMENT_RE, "");
 }
 
-//#endregion
-//#region src/extensions/post-embed.ts
+// src/extensions/post-embed.ts
 /**
 * Wrap a loader in a 64-entry LRU keyed by URL. A settled URL answers
 * synchronously, so a revisited document renders its cards in the first
@@ -3339,8 +3277,7 @@ function parsePostEmbedSnapshot(value) {
 	return result.success ? result.output : void 0;
 }
 
-//#endregion
-//#region src/extensions/wiki-embed.ts
+// src/extensions/wiki-embed.ts
 const WIKI_EMBED_SIZE = /^(\d+)(?:x(\d+))?$/i;
 function positiveInteger(value) {
 	if (!value) return null;
@@ -3402,8 +3339,7 @@ function wikiEmbedBasename(target) {
 	}
 }
 
-//#endregion
-//#region src/extensions/image.ts
+// src/extensions/image.ts
 /**
 * Show an `src` as-is when it is an http(s) URL, otherwise skip rendering it.
 */
@@ -3766,8 +3702,7 @@ function defineImage(getOptions) {
 	});
 }
 
-//#endregion
-//#region src/extensions/mark-chunk.ts
+// src/extensions/mark-chunk.ts
 function markChunkToJSON(chunk) {
 	const [from, to, marks] = chunk;
 	return [
@@ -3785,8 +3720,7 @@ function markChunkFromJSON(schema, json) {
 	];
 }
 
-//#endregion
-//#region src/extensions/marks-equal.ts
+// src/extensions/marks-equal.ts
 /**
 * Position-wise equality on two mark arrays. Returns `true` only when
 * the arrays have the same length and `a[i].eq(b[i])` for every index.
@@ -3798,8 +3732,7 @@ function marksEqual(a, b) {
 	return true;
 }
 
-//#endregion
-//#region src/extensions/batch-set-mark-step.ts
+// src/extensions/batch-set-mark-step.ts
 const SPARSE_CHUNK_LIMIT = 32;
 /**
 * Apply a small batch by visiting each chunk's narrow range independently.
@@ -3968,8 +3901,7 @@ var BatchSetMarkStep = class BatchSetMarkStep extends Step {
 Step.jsonID("batchSetMark", BatchSetMarkStep);
 const emptyBatchSetMarkStep = new BatchSetMarkStep([]);
 
-//#endregion
-//#region src/extensions/reference-links.ts
+// src/extensions/reference-links.ts
 const MAX_DEFINITION_LENGTH = 1024;
 function normalizeReferenceLabel(label) {
 	return normalizeIdentifier(label);
@@ -4076,8 +4008,7 @@ function updateReferenceDefinitions(previous, transaction, doc) {
 	return collectReferenceDefinitions(doc);
 }
 
-//#endregion
-//#region src/extensions/inline-text-to-mark-chunks.ts
+// src/extensions/inline-text-to-mark-chunks.ts
 /**
 * Lookup from Lezer node type id to the ProseMirror mark.
 *
@@ -4650,8 +4581,7 @@ function emit(out, from, to, marks) {
 	]);
 }
 
-//#endregion
-//#region src/extensions/inline-mark-plugin.ts
+// src/extensions/inline-mark-plugin.ts
 const META_KEY = "inline-marks-applied";
 const TRIGGER_KEY = "inline-marks-trigger";
 const RESTYLE_KEY = "inline-marks-restyle";
@@ -4877,8 +4807,7 @@ function defineInlineMarkPlugin(getOptions) {
 	return definePlugin(createInlineMarkPlugin(getOptions));
 }
 
-//#endregion
-//#region src/extensions/inline-marks.ts
+// src/extensions/inline-marks.ts
 function defineMdImage() {
 	return defineMarkSpec({
 		name: "mdImage",
@@ -5107,8 +5036,7 @@ function defineInlineMarks() {
 	return union(defineMdMark(), defineMdEm(), defineMdStrong(), defineMdCode(), defineMdLinkText(), defineMdLinkUri(), defineMdLinkTitle(), defineMdDel(), defineMdHighlight(), defineMdTag(), defineMdWikilink(), defineMdImage(), defineMdFile(), defineMdMath(), defineMdPack());
 }
 
-//#endregion
-//#region src/utils/backticks.ts
+// src/utils/backticks.ts
 /**
 * Length of the longest run of `charCode` in `text`, at least `min`.
 */
@@ -5128,8 +5056,7 @@ function longestBacktickRun(text, min = 0) {
 	return longestCharRun(text, 96, min);
 }
 
-//#endregion
-//#region src/extensions/inline-toggle.ts
+// src/extensions/inline-toggle.ts
 const TOGGLE_SPECS = {
 	em: {
 		node: LEZER_NODE_IDS.Emphasis,
@@ -5383,8 +5310,7 @@ function insideAtom(nodes, pos) {
 	return false;
 }
 
-//#endregion
-//#region src/extensions/inline-toggle-commands.ts
+// src/extensions/inline-toggle-commands.ts
 function toggleInline(spec) {
 	return (state, dispatch) => {
 		if (state.selection.empty) return caretToggle(spec, state, dispatch);
@@ -5466,8 +5392,7 @@ function defineInlineToggle() {
 	return union(defineInlineToggleCommands(), defineInlineToggleKeymap());
 }
 
-//#endregion
-//#region src/extensions/link-click.ts
+// src/extensions/link-click.ts
 const linkClickKey = new PluginKey("meowdown-link-click");
 /**
 * Call `onClick` when the user clicks a rendered Markdown link
@@ -5492,8 +5417,7 @@ function defineLinkClickHandler(getOnClick) {
 	});
 }
 
-//#endregion
-//#region src/extensions/link-commands.ts
+// src/extensions/link-commands.ts
 /**
 * Normalize a typed URL with the existing autolink logic, else keep it verbatim.
 */
@@ -5661,8 +5585,7 @@ function defineLinkEditKeymap(onLinkEdit) {
 	return defineKeymap({ "Mod-k": openLinkEdit(onLinkEdit) });
 }
 
-//#endregion
-//#region src/extensions/link-paste.ts
+// src/extensions/link-paste.ts
 const linkPasteKey = new PluginKey("meowdown-link-paste");
 /**
 * The pasted text as a link `href` when the clipboard holds exactly one URL:
@@ -5704,8 +5627,7 @@ function defineLinkPaste(enabled) {
 	})), Priority$1.high);
 }
 
-//#endregion
-//#region src/extensions/list.ts
+// src/extensions/list.ts
 function serializeListMarker(value) {
 	return value === ")" || value === "*" || value === "+" ? value : void 0;
 }
@@ -6092,8 +6014,7 @@ function defineMeowdownList() {
 	return union(defineListSpec(), defineMeowdownListPlugins(), defineListCommands(), defineMeowdownListSerializer(), defineListDropIndicator(), defineMeowdownListInputRules(), defineMeowdownListKeymap(), defineListMarkerAttr(), defineListTaskMarkerAttr(), defineListMarkerGapAttr(), defineMeowdownListCommands());
 }
 
-//#endregion
-//#region src/extensions/mark-mode.ts
+// src/extensions/mark-mode.ts
 function createMarkModePlugin(getMode) {
 	return new Plugin({ props: {
 		attributes: (state) => ({ "data-mark-mode": getMode(state) }),
@@ -6150,8 +6071,7 @@ function defineMarkMode(getMode) {
 	return definePlugin(createMarkModePlugin(getMode));
 }
 
-//#endregion
-//#region src/utils/katex.ts
+// src/utils/katex.ts
 let katexRenderPromise;
 /**
 * Load KaTeX's render function on first use and cache it. Most documents
@@ -6179,8 +6099,7 @@ function renderMathInto(katexRender, element, formula, displayMode) {
 	}
 }
 
-//#endregion
-//#region src/extensions/math.ts
+// src/extensions/math.ts
 /**
 * Renders one inline math unit: a KaTeX preview next to the editable
 * `$formula$` source. CSS decides which of the two is visible; in hide and
@@ -6251,8 +6170,7 @@ function defineMath() {
 	});
 }
 
-//#endregion
-//#region src/extensions/table-column-align.ts
+// src/extensions/table-column-align.ts
 function parseTableColumnAlign(value) {
 	return value === "left" || value === "center" || value === "right" ? value : null;
 }
@@ -6446,8 +6364,7 @@ function defineTableColumnAlign() {
 	return union(defineTableCellAlignAttr(), defineTableHeaderCellAlignAttr(), defineTableAlignSync(), defineTableColumnAlignCommands());
 }
 
-//#endregion
-//#region src/extensions/table.ts
+// src/extensions/table.ts
 /**
 * Whether the selection sits inside a table cell (data or header). Useful for
 * gating block-creating UI, since cells hold inline content only.
@@ -6486,8 +6403,7 @@ function defineTable() {
 	return union(defineTableSpec(), defineTableRowSpec(), defineTableCellSpec(), defineTableHeaderCellSpec(), defineTableCellContent(), defineTableColumnAlign(), defineTableEditingPlugin({ allowTableNodeSelection: true }), defineTableCommands(), defineTableDropIndicator(), defineTableKeymap());
 }
 
-//#endregion
-//#region src/extensions/move-block.ts
+// src/extensions/move-block.ts
 /**
 * The index of the top-level block holding the whole selection, or undefined
 * when the selection spans several top-level blocks or floats between them (a
@@ -6549,8 +6465,7 @@ function defineMoveBlock() {
 	});
 }
 
-//#endregion
-//#region src/extensions/pending-replacement.ts
+// src/extensions/pending-replacement.ts
 const pendingReplacementKey = new PluginKey("meowdownPendingReplacement");
 /**
 * The active pending replacement, or null when there is none.
@@ -6741,14 +6656,12 @@ function definePendingReplacementHandler(handler) {
 	} }) }));
 }
 
-//#endregion
-//#region src/extensions/readonly.ts
+// src/extensions/readonly.ts
 function defineReadonly(getReadonly = () => true) {
 	return definePlugin(new Plugin({ props: { editable: (state) => !getReadonly(state) } }));
 }
 
-//#endregion
-//#region src/utils/caret-coords.ts
+// src/utils/caret-coords.ts
 /**
 * A dimensionless point: the fallback measurement of a hidden (font-size: 0)
 * syntax run. A real caret rect always has line height, and a block-context
@@ -6776,15 +6689,13 @@ function tryCoordsAtPos(view, pos, side) {
 	return isPointRect(coords) ? void 0 : coords;
 }
 
-//#endregion
-//#region src/utils/line-break.ts
+// src/utils/line-break.ts
 function isAfterLineBreak($pos) {
 	const { parentOffset, parent } = $pos;
 	return parentOffset > 0 && parent.textBetween(parentOffset - 1, parentOffset) === "\n";
 }
 
-//#endregion
-//#region src/extensions/caret-rect.ts
+// src/extensions/caret-rect.ts
 function findNativeCaretRect(view) {
 	const selection = view.dom.ownerDocument.getSelection();
 	if (selection == null || selection.rangeCount === 0) return void 0;
@@ -6890,8 +6801,7 @@ function measureCaretScrollRect(view) {
 	return findCoordsCaretRect(view) ?? findAtomCaretRect(view);
 }
 
-//#endregion
-//#region src/extensions/scroll-to-selection.ts
+// src/extensions/scroll-to-selection.ts
 const key$1 = new PluginKey("meowdown-scroll-to-selection");
 function handleScrollToSelection(view) {
 	const selection = view.state.selection;
@@ -6993,8 +6903,7 @@ function defineScrollToSelection() {
 	}));
 }
 
-//#endregion
-//#region src/extensions/select-doc-boundary.ts
+// src/extensions/select-doc-boundary.ts
 function selectDocBoundary(direction, extend) {
 	return (state, dispatch) => {
 		const boundary = direction < 0 ? Selection.atStart(state.doc) : Selection.atEnd(state.doc);
@@ -7021,8 +6930,7 @@ function defineSelectDocBoundary() {
 	});
 }
 
-//#endregion
-//#region src/extensions/soft-break.ts
+// src/extensions/soft-break.ts
 function canHoldSoftBreak($pos) {
 	if (!isNodeOfType($pos.parent, "paragraph")) return false;
 	const container = $pos.depth > 0 ? $pos.node($pos.depth - 1) : void 0;
@@ -7070,8 +6978,7 @@ function defineSoftBreak() {
 	return union(defineCommands({ insertSoftBreak }), defineKeymap({ "Shift-Enter": chainCommands(exitCodeBlockAtEnd, softBreakCommand) }));
 }
 
-//#endregion
-//#region src/extensions/substitution.ts
+// src/extensions/substitution.ts
 const SUBSTITUTION_RULES = [
 	[/<-/, "←"],
 	[new RegExp((canUseRegexLookbehind() ? "(?<!-)" : "") + "->"), "→"],
@@ -7159,8 +7066,7 @@ function defineSubstitution(enabled) {
 	return union(defineSubstitutionInputRules(enabled), defineSubstitutionUndo(), defineSubstitutionEnterRules(enabled));
 }
 
-//#endregion
-//#region src/extensions/system-substitution-guard.ts
+// src/extensions/system-substitution-guard.ts
 const EM_DASH = "—";
 /**
 * Block the macOS "smart dashes" rewrite. With the `spellcheck` attribute on,
@@ -7186,8 +7092,7 @@ function defineSystemSubstitutionGuard() {
 	return withPriority$1(definePlugin(plugin), Priority$1.highest);
 }
 
-//#endregion
-//#region src/extensions/view-attributes.ts
+// src/extensions/view-attributes.ts
 /**
 * Add DOM attributes to the editable root. `class` and `style` values from
 * every such extension are combined, so applying this more than once adds
@@ -7197,8 +7102,7 @@ function defineViewAttributes(attributes) {
 	return definePlugin(new Plugin({ props: { attributes } }));
 }
 
-//#endregion
-//#region src/utils/clean-text.ts
+// src/utils/clean-text.ts
 /**
 * Projects a document slice to syntax-clean text, omitting inline markers and
 * hidden link destinations. Set `preserveMathSource` when the result must keep
@@ -7219,8 +7123,7 @@ function cleanTextFromSlice(slice, options = {}) {
 	return blocks.join("\n");
 }
 
-//#endregion
-//#region src/extensions/wikilink-trigger.ts
+// src/extensions/wikilink-trigger.ts
 const WIKILINK_OPEN = "[[";
 /**
 * Inserts the `[[` wikilink trigger at the cursor and opens the wikilink menu.
@@ -7265,8 +7168,7 @@ function defineWikilinkTrigger(enabled) {
 	});
 }
 
-//#endregion
-//#region src/extensions/wikilink.ts
+// src/extensions/wikilink.ts
 /**
 * Render `mdWikilink` as a non-editable label standing in for the raw source.
 * The source stays in `contentDOM` after the label, hidden by `style.css`
@@ -7311,8 +7213,7 @@ function defineWikilink() {
 	});
 }
 
-//#endregion
-//#region src/extensions/x-post-media-click.ts
+// src/extensions/x-post-media-click.ts
 const xPostMediaClickKey = new PluginKey("meowdown-x-post-media-click");
 /**
 * Call `onClick` when the user activates a photo or video inside an X post
@@ -7330,8 +7231,7 @@ function defineXPostMediaClickHandler(getOnClick) {
 	}));
 }
 
-//#endregion
-//#region src/extensions/youtube-video-click.ts
+// src/extensions/youtube-video-click.ts
 const youTubeVideoClickKey = new PluginKey("meowdown-youtube-video-click");
 /**
 * Call `onClick` when the user activates the poster of a YouTube card.
@@ -7348,8 +7248,7 @@ function defineYouTubeVideoClickHandler(getOnClick) {
 	}));
 }
 
-//#endregion
-//#region src/extensions/extension.ts
+// src/extensions/extension.ts
 function defineEditorExtensionImpl(options) {
 	return union(defineMeowdownParagraph(), defineDoc(), defineDocFrontmatterAttr(), defineText(), defineMeowdownBlockquote(), defineMeowdownList(), defineHeading(), defineTable(), defineCodeBlock(), defineMeowdownHorizontalRule(), defineHTMLComment(), defineInlineMarks(), defineEditorConfig(options), defineImage(getEditorConfig), defineFileView(getEditorConfig), defineModClickPrevention(), defineFileClickHandler((state) => getEditorConfig(state).onFileClick), defineImageClickHandler((state) => getEditorConfig(state).onImageClick), defineXPostMediaClickHandler((state) => getEditorConfig(state).onXPostMediaClick), defineYouTubeVideoClickHandler((state) => getEditorConfig(state).onYouTubeVideoClick), defineWikilinkClickHandler((state) => getEditorConfig(state).onWikilinkClick), defineTagClickHandler((state) => getEditorConfig(state).onTagClick), defineLinkClickHandler((state) => getEditorConfig(state).onLinkClick), defineFollowLinkHandler(getEditorConfig), defineExitBoundaryHandler((state) => getEditorConfig(state).onExitBoundary), defineFilePaste(getEditorConfig), defineEmbedPaste((state) => !!getEditorConfig(state).embedPaste), defineLinkPaste((state) => !!getEditorConfig(state).linkPaste), defineBulletAfterHeading((state) => !!getEditorConfig(state).bulletAfterHeading), defineBackspaceEmptyFirstBlock((state) => !!getEditorConfig(state).backspaceDeletesEmptyFirstBlock), defineSubstitution((state) => !!getEditorConfig(state).substitution), defineWikilinkTrigger((state) => !!getEditorConfig(state).wikilinkEnabled), definePlaceholder$1({
 		placeholder: (state) => {
@@ -7383,8 +7282,7 @@ function defineEditorExtension(options = {}) {
 	return defineEditorExtensionImpl(options);
 }
 
-//#endregion
-//#region src/extensions/schema.ts
+// src/extensions/schema.ts
 /**
 * The schema shared by every parser and serializer, built once and cached.
 */
@@ -7428,8 +7326,7 @@ function getNodeBuildersForSchema(schema) {
 	return builders;
 }
 
-//#endregion
-//#region src/converters/ast-to-pm.ts
+// src/converters/ast-to-pm.ts
 /**
 * Build nodes with the caller's schema; Markdown inline syntax remains literal text.
 */
@@ -7468,8 +7365,7 @@ function astToDoc(node, nodes = getNodeBuilders()) {
 	}
 }
 
-//#endregion
-//#region src/converters/md-to-pm.ts
+// src/converters/md-to-pm.ts
 /**
 * Convert a markdown string into a ProseMirror document node.
 *
@@ -7488,8 +7384,7 @@ function markdownToDoc(markdown, options = {}) {
 	return astToDoc(parseMarkdownAst(markdown, options), options.nodes);
 }
 
-//#endregion
-//#region src/extensions/code-block-languages.ts
+// src/extensions/code-block-languages.ts
 const excludeLanguages = /* @__PURE__ */ new Set([
 	"MscGen",
 	"Xù",
@@ -7532,8 +7427,7 @@ const codeBlockLanguages = languages.map((language) => ({
 	value: language.name.toLowerCase()
 })).filter((language) => !excludeLanguages.has(language.label)).concat(extraLanguages).sort((a, b) => a.label.localeCompare(b.label));
 
-//#endregion
-//#region src/extensions/key-bindings.ts
+// src/extensions/key-bindings.ts
 /**
 * Human-readable descriptions of the editor's formatting and heading shortcuts.
 */
@@ -7567,8 +7461,7 @@ const EDITOR_KEY_BINDINGS = {
 	Escape: "Collapse the selection"
 };
 
-//#endregion
-//#region src/extensions/mark-hover.ts
+// src/extensions/mark-hover.ts
 const IDLE = { kind: "idle" };
 function getHit(phase) {
 	return phase.kind === "active" || phase.kind === "leaving" ? phase.hit : void 0;
@@ -7800,8 +7693,7 @@ function defineMarkHoverHandler(config) {
 	}));
 }
 
-//#endregion
-//#region src/extensions/link-hover.ts
+// src/extensions/link-hover.ts
 const linkHoverKey = new PluginKey("meowdown-link-hover");
 /**
 * Delay before a cold hover enters, in ms.
@@ -7845,14 +7737,12 @@ function dismissLinkHover(state) {
 	linkHoverKey.getState(state)?.dismiss();
 }
 
-//#endregion
-//#region src/utils/force-reflow.ts
+// src/utils/force-reflow.ts
 function forceReflow(element) {
 	element.offsetWidth;
 }
 
-//#endregion
-//#region src/extensions/virtual-caret.ts
+// src/extensions/virtual-caret.ts
 const key = new PluginKey("meowdown-virtual-caret");
 const BLINK_ANIMATIONS = ["md-virtual-caret-blink", "md-virtual-caret-blink2"];
 const DATA_ATTRIBUTE = "data-meowdown-virtual-caret";
@@ -8017,8 +7907,7 @@ function defineVirtualCaret(layer) {
 	}));
 }
 
-//#endregion
-//#region src/extensions/wikilink-hover.ts
+// src/extensions/wikilink-hover.ts
 const wikilinkHoverKey = new PluginKey("meowdown-wikilink-hover");
 /**
 * Delay before a cold hover enters, in ms.
@@ -8058,8 +7947,7 @@ function defineWikilinkHoverHandler(onHoverChange, openDelay = OPEN_DELAY, close
 	});
 }
 
-//#endregion
-//#region src/utils/display-text.ts
+// src/utils/display-text.ts
 function getAtomDisplayText(atom) {
 	switch (atom.type.name) {
 		case "mdWikilink": {
@@ -8088,8 +7976,7 @@ function getTextblockDisplayText(textblock) {
 	return output;
 }
 
-//#endregion
-//#region src/utils/selected-text.ts
+// src/utils/selected-text.ts
 /**
 * The current selection as Markdown: block structure (list markers, headings,
 * blockquotes) is serialized, and inline Markdown syntax is already literal
@@ -8109,8 +7996,7 @@ function getSelectedText(state) {
 	}
 }
 
-//#endregion
-//#region src/utils/virtual-element.ts
+// src/utils/virtual-element.ts
 function tryHiddenRunCoords(view, pos, side) {
 	if (side === 1) {
 		const run = getHiddenRunAfter(view.state, pos);
@@ -8149,5 +8035,4 @@ function getVirtualElementFromRange(view, range) {
 	};
 }
 
-//#endregion
 export { EDITOR_KEY_BINDINGS, Priority, buildFileMarkdown, codeBlockLanguages, collectReferenceDefinitions, defaultResolveImageUrl, defaultResolveXPost, defaultResolveYouTubeVideo, defineBackspaceEmptyFirstBlock, defineBulletAfterHeading, defineCodeBlockPreviewPlugin, defineCodeBlockSyntaxHighlight, defineEditorExtension, defineEmbedPaste, defineExitBoundaryHandler, defineFileClickHandler, defineFilePaste, defineFileView, defineFollowLinkHandler, defineHTMLComment, defineImage, defineImageClickHandler, defineLinkClickHandler, defineLinkCommands, defineLinkEditKeymap, defineLinkHoverHandler, defineLinkPaste, defineMath, definePendingReplacementHandler, definePlaceholder, defineReadonly, defineSearchStatusHandler, defineSubstitution, defineTagClickHandler, defineViewAttributes, defineVirtualCaret, defineWikilinkClickHandler, defineWikilinkHoverHandler, defineWikilinkTrigger, defineXPostMediaClickHandler, defineYouTubeVideoClickHandler, dismissLinkHover, docToMarkdown, docToParagraphMarkdown, formatFileSize, formatSizedWikiEmbed, getCodeTokens, getEditorConfig, getFileKind, getIsComposing, getLinkText, getLinkUnitAt, getMarkBuilders, getPendingReplacement, getSearchStatus, getSelectedText, getTableColumnAlign, getTextblockDisplayText, getVirtualElementFromRange, inlineTextToMarkChunks, inlineTextToMarkChunksWithContext, insertLink, isCodeBlockPreviewHiddenDecoration, isLinkTextForHref, isMarkOfType, isModEvent, isNodeOfType, isReferenceDefinitionNode, isSelectionInTableCell, loadKaTeX, markdownToDoc, normalizeHref, paragraphMarkdownToDoc, parsePostEmbedSnapshot, parseWikiEmbed, removeLink, renderMathInto, updateEditorConfig, updateLink, wikiEmbedBasename, withPriority };

@@ -1,7 +1,7 @@
 import { GFM, parser } from "@lezer/markdown";
 import { parseXPostId } from "@post-embed/schema";
 
-//#region src/autolink-tld.ts
+// src/autolink-tld.ts
 /**
 * Allowed TLDs when they appear in a bare domain (no scheme, no `www.`).
 *
@@ -65,8 +65,7 @@ function getAutolinkHref(urlText) {
 	if (isLinkableBareHost(hostFromUrl(urlText))) return `https://${urlText}`;
 }
 
-//#endregion
-//#region src/unicode.ts
+// src/unicode.ts
 const CHAR_LINE_FEED = 10;
 const CHAR_CARRIAGE_RETURN = 13;
 const CHAR_TAB = 9;
@@ -80,8 +79,7 @@ function isSpaceChar(char) {
 	return char === 32 || char === 9 || char === 10 || char === CHAR_CARRIAGE_RETURN;
 }
 
-//#endregion
-//#region src/bare-autolink.ts
+// src/bare-autolink.ts
 const DOMAIN_RE = /^[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s<]*)?/i;
 const BOUNDARY_BEFORE_RE = /[\s(*_~]/;
 function isDomainStartChar(code) {
@@ -131,8 +129,7 @@ const bareAutolink = { parseInline: [{
 	}
 }] };
 
-//#endregion
-//#region src/hashtag.ts
+// src/hashtag.ts
 /**
 * Letters, digits, `-`, `_`. Non-ASCII falls back to a Unicode test;
 * surrogate halves fail it, so emoji terminate the tag.
@@ -170,8 +167,7 @@ const hashtag = {
 	}]
 };
 
-//#endregion
-//#region src/highlight.ts
+// src/highlight.ts
 const HighlightDelim = {
 	resolve: "Highlight",
 	mark: "HighlightMark"
@@ -206,8 +202,7 @@ const highlight = {
 	}]
 };
 
-//#endregion
-//#region src/math.ts
+// src/math.ts
 function isDigit(code) {
 	return code >= 48 && code <= 57;
 }
@@ -314,8 +309,7 @@ const math = {
 	}]
 };
 
-//#endregion
-//#region src/scheme-autolink.ts
+// src/scheme-autolink.ts
 const SCHEME_URI_RE = /^[a-z][a-z0-9+.-]*:\/\/[^\s<]+/i;
 function isSchemeStartChar(code) {
 	return code >= 65 && code <= 90 || code >= 97 && code <= 122;
@@ -347,8 +341,7 @@ const schemeAutolink = { parseInline: [{
 	}
 }] };
 
-//#endregion
-//#region src/wiki-embed.ts
+// src/wiki-embed.ts
 /**
 * Inline parser for Obsidian-style wiki embeds (`![[target]]`). The target is
 * deliberately kept opaque here; classification and optional size parsing
@@ -377,8 +370,7 @@ const wikiEmbed = {
 	}]
 };
 
-//#endregion
-//#region src/wikilink.ts
+// src/wikilink.ts
 /**
 * Inline parser for `[[target]]`: any chars except `[`, `]` and
 * newline, at least one of them not a space/tab. The first `]` must
@@ -409,8 +401,7 @@ const wikilink = {
 	}]
 };
 
-//#endregion
-//#region src/parser.ts
+// src/parser.ts
 /**
 * Inline-parser entry that immediately claims the entire inline
 * region. Returning `cx.end` makes `MarkdownParser.parseInline` exit
@@ -451,8 +442,7 @@ const gfmBlockOnlyParser = gfmParser.configure({ parseInline: [{
 	parse: consumeAllInline
 }] });
 
-//#endregion
-//#region src/node-ids.ts
+// src/node-ids.ts
 function lezerNodeIdsByName(parser) {
 	const ids = {};
 	for (const t of parser.nodeSet.types) ids[t.name] = t.id;
@@ -463,8 +453,7 @@ function lezerNodeIdsByName(parser) {
 */
 const LEZER_NODE_IDS = lezerNodeIdsByName(gfmParser);
 
-//#endregion
-//#region src/collect-images.ts
+// src/collect-images.ts
 /**
 * The destinations of the inline `![alt](src)` images in `markdown`, in
 * document order. Reference images are not resolved.
@@ -481,8 +470,7 @@ function collectImages(markdown) {
 	return sources;
 }
 
-//#endregion
-//#region src/safe-parse-url.ts
+// src/safe-parse-url.ts
 function safeParseURL(src) {
 	try {
 		return new URL(src);
@@ -491,8 +479,7 @@ function safeParseURL(src) {
 	}
 }
 
-//#endregion
-//#region src/embed.ts
+// src/embed.ts
 const YOUTUBE_HOSTS = /^(?:www\.|m\.)?(?:youtube\.com|youtube-nocookie\.com)$/i;
 const YOUTU_BE_HOST = /^(?:www\.)?youtu\.be$/i;
 const VIDEO_ID = /^[\w-]{11}$/;
@@ -516,8 +503,7 @@ function matchEmbed(src) {
 	if (isYouTubeVideo(src)) return "youtube-video";
 }
 
-//#endregion
-//#region src/inline.ts
+// src/inline.ts
 /**
 * Run `gfmParser`'s inline phase on a string and return the top-level
 * inline elements. Wraps the cast that's needed because Lezer's
@@ -538,8 +524,7 @@ function collectInlineElements(nodes, test, out = []) {
 	return out;
 }
 
-//#endregion
-//#region src/ast/code.ts
+// src/ast/code.ts
 /**
 * The narrowest fence that can hold `code`: wider than every line of it that
 * would close the fence early, and never under CommonMark's minimum of three. A
@@ -579,8 +564,7 @@ function canIndentCode(code) {
 	return code !== "" && !code.startsWith("\n") && !code.endsWith("\n");
 }
 
-//#endregion
-//#region src/ast/path.ts
+// src/ast/path.ts
 function* visit(entry) {
 	yield entry;
 	const children = entry.node.children;
@@ -626,8 +610,7 @@ function resolveMarkdownAstPath(root, path) {
 	};
 }
 
-//#endregion
-//#region src/ast/parse.ts
+// src/ast/parse.ts
 /**
 * Parse Markdown blocks, retaining inline syntax as literal strings. `\r\n` and
 * `\r` are read as `\n`, and positions index the text with `\n` line endings.
@@ -1390,8 +1373,7 @@ function readTableCells(cursor, text, header) {
 	return cells;
 }
 
-//#endregion
-//#region src/ast/serialize.ts
+// src/ast/serialize.ts
 /**
 * Serialize a block AST using Meowdown's normalization rules, not a lossless source printer.
 *
@@ -2114,8 +2096,7 @@ function isSpaceOrTab(char) {
 	return char === 32 || char === 9;
 }
 
-//#endregion
-//#region src/ast/check-roundtrip.ts
+// src/ast/check-roundtrip.ts
 function trimTrailingNewlines(text) {
 	let end = text.length;
 	while (end > 0 && text.charCodeAt(end - 1) === 10) end--;
@@ -2161,8 +2142,7 @@ function removeMathCodeBlockLanguage(markdown) {
 	return markdown.replaceAll(/math|latex/giu, "");
 }
 
-//#endregion
-//#region src/ast/equal.ts
+// src/ast/equal.ts
 /**
 * Whether two trees hold the same nodes with the same fields, level by level.
 * An absent optional field equals one set to `undefined`. Positions are not
@@ -2218,5 +2198,4 @@ function isNodeEqual(a, b) {
 	}
 }
 
-//#endregion
 export { LEZER_NODE_IDS, checkRoundTrip, collectImages, collectInlineElements, getAutolinkHref, gfmBlockOnlyParser, gfmParser, isMarkdownAstEqual, isSpaceChar, matchEmbed, parseInline, parseMarkdownAst, parseXPostId, resolveMarkdownAstPath, serializeMarkdownAst, walkMarkdownAst };

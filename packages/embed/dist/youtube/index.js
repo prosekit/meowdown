@@ -1,9 +1,9 @@
-import { a as useFetch, i as getSafeUrl, n as getRootContainer, r as renderLink, t as isPlainClick } from "../is-plain-click-QDpLdFP7.js";
+import { a as useFetch, i as getSafeUrl, n as getRootContainer, r as renderLink, t as isPlainClick } from "../is-plain-click-CvDb-mN4.js";
 import { defineCustomElement, defineProps, registerCustomElement, useEffect } from "@aria-ui/core";
 import { parseYouTubeVideo } from "@post-embed/schema";
 import el from "crelt";
 
-//#region src/youtube/parse-url.ts
+// src/youtube/parse-url.ts
 const YOUTUBE_HOSTS = /^(?:www\.|m\.)?(?:youtube\.com|youtube-nocookie\.com)$/i;
 const YOUTU_BE_HOST = /^(?:www\.)?youtu\.be$/i;
 const VIDEO_ID = /^[\w-]{11}$/;
@@ -56,8 +56,7 @@ function getEmbedUrl(ref) {
 	return `https://www.youtube-nocookie.com/embed/${ref.videoId}?${params}`;
 }
 
-//#endregion
-//#region src/youtube/video-click.ts
+// src/youtube/video-click.ts
 const YOUTUBE_VIDEO_CLICK = "meowdown-embed-youtube-click";
 /**
 * Returns false when a listener called `preventDefault()`: the host plays the
@@ -72,8 +71,7 @@ function dispatchVideoClick(target, detail) {
 	}));
 }
 
-//#endregion
-//#region src/youtube/render-video.ts
+// src/youtube/render-video.ts
 function renderFrame(ref, title) {
 	return el("iframe", {
 		src: getEmbedUrl(ref),
@@ -144,8 +142,7 @@ function renderVideo(video, ref, playback) {
 	}, title), video.author_name ? renderLink(el("span", { "data-author": "" }, video.author_name), video.author_url) : void 0));
 }
 
-//#endregion
-//#region src/youtube/youtube-video.ts
+// src/youtube/youtube-video.ts
 /** @internal */
 function useYouTubeVideo(host, props) {
 	const { fetched, pending } = useFetch(host, props, "YouTube video");
@@ -186,11 +183,9 @@ const YouTubeVideoCustomElement = defineCustomElement(useYouTubeVideo, definePro
 	}
 }));
 
-//#endregion
-//#region src/youtube/register.ts
+// src/youtube/register.ts
 function registerYouTubeVideo(name = "meowdown-embed-youtube") {
 	registerCustomElement(name, class extends YouTubeVideoCustomElement {});
 }
 
-//#endregion
 export { YOUTUBE_VIDEO_CLICK, registerYouTubeVideo, useYouTubeVideo };

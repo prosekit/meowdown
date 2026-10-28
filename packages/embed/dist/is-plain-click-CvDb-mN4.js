@@ -1,7 +1,7 @@
 import { createSignal, useEffect } from "@aria-ui/core";
 import el from "crelt";
 
-//#region src/fetch.ts
+// src/fetch.ts
 /**
 * Runs `resolver(url)` whenever `data` is `null` and both `url` and `resolver`
 * are set, ignoring results that arrive after the inputs changed or the host
@@ -53,8 +53,7 @@ function isPromiseLike(value) {
 	return typeof value === "object" && value !== null && typeof value.then === "function";
 }
 
-//#endregion
-//#region src/safe-url.ts
+// src/safe-url.ts
 function getSafeUrl(value, protocols) {
 	if (Array.from(value).some((character) => {
 		return character.charCodeAt(0) <= 32 || character.charCodeAt(0) === 127;
@@ -68,8 +67,7 @@ function getSafeUrl(value, protocols) {
 	}
 }
 
-//#endregion
-//#region src/render-link.ts
+// src/render-link.ts
 function renderLink(content, destination) {
 	const href = destination && getSafeUrl(destination);
 	return href ? el("a", {
@@ -79,8 +77,7 @@ function renderLink(content, destination) {
 	}, content) : content;
 }
 
-//#endregion
-//#region src/root.ts
+// src/root.ts
 /**
 * The direct `<div data-root>` child that holds the rendered snapshot. Reused
 * across updates so other children the host appended survive; created on
@@ -96,11 +93,9 @@ function getRootContainer(host) {
 	return container;
 }
 
-//#endregion
-//#region src/is-plain-click.ts
+// src/is-plain-click.ts
 function isPlainClick(event) {
 	return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 }
 
-//#endregion
 export { useFetch as a, getSafeUrl as i, getRootContainer as n, renderLink as r, isPlainClick as t };
