@@ -31,6 +31,37 @@ export interface EditorConfig
   wikilinkEnabled?: boolean | undefined
   placeholder?: PlaceholderOptions['placeholder'] | undefined
   readOnly?: boolean | undefined
+  /**
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/spellcheck
+   */
   spellCheck?: boolean | undefined
+  /**
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/writingsuggestions
+   */
+  writingSuggestions?: boolean | undefined
+  /**
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/autocorrect
+   */
+  autoCorrect?: boolean | undefined
+  /**
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/autocapitalize
+   */
+  autoCapitalize?: 'off' | 'sentences' | 'words' | 'characters' | undefined
+  /**
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/enterkeyhint
+   */
+  enterKeyHint?: 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send' | undefined
+  /**
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/dir
+   */
+  dir?: 'ltr' | 'rtl' | 'auto' | undefined
+  /**
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/lang
+   */
+  lang?: string | undefined
+  /**
+   * @see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-label
+   */
+  ariaLabel?: string | undefined
   editorClassName?: string | undefined
 }

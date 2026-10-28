@@ -373,10 +373,60 @@ export interface EditorProps {
   readOnly?: boolean | undefined
 
   /**
-   * Enables the browser's native spell checking. Defaults to the browser's
-   * behavior.
+   * Whether to enable spell checking. Defaults to the browser's behavior.
+   *
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/spellcheck
    */
   spellCheck?: boolean | undefined
+
+  /**
+   * Whether to enable writing suggestions. Defaults to the browser's behavior.
+   *
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/writingsuggestions
+   */
+  writingSuggestions?: boolean | undefined
+
+  /**
+   * Whether to enable autocorrect. Defaults to the browser's behavior.
+   *
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/autocorrect
+   */
+  autoCorrect?: boolean | undefined
+
+  /**
+   * How the virtual keyboard capitalizes text. Defaults to the browser's behavior.
+   *
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/autocapitalize
+   */
+  autoCapitalize?: EditorConfig['autoCapitalize'] | undefined
+
+  /**
+   * The label of the Enter key on the virtual keyboard.
+   *
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/enterkeyhint
+   */
+  enterKeyHint?: EditorConfig['enterKeyHint'] | undefined
+
+  /**
+   * The text direction of the editor content.
+   *
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/dir
+   */
+  dir?: EditorConfig['dir'] | undefined
+
+  /**
+   * The language of the editor content.
+   *
+   * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/lang
+   */
+  lang?: string | undefined
+
+  /**
+   * The accessible name of the editor.
+   *
+   * @see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-label
+   */
+  ariaLabel?: string | undefined
 
   /**
    * The search query. Every match is highlighted, and the first match at or
@@ -476,6 +526,13 @@ export function MarkdownEditor({
   placeholder,
   readOnly,
   spellCheck,
+  writingSuggestions,
+  autoCorrect,
+  autoCapitalize,
+  enterKeyHint,
+  dir,
+  lang,
+  ariaLabel,
   searchQuery,
   onSearchChange,
   timeFormat,
@@ -629,6 +686,13 @@ export function MarkdownEditor({
         placeholder={placeholder}
         readOnly={readOnly}
         spellCheck={spellCheck}
+        writingSuggestions={writingSuggestions}
+        autoCorrect={autoCorrect}
+        autoCapitalize={autoCapitalize}
+        enterKeyHint={enterKeyHint}
+        dir={dir}
+        lang={lang}
+        ariaLabel={ariaLabel}
         searchQuery={searchQuery}
         onSearchChange={onSearchChange}
         timeFormat={timeFormat}

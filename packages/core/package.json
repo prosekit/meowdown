@@ -1,7 +1,7 @@
 {
   "name": "@meowdown/core",
   "type": "module",
-  "version": "0.81.2",
+  "version": "0.82.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -49,7 +49,7 @@
     "hast-util-to-mdast": "^10.1.2",
     "katex": "^0.19.0",
     "lru.min": "^1.1.5",
-    "mdast-util-to-markdown": "^2.2.0",
+    "mdast-util-to-markdown": "^2.2.1",
     "micromark-util-decode-string": "^2.0.1",
     "micromark-util-normalize-identifier": "^2.0.1",
     "prosemirror-enter-rules": "^0.1.6",
@@ -65,13 +65,13 @@
   "devDependencies": {
     "@meowdown/vitest": "workspace:*",
     "@ocavue/tsconfig": "^0.7.1",
-    "@tsdown/css": "^0.23.1",
+    "@tsdown/css": "^0.23.2",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
     "@vitest/browser-playwright": "^5.0.5",
     "dedent": "^1.7.2",
-    "diffable-html-snapshot": "^0.3.0",
-    "tsdown": "^0.23.1",
+    "diffable-html-snapshot": "^0.4.0",
+    "tsdown": "^0.23.2",
     "vitest": "^5.0.5"
   },
   "publishConfig": {

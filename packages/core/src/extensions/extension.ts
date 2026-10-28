@@ -120,10 +120,35 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     }),
     defineReadonly((state) => !!getEditorConfig(state).readOnly),
     defineViewAttributes((state) => {
-      const { editorClassName, spellCheck } = getEditorConfig(state)
+      const config = getEditorConfig(state)
       const attributes: Record<string, string> = { class: 'meowdown-content' }
-      if (editorClassName) attributes.class += ` ${editorClassName}`
-      if (spellCheck != null) attributes.spellcheck = String(spellCheck)
+      if (config.editorClassName) {
+        attributes.class += ` ${config.editorClassName}`
+      }
+      if (config.spellCheck != null) {
+        attributes.spellcheck = String(config.spellCheck)
+      }
+      if (config.writingSuggestions != null) {
+        attributes.writingsuggestions = String(config.writingSuggestions)
+      }
+      if (config.autoCorrect != null) {
+        attributes.autocorrect = config.autoCorrect ? 'on' : 'off'
+      }
+      if (config.autoCapitalize != null) {
+        attributes.autocapitalize = config.autoCapitalize
+      }
+      if (config.enterKeyHint != null) {
+        attributes.enterkeyhint = config.enterKeyHint
+      }
+      if (config.dir != null) {
+        attributes.dir = config.dir
+      }
+      if (config.lang != null) {
+        attributes.lang = config.lang
+      }
+      if (config.ariaLabel != null) {
+        attributes['aria-label'] = config.ariaLabel
+      }
       return attributes
     }),
     defineCodeBlockSyntaxHighlight(),

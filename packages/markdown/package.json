@@ -24,7 +24,7 @@
     "build": "tsdown"
   },
   "dependencies": {
-    "@lezer/common": "^1.5.3",
+    "@lezer/common": "^1.5.4",
     "@lezer/markdown": "^1.8.1",
     "@post-embed/schema": "^0.5.2"
   },
@@ -33,7 +33,7 @@
     "@ocavue/tsconfig": "^0.7.1",
     "commonmark.json": "^0.31.0",
     "dedent": "^1.7.2",
-    "tsdown": "^0.23.1",
+    "tsdown": "^0.23.2",
     "vitest": "^5.0.5"
   },
   "publishConfig": {

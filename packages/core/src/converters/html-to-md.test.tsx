@@ -260,7 +260,17 @@ describe('toMeowdownUnsafe', () => {
         {
           "after": "[#A-Za-z]",
           "character": "&",
-          "inConstruct": "phrasing",
+          "inConstruct": [
+            "codeFencedLangGraveAccent",
+            "codeFencedLangTilde",
+            "codeFencedMetaGraveAccent",
+            "codeFencedMetaTilde",
+            "destinationLiteral",
+            "destinationRaw",
+            "phrasing",
+            "titleApostrophe",
+            "titleQuote",
+          ],
         },
         {
           "character": "'",
@@ -788,7 +798,17 @@ describe('toMeowdownUnsafe', () => {
         {
           "after": "[#A-Za-z]",
           "character": "&",
-          "inConstruct": "phrasing",
+          "inConstruct": [
+            "codeFencedLangGraveAccent",
+            "codeFencedLangTilde",
+            "codeFencedMetaGraveAccent",
+            "codeFencedMetaTilde",
+            "destinationLiteral",
+            "destinationRaw",
+            "phrasing",
+            "titleApostrophe",
+            "titleQuote",
+          ],
         },
         {
           "character": "'",

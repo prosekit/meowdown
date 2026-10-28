@@ -663,12 +663,61 @@ describe('file pill props', () => {
   })
 })
 
-describe('spellCheck prop', () => {
-  it('applies and updates the spellCheck prop on the editor root', async () => {
+describe('editor root attributes', () => {
+  it('applies and updates the spellCheck prop', async () => {
     const screen = await render(<MarkdownEditor spellCheck />)
     await expect.element(pmRoot).toHaveAttribute('spellcheck', 'true')
     await screen.rerender(<MarkdownEditor spellCheck={false} />)
     await expect.element(pmRoot).toHaveAttribute('spellcheck', 'false')
+  })
+
+  it('applies and removes the writingSuggestions prop', async () => {
+    const screen = await render(<MarkdownEditor writingSuggestions={false} />)
+    await expect.element(pmRoot).toHaveAttribute('writingsuggestions', 'false')
+    await screen.rerender(<MarkdownEditor />)
+    await expect.element(pmRoot).not.toHaveAttribute('writingsuggestions')
+  })
+
+  it('applies and removes the autoCorrect prop', async () => {
+    const screen = await render(<MarkdownEditor autoCorrect={false} />)
+    await expect.element(pmRoot).toHaveAttribute('autocorrect', 'off')
+    await screen.rerender(<MarkdownEditor />)
+    await expect.element(pmRoot).not.toHaveAttribute('autocorrect')
+  })
+
+  it('applies and removes the autoCapitalize prop', async () => {
+    const screen = await render(<MarkdownEditor autoCapitalize="words" />)
+    await expect.element(pmRoot).toHaveAttribute('autocapitalize', 'words')
+    await screen.rerender(<MarkdownEditor />)
+    await expect.element(pmRoot).not.toHaveAttribute('autocapitalize')
+  })
+
+  it('applies and removes the enterKeyHint prop', async () => {
+    const screen = await render(<MarkdownEditor enterKeyHint="done" />)
+    await expect.element(pmRoot).toHaveAttribute('enterkeyhint', 'done')
+    await screen.rerender(<MarkdownEditor />)
+    await expect.element(pmRoot).not.toHaveAttribute('enterkeyhint')
+  })
+
+  it('applies and removes the dir prop', async () => {
+    const screen = await render(<MarkdownEditor dir="rtl" />)
+    await expect.element(pmRoot).toHaveAttribute('dir', 'rtl')
+    await screen.rerender(<MarkdownEditor />)
+    await expect.element(pmRoot).not.toHaveAttribute('dir')
+  })
+
+  it('applies and removes the lang prop', async () => {
+    const screen = await render(<MarkdownEditor lang="ar" />)
+    await expect.element(pmRoot).toHaveAttribute('lang', 'ar')
+    await screen.rerender(<MarkdownEditor />)
+    await expect.element(pmRoot).not.toHaveAttribute('lang')
+  })
+
+  it('applies and removes the ariaLabel prop', async () => {
+    const screen = await render(<MarkdownEditor ariaLabel="Note" />)
+    await expect.element(pmRoot).toHaveAttribute('aria-label', 'Note')
+    await screen.rerender(<MarkdownEditor />)
+    await expect.element(pmRoot).not.toHaveAttribute('aria-label')
   })
 })
 
