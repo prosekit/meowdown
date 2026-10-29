@@ -6,11 +6,12 @@ export const sampleContent: NodeJSON = {
   content: [
     {
       type: 'heading',
-      attrs: { level: 1, setextUnderline: null, closingHashes: null },
+      attrs: { level: 1, setextUnderline: null, closingHashes: null, blankBefore: null },
       content: [{ type: 'text', text: 'Meowdown' }],
     },
     {
       type: 'paragraph',
+      attrs: { blankBefore: null },
       content: [
         {
           type: 'text',
@@ -20,6 +21,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'paragraph',
+      attrs: { blankBefore: null },
       content: [
         {
           type: 'text',
@@ -29,24 +31,26 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'heading',
-      attrs: { level: 2, setextUnderline: null, closingHashes: null },
+      attrs: { level: 2, setextUnderline: null, closingHashes: null, blankBefore: null },
       content: [{ type: 'text', text: 'Headings' }],
     },
     {
       type: 'heading',
-      attrs: { level: 3, setextUnderline: null, closingHashes: null },
+      attrs: { level: 3, setextUnderline: null, closingHashes: null, blankBefore: null },
       content: [{ type: 'text', text: 'This is an H3' }],
     },
     {
       type: 'heading',
-      attrs: { level: 2, setextUnderline: null, closingHashes: null },
+      attrs: { level: 2, setextUnderline: null, closingHashes: null, blankBefore: null },
       content: [{ type: 'text', text: 'Blockquote' }],
     },
     {
       type: 'blockquote',
+      attrs: { blankBefore: null },
       content: [
         {
           type: 'paragraph',
+          attrs: { blankBefore: null },
           content: [
             {
               type: 'text',
@@ -58,7 +62,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'heading',
-      attrs: { level: 2, setextUnderline: null, closingHashes: null },
+      attrs: { level: 2, setextUnderline: null, closingHashes: null, blankBefore: null },
       content: [{ type: 'text', text: 'Bullet list' }],
     },
     {
@@ -76,6 +80,7 @@ export const sampleContent: NodeJSON = {
       content: [
         {
           type: 'paragraph',
+          attrs: { blankBefore: null },
           content: [{ type: 'text', text: 'First item' }],
         },
       ],
@@ -95,6 +100,7 @@ export const sampleContent: NodeJSON = {
       content: [
         {
           type: 'paragraph',
+          attrs: { blankBefore: null },
           content: [{ type: 'text', text: 'Second item' }],
         },
         {
@@ -112,6 +118,7 @@ export const sampleContent: NodeJSON = {
           content: [
             {
               type: 'paragraph',
+              attrs: { blankBefore: null },
               content: [{ type: 'text', text: 'A nested bullet' }],
             },
           ],
@@ -120,7 +127,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'heading',
-      attrs: { level: 2, setextUnderline: null, closingHashes: null },
+      attrs: { level: 2, setextUnderline: null, closingHashes: null, blankBefore: null },
       content: [{ type: 'text', text: 'Ordered list' }],
     },
     {
@@ -138,6 +145,7 @@ export const sampleContent: NodeJSON = {
       content: [
         {
           type: 'paragraph',
+          attrs: { blankBefore: null },
           content: [{ type: 'text', text: 'Step one' }],
         },
       ],
@@ -157,18 +165,19 @@ export const sampleContent: NodeJSON = {
       content: [
         {
           type: 'paragraph',
+          attrs: { blankBefore: null },
           content: [{ type: 'text', text: 'Step two' }],
         },
       ],
     },
     {
       type: 'heading',
-      attrs: { level: 2, setextUnderline: null, closingHashes: null },
+      attrs: { level: 2, setextUnderline: null, closingHashes: null, blankBefore: null },
       content: [{ type: 'text', text: 'Code block' }],
     },
     {
       type: 'codeBlock',
-      attrs: { language: 'ts', fenceStyle: null, fenceLength: null },
+      attrs: { language: 'ts', fenceStyle: null, fenceLength: null, blankBefore: null },
       content: [
         {
           type: 'text',
@@ -178,7 +187,7 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'heading',
-      attrs: { level: 2, setextUnderline: null, closingHashes: null },
+      attrs: { level: 2, setextUnderline: null, closingHashes: null, blankBefore: null },
       content: [{ type: 'text', text: 'Table' }],
     },
     {
@@ -193,6 +202,7 @@ export const sampleContent: NodeJSON = {
               content: [
                 {
                   type: 'paragraph',
+                  attrs: { blankBefore: null },
                   content: [{ type: 'text', text: 'Syntax' }],
                 },
               ],
@@ -203,6 +213,7 @@ export const sampleContent: NodeJSON = {
               content: [
                 {
                   type: 'paragraph',
+                  attrs: { blankBefore: null },
                   content: [{ type: 'text', text: 'Description' }],
                 },
               ],
@@ -218,6 +229,7 @@ export const sampleContent: NodeJSON = {
               content: [
                 {
                   type: 'paragraph',
+                  attrs: { blankBefore: null },
                   content: [{ type: 'text', text: '# Heading' }],
                 },
               ],
@@ -228,6 +240,7 @@ export const sampleContent: NodeJSON = {
               content: [
                 {
                   type: 'paragraph',
+                  attrs: { blankBefore: null },
                   content: [{ type: 'text', text: 'Creates a heading' }],
                 },
               ],
@@ -243,6 +256,7 @@ export const sampleContent: NodeJSON = {
               content: [
                 {
                   type: 'paragraph',
+                  attrs: { blankBefore: null },
                   content: [{ type: 'text', text: '- item' }],
                 },
               ],
@@ -253,6 +267,7 @@ export const sampleContent: NodeJSON = {
               content: [
                 {
                   type: 'paragraph',
+                  attrs: { blankBefore: null },
                   content: [{ type: 'text', text: 'Creates a bullet list' }],
                 },
               ],
@@ -263,10 +278,11 @@ export const sampleContent: NodeJSON = {
     },
     {
       type: 'horizontalRule',
-      attrs: { marker: null },
+      attrs: { marker: null, blankBefore: null },
     },
     {
       type: 'paragraph',
+      attrs: { blankBefore: null },
       content: [
         {
           type: 'text',

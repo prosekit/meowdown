@@ -14,6 +14,7 @@ import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
 import { defineAtomMarkNavigation } from './atom-mark-navigation.ts'
 import { defineBackspaceEmptyFirstBlock } from './backspace-empty-first-block.ts'
+import { defineBlankBeforeAttrs } from './blank-before.ts'
 import { defineMeowdownBlockquote } from './blockquote.ts'
 import { defineBulletAfterHeading } from './bullet-after-heading.ts'
 import { defineClickBelow } from './click-below.ts'
@@ -84,6 +85,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineCodeBlock(),
     defineMeowdownHorizontalRule(),
     defineHTMLComment(),
+    defineBlankBeforeAttrs(),
 
     // marks
     defineInlineMarks(),

@@ -131,6 +131,18 @@ const EXACT_CASES: string[] = [
   'para\n- a',
   '> text\n> - item',
   '> a\n> - x\n> - y',
+
+  // a block that interrupts the one above it stays on the next line
+  '# h1\n## h2\n### h3',
+  '## Text\ncontent',
+  'a\n# h',
+  '```\nx\n```\na',
+  'a\n```\nx\n```',
+  '***\na',
+  'a\n***',
+  '<!-- c -->\na',
+  'a\n<!-- c -->',
+  '> a\n> # h',
 ]
 
 const NORMALIZING_CASES: string[] = [
@@ -141,6 +153,15 @@ const NORMALIZING_CASES: string[] = [
   // a lazy continuation gains the canonical item indent
   '- [ ] todo\neen voorlopig idee',
   '- item\nlazy line',
+
+  // a blockquote under a paragraph, a list, or another quote gains a blank line
+  'a\n> q',
+  '- a\n> b',
+  '> a\n> > b',
+
+  // so does a block under a quote or list that ends in paragraph text
+  '> q\n# h',
+  '- a\n# h',
 
   // a nested item's indent normalizes to the parent's content column
   '- a\n    - deep',
