@@ -72,6 +72,7 @@ function readBlock(node: ProseMirrorNode): MarkdownBlock {
         marker: attrs.marker ?? undefined,
         taskMarker: attrs.taskMarker ?? undefined,
         markerGap: attrs.markerGap,
+        blankBefore: attrs.blankBefore ?? undefined,
         children: readBlocks(node),
       }
     }
