@@ -113,6 +113,12 @@ export {
   type LinkHoverOptions,
 } from './extensions/link-hover.ts'
 export { defineLinkPaste } from './extensions/link-paste.ts'
+export {
+  getPresentedLinks,
+  setLinkPresentation,
+  type LinkPresentation,
+  type PresentedLink,
+} from './extensions/link-presentation.ts'
 export type { LinkPreview, LinkPreviewResolver } from './extensions/link-preview.ts'
 export type { ListMarker, MeowdownListAttrs } from './extensions/list.ts'
 export type { MarkChunk } from './extensions/mark-chunk.ts'
