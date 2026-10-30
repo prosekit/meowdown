@@ -1,5 +1,11 @@
 # @meowdown/react
 
+## 0.82.3
+
+### Patch Changes
+
+- [#752](https://github.com/prosekit/meowdown/pull/752) [`f346dab`](https://github.com/prosekit/meowdown/commit/f346dab2dc24aaf726dcbed9d3e73a398a603eaa) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Mark code blocks and math and Mermaid previews with `data-scroll-x`, so a host page can tell them apart as horizontal scrollers.
+
 ## 0.82.2
 
 ### Patch Changes
