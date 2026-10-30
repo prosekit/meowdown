@@ -86,6 +86,18 @@ interface DemoRun {
   cancelled: boolean
 }
 
+function streamText(run: DemoRun, text: string, append: (chunk: string) => void): void {
+  let offset = 0
+  const timer = setInterval(() => {
+    if (run.cancelled || offset >= text.length) {
+      clearInterval(timer)
+      return
+    }
+    append(text.slice(offset, offset + STREAM_CHUNK_SIZE))
+    offset += STREAM_CHUNK_SIZE
+  }, STREAM_INTERVAL_MS)
+}
+
 const ACTION_BUTTON_CLASS =
   'inline-flex cursor-pointer items-center rounded-lg border-0 bg-transparent px-2.5 py-1 [font:inherit] whitespace-nowrap text-stone-600 hover:bg-stone-100 dark:text-stone-300 dark:hover:bg-stone-800'
 
@@ -143,18 +155,9 @@ export function useSelectionDemo(handleRef: RefObject<EditorHandle | null>): Sel
       const run: DemoRun = { command, context, cancelled: false }
       runRef.current = run
 
-      const result = command.transform(context.selectedText)
-      let offset = 0
-      const timer = setInterval(() => {
-        if (run.cancelled || offset >= result.length) {
-          clearInterval(timer)
-          return
-        }
-        handleRef.current?.appendPendingReplacementText(
-          result.slice(offset, offset + STREAM_CHUNK_SIZE),
-        )
-        offset += STREAM_CHUNK_SIZE
-      }, STREAM_INTERVAL_MS)
+      streamText(run, command.transform(context.selectedText), (chunk) => {
+        handleRef.current?.appendPendingReplacementText(chunk)
+      })
     },
     [handleRef],
   )
