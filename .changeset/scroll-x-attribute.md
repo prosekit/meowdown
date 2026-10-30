@@ -1,5 +1,4 @@
 ---
-'@meowdown/core': patch
 '@meowdown/react': patch
 ---
 
