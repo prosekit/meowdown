@@ -95,7 +95,7 @@ function defineCodeBlockDOM(): CodeBlockDOMExtension {
       const { language } = node.attrs as CodeBlockAttrs
       return [
         'pre',
-        { 'data-code-block': '', 'data-language': language || undefined },
+        { 'data-code-block': '', 'data-language': language || undefined, 'data-scroll-x': '' },
         ['code', { class: language ? `language-${language}` : undefined }, 0],
       ]
     },
