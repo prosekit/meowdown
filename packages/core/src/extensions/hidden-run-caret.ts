@@ -107,12 +107,41 @@ const deleteUnformat = createUnformatCommand(1)
 // uncancelable; there the native per-char deletion proceeds and the reparse
 // plus the snap keep the result consistent.
 function createBeforeInputPlugin(): Plugin {
+  let lastEnterKeydownAt = -Infinity
   return new Plugin({
     key: beforeInputKey,
     props: {
       handleDOMEvents: {
+        keydown: (view, event) => {
+          if (
+            event.key === 'Enter' &&
+            !event.ctrlKey &&
+            !event.altKey &&
+            !event.metaKey &&
+            !view.composing
+          )
+            lastEnterKeydownAt = Date.now()
+          return false
+        },
         beforeinput: (view, event) => {
-          if (view.composing) return false
+          if (view.composing || event.isComposing) return false
+          if (event.inputType === 'insertParagraph' && event.cancelable) {
+            // A real keydown already belongs to ProseMirror's Enter handling,
+            // including its 200 ms iOS fallback. Only fill the missing-keydown path.
+            if (Date.now() - lastEnterKeydownAt < 225) return false
+            // Software keyboards may omit keydown. Native DOM splitting can clone
+            // a non-editable inline label beside its hidden Markdown source.
+            const enter = new KeyboardEvent('keydown', {
+              key: 'Enter',
+              code: 'Enter',
+              keyCode: 13,
+              which: 13,
+            })
+            const handled = view.someProp('handleKeyDown', (handler) => handler(view, enter))
+            if (!handled) return false
+            event.preventDefault()
+            return true
+          }
           const command =
             event.inputType === 'deleteContentBackward'
               ? backspaceUnformat
