@@ -5,7 +5,7 @@ export type { Resolver } from '../fetch.ts'
 export { X_POST_MEDIA_CLICK } from './media-click.ts'
 export type { XPostMediaClickDetail, XPostMediaClickEvent } from './media-click.ts'
 export { registerXPost } from './register.ts'
-export { useXPost } from './x-post.ts'
+export { setupXPost, setupXPost as useXPost } from './x-post.ts'
 export type { XPostElement, XPostProps } from './x-post.ts'
 
 declare global {

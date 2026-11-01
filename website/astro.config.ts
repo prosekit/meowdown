@@ -7,7 +7,12 @@ import packageJson from '../packages/react/package.json' with { type: 'json' }
 
 export default defineConfig({
   integrations: [
-    react({ compiler: true }),
+    react({
+      compiler: {
+        reportDiagnostics: true,
+        panicThreshold: process.env.NODE_ENV === 'production' ? 'all_errors' : 'none',
+      },
+    }),
     astrobook({
       directory: 'src/stories',
       subpath: '/playground',
