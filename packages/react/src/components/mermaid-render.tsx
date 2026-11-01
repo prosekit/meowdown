@@ -8,6 +8,10 @@ interface MermaidRenderProps {
   source: string
   className?: string
   'data-testid'?: string
+  /**
+   * Marks the host as a horizontal scroller.
+   */
+  'data-scroll-x'?: boolean
   onMouseDown?: MouseEventHandler
 }
 
@@ -63,6 +67,7 @@ export function MermaidRender(props: MermaidRenderProps): ReactElement {
         contentEditable={false}
         data-error
         data-testid={props['data-testid']}
+        data-scroll-x={props['data-scroll-x']}
         onMouseDown={onMouseDown}
       >
         {output.error}
@@ -77,6 +82,7 @@ export function MermaidRender(props: MermaidRenderProps): ReactElement {
       className={className}
       contentEditable={false}
       data-testid={props['data-testid']}
+      data-scroll-x={props['data-scroll-x']}
       onMouseDown={onMouseDown}
     />
   )

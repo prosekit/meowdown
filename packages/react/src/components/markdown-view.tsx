@@ -613,7 +613,7 @@ function CodeBlock({ code, language }: { code: string; language: string }): Reac
   )
   const tokens = useMaybePromise(result) ?? []
   return (
-    <pre data-code-block="" data-language={language || undefined}>
+    <pre data-code-block="" data-language={language || undefined} data-scroll-x>
       <code>{tokens.length > 0 ? renderTokens(code, tokens) : code}</code>
     </pre>
   )
@@ -655,6 +655,7 @@ function MathCodeBlock({ code }: { code: string }): ReactElement {
       displayMode
       className={styles.Preview}
       data-testid="code-block-math-preview"
+      data-scroll-x
     />
   )
 }
@@ -668,6 +669,7 @@ function MermaidCodeBlock({ code }: { code: string }): ReactElement {
       source={code}
       className={`${styles.Preview} ${styles.MermaidPreview}`}
       data-testid="code-block-mermaid-preview"
+      data-scroll-x
     />
   )
 }

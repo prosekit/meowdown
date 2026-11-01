@@ -10,6 +10,10 @@ interface MathRenderProps {
   displayMode: boolean
   className?: string
   'data-testid'?: string
+  /**
+   * Marks the host as a horizontal scroller.
+   */
+  'data-scroll-x'?: boolean
   onMouseDown?: MouseEventHandler
 }
 
@@ -32,6 +36,7 @@ export function MathRender(props: MathRenderProps): ReactElement {
       className={className}
       contentEditable={false}
       data-testid={props['data-testid']}
+      data-scroll-x={props['data-scroll-x']}
       onMouseDown={onMouseDown}
     />
   )

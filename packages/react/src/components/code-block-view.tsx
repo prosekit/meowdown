@@ -79,7 +79,7 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
       data-selected={selected || undefined}
       data-testid="code-block"
     >
-      <pre ref={contentRef} data-language={language} {...NON_PROSE_PROPS}></pre>
+      <pre ref={contentRef} data-language={language} data-scroll-x {...NON_PROSE_PROPS}></pre>
       {
         /* Skip rendering the toolbar during dragging to improve the performance of rendering the drag preview image in Safari */
         selected ? null : (
@@ -93,6 +93,7 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
           displayMode
           className={styles.Preview}
           data-testid="code-block-math-preview"
+          data-scroll-x
           onMouseDown={focusSource}
         />
       )}
@@ -102,6 +103,7 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
           source={previewCode}
           className={`${styles.Preview} ${styles.MermaidPreview}`}
           data-testid="code-block-mermaid-preview"
+          data-scroll-x
           onMouseDown={focusSource}
         />
       )}
