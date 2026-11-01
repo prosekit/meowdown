@@ -49,6 +49,7 @@ export function useFetch<T>(
 ): FetchState<T> {
   // An aria-ui host hook, not a React hook.
   'use no memo'
+
   const fetched = createSignal<T | null>(null)
   const pending = createSignal(false)
 
