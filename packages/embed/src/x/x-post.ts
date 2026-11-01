@@ -22,9 +22,7 @@ export interface XPostProps extends FetchProps<XPostSnapshot> {
 export interface XPostElement extends HTMLElement, XPostProps {}
 
 /** @internal */
-export function useXPost(host: HostElement, props: State<XPostProps>): void {
-  // An aria-ui host hook, not a React hook.
-  'use no memo'
+export function setupXPost(host: HostElement, props: State<XPostProps>): void {
   const { fetched, pending } = useFetch(host, props, 'X post')
 
   useHostEffect(host, () => {
@@ -69,7 +67,7 @@ function renderFallback(pending: boolean, url: string | null): HTMLElement {
 }
 
 export const XPost = defineCustomElement(
-  useXPost,
+  setupXPost,
   defineProps<XPostProps>({
     data: { default: null, attribute: false },
     url: { default: null, attribute: false },
