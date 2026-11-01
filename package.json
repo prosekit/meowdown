@@ -5,7 +5,7 @@
   "packageManager": "pnpm@11.28.6",
   "scripts": {
     "dev": "pnpm --filter ./website run dev",
-    "build": "pnpm -r run build",
+    "build": "pnpm -r --stream --sequential run build",
     "preview": "pnpm run build && pnpm --filter ./website run preview",
     "ci:publish:snapshot": "pkg-pr-new publish --pnpm ./packages/markdown ./packages/embed ./packages/core ./packages/react",
     "change": "changeset",
