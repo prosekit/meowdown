@@ -29,6 +29,7 @@ export interface YouTubeVideoElement extends HTMLElement, YouTubeVideoProps {}
 export function useYouTubeVideo(host: HostElement, props: State<YouTubeVideoProps>): void {
   // An aria-ui host hook, not a React hook.
   'use no memo'
+
   const { fetched, pending } = useFetch(host, props, 'YouTube video')
 
   useHostEffect(host, () => {

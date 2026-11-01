@@ -15,7 +15,10 @@ export default defineConfig({
   plugins: [
     // The default `include` also matches `.d.ts`, which the compiler empties.
     react({
-      compiler: { reportDiagnostics: true, panicThreshold: 'all_errors' },
+      compiler: {
+        reportDiagnostics: true,
+        panicThreshold: 'all_errors',
+      },
       exclude: [/\/node_modules\//, /\.d\.[cm]?ts$/],
     }),
   ],
