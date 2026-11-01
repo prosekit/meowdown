@@ -5,7 +5,7 @@ export type { Resolver } from '../fetch.ts'
 export { registerYouTubeVideo } from './register.ts'
 export { YOUTUBE_VIDEO_CLICK } from './video-click.ts'
 export type { YouTubeVideoClickDetail, YouTubeVideoClickEvent } from './video-click.ts'
-export { useYouTubeVideo } from './youtube-video.ts'
+export { setupYouTubeVideo, setupYouTubeVideo as useYouTubeVideo } from './youtube-video.ts'
 export type { YouTubeVideoElement, YouTubeVideoProps } from './youtube-video.ts'
 
 declare global {

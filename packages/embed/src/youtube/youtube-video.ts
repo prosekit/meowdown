@@ -26,10 +26,7 @@ export interface YouTubeVideoProps extends FetchProps<YouTubeVideo> {
 export interface YouTubeVideoElement extends HTMLElement, YouTubeVideoProps {}
 
 /** @internal */
-export function useYouTubeVideo(host: HostElement, props: State<YouTubeVideoProps>): void {
-  // An aria-ui host hook, not a React hook.
-  'use no memo'
-
+export function setupYouTubeVideo(host: HostElement, props: State<YouTubeVideoProps>): void {
   const { fetched, pending } = useFetch(host, props, 'YouTube video')
 
   useHostEffect(host, () => {
@@ -64,7 +61,7 @@ function renderFallback(pending: boolean): HTMLElement {
 }
 
 export const YouTubeVideoCustomElement = defineCustomElement(
-  useYouTubeVideo,
+  setupYouTubeVideo,
   defineProps<YouTubeVideoProps>({
     data: { default: null, attribute: false },
     url: { default: null, attribute: false },
