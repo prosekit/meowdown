@@ -35,7 +35,7 @@
     "@meowdown/core": "workspace:*",
     "@meowdown/embed": "workspace:*",
     "@meowdown/markdown": "workspace:*",
-    "@ocavue/utils": "^1.9.0",
+    "@ocavue/utils": "^1.11.0",
     "@post-embed/types": "^0.5.0",
     "@prosekit/core": "^0.13.4",
     "@prosekit/pm": "^0.1.21",
@@ -60,7 +60,7 @@
     }
   },
   "devDependencies": {
-    "@css-modules-kit/codegen": "^1.4.0",
+    "@css-modules-kit/codegen": "^1.4.1",
     "@meowdown/vitest": "workspace:*",
     "@ocavue/tsconfig": "^0.7.1",
     "@tsdown/css": "^0.23.3",
