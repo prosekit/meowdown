@@ -70,8 +70,8 @@
     /* inline and block code background */
     --meowdown-code-bg: light-dark(oklch(0.967 0 0), oklch(0.21 0.006 286));
 
-    /* Mermaid diagram palette. The enrichment colors are passed explicitly so
-     * generic host variables such as `--muted` and `--border` cannot leak into
+    /* Mermaid diagram palette. The preview maps every color to Pele's
+     * `--pele-*` variables, so host values of those variables cannot leak into
      * the generated SVG. */
     --meowdown-mermaid-bg: var(--meowdown-code-bg);
     --meowdown-mermaid-fg: var(--meowdown-text);
@@ -91,11 +91,17 @@
       var(--meowdown-mermaid-fg) 3%,
       var(--meowdown-mermaid-bg)
     );
+    --meowdown-mermaid-surface-alt: color-mix(
+      in srgb,
+      var(--meowdown-mermaid-fg) 8%,
+      var(--meowdown-mermaid-bg)
+    );
     --meowdown-mermaid-border: color-mix(
       in srgb,
       var(--meowdown-mermaid-fg) 20%,
       var(--meowdown-mermaid-bg)
     );
+    --meowdown-mermaid-critical: var(--meowdown-danger);
     --meowdown-mermaid-error: var(--meowdown-danger);
 
     /* placeholder fill while an image loads */

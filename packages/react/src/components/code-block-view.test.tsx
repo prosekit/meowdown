@@ -217,6 +217,32 @@ describe('code block Mermaid preview', () => {
     await expect.element(mermaidPreview).toMatchTextContent('Hello Alice')
   })
 
+  it('renders a Mind map', async () => {
+    const markdown =
+      'before\n\n```mermaid\nmindmap\n  root((Reflect))\n    Notes\n      Backlinks\n    Sync\n```'
+    await render(<ProseKitEditor initialMarkdown={markdown} />)
+
+    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+    await expect.element(mermaidPreview).toMatchTextContent('Backlinks')
+  })
+
+  it('renders a Pie chart', async () => {
+    const markdown =
+      'before\n\n```mermaid\npie title Time spent\n  "Writing" : 45\n  "Reading" : 30\n```'
+    await render(<ProseKitEditor initialMarkdown={markdown} />)
+
+    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+    await expect.element(mermaidPreview).toMatchTextContent('Writing')
+  })
+
+  it('renders a Flowchart without a direction', async () => {
+    const markdown = 'before\n\n```mermaid\nflowchart\n  A[Start] --> B[End]\n```'
+    await render(<ProseKitEditor initialMarkdown={markdown} />)
+
+    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+    await expect.element(mermaidPreview).toMatchTextContent('End')
+  })
+
   it('keeps the source visible for an empty Mermaid block', async () => {
     await render(<ProseKitEditor initialMarkdown={'before\n\n```mermaid\n```'} />)
 
@@ -224,9 +250,8 @@ describe('code block Mermaid preview', () => {
   })
 
   it('shows an editable error for unsupported syntax', async () => {
-    await render(
-      <ProseKitEditor initialMarkdown={'before\n\n```mermaid\npie\n  "Dogs" : 10\n```'} />,
-    )
+    await render(<ProseKitEditor initialMarkdown={'before\n\n```mermaid\nnot a diagram\n```'} />)
+    await expect.element(mermaidPreview, { timeout: 15000 }).toMatchTextContent('No diagram type')
     await expect.element(mermaidPreview, { timeout: 15000 }).toHaveAttribute('data-error')
     await expect.element(mermaidSource).not.toBeVisible()
 
@@ -254,13 +279,31 @@ describe('code block Mermaid preview', () => {
 
   it('keeps hostile labels passive', async () => {
     const markdown =
-      'before\n\n```mermaid\nflowchart LR\n  A[<script>alert(1)</script><img src=x onerror=alert(1)> & safe] --> B\n```'
+      'before\n\n```mermaid\nflowchart LR\n  A["<script>alert(1)</script><img src=x onerror=alert(1)> & safe"] --> B\n```'
     await render(<ProseKitEditor initialMarkdown={markdown} />)
 
     await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
     await expect.element(mermaidPreview.locate('script')).not.toBeInTheDocument()
     await expect.element(mermaidPreview.locate('img')).not.toBeInTheDocument()
     await expect.element(mermaidPreview.locate('[onerror]')).not.toBeInTheDocument()
+  })
+
+  it('drops click links', async () => {
+    const markdown =
+      'before\n\n```mermaid\nflowchart LR\n  A --> B\n  click A "javascript:alert(1)"\n  click B "https://example.com"\n```'
+    await render(<ProseKitEditor initialMarkdown={markdown} />)
+
+    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+    await expect.element(mermaidPreview.locate('a')).not.toBeInTheDocument()
+  })
+
+  it('drops remote images', async () => {
+    const markdown =
+      'before\n\n```mermaid\nflowchart LR\n  A@{ img: "https://example.com/a.png", label: "Picture" }\n```'
+    await render(<ProseKitEditor initialMarkdown={markdown} />)
+
+    await expect.element(mermaidPreview.locate('svg'), { timeout: 15000 }).toBeInTheDocument()
+    await expect.element(mermaidPreview.locate('image')).not.toBeInTheDocument()
   })
 })
 

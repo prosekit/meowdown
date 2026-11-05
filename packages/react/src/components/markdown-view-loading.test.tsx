@@ -4,8 +4,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 
-vi.mock('../hooks/use-beautiful-mermaid.ts', () => ({
-  useBeautifulMermaid: () => undefined,
+vi.mock('../hooks/use-pele.ts', () => ({
+  usePele: () => undefined,
 }))
 
 import { MarkdownView } from './markdown-view.tsx'

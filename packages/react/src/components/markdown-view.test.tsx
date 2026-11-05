@@ -771,10 +771,10 @@ describe('MarkdownView Mermaid', () => {
   })
 
   it('renders unsupported syntax as an error', async () => {
-    await renderView('```mermaid\npie\n  "Dogs" : 10\n```')
+    await renderView('```mermaid\nnot a diagram\n```')
 
     await expect.element(mermaidPreview, { timeout: 15000 }).toHaveAttribute('data-error')
-    await expect.element(mermaidPreview).toMatchTextContent(/Invalid|Unsupported/i)
+    await expect.element(mermaidPreview).toMatchTextContent('No diagram type')
   })
 
   it('renders passive SVG when interaction is disabled', async () => {

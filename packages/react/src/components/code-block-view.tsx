@@ -19,8 +19,8 @@ import {
   type ReactElement,
 } from 'react'
 
-import { useBeautifulMermaid } from '../hooks/use-beautiful-mermaid.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
+import { usePele } from '../hooks/use-pele.ts'
 import { NON_PROSE_PROPS } from '../utils/non-prose-props.ts'
 
 import styles from './code-block-view.module.css'
@@ -41,7 +41,7 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
   const caretInside = decorations.some(isCodeBlockPreviewHiddenDecoration)
 
   const katex = useKaTeX(isMath)
-  const mermaid = useBeautifulMermaid(isMermaid)
+  const mermaid = usePele(isMermaid)
   const showMathPreview = isMath && katex != null
   const showMermaidPreview = isMermaid && mermaid != null
   const showPreview = showMathPreview || showMermaidPreview
