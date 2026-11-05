@@ -4,20 +4,15 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 
-import type { PeleRender } from '../hooks/use-pele.ts'
+import type { MermaidRenderer } from '../hooks/use-pele.ts'
 
 import styles from './code-block-view.module.css'
 import { MermaidRender } from './mermaid-render.tsx'
 
 function mockRenderer(svg: string) {
-  return vi.fn<PeleRender>(() => ({
-    svg,
-    width: 0,
-    height: 0,
-    type: 'flowchart',
-    mermaidType: 'flowchart-v2',
-    links: [],
-  }))
+  return vi.fn<MermaidRenderer>(() => {
+    return new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement
+  })
 }
 
 describe('MermaidRender', () => {
@@ -56,48 +51,10 @@ describe('MermaidRender', () => {
       </div>,
     )
 
-    const prefixes = renderer.mock.calls.map(([, options]) => options?.idPrefix)
+    const prefixes = renderer.mock.calls.map(([, options]) => options.idPrefix)
     expect(prefixes).toHaveLength(2)
     expect(prefixes[0]).toMatch(/^[\w-]+$/)
     expect(prefixes[1]).toMatch(/^[\w-]+$/)
     expect(prefixes[0]).not.toBe(prefixes[1])
-  })
-
-  it('rejects SVG with an event handler', async () => {
-    const renderer = mockRenderer(
-      '<svg xmlns="http://www.w3.org/2000/svg"><rect onclick="alert(1)"/></svg>',
-    )
-    await render(
-      <MermaidRender renderer={renderer} source="flowchart LR" data-testid="mermaid-output" />,
-    )
-
-    const output = page.getByTestId('mermaid-output')
-    await expect.element(output).toHaveAttribute('data-error')
-    await expect.element(output).toHaveTextContent('Invalid SVG output.')
-    await expect.element(output.locate('rect')).not.toBeInTheDocument()
-  })
-
-  it('rejects SVG with an external reference', async () => {
-    const renderer = mockRenderer(
-      '<svg xmlns="http://www.w3.org/2000/svg"><use href="https://example.com/a.svg#b"/></svg>',
-    )
-    await render(
-      <MermaidRender renderer={renderer} source="flowchart LR" data-testid="mermaid-output" />,
-    )
-
-    const output = page.getByTestId('mermaid-output')
-    await expect.element(output).toHaveTextContent('Invalid SVG output.')
-  })
-
-  it('rejects SVG with a foreign object', async () => {
-    const renderer = mockRenderer(
-      '<svg xmlns="http://www.w3.org/2000/svg"><foreignObject><div xmlns="http://www.w3.org/1999/xhtml">x</div></foreignObject></svg>',
-    )
-    await render(
-      <MermaidRender renderer={renderer} source="flowchart LR" data-testid="mermaid-output" />,
-    )
-
-    const output = page.getByTestId('mermaid-output')
-    await expect.element(output).toHaveTextContent('Invalid SVG output.')
   })
 })

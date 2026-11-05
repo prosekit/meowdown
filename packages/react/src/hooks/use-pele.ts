@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 
-import type { PeleRender } from './pele-chunk.ts'
+import type { MermaidRenderer } from './pele-chunk.ts'
 
-export { type PeleRender }
+export { type MermaidRenderer }
 
-let pelePromise: Promise<PeleRender> | undefined
+let pelePromise: Promise<MermaidRenderer> | undefined
 
-function loadPele(): Promise<PeleRender> {
+function loadPele(): Promise<MermaidRenderer> {
   pelePromise ??= import('./pele-chunk.ts')
-    .then((module) => module.render)
+    .then((module) => module.renderMermaid)
     .catch((error) => {
       console.error('[meowdown] Failed to load pele.', error)
       throw error
@@ -16,8 +16,8 @@ function loadPele(): Promise<PeleRender> {
   return pelePromise
 }
 
-export function usePele(enabled: boolean): PeleRender | undefined {
-  const [renderer, setRenderer] = useState<PeleRender | undefined>(undefined)
+export function usePele(enabled: boolean): MermaidRenderer | undefined {
+  const [renderer, setRenderer] = useState<MermaidRenderer | undefined>(undefined)
   useEffect(() => {
     if (!enabled || renderer) return
     let cancelled = false

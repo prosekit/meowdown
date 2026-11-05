@@ -8,10 +8,10 @@ import {
   type ReactElement,
 } from 'react'
 
-import type { PeleRender } from '../hooks/use-pele.ts'
+import type { MermaidRenderer } from '../hooks/use-pele.ts'
 
 interface MermaidRenderProps {
-  renderer: PeleRender
+  renderer: MermaidRenderer
   source: string
   className?: string
   'data-testid'?: string
@@ -33,49 +33,17 @@ const PELE_OPTIONS = {
   autoDirection: false,
 } as const satisfies RenderOptions
 
-const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
-
-const UNSAFE_ELEMENTS = new Set([
-  'a',
-  'animate',
-  'animateMotion',
-  'animateTransform',
-  'foreignObject',
-  'image',
-  'script',
-  'set',
-])
-
 type MermaidOutput =
   | { element: Element; error?: undefined }
   | { element?: undefined; error: string }
 
-function isUnsafeElement(element: Element): boolean {
-  if (element.namespaceURI !== SVG_NAMESPACE || UNSAFE_ELEMENTS.has(element.localName)) {
-    return true
-  }
-  for (const attribute of element.attributes) {
-    const name = attribute.localName.toLowerCase()
-    if (name.startsWith('on')) return true
-    if (name === 'href' && !attribute.value.startsWith('#')) return true
-  }
-  return false
-}
-
-function renderMermaid(renderer: PeleRender, source: string, idPrefix: string): MermaidOutput {
+function getMermaidOutput(
+  renderer: MermaidRenderer,
+  source: string,
+  idPrefix: string,
+): MermaidOutput {
   try {
-    const { svg } = renderer(source, { ...PELE_OPTIONS, idPrefix })
-    const document = new DOMParser().parseFromString(svg, 'image/svg+xml')
-    const element = document.documentElement
-    if (
-      document.querySelector('parsererror') ||
-      element.localName !== 'svg' ||
-      isUnsafeElement(element) ||
-      Array.from(element.querySelectorAll('*')).some(isUnsafeElement)
-    ) {
-      return { error: 'Invalid SVG output.' }
-    }
-    return { element }
+    return { element: renderer(source, { ...PELE_OPTIONS, idPrefix }) }
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) }
   }
@@ -85,7 +53,7 @@ export function MermaidRender(props: MermaidRenderProps): ReactElement {
   const { renderer, source, className, onMouseDown } = props
   const idPrefix = `meowdown-mermaid-${useId().replaceAll(/[^\w-]/g, '')}`
   const output = useMemo(
-    () => renderMermaid(renderer, source, idPrefix),
+    () => getMermaidOutput(renderer, source, idPrefix),
     [renderer, source, idPrefix],
   )
   const ref = useRef<HTMLSpanElement>(null)
