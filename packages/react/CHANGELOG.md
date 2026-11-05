@@ -1,5 +1,11 @@
 # @meowdown/react
 
+## 0.83.0
+
+### Minor Changes
+
+- [#755](https://github.com/prosekit/meowdown/pull/755) [`6c5c06e`](https://github.com/prosekit/meowdown/commit/6c5c06ebbd7d1c7b5292a1d8636fdf98a9f5e122) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Render Mermaid diagrams with Pele, which supports every diagram type in Mermaid 12.1, including mind maps, Venn, pie, Gantt, and timeline diagrams.
+
 ## 0.82.3
 
 ### Patch Changes
