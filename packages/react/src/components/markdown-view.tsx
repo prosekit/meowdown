@@ -62,9 +62,9 @@ import {
   type ReactNode,
 } from 'react'
 
-import { useBeautifulMermaid } from '../hooks/use-beautiful-mermaid.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
 import { useMaybePromise } from '../hooks/use-maybe-promise.ts'
+import { usePele } from '../hooks/use-pele.ts'
 
 import { attributesToProps } from './attributes-to-props.ts'
 import styles from './code-block-view.module.css'
@@ -661,7 +661,7 @@ function MathCodeBlock({ code }: { code: string }): ReactElement {
 }
 
 function MermaidCodeBlock({ code }: { code: string }): ReactElement {
-  const renderer = useBeautifulMermaid(true)
+  const renderer = usePele(true)
   if (!renderer || code.trim() === '') return <CodeBlock code={code} language="mermaid" />
   return (
     <MermaidRender

@@ -38,6 +38,16 @@
 }
 
 .MermaidPreview {
+  --pele-bg: var(--meowdown-mermaid-bg);
+  --pele-fg: var(--meowdown-mermaid-fg);
+  --pele-muted: var(--meowdown-mermaid-muted);
+  --pele-line: var(--meowdown-mermaid-line);
+  --pele-surface: var(--meowdown-mermaid-surface);
+  --pele-surface-alt: var(--meowdown-mermaid-surface-alt);
+  --pele-border: var(--meowdown-mermaid-border);
+  --pele-accent: var(--meowdown-mermaid-accent);
+  --pele-critical: var(--meowdown-mermaid-critical);
+
   text-align: initial;
 
   &[data-error] {
