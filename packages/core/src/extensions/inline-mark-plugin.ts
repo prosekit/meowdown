@@ -19,6 +19,7 @@ import type { EditorState, Transaction } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
+import { guardAppendTransaction } from '../utils/guard-plugin.ts'
 import type { PositionRange } from '../utils/range.ts'
 
 import { BatchSetMarkStep } from './batch-set-mark-step.ts'
@@ -314,7 +315,7 @@ function createInlineMarkPlugin(
         }
       },
     },
-    appendTransaction(transactions, oldState, newState) {
+    appendTransaction: guardAppendTransaction((transactions, oldState, newState) => {
       // Drop transactions we appended ourselves to avoid recursing.
       for (const tr of transactions) {
         if (tr.getMeta(META_KEY)) return null
@@ -343,12 +344,18 @@ function createInlineMarkPlugin(
       tr.setMeta(META_KEY, true)
       tr.setMeta('addToHistory', false)
       return tr
-    },
+    }),
     view(view) {
       // `EditorState.create` does NOT fire `appendTransaction`, so the
       // initial document never gets processed via the normal path. Dispatch
       // a no-op tr on mount to wake the plugin up.
-      view.dispatch(triggerInlineMarks(view.state))
+      // A throw here would stop ProseMirror from creating the plugin views
+      // after this one.
+      try {
+        view.dispatch(triggerInlineMarks(view.state))
+      } catch (error) {
+        reportError(error)
+      }
 
       const controller = new AbortController()
 

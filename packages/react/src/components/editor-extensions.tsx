@@ -43,7 +43,16 @@ export function EditorExtensions({
   }, [editor, deferredSearchQuery])
 
   useExtension(
-    useMemo(() => (onDocChange ? defineDocChangeHandler(onDocChange) : null), [onDocChange]),
+    useMemo(() => {
+      if (!onDocChange) return null
+      return defineDocChangeHandler(() => {
+        try {
+          onDocChange()
+        } catch (error) {
+          reportError(error)
+        }
+      })
+    }, [onDocChange]),
   )
   useExtension(
     useMemo(

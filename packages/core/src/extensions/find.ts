@@ -7,17 +7,19 @@ import {
 import { Plugin } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
+import { guardDecorations } from '../utils/guard-plugin.ts'
+
 // Hide and focus mode render syntax runs, link destinations, and link titles at
 // font-size 0, so a match landing in one would paint an invisible box. Reveal
 // the active match through the same `show` class focus mode uses. Only the
 // active one: a query matching twenty destinations must not reflow the page.
 const revealActiveMatch = new Plugin({
   props: {
-    decorations: (state) => {
+    decorations: guardDecorations((state) => {
       const { from, to, empty } = state.selection
       if (empty || getSearchStatus(state).active === 0) return
       return DecorationSet.create(state.doc, [Decoration.inline(from, to, { class: 'show' })])
-    },
+    }),
   },
 })
 
