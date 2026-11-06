@@ -40,6 +40,7 @@ export function astToDoc(
           marker: node.marker ?? null,
           taskMarker: node.taskMarker,
           markerGap: node.markerGap,
+          blankBefore: node.blankBefore ?? null,
         },
         children,
       )

@@ -71,6 +71,7 @@ describe('defineEditorExtension', () => {
           },
           {
             "attrs": {
+              "blankBefore": null,
               "checked": false,
               "collapsed": false,
               "kind": "bullet",
@@ -94,6 +95,7 @@ describe('defineEditorExtension', () => {
           },
           {
             "attrs": {
+              "blankBefore": null,
               "checked": false,
               "collapsed": false,
               "kind": "ordered",
@@ -117,6 +119,7 @@ describe('defineEditorExtension', () => {
           },
           {
             "attrs": {
+              "blankBefore": null,
               "checked": false,
               "collapsed": false,
               "kind": "task",

@@ -453,7 +453,7 @@ describe('bullet lists', () => {
     expect(roundtrip('- a\n    - deep')).toBe('- a\n  - deep\n')
   })
 
-  it.fails('keeps a loose list', () => {
+  it('keeps a loose list', () => {
     const md = ['- a', '', '- b'].join('\n')
     expect(roundtrip(md)).toBe(md + '\n')
   })
@@ -466,12 +466,12 @@ describe('bullet lists', () => {
     expect(roundtrip('- a\n- \n- b')).toBe('- a\n-\n- b\n')
   })
 
-  it.fails('keeps a tight sibling after a two-block item', () => {
+  it('keeps a tight sibling after a two-block item', () => {
     const md = ['- a', '', '  b', '- c'].join('\n')
     expect(roundtrip(md)).toBe(md + '\n')
   })
 
-  it.fails('keeps a nested list right under its paragraph in a loose list', () => {
+  it('keeps a nested list right under its paragraph in a loose list', () => {
     const md = ['- a', '', '  b', '- c', '  - d'].join('\n')
     expect(roundtrip(md)).toBe(md + '\n')
   })
@@ -1071,7 +1071,7 @@ describe('mixed structures', () => {
     expect(roundtrip('# h1\n## h2\n### h3')).toBe('# h1\n## h2\n### h3\n')
   })
 
-  it.fails('keeps a list right under a paragraph', () => {
+  it('keeps a list right under a paragraph', () => {
     expect(roundtrip('para\n- a')).toBe('para\n- a\n')
   })
 

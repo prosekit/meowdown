@@ -197,6 +197,15 @@ describe('docToMarkdown', () => {
     expect(markdown).toBe('- first\n\n  second\n\n- third\n')
   })
 
+  it('continues the gap of the item above it', () => {
+    const doc = n.doc(
+      n.list({ kind: 'bullet' }, n.paragraph('a')),
+      n.list({ kind: 'bullet', blankBefore: true }, n.paragraph('b')),
+      n.list({ kind: 'bullet' }, n.paragraph('c')),
+    )
+    expect(docToMarkdown(doc)).toBe('- a\n\n- b\n\n- c\n')
+  })
+
   it('keeps a blank line after a list', () => {
     const doc = n.doc(n.list({ kind: 'bullet' }, n.paragraph('item')), n.paragraph('after'))
     const markdown = docToMarkdown(doc)

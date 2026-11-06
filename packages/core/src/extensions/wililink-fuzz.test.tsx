@@ -129,7 +129,6 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
         - [[bar]]
       ----- markdown after -------------
       top
-
       - [[foo]]
       - [[bar]]
       ----- selection before/after -----
@@ -204,7 +203,6 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
       - top
 
         [[foo]]
-
         - [[bar]]
       ----- selection before/after -----
       top
@@ -359,7 +357,6 @@ describe('caret fuzz over a wikilink outline in focus mode', () => {
         - [[bar]]
       ----- markdown after -------------
       - top
-
         - [[foo]]
 
         [[bar]]
@@ -1330,7 +1327,6 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
         - [[bar]]
       ----- markdown after -------------
       top
-
       - [[foo]]
       - [[bar]]
       ----- selection before/after -----
@@ -1405,7 +1401,6 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
       - top
 
         [[foo]]
-
         - [[bar]]
       ----- selection before/after -----
       top
@@ -1560,7 +1555,6 @@ describe('caret fuzz over a wikilink outline in hide mode', () => {
         - [[bar]]
       ----- markdown after -------------
       - top
-
         - [[foo]]
 
         [[bar]]
