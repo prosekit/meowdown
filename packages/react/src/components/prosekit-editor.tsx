@@ -735,9 +735,24 @@ export function ProseKitEditor({
     }
   }, [editor, frontmatter, hasSelectionMenu, openSelectionMenu, singleParagraph])
 
+  // React hands a throw from a ref callback, or from its cleanup during a
+  // deletion, to an error boundary outside the deleted subtree, usually the
+  // host app's root one. A broken editor must not take the whole app down.
   const mount = useCallback(
     (element: HTMLDivElement | null) => {
-      return editor.mount(element)
+      if (!element) return
+      try {
+        editor.mount(element)
+      } catch (error) {
+        reportError(error)
+      }
+      return () => {
+        try {
+          editor.unmount()
+        } catch (error) {
+          reportError(error)
+        }
+      }
     },
     [editor],
   )
