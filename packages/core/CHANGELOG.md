@@ -1,5 +1,13 @@
 # @meowdown/core
 
+## 0.83.1
+
+### Patch Changes
+
+- [#759](https://github.com/prosekit/meowdown/pull/759) [`5ea33e3`](https://github.com/prosekit/meowdown/commit/5ea33e372ec7bce683cb2c9314c38756bffa5c1a) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Report an error thrown by an image, file, math, or wikilink mark view with `reportError`. The mark then renders as plain source text instead of breaking the editor.
+
+- [#760](https://github.com/prosekit/meowdown/pull/760) [`0759a8b`](https://github.com/prosekit/meowdown/commit/0759a8b76647787bae562ca7f2c805a64637e29a) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Report an error thrown by an editor plugin's `appendTransaction` or `decorations`, or by an `onDocChange` or pending replacement handler, with `reportError` instead of failing the transaction or the view update.
+
 ## 0.83.0
 
 ### Minor Changes
