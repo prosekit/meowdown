@@ -12,6 +12,7 @@ import { Plugin, PluginKey, TextSelection } from '@prosekit/pm/state'
 
 import { getIsComposing } from '../utils/composition.ts'
 import { executeCommand } from '../utils/execute-command.ts'
+import { guardAppendTransaction } from '../utils/guard-plugin.ts'
 import { hasPointerSelectionTransaction } from '../utils/transaction.ts'
 
 import {
@@ -34,7 +35,7 @@ const beforeInputKey = new PluginKey('meowdown-hidden-run-beforeinput')
 function createSnapPlugin(): Plugin {
   return new Plugin({
     key: snapKey,
-    appendTransaction: (transactions, oldState, newState) => {
+    appendTransaction: guardAppendTransaction((transactions, oldState, newState) => {
       if (getIsComposing()) return null
       if (getMarkMode(newState) !== 'hide') return null
       const selection = newState.selection
@@ -51,7 +52,7 @@ function createSnapPlugin(): Plugin {
       const anchor = selection.anchor === selection.from ? from : to
       const head = selection.head === selection.from ? from : to
       return newState.tr.setSelection(TextSelection.create(newState.doc, anchor, head))
-    },
+    }),
   })
 }
 

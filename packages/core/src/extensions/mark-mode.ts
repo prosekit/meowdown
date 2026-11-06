@@ -4,6 +4,8 @@ import type { EditorState } from '@prosekit/pm/state'
 import { Plugin } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
+import { guardDecorations } from '../utils/guard-plugin.ts'
+
 import type { MdPackAttrs } from './inline-marks.ts'
 import { isMarkOfType, type MarkName } from './mark-names.ts'
 
@@ -23,12 +25,12 @@ function createMarkModePlugin(getMode: MarkModeGetter): Plugin {
   return new Plugin({
     props: {
       attributes: (state) => ({ 'data-mark-mode': getMode(state) }),
-      decorations: (state) => {
+      decorations: guardDecorations((state) => {
         const mode = getMode(state)
         return mode === 'focus' || mode === 'hide'
           ? computeRevealDecorations(state, mode)
           : undefined
-      },
+      }),
     },
   })
 }

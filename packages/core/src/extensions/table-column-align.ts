@@ -17,6 +17,8 @@ import {
   type Transaction,
 } from '@prosekit/pm/state'
 
+import { guardAppendTransaction } from '../utils/guard-plugin.ts'
+
 import { isNodeOfType, type NodeName } from './node-names.ts'
 
 /**
@@ -148,7 +150,7 @@ function unionOfChangedRanges(
 function createTableAlignSyncPlugin(): Plugin {
   return new Plugin({
     key: new PluginKey('table-align-sync'),
-    appendTransaction(transactions, _oldState, newState) {
+    appendTransaction: guardAppendTransaction((transactions, _oldState, newState) => {
       if (!transactions.some((transaction) => transaction.docChanged)) return
       const range = unionOfChangedRanges(transactions)
       if (!range) return
@@ -163,7 +165,7 @@ function createTableAlignSyncPlugin(): Plugin {
         return false
       })
       return tr?.docChanged ? tr : undefined
-    },
+    }),
   })
 }
 

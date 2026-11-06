@@ -14,6 +14,7 @@ import { Plugin, PluginKey, Selection, TextSelection } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
 import { getIsComposing } from '../utils/composition.ts'
+import { guardAppendTransaction, guardDecorations } from '../utils/guard-plugin.ts'
 import { hasPointerSelectionTransaction } from '../utils/transaction.ts'
 
 import { getMarkMode } from './mark-mode-config.ts'
@@ -258,7 +259,7 @@ function getUnitEdge(range: MarkRange, oldPos: number, newPos: number, isPointer
 function createCaretSnapPlugin(marks: AtomMarks): Plugin {
   return new Plugin({
     key: new PluginKey('atom-mark-caret-snap'),
-    appendTransaction: (transactions, oldState, newState) => {
+    appendTransaction: guardAppendTransaction((transactions, oldState, newState) => {
       if (getIsComposing()) return null
       const markNames = getActiveMarkNames(marks, newState)
       if (markNames.length === 0) return null
@@ -281,7 +282,7 @@ function createCaretSnapPlugin(marks: AtomMarks): Plugin {
       const isPointer = hasPointerSelectionTransaction(transactions)
       const head = getUnitEdge(range, oldState.selection.head, selection.head, isPointer)
       return newState.tr.setSelection(TextSelection.create(newState.doc, head))
-    },
+    }),
   })
 }
 
@@ -293,7 +294,7 @@ function createSelectionPlugin(marks: AtomMarks): Plugin {
   return new Plugin({
     key: new PluginKey('atom-mark-selection'),
     props: {
-      decorations: (state) => {
+      decorations: guardDecorations((state) => {
         const markNames = getActiveMarkNames(marks, state)
         if (markNames.length === 0) return
         // A node selection already outlines the whole block; atom rings inside
@@ -316,7 +317,7 @@ function createSelectionPlugin(marks: AtomMarks): Plugin {
           }
         })
         return DecorationSet.create(state.doc, decorations)
-      },
+      }),
     },
   })
 }

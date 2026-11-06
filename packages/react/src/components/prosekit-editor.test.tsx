@@ -63,6 +63,32 @@ describe('ProseKitEditor', () => {
     expect(markdown.startsWith('# ')).toBe(true)
   })
 
+  it('reports a throwing onDocChange and keeps the editor editable', async () => {
+    const error = new Error('onDocChange failed')
+    const onDocChange = vi.fn(() => {
+      throw error
+    })
+    const reportErrorSpy = vi.spyOn(globalThis, 'reportError').mockImplementation(() => {})
+    try {
+      const ref = createRef<EditorHandle>()
+      const screen = await render(
+        <ProseKitEditor ref={ref} initialMarkdown="Hello" onDocChange={onDocChange} />,
+      )
+      await expect.element(screen.getByText('Hello')).toBeInTheDocument()
+
+      await pmRoot.click()
+      await userEvent.keyboard('abc')
+
+      await vi.waitFor(() => {
+        expect(reportErrorSpy).toHaveBeenCalledWith(error)
+      })
+      await expect.element(pmRoot).toHaveTextContent('Helloabc')
+      expect(ref.current?.getMarkdown()).toContain('abc')
+    } finally {
+      reportErrorSpy.mockRestore()
+    }
+  })
+
   it('round-trips a node selection through getState and setState', async () => {
     const ref = createRef<EditorHandle>()
     const screen = await render(<ProseKitEditor ref={ref} initialMarkdown="Hello" />)

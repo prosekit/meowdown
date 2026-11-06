@@ -16,6 +16,7 @@ import {
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
 import { markdownToDoc } from '../converters/md-to-pm.ts'
+import { guardDecorations } from '../utils/guard-plugin.ts'
 import type { PositionRange } from '../utils/range.ts'
 
 import { isNodeOfType } from './node-names.ts'
@@ -126,13 +127,13 @@ const pendingReplacementPlugin = new Plugin<PendingReplacementPluginState>({
     },
   },
   props: {
-    decorations: (state) => {
+    decorations: guardDecorations((state) => {
       const pending = getPendingReplacement(state)
       if (!pending || pending.from >= pending.to) return null
       return DecorationSet.create(state.doc, [
         Decoration.inline(pending.from, pending.to, { class: 'md-pending-replacement' }),
       ])
-    },
+    }),
   },
 })
 
@@ -297,10 +298,14 @@ export function definePendingReplacementHandler(
           const prev = pendingReplacementKey.getState(prevState)
           const next = pendingReplacementKey.getState(view.state)
           if (!next || prev === next) return
-          if (next.pending) {
-            if (next.pending !== prev?.pending) handler({ type: 'update', pending: next.pending })
-          } else if (next.ended && next.ended !== prev?.ended) {
-            handler({ type: 'ended', pending: next.ended.pending, outcome: next.ended.outcome })
+          try {
+            if (next.pending) {
+              if (next.pending !== prev?.pending) handler({ type: 'update', pending: next.pending })
+            } else if (next.ended && next.ended !== prev?.ended) {
+              handler({ type: 'ended', pending: next.ended.pending, outcome: next.ended.outcome })
+            }
+          } catch (error) {
+            reportError(error)
           }
         },
       }),

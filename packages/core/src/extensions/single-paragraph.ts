@@ -2,6 +2,7 @@ import { definePlugin, Priority, withPriority, type PlainExtension } from '@pros
 import { Plugin, PluginKey, TextSelection, type EditorState } from '@prosekit/pm/state'
 
 import { docToParagraphMarkdown, paragraphMarkdownToDoc } from '../converters/paragraph.ts'
+import { guardAppendTransaction } from '../utils/guard-plugin.ts'
 
 import { getEditorConfig } from './editor-config-getter.ts'
 import { isNodeOfType } from './node-names.ts'
@@ -28,7 +29,7 @@ export function defineSingleParagraph(): PlainExtension {
     definePlugin(
       new Plugin({
         key: singleParagraphPluginKey,
-        appendTransaction(transactions, _oldState, state) {
+        appendTransaction: guardAppendTransaction((transactions, _oldState, state) => {
           if (!isSingleParagraph(state)) return
           if (!transactions.some((transaction) => transaction.docChanged)) return
           const markdown = docToParagraphMarkdown(state.doc)
@@ -44,7 +45,7 @@ export function defineSingleParagraph(): PlainExtension {
           return transaction.setSelection(
             TextSelection.create(transaction.doc, Math.max(1, position)),
           )
-        },
+        }),
       }),
     ),
     Priority.highest,
