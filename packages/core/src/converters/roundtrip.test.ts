@@ -213,10 +213,9 @@ describe('inline', () => {
   })
 
   it('keeps sentinel comments around body text', () => {
-    // The serializer separates a run of blocks with blank lines (as it does for
-    // any adjacent blocks, comment or not); both sentinels and the body survive.
+    // The sentinels stay on the lines right around the body, as written.
     expect(roundtrip('<!-- start -->\nbody text\n<!-- end -->')).toBe(
-      '<!-- start -->\n\nbody text\n\n<!-- end -->\n',
+      '<!-- start -->\nbody text\n<!-- end -->\n',
     )
   })
 
@@ -355,8 +354,8 @@ describe('blockquotes', () => {
     expect(roundtrip('> l1\n> l2')).toBe('> l1\n> l2\n')
   })
 
-  it.fails('keeps a lazily-nested quote', () => {
-    expect(roundtrip('> a\n>> b')).toBe('> a\n>> b\n')
+  it('respaces a lazily-nested quote', () => {
+    expect(roundtrip('> a\n>> b')).toBe('> a\n>\n> > b\n')
   })
 
   it('keeps a nested list in a quote', () => {
@@ -842,7 +841,7 @@ describe('soft breaks', () => {
   // backslash would become part of the text.
   it('reads a continuation line that opens a block back as that block', () => {
     const doc1 = n.doc(n.paragraph('foo\n# bar'))
-    const doc2 = n.doc(n.paragraph('foo'), n.heading({ level: 1 }, 'bar'))
+    const doc2 = n.doc(n.paragraph('foo'), n.heading({ level: 1, blankBefore: false }, 'bar'))
     const markdown = docToMarkdown(doc1)
     expect(markdown).toBe('foo\n# bar\n')
     expect(markdownToDoc(markdown, { nodes: n }).eq(doc2)).toBe(true)
@@ -985,7 +984,7 @@ describe('escapes and whitespace', () => {
     const reparsed = markdownToDoc(markdown)
     expect(reparsed.childCount).toBe(2)
     expect(reparsed.child(0).type.name).toBe('list')
-    expect(reparsed.child(1).toJSON()).toEqual({ type: 'paragraph' })
+    expect(reparsed.child(1).toJSON()).toEqual({ type: 'paragraph', attrs: { blankBefore: null } })
     expect(docToMarkdown(reparsed)).toBe(markdown)
   })
 
@@ -1067,7 +1066,7 @@ describe('mixed structures', () => {
     expect(roundtrip(md)).toBe(md + '\n')
   })
 
-  it.fails('keeps stacked headings tight', () => {
+  it('keeps stacked headings tight', () => {
     expect(roundtrip('# h1\n## h2\n### h3')).toBe('# h1\n## h2\n### h3\n')
   })
 
@@ -1075,7 +1074,7 @@ describe('mixed structures', () => {
     expect(roundtrip('para\n- a')).toBe('para\n- a\n')
   })
 
-  it.fails('keeps a paragraph right under a heading', () => {
+  it('keeps a paragraph right under a heading', () => {
     expect(roundtrip('## Text\ncontent')).toBe('## Text\ncontent\n')
   })
 

@@ -12,6 +12,23 @@ export function canJoinTight(previous: MarkdownBlock, next: MarkdownBlock): bool
   // A paragraph that opens an HTML block runs on to the next blank line.
   if (previous.type === 'paragraph' && opensHTMLBlock(previous.value)) return false
   switch (next.type) {
+    case 'paragraph':
+    case 'blockquote':
+    case 'table':
+      return endsClosed(previous)
+    case 'heading':
+      return next.setextUnderline == null ? !endsInLazyText(previous) : endsClosed(previous)
+    case 'codeBlock':
+      return next.fenceStyle == null || next.fenceStyle === 'tilde'
+        ? !endsInLazyText(previous)
+        : next.fenceStyle === 'dollar' && endsClosed(previous)
+    case 'horizontalRule':
+      // A dash rule under paragraph text is a setext underline.
+      return (next.marker ?? '---').startsWith('-')
+        ? endsClosed(previous)
+        : !endsInLazyText(previous)
+    case 'htmlComment':
+      return !endsInLazyText(previous)
     case 'listItem':
       // Lezer reads a bare marker of another list under an item's paragraph as
       // more of that paragraph, so only the same list carries on regardless.
@@ -78,6 +95,17 @@ function endsClosed(block: MarkdownBlock): boolean {
     default:
       return false
   }
+}
+
+/**
+ * Whether `block` is a container whose last line is paragraph text. The
+ * serializer can write such a line lazily, and a lazy line can open a block
+ * that runs on into whatever follows.
+ */
+function endsInLazyText(block: MarkdownBlock): boolean {
+  return (
+    (block.type === 'listItem' || block.type === 'blockquote') && !endsClosed(getLastBlock(block))
+  )
 }
 
 /**

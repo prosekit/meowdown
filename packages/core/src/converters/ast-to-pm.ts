@@ -11,6 +11,10 @@ export function astToDoc(
   nodes: TypedNodeBuilders = getNodeBuilders(),
 ): ProseMirrorNode {
   const children = node.children?.map((child) => astToDoc(child, nodes)) || []
+  const blankBefore =
+    node.type === 'document' || node.type === 'tableRow' || node.type === 'tableCell'
+      ? null
+      : (node.blankBefore ?? null)
   switch (node.type) {
     case 'document':
       return nodes.doc(
@@ -18,18 +22,19 @@ export function astToDoc(
         children,
       )
     case 'paragraph':
-      return nodes.paragraph(node.value)
+      return nodes.paragraph({ blankBefore }, node.value)
     case 'heading':
       return nodes.heading(
         {
           level: node.level,
           setextUnderline: node.setextUnderline ?? null,
           closingHashes: node.closingHashes ?? null,
+          blankBefore,
         },
         node.value,
       )
     case 'blockquote':
-      return nodes.blockquote(children)
+      return nodes.blockquote({ blankBefore }, children)
     case 'listItem':
       return nodes.list(
         {
@@ -40,7 +45,7 @@ export function astToDoc(
           marker: node.marker ?? null,
           taskMarker: node.taskMarker,
           markerGap: node.markerGap,
-          blankBefore: node.blankBefore ?? null,
+          blankBefore,
         },
         children,
       )
@@ -50,13 +55,14 @@ export function astToDoc(
           language: node.language,
           fenceStyle: node.fenceStyle ?? null,
           fenceLength: node.fenceLength ?? null,
+          blankBefore,
         },
         node.value,
       )
     case 'horizontalRule':
-      return nodes.horizontalRule({ marker: node.marker ?? null })
+      return nodes.horizontalRule({ marker: node.marker ?? null, blankBefore })
     case 'htmlComment':
-      return nodes.htmlComment({ content: node.value })
+      return nodes.htmlComment({ content: node.value, blankBefore })
     case 'table':
       return nodes.table(children)
     case 'tableRow':

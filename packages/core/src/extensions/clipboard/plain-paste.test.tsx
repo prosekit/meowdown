@@ -143,7 +143,6 @@ describe('plain text paste', () => {
     expect(await pastePlainText('# title\ntext')).toMatchInlineSnapshot(`
       """
       # title
-
       text
 
       """
