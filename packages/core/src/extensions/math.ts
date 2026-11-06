@@ -3,6 +3,7 @@ import type { Mark } from '@prosekit/pm/model'
 import { TextSelection } from '@prosekit/pm/state'
 import type { EditorView, MarkView, ViewMutationRecord } from '@prosekit/pm/view'
 
+import { guardMarkView } from '../utils/guard-mark-view.ts'
 import { loadKaTeX, renderMathInto } from '../utils/katex.ts'
 import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
 
@@ -92,6 +93,6 @@ class MathMarkView implements MarkView {
 export function defineMath(): PlainExtension {
   return defineMarkView({
     name: 'mdMath' satisfies MarkName,
-    constructor: (mark, view) => new MathMarkView(mark, view),
+    constructor: guardMarkView((mark, view) => new MathMarkView(mark, view)),
   }) as PlainExtension
 }

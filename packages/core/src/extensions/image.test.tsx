@@ -647,3 +647,37 @@ describe('image source spellcheck exemption', () => {
     expect(imageSource.element()).toHaveProperty('spellcheck', false)
   })
 })
+
+describe('image resolver errors', () => {
+  // Render `markdown` with a resolver that throws synchronously.
+  function setupThrowing(markdown: string, error: Error): Fixture {
+    const fixture = setupFixture({
+      extensionOptions: {
+        markMode: 'show',
+        resolveImageUrl: () => {
+          throw error
+        },
+      },
+    })
+    const { n } = fixture
+    fixture.set(n.doc(n.paragraph(markdown)))
+    fixture.view.focus()
+    return fixture
+  }
+
+  it('reports a throwing resolver and keeps the source editable', async () => {
+    const error = new Error('resolver failed')
+    const reportErrorSpy = vi.spyOn(globalThis, 'reportError').mockImplementation(() => {})
+    try {
+      using fixture = setupThrowing('![img](photo.png)', error)
+      expect(reportErrorSpy).toHaveBeenCalledWith(error)
+      await expect.element(pmRoot).toHaveTextContent('![img](photo.png)')
+
+      await userEvent.keyboard('x')
+      await expect.element(pmRoot).toHaveTextContent('x![img](photo.png)')
+      expect(fixture.doc.textContent).toBe('x![img](photo.png)')
+    } finally {
+      reportErrorSpy.mockRestore()
+    }
+  })
+})

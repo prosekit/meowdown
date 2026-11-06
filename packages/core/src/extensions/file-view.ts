@@ -4,6 +4,7 @@ import type { EditorState } from '@prosekit/pm/state'
 import type { MarkView, ViewMutationRecord } from '@prosekit/pm/view'
 
 import { formatFileSize } from '../utils/format-file-size.ts'
+import { guardMarkView } from '../utils/guard-mark-view.ts'
 
 import type { MdFileAttrs } from './inline-marks.ts'
 import type { MarkName } from './mark-names.ts'
@@ -215,6 +216,6 @@ export function defineFileView(
 ): PlainExtension {
   return defineMarkView({
     name: 'mdFile' satisfies MarkName,
-    constructor: (mark, view) => new FileMarkView(mark, getOptions?.(view.state)),
+    constructor: guardMarkView((mark, view) => new FileMarkView(mark, getOptions?.(view.state))),
   }) as PlainExtension
 }
