@@ -1,5 +1,11 @@
 # @meowdown/core
 
+## 0.83.2
+
+### Patch Changes
+
+- [#763](https://github.com/prosekit/meowdown/pull/763) [`53dd86d`](https://github.com/prosekit/meowdown/commit/53dd86d196864c8007538e60861ff65e5863e62e) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Dim checked task items with colors instead of `opacity`, so their text no longer changes brightness while an iOS scroller moves.
+
 ## 0.83.1
 
 ### Patch Changes
