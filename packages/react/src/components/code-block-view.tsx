@@ -10,7 +10,7 @@ import { isApple } from '@prosekit/core'
 import { TextSelection } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 import type { ReactNodeViewProps } from '@prosekit/react'
-import { CheckIcon, ChevronsUpDownIcon, CopyIcon, EllipsisIcon, LanguagesIcon } from 'lucide-react'
+import { BracesIcon, CheckIcon, ChevronsUpDownIcon, CopyIcon, EllipsisIcon } from 'lucide-react'
 import {
   memo,
   use,
@@ -265,7 +265,7 @@ function CodeBlockMenuPopup({
             onClick={onChangeLanguage}
             data-testid="code-block-menu-language"
           >
-            <LanguagesIcon />
+            <BracesIcon />
             Change language
           </Menu.Item>
           <Menu.Item
