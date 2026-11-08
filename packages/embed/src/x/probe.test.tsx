@@ -41,9 +41,23 @@ describe('probe', () => {
       @container style(--_overflowing: 1) {
         [data-meowdown-embed='x'].v-hidden [data-root] > article > [data-show-more] { visibility: visible }
       }
+      @keyframes probe-show { from, to { visibility: visible } }
+      [data-meowdown-embed='x'].v-anim [data-root] > article { scroll-timeline: --probe-clip block }
+      [data-meowdown-embed='x'].v-anim [data-root] > article > [data-show-more] {
+        display: block;
+        visibility: hidden;
+        animation: probe-show linear both;
+        animation-timeline: --probe-clip;
+      }
+      @keyframes probe-show-display { from, to { display: block } }
+      [data-meowdown-embed='x'].v-anim-display [data-root] > article { scroll-timeline: --probe-clip2 block }
+      [data-meowdown-embed='x'].v-anim-display [data-root] > article > [data-show-more] {
+        animation: probe-show-display linear both;
+        animation-timeline: --probe-clip2;
+      }
     `
     document.head.append(sheet)
-    const variants = ['v-base', 'v-plain', 'v-container', 'v-flex', 'v-hidden']
+    const variants = ['v-base', 'v-plain', 'v-container', 'v-flex', 'v-hidden', 'v-anim', 'v-anim-display']
     const elements = variants.map((name) => mountLimited(name))
     const result: Record<string, string> = {}
     for (const ms of [0, 50, 200, 1000]) {
@@ -64,6 +78,15 @@ describe('probe', () => {
     result['v-base-after-inline'] = describeToggle(base)
     const visibility = elements[4].querySelector<HTMLElement>('[data-show-more]')!
     result['v-hidden-visibility'] = getComputedStyle(visibility).visibility
+    const baseArticle = elements[0].querySelector('article')!
+    const baseToggle = elements[0].querySelector('[data-show-more]')!
+    result['v-base-inherited'] = getComputedStyle(baseToggle).getPropertyValue('--_overflowing')
+    result['v-base-article'] = getComputedStyle(baseArticle).getPropertyValue('--_overflowing')
+    result['v-base-mask'] = getComputedStyle(elements[0].querySelector('[data-content]')!).maskImage
+    for (const name of ['v-anim', 'v-anim-display']) {
+      const toggle = elements[variants.indexOf(name)].querySelector<HTMLElement>('[data-show-more]')!
+      result[`${name}-visibility`] = getComputedStyle(toggle).visibility
+    }
     console.info(JSON.stringify(result, null, 2))
   })
 })
