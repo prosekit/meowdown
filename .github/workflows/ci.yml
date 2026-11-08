@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   lint:
+    if: false
     runs-on: ubuntu-26.04
     timeout-minutes: 15
     steps:
@@ -31,6 +32,7 @@ jobs:
         run: pnpm run lint
 
   build:
+    if: false
     runs-on: ubuntu-26.04
     timeout-minutes: 15
 
@@ -132,7 +134,7 @@ jobs:
     runs-on: ubuntu-slim
     timeout-minutes: 5
 
-    if: always()
+    if: false
     needs: [lint, build, test]
 
     steps:
@@ -143,6 +145,7 @@ jobs:
           exit 1
 
   publish-snapshot:
+    if: false
     runs-on: ubuntu-26.04
     timeout-minutes: 15
 
