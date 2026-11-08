@@ -1,5 +1,5 @@
 ---
-'@meowdown/core': minor
+'@meowdown/core': patch
 '@meowdown/react': minor
 ---
 
