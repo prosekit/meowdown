@@ -333,11 +333,11 @@ function CodeBlockLanguagePicker({
       inputValue={query}
       onInputValueChange={setQuery}
       open={open}
-      onOpenChange={(open) => {
-        onOpenChange(open)
+      onOpenChange={onOpenChange}
+      onOpenChangeComplete={(open) => {
+        onOpenChangeComplete(open)
         if (!open) setQuery('')
       }}
-      onOpenChangeComplete={onOpenChangeComplete}
     >
       <Combobox.Trigger className={styles.Trigger} data-testid="code-block-language">
         <Combobox.Value placeholder="Plain Text" />
