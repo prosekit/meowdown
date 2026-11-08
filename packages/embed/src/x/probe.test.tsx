@@ -30,23 +30,26 @@ describe('probe', () => {
   it('probe', async () => {
     const sheet = document.createElement('style')
     sheet.textContent = `
-      [data-meowdown-embed='x'].v-plain > article > [data-show-more] { display: block }
+      [data-meowdown-embed='x'].v-plain [data-root] > article > [data-show-more] { display: block }
       @container style(--_overflowing: 1) {
-        [data-meowdown-embed='x'].v-container > article > [data-show-more] { display: block }
+        [data-meowdown-embed='x'].v-container [data-root] > article > [data-show-more] { display: block }
       }
       @container style(--_overflowing: 1) {
-        [data-meowdown-embed='x'].v-flex > article > [data-show-more] { display: flex }
+        [data-meowdown-embed='x'].v-flex [data-root] > article > [data-show-more] { display: flex }
       }
-      [data-meowdown-embed='x'].v-hidden > article > [data-show-more] { display: block; visibility: hidden }
+      [data-meowdown-embed='x'].v-hidden [data-root] > article > [data-show-more] { display: block; visibility: hidden }
       @container style(--_overflowing: 1) {
-        [data-meowdown-embed='x'].v-hidden > article > [data-show-more] { visibility: visible }
+        [data-meowdown-embed='x'].v-hidden [data-root] > article > [data-show-more] { visibility: visible }
       }
     `
     document.head.append(sheet)
     const variants = ['v-base', 'v-plain', 'v-container', 'v-flex', 'v-hidden']
     const elements = variants.map((name) => mountLimited(name))
-    await sleep(1000)
     const result: Record<string, string> = {}
+    for (const ms of [0, 50, 200, 1000]) {
+      await sleep(ms)
+      result[`v-base-at-${ms}`] = describeToggle(elements[0])
+    }
     elements.forEach((element, i) => {
       result[variants[i]] = describeToggle(element)
     })
