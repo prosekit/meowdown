@@ -233,8 +233,8 @@
    * "Show more" toggle takes, so the whole card is exactly the limit. The
    * toggle is anchored to the card's padding box, out of the article's clip.
    * The fade and the toggle run their own animations on the article's named
-   * timeline instead of a `style(--_overflowing: 1)` container query: Firefox
-   * does not re-evaluate style queries when an animation changes the value.
+   * timeline, which update on every scroll in every engine. Firefox applies
+   * a `style()` query on an animated value only after a full restyle.
    * Browsers without scroll-driven animations show the whole card. */
   & > article {
     /* Room inside the clip for focus rings at the article's edges. */
