@@ -667,7 +667,7 @@ function MermaidCodeBlock({ code }: { code: string }): ReactElement {
     <MermaidRender
       renderer={renderer}
       source={code}
-      className={`${styles.Preview} ${styles.MermaidPreview}`}
+      className={clsx(styles.Preview, styles.MermaidPreview)}
       data-testid="code-block-mermaid-preview"
       data-scroll-x
     />

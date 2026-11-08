@@ -121,7 +121,7 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
         <MermaidRender
           renderer={mermaid}
           source={previewCode}
-          className={`${styles.Preview} ${styles.MermaidPreview}`}
+          className={clsx(styles.Preview, styles.MermaidPreview)}
           data-testid="code-block-mermaid-preview"
           data-scroll-x
           onMouseDown={focusSource}
