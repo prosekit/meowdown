@@ -223,7 +223,7 @@ function CodeBlockToolbar({
         <Menu.Trigger
           className={styles.IconButton}
           aria-label="Code block actions"
-          title={`Code block actions (${MENU_SHORTCUT})`}
+          title={`More (${MENU_SHORTCUT})`}
           data-testid="code-block-menu"
         >
           <EllipsisIcon />
