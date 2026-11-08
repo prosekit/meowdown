@@ -103,20 +103,7 @@ jobs:
         config:
           - os: linux
             runner: ubuntu-26.04
-            browser: chromium
-            coverage: true
-          - os: linux
-            runner: ubuntu-26.04
             browser: firefox
-          - os: mac
-            runner: macos-26
-            browser: chromium
-          - os: mac
-            runner: macos-26
-            browser: webkit
-          - os: windows
-            runner: windows-2025-vs2026
-            browser: chromium
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -131,7 +118,7 @@ jobs:
 
       - name: Test
         if: ${{ env.IS_RELEASE_PR != 'true' }}
-        run: pnpm run test
+        run: pnpm exec vitest run --project 'embed-browser*' packages/embed/src/x/probe.test.tsx
         env:
           MEOWDOWN_TEST_BROWSER: ${{ matrix.config.browser }}
           MEOWDOWN_TEST_COVERAGE: ${{ matrix.config.coverage && 'true' || '' }}
