@@ -216,26 +216,51 @@ function CodeBlockToolbar({
         className={styles.IconButton}
         data-testid="code-block-copy"
       />
-      <Menu.Root
+      <CodeBlockMenu
         open={state.open === 'menu'}
         onOpenChange={changeMenuOpen}
         onOpenChangeComplete={completeMenuOpenChange}
-      >
-        <Menu.Trigger
-          className={styles.IconButton}
-          aria-label="More"
-          title={`More (${MENU_SHORTCUT})`}
-          data-testid="code-block-menu"
-        >
-          <EllipsisIcon />
-        </Menu.Trigger>
-        <CodeBlockMenuPopup
-          getFinalFocus={getFinalFocus}
-          onChangeLanguage={handOverToLanguagePicker}
-          onCopyCode={copyCode}
-        />
-      </Menu.Root>
+        getFinalFocus={getFinalFocus}
+        onChangeLanguage={handOverToLanguagePicker}
+        onCopyCode={copyCode}
+      />
     </div>
+  )
+}
+
+interface CodeBlockMenuProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onOpenChangeComplete: (open: boolean) => void
+  getFinalFocus: () => boolean
+  onChangeLanguage: VoidFunction
+  onCopyCode: VoidFunction
+}
+
+function CodeBlockMenu({
+  open,
+  onOpenChange,
+  onOpenChangeComplete,
+  getFinalFocus,
+  onChangeLanguage,
+  onCopyCode,
+}: CodeBlockMenuProps): ReactElement {
+  return (
+    <Menu.Root open={open} onOpenChange={onOpenChange} onOpenChangeComplete={onOpenChangeComplete}>
+      <Menu.Trigger
+        className={styles.IconButton}
+        aria-label="More"
+        title={`More (${MENU_SHORTCUT})`}
+        data-testid="code-block-menu"
+      >
+        <EllipsisIcon />
+      </Menu.Trigger>
+      <CodeBlockMenuPopup
+        getFinalFocus={getFinalFocus}
+        onChangeLanguage={onChangeLanguage}
+        onCopyCode={onCopyCode}
+      />
+    </Menu.Root>
   )
 }
 
