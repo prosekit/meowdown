@@ -90,6 +90,76 @@ describe('code block language selector', () => {
   })
 })
 
+const menuButton = page.getByTestId('code-block-menu')
+const menuLanguageItem = page.getByTestId('code-block-menu-language')
+const menuCopyItem = page.getByTestId('code-block-menu-copy')
+
+describe('code block menu', () => {
+  async function setupCaretInCodeBlock() {
+    const ref = createRef<EditorHandle>()
+    await render(<ProseKitEditor ref={ref} initialMarkdown={CODE_BLOCK_MD} />)
+    await expect.element(selector).toHaveTextContent('Rust')
+    ref.current?.setSelection('end')
+    ref.current?.focus()
+    return ref
+  }
+
+  it('opens with Mod-/ and gives the focus back to the editor on Escape', async () => {
+    const ref = await setupCaretInCodeBlock()
+
+    await userEvent.keyboard('{ControlOrMeta>}/{/ControlOrMeta}')
+    await expect.element(menuLanguageItem).toBeVisible()
+    await expect.element(menuCopyItem).toBeVisible()
+
+    await userEvent.keyboard('{Escape}')
+    await expect.element(menuLanguageItem).not.toBeInTheDocument()
+
+    await userEvent.keyboard('x')
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toContain('fn main() {}x')
+    })
+  })
+
+  it('changes the language with the keyboard only', async () => {
+    const ref = await setupCaretInCodeBlock()
+
+    await userEvent.keyboard('{ControlOrMeta>}/{/ControlOrMeta}')
+    await expect.element(menuLanguageItem).toBeVisible()
+    await userEvent.keyboard('{ArrowDown}')
+    await expect.element(menuLanguageItem).toHaveAttribute('data-highlighted')
+    await userEvent.keyboard('{Enter}')
+
+    await expect.element(search).toHaveFocus()
+    await userEvent.keyboard('python')
+    await expect
+      .element(page.getByRole('option', { name: 'Python', exact: true }))
+      .toHaveAttribute('data-highlighted')
+    await userEvent.keyboard('{Enter}')
+
+    await expect.element(selector).toHaveTextContent('Python')
+    await expect.element(search).not.toBeInTheDocument()
+
+    await userEvent.keyboard('x')
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toBe('```python\nfn main() {}x\n```\n')
+    })
+  })
+
+  it('copies the code from the menu', async () => {
+    await render(<ProseKitEditor initialMarkdown={CODE_BLOCK_MD} />)
+    await expect.element(menuButton).toBeInTheDocument()
+
+    await hover(menuButton)
+    await menuButton.click()
+    await menuCopyItem.click()
+
+    await expect.element(menuCopyItem).not.toBeInTheDocument()
+    await vi.waitFor(async () => {
+      expect((await readClipboard()).text).toBe('fn main() {}')
+    })
+  })
+})
+
 const mathPreview = page.getByTestId('code-block-math-preview')
 const mathSource = page.locate('.ProseMirror pre[data-language="math"]')
 

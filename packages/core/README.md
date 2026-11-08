@@ -60,6 +60,7 @@ the current block to that level (or back to a paragraph).
 | `Mod-Alt-5`           | Heading 5                                                 | `##### heading`     |
 | `Mod-Alt-6`           | Heading 6                                                 | `###### heading`    |
 | `Mod-.`               | Fold or unfold a bullet                                   |                     |
+| `Mod-/`               | Open the code block menu                                  |                     |
 | `Shift-Enter`         | Insert a line break                                       |                     |
 | `Mod-Enter`           | Follow the link under the caret, or cycle a checkbox task | `- [ ]` / `- [x]`   |
 | `Mod-Shift-Enter`     | Cycle a circle checkbox task                              | `+ [ ]` / `+ [x]`   |

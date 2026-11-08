@@ -16,6 +16,7 @@ export const EDITOR_KEY_BINDINGS = {
   'Mod-Alt-5': 'Heading 5',
   'Mod-Alt-6': 'Heading 6',
   'Mod-.': 'Fold or unfold a bullet',
+  'Mod-/': 'Open the code block menu',
   'Shift-Enter': 'Insert a line break, or leave a code block from its end',
   'Mod-Enter': 'Follow the link under the caret, or cycle a checkbox task',
   'Mod-Shift-Enter': 'Cycle a circle checkbox task',
