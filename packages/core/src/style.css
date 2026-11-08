@@ -1153,6 +1153,58 @@
       overflow: visible;
     }
 
+    /* The card's menu button, present only while an embed menu is installed
+     * (`data-embed-menu` on the editor). It shows on hover, while the card is
+     * selected, and while its menu is open. */
+    .md-image-view-preview[data-post-embed] {
+      position: relative;
+    }
+
+    .md-embed-menu-button {
+      display: none;
+    }
+
+    &[data-embed-menu] .md-embed-menu-button {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      width: 1.6rem;
+      height: 1.6rem;
+      margin: 0;
+      padding: 0;
+      border: 1px solid var(--meowdown-border);
+      border-radius: 0.35rem;
+      background: var(--meowdown-popover-bg);
+      color: var(--meowdown-muted);
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 100ms ease-out;
+
+      &:hover,
+      &[aria-expanded='true'] {
+        color: var(--meowdown-heading);
+      }
+
+      svg {
+        display: block;
+        width: 0.85rem;
+        height: 0.85rem;
+      }
+    }
+
+    &[data-embed-menu] .md-image-view-preview[data-post-embed]:hover .md-embed-menu-button,
+    &[data-embed-menu] .md-atom-view:has(.md-atom-selected) .md-embed-menu-button,
+    &[data-embed-menu] .md-embed-menu-button[aria-expanded='true'] {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
     .md-image-resizable {
       position: relative;
       display: inline-block;

@@ -1,0 +1,60 @@
+/* Shared by the action menus: the code block menu and the embed menu. */
+
+.Positioner {
+  z-index: 50;
+  outline: none;
+}
+
+.Popup {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-width: 10rem;
+  padding: 0.25rem;
+  border: 1px solid var(--meowdown-border);
+  border-radius: 0.5rem;
+  background: var(--meowdown-popover-bg);
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
+  color: var(--meowdown-text);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.8rem;
+  outline: none;
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity 100ms,
+    scale 100ms;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    scale: 0.95;
+  }
+}
+
+.Item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.35rem;
+  cursor: pointer;
+  outline: none;
+
+  &[data-highlighted] {
+    background: color-mix(in oklab, var(--meowdown-accent) 14%, transparent);
+    color: var(--meowdown-heading);
+  }
+
+  svg {
+    display: block;
+    width: 0.9rem;
+    height: 0.9rem;
+    color: var(--meowdown-muted);
+  }
+}

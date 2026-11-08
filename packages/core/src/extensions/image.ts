@@ -2,7 +2,7 @@ import { registerXPost, type Resolver } from '@meowdown/embed/x'
 import { registerYouTubeVideo } from '@meowdown/embed/youtube'
 import { matchEmbed, type EmbedKind } from '@meowdown/markdown'
 import type { XPost, YouTubeVideo } from '@post-embed/types'
-import { defineMarkView, type PlainExtension } from '@prosekit/core'
+import { defineMarkView, isApple, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
 import type { EditorView, MarkView, ViewMutationRecord } from '@prosekit/pm/view'
@@ -15,6 +15,7 @@ import {
 import { guardMarkView } from '../utils/guard-mark-view.ts'
 import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
 
+import { EMBED_MENU_BUTTON_CLASS } from './embed-menu.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import {
   formatMagicComment,
@@ -33,6 +34,37 @@ import {
   type YouTubeVideoResolver,
 } from './post-embed.ts'
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
+
+const SVG_NS = 'http://www.w3.org/2000/svg'
+
+/**
+ * The card's menu button. It stays hidden until `defineEmbedMenuHandler`
+ * marks the editor, and out of the tab order: `Mod-/` opens the menu from the
+ * keyboard.
+ */
+function createEmbedMenuButton(): HTMLButtonElement {
+  const button = document.createElement('button')
+  button.type = 'button'
+  button.className = EMBED_MENU_BUTTON_CLASS
+  button.tabIndex = -1
+  button.setAttribute('aria-label', 'More')
+  button.setAttribute('aria-haspopup', 'menu')
+  button.title = `More (${isApple ? '⌘/' : 'Ctrl+/'})`
+  button.dataset.testid = 'embed-menu'
+  const svg = document.createElementNS(SVG_NS, 'svg')
+  svg.setAttribute('viewBox', '0 0 24 24')
+  svg.setAttribute('aria-hidden', 'true')
+  for (const cx of [5, 12, 19]) {
+    const circle = document.createElementNS(SVG_NS, 'circle')
+    circle.setAttribute('cx', String(cx))
+    circle.setAttribute('cy', '12')
+    circle.setAttribute('r', '2')
+    circle.setAttribute('fill', 'currentColor')
+    svg.appendChild(circle)
+  }
+  button.appendChild(svg)
+  return button
+}
 
 /**
  * Maps a markdown `src` to a displayable URL, or `undefined` to skip rendering
@@ -308,6 +340,7 @@ class ImageMarkView implements MarkView {
       wrapper.dataset.testid = `${kind}-embed`
       wrapper.dataset.postEmbed = kind
       wrapper.appendChild(this.#buildPostEmbed(kind, src))
+      wrapper.appendChild(createEmbedMenuButton())
       this.#insertPreview(wrapper)
       return
     }

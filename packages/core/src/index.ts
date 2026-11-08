@@ -25,6 +25,12 @@ export type { CodeBlockFenceStyle, MeowdownCodeBlockAttrs } from './extensions/c
 export { getEditorConfig } from './extensions/editor-config-getter.ts'
 export type { EditorConfig } from './extensions/editor-config-types.ts'
 export { updateEditorConfig } from './extensions/editor-config.ts'
+export {
+  convertEmbedToLink,
+  defineEmbedMenuHandler,
+  type EmbedMenuOpenHandler,
+  type EmbedTarget,
+} from './extensions/embed-menu.ts'
 export { defineEmbedPaste } from './extensions/embed-paste.ts'
 export {
   defineExitBoundaryHandler,

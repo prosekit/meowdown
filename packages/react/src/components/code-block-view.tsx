@@ -41,6 +41,7 @@ import styles from './code-block-view.module.css'
 import { CollisionBoundaryContext } from './collision-boundary.ts'
 import { CopyButton } from './copy-button.tsx'
 import { MathRender } from './math-render.tsx'
+import menuStyles from './menu.module.css'
 import { MermaidRender } from './mermaid-render.tsx'
 
 export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
@@ -280,14 +281,14 @@ function CodeBlockMenuPopup({
   return (
     <Menu.Portal>
       <Menu.Positioner
-        className={styles.Positioner}
+        className={menuStyles.Positioner}
         sideOffset={4}
         align="end"
         collisionBoundary={collisionBoundary}
       >
-        <Menu.Popup className={clsx(styles.Popup, styles.Menu)} finalFocus={getFinalFocus}>
+        <Menu.Popup className={menuStyles.Popup} finalFocus={getFinalFocus}>
           <Menu.Item
-            className={styles.MenuItem}
+            className={menuStyles.Item}
             onClick={onChangeLanguage}
             data-testid="code-block-menu-language"
           >
@@ -295,7 +296,7 @@ function CodeBlockMenuPopup({
             <span>Change language</span>
           </Menu.Item>
           <Menu.Item
-            className={styles.MenuItem}
+            className={menuStyles.Item}
             onClick={onCopyCode}
             data-testid="code-block-menu-copy"
           >

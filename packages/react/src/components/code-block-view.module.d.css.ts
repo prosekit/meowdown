@@ -19,8 +19,6 @@ declare const styles = {
   'IconButton': '' as string,
   'Positioner': '' as string,
   'Popup': '' as string,
-  'Menu': '' as string,
-  'MenuItem': '' as string,
   'SearchRow': '' as string,
   'Search': '' as string,
   'Empty': '' as string,
