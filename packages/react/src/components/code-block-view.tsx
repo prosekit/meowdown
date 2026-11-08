@@ -292,7 +292,7 @@ function CodeBlockMenuPopup({
             data-testid="code-block-menu-language"
           >
             <BracesIcon />
-            Change language
+            <span>Change language</span>
           </Menu.Item>
           <Menu.Item
             className={styles.MenuItem}
@@ -300,7 +300,7 @@ function CodeBlockMenuPopup({
             data-testid="code-block-menu-copy"
           >
             <CopyIcon />
-            Copy code
+            <span>Copy code</span>
           </Menu.Item>
         </Menu.Popup>
       </Menu.Positioner>
