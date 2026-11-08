@@ -1,4 +1,4 @@
-export type CodeBlockToolbarPopup = 'menu' | 'language'
+type CodeBlockToolbarPopup = 'menu' | 'language'
 
 /**
  * Where the focus goes when the last open popup closes: back into the editor
