@@ -10,6 +10,7 @@ import { isApple } from '@prosekit/core'
 import { TextSelection } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 import type { ReactNodeViewProps } from '@prosekit/react'
+import { clsx } from 'clsx/lite'
 import { BracesIcon, CheckIcon, ChevronsUpDownIcon, CopyIcon, EllipsisIcon } from 'lucide-react'
 import {
   memo,
@@ -259,7 +260,7 @@ function CodeBlockMenuPopup({
         align="end"
         collisionBoundary={collisionBoundary}
       >
-        <Menu.Popup className={`${styles.Popup} ${styles.Menu}`} finalFocus={getFinalFocus}>
+        <Menu.Popup className={clsx(styles.Popup, styles.Menu)} finalFocus={getFinalFocus}>
           <Menu.Item
             className={styles.MenuItem}
             onClick={onChangeLanguage}
