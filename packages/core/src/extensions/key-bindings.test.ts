@@ -10,6 +10,7 @@ describe('EDITOR_KEY_BINDINGS', () => {
         "Alt-ArrowUp": "Move the block or list item up",
         "Escape": "Collapse the selection",
         "Mod-.": "Fold or unfold a bullet",
+        "Mod-/": "Open the code block menu",
         "Mod-Alt-1": "Heading 1",
         "Mod-Alt-2": "Heading 2",
         "Mod-Alt-3": "Heading 3",

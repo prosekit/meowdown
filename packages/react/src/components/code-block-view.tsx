@@ -1,28 +1,42 @@
 import { Combobox } from '@base-ui/react/combobox'
+import { Menu } from '@base-ui/react/menu'
 import {
   codeBlockLanguages,
   isCodeBlockPreviewHiddenDecoration,
   type CodeBlockAttrs,
   type LanguageItem,
 } from '@meowdown/core'
+import { isApple } from '@prosekit/core'
 import { TextSelection } from '@prosekit/pm/state'
+import type { EditorView } from '@prosekit/pm/view'
 import type { ReactNodeViewProps } from '@prosekit/react'
-import { CheckIcon, ChevronsUpDownIcon } from 'lucide-react'
+import { clsx } from 'clsx/lite'
+import { BracesIcon, CheckIcon, ChevronsUpDownIcon, CopyIcon, EllipsisIcon } from 'lucide-react'
 import {
   memo,
   use,
   useCallback,
   useDeferredValue,
+  useEffect,
   useMemo,
+  useReducer,
   useState,
   type MouseEvent,
   type ReactElement,
 } from 'react'
 
+import { setCaretCodeBlockMenu } from '../extensions/block-menu.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
 import { usePele } from '../hooks/use-pele.ts'
 import { NON_PROSE_PROPS } from '../utils/non-prose-props.ts'
+import { writeClipboardText } from '../utils/write-clipboard-text.ts'
 
+import {
+  CODE_BLOCK_TOOLBAR_IDLE,
+  getCodeBlockToolbarFinalFocus,
+  isCodeBlockToolbarActive,
+  reduceCodeBlockToolbar,
+} from './code-block-toolbar-state.ts'
 import styles from './code-block-view.module.css'
 import { CollisionBoundaryContext } from './collision-boundary.ts'
 import { CopyButton } from './copy-button.tsx'
@@ -83,7 +97,13 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
       {
         /* Skip rendering the toolbar during dragging to improve the performance of rendering the drag preview image in Safari */
         selected ? null : (
-          <CodeBlockToolbar code={code} language={language} setLanguage={setLanguage} />
+          <CodeBlockToolbar
+            code={code}
+            language={language}
+            setLanguage={setLanguage}
+            view={view}
+            caretInside={caretInside}
+          />
         )
       }
       {showMathPreview && (
@@ -101,7 +121,7 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
         <MermaidRender
           renderer={mermaid}
           source={previewCode}
-          className={`${styles.Preview} ${styles.MermaidPreview}`}
+          className={clsx(styles.Preview, styles.MermaidPreview)}
           data-testid="code-block-mermaid-preview"
           data-scroll-x
           onMouseDown={focusSource}
@@ -111,47 +131,199 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
   )
 }
 
+const MENU_SHORTCUT = isApple ? '⌘/' : 'Ctrl+/'
+
 interface CodeBlockToolbarProps {
   code: string
   language: string
   setLanguage: (language: string) => void
+  view: EditorView
+  caretInside: boolean
 }
 
-function CodeBlockToolbar({ code, language, setLanguage }: CodeBlockToolbarProps) {
-  // Keep the toolbar shown until the popup finishes its closing animation
-  const [comboboxOpen, setComboboxOpen] = useState(false)
+function CodeBlockToolbar({
+  code,
+  language,
+  setLanguage,
+  view,
+  caretInside,
+}: CodeBlockToolbarProps) {
+  const [state, dispatch] = useReducer(reduceCodeBlockToolbar, CODE_BLOCK_TOOLBAR_IDLE)
+
+  const changeMenuOpen = useCallback((open: boolean) => {
+    dispatch(
+      open
+        ? { type: 'open', popup: 'menu', focusReturn: 'trigger' }
+        : { type: 'close', popup: 'menu' },
+    )
+  }, [])
+
+  const completeMenuOpenChange = useCallback((open: boolean) => {
+    if (!open) dispatch({ type: 'closed', popup: 'menu' })
+  }, [])
+
+  const changeLanguageOpen = useCallback((open: boolean) => {
+    dispatch(
+      open
+        ? { type: 'open', popup: 'language', focusReturn: 'trigger' }
+        : { type: 'close', popup: 'language' },
+    )
+  }, [])
+
+  const completeLanguageOpenChange = useCallback((open: boolean) => {
+    if (!open) dispatch({ type: 'closed', popup: 'language' })
+  }, [])
+
+  useEffect(() => {
+    if (!caretInside) return
+    return setCaretCodeBlockMenu(view, () => {
+      dispatch({ type: 'open', popup: 'menu', focusReturn: 'editor' })
+    })
+  }, [caretInside, view])
+
+  const finalFocus = getCodeBlockToolbarFinalFocus(state)
+  const getFinalFocus = useCallback((): boolean => {
+    if (finalFocus !== 'editor') return finalFocus === 'trigger'
+    view.focus()
+    return false
+  }, [finalFocus, view])
+
+  const handOverToLanguagePicker = useCallback(() => {
+    dispatch({ type: 'handOver' })
+  }, [])
+
+  const copyCode = useCallback(() => {
+    void writeClipboardText(code)
+  }, [code])
 
   return (
-    <div className={styles.Toolbar} contentEditable={false} data-open={comboboxOpen || undefined}>
+    <div
+      className={styles.Toolbar}
+      contentEditable={false}
+      data-open={isCodeBlockToolbarActive(state) || undefined}
+    >
       <CodeBlockLanguagePickerMemo
         language={language}
         setLanguage={setLanguage}
-        onShownChange={setComboboxOpen}
+        open={state.open === 'language'}
+        onOpenChange={changeLanguageOpen}
+        onOpenChangeComplete={completeLanguageOpenChange}
+        getFinalFocus={getFinalFocus}
       />
       <CopyButton
         getText={() => code}
         label="Copy code"
-        className={styles.CopyButton}
+        className={styles.IconButton}
         data-testid="code-block-copy"
       />
+      <CodeBlockMenu
+        open={state.open === 'menu'}
+        onOpenChange={changeMenuOpen}
+        onOpenChangeComplete={completeMenuOpenChange}
+        getFinalFocus={getFinalFocus}
+        onChangeLanguage={handOverToLanguagePicker}
+        onCopyCode={copyCode}
+      />
     </div>
+  )
+}
+
+interface CodeBlockMenuProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onOpenChangeComplete: (open: boolean) => void
+  getFinalFocus: () => boolean
+  onChangeLanguage: VoidFunction
+  onCopyCode: VoidFunction
+}
+
+function CodeBlockMenu({
+  open,
+  onOpenChange,
+  onOpenChangeComplete,
+  getFinalFocus,
+  onChangeLanguage,
+  onCopyCode,
+}: CodeBlockMenuProps): ReactElement {
+  return (
+    <Menu.Root open={open} onOpenChange={onOpenChange} onOpenChangeComplete={onOpenChangeComplete}>
+      <Menu.Trigger
+        className={styles.IconButton}
+        aria-label="More"
+        title={`More (${MENU_SHORTCUT})`}
+        data-testid="code-block-menu"
+      >
+        <EllipsisIcon />
+      </Menu.Trigger>
+      <CodeBlockMenuPopup
+        getFinalFocus={getFinalFocus}
+        onChangeLanguage={onChangeLanguage}
+        onCopyCode={onCopyCode}
+      />
+    </Menu.Root>
+  )
+}
+
+interface CodeBlockMenuPopupProps {
+  getFinalFocus: () => boolean
+  onChangeLanguage: VoidFunction
+  onCopyCode: VoidFunction
+}
+
+function CodeBlockMenuPopup({
+  getFinalFocus,
+  onChangeLanguage,
+  onCopyCode,
+}: CodeBlockMenuPopupProps): ReactElement {
+  const collisionBoundary = use(CollisionBoundaryContext)
+
+  return (
+    <Menu.Portal>
+      <Menu.Positioner
+        className={styles.Positioner}
+        sideOffset={4}
+        align="end"
+        collisionBoundary={collisionBoundary}
+      >
+        <Menu.Popup className={clsx(styles.Popup, styles.Menu)} finalFocus={getFinalFocus}>
+          <Menu.Item
+            className={styles.MenuItem}
+            onClick={onChangeLanguage}
+            data-testid="code-block-menu-language"
+          >
+            <BracesIcon />
+            <span>Change language</span>
+          </Menu.Item>
+          <Menu.Item
+            className={styles.MenuItem}
+            onClick={onCopyCode}
+            data-testid="code-block-menu-copy"
+          >
+            <CopyIcon />
+            <span>Copy code</span>
+          </Menu.Item>
+        </Menu.Popup>
+      </Menu.Positioner>
+    </Menu.Portal>
   )
 }
 
 interface CodeBlockLanguagePickerProps {
   language: string
   setLanguage: (language: string) => void
-  /**
-   * Called with `true` when the popup opens and with `false` once its closing
-   * animation finishes.
-   */
-  onShownChange: (shown: boolean) => void
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onOpenChangeComplete: (open: boolean) => void
+  getFinalFocus: () => boolean
 }
 
 function CodeBlockLanguagePicker({
   language,
   setLanguage,
-  onShownChange,
+  open,
+  onOpenChange,
+  onOpenChangeComplete,
+  getFinalFocus,
 }: CodeBlockLanguagePickerProps): ReactElement {
   const collisionBoundary = use(CollisionBoundaryContext)
   // Fall back to the raw value so an alias or unknown language still shows in
@@ -181,16 +353,16 @@ function CodeBlockLanguagePicker({
   return (
     <Combobox.Root
       items={itemsForView}
+      autoHighlight
       value={selected}
       onValueChange={(item) => setLanguage(item?.value ?? '')}
       inputValue={query}
       onInputValueChange={setQuery}
-      onOpenChange={(open) => {
-        if (open) onShownChange(true)
-        else setQuery('')
-      }}
+      open={open}
+      onOpenChange={onOpenChange}
       onOpenChangeComplete={(open) => {
-        if (!open) onShownChange(false)
+        onOpenChangeComplete(open)
+        if (!open) setQuery('')
       }}
     >
       <Combobox.Trigger className={styles.Trigger} data-testid="code-block-language">
@@ -205,7 +377,7 @@ function CodeBlockLanguagePicker({
           sideOffset={4}
           collisionBoundary={collisionBoundary}
         >
-          <Combobox.Popup className={styles.Popup}>
+          <Combobox.Popup className={styles.Popup} finalFocus={getFinalFocus}>
             <div className={styles.SearchRow}>
               <Combobox.Input
                 className={styles.Search}

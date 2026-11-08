@@ -1,6 +1,8 @@
 import { CheckIcon, CopyIcon } from 'lucide-react'
 import { useRef, useState, type ReactElement } from 'react'
 
+import { writeClipboardText } from '../utils/write-clipboard-text.ts'
+
 const COPIED_RESET_MS = 1500
 
 interface CopyButtonProps {
@@ -35,12 +37,7 @@ export function CopyButton({
   const resetTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(getText())
-    } catch (error) {
-      console.warn('[meowdown] Failed to copy:', error)
-      return
-    }
+    if (!(await writeClipboardText(getText()))) return
     setCopied(true)
     clearTimeout(resetTimerRef.current)
     resetTimerRef.current = setTimeout(() => setCopied(false), COPIED_RESET_MS)
