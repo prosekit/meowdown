@@ -4,7 +4,7 @@ import { defineReactNodeView, type ReactNodeViewComponent } from '@prosekit/reac
 
 import { CodeBlockView } from '../components/code-block-view.tsx'
 
-import { defineCodeBlockMenuKeymap } from './code-block-menu.ts'
+import { defineCodeBlockMenuKeymap } from './block-menu.ts'
 
 export function defineCodeBlockView(component: ReactNodeViewComponent = CodeBlockView): Extension {
   return union(

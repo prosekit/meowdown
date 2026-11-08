@@ -158,6 +158,30 @@ describe('code block menu', () => {
       expect((await readClipboard()).text).toBe('fn main() {}')
     })
   })
+
+  it('opens the menu of the code block that holds the caret', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(
+      <ProseKitEditor ref={ref} initialMarkdown={'```rust\nfirst\n```\n\n```rust\nsecond\n```'} />,
+    )
+    const firstMenuButton = menuButton.nth(0)
+    const secondMenuButton = menuButton.nth(1)
+    await expect.element(secondMenuButton).toBeInTheDocument()
+
+    ref.current?.setSelection('end')
+    ref.current?.focus()
+    await userEvent.keyboard('{ControlOrMeta>}/{/ControlOrMeta}')
+    await expect.element(secondMenuButton).toHaveAttribute('data-popup-open')
+    await expect.element(firstMenuButton).not.toHaveAttribute('data-popup-open')
+    await userEvent.keyboard('{Escape}')
+    await expect.element(menuLanguageItem).not.toBeInTheDocument()
+
+    ref.current?.setSelection('start')
+    ref.current?.focus()
+    await userEvent.keyboard('{ControlOrMeta>}/{/ControlOrMeta}')
+    await expect.element(firstMenuButton).toHaveAttribute('data-popup-open')
+    await expect.element(secondMenuButton).not.toHaveAttribute('data-popup-open')
+  })
 })
 
 const mathPreview = page.getByTestId('code-block-math-preview')

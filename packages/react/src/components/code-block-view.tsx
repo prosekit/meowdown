@@ -24,7 +24,7 @@ import {
   type ReactElement,
 } from 'react'
 
-import { registerCodeBlockMenu } from '../extensions/code-block-menu.ts'
+import { setCaretCodeBlockMenu } from '../extensions/block-menu.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
 import { usePele } from '../hooks/use-pele.ts'
 import { NON_PROSE_PROPS } from '../utils/non-prose-props.ts'
@@ -101,7 +101,7 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
             language={language}
             setLanguage={setLanguage}
             view={view}
-            getPos={getPos}
+            caretInside={caretInside}
           />
         )
       }
@@ -137,10 +137,16 @@ interface CodeBlockToolbarProps {
   language: string
   setLanguage: (language: string) => void
   view: EditorView
-  getPos: () => number | undefined
+  caretInside: boolean
 }
 
-function CodeBlockToolbar({ code, language, setLanguage, view, getPos }: CodeBlockToolbarProps) {
+function CodeBlockToolbar({
+  code,
+  language,
+  setLanguage,
+  view,
+  caretInside,
+}: CodeBlockToolbarProps) {
   const [state, dispatch] = useReducer(reduceCodeBlockToolbar, CODE_BLOCK_TOOLBAR_IDLE)
 
   const changeMenuOpen = useCallback((open: boolean) => {
@@ -168,11 +174,11 @@ function CodeBlockToolbar({ code, language, setLanguage, view, getPos }: CodeBlo
   }, [])
 
   useEffect(() => {
-    return registerCodeBlockMenu(view, {
-      getPos,
-      open: () => dispatch({ type: 'open', popup: 'menu', focusReturn: 'editor' }),
+    if (!caretInside) return
+    return setCaretCodeBlockMenu(view, () => {
+      dispatch({ type: 'open', popup: 'menu', focusReturn: 'editor' })
     })
-  }, [view, getPos])
+  }, [caretInside, view])
 
   const finalFocus = getCodeBlockToolbarFinalFocus(state)
   const getFinalFocus = useCallback((): boolean => {
