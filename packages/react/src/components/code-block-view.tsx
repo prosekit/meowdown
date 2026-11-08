@@ -18,7 +18,7 @@ import {
   useDeferredValue,
   useEffect,
   useMemo,
-  useRef,
+  useReducer,
   useState,
   type MouseEvent,
   type ReactElement,
@@ -30,6 +30,12 @@ import { usePele } from '../hooks/use-pele.ts'
 import { NON_PROSE_PROPS } from '../utils/non-prose-props.ts'
 import { writeClipboardText } from '../utils/write-clipboard-text.ts'
 
+import {
+  CODE_BLOCK_TOOLBAR_IDLE,
+  getCodeBlockToolbarFinalFocus,
+  isCodeBlockToolbarActive,
+  reduceCodeBlockToolbar,
+} from './code-block-toolbar-state.ts'
 import styles from './code-block-view.module.css'
 import { CollisionBoundaryContext } from './collision-boundary.ts'
 import { CopyButton } from './copy-button.tsx'
@@ -135,60 +141,49 @@ interface CodeBlockToolbarProps {
 }
 
 function CodeBlockToolbar({ code, language, setLanguage, view, getPos }: CodeBlockToolbarProps) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [languageOpen, setLanguageOpen] = useState(false)
-  // Keep the toolbar shown until each popup finishes its closing animation
-  const [menuShown, setMenuShown] = useState(false)
-  const [languageShown, setLanguageShown] = useState(false)
-  // Set when the menu opens from the keyboard shortcut. The popup that closes
-  // last then gives the focus back to the editor.
-  const returnFocusToEditorRef = useRef(false)
-  // Set while the menu hands over to the language picker
-  const openingLanguageRef = useRef(false)
+  const [state, dispatch] = useReducer(reduceCodeBlockToolbar, CODE_BLOCK_TOOLBAR_IDLE)
 
   const changeMenuOpen = useCallback((open: boolean) => {
-    setMenuOpen(open)
-    if (open) setMenuShown(true)
+    dispatch(
+      open
+        ? { type: 'open', popup: 'menu', focusReturn: 'trigger' }
+        : { type: 'close', popup: 'menu' },
+    )
+  }, [])
+
+  const completeMenuOpenChange = useCallback((open: boolean) => {
+    if (!open) dispatch({ type: 'closed', popup: 'menu' })
   }, [])
 
   const changeLanguageOpen = useCallback((open: boolean) => {
-    setLanguageOpen(open)
-    if (open) setLanguageShown(true)
+    dispatch(
+      open
+        ? { type: 'open', popup: 'language', focusReturn: 'trigger' }
+        : { type: 'close', popup: 'language' },
+    )
   }, [])
 
   const completeLanguageOpenChange = useCallback((open: boolean) => {
-    if (!open) setLanguageShown(false)
+    if (!open) dispatch({ type: 'closed', popup: 'language' })
   }, [])
 
   useEffect(() => {
     return registerCodeBlockMenu(view, {
       getPos,
-      open: () => {
-        returnFocusToEditorRef.current = true
-        changeMenuOpen(true)
-      },
+      open: () => dispatch({ type: 'open', popup: 'menu', focusReturn: 'editor' }),
     })
-  }, [view, getPos, changeMenuOpen])
+  }, [view, getPos])
 
-  const getLanguageFinalFocus = useCallback((): boolean => {
-    if (!returnFocusToEditorRef.current) return true
-    returnFocusToEditorRef.current = false
+  const finalFocus = getCodeBlockToolbarFinalFocus(state)
+  const getFinalFocus = useCallback((): boolean => {
+    if (finalFocus !== 'editor') return finalFocus === 'trigger'
     view.focus()
     return false
-  }, [view])
+  }, [finalFocus, view])
 
-  const getMenuFinalFocus = useCallback((): boolean => {
-    if (openingLanguageRef.current) {
-      openingLanguageRef.current = false
-      return false
-    }
-    return getLanguageFinalFocus()
-  }, [getLanguageFinalFocus])
-
-  const openLanguagePicker = useCallback(() => {
-    openingLanguageRef.current = true
-    changeLanguageOpen(true)
-  }, [changeLanguageOpen])
+  const handOverToLanguagePicker = useCallback(() => {
+    dispatch({ type: 'handOver' })
+  }, [])
 
   const copyCode = useCallback(() => {
     void writeClipboardText(code)
@@ -198,15 +193,15 @@ function CodeBlockToolbar({ code, language, setLanguage, view, getPos }: CodeBlo
     <div
       className={styles.Toolbar}
       contentEditable={false}
-      data-open={menuShown || languageShown || undefined}
+      data-open={isCodeBlockToolbarActive(state) || undefined}
     >
       <CodeBlockLanguagePickerMemo
         language={language}
         setLanguage={setLanguage}
-        open={languageOpen}
+        open={state.open === 'language'}
         onOpenChange={changeLanguageOpen}
         onOpenChangeComplete={completeLanguageOpenChange}
-        getFinalFocus={getLanguageFinalFocus}
+        getFinalFocus={getFinalFocus}
       />
       <CopyButton
         getText={() => code}
@@ -215,11 +210,9 @@ function CodeBlockToolbar({ code, language, setLanguage, view, getPos }: CodeBlo
         data-testid="code-block-copy"
       />
       <Menu.Root
-        open={menuOpen}
+        open={state.open === 'menu'}
         onOpenChange={changeMenuOpen}
-        onOpenChangeComplete={(open) => {
-          if (!open) setMenuShown(false)
-        }}
+        onOpenChangeComplete={completeMenuOpenChange}
       >
         <Menu.Trigger
           className={styles.IconButton}
@@ -230,8 +223,8 @@ function CodeBlockToolbar({ code, language, setLanguage, view, getPos }: CodeBlo
           <EllipsisIcon />
         </Menu.Trigger>
         <CodeBlockMenuPopup
-          getFinalFocus={getMenuFinalFocus}
-          onChangeLanguage={openLanguagePicker}
+          getFinalFocus={getFinalFocus}
+          onChangeLanguage={handOverToLanguagePicker}
           onCopyCode={copyCode}
         />
       </Menu.Root>
