@@ -51,6 +51,22 @@
   }
 }
 
+@keyframes meowdown-embed-fade {
+  from,
+  to {
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+    mask-size: 100% calc(var(--_body-limit) - var(--_show-more-height) - 2 * var(--_clip-gutter));
+    mask-repeat: no-repeat;
+  }
+}
+
+@keyframes meowdown-embed-show {
+  from,
+  to {
+    visibility: visible;
+  }
+}
+
 /*
  * Hard reset. `all: revert` rolls every property on every box inside the card
  * back to the user-agent default, so a host rule on `p`, `a`, `img`,
@@ -216,6 +232,9 @@
    * when the card is too tall. Then the article gives up one row, which the
    * "Show more" toggle takes, so the whole card is exactly the limit. The
    * toggle is anchored to the card's padding box, out of the article's clip.
+   * The fade and the toggle run their own animations on the article's named
+   * timeline instead of a `style(--_overflowing: 1)` container query: Firefox
+   * does not re-evaluate style queries when an animation changes the value.
    * Browsers without scroll-driven animations show the whole card. */
   & > article {
     /* Room inside the clip for focus rings at the article's edges. */
@@ -264,6 +283,7 @@
       margin-block-end: calc(var(--_overflowing) * var(--_show-more-height) - var(--_clip-gutter));
       animation: meowdown-embed-overflowing linear both;
       animation-timeline: scroll(self);
+      scroll-timeline: --meowdown-embed-clip block;
     }
     /* Opened, or holding keyboard focus that the clip could hide. */
     & > article:has(> [data-show-more][open]),
@@ -272,21 +292,20 @@
       overflow: visible;
       margin-block-end: calc(-1 * var(--_clip-gutter));
     }
-    @container style(--_overflowing: 1) {
-      /* On the content, not the article: a mask on the article would also
-       * hide the toggle below it. */
-      & > article > [data-content] {
-        mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
-        mask-size: 100%
-          calc(var(--_body-limit) - var(--_show-more-height) - 2 * var(--_clip-gutter));
-        mask-repeat: no-repeat;
-      }
-      & > article > [data-show-more] {
-        display: block;
-        position: absolute;
-        inset-inline-start: var(--meowdown-embed-padding, 1rem);
-        bottom: var(--meowdown-embed-padding, 1rem);
-      }
+    /* On the content, not the article: a mask on the article would also
+     * hide the toggle below it. */
+    & > article > [data-content] {
+      animation: meowdown-embed-fade linear both;
+      animation-timeline: --meowdown-embed-clip;
+    }
+    & > article > [data-show-more] {
+      display: block;
+      position: absolute;
+      inset-inline-start: var(--meowdown-embed-padding, 1rem);
+      bottom: var(--meowdown-embed-padding, 1rem);
+      visibility: hidden;
+      animation: meowdown-embed-show linear both;
+      animation-timeline: --meowdown-embed-clip;
     }
     /* Opened, "Show less" sticks to the bottom of the scrollport until the
      * card's end scrolls into view. */
@@ -294,6 +313,7 @@
       display: block;
       position: sticky;
       bottom: 0.75rem;
+      visibility: visible;
       z-index: 1;
       width: fit-content;
       margin: 0.5rem auto 0;

@@ -231,9 +231,6 @@ describe('Width', () => {
   })
 })
 
-// Clipping needs scroll-driven animations; without them the whole card shows.
-const clipSupported = CSS.supports('animation-timeline: scroll()')
-
 describe('Max height', () => {
   const longText = Array.from({ length: 20 }, (_, index) => `Line ${index + 1}`).join('\n')
 
@@ -257,10 +254,13 @@ describe('Max height', () => {
   const heightOf = (card: HTMLElement) => card.getBoundingClientRect().height
   // The label is generated content, which text locators cannot see.
   function isShown(element: Element): boolean {
-    return element.checkVisibility() && element.getBoundingClientRect().height > 0
+    return (
+      element.checkVisibility({ visibilityProperty: true }) &&
+      element.getBoundingClientRect().height > 0
+    )
   }
 
-  it.runIf(clipSupported)('clips a card taller than the max height behind Show more', async () => {
+  it('clips a card taller than the max height behind Show more', async () => {
     const { card, toggle } = mountLimited(createPost(longText))
     await vi.waitFor(() => expect(heightOf(card)).toBeCloseTo(300, 0))
     await vi.waitFor(() => expect(isShown(toggle)).toBe(true))
@@ -269,7 +269,7 @@ describe('Max height', () => {
     )
   })
 
-  it.runIf(clipSupported)('expands and collapses a clipped card', async () => {
+  it('expands and collapses a clipped card', async () => {
     const { card, toggle, summary } = mountLimited(createPost(longText))
     await vi.waitFor(() => expect(isShown(toggle)).toBe(true))
     await summary.click()
@@ -280,7 +280,7 @@ describe('Max height', () => {
     await vi.waitFor(() => expect(heightOf(card)).toBeCloseTo(300, 0))
   })
 
-  it.runIf(clipSupported)('clips a card made tall by media rather than text', async () => {
+  it('clips a card made tall by media rather than text', async () => {
     const snapshot = createPost('Four pictures and a quote')
     snapshot.media = Array.from({ length: 4 }, createPhoto)
     snapshot.quote = { ...createPost('Quoted'), id: '222', media: [createPhoto()] }
@@ -289,7 +289,7 @@ describe('Max height', () => {
     await vi.waitFor(() => expect(isShown(toggle)).toBe(true))
   })
 
-  it.runIf(clipSupported)('clips a card that grows taller after a resize', async () => {
+  it('clips a card that grows taller after a resize', async () => {
     const text = Array.from(
       { length: 7 },
       () => 'A sentence that wraps once the card gets narrow.',
@@ -305,7 +305,7 @@ describe('Max height', () => {
     await vi.waitFor(() => expect(heightOf(card)).toBeCloseTo(300, 0))
   })
 
-  it.runIf(clipSupported)('expands while keyboard focus is inside the card', async () => {
+  it('expands while keyboard focus is inside the card', async () => {
     const snapshot = createPost(`${longText}\n`)
     snapshot.body.push({ type: 'link', text: 'Clipped link', url: 'https://example.com/' })
     const { element, card, toggle } = mountLimited(snapshot)
@@ -325,7 +325,7 @@ describe('Max height', () => {
     )
   })
 
-  it.runIf(clipSupported)('keeps Show less in view while the expanded card scrolls', async () => {
+  it('keeps Show less in view while the expanded card scrolls', async () => {
     const scroller = document.createElement('div')
     scroller.style.cssText = 'height: 240px; overflow: auto'
     document.body.append(scroller)
@@ -338,22 +338,5 @@ describe('Max height', () => {
         scroller.getBoundingClientRect().bottom,
       )
     })
-  })
-
-  // Fails once Firefox ships scroll-driven animations; then `clipSupported`
-  // and the fallback test can go.
-  it('supports clipping everywhere but Firefox', () => {
-    if (server.browser === 'firefox') {
-      expect(clipSupported).toBe(false)
-    } else {
-      expect(clipSupported).toBe(true)
-    }
-  })
-
-  it.runIf(!clipSupported)('shows the whole card without clip support', async () => {
-    const { card, toggle } = mountLimited(createPost(longText))
-    await expect.element(post.getByText(/Line 20/)).toBeVisible()
-    expect(heightOf(card)).toBeGreaterThan(400)
-    expect(isShown(toggle)).toBe(false)
   })
 })
