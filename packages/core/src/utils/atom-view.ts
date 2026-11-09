@@ -5,10 +5,10 @@ import type { EditorView } from '@prosekit/pm/view'
  * The atom mark view (an image, file, or wiki link) whose source holds
  * `insidePos`, a position inside the unit rather than on its edges.
  */
-export function getAtomViewAt(view: EditorView, insidePos: number): Element | undefined {
+export function getAtomViewAt(view: EditorView, insidePos: number): Element | undefined | null {
   const { node } = view.domAtPos(insidePos, 0)
   const element = isElementLike(node) ? node : node.parentElement
-  return element?.closest('.md-atom-view') ?? undefined
+  return element?.closest('.md-atom-view')
 }
 
 /**
