@@ -31,7 +31,7 @@ export function EmbedMenu({ readOnly = false }: EmbedMenuProps): ReactElement {
 
   useEffect(() => {
     const extension = defineEmbedMenuHandler((embed, button) => {
-      dispatch({ type: 'open', embed, button })
+      dispatch({ type: 'toggle', embed, button })
     })
     return queueExtension(editor, extension)
   }, [editor])
@@ -47,9 +47,25 @@ export function EmbedMenu({ readOnly = false }: EmbedMenuProps): ReactElement {
     return () => button.removeAttribute('aria-expanded')
   }, [button, open])
 
-  const changeOpen = useCallback((next: boolean) => {
-    if (!next) dispatch({ type: 'close' })
-  }, [])
+  const changeOpen = useCallback(
+    (next: boolean, details: Menu.Root.ChangeEventDetails) => {
+      if (next) return
+      // Base UI does not know the button opens this menu, so a press on it
+      // reads as a press outside. Keep the menu open: the click that follows
+      // toggles it.
+      const target = details.event.target
+      if (
+        details.reason === 'outside-press' &&
+        target instanceof Node &&
+        button?.contains(target)
+      ) {
+        details.cancel()
+        return
+      }
+      dispatch({ type: 'close' })
+    },
+    [button],
+  )
 
   const completeOpenChange = useCallback((next: boolean) => {
     if (!next) dispatch({ type: 'closed' })

@@ -66,6 +66,16 @@ describe('embed menu', () => {
     expect(ref.current?.getMarkdown()).toBe(`Before ![](${TWEET}) after\n`)
   })
 
+  it('closes when its button is clicked again', async () => {
+    await setup(`![](${TWEET})`)
+
+    await openFromButton()
+    await menuButton.click()
+
+    await expect.element(copyItem).not.toBeInTheDocument()
+    await expect.element(menuButton).not.toHaveAttribute('aria-expanded')
+  })
+
   it('keeps the alt text and title, and drops the magic comment', async () => {
     const ref = await setup(`![Jack's post](${TWEET} "First")<!-- {"width":320} -->`)
 

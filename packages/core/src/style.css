@@ -339,8 +339,8 @@
     }
 
     .meowdown-icon {
-      width: 0.85rem;
-      height: 0.85rem;
+      width: 0.875rem;
+      height: 0.875rem;
     }
   }
 
@@ -398,8 +398,8 @@
     }
 
     .meowdown-icon {
-      width: 0.9rem;
-      height: 0.9rem;
+      width: 0.875rem;
+      height: 0.875rem;
       color: var(--meowdown-muted);
     }
   }

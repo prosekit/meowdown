@@ -116,8 +116,8 @@
 
   :global(.meowdown-icon) {
     display: block;
-    width: 0.85rem;
-    height: 0.85rem;
+    width: 0.875rem;
+    height: 0.875rem;
   }
 }
 

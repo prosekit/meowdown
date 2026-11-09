@@ -23,7 +23,11 @@ export type EmbedMenuState =
 
 export type EmbedMenuEvent =
   | {
-      readonly type: 'open'
+      /**
+       * The user pressed `button` or `Mod-/`: close the menu if it is open
+       * over this button, otherwise open it over `embed`.
+       */
+      readonly type: 'toggle'
       readonly embed: EmbedTarget
       readonly button: HTMLElement
     }
@@ -44,7 +48,10 @@ export const EMBED_MENU_IDLE: EmbedMenuState = { phase: 'idle' }
 
 export function reduceEmbedMenu(state: EmbedMenuState, event: EmbedMenuEvent): EmbedMenuState {
   switch (event.type) {
-    case 'open':
+    case 'toggle':
+      if (state.phase === 'open' && state.button === event.button) {
+        return { ...state, phase: 'closing' }
+      }
       return { phase: 'open', embed: event.embed, button: event.button }
     case 'close':
       return state.phase === 'open' ? { ...state, phase: 'closing' } : state
