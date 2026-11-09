@@ -52,7 +52,7 @@ function createEmbedMenuButton(): HTMLButtonElement {
   button.title = `More (${isApple ? '⌘/' : 'Ctrl+/'})`
   button.dataset.testid = 'embed-menu'
 
-  // FIXME: I do not like how you create this icon by hand
+  // FIXME: I do not like how you create this icon by hand. Please use meowdown-icon meowdown-icon-ellipsis in style.css instead.
   const svg = document.createElementNS(SVG_NS, 'svg')
   svg.setAttribute('viewBox', '0 0 24 24')
   svg.setAttribute('aria-hidden', 'true')
