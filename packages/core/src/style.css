@@ -222,9 +222,9 @@
   /* ---------------------------------------------------------------------------
    * Icons
    *
-   * `<span class="meowdown-icon meowdown-icon-{name}">` draws a Lucide icon in
-   * `currentColor`, sized like the `<svg>` icons next to it. The icon data
-   * comes from:
+   * `<span class="meowdown-icon meowdown-icon-{name}">` draws a Lucide icon in `currentColor`.
+   *
+   * The icon data comes from:
    *
    * https://api.iconify.design/lucide.css?var=_svg&commonSelector=.meowdown-icon&selector=.meowdown-icon-{name}&icons=ellipsis,braces
    * ------------------------------------------------------------------------- */
