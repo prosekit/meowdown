@@ -143,6 +143,7 @@ export function findAtomEdgeRect(
   return undefined
 }
 
+// FIXME: move findAtomPreviewElement to atom-view.ts
 function findAtomPreviewElement(view: EditorView, insidePos: number): Element | undefined {
   return getAtomViewAt(view, insidePos)?.querySelector('.md-atom-view-preview') ?? undefined
 }
