@@ -42,6 +42,8 @@ export function defineCodeBlockMenuKeymap(): PlainExtension {
  * Deletes the block at `pos` and puts the caret where it was. A block that is
  * the only child of its parent gives way to an empty default block (usually a
  * paragraph), since the parent cannot be left empty.
+ *
+ * FIXME: move deleteBlock to packages/core/src/extensions/commands.ts and add some unit tests for it.
  */
 export function deleteBlock(pos: number): Command {
   return (state, dispatch) => {
