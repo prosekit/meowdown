@@ -1,5 +1,17 @@
 # @meowdown/react
 
+## 0.84.0
+
+### Minor Changes
+
+- [#770](https://github.com/prosekit/meowdown/pull/770) [`15cb9da`](https://github.com/prosekit/meowdown/commit/15cb9dae282199468f1e37b47df462dfbebc07a1) Thanks [@ocavue](https://github.com/ocavue)! - Add a code block menu with "Change language" and "Copy code" actions. Press `Mod-/` with the caret in a code block to open it from the keyboard.
+
+### Patch Changes
+
+- Updated dependencies [[`15cb9da`](https://github.com/prosekit/meowdown/commit/15cb9dae282199468f1e37b47df462dfbebc07a1), [`687b944`](https://github.com/prosekit/meowdown/commit/687b944e7dede96fb9ecaf59014a03b29da3ee46)]:
+  - @meowdown/core@0.83.3
+  - @meowdown/embed@0.3.2
+
 ## 0.83.2
 
 ### Patch Changes

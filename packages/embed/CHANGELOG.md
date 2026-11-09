@@ -1,5 +1,11 @@
 # @meowdown/embed
 
+## 0.3.2
+
+### Patch Changes
+
+- [#765](https://github.com/prosekit/meowdown/pull/765) [`687b944`](https://github.com/prosekit/meowdown/commit/687b944e7dede96fb9ecaf59014a03b29da3ee46) Thanks [@ocavuebot](https://github.com/ocavuebot)! - Fix the X post card's "Show more" clipping in Firefox versions that support scroll-driven animations.
+
 ## 0.3.1
 
 ### Patch Changes
