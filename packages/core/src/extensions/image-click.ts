@@ -144,7 +144,7 @@ export function defineImageClickHandler(
         src: hit.src,
         alt: hit.alt,
         event,
-        element: getPreviewImage(preview),
+        element: getPreviewImage(preview) ?? undefined,
         mod: isModEvent(event),
       })
     }
@@ -212,7 +212,7 @@ export function defineImageClickHandler(
             src: hit.src,
             alt: hit.alt,
             event,
-            element: getPreviewImage(preview),
+            element: getPreviewImage(preview) ?? undefined,
             mod: isModEvent(event),
           })
           return true
