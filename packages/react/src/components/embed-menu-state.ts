@@ -1,26 +1,44 @@
 import type { EmbedTarget } from '@meowdown/core'
 
 export type EmbedMenuState =
-  | { readonly phase: 'idle' }
+  | {
+      readonly phase: 'idle'
+    }
   /**
    * The menu is open over `embed`, anchored to its menu `button`.
    */
-  | { readonly phase: 'open'; readonly embed: EmbedTarget; readonly button: HTMLElement }
+  | {
+      readonly phase: 'open'
+      readonly embed: EmbedTarget
+      readonly button: HTMLElement
+    }
   /**
    * The menu plays its exit animation, still anchored to `button`.
    */
-  | { readonly phase: 'closing'; readonly embed: EmbedTarget; readonly button: HTMLElement }
+  | {
+      readonly phase: 'closing'
+      readonly embed: EmbedTarget
+      readonly button: HTMLElement
+    }
 
 export type EmbedMenuEvent =
-  | { readonly type: 'open'; readonly embed: EmbedTarget; readonly button: HTMLElement }
+  | {
+      readonly type: 'open'
+      readonly embed: EmbedTarget
+      readonly button: HTMLElement
+    }
   /**
    * The menu starts to close.
    */
-  | { readonly type: 'close' }
+  | {
+      readonly type: 'close'
+    }
   /**
    * The exit animation finished.
    */
-  | { readonly type: 'closed' }
+  | {
+      readonly type: 'closed'
+    }
 
 export const EMBED_MENU_IDLE: EmbedMenuState = { phase: 'idle' }
 
