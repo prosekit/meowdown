@@ -24,12 +24,13 @@ import {
   type ReactElement,
 } from 'react'
 
-import { setCaretCodeBlockMenu } from '../extensions/block-menu.ts'
+import { deleteBlock, setCaretCodeBlockMenu } from '../extensions/block-menu.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
 import { usePele } from '../hooks/use-pele.ts'
 import { NON_PROSE_PROPS } from '../utils/non-prose-props.ts'
 import { writeClipboardText } from '../utils/write-clipboard-text.ts'
 
+import { ActionMenuItem, ActionMenuPopup } from './action-menu.tsx'
 import {
   CODE_BLOCK_TOOLBAR_IDLE,
   getCodeBlockToolbarFinalFocus,
@@ -202,7 +203,7 @@ function CodeBlockToolbar({
   const deleteCodeBlock = useCallback(() => {
     const pos = getPos()
     if (pos == null) return
-    deleteBlockAt(view, pos)
+    deleteBlock(pos)(view.state, view.dispatch)
     view.focus()
   }, [getPos, view])
 
@@ -303,46 +304,29 @@ function CodeBlockMenuPopup({
   onDelete,
   canDelete,
 }: CodeBlockMenuPopupProps): ReactElement {
-  const collisionBoundary = use(CollisionBoundaryContext)
-
   return (
-    <Menu.Portal>
-      <Menu.Positioner
-        className="meowdown-menu-positioner"
-        sideOffset={4}
-        align="start"
-        collisionBoundary={collisionBoundary}
-      >
-        <Menu.Popup className="meowdown-menu-popup" finalFocus={getFinalFocus}>
-          <Menu.Item
-            className="meowdown-menu-item"
-            onClick={onChangeLanguage}
-            data-testid="code-block-menu-language"
-          >
-            <Icon name="braces" />
-            <span>Change language</span>
-          </Menu.Item>
-          <Menu.Item
-            className="meowdown-menu-item"
-            onClick={onCopyCode}
-            data-testid="code-block-menu-copy"
-          >
-            <Icon name="copy" />
-            <span>Copy code</span>
-          </Menu.Item>
-          {canDelete() && (
-            <Menu.Item
-              className="meowdown-menu-item"
-              onClick={onDelete}
-              data-testid="code-block-menu-delete"
-            >
-              <Icon name="trash-2" />
-              <span>Delete</span>
-            </Menu.Item>
-          )}
-        </Menu.Popup>
-      </Menu.Positioner>
-    </Menu.Portal>
+    <ActionMenuPopup finalFocus={getFinalFocus}>
+      <ActionMenuItem
+        icon="braces"
+        label="Change language"
+        onClick={onChangeLanguage}
+        testId="code-block-menu-language"
+      />
+      <ActionMenuItem
+        icon="copy"
+        label="Copy code"
+        onClick={onCopyCode}
+        testId="code-block-menu-copy"
+      />
+      {canDelete() && (
+        <ActionMenuItem
+          icon="trash-2"
+          label="Delete"
+          onClick={onDelete}
+          testId="code-block-menu-delete"
+        />
+      )}
+    </ActionMenuPopup>
   )
 }
 
@@ -451,26 +435,3 @@ function CodeBlockLanguagePicker({
 }
 
 const CodeBlockLanguagePickerMemo = /* @__PURE__ */ memo(CodeBlockLanguagePicker)
-
-/**
- * Delete the block at `pos` and put the caret where it was. A block that is
- * the only child of its parent gives way to an empty default block (usually a
- * paragraph), since the parent cannot be left empty.
- */
-function deleteBlockAt(view: EditorView, pos: number): void {
-  const { state } = view
-  const $pos = state.doc.resolve(pos)
-  const node = $pos.nodeAfter
-  if (!node) return
-  const end = pos + node.nodeSize
-  const tr =
-    $pos.parent.childCount === 1
-      ? state.tr.replaceWith(
-          pos,
-          end,
-          $pos.parent.type.contentMatch.defaultType?.createAndFill() ?? [],
-        )
-      : state.tr.delete(pos, end)
-  tr.setSelection(TextSelection.near(tr.doc.resolve(Math.min(pos, tr.doc.content.size)), 1))
-  view.dispatch(tr.scrollIntoView())
-}

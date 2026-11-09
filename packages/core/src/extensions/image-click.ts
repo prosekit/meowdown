@@ -2,9 +2,10 @@ import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
+import { getAtomViewSourcePos } from '../utils/atom-view.ts'
 import { isModEvent } from '../utils/is-mod-event.ts'
 
-import { EMBED_MENU_BUTTON_CLASS } from './embed-menu.ts'
+import { EMBED_MENU_BUTTON_CLASS } from './image.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 
@@ -15,6 +16,7 @@ interface ImageHit {
   to: number
   src: string
   alt: string
+  syntax: MdImageAttrs['syntax']
 }
 
 /**
@@ -37,19 +39,16 @@ function getPreviewImage(preview: HTMLElement): HTMLImageElement | undefined | n
 export function findImageAt(state: EditorState, pos: number): ImageHit | undefined {
   const range = getMarkRangeAt(state, pos, 'mdImage')
   if (!range) return
-  const { src, alt } = range.mark.attrs as MdImageAttrs
-  return { from: range.from, to: range.to, src, alt }
+  const { src, alt, syntax } = range.mark.attrs as MdImageAttrs
+  return { from: range.from, to: range.to, src, alt, syntax }
 }
 
 /**
- * Resolve the image hit for a preview element via its content holder, not the
- * event's document position: an event on the non-editable preview lands on the
- * run boundary, where `getMarkRange` would pick the next adjacent image.
+ * The image whose rendered preview, menu button, or other element is `element`.
  */
-function findImageForPreview(view: EditorView, preview: HTMLElement): ImageHit | undefined {
-  const content = preview.closest('.md-image-view')?.querySelector('.md-image-view-content')
-  if (!content) return
-  return findImageAt(view.state, view.posAtDOM(content, 0))
+export function findImageForElement(view: EditorView, element: Element): ImageHit | undefined {
+  const pos = getAtomViewSourcePos(view, element)
+  return pos == null ? undefined : findImageAt(view.state, pos)
 }
 
 /**
@@ -138,7 +137,7 @@ export function defineImageClickHandler(
     // Cancelling the touchend also suppresses the synthetic click, so the
     // handler fires here instead of in handleClick.
     event.preventDefault()
-    const hit = findImageForPreview(view, preview)
+    const hit = findImageForElement(view, preview)
     if (hit) {
       handler({
         src: hit.src,
@@ -206,7 +205,7 @@ export function defineImageClickHandler(
           if (!handler) return false
           const preview = getClosestImagePreview(event.target)
           if (!preview) return false
-          const hit = findImageForPreview(view, preview)
+          const hit = findImageForElement(view, preview)
           if (!hit) return false
           handler({
             src: hit.src,

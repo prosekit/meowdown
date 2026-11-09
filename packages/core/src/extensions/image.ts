@@ -15,7 +15,6 @@ import {
 import { guardMarkView } from '../utils/guard-mark-view.ts'
 import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
 
-import { EMBED_MENU_BUTTON_CLASS } from './embed-menu.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import {
   formatMagicComment,
@@ -34,6 +33,12 @@ import {
   type YouTubeVideoResolver,
 } from './post-embed.ts'
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
+
+/**
+ * The class of the menu button that an image, X post, or YouTube card shows
+ * in the editor.
+ */
+export const EMBED_MENU_BUTTON_CLASS = 'md-embed-menu-button'
 
 /**
  * The menu button of an image or card. It stays hidden until `defineEmbedMenuHandler`

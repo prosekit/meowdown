@@ -8,13 +8,12 @@ import {
 } from '@meowdown/core'
 import { useEditor } from '@prosekit/react'
 import { queueExtension } from '@prosekit/web'
-import { use, useCallback, useEffect, useReducer, type ReactElement } from 'react'
+import { useCallback, useEffect, useReducer, type ReactElement } from 'react'
 
 import { writeClipboardText } from '../utils/write-clipboard-text.ts'
 
-import { CollisionBoundaryContext } from './collision-boundary.ts'
+import { ActionMenuItem, ActionMenuPopup } from './action-menu.tsx'
 import { EMBED_MENU_IDLE, reduceEmbedMenu } from './embed-menu-state.ts'
-import { Icon } from './icon.tsx'
 
 export interface EmbedMenuProps {
   readOnly?: boolean
@@ -27,7 +26,6 @@ export interface EmbedMenuProps {
 export function EmbedMenu({ readOnly = false }: EmbedMenuProps): ReactElement {
   const editor: TypedEditor = useEditor<EditorExtension>()
   const [state, dispatch] = useReducer(reduceEmbedMenu, EMBED_MENU_IDLE)
-  const collisionBoundary = use(CollisionBoundaryContext)
 
   useEffect(() => {
     const extension = defineEmbedMenuHandler((embed, button) => {
@@ -93,50 +91,30 @@ export function EmbedMenu({ readOnly = false }: EmbedMenuProps): ReactElement {
 
   return (
     <Menu.Root open={open} onOpenChange={changeOpen} onOpenChangeComplete={completeOpenChange}>
-      <Menu.Portal>
-        <Menu.Positioner
-          anchor={button}
-          className="meowdown-menu-positioner"
-          sideOffset={4}
-          align="start"
-          collisionBoundary={collisionBoundary}
-        >
-          <Menu.Popup
-            className="meowdown-menu-popup"
-            finalFocus={getFinalFocus}
-            data-testid="embed-menu-popup"
-          >
-            {canConvert && (
-              <Menu.Item
-                className="meowdown-menu-item"
-                onClick={convertToLink}
-                data-testid="embed-menu-convert"
-              >
-                <Icon name="link-2" />
-                <span>Convert to link</span>
-              </Menu.Item>
-            )}
-            <Menu.Item
-              className="meowdown-menu-item"
-              onClick={copyLink}
-              data-testid="embed-menu-copy"
-            >
-              <Icon name="copy" />
-              <span>{embed?.kind === 'image' ? 'Copy image link' : 'Copy link'}</span>
-            </Menu.Item>
-            {!readOnly && (
-              <Menu.Item
-                className="meowdown-menu-item"
-                onClick={remove}
-                data-testid="embed-menu-delete"
-              >
-                <Icon name="trash-2" />
-                <span>Delete</span>
-              </Menu.Item>
-            )}
-          </Menu.Popup>
-        </Menu.Positioner>
-      </Menu.Portal>
+      <ActionMenuPopup anchor={button} finalFocus={getFinalFocus} testId="embed-menu-popup">
+        {canConvert && (
+          <ActionMenuItem
+            icon="link-2"
+            label="Convert to link"
+            onClick={convertToLink}
+            testId="embed-menu-convert"
+          />
+        )}
+        <ActionMenuItem
+          icon="copy"
+          label={embed?.kind === 'image' ? 'Copy image link' : 'Copy link'}
+          onClick={copyLink}
+          testId="embed-menu-copy"
+        />
+        {!readOnly && (
+          <ActionMenuItem
+            icon="trash-2"
+            label="Delete"
+            onClick={remove}
+            testId="embed-menu-delete"
+          />
+        )}
+      </ActionMenuPopup>
     </Menu.Root>
   )
 }

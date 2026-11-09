@@ -10,17 +10,14 @@ import {
 } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
+import { getAtomViewAt } from '../utils/atom-view.ts'
+
+import { findImageAt, findImageForElement } from './image-click.ts'
+import { EMBED_MENU_BUTTON_CLASS } from './image.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import { stripMagicComment } from './magic-comment.ts'
-import { getMarkRangeAt } from './mark-range.ts'
 
 const embedMenuKey = new PluginKey('meowdown-embed-menu')
-
-/**
- * The class of the menu button that an image, X post, or YouTube card shows
- * in the editor.
- */
-export const EMBED_MENU_BUTTON_CLASS = 'md-embed-menu-button'
 
 /**
  * An image, X post, or YouTube card in the document: its `![](src)` or
@@ -31,32 +28,33 @@ export interface EmbedTarget {
   kind: EmbedKind | 'image'
   src: string
   alt: string
+  /**
+   * `wikiEmbed` for a `![[target]]` source, which does not convert to a link.
+   */
+  syntax: MdImageAttrs['syntax']
   from: number
   to: number
 }
 
-// FIXME: question: Is there any case that we use "EmbedTarget" but we do not use "EmbedHit" ? If the answer is yes, use a comment to explain why these two interfaces are different. If the answer is no, just use one interface to represent this data structure.
-interface EmbedHit extends EmbedTarget {
-  syntax: MdImageAttrs['syntax']
+/**
+ * Tag an image found in the document with the kind of card its URL renders.
+ */
+function toEmbedTarget(image: Omit<EmbedTarget, 'kind'> | undefined): EmbedTarget | undefined {
+  return image && { ...image, kind: matchEmbed(image.src) ?? 'image' }
 }
 
 /**
  * The image or card whose source covers `pos`, if any.
  */
-function getEmbedAt(state: EditorState, pos: number): EmbedHit | undefined {
-  const range = getMarkRangeAt(state, pos, 'mdImage')
-  if (!range) return
-  const { from, to, mark } = range
-  const { src, alt, syntax } = mark.attrs as MdImageAttrs
-  const kind = matchEmbed(src) ?? 'image'
-  return { kind, src, alt, syntax, from: from, to: to }
+function getEmbedAt(state: EditorState, pos: number): EmbedTarget | undefined {
+  return toEmbedTarget(findImageAt(state, pos))
 }
 
 /**
  * The image or card that the selection covers exactly, as arrow keys select
  * it.
  */
-function getSelectedEmbed(state: EditorState): EmbedHit | undefined {
+function getSelectedEmbed(state: EditorState): EmbedTarget | undefined {
   const { from, to, empty } = state.selection
   if (empty) return
   const embed = getEmbedAt(state, from)
@@ -76,10 +74,7 @@ export function convertEmbedToLink(pos: number): Command {
     if (!embed || embed.kind === 'image' || embed.syntax != null) return false
     if (dispatch) {
       const source = stripMagicComment(state.doc.textBetween(embed.from, embed.to))
-      const link = embed.alt ? source.slice(1) : embed.src
-      const transaction = state.tr.insertText(link, embed.from, embed.to)
-      transaction.setSelection(TextSelection.create(transaction.doc, embed.from + link.length))
-      dispatch(transaction.scrollIntoView())
+      dispatch(replaceEmbed(state, embed, embed.alt ? source.slice(1) : embed.src))
     }
     return true
   }
@@ -93,38 +88,31 @@ export function deleteEmbed(pos: number): Command {
   return (state, dispatch) => {
     const embed = getEmbedAt(state, pos)
     if (!embed) return false
-    if (dispatch) {
-      const transaction = state.tr.delete(embed.from, embed.to)
-      transaction.setSelection(TextSelection.create(transaction.doc, embed.from))
-      dispatch(transaction.scrollIntoView())
-    }
+    if (dispatch) dispatch(replaceEmbed(state, embed, ''))
     return true
   }
+}
+
+/**
+ * Replace the source of `embed` with `text`, which may be empty, and put the
+ * caret after the text.
+ */
+function replaceEmbed(state: EditorState, embed: EmbedTarget, text: string) {
+  const { from, to } = embed
+  const tr = text ? state.tr.insertText(text, from, to) : state.tr.delete(from, to)
+  return tr.setSelection(TextSelection.create(tr.doc, from + text.length)).scrollIntoView()
 }
 
 /**
  * The menu button of the card at `pos`, if the card is rendered.
  */
 function getEmbedMenuButton(view: EditorView, pos: number): HTMLElement | undefined | null {
-  const { node } = view.domAtPos(pos + 1)
-  const element = isElementLike(node) ? node : node.parentElement
-  const markView = element?.closest('.md-image-view')
-  return markView?.querySelector<HTMLElement>(`.${EMBED_MENU_BUTTON_CLASS}`)
+  return getAtomViewAt(view, pos + 1)?.querySelector<HTMLElement>(`.${EMBED_MENU_BUTTON_CLASS}`)
 }
 
 function getButtonTarget(target: EventTarget | null): HTMLElement | undefined | null {
   if (!isElementLike(target)) return
   return target.closest<HTMLElement>(`.${EMBED_MENU_BUTTON_CLASS}`)
-}
-
-/**
- * The card a menu button belongs to, found through the hidden source next to
- * the card, since an event on the non-editable card lands on a unit boundary.
- */
-function getEmbedForButton(view: EditorView, button: HTMLElement): EmbedHit | undefined {
-  const content = button.closest('.md-image-view')?.querySelector('.md-image-view-content')
-  if (!content) return
-  return getEmbedAt(view.state, view.posAtDOM(content, 0))
 }
 
 /**
@@ -164,7 +152,7 @@ export function defineEmbedMenuHandler(onOpen: EmbedMenuOpenHandler): PlainExten
               const button = getButtonTarget(event.target)
               if (!button) return false
               event.preventDefault()
-              const embed = getEmbedForButton(view, button)
+              const embed = toEmbedTarget(findImageForElement(view, button))
               if (embed) onOpen(embed, button)
               return true
             },
