@@ -17,6 +17,11 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./class-names": {
+      "development": "./src/class-names.ts",
+      "types": "./dist/class-names.d.ts",
+      "default": "./dist/class-names.js"
+    },
     "./style.css": {
       "development": "./src/style.css",
       "default": "./dist/style.css"
@@ -77,6 +82,7 @@
   "publishConfig": {
     "exports": {
       ".": "./dist/index.js",
+      "./class-names": "./dist/class-names.js",
       "./style.css": "./dist/style.css"
     },
     "access": "public"

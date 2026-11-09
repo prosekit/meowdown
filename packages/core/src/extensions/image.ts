@@ -36,7 +36,7 @@ import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
 
 /**
  * The class of the menu button that an image, X post, or YouTube card shows
- * in the editor.
+ * in the editor. FIXME: delete EMBED_MENU_BUTTON_CLASS here
  */
 export const EMBED_MENU_BUTTON_CLASS = 'md-embed-menu-button'
 
@@ -47,7 +47,7 @@ export const EMBED_MENU_BUTTON_CLASS = 'md-embed-menu-button'
 function createEmbedMenuButton(): HTMLButtonElement {
   const button = document.createElement('button')
   button.type = 'button'
-  button.className = `${EMBED_MENU_BUTTON_CLASS} meowdown-icon-button`
+  button.className = `${EMBED_MENU_BUTTON_CLASS} meowdown-icon-button` // FIXME: add "meowdown-icon-button" to class-names.ts
   button.tabIndex = -1
   button.setAttribute('aria-label', 'More')
   button.setAttribute('aria-haspopup', 'menu')
@@ -55,7 +55,7 @@ function createEmbedMenuButton(): HTMLButtonElement {
   button.dataset.testid = 'embed-menu'
 
   const icon = document.createElement('span')
-  icon.className = 'meowdown-icon meowdown-icon-ellipsis'
+  icon.className = 'meowdown-icon meowdown-icon-ellipsis' // FIXME: add "meowdown-icon" and "meowdown-icon-ellipsis" to class-names.ts
   icon.setAttribute('aria-hidden', 'true')
   button.appendChild(icon)
   return button
@@ -282,10 +282,10 @@ class ImageMarkView implements MarkView {
     this.#resolveYouTubeVideo = options.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
 
     this.#dom = document.createElement('span')
-    this.#dom.className = 'md-image-view md-atom-view'
+    this.#dom.className = 'md-image-view md-atom-view' // FIXME
 
     this.#contentDOM = document.createElement('span')
-    this.#contentDOM.className = 'md-image-view-content md-atom-view-content'
+    this.#contentDOM.className = 'md-image-view-content md-atom-view-content' // FIXME
     this.#contentDOM.dataset.testid = 'image-source'
     for (const [name, value] of Object.entries(NON_PROSE_ATTRS)) {
       this.#contentDOM.setAttribute(name, value)
@@ -395,7 +395,7 @@ class ImageMarkView implements MarkView {
 
   #createWrapper(): HTMLElement {
     const wrapper = document.createElement('span')
-    wrapper.className = 'md-image-view-preview md-atom-view-preview'
+    wrapper.className = 'md-image-view-preview md-atom-view-preview' // FIXME
     return wrapper
   }
 
@@ -518,7 +518,7 @@ class ImageMarkView implements MarkView {
     applySize(root, this.#attrs.width, this.#attrs.height)
 
     const handle = document.createElement('prosekit-resizable-handle')
-    handle.className = 'md-image-resize-handle'
+    handle.className = 'md-image-resize-handle' // FIXME
     handle.setAttribute('position', 'bottom-right')
     // A click (no drag) on the handle must not bubble to the image-click handler.
     handle.addEventListener('click', (event) => event.stopPropagation())
