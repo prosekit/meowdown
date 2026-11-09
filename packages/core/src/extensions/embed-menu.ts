@@ -23,6 +23,7 @@ const embedMenuKey = new PluginKey('meowdown-embed-menu')
  * An image, X post, or YouTube card in the document: its `![](src)` or
  * `![[target]]` source, including any trailing magic comment, spans `from` to
  * `to`. `src` is the image or post URL.
+ * FIXME: now ImageHit already have "kind", we do not need "EmbedTarget" anymore.
  */
 export interface EmbedTarget {
   kind: EmbedKind | 'image'
