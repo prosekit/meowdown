@@ -231,6 +231,7 @@
   padding: 0.25rem;
 }
 
+/*FIXME: merge reusable CSS for menu trigger / icons etc into prosekit/core */
 .Item {
   display: grid;
   grid-template-columns: 1rem 1fr;
@@ -249,6 +250,7 @@
   }
 }
 
+/*FIXME: merge reusable CSS for menu trigger / icons etc into prosekit/core */
 .ItemIndicator {
   display: flex;
   grid-column: 1;

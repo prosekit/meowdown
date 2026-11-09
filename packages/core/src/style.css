@@ -222,10 +222,11 @@
   /* ---------------------------------------------------------------------------
      * Icons
      *
-     * CSS generated from:
+     * CSS based on the following link(s):
      * https://api.iconify.design/lucide.css?var=_svg&commonSelector=.meowdown-icon&selector=.meowdown-icon-{name}&icons=ellipsis,braces
      * ------------------------------------------------------------------------- */
   .meowdown-icon {
+    /*FIXME: update meowdown-icon so that it matches all styles */
     display: inline-block;
     width: 1em;
     height: 1em;

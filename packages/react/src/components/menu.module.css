@@ -37,6 +37,7 @@
   }
 }
 
+/*FIXME: merge reusable CSS for menu trigger / icons etc into prosekit/core */
 .Item {
   display: flex;
   align-items: center;
