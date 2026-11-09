@@ -12,14 +12,6 @@ import type { EditorView } from '@prosekit/pm/view'
 import type { ReactNodeViewProps } from '@prosekit/react'
 import { clsx } from 'clsx/lite'
 import {
-  BracesIcon,
-  CheckIcon,
-  ChevronsUpDownIcon,
-  CopyIcon,
-  EllipsisIcon,
-  Trash2Icon,
-} from 'lucide-react'
-import {
   memo,
   use,
   useCallback,
@@ -47,6 +39,7 @@ import {
 import styles from './code-block-view.module.css'
 import { CollisionBoundaryContext } from './collision-boundary.ts'
 import { CopyButton } from './copy-button.tsx'
+import { Icon } from './icon.tsx'
 import { MathRender } from './math-render.tsx'
 import { MermaidRender } from './mermaid-render.tsx'
 
@@ -282,7 +275,7 @@ function CodeBlockMenu({
         title={`More (${MENU_SHORTCUT})`}
         data-testid="code-block-menu"
       >
-        <EllipsisIcon />
+        <Icon name="ellipsis" />
       </Menu.Trigger>
       <CodeBlockMenuPopup
         getFinalFocus={getFinalFocus}
@@ -326,7 +319,7 @@ function CodeBlockMenuPopup({
             onClick={onChangeLanguage}
             data-testid="code-block-menu-language"
           >
-            <BracesIcon />
+            <Icon name="braces" />
             <span>Change language</span>
           </Menu.Item>
           <Menu.Item
@@ -334,7 +327,7 @@ function CodeBlockMenuPopup({
             onClick={onCopyCode}
             data-testid="code-block-menu-copy"
           >
-            <CopyIcon />
+            <Icon name="copy" />
             <span>Copy code</span>
           </Menu.Item>
           {canDelete() && (
@@ -343,7 +336,7 @@ function CodeBlockMenuPopup({
               onClick={onDelete}
               data-testid="code-block-menu-delete"
             >
-              <Trash2Icon />
+              <Icon name="trash-2" />
               <span>Delete</span>
             </Menu.Item>
           )}
@@ -413,7 +406,7 @@ function CodeBlockLanguagePicker({
       <Combobox.Trigger className={styles.Trigger} data-testid="code-block-language">
         <Combobox.Value placeholder="Plain Text" />
         <Combobox.Icon className={styles.TriggerIcon}>
-          <ChevronsUpDownIcon />
+          <Icon name="chevrons-up-down" />
         </Combobox.Icon>
       </Combobox.Trigger>
       <Combobox.Portal>
@@ -444,7 +437,7 @@ function CodeBlockLanguagePicker({
                   <Combobox.ItemIndicator
                     className={clsx('meowdown-menu-item-indicator', styles.ItemIndicator)}
                   >
-                    <CheckIcon />
+                    <Icon name="check" />
                   </Combobox.ItemIndicator>
                   <span className={styles.ItemText}>{item.label}</span>
                 </Combobox.Item>

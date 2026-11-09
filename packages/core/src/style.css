@@ -226,7 +226,7 @@
    *
    * The icon data comes from:
    *
-   * https://api.iconify.design/lucide.css?var=_svg&commonSelector=.meowdown-icon&selector=.meowdown-icon-{name}&icons=ellipsis,braces
+   * https://api.iconify.design/lucide.css?var=_svg&commonSelector=.meowdown-icon&selector=.meowdown-icon-{name}&icons=braces,check,chevrons-up-down,copy,earth,ellipsis,grip-horizontal,grip-vertical,link-2,pencil,sparkles,trash-2,unlink
    * ------------------------------------------------------------------------- */
   .meowdown-icon {
     display: block;
@@ -238,17 +238,70 @@
     mask: var(--_svg) no-repeat center / 100% 100%;
   }
 
-  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:ellipsis */
-  .meowdown-icon-ellipsis {
-    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='1'/%3E%3Ccircle cx='19' cy='12' r='1'/%3E%3Ccircle cx='5' cy='12' r='1'/%3E%3C/g%3E%3C/svg%3E");
-  }
-
   /* Preview: https://icones.js.org/collection/lucide?icon=lucide:braces */
   .meowdown-icon-braces {
     --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2a2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1m8 0h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1'/%3E%3C/svg%3E");
   }
 
-  /*FIXME: add more icons here and use them in meowdown/react so that meowdown/react does not need to depend on lucide-react anymore */
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:check */
+  .meowdown-icon-check {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:chevrons-up-down */
+  .meowdown-icon-chevrons-up-down {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m7 15l5 5l5-5M7 9l5-5l5 5'/%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:copy */
+  .meowdown-icon-copy {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Crect width='14' height='14' x='8' y='8' rx='2' ry='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:earth */
+  .meowdown-icon-earth {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Cpath d='M21.54 15H17a2 2 0 0 0-2 2v4.54M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05'/%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:ellipsis */
+  .meowdown-icon-ellipsis {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='1'/%3E%3Ccircle cx='19' cy='12' r='1'/%3E%3Ccircle cx='5' cy='12' r='1'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:grip-horizontal */
+  .meowdown-icon-grip-horizontal {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Ccircle cx='12' cy='9' r='1'/%3E%3Ccircle cx='19' cy='9' r='1'/%3E%3Ccircle cx='5' cy='9' r='1'/%3E%3Ccircle cx='12' cy='15' r='1'/%3E%3Ccircle cx='19' cy='15' r='1'/%3E%3Ccircle cx='5' cy='15' r='1'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:grip-vertical */
+  .meowdown-icon-grip-vertical {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Ccircle cx='9' cy='12' r='1'/%3E%3Ccircle cx='9' cy='5' r='1'/%3E%3Ccircle cx='9' cy='19' r='1'/%3E%3Ccircle cx='15' cy='12' r='1'/%3E%3Ccircle cx='15' cy='5' r='1'/%3E%3Ccircle cx='15' cy='19' r='1'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:link-2 */
+  .meowdown-icon-link-2 {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 17H7A5 5 0 0 1 7 7h2m6 0h2a5 5 0 1 1 0 10h-2m-7-5h8'/%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:pencil */
+  .meowdown-icon-pencil {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497zM15 5l4 4'/%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:sparkles */
+  .meowdown-icon-sparkles {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Cpath d='M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594zM20 2v4m2-2h-4'/%3E%3Ccircle cx='4' cy='20' r='2'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:trash-2 */
+  .meowdown-icon-trash-2 {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M10 11v6m4-6v6m5-11v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2'/%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:unlink */
+  .meowdown-icon-unlink {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m18.84 12.25l1.72-1.71h-.02a5.004 5.004 0 0 0-.12-7.07a5.006 5.006 0 0 0-6.95 0l-1.72 1.71m-6.58 6.57l-1.71 1.71a5.004 5.004 0 0 0 .12 7.07a5.006 5.006 0 0 0 6.95 0l1.71-1.71M8 2v3M2 8h3m11 11v3m3-6h3'/%3E%3C/svg%3E");
+  }
 
   /* ---------------------------------------------------------------------------
    * Menus

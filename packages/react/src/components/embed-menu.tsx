@@ -8,13 +8,13 @@ import {
 } from '@meowdown/core'
 import { useEditor } from '@prosekit/react'
 import { queueExtension } from '@prosekit/web'
-import { CopyIcon, Link2Icon, Trash2Icon } from 'lucide-react'
 import { use, useCallback, useEffect, useReducer, type ReactElement } from 'react'
 
 import { writeClipboardText } from '../utils/write-clipboard-text.ts'
 
 import { CollisionBoundaryContext } from './collision-boundary.ts'
 import { EMBED_MENU_IDLE, reduceEmbedMenu } from './embed-menu-state.ts'
+import { Icon } from './icon.tsx'
 
 export interface EmbedMenuProps {
   readOnly?: boolean
@@ -96,7 +96,7 @@ export function EmbedMenu({ readOnly = false }: EmbedMenuProps): ReactElement {
                 onClick={convertToLink}
                 data-testid="embed-menu-convert"
               >
-                <Link2Icon />
+                <Icon name="link-2" />
                 <span>Convert to link</span>
               </Menu.Item>
             )}
@@ -105,7 +105,7 @@ export function EmbedMenu({ readOnly = false }: EmbedMenuProps): ReactElement {
               onClick={copyLink}
               data-testid="embed-menu-copy"
             >
-              <CopyIcon />
+              <Icon name="copy" />
               <span>{embed?.kind === 'image' ? 'Copy image link' : 'Copy link'}</span>
             </Menu.Item>
             {!readOnly && (
@@ -114,7 +114,7 @@ export function EmbedMenu({ readOnly = false }: EmbedMenuProps): ReactElement {
                 onClick={remove}
                 data-testid="embed-menu-delete"
               >
-                <Trash2Icon />
+                <Icon name="trash-2" />
                 <span>Delete</span>
               </Menu.Item>
             )}

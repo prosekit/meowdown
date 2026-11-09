@@ -1,7 +1,8 @@
-import { CheckIcon, CopyIcon } from 'lucide-react'
 import { useRef, useState, type ReactElement } from 'react'
 
 import { writeClipboardText } from '../utils/write-clipboard-text.ts'
+
+import { Icon } from './icon.tsx'
 
 const COPIED_RESET_MS = 1500
 
@@ -55,7 +56,7 @@ export function CopyButton({
       onClick={copy}
       {...rest}
     >
-      {copied ? <CheckIcon /> : <CopyIcon />}
+      {copied ? <Icon name="check" /> : <Icon name="copy" />}
     </button>
   )
 }
