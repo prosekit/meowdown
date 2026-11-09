@@ -45,9 +45,10 @@ interface EmbedHit extends EmbedTarget {
 function getEmbedAt(state: EditorState, pos: number): EmbedHit | undefined {
   const range = getMarkRangeAt(state, pos, 'mdImage')
   if (!range) return
-  const { src, alt, syntax } = range.mark.attrs as MdImageAttrs
+  const { from, to, mark } = range
+  const { src, alt, syntax } = mark.attrs as MdImageAttrs
   const kind = matchEmbed(src) ?? 'image'
-  return { kind, src, alt, syntax, from: range.from, to: range.to }
+  return { kind, src, alt, syntax, from: from, to: to }
 }
 
 /**
