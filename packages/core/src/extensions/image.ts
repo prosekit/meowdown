@@ -51,6 +51,8 @@ function createEmbedMenuButton(): HTMLButtonElement {
   button.setAttribute('aria-haspopup', 'menu')
   button.title = `More (${isApple ? '⌘/' : 'Ctrl+/'})`
   button.dataset.testid = 'embed-menu'
+
+  // FIXME: I do not like how you create this icon by hand
   const svg = document.createElementNS(SVG_NS, 'svg')
   svg.setAttribute('viewBox', '0 0 24 24')
   svg.setAttribute('aria-hidden', 'true')
