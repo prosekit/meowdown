@@ -1,4 +1,4 @@
-import { sleep } from '@ocavue/utils'
+import { sleep, noop } from '@ocavue/utils'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
@@ -51,7 +51,7 @@ describe('useMaybePromise', () => {
   })
 
   it('stays undefined and warns when the Promise rejects', async () => {
-    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(noop)
     try {
       const { promise, reject } = deferred<string>()
       const error = new Error('nope')

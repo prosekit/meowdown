@@ -1,5 +1,6 @@
 import type { XPostMediaClickEvent } from '@meowdown/embed/x'
 import type { YouTubeVideoClickEvent } from '@meowdown/embed/youtube'
+import { noop } from '@ocavue/utils'
 import type { XPost } from '@post-embed/types'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
@@ -206,7 +207,7 @@ describe('X post embed', () => {
   })
 
   it('shows the unavailable card without a snapshot', async () => {
-    using fixture = setup(TWEET, { resolveXPost: () => undefined })
+    using fixture = setup(TWEET, { resolveXPost: noop })
     void fixture
     await expect.element(xPostCard.locate('[data-fallback]')).toBeInTheDocument()
     expect(xPostCard.locate('[data-pending]').query()).toBeNull()
@@ -295,7 +296,7 @@ describe('host data and snapshot persistence', () => {
   })
 
   it('writes nothing when the resolver has no snapshot', async () => {
-    using fixture = setup(TWEET, { resolveXPost: () => undefined })
+    using fixture = setup(TWEET, { resolveXPost: noop })
     const { editor } = fixture
     await expect.element(xPostCard.locate('[data-fallback]')).toBeInTheDocument()
     expect(docToMarkdown(editor.state.doc).trim()).toBe(TWEET)
@@ -323,7 +324,7 @@ describe('YouTube video resize', () => {
 
   // No snapshot from the resolver, so the width is the only thing written.
   it('writes a width comment when resized', async () => {
-    using fixture = setup(VIDEO, { resolveYouTubeVideo: () => undefined })
+    using fixture = setup(VIDEO, { resolveYouTubeVideo: noop })
     const { editor } = fixture
     await expect.element(videoResizable).toBeInTheDocument()
     endResize(200)
@@ -345,7 +346,7 @@ describe('YouTube video resize', () => {
 
   it('drops a stale height when resized again', async () => {
     using fixture = setup(`${VIDEO}<!-- {"width":100,"height":75} -->`, {
-      resolveYouTubeVideo: () => undefined,
+      resolveYouTubeVideo: noop,
     })
     const { editor } = fixture
     await expect.element(videoResizable).toHaveAttribute('data-width', '100')

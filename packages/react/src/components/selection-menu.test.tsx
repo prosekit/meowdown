@@ -1,6 +1,6 @@
 import '../testing/index.ts'
 
-import { sleep } from '@ocavue/utils'
+import { sleep, noop } from '@ocavue/utils'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -17,9 +17,9 @@ const menu = page.getByTestId('selection-menu')
 const affordance = page.getByTestId('selection-menu-affordance')
 
 const ITEMS: SelectionMenuItem[] = [
-  { id: 'fix', label: 'Fix grammar', onSelect: () => {} },
-  { id: 'summarize', label: 'Summarize', detail: 'Short summary', onSelect: () => {} },
-  { id: 'rephrase', label: 'Rephrase', onSelect: () => {} },
+  { id: 'fix', label: 'Fix grammar', onSelect: noop },
+  { id: 'summarize', label: 'Summarize', detail: 'Short summary', onSelect: noop },
+  { id: 'rephrase', label: 'Rephrase', onSelect: noop },
 ]
 
 function searchItems(query: string): SelectionMenuItem[] {

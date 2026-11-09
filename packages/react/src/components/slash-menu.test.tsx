@@ -1,6 +1,7 @@
 import '../testing/index.ts'
 
 import { isNodeOfType } from '@meowdown/core'
+import { noop } from '@ocavue/utils'
 import type { EditorNode } from '@prosekit/pm/model'
 import { TextSelection } from '@prosekit/pm/state'
 import { createRef } from 'react'
@@ -250,7 +251,7 @@ describe('SlashMenu', () => {
     await render(<ProseKitEditor ref={ref} onFilePaste={onFilePaste} />)
 
     const input = page.getByTestId('slash-menu-file-input').element() as HTMLInputElement
-    const inputClick = vi.spyOn(input, 'click').mockImplementation(() => {})
+    const inputClick = vi.spyOn(input, 'click').mockImplementation(noop)
     await pmRoot.click()
     await userEvent.keyboard('Hello /attach')
     await menu.getByText('Attach file', { exact: true }).click()
@@ -271,8 +272,8 @@ describe('SlashMenu', () => {
 
   it('shows host items after the built-in ones', async () => {
     const onSlashMenuSearch = (): SlashMenuItem[] => [
-      { label: 'Meeting note', detail: 'Template', onSelect: () => {} },
-      { label: 'Daily log', onSelect: () => {} },
+      { label: 'Meeting note', detail: 'Template', onSelect: noop },
+      { label: 'Daily log', onSelect: noop },
     ]
     await render(<ProseKitEditor onSlashMenuSearch={onSlashMenuSearch} />)
     await pmRoot.click()
@@ -289,7 +290,7 @@ describe('SlashMenu', () => {
   it('supports an async host search handler', async () => {
     const onSlashMenuSearch = async (): Promise<SlashMenuItem[]> => {
       await Promise.resolve()
-      return [{ label: 'Async item', onSelect: () => {} }]
+      return [{ label: 'Async item', onSelect: noop }]
     }
     await render(<ProseKitEditor onSlashMenuSearch={onSlashMenuSearch} />)
     await pmRoot.click()
@@ -300,8 +301,8 @@ describe('SlashMenu', () => {
 
   it('filters host items by the query like the built-in items', async () => {
     const onSlashMenuSearch = (): SlashMenuItem[] => [
-      { label: 'Meeting note', onSelect: () => {} },
-      { label: 'Daily log', onSelect: () => {} },
+      { label: 'Meeting note', onSelect: noop },
+      { label: 'Daily log', onSelect: noop },
     ]
     await render(<ProseKitEditor onSlashMenuSearch={onSlashMenuSearch} />)
     await pmRoot.click()
@@ -314,9 +315,9 @@ describe('SlashMenu', () => {
 
   it('matches host-item keywords, never displaying them', async () => {
     const onSlashMenuSearch = (): SlashMenuItem[] => [
-      { label: 'Meeting note', keywords: ['template'], onSelect: () => {} },
-      { label: 'Daily log', keywords: ['template'], onSelect: () => {} },
-      { label: 'Untagged', onSelect: () => {} },
+      { label: 'Meeting note', keywords: ['template'], onSelect: noop },
+      { label: 'Daily log', keywords: ['template'], onSelect: noop },
+      { label: 'Untagged', onSelect: noop },
     ]
     await render(<ProseKitEditor onSlashMenuSearch={onSlashMenuSearch} />)
     await pmRoot.click()

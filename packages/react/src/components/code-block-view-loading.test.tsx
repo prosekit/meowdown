@@ -5,8 +5,10 @@ import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 
 vi.mock('../hooks/use-pele.ts', () => ({
-  usePele: () => undefined,
+  usePele: noop,
 }))
+
+import { noop } from '@ocavue/utils'
 
 import { ProseKitEditor } from './prosekit-editor.tsx'
 

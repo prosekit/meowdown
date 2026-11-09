@@ -1,3 +1,4 @@
+import { returnTrue } from '@ocavue/utils'
 import { describe, expect, it } from 'vitest'
 
 import { resolveWikilinkAlias, setupFixture } from '../testing/index.ts'
@@ -27,7 +28,7 @@ describe('getTextblockDisplayText', () => {
   })
 
   it('replaces a file pill with its name', () => {
-    using fixture = setupFixture({ extensionOptions: { resolveFileLink: () => true } })
+    using fixture = setupFixture({ extensionOptions: { resolveFileLink: returnTrue } })
     const { n } = fixture
     fixture.set(n.doc(n.heading({ level: 1 }, 'read [report.pdf](files/report.pdf)')))
     expect(getTextblockDisplayText(fixture.doc.child(0))).toBe('read report.pdf')

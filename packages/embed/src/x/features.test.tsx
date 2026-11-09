@@ -1,5 +1,6 @@
 import './theme.css'
 
+import { noop } from '@ocavue/utils'
 import type { XPost } from '@post-embed/types'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { page, server, userEvent } from 'vitest/browser'
@@ -127,7 +128,7 @@ describe('Full post snapshots', () => {
   })
 
   it('rejects unsafe media URLs and survives missing media and invalid dates', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const warn = vi.spyOn(console, 'warn').mockImplementation(noop)
     const snapshot = createPost()
     snapshot.createdAt = 'bad-date'
     snapshot.media = [

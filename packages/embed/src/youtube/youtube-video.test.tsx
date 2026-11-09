@@ -1,5 +1,6 @@
 import './theme.css'
 
+import { noop } from '@ocavue/utils'
 import type { YouTubeVideo } from '@post-embed/types'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
@@ -155,7 +156,7 @@ describe('YouTube video', () => {
   })
 
   it('falls back for unsupported URLs, missing data, and invalid data', async () => {
-    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const error = vi.spyOn(console, 'error').mockImplementation(noop)
     const element = mount(createVideo('https://example.com/video'))
     await expect.element(video.getByText('This video is unavailable.')).toBeVisible()
     expect(element.querySelector('[data-fallback]')).not.toBeNull()

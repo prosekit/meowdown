@@ -1,3 +1,4 @@
+import { returnTrue, returnFalse } from '@ocavue/utils'
 import { createEditor, definePlugin } from '@prosekit/core'
 import { Plugin } from '@prosekit/pm/state'
 import { describe, expect, it, vi } from 'vitest'
@@ -13,7 +14,7 @@ import type { FileInfo } from './file-view.ts'
 import { getMarkMode } from './mark-mode-config.ts'
 
 const pmRoot = page.locate('.ProseMirror')
-const claimFiles = () => true
+const claimFiles = returnTrue
 
 describe('editor configuration', () => {
   it('does no work for empty or equal patches', () => {
@@ -172,7 +173,7 @@ describe('editor configuration', () => {
   it('stores configuration independently of transaction filtering', () => {
     using fixture = setupFixture()
     const { editor } = fixture
-    editor.use(definePlugin(new Plugin({ filterTransaction: () => false })))
+    editor.use(definePlugin(new Plugin({ filterTransaction: returnFalse })))
     const state = editor.state
     updateEditorConfig(editor, { markMode: 'hide', onFileClick: vi.fn() })
     expect(editor.state).toBe(state)

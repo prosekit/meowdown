@@ -1,3 +1,4 @@
+import { noop } from '@ocavue/utils'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
@@ -93,14 +94,14 @@ describe('file pill size', () => {
   })
 
   it('leaves the size empty when the resolver returns undefined', async () => {
-    using fixture = setup('[report.pdf](assets/report.pdf)', () => undefined)
+    using fixture = setup('[report.pdf](assets/report.pdf)', noop)
     void fixture
     await expect.element(pill).toBeInTheDocument()
     expect(pillSize.element().textContent).toBe('')
   })
 
   it('leaves the size empty and logs when the resolver rejects', async () => {
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(noop)
     try {
       using fixture = setup('[report.pdf](assets/report.pdf)', () => {
         return Promise.reject(new Error('boom'))
