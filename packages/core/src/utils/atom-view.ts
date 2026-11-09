@@ -6,7 +6,7 @@ import type { EditorView } from '@prosekit/pm/view'
  * `insidePos`, a position inside the unit rather than on its edges.
  */
 export function getAtomViewAt(view: EditorView, insidePos: number): Element | undefined | null {
-  const { node } = view.domAtPos(insidePos, 0)
+  const { node } = view.domAtPos(insidePos, 0) // FIXME: 1. rename getAtomViewAt to findAtomViewAt
   const element = isElementLike(node) ? node : node.parentElement
   return element?.closest('.md-atom-view')
 }
