@@ -1,5 +1,11 @@
 # @meowdown/embed
 
+## 0.3.3
+
+### Patch Changes
+
+- [#771](https://github.com/prosekit/meowdown/pull/771) [`238c594`](https://github.com/prosekit/meowdown/commit/238c594c5f3c0ac26bbc2c788f038452ee0a3000) Thanks [@ocavue](https://github.com/ocavue)! - Change the default YouTube embed border radius from `1rem` to `0.75rem`, to match the X post card.
+
 ## 0.3.2
 
 ### Patch Changes
