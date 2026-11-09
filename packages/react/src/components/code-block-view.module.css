@@ -231,7 +231,7 @@
   padding: 0.25rem;
 }
 
-/*FIXME: merge reusable CSS for menu trigger / icons etc into prosekit/core */
+/*FIXME: merge reusable CSS for menu trigger / icons etc into meowdown/core */
 .Item {
   display: grid;
   grid-template-columns: 1rem 1fr;
@@ -250,7 +250,7 @@
   }
 }
 
-/*FIXME: merge reusable CSS for menu trigger / icons etc into prosekit/core */
+/*FIXME: merge reusable CSS for menu trigger / icons etc into meowdown/core */
 .ItemIndicator {
   display: flex;
   grid-column: 1;

@@ -37,7 +37,7 @@
   }
 }
 
-/*FIXME: merge reusable CSS for menu trigger / icons etc into prosekit/core */
+/*FIXME: merge reusable CSS for menu trigger / icons etc into meowdown/core */
 .Item {
   display: flex;
   align-items: center;
