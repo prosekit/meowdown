@@ -3,10 +3,14 @@ import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
+import {
+  EMBED_MENU_BUTTON_CLASS,
+  IMAGE_RESIZE_HANDLE_CLASS,
+  IMAGE_VIEW_PREVIEW_CLASS,
+} from '../class-names.ts'
 import { getAtomViewSourcePos } from '../utils/atom-view.ts'
 import { isModEvent } from '../utils/is-mod-event.ts'
 
-import { EMBED_MENU_BUTTON_CLASS } from './image.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 
@@ -53,7 +57,7 @@ export type EmbedHit = ImageHit
 function getClosestImagePreview(target: EventTarget | null): HTMLElement | undefined {
   if (!(target instanceof HTMLElement)) return
   if (target.closest(`.${EMBED_MENU_BUTTON_CLASS}`)) return
-  const preview = target.closest<HTMLElement>('.md-image-view-preview')
+  const preview = target.closest<HTMLElement>(`.${IMAGE_VIEW_PREVIEW_CLASS}`)
   if (!preview || preview.dataset.postEmbed != null) return
   return preview
 }
@@ -202,7 +206,7 @@ export function defineImageClickHandler(
             // A touch on the resize handle starts a resize, never a tap.
             if (
               event.target instanceof HTMLElement &&
-              event.target.closest('.md-image-resize-handle')
+              event.target.closest(`.${IMAGE_RESIZE_HANDLE_CLASS}`)
             ) {
               return false
             }

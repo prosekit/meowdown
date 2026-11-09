@@ -3,10 +3,10 @@ import { defineDOMEventHandler, defineKeymap, union, type PlainExtension } from 
 import { TextSelection, type Command, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
-import { getAtomViewAt } from '../utils/atom-view.ts'
+import { EMBED_MENU_BUTTON_CLASS } from '../class-names.ts'
+import { findAtomViewAt } from '../utils/atom-view.ts'
 
 import { findImageAt, findImageForElement, type EmbedHit } from './image-click.ts'
-import { EMBED_MENU_BUTTON_CLASS } from './image.ts'
 import { stripMagicComment } from './magic-comment.ts'
 
 /**
@@ -66,7 +66,7 @@ function replaceEmbed(state: EditorState, embed: EmbedHit, text: string) {
  * The menu button of the card at `pos`, if the card is rendered.
  */
 function getEmbedMenuButton(view: EditorView, pos: number): HTMLElement | undefined | null {
-  return getAtomViewAt(view, pos + 1)?.querySelector<HTMLElement>(`.${EMBED_MENU_BUTTON_CLASS}`)
+  return findAtomViewAt(view, pos + 1)?.querySelector<HTMLElement>(`.${EMBED_MENU_BUTTON_CLASS}`)
 }
 
 function getButtonTarget(target: EventTarget | null): HTMLElement | undefined | null {

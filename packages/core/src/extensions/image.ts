@@ -12,6 +12,19 @@ import {
   type ResizeEndEvent,
 } from '@prosekit/web/resizable'
 
+import {
+  ATOM_VIEW_CLASS,
+  ATOM_VIEW_CONTENT_CLASS,
+  ATOM_VIEW_PREVIEW_CLASS,
+  EMBED_MENU_BUTTON_CLASS,
+  getIconClass,
+  ICON_BUTTON_CLASS,
+  ICON_CLASS,
+  IMAGE_RESIZE_HANDLE_CLASS,
+  IMAGE_VIEW_CLASS,
+  IMAGE_VIEW_CONTENT_CLASS,
+  IMAGE_VIEW_PREVIEW_CLASS,
+} from '../class-names.ts'
 import { guardMarkView } from '../utils/guard-mark-view.ts'
 import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
 
@@ -35,19 +48,13 @@ import {
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
 
 /**
- * The class of the menu button that an image, X post, or YouTube card shows
- * in the editor. FIXME: delete EMBED_MENU_BUTTON_CLASS here
- */
-export const EMBED_MENU_BUTTON_CLASS = 'md-embed-menu-button'
-
-/**
  * The menu button of an image or card, handled by `defineEmbedMenuHandler`.
  * It stays out of the tab order: `Mod-/` opens the menu from the keyboard.
  */
 function createEmbedMenuButton(): HTMLButtonElement {
   const button = document.createElement('button')
   button.type = 'button'
-  button.className = `${EMBED_MENU_BUTTON_CLASS} meowdown-icon-button` // FIXME: add "meowdown-icon-button" to class-names.ts
+  button.className = `${EMBED_MENU_BUTTON_CLASS} ${ICON_BUTTON_CLASS}`
   button.tabIndex = -1
   button.setAttribute('aria-label', 'More')
   button.setAttribute('aria-haspopup', 'menu')
@@ -55,7 +62,7 @@ function createEmbedMenuButton(): HTMLButtonElement {
   button.dataset.testid = 'embed-menu'
 
   const icon = document.createElement('span')
-  icon.className = 'meowdown-icon meowdown-icon-ellipsis' // FIXME: add "meowdown-icon" and "meowdown-icon-ellipsis" to class-names.ts
+  icon.className = `${ICON_CLASS} ${getIconClass('ellipsis')}`
   icon.setAttribute('aria-hidden', 'true')
   button.appendChild(icon)
   return button
@@ -282,10 +289,10 @@ class ImageMarkView implements MarkView {
     this.#resolveYouTubeVideo = options.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
 
     this.#dom = document.createElement('span')
-    this.#dom.className = 'md-image-view md-atom-view' // FIXME
+    this.#dom.className = `${IMAGE_VIEW_CLASS} ${ATOM_VIEW_CLASS}`
 
     this.#contentDOM = document.createElement('span')
-    this.#contentDOM.className = 'md-image-view-content md-atom-view-content' // FIXME
+    this.#contentDOM.className = `${IMAGE_VIEW_CONTENT_CLASS} ${ATOM_VIEW_CONTENT_CLASS}`
     this.#contentDOM.dataset.testid = 'image-source'
     for (const [name, value] of Object.entries(NON_PROSE_ATTRS)) {
       this.#contentDOM.setAttribute(name, value)
@@ -395,7 +402,7 @@ class ImageMarkView implements MarkView {
 
   #createWrapper(): HTMLElement {
     const wrapper = document.createElement('span')
-    wrapper.className = 'md-image-view-preview md-atom-view-preview' // FIXME
+    wrapper.className = `${IMAGE_VIEW_PREVIEW_CLASS} ${ATOM_VIEW_PREVIEW_CLASS}`
     return wrapper
   }
 
@@ -480,7 +487,7 @@ class ImageMarkView implements MarkView {
     root.appendChild(element)
 
     const handle = document.createElement('prosekit-resizable-handle')
-    handle.className = 'md-image-resize-handle'
+    handle.className = IMAGE_RESIZE_HANDLE_CLASS
     handle.setAttribute('position', 'bottom-right')
     // A click (no drag) on the handle must not bubble to the image-click handler.
     handle.addEventListener('click', (event) => event.stopPropagation())
@@ -518,7 +525,7 @@ class ImageMarkView implements MarkView {
     applySize(root, this.#attrs.width, this.#attrs.height)
 
     const handle = document.createElement('prosekit-resizable-handle')
-    handle.className = 'md-image-resize-handle' // FIXME
+    handle.className = IMAGE_RESIZE_HANDLE_CLASS
     handle.setAttribute('position', 'bottom-right')
     // A click (no drag) on the handle must not bubble to the image-click handler.
     handle.addEventListener('click', (event) => event.stopPropagation())

@@ -24,6 +24,13 @@ import {
   type ReactElement,
 } from 'react'
 
+import {
+  ICON_BUTTON_CLASS,
+  MENU_ITEM_CLASS,
+  MENU_ITEM_INDICATOR_CLASS,
+  MENU_POPUP_CLASS,
+  MENU_POSITIONER_CLASS,
+} from '../class-names.ts'
 import { deleteBlock, setCaretCodeBlockMenu } from '../extensions/block-menu.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
 import { usePele } from '../hooks/use-pele.ts'
@@ -227,7 +234,7 @@ function CodeBlockToolbar({
       <CopyButton
         getText={() => code}
         label="Copy code"
-        className="meowdown-icon-button"
+        className={ICON_BUTTON_CLASS}
         data-testid="code-block-copy"
       />
       <CodeBlockMenu
@@ -271,7 +278,7 @@ function CodeBlockMenu({
   return (
     <Menu.Root open={open} onOpenChange={onOpenChange} onOpenChangeComplete={onOpenChangeComplete}>
       <Menu.Trigger
-        className="meowdown-icon-button" // FIXME
+        className={ICON_BUTTON_CLASS}
         aria-label="More"
         title={`More (${MENU_SHORTCUT})`}
         data-testid="code-block-menu"
@@ -395,15 +402,12 @@ function CodeBlockLanguagePicker({
       </Combobox.Trigger>
       <Combobox.Portal>
         <Combobox.Positioner
-          className="meowdown-menu-positioner"
+          className={MENU_POSITIONER_CLASS}
           sideOffset={4}
           collisionBoundary={collisionBoundary}
         >
           <Combobox.Popup
-            className={clsx(
-              'meowdown-menu-popup', // FIXME: use "meowdown-menu-popup" from 'class-names.ts'
-              styles.Popup,
-            )}
+            className={clsx(MENU_POPUP_CLASS, styles.Popup)}
             finalFocus={getFinalFocus}
           >
             <div className={styles.SearchRow}>
@@ -419,10 +423,10 @@ function CodeBlockLanguagePicker({
                 <Combobox.Item
                   key={item.label}
                   value={item}
-                  className={clsx('meowdown-menu-item', styles.Item)}
+                  className={clsx(MENU_ITEM_CLASS, styles.Item)}
                 >
                   <Combobox.ItemIndicator
-                    className={clsx('meowdown-menu-item-indicator', styles.ItemIndicator)}
+                    className={clsx(MENU_ITEM_INDICATOR_CLASS, styles.ItemIndicator)}
                   >
                     <Icon name="check" />
                   </Combobox.ItemIndicator>

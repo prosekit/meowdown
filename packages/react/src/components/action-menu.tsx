@@ -1,8 +1,15 @@
 import { Menu } from '@base-ui/react/menu'
 import { use, type ReactElement, type ReactNode } from 'react'
 
+import {
+  MENU_ITEM_CLASS,
+  MENU_POPUP_CLASS,
+  MENU_POSITIONER_CLASS,
+  type IconName,
+} from '../class-names.ts'
+
 import { CollisionBoundaryContext } from './collision-boundary.ts'
-import { Icon, type IconName } from './icon.tsx'
+import { Icon } from './icon.tsx'
 
 export interface ActionMenuPopupProps {
   /**
@@ -30,12 +37,12 @@ export function ActionMenuPopup({
     <Menu.Portal>
       <Menu.Positioner
         anchor={anchor}
-        className="meowdown-menu-positioner"
+        className={MENU_POSITIONER_CLASS}
         sideOffset={4}
         align="start"
         collisionBoundary={collisionBoundary}
       >
-        <Menu.Popup className="meowdown-menu-popup" finalFocus={finalFocus} data-testid={testId}>
+        <Menu.Popup className={MENU_POPUP_CLASS} finalFocus={finalFocus} data-testid={testId}>
           {children}
         </Menu.Popup>
       </Menu.Positioner>
@@ -60,7 +67,7 @@ export function ActionMenuItem({
   testId,
 }: ActionMenuItemProps): ReactElement {
   return (
-    <Menu.Item className="meowdown-menu-item" onClick={onClick} data-testid={testId}>
+    <Menu.Item className={MENU_ITEM_CLASS} onClick={onClick} data-testid={testId}>
       <Icon name={icon} />
       <span>{label}</span>
     </Menu.Item>
