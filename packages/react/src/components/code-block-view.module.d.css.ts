@@ -16,8 +16,6 @@ declare const styles = {
   'Toolbar': '' as string,
   'Trigger': '' as string,
   'TriggerIcon': '' as string,
-  'IconButton': '' as string,
-  'Positioner': '' as string,
   'Popup': '' as string,
   'SearchRow': '' as string,
   'Search': '' as string,

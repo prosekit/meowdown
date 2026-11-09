@@ -7,11 +7,13 @@ import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
 import { hover } from '../testing/mouse.ts'
+import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
 
 import { ProseKitEditor } from './prosekit-editor.tsx'
 import type { EditorHandle } from './types.ts'
 
 const TWEET = 'https://x.com/jack/status/20'
+const VIDEO = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
 
 const card = page.getByTestId('x-post-embed')
 const menuButton = page.getByTestId('embed-menu')
@@ -125,5 +127,33 @@ describe('embed menu', () => {
 
     await openFromButton()
     await expect.element(convertItem).not.toBeInTheDocument()
+  })
+  it('stays anchored to the card while a YouTube card saves its snapshot', async () => {
+    const video = Promise.withResolvers<ReturnType<typeof createYouTubeVideo>>()
+    const ref = createRef<EditorHandle>()
+    await render(
+      <ProseKitEditor
+        ref={ref}
+        initialMarkdown={`![](${VIDEO})`}
+        resolveYouTubeVideo={() => video.promise}
+      />,
+    )
+    const youtube = page.getByTestId('youtube-video-embed')
+    await hover(youtube)
+    await menuButton.click()
+    await expect.element(copyItem).toBeVisible()
+    const button = menuButton.element()
+
+    video.resolve(createYouTubeVideo())
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toContain('"snapshot"')
+    })
+
+    expect(button.isConnected).toBe(true)
+    await expect.element(menuButton).toHaveAttribute('aria-expanded', 'true')
+    await convertItem.click()
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toBe(`${VIDEO}\n`)
+    })
   })
 })

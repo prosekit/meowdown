@@ -14,7 +14,6 @@ import { writeClipboardText } from '../utils/write-clipboard-text.ts'
 
 import { CollisionBoundaryContext } from './collision-boundary.ts'
 import { EMBED_MENU_IDLE, reduceEmbedMenu } from './embed-menu-state.ts'
-import styles from './menu.module.css'
 
 export interface EmbedMenuProps {
   readOnly?: boolean
@@ -73,19 +72,19 @@ export function EmbedMenu({ readOnly = false }: EmbedMenuProps): ReactElement {
       <Menu.Portal>
         <Menu.Positioner
           anchor={button}
-          className={styles.Positioner}
+          className="meowdown-menu-positioner"
           sideOffset={4}
           align="start"
           collisionBoundary={collisionBoundary}
         >
           <Menu.Popup
-            className={styles.Popup}
+            className="meowdown-menu-popup"
             finalFocus={getFinalFocus}
             data-testid="embed-menu-popup"
           >
             {!readOnly && (
               <Menu.Item
-                className={styles.Item}
+                className="meowdown-menu-item"
                 onClick={convertToLink}
                 data-testid="embed-menu-convert"
               >
@@ -93,7 +92,11 @@ export function EmbedMenu({ readOnly = false }: EmbedMenuProps): ReactElement {
                 <span>Convert to link</span>
               </Menu.Item>
             )}
-            <Menu.Item className={styles.Item} onClick={copyLink} data-testid="embed-menu-copy">
+            <Menu.Item
+              className="meowdown-menu-item"
+              onClick={copyLink}
+              data-testid="embed-menu-copy"
+            >
               <CopyIcon />
               <span>Copy link</span>
             </Menu.Item>

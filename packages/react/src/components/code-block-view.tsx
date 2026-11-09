@@ -41,7 +41,6 @@ import styles from './code-block-view.module.css'
 import { CollisionBoundaryContext } from './collision-boundary.ts'
 import { CopyButton } from './copy-button.tsx'
 import { MathRender } from './math-render.tsx'
-import menuStyles from './menu.module.css'
 import { MermaidRender } from './mermaid-render.tsx'
 
 export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
@@ -214,7 +213,7 @@ function CodeBlockToolbar({
       <CopyButton
         getText={() => code}
         label="Copy code"
-        className={styles.IconButton}
+        className="meowdown-icon-button"
         data-testid="code-block-copy"
       />
       <CodeBlockMenu
@@ -249,7 +248,7 @@ function CodeBlockMenu({
   return (
     <Menu.Root open={open} onOpenChange={onOpenChange} onOpenChangeComplete={onOpenChangeComplete}>
       <Menu.Trigger
-        className={styles.IconButton}
+        className="meowdown-icon-button"
         aria-label="More"
         title={`More (${MENU_SHORTCUT})`}
         data-testid="code-block-menu"
@@ -281,14 +280,14 @@ function CodeBlockMenuPopup({
   return (
     <Menu.Portal>
       <Menu.Positioner
-        className={menuStyles.Positioner}
+        className="meowdown-menu-positioner"
         sideOffset={4}
         align="start"
         collisionBoundary={collisionBoundary}
       >
-        <Menu.Popup className={menuStyles.Popup} finalFocus={getFinalFocus}>
+        <Menu.Popup className="meowdown-menu-popup" finalFocus={getFinalFocus}>
           <Menu.Item
-            className={menuStyles.Item}
+            className="meowdown-menu-item"
             onClick={onChangeLanguage}
             data-testid="code-block-menu-language"
           >
@@ -296,7 +295,7 @@ function CodeBlockMenuPopup({
             <span>Change language</span>
           </Menu.Item>
           <Menu.Item
-            className={menuStyles.Item}
+            className="meowdown-menu-item"
             onClick={onCopyCode}
             data-testid="code-block-menu-copy"
           >
@@ -374,11 +373,14 @@ function CodeBlockLanguagePicker({
       </Combobox.Trigger>
       <Combobox.Portal>
         <Combobox.Positioner
-          className={styles.Positioner}
+          className="meowdown-menu-positioner"
           sideOffset={4}
           collisionBoundary={collisionBoundary}
         >
-          <Combobox.Popup className={styles.Popup} finalFocus={getFinalFocus}>
+          <Combobox.Popup
+            className={clsx('meowdown-menu-popup', styles.Popup)}
+            finalFocus={getFinalFocus}
+          >
             <div className={styles.SearchRow}>
               <Combobox.Input
                 className={styles.Search}
@@ -389,8 +391,14 @@ function CodeBlockLanguagePicker({
             <Combobox.Empty className={styles.Empty}>No languages found.</Combobox.Empty>
             <Combobox.List className={styles.List}>
               {(item: LanguageItem) => (
-                <Combobox.Item key={item.label} value={item} className={styles.Item}>
-                  <Combobox.ItemIndicator className={styles.ItemIndicator}>
+                <Combobox.Item
+                  key={item.label}
+                  value={item}
+                  className={clsx('meowdown-menu-item', styles.Item)}
+                >
+                  <Combobox.ItemIndicator
+                    className={clsx('meowdown-menu-item-indicator', styles.ItemIndicator)}
+                  >
                     <CheckIcon />
                   </Combobox.ItemIndicator>
                   <span className={styles.ItemText}>{item.label}</span>

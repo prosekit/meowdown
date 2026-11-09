@@ -220,29 +220,144 @@
   }
 
   /* ---------------------------------------------------------------------------
-     * Icons
-     *
-     * CSS based on the following link(s):
-     * https://api.iconify.design/lucide.css?var=_svg&commonSelector=.meowdown-icon&selector=.meowdown-icon-{name}&icons=ellipsis,braces
-     * ------------------------------------------------------------------------- */
+   * Icons
+   *
+   * `<span class="meowdown-icon meowdown-icon-{name}">` draws a Lucide icon in
+   * `currentColor`, sized like the `<svg>` icons next to it. The icon data
+   * comes from:
+   * https://api.iconify.design/lucide.css?var=_svg&commonSelector=.meowdown-icon&selector=.meowdown-icon-{name}&icons=ellipsis,braces
+   * ------------------------------------------------------------------------- */
   .meowdown-icon {
-    /*FIXME: update meowdown-icon so that it matches all styles */
-    display: inline-block;
+    display: block;
+    flex-shrink: 0;
     width: 1em;
     height: 1em;
     background-color: currentColor;
-    -webkit-mask-image: var(--_svg);
-    mask-image: var(--_svg);
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-size: 100% 100%;
-    mask-size: 100% 100%;
+    -webkit-mask: var(--_svg) no-repeat center / 100% 100%;
+    mask: var(--_svg) no-repeat center / 100% 100%;
   }
+
   .meowdown-icon-ellipsis {
     --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='1'/%3E%3Ccircle cx='19' cy='12' r='1'/%3E%3Ccircle cx='5' cy='12' r='1'/%3E%3C/g%3E%3C/svg%3E");
   }
   .meowdown-icon-braces {
     --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2a2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1m8 0h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1'/%3E%3C/svg%3E");
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Menus
+   *
+   * Shared by the floating menus and their trigger buttons, inside the editor
+   * (the embed card's menu button) and in `@meowdown/react` (the code block
+   * toolbar and menus, the embed menu). Menus are portaled out of
+   * `.ProseMirror`, so these classes are not scoped to it.
+   * ------------------------------------------------------------------------- */
+
+  /* A small square button holding one icon. */
+  .meowdown-icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 1.6rem;
+    height: 1.6rem;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--meowdown-border);
+    border-radius: 0.35rem;
+    background: var(--meowdown-popover-bg);
+    color: var(--meowdown-muted);
+    cursor: pointer;
+
+    &:hover,
+    &[data-popup-open],
+    &[aria-expanded='true'] {
+      color: var(--meowdown-heading);
+    }
+
+    &[data-copied] {
+      color: var(--meowdown-accent);
+    }
+
+    svg,
+    .meowdown-icon {
+      display: block;
+      width: 0.85rem;
+      height: 0.85rem;
+    }
+  }
+
+  .meowdown-menu-positioner {
+    z-index: 50;
+    outline: none;
+  }
+
+  .meowdown-menu-popup {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    min-width: 10rem;
+    padding: 0.25rem;
+    border: 1px solid var(--meowdown-border);
+    border-radius: 0.5rem;
+    background: var(--meowdown-popover-bg);
+    box-shadow:
+      0 4px 6px -1px rgb(0 0 0 / 0.1),
+      0 2px 4px -2px rgb(0 0 0 / 0.1);
+    color: var(--meowdown-text);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.8rem;
+    outline: none;
+    transform-origin: var(--transform-origin);
+    transition:
+      opacity 100ms,
+      scale 100ms;
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      opacity: 0;
+      scale: 0.95;
+    }
+  }
+
+  /* A menu row: an optional leading icon, then its label. */
+  .meowdown-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-sizing: border-box;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.35rem;
+    cursor: pointer;
+    outline: none;
+
+    &[data-highlighted] {
+      background: color-mix(in oklab, var(--meowdown-accent) 14%, transparent);
+      color: var(--meowdown-heading);
+    }
+
+    svg,
+    .meowdown-icon {
+      display: block;
+      width: 0.9rem;
+      height: 0.9rem;
+      color: var(--meowdown-muted);
+    }
+  }
+
+  /* The check mark of the chosen row in a pick list. */
+  .meowdown-menu-item-indicator {
+    display: flex;
+    color: var(--meowdown-accent);
+
+    svg,
+    .meowdown-icon {
+      color: inherit;
+    }
   }
 
   /* ---------------------------------------------------------------------------
@@ -1196,32 +1311,9 @@
       right: 0.5rem;
       z-index: 1;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      box-sizing: border-box;
-      width: 1.6rem;
-      height: 1.6rem;
-      margin: 0;
-      padding: 0;
-      border: 1px solid var(--meowdown-border);
-      border-radius: 0.35rem;
-      background: var(--meowdown-popover-bg);
-      color: var(--meowdown-muted);
-      cursor: pointer;
       opacity: 0;
       pointer-events: none;
       transition: opacity 100ms ease-out;
-
-      &:hover,
-      &[aria-expanded='true'] {
-        color: var(--meowdown-heading);
-      }
-
-      svg {
-        display: block;
-        width: 0.85rem;
-        height: 0.85rem;
-      }
     }
 
     &[data-embed-menu] .md-image-view-preview[data-post-embed]:hover .md-embed-menu-button,

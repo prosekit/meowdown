@@ -1,5 +1,5 @@
 import { registerXPost, type Resolver } from '@meowdown/embed/x'
-import { registerYouTubeVideo } from '@meowdown/embed/youtube'
+import { registerYouTubeVideo, type YouTubeVideoElement } from '@meowdown/embed/youtube'
 import { matchEmbed, type EmbedKind } from '@meowdown/markdown'
 import type { XPost, YouTubeVideo } from '@post-embed/types'
 import { defineMarkView, isApple, type PlainExtension } from '@prosekit/core'
@@ -35,8 +35,6 @@ import {
 } from './post-embed.ts'
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
 
-const SVG_NS = 'http://www.w3.org/2000/svg'
-
 /**
  * The card's menu button. It stays hidden until `defineEmbedMenuHandler`
  * marks the editor, and out of the tab order: `Mod-/` opens the menu from the
@@ -45,27 +43,26 @@ const SVG_NS = 'http://www.w3.org/2000/svg'
 function createEmbedMenuButton(): HTMLButtonElement {
   const button = document.createElement('button')
   button.type = 'button'
-  button.className = EMBED_MENU_BUTTON_CLASS
+  button.className = `${EMBED_MENU_BUTTON_CLASS} meowdown-icon-button`
   button.tabIndex = -1
   button.setAttribute('aria-label', 'More')
   button.setAttribute('aria-haspopup', 'menu')
   button.title = `More (${isApple ? '⌘/' : 'Ctrl+/'})`
   button.dataset.testid = 'embed-menu'
 
-  // FIXME: I do not like how you create this icon by hand. Please use meowdown-icon meowdown-icon-ellipsis in style.css instead.
-  const svg = document.createElementNS(SVG_NS, 'svg')
-  svg.setAttribute('viewBox', '0 0 24 24')
-  svg.setAttribute('aria-hidden', 'true')
-  for (const cx of [5, 12, 19]) {
-    const circle = document.createElementNS(SVG_NS, 'circle')
-    circle.setAttribute('cx', String(cx))
-    circle.setAttribute('cy', '12')
-    circle.setAttribute('r', '2')
-    circle.setAttribute('fill', 'currentColor')
-    svg.appendChild(circle)
-  }
-  button.appendChild(svg)
+  const icon = document.createElement('span')
+  icon.className = 'meowdown-icon meowdown-icon-ellipsis'
+  icon.setAttribute('aria-hidden', 'true')
+  button.appendChild(icon)
   return button
+}
+
+/**
+ * The YouTube video saved in a mark's `snapshot` attr, or `null` to fetch it.
+ */
+function getSavedYouTubeVideo(snapshot: object | null): YouTubeVideo | null {
+  const saved = snapshot == null ? undefined : parsePostEmbedSnapshot(snapshot)
+  return saved?.kind === 'youtube-video' ? saved.data : null
 }
 
 /**
@@ -269,6 +266,7 @@ class ImageMarkView implements MarkView {
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
+  #youtube: YouTubeVideoElement | undefined
   #destroyed = false
 
   constructor(mark: Mark, view: EditorView, options: ImageOptions) {
@@ -305,9 +303,14 @@ class ImageMarkView implements MarkView {
     const next = mark.attrs as MdImageAttrs
     const previous = this.#attrs
     // False rebuilds the view from the constructor: a new src can change the
-    // preview shape, and a new snapshot switches the card to its data path.
-    if (next.src !== previous.src || next.snapshot !== previous.snapshot) return false
+    // preview shape.
+    if (next.src !== previous.src) return false
     this.#attrs = next
+    // A new snapshot (usually the card persisting its first fetch) updates the
+    // card in place, so the wrapper and its menu button stay in the document.
+    if (this.#youtube && next.snapshot !== previous.snapshot) {
+      this.#youtube.data = getSavedYouTubeVideo(next.snapshot)
+    }
     if (this.#image && next.alt !== previous.alt) {
       this.#image.alt = next.alt
     }
@@ -415,8 +418,6 @@ class ImageMarkView implements MarkView {
    * Resolve X cards from their URL; YouTube cards may reuse a saved snapshot.
    */
   #buildPostEmbed(kind: EmbedKind, src: string): HTMLElement {
-    const saved =
-      this.#attrs.snapshot == null ? undefined : parsePostEmbedSnapshot(this.#attrs.snapshot)
     if (kind === 'x-post') {
       registerXPost()
       const element = document.createElement('meowdown-embed-x')
@@ -428,9 +429,10 @@ class ImageMarkView implements MarkView {
     registerYouTubeVideo()
     const element = document.createElement('meowdown-embed-youtube')
     element.playback = 'inline'
-    element.data = saved?.kind === 'youtube-video' ? saved.data : null
+    element.data = getSavedYouTubeVideo(this.#attrs.snapshot)
     element.resolver = this.#persisting(kind, this.#resolveYouTubeVideo)
     element.url = src
+    this.#youtube = element
     return this.#buildResizableVideo(element)
   }
 
