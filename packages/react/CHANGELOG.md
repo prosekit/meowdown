@@ -1,5 +1,18 @@
 # @meowdown/react
 
+## 0.85.0
+
+### Minor Changes
+
+- [#771](https://github.com/prosekit/meowdown/pull/771) [`238c594`](https://github.com/prosekit/meowdown/commit/238c594c5f3c0ac26bbc2c788f038452ee0a3000) Thanks [@ocavue](https://github.com/ocavue)! - Add a menu to images, X post cards, and YouTube cards. Click the menu button, or press `Mod-/` with one selected. X post and YouTube cards offer "Convert to link", images offer "Copy image link", cards offer "Copy link", and all of them offer "Delete". The code block menu also gets "Delete".
+
+### Patch Changes
+
+- [#771](https://github.com/prosekit/meowdown/pull/771) [`238c594`](https://github.com/prosekit/meowdown/commit/238c594c5f3c0ac26bbc2c788f038452ee0a3000) Thanks [@ocavue](https://github.com/ocavue)! - Ship the editor's Lucide icons as `.meowdown-icon .meowdown-icon-{name}` classes in `@meowdown/core/style.css`. `@meowdown/react` draws its icons with them and no longer depends on `lucide-react`.
+- Updated dependencies [[`238c594`](https://github.com/prosekit/meowdown/commit/238c594c5f3c0ac26bbc2c788f038452ee0a3000), [`238c594`](https://github.com/prosekit/meowdown/commit/238c594c5f3c0ac26bbc2c788f038452ee0a3000), [`238c594`](https://github.com/prosekit/meowdown/commit/238c594c5f3c0ac26bbc2c788f038452ee0a3000)]:
+  - @meowdown/core@0.84.0
+  - @meowdown/embed@0.3.3
+
 ## 0.84.0
 
 ### Minor Changes
