@@ -2,6 +2,7 @@ import { Combobox } from '@base-ui/react/combobox'
 import { Menu } from '@base-ui/react/menu'
 import {
   codeBlockLanguages,
+  deleteBlock,
   isCodeBlockPreviewHiddenDecoration,
   type CodeBlockAttrs,
   type LanguageItem,
@@ -31,7 +32,7 @@ import {
   MENU_POPUP_CLASS,
   MENU_POSITIONER_CLASS,
 } from '../class-names.ts'
-import { deleteBlock, setCaretCodeBlockMenu } from '../extensions/block-menu.ts'
+import { setCaretCodeBlockMenu } from '../extensions/block-menu.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
 import { usePele } from '../hooks/use-pele.ts'
 import { NON_PROSE_PROPS } from '../utils/non-prose-props.ts'

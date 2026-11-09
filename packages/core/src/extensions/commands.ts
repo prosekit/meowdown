@@ -11,7 +11,7 @@ import { isNodeOfType, type NodeName } from './node-names.ts'
 import { getNodeBuildersForSchema } from './schema.ts'
 
 /** @internal */
-function selectText(anchor: number, head?: number): Command {
+export function selectText(anchor: number, head?: number): Command {
   return (state, dispatch) => {
     if (dispatch) {
       const selection = TextSelection.create(state.doc, anchor, head)
@@ -23,7 +23,11 @@ function selectText(anchor: number, head?: number): Command {
 }
 
 /** @internal */
-function selectTextBetween($anchor: ResolvedPos, $head: ResolvedPos, bias?: number): Command {
+export function selectTextBetween(
+  $anchor: ResolvedPos,
+  $head: ResolvedPos,
+  bias?: number,
+): Command {
   return (state, dispatch) => {
     if (dispatch) {
       const selection = TextSelection.between($anchor, $head, bias)
@@ -35,7 +39,7 @@ function selectTextBetween($anchor: ResolvedPos, $head: ResolvedPos, bias?: numb
 }
 
 /** @internal */
-function insertMarkdown(markdown: string): Command {
+export function insertMarkdown(markdown: string): Command {
   return (state, dispatch) => {
     if (!markdown.trim()) return false
     const nodes = getNodeBuildersForSchema(state.schema)
@@ -69,7 +73,7 @@ function insertMarkdown(markdown: string): Command {
  *
  * @internal
  */
-function insertTrigger(text: string): Command {
+export function insertTrigger(text: string): Command {
   return (state, dispatch) => {
     if (!text) return false
     const $from = state.selection.$from
@@ -95,12 +99,12 @@ function insertTrigger(text: string): Command {
  *
  * @internal
  */
-function turnIntoText(): Command {
+export function turnIntoText(): Command {
   return chainCommands(setBlockType({ type: 'paragraph' satisfies NodeName }), unwrapList(), lift)
 }
 
 /** @internal */
-function scrollIntoView(): Command {
+export function scrollIntoView(): Command {
   return (state, dispatch) => {
     if (dispatch) {
       dispatch(state.tr.scrollIntoView())
@@ -109,7 +113,34 @@ function scrollIntoView(): Command {
   }
 }
 
-// FIXME: 1. export these command functions like scrollIntoView and turnIntoText in core/src/index.ts
+/**
+ * Deletes the block at `pos` and puts the caret where it was. A block that is
+ * the only child of its parent gives way to an empty default block (usually a
+ * paragraph), since the parent cannot be left empty.
+ *
+ * @internal
+ */
+export function deleteBlock(pos: number): Command {
+  return (state, dispatch) => {
+    const $pos = state.doc.resolve(pos)
+    const node = $pos.nodeAfter
+    if (!node) return false
+    if (dispatch) {
+      const end = pos + node.nodeSize
+      const tr =
+        $pos.parent.childCount === 1
+          ? state.tr.replaceWith(
+              pos,
+              end,
+              $pos.parent.type.contentMatch.defaultType?.createAndFill() ?? [],
+            )
+          : state.tr.delete(pos, end)
+      tr.setSelection(TextSelection.near(tr.doc.resolve(Math.min(pos, tr.doc.content.size)), 1))
+      dispatch(tr.scrollIntoView())
+    }
+    return true
+  }
+}
 
 export function defineEditorCommands() {
   return defineCommands({

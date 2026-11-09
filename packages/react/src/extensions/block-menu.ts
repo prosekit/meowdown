@@ -1,6 +1,6 @@
 import { isNodeOfType } from '@meowdown/core'
 import { defineKeymap, type PlainExtension } from '@prosekit/core'
-import { TextSelection, type Command } from '@prosekit/pm/state'
+import type { Command } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
 // TODO: Only code blocks have a block menu today. Give every block a menu.
@@ -36,33 +36,4 @@ const openCodeBlockMenu: Command = (state, dispatch, view) => {
  */
 export function defineCodeBlockMenuKeymap(): PlainExtension {
   return defineKeymap({ 'Mod-/': openCodeBlockMenu })
-}
-
-/**
- * Deletes the block at `pos` and puts the caret where it was. A block that is
- * the only child of its parent gives way to an empty default block (usually a
- * paragraph), since the parent cannot be left empty.
- *
- * FIXME: move deleteBlock to packages/core/src/extensions/commands.ts and add some unit tests for it. export it as an internal function
- */
-export function deleteBlock(pos: number): Command {
-  return (state, dispatch) => {
-    const $pos = state.doc.resolve(pos)
-    const node = $pos.nodeAfter
-    if (!node) return false
-    if (dispatch) {
-      const end = pos + node.nodeSize
-      const tr =
-        $pos.parent.childCount === 1
-          ? state.tr.replaceWith(
-              pos,
-              end,
-              $pos.parent.type.contentMatch.defaultType?.createAndFill() ?? [],
-            )
-          : state.tr.delete(pos, end)
-      tr.setSelection(TextSelection.near(tr.doc.resolve(Math.min(pos, tr.doc.content.size)), 1))
-      dispatch(tr.scrollIntoView())
-    }
-    return true
-  }
 }

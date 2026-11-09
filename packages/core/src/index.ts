@@ -112,6 +112,15 @@ export {
   updateLink,
   type LinkAttrs,
 } from './extensions/link-commands.ts'
+export {
+  deleteBlock,
+  insertMarkdown,
+  insertTrigger,
+  scrollIntoView,
+  selectText,
+  selectTextBetween,
+  turnIntoText,
+} from './extensions/commands.ts'
 export type { LinkEditHandler, LinkEditOptions } from './extensions/link-commands.ts'
 export {
   defineLinkHoverHandler,
