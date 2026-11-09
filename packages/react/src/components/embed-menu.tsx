@@ -75,7 +75,7 @@ export function EmbedMenu({ readOnly = false }: EmbedMenuProps): ReactElement {
           anchor={button}
           className={styles.Positioner}
           sideOffset={4}
-          align="end"
+          align="start"
           collisionBoundary={collisionBoundary}
         >
           <Menu.Popup

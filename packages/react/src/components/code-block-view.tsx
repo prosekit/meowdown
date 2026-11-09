@@ -283,7 +283,7 @@ function CodeBlockMenuPopup({
       <Menu.Positioner
         className={menuStyles.Positioner}
         sideOffset={4}
-        align="end"
+        align="start"
         collisionBoundary={collisionBoundary}
       >
         <Menu.Popup className={menuStyles.Popup} finalFocus={getFinalFocus}>
