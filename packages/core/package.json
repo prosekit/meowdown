@@ -17,8 +17,7 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./class-names": {
-      "FIXME": "FIXME let's update package.json so that you can only import class-name from @meowdown/core/internal/class-names so that it's clear that this is an internal API and not a public API.",
+    "./internal/class-names": {
       "development": "./src/class-names.ts",
       "types": "./dist/class-names.d.ts",
       "default": "./dist/class-names.js"
@@ -83,7 +82,7 @@
   "publishConfig": {
     "exports": {
       ".": "./dist/index.js",
-      "./class-names": "./dist/class-names.js",
+      "./internal/class-names": "./dist/class-names.js",
       "./style.css": "./dist/style.css"
     },
     "access": "public"
