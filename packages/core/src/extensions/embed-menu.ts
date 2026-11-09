@@ -35,6 +35,7 @@ export interface EmbedTarget {
   to: number
 }
 
+// FIXME: question: Is there any case that we use "EmbedTarget" but we do not use "EmbedHit" ? If the answer is yes, use a comment to explain why these two interfaces are different. If the answer is no, just use one interface to represent this data structure.
 interface EmbedHit extends EmbedTarget {
   syntax: MdImageAttrs['syntax']
 }
