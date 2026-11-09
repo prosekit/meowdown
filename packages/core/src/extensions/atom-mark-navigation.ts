@@ -13,6 +13,7 @@ import type { Command, EditorState } from '@prosekit/pm/state'
 import { Plugin, PluginKey, Selection, TextSelection } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
+import { ATOM_SELECTED_CLASS } from '../class-names.ts'
 import { getIsComposing } from '../utils/composition.ts'
 import { guardAppendTransaction, guardDecorations } from '../utils/guard-plugin.ts'
 import { hasPointerSelectionTransaction } from '../utils/transaction.ts'
@@ -286,8 +287,6 @@ function createCaretSnapPlugin(marks: AtomMarks): Plugin {
   })
 }
 
-const SELECTED_CLASS = 'md-atom-selected'
-
 // Decorate each selected atom's source range with `md-atom-selected`, so its
 // mark view can ring the rendered preview/label.
 function createSelectionPlugin(marks: AtomMarks): Plugin {
@@ -303,7 +302,7 @@ function createSelectionPlugin(marks: AtomMarks): Plugin {
         const range = getSelectedRange(state, markNames)
         if (range) {
           return DecorationSet.create(state.doc, [
-            Decoration.inline(range.from, range.to, { class: SELECTED_CLASS }),
+            Decoration.inline(range.from, range.to, { class: ATOM_SELECTED_CLASS }),
           ])
         }
 
@@ -313,7 +312,9 @@ function createSelectionPlugin(marks: AtomMarks): Plugin {
         const decorations: Decoration[] = []
         state.doc.nodesBetween(from, to, (node, pos) => {
           if (node.marks.some((mark) => markNames.includes(mark.type.name as MarkName))) {
-            decorations.push(Decoration.inline(pos, pos + node.nodeSize, { class: SELECTED_CLASS }))
+            decorations.push(
+              Decoration.inline(pos, pos + node.nodeSize, { class: ATOM_SELECTED_CLASS }),
+            )
           }
         })
         return DecorationSet.create(state.doc, decorations)

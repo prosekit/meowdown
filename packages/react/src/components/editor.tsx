@@ -37,6 +37,7 @@ import {
   type Ref,
 } from 'react'
 
+import { ROOT_CLASS } from '../class-names.ts'
 import type { TimeFormat } from '../utils/date-format.ts'
 
 import type { CollisionBoundary } from './collision-boundary.ts'
@@ -638,7 +639,7 @@ export function MarkdownEditor({
 
   return (
     <div
-      className={clsx('meowdown', wrapperClassName)}
+      className={clsx(ROOT_CLASS, wrapperClassName)}
       style={caretGlide ? undefined : CARET_GLIDE_OFF}
     >
       <ProseKitEditor

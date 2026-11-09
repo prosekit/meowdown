@@ -141,8 +141,6 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
   )
 }
 
-const MENU_SHORTCUT = isApple ? '⌘/' : 'Ctrl+/'
-
 interface CodeBlockToolbarProps {
   code: string
   language: string
@@ -281,7 +279,7 @@ function CodeBlockMenu({
       <Menu.Trigger
         className={ICON_BUTTON_CLASS}
         aria-label="More"
-        title={`More (${MENU_SHORTCUT})`}
+        title={`More (${isApple ? '⌘/' : 'Ctrl+/'})`}
         data-testid="code-block-menu"
       >
         <Icon name="ellipsis" />

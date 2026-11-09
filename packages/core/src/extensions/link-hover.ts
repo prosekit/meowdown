@@ -1,6 +1,8 @@
 import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 
+import { LINK_TEXT_MARK_CLASS } from '../class-names.ts'
+
 import { getLinkUnitAt, type LinkUnit } from './get-link-unit-at.ts'
 import { defineMarkHoverHandler, type HoverTracker, type MarkHoverHit } from './mark-hover.ts'
 
@@ -40,7 +42,7 @@ export function defineLinkHoverHandler(
 ): PlainExtension {
   return defineMarkHoverHandler<LinkUnit>({
     key: linkHoverKey,
-    selector: '.md-link',
+    selector: `.${LINK_TEXT_MARK_CLASS}`,
     openDelay: OPEN_DELAY,
     closeDelay: CLOSE_DELAY,
     tap: true,

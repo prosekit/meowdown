@@ -17,9 +17,11 @@ import {
   ATOM_VIEW_CONTENT_CLASS,
   ATOM_VIEW_PREVIEW_CLASS,
   EMBED_MENU_BUTTON_CLASS,
+  EMBED_RESIZABLE_CLASS,
   getIconClass,
   ICON_BUTTON_CLASS,
   ICON_CLASS,
+  IMAGE_RESIZABLE_CLASS,
   IMAGE_RESIZE_HANDLE_CLASS,
   IMAGE_VIEW_CLASS,
   IMAGE_VIEW_CONTENT_CLASS,
@@ -481,7 +483,7 @@ class ImageMarkView implements MarkView {
     registerResizableHandleElement()
 
     const root = document.createElement('prosekit-resizable-root')
-    root.className = 'md-embed-resizable'
+    root.className = EMBED_RESIZABLE_CLASS
     root.dataset.testid = 'embed-resizable'
     applySize(root, this.#attrs.width, null)
     root.appendChild(element)
@@ -513,7 +515,7 @@ class ImageMarkView implements MarkView {
     registerResizableHandleElement()
 
     const root = document.createElement('prosekit-resizable-root')
-    root.className = 'md-image-resizable'
+    root.className = IMAGE_RESIZABLE_CLASS
     root.dataset.testid = 'image-resizable'
     // Show a placeholder background until the image paints, so a freshly dropped,
     // not-yet-loaded image still fills a visible box. Removed on load/error.

@@ -1,6 +1,15 @@
 import { defineMarkView, type PlainExtension } from '@prosekit/core'
 import type { MarkViewConstructor } from '@prosekit/pm/view'
 
+import {
+  ATOM_VIEW_CLASS,
+  ATOM_VIEW_CONTENT_CLASS,
+  ATOM_VIEW_PREVIEW_CLASS,
+  WIKILINK_VIEW_CLASS,
+  WIKILINK_VIEW_CONTENT_CLASS,
+  WIKILINK_VIEW_LABEL_CLASS,
+  WIKILINK_VIEW_PREVIEW_CLASS,
+} from '../class-names.ts'
 import { guardMarkView } from '../utils/guard-mark-view.ts'
 
 import type { MdWikilinkAttrs } from './inline-marks.ts'
@@ -58,22 +67,22 @@ function createWikilinkMarkView(): MarkViewConstructor {
     const attrs = mark.attrs as MdWikilinkAttrs
 
     const dom = document.createElement('span')
-    dom.className = 'md-wikilink-view md-atom-view'
+    dom.className = `${WIKILINK_VIEW_CLASS} ${ATOM_VIEW_CLASS}`
 
     const preview = document.createElement('span')
-    preview.className = 'md-wikilink-view-preview md-atom-view-preview'
+    preview.className = `${WIKILINK_VIEW_PREVIEW_CLASS} ${ATOM_VIEW_PREVIEW_CLASS}`
     preview.contentEditable = 'false'
     preview.dataset.testid = 'wikilink'
     dom.appendChild(preview)
 
     const label = document.createElement('span')
-    label.className = 'md-wikilink-view-label'
+    label.className = WIKILINK_VIEW_LABEL_CLASS
     label.contentEditable = 'false'
     label.textContent = attrs.display || attrs.target
     preview.appendChild(label)
 
     const contentDOM = document.createElement('span')
-    contentDOM.className = 'md-wikilink-view-content md-atom-view-content'
+    contentDOM.className = `${WIKILINK_VIEW_CONTENT_CLASS} ${ATOM_VIEW_CONTENT_CLASS}`
     dom.appendChild(contentDOM)
 
     return {

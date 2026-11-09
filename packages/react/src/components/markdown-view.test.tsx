@@ -18,6 +18,13 @@ import { MarkdownView } from './markdown-view.tsx'
 // A photo that loads without the network: the card hides one that fails.
 const PHOTO_URL =
   "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='100'%20height='100'/%3E"
+import {
+  ATOM_VIEW_CLASS,
+  LINK_TEXT_MARK_CLASS,
+  TAG_MARK_CLASS,
+  WIKILINK_VIEW_LABEL_CLASS,
+} from '../class-names.ts'
+
 import { ProseKitEditor } from './prosekit-editor.tsx'
 
 const view = page.getByTestId('markdown-view')
@@ -223,7 +230,7 @@ describe('MarkdownView', () => {
   it('leaves an unresolved wiki embed literal', async () => {
     await renderView('![[ambiguous.png]]', { resolveWikiEmbed: () => undefined })
     await expect.element(view).toHaveTextContent('![[ambiguous.png]]')
-    expect(view.element().querySelector('.md-atom-view')).toBeNull()
+    expect(view.element().querySelector(`.${ATOM_VIEW_CLASS}`)).toBeNull()
   })
 
   it('renders a resolved wikilink label and reports the full target', async () => {
@@ -795,7 +802,7 @@ describe('MarkdownView parity with the editor', () => {
   const staticHost = page.getByTestId('parity-static')
   // A rich element appears once marks are applied (editor) or on first render
   // (static); waiting on it avoids reading the DOM mid-render.
-  const richSelector = 'strong, em, code, del, .md-tag, .md-link, .md-wikilink-view-label'
+  const richSelector = `strong, em, code, del, .${TAG_MARK_CLASS}, .${LINK_TEXT_MARK_CLASS}, .${WIKILINK_VIEW_LABEL_CLASS}`
 
   it.each([
     '**bold** text',

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
+import { WIKILINK_VIEW_PREVIEW_CLASS } from '../class-names.ts'
 import {
   formatSelectionSteps,
   getSelectionSnapshot,
@@ -70,7 +71,7 @@ describe.each(ALL_MODES)('wikilink rendering in %s mode', (mode) => {
     using fixture = setup(`before [[${longTarget}]]<a>`)
     await expect.element(label).toBeVisible()
 
-    const preview = fixture.dom.querySelector('.md-wikilink-view-preview')!
+    const preview = fixture.dom.querySelector(`.${WIKILINK_VIEW_PREVIEW_CLASS}`)!
     expect(getComputedStyle(preview).display).toBe('inline')
   })
 })

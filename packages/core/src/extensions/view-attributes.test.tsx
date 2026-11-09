@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
 
+import { CONTENT_CLASS } from '../class-names.ts'
 import { setupFixture } from '../testing/index.ts'
 
 import { defineViewAttributes } from './view-attributes.ts'
@@ -11,7 +12,7 @@ describe('defineViewAttributes', () => {
   it('gives the editable root the content class from the first paint', async () => {
     using fixture = setupFixture()
     void fixture
-    await expect.element(pmRoot).toHaveClass('meowdown-content')
+    await expect.element(pmRoot).toHaveClass(CONTENT_CLASS)
   })
 
   it('applies the gutter padding the content class carries', () => {
@@ -24,7 +25,7 @@ describe('defineViewAttributes', () => {
     fixture.editor.use(defineViewAttributes({ class: 'host-class' }))
 
     await expect.element(pmRoot).toHaveClass('ProseMirror')
-    await expect.element(pmRoot).toHaveClass('meowdown-content')
+    await expect.element(pmRoot).toHaveClass(CONTENT_CLASS)
     await expect.element(pmRoot).toHaveClass('host-class')
   })
 
@@ -36,6 +37,6 @@ describe('defineViewAttributes', () => {
     dispose()
 
     await expect.element(pmRoot).not.toHaveClass('host-class')
-    await expect.element(pmRoot).toHaveClass('meowdown-content')
+    await expect.element(pmRoot).toHaveClass(CONTENT_CLASS)
   })
 })

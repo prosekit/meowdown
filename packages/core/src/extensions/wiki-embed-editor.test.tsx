@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
+import { ATOM_VIEW_CLASS } from '../class-names.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
 import { updateEditorConfig } from './editor-config.ts'
@@ -32,7 +33,7 @@ function setup(
 describe('wiki embed editor integration', () => {
   it('keeps unresolved embeds literal and editable', async () => {
     using fixture = setup('before ![[missing.png]] after', undefined)
-    expect(fixture.dom.querySelector('.md-atom-view')).toBeNull()
+    expect(fixture.dom.querySelector(`.${ATOM_VIEW_CLASS}`)).toBeNull()
     await expect.element(pmRoot).toHaveTextContent('before ![[missing.png]] after')
   })
 

@@ -3,6 +3,17 @@ import type { Mark } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
 import type { MarkView, ViewMutationRecord } from '@prosekit/pm/view'
 
+import {
+  ATOM_VIEW_CLASS,
+  ATOM_VIEW_CONTENT_CLASS,
+  ATOM_VIEW_PREVIEW_CLASS,
+  FILE_VIEW_CLASS,
+  FILE_VIEW_CONTENT_CLASS,
+  FILE_VIEW_ICON_CLASS,
+  FILE_VIEW_NAME_CLASS,
+  FILE_VIEW_PREVIEW_CLASS,
+  FILE_VIEW_SIZE_CLASS,
+} from '../class-names.ts'
 import { formatFileSize } from '../utils/format-file-size.ts'
 import { guardMarkView } from '../utils/guard-mark-view.ts'
 
@@ -92,7 +103,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg'
  */
 function buildFileIcon(): SVGSVGElement {
   const svg = document.createElementNS(SVG_NS, 'svg')
-  svg.setAttribute('class', 'md-file-view-icon')
+  svg.setAttribute('class', FILE_VIEW_ICON_CLASS)
   svg.setAttribute('viewBox', '0 0 24 24')
   svg.setAttribute('aria-hidden', 'true')
   for (const shape of [
@@ -124,10 +135,10 @@ class FileMarkView implements MarkView {
     this.#attrs = mark.attrs as MdFileAttrs
 
     this.#dom = document.createElement('span')
-    this.#dom.className = 'md-file-view md-atom-view'
+    this.#dom.className = `${FILE_VIEW_CLASS} ${ATOM_VIEW_CLASS}`
 
     this.#preview = document.createElement('span')
-    this.#preview.className = 'md-file-view-preview md-atom-view-preview'
+    this.#preview.className = `${FILE_VIEW_PREVIEW_CLASS} ${ATOM_VIEW_PREVIEW_CLASS}`
     this.#preview.contentEditable = 'false'
     this.#preview.dataset.testid = 'file-pill'
     this.#preview.dataset.fileKind = getFileKind(this.#attrs.href)
@@ -138,17 +149,17 @@ class FileMarkView implements MarkView {
     this.#preview.appendChild(buildFileIcon())
 
     this.#nameElement = document.createElement('span')
-    this.#nameElement.className = 'md-file-view-name'
+    this.#nameElement.className = FILE_VIEW_NAME_CLASS
     this.#nameElement.textContent = this.#attrs.name
     this.#preview.appendChild(this.#nameElement)
 
     this.#sizeElement = document.createElement('span')
-    this.#sizeElement.className = 'md-file-view-size'
+    this.#sizeElement.className = FILE_VIEW_SIZE_CLASS
     this.#sizeElement.dataset.testid = 'file-pill-size'
     this.#preview.appendChild(this.#sizeElement)
 
     this.#contentDOM = document.createElement('span')
-    this.#contentDOM.className = 'md-file-view-content md-atom-view-content'
+    this.#contentDOM.className = `${FILE_VIEW_CONTENT_CLASS} ${ATOM_VIEW_CONTENT_CLASS}`
     this.#dom.appendChild(this.#contentDOM)
 
     void this.#loadFileInfo(options?.resolveFileInfo)

@@ -1,6 +1,86 @@
 // All class names used in the editor should be defined here to avoid typos and make it easier to change them in the future.
 
 /**
+ * The root of the editable document, and of a `MarkdownView`.
+ */
+export const CONTENT_CLASS = 'meowdown-content'
+
+/**
+ * The `mdMark` mark: a run of Markdown syntax characters.
+ */
+export const SYNTAX_MARK_CLASS = 'md-mark'
+
+/**
+ * The `mdImage` mark.
+ */
+export const IMAGE_MARK_CLASS = 'md-image'
+
+/**
+ * The `mdLinkText` mark, and a rendered link in a `MarkdownView`.
+ */
+export const LINK_TEXT_MARK_CLASS = 'md-link'
+
+/**
+ * The `mdLinkUri` mark.
+ */
+export const LINK_URI_MARK_CLASS = 'md-link-uri'
+
+/**
+ * The `mdLinkTitle` mark.
+ */
+export const LINK_TITLE_MARK_CLASS = 'md-link-title'
+
+/**
+ * The `mdTag` mark.
+ */
+export const TAG_MARK_CLASS = 'md-tag'
+
+/**
+ * The `mdWikilink` mark.
+ */
+export const WIKILINK_MARK_CLASS = 'md-wikilink'
+
+/**
+ * The `mdFile` mark.
+ */
+export const FILE_MARK_CLASS = 'md-file'
+
+/**
+ * The `mdMath` mark.
+ */
+export const MATH_MARK_CLASS = 'md-math'
+
+/**
+ * The `mdPack` mark.
+ */
+export const PACK_MARK_CLASS = 'md-pack'
+
+/**
+ * A decoration that reveals the hidden Markdown syntax in its range.
+ */
+export const SHOW_CLASS = 'show'
+
+/**
+ * A decoration on the source range of a selected atom.
+ */
+export const ATOM_SELECTED_CLASS = 'md-atom-selected'
+
+/**
+ * A decoration on the range of a pending replacement.
+ */
+export const PENDING_REPLACEMENT_CLASS = 'md-pending-replacement'
+
+/**
+ * The layer that holds the virtual caret.
+ */
+export const VIRTUAL_CARET_LAYER_CLASS = 'md-virtual-caret-layer'
+
+/**
+ * The virtual caret.
+ */
+export const VIRTUAL_CARET_CLASS = 'md-virtual-caret'
+
+/**
  * The root of an atom mark view: an image, file, or wiki link.
  */
 export const ATOM_VIEW_CLASS = 'md-atom-view'
@@ -34,6 +114,81 @@ export const IMAGE_VIEW_PREVIEW_CLASS = 'md-image-view-preview'
  * The drag handle that resizes an image or YouTube card.
  */
 export const IMAGE_RESIZE_HANDLE_CLASS = 'md-image-resize-handle'
+
+/**
+ * The resizable box around an image.
+ */
+export const IMAGE_RESIZABLE_CLASS = 'md-image-resizable'
+
+/**
+ * The resizable box around a YouTube card.
+ */
+export const EMBED_RESIZABLE_CLASS = 'md-embed-resizable'
+
+/**
+ * The root of a file mark view.
+ */
+export const FILE_VIEW_CLASS = 'md-file-view'
+
+/**
+ * The hidden holder of a file's Markdown source.
+ */
+export const FILE_VIEW_CONTENT_CLASS = 'md-file-view-content'
+
+/**
+ * The rendered file pill.
+ */
+export const FILE_VIEW_PREVIEW_CLASS = 'md-file-view-preview'
+
+/**
+ * The icon of a file pill.
+ */
+export const FILE_VIEW_ICON_CLASS = 'md-file-view-icon'
+
+/**
+ * The name of a file pill.
+ */
+export const FILE_VIEW_NAME_CLASS = 'md-file-view-name'
+
+/**
+ * The size of a file pill.
+ */
+export const FILE_VIEW_SIZE_CLASS = 'md-file-view-size'
+
+/**
+ * The root of a wiki link mark view.
+ */
+export const WIKILINK_VIEW_CLASS = 'md-wikilink-view'
+
+/**
+ * The hidden holder of a wiki link's Markdown source.
+ */
+export const WIKILINK_VIEW_CONTENT_CLASS = 'md-wikilink-view-content'
+
+/**
+ * The rendered wiki link.
+ */
+export const WIKILINK_VIEW_PREVIEW_CLASS = 'md-wikilink-view-preview'
+
+/**
+ * The label of a rendered wiki link.
+ */
+export const WIKILINK_VIEW_LABEL_CLASS = 'md-wikilink-view-label'
+
+/**
+ * The root of a math mark view.
+ */
+export const MATH_VIEW_CLASS = 'md-math-view'
+
+/**
+ * The Markdown source of a math formula.
+ */
+export const MATH_VIEW_CONTENT_CLASS = 'md-math-view-content'
+
+/**
+ * The rendered math formula.
+ */
+export const MATH_VIEW_PREVIEW_CLASS = 'md-math-view-preview'
 
 /**
  * The class of the menu button that an image, X post, or YouTube card shows

@@ -1,6 +1,7 @@
 import { clsx } from 'clsx/lite'
 import { ViewTransition, type ComponentProps, type ReactNode } from 'react'
 
+import { LIGHTBOX_DIALOG_TRANSITION_CLASS } from '../class-names.ts'
 import type { LightboxController, LightboxItem } from '../hooks/use-lightbox.ts'
 
 import styles from './lightbox.module.css'
@@ -22,8 +23,6 @@ export interface LightboxRootProps extends Omit<
    */
   readonly children: (item: LightboxItem) => ReactNode
 }
-
-const DIALOG_TRANSITION_CLASS = 'meowdown-lightbox-dialog'
 
 function showModal(dialog: HTMLDialogElement) {
   // A closing dialog hands focus back, and WebKit scrolls a focused editor to
@@ -48,7 +47,7 @@ export function LightboxRoot({
   if (!item) return null
 
   return (
-    <ViewTransition default={DIALOG_TRANSITION_CLASS} onExit={() => onExited}>
+    <ViewTransition default={LIGHTBOX_DIALOG_TRANSITION_CLASS} onExit={() => onExited}>
       <dialog
         aria-label={item.type === 'image' ? 'Image preview' : 'Video preview'}
         {...props}

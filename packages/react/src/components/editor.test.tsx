@@ -9,6 +9,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
+import { ATOM_VIEW_CONTENT_CLASS, CONTENT_CLASS } from '../class-names.ts'
 import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
 import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
@@ -395,13 +396,13 @@ describe('MarkdownEditor', () => {
     const screen = await render(
       <MarkdownEditor initialMarkdown="A [[link]]" editorClassName="first" />,
     )
-    await expect.element(pmRoot).toHaveClass('meowdown-content')
+    await expect.element(pmRoot).toHaveClass(CONTENT_CLASS)
     await expect.element(pmRoot).toHaveClass('first')
 
     await screen.rerender(<MarkdownEditor initialMarkdown="A [[link]]" editorClassName="second" />)
 
     await expect.element(pmRoot).toHaveClass('ProseMirror')
-    await expect.element(pmRoot).toHaveClass('meowdown-content')
+    await expect.element(pmRoot).toHaveClass(CONTENT_CLASS)
     await expect.element(pmRoot).toHaveClass('second')
     await expect.element(pmRoot).not.toHaveClass('first')
   })
@@ -409,7 +410,7 @@ describe('MarkdownEditor', () => {
   // The regression the class loss caused: `.ProseMirror .md-atom-view-content`
   // is the only thing hiding a wikilink's raw `[[…]]` source.
   it('keeps wikilink source hidden across an editorClassName change', async () => {
-    const source = page.locate('.md-atom-view-content')
+    const source = page.locate(`.${ATOM_VIEW_CONTENT_CLASS}`)
     const screen = await render(
       <MarkdownEditor initialMarkdown="A [[link]]" mode="hide" editorClassName="first" />,
     )

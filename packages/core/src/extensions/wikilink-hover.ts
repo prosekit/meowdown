@@ -1,6 +1,8 @@
 import type { PlainExtension } from '@prosekit/core'
 import { PluginKey } from '@prosekit/pm/state'
 
+import { WIKILINK_VIEW_PREVIEW_CLASS } from '../class-names.ts'
+
 import { defineMarkHoverHandler, type HoverTracker } from './mark-hover.ts'
 import { findWikilinkAt, findWikilinkForElement, type WikilinkHit } from './wikilink-click.ts'
 
@@ -49,7 +51,7 @@ export function defineWikilinkHoverHandler(
 ): PlainExtension {
   return defineMarkHoverHandler<WikilinkHit>({
     key: wikilinkHoverKey,
-    selector: '.md-wikilink-view-preview',
+    selector: `.${WIKILINK_VIEW_PREVIEW_CLASS}`,
     openDelay,
     closeDelay,
     // A touch tap must keep navigating: the card is inert.
