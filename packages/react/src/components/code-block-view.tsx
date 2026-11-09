@@ -271,7 +271,7 @@ function CodeBlockMenu({
   return (
     <Menu.Root open={open} onOpenChange={onOpenChange} onOpenChangeComplete={onOpenChangeComplete}>
       <Menu.Trigger
-        className="meowdown-icon-button"
+        className="meowdown-icon-button" // FIXME
         aria-label="More"
         title={`More (${MENU_SHORTCUT})`}
         data-testid="code-block-menu"
@@ -400,7 +400,10 @@ function CodeBlockLanguagePicker({
           collisionBoundary={collisionBoundary}
         >
           <Combobox.Popup
-            className={clsx('meowdown-menu-popup', styles.Popup)}
+            className={clsx(
+              'meowdown-menu-popup', // FIXME: use "meowdown-menu-popup" from 'class-names.ts'
+              styles.Popup,
+            )}
             finalFocus={getFinalFocus}
           >
             <div className={styles.SearchRow}>
