@@ -4,18 +4,18 @@ export type EmbedMenuState =
   | {
       readonly phase: 'idle'
     }
-  /**
-   * The menu is open over `embed`, anchored to its menu `button`.
-   */
   | {
+      /**
+       * The menu is open over `embed`, anchored to its menu `button`.
+       */
       readonly phase: 'open'
       readonly embed: EmbedTarget
       readonly button: HTMLElement
     }
-  /**
-   * The menu plays its exit animation, still anchored to `button`.
-   */
   | {
+      /**
+       * The menu plays its exit animation, still anchored to `button`.
+       */
       readonly phase: 'closing'
       readonly embed: EmbedTarget
       readonly button: HTMLElement
@@ -27,16 +27,16 @@ export type EmbedMenuEvent =
       readonly embed: EmbedTarget
       readonly button: HTMLElement
     }
-  /**
-   * The menu starts to close.
-   */
   | {
+      /**
+       * The menu starts to close.
+       */
       readonly type: 'close'
     }
-  /**
-   * The exit animation finished.
-   */
   | {
+      /**
+       * The exit animation finished.
+       */
       readonly type: 'closed'
     }
 
