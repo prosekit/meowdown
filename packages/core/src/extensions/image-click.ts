@@ -5,6 +5,7 @@ import type { EditorView } from '@prosekit/pm/view'
 import { getAtomViewSourcePos } from '../utils/atom-view.ts'
 import { isModEvent } from '../utils/is-mod-event.ts'
 
+import { matchEmbed } from '@meowdown/markdown'
 import { EMBED_MENU_BUTTON_CLASS } from './image.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import { getMarkRangeAt } from './mark-range.ts'
@@ -16,7 +17,11 @@ interface ImageHit {
   to: number
   src: string
   alt: string
-  syntax: MdImageAttrs['syntax']
+  kind: 'x-post' | 'youtube-video' | 'image'
+  /**
+   * `wikiEmbed` for a `![[target]]` source, otherwise `null`.
+   */
+  syntax: 'wikiEmbed' | null
 }
 
 /**
@@ -39,8 +44,10 @@ function getPreviewImage(preview: HTMLElement): HTMLImageElement | undefined | n
 export function findImageAt(state: EditorState, pos: number): ImageHit | undefined {
   const range = getMarkRangeAt(state, pos, 'mdImage')
   if (!range) return
-  const { src, alt, syntax } = range.mark.attrs as MdImageAttrs
-  return { from: range.from, to: range.to, src, alt, syntax }
+  const { from, to, mark } = range
+  const { src, alt, syntax } = mark.attrs as MdImageAttrs
+  const kind = matchEmbed(src) || 'image'
+  return { from, to, src, alt, syntax, kind }
 }
 
 /**
