@@ -1,12 +1,12 @@
 import {
   defineEditorExtension,
-  paragraphMarkdownToDoc,
-  docToParagraphMarkdown,
   docToMarkdown,
+  docToParagraphMarkdown,
   getSelectedText,
   getTextblockDisplayText,
   isNodeOfType,
   markdownToDoc,
+  paragraphMarkdownToDoc,
   type AcceptPendingReplacementOptions,
   type EditorConfig,
   type ExitBoundaryHandler,
@@ -781,7 +781,7 @@ export function ProseKitEditor({
           onFileSaveError={onFileSaveError}
         />
         <LinkMenu
-          key={String(readOnly)}
+          key={readOnly ? 1 : 2}
           onLinkClick={onLinkClick}
           onLinkCopy={onLinkCopy}
           resolveLinkPreview={resolveLinkPreview}
