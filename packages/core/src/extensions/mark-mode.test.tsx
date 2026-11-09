@@ -1164,7 +1164,9 @@ describe('focus mode', () => {
     })
     const { n } = fixture
     fixture.set(n.doc(n.paragraph('![alt](pic.png)')))
-    expect(fixture.htmlSnapshot).toMatchInlineSnapshot(`
+    // The menu button's title names the platform's shortcut.
+    const html = fixture.htmlSnapshot.replace(/More \((?:⌘|Ctrl\+)\/\)/, 'More (Mod-/)')
+    expect(html).toMatchInlineSnapshot(`
       "
       <p>
         <span
@@ -1194,6 +1196,21 @@ describe('focus mode', () => {
                 >
                 </prosekit-resizable-handle>
               </prosekit-resizable-root>
+              <button
+                aria-haspopup="menu"
+                aria-label="More"
+                class="md-embed-menu-button meowdown-icon-button"
+                data-testid="embed-menu"
+                tabindex="-1"
+                title="More (Mod-/)"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="meowdown-icon meowdown-icon-ellipsis"
+                >
+                </span>
+              </button>
             </span>
             <span
               autocapitalize="off"

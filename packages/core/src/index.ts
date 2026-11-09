@@ -27,6 +27,7 @@ export type { EditorConfig } from './extensions/editor-config-types.ts'
 export { updateEditorConfig } from './extensions/editor-config.ts'
 export {
   convertEmbedToLink,
+  deleteEmbed,
   defineEmbedMenuHandler,
   type EmbedMenuOpenHandler,
   type EmbedTarget,

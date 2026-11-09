@@ -36,7 +36,7 @@ import {
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
 
 /**
- * The card's menu button. It stays hidden until `defineEmbedMenuHandler`
+ * The menu button of an image or card. It stays hidden until `defineEmbedMenuHandler`
  * marks the editor, and out of the tab order: `Mod-/` opens the menu from the
  * keyboard.
  */
@@ -411,6 +411,7 @@ class ImageMarkView implements MarkView {
     const wrapper = this.#createWrapper()
     wrapper.dataset.testid = 'image-preview'
     wrapper.appendChild(this.#buildResizableImage(url))
+    wrapper.appendChild(createEmbedMenuButton())
     return wrapper
   }
 

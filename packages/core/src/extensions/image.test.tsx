@@ -230,6 +230,22 @@ describe('image click callback', () => {
     expect(onImageClick.mock.calls[0][0].event).toBeInstanceOf(TouchEvent)
   })
 
+  it.skipIf(cannotConstructTouch)('ignores a tap on the menu button', async () => {
+    const onImageClick = vi.fn<ImageClickHandler>()
+    using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
+    void fixture
+    await expect.element(preview).toBeInTheDocument()
+
+    const button = preview.element().querySelector('.md-embed-menu-button')
+    expect(button).not.toBeNull()
+    const tap = buildTap(button!)
+    button!.dispatchEvent(tap.start)
+    button!.dispatchEvent(tap.end)
+
+    expect(tap.end.defaultPrevented).toBe(false)
+    expect(onImageClick).not.toHaveBeenCalled()
+  })
+
   it.skipIf(cannotConstructTouch)('ignores a touch that moved too far to be a tap', async () => {
     const onImageClick = vi.fn<ImageClickHandler>()
     using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)

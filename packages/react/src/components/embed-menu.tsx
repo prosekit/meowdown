@@ -2,12 +2,13 @@ import { Menu } from '@base-ui/react/menu'
 import {
   convertEmbedToLink,
   defineEmbedMenuHandler,
+  deleteEmbed,
   type EditorExtension,
   type TypedEditor,
 } from '@meowdown/core'
 import { useEditor } from '@prosekit/react'
 import { queueExtension } from '@prosekit/web'
-import { CopyIcon, Link2Icon } from 'lucide-react'
+import { CopyIcon, Link2Icon, Trash2Icon } from 'lucide-react'
 import { use, useCallback, useEffect, useReducer, type ReactElement } from 'react'
 
 import { writeClipboardText } from '../utils/write-clipboard-text.ts'
@@ -20,8 +21,8 @@ export interface EmbedMenuProps {
 }
 
 /**
- * The menu of the X post and YouTube cards, opened from a card's menu button
- * or with `Mod-/` while a card is selected. One instance serves every card.
+ * The menu of images, X post cards, and YouTube cards, opened from their menu
+ * button or with `Mod-/` while one is selected. One instance serves them all.
  */
 export function EmbedMenu({ readOnly = false }: EmbedMenuProps): ReactElement {
   const editor: TypedEditor = useEditor<EditorExtension>()
@@ -67,6 +68,13 @@ export function EmbedMenu({ readOnly = false }: EmbedMenuProps): ReactElement {
     if (embed) void writeClipboardText(embed.src)
   }, [embed])
 
+  const remove = useCallback(() => {
+    if (embed) editor.exec(deleteEmbed(embed.from))
+  }, [editor, embed])
+
+  // Only X post and YouTube cards written as `![](url)` convert.
+  const canConvert = !readOnly && embed != null && convertEmbedToLink(embed.from)(editor.state)
+
   return (
     <Menu.Root open={open} onOpenChange={changeOpen} onOpenChangeComplete={completeOpenChange}>
       <Menu.Portal>
@@ -82,7 +90,7 @@ export function EmbedMenu({ readOnly = false }: EmbedMenuProps): ReactElement {
             finalFocus={getFinalFocus}
             data-testid="embed-menu-popup"
           >
-            {!readOnly && (
+            {canConvert && (
               <Menu.Item
                 className="meowdown-menu-item"
                 onClick={convertToLink}
@@ -98,8 +106,18 @@ export function EmbedMenu({ readOnly = false }: EmbedMenuProps): ReactElement {
               data-testid="embed-menu-copy"
             >
               <CopyIcon />
-              <span>Copy link</span>
+              <span>{embed?.kind === 'image' ? 'Copy image link' : 'Copy link'}</span>
             </Menu.Item>
+            {!readOnly && (
+              <Menu.Item
+                className="meowdown-menu-item"
+                onClick={remove}
+                data-testid="embed-menu-delete"
+              >
+                <Trash2Icon />
+                <span>Delete</span>
+              </Menu.Item>
+            )}
           </Menu.Popup>
         </Menu.Positioner>
       </Menu.Portal>

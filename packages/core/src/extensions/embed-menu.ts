@@ -17,40 +17,44 @@ import { getMarkRangeAt } from './mark-range.ts'
 const embedMenuKey = new PluginKey('meowdown-embed-menu')
 
 /**
- * The class of the menu button that an X post or YouTube card shows in the
- * editor.
+ * The class of the menu button that an image, X post, or YouTube card shows
+ * in the editor.
  */
 export const EMBED_MENU_BUTTON_CLASS = 'md-embed-menu-button'
 
 /**
- * An X post or YouTube card in the document: its `![](src)` source, including
- * any trailing magic comment, spans `from` to `to`.
+ * An image, X post, or YouTube card in the document: its `![](src)` or
+ * `![[target]]` source, including any trailing magic comment, spans `from` to
+ * `to`. `src` is the image or post URL.
  */
 export interface EmbedTarget {
-  kind: EmbedKind
+  kind: EmbedKind | 'image'
   src: string
   alt: string
   from: number
   to: number
 }
 
-/**
- * The card whose source covers `pos`, if any.
- */
-function getEmbedAt(state: EditorState, pos: number): EmbedTarget | undefined {
-  const range = getMarkRangeAt(state, pos, 'mdImage')
-  if (!range) return
-  const { src, alt, syntax } = range.mark.attrs as MdImageAttrs
-  if (syntax != null) return
-  const kind = matchEmbed(src)
-  if (!kind) return
-  return { kind, src, alt, from: range.from, to: range.to }
+interface EmbedHit extends EmbedTarget {
+  syntax: MdImageAttrs['syntax']
 }
 
 /**
- * The card that the selection covers exactly, as arrow keys select it.
+ * The image or card whose source covers `pos`, if any.
  */
-function getSelectedEmbed(state: EditorState): EmbedTarget | undefined {
+function getEmbedAt(state: EditorState, pos: number): EmbedHit | undefined {
+  const range = getMarkRangeAt(state, pos, 'mdImage')
+  if (!range) return
+  const { src, alt, syntax } = range.mark.attrs as MdImageAttrs
+  const kind = matchEmbed(src) ?? 'image'
+  return { kind, src, alt, syntax, from: range.from, to: range.to }
+}
+
+/**
+ * The image or card that the selection covers exactly, as arrow keys select
+ * it.
+ */
+function getSelectedEmbed(state: EditorState): EmbedHit | undefined {
   const { from, to, empty } = state.selection
   if (empty) return
   const embed = getEmbedAt(state, from)
@@ -58,20 +62,38 @@ function getSelectedEmbed(state: EditorState): EmbedTarget | undefined {
 }
 
 /**
- * Replace the card at `pos` with an ordinary link and put the caret after it.
- * A card without alt text becomes its bare URL, which renders as an autolink;
- * otherwise the `![alt](src "title")` source loses its `!`. The trailing magic
- * comment (size and saved snapshot) is dropped.
+ * Replace the X post or YouTube card at `pos` with an ordinary link and put
+ * the caret after it. A card without alt text becomes its bare URL, which
+ * renders as an autolink; otherwise the `![alt](src "title")` source loses its
+ * `!`. The trailing magic comment (size and saved snapshot) is dropped. Images
+ * and `![[target]]` embeds are not converted.
  */
 export function convertEmbedToLink(pos: number): Command {
   return (state, dispatch) => {
     const embed = getEmbedAt(state, pos)
-    if (!embed) return false
+    if (!embed || embed.kind === 'image' || embed.syntax != null) return false
     if (dispatch) {
       const source = stripMagicComment(state.doc.textBetween(embed.from, embed.to))
       const link = embed.alt ? source.slice(1) : embed.src
       const transaction = state.tr.insertText(link, embed.from, embed.to)
       transaction.setSelection(TextSelection.create(transaction.doc, embed.from + link.length))
+      dispatch(transaction.scrollIntoView())
+    }
+    return true
+  }
+}
+
+/**
+ * Delete the image or card at `pos`, with its source and magic comment, and
+ * put the caret where it was.
+ */
+export function deleteEmbed(pos: number): Command {
+  return (state, dispatch) => {
+    const embed = getEmbedAt(state, pos)
+    if (!embed) return false
+    if (dispatch) {
+      const transaction = state.tr.delete(embed.from, embed.to)
+      transaction.setSelection(TextSelection.create(transaction.doc, embed.from))
       dispatch(transaction.scrollIntoView())
     }
     return true
@@ -97,7 +119,7 @@ function getButtonTarget(target: EventTarget | null): HTMLElement | undefined {
  * The card a menu button belongs to, found through the hidden source next to
  * the card, since an event on the non-editable card lands on a unit boundary.
  */
-function getEmbedForButton(view: EditorView, button: HTMLElement): EmbedTarget | undefined {
+function getEmbedForButton(view: EditorView, button: HTMLElement): EmbedHit | undefined {
   const content = button.closest('.md-image-view')?.querySelector('.md-image-view-content')
   if (!content) return
   return getEmbedAt(view.state, view.posAtDOM(content, 0))
@@ -109,9 +131,9 @@ function getEmbedForButton(view: EditorView, button: HTMLElement): EmbedTarget |
 export type EmbedMenuOpenHandler = (embed: EmbedTarget, button: HTMLElement) => void
 
 /**
- * Show the menu button on X post and YouTube cards, and call `onOpen` when
- * the user clicks it or presses `Mod-/` with a card selected. Install it only
- * where a menu is rendered: without it, the cards show no button.
+ * Show the menu button on images, X post cards, and YouTube cards, and call
+ * `onOpen` when the user clicks it or presses `Mod-/` with one selected.
+ * Install it only where a menu is rendered: without it, no button shows.
  */
 export function defineEmbedMenuHandler(onOpen: EmbedMenuOpenHandler): PlainExtension {
   const openSelectedEmbed: Command = (state, dispatch, view) => {

@@ -11,7 +11,14 @@ import { TextSelection } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 import type { ReactNodeViewProps } from '@prosekit/react'
 import { clsx } from 'clsx/lite'
-import { BracesIcon, CheckIcon, ChevronsUpDownIcon, CopyIcon, EllipsisIcon } from 'lucide-react'
+import {
+  BracesIcon,
+  CheckIcon,
+  ChevronsUpDownIcon,
+  CopyIcon,
+  EllipsisIcon,
+  Trash2Icon,
+} from 'lucide-react'
 import {
   memo,
   use,
@@ -102,6 +109,7 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
             language={language}
             setLanguage={setLanguage}
             view={view}
+            getPos={getPos}
             caretInside={caretInside}
           />
         )
@@ -138,6 +146,7 @@ interface CodeBlockToolbarProps {
   language: string
   setLanguage: (language: string) => void
   view: EditorView
+  getPos: () => number | undefined
   caretInside: boolean
 }
 
@@ -146,6 +155,7 @@ function CodeBlockToolbar({
   language,
   setLanguage,
   view,
+  getPos,
   caretInside,
 }: CodeBlockToolbarProps) {
   const [state, dispatch] = useReducer(reduceCodeBlockToolbar, CODE_BLOCK_TOOLBAR_IDLE)
@@ -196,6 +206,16 @@ function CodeBlockToolbar({
     void writeClipboardText(code)
   }, [code])
 
+  const deleteCodeBlock = useCallback(() => {
+    const pos = getPos()
+    if (pos == null) return
+    deleteBlockAt(view, pos)
+    view.focus()
+  }, [getPos, view])
+
+  // Read when the menu opens: a read-only switch does not re-render the view.
+  const canDeleteCodeBlock = useCallback(() => view.editable, [view])
+
   return (
     <div
       className={styles.Toolbar}
@@ -223,6 +243,8 @@ function CodeBlockToolbar({
         getFinalFocus={getFinalFocus}
         onChangeLanguage={handOverToLanguagePicker}
         onCopyCode={copyCode}
+        onDelete={deleteCodeBlock}
+        canDelete={canDeleteCodeBlock}
       />
     </div>
   )
@@ -235,6 +257,11 @@ interface CodeBlockMenuProps {
   getFinalFocus: () => boolean
   onChangeLanguage: VoidFunction
   onCopyCode: VoidFunction
+  onDelete: VoidFunction
+  /**
+   * Whether to offer `onDelete`, read each time the menu opens.
+   */
+  canDelete: () => boolean
 }
 
 function CodeBlockMenu({
@@ -244,6 +271,8 @@ function CodeBlockMenu({
   getFinalFocus,
   onChangeLanguage,
   onCopyCode,
+  onDelete,
+  canDelete,
 }: CodeBlockMenuProps): ReactElement {
   return (
     <Menu.Root open={open} onOpenChange={onOpenChange} onOpenChangeComplete={onOpenChangeComplete}>
@@ -259,6 +288,8 @@ function CodeBlockMenu({
         getFinalFocus={getFinalFocus}
         onChangeLanguage={onChangeLanguage}
         onCopyCode={onCopyCode}
+        onDelete={onDelete}
+        canDelete={canDelete}
       />
     </Menu.Root>
   )
@@ -268,12 +299,16 @@ interface CodeBlockMenuPopupProps {
   getFinalFocus: () => boolean
   onChangeLanguage: VoidFunction
   onCopyCode: VoidFunction
+  onDelete: VoidFunction
+  canDelete: () => boolean
 }
 
 function CodeBlockMenuPopup({
   getFinalFocus,
   onChangeLanguage,
   onCopyCode,
+  onDelete,
+  canDelete,
 }: CodeBlockMenuPopupProps): ReactElement {
   const collisionBoundary = use(CollisionBoundaryContext)
 
@@ -302,6 +337,16 @@ function CodeBlockMenuPopup({
             <CopyIcon />
             <span>Copy code</span>
           </Menu.Item>
+          {canDelete() && (
+            <Menu.Item
+              className="meowdown-menu-item"
+              onClick={onDelete}
+              data-testid="code-block-menu-delete"
+            >
+              <Trash2Icon />
+              <span>Delete</span>
+            </Menu.Item>
+          )}
         </Menu.Popup>
       </Menu.Positioner>
     </Menu.Portal>
@@ -413,3 +458,26 @@ function CodeBlockLanguagePicker({
 }
 
 const CodeBlockLanguagePickerMemo = /* @__PURE__ */ memo(CodeBlockLanguagePicker)
+
+/**
+ * Delete the block at `pos` and put the caret where it was. A block that is
+ * the only child of its parent gives way to an empty default block (usually a
+ * paragraph), since the parent cannot be left empty.
+ */
+function deleteBlockAt(view: EditorView, pos: number): void {
+  const { state } = view
+  const $pos = state.doc.resolve(pos)
+  const node = $pos.nodeAfter
+  if (!node) return
+  const end = pos + node.nodeSize
+  const tr =
+    $pos.parent.childCount === 1
+      ? state.tr.replaceWith(
+          pos,
+          end,
+          $pos.parent.type.contentMatch.defaultType?.createAndFill() ?? [],
+        )
+      : state.tr.delete(pos, end)
+  tr.setSelection(TextSelection.near(tr.doc.resolve(Math.min(pos, tr.doc.content.size)), 1))
+  view.dispatch(tr.scrollIntoView())
+}

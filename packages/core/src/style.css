@@ -1298,10 +1298,10 @@
       overflow: visible;
     }
 
-    /* The card's menu button, present only while an embed menu is installed
-     * (`data-embed-menu` on the editor). It shows on hover, while the card is
-     * selected, and while its menu is open. */
-    .md-image-view-preview[data-post-embed] {
+    /* The menu button of an image or card, present only while an embed menu
+     * is installed (`data-embed-menu` on the editor). It shows on hover, while
+     * the image or card is selected, and while its menu is open. */
+    .md-image-view-preview {
       position: relative;
     }
 
@@ -1320,7 +1320,7 @@
       transition: opacity 100ms ease-out;
     }
 
-    &[data-embed-menu] .md-image-view-preview[data-post-embed]:hover .md-embed-menu-button,
+    &[data-embed-menu] .md-image-view-preview:hover .md-embed-menu-button,
     &[data-embed-menu] .md-atom-view:has(.md-atom-selected) .md-embed-menu-button,
     &[data-embed-menu] .md-embed-menu-button[aria-expanded='true'] {
       opacity: 1;
@@ -1337,10 +1337,11 @@
        * image, not the page behind it. */
       isolation: isolate;
       max-width: 100%;
-      /* Avoid a 1px collapse before the image loads / a width is known, and keep
-       * the corner handle clear of the image center. */
-      min-width: 2.5rem;
-      min-height: 2.5rem;
+      /* Avoid a 1px collapse before the image loads / a width is known, keep
+       * the corner handle clear of the image center, and fit the menu button
+       * (1.6rem, inset 0.5rem on each side). */
+      min-width: 2.6rem;
+      min-height: 2.6rem;
     }
 
     /* While the image is still loading (e.g. a freshly dropped image), fill the

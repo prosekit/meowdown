@@ -4,6 +4,7 @@ import type { EditorView } from '@prosekit/pm/view'
 
 import { isModEvent } from '../utils/is-mod-event.ts'
 
+import { EMBED_MENU_BUTTON_CLASS } from './embed-menu.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 
@@ -18,10 +19,12 @@ interface ImageHit {
 
 /**
  * The image preview wrapper around `target`, or nothing when the wrapper holds
- * a post-embed card: its links and controls have their own click behavior.
+ * a post-embed card (its links and controls have their own click behavior) or
+ * `target` is the preview's menu button.
  */
 function getClosestImagePreview(target: EventTarget | null): HTMLElement | undefined {
   if (!(target instanceof HTMLElement)) return
+  if (target.closest(`.${EMBED_MENU_BUTTON_CLASS}`)) return
   const preview = target.closest<HTMLElement>('.md-image-view-preview')
   if (!preview || preview.dataset.postEmbed != null) return
   return preview
