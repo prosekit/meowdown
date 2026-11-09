@@ -1,4 +1,4 @@
-@layer meowdown.base, meowdown.theme, meowdown.editor;
+@layer meowdown.base, meowdown.icons, meowdown.theme, meowdown.editor;
 
 @import '@prosekit/pm/view/style/prosemirror.css' layer(meowdown.base);
 @import '@prosekit/extensions/list/style.css' layer(meowdown.base);
