@@ -432,14 +432,16 @@ class ImageMarkView implements MarkView {
       element.url = src
       return element
     }
-    registerYouTubeVideo()
-    const element = document.createElement('meowdown-embed-youtube')
-    element.playback = 'inline'
-    element.data = getSavedYouTubeVideo(this.#attrs.snapshot)
-    element.resolver = this.#persisting(kind, this.#resolveYouTubeVideo)
-    element.url = src
-    this.#youtube = element
-    return this.#buildResizableVideo(element)
+    if (kind === 'youtube-video') {
+      registerYouTubeVideo()
+      const element = document.createElement('meowdown-embed-youtube')
+      element.playback = 'inline'
+      element.data = getSavedYouTubeVideo(this.#attrs.snapshot)
+      element.resolver = this.#persisting(kind, this.#resolveYouTubeVideo)
+      element.url = src
+      this.#youtube = element
+      return this.#buildResizableVideo(element)
+    }
   }
 
   /**
