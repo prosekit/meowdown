@@ -41,9 +41,8 @@ import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
 export const EMBED_MENU_BUTTON_CLASS = 'md-embed-menu-button'
 
 /**
- * The menu button of an image or card. It stays hidden until `defineEmbedMenuHandler`
- * marks the editor, and out of the tab order: `Mod-/` opens the menu from the
- * keyboard.
+ * The menu button of an image or card, handled by `defineEmbedMenuHandler`.
+ * It stays out of the tab order: `Mod-/` opens the menu from the keyboard.
  */
 function createEmbedMenuButton(): HTMLButtonElement {
   const button = document.createElement('button')

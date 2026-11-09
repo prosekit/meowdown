@@ -123,9 +123,8 @@ function getButtonTarget(target: EventTarget | null): HTMLElement | undefined | 
 export type EmbedMenuOpenHandler = (embed: EmbedTarget, button: HTMLElement) => void
 
 /**
- * Show the menu button on images, X post cards, and YouTube cards, and call
- * `onOpen` when the user clicks it or presses `Mod-/` with one selected.
- * Install it only where a menu is rendered: without it, no button shows.
+ * Call `onOpen` when the user clicks the menu button of an image, X post card,
+ * or YouTube card, or presses `Mod-/` with one selected.
  */
 export function defineEmbedMenuHandler(onOpen: EmbedMenuOpenHandler): PlainExtension {
   const openSelectedEmbed: Command = (state, dispatch, view) => {
@@ -141,7 +140,6 @@ export function defineEmbedMenuHandler(onOpen: EmbedMenuOpenHandler): PlainExten
       new Plugin({
         key: embedMenuKey,
         props: {
-          attributes: { 'data-embed-menu': '' },
           handleDOMEvents: {
             // Keep the caret and focus where they are, and keep ProseMirror
             // from starting a selection on the non-editable card.
