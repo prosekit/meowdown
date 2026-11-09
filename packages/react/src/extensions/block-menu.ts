@@ -43,7 +43,7 @@ export function defineCodeBlockMenuKeymap(): PlainExtension {
  * the only child of its parent gives way to an empty default block (usually a
  * paragraph), since the parent cannot be left empty.
  *
- * FIXME: move deleteBlock to packages/core/src/extensions/commands.ts and add some unit tests for it.
+ * FIXME: move deleteBlock to packages/core/src/extensions/commands.ts and add some unit tests for it. export it as an internal function
  */
 export function deleteBlock(pos: number): Command {
   return (state, dispatch) => {
