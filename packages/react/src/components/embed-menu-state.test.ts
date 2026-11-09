@@ -7,6 +7,7 @@ const embed: EmbedTarget = {
   kind: 'x-post',
   src: 'https://x.com/jack/status/20',
   alt: '',
+  syntax: null,
   from: 1,
   to: 31,
 }
