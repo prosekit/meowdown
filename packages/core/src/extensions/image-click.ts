@@ -39,7 +39,11 @@ export interface ImageHit {
   syntax: 'wikiEmbed' | null
 }
 
-// FIXME: add an alias EmbedHit for ImageHit, since it can be a post or YouTube card too. Use "embed: EmbedHit" instead of "embed: ImageHit" in APIs
+/**
+ * An {@link ImageHit} seen as what the menu acts on, which is just as often an
+ * X post or YouTube card as a plain image.
+ */
+export type EmbedHit = ImageHit
 
 /**
  * The image preview wrapper around `target`, or nothing when the wrapper holds

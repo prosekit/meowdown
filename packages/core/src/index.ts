@@ -69,7 +69,7 @@ export {
   defineImageClickHandler,
   type ImageClickHandler,
   type ImageClickPayload,
-  type ImageHit,
+  type EmbedHit,
 } from './extensions/image-click.ts'
 export {
   defaultResolveImageUrl,

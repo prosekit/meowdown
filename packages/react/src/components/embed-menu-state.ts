@@ -1,4 +1,4 @@
-import type { ImageHit } from '@meowdown/core'
+import type { EmbedHit } from '@meowdown/core'
 
 export type EmbedMenuState =
   | {
@@ -9,7 +9,7 @@ export type EmbedMenuState =
        * The menu is open over `embed`, anchored to its menu `button`.
        */
       readonly phase: 'open'
-      readonly embed: ImageHit
+      readonly embed: EmbedHit
       readonly button: HTMLElement
     }
   | {
@@ -17,7 +17,7 @@ export type EmbedMenuState =
        * The menu plays its exit animation, still anchored to `button`.
        */
       readonly phase: 'closing'
-      readonly embed: ImageHit
+      readonly embed: EmbedHit
       readonly button: HTMLElement
     }
 
@@ -28,7 +28,7 @@ export type EmbedMenuEvent =
        * over this button, otherwise open it over `embed`.
        */
       readonly type: 'toggle'
-      readonly embed: ImageHit
+      readonly embed: EmbedHit
       readonly button: HTMLElement
     }
   | {

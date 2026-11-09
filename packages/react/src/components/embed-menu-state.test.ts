@@ -1,9 +1,9 @@
-import type { ImageHit } from '@meowdown/core'
+import type { EmbedHit } from '@meowdown/core'
 import { describe, expect, it } from 'vitest'
 
 import { EMBED_MENU_IDLE, reduceEmbedMenu, type EmbedMenuState } from './embed-menu-state.ts'
 
-const embed: ImageHit = {
+const embed: EmbedHit = {
   kind: 'x-post',
   src: 'https://x.com/jack/status/20',
   alt: '',
@@ -11,7 +11,7 @@ const embed: ImageHit = {
   from: 1,
   to: 31,
 }
-const otherEmbed: ImageHit = { ...embed, from: 40, to: 70 }
+const otherEmbed: EmbedHit = { ...embed, from: 40, to: 70 }
 const button = {} as HTMLElement
 const otherButton = {} as HTMLElement
 
