@@ -10,6 +10,7 @@ import { markdownToDoc } from '../converters/md-to-pm.ts'
 import { isNodeOfType, type NodeName } from './node-names.ts'
 import { getNodeBuildersForSchema } from './schema.ts'
 
+/** @internal */
 function selectText(anchor: number, head?: number): Command {
   return (state, dispatch) => {
     if (dispatch) {
@@ -21,6 +22,7 @@ function selectText(anchor: number, head?: number): Command {
   }
 }
 
+/** @internal */
 function selectTextBetween($anchor: ResolvedPos, $head: ResolvedPos, bias?: number): Command {
   return (state, dispatch) => {
     if (dispatch) {
@@ -32,6 +34,7 @@ function selectTextBetween($anchor: ResolvedPos, $head: ResolvedPos, bias?: numb
   }
 }
 
+/** @internal */
 function insertMarkdown(markdown: string): Command {
   return (state, dispatch) => {
     if (!markdown.trim()) return false
@@ -63,6 +66,8 @@ function insertMarkdown(markdown: string): Command {
  * `insertText`. When a non-space character sits right before the caret, a
  * space is inserted first so the trigger can match, like a user would type
  * it. In a code block, where no menu can open, the command does nothing.
+ *
+ * @internal
  */
 function insertTrigger(text: string): Command {
   return (state, dispatch) => {
@@ -87,11 +92,14 @@ function insertTrigger(text: string): Command {
  * Turns the current block into plain text, peeling one layer per call: a
  * non-paragraph textblock becomes a paragraph, then a paragraph in a list
  * loses its marker, then a paragraph in a blockquote lifts out of it.
+ *
+ * @internal
  */
 function turnIntoText(): Command {
   return chainCommands(setBlockType({ type: 'paragraph' satisfies NodeName }), unwrapList(), lift)
 }
 
+/** @internal */
 function scrollIntoView(): Command {
   return (state, dispatch) => {
     if (dispatch) {
@@ -100,6 +108,8 @@ function scrollIntoView(): Command {
     return true
   }
 }
+
+// FIXME: 1. export these command functions like scrollIntoView and turnIntoText in core/src/index.ts
 
 export function defineEditorCommands() {
   return defineCommands({
