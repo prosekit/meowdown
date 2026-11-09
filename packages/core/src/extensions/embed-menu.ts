@@ -38,6 +38,7 @@ export interface EmbedTarget {
 
 /**
  * Tag an image found in the document with the kind of card its URL renders.
+ * FIXME: now ImageHit already have "kind", we do not need to call this function anymore.
  */
 function toEmbedTarget(image: Omit<EmbedTarget, 'kind'> | undefined): EmbedTarget | undefined {
   return image && { ...image, kind: matchEmbed(image.src) ?? 'image' }

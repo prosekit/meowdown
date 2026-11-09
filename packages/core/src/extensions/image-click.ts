@@ -15,9 +15,11 @@ const imageClickKey = new PluginKey('meowdown-image-click')
 interface ImageHit {
   from: number
   to: number
-  src: string
-  alt: string
   kind: 'x-post' | 'youtube-video' | 'image'
+  /** FIXME: add comment for src */
+  src: string
+  /** FIXME: add comment for alt */
+  alt: string
   /**
    * `wikiEmbed` for a `![[target]]` source, otherwise `null`.
    */
