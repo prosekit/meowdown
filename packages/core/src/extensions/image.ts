@@ -442,7 +442,7 @@ class ImageMarkView implements MarkView {
       this.#youtube = element
       return this.#buildResizableVideo(element)
     }
-    throw new Error(`unexpected embed kind ${kind satisfies never}`)
+    throw new Error(`Unexpected embed kind ${kind satisfies never}`)
   }
 
   /**
