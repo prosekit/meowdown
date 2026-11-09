@@ -2,7 +2,7 @@ import '../testing/index.ts'
 
 import type { LinkPreview } from '@meowdown/core'
 import { readClipboard } from '@meowdown/vitest/clipboard'
-import { sleep } from '@ocavue/utils'
+import { sleep, noop } from '@ocavue/utils'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -18,7 +18,7 @@ const popover = page.getByTestId('link-popover')
 
 describe('LinkMenu', () => {
   it('shows loading and then rich metadata', async () => {
-    let resolvePreview: (preview: LinkPreview | undefined) => void = () => undefined
+    let resolvePreview: (preview: LinkPreview | undefined) => void = noop
     const resolver = vi.fn(() => {
       return new Promise<LinkPreview | undefined>((resolve) => {
         resolvePreview = resolve
@@ -103,7 +103,7 @@ describe('LinkMenu', () => {
 
   it('replaces only a URL label with the resolved title', async () => {
     const ref = createRef<EditorHandle>()
-    let resolvePreview: (preview: LinkPreview | undefined) => void = () => undefined
+    let resolvePreview: (preview: LinkPreview | undefined) => void = noop
     await render(
       <MarkdownEditor
         handleRef={ref}
@@ -125,7 +125,7 @@ describe('LinkMenu', () => {
   })
 
   it('does not offer title replacement for an intentional label', async () => {
-    let resolvePreview: (preview: LinkPreview | undefined) => void = () => undefined
+    let resolvePreview: (preview: LinkPreview | undefined) => void = noop
     const screen = await render(
       <MarkdownEditor
         initialMarkdown="[My label](https://example.com)"

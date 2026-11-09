@@ -1,3 +1,4 @@
+import { returnNull } from '@ocavue/utils'
 import {
   canUseRegexLookbehind,
   defineKeymap,
@@ -90,7 +91,7 @@ function defineSubstitutionUndoPlugin(): PlainExtension {
     new Plugin<SubstitutionUndoState | null>({
       key: substitutionUndoKey,
       state: {
-        init: () => null,
+        init: returnNull,
         apply: (tr, previous) => {
           // A meta from this extension starts tracking a fresh substitution
           // (a state object) or stops tracking after a Backspace restore (null).

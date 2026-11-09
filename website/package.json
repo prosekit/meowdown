@@ -21,7 +21,7 @@
     "@meowdown/core": "workspace:*",
     "@meowdown/embed": "workspace:*",
     "@meowdown/react": "workspace:*",
-    "@ocavue/utils": "^1.11.0",
+    "@ocavue/utils": "^1.12.0",
     "astro": "^7.4.2",
     "astro-theme-toggle": "^0.8.2",
     "astrobook": "^0.13.3",

@@ -1,3 +1,4 @@
+import { noop } from '@ocavue/utils'
 import { TextSelection } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
@@ -33,8 +34,8 @@ function setup(mode: MarkMode, paragraphs: string[]): Fixture {
   const imageOptions: ImageOptions = {
     resolveImageUrl: () => getSVGImageURL(24, 24),
     // Keep the card unavailable while tracing navigation selections.
-    resolveXPost: () => undefined,
-    resolveYouTubeVideo: () => undefined,
+    resolveXPost: noop,
+    resolveYouTubeVideo: noop,
   }
   const fixture = setupFixture({ extensionOptions: { markMode: mode, ...imageOptions } })
   const { n } = fixture

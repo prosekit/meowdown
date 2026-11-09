@@ -1,6 +1,7 @@
 import { registerXPost, type Resolver } from '@meowdown/embed/x'
 import { registerYouTubeVideo, type YouTubeVideoElement } from '@meowdown/embed/youtube'
 import { matchEmbed, type EmbedKind } from '@meowdown/markdown'
+import { noop } from '@ocavue/utils'
 import type { XPost, YouTubeVideo } from '@post-embed/types'
 import { defineMarkView, isApple, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
@@ -461,14 +462,11 @@ class ImageMarkView implements MarkView {
   #persisting<T extends XPost | YouTubeVideo>(kind: EmbedKind, resolver: Resolver<T>): Resolver<T> {
     return (url) => {
       const result = resolver(url)
-      void Promise.resolve(result).then(
-        (value) => {
-          if (this.#destroyed || value == null) return
-          const snapshot = parsePostEmbedSnapshot({ kind, data: value })
-          if (snapshot) commitSnapshot(this.#view, this.#contentDOM, url, snapshot)
-        },
-        () => {},
-      )
+      void Promise.resolve(result).then((value) => {
+        if (this.#destroyed || value == null) return
+        const snapshot = parsePostEmbedSnapshot({ kind, data: value })
+        if (snapshot) commitSnapshot(this.#view, this.#contentDOM, url, snapshot)
+      }, noop)
       return result
     }
   }

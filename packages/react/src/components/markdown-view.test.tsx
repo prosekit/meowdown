@@ -18,6 +18,8 @@ import { MarkdownView } from './markdown-view.tsx'
 // A photo that loads without the network: the card hides one that fails.
 const PHOTO_URL =
   "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='100'%20height='100'/%3E"
+import { noop, returnFalse, returnTrue } from '@ocavue/utils'
+
 import {
   ATOM_VIEW_CLASS,
   LINK_TEXT_MARK_CLASS,
@@ -120,7 +122,7 @@ describe('MarkdownView', () => {
   })
 
   it('leaves an unclaimed standard Markdown link as a link', async () => {
-    await renderView('[Website](https://example.com)', { resolveFileLink: () => false })
+    await renderView('[Website](https://example.com)', { resolveFileLink: returnFalse })
 
     await expect.element(view.locate('a')).toHaveAttribute('href', 'https://example.com')
     expect(view.element().querySelector('[data-testid="file-pill"]')).toBeNull()
@@ -177,7 +179,7 @@ describe('MarkdownView', () => {
   it('resolves metadata for a claimed standard Markdown file link', async () => {
     const resolveFileInfo = vi.fn(() => ({ size: 1_400_000 }))
     await renderView('[Quarterly](docs/report.pdf)', {
-      resolveFileLink: () => true,
+      resolveFileLink: returnTrue,
       resolveFileInfo,
     })
 
@@ -188,7 +190,7 @@ describe('MarkdownView', () => {
   it('reports clicks on a claimed standard Markdown file link', async () => {
     const onFileClick = vi.fn<FileClickHandler>()
     await renderView('[Quarterly](docs/report.pdf)', {
-      resolveFileLink: () => true,
+      resolveFileLink: returnTrue,
       onFileClick,
     })
 
@@ -203,7 +205,7 @@ describe('MarkdownView', () => {
     const onFileClick = vi.fn()
     await renderView('[Quarterly](docs/report.pdf)', {
       interactive: false,
-      resolveFileLink: () => true,
+      resolveFileLink: returnTrue,
       onFileClick,
     })
 
@@ -228,7 +230,7 @@ describe('MarkdownView', () => {
   })
 
   it('leaves an unresolved wiki embed literal', async () => {
-    await renderView('![[ambiguous.png]]', { resolveWikiEmbed: () => undefined })
+    await renderView('![[ambiguous.png]]', { resolveWikiEmbed: noop })
     await expect.element(view).toHaveTextContent('![[ambiguous.png]]')
     expect(view.element().querySelector(`.${ATOM_VIEW_CLASS}`)).toBeNull()
   })
@@ -359,7 +361,7 @@ describe('MarkdownView', () => {
 
   it('renders the unavailable card without a snapshot', async () => {
     await renderView('![](https://x.com/jack/status/20)', {
-      resolveXPost: () => undefined,
+      resolveXPost: noop,
     })
     await expect
       .element(view.getByTestId('x-post-embed').locate('[data-fallback]'))

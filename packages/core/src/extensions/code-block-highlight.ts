@@ -1,6 +1,7 @@
 import { LanguageDescription, type LanguageSupport } from '@codemirror/language'
 import { languages } from '@codemirror/language-data'
 import { classHighlighter, highlightTree } from '@lezer/highlight'
+import { noop } from '@ocavue/utils'
 import type { Extension } from '@prosekit/core'
 import { defineCodeBlockHighlight, type HighlightParser } from '@prosekit/extensions/code-block'
 import { createParser } from 'prosemirror-highlight/lezer'
@@ -70,7 +71,7 @@ const lazyParser: HighlightParser = (options) => {
   if (support) return getParser(language, support)(options)
 
   // Not loaded yet: trigger the load and let the plugin re-run once it resolves.
-  return loadLanguageSupport(language).then(() => undefined)
+  return loadLanguageSupport(language).then(noop)
 }
 
 /**

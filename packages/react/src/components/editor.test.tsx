@@ -1,6 +1,7 @@
 import '../testing/index.ts'
 
 import { dropFiles } from '@meowdown/vitest/file-events'
+import { noop } from '@ocavue/utils'
 import { pasteText } from '@prosekit/core/test'
 import { TextSelection } from '@prosekit/pm/state'
 import { useEditor } from '@prosekit/react'
@@ -213,9 +214,7 @@ describe('MarkdownEditor', () => {
   })
 
   it('does not render an image when resolveImageUrl returns undefined', async () => {
-    await render(
-      <MarkdownEditor initialMarkdown="![pic](a.png)" resolveImageUrl={() => undefined} />,
-    )
+    await render(<MarkdownEditor initialMarkdown="![pic](a.png)" resolveImageUrl={noop} />)
     await expect.element(page.getByAltText('pic')).not.toBeInTheDocument()
   })
 

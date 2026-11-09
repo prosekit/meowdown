@@ -1,6 +1,7 @@
 import '../testing/index.ts'
 
 import { readClipboard } from '@meowdown/vitest/clipboard'
+import { noop } from '@ocavue/utils'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -26,12 +27,7 @@ const IMAGE =
 async function setup(markdown: string, readOnly = false) {
   const ref = createRef<EditorHandle>()
   await render(
-    <ProseKitEditor
-      ref={ref}
-      initialMarkdown={markdown}
-      resolveXPost={() => undefined}
-      readOnly={readOnly}
-    />,
+    <ProseKitEditor ref={ref} initialMarkdown={markdown} resolveXPost={noop} readOnly={readOnly} />,
   )
   await expect.element(card).toBeInTheDocument()
   return ref

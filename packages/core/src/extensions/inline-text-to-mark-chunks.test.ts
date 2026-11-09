@@ -1,4 +1,4 @@
-import { once } from '@ocavue/utils'
+import { once, noop, returnFalse, returnTrue } from '@ocavue/utils'
 import { createMarkBuilders } from '@prosekit/core'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -738,8 +738,7 @@ describe('wiki embed', () => {
   })
 
   it('stays literal when the resolver cannot prove a target', () => {
-    expect(parse('![[duplicate.png]]', { resolveWikiEmbed: () => undefined }))
-      .toMatchInlineSnapshot(`
+    expect(parse('![[duplicate.png]]', { resolveWikiEmbed: noop })).toMatchInlineSnapshot(`
       "
       [0, 18]
       "
@@ -747,7 +746,7 @@ describe('wiki embed', () => {
   })
 
   it('passes the parsed alias and dimensions to the resolver', () => {
-    const resolveWikiEmbed = vi.fn(() => undefined)
+    const resolveWikiEmbed = vi.fn(noop)
     parse('![[assets/photo.png|320x180]]', { resolveWikiEmbed })
     expect(resolveWikiEmbed).toHaveBeenCalledWith({
       target: 'assets/photo.png',
@@ -834,7 +833,7 @@ describe('wikilink resolver', () => {
   })
 
   it('passes the trimmed bracketed text to the resolver', () => {
-    const resolveWikilink = vi.fn(() => undefined)
+    const resolveWikilink = vi.fn(noop)
     parse('[[  Tim MacCaw // Dad|Dad  ]]', { resolveWikilink })
     expect(resolveWikilink).toHaveBeenCalledWith({ target: 'Tim MacCaw // Dad|Dad' })
   })
@@ -1266,7 +1265,7 @@ describe('file link', () => {
   })
 
   it('leaves a declined link as a regular link', () => {
-    expect(parse('[report.pdf](assets/report.pdf)', { resolveFileLink: () => false }))
+    expect(parse('[report.pdf](assets/report.pdf)', { resolveFileLink: returnFalse }))
       .toMatchInlineSnapshot(`
         "
         [0, 1]   mdPack(key=link-inline,data={"href":"assets/report.pdf","title":""},revealInFocus=true) + mdLinkText(href=assets/report.pdf) + mdMark
@@ -1354,7 +1353,7 @@ describe('file link', () => {
   })
 
   it('never consults the resolver for images, autolinks, or linkless shapes', () => {
-    const resolveFileLink = vi.fn(() => true)
+    const resolveFileLink = vi.fn(returnTrue)
     parse('![img](assets/img.pdf)', { resolveFileLink })
     parse('www.example.com/file.pdf', { resolveFileLink })
     parse('[shortcut]', { resolveFileLink })

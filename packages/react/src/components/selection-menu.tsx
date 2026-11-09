@@ -6,6 +6,7 @@ import {
   type EditorExtension,
   type VirtualElement,
 } from '@meowdown/core'
+import { noop } from '@ocavue/utils'
 import { defineUpdateHandler, isTextSelection } from '@prosekit/core'
 import type { EditorView } from '@prosekit/pm/view'
 import { useEditor, useExtension } from '@prosekit/react'
@@ -144,7 +145,7 @@ export function SelectionMenu({
 
   if (affordanceVisible && showAffordance) {
     return (
-      <Popover.Root open onOpenChange={() => {}}>
+      <Popover.Root open onOpenChange={noop}>
         <Popover.Portal>
           <Popover.Positioner
             anchor={affordanceAnchor}

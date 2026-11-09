@@ -1,4 +1,5 @@
 import { isSafari } from '@meowdown/vitest/helpers'
+import { noop } from '@ocavue/utils'
 import { NodeSelection } from '@prosekit/pm/state'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
@@ -688,7 +689,7 @@ describe('image resolver errors', () => {
 
   it('reports a throwing resolver and keeps the source editable', async () => {
     const error = new Error('resolver failed')
-    const reportErrorSpy = vi.spyOn(globalThis, 'reportError').mockImplementation(() => {})
+    const reportErrorSpy = vi.spyOn(globalThis, 'reportError').mockImplementation(noop)
     try {
       using fixture = setupThrowing('![img](photo.png)', error)
       expect(reportErrorSpy).toHaveBeenCalledWith(error)
