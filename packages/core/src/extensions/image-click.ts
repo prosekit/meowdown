@@ -1,3 +1,4 @@
+import { matchEmbed, type EmbedKind } from '@meowdown/markdown'
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
@@ -5,20 +6,32 @@ import type { EditorView } from '@prosekit/pm/view'
 import { getAtomViewSourcePos } from '../utils/atom-view.ts'
 import { isModEvent } from '../utils/is-mod-event.ts'
 
-import { matchEmbed } from '@meowdown/markdown'
 import { EMBED_MENU_BUTTON_CLASS } from './image.ts'
 import type { MdImageAttrs } from './inline-marks.ts'
 import { getMarkRangeAt } from './mark-range.ts'
 
 const imageClickKey = new PluginKey('meowdown-image-click')
 
-interface ImageHit {
+/**
+ * An image, X post card, or YouTube card in the document. Its `![](src)` or
+ * `![[target]]` source, including any trailing magic comment, spans `from` to
+ * `to`.
+ */
+export interface ImageHit {
   from: number
   to: number
-  kind: 'x-post' | 'youtube-video' | 'image'
-  /** FIXME: add comment for src */
+  /**
+   * The kind of card that `src` renders, or `image` for a plain image.
+   */
+  kind: EmbedKind | 'image'
+  /**
+   * The image or post URL: the Markdown destination, or the resolved target
+   * of a `![[target]]` embed.
+   */
   src: string
-  /** FIXME: add comment for alt */
+  /**
+   * The alt text, or for a `![[target]]` embed, its display text or file name.
+   */
   alt: string
   /**
    * `wikiEmbed` for a `![[target]]` source, otherwise `null`.
@@ -48,7 +61,7 @@ export function findImageAt(state: EditorState, pos: number): ImageHit | undefin
   if (!range) return
   const { from, to, mark } = range
   const { src, alt, syntax } = mark.attrs as MdImageAttrs
-  const kind = matchEmbed(src) || 'image'
+  const kind = matchEmbed(src) ?? 'image'
   return { from, to, src, alt, syntax, kind }
 }
 

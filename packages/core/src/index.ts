@@ -30,7 +30,6 @@ export {
   deleteEmbed,
   defineEmbedMenuHandler,
   type EmbedMenuOpenHandler,
-  type EmbedTarget,
 } from './extensions/embed-menu.ts'
 export { defineEmbedPaste } from './extensions/embed-paste.ts'
 export {
@@ -70,6 +69,7 @@ export {
   defineImageClickHandler,
   type ImageClickHandler,
   type ImageClickPayload,
+  type ImageHit,
 } from './extensions/image-click.ts'
 export {
   defaultResolveImageUrl,

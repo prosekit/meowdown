@@ -1,4 +1,3 @@
-import { matchEmbed, type EmbedKind } from '@meowdown/markdown'
 import { isElementLike } from '@ocavue/utils'
 import { defineKeymap, definePlugin, union, type PlainExtension } from '@prosekit/core'
 import {
@@ -12,54 +11,20 @@ import type { EditorView } from '@prosekit/pm/view'
 
 import { getAtomViewAt } from '../utils/atom-view.ts'
 
-import { findImageAt, findImageForElement } from './image-click.ts'
+import { findImageAt, findImageForElement, type ImageHit } from './image-click.ts'
 import { EMBED_MENU_BUTTON_CLASS } from './image.ts'
-import type { MdImageAttrs } from './inline-marks.ts'
 import { stripMagicComment } from './magic-comment.ts'
 
 const embedMenuKey = new PluginKey('meowdown-embed-menu')
 
 /**
- * An image, X post, or YouTube card in the document: its `![](src)` or
- * `![[target]]` source, including any trailing magic comment, spans `from` to
- * `to`. `src` is the image or post URL.
- * FIXME: now ImageHit already have "kind", we do not need "EmbedTarget" anymore.
- */
-export interface EmbedTarget {
-  kind: EmbedKind | 'image'
-  src: string
-  alt: string
-  /**
-   * `wikiEmbed` for a `![[target]]` source, which does not convert to a link.
-   */
-  syntax: MdImageAttrs['syntax']
-  from: number
-  to: number
-}
-
-/**
- * Tag an image found in the document with the kind of card its URL renders.
- * FIXME: now ImageHit already have "kind", we do not need to call this function anymore.
- */
-function toEmbedTarget(image: Omit<EmbedTarget, 'kind'> | undefined): EmbedTarget | undefined {
-  return image && { ...image, kind: matchEmbed(image.src) ?? 'image' }
-}
-
-/**
- * The image or card whose source covers `pos`, if any.
- */
-function getEmbedAt(state: EditorState, pos: number): EmbedTarget | undefined {
-  return toEmbedTarget(findImageAt(state, pos))
-}
-
-/**
  * The image or card that the selection covers exactly, as arrow keys select
  * it.
  */
-function getSelectedEmbed(state: EditorState): EmbedTarget | undefined {
+function getSelectedEmbed(state: EditorState): ImageHit | undefined {
   const { from, to, empty } = state.selection
   if (empty) return
-  const embed = getEmbedAt(state, from)
+  const embed = findImageAt(state, from)
   return embed && embed.from === from && embed.to === to ? embed : undefined
 }
 
@@ -72,7 +37,7 @@ function getSelectedEmbed(state: EditorState): EmbedTarget | undefined {
  */
 export function convertEmbedToLink(pos: number): Command {
   return (state, dispatch) => {
-    const embed = getEmbedAt(state, pos)
+    const embed = findImageAt(state, pos)
     if (!embed || embed.kind === 'image' || embed.syntax != null) return false
     if (dispatch) {
       const source = stripMagicComment(state.doc.textBetween(embed.from, embed.to))
@@ -88,7 +53,7 @@ export function convertEmbedToLink(pos: number): Command {
  */
 export function deleteEmbed(pos: number): Command {
   return (state, dispatch) => {
-    const embed = getEmbedAt(state, pos)
+    const embed = findImageAt(state, pos)
     if (!embed) return false
     if (dispatch) dispatch(replaceEmbed(state, embed, ''))
     return true
@@ -99,7 +64,7 @@ export function deleteEmbed(pos: number): Command {
  * Replace the source of `embed` with `text`, which may be empty, and put the
  * caret after the text.
  */
-function replaceEmbed(state: EditorState, embed: EmbedTarget, text: string) {
+function replaceEmbed(state: EditorState, embed: ImageHit, text: string) {
   const { from, to } = embed
   const tr = text ? state.tr.insertText(text, from, to) : state.tr.delete(from, to)
   return tr.setSelection(TextSelection.create(tr.doc, from + text.length)).scrollIntoView()
@@ -120,7 +85,7 @@ function getButtonTarget(target: EventTarget | null): HTMLElement | undefined | 
 /**
  * Receives a request to open the menu of `embed`, anchored to `button`.
  */
-export type EmbedMenuOpenHandler = (embed: EmbedTarget, button: HTMLElement) => void
+export type EmbedMenuOpenHandler = (embed: ImageHit, button: HTMLElement) => void
 
 /**
  * Call `onOpen` when the user clicks the menu button of an image, X post card,
@@ -152,7 +117,7 @@ export function defineEmbedMenuHandler(onOpen: EmbedMenuOpenHandler): PlainExten
               const button = getButtonTarget(event.target)
               if (!button) return false
               event.preventDefault()
-              const embed = toEmbedTarget(findImageForElement(view, button))
+              const embed = findImageForElement(view, button)
               if (embed) onOpen(embed, button)
               return true
             },
