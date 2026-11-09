@@ -442,6 +442,8 @@ class ImageMarkView implements MarkView {
       this.#youtube = element
       return this.#buildResizableVideo(element)
     }
+
+    console.warn(`[meowdown] unexpected embed kind ${kind satisfies never}`)
   }
 
   /**
