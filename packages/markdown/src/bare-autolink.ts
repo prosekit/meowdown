@@ -45,7 +45,7 @@ function countChar(text: string, end: number, ch: string): number {
 // Ported from https://code.haverbeke.berlin/lezer/markdown/src/commit/1.6.4/src/extension.ts#L179-L195
 export function trimAutolinkEnd(matched: string): number {
   let end = matched.length
-  for (;;) {
+  while (true) {
     const last = matched[end - 1]
     if (
       /[?!.,:*_~]/.test(last) ||
