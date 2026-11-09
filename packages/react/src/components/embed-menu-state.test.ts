@@ -1,0 +1,52 @@
+import type { EmbedHit } from '@meowdown/core'
+import { describe, expect, it } from 'vitest'
+
+import { EMBED_MENU_IDLE, reduceEmbedMenu, type EmbedMenuState } from './embed-menu-state.ts'
+
+const embed: EmbedHit = {
+  kind: 'x-post',
+  src: 'https://x.com/jack/status/20',
+  alt: '',
+  syntax: null,
+  from: 1,
+  to: 31,
+}
+const otherEmbed: EmbedHit = { ...embed, from: 40, to: 70 }
+const button = {} as HTMLElement
+const otherButton = {} as HTMLElement
+
+describe('reduceEmbedMenu', () => {
+  it('opens, closes, and returns to idle after the exit animation', () => {
+    let state: EmbedMenuState = reduceEmbedMenu(EMBED_MENU_IDLE, { type: 'toggle', embed, button })
+    expect(state).toEqual({ phase: 'open', embed, button })
+    state = reduceEmbedMenu(state, { type: 'close' })
+    expect(state).toEqual({ phase: 'closing', embed, button })
+    state = reduceEmbedMenu(state, { type: 'closed' })
+    expect(state).toBe(EMBED_MENU_IDLE)
+  })
+
+  it('moves to another card while the menu is closing', () => {
+    let state = reduceEmbedMenu(EMBED_MENU_IDLE, { type: 'toggle', embed, button })
+    state = reduceEmbedMenu(state, { type: 'close' })
+    state = reduceEmbedMenu(state, { type: 'toggle', embed: otherEmbed, button: otherButton })
+    expect(state).toEqual({ phase: 'open', embed: otherEmbed, button: otherButton })
+    // The exit animation of the previous card must not close the new menu.
+    expect(reduceEmbedMenu(state, { type: 'closed' })).toBe(state)
+  })
+
+  it('closes when the open menu is toggled from its own button', () => {
+    let state = reduceEmbedMenu(EMBED_MENU_IDLE, { type: 'toggle', embed, button })
+    state = reduceEmbedMenu(state, { type: 'toggle', embed, button })
+    expect(state).toEqual({ phase: 'closing', embed, button })
+  })
+
+  it('moves to another card when toggled from its button', () => {
+    let state = reduceEmbedMenu(EMBED_MENU_IDLE, { type: 'toggle', embed, button })
+    state = reduceEmbedMenu(state, { type: 'toggle', embed: otherEmbed, button: otherButton })
+    expect(state).toEqual({ phase: 'open', embed: otherEmbed, button: otherButton })
+  })
+
+  it('ignores a close while idle', () => {
+    expect(reduceEmbedMenu(EMBED_MENU_IDLE, { type: 'close' })).toBe(EMBED_MENU_IDLE)
+  })
+})

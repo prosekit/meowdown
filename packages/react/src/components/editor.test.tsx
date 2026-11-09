@@ -467,7 +467,9 @@ describe('MarkdownEditor', () => {
         onImageClick={onImageClick}
       />,
     )
-    await screen.getByAltText('pic').click()
+    // The image never loads, so it keeps its minimum size, where the menu
+    // button covers the center. Click its top-left corner instead.
+    await screen.getByAltText('pic').click({ position: { x: 4, y: 4 } })
     await vi.waitFor(() => {
       expect(onImageClick).toHaveBeenCalledWith(
         expect.objectContaining({ src: 'https://example.com/a.png', alt: 'pic' }),

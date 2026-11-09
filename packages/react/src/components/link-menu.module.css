@@ -87,7 +87,7 @@
     background: var(--meowdown-popover-hover-bg);
   }
 
-  & svg {
+  & :global(.meowdown-icon) {
     width: 1rem;
     height: 1rem;
   }
@@ -110,7 +110,7 @@
   border-radius: 0.375rem;
 
   & img,
-  & svg {
+  & :global(.meowdown-icon) {
     width: 1.25rem;
     height: 1.25rem;
     object-fit: contain;
@@ -163,13 +163,13 @@
   color: var(--meowdown-text);
   border-top: 1px solid var(--meowdown-border);
 
-  & > svg {
+  & > :global(.meowdown-icon) {
     width: 0.875rem;
     height: 0.875rem;
     color: var(--meowdown-accent);
   }
 
-  & > span {
+  & > span:not(:global(.meowdown-icon)) {
     flex: 1;
     min-width: 0;
     font-size: 0.8125rem;

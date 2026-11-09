@@ -25,6 +25,12 @@ export type { CodeBlockFenceStyle, MeowdownCodeBlockAttrs } from './extensions/c
 export { getEditorConfig } from './extensions/editor-config-getter.ts'
 export type { EditorConfig } from './extensions/editor-config-types.ts'
 export { updateEditorConfig } from './extensions/editor-config.ts'
+export {
+  convertEmbedToLink,
+  deleteEmbed,
+  defineEmbedMenuHandler,
+  type EmbedMenuOpenHandler,
+} from './extensions/embed-menu.ts'
 export { defineEmbedPaste } from './extensions/embed-paste.ts'
 export {
   defineExitBoundaryHandler,
@@ -63,6 +69,7 @@ export {
   defineImageClickHandler,
   type ImageClickHandler,
   type ImageClickPayload,
+  type EmbedHit,
 } from './extensions/image-click.ts'
 export {
   defaultResolveImageUrl,
@@ -105,6 +112,15 @@ export {
   updateLink,
   type LinkAttrs,
 } from './extensions/link-commands.ts'
+export {
+  deleteBlock,
+  insertMarkdown,
+  insertTrigger,
+  scrollIntoView,
+  selectText,
+  selectTextBetween,
+  turnIntoText,
+} from './extensions/commands.ts'
 export type { LinkEditHandler, LinkEditOptions } from './extensions/link-commands.ts'
 export {
   defineLinkHoverHandler,

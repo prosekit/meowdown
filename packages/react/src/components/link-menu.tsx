@@ -20,7 +20,6 @@ import {
 } from '@meowdown/core'
 import { useEditor } from '@prosekit/react'
 import { queueExtension } from '@prosekit/web'
-import { Globe2Icon, PencilIcon, SparklesIcon, UnlinkIcon } from 'lucide-react'
 import {
   use,
   useCallback,
@@ -34,6 +33,7 @@ import {
 
 import { CollisionBoundaryContext } from './collision-boundary.ts'
 import { CopyButton } from './copy-button.tsx'
+import { Icon } from './icon.tsx'
 import { getLinkMenuView, LINK_MENU_IDLE, reduceLinkMenu } from './link-menu-state.ts'
 import styles from './link-menu.module.css'
 
@@ -206,7 +206,7 @@ function LinkActions({
           aria-label="Edit link"
           onClick={onEdit}
         >
-          <PencilIcon />
+          <Icon name="pencil" />
         </button>
       )}
       {onRemove && (
@@ -217,7 +217,7 @@ function LinkActions({
           aria-label="Remove link"
           onClick={onRemove}
         >
-          <UnlinkIcon />
+          <Icon name="unlink" />
         </button>
       )}
     </div>
@@ -226,7 +226,7 @@ function LinkActions({
 
 function PreviewIcon({ preview }: { preview: LinkPreview }) {
   const [failed, setFailed] = useState(false)
-  if (!preview.iconSrc || failed) return <Globe2Icon aria-hidden="true" />
+  if (!preview.iconSrc || failed) return <Icon name="earth" />
   return <img src={preview.iconSrc} alt="" onError={() => setFailed(true)} />
 }
 
@@ -274,7 +274,7 @@ function LinkInfoContent({
         {preview.description && <p className={styles.Description}>{preview.description}</p>}
         {onUseTitle && (
           <div className={styles.ReplaceRow}>
-            <SparklesIcon aria-hidden="true" />
+            <Icon name="sparkles" />
             <span>Replace URL with its title?</span>
             <button
               type="button"

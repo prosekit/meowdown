@@ -9,7 +9,6 @@ import {
 import { defineUpdateHandler, isTextSelection } from '@prosekit/core'
 import type { EditorView } from '@prosekit/pm/view'
 import { useEditor, useExtension } from '@prosekit/react'
-import { SparklesIcon } from 'lucide-react'
 import {
   use,
   useCallback,
@@ -23,6 +22,7 @@ import {
 import { useDelayedFlag } from '../hooks/use-delayed-flag.ts'
 
 import { CollisionBoundaryContext } from './collision-boundary.ts'
+import { Icon } from './icon.tsx'
 import styles from './selection-menu.module.css'
 import type {
   SelectionMenuContext,
@@ -168,7 +168,7 @@ export function SelectionMenu({
                 onPointerDown={(event) => event.preventDefault()}
                 onClick={onOpen}
               >
-                <SparklesIcon />
+                <Icon name="sparkles" />
               </button>
             </Popover.Popup>
           </Popover.Positioner>

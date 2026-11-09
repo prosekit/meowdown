@@ -20,10 +20,10 @@ import {
   TableHandleRowPositioner,
 } from '@prosekit/react/table-handle'
 import type { MenuRootEvents } from '@prosekit/web/menu'
-import { CheckIcon, GripHorizontalIcon, GripVerticalIcon } from 'lucide-react'
 import type { ReactElement, ReactNode } from 'react'
 import { useCallback, useState } from 'react'
 
+import { Icon } from './icon.tsx'
 import styles from './table-handle.module.css'
 
 function TableHandleItem({
@@ -115,7 +115,7 @@ function TableMenuAlignItem({
   return (
     <TableHandleItem testId={`table-align-${align}`} active={active} onSelect={handler}>
       <span>{label}</span>
-      {active && <CheckIcon />}
+      {active && <Icon name="check" />}
     </TableHandleItem>
   )
 }
@@ -341,7 +341,7 @@ export function TableHandle(): ReactElement {
               className={styles.Trigger}
               data-testid="table-handle-column"
             >
-              <GripHorizontalIcon />
+              <Icon name="grip-horizontal" />
             </TableHandleColumnMenuTrigger>
             <MenuPositioner className={styles.MenuPositioner}>
               <MenuPopup className={styles.MenuPopup} data-testid="table-handle-column-menu">
@@ -360,7 +360,7 @@ export function TableHandle(): ReactElement {
             onOpenChangeComplete={rowMenu.onOpenChangeComplete}
           >
             <TableHandleRowMenuTrigger className={styles.Trigger} data-testid="table-handle-row">
-              <GripVerticalIcon />
+              <Icon name="grip-vertical" />
             </TableHandleRowMenuTrigger>
             <MenuPositioner className={styles.MenuPositioner}>
               <MenuPopup className={styles.MenuPopup} data-testid="table-handle-row-menu">

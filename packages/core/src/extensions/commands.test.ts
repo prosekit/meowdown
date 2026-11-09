@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { setupHeadlessFixture } from '../testing/headless.ts'
 
+import { deleteBlock } from './commands.ts'
+
 describe('insertMarkdown', () => {
   it('inserts a lone-paragraph fragment inline at the cursor', () => {
     const fixture = setupHeadlessFixture()
@@ -499,5 +501,72 @@ describe('turnIntoText', () => {
 
       """
     `)
+  })
+})
+
+describe('deleteBlock', () => {
+  it('deletes a block and puts the caret at the start of the next one', () => {
+    const fixture = setupHeadlessFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('Before'), n.codeBlock('code'), n.paragraph('After')))
+    const pos = fixture.doc.child(0).nodeSize
+
+    expect(editor.exec(deleteBlock(pos))).toBe(true)
+
+    expect(docToMarkdown(fixture.doc)).toBe('Before\n\nAfter\n')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`
+      "
+      Before
+      ┃After
+      "
+    `)
+  })
+
+  it('puts the caret at the end of the previous block after deleting the last block', () => {
+    const fixture = setupHeadlessFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('Before'), n.codeBlock('code')))
+    const pos = fixture.doc.child(0).nodeSize
+
+    expect(editor.exec(deleteBlock(pos))).toBe(true)
+
+    expect(docToMarkdown(fixture.doc)).toBe('Before\n')
+    expect(fixture.selectionSnapshot).toMatchInlineSnapshot(`"Before┃"`)
+  })
+
+  it('leaves an empty paragraph after deleting the only block of the document', () => {
+    const fixture = setupHeadlessFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.codeBlock('code')))
+
+    expect(editor.exec(deleteBlock(0))).toBe(true)
+
+    expect(fixture.doc.childCount).toBe(1)
+    expect(fixture.doc.child(0).type.name).toBe('paragraph')
+    expect(fixture.doc.child(0).content.size).toBe(0)
+  })
+
+  it('leaves an empty paragraph inside a container that would be left empty', () => {
+    const fixture = setupHeadlessFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.blockquote(n.codeBlock('code')), n.paragraph('After')))
+
+    expect(editor.exec(deleteBlock(1))).toBe(true)
+
+    const blockquote = fixture.doc.child(0)
+    expect(blockquote.type.name).toBe('blockquote')
+    expect(blockquote.childCount).toBe(1)
+    expect(blockquote.child(0).type.name).toBe('paragraph')
+    expect(blockquote.child(0).content.size).toBe(0)
+  })
+
+  it('does nothing when no block starts at the position', () => {
+    const fixture = setupHeadlessFixture()
+    const { editor, n } = fixture
+    fixture.set(n.doc(n.paragraph('Text')))
+    const doc = fixture.doc
+
+    expect(editor.exec(deleteBlock(doc.content.size))).toBe(false)
+    expect(fixture.doc).toBe(doc)
   })
 })

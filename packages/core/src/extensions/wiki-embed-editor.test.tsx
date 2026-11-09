@@ -47,7 +47,9 @@ describe('wiki embed editor integration', () => {
 
     const image = pmRoot.getByAltText('Photo')
     await expect.element(image).toBeInTheDocument()
-    await userEvent.click(image)
+    // The image never loads, so it keeps its minimum size, where the menu
+    // button covers the center. Click its top-left corner instead.
+    await userEvent.click(image, { position: { x: 4, y: 4 } })
     expect(onImageClick).toHaveBeenCalledWith(
       expect.objectContaining({ src: 'photo.png', alt: 'Photo' }),
     )

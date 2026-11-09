@@ -130,6 +130,10 @@ describe('image selection ring', () => {
 
 describe('image click callback', () => {
   // Render `markdown` with a click handler attached, showing http(s) images as-is.
+  // The image never loads, so it keeps its minimum size, where the menu
+  // button covers the center. Click its top-left corner instead.
+  const CORNER = { position: { x: 4, y: 4 } }
+
   function setupClickable(markdown: string, onImageClick: ImageClickHandler): Fixture {
     const fixture = setupFixture({
       extensionOptions: { onImageClick, resolveImageUrl: (src) => src },
@@ -144,7 +148,7 @@ describe('image click callback', () => {
     using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
     void fixture
     await expect.element(preview).toBeInTheDocument()
-    await userEvent.click(preview)
+    await userEvent.click(preview, CORNER)
     await vi.waitFor(() => {
       expect(onImageClick).toHaveBeenCalledWith(
         expect.objectContaining({ src: 'https://example.com/cat.png', alt: 'cat' }),
@@ -168,7 +172,7 @@ describe('image click callback', () => {
     expect(preview.element().dispatchEvent(pointerDown)).toBe(false)
     expect(pointerDown.defaultPrevented).toBe(true)
 
-    await userEvent.click(preview)
+    await userEvent.click(preview, CORNER)
     await vi.waitFor(() => expect(onImageClick).toHaveBeenCalledTimes(1))
   })
 
@@ -228,6 +232,22 @@ describe('image click callback', () => {
     })
     expect(onImageClick).toHaveBeenCalledTimes(1)
     expect(onImageClick.mock.calls[0][0].event).toBeInstanceOf(TouchEvent)
+  })
+
+  it.skipIf(cannotConstructTouch)('ignores a tap on the menu button', async () => {
+    const onImageClick = vi.fn<ImageClickHandler>()
+    using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
+    void fixture
+    await expect.element(preview).toBeInTheDocument()
+
+    const button = preview.element().querySelector('.md-embed-menu-button')
+    expect(button).not.toBeNull()
+    const tap = buildTap(button!)
+    button!.dispatchEvent(tap.start)
+    button!.dispatchEvent(tap.end)
+
+    expect(tap.end.defaultPrevented).toBe(false)
+    expect(onImageClick).not.toHaveBeenCalled()
   })
 
   it.skipIf(cannotConstructTouch)('ignores a touch that moved too far to be a tap', async () => {
@@ -296,8 +316,8 @@ describe('image click callback', () => {
     )
     void fixture
     await expect.element(pmRoot.getByAltText('one')).toBeInTheDocument()
-    await userEvent.click(pmRoot.getByAltText('one'))
-    await userEvent.click(pmRoot.getByAltText('two'))
+    await userEvent.click(pmRoot.getByAltText('one'), CORNER)
+    await userEvent.click(pmRoot.getByAltText('two'), CORNER)
     await vi.waitFor(() => expect(onImageClick).toHaveBeenCalledTimes(2))
     expect(onImageClick.mock.calls.map(([payload]) => payload.src)).toEqual([
       'https://example.com/1.png',

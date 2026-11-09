@@ -1,7 +1,14 @@
+import { matchEmbed, type EmbedKind } from '@meowdown/markdown'
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
+import {
+  EMBED_MENU_BUTTON_CLASS,
+  IMAGE_RESIZE_HANDLE_CLASS,
+  IMAGE_VIEW_PREVIEW_CLASS,
+} from '../class-names.ts'
+import { getAtomViewSourcePos } from '../utils/atom-view.ts'
 import { isModEvent } from '../utils/is-mod-event.ts'
 
 import type { MdImageAttrs } from './inline-marks.ts'
@@ -9,44 +16,71 @@ import { getMarkRangeAt } from './mark-range.ts'
 
 const imageClickKey = new PluginKey('meowdown-image-click')
 
-interface ImageHit {
+/**
+ * An image, X post card, or YouTube card in the document. Its `![](src)` or
+ * `![[target]]` source, including any trailing magic comment, spans `from` to
+ * `to`.
+ */
+export interface ImageHit {
   from: number
   to: number
+  /**
+   * The kind of card that `src` renders, or `image` for a plain image.
+   */
+  kind: EmbedKind | 'image'
+  /**
+   * The image or post URL: the Markdown destination, or the resolved target
+   * of a `![[target]]` embed.
+   */
   src: string
+  /**
+   * The alt text, or for a `![[target]]` embed, its display text or file name.
+   */
   alt: string
+  /**
+   * `wikiEmbed` for a `![[target]]` source, otherwise `null`.
+   */
+  syntax: 'wikiEmbed' | null
 }
 
 /**
+ * An {@link ImageHit} seen as what the menu acts on, which is just as often an
+ * X post or YouTube card as a plain image.
+ */
+export type EmbedHit = ImageHit
+
+/**
  * The image preview wrapper around `target`, or nothing when the wrapper holds
- * a post-embed card: its links and controls have their own click behavior.
+ * a post-embed card (its links and controls have their own click behavior) or
+ * `target` is the preview's menu button.
  */
 function getClosestImagePreview(target: EventTarget | null): HTMLElement | undefined {
   if (!(target instanceof HTMLElement)) return
-  const preview = target.closest<HTMLElement>('.md-image-view-preview')
+  if (target.closest(`.${EMBED_MENU_BUTTON_CLASS}`)) return
+  const preview = target.closest<HTMLElement>(`.${IMAGE_VIEW_PREVIEW_CLASS}`)
   if (!preview || preview.dataset.postEmbed != null) return
   return preview
 }
 
-function getPreviewImage(preview: HTMLElement): HTMLImageElement | undefined {
-  return preview.querySelector('img') ?? undefined
+function getPreviewImage(preview: HTMLElement): HTMLImageElement | undefined | null {
+  return preview.querySelector('img')
 }
 
 export function findImageAt(state: EditorState, pos: number): ImageHit | undefined {
   const range = getMarkRangeAt(state, pos, 'mdImage')
   if (!range) return
-  const { src, alt } = range.mark.attrs as MdImageAttrs
-  return { from: range.from, to: range.to, src, alt }
+  const { from, to, mark } = range
+  const { src, alt, syntax } = mark.attrs as MdImageAttrs
+  const kind = matchEmbed(src) ?? 'image'
+  return { from, to, src, alt, syntax, kind }
 }
 
 /**
- * Resolve the image hit for a preview element via its content holder, not the
- * event's document position: an event on the non-editable preview lands on the
- * run boundary, where `getMarkRange` would pick the next adjacent image.
+ * The image whose rendered preview, menu button, or other element is `element`.
  */
-function findImageForPreview(view: EditorView, preview: HTMLElement): ImageHit | undefined {
-  const content = preview.closest('.md-image-view')?.querySelector('.md-image-view-content')
-  if (!content) return
-  return findImageAt(view.state, view.posAtDOM(content, 0))
+export function findImageForElement(view: EditorView, element: Element): ImageHit | undefined {
+  const pos = getAtomViewSourcePos(view, element)
+  return pos == null ? undefined : findImageAt(view.state, pos)
 }
 
 /**
@@ -135,13 +169,13 @@ export function defineImageClickHandler(
     // Cancelling the touchend also suppresses the synthetic click, so the
     // handler fires here instead of in handleClick.
     event.preventDefault()
-    const hit = findImageForPreview(view, preview)
+    const hit = findImageForElement(view, preview)
     if (hit) {
       handler({
         src: hit.src,
         alt: hit.alt,
         event,
-        element: getPreviewImage(preview),
+        element: getPreviewImage(preview) ?? undefined,
         mod: isModEvent(event),
       })
     }
@@ -172,7 +206,7 @@ export function defineImageClickHandler(
             // A touch on the resize handle starts a resize, never a tap.
             if (
               event.target instanceof HTMLElement &&
-              event.target.closest('.md-image-resize-handle')
+              event.target.closest(`.${IMAGE_RESIZE_HANDLE_CLASS}`)
             ) {
               return false
             }
@@ -203,13 +237,13 @@ export function defineImageClickHandler(
           if (!handler) return false
           const preview = getClosestImagePreview(event.target)
           if (!preview) return false
-          const hit = findImageForPreview(view, preview)
+          const hit = findImageForElement(view, preview)
           if (!hit) return false
           handler({
             src: hit.src,
             alt: hit.alt,
             event,
-            element: getPreviewImage(preview),
+            element: getPreviewImage(preview) ?? undefined,
             mod: isModEvent(event),
           })
           return true

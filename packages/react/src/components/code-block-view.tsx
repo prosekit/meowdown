@@ -2,6 +2,7 @@ import { Combobox } from '@base-ui/react/combobox'
 import { Menu } from '@base-ui/react/menu'
 import {
   codeBlockLanguages,
+  deleteBlock,
   isCodeBlockPreviewHiddenDecoration,
   type CodeBlockAttrs,
   type LanguageItem,
@@ -11,7 +12,6 @@ import { TextSelection } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 import type { ReactNodeViewProps } from '@prosekit/react'
 import { clsx } from 'clsx/lite'
-import { BracesIcon, CheckIcon, ChevronsUpDownIcon, CopyIcon, EllipsisIcon } from 'lucide-react'
 import {
   memo,
   use,
@@ -25,12 +25,20 @@ import {
   type ReactElement,
 } from 'react'
 
+import {
+  ICON_BUTTON_CLASS,
+  MENU_ITEM_CLASS,
+  MENU_ITEM_INDICATOR_CLASS,
+  MENU_POPUP_CLASS,
+  MENU_POSITIONER_CLASS,
+} from '../class-names.ts'
 import { setCaretCodeBlockMenu } from '../extensions/block-menu.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
 import { usePele } from '../hooks/use-pele.ts'
 import { NON_PROSE_PROPS } from '../utils/non-prose-props.ts'
 import { writeClipboardText } from '../utils/write-clipboard-text.ts'
 
+import { ActionMenuItem, ActionMenuPopup } from './action-menu.tsx'
 import {
   CODE_BLOCK_TOOLBAR_IDLE,
   getCodeBlockToolbarFinalFocus,
@@ -40,6 +48,7 @@ import {
 import styles from './code-block-view.module.css'
 import { CollisionBoundaryContext } from './collision-boundary.ts'
 import { CopyButton } from './copy-button.tsx'
+import { Icon } from './icon.tsx'
 import { MathRender } from './math-render.tsx'
 import { MermaidRender } from './mermaid-render.tsx'
 
@@ -102,6 +111,7 @@ export function CodeBlockView(props: ReactNodeViewProps): ReactElement {
             language={language}
             setLanguage={setLanguage}
             view={view}
+            getPos={getPos}
             caretInside={caretInside}
           />
         )
@@ -138,6 +148,7 @@ interface CodeBlockToolbarProps {
   language: string
   setLanguage: (language: string) => void
   view: EditorView
+  getPos: () => number | undefined
   caretInside: boolean
 }
 
@@ -146,6 +157,7 @@ function CodeBlockToolbar({
   language,
   setLanguage,
   view,
+  getPos,
   caretInside,
 }: CodeBlockToolbarProps) {
   const [state, dispatch] = useReducer(reduceCodeBlockToolbar, CODE_BLOCK_TOOLBAR_IDLE)
@@ -196,6 +208,16 @@ function CodeBlockToolbar({
     void writeClipboardText(code)
   }, [code])
 
+  const deleteCodeBlock = useCallback(() => {
+    const pos = getPos()
+    if (pos == null) return
+    deleteBlock(pos)(view.state, view.dispatch)
+    view.focus()
+  }, [getPos, view])
+
+  // Read when the menu opens: a read-only switch does not re-render the view.
+  const canDeleteCodeBlock = useCallback(() => view.editable, [view])
+
   return (
     <div
       className={styles.Toolbar}
@@ -213,7 +235,7 @@ function CodeBlockToolbar({
       <CopyButton
         getText={() => code}
         label="Copy code"
-        className={styles.IconButton}
+        className={ICON_BUTTON_CLASS}
         data-testid="code-block-copy"
       />
       <CodeBlockMenu
@@ -223,6 +245,8 @@ function CodeBlockToolbar({
         getFinalFocus={getFinalFocus}
         onChangeLanguage={handOverToLanguagePicker}
         onCopyCode={copyCode}
+        onDelete={deleteCodeBlock}
+        canDelete={canDeleteCodeBlock}
       />
     </div>
   )
@@ -235,6 +259,11 @@ interface CodeBlockMenuProps {
   getFinalFocus: () => boolean
   onChangeLanguage: VoidFunction
   onCopyCode: VoidFunction
+  onDelete: VoidFunction
+  /**
+   * Whether to offer `onDelete`, read each time the menu opens.
+   */
+  canDelete: () => boolean
 }
 
 function CodeBlockMenu({
@@ -244,21 +273,25 @@ function CodeBlockMenu({
   getFinalFocus,
   onChangeLanguage,
   onCopyCode,
+  onDelete,
+  canDelete,
 }: CodeBlockMenuProps): ReactElement {
   return (
     <Menu.Root open={open} onOpenChange={onOpenChange} onOpenChangeComplete={onOpenChangeComplete}>
       <Menu.Trigger
-        className={styles.IconButton}
+        className={ICON_BUTTON_CLASS}
         aria-label="More"
         title={`More (${MENU_SHORTCUT})`}
         data-testid="code-block-menu"
       >
-        <EllipsisIcon />
+        <Icon name="ellipsis" />
       </Menu.Trigger>
       <CodeBlockMenuPopup
         getFinalFocus={getFinalFocus}
         onChangeLanguage={onChangeLanguage}
         onCopyCode={onCopyCode}
+        onDelete={onDelete}
+        canDelete={canDelete}
       />
     </Menu.Root>
   )
@@ -268,43 +301,40 @@ interface CodeBlockMenuPopupProps {
   getFinalFocus: () => boolean
   onChangeLanguage: VoidFunction
   onCopyCode: VoidFunction
+  onDelete: VoidFunction
+  canDelete: () => boolean
 }
 
 function CodeBlockMenuPopup({
   getFinalFocus,
   onChangeLanguage,
   onCopyCode,
+  onDelete,
+  canDelete,
 }: CodeBlockMenuPopupProps): ReactElement {
-  const collisionBoundary = use(CollisionBoundaryContext)
-
   return (
-    <Menu.Portal>
-      <Menu.Positioner
-        className={styles.Positioner}
-        sideOffset={4}
-        align="end"
-        collisionBoundary={collisionBoundary}
-      >
-        <Menu.Popup className={clsx(styles.Popup, styles.Menu)} finalFocus={getFinalFocus}>
-          <Menu.Item
-            className={styles.MenuItem}
-            onClick={onChangeLanguage}
-            data-testid="code-block-menu-language"
-          >
-            <BracesIcon />
-            <span>Change language</span>
-          </Menu.Item>
-          <Menu.Item
-            className={styles.MenuItem}
-            onClick={onCopyCode}
-            data-testid="code-block-menu-copy"
-          >
-            <CopyIcon />
-            <span>Copy code</span>
-          </Menu.Item>
-        </Menu.Popup>
-      </Menu.Positioner>
-    </Menu.Portal>
+    <ActionMenuPopup finalFocus={getFinalFocus}>
+      <ActionMenuItem
+        icon="braces"
+        label="Change language"
+        onClick={onChangeLanguage}
+        testId="code-block-menu-language"
+      />
+      <ActionMenuItem
+        icon="copy"
+        label="Copy code"
+        onClick={onCopyCode}
+        testId="code-block-menu-copy"
+      />
+      {canDelete() && (
+        <ActionMenuItem
+          icon="trash-2"
+          label="Delete"
+          onClick={onDelete}
+          testId="code-block-menu-delete"
+        />
+      )}
+    </ActionMenuPopup>
   )
 }
 
@@ -368,16 +398,19 @@ function CodeBlockLanguagePicker({
       <Combobox.Trigger className={styles.Trigger} data-testid="code-block-language">
         <Combobox.Value placeholder="Plain Text" />
         <Combobox.Icon className={styles.TriggerIcon}>
-          <ChevronsUpDownIcon />
+          <Icon name="chevrons-up-down" />
         </Combobox.Icon>
       </Combobox.Trigger>
       <Combobox.Portal>
         <Combobox.Positioner
-          className={styles.Positioner}
+          className={MENU_POSITIONER_CLASS}
           sideOffset={4}
           collisionBoundary={collisionBoundary}
         >
-          <Combobox.Popup className={styles.Popup} finalFocus={getFinalFocus}>
+          <Combobox.Popup
+            className={clsx(MENU_POPUP_CLASS, styles.Popup)}
+            finalFocus={getFinalFocus}
+          >
             <div className={styles.SearchRow}>
               <Combobox.Input
                 className={styles.Search}
@@ -388,9 +421,15 @@ function CodeBlockLanguagePicker({
             <Combobox.Empty className={styles.Empty}>No languages found.</Combobox.Empty>
             <Combobox.List className={styles.List}>
               {(item: LanguageItem) => (
-                <Combobox.Item key={item.label} value={item} className={styles.Item}>
-                  <Combobox.ItemIndicator className={styles.ItemIndicator}>
-                    <CheckIcon />
+                <Combobox.Item
+                  key={item.label}
+                  value={item}
+                  className={clsx(MENU_ITEM_CLASS, styles.Item)}
+                >
+                  <Combobox.ItemIndicator
+                    className={clsx(MENU_ITEM_INDICATOR_CLASS, styles.ItemIndicator)}
+                  >
+                    <Icon name="check" />
                   </Combobox.ItemIndicator>
                   <span className={styles.ItemText}>{item.label}</span>
                 </Combobox.Item>
