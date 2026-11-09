@@ -30,8 +30,8 @@ function getClosestImagePreview(target: EventTarget | null): HTMLElement | undef
   return preview
 }
 
-function getPreviewImage(preview: HTMLElement): HTMLImageElement | undefined {
-  return preview.querySelector('img') ?? undefined
+function getPreviewImage(preview: HTMLElement): HTMLImageElement | undefined | null {
+  return preview.querySelector('img')
 }
 
 export function findImageAt(state: EditorState, pos: number): ImageHit | undefined {

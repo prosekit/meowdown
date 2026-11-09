@@ -103,16 +103,16 @@ export function deleteEmbed(pos: number): Command {
 /**
  * The menu button of the card at `pos`, if the card is rendered.
  */
-function getEmbedMenuButton(view: EditorView, pos: number): HTMLElement | undefined {
+function getEmbedMenuButton(view: EditorView, pos: number): HTMLElement | undefined | null {
   const { node } = view.domAtPos(pos + 1)
   const element = isElementLike(node) ? node : node.parentElement
   const markView = element?.closest('.md-image-view')
-  return markView?.querySelector<HTMLElement>(`.${EMBED_MENU_BUTTON_CLASS}`) ?? undefined
+  return markView?.querySelector<HTMLElement>(`.${EMBED_MENU_BUTTON_CLASS}`)
 }
 
-function getButtonTarget(target: EventTarget | null): HTMLElement | undefined {
+function getButtonTarget(target: EventTarget | null): HTMLElement | undefined | null {
   if (!isElementLike(target)) return
-  return target.closest<HTMLElement>(`.${EMBED_MENU_BUTTON_CLASS}`) ?? undefined
+  return target.closest<HTMLElement>(`.${EMBED_MENU_BUTTON_CLASS}`)
 }
 
 /**
