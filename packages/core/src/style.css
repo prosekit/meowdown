@@ -338,10 +338,7 @@
       color: var(--meowdown-accent);
     }
 
-    /*FIXME: 1. do we still need svg here? */
-    svg,
     .meowdown-icon {
-      display: block;
       width: 0.85rem;
       height: 0.85rem;
     }
@@ -400,11 +397,8 @@
       color: var(--meowdown-heading);
     }
 
-    /*FIXME: 1. do we still need svg here */
     /*FIXME: 2. */
-    svg,
     .meowdown-icon {
-      display: block;
       width: 0.9rem;
       height: 0.9rem;
       color: var(--meowdown-muted);
@@ -416,7 +410,6 @@
     display: flex;
     color: var(--meowdown-accent);
 
-    svg,
     .meowdown-icon {
       color: inherit;
     }
