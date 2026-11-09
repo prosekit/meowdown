@@ -15,6 +15,7 @@ import {
 } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
+import { PENDING_REPLACEMENT_CLASS } from '../class-names.ts'
 import { markdownToDoc } from '../converters/md-to-pm.ts'
 import { guardDecorations } from '../utils/guard-plugin.ts'
 import type { PositionRange } from '../utils/range.ts'
@@ -131,7 +132,7 @@ const pendingReplacementPlugin = new Plugin<PendingReplacementPluginState>({
       const pending = getPendingReplacement(state)
       if (!pending || pending.from >= pending.to) return null
       return DecorationSet.create(state.doc, [
-        Decoration.inline(pending.from, pending.to, { class: 'md-pending-replacement' }),
+        Decoration.inline(pending.from, pending.to, { class: PENDING_REPLACEMENT_CLASS }),
       ])
     }),
   },

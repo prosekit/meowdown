@@ -4,6 +4,7 @@ import type { EditorState } from '@prosekit/pm/state'
 import { Plugin } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
+import { SHOW_CLASS } from '../class-names.ts'
 import { guardDecorations } from '../utils/guard-plugin.ts'
 
 import type { MdPackAttrs } from './inline-marks.ts'
@@ -95,7 +96,7 @@ function computeRevealDecorations(
   if (ranges.length === 0) return
 
   const decorations = ranges.map((range) => {
-    return Decoration.inline(range.from, range.to, { class: 'show' })
+    return Decoration.inline(range.from, range.to, { class: SHOW_CLASS })
   })
   return DecorationSet.create(state.doc, decorations)
 }

@@ -3,6 +3,7 @@ import { NodeSelection } from '@prosekit/pm/state'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
+import { EMBED_MENU_BUTTON_CLASS, IMAGE_RESIZE_HANDLE_CLASS } from '../class-names.ts'
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { findText } from '../testing/find-text.ts'
 import {
@@ -240,7 +241,7 @@ describe('image click callback', () => {
     void fixture
     await expect.element(preview).toBeInTheDocument()
 
-    const button = preview.element().querySelector('.md-embed-menu-button')
+    const button = preview.element().querySelector(`.${EMBED_MENU_BUTTON_CLASS}`)
     expect(button).not.toBeNull()
     const tap = buildTap(button!)
     button!.dispatchEvent(tap.start)
@@ -274,7 +275,7 @@ describe('image click callback', () => {
     void fixture
     await expect.element(preview).toBeInTheDocument()
 
-    const handle = preview.element().querySelector('.md-image-resize-handle')
+    const handle = preview.element().querySelector(`.${IMAGE_RESIZE_HANDLE_CLASS}`)
     if (!handle) throw new Error('missing resize handle')
     const tap = buildTap(handle)
     handle.dispatchEvent(tap.start)

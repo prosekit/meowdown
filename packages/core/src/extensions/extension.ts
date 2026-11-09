@@ -12,6 +12,8 @@ import { definePlaceholder } from '@prosekit/extensions/placeholder'
 import { defineText } from '@prosekit/extensions/text'
 import { defineVirtualSelection } from '@prosekit/extensions/virtual-selection'
 
+import { CONTENT_CLASS } from '../class-names.ts'
+
 import { defineAtomMarkNavigation } from './atom-mark-navigation.ts'
 import { defineBackspaceEmptyFirstBlock } from './backspace-empty-first-block.ts'
 import { defineMeowdownBlockquote } from './blockquote.ts'
@@ -121,7 +123,7 @@ function defineEditorExtensionImpl(options: EditorExtensionOptions) {
     defineReadonly((state) => !!getEditorConfig(state).readOnly),
     defineViewAttributes((state) => {
       const config = getEditorConfig(state)
-      const attributes: Record<string, string> = { class: 'meowdown-content' }
+      const attributes: Record<string, string> = { class: CONTENT_CLASS }
       if (config.editorClassName) {
         attributes.class += ` ${config.editorClassName}`
       }

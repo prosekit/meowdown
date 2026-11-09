@@ -3,6 +3,7 @@ import type { EditorState, PluginView } from '@prosekit/pm/state'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
+import { VIRTUAL_CARET_CLASS, VIRTUAL_CARET_LAYER_CLASS } from '../class-names.ts'
 import { forceReflow } from '../utils/force-reflow.ts'
 import {
   getIsPointerSelection,
@@ -72,9 +73,9 @@ class VirtualCaretView implements PluginView {
     this.#view = view
     this.#document = view.dom.ownerDocument
     this.#layer = layer
-    this.#layer.classList.add('md-virtual-caret-layer')
+    this.#layer.classList.add(VIRTUAL_CARET_LAYER_CLASS)
     this.#caret = this.#layer.appendChild(this.#document.createElement('div'))
-    this.#caret.className = 'md-virtual-caret'
+    this.#caret.className = VIRTUAL_CARET_CLASS
     this.#caret.dataset.testid = 'virtual-caret'
     this.#document.addEventListener('selectionchange', this.#requestReposition)
     this.#unsubscribeModality = onIsTouchInputChange(this.#requestReposition)
@@ -100,7 +101,7 @@ class VirtualCaretView implements PluginView {
     this.#view.dom.removeEventListener('blur', this.#handleBlur)
     this.#resizeObserver?.disconnect()
     this.#caret.remove()
-    this.#layer.classList.remove('md-virtual-caret-layer')
+    this.#layer.classList.remove(VIRTUAL_CARET_LAYER_CLASS)
     delete this.#layer.dataset.focused
     this.#view.dom.removeAttribute(DATA_ATTRIBUTE)
   }

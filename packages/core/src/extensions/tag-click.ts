@@ -1,6 +1,7 @@
 import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 
+import { TAG_MARK_CLASS } from '../class-names.ts'
 import { isModEvent } from '../utils/is-mod-event.ts'
 
 import { defineMarkClickHandler } from './mark-click.ts'
@@ -57,7 +58,7 @@ export function defineTagClickHandler(
   return defineMarkClickHandler<string>({
     key: tagClickKey,
     enabled: (state) => !!getOnClick?.(state),
-    selector: '.md-tag',
+    selector: `.${TAG_MARK_CLASS}`,
     preventDefault: false,
     findPayloadAt: (state, pos) => findTagAt(state, pos)?.tag,
     onClick: (tag, event, state) => {

@@ -3,6 +3,11 @@ import type { Mark } from '@prosekit/pm/model'
 import { TextSelection } from '@prosekit/pm/state'
 import type { EditorView, MarkView, ViewMutationRecord } from '@prosekit/pm/view'
 
+import {
+  MATH_VIEW_CLASS,
+  MATH_VIEW_CONTENT_CLASS,
+  MATH_VIEW_PREVIEW_CLASS,
+} from '../class-names.ts'
 import { guardMarkView } from '../utils/guard-mark-view.ts'
 import { loadKaTeX, renderMathInto } from '../utils/katex.ts'
 import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
@@ -27,10 +32,10 @@ class MathMarkView implements MarkView {
     this.#formula = (mark.attrs as MdMathAttrs).formula
 
     this.#dom = document.createElement('span')
-    this.#dom.className = 'md-math-view'
+    this.#dom.className = MATH_VIEW_CLASS
 
     this.#preview = document.createElement('span')
-    this.#preview.className = 'md-math-view-preview'
+    this.#preview.className = MATH_VIEW_PREVIEW_CLASS
     this.#preview.dataset.testid = 'math-preview'
     this.#preview.contentEditable = 'false'
     // A non-editable preview swallows clicks, so place the caret at the start
@@ -45,7 +50,7 @@ class MathMarkView implements MarkView {
     })
 
     this.#contentDOM = document.createElement('span')
-    this.#contentDOM.className = 'md-math-view-content'
+    this.#contentDOM.className = MATH_VIEW_CONTENT_CLASS
     for (const [name, value] of Object.entries(NON_PROSE_ATTRS)) {
       this.#contentDOM.setAttribute(name, value)
     }

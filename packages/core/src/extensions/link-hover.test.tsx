@@ -1,12 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
+import { LINK_TEXT_MARK_CLASS } from '../class-names.ts'
 import { setupFixture } from '../testing/index.ts'
 
 import { updateEditorConfig } from './editor-config.ts'
 import { defineLinkHoverHandler, dismissLinkHover, type LinkHoverHandler } from './link-hover.ts'
 
-const markdownLink = page.locate('.ProseMirror .md-link')
+const markdownLink = page.locate(`.ProseMirror .${LINK_TEXT_MARK_CLASS}`)
 
 function applyHoverable(markdown: string, onHoverChange: LinkHoverHandler) {
   const fixture = setupFixture()
@@ -165,7 +166,7 @@ describe('Markdown-link tap callback', () => {
   it('enters immediately from a touch tap and consumes its events', () => {
     const onHoverChange = vi.fn<LinkHoverHandler>()
     using fixture = applyHoverable('[Docs](https://example.com)', onHoverChange)
-    const link = fixture.view.dom.querySelector('.md-link')
+    const link = fixture.view.dom.querySelector(`.${LINK_TEXT_MARK_CLASS}`)
     if (!link) throw new Error('missing link')
 
     const { mousedown, click } = dispatchTap(link)
@@ -179,7 +180,7 @@ describe('Markdown-link tap callback', () => {
   it('leaves immediately when a tap lands outside links', () => {
     const onHoverChange = vi.fn<LinkHoverHandler>()
     using fixture = applyHoverable('before [Docs](https://example.com)', onHoverChange)
-    const link = fixture.view.dom.querySelector('.md-link')
+    const link = fixture.view.dom.querySelector(`.${LINK_TEXT_MARK_CLASS}`)
     const paragraph = fixture.view.dom.querySelector('p')
     if (!link || !paragraph) throw new Error('missing target')
 
@@ -196,7 +197,7 @@ describe('Markdown-link tap callback', () => {
   it('leaves mouse and pen input alone', () => {
     const onHoverChange = vi.fn<LinkHoverHandler>()
     using fixture = applyHoverable('[Docs](https://example.com)', onHoverChange)
-    const link = fixture.view.dom.querySelector('.md-link')
+    const link = fixture.view.dom.querySelector(`.${LINK_TEXT_MARK_CLASS}`)
     if (!link) throw new Error('missing link')
 
     for (const pointerType of ['mouse', 'pen']) {
@@ -210,7 +211,7 @@ describe('Markdown-link tap callback', () => {
   it('does nothing for a gesture the browser does not turn into a tap', () => {
     const onHoverChange = vi.fn<LinkHoverHandler>()
     using fixture = applyHoverable('[Docs](https://example.com)', onHoverChange)
-    const link = fixture.view.dom.querySelector('.md-link')
+    const link = fixture.view.dom.querySelector(`.${LINK_TEXT_MARK_CLASS}`)
     if (!link) throw new Error('missing link')
     const rect = link.getBoundingClientRect()
     const base = {
