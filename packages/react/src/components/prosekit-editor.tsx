@@ -781,7 +781,7 @@ export function ProseKitEditor({
           onFileSaveError={onFileSaveError}
         />
         <LinkMenu
-          key={readOnly ? 1 : 2}
+          key={readOnly ? 1 : 0}
           onLinkClick={onLinkClick}
           onLinkCopy={onLinkCopy}
           resolveLinkPreview={resolveLinkPreview}
