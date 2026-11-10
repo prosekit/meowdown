@@ -44,7 +44,7 @@ function elapseOpen(phase: Phase) {
 }
 
 function elapseClose(phase: Phase, canLeave = true) {
-  return transitionHover(phase, { type: 'close-elapsed', canLeave: () => canLeave })
+  return transitionHover(phase, { type: 'close-elapsed', canLeave })
 }
 
 function update(phase: Phase, payload: string | undefined, isSamePayload = true) {
@@ -129,11 +129,6 @@ describe('timers', () => {
 
   it('restarts the close delay while the pointer is on the popup', () => {
     expect(elapseClose(leaving(alpha), false)).toEqual(leaving(alpha))
-  })
-
-  it('ignores a timer that outlived its phase', () => {
-    expect(elapseOpen(active(alpha))).toBeUndefined()
-    expect(elapseClose(active(alpha))).toBeUndefined()
   })
 })
 

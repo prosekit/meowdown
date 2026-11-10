@@ -124,7 +124,7 @@ export type HoverInput<Payload, Element> =
   /**
    * The close delay elapsed.
    */
-  | { readonly type: 'close-elapsed'; readonly canLeave: () => boolean }
+  | { readonly type: 'close-elapsed'; readonly canLeave: boolean }
   /**
    * A touch tap landed on `element`, the closest tracked mark.
    */
@@ -218,7 +218,7 @@ export function transitionHover<Payload, Element>(
     }
     case 'close-elapsed':
       if (phase.kind !== 'leaving') return
-      return input.canLeave() ? IDLE : phase
+      return input.canLeave ? IDLE : phase
     case 'tap': {
       const payload = input.resolve()
       return payload == null
@@ -299,7 +299,7 @@ function createHoverTracker<Payload>(config: MarkHoverConfig<Payload>): HoverTra
   }
 
   const finishLeave = (): void => {
-    send({ type: 'close-elapsed', canLeave: () => config.canLeave?.() !== false })
+    send({ type: 'close-elapsed', canLeave: config.canLeave?.() !== false })
   }
 
   const handleOver = (view: EditorView, event: MouseEvent): void => {
