@@ -8,19 +8,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      hast-util-to-mdast:
-        specifier: ^10.1.2
-        version: 10.1.2
-      mdast-util-gfm-table:
-        specifier: ^2.0.1
-        version: 2.0.1(supports-color@10.2.2)
-      mdast-util-gfm-task-list-item:
-        specifier: ^2.0.1
-        version: 2.0.1(supports-color@10.2.2)
-      mdast-util-to-markdown:
-        specifier: ^2.2.1
-        version: 2.2.1
     devDependencies:
       '@changesets/changelog-github':
         specifier: ^1.0.1
