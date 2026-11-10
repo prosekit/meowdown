@@ -43,7 +43,7 @@
     "monorepo-typescript-references": "^1.1.2",
     "nano-staged": "^1.0.2",
     "oxfmt": "^0.74.0",
-    "pkg-pr-new": "^0.0.91",
+    "pkg-pr-new": "^0.0.93",
     "playwright": "^1.65.0",
     "simple-git-hooks": "^2.14.0",
     "typescript": "^6.0.3",
