@@ -7,13 +7,8 @@ interface Mark {
   readonly payload: string | undefined
 }
 
-interface View {
-  readonly name: string
-}
+type Phase = HoverPhase<string, Mark>
 
-type Phase = HoverPhase<string, Mark, View>
-
-const view: View = { name: 'view' }
 const alpha = { payload: 'Alpha' }
 const beta = { payload: 'Beta' }
 const unresolved: Mark = { payload: undefined }
@@ -21,7 +16,7 @@ const unresolved: Mark = { payload: undefined }
 const idle: Phase = { kind: 'idle' }
 
 function pending(element: Mark): Phase {
-  return { kind: 'pending', element, view }
+  return { kind: 'pending', element }
 }
 
 function active(element: { readonly payload: string }): Phase {
@@ -37,7 +32,7 @@ function dismissed(element: Mark): Phase {
 }
 
 function over(phase: Phase, element: Mark) {
-  return transitionHover(phase, { type: 'over', element, view, resolve: () => element.payload })
+  return transitionHover(phase, { type: 'over', element, resolve: () => element.payload })
 }
 
 function out(phase: Phase) {
@@ -63,7 +58,7 @@ function update(phase: Phase, payload: string | undefined, isSamePayload = true)
 
 describe('over', () => {
   it('starts the open delay on a cold hover', () => {
-    expect(over(idle, alpha)).toEqual({ phase: pending(alpha), timer: 'open', emit: false })
+    expect(over(idle, alpha)).toEqual(pending(alpha))
   })
 
   it('ignores an element without a payload', () => {
@@ -75,23 +70,19 @@ describe('over', () => {
   })
 
   it('restarts the open delay on another mark', () => {
-    expect(over(pending(alpha), beta)).toEqual({ phase: pending(beta), timer: 'open', emit: false })
+    expect(over(pending(alpha), beta)).toEqual(pending(beta))
   })
 
   it('switches from an entered mark without a delay', () => {
-    expect(over(active(alpha), beta)).toEqual({ phase: active(beta), timer: 'none', emit: true })
+    expect(over(active(alpha), beta)).toEqual(active(beta))
   })
 
   it('switches from a leaving mark without a delay', () => {
-    expect(over(leaving(alpha), beta)).toEqual({ phase: active(beta), timer: 'none', emit: true })
+    expect(over(leaving(alpha), beta)).toEqual(active(beta))
   })
 
   it('returns during the leave grace without a delay or an event', () => {
-    expect(over(leaving(alpha), alpha)).toEqual({
-      phase: active(alpha),
-      timer: 'none',
-      emit: false,
-    })
+    expect(over(leaving(alpha), alpha)).toEqual(active(alpha))
   })
 
   it('keeps a dismissed mark silent', () => {
@@ -99,21 +90,17 @@ describe('over', () => {
   })
 
   it('starts the open delay on another mark after a dismiss', () => {
-    expect(over(dismissed(alpha), beta)).toEqual({
-      phase: pending(beta),
-      timer: 'open',
-      emit: false,
-    })
+    expect(over(dismissed(alpha), beta)).toEqual(pending(beta))
   })
 })
 
 describe('out', () => {
   it('cancels a pending enter', () => {
-    expect(out(pending(alpha))).toEqual({ phase: idle, timer: 'none', emit: false })
+    expect(out(pending(alpha))).toEqual(idle)
   })
 
   it('starts the leave grace on an entered mark', () => {
-    expect(out(active(alpha))).toEqual({ phase: leaving(alpha), timer: 'close', emit: false })
+    expect(out(active(alpha))).toEqual(leaving(alpha))
   })
 
   it('ignores moves onto a descendant of the mark', () => {
@@ -129,23 +116,19 @@ describe('out', () => {
 
 describe('timers', () => {
   it('enters when the open delay elapses', () => {
-    expect(elapseOpen(pending(alpha))).toEqual({ phase: active(alpha), timer: 'none', emit: true })
+    expect(elapseOpen(pending(alpha))).toEqual(active(alpha))
   })
 
   it('drops a pending mark that is gone when the open delay elapses', () => {
-    expect(elapseOpen(pending(unresolved))).toEqual({ phase: idle, timer: 'none', emit: false })
+    expect(elapseOpen(pending(unresolved))).toEqual(idle)
   })
 
   it('leaves when the close delay elapses', () => {
-    expect(elapseClose(leaving(alpha))).toEqual({ phase: idle, timer: 'none', emit: true })
+    expect(elapseClose(leaving(alpha))).toEqual(idle)
   })
 
   it('restarts the close delay while the pointer is on the popup', () => {
-    expect(elapseClose(leaving(alpha), false)).toEqual({
-      phase: leaving(alpha),
-      timer: 'close',
-      emit: false,
-    })
+    expect(elapseClose(leaving(alpha), false)).toEqual(leaving(alpha))
   })
 
   it('ignores a timer that outlived its phase', () => {
@@ -155,24 +138,16 @@ describe('timers', () => {
 })
 
 describe('update', () => {
-  it('refreshes the payload without restarting the leave grace', () => {
-    expect(update(leaving(alpha), 'Alpha v2')).toEqual({
-      phase: { kind: 'leaving', hit: { payload: 'Alpha v2', element: alpha } },
-      timer: 'keep',
-      emit: false,
-    })
+  it('ignores an edit that keeps the payload', () => {
+    expect(update(leaving(alpha), 'Alpha v2')).toBeUndefined()
   })
 
   it('leaves when the payload changes', () => {
-    expect(update(active(alpha), 'Gamma', false)).toEqual({
-      phase: idle,
-      timer: 'none',
-      emit: true,
-    })
+    expect(update(active(alpha), 'Gamma', false)).toEqual(idle)
   })
 
   it('leaves when the mark is gone', () => {
-    expect(update(active(alpha), undefined)).toEqual({ phase: idle, timer: 'none', emit: true })
+    expect(update(active(alpha), undefined)).toEqual(idle)
   })
 
   it('forgets a dismissed mark once it is detached', () => {
@@ -182,37 +157,25 @@ describe('update', () => {
       resolve: noop,
       isSamePayload: returnTrue,
     })
-    expect(step).toEqual({ phase: idle, timer: 'none', emit: false })
+    expect(step).toEqual(idle)
   })
 })
 
 describe('dismiss', () => {
   it('silences a pending mark', () => {
-    expect(transitionHover(pending(alpha), { type: 'dismiss' })).toEqual({
-      phase: dismissed(alpha),
-      timer: 'none',
-      emit: false,
-    })
+    expect(transitionHover(pending(alpha), { type: 'dismiss' })).toEqual(dismissed(alpha))
   })
 
   it('leaves an entered mark and silences it', () => {
-    expect(transitionHover(active(alpha), { type: 'dismiss' })).toEqual({
-      phase: dismissed(alpha),
-      timer: 'none',
-      emit: true,
-    })
+    expect(transitionHover(active(alpha), { type: 'dismiss' })).toEqual(dismissed(alpha))
   })
 
   it('leaves a leaving mark at once', () => {
-    expect(transitionHover(leaving(alpha), { type: 'dismiss' })).toEqual({
-      phase: idle,
-      timer: 'none',
-      emit: true,
-    })
+    expect(transitionHover(leaving(alpha), { type: 'dismiss' })).toEqual(idle)
   })
 
   it('forgets a dismissed mark once the pointer leaves it', () => {
-    expect(out(dismissed(alpha))).toEqual({ phase: idle, timer: 'none', emit: false })
+    expect(out(dismissed(alpha))).toEqual(idle)
   })
 })
 
@@ -223,14 +186,10 @@ describe('tap and reset', () => {
       element: alpha,
       resolve: () => alpha.payload,
     })
-    expect(step).toEqual({ phase: active(alpha), timer: 'none', emit: true })
+    expect(step).toEqual(active(alpha))
   })
 
   it('leaves at once on a reset', () => {
-    expect(transitionHover(leaving(alpha), { type: 'reset' })).toEqual({
-      phase: idle,
-      timer: 'none',
-      emit: true,
-    })
+    expect(transitionHover(leaving(alpha), { type: 'reset' })).toEqual(idle)
   })
 })

@@ -76,16 +76,15 @@ export interface MarkHoverConfig<Payload> {
 }
 
 /**
- * A phase of the hover state machine. `Element` is the rendered mark and
- * `View` the editor that reported it; the transition only compares them by
- * identity.
+ * A phase of the hover state machine. `Element` is the rendered mark; the
+ * transition only compares it by identity.
  */
-export type HoverPhase<Payload, Element, View> =
+export type HoverPhase<Payload, Element> =
   | { readonly kind: 'idle' }
   /**
    * The pointer rests on `element`; the open delay is running.
    */
-  | { readonly kind: 'pending'; readonly element: Element; readonly view: View }
+  | { readonly kind: 'pending'; readonly element: Element }
   /**
    * Enter was reported and the pointer is on the mark.
    */
@@ -104,14 +103,13 @@ export type HoverPhase<Payload, Element, View> =
  * An event the hover state machine reacts to. The caller resolves every DOM
  * and editor lookup, so a transition touches no DOM and no timer.
  */
-export type HoverInput<Payload, Element, View> =
+export type HoverInput<Payload, Element> =
   /**
    * The pointer moved onto `element`, the closest tracked mark.
    */
   | {
       readonly type: 'over'
       readonly element: Element
-      readonly view: View
       readonly resolve: () => Payload | undefined
     }
   /**
@@ -122,10 +120,7 @@ export type HoverInput<Payload, Element, View> =
   /**
    * The open delay elapsed.
    */
-  | {
-      readonly type: 'open-elapsed'
-      readonly resolve: (element: Element, view: View) => Payload | undefined
-    }
+  | { readonly type: 'open-elapsed'; readonly resolve: (element: Element) => Payload | undefined }
   /**
    * The close delay elapsed.
    */
@@ -152,34 +147,10 @@ export type HoverInput<Payload, Element, View> =
    */
   | { readonly type: 'reset' }
 
-/**
- * The outcome of one transition.
- */
-export interface HoverStep<Payload, Element, View> {
-  readonly phase: HoverPhase<Payload, Element, View>
-  /**
-   * `open` and `close` restart the timer with that delay, `none` clears it,
-   * and `keep` leaves the running timer alone.
-   */
-  readonly timer: 'open' | 'close' | 'none' | 'keep'
-  /**
-   * The hit element changed: report the hit of `phase`.
-   */
-  readonly emit: boolean
-}
-
 const IDLE = { kind: 'idle' } as const
 
-const PHASE_TIMERS = {
-  idle: 'none',
-  pending: 'open',
-  active: 'none',
-  leaving: 'close',
-  dismissed: 'none',
-} as const
-
-function getHit<Payload, Element, View>(
-  phase: HoverPhase<Payload, Element, View>,
+function getHit<Payload, Element>(
+  phase: HoverPhase<Payload, Element>,
 ): MarkHoverHit<Payload, Element> | undefined {
   return phase.kind === 'active' || phase.kind === 'leaving' ? phase.hit : undefined
 }
@@ -187,8 +158,8 @@ function getHit<Payload, Element, View>(
 /**
  * The tracked element the pointer is on, if any.
  */
-function getPointerElement<Payload, Element, View>(
-  phase: HoverPhase<Payload, Element, View>,
+function getPointerElement<Payload, Element>(
+  phase: HoverPhase<Payload, Element>,
 ): Element | undefined {
   switch (phase.kind) {
     case 'pending':
@@ -201,127 +172,86 @@ function getPointerElement<Payload, Element, View>(
   }
 }
 
-/**
- * A step to `next` that restarts the timer `next` needs.
- */
-function stepTo<Payload, Element, View>(
-  previous: HoverPhase<Payload, Element, View>,
-  next: HoverPhase<Payload, Element, View>,
-): HoverStep<Payload, Element, View> {
-  return {
-    phase: next,
-    timer: PHASE_TIMERS[next.kind],
-    emit: getHit(next)?.element !== getHit(previous)?.element,
-  }
-}
-
-function startPending<Payload, Element, View>(
-  phase: HoverPhase<Payload, Element, View>,
-  input: Extract<HoverInput<Payload, Element, View>, { type: 'over' }>,
-): HoverStep<Payload, Element, View> | undefined {
-  if (input.resolve() == null) return
-  return stepTo(phase, { kind: 'pending', element: input.element, view: input.view })
-}
-
-function transitionOver<Payload, Element, View>(
-  phase: HoverPhase<Payload, Element, View>,
-  input: Extract<HoverInput<Payload, Element, View>, { type: 'over' }>,
-): HoverStep<Payload, Element, View> | undefined {
+function transitionOver<Payload, Element>(
+  phase: HoverPhase<Payload, Element>,
+  input: Extract<HoverInput<Payload, Element>, { type: 'over' }>,
+): HoverPhase<Payload, Element> | undefined {
+  const { element } = input
   switch (phase.kind) {
     case 'idle':
-      return startPending(phase, input)
     case 'pending':
     case 'dismissed':
-      return input.element === phase.element ? undefined : startPending(phase, input)
+      if (phase.kind !== 'idle' && element === phase.element) return
+      return input.resolve() == null ? undefined : { kind: 'pending', element }
     case 'active':
     case 'leaving': {
       // Switching from another mark, or returning during the leave grace,
       // skips the open delay.
-      if (input.element === phase.hit.element) {
-        return stepTo(phase, { kind: 'active', hit: phase.hit })
-      }
+      if (element === phase.hit.element) return { kind: 'active', hit: phase.hit }
       const payload = input.resolve()
-      if (payload == null) return
-      return stepTo(phase, { kind: 'active', hit: { payload, element: input.element } })
+      return payload == null ? undefined : { kind: 'active', hit: { payload, element } }
     }
   }
 }
 
-function transitionUpdate<Payload, Element, View>(
-  phase: HoverPhase<Payload, Element, View>,
-  input: Extract<HoverInput<Payload, Element, View>, { type: 'update' }>,
-): HoverStep<Payload, Element, View> | undefined {
-  if (phase.kind === 'dismissed') {
-    return input.isAttached(phase.element) ? undefined : stepTo(phase, IDLE)
-  }
-  if (phase.kind !== 'active' && phase.kind !== 'leaving') return
-  const { element } = phase.hit
-  const payload = input.resolve(element)
-  if (payload == null || !input.isSamePayload(phase.hit.payload, payload)) {
-    return stepTo(phase, IDLE)
-  }
-  // A refresh is not a transition: it must not restart the leave grace.
-  return { phase: { kind: phase.kind, hit: { payload, element } }, timer: 'keep', emit: false }
-}
-
-function transitionDismiss<Payload, Element, View>(
-  phase: HoverPhase<Payload, Element, View>,
-): HoverStep<Payload, Element, View> | undefined {
-  switch (phase.kind) {
-    case 'pending':
-      return stepTo(phase, { kind: 'dismissed', element: phase.element })
-    case 'active':
-      return stepTo(phase, { kind: 'dismissed', element: phase.hit.element })
-    case 'leaving':
-      return stepTo(phase, IDLE)
-    default:
-      return undefined
-  }
-}
-
 /**
- * The hover state machine as a pure function. Returns `undefined` when
- * `input` leaves `phase` as it is.
+ * The hover state machine as a pure function. Returns the phase to enter,
+ * or `undefined` when `input` is ignored. Entering a phase restarts its timer.
  */
-export function transitionHover<Payload, Element, View>(
-  phase: HoverPhase<Payload, Element, View>,
-  input: HoverInput<Payload, Element, View>,
-): HoverStep<Payload, Element, View> | undefined {
+export function transitionHover<Payload, Element>(
+  phase: HoverPhase<Payload, Element>,
+  input: HoverInput<Payload, Element>,
+): HoverPhase<Payload, Element> | undefined {
   switch (input.type) {
     case 'over':
       return transitionOver(phase, input)
     case 'out': {
       const element = getPointerElement(phase)
       if (element == null || input.isWithin(element)) return
-      return stepTo(phase, phase.kind === 'active' ? { kind: 'leaving', hit: phase.hit } : IDLE)
+      return phase.kind === 'active' ? { kind: 'leaving', hit: phase.hit } : IDLE
     }
     case 'open-elapsed': {
       if (phase.kind !== 'pending') return
-      const { element, view } = phase
-      const payload = input.resolve(element, view)
-      return stepTo(phase, payload == null ? IDLE : { kind: 'active', hit: { payload, element } })
+      const { element } = phase
+      const payload = input.resolve(element)
+      return payload == null ? IDLE : { kind: 'active', hit: { payload, element } }
     }
     case 'close-elapsed':
       if (phase.kind !== 'leaving') return
-      return stepTo(phase, input.canLeave() ? IDLE : phase)
+      return input.canLeave() ? IDLE : phase
     case 'tap': {
       const payload = input.resolve()
-      if (payload == null) return
-      return stepTo(phase, { kind: 'active', hit: { payload, element: input.element } })
+      return payload == null
+        ? undefined
+        : { kind: 'active', hit: { payload, element: input.element } }
     }
-    case 'update':
-      return transitionUpdate(phase, input)
+    case 'update': {
+      if (phase.kind === 'dismissed') return input.isAttached(phase.element) ? undefined : IDLE
+      const hit = getHit(phase)
+      if (!hit) return
+      const payload = input.resolve(hit.element)
+      return payload != null && input.isSamePayload(hit.payload, payload) ? undefined : IDLE
+    }
     case 'dismiss':
-      return transitionDismiss(phase)
+      switch (phase.kind) {
+        case 'pending':
+          return { kind: 'dismissed', element: phase.element }
+        case 'active':
+          return { kind: 'dismissed', element: phase.hit.element }
+        case 'leaving':
+          return IDLE
+        default:
+          return undefined
+      }
     case 'reset':
-      return stepTo(phase, IDLE)
+      return IDLE
   }
 }
 
 function createHoverTracker<Payload>(config: MarkHoverConfig<Payload>): HoverTracker {
   const { openDelay, closeDelay } = config
 
-  let phase: HoverPhase<Payload, HTMLElement, EditorView> = IDLE
+  let phase: HoverPhase<Payload, HTMLElement> = IDLE
   /**
    * Runs exactly while the phase is `pending` or `leaving`.
    */
@@ -343,24 +273,26 @@ function createHoverTracker<Payload>(config: MarkHoverConfig<Payload>): HoverTra
   }
 
   /**
-   * The only way to change the phase. It applies the timer the step asks for
-   * and reports a change of the hit element.
+   * The only way to change the phase. It restarts the timer the next phase
+   * needs and reports a change of the hit element.
    */
-  const send = (input: HoverInput<Payload, HTMLElement, EditorView>): void => {
-    const step = transitionHover(phase, input)
-    if (!step) return
-    if (step.timer !== 'keep') clearTimeout(timer)
-    phase = step.phase
-    if (step.timer === 'open') timer = setTimeout(finishOpen, openDelay)
-    if (step.timer === 'close') timer = setTimeout(finishLeave, closeDelay)
-    if (step.emit) config.onHoverChange(getHit(phase))
+  const send = (input: HoverInput<Payload, HTMLElement>, view?: EditorView): void => {
+    const next = transitionHover(phase, input)
+    if (!next) return
+    clearTimeout(timer)
+    const previousHit = getHit(phase)
+    phase = next
+    if (next.kind === 'pending' && view) timer = setTimeout(finishOpen, openDelay, view)
+    if (next.kind === 'leaving') timer = setTimeout(finishLeave, closeDelay)
+    const hit = getHit(next)
+    if (hit?.element !== previousHit?.element) config.onHoverChange(hit)
   }
 
-  const finishOpen = (): void => {
+  const finishOpen = (view: EditorView): void => {
     send({
       type: 'open-elapsed',
       // The mark may be gone or rewritten by the time the open delay elapses.
-      resolve: (element, view) => {
+      resolve: (element) => {
         return element.isConnected ? findPayloadForElement(view, element) : undefined
       },
     })
@@ -373,7 +305,7 @@ function createHoverTracker<Payload>(config: MarkHoverConfig<Payload>): HoverTra
   const handleOver = (view: EditorView, event: MouseEvent): void => {
     const element = findClosestMark(event.target)
     if (!element || !view.dom.contains(element)) return
-    send({ type: 'over', element, view, resolve: () => findPayloadForElement(view, element) })
+    send({ type: 'over', element, resolve: () => findPayloadForElement(view, element) }, view)
   }
 
   const handleOut = (event: MouseEvent): void => {
