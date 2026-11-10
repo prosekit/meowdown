@@ -50,4 +50,4 @@ allowBuilds:
 #   '@post-embed/exporter': https://pkg.pr.new/@post-embed/exporter@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
 
 overrides:
-  prosemirror-view: 1.43.0-beta1
+  prosemirror-view: 1.43.0-beta2
