@@ -678,11 +678,6 @@ describe('toMeowdownUnsafe', () => {
           "atBreak": true,
           "character": "-",
         },
-        {
-          "after": "[:|-]",
-          "atBreak": true,
-          "character": "-",
-        },
       ]
     `)
     expect(strip(toMeowdownUnsafe(stock))).toMatchInlineSnapshot(`
@@ -1174,11 +1169,6 @@ describe('toMeowdownUnsafe', () => {
           "after": "-",
           "atBreak": true,
           "character": ":",
-        },
-        {
-          "after": "[:|-]",
-          "atBreak": true,
-          "character": "-",
         },
         {
           "after": "[:|-]",
