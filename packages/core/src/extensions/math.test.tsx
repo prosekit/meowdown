@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
+import { MATH_VIEW_CLASS, MATH_VIEW_CONTENT_CLASS, SYNTAX_MARK_CLASS } from '../class-names.ts'
 import { findText } from '../testing/find-text.ts'
 import { setupFixture, traceKeySelection, type Fixture } from '../testing/index.ts'
 
@@ -8,7 +9,7 @@ import type { MarkMode } from './mark-mode.ts'
 
 const pmRoot = page.locate('.ProseMirror')
 const preview = pmRoot.getByTestId('math-preview')
-const mathContent = pmRoot.locate('.md-math-view-content')
+const mathContent = pmRoot.locate(`.${MATH_VIEW_CONTENT_CLASS}`)
 
 // An editor showing one paragraph in the given mark mode (caret at `<a>`).
 function setup(mode: MarkMode, text: string): Fixture {
@@ -69,7 +70,9 @@ describe('math source reveal', () => {
     await expect.element(mathContent).toBeVisible()
     await expect.element(preview).not.toBeVisible()
     // The dollars reveal along with the content.
-    await expect.element(pmRoot.locate('.md-math-view .md-mark').first()).toBeVisible()
+    await expect
+      .element(pmRoot.locate(`.${MATH_VIEW_CLASS} .${SYNTAX_MARK_CLASS}`).first())
+      .toBeVisible()
   })
 
   it('reveals the source when the caret is inside, even in hide mode', async () => {
@@ -77,7 +80,9 @@ describe('math source reveal', () => {
     void fixture
     await expect.element(mathContent).toBeVisible()
     await expect.element(preview).not.toBeVisible()
-    await expect.element(pmRoot.locate('.md-math-view .md-mark').first()).toBeVisible()
+    await expect
+      .element(pmRoot.locate(`.${MATH_VIEW_CLASS} .${SYNTAX_MARK_CLASS}`).first())
+      .toBeVisible()
   })
 
   it('reveals at the unit boundary, before the opening dollar', async () => {

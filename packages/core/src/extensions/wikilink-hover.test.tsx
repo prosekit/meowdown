@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
+import { WIKILINK_VIEW_LABEL_CLASS } from '../class-names.ts'
 import { resolveWikilinkAlias, setupFixture } from '../testing/index.ts'
 
 import { updateEditorConfig } from './editor-config.ts'
@@ -41,7 +42,7 @@ describe('wikilink hover callback', () => {
     using fixture = applyHoverable('see [[Note|Wide alias]] here', onHoverChange)
     void fixture
     const preview = pmRoot.getByTestId('wikilink')
-    const label = preview.locate('.md-wikilink-view-label')
+    const label = preview.locate(`.${WIKILINK_VIEW_LABEL_CLASS}`)
 
     await preview.hover()
     vi.advanceTimersByTime(300)

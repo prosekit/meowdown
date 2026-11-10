@@ -62,6 +62,30 @@ import {
   type ReactNode,
 } from 'react'
 
+import {
+  ATOM_VIEW_CLASS,
+  ATOM_VIEW_CONTENT_CLASS,
+  ATOM_VIEW_PREVIEW_CLASS,
+  CONTENT_CLASS,
+  FILE_VIEW_CLASS,
+  FILE_VIEW_CONTENT_CLASS,
+  FILE_VIEW_ICON_CLASS,
+  FILE_VIEW_NAME_CLASS,
+  FILE_VIEW_PREVIEW_CLASS,
+  FILE_VIEW_SIZE_CLASS,
+  IMAGE_RESIZABLE_CLASS,
+  IMAGE_VIEW_CLASS,
+  IMAGE_VIEW_CONTENT_CLASS,
+  IMAGE_VIEW_PREVIEW_CLASS,
+  LINK_TEXT_MARK_CLASS,
+  MATH_VIEW_CLASS,
+  MATH_VIEW_CONTENT_CLASS,
+  MATH_VIEW_PREVIEW_CLASS,
+  WIKILINK_VIEW_CLASS,
+  WIKILINK_VIEW_CONTENT_CLASS,
+  WIKILINK_VIEW_LABEL_CLASS,
+  WIKILINK_VIEW_PREVIEW_CLASS,
+} from '../class-names.ts'
 import { useKaTeX } from '../hooks/use-katex.ts'
 import { useMaybePromise } from '../hooks/use-maybe-promise.ts'
 import { usePele } from '../hooks/use-pele.ts'
@@ -312,18 +336,20 @@ function WikilinkChip(props: {
       }
     : undefined
   return (
-    <span className="md-wikilink-view md-atom-view">
+    <span className={`${WIKILINK_VIEW_CLASS} ${ATOM_VIEW_CLASS}`}>
       <span
-        className="md-wikilink-view-preview md-atom-view-preview"
+        className={`${WIKILINK_VIEW_PREVIEW_CLASS} ${ATOM_VIEW_PREVIEW_CLASS}`}
         data-testid="wikilink"
         contentEditable={false}
         onClick={handleClick}
       >
-        <span className="md-wikilink-view-label" contentEditable={false}>
+        <span className={WIKILINK_VIEW_LABEL_CLASS} contentEditable={false}>
           {display || target}
         </span>
       </span>
-      <span className="md-wikilink-view-content md-atom-view-content">{children}</span>
+      <span className={`${WIKILINK_VIEW_CONTENT_CLASS} ${ATOM_VIEW_CONTENT_CLASS}`}>
+        {children}
+      </span>
     </span>
   )
 }
@@ -349,7 +375,7 @@ function PostEmbed(props: {
   const saved = snapshot == null ? undefined : parsePostEmbedSnapshot(snapshot)
   return (
     <span
-      className="md-image-view-preview md-atom-view-preview"
+      className={`${IMAGE_VIEW_PREVIEW_CLASS} ${ATOM_VIEW_PREVIEW_CLASS}`}
       contentEditable={false}
       data-testid={`${kind}-embed`}
       data-post-embed={kind}
@@ -432,12 +458,12 @@ function ImagePreview(props: {
     if (resolved instanceof Promise && width != null && height != null) {
       return (
         <span
-          className="md-image-view-preview md-atom-view-preview"
+          className={`${IMAGE_VIEW_PREVIEW_CLASS} ${ATOM_VIEW_PREVIEW_CLASS}`}
           data-testid="image-preview"
           contentEditable={false}
         >
           <span
-            className="md-image-resizable"
+            className={IMAGE_RESIZABLE_CLASS}
             data-testid="image-resizable"
             data-loading=""
             style={{ width: `${width}px`, height: `${height}px` }}
@@ -460,7 +486,7 @@ function ImagePreview(props: {
     : undefined
   return (
     <span
-      className="md-image-view-preview md-atom-view-preview"
+      className={`${IMAGE_VIEW_PREVIEW_CLASS} ${ATOM_VIEW_PREVIEW_CLASS}`}
       data-testid="image-preview"
       contentEditable={false}
     >
@@ -486,7 +512,7 @@ function ImageView(props: {
 }): ReactElement {
   const { src, alt, width, height, snapshot, context, children } = props
   return (
-    <span className="md-image-view md-atom-view">
+    <span className={`${IMAGE_VIEW_CLASS} ${ATOM_VIEW_CLASS}`}>
       <ImagePreview
         src={src}
         alt={alt}
@@ -500,7 +526,7 @@ function ImageView(props: {
         onImageClick={context.onImageClick}
         interactive={context.interactive}
       />
-      <span className="md-image-view-content md-atom-view-content">{children}</span>
+      <span className={`${IMAGE_VIEW_CONTENT_CLASS} ${ATOM_VIEW_CONTENT_CLASS}`}>{children}</span>
     </span>
   )
 }
@@ -554,9 +580,9 @@ function FileView(props: {
       }
     : undefined
   return (
-    <span className="md-file-view md-atom-view">
+    <span className={`${FILE_VIEW_CLASS} ${ATOM_VIEW_CLASS}`}>
       <span
-        className="md-file-view-preview md-atom-view-preview"
+        className={`${FILE_VIEW_PREVIEW_CLASS} ${ATOM_VIEW_PREVIEW_CLASS}`}
         data-testid="file-pill"
         data-file-kind={getFileKind(href)}
         contentEditable={false}
@@ -564,7 +590,7 @@ function FileView(props: {
         onClick={handleClick}
       >
         <svg
-          className="md-file-view-icon"
+          className={FILE_VIEW_ICON_CLASS}
           viewBox="0 0 24 24"
           aria-hidden="true"
           fill="none"
@@ -576,12 +602,12 @@ function FileView(props: {
           <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
           <path d="M14 2v4a2 2 0 0 0 2 2h4" />
         </svg>
-        <span className="md-file-view-name">{name}</span>
-        <span className="md-file-view-size" data-testid="file-pill-size">
+        <span className={FILE_VIEW_NAME_CLASS}>{name}</span>
+        <span className={FILE_VIEW_SIZE_CLASS} data-testid="file-pill-size">
           {size}
         </span>
       </span>
-      <span className="md-file-view-content md-atom-view-content">{children}</span>
+      <span className={`${FILE_VIEW_CONTENT_CLASS} ${ATOM_VIEW_CONTENT_CLASS}`}>{children}</span>
     </span>
   )
 }
@@ -629,15 +655,15 @@ function MathView(props: { formula: string; children: ReactNode }): ReactElement
   const katex = useKaTeX(true)
   if (!katex) return <span>{formula}</span>
   return (
-    <span className="md-math-view">
+    <span className={MATH_VIEW_CLASS}>
       <MathRender
         katex={katex}
         formula={formula}
         displayMode={false}
-        className="md-math-view-preview"
+        className={MATH_VIEW_PREVIEW_CLASS}
         data-testid="math-preview"
       />
-      <span className="md-math-view-content">{children}</span>
+      <span className={MATH_VIEW_CONTENT_CLASS}>{children}</span>
     </span>
   )
 }
@@ -721,7 +747,7 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
     }
     case 'mdLinkText': {
       const attrs = mark.attrs as MdLinkTextAttrs
-      if (!context.interactive) return <span className="md-link">{children}</span>
+      if (!context.interactive) return <span className={LINK_TEXT_MARK_CLASS}>{children}</span>
       const handleClick = context.onLinkClick
         ? (event: MouseEvent) => {
             event.preventDefault()
@@ -733,7 +759,7 @@ function wrapMark(mark: Mark, children: ReactNode, context: RenderContext): Reac
           }
         : undefined
       return (
-        <a className="md-link" href={attrs.href} onClick={handleClick}>
+        <a className={LINK_TEXT_MARK_CLASS} href={attrs.href} onClick={handleClick}>
           {children}
         </a>
       )
@@ -1111,7 +1137,7 @@ export function MarkdownView({
   return (
     <div
       ref={rootRef}
-      className={clsx('ProseMirror', 'meowdown-content', className)}
+      className={clsx('ProseMirror', CONTENT_CLASS, className)}
       data-mark-mode={markMode}
     >
       {blocks.map(({ node, taskBase }, index) => (

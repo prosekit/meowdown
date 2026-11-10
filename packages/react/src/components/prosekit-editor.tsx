@@ -1,12 +1,12 @@
 import {
   defineEditorExtension,
-  paragraphMarkdownToDoc,
-  docToParagraphMarkdown,
   docToMarkdown,
+  docToParagraphMarkdown,
   getSelectedText,
   getTextblockDisplayText,
   isNodeOfType,
   markdownToDoc,
+  paragraphMarkdownToDoc,
   type AcceptPendingReplacementOptions,
   type EditorConfig,
   type ExitBoundaryHandler,
@@ -57,6 +57,7 @@ import { BlockHandle } from './block-handle.tsx'
 import { CollisionBoundaryContext, type CollisionBoundary } from './collision-boundary.ts'
 import { DropIndicator } from './drop-indicator.tsx'
 import { EditorExtensions } from './editor-extensions.tsx'
+import { EmbedMenu } from './embed-menu.tsx'
 import { LinkMenu } from './link-menu.tsx'
 import { PendingReplacementPreview } from './pending-replacement-preview.tsx'
 import { SelectionMenu } from './selection-menu.tsx'
@@ -780,12 +781,13 @@ export function ProseKitEditor({
           onFileSaveError={onFileSaveError}
         />
         <LinkMenu
-          key={String(readOnly)}
+          key={readOnly ? 1 : 0}
           onLinkClick={onLinkClick}
           onLinkCopy={onLinkCopy}
           resolveLinkPreview={resolveLinkPreview}
           readOnly={readOnly}
         />
+        <EmbedMenu readOnly={readOnly} />
         {onTagSearch && <TagMenu onTagSearch={onTagSearch} />}
         {onWikilinkSearch && <WikilinkMenu onWikilinkSearch={onWikilinkSearch} />}
         {onSelectionMenuSearch && !readOnly && (

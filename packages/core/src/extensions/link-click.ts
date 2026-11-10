@@ -1,6 +1,7 @@
 import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 
+import { LINK_TEXT_MARK_CLASS } from '../class-names.ts'
 import { isModEvent } from '../utils/is-mod-event.ts'
 
 import { getLinkUnitAt } from './get-link-unit-at.ts'
@@ -40,7 +41,7 @@ export function defineLinkClickHandler(
   return defineMarkClickHandler<string>({
     key: linkClickKey,
     enabled: (state) => !!getOnClick?.(state),
-    selector: '.md-link',
+    selector: `.${LINK_TEXT_MARK_CLASS}`,
     preventDefault: true,
     findPayloadAt: (state, pos) => getLinkUnitAt(state, pos)?.href,
     onClick: (href, event, state) => {

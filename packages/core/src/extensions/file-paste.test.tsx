@@ -1,5 +1,5 @@
 import { dropFiles, pasteFiles } from '@meowdown/vitest/file-events'
-import { sleep } from '@ocavue/utils'
+import { sleep, noop } from '@ocavue/utils'
 import { describe, expect, it, vi } from 'vitest'
 
 import { docToMarkdown } from '../converters/pm-to-md.ts'
@@ -50,7 +50,7 @@ describe('file paste', () => {
   })
 
   it('inserts nothing when the callback declines with undefined', async () => {
-    const onFilePaste = vi.fn(() => undefined)
+    const onFilePaste = vi.fn(noop)
     using fixture = setup({ onFilePaste }, 'text')
     pasteFiles(fixture.view, [pdf('skip.pdf')])
     await vi.waitFor(() => expect(onFilePaste).toHaveBeenCalledOnce())
@@ -131,7 +131,7 @@ describe('file drop', () => {
   })
 
   it('consumes a declined drop without inserting anything', async () => {
-    const onFilePaste = vi.fn(() => undefined)
+    const onFilePaste = vi.fn(noop)
     using fixture = setup({ onFilePaste }, 'text')
     const event = dropFiles(fixture.view, [png('cat.png')], 1)
     expect(event.defaultPrevented).toBe(true)

@@ -1,6 +1,8 @@
 import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey, type EditorState } from '@prosekit/pm/state'
 
+import { FILE_VIEW_PREVIEW_CLASS } from '../class-names.ts'
+import { getAtomViewSourcePos } from '../utils/atom-view.ts'
 import { isModEvent } from '../utils/is-mod-event.ts'
 
 import type { MdFileAttrs } from './inline-marks.ts'
@@ -64,14 +66,14 @@ export function defineFileClickHandler(
           const handler = getOnClick?.(view.state)
           if (!handler) return false
           const target = event.target as HTMLElement | null
-          const preview = target?.closest?.('.md-file-view-preview')
+          const preview = target?.closest?.(`.${FILE_VIEW_PREVIEW_CLASS}`)
           if (!preview) return false
           // Resolve the position from the pill's own content holder, not the
           // click's `pos`: a click on the non-editable pill lands on the run
           // boundary, where `getMarkRange` would pick the next adjacent file.
-          const content = preview.closest('.md-file-view')?.querySelector('.md-file-view-content')
-          if (!content) return false
-          const hit = findFileAt(view.state, view.posAtDOM(content, 0))
+          const pos = getAtomViewSourcePos(view, preview)
+          if (pos == null) return false
+          const hit = findFileAt(view.state, pos)
           if (!hit) return false
           handler({ href: hit.href, name: hit.name, event, mod: isModEvent(event) })
           return true

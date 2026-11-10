@@ -2,6 +2,8 @@ import type { PlainExtension } from '@prosekit/core'
 import { PluginKey, type EditorState } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
+import { WIKILINK_VIEW_PREVIEW_CLASS } from '../class-names.ts'
+import { getAtomViewSourcePos } from '../utils/atom-view.ts'
 import { isModEvent } from '../utils/is-mod-event.ts'
 
 import type { MdWikilinkAttrs } from './inline-marks.ts'
@@ -37,11 +39,8 @@ export function findWikilinkForElement(
   view: EditorView,
   element: HTMLElement,
 ): WikilinkHit | undefined {
-  const content = element
-    .closest('.md-wikilink-view')
-    ?.querySelector<HTMLElement>('.md-wikilink-view-content')
-  if (!content) return
-  return findWikilinkAt(view.state, view.posAtDOM(content, 0))
+  const pos = getAtomViewSourcePos(view, element)
+  return pos == null ? undefined : findWikilinkAt(view.state, pos)
 }
 
 export interface WikilinkClickPayload {
@@ -70,7 +69,7 @@ export function defineWikilinkClickHandler(
   return defineMarkClickHandler<string>({
     key: wikilinkClickKey,
     enabled: (state) => !!getOnClick?.(state),
-    selector: '.md-wikilink-view-preview',
+    selector: `.${WIKILINK_VIEW_PREVIEW_CLASS}`,
     preventDefault: false,
     findPayloadAt: (state, pos) => findWikilinkAt(state, pos)?.target,
     findPayloadForElement: (view, element) => findWikilinkForElement(view, element)?.target,

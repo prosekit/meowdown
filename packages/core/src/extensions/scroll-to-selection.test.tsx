@@ -2,6 +2,7 @@ import { definePlugin } from '@prosekit/core'
 import { Plugin } from '@prosekit/pm/state'
 import { describe, expect, it } from 'vitest'
 
+import { WIKILINK_VIEW_PREVIEW_CLASS } from '../class-names.ts'
 import { setupFixture, type Fixture } from '../testing/index.ts'
 
 import type { MarkMode } from './mark-mode.ts'
@@ -48,7 +49,7 @@ function getLastTextRect(fixture: Fixture): DOMRect {
 }
 
 function wikilinkPreview(fixture: Fixture): Element {
-  const preview = fixture.dom.querySelector('.md-wikilink-view-preview')
+  const preview = fixture.dom.querySelector(`.${WIKILINK_VIEW_PREVIEW_CLASS}`)
   if (preview == null) throw new Error('no wikilink preview rendered')
   return preview
 }

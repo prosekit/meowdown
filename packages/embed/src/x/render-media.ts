@@ -1,4 +1,4 @@
-import { isNotNullish } from '@ocavue/utils'
+import { isNotNullish, noop } from '@ocavue/utils'
 import type { XPostMedia, XPostPhoto, XPostVideo } from '@post-embed/types'
 import el from 'crelt'
 
@@ -176,7 +176,7 @@ function renderVideo(
     button.replaceWith(video)
     video.focus()
     // The click is the user gesture that allows playback with sound.
-    video.play().catch(() => {})
+    video.play().catch(noop)
   })
   return button
 }

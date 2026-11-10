@@ -1,8 +1,9 @@
 import { registerXPost, type Resolver } from '@meowdown/embed/x'
-import { registerYouTubeVideo } from '@meowdown/embed/youtube'
+import { registerYouTubeVideo, type YouTubeVideoElement } from '@meowdown/embed/youtube'
 import { matchEmbed, type EmbedKind } from '@meowdown/markdown'
+import { noop } from '@ocavue/utils'
 import type { XPost, YouTubeVideo } from '@post-embed/types'
-import { defineMarkView, type PlainExtension } from '@prosekit/core'
+import { defineMarkView, isApple, type PlainExtension } from '@prosekit/core'
 import type { Mark } from '@prosekit/pm/model'
 import type { EditorState } from '@prosekit/pm/state'
 import type { EditorView, MarkView, ViewMutationRecord } from '@prosekit/pm/view'
@@ -12,6 +13,21 @@ import {
   type ResizeEndEvent,
 } from '@prosekit/web/resizable'
 
+import {
+  ATOM_VIEW_CLASS,
+  ATOM_VIEW_CONTENT_CLASS,
+  ATOM_VIEW_PREVIEW_CLASS,
+  EMBED_MENU_BUTTON_CLASS,
+  EMBED_RESIZABLE_CLASS,
+  getIconClass,
+  ICON_BUTTON_CLASS,
+  ICON_CLASS,
+  IMAGE_RESIZABLE_CLASS,
+  IMAGE_RESIZE_HANDLE_CLASS,
+  IMAGE_VIEW_CLASS,
+  IMAGE_VIEW_CONTENT_CLASS,
+  IMAGE_VIEW_PREVIEW_CLASS,
+} from '../class-names.ts'
 import { guardMarkView } from '../utils/guard-mark-view.ts'
 import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
 
@@ -33,6 +49,35 @@ import {
   type YouTubeVideoResolver,
 } from './post-embed.ts'
 import { formatSizedWikiEmbed, parseWikiEmbed } from './wiki-embed.ts'
+
+/**
+ * The menu button of an image or card, handled by `defineEmbedMenuHandler`.
+ * It stays out of the tab order: `Mod-/` opens the menu from the keyboard.
+ */
+function createEmbedMenuButton(): HTMLButtonElement {
+  const button = document.createElement('button')
+  button.type = 'button'
+  button.className = `${EMBED_MENU_BUTTON_CLASS} ${ICON_BUTTON_CLASS}`
+  button.tabIndex = -1
+  button.setAttribute('aria-label', 'More')
+  button.setAttribute('aria-haspopup', 'menu')
+  button.title = `More (${isApple ? '⌘/' : 'Ctrl+/'})`
+  button.dataset.testid = 'embed-menu'
+
+  const icon = document.createElement('span')
+  icon.className = `${ICON_CLASS} ${getIconClass('ellipsis')}`
+  icon.setAttribute('aria-hidden', 'true')
+  button.appendChild(icon)
+  return button
+}
+
+/**
+ * The YouTube video saved in a mark's `snapshot` attr, or `null` to fetch it.
+ */
+function getSavedYouTubeVideo(snapshot: object | null): YouTubeVideo | null {
+  const saved = snapshot == null ? undefined : parsePostEmbedSnapshot(snapshot)
+  return saved?.kind === 'youtube-video' ? saved.data : null
+}
 
 /**
  * Maps a markdown `src` to a displayable URL, or `undefined` to skip rendering
@@ -235,6 +280,7 @@ class ImageMarkView implements MarkView {
   #attrs: MdImageAttrs
   #resizableRoot: HTMLElement | undefined
   #image: HTMLImageElement | undefined
+  #youtube: YouTubeVideoElement | undefined
   #destroyed = false
 
   constructor(mark: Mark, view: EditorView, options: ImageOptions) {
@@ -246,10 +292,10 @@ class ImageMarkView implements MarkView {
     this.#resolveYouTubeVideo = options.resolveYouTubeVideo ?? defaultResolveYouTubeVideo
 
     this.#dom = document.createElement('span')
-    this.#dom.className = 'md-image-view md-atom-view'
+    this.#dom.className = `${IMAGE_VIEW_CLASS} ${ATOM_VIEW_CLASS}`
 
     this.#contentDOM = document.createElement('span')
-    this.#contentDOM.className = 'md-image-view-content md-atom-view-content'
+    this.#contentDOM.className = `${IMAGE_VIEW_CONTENT_CLASS} ${ATOM_VIEW_CONTENT_CLASS}`
     this.#contentDOM.dataset.testid = 'image-source'
     for (const [name, value] of Object.entries(NON_PROSE_ATTRS)) {
       this.#contentDOM.setAttribute(name, value)
@@ -271,9 +317,14 @@ class ImageMarkView implements MarkView {
     const next = mark.attrs as MdImageAttrs
     const previous = this.#attrs
     // False rebuilds the view from the constructor: a new src can change the
-    // preview shape, and a new snapshot switches the card to its data path.
-    if (next.src !== previous.src || next.snapshot !== previous.snapshot) return false
+    // preview shape.
+    if (next.src !== previous.src) return false
     this.#attrs = next
+    // A new snapshot (usually the card persisting its first fetch) updates the
+    // card in place, so the wrapper and its menu button stay in the document.
+    if (this.#youtube && next.snapshot !== previous.snapshot) {
+      this.#youtube.data = getSavedYouTubeVideo(next.snapshot)
+    }
     if (this.#image && next.alt !== previous.alt) {
       this.#image.alt = next.alt
     }
@@ -308,6 +359,7 @@ class ImageMarkView implements MarkView {
       wrapper.dataset.testid = `${kind}-embed`
       wrapper.dataset.postEmbed = kind
       wrapper.appendChild(this.#buildPostEmbed(kind, src))
+      wrapper.appendChild(createEmbedMenuButton())
       this.#insertPreview(wrapper)
       return
     }
@@ -353,7 +405,7 @@ class ImageMarkView implements MarkView {
 
   #createWrapper(): HTMLElement {
     const wrapper = document.createElement('span')
-    wrapper.className = 'md-image-view-preview md-atom-view-preview'
+    wrapper.className = `${IMAGE_VIEW_PREVIEW_CLASS} ${ATOM_VIEW_PREVIEW_CLASS}`
     return wrapper
   }
 
@@ -373,6 +425,7 @@ class ImageMarkView implements MarkView {
     const wrapper = this.#createWrapper()
     wrapper.dataset.testid = 'image-preview'
     wrapper.appendChild(this.#buildResizableImage(url))
+    wrapper.appendChild(createEmbedMenuButton())
     return wrapper
   }
 
@@ -380,8 +433,6 @@ class ImageMarkView implements MarkView {
    * Resolve X cards from their URL; YouTube cards may reuse a saved snapshot.
    */
   #buildPostEmbed(kind: EmbedKind, src: string): HTMLElement {
-    const saved =
-      this.#attrs.snapshot == null ? undefined : parsePostEmbedSnapshot(this.#attrs.snapshot)
     if (kind === 'x-post') {
       registerXPost()
       const element = document.createElement('meowdown-embed-x')
@@ -390,13 +441,17 @@ class ImageMarkView implements MarkView {
       element.url = src
       return element
     }
-    registerYouTubeVideo()
-    const element = document.createElement('meowdown-embed-youtube')
-    element.playback = 'inline'
-    element.data = saved?.kind === 'youtube-video' ? saved.data : null
-    element.resolver = this.#persisting(kind, this.#resolveYouTubeVideo)
-    element.url = src
-    return this.#buildResizableVideo(element)
+    if (kind === 'youtube-video') {
+      registerYouTubeVideo()
+      const element = document.createElement('meowdown-embed-youtube')
+      element.playback = 'inline'
+      element.data = getSavedYouTubeVideo(this.#attrs.snapshot)
+      element.resolver = this.#persisting(kind, this.#resolveYouTubeVideo)
+      element.url = src
+      this.#youtube = element
+      return this.#buildResizableVideo(element)
+    }
+    throw new Error(`Unexpected embed kind ${kind satisfies never}`)
   }
 
   /**
@@ -407,14 +462,11 @@ class ImageMarkView implements MarkView {
   #persisting<T extends XPost | YouTubeVideo>(kind: EmbedKind, resolver: Resolver<T>): Resolver<T> {
     return (url) => {
       const result = resolver(url)
-      void Promise.resolve(result).then(
-        (value) => {
-          if (this.#destroyed || value == null) return
-          const snapshot = parsePostEmbedSnapshot({ kind, data: value })
-          if (snapshot) commitSnapshot(this.#view, this.#contentDOM, url, snapshot)
-        },
-        () => {},
-      )
+      void Promise.resolve(result).then((value) => {
+        if (this.#destroyed || value == null) return
+        const snapshot = parsePostEmbedSnapshot({ kind, data: value })
+        if (snapshot) commitSnapshot(this.#view, this.#contentDOM, url, snapshot)
+      }, noop)
       return result
     }
   }
@@ -429,13 +481,13 @@ class ImageMarkView implements MarkView {
     registerResizableHandleElement()
 
     const root = document.createElement('prosekit-resizable-root')
-    root.className = 'md-embed-resizable'
+    root.className = EMBED_RESIZABLE_CLASS
     root.dataset.testid = 'embed-resizable'
     applySize(root, this.#attrs.width, null)
     root.appendChild(element)
 
     const handle = document.createElement('prosekit-resizable-handle')
-    handle.className = 'md-image-resize-handle'
+    handle.className = IMAGE_RESIZE_HANDLE_CLASS
     handle.setAttribute('position', 'bottom-right')
     // A click (no drag) on the handle must not bubble to the image-click handler.
     handle.addEventListener('click', (event) => event.stopPropagation())
@@ -461,7 +513,7 @@ class ImageMarkView implements MarkView {
     registerResizableHandleElement()
 
     const root = document.createElement('prosekit-resizable-root')
-    root.className = 'md-image-resizable'
+    root.className = IMAGE_RESIZABLE_CLASS
     root.dataset.testid = 'image-resizable'
     // Show a placeholder background until the image paints, so a freshly dropped,
     // not-yet-loaded image still fills a visible box. Removed on load/error.
@@ -473,7 +525,7 @@ class ImageMarkView implements MarkView {
     applySize(root, this.#attrs.width, this.#attrs.height)
 
     const handle = document.createElement('prosekit-resizable-handle')
-    handle.className = 'md-image-resize-handle'
+    handle.className = IMAGE_RESIZE_HANDLE_CLASS
     handle.setAttribute('position', 'bottom-right')
     // A click (no drag) on the handle must not bubble to the image-click handler.
     handle.addEventListener('click', (event) => event.stopPropagation())

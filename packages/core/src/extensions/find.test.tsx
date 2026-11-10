@@ -2,6 +2,7 @@ import { getSearchStatus } from '@prosekit/extensions/search'
 import { describe, expect, it } from 'vitest'
 import { page } from 'vitest/browser'
 
+import { LINK_URI_MARK_CLASS } from '../class-names.ts'
 import { resolveWikilinkAlias, setupFixture, type Fixture } from '../testing/index.ts'
 
 function setupFind(markdown: string): Fixture {
@@ -17,7 +18,7 @@ function getSelectedText(fixture: Fixture): string {
 }
 
 describe('find over hidden source', () => {
-  const linkDestination = page.locate('.ProseMirror .md-link-uri')
+  const linkDestination = page.locate(`.ProseMirror .${LINK_URI_MARK_CLASS}`)
   const activeMatch = page.locate('.ProseMirror .ProseMirror-active-search-match')
 
   it('counts a match inside a hidden link destination and reveals it', () => {

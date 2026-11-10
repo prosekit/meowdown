@@ -7,6 +7,7 @@ import {
 import { Plugin } from '@prosekit/pm/state'
 import { Decoration, DecorationSet } from '@prosekit/pm/view'
 
+import { SHOW_CLASS } from '../class-names.ts'
 import { guardDecorations } from '../utils/guard-plugin.ts'
 
 // Hide and focus mode render syntax runs, link destinations, and link titles at
@@ -18,7 +19,7 @@ const revealActiveMatch = new Plugin({
     decorations: guardDecorations((state) => {
       const { from, to, empty } = state.selection
       if (empty || getSearchStatus(state).active === 0) return
-      return DecorationSet.create(state.doc, [Decoration.inline(from, to, { class: 'show' })])
+      return DecorationSet.create(state.doc, [Decoration.inline(from, to, { class: SHOW_CLASS })])
     }),
   },
 })

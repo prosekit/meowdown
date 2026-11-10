@@ -50,7 +50,7 @@
     background: var(--meowdown-popover-hover-bg);
   }
 
-  svg {
+  :global(.meowdown-icon) {
     display: block;
     width: 1.25rem;
     height: 1.25rem;

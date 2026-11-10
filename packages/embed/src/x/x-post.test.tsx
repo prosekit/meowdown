@@ -1,6 +1,6 @@
 import './theme.css'
 
-import { sleep } from '@ocavue/utils'
+import { sleep, noop } from '@ocavue/utils'
 import type { XPost } from '@post-embed/types'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { page, server, userEvent } from 'vitest/browser'
@@ -76,7 +76,7 @@ describe('X post', () => {
   })
 
   it('shows invalid input and recovers with a valid snapshot', async () => {
-    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const error = vi.spyOn(console, 'error').mockImplementation(noop)
     const element = mount('Before')
     await expect.element(post.getByText('Before')).toBeVisible()
     Reflect.set(element, 'data', {})
@@ -133,7 +133,7 @@ describe('X post', () => {
   })
 
   it('shows a themed fallback for missing data without logging an error', async () => {
-    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const error = vi.spyOn(console, 'error').mockImplementation(noop)
     const element = document.createElement('meowdown-embed-x')
     element.dataset.testid = 'post'
     document.body.append(element)
@@ -264,7 +264,7 @@ describe('X post fetch', () => {
   })
 
   it('shows the fallback when `resolver` finds nothing', async () => {
-    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const error = vi.spyOn(console, 'error').mockImplementation(noop)
     mountRemote(() => Promise.resolve(undefined))
     await expect.element(post.getByText('This post is unavailable.')).toBeVisible()
     expect(error).not.toHaveBeenCalled()
@@ -276,7 +276,7 @@ describe('X post fetch', () => {
   })
 
   it('logs a rejected fetch and shows the fallback', async () => {
-    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const error = vi.spyOn(console, 'error').mockImplementation(noop)
     const element = mountRemote(() => Promise.reject(new Error('offline')))
     await expect.element(post.getByText('This post is unavailable.')).toBeVisible()
     expect(error).toHaveBeenCalledWith('[meowdown] Failed to fetch X post:', expect.any(Error))

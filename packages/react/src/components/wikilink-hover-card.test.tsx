@@ -1,7 +1,7 @@
 import '../testing/index.ts'
 
 import type { WikilinkHoverHit } from '@meowdown/core'
-import { sleep } from '@ocavue/utils'
+import { sleep, noop } from '@ocavue/utils'
 import { createRef, type ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -139,7 +139,7 @@ describe('WikilinkHoverCard', () => {
 
   it('renders no card when the render promise rejects', async () => {
     await unhover()
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(noop)
     await render(
       <MarkdownEditor initialMarkdown="see [[Broken]] here" blockHandle={false}>
         <WikilinkHoverCard>

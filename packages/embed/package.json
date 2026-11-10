@@ -1,7 +1,7 @@
 {
   "name": "@meowdown/embed",
   "type": "module",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -48,7 +48,7 @@
   "devDependencies": {
     "@meowdown/vitest": "workspace:*",
     "@ocavue/tsconfig": "^0.7.1",
-    "@ocavue/utils": "^1.11.0",
+    "@ocavue/utils": "^1.12.0",
     "@vitest/browser-playwright": "^5.0.5",
     "tsdown": "^0.23.3",
     "vitest": "^5.0.5"

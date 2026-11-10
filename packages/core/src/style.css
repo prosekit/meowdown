@@ -220,6 +220,201 @@
   }
 
   /* ---------------------------------------------------------------------------
+   * Icons
+   *
+   * `<span class="meowdown-icon meowdown-icon-{name}">` draws a Lucide icon in `currentColor`.
+   *
+   * The icon data comes from:
+   *
+   * https://api.iconify.design/lucide.css?var=_svg&commonSelector=.meowdown-icon&selector=.meowdown-icon-{name}&icons=braces,check,chevrons-up-down,copy,earth,ellipsis,grip-horizontal,grip-vertical,link-2,pencil,sparkles,trash-2,unlink
+   * ------------------------------------------------------------------------- */
+  .meowdown-icon {
+    display: block;
+    flex-shrink: 0;
+    width: 1em;
+    height: 1em;
+    background-color: currentColor;
+    -webkit-mask: var(--_svg) no-repeat center / 100% 100%;
+    mask: var(--_svg) no-repeat center / 100% 100%;
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:braces */
+  .meowdown-icon-braces {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2a2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1m8 0h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1'/%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:check */
+  .meowdown-icon-check {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:chevrons-up-down */
+  .meowdown-icon-chevrons-up-down {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m7 15l5 5l5-5M7 9l5-5l5 5'/%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:copy */
+  .meowdown-icon-copy {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Crect width='14' height='14' x='8' y='8' rx='2' ry='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:earth */
+  .meowdown-icon-earth {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Cpath d='M21.54 15H17a2 2 0 0 0-2 2v4.54M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05'/%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:ellipsis */
+  .meowdown-icon-ellipsis {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='1'/%3E%3Ccircle cx='19' cy='12' r='1'/%3E%3Ccircle cx='5' cy='12' r='1'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:grip-horizontal */
+  .meowdown-icon-grip-horizontal {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Ccircle cx='12' cy='9' r='1'/%3E%3Ccircle cx='19' cy='9' r='1'/%3E%3Ccircle cx='5' cy='9' r='1'/%3E%3Ccircle cx='12' cy='15' r='1'/%3E%3Ccircle cx='19' cy='15' r='1'/%3E%3Ccircle cx='5' cy='15' r='1'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:grip-vertical */
+  .meowdown-icon-grip-vertical {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Ccircle cx='9' cy='12' r='1'/%3E%3Ccircle cx='9' cy='5' r='1'/%3E%3Ccircle cx='9' cy='19' r='1'/%3E%3Ccircle cx='15' cy='12' r='1'/%3E%3Ccircle cx='15' cy='5' r='1'/%3E%3Ccircle cx='15' cy='19' r='1'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:link-2 */
+  .meowdown-icon-link-2 {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 17H7A5 5 0 0 1 7 7h2m6 0h2a5 5 0 1 1 0 10h-2m-7-5h8'/%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:pencil */
+  .meowdown-icon-pencil {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497zM15 5l4 4'/%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:sparkles */
+  .meowdown-icon-sparkles {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2'%3E%3Cpath d='M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594zM20 2v4m2-2h-4'/%3E%3Ccircle cx='4' cy='20' r='2'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:trash-2 */
+  .meowdown-icon-trash-2 {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M10 11v6m4-6v6m5-11v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2'/%3E%3C/svg%3E");
+  }
+
+  /* Preview: https://icones.js.org/collection/lucide?icon=lucide:unlink */
+  .meowdown-icon-unlink {
+    --_svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m18.84 12.25l1.72-1.71h-.02a5.004 5.004 0 0 0-.12-7.07a5.006 5.006 0 0 0-6.95 0l-1.72 1.71m-6.58 6.57l-1.71 1.71a5.004 5.004 0 0 0 .12 7.07a5.006 5.006 0 0 0 6.95 0l1.71-1.71M8 2v3M2 8h3m11 11v3m3-6h3'/%3E%3C/svg%3E");
+  }
+
+  /* ---------------------------------------------------------------------------
+   * Menus
+   *
+   * Shared by the floating menus and their trigger buttons, inside the editor
+   * (the embed card's menu button) and in `@meowdown/react` (the code block
+   * toolbar and menus, the embed menu). Menus are portaled out of
+   * `.ProseMirror`, so these classes are not scoped to it.
+   * ------------------------------------------------------------------------- */
+
+  /* A small square button holding one icon. */
+  .meowdown-icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 1.6rem;
+    height: 1.6rem;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--meowdown-border);
+    border-radius: 0.35rem;
+    background: var(--meowdown-popover-bg);
+    color: var(--meowdown-muted);
+    cursor: pointer;
+
+    &:hover,
+    &[data-popup-open],
+    &[aria-expanded='true'] {
+      color: var(--meowdown-heading);
+    }
+
+    &[data-copied] {
+      color: var(--meowdown-accent);
+    }
+
+    .meowdown-icon {
+      width: 0.875rem;
+      height: 0.875rem;
+    }
+  }
+
+  .meowdown-menu-positioner {
+    z-index: 50;
+    outline: none;
+  }
+
+  .meowdown-menu-popup {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    min-width: 10rem;
+    padding: 0.25rem;
+    border: 1px solid var(--meowdown-border);
+    border-radius: 0.5rem;
+    background: var(--meowdown-popover-bg);
+    box-shadow:
+      0 4px 6px -1px rgb(0 0 0 / 0.1),
+      0 2px 4px -2px rgb(0 0 0 / 0.1);
+    color: var(--meowdown-text);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.8rem;
+    outline: none;
+    transform-origin: var(--transform-origin);
+    transition:
+      opacity 100ms,
+      scale 100ms;
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+
+    &[data-starting-style],
+    &[data-ending-style] {
+      opacity: 0;
+      scale: 0.95;
+    }
+  }
+
+  /* A menu row: an optional leading icon, then its label. */
+  .meowdown-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-sizing: border-box;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.35rem;
+    cursor: pointer;
+    outline: none;
+
+    &[data-highlighted] {
+      background: color-mix(in oklab, var(--meowdown-accent) 14%, transparent);
+      color: var(--meowdown-heading);
+    }
+
+    .meowdown-icon {
+      width: 0.875rem;
+      height: 0.875rem;
+      color: var(--meowdown-muted);
+    }
+  }
+
+  /* The check mark of the chosen row in a pick list. */
+  .meowdown-menu-item-indicator {
+    display: flex;
+    color: var(--meowdown-accent);
+
+    .meowdown-icon {
+      color: inherit;
+    }
+  }
+
+  /* ---------------------------------------------------------------------------
    * Virtual caret
    *
    * A host-owned zero-size in-flow layer near `.ProseMirror` (outside the
@@ -1153,6 +1348,30 @@
       overflow: visible;
     }
 
+    /* The menu button of an image or card. It shows on hover, while the image
+     * or card is selected, and while its menu is open. */
+    .md-image-view-preview {
+      position: relative;
+    }
+
+    .md-embed-menu-button {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      z-index: 1;
+      display: flex;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 100ms ease-out;
+    }
+
+    .md-image-view-preview:hover .md-embed-menu-button,
+    .md-atom-view:has(.md-atom-selected) .md-embed-menu-button,
+    .md-embed-menu-button[aria-expanded='true'] {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
     .md-image-resizable {
       position: relative;
       display: inline-block;
@@ -1163,10 +1382,11 @@
        * image, not the page behind it. */
       isolation: isolate;
       max-width: 100%;
-      /* Avoid a 1px collapse before the image loads / a width is known, and keep
-       * the corner handle clear of the image center. */
-      min-width: 2.5rem;
-      min-height: 2.5rem;
+      /* Avoid a 1px collapse before the image loads / a width is known, keep
+       * the corner handle clear of the image center, and fit the menu button
+       * (1.6rem, inset 0.5rem on each side). */
+      min-width: 2.6rem;
+      min-height: 2.6rem;
     }
 
     /* While the image is still loading (e.g. a freshly dropped image), fill the

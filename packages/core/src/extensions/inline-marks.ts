@@ -1,5 +1,17 @@
 import { defineMarkSpec, union } from '@prosekit/core'
 
+import {
+  FILE_MARK_CLASS,
+  IMAGE_MARK_CLASS,
+  LINK_TEXT_MARK_CLASS,
+  LINK_TITLE_MARK_CLASS,
+  LINK_URI_MARK_CLASS,
+  MATH_MARK_CLASS,
+  PACK_MARK_CLASS,
+  SYNTAX_MARK_CLASS,
+  TAG_MARK_CLASS,
+  WIKILINK_MARK_CLASS,
+} from '../class-names.ts'
 import { NON_PROSE_ATTRS } from '../utils/non-prose-attrs.ts'
 
 import type { MarkName } from './mark-names.ts'
@@ -57,8 +69,8 @@ function defineMdImage() {
       syntax: { default: null },
       wikiTarget: { default: null },
     },
-    toDOM: () => ['span', { class: 'md-image' }, 0],
-    parseDOM: [{ tag: 'span.md-image' }],
+    toDOM: () => ['span', { class: IMAGE_MARK_CLASS }, 0],
+    parseDOM: [{ tag: `span.${IMAGE_MARK_CLASS}` }],
   })
 }
 
@@ -70,8 +82,8 @@ function defineMdMark() {
     name: 'mdMark' satisfies MarkName,
     // `inclusive: false` so typing right after a mark boundary does not extend the mark
     inclusive: false,
-    toDOM: () => ['span', { class: 'md-mark' }, 0],
-    parseDOM: [{ tag: 'span.md-mark' }],
+    toDOM: () => ['span', { class: SYNTAX_MARK_CLASS }, 0],
+    parseDOM: [{ tag: `span.${SYNTAX_MARK_CLASS}` }],
   })
 }
 
@@ -108,7 +120,11 @@ function defineMdLinkText() {
     name: 'mdLinkText' satisfies MarkName,
     inclusive: false,
     attrs: { href: { default: '' } },
-    toDOM: (mark) => ['a', { class: 'md-link', href: (mark.attrs as MdLinkTextAttrs).href }, 0],
+    toDOM: (mark) => [
+      'a',
+      { class: LINK_TEXT_MARK_CLASS, href: (mark.attrs as MdLinkTextAttrs).href },
+      0,
+    ],
     parseDOM: [
       {
         tag: 'a',
@@ -125,8 +141,8 @@ function defineMdLinkUri() {
   return defineMarkSpec({
     name: 'mdLinkUri' satisfies MarkName,
     inclusive: false,
-    toDOM: () => ['span', { class: 'md-link-uri', ...NON_PROSE_ATTRS }, 0],
-    parseDOM: [{ tag: 'span.md-link-uri' }],
+    toDOM: () => ['span', { class: LINK_URI_MARK_CLASS, ...NON_PROSE_ATTRS }, 0],
+    parseDOM: [{ tag: `span.${LINK_URI_MARK_CLASS}` }],
   })
 }
 
@@ -134,8 +150,8 @@ function defineMdLinkTitle() {
   return defineMarkSpec({
     name: 'mdLinkTitle' satisfies MarkName,
     inclusive: false,
-    toDOM: () => ['span', { class: 'md-link-title' }, 0],
-    parseDOM: [{ tag: 'span.md-link-title' }],
+    toDOM: () => ['span', { class: LINK_TITLE_MARK_CLASS }, 0],
+    parseDOM: [{ tag: `span.${LINK_TITLE_MARK_CLASS}` }],
   })
 }
 
@@ -162,8 +178,8 @@ function defineMdHighlight() {
 function defineMdTag() {
   return defineMarkSpec({
     name: 'mdTag' satisfies MarkName,
-    toDOM: () => ['span', { class: 'md-tag' }, 0],
-    parseDOM: [{ tag: 'span.md-tag' }],
+    toDOM: () => ['span', { class: TAG_MARK_CLASS }, 0],
+    parseDOM: [{ tag: `span.${TAG_MARK_CLASS}` }],
   })
 }
 
@@ -175,8 +191,8 @@ function defineMdWikilink() {
     name: 'mdWikilink' satisfies MarkName,
     inclusive: false,
     attrs: { target: { default: '' }, display: { default: '' } },
-    toDOM: () => ['span', { class: 'md-wikilink' }, 0],
-    parseDOM: [{ tag: 'span.md-wikilink' }],
+    toDOM: () => ['span', { class: WIKILINK_MARK_CLASS }, 0],
+    parseDOM: [{ tag: `span.${WIKILINK_MARK_CLASS}` }],
   })
 }
 
@@ -220,8 +236,8 @@ function defineMdFile() {
       name: { default: '' },
       title: { default: '' },
     },
-    toDOM: () => ['span', { class: 'md-file' }, 0],
-    parseDOM: [{ tag: 'span.md-file' }],
+    toDOM: () => ['span', { class: FILE_MARK_CLASS }, 0],
+    parseDOM: [{ tag: `span.${FILE_MARK_CLASS}` }],
   })
 }
 
@@ -244,8 +260,8 @@ function defineMdMath() {
     name: 'mdMath' satisfies MarkName,
     inclusive: false,
     attrs: { formula: { default: '' } },
-    toDOM: () => ['span', { class: 'md-math' }, 0],
-    parseDOM: [{ tag: 'span.md-math' }],
+    toDOM: () => ['span', { class: MATH_MARK_CLASS }, 0],
+    parseDOM: [{ tag: `span.${MATH_MARK_CLASS}` }],
   })
 }
 
@@ -348,9 +364,9 @@ function defineMdPack() {
     },
     toDOM: (mark) => {
       const attrs = mark.attrs as MdPackAttrs
-      return ['span', { class: 'md-pack', 'data-key': attrs.key }, 0]
+      return ['span', { class: PACK_MARK_CLASS, 'data-key': attrs.key }, 0]
     },
-    parseDOM: [{ tag: 'span.md-pack' }],
+    parseDOM: [{ tag: `span.${PACK_MARK_CLASS}` }],
   })
 }
 

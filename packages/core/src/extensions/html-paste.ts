@@ -2,6 +2,7 @@ import { definePlugin, type PlainExtension } from '@prosekit/core'
 import { Plugin, PluginKey } from '@prosekit/pm/state'
 import { NO_BREAK_SPACE } from 'unicode-by-name'
 
+import { SYNTAX_MARK_CLASS } from '../class-names.ts'
 import { htmlToMarkdown } from '../converters/html-to-md.ts'
 import { markdownToDoc } from '../converters/md-to-pm.ts'
 import { CHAR_LINE_FEED } from '../unicode.ts'
@@ -20,7 +21,7 @@ const htmlPasteKey = new PluginKey('meowdown-html-paste')
  */
 function isMeowdownClipboardHTML(html: string): boolean {
   if (html.includes('data-meowdown')) return true
-  return html.includes('data-pm-slice') && html.includes('md-mark')
+  return html.includes('data-pm-slice') && html.includes(SYNTAX_MARK_CLASS)
 }
 
 /**

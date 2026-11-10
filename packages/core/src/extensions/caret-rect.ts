@@ -1,5 +1,6 @@
 import type { EditorView } from '@prosekit/pm/view'
 
+import { findAtomPreviewElement } from '../utils/atom-view.ts'
 import { tryCoordsAtPos, type CaretCoords } from '../utils/caret-coords.ts'
 import { isAfterLineBreak } from '../utils/line-break.ts'
 
@@ -140,13 +141,6 @@ export function findAtomEdgeRect(
     return side === 1 ? fragments[0] : fragments[fragments.length - 1]
   }
   return undefined
-}
-
-function findAtomPreviewElement(view: EditorView, insidePos: number): Element | undefined {
-  const { node } = view.domAtPos(insidePos, 0)
-  const element = node instanceof Element ? node : node.parentElement
-  const preview = element?.closest('.md-atom-view')?.querySelector('.md-atom-view-preview')
-  return preview ?? undefined
 }
 
 /**

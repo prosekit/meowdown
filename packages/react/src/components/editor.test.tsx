@@ -1,6 +1,7 @@
 import '../testing/index.ts'
 
 import { dropFiles } from '@meowdown/vitest/file-events'
+import { noop } from '@ocavue/utils'
 import { pasteText } from '@prosekit/core/test'
 import { TextSelection } from '@prosekit/pm/state'
 import { useEditor } from '@prosekit/react'
@@ -9,6 +10,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page, userEvent } from 'vitest/browser'
 
+import { ATOM_VIEW_CONTENT_CLASS, CONTENT_CLASS } from '../class-names.ts'
 import { resolveWikilinkAlias } from '../testing/resolve-wikilink-alias.ts'
 import { createXPost } from '../testing/x-post-fixture.ts'
 import { createYouTubeVideo } from '../testing/youtube-fixture.ts'
@@ -212,9 +214,7 @@ describe('MarkdownEditor', () => {
   })
 
   it('does not render an image when resolveImageUrl returns undefined', async () => {
-    await render(
-      <MarkdownEditor initialMarkdown="![pic](a.png)" resolveImageUrl={() => undefined} />,
-    )
+    await render(<MarkdownEditor initialMarkdown="![pic](a.png)" resolveImageUrl={noop} />)
     await expect.element(page.getByAltText('pic')).not.toBeInTheDocument()
   })
 
@@ -395,13 +395,13 @@ describe('MarkdownEditor', () => {
     const screen = await render(
       <MarkdownEditor initialMarkdown="A [[link]]" editorClassName="first" />,
     )
-    await expect.element(pmRoot).toHaveClass('meowdown-content')
+    await expect.element(pmRoot).toHaveClass(CONTENT_CLASS)
     await expect.element(pmRoot).toHaveClass('first')
 
     await screen.rerender(<MarkdownEditor initialMarkdown="A [[link]]" editorClassName="second" />)
 
     await expect.element(pmRoot).toHaveClass('ProseMirror')
-    await expect.element(pmRoot).toHaveClass('meowdown-content')
+    await expect.element(pmRoot).toHaveClass(CONTENT_CLASS)
     await expect.element(pmRoot).toHaveClass('second')
     await expect.element(pmRoot).not.toHaveClass('first')
   })
@@ -409,7 +409,7 @@ describe('MarkdownEditor', () => {
   // The regression the class loss caused: `.ProseMirror .md-atom-view-content`
   // is the only thing hiding a wikilink's raw `[[…]]` source.
   it('keeps wikilink source hidden across an editorClassName change', async () => {
-    const source = page.locate('.md-atom-view-content')
+    const source = page.locate(`.${ATOM_VIEW_CONTENT_CLASS}`)
     const screen = await render(
       <MarkdownEditor initialMarkdown="A [[link]]" mode="hide" editorClassName="first" />,
     )
@@ -467,7 +467,9 @@ describe('MarkdownEditor', () => {
         onImageClick={onImageClick}
       />,
     )
-    await screen.getByAltText('pic').click()
+    // The image never loads, so it keeps its minimum size, where the menu
+    // button covers the center. Click its top-left corner instead.
+    await screen.getByAltText('pic').click({ position: { x: 4, y: 4 } })
     await vi.waitFor(() => {
       expect(onImageClick).toHaveBeenCalledWith(
         expect.objectContaining({ src: 'https://example.com/a.png', alt: 'pic' }),

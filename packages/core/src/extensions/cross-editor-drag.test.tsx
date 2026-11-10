@@ -1,4 +1,5 @@
 import { startBlockDrag, startTextDrag } from '@meowdown/vitest/drag-events'
+import { returnFalse } from '@ocavue/utils'
 import { describe, expect, it } from 'vitest'
 
 import { markdownToDoc } from '../converters/md-to-pm.ts'
@@ -93,7 +94,7 @@ describe('removeMovedContent', () => {
   it('leaves a read-only source alone', () => {
     using source = setupSource()
 
-    source.view.setProps({ editable: () => false })
+    source.view.setProps({ editable: returnFalse })
     startBlockDrag(source.view, 0)
     removeMovedContent(source.view, 'move')
 

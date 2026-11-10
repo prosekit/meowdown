@@ -1,8 +1,10 @@
 import { isSafari } from '@meowdown/vitest/helpers'
+import { noop } from '@ocavue/utils'
 import { NodeSelection } from '@prosekit/pm/state'
 import { describe, expect, it, vi } from 'vitest'
 import { page, userEvent } from 'vitest/browser'
 
+import { EMBED_MENU_BUTTON_CLASS, IMAGE_RESIZE_HANDLE_CLASS } from '../class-names.ts'
 import { docToMarkdown } from '../converters/pm-to-md.ts'
 import { findText } from '../testing/find-text.ts'
 import {
@@ -130,6 +132,10 @@ describe('image selection ring', () => {
 
 describe('image click callback', () => {
   // Render `markdown` with a click handler attached, showing http(s) images as-is.
+  // The image never loads, so it keeps its minimum size, where the menu
+  // button covers the center. Click its top-left corner instead.
+  const CORNER = { position: { x: 4, y: 4 } }
+
   function setupClickable(markdown: string, onImageClick: ImageClickHandler): Fixture {
     const fixture = setupFixture({
       extensionOptions: { onImageClick, resolveImageUrl: (src) => src },
@@ -144,7 +150,7 @@ describe('image click callback', () => {
     using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
     void fixture
     await expect.element(preview).toBeInTheDocument()
-    await userEvent.click(preview)
+    await userEvent.click(preview, CORNER)
     await vi.waitFor(() => {
       expect(onImageClick).toHaveBeenCalledWith(
         expect.objectContaining({ src: 'https://example.com/cat.png', alt: 'cat' }),
@@ -168,7 +174,7 @@ describe('image click callback', () => {
     expect(preview.element().dispatchEvent(pointerDown)).toBe(false)
     expect(pointerDown.defaultPrevented).toBe(true)
 
-    await userEvent.click(preview)
+    await userEvent.click(preview, CORNER)
     await vi.waitFor(() => expect(onImageClick).toHaveBeenCalledTimes(1))
   })
 
@@ -230,6 +236,22 @@ describe('image click callback', () => {
     expect(onImageClick.mock.calls[0][0].event).toBeInstanceOf(TouchEvent)
   })
 
+  it.skipIf(cannotConstructTouch)('ignores a tap on the menu button', async () => {
+    const onImageClick = vi.fn<ImageClickHandler>()
+    using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
+    void fixture
+    await expect.element(preview).toBeInTheDocument()
+
+    const button = preview.element().querySelector(`.${EMBED_MENU_BUTTON_CLASS}`)
+    expect(button).not.toBeNull()
+    const tap = buildTap(button!)
+    button!.dispatchEvent(tap.start)
+    button!.dispatchEvent(tap.end)
+
+    expect(tap.end.defaultPrevented).toBe(false)
+    expect(onImageClick).not.toHaveBeenCalled()
+  })
+
   it.skipIf(cannotConstructTouch)('ignores a touch that moved too far to be a tap', async () => {
     const onImageClick = vi.fn<ImageClickHandler>()
     using fixture = setupClickable('![cat](https://example.com/cat.png)', onImageClick)
@@ -254,7 +276,7 @@ describe('image click callback', () => {
     void fixture
     await expect.element(preview).toBeInTheDocument()
 
-    const handle = preview.element().querySelector('.md-image-resize-handle')
+    const handle = preview.element().querySelector(`.${IMAGE_RESIZE_HANDLE_CLASS}`)
     if (!handle) throw new Error('missing resize handle')
     const tap = buildTap(handle)
     handle.dispatchEvent(tap.start)
@@ -296,8 +318,8 @@ describe('image click callback', () => {
     )
     void fixture
     await expect.element(pmRoot.getByAltText('one')).toBeInTheDocument()
-    await userEvent.click(pmRoot.getByAltText('one'))
-    await userEvent.click(pmRoot.getByAltText('two'))
+    await userEvent.click(pmRoot.getByAltText('one'), CORNER)
+    await userEvent.click(pmRoot.getByAltText('two'), CORNER)
     await vi.waitFor(() => expect(onImageClick).toHaveBeenCalledTimes(2))
     expect(onImageClick.mock.calls.map(([payload]) => payload.src)).toEqual([
       'https://example.com/1.png',
@@ -667,7 +689,7 @@ describe('image resolver errors', () => {
 
   it('reports a throwing resolver and keeps the source editable', async () => {
     const error = new Error('resolver failed')
-    const reportErrorSpy = vi.spyOn(globalThis, 'reportError').mockImplementation(() => {})
+    const reportErrorSpy = vi.spyOn(globalThis, 'reportError').mockImplementation(noop)
     try {
       using fixture = setupThrowing('![img](photo.png)', error)
       expect(reportErrorSpy).toHaveBeenCalledWith(error)

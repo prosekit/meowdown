@@ -93,6 +93,7 @@ describe('code block language selector', () => {
 const menuButton = page.getByTestId('code-block-menu')
 const menuLanguageItem = page.getByTestId('code-block-menu-language')
 const menuCopyItem = page.getByTestId('code-block-menu-copy')
+const menuDeleteItem = page.getByTestId('code-block-menu-delete')
 
 describe('code block menu', () => {
   async function setupCaretInCodeBlock() {
@@ -157,6 +158,56 @@ describe('code block menu', () => {
     await vi.waitFor(async () => {
       expect((await readClipboard()).text).toBe('fn main() {}')
     })
+  })
+
+  it('deletes the code block from the menu, and undo brings it back', async () => {
+    const ref = createRef<EditorHandle>()
+    await render(
+      <ProseKitEditor ref={ref} initialMarkdown={`Before\n\n${CODE_BLOCK_MD}\n\nAfter`} />,
+    )
+    await expect.element(menuButton).toBeInTheDocument()
+
+    await hover(menuButton)
+    await menuButton.click()
+    await menuDeleteItem.click()
+
+    await expect.element(menuButton).not.toBeInTheDocument()
+    expect(ref.current?.getMarkdown()).toBe('Before\n\nAfter\n')
+
+    // The caret lands in the next block, in a focused editor.
+    await userEvent.keyboard('x')
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toBe('Before\n\nxAfter\n')
+    })
+
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}')
+    await userEvent.keyboard('{ControlOrMeta>}z{/ControlOrMeta}')
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toBe(`Before\n\n${CODE_BLOCK_MD}\n\nAfter\n`)
+    })
+  })
+
+  it('leaves an empty paragraph after deleting the only block', async () => {
+    const ref = await setupCaretInCodeBlock()
+
+    await userEvent.keyboard('{ControlOrMeta>}/{/ControlOrMeta}')
+    await menuDeleteItem.click()
+
+    await expect.element(menuButton).not.toBeInTheDocument()
+    await userEvent.keyboard('x')
+    await vi.waitFor(() => {
+      expect(ref.current?.getMarkdown()).toBe('x\n')
+    })
+  })
+
+  it('offers no delete action in a read-only editor', async () => {
+    await render(<ProseKitEditor initialMarkdown={CODE_BLOCK_MD} readOnly />)
+    await expect.element(menuButton).toBeInTheDocument()
+
+    await hover(menuButton)
+    await menuButton.click()
+    await expect.element(menuCopyItem).toBeVisible()
+    await expect.element(menuDeleteItem).not.toBeInTheDocument()
   })
 
   it('opens the menu of the code block that holds the caret', async () => {
