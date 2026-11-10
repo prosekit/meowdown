@@ -210,6 +210,10 @@ describe('dismiss', () => {
       emit: true,
     })
   })
+
+  it('forgets a dismissed mark once the pointer leaves it', () => {
+    expect(out(dismissed(alpha))).toEqual({ phase: idle, timer: 'none', emit: false })
+  })
 })
 
 describe('tap and reset', () => {

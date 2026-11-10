@@ -92,8 +92,8 @@ describe('Markdown-link hover callback', () => {
 })
 
 describe('dismissLinkHover', () => {
-  // Only the timers the hover handler schedules are faked. Playwright's
-  // pointer actions poll the page with `requestAnimationFrame`, which stays real.
+  // Only the timers the hover handler schedules are faked. Mouse events are
+  // dispatched directly, so the fake clock moves only when a test runs timers.
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
   })
@@ -102,26 +102,35 @@ describe('dismissLinkHover', () => {
     vi.useRealTimers()
   })
 
-  it('cancels a pending enter while the pointer stays', async () => {
+  function dispatchMouseOver(target: Element) {
+    target.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
+  }
+
+  function dispatchMouseOut(target: Element) {
+    target.dispatchEvent(
+      new MouseEvent('mouseout', { bubbles: true, relatedTarget: document.body }),
+    )
+  }
+
+  it('cancels a pending enter while the pointer stays', () => {
     const onHoverChange = vi.fn<LinkHoverHandler>()
     using fixture = applyHoverable('[Docs](https://example.com)', onHoverChange)
 
-    await markdownLink.hover()
-    vi.advanceTimersByTime(100)
+    dispatchMouseOver(markdownLink.element())
     dismissLinkHover(fixture.state)
-    vi.advanceTimersByTime(1000)
+    vi.runOnlyPendingTimers()
 
     expect(onHoverChange).not.toHaveBeenCalled()
   })
 
-  it('leaves an entered link and keeps it silent while the pointer stays', async () => {
+  it('leaves an entered link and keeps it silent while the pointer stays', () => {
     const onHoverChange = vi.fn<LinkHoverHandler>()
     using fixture = applyHoverable('[Docs](https://example.com)', onHoverChange)
 
-    await markdownLink.hover()
-    vi.advanceTimersByTime(300)
+    dispatchMouseOver(markdownLink.element())
+    vi.runOnlyPendingTimers()
     dismissLinkHover(fixture.state)
-    vi.advanceTimersByTime(1000)
+    vi.runOnlyPendingTimers()
 
     expect(onHoverChange.mock.calls.map(([hit]) => hit?.payload.href)).toEqual([
       'https://example.com',
@@ -129,30 +138,28 @@ describe('dismissLinkHover', () => {
     ])
   })
 
-  it('enters again after the pointer leaves and returns', async () => {
+  it('enters again after the pointer leaves and returns', () => {
     const onHoverChange = vi.fn<LinkHoverHandler>()
     using fixture = applyHoverable('[Docs](https://example.com)', onHoverChange)
+    const link = markdownLink.element()
 
-    await markdownLink.hover()
-    vi.advanceTimersByTime(100)
+    dispatchMouseOver(link)
     dismissLinkHover(fixture.state)
-    await markdownLink.unhover()
-    await markdownLink.hover()
-    vi.advanceTimersByTime(299)
+    dispatchMouseOut(link)
+    dispatchMouseOver(link)
     expect(onHoverChange).not.toHaveBeenCalled()
-    vi.advanceTimersByTime(1)
+    vi.runOnlyPendingTimers()
 
     expect(onHoverChange.mock.calls.map(([hit]) => hit?.payload.href)).toEqual([
       'https://example.com',
     ])
   })
 
-  it('lets a tap enter a dismissed link', async () => {
+  it('lets a tap enter a dismissed link', () => {
     const onHoverChange = vi.fn<LinkHoverHandler>()
     using fixture = applyHoverable('[Docs](https://example.com)', onHoverChange)
 
-    await markdownLink.hover()
-    vi.advanceTimersByTime(100)
+    dispatchMouseOver(markdownLink.element())
     dismissLinkHover(fixture.state)
     dispatchTap(markdownLink.element())
 
