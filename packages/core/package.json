@@ -54,7 +54,7 @@
     "hast-util-to-mdast": "^10.1.2",
     "katex": "^0.19.1",
     "lru.min": "^1.1.5",
-    "mdast-util-to-markdown": "^2.2.1",
+    "mdast-util-to-markdown": "^2.2.3",
     "micromark-util-decode-string": "^2.0.1",
     "micromark-util-normalize-identifier": "^2.0.1",
     "prosemirror-enter-rules": "^0.1.6",
