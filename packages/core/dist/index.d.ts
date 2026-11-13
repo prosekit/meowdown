@@ -3,7 +3,7 @@ import { CodeBlockAttrs, CodeBlockAttrs as CodeBlockAttrs$1, defineCodeBlockPrev
 import { PlaceholderOptions, PlaceholderOptions as PlaceholderOptions$1, definePlaceholder } from "@prosekit/extensions/placeholder";
 import { SearchStatus, SearchStatusHandler, defineSearchStatusHandler, getSearchStatus } from "@prosekit/extensions/search";
 import { EmbedKind } from "@meowdown/markdown";
-import { Command, EditorState, PluginKey } from "@prosekit/pm/state";
+import { Command, EditorState } from "@prosekit/pm/state";
 import { EditorView } from "@prosekit/pm/view";
 import { EditorNode, Mark, ProseMirrorNode, ResolvedPos } from "@prosekit/pm/model";
 import { ListAttrs } from "@prosekit/extensions/list";

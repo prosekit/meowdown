@@ -1,4 +1,4 @@
-import { n as Resolver, t as FetchProps } from "../fetch-gxdhOZP6.js";
+import { n as Resolver, t as FetchProps } from "../fetch-BvgoWrlB.js";
 import { HostElement, State } from "@aria-ui/core";
 import { XPost, XPostMedia } from "@post-embed/types";
 export declare const X_POST_MEDIA_CLICK = "meowdown-embed-media-click";

@@ -1,4 +1,4 @@
-import { n as Resolver, t as FetchProps } from "../fetch-gxdhOZP6.js";
+import { n as Resolver, t as FetchProps } from "../fetch-BvgoWrlB.js";
 import { HostElement, State } from "@aria-ui/core";
 import { YouTubeVideo } from "@post-embed/types";
 export declare const YOUTUBE_VIDEO_CLICK = "meowdown-embed-youtube-click";
