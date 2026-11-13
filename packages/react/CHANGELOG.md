@@ -1,5 +1,12 @@
 # @meowdown/react
 
+## 0.85.1
+
+### Patch Changes
+
+- Updated dependencies [[`fa2560f`](https://github.com/prosekit/meowdown/commit/fa2560f3023a1bca471493ba975ac1b3b0ba248b)]:
+  - @meowdown/core@0.85.0
+
 ## 0.85.0
 
 ### Minor Changes
