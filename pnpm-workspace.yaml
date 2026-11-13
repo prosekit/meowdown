@@ -25,10 +25,6 @@ minimumReleaseAgeExclude:
   - vitest-browser-commands
   - prosemirror-flat-list
 
-peerDependencyRules:
-  allowedVersions:
-    oxc-transform-react: 0.x
-
 allowBuilds:
   esbuild: false
   simple-git-hooks: false
