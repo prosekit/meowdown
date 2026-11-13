@@ -58,7 +58,7 @@
     "micromark-util-decode-string": "^2.0.1",
     "micromark-util-normalize-identifier": "^2.0.1",
     "prosemirror-enter-rules": "^0.1.6",
-    "prosemirror-flat-list": "^0.7.3",
+    "prosemirror-flat-list": "^0.7.4",
     "prosemirror-highlight": "^0.16.0",
     "rehype-remark": "^10.0.1",
     "remark-gfm": "^4.0.1",
@@ -70,14 +70,14 @@
   "devDependencies": {
     "@meowdown/vitest": "workspace:*",
     "@ocavue/tsconfig": "^0.7.1",
-    "@tsdown/css": "^0.23.3",
+    "@tsdown/css": "^0.23.7",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
-    "@vitest/browser-playwright": "^5.0.5",
+    "@vitest/browser-playwright": "^5.1.0",
     "dedent": "^1.7.2",
     "diffable-html-snapshot": "^0.4.0",
-    "tsdown": "^0.23.3",
-    "vitest": "^5.0.5"
+    "tsdown": "^0.23.7",
+    "vitest": "^5.1.0"
   },
   "publishConfig": {
     "exports": {
