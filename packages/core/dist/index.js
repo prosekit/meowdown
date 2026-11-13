@@ -4793,8 +4793,8 @@ let chunkCacheHits = 0;
 * inert / no-op transaction used to wake the plugin up).
 */
 function computeAffectedRange(transactions, newState) {
-	let from = Infinity;
-	let to = -Infinity;
+	let from = 1e400;
+	let to = -1e400;
 	for (const tr of transactions) for (const map of tr.mapping.maps) map.forEach((_oldStart, _oldEnd, newStart, newEnd) => {
 		if (newStart < from) from = newStart;
 		if (newEnd > to) to = newEnd;

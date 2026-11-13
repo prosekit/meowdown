@@ -11,7 +11,7 @@ import { Combobox } from "@base-ui/react/combobox";
 import { Menu } from "@base-ui/react/menu";
 import { Fragment as Fragment$1, jsx, jsxs } from "react/jsx-runtime";
 import { BlockHandleDraggable, BlockHandlePopup, BlockHandlePositioner, BlockHandleRoot } from "@prosekit/react/block-handle";
-import { DropIndicator } from "@prosekit/react/drop-indicator";
+import { DropIndicator as DropIndicator$1 } from "@prosekit/react/drop-indicator";
 import { queueExtension } from "@prosekit/web";
 import { Popover } from "@base-ui/react/popover";
 import { AutocompleteEmpty, AutocompleteItem, AutocompletePopup, AutocompletePositioner, AutocompleteRoot } from "@prosekit/react/autocomplete";
@@ -29,18 +29,18 @@ var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __exportAll = (all, no_symbols) => {
-	let target = {};
+var __exportAll = (all, flags) => {
+	let target = Object.setPrototypeOf({}, null);
 	for (var name in all) {
 		__defProp(target, name, {
 			get: all[name],
 			enumerable: true
 		});
 	}
-	if (!no_symbols) {
+	if (!(flags & 1)) {
 		__defProp(target, Symbol.toStringTag, { value: "Module" });
 	}
-	return target;
+	return flags & 2 ? target : Object.preventExtensions(target);
 };
 var __copyProps = (to, from, except, desc) => {
 	if (from && typeof from === "object" || typeof from === "function") {
@@ -62,7 +62,7 @@ var __reExport = (target, mod, secondTarget) => (__copyProps(target, mod, "defau
 var class_names_exports = /* @__PURE__ */ __exportAll({
 	LIGHTBOX_DIALOG_TRANSITION_CLASS: () => LIGHTBOX_DIALOG_TRANSITION_CLASS,
 	ROOT_CLASS: () => ROOT_CLASS
-});
+}, 2);
 import * as import__meowdown_core_internal_class_names from "@meowdown/core/internal/class-names";
 __reExport(class_names_exports, import__meowdown_core_internal_class_names);
 /**
@@ -1279,11 +1279,11 @@ function BlockHandle() {
 var drop_indicator_module_default = { "DropIndicator": "meow_DropIndicator_dZ-6sG" };
 
 // src/components/drop-indicator.tsx
-function DropIndicator$1() {
+function DropIndicator() {
 	const $ = c(1);
 	let t0;
 	if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
-		t0 = /* @__PURE__ */ jsx(DropIndicator, {
+		t0 = /* @__PURE__ */ jsx(DropIndicator$1, {
 			className: drop_indicator_module_default.DropIndicator,
 			"data-testid": "drop-indicator"
 		});
@@ -3105,7 +3105,7 @@ function getMenuAnchor(view, from, to) {
 		to
 	});
 	const pickAnchor = () => {
-		const visibleHeight = view.dom.ownerDocument.defaultView?.visualViewport?.height ?? Infinity;
+		const visibleHeight = view.dom.ownerDocument.defaultView?.visualViewport?.height ?? 1e400;
 		return range.getBoundingClientRect().height > visibleHeight / 3 ? end : range;
 	};
 	return {
@@ -5007,7 +5007,7 @@ function ProseKitEditor(t0) {
 	} else t20 = $[71];
 	let t21;
 	if ($[72] !== blockHandle || $[73] !== readOnly) {
-		t21 = blockHandle && !readOnly && /* @__PURE__ */ jsx(DropIndicator$1, {});
+		t21 = blockHandle && !readOnly && /* @__PURE__ */ jsx(DropIndicator, {});
 		$[72] = blockHandle;
 		$[73] = readOnly;
 		$[74] = t21;
