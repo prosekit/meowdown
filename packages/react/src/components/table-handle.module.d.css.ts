@@ -3,6 +3,7 @@ declare const styles = {
   'MenuPositioner': '' as string,
   'Positioner': '' as string,
   'MenuPositioner': '' as string,
+  'Positioner': '' as string,
   'ColumnPopup': '' as string,
   'RowPopup': '' as string,
   'ColumnPopup': '' as string,

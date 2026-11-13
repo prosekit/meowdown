@@ -19,6 +19,12 @@
   }
 }
 
+/* The open menu is positioned against the trigger inside this positioner, so a
+   running transition would place the menu at a mid-transition position. */
+.Positioner:has(prosekit-menu-positioner[data-state='open']) {
+  transition: none;
+}
+
 .ColumnPopup {
   transform: translateY(50%);
 }
