@@ -38,22 +38,18 @@ export type WikilinkHoverHandler = (hit: WikilinkHoverHit | undefined) => void
  * Track the wikilink the pointer rests on without attaching per-link
  * listeners.
  *
- * A cold pointer must rest on a link for `openDelay` ms before enter fires.
+ * A cold pointer must rest on a link for a short delay before enter fires.
  * Moving to an adjacent link restarts the delay, or switches at once when a
- * link is already entered. Leave fires `closeDelay` ms after the pointer
+ * link is already entered. Leave fires a short grace after the pointer
  * leaves, and immediately when the hovered link is deleted, replaced, or
  * changes target. Moving among descendants of one label is de-duplicated.
  */
-export function defineWikilinkHoverHandler(
-  onHoverChange: WikilinkHoverHandler,
-  openDelay: number = OPEN_DELAY,
-  closeDelay: number = CLOSE_DELAY,
-): PlainExtension {
+export function defineWikilinkHoverHandler(onHoverChange: WikilinkHoverHandler): PlainExtension {
   return defineMarkHoverHandler<WikilinkHit>({
     key: wikilinkHoverKey,
     selector: `.${WIKILINK_VIEW_PREVIEW_CLASS}`,
-    openDelay,
-    closeDelay,
+    openDelay: OPEN_DELAY,
+    closeDelay: CLOSE_DELAY,
     // A touch tap must keep navigating: the card is inert.
     tap: false,
     findPayloadAt: findWikilinkAt,
