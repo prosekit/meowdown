@@ -58,7 +58,7 @@
     "micromark-util-decode-string": "^2.0.1",
     "micromark-util-normalize-identifier": "^2.0.1",
     "prosemirror-enter-rules": "^0.1.6",
-    "prosemirror-flat-list": "^0.7.3",
+    "prosemirror-flat-list": "^0.7.4",
     "prosemirror-highlight": "^0.16.0",
     "rehype-remark": "^10.0.1",
     "remark-gfm": "^4.0.1",
