@@ -1,7 +1,7 @@
 {
   "name": "@meowdown/core",
   "type": "module",
-  "version": "0.84.0",
+  "version": "0.85.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -46,19 +46,19 @@
     "@post-embed/exporter": "^0.5.0",
     "@post-embed/schema": "^0.5.2",
     "@post-embed/types": "^0.5.0",
-    "@prosekit/core": "^0.13.4",
-    "@prosekit/extensions": "^0.18.5",
+    "@prosekit/core": "^0.13.5",
+    "@prosekit/extensions": "^0.18.7",
     "@prosekit/pm": "^0.1.21",
-    "@prosekit/web": "^0.10.0",
+    "@prosekit/web": "^0.10.2",
     "hast-util-from-dom": "^5.0.1",
     "hast-util-to-mdast": "^10.1.2",
     "katex": "^0.19.1",
     "lru.min": "^1.1.5",
-    "mdast-util-to-markdown": "^2.2.1",
+    "mdast-util-to-markdown": "^2.2.3",
     "micromark-util-decode-string": "^2.0.1",
     "micromark-util-normalize-identifier": "^2.0.1",
     "prosemirror-enter-rules": "^0.1.6",
-    "prosemirror-flat-list": "^0.7.3",
+    "prosemirror-flat-list": "^0.7.4",
     "prosemirror-highlight": "^0.16.0",
     "rehype-remark": "^10.0.1",
     "remark-gfm": "^4.0.1",
@@ -70,14 +70,14 @@
   "devDependencies": {
     "@meowdown/vitest": "workspace:*",
     "@ocavue/tsconfig": "^0.7.1",
-    "@tsdown/css": "^0.23.3",
+    "@tsdown/css": "^0.23.7",
     "@types/hast": "^3.0.5",
     "@types/mdast": "^4.0.4",
-    "@vitest/browser-playwright": "^5.0.5",
+    "@vitest/browser-playwright": "^5.1.0",
     "dedent": "^1.7.2",
     "diffable-html-snapshot": "^0.4.0",
-    "tsdown": "^0.23.3",
-    "vitest": "^5.0.5"
+    "tsdown": "^0.23.7",
+    "vitest": "^5.1.0"
   },
   "publishConfig": {
     "exports": {

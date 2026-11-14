@@ -1,5 +1,11 @@
 # @meowdown/core
 
+## 0.85.0
+
+### Minor Changes
+
+- [#782](https://github.com/prosekit/meowdown/pull/782) [`fa2560f`](https://github.com/prosekit/meowdown/commit/fa2560f3023a1bca471493ba975ac1b3b0ba248b) Thanks [@ocavuebot](https://github.com/ocavuebot)! - `defineWikilinkHoverHandler` no longer takes `openDelay` and `closeDelay` arguments. It always uses the default delays.
+
 ## 0.84.0
 
 ### Minor Changes

@@ -24,12 +24,6 @@ minimumReleaseAgeExclude:
   - eslint-plugin-ocavue
   - vitest-browser-commands
   - prosemirror-flat-list
-  - '@tsdown/css@0.23.3'
-  - tsdown@0.23.3
-
-peerDependencyRules:
-  allowedVersions:
-    oxc-transform-react: 0.x
 
 allowBuilds:
   esbuild: false
@@ -50,4 +44,4 @@ allowBuilds:
 #   '@post-embed/exporter': https://pkg.pr.new/@post-embed/exporter@6d2125d2b99494dc02e98eaf0878f765e62bd2a2
 
 overrides:
-  prosemirror-view: 1.43.0-beta2
+  prosemirror-view: 1.43.0-beta3

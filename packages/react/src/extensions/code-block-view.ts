@@ -13,6 +13,9 @@ export function defineCodeBlockView(component: ReactNodeViewComponent = CodeBloc
       as: createCodeBlockRoot,
       contentAs: 'code',
       component,
+      stopEvent: (event) => {
+        return event.target instanceof Element && !!event.target.closest('button, input')
+      },
     }),
     // Decorates the code block under the caret; `CodeBlockView` reads it to
     // decide whether the preview shows alone or below the source.

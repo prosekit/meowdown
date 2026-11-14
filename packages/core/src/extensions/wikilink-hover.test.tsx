@@ -9,14 +9,9 @@ import { defineWikilinkHoverHandler, type WikilinkHoverHandler } from './wikilin
 
 const pmRoot = page.locate('.ProseMirror')
 
-function applyHoverable(
-  markdown: string,
-  onHoverChange: WikilinkHoverHandler,
-  openDelay?: number,
-  closeDelay?: number,
-) {
+function applyHoverable(markdown: string, onHoverChange: WikilinkHoverHandler) {
   const fixture = setupFixture({ extensionOptions: { resolveWikilink: resolveWikilinkAlias } })
-  fixture.editor.use(defineWikilinkHoverHandler(onHoverChange, openDelay, closeDelay))
+  fixture.editor.use(defineWikilinkHoverHandler(onHoverChange))
   fixture.set(fixture.n.doc(fixture.n.paragraph(markdown)))
   updateEditorConfig(fixture.editor, { markMode: 'hide' })
   return fixture
@@ -45,7 +40,7 @@ describe('wikilink hover callback', () => {
     const label = preview.locate(`.${WIKILINK_VIEW_LABEL_CLASS}`)
 
     await preview.hover()
-    vi.advanceTimersByTime(300)
+    vi.runOnlyPendingTimers()
     label.element().dispatchEvent(
       new MouseEvent('mouseover', {
         bubbles: true,
@@ -69,7 +64,7 @@ describe('wikilink hover callback', () => {
     const links = pmRoot.getByTestId('wikilink')
 
     await links.nth(0).hover()
-    vi.advanceTimersByTime(300)
+    vi.runOnlyPendingTimers()
     await links.nth(1).hover()
 
     expect(targets(onHoverChange)).toEqual(['Alpha', 'Beta'])
@@ -80,7 +75,7 @@ describe('wikilink hover callback', () => {
     using fixture = applyHoverable('before [[Note]] after', onHoverChange)
 
     await pmRoot.getByTestId('wikilink').hover()
-    vi.advanceTimersByTime(300)
+    vi.runOnlyPendingTimers()
     fixture.set(fixture.n.doc(fixture.n.paragraph('before after')))
 
     expect(targets(onHoverChange)).toEqual(['Note', undefined])
@@ -91,7 +86,7 @@ describe('wikilink hover callback', () => {
     using fixture = applyHoverable('[[Alpha]]', onHoverChange)
 
     await pmRoot.getByTestId('wikilink').hover()
-    vi.advanceTimersByTime(300)
+    vi.runOnlyPendingTimers()
     fixture.set(fixture.n.doc(fixture.n.paragraph('[[Beta]]')))
 
     expect(targets(onHoverChange)).toEqual(['Alpha', undefined])
@@ -102,7 +97,7 @@ describe('wikilink hover callback', () => {
     using fixture = applyHoverable('before [[Note]]', onHoverChange)
 
     await pmRoot.getByTestId('wikilink').hover()
-    vi.advanceTimersByTime(300)
+    vi.runOnlyPendingTimers()
     fixture.view.dispatch(fixture.state.tr.insertText('new ', 1))
 
     expect(targets(onHoverChange)).toEqual(['Note'])
@@ -114,108 +109,8 @@ describe('wikilink hover callback', () => {
       using fixture = applyHoverable('[[Note]]', onHoverChange)
       void fixture
       await pmRoot.getByTestId('wikilink').hover()
-      vi.advanceTimersByTime(300)
+      vi.runOnlyPendingTimers()
     }
-
-    expect(targets(onHoverChange)).toEqual(['Note', undefined])
-  })
-})
-
-describe('wikilink hover delays', () => {
-  it('enters once the open delay elapses', async () => {
-    const onHoverChange = vi.fn<WikilinkHoverHandler>()
-    using fixture = applyHoverable('[[Note]]', onHoverChange)
-    void fixture
-
-    await pmRoot.getByTestId('wikilink').hover()
-    vi.advanceTimersByTime(299)
-    expect(onHoverChange).not.toHaveBeenCalled()
-    vi.advanceTimersByTime(1)
-
-    expect(targets(onHoverChange)).toEqual(['Note'])
-  })
-
-  it('restarts the open delay when the pointer moves to an adjacent link', async () => {
-    const onHoverChange = vi.fn<WikilinkHoverHandler>()
-    using fixture = applyHoverable(
-      '[[Alpha|A wide alias]][[Beta|Another wide alias]]',
-      onHoverChange,
-    )
-    void fixture
-    const links = pmRoot.getByTestId('wikilink')
-
-    await links.nth(0).hover()
-    vi.advanceTimersByTime(200)
-    await links.nth(1).hover()
-    vi.advanceTimersByTime(299)
-    expect(onHoverChange).not.toHaveBeenCalled()
-    vi.advanceTimersByTime(1)
-
-    expect(targets(onHoverChange)).toEqual(['Beta'])
-  })
-
-  it('cancels a pending enter when the pointer leaves', async () => {
-    const onHoverChange = vi.fn<WikilinkHoverHandler>()
-    using fixture = applyHoverable('[[Note]]', onHoverChange)
-    void fixture
-    const link = pmRoot.getByTestId('wikilink')
-
-    await link.hover()
-    vi.advanceTimersByTime(200)
-    await link.unhover()
-    vi.advanceTimersByTime(1000)
-
-    expect(onHoverChange).not.toHaveBeenCalled()
-  })
-
-  it('leaves once the close delay elapses', async () => {
-    const onHoverChange = vi.fn<WikilinkHoverHandler>()
-    using fixture = applyHoverable('[[Note]]', onHoverChange)
-    void fixture
-    const link = pmRoot.getByTestId('wikilink')
-
-    await link.hover()
-    vi.advanceTimersByTime(300)
-    await link.unhover()
-    vi.advanceTimersByTime(99)
-    expect(targets(onHoverChange)).toEqual(['Note'])
-    vi.advanceTimersByTime(1)
-
-    expect(targets(onHoverChange)).toEqual(['Note', undefined])
-  })
-
-  it('re-enters without a new open delay when returning within the close delay', async () => {
-    const onHoverChange = vi.fn<WikilinkHoverHandler>()
-    using fixture = applyHoverable('[[Note]]', onHoverChange)
-    void fixture
-    const link = pmRoot.getByTestId('wikilink')
-
-    await link.hover()
-    vi.advanceTimersByTime(300)
-    await link.unhover()
-    vi.advanceTimersByTime(50)
-    await link.hover()
-    vi.advanceTimersByTime(1000)
-
-    expect(targets(onHoverChange)).toEqual(['Note'])
-  })
-
-  it('honors custom delays', async () => {
-    const onHoverChange = vi.fn<WikilinkHoverHandler>()
-    using fixture = applyHoverable('[[Note]]', onHoverChange, 50, 20)
-    void fixture
-    const link = pmRoot.getByTestId('wikilink')
-
-    await link.hover()
-    vi.advanceTimersByTime(49)
-    expect(onHoverChange).not.toHaveBeenCalled()
-    vi.advanceTimersByTime(1)
-    expect(targets(onHoverChange)).toEqual(['Note'])
-
-    await link.unhover()
-    vi.advanceTimersByTime(19)
-    expect(targets(onHoverChange)).toEqual(['Note'])
-    vi.advanceTimersByTime(1)
 
     expect(targets(onHoverChange)).toEqual(['Note', undefined])
   })

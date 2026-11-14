@@ -1,3 +1,7 @@
+import { mkdtempSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+
 import { playwright } from '@vitest/browser-playwright'
 import { playwrightCommands } from 'vitest-browser-commands'
 import { defineProject, type UserWorkspaceConfig } from 'vitest/config'
@@ -85,6 +89,15 @@ export function defineBrowserConfig({
             // download two copies of Chromium anymore.
             // See https://playwright.dev/docs/browsers#chromium-new-headless-mode
             channel: browserName === 'chromium' ? 'chromium' : undefined,
+            // macOS 27 denies access to `~/Library/Application Support/Firefox`.
+            // See https://github.com/microsoft/playwright/issues/42768
+            env:
+              browserName === 'firefox' && process.platform === 'darwin'
+                ? {
+                    ...process.env,
+                    CFFIXED_USER_HOME: mkdtempSync(join(tmpdir(), 'meowdown-firefox-')),
+                  }
+                : undefined,
           },
           contextOptions: {
             reducedMotion: 'reduce',
