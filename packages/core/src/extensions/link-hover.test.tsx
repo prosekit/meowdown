@@ -1,3 +1,5 @@
+import { definePlugin, Priority, withPriority } from '@prosekit/core'
+import { Plugin } from '@prosekit/pm/state'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { page } from 'vitest/browser'
 
@@ -15,6 +17,26 @@ function applyHoverable(markdown: string, onHoverChange: LinkHoverHandler) {
   fixture.set(fixture.n.doc(fixture.n.paragraph(markdown)))
   updateEditorConfig(fixture.editor, { markMode: 'hide' })
   return fixture
+}
+
+/**
+ * Records the `defaultPrevented` state of each `mousedown` that reaches a
+ * lowest-priority handler, after every other `handleDOMEvents.mousedown`.
+ */
+function recordPassedMouseDowns(fixture: ReturnType<typeof setupFixture>): boolean[] {
+  const passed: boolean[] = []
+  const plugin = new Plugin({
+    props: {
+      handleDOMEvents: {
+        mousedown: (_view, event) => {
+          passed.push(event.defaultPrevented)
+          return false
+        },
+      },
+    },
+  })
+  fixture.editor.use(withPriority(definePlugin(plugin), Priority.lowest))
+  return passed
 }
 
 function buildMouse(type: 'mousedown' | 'mouseup' | 'click', clientX: number, clientY: number) {
@@ -190,11 +212,13 @@ describe('Markdown-link tap callback', () => {
     const link = fixture.view.dom.querySelector(`.${LINK_TEXT_MARK_CLASS}`)
     const paragraph = fixture.view.dom.querySelector('p')
     if (!link || !paragraph) throw new Error('missing target')
+    const passed = recordPassedMouseDowns(fixture)
 
     dispatchTap(link)
-    const { mousedown } = dispatchTap(paragraph)
+    dispatchTap(paragraph)
 
-    expect(mousedown.defaultPrevented).toBe(false)
+    // Only the tap outside links reaches the handlers after this extension.
+    expect(passed).toEqual([false])
     expect(onHoverChange.mock.calls.map(([hit]) => hit?.payload.href)).toEqual([
       'https://example.com',
       undefined,
@@ -206,12 +230,13 @@ describe('Markdown-link tap callback', () => {
     using fixture = applyHoverable('[Docs](https://example.com)', onHoverChange)
     const link = fixture.view.dom.querySelector(`.${LINK_TEXT_MARK_CLASS}`)
     if (!link) throw new Error('missing link')
+    const passed = recordPassedMouseDowns(fixture)
 
     for (const pointerType of ['mouse', 'pen']) {
-      const { mousedown, click } = dispatchTap(link, pointerType)
-      expect(mousedown.defaultPrevented).toBe(false)
+      const { click } = dispatchTap(link, pointerType)
       expect(click.defaultPrevented).toBe(false)
     }
+    expect(passed).toEqual([false, false])
     expect(onHoverChange).not.toHaveBeenCalled()
   })
 
