@@ -77,6 +77,7 @@ export interface MeowdownListAttrs extends ListAttrs {
   marker?: ListMarker | undefined
   taskMarker?: TaskMarker | undefined
   markerGap?: number | undefined
+  blankBefore?: boolean | null | undefined
 }
 
 // Each attr persists only its non-canonical values (`.`, `-`, `x`, and a gap
@@ -162,6 +163,22 @@ function defineListMarkerGapAttr(): ListMarkerGapExtension {
       const value = Number.parseInt(node.getAttribute('data-list-marker-gap') ?? '', 10)
       return isValidMarkerGap(value) ? value : 1
     },
+  })
+}
+
+type ListBlankBeforeExtension = Extension<{
+  Nodes: { list: { blankBefore?: boolean | null | undefined } }
+}>
+
+/**
+ * Whether one blank line separated the item from the sibling before it in the
+ * Markdown source. `null` leaves the gap to the serializer.
+ */
+function defineListBlankBeforeAttr(): ListBlankBeforeExtension {
+  return defineNodeAttr<'list', 'blankBefore', boolean | null>({
+    type: 'list' satisfies NodeName,
+    attr: 'blankBefore',
+    default: null,
   })
 }
 
@@ -529,6 +546,7 @@ export function defineMeowdownList() {
     defineListMarkerAttr(),
     defineListTaskMarkerAttr(),
     defineListMarkerGapAttr(),
+    defineListBlankBeforeAttr(),
     defineMeowdownListCommands(),
   )
 }

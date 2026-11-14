@@ -20,6 +20,7 @@ import {
 } from '../unicode.ts'
 
 import { canIndentCode, minFenceLength } from './code.ts'
+import { canJoinTight } from './gap.ts'
 import { walkMarkdownAst } from './path.ts'
 import type {
   MarkdownBlock,
@@ -147,9 +148,10 @@ function collectBlocks(
   appendBlankLineParagraphs(out, text, 0, cursor.from, afterFrontmatter ? 1 : 0, false)
   let previousTo: number | undefined
   do {
-    if (previousTo != null) appendGapParagraphs(out, text, previousTo, cursor.from)
+    const blankLines =
+      previousTo == null ? Infinity : appendGapParagraphs(out, text, previousTo, cursor.from)
     previousTo = cursor.to
-    appendBlocks(out, convertBlock(cursor, text, column))
+    appendBlocks(out, convertBlock(cursor, text, column), blankLines)
   } while (cursor.nextSibling())
   cursor.parent()
   // The last line's own terminator is not a blank line.
@@ -162,8 +164,11 @@ function collectBlocks(
  * Append `blocks`, dropping the indented spelling from a code block that lands
  * right after a list: four columns of indentation would put it inside the item
  * above instead of after it, so it can only be written as a fence.
+ * `blankLines` counts the blank lines between `out`'s last block and the first
+ * of `blocks`.
  */
-function appendBlocks(out: MarkdownBlock[], blocks: MarkdownBlock[]): void {
+function appendBlocks(out: MarkdownBlock[], blocks: MarkdownBlock[], blankLines: number): void {
+  markBlankBefore(out.at(-1), blocks[0], blankLines)
   for (const block of blocks) {
     if (
       block.type === 'codeBlock' &&
@@ -189,8 +194,23 @@ function appendGapParagraphs(
   text: string,
   gapFrom: number,
   gapTo: number,
+): number {
+  return appendBlankLineParagraphs(out, text, gapFrom, gapTo, 2, false) - 1
+}
+
+/**
+ * Record whether the one optional blank line was written before a list item.
+ * Two or more blank lines are empty paragraphs, which say it already.
+ */
+function markBlankBefore(
+  previous: MarkdownBlock | undefined,
+  block: MarkdownBlock | undefined,
+  blankLines: number,
 ): void {
-  appendBlankLineParagraphs(out, text, gapFrom, gapTo, 2, false)
+  if (block?.type !== 'listItem' || previous == null || blankLines > 1) return
+  // A tight gap the serializer cannot write goes out with its blank line, so
+  // record that blank line now and the tree reads back the same.
+  block.blankBefore = !(blankLines === 0 && canJoinTight(previous, block))
 }
 
 /**
@@ -208,7 +228,7 @@ function appendBlankLineParagraphs(
   to: number,
   skip: number,
   openLast: boolean,
-): void {
+): number {
   let count = 0
   for (let index = from; index < to; index++) {
     if (text.charCodeAt(index) !== CHAR_LINE_FEED) continue
@@ -216,6 +236,7 @@ function appendBlankLineParagraphs(
     if (count > skip) out.push(buildEmptyParagraph(index))
   }
   if (openLast && count >= skip) out.push(buildEmptyParagraph(lineEndAt(text, to)))
+  return count
 }
 
 /**
@@ -605,13 +626,14 @@ function convertBlockquote(cursor: TreeCursor, text: string): MarkdownBlock {
   if (cursor.firstChild()) {
     do {
       if (cursor.type.id === LEZER_NODE_IDS.QuoteMark) continue
+      let blankLines = Infinity
       if (previousTo == null) {
         appendBlankLineParagraphs(content, text, from, cursor.from, 0, false)
       } else {
-        appendGapParagraphs(content, text, previousTo, cursor.from)
+        blankLines = appendGapParagraphs(content, text, previousTo, cursor.from)
       }
       previousTo = cursor.to
-      appendBlocks(content, convertBlock(cursor, text, 0))
+      appendBlocks(content, convertBlock(cursor, text, 0), blankLines)
     } while (cursor.nextSibling())
     cursor.parent()
   }
@@ -639,10 +661,12 @@ function convertList(
     let previousContentEnd: number | undefined
     do {
       if (cursor.type.id !== LEZER_NODE_IDS.ListItem) continue
-      if (previousContentEnd != null) {
-        appendGapParagraphs(out, text, previousContentEnd, cursor.from)
-      }
+      const blankLines =
+        previousContentEnd == null
+          ? Infinity
+          : appendGapParagraphs(out, text, previousContentEnd, cursor.from)
       const [item, contentEnd] = convertListItem(cursor, text, column, kind)
+      markBlankBefore(out.at(-1), item, blankLines)
       out.push(item)
       previousContentEnd = contentEnd
     } while (cursor.nextSibling())
@@ -779,11 +803,11 @@ function convertListItem(
         markEndColumn = measureContentColumn(text, cursor.to)
         continue
       }
+      const blankLines =
+        previousTo == null ? Infinity : appendGapParagraphs(content, text, previousTo, cursor.from)
       if (previousTo == null) {
         markerGap = measureMarkerGap(text, cursor.from, markTo, markEndColumn)
         contentColumn = column + markWidth + markerGap
-      } else {
-        appendGapParagraphs(content, text, previousTo, cursor.from)
       }
       previousTo = cursor.to
       if (kind === 'bullet' && cursor.type.id === LEZER_NODE_IDS.Task) {
@@ -793,7 +817,7 @@ function convertListItem(
         content.push(task.paragraph)
         continue
       }
-      appendBlocks(content, convertBlock(cursor, text, contentColumn))
+      appendBlocks(content, convertBlock(cursor, text, contentColumn), blankLines)
     } while (cursor.nextSibling())
     cursor.parent()
   }
