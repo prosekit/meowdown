@@ -2,8 +2,11 @@ import { createStringPicker } from '@meowdown/vitest/random'
 import { it } from 'vitest'
 
 import { checkRoundTrip } from './check-roundtrip.ts'
+import { isMarkdownAstEqual } from './equal.ts'
 import { parseMarkdownAst } from './parse.ts'
-import type { MarkdownNode } from './types.ts'
+import { walkMarkdownAst } from './path.ts'
+import { serializeMarkdownAst } from './serialize.ts'
+import type { MarkdownDocument, MarkdownNode } from './types.ts'
 
 // Use a fixed seed from the environment variable for reproducibility, or fallback to a random seed
 const SEED = Number.parseInt(process.env.VITE_FUZZ_SEED || '') || Date.now()
@@ -168,6 +171,33 @@ function findNestingError(node: MarkdownNode, from: number, to: number): string 
   }
 }
 
+/**
+ * Set every block's recorded gap to `value`.
+ */
+function setBlankBefore(document: MarkdownDocument, value: false | undefined): MarkdownDocument {
+  for (const { node } of walkMarkdownAst(document)) {
+    if (node.type === 'document' || node.type === 'tableRow' || node.type === 'tableCell') continue
+    node.blankBefore = value
+  }
+  return document
+}
+
+/**
+ * The editor can move any block under any other and keep its recorded gap.
+ * Asking every block to sit tight must still read back as the same blocks.
+ */
+function findForcedTightError(input: string): string | undefined {
+  const document = setBlankBefore(parseMarkdownAst(input), undefined)
+  const expected = setBlankBefore(parseMarkdownAst(serializeMarkdownAst(document)), undefined)
+  // An input that does not read back the same with its gaps left to the
+  // serializer says nothing about the gaps.
+  if (!isMarkdownAstEqual(expected, document)) return
+  const output = serializeMarkdownAst(setBlankBefore(parseMarkdownAst(input), false))
+  const actual = setBlankBefore(parseMarkdownAst(output), undefined)
+  if (!isMarkdownAstEqual(actual, expected))
+    return `forced tight gaps change the blocks: ${JSON.stringify(output)}`
+}
+
 for (const [minLength, maxLength] of RANGES) {
   for (const { name, pool } of POOLS) {
     it(
@@ -180,6 +210,12 @@ for (const [minLength, maxLength] of RANGES) {
           if (isLossy(input)) {
             throw new Error(
               `lossy input (seed=${SEED}, sample=${sample}, input=${JSON.stringify(input)})`,
+            )
+          }
+          const forcedTightError = findForcedTightError(input)
+          if (forcedTightError) {
+            throw new Error(
+              `${forcedTightError} (seed=${SEED}, sample=${sample}, input=${JSON.stringify(input)})`,
             )
           }
           const positionError = findPositionError(input)
