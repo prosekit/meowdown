@@ -2,7 +2,7 @@
   "name": "meowdown-monorepo",
   "type": "module",
   "private": true,
-  "packageManager": "pnpm@11.28.6",
+  "packageManager": "pnpm@11.28.12",
   "scripts": {
     "dev": "pnpm --filter ./website run dev",
     "build": "pnpm -r --stream --sequential run build",
