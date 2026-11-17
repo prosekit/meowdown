@@ -57,8 +57,7 @@ function isListItemEqual(a: MarkdownListItem, b: MarkdownListItem): boolean {
     a.collapsed === b.collapsed &&
     a.marker === b.marker &&
     a.taskMarker === b.taskMarker &&
-    a.markerGap === b.markerGap &&
-    a.blankBefore === b.blankBefore
+    a.markerGap === b.markerGap
   )
 }
 
@@ -71,10 +70,17 @@ function isCodeBlockEqual(a: MarkdownCodeBlock, b: MarkdownCodeBlock): boolean {
   )
 }
 
+function getBlankBefore(node: MarkdownNode): boolean | undefined {
+  return node.type === 'document' || node.type === 'tableRow' || node.type === 'tableCell'
+    ? undefined
+    : node.blankBefore
+}
+
 /**
  * Compare the fields of two nodes, without their children and positions.
  */
 function isNodeEqual(a: MarkdownNode, b: MarkdownNode): boolean {
+  if (getBlankBefore(a) !== getBlankBefore(b)) return false
   switch (a.type) {
     case 'document':
       return (

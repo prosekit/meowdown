@@ -42,10 +42,10 @@ describe('markdownToDoc', () => {
       type: 'doc',
       attrs: { frontmatter: null, frontmatterTight: false },
       content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'a' }] },
-        { type: 'paragraph' },
-        { type: 'paragraph' },
-        { type: 'paragraph', content: [{ type: 'text', text: 'b' }] },
+        { type: 'paragraph', attrs: { blankBefore: null }, content: [{ type: 'text', text: 'a' }] },
+        { type: 'paragraph', attrs: { blankBefore: null } },
+        { type: 'paragraph', attrs: { blankBefore: null } },
+        { type: 'paragraph', attrs: { blankBefore: null }, content: [{ type: 'text', text: 'b' }] },
       ],
     })
   })
@@ -55,11 +55,11 @@ describe('markdownToDoc', () => {
       type: 'doc',
       attrs: { frontmatter: null, frontmatterTight: false },
       content: [
-        { type: 'paragraph' },
-        { type: 'paragraph' },
-        { type: 'paragraph', content: [{ type: 'text', text: 'a' }] },
-        { type: 'paragraph' },
-        { type: 'paragraph' },
+        { type: 'paragraph', attrs: { blankBefore: null } },
+        { type: 'paragraph', attrs: { blankBefore: null } },
+        { type: 'paragraph', attrs: { blankBefore: null }, content: [{ type: 'text', text: 'a' }] },
+        { type: 'paragraph', attrs: { blankBefore: null } },
+        { type: 'paragraph', attrs: { blankBefore: null } },
       ],
     })
   })
@@ -68,19 +68,26 @@ describe('markdownToDoc', () => {
     const empty = {
       type: 'doc',
       attrs: { frontmatter: null, frontmatterTight: false },
-      content: [{ type: 'paragraph' }],
+      content: [{ type: 'paragraph', attrs: { blankBefore: null } }],
     }
     expect(markdownToDoc('').toJSON()).toEqual(empty)
     expect(markdownToDoc('\n').toJSON()).toEqual(empty)
     expect(markdownToDoc('\n\n').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null, frontmatterTight: false },
-      content: [{ type: 'paragraph' }, { type: 'paragraph' }],
+      content: [
+        { type: 'paragraph', attrs: { blankBefore: null } },
+        { type: 'paragraph', attrs: { blankBefore: null } },
+      ],
     })
   })
 
   it('reads the blank line after frontmatter as a separator', () => {
-    const paragraph = { type: 'paragraph', content: [{ type: 'text', text: 'a' }] }
+    const paragraph = {
+      type: 'paragraph',
+      attrs: { blankBefore: null },
+      content: [{ type: 'text', text: 'a' }],
+    }
     expect(markdownToDoc('---\nt: x\n---\n\na', { frontmatter: true }).toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: 't: x', frontmatterTight: false },
@@ -89,7 +96,11 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('---\nt: x\n---\n\n\n\na', { frontmatter: true }).toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: 't: x', frontmatterTight: false },
-      content: [{ type: 'paragraph' }, { type: 'paragraph' }, paragraph],
+      content: [
+        { type: 'paragraph', attrs: { blankBefore: null } },
+        { type: 'paragraph', attrs: { blankBefore: null } },
+        paragraph,
+      ],
     })
   })
 
@@ -97,7 +108,9 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('---\nt: x\n---\na', { frontmatter: true }).toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: 't: x', frontmatterTight: true },
-      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'a' }] }],
+      content: [
+        { type: 'paragraph', attrs: { blankBefore: null }, content: [{ type: 'text', text: 'a' }] },
+      ],
     })
   })
 
@@ -107,10 +120,10 @@ describe('markdownToDoc', () => {
     expect(doc.child(0).toJSON()).toMatchObject({
       type: 'list',
       content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'a' }] },
-        { type: 'paragraph' },
-        { type: 'paragraph' },
-        { type: 'paragraph', content: [{ type: 'text', text: 'b' }] },
+        { type: 'paragraph', attrs: { blankBefore: null }, content: [{ type: 'text', text: 'a' }] },
+        { type: 'paragraph', attrs: { blankBefore: null } },
+        { type: 'paragraph', attrs: { blankBefore: null } },
+        { type: 'paragraph', attrs: { blankBefore: null }, content: [{ type: 'text', text: 'b' }] },
       ],
     })
   })
@@ -119,7 +132,7 @@ describe('markdownToDoc', () => {
     const doc = markdownToDoc('- a\n\n\n- b')
     expect(doc.childCount).toBe(3)
     expect(doc.child(0).type.name).toBe('list')
-    expect(doc.child(1).toJSON()).toEqual({ type: 'paragraph' })
+    expect(doc.child(1).toJSON()).toEqual({ type: 'paragraph', attrs: { blankBefore: null } })
     expect(doc.child(2).type.name).toBe('list')
   })
 
@@ -137,11 +150,16 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'blockquote',
+          attrs: { blankBefore: null },
           content: [
-            { type: 'paragraph' },
-            { type: 'paragraph' },
-            { type: 'paragraph', content: [{ type: 'text', text: 'a' }] },
-            { type: 'paragraph' },
+            { type: 'paragraph', attrs: { blankBefore: null } },
+            { type: 'paragraph', attrs: { blankBefore: null } },
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'a' }],
+            },
+            { type: 'paragraph', attrs: { blankBefore: null } },
           ],
         },
       ],
@@ -155,7 +173,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'heading',
-          attrs: { level: 1, setextUnderline: null, closingHashes: null },
+          attrs: { level: 1, setextUnderline: null, closingHashes: null, blankBefore: null },
           content: [{ type: 'text', text: 'Hello' }],
         },
       ],
@@ -169,6 +187,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'paragraph',
+          attrs: { blankBefore: null },
           content: [{ type: 'text', text: 'hello world' }],
         },
       ],
@@ -182,9 +201,11 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'blockquote',
+          attrs: { blankBefore: null },
           content: [
             {
               type: 'paragraph',
+              attrs: { blankBefore: null },
               content: [{ type: 'text', text: 'quoted text' }],
             },
           ],
@@ -214,7 +235,13 @@ describe('markdownToDoc', () => {
             markerGap: 1,
             blankBefore: null,
           },
-          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'one' }] }],
+          content: [
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'one' }],
+            },
+          ],
         },
         {
           type: 'list',
@@ -228,7 +255,13 @@ describe('markdownToDoc', () => {
             markerGap: 1,
             blankBefore: false,
           },
-          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'two' }] }],
+          content: [
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'two' }],
+            },
+          ],
         },
       ],
     })
@@ -280,7 +313,13 @@ describe('markdownToDoc', () => {
             markerGap: 1,
             blankBefore: null,
           },
-          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'five' }] }],
+          content: [
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'five' }],
+            },
+          ],
         },
         {
           type: 'list',
@@ -294,7 +333,13 @@ describe('markdownToDoc', () => {
             markerGap: 1,
             blankBefore: false,
           },
-          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'six' }] }],
+          content: [
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'six' }],
+            },
+          ],
         },
       ],
     })
@@ -317,7 +362,13 @@ describe('markdownToDoc', () => {
             markerGap: 1,
             blankBefore: null,
           },
-          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'todo' }] }],
+          content: [
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'todo' }],
+            },
+          ],
         },
       ],
     })
@@ -340,7 +391,13 @@ describe('markdownToDoc', () => {
             markerGap: 1,
             blankBefore: null,
           },
-          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'done' }] }],
+          content: [
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'done' }],
+            },
+          ],
         },
       ],
     })
@@ -364,7 +421,13 @@ describe('markdownToDoc', () => {
             markerGap: 1,
             blankBefore: null,
           },
-          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Square Task' }] }],
+          content: [
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'Square Task' }],
+            },
+          ],
         },
         {
           type: 'list',
@@ -378,7 +441,13 @@ describe('markdownToDoc', () => {
             markerGap: 1,
             blankBefore: true,
           },
-          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Circle Task' }] }],
+          content: [
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'Circle Task' }],
+            },
+          ],
         },
       ],
     })
@@ -415,7 +484,13 @@ describe('markdownToDoc', () => {
             markerGap: 1,
             blankBefore: null,
           },
-          content: [{ type: 'paragraph', content: [{ type: 'text', text: '[x] done' }] }],
+          content: [
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: '[x] done' }],
+            },
+          ],
         },
       ],
     })
@@ -435,7 +510,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'codeBlock',
-          attrs: { language: 'js', fenceStyle: null, fenceLength: null },
+          attrs: { language: 'js', fenceStyle: null, fenceLength: null, blankBefore: null },
           content: [{ type: 'text', text: 'console.log(1)' }],
         },
       ],
@@ -470,10 +545,14 @@ describe('markdownToDoc', () => {
             blankBefore: null,
           },
           content: [
-            { type: 'paragraph', content: [{ type: 'text', text: 'x' }] },
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'x' }],
+            },
             {
               type: 'codeBlock',
-              attrs: { language: '', fenceStyle: null, fenceLength: null },
+              attrs: { language: '', fenceStyle: null, fenceLength: null, blankBefore: null },
               content: [{ type: 'text', text: 'line1\nline2\nline3' }],
             },
           ],
@@ -486,7 +565,7 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('---').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null, frontmatterTight: false },
-      content: [{ type: 'horizontalRule', attrs: { marker: null } }],
+      content: [{ type: 'horizontalRule', attrs: { marker: null, blankBefore: null } }],
     })
   })
 
@@ -527,6 +606,7 @@ describe('markdownToDoc', () => {
                   content: [
                     {
                       type: 'paragraph',
+                      attrs: { blankBefore: null },
                       content: [{ type: 'text', text: 'a' }],
                     },
                   ],
@@ -537,6 +617,7 @@ describe('markdownToDoc', () => {
                   content: [
                     {
                       type: 'paragraph',
+                      attrs: { blankBefore: null },
                       content: [{ type: 'text', text: 'b' }],
                     },
                   ],
@@ -552,6 +633,7 @@ describe('markdownToDoc', () => {
                   content: [
                     {
                       type: 'paragraph',
+                      attrs: { blankBefore: null },
                       content: [{ type: 'text', text: '1' }],
                     },
                   ],
@@ -562,6 +644,7 @@ describe('markdownToDoc', () => {
                   content: [
                     {
                       type: 'paragraph',
+                      attrs: { blankBefore: null },
                       content: [{ type: 'text', text: '2' }],
                     },
                   ],
@@ -697,7 +780,13 @@ describe('markdownToDoc', () => {
             markerGap: 1,
             blankBefore: null,
           },
-          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'star' }] }],
+          content: [
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'star' }],
+            },
+          ],
         },
       ],
     })
@@ -720,7 +809,13 @@ describe('markdownToDoc', () => {
             markerGap: 1,
             blankBefore: null,
           },
-          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'paren' }] }],
+          content: [
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'paren' }],
+            },
+          ],
         },
       ],
     })
@@ -743,7 +838,13 @@ describe('markdownToDoc', () => {
             markerGap: 1,
             blankBefore: null,
           },
-          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'zero' }] }],
+          content: [
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'zero' }],
+            },
+          ],
         },
       ],
     })
@@ -766,7 +867,13 @@ describe('markdownToDoc', () => {
             markerGap: 1,
             blankBefore: null,
           },
-          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'upper' }] }],
+          content: [
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'upper' }],
+            },
+          ],
         },
       ],
     })
@@ -779,7 +886,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'codeBlock',
-          attrs: { language: '', fenceStyle: 'indented', fenceLength: null },
+          attrs: { language: '', fenceStyle: 'indented', fenceLength: null, blankBefore: null },
           content: [{ type: 'text', text: 'indented' }],
         },
       ],
@@ -793,7 +900,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'codeBlock',
-          attrs: { language: 'math', fenceStyle: 'dollar', fenceLength: null },
+          attrs: { language: 'math', fenceStyle: 'dollar', fenceLength: null, blankBefore: null },
           content: [{ type: 'text', text: 'E=mc^2' }],
         },
       ],
@@ -807,7 +914,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'codeBlock',
-          attrs: { language: 'math', fenceStyle: null, fenceLength: null },
+          attrs: { language: 'math', fenceStyle: null, fenceLength: null, blankBefore: null },
           content: [{ type: 'text', text: 'E=mc^2' }],
         },
       ],
@@ -821,7 +928,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'codeBlock',
-          attrs: { language: 'math', fenceStyle: 'dollar', fenceLength: null },
+          attrs: { language: 'math', fenceStyle: 'dollar', fenceLength: null, blankBefore: null },
           content: [{ type: 'text', text: 'E=mc^2' }],
         },
       ],
@@ -835,7 +942,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'codeBlock',
-          attrs: { language: '', fenceStyle: 'tilde', fenceLength: null },
+          attrs: { language: '', fenceStyle: 'tilde', fenceLength: null, blankBefore: null },
           content: [{ type: 'text', text: 'tilde' }],
         },
       ],
@@ -849,7 +956,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'codeBlock',
-          attrs: { language: '', fenceStyle: null, fenceLength: 4 },
+          attrs: { language: '', fenceStyle: null, fenceLength: 4, blankBefore: null },
           content: [{ type: 'text', text: 'code' }],
         },
       ],
@@ -860,7 +967,13 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('#nospace').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null, frontmatterTight: false },
-      content: [{ type: 'paragraph', content: [{ type: 'text', text: '#nospace' }] }],
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { blankBefore: null },
+          content: [{ type: 'text', text: '#nospace' }],
+        },
+      ],
     })
   })
 
@@ -868,7 +981,13 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('####### seven').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null, frontmatterTight: false },
-      content: [{ type: 'paragraph', content: [{ type: 'text', text: '####### seven' }] }],
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { blankBefore: null },
+          content: [{ type: 'text', text: '####### seven' }],
+        },
+      ],
     })
   })
 
@@ -877,7 +996,10 @@ describe('markdownToDoc', () => {
       type: 'doc',
       attrs: { frontmatter: null, frontmatterTight: false },
       content: [
-        { type: 'heading', attrs: { level: 1, setextUnderline: null, closingHashes: null } },
+        {
+          type: 'heading',
+          attrs: { level: 1, setextUnderline: null, closingHashes: null, blankBefore: null },
+        },
       ],
     })
   })
@@ -889,11 +1011,23 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'blockquote',
+          attrs: { blankBefore: null },
           content: [
-            { type: 'paragraph', content: [{ type: 'text', text: 'a' }] },
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'a' }],
+            },
             {
               type: 'blockquote',
-              content: [{ type: 'paragraph', content: [{ type: 'text', text: 'b' }] }],
+              attrs: { blankBefore: null },
+              content: [
+                {
+                  type: 'paragraph',
+                  attrs: { blankBefore: null },
+                  content: [{ type: 'text', text: 'b' }],
+                },
+              ],
             },
           ],
         },
@@ -908,7 +1042,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'heading',
-          attrs: { level: 1, setextUnderline: 3, closingHashes: null },
+          attrs: { level: 1, setextUnderline: 3, closingHashes: null, blankBefore: null },
           content: [{ type: 'text', text: 'Setext1' }],
         },
       ],
@@ -922,7 +1056,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'heading',
-          attrs: { level: 2, setextUnderline: 3, closingHashes: null },
+          attrs: { level: 2, setextUnderline: 3, closingHashes: null, blankBefore: null },
           content: [{ type: 'text', text: 'Setext2' }],
         },
       ],
@@ -933,7 +1067,13 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('<div>html</div>').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null, frontmatterTight: false },
-      content: [{ type: 'paragraph', content: [{ type: 'text', text: '<div>html</div>' }] }],
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { blankBefore: null },
+          content: [{ type: 'text', text: '<div>html</div>' }],
+        },
+      ],
     })
   })
 
@@ -941,7 +1081,13 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('<?php echo 1; ?>').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null, frontmatterTight: false },
-      content: [{ type: 'paragraph', content: [{ type: 'text', text: '<?php echo 1; ?>' }] }],
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { blankBefore: null },
+          content: [{ type: 'text', text: '<?php echo 1; ?>' }],
+        },
+      ],
     })
   })
 
@@ -949,7 +1095,9 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('<!-- a comment -->').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null, frontmatterTight: false },
-      content: [{ type: 'htmlComment', attrs: { content: '<!-- a comment -->' } }],
+      content: [
+        { type: 'htmlComment', attrs: { content: '<!-- a comment -->', blankBefore: null } },
+      ],
     })
   })
 
@@ -957,7 +1105,12 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('<!-- line one\nline two -->').toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null, frontmatterTight: false },
-      content: [{ type: 'htmlComment', attrs: { content: '<!-- line one\nline two -->' } }],
+      content: [
+        {
+          type: 'htmlComment',
+          attrs: { content: '<!-- line one\nline two -->', blankBefore: null },
+        },
+      ],
     })
   })
 
@@ -968,9 +1121,13 @@ describe('markdownToDoc', () => {
       type: 'doc',
       attrs: { frontmatter: null, frontmatterTight: false },
       content: [
-        { type: 'htmlComment', attrs: { content: '<!-- start -->' } },
-        { type: 'paragraph', content: [{ type: 'text', text: 'body text' }] },
-        { type: 'htmlComment', attrs: { content: '<!-- end -->' } },
+        { type: 'htmlComment', attrs: { content: '<!-- start -->', blankBefore: null } },
+        {
+          type: 'paragraph',
+          attrs: { blankBefore: false },
+          content: [{ type: 'text', text: 'body text' }],
+        },
+        { type: 'htmlComment', attrs: { content: '<!-- end -->', blankBefore: false } },
       ],
     })
   })
@@ -982,7 +1139,14 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'blockquote',
-          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'l1\nl2' }] }],
+          attrs: { blankBefore: null },
+          content: [
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'l1\nl2' }],
+            },
+          ],
         },
       ],
     })
@@ -1006,8 +1170,16 @@ describe('markdownToDoc', () => {
             blankBefore: null,
           },
           content: [
-            { type: 'paragraph', content: [{ type: 'text', text: 'x' }] },
-            { type: 'paragraph', content: [{ type: 'text', text: 'line one\nline two' }] },
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'x' }],
+            },
+            {
+              type: 'paragraph',
+              attrs: { blankBefore: null },
+              content: [{ type: 'text', text: 'line one\nline two' }],
+            },
           ],
         },
       ],
@@ -1020,7 +1192,7 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('---\ntitle: x\n---', { frontmatter: true }).toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: 'title: x', frontmatterTight: false },
-      content: [{ type: 'paragraph' }],
+      content: [{ type: 'paragraph', attrs: { blankBefore: null } }],
     })
   })
 
@@ -1032,7 +1204,7 @@ describe('markdownToDoc', () => {
       content: [
         {
           type: 'heading',
-          attrs: { level: 1, setextUnderline: null, closingHashes: null },
+          attrs: { level: 1, setextUnderline: null, closingHashes: null, blankBefore: null },
           content: [{ type: 'text', text: 'heading' }],
         },
       ],
@@ -1043,7 +1215,7 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('---\n---', { frontmatter: true }).toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: '', frontmatterTight: false },
-      content: [{ type: 'paragraph' }],
+      content: [{ type: 'paragraph', attrs: { blankBefore: null } }],
     })
   })
 
@@ -1051,7 +1223,7 @@ describe('markdownToDoc', () => {
     expect(markdownToDoc('---', { frontmatter: true }).toJSON()).toEqual({
       type: 'doc',
       attrs: { frontmatter: null, frontmatterTight: false },
-      content: [{ type: 'horizontalRule', attrs: { marker: null } }],
+      content: [{ type: 'horizontalRule', attrs: { marker: null, blankBefore: null } }],
     })
   })
 
