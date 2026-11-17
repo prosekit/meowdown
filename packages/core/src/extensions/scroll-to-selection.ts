@@ -28,13 +28,14 @@ interface ScrollTarget {
 }
 
 /**
- * The part of the layout viewport the visual viewport shows, in client
- * coordinates, or undefined while it shows the full height. A software
- * keyboard that overlays the page shrinks it.
+ * The part of the layout viewport the visual viewport shows at page scale 1,
+ * in client coordinates, or undefined while it shows the full height. A
+ * software keyboard that overlays the page shrinks it.
  */
 function getVisibleSpan(doc: Document): VerticalSpan | undefined {
   const viewport = doc.defaultView?.visualViewport
-  if (viewport == null) return undefined
+  // At other scales the browser pans the visual viewport to the caret itself.
+  if (viewport == null || viewport.scale !== 1) return undefined
   const top = viewport.offsetTop
   const bottom = top + viewport.height
   if (top < 1 && bottom > doc.documentElement.clientHeight - 1) return undefined
