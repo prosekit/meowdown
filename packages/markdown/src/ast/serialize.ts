@@ -20,6 +20,7 @@ import {
 } from '../unicode.ts'
 
 import { canIndentCode, minFenceLength } from './code.ts'
+import { canJoinTight, hasInlineContent, listMarkerChar, opensHTMLBlock } from './gap.ts'
 import type {
   MarkdownBlock,
   MarkdownCodeBlock,
@@ -457,13 +458,8 @@ function emitBlockChildren(children: MarkdownBlock[], out: MdOut, tightItem = fa
     for (let item = index; item < runEnd; item++) {
       const child = children[item]
       if (child.type !== 'listItem') continue
-      const isRunStart = item === index
-      const tight = isRunStart ? tightItem && index > 0 : tightRun
-      // An item that carries on the list above it needs no blank line. One that
-      // opens a new list does, unless its own marker can interrupt what it
-      // follows - which is a paragraph whenever the blank is being dropped.
-      const carriesOn = !isRunStart && listMarkerChar(children[item - 1]) === listMarkerChar(child)
-      if (tight && (carriesOn || canInterruptParagraph(child))) out.suppressBlank()
+      if (isTightBefore(children, item, index, tightItem, tightRun)) out.suppressBlank()
+      const carriesOn = item > index && listMarkerChar(children[item - 1]) === listMarkerChar(child)
       // Only the first item of an ordered list sets its number; the items
       // after it count up, as a Markdown renderer numbers them.
       order = carriesOn ? Math.min(order + 1, MAX_LIST_ORDER) : (child.order ?? 1)
@@ -474,30 +470,27 @@ function emitBlockChildren(children: MarkdownBlock[], out: MdOut, tightItem = fa
 }
 
 /**
- * Whether `list`'s marker line still opens an item when the line above it is a
- * paragraph. CommonMark lets a list interrupt a paragraph only when the item
- * carries content and, if ordered, is numbered 1; anything else reads as more of
- * the paragraph, so the blank line before it is what keeps it a list at all.
+ * Whether the list item at `item` starts on the line right under its previous
+ * sibling. A recorded gap wins. An item the editor created has none, and takes
+ * the gap above it in the same run, or else the run's own tightness.
  */
-function canInterruptParagraph(list: MarkdownListItem): boolean {
-  const attrs = list
-  if (attrs.kind === 'ordered' && (attrs.order ?? 1) !== 1) return false
-  // An empty item writes a bare marker, and a bare marker interrupts nothing.
-  // A task always writes its `[ ]`, which is content enough.
-  return attrs.kind === 'task' || (list.children.length > 0 && hasBlockContent(list.children[0]))
-}
-
-/**
- * The character a list item's marker ends with: the bullet itself, or the
- * delimiter after an ordered item's number. A markdown list runs for as long as
- * this stays the same, and a different one opens a new list.
- */
-function listMarkerChar(node: MarkdownBlock): string {
-  if (node.type !== 'listItem') return ''
-  const { kind, marker, collapsed } = node
-  if (kind === 'ordered') return marker === ')' ? ')' : '.'
-  if (kind === 'task') return marker === '+' ? '+' : marker === '*' ? '*' : '-'
-  return collapsed ? '+' : marker === '*' ? '*' : '-'
+function isTightBefore(
+  children: MarkdownBlock[],
+  item: number,
+  runStart: number,
+  tightItem: boolean,
+  tightRun: boolean,
+): boolean {
+  if (item === 0) return false
+  const child = children[item]
+  const previous = children[item - 1]
+  if (child.type !== 'listItem') return false
+  let blankBefore = child.blankBefore
+  if (blankBefore == null && item - 1 > runStart && previous.type === 'listItem') {
+    blankBefore = previous.blankBefore
+  }
+  const tight = blankBefore == null ? (item === runStart ? tightItem : tightRun) : !blankBefore
+  return tight && canJoinTight(previous, child)
 }
 
 /**
@@ -593,37 +586,6 @@ function dedentKeepsLine(line: string, column: number): boolean {
     } else {
       return true
     }
-  }
-  return false
-}
-
-/**
- * The line patterns that open an HTML block, the openers of `HTMLBlockStyle`
- * in `@lezer/markdown`: script/pre/style, a comment, a processing instruction,
- * a declaration, CDATA, a known block-level tag, and a complete tag alone on
- * its line. Leading whitespace is stripped before matching.
- */
-const HTML_BLOCK_OPEN = [
-  /^<(?:script|pre|style)(?:\s|>|$)/i,
-  /^<!--/,
-  /^<\?/,
-  /^<![A-Z]/,
-  /^<!\[CDATA\[/,
-  /^<\/?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h1|h2|h3|h4|h5|h6|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|nav|noframes|ol|optgroup|option|p|param|section|source|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul)(?:\s|\/?>|$)/i,
-  /^(?:<\/[a-z][\w-]*\s*>|<[a-z][\w-]*(\s+[a-z:_][\w.-]*(?:\s*=\s*(?:[^\s"'=<>`]+|'[^']*'|"[^"]*"))?)*\s*>)\s*$/i,
-]
-
-/**
- * Whether `text`'s first line opens an HTML block. The last pattern (a
- * complete tag) cannot interrupt a paragraph, but a lazy spelling of such a
- * line round-trips all the same, so one check serves both callers.
- */
-function opensHTMLBlock(text: string): boolean {
-  if (text.charCodeAt(0) !== CHAR_LESS_THAN) return false
-  const lineEnd = text.indexOf('\n')
-  const line = lineEnd < 0 ? text : text.slice(0, lineEnd)
-  for (const pattern of HTML_BLOCK_OPEN) {
-    if (pattern.test(line)) return true
   }
   return false
 }
@@ -762,17 +724,6 @@ function emitInlineChildren(node: MarkdownInline, out: MdOut): void {
   } else if (node.value) {
     out.write(node.value, lazy)
   }
-}
-
-function hasInlineContent(node: MarkdownInline): boolean {
-  return node.segments?.value === node.value ? node.segments.chunks.length > 0 : node.value !== ''
-}
-
-function hasBlockContent(node: MarkdownBlock): boolean {
-  if (node.children) return node.children.length > 0
-  if (node.type === 'ignored') return node.hasContent
-  if (node.type === 'paragraph' || node.type === 'heading') return hasInlineContent(node)
-  return node.type === 'codeBlock' && node.value !== ''
 }
 
 // ─────────────────────────────────────────────────────────────────────

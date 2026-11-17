@@ -121,19 +121,22 @@ const EXACT_CASES: string[] = [
 
   // a no-break space is heading text, not the gap around a closing `#` run
   '# #\u{A0}',
+
+  // a loose list stays loose, and a tight list after a two-block item tight
+  '- a\n\n- b',
+  '1. a\n\n2. b',
+  '- a\n\n  b\n- c',
+
+  // a list starts right under a paragraph, in a blockquote too
+  'para\n- a',
+  '> text\n> - item',
+  '> a\n> - x\n> - y',
 ]
 
 const NORMALIZING_CASES: string[] = [
-  // a loose list serializes tight
-  '- a\n\n- b',
-
   // the items of an ordered list are numbered in sequence
   '1. a\n1. b\n1. c',
   '3) a\n7) b',
-
-  // a blockquote gains an empty `>` line before a following list
-  '> text\n> - item',
-  '> a\n> - x\n> - y',
 
   // a lazy continuation gains the canonical item indent
   '- [ ] todo\neen voorlopig idee',
