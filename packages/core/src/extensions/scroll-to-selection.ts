@@ -33,12 +33,15 @@ interface ScrollTarget {
  * software keyboard that overlays the page shrinks it.
  */
 function getVisibleSpan(doc: Document): VerticalSpan | undefined {
-  const viewport = doc.defaultView?.visualViewport
+  const win = doc.defaultView
+  const viewport = win?.visualViewport
   // At other scales the browser pans the visual viewport to the caret itself.
-  if (viewport == null || viewport.scale !== 1) return undefined
+  if (win == null || viewport == null || viewport.scale !== 1) return undefined
   const top = viewport.offsetTop
   const bottom = top + viewport.height
-  if (top < 1 && bottom > doc.documentElement.clientHeight - 1) return undefined
+  // `innerHeight` uses the same units as `visualViewport`. `clientHeight` is
+  // larger than both when WKWebView `pageZoom` is below 1.
+  if (top < 1 && bottom > win.innerHeight - 1) return undefined
   return { top, bottom }
 }
 
@@ -47,9 +50,10 @@ function getVisibleSpan(doc: Document): VerticalSpan | undefined {
  * leaves out at page scale 1.
  */
 function getCoveredBottom(doc: Document): number {
-  const viewport = doc.defaultView?.visualViewport
-  if (viewport == null || viewport.scale !== 1) return 0
-  return Math.max(0, doc.documentElement.clientHeight - viewport.offsetTop - viewport.height)
+  const win = doc.defaultView
+  const viewport = win?.visualViewport
+  if (win == null || viewport == null || viewport.scale !== 1) return 0
+  return Math.max(0, win.innerHeight - viewport.offsetTop - viewport.height)
 }
 
 // prosemirror-view scrolls to coordsAtPos(head, 1), but every position beside
