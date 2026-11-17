@@ -1,5 +1,5 @@
 import { definePlugin, isTextSelection, type PlainExtension } from '@prosekit/core'
-import { Plugin, PluginKey } from '@prosekit/pm/state'
+import { NodeSelection, Plugin, PluginKey, type PluginView } from '@prosekit/pm/state'
 import type { EditorView } from '@prosekit/pm/view'
 
 import { tryCoordsAtPos } from '../utils/caret-coords.ts'
@@ -17,25 +17,84 @@ interface Rect {
 
 type Sides = number | { top: number; right: number; bottom: number; left: number }
 
+interface VerticalSpan {
+  top: number
+  bottom: number
+}
+
+interface ScrollTarget {
+  rect: Rect
+  startDOM: Node
+}
+
+/**
+ * The part of the layout viewport the visual viewport shows at page scale 1,
+ * in client coordinates, or undefined while it shows the full height. A
+ * software keyboard that overlays the page shrinks it.
+ */
+function getVisibleSpan(doc: Document): VerticalSpan | undefined {
+  const win = doc.defaultView
+  const viewport = win?.visualViewport
+  // At other scales the browser pans the visual viewport to the caret itself.
+  if (win == null || viewport == null || viewport.scale !== 1) return undefined
+  const top = viewport.offsetTop
+  const bottom = top + viewport.height
+  // `innerHeight` uses the same units as `visualViewport`. `clientHeight` is
+  // larger than both when WKWebView `pageZoom` is below 1.
+  if (top < 1 && bottom > win.innerHeight - 1) return undefined
+  return { top, bottom }
+}
+
+/**
+ * The height at the bottom of the layout viewport that the visual viewport
+ * leaves out at page scale 1.
+ */
+function getCoveredBottom(doc: Document): number {
+  const win = doc.defaultView
+  const viewport = win?.visualViewport
+  if (win == null || viewport == null || viewport.scale !== 1) return 0
+  return Math.max(0, win.innerHeight - viewport.offsetTop - viewport.height)
+}
+
 // prosemirror-view scrolls to coordsAtPos(head, 1), but every position beside
 // an atom mark view measures as a dimensionless point (the outer span is
 // display: contents, the source text font-size: 0): since prosemirror-view
 // 1.42.1 the default path silently skips such rects, before that it scrolled
 // toward the origin. Take over exactly there, with the same geometry the
 // virtual caret draws.
+// While the visual viewport leaves part of the page out (a software keyboard
+// over it), take over every selection: scroll containers that reach under the
+// covered part must keep the caret above it.
 function handleScrollToSelection(view: EditorView): boolean {
-  const selection = view.state.selection
-  if (!isTextSelection(selection)) return false
-  if (tryCoordsAtPos(view, selection.head, 1) != null) return false
-  const caret = measureCaretScrollRect(view)
-  if (caret == null) return false
-  const startDOM = view.domAtPos(selection.head).node
-  scrollRectIntoView(
-    view,
-    { left: caret.left, right: caret.left, top: caret.top, bottom: caret.top + caret.height },
-    startDOM,
-  )
+  const visible = getVisibleSpan(view.dom.ownerDocument)
+  const target = findScrollTarget(view, visible != null)
+  if (target == null) return false
+  scrollRectIntoView(view, target.rect, target.startDOM, visible)
   return true
+}
+
+/**
+ * The rect to scroll into view for the selection. Without `all`, only the
+ * rects that prosemirror-view cannot measure.
+ */
+function findScrollTarget(view: EditorView, all: boolean): ScrollTarget | undefined {
+  const selection = view.state.selection
+  if (selection instanceof NodeSelection) {
+    if (!all) return undefined
+    const dom = view.nodeDOM(selection.from)
+    if (!(dom instanceof HTMLElement)) return undefined
+    return { rect: dom.getBoundingClientRect(), startDOM: dom }
+  }
+  const startDOM = view.domAtPos(selection.head).node
+  const coords = tryCoordsAtPos(view, selection.head, 1)
+  if (coords != null) return all ? { rect: coords, startDOM } : undefined
+  if (!isTextSelection(selection)) return undefined
+  const caret = measureCaretScrollRect(view)
+  if (caret == null) return undefined
+  return {
+    rect: { left: caret.left, right: caret.left, top: caret.top, bottom: caret.top + caret.height },
+    startDOM,
+  }
 }
 
 function getSide(value: Sides, side: 'top' | 'right' | 'bottom' | 'left'): number {
@@ -47,14 +106,25 @@ function parentNode(node: Node): Node | null {
   return parent?.nodeType === 11 ? (parent as ShadowRoot).host : parent
 }
 
-function windowRect(doc: Document): Rect {
+function windowRect(doc: Document, visible: VerticalSpan | undefined): Rect {
   const viewport = doc.defaultView?.visualViewport
+  if (viewport && visible) return { left: 0, right: viewport.width, ...visible }
   if (viewport) return { left: 0, right: viewport.width, top: 0, bottom: viewport.height }
   return {
     left: 0,
     right: doc.documentElement.clientWidth,
     top: 0,
     bottom: doc.documentElement.clientHeight,
+  }
+}
+
+function clipToVisible(rect: Rect, visible: VerticalSpan | undefined): Rect {
+  if (visible == null) return rect
+  return {
+    left: rect.left,
+    right: rect.right,
+    top: Math.max(rect.top, visible.top),
+    bottom: Math.min(rect.bottom, visible.bottom),
   }
 }
 
@@ -75,7 +145,13 @@ function clientRect(node: HTMLElement): Rect {
 // A port of prosemirror-view's scrollRectIntoView (1.42.1), minus its
 // empty-rect guard: callers here always pass a measured rect. Honors the same
 // scrollThreshold / scrollMargin props so the takeover is invisible to them.
-function scrollRectIntoView(view: EditorView, rect: Rect, startDOM: Node): void {
+// With `visible`, each container's box is clipped to the visible span.
+function scrollRectIntoView(
+  view: EditorView,
+  rect: Rect,
+  startDOM: Node,
+  visible?: VerticalSpan,
+): void {
   const scrollThreshold: Sides = view.someProp('scrollThreshold') ?? 0
   const scrollMargin: Sides = view.someProp('scrollMargin') ?? 5
   const doc = view.dom.ownerDocument
@@ -86,7 +162,7 @@ function scrollRectIntoView(view: EditorView, rect: Rect, startDOM: Node): void 
     }
     const elt = parent as HTMLElement
     const atTop = elt === doc.body
-    const bounding = atTop ? windowRect(doc) : clientRect(elt)
+    const bounding = clipToVisible(atTop ? windowRect(doc, visible) : clientRect(elt), visible)
     let moveX = 0
     let moveY = 0
     if (rect.top < bounding.top + getSide(scrollThreshold, 'top')) {
@@ -127,10 +203,51 @@ function scrollRectIntoView(view: EditorView, rect: Rect, startDOM: Node): void 
 }
 
 /**
+ * Scrolls the focused editor's selection into view again when the covered
+ * bottom of the layout viewport grows (a software keyboard opens). The
+ * `resize` event comes after the keyboard animation, and the host's layout for
+ * the new height lands by the next frame.
+ */
+function createViewportRevealView(view: EditorView): PluginView {
+  const doc = view.dom.ownerDocument
+  const win = doc.defaultView
+  const viewport = win?.visualViewport
+  if (win == null || viewport == null) return {}
+  const controller = new AbortController()
+  let coveredBottom = getCoveredBottom(doc)
+  let frame = 0
+  const reveal = (): void => {
+    if (view.hasFocus()) view.dispatch(view.state.tr.scrollIntoView())
+  }
+  viewport.addEventListener(
+    'resize',
+    () => {
+      const previous = coveredBottom
+      coveredBottom = getCoveredBottom(doc)
+      if (coveredBottom <= previous || !view.hasFocus()) return
+      win.cancelAnimationFrame(frame)
+      frame = win.requestAnimationFrame(reveal)
+    },
+    { signal: controller.signal },
+  )
+  return {
+    destroy: () => {
+      controller.abort()
+      win.cancelAnimationFrame(frame)
+    },
+  }
+}
+
+/**
  * Scroll to the selection when the default measurement cannot: a caret on an
  * atom mark view boundary (wikilink, image, file) has no visible box of its
  * own, so `tr.scrollIntoView()` would otherwise silently do nothing there.
+ *
+ * Also keeps the selection inside the visual viewport: when a software
+ * keyboard overlays the page, the caret stays above it.
  */
 export function defineScrollToSelection(): PlainExtension {
-  return definePlugin(new Plugin({ key, props: { handleScrollToSelection } }))
+  return definePlugin(
+    new Plugin({ key, props: { handleScrollToSelection }, view: createViewportRevealView }),
+  )
 }
