@@ -45,7 +45,6 @@
     "oxfmt": "^0.74.0",
     "pkg-pr-new": "^0.0.93",
     "playwright": "^1.65.0",
-    "prosemirror-view": "^1.43.0",
     "simple-git-hooks": "^2.14.0",
     "typescript": "^6.0.3",
     "vite": "^8.3.5",
